@@ -16,28 +16,6 @@ You should have received a copy of the GNU General Public License along with thi
 #include "libfossdb.h"
 #include "libfossdbmanager.h"
 
-int queryUploadIdFromTreeId(fo_dbManager* dbManager, long uploadTreeId) {
-  PGresult* queryResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "queryUploadIdFromTreeId",
-      "select upload_fk from uploadtree where uploadtree_pk=$1",
-      long
-    ),
-    uploadTreeId
-  );
-
-  long result = -1;
-  if (queryResult) {
-    if (PQntuples(queryResult)==1) {
-      result = atol(PQgetvalue(queryResult, 0, 0));
-    }
-    PQclear(queryResult);
-  }
-
-  return result;
-}
-
 PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
   return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(

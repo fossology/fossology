@@ -18,16 +18,19 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "getopt.h"
 
-int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
+int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd, long* bulkOptId) {
   int c;
   state->verbosity = 0;
-  while ((c = getopt(argc, argv, "Vvh")) != -1)
+  while ((c = getopt(argc, argv, "VvhB:")) != -1)
   {
     switch (c) {
       case 'v':
         state->verbosity++;
         break;
-      case 'V':
+      case 'B':
+        *bulkOptId = atol(optarg);
+        break;
+       case 'V':
 #ifdef SVN_REV_S
         printf(AGENT_NAME " version " VERSION_S " r(" SVN_REV_S ")\n");
 #else
@@ -52,14 +55,14 @@ int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
 
 int handleArguments(MonkState* state, int argc, char** argv) {
   int fileOptInd;
-  if (!parseArguments(state, argc, argv, &fileOptInd))
+  long bulkOptId = -1;
+  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
     return 0;
 
   int result;
-  if (parseBulkArguments(argc, argv, state)) {
+  if (bulkOptId > 0) {
     state->scanMode = MODE_BULK;
-    result = handleBulkMode(state);
-    bulkArguments_contents_free(state->bulkArguments);
+    result = handleBulkMode(state, bulkOptId);
   } else {
     state->scanMode = MODE_CLI;
     result = handleCliMode(state, argc, argv, fileOptInd);

@@ -40,6 +40,7 @@ You should have received a copy of the GNU General Public License along with thi
 #endif
 
 typedef struct {
+  long bulkId;
   long uploadTreeId;
   long licenseId;
   int uploadId;

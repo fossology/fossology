@@ -21,53 +21,43 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "monk.h"
 
-int parseBulkArguments(int argc, char** argv, MonkState* state) {
-  if (argc < 1)
-    return 0;
-  /* TODO use normal cli arguments instead of this indian string
-   *
-   * at the moment it is separated by '\31' == \x19
-   *  B or N, uploadId, uploadTreeId, licenseName, userId, refText, groupName, fullLicenseName
-   *
-   *  for example run
-   *  monk $'B\x191\x19a\x19\x19shortname\x192\x19copyrights\x19group\x19fullname'
-   */
-
-  // TODO remove magics from here
-  char* delimiters = "\31";
-  char* remainder = NULL;
-  char* argumentsCopy = g_strdup(argv[1]);
-
-  char* tempargs[8];
-  unsigned int index = 0;
-
-  char* tokenString = strtok_r(argumentsCopy, delimiters, &remainder);
-  while (tokenString != NULL && index < sizeof(tempargs)) {
-    tempargs[index++] = tokenString;
-    tokenString = strtok_r(NULL, delimiters, &remainder);
-  }
+int queryBulkArguments(long bulkId, MonkState* state) {
+  PGresult* bulkArgumentsResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      state->dbManager,
+      "queryBulkArguments",
+      "SELECT upload_fk, uploadtree_pk, user_fk, group_fk, rf_fk, rf_text, removing "
+      "FROM license_ref_bulk INNER JOIN uploadtree "
+      "ON uploadtree.uploadtree_pk = license_ref_bulk.uploadtree_fk "
+      "WHERE lrb_pk = $1",
+      long
+    ),
+    bulkId
+  );
 
   int result = 0;
-  // TODO remove magics from here
-  if ((tokenString == NULL) &&
-    ((strcmp(tempargs[0], "B") == 0) || (strcmp(tempargs[0], "N") == 0)) &&
-    (index >= 6))
-  {
-    BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
 
-    bulkArguments->removing = (tempargs[0][0] == 'N');
-    bulkArguments->userId = atoi(tempargs[1]);
-    bulkArguments->groupId = atoi(tempargs[2]);
-    bulkArguments->uploadTreeId = atol(tempargs[3]);
-    bulkArguments->licenseId = atol(tempargs[4]);
-    bulkArguments->refText = g_strdup(tempargs[5]);
+  if (bulkArgumentsResult) {
+    if (PQntuples(bulkArgumentsResult)==1) {
+      BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
 
-    state->bulkArguments = bulkArguments;
+      int i = 0;
+      bulkArguments->uploadId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->uploadTreeId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->licenseId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->removing = (strcmp(PQgetvalue(bulkArgumentsResult, 0, i), "t") == 0);
 
-    result = 1;
+      bulkArguments->bulkId = bulkId;
+
+      state->bulkArguments = bulkArguments;
+
+      result = 1;
+    }
+    PQclear(bulkArgumentsResult);
   }
-
-  g_free(argumentsCopy);
   return result;
 }
 
@@ -82,7 +72,6 @@ int bulk_identification(MonkState* state) {
 
   License license = (License){
     .refId = bulkArguments->licenseId,
-    .shortname = "unused" // we could query it, but we do not need it
   };
   license.tokens = tokenize(bulkArguments->refText, DELIMITERS);
 
@@ -127,41 +116,49 @@ int bulk_identification(MonkState* state) {
   return !haveError;
 }
 
-int handleBulkMode(MonkState* state) {
-  BulkArguments* bulkArguments = state->bulkArguments;
+int handleBulkMode(MonkState* state, long bulkId) {
+  if (queryBulkArguments(bulkId, state)) {
+    BulkArguments* bulkArguments = state->bulkArguments;
 
-  bulkArguments->uploadId = queryUploadIdFromTreeId(state->dbManager,
-                                                    bulkArguments->uploadTreeId);
+    int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
+                            0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
 
-  int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-                          0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
+    int result = bulk_identification(state);
 
-  int result = bulk_identification(state);
+    fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
+                arsId, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 1);
 
-  fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-              arsId, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 1);
-
-  return result;
+    return result;
+  } else {
+    return 0;
+  }
 }
 
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
-  int removed = state->bulkArguments->removing ? 1 : 0;
+  PGresult* highlightResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      state->dbManager,
+      "saveBulkResult:highlight",
+      "INSERT INTO highlight_bulk(lrb_fk, pfile_fk, start, len) VALUES($1,$2,$3,$4)",
+      long, long, size_t, size_t
+    ),
+    state->bulkArguments->bulkId,
+    file->id,
+    matchInfo->text.start,
+    matchInfo->text.length
+  );
 
-if (0) {
-  printf("found bulk match: fileId=%ld, licId=%ld, ", file->id, license->refId);
-  printf("start: %zu, length: %zu, ", matchInfo->text.start, matchInfo->text.length);
-  printf("removed: %d\n", removed);
-}
-  /* TODO write correct query after changing the db format */
-  //TODO we also want to save highlights
+  /* ignore errors */
+  if (highlightResult)
+    PQclear(highlightResult);
 
   /* we add a clearing decision for each uploadtree_fk corresponding to this pfile_fk
    * For each bulk scan scan we only have a n the other hand we have only one license per clearing decision
    */
-  PGresult* insertResult = fo_dbManager_ExecPrepared(
+  PGresult* clearingInsertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
-      "saveBulkResult",
+      "saveBulkResult:clearing",
       "WITH clearingIds AS ("
       " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
       "  SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
@@ -179,10 +176,10 @@ if (0) {
     state->bulkArguments->userId,
     state->bulkArguments->uploadId,
     license->refId,
-    removed
+    state->bulkArguments->removing ? 1 : 0
   );
 
   /* ignore errors */
-  if (insertResult)
-    PQclear(insertResult);
+  if (clearingInsertResult)
+    PQclear(clearingInsertResult);
 }
