@@ -71,7 +71,7 @@ class LicenseOverviewPrinter extends Object
     {
       $output .= _("license text");
       foreach (array(Highlight::MATCH => 'identical', Highlight::CHANGED => 'modified', Highlight::ADDED => 'added', Highlight::DELETED => 'removed',
-                     Highlight::SIGNATURE => 'license relevant text', Highlight::KEYWORD => 'keyword')
+                     Highlight::SIGNATURE => 'license relevant text', Highlight::KEYWORD => 'keyword', Highlight::BULK => 'bulk')
                as $colorKey => $txt)
       {
         $output .= '<br/>'.$this->highlightRenderer->createStyle( $colorKey, $txt, $colorMapping) . $txt . '</span>';

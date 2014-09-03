@@ -30,6 +30,7 @@ class Highlight extends Object
   const DELETED = "MD";
   const SIGNATURE = "S";
   const KEYWORD = "K";
+  const BULK = "B";
 
   const COPYRIGHT = "C";
   const URL = "U";
