@@ -124,18 +124,47 @@ function performNoLicensePostRequest() {
     performPostRequest();
 }
 
+function linkToJob(jqPk) {
+  return "<a href='?mod=showjobs&show=job&job="+ jqPk +"'>job #" + jqPk + "</a>";
+}
+
+function scheduleBulkScanError(error) {
+
+}
+
 function scheduleBulkScan() {
-    var data = {
+    var post_data = {
         "mode": $('#bulkAction').val(),
         "refText": $('#bulkRefText').val(),
         "licenseId": $('#bulkLicense').val(),
         "uploadTreeId": $('#uploadTreeId').val()
     };
 
+    var resultEntity = $('#bulkIdResult');
+    resultEntity.hide();
+
     $.ajax({
         type: "POST",
         url: "?mod=change-license-bulk",
-        data: data
+        data: post_data,
+        success: function(data) {
+            var jqPk = data.jqid;
+            if (jqPk) {
+                resultEntity.html("scan scheduled as " + linkToJob(jqPk));
+            } else {
+                resultEntity.html("bad response from server");
+            }
+            resultEntity.show();
+        },
+        error: function(responseobject) {
+            var error = responseobject.responseJSON.error;
+            if (error) {
+                resultEntity.text("error: " + error );
+            } else {
+                resultEntity.text("error");
+            }
+            resultEntity.show();
+        }
     });
 
 }

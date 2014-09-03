@@ -82,10 +82,17 @@ class changeLicenseBulk extends FO_Plugin
 
     $job_pk = JobAddJob($userId, $uploadName, $uploadId);
     $ErrorMsg = "";
-    $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $jq_cmd_args);
+    $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $jq_cmd_args);
 
     ReportCachePurgeAll();
-    // TODO return ErrorMsg status
+
+    if ($jq_pk>0) {
+      header('Content-type: text/json');
+      print json_encode(array("jobid" => $job_pk, "jqid" => $jq_pk ));
+    } else {
+      header('Content-type: text/json', true, 500);
+      print json_encode(array("error" => $ErrorMsg));
+    }
   } // Output()
 
 }
