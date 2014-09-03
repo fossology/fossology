@@ -17,6 +17,7 @@
  ***********************************************************/
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 
 define("TITLE_changeLicenseBulk", _("Private: schedule a bulk scan from post"));
 
@@ -26,6 +27,11 @@ class changeLicenseBulk extends FO_Plugin
    * @var LicenseDao
    */
   private $licenseDao;
+
+  /**
+   * @var DbManager
+   */
+  private $dbManager;
 
   /**
    * @var UploadDao
@@ -48,6 +54,7 @@ class changeLicenseBulk extends FO_Plugin
     global $container;
     $this->licenseDao = $container->get('dao.license');
     $this->uploadDao = $container->get('dao.upload');
+    $this->dbManager = $container->get('db.manager');
   }
 
   /**
@@ -65,7 +72,7 @@ class changeLicenseBulk extends FO_Plugin
     $uploadTreeId = $_POST['uploadTreeId'];
     $refText = $_POST['refText'];
     $licenseId = $_POST['licenseId'];
-    $mode = $_POST['mode'];
+    $removing = $_POST['removing'];
     // TODO sanitize input
 
     $license = $this->licenseDao->getLicenseById($licenseId);
@@ -74,15 +81,25 @@ class changeLicenseBulk extends FO_Plugin
     $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
     $uploadName = $uploadInfo['upload_filename'];
 
-    global $Plugins;
-    $MonkBulkPlugin = plugin_find("agent_monk_bulk");
+    $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
+      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
+      VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
+      array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+    );
 
-    $BulkSep = "\31";
-    $jq_cmd_args = implode($BulkSep, array($mode, $userId, $groupId, $uploadTreeId, $licenseId, $refText));
+    if ($licenseRefBulkIdResult !== false) {
+      $licenseRefBulkId = $licenseRefBulkIdResult['lrb_pk'];
+      $jq_cmd_args = "-B".$licenseRefBulkId;
+      $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+      $ErrorMsg = "";
 
-    $job_pk = JobAddJob($userId, $uploadName, $uploadId);
-    $ErrorMsg = "";
-    $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $jq_cmd_args);
+      global $Plugins;
+      $MonkBulkPlugin = plugin_find("agent_monk_bulk");
+      $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $jq_cmd_args);
+    } else {
+      $ErrorMsg = "can not insert bulk reference";
+      $jq_pk = -1;
+    }
 
     ReportCachePurgeAll();
 

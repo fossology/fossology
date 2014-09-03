@@ -134,7 +134,7 @@ function scheduleBulkScanError(error) {
 
 function scheduleBulkScan() {
     var post_data = {
-        "mode": $('#bulkAction').val(),
+        "removing": $('#bulkRemoving').val(),
         "refText": $('#bulkRefText').val(),
         "licenseId": $('#bulkLicense').val(),
         "uploadTreeId": $('#uploadTreeId').val()

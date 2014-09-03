@@ -271,9 +271,9 @@ class change_license extends FO_Plugin
     $allLicenseRefs = $this->licenseDao->getLicenseRefs();
     $text = _("Bulk recognition");
     $output .= "<h2>$text</h2>";
-    $output .= "<select name=\"bulkAction\" id=\"bulkAction\">";
-    $output .= "<option value=\"B\">Add license</option>";
-    $output .= "<option value=\"N\">Remove license</option>";
+    $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
+    $output .= "<option value=\"f\">Add license</option>";
+    $output .= "<option value=\"t\">Remove license</option>";
     $output .= "</select>";
     $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
     $text = _("reference text");
