@@ -42,7 +42,7 @@ int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {
     threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
     if (threadLocalState->dbManager) {
 #ifdef MONK_MULTI_THREAD
-      #pragma omp for
+      #pragma omp for schedule(dynamic)
 #endif
       for (int fileId = fileOptInd; fileId < argc; fileId++) {
         matchCliFileWithLicenses(threadLocalState, licenses, fileId, argv);

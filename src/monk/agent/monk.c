@@ -64,7 +64,7 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses){
     if (threadLocalState->dbManager) {
       int count = PQntuples(fileIdResult);
 #ifdef MONK_MULTI_THREAD
-      #pragma omp for
+      #pragma omp for schedule(dynamic)
 #endif
       for (int i = 0; i < count; i++) {
         long pFileId = atol(PQgetvalue(fileIdResult, i, 0));

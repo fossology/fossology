@@ -105,7 +105,7 @@ int bulk_identification(MonkState* state) {
       threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
       if (threadLocalState->dbManager) {
 #ifdef MONK_MULTI_THREAD
-        #pragma omp for
+        #pragma omp for schedule(dynamic)
 #endif
         for (int i = 0; i<resultsCount; i++) {
           long fileId = atol(PQgetvalue(filesResult, i, 0));
