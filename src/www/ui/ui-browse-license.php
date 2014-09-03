@@ -213,8 +213,9 @@ class ui_browse_license extends FO_Plugin
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
         {
-          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed");
+          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
           $V .= $this->getViewJobsLink($uploadId);
+          $V .= " " . _("or")." ";
           $V .= " <a href='$link'>" . _("Reschedule agent") . " $agentName</a><br/>";
         } else
         {
