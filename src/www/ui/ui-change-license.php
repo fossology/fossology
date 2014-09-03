@@ -264,7 +264,14 @@ class change_license extends FO_Plugin
     $output .= "</td>";
     $output .= "</tr>";
     $output .= "<tr><td>&nbsp;</td></tr></table>";
-    $output .= "<button  type=\"button\" autofocus  onclick='scheduleBulkScan()'>Run Bulk scan</button>";
+
+    $text = _("Bulk recognition:");
+    $output .= "<h2>$text</h2>";
+    $text = _("reference text:");
+    $output .= "$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"150\"></textarea>";
+    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs);
+    $output .= "<button  type=\"button\" onclick='scheduleBulkScan()'>Run Bulk scan</button>";
+
     $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
     $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
 
