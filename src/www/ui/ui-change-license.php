@@ -268,16 +268,16 @@ class change_license extends FO_Plugin
     $output .= "</tr>";
     $output .= "<tr><td>&nbsp;</td></tr></table>";
 
-    $text = _("Bulk recognition:");
+    $text = _("Bulk recognition");
     $output .= "<h2>$text</h2>";
-    $text = _("reference text:");
-    $output .= "$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"150\"></textarea>";
-    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs, false, 1);
+    $text = _("reference text");
+    $output .= "$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"1000\"></textarea><br>";
     $output .= "<select name=\"bulkAction\" id=\"bulkAction\">";
     $output .= "<option value=\"B\">Add license</option>";
     $output .= "<option value=\"N\">Remove license</option>";
     $output .= "</select>";
-    $output .= "<button type=\"button\" onclick='scheduleBulkScan()'>Run Bulk scan</button>";
+    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $licenseRefs, false, 1);
+    $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
 
     $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
     $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
