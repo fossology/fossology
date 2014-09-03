@@ -126,7 +126,7 @@ function performNoLicensePostRequest() {
 
 function scheduleBulkScan() {
     var data = {
-        "mode": "B",
+        "mode": $('#bulkAction').val(),
         "refText": $('#bulkRefText').val(),
         "licenseId": $('#bulkLicense').val(),
         "uploadTreeId": $('#uploadTreeId').val()
