@@ -38,10 +38,9 @@ void test_doctorBuffer()
 {
   licenseInit();
   char* buf, *fer;
-  buf = (char*) malloc(200);
-  fer = (char*) malloc(200);
-  sprintf(fer, "//Th- is is     a li-\n// cence of the test string");
-  sprintf(buf, "This is a li cence of the test string");
+
+  fer = g_strdup_printf("//Th- is is     a li-\n// cence of the test string");
+  buf = g_strdup_printf("This is a li cence of the test string");
   printf("%s \n", buf);
   printf("%s \n", fer);
   initializeCurScan(&cur);
@@ -50,8 +49,8 @@ void test_doctorBuffer()
   printf("%s \n", fer);
   CU_ASSERT_STRING_EQUAL(buf, fer);
   freeAndClearScan(&cur);
-  free(buf);
-  free(fer);
+  g_free(buf);
+  g_free(fer);
 }
 
 void test_doctorBuffer_uncollapse()
@@ -59,10 +58,8 @@ void test_doctorBuffer_uncollapse()
 
   licenseInit();
   char *fer, *cfer;
-  fer = (char*) malloc(200);
-  cfer = (char*) malloc(200);
-  sprintf(fer, "//This              is         the test string");
-  strcpy(cfer, fer);
+  fer = g_strdup_printf("//This              is         the test string");
+  cfer= g_strdup( fer);
   printf("%s \n", fer);
   initializeCurScan(&cur);
   doctorBuffer(fer, 0, 0, 0);
@@ -73,8 +70,8 @@ void test_doctorBuffer_uncollapse()
     CU_ASSERT_EQUAL(*(fer + i), *(cfer + uncollapsePosition(i, cur.docBufferPositionsAndOffsets)));
   }
 
-  free(cfer);
-  free(fer);
+  g_free(cfer);
+  g_free(fer);
 }
 
 static void report_Match(char* buf)
@@ -103,14 +100,13 @@ void test_doctorBuffer_fromFile()
   licenseInit();
   char* buf, *undoc;
   buf = (char*) malloc(3000);
-  undoc = (char*) malloc(3000);
 
   int f = open("../testdata/NomosTestfiles/WXwindows/WXwindows.txt", O_RDONLY);
   int whatIread = read(f, buf, 3000);
   close(f);
 
   CU_ASSERT_EQUAL(whatIread, 2496);
-  strcpy(undoc, buf);
+  undoc = g_strdup(buf);
 
   printf("\n%s\n", undoc);
   fflush(stdout);
@@ -153,7 +149,7 @@ void test_doctorBuffer_fromFile()
   freeAndClearScan(&cur);
 
   free(buf);
-  free(undoc);
+  g_free(undoc);
 
 }
 
@@ -174,19 +170,18 @@ void test_doctorBuffer_fromFile()
 void test_1_removeHtmlComments()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      "&quot the big\t(C) and long\\n &quot\\s-1234, test &copy; string \n con-\n// tains losts; of . <string test> &nbsp;  <body> \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n &quot \n ");
-//  printf("%s\n",textBuffer);
+  char* textBuffer = g_strdup_printf("&quot the big\t(C) and long\\n &quot\\s-1234,"
+              " test &copy; string \n con-\n// tains losts; of . <string test> &nbsp;"
+              "  <body> \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n &quot \n ");
   removeHtmlComments(textBuffer);
-//  printf("%s\n",textBuffer);
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big\t(C) and long\\n  quot\\s-1234, test &copy  string \n con-\n// tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
+  char* te22Buffer = g_strdup_printf(" quot the big\t(C) and long\\n  quot\\s-1234,"
+              " test &copy  string \n con-\n// tains losts; of . <string test   nbsp "
+              "   body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -196,20 +191,20 @@ void test_1_removeHtmlComments()
 void test_2_removeLineComments()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big\t(C) and long\\n  quot\\s-1234, test &copy  string \n con-\n// tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
-//  printf("%s\n",textBuffer);
-  removeLineComments(textBuffer);
-//  printf("%s\n",textBuffer);
+  char* textBuffer = g_strdup_printf(" quot the big\t(C) and long\\n  quot\\s-1234,"
+              " test &copy  string \n con-\n// tains losts; of . <string test   nbsp "
+              "   body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big\t(C) and long\\n  quot\\s-1234, test &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
+  removeLineComments(textBuffer);
+
+  char* te22Buffer = g_strdup_printf(" quot the big\t(C) and long\\n  quot\\s-1234,"
+              " test &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp"
+              "    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -218,21 +213,14 @@ void test_2_removeLineComments()
 void test_3_cleanUpPostscript()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
+  char* textBuffer=g_strdup_printf("(8) (89) -9.- A %%!PS-Adobe-3.0 (12) EPSF-3.0 --8. -9.- A");
 
-  textBuffer = (char*) malloc(1000);
-  sprintf(textBuffer, "(8) (89) -9.- A %%!PS-Adobe-3.0 (12) EPSF-3.0 --8. -9.- A");
-
-//  printf("%s\n",textBuffer);
   cleanUpPostscript(textBuffer);
-//  printf("%s\n",textBuffer);
 
-  char* te22Buffer = (char*) malloc(1000);
-  sprintf(te22Buffer, "                %%!PS-Adobe-3.0 (12) EPSF-3.0            ");
+  char* te22Buffer = g_strdup_printf("                %%!PS-Adobe-3.0 (12) EPSF-3.0            ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
-
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 
@@ -243,20 +231,20 @@ void test_3_cleanUpPostscript()
 void test_4_removeBackslashesAndGTroffIndicators()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big\t(C) and long\\n  quot\\s-1234, test &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
-// printf("%s\n",textBuffer);
-  removeBackslashesAndGTroffIndicators(textBuffer);
-// printf("%s\n",textBuffer);
+  char* textBuffer= g_strdup_printf(" quot the big\t(C) and long\\n  quot\\s-1234, test"
+              " &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp  "
+              "  body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big\t(C) and long    quot       , test &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
+  removeBackslashesAndGTroffIndicators(textBuffer);
+
+  char* te22Buffer = g_strdup_printf(" quot the big\t(C) and long    quot       , test"
+              " &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp  "
+              "  body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -273,19 +261,20 @@ void test_5_convertWhitespaceToSpaceAndRemoveSpecialChars()
   char* textBuffer;
   int isCR = NO; // isCR switches the replacment of ';' and '.', in the project it is always NO
 
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big\t(C) and long    quot       , test &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp    body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
-  //   printf("%s\n",textBuffer);
-  convertWhitespaceToSpaceAndRemoveSpecialChars(textBuffer, isCR);
-//   printf("%s\n",textBuffer);
+  textBuffer = g_strdup_printf(" quot the big\t(C) and long    quot       , test"
+              " &copy  string \n con-\n\377\377 tains losts; of . <string test   nbsp  "
+              "  body  \" compli-\n cated /* COMMENT s and funny */ Words as it \n "
+              "mimi-cs printf(\"Licence\"); and so on\n  quot \n ");
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long    quot         test &copy  string   con- \377\377 tains losts  of \377         test   nbsp    body    compli-  cated /  COMMENT s and funny  / Words as it   mimi-cs printf  Licence    and so on   quot   ");
+  convertWhitespaceToSpaceAndRemoveSpecialChars(textBuffer, isCR);
+
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long    quot         test"
+              " &copy  string   con- \377\377 tains losts  of \377         test   nbsp  "
+              "  body    compli-  cated /  COMMENT s and funny  / Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 
 }
 
@@ -301,37 +290,30 @@ void test_6_dehyphen()
 {
   initializeCurScan(&cur);
   char* buf, *fer;
-  buf = (char*) malloc(200);
-  fer = (char*) malloc(200);
-  sprintf(fer, "This- is  the-test str- ing");
-  sprintf(buf, "This\377\377is  the-test str\377\377ing");
-//  printf("%s \n", buf);
-//  printf("%s \n", fer);
+  fer= g_strdup_printf("This- is  the-test str- ing");
+  buf= g_strdup_printf("This\377\377is  the-test str\377\377ing");
   dehyphen(fer);
-//  printf("%s \n", buf);
-//  printf("%s \n", fer);
   CU_ASSERT_STRING_EQUAL(buf, fer);
-  free(buf);
-  free(fer);
+  g_free(buf);
+  g_free(fer);
 }
 
 void test_6a_dehyphen()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big (C) and long    quot       , test &copy  string   con- \377\377 tains losts  of \377         test   nbsp    body    compli-  cated /  COMMENT s and funny  / Words as it   mimi-cs printf  Licence    and so on   quot   ");
-//  printf("%s\n", textBuffer);
+  char* textBuffer= g_strdup_printf(" quot the big (C) and long    quot       , "
+              "test &copy  string   con- \377\377 tains losts  of \377         test"
+              "   nbsp    body    compli-  cated /  COMMENT s and funny  / Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
   dehyphen(textBuffer);
-//  printf("%s\n", textBuffer);
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long    quot       , test &copy  string   con- \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated /  COMMENT s and funny  / Words as it   mimi-cs printf  Licence    and so on   quot   ");
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long    quot       , test &copy  "
+              "string   con- \377\377 tains losts  of \377         test   nbsp    body    "
+              "compli\377\377\377cated /  COMMENT s and funny  / Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 
 }
 
@@ -342,21 +324,20 @@ void test_6a_dehyphen()
 void test_7_removePunctuation()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big (C) and long    quot       , test &copy  string   con- \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated /  COMMENT s and funny  / Words as it   mimi-cs printf  Licence    and so on   quot   ");
+  char* textBuffer= g_strdup_printf(" quot the big (C) and long    quot       , "
+              "test &copy  string   con- \377\377 tains losts  of \377         test   "
+              "nbsp    body    compli\377\377\377cated /  COMMENT s and funny  / Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
  //! Note the added ',' so removePunctuation does ignore commas...
-//  printf("%s\n", textBuffer);
   removePunctuation(textBuffer);
-//  printf("%s\n", textBuffer);
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long    quot       , test &copy  string   con  \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated    COMMENT s and funny    Words as it   mimi-cs printf  Licence    and so on   quot   ");
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long    quot       , test "
+              "&copy  string   con  \377\377 tains losts  of \377         test   nbsp    body    "
+              "compli\377\377\377cated    COMMENT s and funny    Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -370,20 +351,19 @@ void test_7_removePunctuation()
 void test_8_ignoreFunctionCalls()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big (C) and long    quot       , test &copy  string   con  \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated    COMMENT s and funny    Words as it   mimi-cs printf  Licence    and so on   quot   ");
-//  printf("%s\n", textBuffer);
+  char* textBuffer= g_strdup_printf(" quot the big (C) and long    quot       , test &copy  "
+              "string   con  \377\377 tains losts  of \377         test   nbsp    body    "
+              "compli\377\377\377cated    COMMENT s and funny    Words as it   "
+              "mimi-cs printf  Licence    and so on   quot   ");
   ignoreFunctionCalls(textBuffer);
-//  printf("%s\n", textBuffer);
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long    quot       , test &copy  string   con  \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated    COMMENT s and funny    Words as it   mimi-cs         Licence    and so on   quot   ");
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long    quot       , test &copy  "
+              "string   con  \377\377 tains losts  of \377         test   nbsp    body    "
+              "compli\377\377\377cated    COMMENT s and funny    Words as it   "
+              "mimi-cs         Licence    and so on   quot   ");
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -393,20 +373,21 @@ void test_8_ignoreFunctionCalls()
 void test_9_convertSpaceToInvisible()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big (C) and long    quot       , test &copy  string   con  \377\377 tains losts  of \377         test   nbsp    body    compli\377\377\377cated    COMMENT s and funny    Words as it   mimi-cs         Licence    and so on   quot   ");
+  char* textBuffer= g_strdup_printf(" quot the big (C) and long    quot       , test &copy  "
+              "string   con  \377\377 tains losts  of \377         test   nbsp    body    "
+              "compli\377\377\377cated    COMMENT s and funny    Words as it   "
+              "mimi-cs         Licence    and so on   quot   ");
   convertSpaceToInvisible(textBuffer);
-//  printf("%s\n", textBuffer);
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long \377\377\377quot \377\377\377\377\377\377, test &copy \377string \377\377con \377\377\377\377tains losts \377of \377\377\377\377\377\377\377\377\377\377test \377\377nbsp \377\377\377body \377\377\377compli\377\377\377cated \377\377\377COMMENT s and funny \377\377\377Words as it \377\377mimi-cs \377\377\377\377\377\377\377\377Licence \377\377\377and so on \377\377quot \377\377");
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long \377\377\377quot \377\377\377\377\377\377, "
+              "test &copy \377string \377\377con \377\377\377\377tains losts \377of \377\377\377\377\377\377\377\377\377\377"
+              "test \377\377nbsp \377\377\377body \377\377\377compli\377\377\377cated \377\377\377COMMENT s "
+              "and funny \377\377\377Words as it \377\377mimi-cs \377\377\377\377\377\377\377\377Licence \377\377\377"
+              "and so on \377\377quot \377\377");
 //  printf("%s\n", te22Buffer);
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 /*
@@ -415,21 +396,21 @@ void test_9_convertSpaceToInvisible()
 void test_10_compressDoctoredBuffer()
 {
   initializeCurScan(&cur);
-  char* textBuffer;
-  textBuffer = (char*) malloc(1200);
-  sprintf(textBuffer,
-      " quot the big (C) and long \377\377\377quot \377\377\377\377\377\377, test &copy \377string \377\377con \377\377\377\377tains losts \377of \377\377\377\377\377\377\377\377\377\377test \377\377nbsp \377\377\377body \377\377\377compli\377\377\377cated \377\377\377COMMENT s and funny \377\377\377Words as it \377\377mimi-cs \377\377\377\377\377\377\377\377Licence \377\377\377and so on \377\377quot \377\377");
+  char* textBuffer= g_strdup_printf(" quot the big (C) and long \377\377\377quot \377\377\377\377\377\377, "
+              "test &copy \377string \377\377con \377\377\377\377tains losts \377of \377\377\377\377\377\377\377\377\377\377"
+              "test \377\377nbsp \377\377\377body \377\377\377compli\377\377\377cated \377\377\377COMMENT s "
+              "and funny \377\377\377Words as it \377\377mimi-cs \377\377\377\377\377\377\377\377Licence \377\377\377"
+              "and so on \377\377quot \377\377");
+
   compressDoctoredBuffer(textBuffer);
-//  printf("%s\n", textBuffer);
 
-  char* te22Buffer = (char*) malloc(1200);
-  sprintf(te22Buffer,
-      " quot the big (C) and long quot , test &copy string con tains losts of test nbsp body complicated COMMENT s and funny Words as it mimi-cs Licence and so on quot ");
-//  printf("%s\n", te22Buffer);
+  char* te22Buffer = g_strdup_printf(" quot the big (C) and long quot , test &copy string "
+              "con tains losts of test nbsp body complicated COMMENT s and funny Words as "
+              "it mimi-cs Licence and so on quot ");
+
   CU_ASSERT_STRING_EQUAL(te22Buffer, textBuffer);
-  free(textBuffer);
-  free(te22Buffer);
-
+  g_free(textBuffer);
+  g_free(te22Buffer);
 }
 
 CU_TestInfo doctorBuffer_testcases[] =

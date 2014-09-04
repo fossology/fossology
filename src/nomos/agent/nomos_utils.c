@@ -786,9 +786,9 @@ FUNCTION void processFile(char *fileToScan)
   (void) strcpy(cur.cwd, gl.initwd);
 
   strcpy(cur.filePath, fileToScan);
-  pathcopy = strdup(fileToScan);
+  pathcopy = g_strdup(fileToScan);
   strcpy(cur.targetDir, dirname(pathcopy));
-  free(pathcopy);
+  g_free(pathcopy);
   strcpy(cur.targetFile, fileToScan);
   cur.targetLen = strlen(cur.targetDir);
 
@@ -943,7 +943,7 @@ FUNCTION inline void cleanTheMatches(GArray* theMatches){
 
 FUNCTION inline void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in )
 {
-  if(in->licenceName) free(in->licenceName);
+  if(in->licenceName) g_free(in->licenceName);
   g_array_free(in->matchPositions, TRUE);
   g_array_free(in->indexList,TRUE);
 }
@@ -955,9 +955,8 @@ FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
 
   //! fill this later
   newMatch.matchPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
-  newMatch.licenceName = (char*) malloc(strlen(licenceName) + 1);
+  newMatch.licenceName = g_strdup(licenceName);
   newMatch.licenseFileId = -1; //initial Value <- check if it was set
-  strcpy(  newMatch.licenceName,licenceName );
   g_array_append_val(theMatches , newMatch);
 }
 
