@@ -124,9 +124,6 @@ function performNoLicensePostRequest() {
     performPostRequest();
 }
 
-function linkToJob(jqPk) {
-  return "<a href='?mod=showjobs&show=job&job="+ jqPk +"'>job #" + jqPk + "</a>";
-}
 
 function reloadClearingTable(){
     // TODO reload also highlights
