@@ -118,7 +118,7 @@ class LicenseDao extends Object
    * @param $selectedAgentId
    * @return array
    */
-  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null, $filterLicenses=array('No_license_found', 'VOID'))
+  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null, $filterLicenses=array('VOID'))//'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
@@ -187,7 +187,7 @@ class LicenseDao extends Object
     return $assocLicenseHist;
   }
 
-  public function getLicenseShortnamesContained(FileTreeBounds $fileTreeBounds, $filterLicenses=array('No_license_found', 'VOID'))
+  public function getLicenseShortnamesContained(FileTreeBounds $fileTreeBounds, $filterLicenses=array('VOID')) //'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
 

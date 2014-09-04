@@ -532,7 +532,7 @@ class ui_browse_license extends FO_Plugin
         if ($isContainer)
         {
           $containerFileTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
-          $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds );
+          $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds , array());
           $licenseList = implode(', ', $licenses);
           $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($containerFileTreeBounds);
           $editedLicenseList .= implode(', ', $editedLicenses);
