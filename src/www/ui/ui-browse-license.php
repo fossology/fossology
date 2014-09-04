@@ -445,7 +445,7 @@ class ui_browse_license extends FO_Plugin
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId)
+  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $fileTreeBounds->getUploadId();
