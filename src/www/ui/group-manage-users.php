@@ -66,6 +66,8 @@ class group_manage_users extends FO_Plugin {
     global $PERM_NAMES;
     global $SysConf;
 
+    global $container;
+    $dbManager = $container->get('db.manager');
     $user_pk = $SysConf['auth']['UserId'];
 
     /* GET parameters */
@@ -150,10 +152,11 @@ class group_manage_users extends FO_Plugin {
     $group_permArray = array(-1 => "None", 0=>"User", 1=>"Admin");
 
     /* Select all the user members of this group */
-    $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member, users
-              where group_fk='$group_pk' and user_fk=user_pk order by user_name";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $stmt = __METHOD__."getUsersWithGroup";
+    $dbManager->prepare($stmt,"select group_user_member_pk, user_fk, group_perm, user_name from group_user_member GUM INNER JOIN users
+             on  GUM.user_fk=users.user_pk where GUM.group_fk=$1  order by user_name");
+    $result = $dbManager->execute($stmt,array($group_pk));
+
     $GroupMembersArray = pg_fetch_all($result);
     pg_free_result($result);
 

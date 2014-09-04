@@ -29,11 +29,12 @@ UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js)
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php \
                 group-manage-self.php group-manage.php ajax-perms.php
 
-OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png)$$" `
+OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm)$$" `
 
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
 all:
+#	php5 fo-render.php m
 
 install: all
 
@@ -64,5 +65,6 @@ uninstall:
 
 clean:
 	rm -f *.o core $(iPATHFILE)
+	rm template/*.htm
 
 .PHONY: all install uninstall clean test

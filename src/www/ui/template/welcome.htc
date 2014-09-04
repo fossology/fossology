@@ -1,0 +1,79 @@
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3><font color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><i18n>The FOSSology Toolset</i18n></font></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'><i18n>FOSSology is a framework for software analysis tools. The current FOSSology tools can:</i18n><br>
+          <br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Find license references in software</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Browse uploaded file hierarchies</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Find copyrights, url's and email addresses</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Classify licenses into user definable categories (aka buckets)</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Browse package (rpm, apt) metadata</i18n><br>
+          </font>
+        <p>
+      </blockquote></td>
+    <td><img src='{{ SiteURI }}images/white.png'></td>
+  </tr>
+</table>
+
+<table width='100%' border='0'>
+  <tr> 
+    <td><img src='{{ SiteURI }}images/logo2.png' align='right'></td>
+    <td valign='top'>
+      <h3 style='color:#CC0000;font-family:Verdana, Arial, Helvetica, sans-serif;'><i18n>FOSSology's Graphical User Interface</i18n></h3>
+      <blockquote> 
+        <p style='font-family:Arial, Helvetica, sans-serif'><i18n>This website is an interface into the FOSSology project. With it, you can:</i18n><br>
+          <br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Upload files to analyze.</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Unpack and store the data within the files for analysis.</i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Invoke specialized agents to scan and analyze the files.  </i18n><br>
+          <img src='{{ SiteURI }}images/right-point-bullet.gif'><i18n>Store and display the analyzed results. </i18n><br>
+        </p>
+      </blockquote></td>
+  </tr>
+</table>
+
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3 style='color:#CC0000;font-family:Verdana, Arial, Helvetica, sans-serif;'><i18n>How to Begin</i18n></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'><i18n>The menu at the top contains all the primary capabilities of FOSSology. Most functions require you to log in before they can be accessed. The following functions are available without logging in:</i18n><br>
+          <br>
+          <strong><em>{{ login }}:</em></strong> <i18n>If you log in, you can access additional capabilities. Depending on your account's access rights,</i18n><br>
+          <i18n>you may be able to upload files, schedule analysis tasks, or even add new users.</i18n></font></p>
+      </blockquote></td>
+  </tr>
+</table>
+
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3 style='color:#CC0000;font-family:Verdana, Arial, Helvetica, sans-serif;'><i18n>Inside FOSSology</i18n></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'><i18n>Some parts of FOSSology helpful to know about are:</i18n><br>
+          <br>
+          <em><strong><i18n>Software Repository</i18n></strong></em> <i18n>- Stores files uploaded for analysis.</i18n><br>
+          <em><strong><i18n>Database</i18n></strong></em> <i18n>- Stores user accounts, file information, and analysis results.</i18n><br>
+          <em><strong><i18n>Agents</i18n></strong></em> <i18n>- Perform analysis of files and data found in the Software Repository and Database.</i18n><br>
+          <em><strong><i18n>Scheduler</i18n></strong></em> <i18n>- Runs the agents, making efficient  use of available resources.</i18n><br>
+          <em><strong><i18n>Web GUI</i18n></strong></em> &shy; <i18n>- Provides user access to FOSSology.</i18n><br>
+          <em><strong><i18n>Command line utilities</i18n></strong></em> &shy; <i18n>- Provides scripting access to FOSSology.</i18n><br>
+        </p>
+      </blockquote></td>
+    <td><img src='{{ SiteURI }}images/fossology-flow4.png'></td>
+  </tr>
+</table>
+
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3 style='color:#CC0000;font-family:Verdana, Arial, Helvetica, sans-serif'><img src='{{ SiteURI }}images/white.png' align='left'><i18n>Need Some Help?</i18n></h3>
+      <blockquote> 
+        <p style='font-family:Arial, Helvetica, sans-serif;'><i18n>Now that you've been introduced to Fossology, try exploring it!</i18n><br>
+          <i18n>The following resources will provide additional help and information:</i18n>
+        </p>
+        <!--  <font face='Arial, Helvetica, sans-serif'><em><strong><i18n>Help tab</i18n></strong></em><i18n>- Select this website's Help tab for software-related help and tips.</i18n>
+          </font><br>-->
+          <font face='Arial, Helvetica, sans-serif'><em><strong><a href='http://fossology.org/'><i18n>FOSSology web site</i18n></a></strong></em> <i18n>- Where you can find more information and get help on FOSSology.</i18n><br>
+          </font> 
+      </blockquote></td>
+  </tr>
+</table>

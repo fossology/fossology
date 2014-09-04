@@ -350,7 +350,11 @@ class FO_Plugin
           if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
           $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
           $V .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
-          print $V; $V="";
+          print $V;
+          print "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
+          print "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
+          $V = "";
+
           if (!empty($Menu)) { print $Menu->OutputCSS(); }
           $V .= "</head>\n";
 

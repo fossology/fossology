@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 
@@ -167,6 +168,7 @@ class ui_browse_license extends FO_Plugin
 
     global $container;
     $dbManager = $container->get('db.manager');
+    /** @var DbManager $dbManager */
     $allScans = array();
     foreach($scannerAgents as $agentName){
       $agentHasArsTable = DB_TableExists($agentName."_ars");
