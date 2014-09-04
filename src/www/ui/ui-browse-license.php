@@ -460,7 +460,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $AddInfoText = "";
-    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds, $selectedAgentId);
+    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
     $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($fileTreeBounds);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
@@ -532,7 +532,7 @@ class ui_browse_license extends FO_Plugin
         if ($isContainer)
         {
           $containerFileTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
-          $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds);
+          $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds );
           $licenseList = implode(', ', $licenses);
           $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($containerFileTreeBounds);
           $editedLicenseList .= implode(', ', $editedLicenses);
