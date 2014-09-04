@@ -140,6 +140,10 @@ class change_license extends FO_Plugin
       $output .= "<b>$text</b>";
 
       $output .= $this->createChangeLicenseForm($uploadTreeId);
+      $output .= $this->createBulkForm($uploadTreeId);
+
+      $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
+      $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";
 
       $text = _("Clearing History:");
       $output .= "<h2>$text</h2>";
@@ -191,14 +195,12 @@ class change_license extends FO_Plugin
     return $this->changeLicenseUtility->printClearingTable($tableName, $clearingDecWithLicenses, $user_pk);
   }
 
-
   /**
    * @param $uploadTreeId
    * @return string
    * creates two licenseListSelects and buttons to transfer licenses and two text boxes
    */
-  private function createChangeLicenseForm($uploadTreeId)
-  {
+  private function createChangeLicenseForm($uploadTreeId) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
 
     $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
@@ -221,9 +223,10 @@ class change_license extends FO_Plugin
     $this->changeLicenseUtility->filterLists($licenseRefs, $preSelectedLicenses);
 
     $output = "";
-    $output .= "<form name=\"licenseListSelect\">";
-    $output .= " <table border=\"0\">	<tr>";
 
+    $output .= "<div class=\"modal\" id=\"userModal\" hidden>";
+    $output .= "<form name=\"licenseListSelect\">";
+    $output .= " <table border=\"0\"> <tr>";
     $text = _("Available licenses:");
     $output .= "<td><p>$text<br>";
     $output .= $this->changeLicenseUtility->createListSelect("licenseLeft", $licenseRefs);
@@ -267,8 +270,18 @@ class change_license extends FO_Plugin
     $output .= "</td>";
     $output .= "</tr>";
     $output .= "<tr><td>&nbsp;</td></tr></table>";
+    $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
+    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
+    $output .= "</div>";
 
+    return $output;
+  }
+
+  private function createBulkForm($uploadTreeId) {
+    $output = "";
     $allLicenseRefs = $this->licenseDao->getLicenseRefs();
+    $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
+    $output .= "<form name=\"bulkForm\">";
     $text = _("Bulk recognition");
     $output .= "<h2>$text</h2>";
     $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
@@ -281,17 +294,16 @@ class change_license extends FO_Plugin
     $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
     $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
     $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
-
-    $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
+    $output .= "</div>";
     $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
 
     return $output;
-
   }
 
   private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/change-license.js\" type=\"text/javascript\"></script>\n";
     return $output;

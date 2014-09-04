@@ -200,3 +200,11 @@ html, body
     {
       background-color: #bebebe;
     }
+
+.modal {
+  padding: 20px 40px;
+  color: #000000;
+  background-color: #E6E6E6;
+  border-radius: 10px;
+  display: none;
+}
