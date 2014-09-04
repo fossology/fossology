@@ -83,7 +83,7 @@ function selectNoLicenseFound(left, right) {
     sortList(left);
 }
 
-function success(data) {
+function clearingSuccess(data) {
     $('#clearingHistoryTable').html(data.tableClearing);
     $('#recentLicenseClearing').html(data.recentLicenseClearing);
 }
@@ -113,7 +113,7 @@ function performPostRequest() {
         type: "POST",
         url: "?mod=change-license-processPost",
         data: data,
-        success: success
+        success: clearingSuccess
     });
 
 
@@ -142,15 +142,14 @@ function updateCheckSuccess(data) {
     }
   });
   if (redraw) {
-    // TODO do proper reloading of page contents
-    var resultEntity = $('#bulkIdResult');
-    resultEntity.hide();
-    var jobResultEntity = $('#bulkJobResult');
-    jobResultEntity.hide();
-    setTimeout(function() {
-      jobResultEntity.show();
-    }, 200
-    );
+    // TODO reload also highlights
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-newclearing",
+        data: { "uploadTreeId": $('#uploadTreeId').val() },
+        success: clearingSuccess
+    });
+    $('#bulkIdResult').hide();
   }
   if (checkList.length > 0) {
     currentTimeout += 1000;
