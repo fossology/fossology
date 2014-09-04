@@ -68,9 +68,8 @@ class changeLicenseBulk extends FO_Plugin
     $ErrorMsg = "";
     $jq_pk = -1;
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = 2; // TODO
+    $userId = $_SESSION['UserId'];
+    $groupId = $_SESSION['GroupId'];
     $uploadTreeId = intval($_POST['uploadTreeId']);
     $refText = $_POST['refText'];
     $licenseId = intval($_POST['licenseId']);
