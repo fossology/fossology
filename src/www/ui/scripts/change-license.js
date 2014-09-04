@@ -116,12 +116,36 @@ function performPostRequest() {
         success: clearingSuccess
     });
 
-
+    closeUserModal();
 }
 
 function performNoLicensePostRequest() {
     selectNoLicenseFound(licenseLeft, licenseRight);
     performPostRequest();
+    closeUserModal();
+}
+
+var bulkModal;
+var userModal;
+$(document).ready(function() {
+  bulkModal = $('#bulkModal').plainModal();
+  userModal = $('#userModal').plainModal();
+});
+
+function openBulkModal() {
+  bulkModal.plainModal('open');
+}
+
+function closeBulkModal() {
+  bulkModal.plainModal('close');
+}
+
+function openUserModal() {
+  userModal.plainModal('open');
+}
+
+function closeUserModal() {
+  userModal.plainModal('close');
 }
 
 function linkToJob(jqPk) {
@@ -159,6 +183,7 @@ function scheduleBulkScan() {
             if (jqPk) {
                 resultEntity.html("scan scheduled as " + linkToJob(jqPk));
                 queueUpdateCheck(jqPk, reloadClearingTable);
+                closeBulkModal();
             } else {
                 resultEntity.html("bad response from server");
             }
