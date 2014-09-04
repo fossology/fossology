@@ -128,20 +128,7 @@ function linkToJob(jqPk) {
   return "<a href='?mod=showjobs&show=job&job="+ jqPk +"'>job #" + jqPk + "</a>";
 }
 
-var checkList = [];
-var currentTimeout = 1000;
-
-function updateCheckSuccess(data) {
-  var redraw = false;
-  checkList = $.map(checkList, function(val,i) {
-    if ((data[val]) && (data[val].end_bits)) {
-      redraw = true;
-      return null;
-    } else {
-      return val;
-    }
-  });
-  if (redraw) {
+function reloadClearingTable(){
     // TODO reload also highlights
     $.ajax({
         type: "POST",
@@ -150,33 +137,6 @@ function updateCheckSuccess(data) {
         success: clearingSuccess
     });
     $('#bulkIdResult').hide();
-  }
-  if (checkList.length > 0) {
-    currentTimeout += 1000;
-    setTimeout(updateCheck, currentTimeout);
-  }
-}
-
-function updateCheck() {
-  if (checkList.length > 0) {
-    $.ajax({
-      type: "POST",
-      url: "?mod=jobinfo",
-      data: {
-        "jqIds" : checkList
-      },
-      success: updateCheckSuccess,
-      error: function() {
-        checkList = [];
-      }
-    });
-  }
-}
-
-function queueUpdateCheck(jqPk) {
-    checkList.push(jqPk);
-    currentTimeout = 1000;
-    setTimeout(updateCheck, currentTimeout);
 }
 
 function scheduleBulkScan() {
@@ -198,7 +158,7 @@ function scheduleBulkScan() {
             var jqPk = data.jqid;
             if (jqPk) {
                 resultEntity.html("scan scheduled as " + linkToJob(jqPk));
-                queueUpdateCheck(jqPk);
+                queueUpdateCheck(jqPk, reloadClearingTable);
             } else {
                 resultEntity.html("bad response from server");
             }
