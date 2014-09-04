@@ -16,10 +16,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
@@ -55,6 +57,10 @@ class ui_browse_license extends FO_Plugin
   private $licenseProcessor;
 
   /**
+   * @var AgentsDao
+   */
+  private $agentsDao;
+  /**
    * @var LicenseRenderer
    */
   private $licenseRenderer;
@@ -72,6 +78,7 @@ class ui_browse_license extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
+    $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
     $this->licenseRenderer = $container->get('view.license_renderer');
 
@@ -162,65 +169,109 @@ class ui_browse_license extends FO_Plugin
       $V = "<b>$text</b><p>";
       return $V;
     }
-    
+
     $uploadId = GetParm('upload', PARM_NUMBER);
-    $scannerAgents = array('nomos','monk');
+    $scannerAgents = array('nomos', 'monk');
 
     global $container;
     $dbManager = $container->get('db.manager');
     /** @var DbManager $dbManager */
     $allScans = array();
-    foreach($scannerAgents as $agentName){
-      $agentHasArsTable = DB_TableExists($agentName."_ars");
-      if (empty($agentHasArsTable)) {
+    foreach ($scannerAgents as $agentName)
+    {
+      $agentHasArsTable = DB_TableExists($agentName . "_ars");
+      if (empty($agentHasArsTable))
+      {
         continue;
       }
 
-      $newestAgent = $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
-              . "ORDER BY agent_pk DESC LIMIT 1",array($agentName));
-      $stmt = __METHOD__.".getAgent.$agentName";
+      $newestAgent = $this->getNewestAgent($agentName);
+      $stmt = __METHOD__ . ".getAgent.$agentName";
       $dbManager->prepare($stmt,
-                $sql="SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN ".$agentName."_ars ON agent_fk=agent_pk "
+          $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
               . "WHERE agent_name=$2 AND agent_enabled "
               . "  AND upload_fk=$1 AND ars_success "
               . "ORDER BY agent_pk DESC");
-      $res = $dbManager->execute($stmt,array($uploadId,$agentName));
+      $res = $dbManager->execute($stmt, array($uploadId, $agentName));
       $latestRun = $dbManager->fetchArray($res);
-      if($latestRun)
+      if ($latestRun)
       {
         $allScans[] = $latestRun;
       }
-      while($run=$dbManager->fetchArray($res) )
+      while ($run = $dbManager->fetchArray($res))
       {
         $allScans[] = $run;
       }
       $dbManager->freeResult($res);
-      
-      if (false===$latestRun)
+
+      if (false === $latestRun)
       {
-        $V .= _("The agent"). " <b>$agentName</b> "._("did never successfully run on this upload.")."<br/>";
+
+        $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
+        $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId . '&agents[]=agent_' . $agentName;
+
+        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        if (count($runningJobs) > 0)
+        {
+          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
+          $V .= $this->getViewJobsLink($uploadId);
+          $V .= " " . _("or")." ";
+          $V .= " <a href='$link'>" . _("Reschedule agent") . " $agentName</a><br/>";
+        } else
+        {
+          $V .= " <a href='$link'>" . _("schedule agent") . " $agentName</a><br/>";
+        }
         continue;
       }
-      
-      $V .= _("The latest results of agent")." <b>$agentName</b> "._("are from revision ")."$latestRun[agent_rev].";
-      if ($latestRun['agent_pk']!=$newestAgent['agent_pk'])
+
+      $V .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . "$latestRun[agent_rev].";
+      if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
       {
-        $link = Traceback_uri().'?mod=agent_add&upload='.$uploadId;
-        $V .= _(" (The newer revision")." $newestAgent[agent_rev] "._("did not run on this upload: ")."<a href='$link'>"._("schedule agents")."</a>)";
+        $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId . '&agents[]=agent_' . $agentName;
+
+        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        if (in_array($newestAgent['agent_pk'], $runningJobs))
+        {
+          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
+          $V .= $this->getViewJobsLink($uploadId);
+          $V .= " "._("or")." ";
+        } else
+        {
+          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
+
+        }
+        $V .= " <a href='$link'>" . _("schedule agent") . " $agentName</a>";
       }
       $V .= '<br/>';
-    }    
-
-    if(empty($allScans))
-    {
-      return _("There is no successful scan for this upload, please schedule one license scanner on this upload.");
     }
-    
-    $V .= $this->buildAgentSelector($allScans);   
+
+    if (empty($allScans))
+    {
+
+      $out = "";
+      $out .= _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
+
+      foreach ($scannerAgents as $agentName)
+      {
+        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        if (count($runningJobs) > 0)
+        {
+          $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
+          $out .= $this->getViewJobsLink($uploadId);
+          $out .= "<br/>";
+        }
+      }
+      $out .= _("Do you want to ");
+      $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId;
+      $out .= "<a href='$link'>" . _("schedule agents") . "</a>";
+      return $out;
+    }
+
+    $V .= $this->buildAgentSelector($allScans);
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    list($jsBlockLicenseHist,$VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds,  $ModLicView, $UniqueTagArray, $selectedAgentId);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -335,7 +386,7 @@ class ui_browse_license extends FO_Plugin
     print "$V";
     $Time = microtime(true) - $uTime; // convert usecs to secs
     $text = _("Elapsed time: %.3f seconds");
-    printf("<small>$text</small>", $Time);
+    printf("<br/><small>$text</small>", $Time);
 
     if ($Cached)
     {
@@ -351,9 +402,10 @@ class ui_browse_license extends FO_Plugin
     return "";
   }
 
-  private function createJavaScriptBlock() {
-    $output ="\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+  private function createJavaScriptBlock()
+  {
+    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
     return $output;
   }
@@ -369,12 +421,14 @@ class ui_browse_license extends FO_Plugin
          * polluted with updcache
          * Use Traceback_parm_keep to ensure that all parameters are in order */
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item", "tag", "agent", "orderBy", "orderl", "orderc"));
-    if ($updcache) {
+    if ($updcache)
+    {
       $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/", "", $_SERVER['REQUEST_URI']);
       unset($_GET['updcache']);
       $V = ReportCachePurgeByKey($CacheKey);
       return array($CacheKey, $V);
-    } else {
+    } else
+    {
       $V = ReportCacheGet($CacheKey);
       return array($CacheKey, $V);
     }
@@ -396,8 +450,12 @@ class ui_browse_license extends FO_Plugin
     /** change the license result when selecting one version of nomos */
     $uploadId = $fileTreeBounds->getUploadId();
 
-    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => LatestAgentpk($uploadId, "nomos_ars")),
-      'monk' => array('name' => 'M', 'latest' => LatestAgentpk($uploadId, "monk_ars")));
+    $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
+    $newestNomos=$this->getNewestAgent("nomos");
+    $latestMonk=LatestAgentpk($uploadId, "monk_ars");
+    $newestMonk=$this->getNewestAgent("monk");
+    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
+        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
 
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
@@ -413,13 +471,16 @@ class ui_browse_license extends FO_Plugin
 
     $ChildCount = 0;
 
-    if (!empty($Children)) {
-      $haveUnconfirmed = false;
+    if (!empty($Children))
+    {
+      $haveOldVersionResult = false;
+      $haveRunningResult = false;
+      $tableData = array();
 
-      $tableData=array();
-
-      foreach ($Children as $child) {
-        if (empty($child)) {
+      foreach ($Children as $child)
+      {
+        if (empty($child))
+        {
           continue;
         }
 
@@ -427,27 +488,31 @@ class ui_browse_license extends FO_Plugin
         $fileId = $child['pfile_fk'];
         $childUploadTreeId = $child['uploadtree_pk'];
 
-        if (!empty($fileId) && !empty($ModLicView)) {
+        if (!empty($fileId) && !empty($ModLicView))
+        {
           $LinkUri = Traceback_uri();
           $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
           if ($selectedAgentId)
           {
             $LinkUri .= "&agentId=$selectedAgentId";
           }
-        } else {
+        } else
+        {
           $LinkUri = NULL;
         }
 
         /* Determine link for containers */
         $isContainer = Iscontainer($child['ufile_mode']);
-        if ($isContainer) {
+        if ($isContainer)
+        {
           $uploadtree_pk = DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename);
           $LicUri = "$Uri&item=" . $uploadtree_pk;
           if ($selectedAgentId)
           {
             $LicUri .= "&agentId=$selectedAgentId";
           }
-        } else {
+        } else
+        {
           $LicUri = NULL;
         }
 
@@ -460,30 +525,49 @@ class ui_browse_license extends FO_Plugin
           $fileName = "<a href='$LinkUri'>$fileName</a>";
         $ChildCount++;
 
-        
+
         /* show licenses under file name */
-        $licenseList="";
-        $editedLicenseList= "";
-        if ($isContainer) {
+        $licenseList = "";
+        $editedLicenseList = "";
+        if ($isContainer)
+        {
           $containerFileTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
           $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds);
           $licenseList = implode(', ', $licenses);
           $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($containerFileTreeBounds);
           $editedLicenseList .= implode(', ', $editedLicenses);
-        }
-        else{
-          if (array_key_exists($fileId, $pfileLicenses)) {
+        } else
+        {
+          if (array_key_exists($fileId, $pfileLicenses))
+          {
             $licenseEntries = array();
-            foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {
+            foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
+            {
               $agentEntries = array();
-              foreach ($rfInfo as $agent => $lic) {
-                $linkInfo = $goodAgents[$agent];
-                $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$linkInfo[name]</a>";
-                if ($lic['agent_id'] != $linkInfo['latest']) {
-                  $agentEntry .= "&dagger;";
-                  $haveUnconfirmed = true;
+              foreach ($rfInfo as $agent => $lic)
+              {
+                $agentInfo = $goodAgents[$agent];
+                $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$agentInfo[name]</a>";
+
+                if($agentInfo['latestIsNewest']) {
+                  if ($lic['agent_id'] != $agentInfo['latest'])
+                  {
+                    $agentEntry .= "&dagger;";
+                    $haveOldVersionResult = true;
+                  }
                 }
-                if ($lic['match_percentage'] > 0) {
+                else {
+                  if($lic['agent_id'] == $agentInfo['newest']['agent_pk']) {
+                    $agentEntry .= "&sect;";
+                    $haveRunningResult = true;
+                  }
+                  else {
+                    $agentEntry .= "&dagger;";
+                    $haveOldVersionResult = true;
+                  }
+                }
+                if ($lic['match_percentage'] > 0)
+                {
                   $agentEntry .= ": $lic[match_percentage]%";
                 }
                 $agentEntries[] = $agentEntry;
@@ -492,90 +576,98 @@ class ui_browse_license extends FO_Plugin
             }
             $licenseList = implode(", ", $licenseEntries);
           }
-          if (array_key_exists($fileId, $editedPfileLicenses)) {
-            $editedLicenseList .= implode(", ", array_map(function ($licenseRef) use ($uploadId, $childUploadTreeId) {
+          if (array_key_exists($fileId, $editedPfileLicenses))
+          {
+            $editedLicenseList .= implode(", ", array_map(function ($licenseRef) use ($uploadId, $childUploadTreeId)
+            {
+              /** @var LicenseRef $licenseRef */
               return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-            }, $editedPfileLicenses[$fileId]->getLicenses() ));
+            }, $editedPfileLicenses[$fileId]->getLicenses()));
           }
         }
-        $fileListLinks=FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
-        $tableData[]=array($fileName, $licenseList,$editedLicenseList, $fileListLinks);
+        $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
+        $tableData[] = array($fileName, $licenseList, $editedLicenseList, $fileListLinks);
       }
-        
-      if ($haveUnconfirmed)
+
+      if ($haveOldVersionResult)
       {
-        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . "&dagger;" . _(" were not confirmed in latest successful scan or were found during incomplete scan.");
+        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . "&dagger;" . _(" are from an older version, or were not confirmed in latest successful scan or were found during incomplete scan.");
       }
+      if($haveRunningResult)
+      {
+        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . "&sect;" . _(" are from the newest version and come from a currently running or incomplete scan.");
+      }
+
 
       $tableColumns = array(
-          array("sTitle" => _("Files"), "sClass"=>"left" ),
-          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass"=>"left" ),
-          array("sTitle" => _("Edited Results"), "sClass"=>"left" ),
-          array("sTitle" => _("Actions"), "sClass"=>"left",  "bSortable"=>false, "bSearchable"=>false, "sWidth"=>"14.6%" )
-        );
-
-      $tableSorting = array(
-          array(0,"asc"),
-          array(2,"desc"),
-          array(1,"desc")
-        );
-
-      $tableLanguage = array(
-             "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-             "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
-          // in results. 
-          . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
-             "sInfoPostFix" => $AddInfoText,
-             "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
-        );
-
-      $dataTableConfig = array(
-        "aaData" => $tableData,
-        "aoColumns" => $tableColumns,
-        "aaSorting" => $tableSorting,
-        "iDisplayLength" => 50,
-        "oLanguage" => $tableLanguage
+          array("sTitle" => _("Files"), "sClass" => "left"),
+          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
+          array("sTitle" => _("Edited Results"), "sClass" => "left"),
+          array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "14.6%")
       );
 
-      $VF.= "<script>
+      $tableSorting = array(
+          array(0, "asc"),
+          array(2, "desc"),
+          array(1, "desc")
+      );
+
+      $tableLanguage = array(
+          "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
+          "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
+              // in results.
+              . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
+          "sInfoPostFix" => $AddInfoText,
+          "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
+      );
+
+      $dataTableConfig = array(
+          "aaData" => $tableData,
+          "aoColumns" => $tableColumns,
+          "aaSorting" => $tableSorting,
+          "iDisplayLength" => 50,
+          "oLanguage" => $tableLanguage
+      );
+
+      $VF .= "<script>
     function createDirlistTable() {
-        dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) .");
+        dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) . ");
     }
 </script>";
       return array($ChildCount, $VF, $AddInfoText);
     }
-    return array($ChildCount, $VF,$AddInfoText);
+    return array($ChildCount, $VF, $AddInfoText);
   }
 
   /**
    * @param $uploadTreeId
    * @param $tagId
    * @param FileTreeBounds $fileTreeBounds
-   * @param int|null $agentId 
+   * @param int|null $agentId
    * @return string
    */
   public function createLicenseHistogram($uploadTreeId, $tagId, FileTreeBounds $fileTreeBounds, $agentId)
   {
     $FileCount = $this->uploadDao->countPlainFiles($fileTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($fileTreeBounds, $orderStmt="", $agentId);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($fileTreeBounds, $orderStmt = "", $agentId);
     $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($fileTreeBounds);
 
-    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram,$editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
+    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
 
   private function buildAgentSelector($allScans)
   {
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    if (count($allScans)==1)
+    if (count($allScans) == 1)
     {
       $run = reset($allScans);
       return "Only one revision of <b>$run[agent_name]</b> ran for this upload. <br/>";
     }
-    $URI = Traceback_uri().'?mod='.Traceback_parm().'&updcache=1';
+    $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
     $V = "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
-    $isSelected = (0==$selectedAgentId) ? " selected='selected'" : '';
-    $V .= "<option value='0' $isSelected>"._('Latest run')."</option>\n";
-    foreach($allScans as $run)
+    $isSelected = (0 == $selectedAgentId) ? " selected='selected'" : '';
+    $V .= "<option value='0' $isSelected>" . _('Latest run of all available agents') . "</option>\n";
+    foreach ($allScans as $run)
     {
       if ($run['agent_pk'] == $selectedAgentId)
       {
@@ -588,6 +680,32 @@ class ui_browse_license extends FO_Plugin
     }
     $V .= "</select><input type='submit' name='' value='Show'/></form>";
     return $V;
+  }
+
+  /**
+   * @param $uploadId
+   * @return string
+   */
+  public function getViewJobsLink($uploadId)
+  {
+    $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+    $linkText = _("View Jobs");
+    $out = "<a href=$URL>$linkText</a>";
+    return $out;
+  }
+
+
+  /**
+   * @param string $agentName
+   * @return array
+   */
+  public function getNewestAgent($agentName)
+  {
+    global $container;
+    $dbManager = $container->get('db.manager');
+    /** @var DbManager $dbManager */
+    return $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
+        . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
   }
 
 }

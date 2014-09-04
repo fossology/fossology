@@ -203,6 +203,9 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_mandir}/man1/*
 %{_sysconfdir}/PBPROJ/mods-enabled/maintagent
 %{_datadir}/PBPROJ/maintagent/*
+%{_datadir}/PBPROJ/composer.json
+%{_datadir}/PBPROJ/composer.lock
+%{_datadir}/PBPROJ/vendor/*
 
 %files db
 %defattr(-,root,root)
@@ -303,9 +306,6 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/monk
 %{_datadir}/PBPROJ/monk/*
-%{_datadir}/PBPROJ/composer.json
-%{_datadir}/PBPROJ/composer.lock
-%{_datadir}/PBPROJ/vendor/*
 
 %post common
 # Run the postinstall script

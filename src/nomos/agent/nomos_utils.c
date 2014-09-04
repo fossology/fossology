@@ -955,7 +955,7 @@ FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
 
   //! fill this later
   newMatch.matchPositions = g_array_new(FALSE, FALSE, sizeof(MatchPositionAndType));
-  newMatch.licenceName = (char*) malloc(strlen(licenceName));
+  newMatch.licenceName = (char*) malloc(strlen(licenceName) + 1);
   newMatch.licenseFileId = -1; //initial Value <- check if it was set
   strcpy(  newMatch.licenceName,licenceName );
   g_array_append_val(theMatches , newMatch);
