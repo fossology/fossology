@@ -105,3 +105,47 @@ function resetFileFields() {
     searchField.val('');
     searchField.trigger('keyup');
 }
+
+
+function scheduleScan(upload, agentName , resultEntityKey) {
+    var post_data = {
+         "agentName" : agentName,
+        "uploadId": upload
+    };
+
+    var resultEntity = $(resultEntityKey);
+    resultEntity.hide();
+
+    $.ajax({
+        type: "POST",
+        url: "?mod=scheduleAgentAjax",
+        data: post_data,
+        success: function(data) {
+            var jqPk = data.jqid;
+            if (jqPk) {
+                resultEntity.html("scan scheduled as " + linkToJob(jqPk) + "<br/>");
+                $('#'+agentName.replace("agent_", "")+"_span").hide();
+                queueUpdateCheck(jqPk, function(){
+                    resultEntity.html(agentName.replace("agent_", "") + " done.<br/>");
+                }, function(){
+                        resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
+                    }
+
+                );
+            } else {
+                resultEntity.html("Bad response from server. <br/>");
+            }
+            resultEntity.show();
+        },
+        error: function(responseobject) {
+            var error = responseobject.responseJSON.error;
+            if (error) {
+                resultEntity.html("error: " + error + "<br/>");
+            } else {
+                resultEntity.html("error"+ "<br/>");
+            }
+            resultEntity.show();
+        }
+    });
+
+}

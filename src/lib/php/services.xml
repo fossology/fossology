@@ -33,6 +33,9 @@ without any warranty.
         <service id="dao.highlight" class="\Fossology\Lib\Dao\HighlightDao">
             <argument type="service" id="db.manager"/>
         </service>
+        <service id="dao.agents" class="\Fossology\Lib\Dao\AgentsDao">
+            <argument type="service" id="db.manager"/>
+        </service>
         <service id="dao.copyright" class="\Fossology\Lib\Dao\CopyrightDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>

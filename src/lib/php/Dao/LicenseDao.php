@@ -118,11 +118,14 @@ class LicenseDao extends Object
    * @param $selectedAgentId
    * @return array
    */
-  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null)
+  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null, $filterLicenses=array('VOID'))//'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
+
+    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
+        . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
 
     $sql = "SELECT license_file_ref.pfile_fk as file_id,
            rf_shortname as license_shortname,
@@ -136,7 +139,7 @@ class LicenseDao extends Object
          INNER JOIN agent ON agent_fk=agent_pk
          WHERE utree.upload_fk=$1 and utree.lft BETWEEN $2 and $3
            AND license_file_ref.pfile_fk=utree.pfile_fk
-           AND rf_shortname != 'No_license_found'";
+            $noLicenseFoundStmt";
     if (!empty($selectedAgentId)){
       $sql .= " AND agent_pk=$4";
       $param[] = $selectedAgentId;
@@ -184,9 +187,13 @@ class LicenseDao extends Object
     return $assocLicenseHist;
   }
 
-  public function getLicenseShortnamesContained(FileTreeBounds $fileTreeBounds)
+  public function getLicenseShortnamesContained(FileTreeBounds $fileTreeBounds, $filterLicenses=array('VOID')) //'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+
+    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
+        . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
+
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
     $this->dbManager->prepare($statementName,
@@ -195,7 +202,7 @@ class LicenseDao extends Object
               INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file_ref.pfile_fk
               WHERE upload_fk=$1
                 AND lft BETWEEN $2 AND $3
-                AND rf_shortname NOT IN ('No_license_found', 'VOID')
+                $noLicenseFoundStmt
               GROUP BY rf_shortname
               ORDER BY rf_shortname ASC");
     $result = $this->dbManager->execute($statementName,

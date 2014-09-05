@@ -139,7 +139,8 @@ class LicenseRenderer
       {
         $noScannerLicenseFoundCount = $count;
         $editedNoLicenseFoundCount = $editedCount;
-      } else
+      }
+      //else
       {
 
         /*  Count  */

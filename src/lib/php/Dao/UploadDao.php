@@ -50,6 +50,14 @@ class UploadDao extends Object
     return $uploadEntry;
   }
 
+  function getUploadInfo($uploadId)
+  {
+    $stmt = __METHOD__;
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM upload WHERE upload_pk = $1",
+        array($uploadId), $stmt);
+    return $uploadEntry;
+  }
+
   /**
    * @param $uploadTreeId
    * @param $uploadTreeTableName

@@ -258,6 +258,7 @@ function GetAgentKey($agentName, $agentDesc)
 
 
 /**
+ * \deprecated  Use AgentesDao->AgentARSList
  * \brief
  *  The purpose of this function is to return an array of
  *  _ars records for an agent so that the latest agent_pk(s)
