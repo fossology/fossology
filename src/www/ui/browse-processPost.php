@@ -85,6 +85,7 @@ class browseProcessPost extends FO_Plugin
   {
     global $container;
     $dbManager = $container->get('db.manager');
+    /**@var DbManager $dbManager */
 
     /* Browse-Pfile menu */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
@@ -96,16 +97,31 @@ class browseProcessPost extends FO_Plugin
 
     $output = array();
     /* Get list of uploads in this folder */
-    $stmt = __METHOD__."getFolderContents";
-    $dbManager->prepare($stmt,"SELECT * FROM upload
+
+    $columNamesInDatabase=array('upload_filename', '');
+
+    $orderString =  "ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin";
+
+    $stmt = __METHOD__."getFolderContents".$orderString;
+    $unorderedQuerry = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
         AND lft IS NOT NULL
         WHERE upload_pk IN
-        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1)
-        ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin");
-    $result = $dbManager->execute($stmt,array($Folder));
+        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
+
+    $dbManager->prepare($stmt,"SELECT * $unorderedQuerry
+        $orderString
+        OFFSET $2 LIMIT $3
+        ");
+    $offset = $_GET['iDisplayStart'];
+    $limit = $_GET['iDisplayLength'];
+    $result = $dbManager->execute($stmt,array($Folder, $offset, $limit));
+
+
+    $iTotalRecordsRow=$dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ",array($Folder),__METHOD__."count");
+    $iTotalRecords=$iTotalRecordsRow['count'];
 
     while ($Row = pg_fetch_assoc($result)) {
       if (empty($Row['upload_pk'])) {
@@ -160,7 +176,7 @@ class browseProcessPost extends FO_Plugin
       $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
       $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , $pairIdPrio );
     }
-    return $output;
+    return array($output, $iTotalRecords);
   }
 
   /**
@@ -181,7 +197,16 @@ class browseProcessPost extends FO_Plugin
 //      $this->moveUploadBeyond($moveUpload, $beyondUpload);
 //    }
 header('Content-type: text/json');
-    print(json_encode(array('aaData' =>$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']))));
+    list($aaData, $iTotalRecords) =$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']);
+    print(json_encode(array(
+                              'sEcho' => intval($_GET['sEcho']),
+                              'aaData' =>$aaData,
+                              'iTotalRecords' =>$iTotalRecords,
+                              'iTotalDisplayRecords' => count($aaData)
+                           )
+
+                      )
+         );
 
   }
 

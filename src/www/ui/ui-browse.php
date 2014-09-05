@@ -429,9 +429,10 @@ class ui_browse extends FO_Plugin {
    '{  "bServerSide": true,
        "sAjaxSource": "?mod=browse-processPost",
        "fnServerData": function ( sSource, aoData, fnCallback ) {
-        aoData.push( { "folder": "'.$Folder.'" , "show" : "'.$Show.'" } );
-                        $.getJSON( sSource, aoData, function (json) { fnCallback(json);  });
-                    },
+            aoData.push( { "name":"folder" , "value" : "'.$Folder.'" } );
+            aoData.push( { "name":"show" , "value" : "'.$Show.'" } );
+            $.getJSON( sSource, aoData, function (json) { fnCallback(json);  });
+          },
       "aoColumns": '.$tableColumns.',
       "aaSorting": '.$tableSorting.',
       "iDisplayLength": 50,
