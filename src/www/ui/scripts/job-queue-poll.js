@@ -24,16 +24,24 @@ function updateCheckSuccess(data) {
   var hasFinishedJobs = false;
   jobPollQueue = $.map(jobPollQueue, function(val) {
     var jqId = val.jqId;
-    var callback = val.callback;
-    if ((data[jqId]) && (data[jqId].end_bits > 0)) {
-      callback(jqId);
+    var callbacksuccess = val.callbacksuccess;
+    var callbackfail = val.callbackfail;
+    if ((data[jqId]) && (data[jqId].end_bits == 1)) {
+      callbacksuccess(jqId);
       return null;
-    } else {
+    }
+    else if ((data[jqId]) && (data[jqId].end_bits > 1)) {
+      callbackfail(jqId);
+      return null;
+    }
+    else {
       return val;
     }
   });
   if (jobPollQueue.length > 0) {
-    currentTimeout += 1000;
+    if (currentTimeout < 10000) {
+      currentTimeout += 1000;
+    }
     currentTimeoutObj = setTimeout(updateCheck, currentTimeout);
   } else {
     currentTimeoutObj = "";
@@ -55,11 +63,16 @@ function updateCheck() {
   }
 }
 
-function queueUpdateCheck(jqPk, callback) {
-  jobPollQueue.push({ "jqId" : jqPk, "callback" : callback});
+function queueUpdateCheck(jqPk, callbacksucess,  callbackfail) {
+  jobPollQueue.push({ "jqId" : jqPk, "callbacksuccess" : callbacksucess, "callbackfail" : callbackfail});
   currentTimeout = 1000;
   if (currentTimeoutObj) {
     clearTimeout(currentTimeoutObj);
   }
   currentTimeoutObj = setTimeout(updateCheck, currentTimeout);
+}
+
+
+function linkToJob(jqPk) {
+    return "<a href='?mod=showjobs&show=job&job="+ jqPk +"'>job #" + jqPk + "</a>";
 }

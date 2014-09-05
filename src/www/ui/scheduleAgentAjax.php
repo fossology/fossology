@@ -15,24 +15,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_jobinfo", _("Private: reply to job status information"));
+define("TITLE_scheduleAgentAjax", _("Private: schedule a agent scan from post"));
 
-class ajaxJobInfo extends FO_Plugin
+class scheduleAgentAjax extends FO_Plugin
 {
+
   /**
    * @var DbManager
    */
   private $dbManager;
 
+  /**
+   * @var UploadDao
+   */
+  private $uploadDao;
+
   function __construct()
   {
-    $this->Name = "jobinfo";
-    $this->Title = TITLE_jobinfo;
+    $this->Name = "scheduleAgentAjax";
+    $this->Title = TITLE_scheduleAgentAjax;
     $this->Version = "1.0";
     $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_READ;
+    $this->DBaccess = PLUGIN_DB_WRITE;
     $this->NoHTML = 1;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -40,6 +48,8 @@ class ajaxJobInfo extends FO_Plugin
     parent::__construct();
 
     global $container;
+    $this->licenseDao = $container->get('dao.license');
+    $this->uploadDao = $container->get('dao.upload');
     $this->dbManager = $container->get('db.manager');
   }
 
@@ -51,37 +61,41 @@ class ajaxJobInfo extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
+    $ErrorMsg = "";
+    $jq_pk = -1;
 
     $userId = $_SESSION['UserId'];
-    $jqIds = (array)$_POST['jqIds'];
+    $uploadId = intval($_POST['uploadId']);
+    $agentName = $_POST['agentName'];
 
-    $result = array();
-    foreach($jqIds as $jq_pk) {
-      $jobInfo = $this->dbManager->getSingleRow(
-        "SELECT jobqueue.jq_end_bits as end_bits FROM
-        jobqueue INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
-        WHERE jobqueue.jq_pk = $1 AND job_user_fk = $2",
-        array($jq_pk, $userId)
-       );
-       if ($jobInfo !== false) {
-         $result[$jq_pk] = array('end_bits' => $jobInfo['end_bits']);
-       }
+
+    if ($uploadId > 0) {
+      $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
+      $uploadName = $uploadInfo['upload_filename'];
+      $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+
+      global $Plugins;
+      $ourPlugin = plugin_find($agentName);
+      $jq_pk = $ourPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array());
+
+    } else {
+      $ErrorMsg = "bad request";
     }
 
     ReportCachePurgeAll();
 
-    if (!empty($result)) {
+    if (empty($ErrorMsg) && ($jq_pk>0)) {
       header('Content-type: text/json');
-      print json_encode($result);
+      print json_encode(array("jqid" => $jq_pk));
     } else {
       header('Content-type: text/json', true, 500);
-      print json_encode(array("error" => "no info"));
+      print json_encode(array("error" => $ErrorMsg));
     }
   } // Output()
 
 }
 
-$NewPlugin = new ajaxJobInfo;
+$NewPlugin = new scheduleAgentAjax;
 $NewPlugin->Initialize();
 
 

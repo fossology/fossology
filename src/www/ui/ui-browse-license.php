@@ -208,18 +208,16 @@ class ui_browse_license extends FO_Plugin
       {
 
         $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
-        $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId . '&agents[]=agent_' . $agentName;
 
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
         {
           $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
           $V .= $this->getViewJobsLink($uploadId);
-          $V .= " " . _("or")." ";
-          $V .= " <a href='$link'>" . _("Reschedule agent") . " $agentName</a><br/>";
+          $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Reschedule %s scan"), $agentName ));
         } else
         {
-          $V .= " <a href='$link'>" . _("schedule agent") . " $agentName</a><br/>";
+          $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Schedule %s scan"), $agentName ));
         }
         continue;
       }
@@ -227,7 +225,6 @@ class ui_browse_license extends FO_Plugin
       $V .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . "$latestRun[agent_rev].";
       if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
       {
-        $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId . '&agents[]=agent_' . $agentName;
 
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (in_array($newestAgent['agent_pk'], $runningJobs))
@@ -240,7 +237,7 @@ class ui_browse_license extends FO_Plugin
           $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
 
         }
-        $V .= " <a href='$link'>" . _("schedule agent") . " $agentName</a>";
+        $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Schedule %s scan"), $agentName ));
       }
       $V .= '<br/>';
     }
@@ -406,6 +403,7 @@ class ui_browse_license extends FO_Plugin
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
     $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
     return $output;
   }
@@ -694,6 +692,13 @@ class ui_browse_license extends FO_Plugin
     return $out;
   }
 
+
+  public function scheduleScan($uploadId, $agentName, $buttonText) {
+    $out = "<span id=".$agentName."_span><br><button type=\"button\" id=$agentName name=$agentName onclick='scheduleScan($uploadId, \"agent_$agentName\",\"#job".$agentName."IdResult\")'>$buttonText</button> </span>";
+    $out .= "<br><span id=\"job".$agentName."IdResult\" name=\"job".$agentName."IdResult\" hidden></span>";
+
+    return $out;
+  }
 
   /**
    * @param string $agentName
