@@ -61,9 +61,13 @@ class DatabaseEnum extends Object
    * @param int $selectedValue
    * @return array
    */
- static function createDatabaseEnumSelect($selectElementName, $databaseEnum, $selectedValue)
+ static function createDatabaseEnumSelect($selectElementName, $databaseEnum, $selectedValue, $callbackString ="", $callbackArg = "")
   {
-    $output = "<select name=\"$selectElementName\" id=\"$selectElementName\" size=\"1\">\n";
+    $output  = "<select name=\"$selectElementName\" id=\"$selectElementName\" size=\"1\" ";
+    if(!empty($callbackString)) {
+      $output .= " onchange =\"$callbackString( this, $callbackArg )\" ";
+    }
+    $output .= ">\n";
     foreach ($databaseEnum as $option)
     {
       $output .= "<option ";

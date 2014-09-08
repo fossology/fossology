@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2014 Siemens AG
+ * Author: J.Najjar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +18,7 @@
  ***********************************************************/
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
@@ -35,6 +37,13 @@ class browseProcessPost extends FO_Plugin
   /** @var  UploadDao $uploadDao */
   private $uploadDao;
 
+  /** @var  UserDao $userDao */
+  private $userDao;
+
+
+  /** @var  DbManager dbManager */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name = "browse-processPost";
@@ -47,28 +56,27 @@ class browseProcessPost extends FO_Plugin
     $this->NoMenu = 0;
 
     parent::__construct();
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+    $this->userDao = $container->get('dao.user');
 
+    $this->dbManager = $container->get('db.manager');
   }
 
-
-  //! This function is wrong, as there can be uploads which are in another folder and need not be in the list. Thus the formula cannot take the priority in between the two points here.
-  //! because if 2 is not shown the two points move/beyond could be 1 and 3 and then we would have 2 points with the same priority. Then a third upload could not be placed in between those 2.
   private function moveUploadBeyond($moveUpload, $beyondUpload)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
-    /** @var DbManager $dbManager */
-    $dbManager->prepare($stmt=__METHOD__.'.get.single.Upload',
+
+    $this->dbManager->prepare($stmt=__METHOD__.'.get.single.Upload',
       $sql='SELECT upload_pk,priority FROM upload WHERE upload_pk=$1');
-    $movePoint = $dbManager->getSingleRow($sql,array($moveUpload),$stmt);
-    $beyondPoint = $dbManager->getSingleRow($sql,array($beyondUpload),$stmt);
+    $movePoint = $this->dbManager->getSingleRow($sql,array($moveUpload),$stmt);
+    $beyondPoint = $this->dbManager->getSingleRow($sql,array($beyondUpload),$stmt);
     if ($movePoint['priority'] > $beyondPoint['priority'])
     {
-      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority<$1 ORDER BY priority DESC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.lower.priority');
+      $farPoint = $this->dbManager->getSingleRow("SELECT priority FROM upload WHERE priority<$1 ORDER BY priority DESC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.lower.priority');
     }
     else
     {
-      $farPoint = $dbManager->getSingleRow("SELECT priority FROM upload WHERE priority>$1 ORDER BY priority ASC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.higher.priority');
+      $farPoint = $this->dbManager->getSingleRow("SELECT priority FROM upload WHERE priority>$1 ORDER BY priority ASC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.higher.priority');
     }
     if (false !== $farPoint)
     {
@@ -82,14 +90,40 @@ class browseProcessPost extends FO_Plugin
     {
       $newPriority = $beyondPoint['priority'] + 0.5;
     }
-    $dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
+    $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
   }
+
+  private function getOrderString(){
+
+    $columNamesInDatabase=array('upload_filename', 'status_fk', 'UNUSED', 'assignee','upload_ts' ,'priority');
+
+    $orderArray=array();
+    for($i=0; $i < $_GET['iSortingCols']; $i++) {
+
+      $whichCol= 'iSortCol_'.$i;
+      $colNumber=$_GET[$whichCol];
+
+      $isSortable = $_GET['bSortable_'.$i];
+
+      if($isSortable !== "true") continue;
+
+      $name = $columNamesInDatabase[$colNumber];
+
+      $whichDir = 'sSortDir_'.$i;
+      $order = $_GET[$whichDir];
+      $orderArray[] = $name." ".$order;
+    }
+
+    $orderString = "ORDER BY ";
+    $orderString .= implode(", ", $orderArray);
+
+    return $orderString;
+  }
+
+
 
   private function ShowFolderGetTableData($Folder, $Show)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
-    /**@var DbManager $dbManager */
 
     /* Browse-Pfile menu */
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
@@ -102,10 +136,8 @@ class browseProcessPost extends FO_Plugin
     $output = array();
     /* Get list of uploads in this folder */
 
-    $columNamesInDatabase=array('upload_filename', '');
 
-    $orderString =  "ORDER BY priority, upload_filename,upload_desc,upload_pk,upload_origin";
-
+    $orderString = $this->getOrderString();
     $stmt = __METHOD__."getFolderContents".$orderString;
     $unorderedQuerry = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
@@ -115,27 +147,28 @@ class browseProcessPost extends FO_Plugin
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-    $dbManager->prepare($stmt,"SELECT * $unorderedQuerry
+    $this->dbManager->prepare($stmt,"SELECT * $unorderedQuerry
         $orderString
         OFFSET $2 LIMIT $3
         ");
     $offset = $_GET['iDisplayStart'];
     $limit = $_GET['iDisplayLength'];
-    $result = $dbManager->execute($stmt,array($Folder, $offset, $limit));
+    $result = $this->dbManager->execute($stmt,array($Folder, $offset, $limit));
 
 
-    $iTotalRecordsRow=$dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ",array($Folder),__METHOD__."count");
+    $iTotalRecordsRow=$this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ",array($Folder),__METHOD__."count");
     $iTotalRecords=$iTotalRecordsRow['count'];
 
 
     $statusTypes = $this->uploadDao->getStatusTypes();
- //   $output .= DatabaseEnum::createDatabaseEnumSelect("Assigned_To", $statusTypes, 1);
+    $users = $this->userDao->getUserChoices();
 
-
+    $rowCounter = 0;
     while ($Row = pg_fetch_assoc($result)) {
       if (empty($Row['upload_pk'])) {
         continue;
       }
+      $rowCounter++;
       $Desc = htmlentities($Row['upload_desc']);
       $UploadPk = $Row['upload_pk'];
 
@@ -183,8 +216,11 @@ class browseProcessPost extends FO_Plugin
         $dateCol = substr($Row['upload_ts'], 0, 19);
       }
       $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
-      $output[]= array($nameColumn , "Status" , "reject" , "assinged" , $dateCol , $pairIdPrio );
+      $currentStatus = DatabaseEnum::createDatabaseEnumSelect("StatusOf_$rowCounter", $statusTypes, $Row['status_fk'], "changeTableEntry", intval($Row['upload_pk']).", 'status_fk'" );
+      $currentAssignee = UserDao::createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", intval($Row['upload_pk']).", 'assignee'" );
+      $output[]= array($nameColumn, $currentStatus, "reject" , $currentAssignee, $dateCol, $pairIdPrio );
     }
+    pg_free_result($result);
     return array($output, $iTotalRecords);
   }
 
@@ -197,26 +233,39 @@ class browseProcessPost extends FO_Plugin
       return;
     }
 
-//
-//    //! Lets do this later
-//    $moveUpload = GetParm("move", PARM_INTEGER);
-//    $beyondUpload = GetParm("beyond", PARM_INTEGER);
-//    if (!empty($moveUpload) && !empty($beyondUpload))
-//    {
-//      $this->moveUploadBeyond($moveUpload, $beyondUpload);
-//    }
-header('Content-type: text/json');
-    list($aaData, $iTotalRecords) =$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']);
-    print(json_encode(array(
-                              'sEcho' => intval($_GET['sEcho']),
-                              'aaData' =>$aaData,
-                              'iTotalRecords' =>$iTotalRecords,
-                              'iTotalDisplayRecords' => count($aaData)
-                           )
+    $columnName = GetParm('columnName', PARM_STRING);
+    $uploadId  = GetParm('uploadId', PARM_INTEGER);
+    $value   = GetParm('value', PARM_INTEGER);
+    $moveUpload = GetParm("move", PARM_INTEGER);
+    $beyondUpload = GetParm("beyond", PARM_INTEGER);
 
-                      )
-         );
+    if(!empty($columnName) and !empty($uploadId) and !empty($value)) {
+        $this->updateTable ($columnName,$uploadId,$value);
+    }
+    else if (!empty($moveUpload) && !empty($beyondUpload))
+    {
+      $this->moveUploadBeyond($moveUpload, $beyondUpload);
+    }
+    else {
+      header('Content-type: text/json');
+          list($aaData, $iTotalRecords) =$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']);
+          print(json_encode(array(
+                                    'sEcho' => intval($_GET['sEcho']),
+                                    'aaData' =>$aaData,
+                                    'iTotalRecords' =>$iTotalRecords,
+                                    'iTotalDisplayRecords' => count($aaData)
+                                 )
 
+                            )
+               );
+    }
+  }
+
+  private function updateTable($columnName, $uploadId, $value)
+  {
+        $stmt = __METHOD__."_update_".$columnName;
+        $sql = "update upload SET ".$columnName."=$1 where upload_pk=$2";
+        $this->dbManager->getSingleRow($sql,array($value, $uploadId),$stmt);
   }
 
 

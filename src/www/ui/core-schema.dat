@@ -2246,10 +2246,10 @@
   $Schema["TABLE"]["upload"]["assignee"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"assignee\" DROP NOT NULL;";
   $Schema["TABLE"]["upload"]["assignee"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["status"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["status"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status\" int4 default 1;";
-  $Schema["TABLE"]["upload"]["status"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload"]["status"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload"]["status_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status\" int4 default 1;";
+  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["status_fk"]["UPDATE"] = "";
 
 
 

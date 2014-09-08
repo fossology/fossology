@@ -414,15 +414,18 @@ class ui_browse extends FO_Plugin {
       { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false },
       { "sTitle" : "'._("Assigned to").'", "sClass": "center" },
       { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string"},
-      { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false, "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); } }
+      { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false,
+                      "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); }
+                  }
     ]';
 
 
     $tableSorting = '[
       [5 , "desc"],
       [0 , "asc"],
-      [2 , "desc"],
+      [3 , "desc"],
       [1 , "desc"],
+      [4 , "desc"]
     ]';
     
     $dataTableConfig =

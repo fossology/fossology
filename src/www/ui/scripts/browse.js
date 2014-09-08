@@ -59,7 +59,7 @@ function initPrioDraw() {
 function prioColumn ( source, type, val ) {
   if (type === 'set') {
     source[1] = val;
-    // Store the computed dislay and filter values for efficiency
+    // Store the computed display and filter values for efficiency
     return;
   }
   if (type === 'display') {
@@ -76,4 +76,27 @@ function prioColumn ( source, type, val ) {
   }
   // 'filter', 'sort', 'type' and undefined all just use the integer
   return source[1];
+}
+
+function mysuccess(){
+    var oTable = $('#browsetbl').dataTable({ "bRetrieve": true });
+    oTable.fnDraw();
+}
+
+
+function changeTableEntry(sel, uploadId, columnName) {
+
+    var post_data = {
+        "columnName" : columnName,
+        "uploadId": uploadId,
+        "value":  sel.value
+    };
+    $.ajax({
+        type: "POST",
+        url:  "?mod=browse-processPost",
+        data: post_data,
+        success: mysuccess
+    });
+
+
 }
