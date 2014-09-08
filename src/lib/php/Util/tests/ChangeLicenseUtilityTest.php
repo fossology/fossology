@@ -71,21 +71,6 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
     assertThat(str_replace(' ', '', $buttons), containsString('moveLicense(this.form.licenseRight,this.form.licenseLeft)'));
   }
 
-  function testCreateDatabaseEnumSelect()
-  {
-    $clu = new ChangeLicenseUtility();
-    $aDbEnum = array(new DatabaseEnum(2,'two'),new DatabaseEnum(3,'three'),new DatabaseEnum(5,'five'),new DatabaseEnum(7,'seven'));
-    $selectedValue = 5;
-    $sel = $clu->createDatabaseEnumSelect('selectElementName', $aDbEnum, $selectedValue);
-    $pattern = '^\<select.* name="selectElementName".*';
-    assertThat($sel,matchesPattern("/$pattern/"));
-    $pattern = '\<\/select\>$';
-    assertThat($sel,matchesPattern("/$pattern/"));
-    $pattern = '\<option[^\>]*selected[^\>]*\>five\<\/option\>';
-    assertThat($sel,matchesPattern("/$pattern/"));
-    $pattern = '\<option[^\>]*selected[^\>]*\>three\<\/option\>';
-    assertThat($sel,not(matchesPattern("/$pattern/")));
-  }
   
 }
  

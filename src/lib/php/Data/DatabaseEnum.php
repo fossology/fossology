@@ -53,4 +53,25 @@ class DatabaseEnum extends Object
   {
     return $this->name;
   }
+
+
+  /**
+   * @param string $selectElementName
+   * @param DatabaseEnum[] $databaseEnum
+   * @param int $selectedValue
+   * @return array
+   */
+ static function createDatabaseEnumSelect($selectElementName, $databaseEnum, $selectedValue)
+  {
+    $output = "<select name=\"$selectElementName\" id=\"$selectElementName\" size=\"1\">\n";
+    foreach ($databaseEnum as $option)
+    {
+      $output .= "<option ";
+      if ($option->getOrdinal() == $selectedValue) $output .= " selected ";
+      $output .= "value=\"" . $option->getOrdinal() . "\">" . $option->getName() . "</option>\n";
+    }
+    $output .= "</select>";
+    return $output;
+  }
+
 }

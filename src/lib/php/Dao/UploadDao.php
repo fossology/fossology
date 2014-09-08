@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -88,5 +89,26 @@ class UploadDao extends Object
     $fileCount = intval($row["count"]);
     return $fileCount;
   }
+
+
+
+  /**
+   * @return DatabaseEnum[]
+   */
+  public function getStatusTypes()
+  {
+    $clearingTypes = array();
+    $statementN = __METHOD__;
+
+    $this->dbManager->prepare($statementN, "select * from upload_status");
+    $res = $this->dbManager->execute($statementN);
+    while ($rw = pg_fetch_assoc($res))
+    {
+      $clearingTypes[] = new DatabaseEnum($rw['status_pk'], $rw['meaning']);
+    }
+    pg_free_result($res);
+    return $clearingTypes;
+  }
+
 
 }

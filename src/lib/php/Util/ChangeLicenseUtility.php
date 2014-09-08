@@ -136,25 +136,6 @@ class ChangeLicenseUtility extends Object
     }
   }
 
-  /**
-   * @param string $selectElementName
-   * @param DatabaseEnum[] $databaseEnum
-   * @param int $selectedValue
-   * @return array
-   */
-  function createDatabaseEnumSelect($selectElementName, $databaseEnum, $selectedValue)
-  {
-    $output = "<select name=\"$selectElementName\" id=\"$selectElementName\" size=\"1\">\n";
-    foreach ($databaseEnum as $option)
-    {
-      $output .= "<option ";
-      if ($option->getOrdinal() == $selectedValue) $output .= " selected ";
-      $output .= "value=\"" . $option->getOrdinal() . "\">" . $option->getName() . "</option>\n";
-    }
-    $output .= "</select>";
-    return $output;
-  }
-
 
   /**
    * @param string $listElementName

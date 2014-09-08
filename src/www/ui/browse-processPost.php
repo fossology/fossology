@@ -17,6 +17,7 @@
  ***********************************************************/
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\LicenseRef;
@@ -30,6 +31,9 @@ define("TITLE_browseProcessPost", _("Private: Browse post"));
 class browseProcessPost extends FO_Plugin
 {
 
+
+  /** @var  UploadDao $uploadDao */
+  private $uploadDao;
 
   function __construct()
   {
@@ -122,6 +126,11 @@ class browseProcessPost extends FO_Plugin
 
     $iTotalRecordsRow=$dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ",array($Folder),__METHOD__."count");
     $iTotalRecords=$iTotalRecordsRow['count'];
+
+
+    $statusTypes = $this->uploadDao->getStatusTypes();
+ //   $output .= DatabaseEnum::createDatabaseEnumSelect("Assigned_To", $statusTypes, 1);
+
 
     while ($Row = pg_fetch_assoc($result)) {
       if (empty($Row['upload_pk'])) {

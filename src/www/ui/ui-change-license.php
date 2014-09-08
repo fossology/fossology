@@ -19,6 +19,7 @@
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -258,12 +259,12 @@ class change_license extends FO_Plugin
     $output .= "<tr><td colspan='2'>";
     $output .= "" . _("License decision scope") . "<br/>";
     $clearingScopes = $this->clearingDao->getClearingScopes();
-    $output .= $this->changeLicenseUtility->createDatabaseEnumSelect("scope", $clearingScopes, 3); //TODO extra class for scope and type
+    $output .= DatabaseEnum::createDatabaseEnumSelect("scope", $clearingScopes, 3);
     $output .= "</td>";
 
     $output .= "<td colspan='2'>" . _("License decision type") . "<br/>";
     $clearingTypes = $this->clearingDao->getClearingTypes();
-    $output .= $this->changeLicenseUtility->createDatabaseEnumSelect("type", $clearingTypes, 1);
+    $output .= DatabaseEnum::createDatabaseEnumSelect("type", $clearingTypes, 1);
 
     $output .= "</td></tr>";
     $output .= "<tr><td>&nbsp;</td></tr>";
