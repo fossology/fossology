@@ -7,12 +7,20 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-$clearingStorage['clearing_decision_scopes.meaning'] = array(
+$dataPropertiesStorage['clearing_decision_scopes.meaning'] = array(
   'global',
   'upload'
 );
 
-$clearingStorage['clearing_decision_types.meaning'] = array(
+$dataPropertiesStorage['clearing_decision_types.meaning'] = array(
   'User decision',
   'To be determined'
+);
+
+
+$dataPropertiesStorage['upload_status.meaning'] = array(
+  'open',
+  'in progress',
+  'closed',
+  'rejected'
 );

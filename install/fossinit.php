@@ -134,7 +134,7 @@ if ($FailMsg)
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
-clearingProperties($dbManager);
+dataProperties($dbManager);
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
@@ -210,22 +210,22 @@ exit(0);
 
 
 /**
- * \brief Adding the predefined constants for clearingDecisions to the database.
+ * \brief Adding the predefined constants for clearingDecisions and upload statuses to the database.
  * deletes the old ones
  */
-function clearingProperties(DbManager &$dbManager)
+function dataProperties(DbManager &$dbManager)
 {
   global $LIBEXECDIR;
-  $filename = "$LIBEXECDIR/clearingProperties.dat";
+  $filename = "$LIBEXECDIR/dataProperties.dat";
   if (!file_exists($filename))
   {
     print "FAILED: Schema data file ($filename) not found.\n";
     return;
   }
   $dbManager->queryOnce("COMMIT");
-  $clearingStorage = array(); // filled in next line
+  $dataPropertiesStorage = array(); // filled in next line
   eval( file_get_contents($filename) );
-  foreach($clearingStorage as $tableColumn=>$columnContent)
+  foreach($dataPropertiesStorage as $tableColumn=>$columnContent)
   {
     list($table,$column) = explode('.', $tableColumn);
     $stmt = __METHOD__.".$table.$column";

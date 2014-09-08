@@ -15,7 +15,7 @@ dbcreate: dbcreate-process
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	$(INSTALL_DATA) licenseref.sql $(DESTDIR)$(LIBEXECDIR)/licenseref.sql
-	$(INSTALL_DATA) clearingProperties.dat $(DESTDIR)$(LIBEXECDIR)/clearingProperties.dat
+	$(INSTALL_DATA) dataProperties.dat $(DESTDIR)$(LIBEXECDIR)/dataProperties.dat
 	$(INSTALL_DATA) dbmigrate_1.4-2.0.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.1.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
