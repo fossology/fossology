@@ -138,7 +138,8 @@ class browseProcessPost extends FO_Plugin
 
 
     $orderString = $this->getOrderString();
-    $stmt = __METHOD__."getFolderContents".$orderString;
+    $searchString = $this->getSearchString();
+    $stmt = __METHOD__."getFolderContents".$orderString.$searchString;
     $unorderedQuerry = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
@@ -148,6 +149,7 @@ class browseProcessPost extends FO_Plugin
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
     $this->dbManager->prepare($stmt,"SELECT * $unorderedQuerry
+        $searchString
         $orderString
         OFFSET $2 LIMIT $3
         ");
@@ -155,6 +157,9 @@ class browseProcessPost extends FO_Plugin
     $limit = $_GET['iDisplayLength'];
     $result = $this->dbManager->execute($stmt,array($Folder, $offset, $limit));
 
+
+    $iTotalDisplayRecordsRow=$this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString",array($Folder),__METHOD__."count");
+    $iTotalDisplayRecords=$iTotalDisplayRecordsRow['count'];
 
     $iTotalRecordsRow=$this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ",array($Folder),__METHOD__."count");
     $iTotalRecords=$iTotalRecordsRow['count'];
@@ -221,7 +226,7 @@ class browseProcessPost extends FO_Plugin
       $output[]= array($nameColumn, $currentStatus, "reject" , $currentAssignee, $dateCol, $pairIdPrio );
     }
     pg_free_result($result);
-    return array($output, $iTotalRecords);
+    return array($output, $iTotalRecords, $iTotalDisplayRecords);
   }
 
   /**
@@ -248,12 +253,12 @@ class browseProcessPost extends FO_Plugin
     }
     else {
       header('Content-type: text/json');
-          list($aaData, $iTotalRecords) =$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']);
+          list($aaData, $iTotalRecords, $iTotalDisplayRecords) =$this->ShowFolderGetTableData($_GET['folder'] , $_GET['show']);
           print(json_encode(array(
                                     'sEcho' => intval($_GET['sEcho']),
                                     'aaData' =>$aaData,
                                     'iTotalRecords' =>$iTotalRecords,
-                                    'iTotalDisplayRecords' => count($aaData)
+                                    'iTotalDisplayRecords' => $iTotalDisplayRecords
                                  )
 
                             )
@@ -266,6 +271,21 @@ class browseProcessPost extends FO_Plugin
         $stmt = __METHOD__."_update_".$columnName;
         $sql = "update upload SET ".$columnName."=$1 where upload_pk=$2";
         $this->dbManager->getSingleRow($sql,array($value, $uploadId),$stmt);
+  }
+
+  private function getSearchString()
+  {
+    $search="";
+
+    $searchPattern = GetParm('sSearch', PARM_STRING);
+
+      if(!empty($searchPattern)) {
+//        $search.= " and upload_filename like '%$searchPattern%'";
+        $searchPattern = strtolower($searchPattern);
+        $search.= " and lower(upload_filename) like '%$searchPattern%'";
+      }
+
+    return $search;
   }
 
 

@@ -16,35 +16,38 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-myKey = 0;
-myVal = 0;
+var myKey = 0;
+var myVal = 0;
+
+var theTable=null;
 
 $(document).ready(function() {
-  createBrowseTable();
+  table =createBrowseTable();
   initPrioClick();
-  table = $('#browsetbl').dataTable();
   table.on('draw', function(){
-    initPrioClick();
-    initPrioDraw();
+      initPrioDraw()
   });
 } );
 
 function initPrioClick() {
   $("td.priobucket").click( function() {
-    table = $('#browsetbl').dataTable();
+    table =  createBrowseTable();
     elementData = table.fnGetData( this );
-    yourKey = elementData[0];// $(this).find("input.hideUploadid").val();
+    yourKey = elementData[0];
     if(myKey>0 && myKey!==yourKey){
-      window.location.href = window.location.href+'&move='+myKey+'&beyond='+yourKey;
+        changePriority(myKey, yourKey);
+        myKey = 0;
+        myVal = 0;
       return;
     }
-    if (yourKey===myKey){
-      myKey = elementData[0];
+    else if (yourKey===myKey){
+      myKey = 0;
+      myVal = 0;
     }
     else
     {
-      myKey = elementData[0];
-      myVal = elementData[1];
+      myKey = elementData[0];  //upload_pk
+      myVal = elementData[1];  //priority
     }
     initPrioDraw();
   });
@@ -79,7 +82,7 @@ function prioColumn ( source, type, val ) {
 }
 
 function mysuccess(){
-    var oTable = $('#browsetbl').dataTable({ "bRetrieve": true });
+    var oTable = createBrowseTable();
     oTable.fnDraw();
 }
 
@@ -90,6 +93,23 @@ function changeTableEntry(sel, uploadId, columnName) {
         "columnName" : columnName,
         "uploadId": uploadId,
         "value":  sel.value
+    };
+    $.ajax({
+        type: "POST",
+        url:  "?mod=browse-processPost",
+        data: post_data,
+        success: mysuccess
+    });
+
+
+}
+
+
+function changePriority( move, beyond) {
+
+    var post_data = {
+        "move" : move,
+        "beyond": beyond,
     };
     $.ajax({
         type: "POST",

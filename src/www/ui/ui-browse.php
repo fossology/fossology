@@ -256,7 +256,12 @@ class ui_browse extends FO_Plugin {
     $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0></table>";
     $V.= "</table>";
 
+
+    $V .="<button name=\"Klickmich\" type=\"button\"   value=\"Draw\" onclick=\"reloadTable()\">";
+
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
+
+
 
     return $V;
   }
@@ -410,10 +415,10 @@ class ui_browse extends FO_Plugin {
   {
     $tableColumns = '[
       { "sTitle" : "'._("Upload Name and Description").'", "sClass": "left" },
-      { "sTitle" : "'._("Status").'", "sClass": "center" },
-      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false },
-      { "sTitle" : "'._("Assigned to").'", "sClass": "center" },
-      { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string"},
+      { "sTitle" : "'._("Status").'", "sClass": "center" , "bSearchable": false},
+      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false, "bSearchable": false },
+      { "sTitle" : "'._("Assigned to").'", "sClass": "center" , "bSearchable": false},
+      { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string", "bSearchable": false},
       { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false,
                       "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); }
                   }
@@ -427,7 +432,14 @@ class ui_browse extends FO_Plugin {
       [1 , "desc"],
       [4 , "desc"]
     ]';
-    
+
+//    $tableLanguage = '[
+//        { "sInfo" : "Showing _START_ to _END_ of _TOTAL_ files" },
+//        { "sSearch" : "Search _INPUT_ in filenames" },
+//        { "sLengthMenu" : "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files" }
+//    ]';
+
+
     $dataTableConfig =
    '{  "bServerSide": true,
        "sAjaxSource": "?mod=browse-processPost",
@@ -439,13 +451,19 @@ class ui_browse extends FO_Plugin {
       "aoColumns": '.$tableColumns.',
       "aaSorting": '.$tableSorting.',
       "iDisplayLength": 50,
-      "bStateSave": true
+      "bProcessing": true,
+      "bStateSave": true,
+      "bRetrieve": true
     }';
 
     
     $VF   = "<script>
               function createBrowseTable() {
-                    dTable=$('#browsetbl').dataTable(". $dataTableConfig . ");
+                 if (theTable === null)
+                  {
+                    theTable= $('#browsetbl').dataTable(". $dataTableConfig . ");
+                  }
+                    return theTable;
                 }
             </script>";
 
@@ -459,6 +477,13 @@ class ui_browse extends FO_Plugin {
 //    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
     $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
+
+    $output .=   "\n<script>
+     function reloadTable() {
+     table=  createBrowseTable();
+      table.fnDraw();
+     }
+    </script>\n";
     return $output;
   }
 
