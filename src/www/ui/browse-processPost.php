@@ -24,6 +24,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\ClearingDecWithLicenses;
+use Fossology\Lib\Util\DataTablesUtility;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -97,26 +98,10 @@ class browseProcessPost extends FO_Plugin
 
     $columNamesInDatabase=array('upload_filename', 'status_fk', 'UNUSED', 'assignee','upload_ts' ,'priority');
 
-    $orderArray=array();
-    for($i=0; $i < $_GET['iSortingCols']; $i++) {
+    $defaultOrder = ui_browse::returnSortOrder();
 
-      $whichCol= 'iSortCol_'.$i;
-      $colNumber=$_GET[$whichCol];
-
-      $isSortable = $_GET['bSortable_'.$i];
-      if($isSortable !== "true") continue;
-
-      $name = $columNamesInDatabase[$colNumber];
-
-      $whichDir = 'sSortDir_'.$i;
-      $order = $_GET[$whichDir];
-      $orderArray[] = $name." ".$order;
-    }
-
-
-
-    $orderString = "ORDER BY ";
-    $orderString .= implode(", ", $orderArray);
+    $dataTablesUtility = new DataTablesUtility();
+    $orderString = $dataTablesUtility->getSortingString($_GET,$columNamesInDatabase, $defaultOrder);
 
     return $orderString;
   }

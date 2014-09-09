@@ -256,12 +256,7 @@ class ui_browse extends FO_Plugin {
     $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0></table>";
     $V.= "</table>";
 
-
-    $V .="<button name=\"Klickmich\" type=\"button\"   value=\"Draw\" onclick=\"reloadTable()\">";
-
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
-
-
 
     return $V;
   }
@@ -424,15 +419,7 @@ class ui_browse extends FO_Plugin {
                   }
     ]';
 
-
-    $tableSorting = '[
-      [5 , "desc"],
-      [0 , "asc"],
-      [3 , "desc"],
-      [1 , "desc"],
-      [4 , "desc"]
-    ]';
-
+    $tableSorting = json_encode($this->returnSortOrder());
 //    $tableLanguage = '[
 //        { "sInfo" : "Showing _START_ to _END_ of _TOTAL_ files" },
 //        { "sSearch" : "Search _INPUT_ in filenames" },
@@ -484,18 +471,22 @@ class ui_browse extends FO_Plugin {
 //    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
     $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
-
-    $output .=   "\n<script> //for debugging
-     function reloadTable() {
-     table=  createBrowseTable();
-      table.fnDraw(false);
-     }
-    </script>\n";
     return $output;
   }
 
 
 
+static  public  function returnSortOrder () {
+  $defaultOrder = array (
+      array(5, "desc"),
+      array(0, "asc"),
+      array(3, "desc"),
+      array(1, "desc"),
+      array(4, "desc")
+  );
+
+  return $defaultOrder;
+}
 
 }
 $NewPlugin = new ui_browse();
