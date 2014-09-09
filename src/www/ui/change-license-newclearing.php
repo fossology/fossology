@@ -15,19 +15,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\ClearingDecWithLicenses;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
-define("TITLE_changeLicProcPost", _("Private: Change license file post"));
+define("TITLE_changeLicensNewclearing", _("Private: get new clearing information"));
 
-class changeLicenseProcessPost extends FO_Plugin
+class changeLicenseNewClearing extends FO_Plugin
 {
 
   /**
@@ -36,14 +34,14 @@ class changeLicenseProcessPost extends FO_Plugin
   private $uploadDao;
 
   /**
-   * @var LicenseDao
-   */
-  private $licenseDao;
-
-  /**
    * @var ClearingDao;
    */
   private $clearingDao;
+
+  /**
+   * @var LicenseDao
+   */
+  private $licenseDao;
 
   /**
    * @var ChangeLicenseUtility
@@ -58,8 +56,8 @@ class changeLicenseProcessPost extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "change-license-processPost";
-    $this->Title = TITLE_changeLicProcPost;
+    $this->Name = "change-license-newclearing";
+    $this->Title = TITLE_changeLicensNewclearing;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
@@ -79,32 +77,6 @@ class changeLicenseProcessPost extends FO_Plugin
   }
 
   /**
-   * \brief change bucket accordingly when change license of one file
-   */
-  // TODO:  Understand Buckets and modify then
-  function ChangeBuckets()
-  {
-    global $SysConf;
-    global $PG_CONN;
-
-    $uploadId = GetParm("upload", PARM_STRING);
-    $uploadTreeId = GetParm("item", PARM_STRING);
-
-    $sql = "SELECT bucketpool_fk from bucket_ars where upload_fk = $uploadId;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $bucketpool_array = pg_fetch_all_columns($result, 0);
-    pg_free_result($result);
-    $buckets_dir = $SysConf['DIRECTORIES']['MODDIR'];
-    /** rerun bucket on the file */
-    foreach ($bucketpool_array as $bucketpool)
-    {
-      $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadTreeId -p $bucketpool";
-      exec($command, $output, $return_var);
-    }
-  }
-
-  /**
    * \brief Display the loaded menu and plugins.
    */
   function Output()
@@ -116,14 +88,10 @@ class changeLicenseProcessPost extends FO_Plugin
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
     $uploadTreeId = $_POST['uploadTreeId'];
-    $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $uploadTreeId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
     $clearingDecWithLicences = $this->clearingDao->getFileClearings($uploadTreeId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
-
-    //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
-   // $this->ChangeBuckets(); // change bucket accordingly
 
     header('Content-type: text/json');
 
@@ -135,7 +103,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
 }
 
-$NewPlugin = new changeLicenseProcessPost;
+$NewPlugin = new changeLicenseNewClearing;
 $NewPlugin->Initialize();
 
 

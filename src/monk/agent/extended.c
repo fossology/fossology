@@ -10,33 +10,27 @@ You should have received a copy of the GNU General Public License along with thi
  */
 
 #include "extended.h"
+#include "cli.h"
+#include "bulk.h"
 #include "file_operations.h"
 #include "database.h"
 #include "license.h"
 #include "match.h"
 #include "getopt.h"
 
-void matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char** argv) {
-  File file;
-  file.id = argi;
-  file.fileName = argv[argi];
-  file.tokens = readTokensFromFile(file.fileName, DELIMITERS);
-
-  matchFileWithLicenses(state, &file, licenses);
-
-  g_array_free(file.tokens, TRUE);
-}
-
-int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
+int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd, long* bulkOptId) {
   int c;
   state->verbosity = 0;
-  while ((c = getopt(argc, argv, "Vvh")) != -1)
+  while ((c = getopt(argc, argv, "VvhB:")) != -1)
   {
     switch (c) {
       case 'v':
         state->verbosity++;
         break;
-      case 'V':
+      case 'B':
+        *bulkOptId = atol(optarg);
+        break;
+       case 'V':
 #ifdef SVN_REV_S
         printf(AGENT_NAME " version " VERSION_S " r(" SVN_REV_S ")\n");
 #else
@@ -61,56 +55,41 @@ int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
 
 int handleArguments(MonkState* state, int argc, char** argv) {
   int fileOptInd;
-  if (!parseArguments(state, argc, argv, &fileOptInd))
+  long bulkOptId = -1;
+  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
     return 0;
 
-  /* extended mode */
-  PGresult* licensesResult = queryAllLicenses(state->dbManager);
-  GArray* licenses = extractLicenses(state->dbManager, licensesResult);
-
-  int threadError = 0;
-#ifdef MONK_MULTI_THREAD
-  #pragma omp parallel
-#endif
-  {
-    MonkState threadLocalStateStore = *state;
-    MonkState* threadLocalState = &threadLocalStateStore;
-
-    threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
-    if (threadLocalState->dbManager) {
-#ifdef MONK_MULTI_THREAD
-      #pragma omp for
-#endif
-      for (int fileId = fileOptInd; fileId < argc; fileId++) {
-        matchCliFileWithLicenses(threadLocalState, licenses, fileId, argv);
-      }
-      fo_dbManager_finish(threadLocalState->dbManager);
-    } else {
-      threadError = 1;
-    }
+  int result;
+  if (bulkOptId > 0) {
+    state->scanMode = MODE_BULK;
+    result = handleBulkMode(state, bulkOptId);
+  } else {
+    state->scanMode = MODE_CLI;
+    result = handleCliMode(state, argc, argv, fileOptInd);
   }
-
-  freeLicenseArray(licenses);
-  PQclear(licensesResult);
-
-  return !threadError;
-}
-void onNoMatch(File* file) {
-  printf("File %s contains license(s) No_license_found\n", file->fileName);
+  return result;
 }
 
-void onFullMatch(File* file, License* license, DiffMatchInfo* matchInfo) {
-  printf("found full match between \"%s\" and \"%s\" (rf_pk=%ld); ",
-         file->fileName, license->shortname, license->refId);
-  printf("matched: %zu+%zu\n", matchInfo->text.start, matchInfo->text.length);
+void onNoMatch(MonkState* state, File* file) {
+  if (state->scanMode == MODE_CLI) {
+    onNoMatch_Cli(file);
+  } else {
+    // ignore for bulk mode
+  }
 }
 
-void onDiffMatch(File* file, License* license, DiffResult* diffResult, unsigned short rank) {
-  printf("found diff match between \"%s\" and \"%s\" (rf_pk=%ld); ",
-         file->fileName, license->shortname, license->refId);
-  printf("rank %u; ", rank);
+void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+  if (state->scanMode == MODE_CLI) {
+    onFullMatch_Cli(file, license, matchInfo);
+  } else {
+    onFullMatch_Bulk(state, file, license, matchInfo);
+  }
+}
 
-  char * formattedMatchArray = formatMatchArray(diffResult->matchedInfo);
-  printf("diffs: {%s}\n", formattedMatchArray);
-  free(formattedMatchArray);
+void onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult, unsigned short rank) {
+  if (state->scanMode == MODE_CLI) {
+    onDiffMatch_Cli(file, license, diffResult, rank);
+  } else {
+    // ignore for bulk mode
+  }
 }

@@ -142,9 +142,13 @@ class ChangeLicenseUtility extends Object
    * @param LicenseRef[] $licenseRefArray
    * @return string
    */
-  function createListSelect($listElementName, $licenseRefArray)
+  function createListSelect($listElementName, $licenseRefArray, $multiple=true, $size=20)
   {
-    $output = "<select name=\"$listElementName\" id=\"$listElementName\" size=\"20\" multiple=\"multiple\" style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
+    $output = "<select name=\"$listElementName\" id=\"$listElementName\" size=\"$size\" ";
+    if ($multiple) {
+      $output .= "multiple=\"multiple\" ";
+    }
+    $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
     foreach ($licenseRefArray as $licenseRef)
     {
       $output .= "<option value=\"" . $licenseRef->getId() . "\">" . $licenseRef->getFullName() . "</option>\n";

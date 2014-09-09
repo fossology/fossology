@@ -597,6 +597,11 @@
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" boolean;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT FALSE;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";
@@ -768,6 +773,27 @@
   $Schema["TABLE"]["highlight"]["rf_len"]["ADD"] = "ALTER TABLE \"highlight\" ADD COLUMN \"rf_len\" int8;";
   $Schema["TABLE"]["highlight"]["rf_len"]["ALTER"] = "ALTER TABLE \"highlight\" ALTER COLUMN \"rf_len\" DROP NOT NULL;";
   $Schema["TABLE"]["highlight"]["rf_len"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"lrb_fk\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"lrb_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"pfile_fk\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight_bulk"]["start"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["start"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"start\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["start"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"start\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["start"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["highlight_bulk"]["len"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["len"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"len\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["len"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"len\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["len"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["highlight_keyword"]["pfile_fk"]["DESC"] = "";
@@ -1111,6 +1137,43 @@
   $Schema["TABLE"]["license_ref"]["rf_detector_type"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_detector_type\" int4;";
   $Schema["TABLE"]["license_ref"]["rf_detector_type"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_detector_type\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref"]["rf_detector_type"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key';";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass);";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["UPDATE"] = "UPDATE license_ref_bulk SET lrb_pk=nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"user_fk\" IS 'user who made this bulk scan';";
+  $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"user_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"group_fk\" IS 'group id';";
+  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"group_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "";
+  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref';";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_text\" IS 'text searched by nulk scan';";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_text\" text;";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_text\" SET NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["removing"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"removing\" IS 'true if removing, false if adding';";
+  $Schema["TABLE"]["license_ref_bulk"]["removing"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"removing\" boolean;";
+  $Schema["TABLE"]["license_ref_bulk"]["removing"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"removing\" SET NOT NULL, ALTER COLUMN \"removing\" SET DEFAULT false;";
+  $Schema["TABLE"]["license_ref_bulk"]["removing"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"uploadtree_fk\" IS 'file from which the decision was made';";
+  $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"uploadtree_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["UPDATE"] = "";
+
 
 
   $Schema["TABLE"]["license_test"]["lt_pk"]["DESC"] = "";
@@ -1996,6 +2059,7 @@
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE \"key_key_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_agent_fk_seq"] = "CREATE SEQUENCE \"license_test_agent_fk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_lt_pk_seq"] = "CREATE SEQUENCE \"license_test_lt_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_pfile_fk_seq"] = "CREATE SEQUENCE \"license_test_pfile_fk_seq\" START 1;";

@@ -101,10 +101,10 @@ class HighlightDao extends Object
           $this->typeMap[$row['type']],
           intval($row['rf_start']), intval($row['rf_start'] + $row['rf_len']));
 
-      $licenseFileId = $row['rf_fk'];
-      if ($licenseFileId)
+      $licenseId = $row['rf_fk'];
+      if ($licenseId)
       {
-        $newHiglight->setLicenseId($licenseFileId);
+        $newHiglight->setLicenseId($licenseId);
       }
       $highlightEntries[] = $newHiglight;
     }
@@ -128,12 +128,37 @@ class HighlightDao extends Object
     {
       $highlightEntries[] = new Highlight(
           intval($row['start']), intval($row['start'] + $row['len']),
-          'K', 0, 0);
+          Highlight::KEYWORD, 0, 0);
     }
     $this->dbManager->freeResult($result);
     return $highlightEntries;
   }
-  
+
+  /*
+   * @param int $uploadTreeId
+   */
+  private function getHighlightBulk($uploadTreeId, $licenseId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT start,len, rf_fk
+             FROM highlight_bulk INNER JOIN license_ref_bulk
+             ON license_ref_bulk.lrb_pk = highlight_bulk.lrb_fk
+             WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
+             ANd rf_fk = $2";
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, array($uploadTreeId, $licenseId));
+    $highlightEntries = array();
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      $newHighlight = new Highlight(
+          intval($row['start']), intval($row['start'] + $row['len']),
+          Highlight::BULK, 0, 0);
+      $newHighlight->setLicenseId($row['rf_fk']);
+      $highlightEntries[] = $newHighlight;
+    }
+    $this->dbManager->freeResult($result);
+    return $highlightEntries;
+  }
   
   /**
    * @param int $item
@@ -145,7 +170,8 @@ class HighlightDao extends Object
   public function getHighlightEntries($item, $licenseId = null, $agentId = null, $highlightId = null){
     $highlightDiffs = $this->getHighlightDiffs($item, $licenseId, $agentId, $highlightId);
     $highlightKeywords = $this->getHighlightKeywords($item);
-    $highlightEntries = array_merge($highlightDiffs,$highlightKeywords);
+    $highlightBulk = $this->getHighlightBulk($item, $licenseId);
+    $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
     return $highlightEntries;
   }
 }

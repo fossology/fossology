@@ -83,7 +83,7 @@ function selectNoLicenseFound(left, right) {
     sortList(left);
 }
 
-function success(data) {
+function clearingSuccess(data) {
     $('#clearingHistoryTable').html(data.tableClearing);
     $('#recentLicenseClearing').html(data.recentLicenseClearing);
 }
@@ -113,13 +113,88 @@ function performPostRequest() {
         type: "POST",
         url: "?mod=change-license-processPost",
         data: data,
-        success: success
+        success: clearingSuccess
     });
 
-
+    closeUserModal();
 }
 
 function performNoLicensePostRequest() {
     selectNoLicenseFound(licenseLeft, licenseRight);
     performPostRequest();
+    closeUserModal();
+}
+
+var bulkModal;
+var userModal;
+$(document).ready(function() {
+  bulkModal = $('#bulkModal').plainModal();
+  userModal = $('#userModal').plainModal();
+});
+
+function openBulkModal() {
+  bulkModal.plainModal('open');
+}
+
+function closeBulkModal() {
+  bulkModal.plainModal('close');
+}
+
+function openUserModal() {
+  userModal.plainModal('open');
+}
+
+function closeUserModal() {
+  userModal.plainModal('close');
+}
+
+
+function reloadClearingTable(){
+    // TODO reload also highlights
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-newclearing",
+        data: { "uploadTreeId": $('#uploadTreeId').val() },
+        success: clearingSuccess
+    });
+    $('#bulkIdResult').hide();
+}
+
+function scheduleBulkScan() {
+    var post_data = {
+        "removing": $('#bulkRemoving').val(),
+        "refText": $('#bulkRefText').val(),
+        "licenseId": $('#bulkLicense').val(),
+        "uploadTreeId": $('#uploadTreeId').val()
+    };
+
+    var resultEntity = $('#bulkIdResult');
+    resultEntity.hide();
+
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-bulk",
+        data: post_data,
+        success: function(data) {
+            var jqPk = data.jqid;
+            if (jqPk) {
+                resultEntity.html("scan scheduled as " + linkToJob(jqPk));
+                queueUpdateCheck(jqPk, reloadClearingTable);
+                closeBulkModal();
+            } else {
+                resultEntity.html("bad response from server");
+            }
+            resultEntity.show();
+        },
+        error: function(responseobject) {
+            var error = responseobject.responseJSON.error;
+            if (error) {
+                resultEntity.text("error: " + error );
+            } else {
+                resultEntity.text("error");
+            }
+            resultEntity.show();
+        }
+    });
+
 }

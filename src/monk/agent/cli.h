@@ -8,15 +8,15 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef MONK_AGENT_EXTENDED_H
-#define MONK_AGENT_EXTENDED_H
+#ifndef MONK_AGENT_CLI_H
+#define MONK_AGENT_CLI_H
 
 #include "monk.h"
 #include "diff.h"
 
-int handleArguments(MonkState* state, int argc, char** argv);
-void onNoMatch(MonkState* state, File* file);
-void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
-void onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult, unsigned short rank);
+int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd);
+void onNoMatch_Cli(File* file);
+void onFullMatch_Cli(File* file, License* license, DiffMatchInfo* matchInfo);
+void onDiffMatch_Cli(File* file, License* license, DiffResult* diffResult, unsigned short rank);
 
 #endif

@@ -19,9 +19,11 @@ EXE=monk
 TESTDIR = ../agent_tests
 OBJECTS  = monk.o string_operations.o file_operations.o database.o\
            license.o highlight.o match.o hash.o diff.o extended.o\
+           cli.o bulk.o \
            _squareVisitor.o
 COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o\
            database_cov.o license_cov.o highlight_cov.o match_cov.o\
+           cli_cov.o bulk_cov.o \
            hash_cov.o diff_cov.o extended_cov.o _squareVisitor_cov.o
 
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
@@ -72,6 +74,12 @@ diff.o: %.o: %.c %.h
 
 match.o: %.o: %.c %.h _squareVisitor.o
 	$(CC) -c $(CFLAGS_LOCAL) $<
+
+bulk.o: %.o: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
+
+cli.o: %.o: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 extended.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<

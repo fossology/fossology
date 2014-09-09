@@ -157,6 +157,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
 {
   global $PG_CONN;
   $jq_args = pg_escape_string($jq_args);
+  $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
   if (is_array($Depends)) 
@@ -436,7 +437,7 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
  * -   0   Not queued, latest version of agent has previously run successfully
  * -  -1   Not queued, error, error string in $ErrorMsg
  **/
-function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs="")
+function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs="", $jq_cmd_args=NULL)
 {
     global $PG_CONN;
     global $Plugins;
@@ -464,7 +465,7 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
 
     /* schedule AgentName */
     if (empty($jqargs)) $jqargs = $upload_pk;
-    $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps);
+    $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL, $jq_cmd_args);
     if (empty($jq_pk)){
       $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
       return (-1);

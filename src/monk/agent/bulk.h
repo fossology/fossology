@@ -8,15 +8,18 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef MONK_AGENT_EXTENDED_H
-#define MONK_AGENT_EXTENDED_H
+#ifndef MONK_AGENT_BULK_H
+#define MONK_AGENT_BULK_H
 
 #include "monk.h"
 #include "diff.h"
 
-int handleArguments(MonkState* state, int argc, char** argv);
-void onNoMatch(MonkState* state, File* file);
-void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
-void onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult, unsigned short rank);
+#define BULK_DECISION_TYPE "bulk"
+#define BULK_DECISION_SCOPE "upload"
+
+void bulkArguments_contents_free(BulkArguments* bulkArguments);
+int queryBulkArguments(long bulkId, MonkState* state);
+int handleBulkMode(MonkState* state, long bulkId);
+void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
 
 #endif

@@ -16,7 +16,9 @@ You should have received a copy of the GNU General Public License along with thi
 #define AGENT_ARS  "monk_ars" 
 
 #define MODE_SCHEDULER 1
-#define MODE_EXTENDED 2
+#define MODE_CLI 2
+#define MODE_BULK 3
+#define MODE_BULK_NEGATIVE 4
 
 #define FULL_MATCH "M"
 #define DIFF_TYPE_MATCH "M0"
@@ -30,7 +32,6 @@ You should have received a copy of the GNU General Public License along with thi
 #define MIN_TRAILING_MATCHES 5
 #define MIN_ALLOWED_RANK 66
 
-#include "libpq-fe.h"
 #include <glib.h>
 #include "libfossdbmanager.h"
 
@@ -39,10 +40,22 @@ You should have received a copy of the GNU General Public License along with thi
 #endif
 
 typedef struct {
+  long bulkId;
+  long uploadTreeId;
+  long licenseId;
+  int uploadId;
+  int removing;
+  int userId;
+  int groupId;
+  char* refText;
+} BulkArguments;
+
+typedef struct {
     fo_dbManager* dbManager;
     int agentId;
     int scanMode;
     int verbosity;
+    BulkArguments* bulkArguments;
 } MonkState;
 
 typedef struct {

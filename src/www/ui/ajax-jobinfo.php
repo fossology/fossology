@@ -53,6 +53,9 @@ class ajaxJobInfo extends FO_Plugin
     }
 
     $userId = $_SESSION['UserId'];
+
+ //   $groupId = $_SESSION['GroupId'];
+
     $jqIds = (array)$_POST['jqIds'];
 
     $result = array();

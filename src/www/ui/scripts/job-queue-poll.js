@@ -42,6 +42,7 @@ function updateCheckSuccess(data) {
     if (currentTimeout < 10000) {
       currentTimeout += 1000;
     }
+    currentTimeout += 1000;
     currentTimeoutObj = setTimeout(updateCheck, currentTimeout);
   } else {
     currentTimeoutObj = "";
