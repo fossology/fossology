@@ -305,7 +305,7 @@ class browseProcessPost extends FO_Plugin
 
     return $search;
   }
-  
+
 }
 
 $NewPlugin = new browseProcessPost;
