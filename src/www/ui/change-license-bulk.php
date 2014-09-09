@@ -95,7 +95,7 @@ class changeLicenseBulk extends FO_Plugin
 
         global $Plugins;
         $MonkBulkPlugin = plugin_find("agent_monk_bulk");
-        $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, &$ErrorMsg, array(), $bulkId);
+        $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $bulkId);
       } else {
         $ErrorMsg = "can not insert bulk reference";
       }

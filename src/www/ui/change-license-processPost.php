@@ -25,7 +25,7 @@ use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
-define("TITLE_changeLicensProcessPost", _("Private: Change license file post"));
+define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
 class changeLicenseProcessPost extends FO_Plugin
 {
@@ -59,7 +59,7 @@ class changeLicenseProcessPost extends FO_Plugin
   function __construct()
   {
     $this->Name = "change-license-processPost";
-    $this->Title = TITLE_changeLicensProcessPost;
+    $this->Title = TITLE_changeLicProcPost;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;

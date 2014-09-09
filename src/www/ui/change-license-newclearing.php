@@ -57,7 +57,7 @@ class changeLicenseNewClearing extends FO_Plugin
   function __construct()
   {
     $this->Name = "change-license-newclearing";
-    $this->Title = TITLE_changeLicensProcessPost;
+    $this->Title = TITLE_changeLicensNewclearing;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
