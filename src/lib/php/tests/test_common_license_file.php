@@ -47,7 +47,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
-  
+
+  private $logFileName;
+
   /**
    * \brief initialization
    */
