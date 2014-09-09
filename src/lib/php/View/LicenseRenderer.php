@@ -211,7 +211,6 @@ class LicenseRenderer
 
   /**
    * @param $fileCount
-   * @param $rendered
    * @param $uniqueLicenseCount
    * @param $scannerUniqueLicenseCount
    * @param $editedUniqueLicenseCount
@@ -219,6 +218,7 @@ class LicenseRenderer
    * @param $noScannerLicenseFoundCount
    * @param $editedTotalLicenseCount
    * @param $editedNoLicenseFoundCount
+   * @internal param $rendered
    * @return string
    */
   public function totalCountHist($fileCount, $uniqueLicenseCount, $scannerUniqueLicenseCount, $editedUniqueLicenseCount, $totalScannerLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedNoLicenseFoundCount)
