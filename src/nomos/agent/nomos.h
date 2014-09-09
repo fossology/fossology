@@ -198,7 +198,7 @@ size_t hashEntries;
 struct mm_cache {
   int inUse;
   int fd;
-  int size;
+  unsigned long size;
   void *mmPtr;
   char label[myBUFSIZ];
 };

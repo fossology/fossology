@@ -1036,18 +1036,22 @@ char *mmapFile(char *pathname) /* read-only for now */
     printf("mmapFile(%s): is a directory\n", pathname);
     Bail(14);
   }
+
   (void) strcpy(mmp->label, pathname);
-  if (cur.stbuf.st_size) {
+  if (cur.stbuf.st_size) 
+  {
     mmp->size = cur.stbuf.st_size + 1;
     mmp->mmPtr = memAlloc(mmp->size, MTAG_MMAPFILE);
 #ifdef DEBUG
-    printf("+MM: %d @ %p\n", mmp->size, mmp->mmPtr);
+    printf("+MM: %lu @ %p\n", mmp->size, mmp->mmPtr);
 #endif /* DEBUG */
 
     /* Limit scan to first MAX_SCANBYTES
      * We have never found a license more than 64k into a file.
      */
+//    if (cur.stbuf.st_size > MAX_SCANBYTES) mmp->size = MAX_SCANBYTES;
     if (mmp->size > MAX_SCANBYTES) mmp->size = MAX_SCANBYTES;
+
 
     rem = mmp->size-1;
     cp = mmp->mmPtr;
@@ -1135,7 +1139,7 @@ void munmapFile(void *ptr)
 #endif /* PARANOID */
       mmp->inUse = 0;
 #ifdef DEBUG
-      printf("DEBUG: munmapFile: freeing %d bytes\n",
+      printf("DEBUG: munmapFile: freeing %lu bytes\n",
           mmp->size);
 #endif /* DEBUG */
       memFree(mmp->mmPtr, MTAG_MMAPFILE);
