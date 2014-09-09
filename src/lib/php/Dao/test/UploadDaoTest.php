@@ -1,7 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Steffen Weber
+Author: Steffen Weber, Johannes Najjar
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -45,16 +45,16 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   public function testGetFileTreeBounds()
   {
     $this->testDb->createPlainTables(array('uploadtree'));
+    $uploadTreeId=103;
+    $left=1;
+    $uploadId=101;
     $uploadDao = new UploadDao($this->dbManager);
-    $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId=103);
-    $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $fileTreeBounds);
-    $this->assertEquals($expected=0, $fileTreeBounds->getLeft());  
-    
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
-            . " VALUES (103, NULL, 101, 1, 33792, 1, 2, 'WXwindows.txt');",
+            . " VALUES ($uploadTreeId, NULL, $uploadId, 1, 33792, $left, 2, 'WXwindows.txt');",
             __METHOD__.'.insert.data');
-    $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId=103);
+    $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId);
     $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $fileTreeBounds);
-    $this->assertEquals($expected=101, $fileTreeBounds->getUploadId());    
+    $this->assertEquals($expected=$uploadId, $fileTreeBounds->getUploadId());
+    $this->assertEquals($expected=$left, $fileTreeBounds->getLeft());
   }
 }
