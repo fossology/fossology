@@ -92,12 +92,13 @@ function prioColumn ( source, type, val ) {
 }
 
 function mysuccess(){
-//    var oTable = createBrowseTable();
-//    oTable.fnDraw();
+    var oTable = createBrowseTable();
+    oTable.fnDraw(false);
 }
 function mysuccess2(){
     var oTable = createBrowseTable();
-    oTable.fnDraw();
+    oTable.fnDraw(false);
+   // initPrioDraw();
 }
 
 function changeTableEntry(sel, uploadId, columnName) {

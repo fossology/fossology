@@ -459,7 +459,9 @@ class ui_browse extends FO_Plugin {
     
     $VF   = "<script>
               function createBrowseTable() {
-                    return $('#browsetbl').dataTable(". $dataTableConfig . ");
+                    var otable = $('#browsetbl').dataTable(". $dataTableConfig . ");
+                    // var settings = otable.fnSettings(); // for debugging
+                    return otable;
                 }
             </script>";
 
@@ -483,10 +485,10 @@ class ui_browse extends FO_Plugin {
     $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
 
-    $output .=   "\n<script>
+    $output .=   "\n<script> //for debugging
      function reloadTable() {
      table=  createBrowseTable();
-      table.fnDraw();
+      table.fnDraw(false);
      }
     </script>\n";
     return $output;

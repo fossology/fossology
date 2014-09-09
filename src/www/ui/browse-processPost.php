@@ -104,7 +104,6 @@ class browseProcessPost extends FO_Plugin
       $colNumber=$_GET[$whichCol];
 
       $isSortable = $_GET['bSortable_'.$i];
-
       if($isSortable !== "true") continue;
 
       $name = $columNamesInDatabase[$colNumber];
@@ -113,6 +112,8 @@ class browseProcessPost extends FO_Plugin
       $order = $_GET[$whichDir];
       $orderArray[] = $name." ".$order;
     }
+
+
 
     $orderString = "ORDER BY ";
     $orderString .= implode(", ", $orderArray);
