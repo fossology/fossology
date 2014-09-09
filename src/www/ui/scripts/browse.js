@@ -25,13 +25,15 @@ $(document).ready(function() {
   table =createBrowseTable();
   initPrioClick();
   table.on('draw', function(){
-      initPrioDraw()
+      initPrioClick();
+      initPrioDraw();
   });
 } );
 
 function initPrioClick() {
   $("td.priobucket").click( function() {
-    table =  createBrowseTable();
+//    table =  $('#browsetbl').dataTable();
+      table =createBrowseTable();
     elementData = table.fnGetData( this );
     yourKey = elementData[0];
     if(myKey>0 && myKey!==yourKey){
@@ -56,7 +58,7 @@ function initPrioDraw() {
   $("td.priobucket").each(function(){
     $(this).html( function(){        return prioColumn(table.fnGetData( this ),'display');   } );
   });
-//    table.fnDraw();
+
 }
 
 function prioColumn ( source, type, val ) {
@@ -66,13 +68,21 @@ function prioColumn ( source, type, val ) {
     return;
   }
   if (type === 'display') {
-    if (myVal===0)
-      return '<img alt="move" src="images/dataTable/sort_both.png"/>';
-    if (myVal<source[1])
-      return '<img alt="move" src="images/dataTable/sort_asc.png"/>';
-    if (myVal>source[1])
-      return '<img alt="move" src="images/dataTable/sort_desc.png"/>';
-    return 'click icon to insert';
+    if (myVal===0){
+     // return '<img alt="move" src="images/dataTable/sort_both.png"/>';
+      return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>' +
+          '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
+    }
+    else if (myVal<source[1]){
+//      return '<img alt="move" src="images/dataTable/sort_asc.png"/>';
+      return '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
+    }
+    else if (myVal>source[1]) {
+//      return '<img alt="move" src="images/dataTable/sort_desc.png"/>';
+      return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>';
+    }
+    else
+        return 'click icon to insert<img alt="move" src="images/icons/close_32.png" class="icon-small"/>' ;
   }
   if (type==='sort') {
     return -source[1];
@@ -82,10 +92,13 @@ function prioColumn ( source, type, val ) {
 }
 
 function mysuccess(){
+//    var oTable = createBrowseTable();
+//    oTable.fnDraw();
+}
+function mysuccess2(){
     var oTable = createBrowseTable();
     oTable.fnDraw();
 }
-
 
 function changeTableEntry(sel, uploadId, columnName) {
 
@@ -115,7 +128,7 @@ function changePriority( move, beyond) {
         type: "POST",
         url:  "?mod=browse-processPost",
         data: post_data,
-        success: mysuccess
+        success: mysuccess2
     });
 
 

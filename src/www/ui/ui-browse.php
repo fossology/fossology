@@ -459,11 +459,7 @@ class ui_browse extends FO_Plugin {
     
     $VF   = "<script>
               function createBrowseTable() {
-                 if (theTable === null)
-                  {
-                    theTable= $('#browsetbl').dataTable(". $dataTableConfig . ");
-                  }
-                    return theTable;
+                    return $('#browsetbl').dataTable(". $dataTableConfig . ");
                 }
             </script>";
 
@@ -471,6 +467,15 @@ class ui_browse extends FO_Plugin {
 
   }
 
+
+  /*
+   *
+   * if (theTable === null)
+                  {
+                    theTable= $('#browsetbl').dataTable(". $dataTableConfig . ");
+                  }
+                    return theTable;
+   */
     private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";

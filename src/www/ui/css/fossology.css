@@ -200,3 +200,8 @@ html, body
     {
       background-color: #bebebe;
     }
+
+.icon-small {
+    width: 16px;
+    height: 16px;
+}

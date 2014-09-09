@@ -131,7 +131,7 @@ class browseProcessPost extends FO_Plugin
     /* Browse-Pfile menu without the compare menu item */
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
 
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    $Uri = Traceback_uri() . "?mod=browse";
 
     $output = array();
     /* Get list of uploads in this folder */
