@@ -101,7 +101,7 @@ without any warranty.
         <exec executable="src/vendor/bin/phpcs">
             <arg value="-p"/>
             <arg value="--report=checkstyle"/>
-            <arg value="--report-file=${basedir}/build/logs/checkstyle.xml"/>
+            <arg value="--report-file=${basedir}/checkstyle.xml"/>
             <arg value="--standard=PSR2"/>
             <arg path="${basedir}/src"/>
         </exec>
