@@ -60,5 +60,8 @@ without any warranty.
         <service id="renderer" class="\Fossology\Lib\View\Renderer">
             <argument type="string"></argument>
         </service>
+
+        <service id="utils.data_tables_utility" class="Fossology\Lib\Util\DataTablesUtility">
+        </service>
     </services>
 </container>
