@@ -479,7 +479,7 @@ for ($i = 1;$i < $argc;$i++) {
         $TarExcludeList .= " ";
       }
       $i++;
-      $TarExcludeList = "--exclude '" . $argv[$i] . "'";
+      $TarExcludeList .= "--exclude '" . $argv[$i] . "'";
       break;
     case '-a': /* it's an archive! */
       /* ignore -a since the next name is a file. */

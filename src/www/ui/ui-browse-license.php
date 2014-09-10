@@ -65,6 +65,9 @@ class ui_browse_license extends FO_Plugin
    */
   private $licenseRenderer;
 
+  /** @var DbManager  */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name = "license";
@@ -81,7 +84,7 @@ class ui_browse_license extends FO_Plugin
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
     $this->licenseRenderer = $container->get('view.license_renderer');
-
+    $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }
 
@@ -154,7 +157,6 @@ class ui_browse_license extends FO_Plugin
    */
   function ShowUploadHist($Uploadtree_pk, $Uri, $tag_pk)
   {
-    $V = ""; // total return value
     $UniqueTagArray = array();
     global $Plugins;
 
@@ -173,94 +175,13 @@ class ui_browse_license extends FO_Plugin
     $uploadId = GetParm('upload', PARM_NUMBER);
     $scannerAgents = array('nomos', 'monk');
 
-    global $container;
-    $dbManager = $container->get('db.manager');
-    /** @var DbManager $dbManager */
-    $allScans = array();
-    foreach ($scannerAgents as $agentName)
-    {
-      $agentHasArsTable = DB_TableExists($agentName . "_ars");
-      if (empty($agentHasArsTable))
-      {
-        continue;
-      }
 
-      $newestAgent = $this->getNewestAgent($agentName);
-      $stmt = __METHOD__ . ".getAgent.$agentName";
-      $dbManager->prepare($stmt,
-          $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
-              . "WHERE agent_name=$2 AND agent_enabled "
-              . "  AND upload_fk=$1 AND ars_success "
-              . "ORDER BY agent_pk DESC");
-      $res = $dbManager->execute($stmt, array($uploadId, $agentName));
-      $latestRun = $dbManager->fetchArray($res);
-      if ($latestRun)
-      {
-        $allScans[] = $latestRun;
-      }
-      while ($run = $dbManager->fetchArray($res))
-      {
-        $allScans[] = $run;
-      }
-      $dbManager->freeResult($res);
 
-      if (false === $latestRun)
-      {
-
-        $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
-
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
-        if (count($runningJobs) > 0)
-        {
-          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
-          $V .= $this->getViewJobsLink($uploadId);
-          $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Reschedule %s scan"), $agentName ));
-        } else
-        {
-          $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Schedule %s scan"), $agentName ));
-        }
-        continue;
-      }
-
-      $V .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . "$latestRun[agent_rev].";
-      if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
-      {
-
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
-        if (in_array($newestAgent['agent_pk'], $runningJobs))
-        {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
-          $V .= $this->getViewJobsLink($uploadId);
-          $V .= " "._("or")." ";
-        } else
-        {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
-
-        }
-        $V .= $this->scheduleScan($uploadId,$agentName,  sprintf(_("Schedule %s scan"), $agentName ));
-      }
-      $V .= '<br/>';
-    }
+    list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
 
     if (empty($allScans))
     {
-
-      $out = "";
-      $out .= _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
-
-      foreach ($scannerAgents as $agentName)
-      {
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
-        if (count($runningJobs) > 0)
-        {
-          $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
-          $out .= $this->getViewJobsLink($uploadId);
-          $out .= "<br/>";
-        }
-      }
-      $out .= _("Do you want to ");
-      $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId;
-      $out .= "<a href='$link'>" . _("schedule agents") . "</a>";
+      $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
       return $out;
     }
 
@@ -711,6 +632,110 @@ class ui_browse_license extends FO_Plugin
     /** @var DbManager $dbManager */
     return $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
         . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
+  }
+
+  /**
+   * @param $scannerAgents
+   * @param $uploadId
+   * @return string
+   */
+  private function handleAllScansEmpty($scannerAgents, $uploadId)
+  {
+    $out = "";
+    $out .= _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
+
+    foreach ($scannerAgents as $agentName)
+    {
+      $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+      if (count($runningJobs) > 0)
+      {
+        $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
+        $out .= $this->getViewJobsLink($uploadId);
+        $out .= "<br/>";
+      }
+    }
+    $out .= _("Do you want to ");
+    $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId;
+    $out .= "<a href='$link'>" . _("schedule agents") . "</a>";
+    return $out;
+  }
+
+  /**
+   * @param $scannerAgents
+   * @param $dbManager
+   * @param $uploadId
+   * @param $allScans
+   * @return array
+   */
+  private function createHeader($scannerAgents, $uploadId)
+  {
+    $allScans = array();
+    $V = ""; // total return value
+    foreach ($scannerAgents as $agentName)
+    {
+      $agentHasArsTable = DB_TableExists($agentName . "_ars");
+      if (empty($agentHasArsTable))
+      {
+        continue;
+      }
+
+      $newestAgent = $this->getNewestAgent($agentName);
+      $stmt = __METHOD__ . ".getAgent.$agentName";
+      $this->dbManager->prepare($stmt,
+          $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
+              . "WHERE agent_name=$2 AND agent_enabled "
+              . "  AND upload_fk=$1 AND ars_success "
+              . "ORDER BY agent_pk DESC");
+      $res = $this->dbManager->execute($stmt, array($uploadId, $agentName));
+      $latestRun = $this->dbManager->fetchArray($res);
+      if ($latestRun)
+      {
+        $allScans[] = $latestRun;
+      }
+      while ($run = $this->dbManager->fetchArray($res))
+      {
+        $allScans[] = $run;
+      }
+      $this->dbManager->freeResult($res);
+
+      if (false === $latestRun)
+      {
+
+        $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
+
+        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        if (count($runningJobs) > 0)
+        {
+          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
+          $V .= $this->getViewJobsLink($uploadId);
+          $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
+        } else
+        {
+          $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+        }
+        continue;
+      }
+
+      $V .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . "$latestRun[agent_rev].";
+      if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
+      {
+
+        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        if (in_array($newestAgent['agent_pk'], $runningJobs))
+        {
+          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
+          $V .= $this->getViewJobsLink($uploadId);
+          $V .= " " . _("or") . " ";
+        } else
+        {
+          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
+
+        }
+        $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+      }
+      $V .= '<br/>';
+    }
+    return array($V, $allScans);
   }
 
 }
