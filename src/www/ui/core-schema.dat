@@ -2311,18 +2311,17 @@
   $Schema["TABLE"]["upload"]["assignee"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["status_fk"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status\" int4 default 1;";
-  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_fk\" int4 default 1;";
+  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["upload"]["status_fk"]["UPDATE"] = "";
 
 
+  $Schema["TABLE"]["upload_comment"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_comment"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_comment"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_comment"]["upload_fk"]["UPDATE"] = "";
 
-    $Schema["TABLE"]["upload_comment"]["upload_fk"]["DESC"] = "";
-    $Schema["TABLE"]["upload_comment"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"upload_fk\" int4;";
-    $Schema["TABLE"]["upload_comment"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
-    $Schema["TABLE"]["upload_comment"]["upload_fk"]["UPDATE"] = "";
-
-    $Schema["TABLE"]["upload_comment"]["comment"]["DESC"] = "";
-    $Schema["TABLE"]["upload_comment"]["comment"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"comment\" text;";
-    $Schema["TABLE"]["upload_comment"]["comment"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"comment\" DROP NOT NULL;";
-    $Schema["TABLE"]["upload_comment"]["comment"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_comment"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["upload_comment"]["comment"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"comment\" text;";
+  $Schema["TABLE"]["upload_comment"]["comment"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"comment\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_comment"]["comment"]["UPDATE"] = "";
