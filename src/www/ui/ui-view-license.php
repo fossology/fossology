@@ -118,7 +118,7 @@ class ui_view_license extends FO_Plugin
     $this->highlightRenderer = $container->get("view.highlight_renderer");
     $this->licenseRenderer = $container->get("view.license_renderer");
     $this->licenseProcessor = $container->get("view.license_processor");
-    $this->licenseOverviewPrinter = new LicenseOverviewPrinter($this->licenseDao, $this->uploadDao, $this->clearingDao, $this->highlightRenderer);
+    $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
   }
 
   /**

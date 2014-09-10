@@ -26,14 +26,6 @@ use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\LicenseProcessor;
 
-/**
- * \file change-license.php
- * \brief change license of one file
- * \note if one file has multiple licenses, you only can change one each time, if you want to delete this
- * license, you can change it to No_license_found
- * \note this will change hopefully with this rewrite
- */
-
 define("TITLE_change_license", _("Change License and Change History"));
 
 class change_license extends FO_Plugin
@@ -79,9 +71,8 @@ class change_license extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseProcessor = $container->get('view.license_processor');
-    $this->changeLicenseUtility = new ChangeLicenseUtility();
-    $highlightRenderer = new HighlightRenderer();
-    $this->licenseOverviewPrinter = new LicenseOverviewPrinter($this->licenseDao, $this->uploadDao, $this->clearingDao, $highlightRenderer);
+    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
+    $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
   }
 
   /**
@@ -164,7 +155,7 @@ class change_license extends FO_Plugin
 
     } else
     {
-      $text = _("Sorry, you do not have write (or above permission) on this upload, thus you cannot change the license of this file.");
+      $text = _("Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.");
       $output .= "<b>$text</b>";
     }
 

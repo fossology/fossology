@@ -31,16 +31,6 @@ class changeLicenseProcessPost extends FO_Plugin
 {
 
   /**
-   * @var UploadDao
-   */
-  private $uploadDao;
-
-  /**
-   * @var LicenseDao
-   */
-  private $licenseDao;
-
-  /**
    * @var ClearingDao;
    */
   private $clearingDao;
@@ -70,12 +60,9 @@ class changeLicenseProcessPost extends FO_Plugin
     parent::__construct();
 
     global $container;
-    $this->licenseDao = $container->get('dao.license');
-    $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
-    $this->changeLicenseUtility = new ChangeLicenseUtility();
-    $highlightRenderer = new HighlightRenderer();
-    $this->licenseOverviewPrinter = new LicenseOverviewPrinter($this->licenseDao,  $this->uploadDao ,  $this->clearingDao, $highlightRenderer);
+    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
+    $this->licenseOverviewPrinter =  $container->get('utils.license_overview_printer');
   }
 
   /**
