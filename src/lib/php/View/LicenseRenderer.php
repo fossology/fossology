@@ -100,7 +100,7 @@ class LicenseRenderer
     $uniqueLicenseCount = 0;
 
     $totalScannerLicenseCount = 0;
-    $scannerUniqueLicenseCount = 0;
+    $scannerUniqueLicenseCount = count (array_unique( $allScannerLicenseNames ) );
     $noScannerLicenseFoundCount = 0;
 
     $editedTotalLicenseCount = 0;
@@ -115,7 +115,6 @@ class LicenseRenderer
       if (array_key_exists($licenseShortName, $scannerLics))
       {
         $count = $scannerLics[$licenseShortName];
-        $scannerUniqueLicenseCount++;
       } else
       {
         $count = 0;
