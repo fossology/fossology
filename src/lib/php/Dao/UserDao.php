@@ -76,11 +76,15 @@ class UserDao extends Object {
       $output .= " onchange =\"$callbackString( this, $callbackArg )\" ";
     }
     $output .= ">\n";
+    $selectedUserInChoices = false;
     foreach ($databaseEnum as $option)
     {
       $output .= "<option ";
       $ordinal = $option->getOrdinal();
-      if ($ordinal == $selectedValue) $output .= " selected ";
+      if ($ordinal == $selectedValue) {
+        $output .= " selected ";
+        $selectedUserInChoices =true ;
+      }
 
       if($ordinal == $_SESSION['UserId']) {
         $name = _("-- Me --");
@@ -89,6 +93,9 @@ class UserDao extends Object {
         $name = $option->getName();
       }
       $output .= "value=\"" . $ordinal . "\">" . $name . "</option>\n";
+    }
+    if(!$selectedUserInChoices) {
+       $output .= "<option  selected value=\"" . $selectedValue . "\">" . _("Unassigned") . "</option>\n";
     }
     $output .= "</select>";
     return $output;

@@ -16,18 +16,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Dao\LicenseDao;
+
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\ClearingDecWithLicenses;
 use Fossology\Lib\Util\DataTablesUtility;
-use Fossology\Lib\View\HighlightRenderer;
-use Fossology\Lib\Util\ChangeLicenseUtility;
-use Fossology\Lib\Util\LicenseOverviewPrinter;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
@@ -81,13 +75,17 @@ class browseProcessPost extends FO_Plugin
     $value   = GetParm('value', PARM_INTEGER);
     $moveUpload = GetParm("move", PARM_INTEGER);
     $beyondUpload = GetParm("beyond", PARM_INTEGER);
-
+    $commentText = GetParm('commentText', PARM_STRING);
+    
     if(!empty($columnName) and !empty($uploadId) and !empty($value)) {
       $this->updateTable ($columnName,$uploadId,$value);
     }
     else if (!empty($moveUpload) && !empty($beyondUpload))
     {
       $this->moveUploadBeyond($moveUpload, $beyondUpload);
+    }
+    else if(!empty($uploadId) and !empty($commentText)) {
+      $this->rejector($uploadId,$commentText);
     }
     else {
       header('Content-type: text/json');
@@ -240,7 +238,8 @@ class browseProcessPost extends FO_Plugin
       $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
       $currentStatus = DatabaseEnum::createDatabaseEnumSelect("StatusOf_$rowCounter", $statusTypes, $Row['status_fk'], "changeTableEntry", intval($Row['upload_pk']) . ", 'status_fk'");
       $currentAssignee = UserDao::createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", intval($Row['upload_pk']) . ", 'assignee'");
-      $output[] = array($nameColumn, $currentStatus, "reject", $currentAssignee, $dateCol, $pairIdPrio);
+      $trioIdRejectReason = array(intval($Row['upload_pk']), 4==$Row['status_fk'], $Row['upload_desc']);
+      $output[] = array($nameColumn, $currentStatus, $trioIdRejectReason, $currentAssignee, $dateCol, $pairIdPrio);
     }
     return $output;
   }
@@ -304,6 +303,12 @@ class browseProcessPost extends FO_Plugin
     }
 
     return $search;
+  }
+
+  private function rejector($uploadId, $commentText)
+  {
+    $sql = "UPDATE upload SET upload_desc=$1,status_fk=$2 WHERE upload_pk=$3";
+    $this->dbManager->getSingleRow($sql,array($commentText, 4, $uploadId),$stmt=__METHOD__);    
   }
 
 }

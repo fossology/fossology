@@ -403,15 +403,32 @@ class ui_browse extends FO_Plugin {
       $html.= $this->createJavaScriptBlock();
       $html.= $this->ShowFolder($Folder, $show);
     }
-    return  "<font class='text'>\n$html</font>\n";
+    return  "<font class='text'>\n$html</font>\n".$this->rejectModal();
   }
+  
+ 
+  
+  
+  private function rejectModal(){ 
+    $output = "<div>"._('Please enter a reason for rejection').":</div> 
+              <textarea id='commentText' style='overflow:auto;resize:none;width:100%;height:80px;' name='commentText'></textarea></br>
+              [<a class='button' onclick='submitRejector()'>OK</a>]   &nbsp;&nbsp;&nbsp;
+              [<a class='button' onclick='closeRejectorModal()'>Cancel</a>] ";
+    
+    $output = "<form name=\"rejector\">$output</form>\n";
+    $output = "<div class=\"modal\" id=\"rejectorModal\" hidden>$output</div>";
+    return $output;
+  }
+  
 
   private function ShowFolderCreateFileTable($Folder, $Show)
   {
     $tableColumns = '[
       { "sTitle" : "'._("Upload Name and Description").'", "sClass": "left" },
       { "sTitle" : "'._("Status").'", "sClass": "center" , "bSearchable": false},
-      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false, "bSearchable": false },
+      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false, "bSearchable": false,
+                      "mRender": function ( source, type, val ) { return rejectorColumn( source, type, val );}
+                  },
       { "sTitle" : "'._("Assigned to").'", "sClass": "center" , "bSearchable": false},
       { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string", "bSearchable": false},
       { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false,
@@ -471,6 +488,7 @@ class ui_browse extends FO_Plugin {
 //    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
     $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
 
