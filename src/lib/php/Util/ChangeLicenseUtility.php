@@ -32,9 +32,9 @@ class ChangeLicenseUtility extends Object
    */
   private $newestEditedLicenseSelector;
 
-  function __construct()
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector)
   {
-    $this->newestEditedLicenseSelector = new NewestEditedLicenseSelector();
+    $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
   }
 
   /**

@@ -55,12 +55,12 @@ class ClearingDao extends Object
   /**
    * @param DbManager $dbManager
    */
-  function __construct(DbManager $dbManager)
+  function __construct(DbManager $dbManager, NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
-    $this->newestEditedLicenseSelector = new NewestEditedLicenseSelector();
-    $this->uploadDao = new UploadDao($dbManager);
+    $this->logger = new Logger(self::className());  //$container->get("logger");
+    $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
+    $this->uploadDao = $uploadDao;
   }
 
   /**

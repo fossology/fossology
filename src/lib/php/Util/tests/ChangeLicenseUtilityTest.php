@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Util;
 
+use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 
@@ -41,7 +42,7 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
       $smallList[] = new LicenseRef($id, $name, $name);
     }
     
-    $clu = new ChangeLicenseUtility();
+    $clu = new ChangeLicenseUtility( new NewestEditedLicenseSelector() );
     $clu->filterLists($bigList, $smallList);
     
     $cloneBigListArray = $bigListArray;
@@ -65,7 +66,7 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
   
   function testCreateLicenseSwitchButtons()
   {
-    $clu = new ChangeLicenseUtility();
+    $clu = new ChangeLicenseUtility(new NewestEditedLicenseSelector() );
     $buttons = $clu->createLicenseSwitchButtons();
     assertThat(str_replace(' ', '', $buttons), containsString('moveLicense(this.form.licenseLeft,this.form.licenseRight)'));
     assertThat(str_replace(' ', '', $buttons), containsString('moveLicense(this.form.licenseRight,this.form.licenseLeft)'));

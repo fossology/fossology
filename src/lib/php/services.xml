@@ -29,6 +29,8 @@ without any warranty.
         </service>
         <service id="dao.clearing" class="\Fossology\Lib\Dao\ClearingDao">
             <argument type="service" id="db.manager"/>
+            <argument type="service" id="buisinessrules.newest_license_selector"/>
+            <argument type="service" id="dao.upload"/>
         </service>
         <service id="dao.highlight" class="\Fossology\Lib\Dao\HighlightDao">
             <argument type="service" id="db.manager"/>
@@ -61,7 +63,26 @@ without any warranty.
             <argument type="string"></argument>
         </service>
 
-        <service id="utils.data_tables_utility" class="Fossology\Lib\Util\DataTablesUtility">
+        <service id="utils.data_tables_utility" class="\Fossology\Lib\Util\DataTablesUtility">
         </service>
+
+        <service id="utils.change_license_utility" class="Fossology\Lib\Util\ChangeLicenseUtility">
+            <argument type="service" id="buisinessrules.newest_license_selector"/>
+        </service>
+
+        <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">
+            <argument type="service" id="dao.license"/>
+            <argument type="service" id="dao.upload"/>
+            <argument type="service" id="dao.clearing"/>
+            <argument type="service" id="view.highlight_renderer"/>
+        </service>
+
+        <service id="buisinessrules.newest_license_selector" class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
+        </service>
+
+
+
+
+
     </services>
 </container>
