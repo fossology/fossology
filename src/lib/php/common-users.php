@@ -44,34 +44,21 @@
 function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify, 
                   $agentList, $Folder, $default_bucketpool_fk='')
 {
-  global $PG_CONN;
+  global $container;
+  $dbManager = $container->get('db.manager');
 
   if (empty($default_bucketpool_fk)) 
   {
-    $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-                        '$Email_notify','$agentList',$Folder, NULL)";
+    $default_bucketpool_fk = NULL;
   }
-  else 
-  {
-    $VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-                        '$Email_notify','$agentList',$Folder, $default_bucketpool_fk)";
-  }
-
-  $SQL = "INSERT INTO users
+  
+  $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
          (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-          email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk)
-          $VALUES";
-
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  pg_free_result($result);
+          email_notify,user_agent_list,root_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9)");
+  $dbManager->execute($stmt,array ($User,$Desc,$Seed,$Hash,$Perm,$Email, $Email_notify,$agentList,$Folder));
 
   /* Make sure it was added */
-  $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
+  $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');
   if (empty($row['user_name'])) 
   {
     $text = _("Failed to insert user.");
@@ -82,27 +69,19 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   $user_name = $row['user_name'];
   $user_pk = $row['user_pk'];
   // Add user group
-  $sql = "insert into groups(group_name) values ('$user_name')";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  /* Get new group_pk */
-  $sql = "select group_pk from groups where group_name='$user_name'";
-  $GroupResult = pg_query($PG_CONN, $sql);
-  DBCheckResult($GroupResult, $sql, __FILE__, __LINE__);
-  $GroupRow = pg_fetch_assoc($GroupResult);
+  $dbManager->prepare($stmt='group.get', $sql = "select group_pk from groups where group_name=$1");
+  $verg = $dbManager->execute('group.get',array($user_name));
+  $GroupRow = $dbManager->fetchArray($verg);
+  if(false===$GroupRow){
+    $dbManager->getSingleRow('insert into groups(group_name) values ($1)',array($user_name));
+    $GroupRow = $dbManager->fetchArray($dbManager->execute('group.get',array($user_name)));
+  }
   $group_pk = $GroupRow['group_pk'];
-  pg_free_result($GroupResult);
   // make user a member of their own group
-  $sql = "insert into group_user_member(group_fk, user_fk, group_perm) values($group_pk, $user_pk, 1)";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $dbManager->getSingleRow($sql="insert into group_user_member (group_fk, user_fk, group_perm) values ($1,$2,$3)",
+          $param=array($group_pk, $user_pk, 1),$stmt='groupmember.insert');
   // set active group = own group
-  // TODO prepare statement
-  $sql = "update users SET group_fk=$group_pk WHERE user_pk=$user_pk";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
+  $dbManager->prepare($stmt='users.update', $sql = "update users SET group_fk=$1, default_bucketpool_fk=$3 WHERE user_pk=$2");
+  $dbManager->execute($stmt,array($group_pk,$user_pk,$default_bucketpool_fk));
   return ('');
 }
