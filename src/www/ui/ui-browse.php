@@ -343,7 +343,7 @@ class ui_browse extends FO_Plugin {
   
   function outputItemHtml($uploadTreeId,$Folder,$Upload)
   {
-    global $PG_CONN, $container;
+    global $container;
     $dbManager = $container->get('db.manager');
     $show = 'detail';
     $html = '';
@@ -379,22 +379,22 @@ class ui_browse extends FO_Plugin {
     if (!empty($Upload)) {
       if (empty($uploadTreeId))
       {
-        $sql = "select uploadtree_pk from uploadtree
-            where parent is NULL and upload_fk=$Upload ";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $dbManager->prepare($stmt=__METHOD__.".getTreeRoot",
+            $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1");
+        $result = $dbManager->execute($stmt,array($Upload));
         if ( pg_num_rows($result))
         {
-          $row = pg_fetch_assoc($result);
+          $row = $dbManager->fetchArray($result);
           $uploadTreeId = $row['uploadtree_pk'];
         }
         else
         {
           $text  = _("Missing upload tree parent for upload");
           $html .= "<hr><h2>$text $Upload</h2><hr>";
+          $dbManager->freeResult($result);
           return $html;
         }
-        pg_free_result($result);
+        $dbManager->freeResult($result);
       }
       $html.= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
     }
