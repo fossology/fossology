@@ -64,21 +64,18 @@ function initPrioDraw() {
 function prioColumn ( source, type, val ) {
   if (type === 'set') {
     source[1] = val;
-    // Store the computed display and filter values for efficiency
+    // Store the computed display and filter values for efficiency?
     return;
   }
   if (type === 'display') {
     if (myVal===0){
-     // return '<img alt="move" src="images/dataTable/sort_both.png"/>';
       return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>' +
           '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
     }
     else if (myVal<source[1]){
-//      return '<img alt="move" src="images/dataTable/sort_asc.png"/>';
       return '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
     }
     else if (myVal>source[1]) {
-//      return '<img alt="move" src="images/dataTable/sort_desc.png"/>';
       return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>';
     }
     else
@@ -95,14 +92,8 @@ function mysuccess(){
     var oTable = createBrowseTable();
     oTable.fnDraw(false);
 }
-function mysuccess2(){
-    var oTable = createBrowseTable();
-    oTable.fnDraw(false);
-   // initPrioDraw();
-}
 
 function changeTableEntry(sel, uploadId, columnName) {
-
     var post_data = {
         "columnName" : columnName,
         "uploadId": uploadId,
@@ -114,23 +105,18 @@ function changeTableEntry(sel, uploadId, columnName) {
         data: post_data,
         success: mysuccess
     });
-
-
 }
 
 
 function changePriority( move, beyond) {
-
     var post_data = {
         "move" : move,
-        "beyond": beyond,
+        "beyond": beyond
     };
     $.ajax({
         type: "POST",
         url:  "?mod=browse-processPost",
         data: post_data,
-        success: mysuccess2
+        success: mysuccess
     });
-
-
 }
