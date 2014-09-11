@@ -45,10 +45,12 @@ class ChangeLicenseUtility extends Object
    */
   function printClearingTable($tableName, $clearingDecWithLicenses, $user_pk)
   {
-    $output = "<table border=\"1\" id=\"$tableName\" name=\"$tableName\">\n";
+    $output = "<div class='scrollable2'>";
+    $output .= "<table border=\"1\" id=\"$tableName\" name=\"$tableName\">\n";
     $output .= $this->printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk);
     $output .= "\n</table>";
     $output .= "<table><tr class='inactiveClearing'><td>Inactive concluded licenses decisions</td></tr></table>";
+    $output .= "</div>";
     return $output;
   }
 

@@ -80,7 +80,7 @@ class LicenseOverviewPrinter extends Object
     {
       $output .= '<span style="background:' . $colorMapping['any'] . '">' . _("license relevant text") . "</span>";
     }
-    return '<div style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:fixed; right:5px; bottom:5px;">' . $output . '</div>';
+    return '<div  id="legendBox" name="legendBox"  style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">' . $output . '</div>'; //position:absolute; right:5px; bottom:5px;
   }
 
   /**
@@ -147,6 +147,7 @@ class LicenseOverviewPrinter extends Object
     $agentLatestMap = $this->fillAgentLatestMap($agentLatestMap,$uploadId);
 
     $output = "<h3>" . _("Scanner results") . "</h3>\n";
+    $output .= "<div class='scrollable'>";
     foreach ($licenseMatches as $fileId => $agents)
     {
       ksort($agents);
@@ -159,10 +160,10 @@ class LicenseOverviewPrinter extends Object
                            $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
       }
     }
-
+    $output .= "</div>";
     if ($hasHighlights)
     {
-      $output .= $this->legendBox($selectedAgentId > 0 && $selectedLicenseId > 0);
+   //   $output .= $this->legendBox($selectedAgentId > 0 && $selectedLicenseId > 0);
     }
     if ($selectedAgentId > 0 && $selectedLicenseId > 0)
     {
@@ -381,12 +382,14 @@ class LicenseOverviewPrinter extends Object
       /**
        * @var LicenseRef[] $auditedLicenses
        */
+      $output .= "<div class='scrollable'>";
       foreach ($auditedLicenses as $license)
       {
         $output .= $this->printLicenseNameAsLink($license->getShortName(), $license->getFullName());
         $output .= ", ";
       }
       $output = substr($output, 0, count($output) - 3);
+      $output .= "</div>";
       return $output;
     }
     else

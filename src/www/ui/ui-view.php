@@ -212,19 +212,29 @@ class ui_view extends FO_Plugin
    */
   function ShowText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
   {
+    print $this->getText($inputFile,$startOffset,$Flowed,$outputLength,$splitPositions,$insertBacklink);
+  }
+  /**
+   * \brief Given a file handle, display "strings" of the file.
+   */
+  function getText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
+  {
     if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
     {
-      return;
+      return "";
     }
 
-    print($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
+    $output ="";
+    $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
 
     fseek($inputFile, $startOffset, SEEK_SET);
     $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
 
     $renderedText = $this->textRenderer->renderText($textFragment, $splitPositions, $insertBacklink);
 
-    print ($Flowed ? nl2br($renderedText) : $renderedText) . (!$Flowed ? "</pre>" : "") . "</div>\n";
+    $output .=($Flowed ? nl2br($renderedText) : $renderedText) . (!$Flowed ? "</pre>" : "") . "</div>\n";
+
+    return $output;
   } // ShowText()
 
 
@@ -234,20 +244,32 @@ class ui_view extends FO_Plugin
    */
   function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions)
   {
+    print $this->getHex($inputFile,$startOffset,$outputLength,$splitPositions);
+  }
+
+  /**
+   * \brief Given a file handle, display a "hex dump" of the file.
+   * Output goes to stdout!
+   */
+  function getHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions)
+  {
     if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
     {
-      return;
+      return "";
     }
 
+    $output = "";
     fseek($inputFile, $startOffset, SEEK_SET);
     $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
 
-    print "<div class='mono'>";
+    $output .= "<div class='mono'>";
 
     $renderedText = $this->textRenderer->renderHex($textFragment, $splitPositions);
-    print $renderedText;
+    $output .=  $renderedText;
 
-    print "</div>\n";
+    $output .=  "</div>\n";
+
+    return $output;
   } // ShowHex()
 
   private function checkAndPrepare($inputFile, $startOffset, $outputLength)
@@ -275,6 +297,7 @@ class ui_view extends FO_Plugin
     return $outputLength;
   }
 
+
   /**
    * \brief Generate the view contents in HTML and sends it
    *  to stdout.
@@ -298,6 +321,33 @@ class ui_view extends FO_Plugin
     {
       return;
     }
+    print $this->getView($inputFile , $BackMod,
+         $ShowHeader , $ShowText, $highlightEntries , $insertBacklink);
+
+  }
+
+  /**
+   * \brief Generate the view contents in HTML
+   *
+   * @param resource $inputFile
+   * @param string $BackMod
+   * @param int $ShowMenu
+   * @param int $ShowHeader
+   * @param null $ShowText
+   * @param bool $ViewOnly
+   * @param bool $DispView
+   * @param Highlight[] $highlightEntries
+   * @param bool $insertBacklink
+   *
+   * \note This function is intended to be called from other plugins.
+   */
+  function getView($inputFile = NULL, $BackMod = "browse",
+                     $ShowHeader = 1, $ShowText = NULL,  $highlightEntries = array(), $insertBacklink = false, $getPageMenuInline = false)
+  {
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      return "";
+    }
     global $Plugins;
 
     $Upload = GetParm("upload", PARM_INTEGER);
@@ -314,13 +364,14 @@ class ui_view extends FO_Plugin
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     if (!$inputFile && (empty($Item) || empty($Upload)))
     {
-      return;
+      return "";
     }
 
     $uploadtree_tablename = GetUploadtreeTablename($Upload);
 
     $Format = $this->getFormatParameter($Item);
 
+    $output="";
     /**********************************
      * Display micro header
      **********************************/
@@ -346,7 +397,7 @@ class ui_view extends FO_Plugin
       }
       /* No item */
       $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename) . "<P />\n";
-      print($header);
+      $output.=$header;
     } // if ShowHeader
 
     /***********************************
@@ -389,20 +440,20 @@ class ui_view extends FO_Plugin
               $text = _("Unpack of Upload failed");
               $V .= displayMessage("$text: $rc");
             }
-            print $V;
+            $output .= $V;
           }
         } else
         {
           $flag = 1;
           $text = _("Reunpack job is running: you can see it in");
           $text1 = _("jobqueue");
-          print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+          $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
         }
         $text = _("File contents are not available in the repository.");
-        print "$text\n";
+        $output .=  "$text\n";
         $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        print $P->ShowReunpackView($Item, $flag);
-        return;
+        $output .=  $P->ShowReunpackView($Item, $flag);
+        return $output;
       }
       /** END **/
     }
@@ -435,28 +486,30 @@ class ui_view extends FO_Plugin
     }
     $PageMenu = $this->GetFileJumpMenu($inputFile, $Page, $blockSize, $Uri);
     $PageSize = VIEW_BLOCK_HEX * $Page;
-    if (!empty($PageMenu))
+    if (!empty($PageMenu) and !$getPageMenuInline)
     {
-      print "<center>$PageMenu</center><br>\n";
+     $output .=  "<center>$PageMenu</center><br>\n";
     }
 
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlightEntries);
 
     if ($Format == 'hex')
     {
-      $this->ShowHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
+       $output .= $this->getHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
     } else
     {
-      $this->ShowText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
+      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
     }
 
-    if (!empty($PageMenu))
+    if (!empty($PageMenu) and !$getPageMenuInline)
     {
-      print "<P /><center>$PageMenu</center><br>\n";
+      $output .= "<P /><center>$PageMenu</center><br>\n";
     }
 
     if ($openedFin) fclose($inputFile);
-    return;
+    if($getPageMenuInline) return array($PageMenu, $output);
+    else
+      return $output;
   } // ShowView()
 
   /**

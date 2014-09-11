@@ -166,7 +166,9 @@ a.treetext:active, a.treetext:hover
 html, body
   {
   margin:0;
-  padding:.25em;
+  padding-right: .25em;
+  padding-left: .25em;
+  /*padding:.25em;*/
   height:100%;
   background-color:white;
   }
@@ -212,4 +214,41 @@ html, body
 .icon-small {
     width: 16px;
     height: 16px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.boxnew {
+    background-color: #ffffff;
+    border: 5px solid #f2f2f2;
+    display: inline-block;
+    float: left;
+    height: 700px;
+    overflow: auto;
+    padding: 0px;
+    position: relative;
+    text-align: left;
+    width: 99%;
+}
+
+.headerNew {
+   vertical-align: top;
+   overflow: auto;
+}
+
+.scrollable {
+    overflow: auto;
+    max-height: 120px;
+}
+
+.scrollable2 {
+    overflow: auto;
+    max-height: 200px;
+}
+
+.headerBox {
+    width: 40%;
+    /*max-width: 20%;*/
 }

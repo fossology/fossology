@@ -97,7 +97,7 @@ class ui_view_license extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "view-license";
+    $this->Name = "view-license_old";
     $this->Title = TITLE_ui_view_license;
     $this->Version = "1.0";
     $this->Dependency = array("view");
