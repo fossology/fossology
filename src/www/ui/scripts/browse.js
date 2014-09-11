@@ -60,9 +60,23 @@ function initPrioClick() {
 }
 function initPrioDraw() {
   $("td.priobucket").each(function(){
-    $(this).html( function(){        return prioColumn(table.fnGetData( this ),'display');   } );
+    $(this).html( function(){    return prioColumn(table.fnGetData( this ),'display');   } );
   });
 
+}
+
+function move2limit(uploadId,direction){
+  myKey=0;
+  var post_data = {
+      "uploadId" : uploadId,
+      "direction": direction
+  };
+  $.ajax({
+      type: "POST",
+      url:  "?mod=browse-processPost",
+      data: post_data,
+      success: mysuccess4
+  });
 }
 
 function prioColumn ( source, type, val ) {
@@ -72,12 +86,13 @@ function prioColumn ( source, type, val ) {
     return;
   }
   if (type === 'display') {
-    if (myVal===0){
-      return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>' +
-          '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
+    if (myKey===0){
+      return '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small" onclick="move2limit('+source[0]+',\'top\')"/>'
+      +' <img alt="move" src="images/icons/arrow_updown_32.png" class="icon-small"/>'
+      +' <img alt="move" src="images/icons/blue_arrow_down_32.png" class="icon-small" onclick="move2limit('+source[0]+',\'-1\')"/>';
     }
     else if (myVal<source[1]){
-      return '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small"/>';
+      return '<img alt="move" src="images/icons/arrow_up_32.png" class="icon-small"/>';
     }
     else if (myVal>source[1]) {
       return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>';
@@ -128,6 +143,13 @@ function mysuccess(){
 
 function mysuccess3(){
   closeRejectorModal();
+  var oTable = createBrowseTable();
+  oTable.fnDraw(false);
+}
+
+function mysuccess4(){
+  myKey=0;
+  initPrioDraw();
   var oTable = createBrowseTable();
   oTable.fnDraw(false);
 }

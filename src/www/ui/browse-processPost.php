@@ -27,15 +27,10 @@ define("TITLE_browseProcessPost", _("Private: Browse post"));
 
 class browseProcessPost extends FO_Plugin
 {
-
-
   /** @var  UploadDao $uploadDao */
   private $uploadDao;
-
   /** @var  UserDao $userDao */
   private $userDao;
-
-
   /** @var  DbManager dbManager */
   private $dbManager;
 
@@ -76,6 +71,7 @@ class browseProcessPost extends FO_Plugin
     $moveUpload = GetParm("move", PARM_INTEGER);
     $beyondUpload = GetParm("beyond", PARM_INTEGER);
     $commentText = GetParm('commentText', PARM_STRING);
+    $direction = GetParm('direction', PARM_STRING);
     
     if(!empty($columnName) and !empty($uploadId) and !empty($value)) {
       $this->updateTable ($columnName,$uploadId,$value);
@@ -86,6 +82,9 @@ class browseProcessPost extends FO_Plugin
     }
     else if(!empty($uploadId) and !empty($commentText)) {
       $this->rejector($uploadId,$commentText);
+    }
+    else if(!empty($uploadId) and !empty($direction)) {
+      $this->moveUploadToInfinity($uploadId,$direction=='top');
     }
     else {
       header('Content-type: text/json');
@@ -310,9 +309,19 @@ class browseProcessPost extends FO_Plugin
   {
     $sql = "UPDATE upload SET status_fk=$1 WHERE upload_pk=$2";
     $this->dbManager->getSingleRow($sql,array(4, $uploadId),$stmt=__METHOD__.'.status');
+    $this->dbManager->getSingleRow($sql='DELETE FROM upload_rejected WHERE upload_fk=$1',array( $uploadId),
+            $stmt=__METHOD__.'.delete.rejecthistory');
     $sql = "INSERT INTO upload_rejected (upload_fk,reason,user_fk) VALUES ($1,$2,$3)";
     $this->dbManager->getSingleRow($sql,array($uploadId, $commentText, $_SESSION['UserId']),$stmt=__METHOD__.'.rejected');
     }
+
+  public function moveUploadToInfinity($uploadId, $top)
+  {
+    $fun = $top ? 'MAX' : 'MIN';
+    $prioRow = $this->dbManager->getSingleRow($sql="SELECT $fun(priority) p FROM upload",array(),"priority.$fun");
+    $newPriority = $top ? $prioRow['p']+1 : $prioRow['p']-1;
+    $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$uploadId),'update.priority'."$newPriority,$uploadId");
+  }
 
 }
 
