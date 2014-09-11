@@ -2316,12 +2316,18 @@
   $Schema["TABLE"]["upload"]["status_fk"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["upload_comment"]["upload_fk"]["DESC"] = "";
-  $Schema["TABLE"]["upload_comment"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"upload_fk\" int4;";
-  $Schema["TABLE"]["upload_comment"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload_comment"]["upload_fk"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_rejected"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_rejected\".\"upload_fk\" IS 'what rejected';";
+  $Schema["TABLE"]["upload_rejected"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_rejected\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_rejected"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_rejected\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_rejected"]["upload_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload_comment"]["comment"]["DESC"] = "";
-  $Schema["TABLE"]["upload_comment"]["comment"]["ADD"] = "ALTER TABLE \"upload_comment\" ADD COLUMN \"comment\" text;";
-  $Schema["TABLE"]["upload_comment"]["comment"]["ALTER"] = "ALTER TABLE \"upload_comment\" ALTER COLUMN \"comment\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload_comment"]["comment"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_rejected"]["reason"]["DESC"] = "COMMENT ON COLUMN \"upload_rejected\".\"reason\" IS 'why rejected';";
+  $Schema["TABLE"]["upload_rejected"]["reason"]["ADD"] = "ALTER TABLE \"upload_rejected\" ADD COLUMN \"reason\" text;";
+  $Schema["TABLE"]["upload_rejected"]["reason"]["ALTER"] = "ALTER TABLE \"upload_rejected\" ALTER COLUMN \"reason\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_rejected"]["reason"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_rejected"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_rejected\".\"user_fk\" IS 'who rejected';";
+  $Schema["TABLE"]["upload_rejected"]["user_fk"]["ADD"] = "ALTER TABLE \"upload_rejected\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["upload_rejected"]["user_fk"]["ALTER"] = "ALTER TABLE \"upload_rejected\" ALTER COLUMN \"user_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_rejected"]["user_fk"]["UPDATE"] = "";
+

@@ -21,6 +21,9 @@ var myVal = 0;
 
 var theTable=null;
 
+var rejectorModal = null;
+var uploadId = 0;
+
 $(document).ready(function() {
   table =createBrowseTable();
   initPrioClick();
@@ -28,6 +31,7 @@ $(document).ready(function() {
       initPrioClick();
       initPrioDraw();
   });
+  rejectorModal = $('#rejectorModal').plainModal();
 } );
 
 function initPrioClick() {
@@ -79,7 +83,7 @@ function prioColumn ( source, type, val ) {
       return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>';
     }
     else
-        return 'click icon to insert<img alt="move" src="images/icons/close_32.png" class="icon-small"/>' ;
+      return 'click icon to insert<img alt="move" src="images/icons/close_32.png" class="icon-small"/>' ;
   }
   if (type==='sort') {
     return -source[1];
@@ -88,9 +92,44 @@ function prioColumn ( source, type, val ) {
   return source[1];
 }
 
+function openRejectorModal(k) {
+  uploadId = k;
+  rejectorModal.plainModal('open');
+}
+
+function closeRejectorModal() {
+  rejectorModal.plainModal('close');
+}
+
+
+function rejectorColumn ( source, type, val ) {
+  if (type === 'set') {
+    source[1] = val;
+    return;
+  }
+  if (type === 'display') {
+    if (source[1]){
+      return 'rejected by '+source[2];
+    }
+    else{
+      return '<a class="button" onclick="openRejectorModal('+source[0]+')"><img alt="move" src="images/icons/close_32.png" class="icon-small"/>reject</a>';
+    }
+  }
+  if (type==='sort') {
+    return -source[1];
+  }
+  return source[1];
+}
+
 function mysuccess(){
     var oTable = createBrowseTable();
     oTable.fnDraw(false);
+}
+
+function mysuccess3(){
+  closeRejectorModal();
+  var oTable = createBrowseTable();
+  oTable.fnDraw(false);
 }
 
 function changeTableEntry(sel, uploadId, columnName) {
@@ -118,5 +157,18 @@ function changePriority( move, beyond) {
         url:  "?mod=browse-processPost",
         data: post_data,
         success: mysuccess
+    });
+}
+
+function submitRejector( ) {
+    var post_data = {
+        "uploadId" : uploadId,
+        "commentText": $("#commentText").val()
+    };
+    $.ajax({
+        type: "POST",
+        url:  "?mod=browse-processPost",
+        data: post_data,
+        success: mysuccess3
     });
 }
