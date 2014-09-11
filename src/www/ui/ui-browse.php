@@ -450,7 +450,10 @@ class ui_browse extends FO_Plugin {
        "fnServerData": function ( sSource, aoData, fnCallback ) {
             aoData.push( { "name":"folder" , "value" : "'.$Folder.'" } );
             aoData.push( { "name":"show" , "value" : "'.$Show.'" } );
-            $.getJSON( sSource, aoData, function (json) { fnCallback(json);  });
+            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+              if (confirm("You are not logged in. Go to login page?"))
+                window.location.href="'.  Traceback_uri(). '?mod=auth";
+            });
           },
       "aoColumns": '.$tableColumns.',
       "aaSorting": '.$tableSorting.',
