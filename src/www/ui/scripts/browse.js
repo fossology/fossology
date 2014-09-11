@@ -109,7 +109,7 @@ function rejectorColumn ( source, type, val ) {
   }
   if (type === 'display') {
     if (source[1]){
-      return 'TODO: insert un-reject button here';
+      return 'rejected by '+source[2];
     }
     else{
       return '<a class="button" onclick="openRejectorModal('+source[0]+')"><img alt="move" src="images/icons/close_32.png" class="icon-small"/>reject</a>';

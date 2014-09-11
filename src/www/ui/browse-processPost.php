@@ -157,7 +157,7 @@ class browseProcessPost extends FO_Plugin
     $users = $this->userDao->getUserChoices();
 
     $output = $this->getArrayOfColumns($Folder, $Show, $result, $Uri, $MenuPfile, $MenuPfileNoCompare, $statusTypes, $users);
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     return array($output, $iTotalRecords, $iTotalDisplayRecords);
   }
 
@@ -179,7 +179,7 @@ class browseProcessPost extends FO_Plugin
   {
     $output = array();
     $rowCounter = 0;
-    while ($Row = pg_fetch_assoc($result))
+    while ($Row = $this->dbManager->fetchArray($result))
     {
       if (empty($Row['upload_pk']))
       {
@@ -229,17 +229,16 @@ class browseProcessPost extends FO_Plugin
 
       /* Job queue link */
       $text = _("History");
-      $dateCol = "";
       if (plugin_find_id('showjobs') >= 0)
       {
         $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$UploadPk'>$text</a>]";
-        $dateCol = substr($Row['upload_ts'], 0, 19);
       }
+      $dateCol = substr($Row['upload_ts'], 0, 19);
       $pairIdPrio = array(intval($Row['upload_pk']), floatval($Row['priority']));
       $currentStatus = DatabaseEnum::createDatabaseEnumSelect("StatusOf_$rowCounter", $statusTypes, $Row['status_fk'], "changeTableEntry", intval($Row['upload_pk']) . ", 'status_fk'");
-      $currentAssignee = UserDao::createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", intval($Row['upload_pk']) . ", 'assignee'");
-      $trioIdRejectReason = array(intval($Row['upload_pk']), 4==$Row['status_fk'], $Row['upload_desc']);
-      $output[] = array($nameColumn, $currentStatus, $trioIdRejectReason, $currentAssignee, $dateCol, $pairIdPrio);
+      $currentAssignee = $this->userDao->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", intval($Row['upload_pk']) . ", 'assignee'");
+      $tupleIdRejectWhoWhy = array(intval($Row['upload_pk']), 4==$Row['status_fk'], $Row['who_id']?$users[$Row['who_id']]:null, $Row['reason']);
+      $output[] = array($nameColumn, $currentStatus, $tupleIdRejectWhoWhy, $currentAssignee, $dateCol, $pairIdPrio);
     }
     return $output;
   }
@@ -258,10 +257,12 @@ class browseProcessPost extends FO_Plugin
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
         AND lft IS NOT NULL
+        LEFT JOIN upload_rejected ON upload_rejected.upload_fk=upload_pk
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-    $this->dbManager->prepare($stmt, "SELECT * $unorderedQuerry
+    $this->dbManager->prepare($stmt, "SELECT upload.*,uploadtree.*,"
+            . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
         $searchString
         $orderString
         OFFSET $2 LIMIT $3
@@ -273,7 +274,7 @@ class browseProcessPost extends FO_Plugin
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString", array($Folder), __METHOD__ . "count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ", array($Folder), __METHOD__ . "count");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ", array($Folder), __METHOD__ . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
     return array($result, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -307,9 +308,11 @@ class browseProcessPost extends FO_Plugin
 
   private function rejector($uploadId, $commentText)
   {
-    $sql = "UPDATE upload SET upload_desc=$1,status_fk=$2 WHERE upload_pk=$3";
-    $this->dbManager->getSingleRow($sql,array($commentText, 4, $uploadId),$stmt=__METHOD__);    
-  }
+    $sql = "UPDATE upload SET status_fk=$1 WHERE upload_pk=$2";
+    $this->dbManager->getSingleRow($sql,array(4, $uploadId),$stmt=__METHOD__.'.status');
+    $sql = "INSERT INTO upload_rejected (upload_fk,reason,user_fk) VALUES ($1,$2,$3)";
+    $this->dbManager->getSingleRow($sql,array($uploadId, $commentText, $_SESSION['UserId']),$stmt=__METHOD__.'.rejected');
+    }
 
 }
 

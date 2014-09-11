@@ -24,28 +24,27 @@ use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
+use Fossology\Lib\View\Renderer;
 
 class UserDao extends Object {
 
-  /**
-   * @var DbManager
-   */
+  /* @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /* @var Renderer */
+  private $renderer;
+  /* @var Logger */
   private $logger;
 
-  function __construct(DbManager $dbManager)
+  function __construct(DbManager $dbManager, Renderer $renderer)
   {
     $this->dbManager = $dbManager;
+    $this->renderer = $renderer;
     $this->logger = new Logger(self::className());
   }
 
 
   /**
-   * @return DatabaseEnum[]
+   * @return array
    */
   public function getUserChoices()
   {
@@ -54,51 +53,30 @@ class UserDao extends Object {
 
     $this->dbManager->prepare($statementN, "select user_pk, user_name from users left join group_user_member as GUM on users.user_pk  = GUM.user_fk  where GUM.group_fk = $1");
     $res = $this->dbManager->execute($statementN, array($_SESSION['GroupId']));
-    while ($rw = pg_fetch_assoc($res))
+    while ($rw = $this->dbManager->fetchArray($res))
     {
-      $userChoices[] = new DatabaseEnum($rw['user_pk'], $rw['user_name']);
+      $userChoices[$rw['user_pk']] = $rw['user_name'];
     }
-    pg_free_result($res);
+    $this->dbManager->freeResult($res);
     return $userChoices;
   }
 
 
   /**
    * @param string $selectElementName
-   * @param DatabaseEnum[] $databaseEnum
+   * @param array $databaseMap
    * @param int $selectedValue
    * @return array
    */
-  static function createSelectUsers($selectElementName, $databaseEnum, $selectedValue, $callbackString ="", $callbackArg = "")
+  public function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $callbackString ="", $callbackArg = "")
   {
-    $output = "<select name=\"$selectElementName\" id=\"$selectElementName\" size=\"1\" ";
-    if(!empty($callbackString)) {
-      $output .= " onchange =\"$callbackString( this, $callbackArg )\" ";
-    }
-    $output .= ">\n";
-    $selectedUserInChoices = false;
-    foreach ($databaseEnum as $option)
+    $action =  " onchange =\"$callbackString( this, $callbackArg )\" ";
+    if (array_key_exists($_SESSION['UserId'], $databaseMap))
     {
-      $output .= "<option ";
-      $ordinal = $option->getOrdinal();
-      if ($ordinal == $selectedValue) {
-        $output .= " selected ";
-        $selectedUserInChoices =true ;
-      }
-
-      if($ordinal == $_SESSION['UserId']) {
-        $name = _("-- Me --");
-      }
-      else {
-        $name = $option->getName();
-      }
-      $output .= "value=\"" . $ordinal . "\">" . $name . "</option>\n";
+      $databaseMap[$_SESSION['UserId']] = _('-- Me --');
     }
-    if(!$selectedUserInChoices) {
-       $output .= "<option  selected value=\"" . $selectedValue . "\">" . _("Unassigned") . "</option>\n";
-    }
-    $output .= "</select>";
-    return $output;
+    $databaseMap[1] = _('Unassigned');
+    return $this->renderer->createSelect($selectElementName,$databaseMap, $selectedValue,$action);
   }
 
 } 
