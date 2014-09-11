@@ -38,6 +38,10 @@ class changeLicenseNewClearing extends FO_Plugin
    */
   private $licenseOverviewPrinter;
 
+  /**
+   * @var ClearingDao;
+   */
+  private $clearingDao;
 
   function __construct()
   {
@@ -53,7 +57,7 @@ class changeLicenseNewClearing extends FO_Plugin
     parent::__construct();
 
     global $container;
-
+    $this->clearingDao = $container->get('dao.clearing');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
   }

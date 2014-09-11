@@ -1,6 +1,6 @@
 /*
  Copyright (C) 2014, Siemens AG
- Author: Johannes Najjar
+ Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -198,3 +198,17 @@ function scheduleBulkScan() {
     });
 
 }
+
+$(document).ready(function(){
+  $(".legendHider").click(function(){
+    $("#legendBox").hide();
+    $(".legendShower").show();
+      $(".legendHider").hide();
+  });
+  $(".legendShower").click(function(){
+      $("#legendBox").show();
+      $(".legendHider").show();
+      $(".legendShower").hide();
+  });
+    var username=$.session.get('User');
+});
