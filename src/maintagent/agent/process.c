@@ -276,3 +276,44 @@ LOG_NOTICE("Remove orphaned gold files from the repository is not implemented ye
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }
+
+
+
+
+/**
+ * @brief Normalize priority of Uploads
+  * @returns void but writes status to stdout
+ */
+FUNCTION void NormalizeUploadPriorities()
+{
+  PGresult* result; // the result of the database access
+  long StartTime, EndTime;
+  char *sql0="drop table if exists tmp_upload_prio";
+  char *sql1="create table tmp_upload_prio(ordprio serial,uploadid int)";
+  char *sql2="insert into tmp_upload_prio (uploadid) (   select upload_pk uploadid from upload order by priority asc  )";
+  char *sql3="UPDATE upload SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_pk; drop table tmp_upload_prio";
+
+  StartTime = (long)time(0);
+
+  result = PQexec(pgConn, sql0);
+  if (fo_checkPQcommand(pgConn, result, sql0, __FILE__, __LINE__)) ExitNow(-210);
+  PQclear(result);
+      
+  result = PQexec(pgConn, sql1);
+  if (fo_checkPQcommand(pgConn, result, sql1, __FILE__, __LINE__)) ExitNow(-211);
+  PQclear(result);
+
+  result = PQexec(pgConn, sql2);
+  if (fo_checkPQcommand(pgConn, result, sql2, __FILE__, __LINE__)) ExitNow(-212);
+  PQclear(result);
+
+  result = PQexec(pgConn, sql3);
+  if (fo_checkPQcommand(pgConn, result, sql3, __FILE__, __LINE__)) ExitNow(-213);
+  PQclear(result);
+  
+  EndTime = (long)time(0);
+  printf("Normalized upload priorities (%ld seconds)\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}

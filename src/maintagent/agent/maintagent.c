@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghpPRTUZivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "aADFghpNPRTUZivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -65,6 +65,7 @@ int main(int argc, char **argv)
           ValidateFolders();
           VerifyFilePerms(1);
           RemoveUploads();
+          NormalizeUploadPriorities();
           RemoveTemps();
           VacAnalyze();
           break;
@@ -72,6 +73,7 @@ int main(int argc, char **argv)
           ValidateFolders();
           VerifyFilePerms(1);
           RemoveUploads();
+          NormalizeUploadPriorities();
           RemoveTemps();
           VacAnalyze();
           ProcessExpired();
@@ -89,6 +91,9 @@ int main(int argc, char **argv)
       case 'h':
             Usage(argv[0]);
             ExitNow(0);
+      case 'N': /* Remove uploads with no pfiles */
+          NormalizeUploadPriorities();
+          break;
       case 'p': /* Verify file permissions */
           VerifyFilePerms(0);
           break;

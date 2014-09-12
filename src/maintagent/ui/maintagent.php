@@ -23,12 +23,16 @@ define("TITLE_maintagent", _("FOSSology Maintenance"));
  * \brief Queue the maintenance agent with the requested parameters
  */
 class maintagent extends FO_Plugin {
-  public $Name = "maintagent";
-  public $Title = TITLE_maintagent;
-  public $Version = "1.0";
-  public $MenuList = "Admin::Maintenance";
-  public $DBaccess = PLUGIN_DB_ADMIN;
 
+  public function __construct()
+  {
+    $this->Name = "maintagent";
+    $this->Title = TITLE_maintagent;
+    $this->MenuList = "Admin::Maintenance";
+    $this->DBaccess = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
+  
   /**
    * \brief queue the job
    *
@@ -76,6 +80,7 @@ class maintagent extends FO_Plugin {
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
               //       "g"=>_("Remove orphaned gold files."),
+                     "N"=>_("Normalize priority "),
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),
                      "R"=>_("Remove uploads with no pfiles."),
@@ -140,6 +145,6 @@ class maintagent extends FO_Plugin {
     print ("$V");
     return;
   }
-};
+}
+
 $NewPlugin = new maintagent;
-?>
