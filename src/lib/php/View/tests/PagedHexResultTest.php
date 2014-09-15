@@ -40,6 +40,11 @@ class PagedHexResultTest extends \PHPUnit_Framework_TestCase
     $this->result = new PagedHexResult(self::START_OFFSET, $highlightState);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   public function testAddSmallAmountOfText()
   {
     $this->result->appendContentText("foo bar");

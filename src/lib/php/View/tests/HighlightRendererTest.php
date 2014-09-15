@@ -23,8 +23,8 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\SplitPosition;
 use Fossology\Lib\Html\HtmlElement;
 use Fossology\Lib\Html\SimpleHtmlElement;
-use Mockery as M;
 use Mockery\MockInterface;
+use Mockery as M;
 
 class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 {
@@ -64,6 +64,10 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
     $this->prepareMocks();
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
 
   public function prepareMocks()
   {

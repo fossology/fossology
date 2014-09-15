@@ -51,6 +51,11 @@ class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
     $this->highlight = new HighlightProcessor($this->licenseDao);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   function testAddReferenceTexts()
   {
     $highlight1 = new Highlight(5, 8, 'type1', 2, 6, $this->license1->getId());

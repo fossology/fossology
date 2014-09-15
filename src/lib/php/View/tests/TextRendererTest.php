@@ -45,6 +45,11 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
     $this->textRenderer = new TextRenderer(new HighlightRenderer());
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   function testRenderHighlightedTextWithNoSplitPosition()
   {
     $renderedText = $this->textRenderer->renderText($this->textFragment);
