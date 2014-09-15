@@ -35,11 +35,31 @@ class LicenseRef
    */
   private $fullName;
 
-  function __construct($licenseId, $licenseShortName, $licenseName)
+  /**
+   * @var boolean
+   */
+  private $removed;
+
+  /**
+   * @param $licenseId
+   * @param $licenseShortName
+   * @param $licenseName
+   * @param bool $removed
+   */
+  function __construct($licenseId, $licenseShortName, $licenseName, $removed =false)
   {
     $this->id = $licenseId;
     $this->shortName = $licenseShortName;
     $this->fullName = $licenseName ? : $licenseShortName;
+    $this->removed = $removed;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getRemoved()
+  {
+    return $this->removed;
   }
 
   /**

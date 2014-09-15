@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\View;
 
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Util\Object;
 
@@ -36,14 +37,68 @@ class LicenseProcessor extends Object
       $agentRef = $match->getAgentRef();
       $licenseRef = $match->getLicenseRef();
 
-      $extractedMatches[$match->getFileId()][$agentRef->getAgentName()][$licenseRef->getShortName()][$agentRef->getAgentId()][$match->getLicenseFileId()] =
-          array(
-              'licenseId' => $licenseRef->getId(),
-              'agentRev' => $agentRef->getAgentRevision(),
-              'percent' => $match->getPercent(),
-              'agentId' => $agentRef->getAgentId() );
+      $content = array(
+          'licenseId' => $licenseRef->getId(),
+          'agentRev' => $agentRef->getAgentRevision(),
+          'percent' => $match->getPercent(),
+          'agentId' => $agentRef->getAgentId());
+
+
+      $fileId = $match->getFileId();
+      $agentName = $agentRef->getAgentName();
+      $shortName = $licenseRef->getShortName();
+      $agentId = $agentRef->getAgentId();
+      $licenseFileId = $match->getLicenseFileId()?: 'empty';
+      $extractedMatches[$fileId][$agentName][$shortName][$agentId][$licenseFileId] = $content;
     }
 
     return $extractedMatches;
   }
+
+  /**
+   * @param ClearingDecision[] $matches
+   * @return array
+   */
+  public function extractBulkLicenseMatches($matches)
+  {
+    $extractedMatches = array();
+
+    foreach ($matches as $match)
+    {
+      $agentRef = "empty";
+      if($match->getType()=="bulk") {
+        foreach($match->getLicenses() as $license) {
+
+          if($license->getRemoved()) {
+
+            $agentName = "bulk removal";
+            $agentId = 1;
+          }
+          else {
+            $agentName = "bulk addition";
+            $agentId = 2;
+          }
+
+          $content = array(
+              'licenseId' => $license->getId(),
+              'agentRev' => $agentRef,
+              'percent' => null,
+              'agentId' => $agentId);
+
+
+          $fileId = $match->getPfileId();
+
+
+          $shortName = $license->getShortName();
+
+          $licenseFileId = $match->getClearingId();
+          $extractedMatches[$fileId][$agentName][$shortName][$agentId][$licenseFileId] = $content;
+        }
+      }
+    }
+
+    return $extractedMatches;
+  }
+
+
 } 
