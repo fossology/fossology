@@ -169,23 +169,7 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
-  /**
-   * @param $uploadTreeId
-   * @return LicenseRef[]
-   */
-  private function getAgentSuggestedLicenses($uploadTreeId)
-  {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
-    $licenses = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
-    $licenseList = array();
 
-    foreach ($licenses as $licenseMatch)
-    {
-      $licenseList[] = $licenseMatch->getLicenseRef();
-
-    }
-    return $licenseList;
-  }
 
 
   /**
@@ -203,110 +187,9 @@ class ClearingView extends FO_Plugin
     return $this->changeLicenseUtility->printClearingTable($tableName, $clearingDecWithLicenses, $user_pk);
   }
 
-  /**
-   * @param $uploadTreeId
-   * @return string
-   * creates two licenseListSelects and buttons to transfer licenses and two text boxes
-   */
-  private function createChangeLicenseForm($uploadTreeId) {
-    $licenseRefs = $this->licenseDao->getLicenseRefs();
-
-    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-
-    $preSelectedLicenses = null;
-    if (!empty($clearingDecWithLicenses))
-    {
-      $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
-      if (!empty ($filteredFileClearings))
-      {
-        $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
-      }
-    }
-
-    if ($preSelectedLicenses === null)
-    {
-      $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
-    }
-
-    $this->changeLicenseUtility->filterLists($licenseRefs, $preSelectedLicenses);
-
-    $output = "";
-
-    $output .= "<div class=\"modal\" id=\"userModal\" hidden>";
-    $output .= "<form name=\"licenseListSelect\">";
-    $output .= " <table border=\"0\"> <tr>";
-    $text = _("Available licenses:");
-    $output .= "<td><p>$text<br>";
-    $output .= $this->changeLicenseUtility->createListSelect("licenseLeft", $licenseRefs);
-    $output .= "</p></td>";
-
-    $output .= "<td align=\"center\" valign=\"middle\">";
-    $output .= $this->changeLicenseUtility->createLicenseSwitchButtons();
-    $output .= "</td>";
-
-    $text = _("Selected licenses:");
-    $output .= "<td><p>$text<br>";
-    $output .= $this->changeLicenseUtility->createListSelect("licenseRight", $preSelectedLicenses);
-    $output .= "</p></td>";
-
-    $output .= "<td>";
-    $text = _("Comment (private)");
-    $output .= "$text:<br><textarea name=\"comment\" id=\"comment\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"150\"></textarea>";
-    $text = _("Remark (public)");
-    $output .= "<p>$text:<br><textarea name=\"remark\" id=\"remark\"   type=\"text\"  cols=\"50\" rows=\"10\" maxlength=\"150\"></textarea></p>";
-    $output .= "</td>";
 
 
-    $output .= "</tr>";
-    $output .= "<tr><td colspan='2'>";
-    $output .= "" . _("License decision scope") . "<br/>";
-    $clearingScopes = $this->clearingDao->getClearingScopes();
-    $output .= DatabaseEnum::createDatabaseEnumSelect("scope", $clearingScopes, 3);
-    $output .= "</td>";
 
-    $output .= "<td colspan='2'>" . _("License decision type") . "<br/>";
-    $clearingTypes = $this->clearingDao->getClearingTypes();
-    $output .= DatabaseEnum::createDatabaseEnumSelect("type", $clearingTypes, 1);
-
-    $output .= "</td></tr>";
-    $output .= "<tr><td>&nbsp;</td></tr>";
-    $output .= "<tr><td colspan='2'>";
-    $output .= "<button  type=\"button\" autofocus  onclick='performPostRequest()'>Submit</button>";
-    $output .= "</td>";
-    $output .= "<td colspan='2'>";
-    $output .= "<button  type=\"button\" autofocus  onclick='performNoLicensePostRequest()'>No License contained</button>";
-    $output .= "</td>";
-    $output .= "</tr>";
-    $output .= "<tr><td>&nbsp;</td></tr></table>";
-    $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
-    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
-    $output .= "</div>";
-
-    return $output;
-  }
-
-  private function createBulkForm($uploadTreeId) {
-    $output = "";
-    $allLicenseRefs = $this->licenseDao->getLicenseRefs();
-    $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
-    $output .= "<form name=\"bulkForm\">";
-    $text = _("Bulk recognition");
-    $output .= "<h2>$text</h2>";
-    $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
-    $output .= "<option value=\"f\">Add license</option>";
-    $output .= "<option value=\"t\">Remove license</option>";
-    $output .= "</select>";
-    $output .= $this->changeLicenseUtility->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
-    $text = _("reference text");
-    $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
-    $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
-    $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
-    $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
-    $output .= "</div>";
-    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
-
-    return $output;
-  }
 
 
   private function createClearingButtons(){
@@ -324,8 +207,8 @@ class ClearingView extends FO_Plugin
       $text = _("You do have write (or above permission) on this upload, thus you can change the license of this file.");
       $output .= "<b>$text</b>";
 
-      $output .= $this->createChangeLicenseForm($uploadTreeId);
-      $output .= $this->createBulkForm($uploadTreeId);
+      $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
+      $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
 
       $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
       $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";

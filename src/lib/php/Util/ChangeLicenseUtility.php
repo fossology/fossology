@@ -20,6 +20,9 @@
 namespace Fossology\Lib\Util;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
@@ -31,10 +34,34 @@ class ChangeLicenseUtility extends Object
    * @var NewestEditedLicenseSelector $newestEditedLicenseSelector
    */
   private $newestEditedLicenseSelector;
+  /**
+   * @var UploadDao $uploadDao
+   */
+  private $uploadDao;
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector)
+  /**
+   * @var LicenseDao $licenseDao
+   */
+  private $licenseDao;
+
+  /**
+   * @var ClearingDao $clearingDao
+   */
+  private $clearingDao;
+
+  /**
+   * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
+   * @param $uploadDao
+   * @param $licenseDao
+   * @param $clearingDao
+   */
+
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao )
   {
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
+    $this->uploadDao = $uploadDao;
+    $this->licenseDao = $licenseDao;
+    $this->clearingDao = $clearingDao;
   }
 
   /**
@@ -159,5 +186,130 @@ class ChangeLicenseUtility extends Object
     return $output;
   }
 
+
+  /**
+   * @param $uploadTreeId
+   * @return LicenseRef[]
+   */
+  private function getAgentSuggestedLicenses($uploadTreeId)
+  {
+    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
+    $licenses = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+    $licenseList = array();
+
+    foreach ($licenses as $licenseMatch)
+    {
+      $licenseList[] = $licenseMatch->getLicenseRef();
+
+    }
+    return $licenseList;
+  }
+
+
+  /**
+   * @param $uploadTreeId
+   * @return string
+   * creates two licenseListSelects and buttons to transfer licenses and two text boxes
+   */
+  public function createChangeLicenseForm($uploadTreeId) {
+    $licenseRefs = $this->licenseDao->getLicenseRefs();
+
+    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+
+    $preSelectedLicenses = null;
+    if (!empty($clearingDecWithLicenses))
+    {
+      $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
+      if (!empty ($filteredFileClearings))
+      {
+        $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
+      }
+    }
+
+    if ($preSelectedLicenses === null)
+    {
+      $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
+    }
+
+    $this->filterLists($licenseRefs, $preSelectedLicenses);
+
+    $output = "";
+
+    $output .= "<div class=\"modal\" id=\"userModal\" hidden>";
+    $output .= "<form name=\"licenseListSelect\">";
+    $output .= " <table border=\"0\"> <tr>";
+    $text = _("Available licenses:");
+    $output .= "<td><p>$text<br>";
+    $output .= $this->createListSelect("licenseLeft", $licenseRefs);
+    $output .= "</p></td>";
+
+    $output .= "<td align=\"center\" valign=\"middle\">";
+    $output .= $this->createLicenseSwitchButtons();
+    $output .= "</td>";
+
+    $text = _("Selected licenses:");
+    $output .= "<td><p>$text<br>";
+    $output .= $this->createListSelect("licenseRight", $preSelectedLicenses);
+    $output .= "</p></td>";
+
+    $output .= "<td>";
+    $text = _("Comment (private)");
+    $output .= "$text:<br><textarea name=\"comment\" id=\"comment\" type=\"text\" cols=\"50\" rows=\"8\" maxlength=\"150\"></textarea>";
+    $text = _("Remark (public)");
+    $output .= "<p>$text:<br><textarea name=\"remark\" id=\"remark\"   type=\"text\"  cols=\"50\" rows=\"10\" maxlength=\"150\"></textarea></p>";
+    $output .= "</td>";
+
+
+    $output .= "</tr>";
+    $output .= "<tr><td colspan='2'>";
+    $output .= "" . _("License decision scope") . "<br/>";
+    $clearingScopes = $this->clearingDao->getClearingScopes();
+    $output .= DatabaseEnum::createDatabaseEnumSelect("scope", $clearingScopes, 3);
+    $output .= "</td>";
+
+    $output .= "<td colspan='2'>" . _("License decision type") . "<br/>";
+    $clearingTypes = $this->clearingDao->getClearingTypes();
+    $output .= DatabaseEnum::createDatabaseEnumSelect("type", $clearingTypes, 1);
+
+    $output .= "</td></tr>";
+    $output .= "<tr><td>&nbsp;</td></tr>";
+    $output .= "<tr><td colspan='2'>";
+    $output .= "<button  type=\"button\" autofocus  onclick='performPostRequest()'>Submit</button>";
+    $output .= "</td>";
+    $output .= "<td colspan='2'>";
+    $output .= "<button  type=\"button\" autofocus  onclick='performNoLicensePostRequest()'>No License contained</button>";
+    $output .= "</td>";
+    $output .= "</tr>";
+    $output .= "<tr><td>&nbsp;</td></tr></table>";
+    $output .= "<input name=\"licenseNumbersToBeSubmitted\" id=\"licenseNumbersToBeSubmitted\" type=\"hidden\" value=\"\" />\n";
+    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
+    $output .= "</div>";
+
+    return $output;
+  }
+
+
+  public function createBulkForm($uploadTreeId) {
+    $output = "";
+    $allLicenseRefs = $this->licenseDao->getLicenseRefs();
+    $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
+    $output .= "<form name=\"bulkForm\">";
+    $text = _("Bulk recognition");
+    $output .= "<h2>$text</h2>";
+    $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
+    $output .= "<option value=\"f\">Add license</option>";
+    $output .= "<option value=\"t\">Remove license</option>";
+    $output .= "</select>";
+    $output .= $this->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
+    $text = _("reference text");
+    $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
+    $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
+    $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
+    $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
+    $output .= "</div>";
+    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
+
+    return $output;
+  }
 
 }
