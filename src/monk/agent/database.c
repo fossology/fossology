@@ -27,6 +27,17 @@ PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
   );
 }
 
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right) {
+  return fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryFileIdsForUploadAndLimits",
+      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3",
+      int, long, long),
+    uploadId, left, right
+  );
+}
+
 char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
   PGresult* fileNameResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
