@@ -217,29 +217,46 @@ class ClearingDao extends Object
    */
   public function insertClearingDecision($licenses, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
   {
-    $statementName2 = __METHOD__ . ".d";
-    $this->dbManager->prepare($statementName2,
-        "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')",
+    $this->dbManager->begin();
+
+    $statementName = __METHOD__ . ".s";
+    $this->dbManager->prepare($statementName,
+        "with thisItem AS (select * from uploadtree where uploadtree_pk = $1)
+         select uploadtree.* from uploadtree, thisItem where uploadtree.lft BETWEEN thisItem.lft AND thisItem.rgt AND ((uploadtree.ufile_mode & (3<<28))=0) AND uploadtree.pfile_fk != 0",
         array($uploadTreeId),
-        $statementName2);
-    $this->dbManager->execute($statementName2, array($uploadTreeId));
-
-    $statementName = __METHOD__;
-    $row = $this->dbManager->getSingleRow(
-        "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) values ($1,(SELECT pfile_fk FROM uploadtree where uploadtree_pk = $1),$2,$3,$4,$5,$6) RETURNING clearing_pk",
-        array($uploadTreeId, $userid, $type, $scope, $comment, $remark),
         $statementName);
-    $lastClearingId=$row['clearing_pk'];
+    $items= $this->dbManager->execute($statementName, array($uploadTreeId));
 
-    $statementN = __METHOD__ . ".l";
-    $this->dbManager->prepare($statementN,
-        "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
-
-    foreach ($licenses as $license)
+    while ($item = $this->dbManager->fetchArray($items))
     {
-      $res = $this->dbManager->execute($statementN, array($lastClearingId, $license));
-      pg_free_result($res);
+      $currentUploadTreeId = $item['uploadtree_pk'];
+      $pfileId = $item['pfile_fk'];
+      $statementName2 = __METHOD__ . ".d";
+      $this->dbManager->prepare($statementName2,
+      "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')");
+      $res = $this->dbManager->execute($statementName2, array($currentUploadTreeId));
+      $this->dbManager->freeResult($res);
+
+      $statementName = __METHOD__;
+      $row = $this->dbManager->getSingleRow(
+        "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING clearing_pk",
+        array($currentUploadTreeId, $pfileId, $userid, $type, $scope, $comment, $remark),
+        $statementName);
+      $lastClearingId=$row['clearing_pk'];
+
+      $statementN = __METHOD__ . ".l";
+      $this->dbManager->prepare($statementN,
+      "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
+
+      foreach ($licenses as $license)
+      {
+        $res1 = $this->dbManager->execute($statementN, array($lastClearingId, $license));
+        $this->dbManager->freeResult($res1);
+      }
     }
+    $this->dbManager->freeResult($items);
+
+    $this->dbManager->commit();
 
   }
 

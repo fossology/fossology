@@ -25,7 +25,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
-
+use Fossology\Lib\Util\ChangeLicenseUtility;
 
 /**
  * \file ui-browse-license.php
@@ -57,6 +57,10 @@ class ui_browse_license extends FO_Plugin
   private $licenseProcessor;
 
   /**
+   * @var ChangeLicenseUtility
+   */
+  private $changeLicenseUtility;
+  /**
    * @var AgentsDao
    */
   private $agentsDao;
@@ -84,6 +88,7 @@ class ui_browse_license extends FO_Plugin
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
     $this->licenseRenderer = $container->get('view.license_renderer');
+    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }
@@ -237,6 +242,8 @@ class ui_browse_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
+    $V .= $this->changeLicenseUtility->createChangeLicenseForm();
+    $V .= $this->changeLicenseUtility->createBulkForm();
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);
@@ -324,7 +331,10 @@ class ui_browse_license extends FO_Plugin
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
+    $output .= "<script src='scripts/change-license-common.js' type='text/javascript'></script>\n";
+    $output .= "<script src='scripts/change-license-browse.js' type='text/javascript'></script>\n";
     $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
     return $output;
   }
@@ -505,8 +515,16 @@ class ui_browse_license extends FO_Plugin
           }
         }
         $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
+
+        $getTextEditUser = _("Edit");
+        $getTextEditBulk = _("Bulk");
+        $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
+        $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+
         $tableData[] = array($fileName, $licenseList, $editedLicenseList, $fileListLinks);
       }
+
+      $AddInfoText .= "<br/><span id='bulkIdResult' hidden></span>";
 
       if ($haveOldVersionResult)
       {
