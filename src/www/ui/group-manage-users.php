@@ -217,7 +217,8 @@ class group_manage_users extends FO_Plugin {
     $V .= "<br>" . $text;
 
     if (!$this->OutputToStdout) return ($V);
-    print($this->OutputOpen($this->OutputType,1-$this->OutputToStdout));
+    print($this->OutputOpen($this->OutputType,0));
+    $this->OutputToStdout = 1;
     print ($V);
     return;
   }
