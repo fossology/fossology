@@ -45,7 +45,7 @@ class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
     $this->license1 = new License(10, "shortName", "fullName", "licenseFullText", "URL");
 
     $this->licenseDao = M::mock(LicenseDao::classname())
-        ->shouldReceive('getLicenseById')->once()->with($this->license1->getId())
+        ->shouldReceive('getLicenseById')->with($this->license1->getId())
         ->andReturn($this->license1)->getMock();
 
     $this->highlight = new HighlightProcessor($this->licenseDao);
