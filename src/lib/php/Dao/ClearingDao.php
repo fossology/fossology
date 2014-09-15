@@ -218,10 +218,11 @@ class ClearingDao extends Object
   public function insertClearingDecision($licenses, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
   {
     $statementName2 = __METHOD__ . ".d";
-    $row = $this->dbManager->getSingleRow(
+    $this->dbManager->prepare($statementName2,
         "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')",
         array($uploadTreeId),
         $statementName2);
+    $this->dbManager->execute($statementName2, array($uploadTreeId));
 
     $statementName = __METHOD__;
     $row = $this->dbManager->getSingleRow(
