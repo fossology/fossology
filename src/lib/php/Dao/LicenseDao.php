@@ -59,22 +59,20 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
     $this->dbManager->prepare($statementName,
-        "SELECT   rf_shortname AS license_shortname,
-                  rf_fullname AS license_fullname,
-                  rf_pk AS license_id,
-                  fl_pk AS license_file_id,
-                  file_id,
-                  agent_name AS agent_name,
-                  agent_pk AS agent_id,
-                  agent_rev AS agent_revision,
-                  rf_match_pct AS percent_match
-          FROM (SELECT pfile_fk AS file_id FROM $uploadTreeTableName
-                               WHERE upload_fk=$1
-                                 AND lft BETWEEN $2 and $3) AS SS
-          INNER JOIN license_file_ref ON SS.file_id = pFile_fk
-          INNER JOIN agent ON agent_pk = agent_fk
-          WHERE SS.file_id=pfile_fk
-            AND agent_enabled='true'
+        "SELECT   LFR.rf_shortname AS license_shortname,
+                  LFR.rf_fullname AS license_fullname,
+                  LFR.rf_pk AS license_id,
+                  LFR.fl_pk AS license_file_id,
+                  LFR.pfile_fk as file_id,
+                  AG.agent_name AS agent_name,
+                  AG.agent_pk AS agent_id,
+                  AG.agent_rev AS agent_revision,
+                  LFR.rf_match_pct AS percent_match
+          FROM license_file_ref as LFR
+          INNER JOIN $uploadTreeTableName as UT  ON UT.pfile_fk = LFR.pfile_fk
+          INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
+          WHERE AG.agent_enabled='true' and
+           UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
           ORDER BY license_shortname ASC, percent_match DESC");
 
     $result = $this->dbManager->execute($statementName,
@@ -87,6 +85,56 @@ class LicenseDao extends Object
       $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
       $agentRef = new AgentRef($row['agent_id'], $row['agent_name'], $row['agent_revision']);
       $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, $row['license_file_id'], $row['percent_match']);
+    }
+
+    $this->dbManager->freeResult($result);
+    return $matches;
+  }
+
+
+  /**
+   * \brief get all the licenses for a single file or uploadtree
+   *
+   * @param \Fossology\Lib\Data\FileTreeBounds $fileTreeBounds
+   * @return LicenseMatch[]
+   */
+  function getBulkFileLicenseMatches(FileTreeBounds $fileTreeBounds)
+  {
+    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . ".$uploadTreeTableName";
+
+    $this->dbManager->prepare($statementName,
+        "SELECT   LF.rf_shortname  AS license_shortname,
+                  LF.rf_fullname AS license_fullname,
+                  LF.rf_pk AS license_id,
+                  LFB.lrb_pk AS license_file_id,
+                  LFB.removing AS removing,
+                  UT.pfile_fk as file_id
+          FROM license_ref_bulk as LFB
+          INNER JOIN license_ref as LF on LF.rf_pk = LFB.rf_fk
+          INNER JOIN $uploadTreeTableName as UT ON UT.uploadtree_pk = LFB.uploadtree_fk
+          WHERE UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
+          ORDER BY license_file_id ASC");
+
+    $result = $this->dbManager->execute($statementName,
+        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
+
+    $matches = array();
+
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
+      if($row['removing'] = 'f') {
+        $agentID=-1;
+        $agentName="bulk addition";
+      }
+      else
+      {
+        $agentID=-2;
+        $agentName="bulk removal";
+      }
+      $agentRef = new AgentRef($agentID, $agentName, "");
+      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, $row['license_file_id']);
     }
 
     $this->dbManager->freeResult($result);
