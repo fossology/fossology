@@ -93,7 +93,7 @@ class LicenseDao extends Object
 
 
   /**
-   * \brief get all the licenses for a single file or uploadtree
+   * \brief get all the tried bulk recognitions for a single file or uploadtree (currently unused)
    *
    * @param \Fossology\Lib\Data\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
@@ -124,17 +124,17 @@ class LicenseDao extends Object
     while ($row = $this->dbManager->fetchArray($result))
     {
       $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
-      if($row['removing'] = 'f') {
-        $agentID=-1;
+      if($row['removing'] == 'f') {
+        $agentID=1;
         $agentName="bulk addition";
       }
       else
       {
-        $agentID=-2;
+        $agentID=2;
         $agentName="bulk removal";
       }
-      $agentRef = new AgentRef($agentID, $agentName, "");
-      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, $row['license_file_id']);
+      $agentRef = new AgentRef($agentID, $agentName, "empty");
+      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']));
     }
 
     $this->dbManager->freeResult($result);

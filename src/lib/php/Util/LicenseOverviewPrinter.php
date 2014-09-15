@@ -161,10 +161,6 @@ class LicenseOverviewPrinter extends Object
       }
     }
     $output .= "</div>";
-    if ($hasHighlights)
-    {
-   //   $output .= $this->legendBox($selectedAgentId > 0 && $selectedLicenseId > 0);
-    }
     if ($selectedAgentId > 0 && $selectedLicenseId > 0)
     {
       $format = GetParm("format", PARM_STRING);
@@ -232,8 +228,32 @@ class LicenseOverviewPrinter extends Object
       $output .= '</b><br/><br/>';
     }
     return $output;
-  }  
-  
+  }
+
+
+  private function renderBulkMatches($foundLicenses,
+                                 $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly)
+  {
+    $output="";
+    $latestMatches=array();
+   foreach ($foundLicenses as $licenseShortname => $agentDetails)
+    {
+      $mostRecentAgentId = max(array_keys($agentDetails) );
+      $latestMatches[$licenseShortname] = $agentDetails[$mostRecentAgentId];
+    }
+    foreach ($latestMatches as $licenseShortname => $agentDetails)
+    {
+      $output .= "<br/>\n";
+      $output .= $this->printLicenseNameAsLink($licenseShortname);
+      $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
+    }
+    $output .= '</b>';
+
+
+    return $output;
+  }
+
+
   /**
    * @param $Upload
    * @param $Item
@@ -420,5 +440,48 @@ class LicenseOverviewPrinter extends Object
     return array($output, $foundNothing );
   }
 
+
+public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
+                                   $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){
+    if (count($licenseMatches)==0)
+    {
+      return '<br><b>'._('No bulk result found').'</b>';
+    }
+
+    $agentLatestMap = array();
+    foreach($licenseMatches as $agents)
+    {
+      foreach (array_keys($agents) as $agentName)
+      {
+        $agentLatestMap[$agentName] = array();
+      }
+    }
+
+    $output = "<h3>" . _("Bulk results") . "</h3>\n";
+    $output .= "<div class='scrollable'>";
+
+    $agentCounter = 0;
+    foreach ($licenseMatches as $fileId => $agents)
+    {
+      ksort($agents);
+      foreach ($agents as $agentName => $foundLicenses)
+      {
+        $breakCounter = 0;
+        if($agentCounter++ > 0) $output .= "<br/>";
+        $output.= "<b>$agentName</b>";
+        if($breakCounter++ > 0) $output .= "<br/>";
+        $output .= $this->renderBulkMatches($foundLicenses,
+                           $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
+      }
+    }
+    $output .= "</div>";
+    if ($selectedAgentId > 0 && $selectedLicenseId > 0)
+    {
+      $format = GetParm("format", PARM_STRING);
+      $output .= "<br/><a href='" .
+          Traceback_uri() . "?mod=view-license&upload=$uploadId&item=$uploadTreeId&format=$format'>" . _("Exit") . "</a> " . _("specific license mode") . "<br/>";
+    }
+    return $output;
+}
 
 } 
