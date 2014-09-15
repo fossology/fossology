@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\View\Renderer;
+
 define("TITLE_group_manage_users", _("Manage Group Users"));
 
 /**
@@ -23,14 +25,17 @@ define("TITLE_group_manage_users", _("Manage Group Users"));
  * \brief edit group user permissions
  */
 class group_manage_users extends FO_Plugin {
-  var $Name = "group_manage_users";
-  var $Title = TITLE_group_manage_users;
-  var $MenuList = "Admin::Groups::Manage Group Users";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
-  var $LoginFlag = 1;  /* Don't allow Default User to add a group */
-
-
+  
+  function __construct(){
+    $this->Name = "group_manage_users";
+    $this->Title = TITLE_group_manage_users;
+    $this->MenuList = "Admin::Groups::Manage Group Users";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
+    parent::__construct();
+  }
+  
   /* @brief Verify user has access to update record
    * @param $user_pk
    * @param $group_pk
@@ -56,14 +61,21 @@ class group_manage_users extends FO_Plugin {
       exit;
     }
   }
+  
+  function OutputOpen($Type,$ToStdout){
+    $this->OutputType = $Type;
+    $this->OutputToStdout = $ToStdout;
+    if ($ToStdout != 1)
+    {
+      return parent::OutputOpen($Type, $ToStdout);
+    }
+  }
 
   /*********************************************
    Output(): Generate the text for this plugin.
    *********************************************/
   function Output() 
   {
-    global $PG_CONN;
-    global $PERM_NAMES;
     global $SysConf;
 
     global $container;
@@ -79,55 +91,44 @@ class group_manage_users extends FO_Plugin {
     if (empty($newperm)) $newperm = 0;
 
     /* If gum_pk is passed in, update either the group_perm or user_pk */
-    $sql = "";
     if (!empty($gum_pk))
     { 
       /* Verify user has access */
       if (empty($group_pk))
       {
-        $gum_rec = GetSingleRec("group_user_member", "where group_user_member_pk='$gum_pk'");
+        $gum_rec = $dbManager->getSingleRow("SELECT group_fk FROM group_user_member WHERE group_user_member_pk=$1",
+                array($gum_pk),$stmt=__METHOD__.".getGroupByGUM");
         $group_pk = $gum_rec['group_fk'];
       }
       $this->VerifyAccess($user_pk, $group_pk);
 
       if ($perm===0 or $perm===1)
       {
-        $sql = "update group_user_member set group_perm='$perm' where group_user_member_pk='$gum_pk'";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
+        $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
+                array($perm,$gum_pk),$stmt=__METHOD__.".updatePermInGUM");
       } 
       else if ($perm === -1)
       {
-        $sql = "delete from group_user_member where group_user_member_pk='$gum_pk'";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
+        $dbManager->prepare($stmt=__METHOD__.".delByGUM",
+                          "delete from group_user_member where group_user_member_pk=$1");
+        $dbManager->freeResult($dbManager->execute($stmt,array($gum_pk)));
       }
     }
     else if (!empty($newuser) && (!empty($group_pk)))
     {
       // before inserting this new record, delete any record for the same upload and group since
       // that would be a duplicate
-      $sql = "delete from group_user_member where group_fk='$group_pk' and user_fk='$newuser'";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      
+      $dbManager->prepare($stmt=__METHOD__.".delByGroupAndUser",
+              "delete from group_user_member where group_fk=$1 and user_fk=$2");
+      $dbManager->freeResult($dbManager->execute($stmt,array($group_pk,$newuser)));
       if ($newperm >= 0)
       {
-        $sql = "insert into group_user_member (group_fk, user_fk, group_perm) values ($group_pk, $newuser, $newperm)";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
+        $dbManager->prepare($stmt=__METHOD__.".insertGUP",
+                "insert into group_user_member (group_fk, user_fk, group_perm) values ($1,$2,$3)");
+        $dbManager->freeResult($dbManager->execute($stmt,array($group_pk, $newuser, $newperm)));
       }
       $newperm = $newuser = 0;
     }
-
-    // start building the output buffer
-    $V = "";
-    /* define js_url */
-    $V .= js_url(); 
 
     /* Get array of groups that this user is an admin of */
     $GroupArray = GetGroupArray($user_pk);
@@ -137,6 +138,12 @@ class group_manage_users extends FO_Plugin {
       echo "<p>$text<p>";
       return;
     }
+        
+    // start building the output buffer
+    $V = js_url();
+    /** @var Renderer   */
+    $renderer = $container->get('renderer');
+
     reset($GroupArray);
     if (empty($group_pk)) $group_pk = key($GroupArray);
 
@@ -146,7 +153,7 @@ class group_manage_users extends FO_Plugin {
     /*** Display group select list, on change request new page with group= in url ***/
     $url = Traceback_uri() . "?mod=group_manage_users&group=";
     $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($GroupArray, "groupselect", $group_pk, false, false, $onchange);
+    $V .= $renderer->createSelect('groupselect', $GroupArray, $group_pk, $onchange);
 
     /* Create array of group_user_member group_perm possible values for use in a select list */
     $group_permArray = array(-1 => "None", 0=>"User", 1=>"Admin");
@@ -156,48 +163,43 @@ class group_manage_users extends FO_Plugin {
     $dbManager->prepare($stmt,"select group_user_member_pk, user_fk, group_perm, user_name from group_user_member GUM INNER JOIN users
              on  GUM.user_fk=users.user_pk where GUM.group_fk=$1  order by user_name");
     $result = $dbManager->execute($stmt,array($group_pk));
+    $groupMembersContent = '';
+    while ($GroupMember = $dbManager->fetchArray($result)) {
+      $url = Traceback_uri() . "?mod=group_manage_users&gum_pk=$GroupMember[group_user_member_pk]&perm=";
+      $onchange = "onchange=\"js_url(this.value, '$url')\"";
 
-    $GroupMembersArray = pg_fetch_all($result);
-    pg_free_result($result);
+      $groupMembersContent .= "<tr>";
+      $groupMembersContent .= "<td>$GroupMember[user_name]</td>";
+      $groupMembersContent .= "<td>".$renderer->createSelect("permselect", $group_permArray, $GroupMember['group_perm'], $onchange)."</td>";
+      $groupMembersContent .= "</tr>";
+    }
+    $dbManager->freeResult($result);
 
     /* Permissions Table */
     $V .= "<p><table border=1>";
     $UserText = _("User");
     $PermText = _("Permission");
     $V .= "<tr><th>$UserText</th><th>$PermText</th></tr>";
-    if (!empty($GroupMembersArray)) { // does this group have childen ?
-      foreach ($GroupMembersArray as $GroupMember)
-      {
-        $V .= "<tr>";
-        $V .= "<td>";  // user
-        $V .= $GroupMember['user_name'];
-        $V .= "</td>";
-
-        $V .= "<td>";  // permission
-        $url = Traceback_uri() . "?mod=group_manage_users&gum_pk=$GroupMember[group_user_member_pk]&perm=";
-        $onchange = "onchange=\"js_url(this.value, '$url')\"";
-        $V .= Array2SingleSelect($group_permArray, "permselect", $GroupMember['group_perm'], false, false, $onchange);
-        $V .= "</td>";
-        $V .= "</tr>";
-      }
+    $V .= $groupMembersContent;
+    
+    $dbManager->prepare($stmt=__METHOD__.".selectUsersNotInGroup",
+            "SELECT user_pk,user_name FROM users LEFT JOIN group_user_member GUM ON user_pk=user_fk AND GUM.group_fk=$1"
+            . " WHERE group_user_member_pk IS NULL ORDER BY user_name");
+    $usersNotInGroup = $dbManager->execute($stmt,array($group_pk));
+    $otherUsers = array(''=>'');
+    while($row=$dbManager->fetchArray($usersNotInGroup))
+    {
+      $otherUsers[$row['user_pk']] = $row['user_name'];
     }
-    /* Print one extra row for adding perms */
-    $V .= "<tr>";
-    $V .= "<td>";  // user
-    $url = Traceback_uri() . "?mod=group_manage_users&newperm=$newperm&group=$group_pk&newuser=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $Selected = (empty($newuser)) ? "" : $newuser;
-    $UserArray = Table2Array("user_pk", "user_name", "users", " ", "order by user_name");
-    $V .= Array2SingleSelect($UserArray, "userselectnew", $Selected, true, false, $onchange);
-    $V .= "</td>";
-    $V .= "<td>";  // permission
-    $url = Traceback_uri() . "?mod=group_manage_users&newuser=$newuser&group=$group_pk&newperm=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $Selected = $newperm;
-    $V .= Array2SingleSelect($group_permArray, "permselectnew", $Selected, false, false, $onchange);
-    $V .= "</td>";
-    $V .= "</tr>";
- 
+    $dbManager->freeResult($usersNotInGroup);
+    if(count($otherUsers)){
+      $url = Traceback_uri() . "?mod=group_manage_users&newperm=$newperm&group=$group_pk&newuser=";
+      $onchange = "onchange=\"js_url(this.value, '$url')\"";
+      $V .= "<tr>";
+      $V .= "<td>".$renderer->createSelect("userselectnew", $otherUsers, '', $onchange)."</td>";
+      $V .= "<td>$group_permArray[$newperm]</td>";
+      $V .= "</tr>";
+    } 
     $V .= "</table>";
 
     $text = _("All user permissions take place immediately when a value is changed.  There is no submit button.");
@@ -205,10 +207,14 @@ class group_manage_users extends FO_Plugin {
     $text = _("Add new users on the last line.");
     $V .= "<br>" . $text;
 
-    if (!$this->OutputToStdout) return ($V);
-    print ("$V");
+    if (!$this->OutputToStdout)
+    {
+      return $V;
+    }
+    print($this->OutputOpen($this->OutputType,0));
+    $this->OutputToStdout = 1;
+    print ($V);
     return;
   }
 }
 $NewPlugin = new group_manage_users;
-?>
