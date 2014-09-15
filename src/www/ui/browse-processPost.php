@@ -111,7 +111,7 @@ class browseProcessPost extends FO_Plugin
 
   private function moveUploadBeyond($moveUpload, $beyondUpload)
   {
-
+    $this->dbManager->begin();
     $this->dbManager->prepare($stmt=__METHOD__.'.get.single.Upload',
       $sql='SELECT upload_pk,priority FROM upload WHERE upload_pk=$1');
     $movePoint = $this->dbManager->getSingleRow($sql,array($moveUpload),$stmt);
@@ -137,6 +137,7 @@ class browseProcessPost extends FO_Plugin
       $newPriority = $beyondPoint['priority'] + 0.5;
     }
     $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$moveUpload),'update.priority');
+    $this->dbManager->commit();
   }
 
   private function ShowFolderGetTableData($Folder, $Show)
@@ -281,11 +282,11 @@ class browseProcessPost extends FO_Plugin
 
   private function getOrderString(){
 
-    $columNamesInDatabase=array('upload_filename', 'status_fk', 'UNUSED', 'assignee','upload_ts' ,'priority');
+    $columnNamesInDatabase=array('upload_filename', 'status_fk', 'UNUSED', 'assignee','upload_ts' ,'priority');
 
     $defaultOrder = ui_browse::returnSortOrder();
 
-    $orderString = $this->dataTablesUtility->getSortingString($_GET,$columNamesInDatabase, $defaultOrder);
+    $orderString = $this->dataTablesUtility->getSortingString($_GET,$columnNamesInDatabase, $defaultOrder);
 
     return $orderString;
   }
@@ -307,20 +308,24 @@ class browseProcessPost extends FO_Plugin
 
   private function rejector($uploadId, $commentText)
   {
+    $this->dbManager->begin();
     $sql = "UPDATE upload SET status_fk=$1 WHERE upload_pk=$2";
     $this->dbManager->getSingleRow($sql,array(4, $uploadId),$stmt=__METHOD__.'.status');
     $this->dbManager->getSingleRow($sql='DELETE FROM upload_rejected WHERE upload_fk=$1',array( $uploadId),
             $stmt=__METHOD__.'.delete.rejecthistory');
     $sql = "INSERT INTO upload_rejected (upload_fk,reason,user_fk) VALUES ($1,$2,$3)";
     $this->dbManager->getSingleRow($sql,array($uploadId, $commentText, $_SESSION['UserId']),$stmt=__METHOD__.'.rejected');
+    $this->dbManager->commit();
     }
 
   public function moveUploadToInfinity($uploadId, $top)
   {
     $fun = $top ? 'MAX' : 'MIN';
+    $this->dbManager->begin();
     $prioRow = $this->dbManager->getSingleRow($sql="SELECT $fun(priority) p FROM upload",array(),"priority.$fun");
     $newPriority = $top ? $prioRow['p']+1 : $prioRow['p']-1;
     $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2',array($newPriority,$uploadId),'update.priority'."$newPriority,$uploadId");
+    $this->dbManager->commit();
   }
 
 }

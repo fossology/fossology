@@ -42,9 +42,18 @@ class DbManager extends Object
     $this->logger = $logger;
   }
 
+  /** param Driver */
   public function setDriver(&$dbDriver)
   {
     $this->dbDriver = $dbDriver;
+  }
+
+  public function begin() {
+    $this->dbDriver->begin();
+  }
+
+  public function commit() {
+    $this->dbDriver->commit();
   }
 
   /**

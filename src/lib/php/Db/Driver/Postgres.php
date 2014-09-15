@@ -115,4 +115,20 @@ class Postgres implements Driver
     return pg_fetch_array($res);
   }
 
+  /**
+   * @return void
+   */
+  public function begin(){
+    pg_query($this->dbConnection, "BEGIN");
+    return;
+  }
+
+  /**
+   * @return void
+   */
+  public function commit(){
+    pg_query($this->dbConnection, "COMMIT");
+    return;
+  }
+
 }

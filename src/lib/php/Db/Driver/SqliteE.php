@@ -136,4 +136,19 @@ class SqliteE implements Driver
     return $res->fetchArray();
   }
 
+  /**
+   * @return void
+   */
+  public function begin(){
+    $this->dbConnection->query("BEGIN");
+    return;
+  }
+
+  /**
+   * @return void
+   */
+  public function commit(){
+    $this->dbConnection->query("COMMIT");
+    return;
+  }
 }

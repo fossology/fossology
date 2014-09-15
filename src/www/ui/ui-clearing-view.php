@@ -422,6 +422,7 @@ class ClearingView extends FO_Plugin
     $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/change-license.js\" type=\"text/javascript\"></script>\n";
+      $output .= "\n<script src=\"scripts/tools.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
 

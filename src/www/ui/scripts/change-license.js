@@ -199,16 +199,33 @@ function scheduleBulkScan() {
 
 }
 
-$(document).ready(function(){
-  $(".legendHider").click(function(){
+
+function hideLegend(){
     $("#legendBox").hide();
     $(".legendShower").show();
-      $(".legendHider").hide();
+    $(".legendHider").hide();
+    setOption("legendShow", false);
+}
+
+function  showLengend() {
+    $("#legendBox").show();
+    $(".legendHider").show();
+    $(".legendShower").hide();
+    setOption("legendShow", true);
+}
+
+$(document).ready(function(){
+  $(".legendHider").click(function(){
+        hideLegend();
   });
   $(".legendShower").click(function(){
-      $("#legendBox").show();
-      $(".legendHider").show();
-      $(".legendShower").hide();
+        showLengend()
   });
-    var username=$.session.get('User');
+  var legendOption =  getOptionDefaultTrue("legendShow");
+  if(legendOption) {
+        showLengend();
+  }
+   else {
+        hideLegend();
+  }
 });

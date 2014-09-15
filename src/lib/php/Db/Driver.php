@@ -65,4 +65,14 @@ interface Driver
    */
   public function fetchArray($res);
 
+  /**
+   * @return void
+   */
+  public function begin();
+
+  /**
+   * @return void
+   */
+  public function commit();
+
 }
