@@ -21,7 +21,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
-use Mockery;
+use Mockery as M;
 
 if (!function_exists('Traceback_uri'))
 {
@@ -47,12 +47,14 @@ class CopyRightDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = null;
     $this->dbManager = null;
+
+    M::close();
   }
 
   public function testGetCopyrightHighlights()
   {
     $this->testDb->createPlainTables(array(),TRUE); //array('copyright'));
-    $uploadDao = Mockery::mock('Fossology\Lib\Dao\UploadDao');
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $uploadDao->shouldReceive('getUploadEntry')->andReturn(array('pfile_fk'=>8));
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $highlights = $copyrightDao->getCopyrightHighlights($uploadTreeId=1);
