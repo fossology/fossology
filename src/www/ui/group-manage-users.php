@@ -23,14 +23,17 @@ define("TITLE_group_manage_users", _("Manage Group Users"));
  * \brief edit group user permissions
  */
 class group_manage_users extends FO_Plugin {
-  var $Name = "group_manage_users";
-  var $Title = TITLE_group_manage_users;
-  var $MenuList = "Admin::Groups::Manage Group Users";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
-  var $LoginFlag = 1;  /* Don't allow Default User to add a group */
-
-
+  
+  function __construct(){
+    $this->Name = "group_manage_users";
+    $this->Title = TITLE_group_manage_users;
+    $this->MenuList = "Admin::Groups::Manage Group Users";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
+    parent::__construct();
+  }
+  
   /* @brief Verify user has access to update record
    * @param $user_pk
    * @param $group_pk
@@ -54,6 +57,15 @@ class group_manage_users extends FO_Plugin {
       $text = _("Permission Failure");
       echo "<h2>$text</h2>";
       exit;
+    }
+  }
+  
+  function OutputOpen($Type,$ToStdout){
+    $this->OutputType = $Type;
+    $this->OutputToStdout = $ToStdout;
+    if ($ToStdout != 1)
+    {
+      return parent::OutputOpen($Type, $ToStdout);
     }
   }
 
@@ -85,17 +97,16 @@ class group_manage_users extends FO_Plugin {
       /* Verify user has access */
       if (empty($group_pk))
       {
-        $gum_rec = GetSingleRec("group_user_member", "where group_user_member_pk='$gum_pk'");
+        $gum_rec = $dbManager->getSingleRow("SELECT group_fk FROM group_user_member WHERE group_user_member_pk=$1",
+                array($gum_pk),$stmt=__METHOD__.".getGroupByGUM");
         $group_pk = $gum_rec['group_fk'];
       }
       $this->VerifyAccess($user_pk, $group_pk);
 
       if ($perm===0 or $perm===1)
       {
-        $sql = "update group_user_member set group_perm='$perm' where group_user_member_pk='$gum_pk'";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
+        $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
+                array($perm,$gum_pk),$stmt=__METHOD__.".updatePermInGUM");
       } 
       else if ($perm === -1)
       {
@@ -206,9 +217,9 @@ class group_manage_users extends FO_Plugin {
     $V .= "<br>" . $text;
 
     if (!$this->OutputToStdout) return ($V);
-    print ("$V");
+    print($this->OutputOpen($this->OutputType,1-$this->OutputToStdout));
+    print ($V);
     return;
   }
 }
 $NewPlugin = new group_manage_users;
-?>
