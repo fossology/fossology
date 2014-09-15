@@ -66,6 +66,12 @@ interface Driver
   public function fetchArray($res);
 
   /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res);
+
+  /**
    * @return void
    */
   public function begin();
