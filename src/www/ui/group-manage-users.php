@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -25,7 +26,8 @@ define("TITLE_group_manage_users", _("Manage Group Users"));
  * \brief edit group user permissions
  */
 class group_manage_users extends FO_Plugin {
-  
+  var $groupPermissions = array(-1 => "None", 0=>"User", 1=>"Admin");
+          
   function __construct(){
     $this->Name = "group_manage_users";
     $this->Title = TITLE_group_manage_users;
@@ -155,9 +157,6 @@ class group_manage_users extends FO_Plugin {
     $onchange = "onchange=\"js_url(this.value, '$url')\"";
     $V .= $renderer->createSelect('groupselect', $GroupArray, $group_pk, $onchange);
 
-    /* Create array of group_user_member group_perm possible values for use in a select list */
-    $group_permArray = array(-1 => "None", 0=>"User", 1=>"Admin");
-
     /* Select all the user members of this group */
     $stmt = __METHOD__."getUsersWithGroup";
     $dbManager->prepare($stmt,"select group_user_member_pk, user_fk, group_perm, user_name from group_user_member GUM INNER JOIN users
@@ -170,7 +169,7 @@ class group_manage_users extends FO_Plugin {
 
       $groupMembersContent .= "<tr>";
       $groupMembersContent .= "<td>$GroupMember[user_name]</td>";
-      $groupMembersContent .= "<td>".$renderer->createSelect("permselect", $group_permArray, $GroupMember['group_perm'], $onchange)."</td>";
+      $groupMembersContent .= "<td>".$renderer->createSelect("permselect", $this->groupPermissions, $GroupMember['group_perm'], $onchange)."</td>";
       $groupMembersContent .= "</tr>";
     }
     $dbManager->freeResult($result);
@@ -194,11 +193,20 @@ class group_manage_users extends FO_Plugin {
     $dbManager->freeResult($usersNotInGroup);
     if(count($otherUsers)){
       $url = Traceback_uri() . "?mod=group_manage_users&newperm=$newperm&group=$group_pk&newuser=";
-      $onchange = "onchange=\"js_url(this.value, '$url')\"";
+      $onchange = "onchange=\"js_url(this.value, newpermurl)\"";
       $V .= "<tr>";
       $V .= "<td>".$renderer->createSelect("userselectnew", $otherUsers, '', $onchange)."</td>";
-      $V .= "<td>$group_permArray[$newperm]</td>";
+      $onPermChange = ' onchange=\'setNewPermUrl(this.value)\'';
+      $newPermArray = $this->groupPermissions;
+      unset($newPermArray[-1]);
+      $V .= "<td>".$renderer->createSelect("permselectnew", $newPermArray,$newperm,$onPermChange)."</td>";
       $V .= "</tr>";
+            $script = "var newpermurl;
+            function setNewPermUrl(newperm){
+               newpermurl='".Traceback_uri()."?mod=group_manage_users&newperm='+newperm+'&group=$group_pk&newuser=';
+            }
+            setNewPermUrl($newperm);";
+      $V .= '<script type="text/javascript"> '.$script.'</script>';
     } 
     $V .= "</table>";
 

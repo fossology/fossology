@@ -20,12 +20,9 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\DatabaseEnum;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
@@ -268,6 +265,7 @@ class ClearingView extends FO_Plugin
 
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
+    $folder = GetParm("folder", PARM_INTEGER);
     $selectedAgentId = GetParm("agentId", PARM_INTEGER);
     $highlightId = GetParm("highlightId", PARM_INTEGER);
     $ModBack = GetParm("modback", PARM_STRING);
@@ -285,13 +283,17 @@ class ClearingView extends FO_Plugin
 
     $output .= Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
 
+    $Uri = Traceback_uri() . "?mod=view-license";
 
-    $header= $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+    $header = "";
+    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
+    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
+    $header .= "<br>";
+    $header .= $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
     $header .= $this->createClearingButtons();
     list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
-
 
     $buttons = "<button class=\"legendHider\">"._("Hide Legend")."</button><button class=\"legendShower\">"._("Show Legend")."</button>";
 
@@ -313,6 +315,26 @@ class ClearingView extends FO_Plugin
     $output .= "\n<script src=\"scripts/tools.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
+
+
+  /**
+   * @param $Uri
+   * @param $folder
+   * @param $uploadId
+   * @param $forwardUploadTreePk
+   * @param $buttonString
+   * @return string
+   */
+  private function createForwardButton($Uri, $folder,$uploadId,  $forwardUploadTreePk, $buttonString) {
+    if (isset($forwardUploadTreePk) ) {
+      $header = "<b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$forwardUploadTreePk\">$buttonString</a></b>";
+    }
+    else {
+      $header ="";
+    }
+    return $header;
+  }
+
 
 }
 $NewPlugin = new ClearingView;

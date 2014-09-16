@@ -19,8 +19,6 @@
 var myKey = 0;
 var myVal = 0;
 
-var theTable=null;
-
 var rejectorModal = null;
 var uploadId = 0;
 
@@ -39,8 +37,7 @@ $(document).ready(function() {
 
 function initPrioClick() {
   $("td.priobucket").click( function() {
-//    table =  $('#browsetbl').dataTable();
-      table =createBrowseTable();
+    table =createBrowseTable();
     elementData = table.fnGetData( this );
     yourKey = elementData[0];
     if(myKey>0 && myKey!==yourKey){
