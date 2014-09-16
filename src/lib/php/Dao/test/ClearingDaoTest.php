@@ -55,120 +55,76 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $logger = new Logger('default');
     $logger->pushHandler(new ErrorLogHandler());
 
-    $dbFileName = "/tmp/fossology.sqlite";
-    if (file_exists($dbFileName))
-    {
-      unlink($dbFileName);
-    }
-    $sqlite3Connection = new SQLite3(true ? $dbFileName : ":memory:", SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
-
-    $this->dbManager = new DbManager($logger);
-    $this->dbManager->setDriver(new SqliteE($sqlite3Connection));
+    $this->testDb = new TestLiteDb();
+    $this->dbManager = $this->testDb->getDbManager();
 
     $this->clearingDao = new ClearingDao($this->dbManager, $this->licenseSelector, $this->uploadDao);
+    
+    $this->testDb->createPlainTables(
+            array(
+                'clearing_decision',
+                'clearing_decision_scopes',
+                'clearing_decision_types',
+                'clearing_licenses',
+                'license_ref',
+                'users',
+                'group_user_member'
+        ));
+    
+    $this->testDb->insertData(
+            array(
+                'clearing_decision_scopes',
+                'clearing_decision_types'
+            ));
+    
+    $this->dbManager->prepare($stmt='insert.users',
+                "INSERT INTO users (user_name, root_folder_fk) VALUES ($1,$2)");
+    $userArray = array( array('myself', 1), array('in_same_group', 2), array('in_trusted_group', 3), array('not_in_trusted_group', 4));
+    foreach ($userArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
 
-    $this->dbManager->queryOnce("CREATE TABLE clearing_decision
-(
-  clearing_pk integer primary key,
-  uploadtree_fk integer NOT NULL,
-  pfile_fk integer NOT NULL,
-  user_fk integer NOT NULL,
-  type_fk integer NOT NULL, -- Identifier for clearing_decision_types
-  scope_fk integer NOT NULL, -- Identifier for clearing_decision_scopes
-  comment text, -- User comment
-  reportinfo text, -- public comment
-  date_added timestamp)");
+    $this->dbManager->prepare($stmt='insert.gum',
+                "INSERT INTO group_user_member (group_fk, user_fk, group_perm) VALUES ($1,$2,$3)");
+    $gumArray = array( array(1, 1, 0), array(1, 2, 0), array(2, 3, 0), array(3, 4, 0));
+    foreach ($gumArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
+    
+    $this->dbManager->prepare($stmt='insert.ref',
+                "INSERT INTO license_ref (rf_shortname, rf_text) VALUES ($1,$2)");
+    $refArray = array( array('FOO', 'foo text'), array('BAR', 'bar text'), array('BAZ', 'baz text'), array('QUX', 'qux text'));
+    foreach ($refArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
+    
+    $this->dbManager->prepare($stmt='insert.cd',
+                "INSERT INTO clearing_decision (pfile_fk, uploadtree_fk, user_fk, type_fk, scope_fk, date_added) VALUES ($1,$2,$3,$4,$5,$6)");
+    $cdArray = array( array(100, 1000, 1, 1, 1, '2014-08-15T12:12:12'),
+      array(100, 1000, 2, 1, 1, '2014-08-15T10:43:58'),
+      array(100, 1000, 3, 1, 1, '2014-08-14T14:33:45'),
+      array(100, 1000, 4, 1, 1, '2014-08-14T11:14:22'),
+      array(100, 1200, 1, 1, 1, '2014-08-15T12:12:12'));
+    foreach ($cdArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
 
-    $this->dbManager->queryOnce("CREATE TABLE clearing_decision_scopes
-(
-  scope_pk integer primary key,
-  meaning character varying(30) )");
-
-    $this->dbManager->queryOnce("CREATE TABLE clearing_decision_types
-(
-  type_pk integer primary key,
-  meaning character varying(30) )");
-
-    $this->dbManager->queryOnce("CREATE TABLE clearing_licenses
-(
-  clearing_fk integer NOT NULL,
-  rf_fk integer NOT NULL,
-  removed boolean NOT NULL DEFAULT false)");
-
-    $this->dbManager->queryOnce("CREATE TABLE license_ref
-(
-  rf_pk integer primary key, -- Primary Key
-  rf_shortname text NOT NULL, -- GPL, APSL, MIT, ...
-  rf_text text NOT NULL, -- reference License text, or regex
-  rf_url text, -- URL of authoritative license text
-  rf_add_date date, -- Date License added to this table
-  rf_copyleft boolean, -- Is license copyleft?
-  rf_OSIapproved boolean, -- Is license OSI approved?
-  rf_fullname text, -- GNU General Public License, Apple Public Source License, ...
-  rf_FSFfree boolean, -- Is license FSF free?
-  rf_GPLv2compatible boolean, -- Is license GPL v2 compatible
-  rf_GPLv3compatible boolean, -- Is license GPL v3 compatible
-  rf_notes text, -- General notes (public)
-  rf_Fedora text,
-  marydone boolean NOT NULL DEFAULT 0,
-  rf_active boolean NOT NULL DEFAULT 1, -- change this to false if you don't want this reference license to be used in new analyses (does  not apply to nomos agent)
-  rf_text_updatable boolean NOT NULL DEFAULT 0, -- true if the license text can be updated (eg written by nomos)
-  rf_md5 character varying(32) -- md5 of the license text, used to keep duplicates out of the system
-)");
-
-    $this->dbManager->queryOnce("CREATE TABLE users
-(
-  user_pk integer primary key,
-  user_name text NOT NULL,
-  root_folder_fk integer NOT NULL, -- root folder for this user
-  user_desc text,
-  user_seed text,
-  user_pass text,
-  user_perm integer,
-  user_email text,
-  email_notify character varying(1) DEFAULT 'y', -- Email notification flag
-  user_agent_list text, -- list of user agents to automatically run on upload
-  default_bucketpool_fk integer,
-  ui_preference character varying DEFAULT 'simple', -- ui preference for the user, either simple or original
-  new_upload_group_fk integer, -- group given new_upload_perm on new uploads
-  new_upload_perm integer, -- permission given to new_upload_group on new uploads
-  group_fk integer)");
-
-    $this->dbManager->queryOnce("CREATE TABLE group_user_member
-(
-  group_user_member_pk integer primary key,
-  group_fk integer NOT NULL, -- Group user is a member of
-  user_fk integer NOT NULL, -- User foreign key
-  group_perm integer NOT NULL) -- Permission: 0=user, 1=admin.  Only Admins can add/remove/assign permissions to users.");
-
-    $this->dbManager->queryOnce("INSERT INTO users (user_name, root_folder_fk) VALUES
-      ('myself', 1), ('in_same_group', 2), ('in_trusted_group', 3), ('not_in_trusted_group', 4)");
-
-    $this->dbManager->queryOnce("INSERT INTO group_user_member (group_fk, user_fk, group_perm) VALUES
-      (1, 1, 0), (1, 2, 0), (2, 3, 0), (3, 4, 0)");
-
-    $this->dbManager->queryOnce("INSERT INTO license_ref (rf_shortname, rf_text) VALUES
-      ('FOO', 'foo text'), ('BAR', 'bar text'), ('BAZ', 'baz text'), ('QUX', 'qux text')");
-
-    $this->dbManager->queryOnce("INSERT INTO clearing_decision_types (meaning) VALUES
-      ('user decision'), ('tbd'), ('bulk') ");
-
-    $this->dbManager->queryOnce("INSERT INTO clearing_decision_scopes (meaning) VALUES
-      ('global'), ('upload')");
-
-    $this->dbManager->queryOnce("INSERT INTO clearing_decision (pfile_fk, uploadtree_fk, user_fk, type_fk, scope_fk, date_added) VALUES
-      (100, 1000, 1, 1, 1, '2014-08-15T12:12:12'),
-      (100, 1000, 2, 1, 1, '2014-08-15T10:43:58'),
-      (100, 1000, 3, 1, 1, '2014-08-14T14:33:45'),
-      (100, 1000, 4, 1, 1, '2014-08-14T11:14:22'),
-      (100, 1200, 1, 1, 1, '2014-08-15T12:12:12')");
-
-    $this->dbManager->queryOnce("INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed) VALUES
-      (1, 1, 0),
-      (1, 2, 0),
-      (2, 4, 1),
-      (3, 4, 0),
-      (5, 3, 0)");
+    $this->dbManager->prepare($stmt='insert.c_lic',
+                "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed) VALUES ($1,$2,$3)");
+    $clicArray = array( array(100, 1000, 1, 1, 1, '2014-08-15T12:12:12'),
+      array(1, 1, 0),
+      array(1, 2, 0),
+      array(2, 4, 1),
+      array(3, 4, 0),
+      array(5, 3, 0));
+    foreach ($clicArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
   }
 
   public function testDBStart()
