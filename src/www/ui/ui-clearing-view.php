@@ -284,11 +284,11 @@ class ClearingView extends FO_Plugin
     $output .= Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
 
     $Uri = Traceback_uri() . "?mod=view-license";
-    $previousUploadTreePk = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
-    $header = "<br><b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$previousUploadTreePk\">&lt;</a></b>";
-    $nextUploadTreePk = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
-    $header .= "<b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$nextUploadTreePk\">&gt;</a></b></br>";
 
+    $header = "";
+    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
+    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
+    $header .= "<br>";
     $header .= $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
     $header .= $this->createClearingButtons();
     list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
@@ -315,6 +315,26 @@ class ClearingView extends FO_Plugin
     $output .= "\n<script src=\"scripts/tools.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
+
+
+  /**
+   * @param $Uri
+   * @param $folder
+   * @param $uploadId
+   * @param $forwardUploadTreePk
+   * @param $buttonString
+   * @return string
+   */
+  private function createForwardButton($Uri, $folder,$uploadId,  $forwardUploadTreePk, $buttonString) {
+    if (isset($forwardUploadTreePk) ) {
+      $header = "<b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$forwardUploadTreePk\">$buttonString</a></b>";
+    }
+    else {
+      $header ="";
+    }
+    return $header;
+  }
+
 
 }
 $NewPlugin = new ClearingView;
