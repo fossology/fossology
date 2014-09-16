@@ -25,6 +25,7 @@ var rejectorModal = null;
 var uploadId = 0;
 
 var assigneeSelected = 0;
+var statusSelected = 0;
 
 $(document).ready(function() {
   table =createBrowseTable();
@@ -170,8 +171,14 @@ function changeTableEntry(sel, uploadId, columnName) {
     });
 }
 
-function filterAssignee(sel) {
-    assigneeSelected = sel;
+function filterAssignee() {
+    assigneeSelected = $('#assigneeSelector').val();
+    var oTable = createBrowseTable();
+    oTable.fnDraw(false);
+}
+
+function filterStatus() {
+    statusSelected = $('#statusSelector').val();
     var oTable = createBrowseTable();
     oTable.fnDraw(false);
 }

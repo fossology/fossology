@@ -33,9 +33,10 @@ class browseProcessPost extends FO_Plugin
   private $userDao;
   /** @var  DbManager dbManager */
   private $dbManager;
-
-  /**@var DataTablesUtility $dataTablesUtility */
+  /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
+  /** @var array */
+  private $filterParams;
 
   function __construct()
   {
@@ -250,18 +251,15 @@ class browseProcessPost extends FO_Plugin
   private function getListOfUploadsOfFolder($Folder)
   {
     $orderString = $this->getOrderString();
-    $params = array($Folder);
-    $searchString = $this->getSearchString($params);
-    $assigneeString = $this->getAssigneeString($params);
-    $stmt = __METHOD__ . "getFolderContents" . $orderString. $assigneeString . $searchString;
+    $this->filterParams = array($Folder);
+    $filter = $this->getSearchString();
+    $filter .= $this->getAssigneeFilter();
+    $filter .= $this->getStatusFilter();
+    $stmt = __METHOD__ . "getFolderContents" . $orderString. $filter;
 
-    $paramsNoOffset = $params;
-
-    $offset = $_GET['iDisplayStart'];
-    $limit = $_GET['iDisplayLength'];
-    $params[] = $offset;
-    $params[] = $limit;
-    $unorderedQuerry = "FROM upload
+    $offset = GetParm('iDisplayStart',PARM_INTEGER);
+    $limit = GetParm('iDisplayLength',PARM_INTEGER);
+    $unorderedQuery = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
@@ -270,23 +268,22 @@ class browseProcessPost extends FO_Plugin
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-     $redCount =  count( $params)-1;
-
     $statementString =  "SELECT upload.*,uploadtree.*,"
-        . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
-        $searchString
-        $assigneeString
-        $orderString
-        OFFSET \$".$redCount. " LIMIT \$" . count( $params) ." ";
-
-    $this->dbManager->prepare($stmt,$statementString );
-
+        . "upload_rejected.reason,upload_rejected.user_fk who_id $unorderedQuery
+        $filter $orderString";
+    $params = $this->filterParams;
+    $params[] = $offset;
+    $statementString .= ' OFFSET $'.count($params);
+    $params[] = $limit;
+    $statementString .= ' LIMIT $'.count($params);
+    $this->dbManager->prepare($stmt, $statementString);
     $result = $this->dbManager->execute($stmt, $params);
 
-    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString $assigneeString", $paramsNoOffset, __METHOD__ . "count");
+    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery $filter",
+            $this->filterParams, __METHOD__ . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ", array($Folder), __METHOD__ . "count.all");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery ", array($Folder), __METHOD__ . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
     return array($result, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -303,37 +300,40 @@ class browseProcessPost extends FO_Plugin
     return $orderString;
   }
 
-  private function getSearchString(&$params)
+  private function getSearchString()
   {
-    $search="";
-
     $searchPattern = GetParm('sSearch', PARM_STRING);
-
-    if(!empty($searchPattern)) {
-
-      $params []  = "%$searchPattern%";
-      $search.= " and lower(upload_filename) ilike \$".count($params)." ";
+    if (empty($searchPattern))
+    {
+      return '';
     }
-
-    return  $search;
+    $this->filterParams[] = "%$searchPattern%";
+    return ' AND upload_filename ilike $'.count($this->filterParams).' ';
   }
 
-  private function getAssigneeString(&$params)
+  private function getAssigneeFilter()
   {
-
-    $assignee="";
-
-    $assigneeNr = GetParm('assigneeSelected', PARM_INTEGER);
-
-    if($assigneeNr>0) {
-      $params[] = $assigneeNr;
-
-      $assignee = " AND assignee = \$". count($params)." ";
+    $assigneeId = GetParm('assigneeSelected', PARM_INTEGER);
+    if (empty($assigneeId))
+    {
+      return '';
     }
-
-    return $assignee;
+    $this->filterParams[] = $assigneeId;
+    return ' AND assignee=$'. count($this->filterParams).' ';
   }
 
+  private function getStatusFilter()
+  {
+    $status = GetParm('statusSelected', PARM_INTEGER);
+    if (empty($status))
+    {
+      return '';
+    }
+    $this->filterParams[] = $status;
+    return ' AND status_fk=$'. count($this->filterParams).' ';
+  }
+
+  
   private function rejector($uploadId, $commentText)
   {
     $this->dbManager->begin();
