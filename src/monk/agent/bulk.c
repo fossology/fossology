@@ -21,6 +21,51 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "monk.h"
 
+int setLeftAndRight(MonkState* state) {
+  /* if we are scanning from a file we want to extend left and right to its parent
+   * (we want to scan all its siblings), if it is a container we want all the contents
+   */
+
+  PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      state->dbManager,
+      "setLeftAndRight",
+      "WITH isFile AS ("
+      "SELECT 1 FROM uploadtree WHERE (ufile_mode&x'3C000000'::int)=0 AND uploadtree_pk = $1 LIMIT 1"
+      "),"
+      "dirResult AS ("
+      "SELECT lft, rgt FROM uploadtree WHERE"
+      " NOT EXISTS(SELECT * FROM isFile)"
+      " AND uploadtree_pk = $1"
+      "),"
+      "fileResult AS ("
+      "SELECT lft, rgt FROM uploadtree WHERE"
+      " EXISTS(SELECT * FROM isFile)"
+      " AND uploadtree_pk = (SELECT parent FROM uploadtree WHERE uploadtree_pk = $1)"
+      ")"
+      "SELECT * FROM fileResult UNION SELECT * FROM dirResult",
+      long
+    ),
+    state->bulkArguments->uploadTreeId
+  );
+
+  int result = 0;
+
+  if (leftAndRightResult) {
+    if (PQntuples(leftAndRightResult)==1) {
+      BulkArguments* bulkArguments = state->bulkArguments;
+
+      int i = 0;
+      bulkArguments->uploadTreeLeft = atol(PQgetvalue(leftAndRightResult, 0, i++));
+      bulkArguments->uploadTreeRight = atol(PQgetvalue(leftAndRightResult, 0, i));
+
+      result = 1;
+    }
+    PQclear(leftAndRightResult);
+  }
+  return result;
+}
+
 int queryBulkArguments(long bulkId, MonkState* state) {
   PGresult* bulkArgumentsResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
@@ -50,11 +95,16 @@ int queryBulkArguments(long bulkId, MonkState* state) {
       bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, i++));
       bulkArguments->removing = (strcmp(PQgetvalue(bulkArgumentsResult, 0, i), "t") == 0);
 
+
       bulkArguments->bulkId = bulkId;
 
       state->bulkArguments = bulkArguments;
 
-      result = 1;
+      if (!setLeftAndRight(state)) {
+        bulkArguments_contents_free(state->bulkArguments);
+      } else {
+        result = 1;
+      }
     }
     PQclear(bulkArgumentsResult);
   }
@@ -78,8 +128,13 @@ int bulk_identification(MonkState* state) {
   GArray* licenses = g_array_new(TRUE, FALSE, sizeof (License));
   g_array_append_val(licenses, license);
 
-  PGresult* filesResult = queryFileIdsForUpload(state->dbManager,
-                                                bulkArguments->uploadId);
+  PGresult* filesResult = queryFileIdsForUploadAndLimits(
+    state->dbManager,
+    bulkArguments->uploadId,
+    bulkArguments->uploadTreeLeft,
+    bulkArguments->uploadTreeRight
+  );
+
   int haveError = 1;
   if (filesResult != NULL) {
     int resultsCount = PQntuples(filesResult);
@@ -163,20 +218,22 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
       " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
       "  SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
       "  FROM uploadtree, clearing_decision_types, clearing_decision_scopes"
-      "  WHERE upload_fk = $3 AND pfile_fk = $1 "
+      "  WHERE upload_fk = $3 AND pfile_fk = $1 AND lft BETWEEN $6 AND $7"
       "  AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
       "  AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
       " RETURNING clearing_pk "
       ")"
       "INSERT INTO clearing_licenses(clearing_fk, rf_fk, removed) "
       "SELECT clearing_pk,$4,$5 FROM clearingIds",
-      long, long, int, long, int
+      long, long, int, long, int, long, long
     ),
     file->id,
     state->bulkArguments->userId,
     state->bulkArguments->uploadId,
     license->refId,
-    state->bulkArguments->removing ? 1 : 0
+    state->bulkArguments->removing ? 1 : 0,
+    state->bulkArguments->uploadTreeLeft,
+    state->bulkArguments->uploadTreeRight
   );
 
   /* ignore errors */

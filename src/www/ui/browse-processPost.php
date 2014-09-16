@@ -33,9 +33,10 @@ class browseProcessPost extends FO_Plugin
   private $userDao;
   /** @var  DbManager dbManager */
   private $dbManager;
-
-  /**@var DataTablesUtility $dataTablesUtility */
+  /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
+  /** @var array */
+  private $filterParams;
 
   function __construct()
   {
@@ -250,9 +251,15 @@ class browseProcessPost extends FO_Plugin
   private function getListOfUploadsOfFolder($Folder)
   {
     $orderString = $this->getOrderString();
-    $searchString = $this->getSearchString();
-    $stmt = __METHOD__ . "getFolderContents" . $orderString . $searchString;
-    $unorderedQuerry = "FROM upload
+    $this->filterParams = array($Folder);
+    $filter = $this->getSearchString();
+    $filter .= $this->getAssigneeFilter();
+    $filter .= $this->getStatusFilter();
+    $stmt = __METHOD__ . "getFolderContents" . $orderString. $filter;
+
+    $offset = GetParm('iDisplayStart',PARM_INTEGER);
+    $limit = GetParm('iDisplayLength',PARM_INTEGER);
+    $unorderedQuery = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
@@ -261,20 +268,22 @@ class browseProcessPost extends FO_Plugin
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-    $this->dbManager->prepare($stmt, "SELECT upload.*,uploadtree.*,"
-            . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
-        $searchString
-        $orderString
-        OFFSET $2 LIMIT $3
-        ");
-    $offset = $_GET['iDisplayStart'];
-    $limit = $_GET['iDisplayLength'];
-    $result = $this->dbManager->execute($stmt, array($Folder, $offset, $limit));
+    $statementString =  "SELECT upload.*,uploadtree.*,"
+        . "upload_rejected.reason,upload_rejected.user_fk who_id $unorderedQuery
+        $filter $orderString";
+    $params = $this->filterParams;
+    $params[] = $offset;
+    $statementString .= ' OFFSET $'.count($params);
+    $params[] = $limit;
+    $statementString .= ' LIMIT $'.count($params);
+    $this->dbManager->prepare($stmt, $statementString);
+    $result = $this->dbManager->execute($stmt, $params);
 
-    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString", array($Folder), __METHOD__ . "count");
+    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery $filter",
+            $this->filterParams, __METHOD__ . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ", array($Folder), __METHOD__ . "count.all");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery ", array($Folder), __METHOD__ . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
     return array($result, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -293,19 +302,38 @@ class browseProcessPost extends FO_Plugin
 
   private function getSearchString()
   {
-    $search="";
-
     $searchPattern = GetParm('sSearch', PARM_STRING);
-
-    if(!empty($searchPattern)) {
-//        $search.= " and upload_filename like '%$searchPattern%'";
-      $searchPattern = strtolower($searchPattern);
-      $search.= " and lower(upload_filename) like '%$searchPattern%'";
+    if (empty($searchPattern))
+    {
+      return '';
     }
-
-    return $search;
+    $this->filterParams[] = "%$searchPattern%";
+    return ' AND upload_filename ilike $'.count($this->filterParams).' ';
   }
 
+  private function getAssigneeFilter()
+  {
+    $assigneeId = GetParm('assigneeSelected', PARM_INTEGER);
+    if (empty($assigneeId))
+    {
+      return '';
+    }
+    $this->filterParams[] = $assigneeId;
+    return ' AND assignee=$'. count($this->filterParams).' ';
+  }
+
+  private function getStatusFilter()
+  {
+    $status = GetParm('statusSelected', PARM_INTEGER);
+    if (empty($status))
+    {
+      return '';
+    }
+    $this->filterParams[] = $status;
+    return ' AND status_fk=$'. count($this->filterParams).' ';
+  }
+
+  
   private function rejector($uploadId, $commentText)
   {
     $this->dbManager->begin();

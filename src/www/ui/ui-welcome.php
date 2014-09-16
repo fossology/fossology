@@ -41,9 +41,15 @@ class ui_welcome extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return(0);
     }
+    $show = GetParm('show', PARM_STRING);
+    if ($show=='licensebrowser'){
+      $this->Title = TITLE_ui_welcome.': License Browser';
+    }
+    
     $topMenuList = "Main::" . $this->MenuList;
     menu_insert($topMenuList.'::Overview', $this->MenuOrder-10, $this->Name."&show=welcome");
     menu_insert($topMenuList.'::Datatables', $this->MenuOrder, $this->Name."&show=datatables");
+    menu_insert($topMenuList.'::License Browser', $this->MenuOrder, $this->Name."&show=licensebrowser");
   }
   
   /**
@@ -73,6 +79,9 @@ class ui_welcome extends FO_Plugin
     $show = GetParm('show', PARM_STRING);
     if ($show=='datatables'){
       return $renderer->renderTemplate("datatables");
+    }
+    if ($show=='licensebrowser'){
+      return $renderer->renderTemplate("licensebrowser");
     }
     $Login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))

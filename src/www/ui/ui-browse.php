@@ -253,7 +253,28 @@ class ui_browse extends FO_Plugin {
     $V.= "</td><td valign='top'>\n";
     $text = _("Uploads");
     $V.= "<div align='center'><H3>$text</H3></div>\n";
-    $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0></table>";
+    
+    global $container;
+    $renderer = $container->get('renderer');
+    $userDao = $container->get('dao.user');
+    $assigneeArray = $userDao->getUserChoices();
+    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
+    $assigneeArray[1] = _('Unassigned');
+    $assigneeArray[0] = '';
+    $assigneeFilter = $renderer->createSelect('assigneeSelector',$assigneeArray,0,' onchange="filterAssignee()"');
+    $statusArray = array(0=>'');
+    $dbManager = $container->get('db.manager');
+    $dbManager->prepare($stmt=__METHOD__.".status",'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
+    $res = $dbManager->execute($stmt);
+    while ($row = $dbManager->fetchArray($res)) {
+      $statusArray[$row['status_pk']] = $row['meaning'];
+    }
+    $dbManager->freeResult($res);
+    $statusFilter = $renderer->createSelect('statusSelector',$statusArray,0,' onchange="filterStatus()"');
+    
+    $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
+            . "<tfoot><th></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tfoot>"
+            . "</table>";
     $V.= "</table>";
 
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
@@ -323,16 +344,8 @@ class ui_browse extends FO_Plugin {
       }
     }
 
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        $V.= $this->outputItemHtml($Item,$folder_pk,$Upload);
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    if ($this->OutputType == 'HTML') {
+      $V.= $this->outputItemHtml($Item,$folder_pk,$Upload);
     }
     if (!$this->OutputToStdout) {
       return ($V);
@@ -407,16 +420,14 @@ class ui_browse extends FO_Plugin {
   }
   
  
-  
-  
   private function rejectModal(){ 
-    $output = "<div>"._('Please enter a reason for rejection').":</div> 
+    $output2 = "<div>"._('Please enter a reason for rejection').":</div> 
               <textarea id='commentText' style='overflow:auto;resize:none;width:100%;height:80px;' name='commentText'></textarea></br>
               [<a class='button' onclick='submitRejector()'>OK</a>]   &nbsp;&nbsp;&nbsp;
               [<a class='button' onclick='closeRejectorModal()'>Cancel</a>] ";
     
-    $output = "<form name=\"rejector\">$output</form>\n";
-    $output = "<div class=\"modal\" id=\"rejectorModal\" hidden>$output</div>";
+    $output1 = "<form name=\"rejector\">$output2</form>\n";
+    $output = "<div class=\"modal\" id=\"rejectorModal\" hidden>$output1</div>";
     return $output;
   }
   
@@ -450,6 +461,8 @@ class ui_browse extends FO_Plugin {
        "fnServerData": function ( sSource, aoData, fnCallback ) {
             aoData.push( { "name":"folder" , "value" : "'.$Folder.'" } );
             aoData.push( { "name":"show" , "value" : "'.$Show.'" } );
+            aoData.push( { "name":"assigneeSelected" , "value" : assigneeSelected } );
+            aoData.push( { "name":"statusSelected" , "value" : statusSelected } );
             $.getJSON( sSource, aoData, fnCallback ).fail( function() {
               if (confirm("You are not logged in. Go to login page?"))
                 window.location.href="'.  Traceback_uri(). '?mod=auth";
