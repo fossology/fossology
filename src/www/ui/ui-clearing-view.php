@@ -244,6 +244,17 @@ class ClearingView extends FO_Plugin
 
       header('Location: ' . Traceback() . "&item=$uploadTreeId");
     }
+
+    $uploadTreeTableName= GetUploadtreeTableName($uploadId);
+    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName );
+    if(Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']) ) {
+       $parent = $this->uploadDao->getUploadParent($uploadId);
+      if (!isset($parent)) return;
+
+      $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+
+      header('Location: ' . Traceback() . "&item=$uploadTreeId");
+    }
     return parent::OutputOpen($Type, $ToStdout);
   }
 
@@ -357,5 +368,16 @@ class ClearingView extends FO_Plugin
   }
 
 
+
+  /**
+ * \brief Customize submenus.
+ */
+  function RegisterMenus()
+  {
+    $text = _("Set the concluded licenses for this upload");
+    menu_insert("Browse-Pfile::Clearing",0,$this->Name,$text);
+
+    return 0;
+  } // RegisterMenus()
 }
 $NewPlugin = new ClearingView;
