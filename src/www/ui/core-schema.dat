@@ -775,6 +775,11 @@
   $Schema["TABLE"]["highlight"]["rf_len"]["UPDATE"] = "";
 
 
+  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"clearing_fk\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"clearing_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["DESC"] = "";
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"lrb_fk\" int8;";
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"lrb_fk\" DROP NOT NULL;";

@@ -225,6 +225,26 @@ char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatem
   return g_string_free(resultCreator, FALSE);
 }
 
+int fo_dbManager_begin(fo_dbManager* dbManager) {
+  int result = 0;
+  PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "BEGIN");
+  if (queryResult) {
+    result = 1;
+    PQclear(queryResult);
+  }
+  return result;
+}
+
+int fo_dbManager_commit(fo_dbManager* dbManager) {
+  int result = 0;
+  PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "COMMIT");
+  if (queryResult) {
+    result = 1;
+    PQclear(queryResult);
+  }
+  return result;
+}
+
 PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...) {
   char* sqlQueryString;
   PGconn* dbConnection = dbManager->dbConnection;
