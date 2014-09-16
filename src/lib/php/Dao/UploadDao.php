@@ -67,10 +67,10 @@ class UploadDao extends Object
   function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
     $uploadEntry = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if ($uploadEntry===FALSE)
+    if ($uploadEntry === FALSE)
     {
       $this->logger->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
-     return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
+      return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
     }
     return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
   }
@@ -88,7 +88,6 @@ class UploadDao extends Object
     $fileCount = intval($row["count"]);
     return $fileCount;
   }
-
 
 
   /**
@@ -109,5 +108,166 @@ class UploadDao extends Object
     return $clearingTypes;
   }
 
+  public function getNextItem($uploadId, $item)
+  {
+    return $this->getItemByDirection($uploadId, $item, self::DIR_FWD);
+  }
+
+  public function getPreviousItem($uploadId, $item)
+  {
+    return $this->getItemByDirection($uploadId, $item, self::DIR_BCK);
+  }
+
+  const DIR_FWD = 1;
+  const DIR_BCK = -1;
+
+  public function getItemByDirection($uploadId, $item, $direction)
+  {
+    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+
+    $itemEntry = $this->getUploadEntry($item, $uploadTreeTableName);
+
+    return $this->findNextItem($itemEntry, $direction, $uploadTreeTableName);
+  }
+
+  /**
+   * @param $itemEntry
+   * @param $direction
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function findNextItem($itemEntry, $direction, $uploadTreeTableName)
+  {
+    $parent = $itemEntry['parent'];
+    $item = $itemEntry['uploadtree_pk'];
+
+    $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeTableName);
+    $parentSize = $this->getParentSize($parent, $uploadTreeTableName);
+
+    $targetOffset = $currentIndex + ($direction == self::DIR_FWD ? 1 : -1);
+    if ($targetOffset >= 0 && $targetOffset < $parentSize)
+    {
+      // new item is contained within same parent
+
+      $newItem = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName);
+
+      $newItemEntry = $this->getUploadEntry($newItem, $uploadTreeTableName);
+
+      $newItem = $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
+
+      if ($newItem)
+      {
+        return $newItem;
+      } else
+      {
+        return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+      }
+    } else
+    {
+      // leaving current directory
+
+      if (isset($parent))
+      {
+        $newItemEntry = $this->getUploadEntry($parent, $uploadTreeTableName);
+        return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+      } else
+      {
+        return null;
+      }
+    }
+  }
+
+
+  /**
+   * @param $newItemEntry
+   * @param $direction
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function handleNewItem($newItemEntry, $direction, $uploadTreeTableName)
+  {
+    $newItem = $newItemEntry['uploadtree_pk'];
+
+    $fileMode = $newItemEntry['ufile_mode'];
+    if (Isartifact($fileMode) || Isdir($fileMode) || Iscontainer($fileMode))
+    {
+      $folderSize = $newItemEntry['rgt'] - $newItemEntry['lft'];
+      if ($folderSize > 1)
+      {
+        return $this->enterFolder($newItem, $direction, $uploadTreeTableName);
+      }
+      return false;
+    } else
+    {
+      return $newItem;
+    }
+  }
+
+  /**
+   * @param $item
+   * @param $direction
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function enterFolder($item, $direction, $uploadTreeTableName)
+  {
+    $name_order = ($direction == self::DIR_FWD ? 'ASC' : 'DESC');
+
+    $statementName = __METHOD__ . "descent_" . $name_order;
+    $newItemResult = $this->dbManager->getSingleRow("
+select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_name $name_order limit 1", array($item), $statementName);
+
+    $newItemEntry = $this->getUploadEntry($newItemResult['uploadtree_pk'], $uploadTreeTableName);
+
+    return $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
+  }
+
+  /**
+   * @param $parent
+   * @param $item
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function getItemIndex($parent, $item, $uploadTreeTableName)
+  {
+    $currentIndexResult = $this->dbManager->getSingleRow("
+select row_number from (
+  select
+    row_number() over (order by ufile_name),
+    uploadtree_pk
+  from $uploadTreeTableName where parent=$1
+) as index where uploadtree_pk=$2", array($parent, $item), __METHOD__ . "_current_offset");
+
+    $currentIndex = $currentIndexResult['row_number'] - 1;
+    return $currentIndex;
+  }
+
+  /**
+   * @param $parent
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function getParentSize($parent, $uploadTreeTableName)
+  {
+    $currentCountResult = $this->dbManager->getSingleRow("select count(*) from $uploadTreeTableName where parent=$1", array($parent), __METHOD__ . "_current_count");
+    $currentCount = $currentCountResult['count'];
+    return $currentCount;
+  }
+
+  /**
+   * @param $parent
+   * @param $targetOffset
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName)
+  {
+    $statementName = __METHOD__ . "_offset";
+    $newItemResult = $this->dbManager->getSingleRow("
+select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_name offset $2 limit 1", array($parent, $targetOffset), $statementName);
+
+    $newItem = $newItemResult['uploadtree_pk'];
+    return $newItem;
+  }
 
 }
