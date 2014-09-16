@@ -172,13 +172,8 @@ function changeTableEntry(sel, uploadId, columnName) {
 
 function filterAssignee(sel) {
     assigneeSelected = sel;
-    aoData.push( { "name":"assigneeSelected" , "value" : assigneeSelected } );
-    $.ajax({
-        type: "POST",
-        url:  "?mod=browse-processPost",
-        success: mysuccess
-    });
-    // oTable.fnDraw(false);
+    var oTable = createBrowseTable();
+    oTable.fnDraw(false);
 }
 
 function changePriority( move, beyond) {
