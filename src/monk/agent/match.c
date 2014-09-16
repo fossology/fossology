@@ -398,22 +398,20 @@ void findDiffMatches(File* file, License* license, GArray* matches,
                      int maxAllowedDiff, int minTrailingMatches) {
   size_t textStartPosition = 0;
   size_t textLength = file->tokens->len;
-  DiffResult* diffResult = findMatchAsDiffs(file->tokens, license->tokens,
-                                           &textStartPosition,
-                                           maxAllowedDiff,
-                                           minTrailingMatches);
+  DiffResult* diffResult;
 
-  while (textStartPosition < textLength) {
+  do {
+    diffResult = findMatchAsDiffs(file->tokens, license->tokens,
+                                       &textStartPosition,
+                                       maxAllowedDiff,
+                                       minTrailingMatches);
     if (diffResult) {
-      DiffPoint firstMatch = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
-      textStartPosition = firstMatch.start + firstMatch.length + 1;
-
       Match* newMatch = malloc(sizeof(Match));
       newMatch->license = license;
       if (diffResult->matchedInfo->len == 1) {
         newMatch->type = MATCH_TYPE_FULL;
         newMatch->ptr.full = malloc(sizeof(DiffPoint));
-        *(newMatch->ptr.full) = firstMatch;
+        *(newMatch->ptr.full) = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
         diffResult_free(diffResult);
       } else {
         newMatch->type = MATCH_TYPE_DIFF;
@@ -425,12 +423,7 @@ void findDiffMatches(File* file, License* license, GArray* matches,
       else
         match_free(newMatch);
     }
-
-    diffResult = findMatchAsDiffs(file->tokens, license->tokens,
-                                 &textStartPosition,
-                                 maxAllowedDiff,
-                                 minTrailingMatches);
-  }
+  } while (textStartPosition < textLength);
 }
 
 #if GLIB_CHECK_VERSION(2,32,0)

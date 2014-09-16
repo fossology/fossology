@@ -38,44 +38,38 @@ inline int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
   return 0;
 }
 
-inline DiffMatchInfo lookForDiff(GArray* textTokens, GArray* searchTokens,
-        size_t iText, size_t iSearch, int maxAllowedDiff, int minTrailingMatches) {
+inline int lookForDiff(GArray* textTokens, GArray* searchTokens,
+                       size_t iText, size_t iSearch,
+                       int maxAllowedDiff, int minTrailingMatches,
+                       DiffMatchInfo* result) {
   size_t searchLength = searchTokens->len;
   size_t textLength = textTokens->len;
-
-  DiffMatchInfo result;
-  result.diffType = NULL;
 
   size_t searchStopAt = MIN(iSearch + maxAllowedDiff, searchLength);
   size_t textStopAt = MIN(iText + maxAllowedDiff, textLength);
 
+  size_t textPos;
+  size_t searchPos;
   for (unsigned int i = 0; i < SQUARE_VISITOR_LENGTH; i++) {
-    result.text.start = iText + squareVisitorX[i];
-    result.search.start = iSearch + squareVisitorY[i];
-    if ((result.text.start > textStopAt) || (result.search.start > searchStopAt))
-      break;
+    textPos = iText + squareVisitorX[i];
+    searchPos = iSearch + squareVisitorY[i];
 
-    if ((result.text.start < textStopAt) && (result.search.start < searchStopAt))
-      if (matchNTokens(textTokens, result.text.start, textLength,
-                       searchTokens, result.search.start, searchLength,
-                       minTrailingMatches))
-           goto diffFound;
+    if ((textPos > textStopAt) || (searchPos > searchStopAt))
+      return 0;
+
+    if ((textPos < textStopAt) && (searchPos < searchStopAt))
+      if (matchNTokens(textTokens, textPos, textLength,
+                       searchTokens, searchPos, searchLength,
+                       minTrailingMatches)) {
+        result->search.start = searchPos;
+        result->search.length = searchPos - iSearch;
+        result->text.start = textPos;
+        result->text.length = textPos - iText;
+        return 1;
+      }
   }
 
-  result.diffSize = -1;
-  result.search.start = iSearch;
-  result.search.length = 0;
-  result.text.start = iText;
-  result.text.length = 0;
-
-  return result;
-
-diffFound:
-  result.diffSize = MAX((result.search.start - iSearch), (result.text.start - iText));
-  result.search.length = result.search.start - iSearch;
-  result.text.length = result.text.start - iText;
-
-  return result;
+  return 0;
 }
 
 inline int applyDiff(const DiffMatchInfo* diff,
@@ -127,15 +121,17 @@ inline void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSe
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
                              size_t* textStartPosition,
                              int maxAllowedDiff, int minTrailingMatches ){
-  DiffResult* result = malloc(sizeof(DiffResult));
   size_t textLength = textTokens->len;
   size_t searchLength = searchTokens->len;
 
+  if (!searchLength || !textLength) {
+    *textStartPosition = textLength;
+    return NULL;
+  }
+
+  DiffResult* result = malloc(sizeof(DiffResult));
   result->matchedInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
   GArray* matchedInfo = result->matchedInfo;
-
-  if (!searchLength || !textLength)
-    return 0;
 
   size_t iText = *textStartPosition;
   size_t iSearch = 0;
@@ -170,31 +166,24 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
         iSearch++;
         iText++;
       } else {
-        if (simpleMatch.text.length > 0) {
-          g_array_append_val(matchedInfo, simpleMatch);
-          initSimpleMatch(&simpleMatch, iText, iSearch);
-        }
+        /* the previous tokens matched, here starts a difference */
+        g_array_append_val(matchedInfo, simpleMatch);
+        initSimpleMatch(&simpleMatch, iText, iSearch);
 
-        if (matchedCounter == 0) {
-          iText++;
-          simpleMatch.text.start++;
+        DiffMatchInfo diff;
+        if (lookForDiff(textTokens, searchTokens,
+                        iText, iSearch,
+                        maxAllowedDiff, minTrailingMatches,
+                        &diff)) {
+          applyDiff(&diff,
+                    matchedInfo,
+                    &additionsCounter, &removedCounter,
+                    &iText, &iSearch);
+
+          simpleMatch.text.start = iText;
+          simpleMatch.search.start = iSearch;
         } else {
-          DiffMatchInfo diff = lookForDiff(textTokens, searchTokens,
-                                           iText, iSearch,
-                                           maxAllowedDiff,
-                                           minTrailingMatches);
-
-          if (diff.diffSize > 0) {
-             applyDiff(&diff,
-                       matchedInfo,
-                       &additionsCounter, &removedCounter,
-                       &iText, &iSearch);
-
-             simpleMatch.text.start = iText;
-             simpleMatch.search.start = iSearch;
-          }
-          else
-            break;
+          break;
         }
       }
     }
@@ -222,6 +211,8 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
       );
     }
 #endif
+    DiffPoint firstMatch = g_array_index(result->matchedInfo, DiffMatchInfo, 0).text;
+    *textStartPosition = firstMatch.start + firstMatch.length;
 
     result->removed = removedCounter;
     result->added = additionsCounter;
