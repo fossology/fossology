@@ -260,7 +260,9 @@ class browseProcessPost extends FO_Plugin
         LEFT JOIN upload_rejected ON upload_rejected.upload_fk=upload_pk
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
-
+    $assignee = GetParm('assigneeSelected',PARM_INTEGER);
+    if($assignee) //TODO: prepare this query
+      $unorderedQuerry .= " AND assignee=$assignee";
     $this->dbManager->prepare($stmt, "SELECT upload.*,uploadtree.*,"
             . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
         $searchString
