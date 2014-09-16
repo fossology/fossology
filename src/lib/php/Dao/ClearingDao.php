@@ -154,7 +154,8 @@ class ClearingDao extends Object
         "select
                license_ref.rf_pk as rf,
                license_ref.rf_shortname as shortname,
-               license_ref.rf_fullname  as fullname
+               license_ref.rf_fullname  as fullname,
+               clearing_licenses.removed  as removed
            from clearing_licenses
            left join license_ref on clearing_licenses.rf_fk=license_ref.rf_pk
                where clearing_fk=$1");
@@ -163,7 +164,7 @@ class ClearingDao extends Object
 
     while ($rw = $this->dbManager->fetchArray($res))
     {
-      $licenses[] = new LicenseRef($rw['rf'], $rw['shortname'], $rw['fullname']);
+      $licenses[] = new LicenseRef($rw['rf'], $rw['shortname'], $rw['fullname'], $rw ['removed'] == 't' );
     }
     pg_free_result($res);
     return $licenses;

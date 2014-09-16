@@ -326,7 +326,7 @@ class FO_Plugin
         if (($this->NoMenu == 0) && ($this->Name != "menus"))
         {
           $Menu = &$Plugins[plugin_find_id("menus")];
-          $Menu->OutputSet($Type,$ToStdout);
+          $Menu->OutputSet($Type,0);
         }
         else { $Menu = NULL; }
 
@@ -347,20 +347,19 @@ class FO_Plugin
            Also, IE will ignore <style>...</style> tags that are NOT
            in a <head>...</head> block.
            **/
-          if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
+          if (!empty($this->Title)) {
+            $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+          }
           $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
           $V .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
-          print $V;
-          print "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
-          print "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
-          $V = "";
+          $V .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
+          $V .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
-          if (!empty($Menu)) { print $Menu->OutputCSS(); }
+          if (!empty($Menu)) { $V .= $Menu->OutputCSS(); }
           $V .= "</head>\n";
 
           $V .= "<body class='text'>\n";
-          print $V; $V="";
-          if (!empty($Menu)) { $Menu->Output($this->Title); }
+          if (!empty($Menu)) { $V .= $Menu->Output($this->Title); }
         }
         break;
       case "Text":

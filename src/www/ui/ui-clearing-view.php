@@ -144,7 +144,11 @@ class ClearingView extends FO_Plugin
 
       $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
       $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
+
       $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+
+      $extractedLicenseBulkMatches  = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
+      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
     }
     return $output;
   }
