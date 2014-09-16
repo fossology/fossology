@@ -21,25 +21,6 @@ You should have received a copy of the GNU General Public License along with thi
 #include "math.h"
 #include "_squareVisitor.h"
 
-/*
- * @param matches: array of Match* where to save found matches
- */
-void appendMatchesBetween(File* file, License* license, GArray* matches,
-                          int maxAllowedDiff, int minTrailingMatches) {
-  size_t matchStart;
-  if (findMatchFull(file->tokens, license->tokens, &matchStart)) {
-
-    Match* match = malloc(sizeof(Match));
-    match->type = MATCH_TYPE_FULL;
-    match->license = license;
-    match->ptr.full = malloc(sizeof(DiffPoint));
-    *(match->ptr.full) = (DiffPoint){.start = matchStart, .length = license->tokens->len};
-    g_array_append_val(matches, match);
-  } else {
-    findDiffMatches(file, license, matches, maxAllowedDiff, minTrailingMatches);
-  }
-}
-
 inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
                                      int maxAllowedDiff, int minTrailingMatches) {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
@@ -47,7 +28,7 @@ inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
   for (unsigned int i = 0; i < licenses->len; i++) {
     License* license = &g_array_index(licenses, License, i);
 
-    appendMatchesBetween(file, license, matches, maxAllowedDiff, minTrailingMatches);
+    findDiffMatches(file, license, matches, maxAllowedDiff, minTrailingMatches);
   }
 
   GArray* filteredMatches = filterNonOverlappingMatches(matches);
@@ -427,15 +408,22 @@ void findDiffMatches(File* file, License* license, GArray* matches,
       DiffPoint firstMatch = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
       textStartPosition = firstMatch.start + firstMatch.length + 1;
 
-      Match* diffMatch = malloc(sizeof(Match));
-      diffMatch->type = MATCH_TYPE_DIFF;
-      diffMatch->ptr.diff = diffResult;
-      diffMatch->license = license;
+      Match* newMatch = malloc(sizeof(Match));
+      newMatch->license = license;
+      if (diffResult->matchedInfo->len == 1) {
+        newMatch->type = MATCH_TYPE_FULL;
+        newMatch->ptr.full = malloc(sizeof(DiffPoint));
+        *(newMatch->ptr.full) = firstMatch;
+        diffResult_free(diffResult);
+      } else {
+        newMatch->type = MATCH_TYPE_DIFF;
+        newMatch->ptr.diff = diffResult;
+      }
 
-      if (match_rank(diffMatch) > MIN_ALLOWED_RANK)
-        g_array_append_val(matches, diffMatch);
+      if (match_rank(newMatch) > MIN_ALLOWED_RANK)
+        g_array_append_val(matches, newMatch);
       else
-        match_free(diffMatch);
+        match_free(newMatch);
     }
 
     diffResult = findMatchAsDiffs(file->tokens, license->tokens,

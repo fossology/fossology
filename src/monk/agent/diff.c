@@ -15,47 +15,6 @@ You should have received a copy of the GNU General Public License along with thi
 #include "_squareVisitor.h"
 #include <stdlib.h>
 
-/**
- @brief perform a full match search between two tokenized texts
-
- @param textTokens   array containing the Tokens of the text in which we are searching
- @param searchTokens array containing the Tokens of the reference text to be searched
-
- @param matchStart the position of the beginning of the match will be written here
-
- @return boolean indicating successful match
- ****************************************************/
-int findMatchFull(GArray* textTokens, GArray* searchTokens, size_t* matchStart) {
-  size_t textLength = textTokens->len;
-  size_t searchLength = searchTokens->len;
-
-  if (!searchLength || !textLength)
-    return 0;
-
-  size_t matched = 0;
-  size_t lastStart = 0;
-  size_t i = 0;
-  while (i < textLength && matched < searchLength) {
-    Token* textToken = &g_array_index(textTokens, Token, i);
-    Token* searchToken = &g_array_index(searchTokens, Token, matched);
-
-    if (tokenEquals(textToken, searchToken)) {
-      matched++;
-      i++;
-    } else {
-      matched = 0;
-      i = ++lastStart;
-    }
-  }
-
-  if (matched == searchLength) {
-    *matchStart = lastStart;
-    return 1;
-  }
-  else
-    return 0;
-}
-
 inline int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                         GArray* searchTokens, size_t searchStart, size_t searchLength,
                         unsigned int numberOfWantedMatches){
