@@ -250,8 +250,17 @@ class browseProcessPost extends FO_Plugin
   private function getListOfUploadsOfFolder($Folder)
   {
     $orderString = $this->getOrderString();
-    $searchString = $this->getSearchString();
-    $stmt = __METHOD__ . "getFolderContents" . $orderString . $searchString;
+    $params = array($Folder);
+    $searchString = $this->getSearchString($params);
+    $assigneeString = $this->getAssigneeString($params);
+    $stmt = __METHOD__ . "getFolderContents" . $orderString. $assigneeString . $searchString;
+
+    $paramsNoOffset = $params;
+
+    $offset = $_GET['iDisplayStart'];
+    $limit = $_GET['iDisplayLength'];
+    $params[] = $offset;
+    $params[] = $limit;
     $unorderedQuerry = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
@@ -261,17 +270,20 @@ class browseProcessPost extends FO_Plugin
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-    $this->dbManager->prepare($stmt, "SELECT upload.*,uploadtree.*,"
-            . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
-        $searchString
-        $orderString
-        OFFSET $2 LIMIT $3
-        ");
-    $offset = $_GET['iDisplayStart'];
-    $limit = $_GET['iDisplayLength'];
-    $result = $this->dbManager->execute($stmt, array($Folder, $offset, $limit));
+     $redCount =  count( $params)-1;
 
-    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString", array($Folder), __METHOD__ . "count");
+    $statementString =  "SELECT upload.*,uploadtree.*,"
+        . "upload_rejected.reason,upload_rejected.user_fk who_id  $unorderedQuerry
+        $searchString
+        $assigneeString
+        $orderString
+        OFFSET \$".$redCount. " LIMIT \$" . count( $params) ." ";
+
+    $this->dbManager->prepare($stmt,$statementString );
+
+    $result = $this->dbManager->execute($stmt, $params);
+
+    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry $searchString $assigneeString", $paramsNoOffset, __METHOD__ . "count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
     $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuerry ", array($Folder), __METHOD__ . "count.all");
@@ -291,19 +303,35 @@ class browseProcessPost extends FO_Plugin
     return $orderString;
   }
 
-  private function getSearchString()
+  private function getSearchString(&$params)
   {
     $search="";
 
     $searchPattern = GetParm('sSearch', PARM_STRING);
 
     if(!empty($searchPattern)) {
-//        $search.= " and upload_filename like '%$searchPattern%'";
-      $searchPattern = strtolower($searchPattern);
-      $search.= " and lower(upload_filename) like '%$searchPattern%'";
+
+      $params []  = "%$searchPattern%";
+      $search.= " and lower(upload_filename) ilike \$".count($params)." ";
     }
 
-    return $search;
+    return  $search;
+  }
+
+  private function getAssigneeString(&$params)
+  {
+
+    $assignee="";
+
+    $assigneeNr = GetParm('assigneeSelected', PARM_INTEGER);
+
+    if($assigneeNr>0) {
+      $params[] = $assigneeNr;
+
+      $assignee = " AND assignee = \$". count($params)." ";
+    }
+
+    return $assignee;
   }
 
   private function rejector($uploadId, $commentText)

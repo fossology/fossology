@@ -253,7 +253,22 @@ class ui_browse extends FO_Plugin {
     $V.= "</td><td valign='top'>\n";
     $text = _("Uploads");
     $V.= "<div align='center'><H3>$text</H3></div>\n";
-    $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0></table>";
+    
+    
+    
+    global $container;
+    $renderer = $container->get('renderer');
+    $userDao = $container->get('dao.user');
+    $userArray = $userDao->getUserChoices();
+    $userArray[$_SESSION['UserId']] = _('-- Me --');
+    $userArray[1] = _('Unassigned');
+    $userArray[0] = '';
+    $userFilter = $renderer->createSelect('userFilter',$userArray,0,' onchange="filterAssignee(this.value)"');
+    
+    
+    $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
+            . "<tfoot><th></th> <th></th> <th></th> <th>$userFilter</th> <th></th> <th></th> </tfoot>"
+            . "</table>";
     $V.= "</table>";
 
     $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
@@ -450,6 +465,7 @@ class ui_browse extends FO_Plugin {
        "fnServerData": function ( sSource, aoData, fnCallback ) {
             aoData.push( { "name":"folder" , "value" : "'.$Folder.'" } );
             aoData.push( { "name":"show" , "value" : "'.$Show.'" } );
+            aoData.push( { "name":"assigneeSelected" , "value" : assigneeSelected } );
             $.getJSON( sSource, aoData, fnCallback ).fail( function() {
               if (confirm("You are not logged in. Go to login page?"))
                 window.location.href="'.  Traceback_uri(). '?mod=auth";
