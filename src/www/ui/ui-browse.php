@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -488,17 +489,8 @@ class ui_browse extends FO_Plugin {
     return $VF;
 
   }
-
-
-  /*
-   *
-   * if (theTable === null)
-                  {
-                    theTable= $('#browsetbl').dataTable(". $dataTableConfig . ");
-                  }
-                    return theTable;
-   */
-    private function createJavaScriptBlock()
+  
+  private function createJavaScriptBlock()
   {
     $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
 //    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
@@ -509,18 +501,16 @@ class ui_browse extends FO_Plugin {
   }
 
 
-
-static  public  function returnSortOrder () {
-  $defaultOrder = array (
-      array(5, "desc"),
-      array(0, "asc"),
-      array(3, "desc"),
-      array(1, "desc"),
-      array(4, "desc")
-  );
-
-  return $defaultOrder;
-}
+  static public function returnSortOrder () {
+    $defaultOrder = array (
+        array(5, "desc"),
+        array(0, "asc"),
+        array(3, "desc"),
+        array(1, "desc"),
+        array(4, "desc")
+    );
+    return $defaultOrder;
+  }
 
 }
 $NewPlugin = new ui_browse();
