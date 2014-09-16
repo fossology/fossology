@@ -40,7 +40,6 @@ class upload_permissions extends FO_Plugin
   {
     global $SysConf;
     global $PG_CONN;
-    global $PERM_NAMES;
 
     $group_pk = GetParm('group_pk', PARM_INTEGER);
     $user_pk = $SysConf['auth']['UserId'];
@@ -72,8 +71,8 @@ class upload_permissions extends FO_Plugin
     $V .= Array2SingleSelect($GroupArray, "groupuserselect", $group_pk, false, false, $onchange);
 
     /* Select all the user members of this group */
-    $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member, users
-              where group_fk='$group_pk' and user_fk=user_pk";
+    $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member GUM, users
+              where GUM.group_fk=$group_pk and user_fk=user_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $GroupMembersArray = pg_fetch_all($result);
@@ -141,7 +140,7 @@ class upload_permissions extends FO_Plugin
       
       if (!empty($sql))
       {
-        $result = @pg_query($PG_CONN, $sql);
+        $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
       } 
@@ -320,4 +319,3 @@ return;
   }
 }
 $NewPlugin = new upload_permissions;
-?>

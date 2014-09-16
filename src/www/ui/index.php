@@ -50,6 +50,7 @@ if ($PluginId >= 0)
 }
 else
 {
+  // header("Status: 408 Request Time-out");
   $Uri = Traceback_uri() . "?mod=auth";
   $text = _("Module unavailable or your login session timed out.");
   print "$text <P />";

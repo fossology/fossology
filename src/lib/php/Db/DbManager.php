@@ -182,6 +182,15 @@ class DbManager extends Object
     return $this->dbDriver->fetchArray($res);
   }
 
+  /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res)
+  {
+    return $this->dbDriver->fetchAll($res);
+  }
+
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)

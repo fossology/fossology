@@ -187,28 +187,28 @@ class LicenseOverviewPrinter extends Object
       $obsoleteMatches[$licenseShortname] = $agentDetails[$mostRecentAgentId];
     }
 
-    $output = _('The newest version of')." $agentName "._('license scanner');
+    $output = _('The newest version of')." <b>$agentName</b> ";
     if (count($latestMatches)==0 && array_key_exists('good', $agentArs) && $latestAgentId==$agentArs['good'])
     {
-      $output .= ' ' . _('ran successful on this file without any match');
+      $output .=  _('ran successful on this file without any match');
     }
     else if (count($latestMatches)==0 && array_key_exists('bad', $agentArs) && $latestAgentId==$agentArs['bad'])
     {
-      $output .= ' ' . _('failed on this upload');
+      $output .=  _('failed on this upload');
       $output .= '. '._('Please re-run');
       $link = Traceback_uri()."?mod=agent_add&upload=$uploadId&agents[]=agent_$agentName";
       $output .= " <a href='$link'>Scheduler for $agentName</a>";
     }
     else if (count($latestMatches)==0)
     {
-      $output .= ' ' . _('did not finish the run on this file');
+      $output .=  _('did not finish the run on this file');
     }
     else
     {
-      $output .= ' ' . _('found') . ':<b>';
+      $output .=  _('found') . ':<b>';
       foreach ($latestMatches as $licenseShortname => $agentDetails)
       {
-        $output .= "<br/>\n";
+        $output .= "<br/>&nbsp&nbsp&nbsp\n";
         $output .= $this->printLicenseNameAsLink($licenseShortname);
         $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
       }
@@ -217,7 +217,7 @@ class LicenseOverviewPrinter extends Object
 
     if(count($obsoleteMatches)>0)
     {
-      $text = _("Other versions of the $agentName license scanner also found");
+      $text = _("Other versions of the <b>$agentName</b> license scanner also found");
       $output .=  "<br/>\n$text: <b>";
       foreach ($obsoleteMatches as $licenseShortname => $agentDetails)
       {
@@ -243,7 +243,7 @@ class LicenseOverviewPrinter extends Object
     }
     foreach ($latestMatches as $licenseShortname => $agentDetails)
     {
-      $output .= "<br/>\n";
+      $output .= "<br/>&nbsp&nbsp&nbsp\n";
       $output .= $this->printLicenseNameAsLink($licenseShortname);
       $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
     }

@@ -116,6 +116,15 @@ class Postgres implements Driver
   }
 
   /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res)
+  {
+    return pg_fetch_all($res);
+  }
+
+  /**
    * @return void
    */
   public function begin(){

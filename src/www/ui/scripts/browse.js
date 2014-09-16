@@ -24,6 +24,9 @@ var theTable=null;
 var rejectorModal = null;
 var uploadId = 0;
 
+var assigneeSelected = 0;
+var statusSelected = 0;
+
 $(document).ready(function() {
   table =createBrowseTable();
   initPrioClick();
@@ -124,7 +127,7 @@ function rejectorColumn ( source, type, val ) {
   }
   if (type === 'display') {
     if (source[1]){
-      return 'rejected by '+source[2];
+      return 'rejected by <span title="'+source[3]+'">'+source[2]+'</span>';
     }
     else{
       return '<a class="button" onclick="openRejectorModal('+source[0]+')"><img alt="move" src="images/icons/close_32.png" class="icon-small"/>reject</a>';
@@ -168,6 +171,17 @@ function changeTableEntry(sel, uploadId, columnName) {
     });
 }
 
+function filterAssignee() {
+    assigneeSelected = $('#assigneeSelector').val();
+    var oTable = createBrowseTable();
+    oTable.fnDraw(false);
+}
+
+function filterStatus() {
+    statusSelected = $('#statusSelector').val();
+    var oTable = createBrowseTable();
+    oTable.fnDraw(false);
+}
 
 function changePriority( move, beyond) {
     var post_data = {

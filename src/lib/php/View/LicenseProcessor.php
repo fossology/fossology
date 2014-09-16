@@ -71,11 +71,11 @@ class LicenseProcessor extends Object
 
           if($license->getRemoved()) {
 
-            $agentName = "bulk removal";
+            $agentName = _("Bulk removal");
             $agentId = 1;
           }
           else {
-            $agentName = "bulk addition";
+            $agentName = _("Bulk addition");
             $agentId = 2;
           }
 

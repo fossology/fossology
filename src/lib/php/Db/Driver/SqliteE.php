@@ -88,7 +88,8 @@ class SqliteE implements Driver
     $stmt = $this->preparedStmt[$statementName];
     for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
     {
-      $stmt->bindValue($this->varPrefix . chr(65 + $idx), $params[$idx]);
+      $variableName = $this->varPrefix . chr(65 + $idx);
+      $stmt->bindValue($variableName, $params[$idx]);
     }
     return $stmt->execute();
   }
@@ -134,6 +135,20 @@ class SqliteE implements Driver
   public function fetchArray($res)
   {
     return $res->fetchArray();
+  }
+
+  /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res)
+  {
+    $result = array();
+    while ($row = $res->fetchArray(SQLITE3_NUM))
+    {
+      $result[] = $row;
+    }
+    return $result;
   }
 
   /**

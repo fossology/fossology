@@ -58,7 +58,7 @@ class ClearingDao extends Object
   function __construct(DbManager $dbManager, NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());  //$container->get("logger");
+    $this->logger = new Logger(self::className()); //$container->get("logger");
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
   }
@@ -243,7 +243,7 @@ class ClearingDao extends Object
         "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING clearing_pk",
         array($currentUploadTreeId, $pfileId, $userid, $type, $scope, $comment, $remark),
         $statementName);
-      $lastClearingId=$row['clearing_pk'];
+      $lastClearingId = $row['clearing_pk'];
 
       $statementN = __METHOD__ . ".l";
       $this->dbManager->prepare($statementN,
@@ -322,5 +322,46 @@ class ClearingDao extends Object
     return $licensesWithCount;
   }
 
+  public function getRelevantLicenseDecisionEvents($uploadTreeId)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "
+SELECT
+CD.pfile_fk,
+CD.uploadtree_fk,
+CD.date_added,
+CD.user_fk,
+GU.group_fk,
+CDS.meaning AS scope,
+CDT.meaning AS type,
+CL.rf_fk,
+LR.rf_shortname,
+CL.removed
+FROM clearing_decision CD
+INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
+INNER JOIN clearing_licenses CL ON CD.clearing_pk = CL.clearing_fk
+INNER JOIN clearing_decision_scopes CDS ON CD.scope_fk = CDS.scope_pk
+INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
+INNER JOIN license_ref LR ON LR.rf_pk = CL.rf_fk
+INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
+WHERE CD2.uploadtree_fk=$1
+GROUP BY CD.uploadtree_fk, CL.rf_fk, CD.user_fk, GU.group_fk, CL.removed
+ORDER BY CD.date_added ASC
+        ");
+    $res = $this->dbManager->execute(
+        $statementName,
+        array($uploadTreeId)
+    );
+    $result = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $result;
+  }
 
+  public function tmp()
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName, "SELECT * from clearing_decision");
+    return $this->dbManager->execute($statementName);
+  }
 }
