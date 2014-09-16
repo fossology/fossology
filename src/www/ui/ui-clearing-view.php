@@ -193,10 +193,7 @@ class ClearingView extends FO_Plugin
 
 
 
-  private function createClearingButtons(){
-
-    $uploadId = GetParm("upload", PARM_INTEGER);
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
+  private function createClearingButtons($uploadId,$uploadTreeId){
 
     $text = _("Audit License");
     $output = "<h3>$text</h3>\n";
@@ -229,6 +226,27 @@ class ClearingView extends FO_Plugin
     return $output;
   }
 
+  function OutputOpen($Type, $ToStdout)
+  {
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    if (empty($uploadId))
+    {
+      return;
+    }
+
+    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    if (empty($uploadTreeId))
+    {
+      $parent = $this->uploadDao->getUploadParent($uploadId);
+      if (!isset($parent)) return;
+
+      $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+
+      header('Location: ' . Traceback() . "&item=$uploadTreeId");
+    }
+    return parent::OutputOpen($Type, $ToStdout);
+  }
+
 
   /**
    * \brief display the license changing page
@@ -251,17 +269,20 @@ class ClearingView extends FO_Plugin
       $this->ViewLicenseText($licenseShortname);
       return;
     }
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
-    {
-      return;
-    }
+
     $uploadId = GetParm("upload", PARM_INTEGER);
 
     if (empty($uploadId))
     {
       return;
     }
+
+    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    if (empty($uploadTreeId))
+    {
+      return;
+    }
+
 
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
@@ -290,7 +311,7 @@ class ClearingView extends FO_Plugin
     $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
     $header .= "<br>";
     $header .= $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-    $header .= $this->createClearingButtons();
+    $header .= $this->createClearingButtons($uploadId,$uploadTreeId);
     list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
