@@ -22,7 +22,6 @@ typedef struct {
 typedef struct {
   DiffPoint text;
   DiffPoint search;
-  long diffSize;
   char* diffType;
 } DiffMatchInfo;
 
@@ -35,14 +34,13 @@ typedef struct {
   unsigned short percentual;
 } DiffResult;
 
-DiffMatchInfo lookForDiff(GArray* textTokens, GArray* searchTokens,
-        size_t iText, size_t iSearch, int maxAllowedDiff, int minTrailingMatches);
+int lookForDiff(GArray* textTokens, GArray* searchTokens,
+        size_t iText, size_t iSearch, int maxAllowedDiff, int minTrailingMatches,
+        DiffMatchInfo* result);
 
 int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                  GArray* searchTokens, size_t searchStart, size_t searchLength,
                  unsigned int numberOfWantedMatches);
-
-int findMatchFull(GArray* textTokens, GArray* searchTokens, size_t* matchStart);
 
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
                              size_t* textStartPosition,

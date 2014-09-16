@@ -46,9 +46,6 @@ gint compareMatchByRank (gconstpointer  a, gconstpointer  b);
 gint compareMatchIncuded (gconstpointer  a, gconstpointer  b);
 Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare);
 
-void appendMatchesBetween(File* file, License* license, GArray* matches,
-                          int maxAllowedDiff, int minTrailingMatches);
-
 GArray* findAllMatchesBetween(File* file, GArray* licenses,
                               int maxAllowedDiff, int minTrailingMatches);
 

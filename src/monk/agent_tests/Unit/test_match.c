@@ -78,15 +78,15 @@ int _matchEquals(Match* match, long refId, size_t start, size_t end){
 }
 
 void test_findAllMatchesDisjoint(){
-  File* file = getFileWithText("a^b^c^d");
+  File* file = getFileWithText("^e^a^b^c^d^e");
   GArray* licenses = getNLicensesWithText(3, "a", "b^c", "d");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
 
   CU_ASSERT_EQUAL(matches->len, 3);
   if (matches->len == 3){
-    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 0, 1))
-    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 1, 1, 3))
-    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 2, 3, 4))
+    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 1, 2))
+    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 1, 2, 4))
+    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 2, 4, 5))
   }
 
   matchesArray_free(matches);
@@ -159,22 +159,22 @@ void test_findAllMatchesAllIncluded(){
 
 void test_formatMatchArray() {
   DiffMatchInfo diff1 = (DiffMatchInfo){
-    .diffType = "a", .diffSize = 42,
+    .diffType = "a",
     .text = (DiffPoint) { .start = 1, .length = 2 },
     .search = (DiffPoint) { .start = 3, .length = 4 },
   };
   DiffMatchInfo diff2 = (DiffMatchInfo){
-    .diffType = "b", .diffSize = 42,
+    .diffType = "b",
     .text = (DiffPoint) { .start = 1, .length = 0 },
     .search = (DiffPoint) { .start = 3, .length = 4 },
   };
   DiffMatchInfo diff3 = (DiffMatchInfo){
-    .diffType = "b", .diffSize = 42,
+    .diffType = "b",
     .text = (DiffPoint) { .start = 2, .length = 2 },
     .search = (DiffPoint) { .start = 3, .length = 0 },
   };
   DiffMatchInfo diff4 = (DiffMatchInfo){
-    .diffType = "b", .diffSize = 42,
+    .diffType = "b",
     .text = (DiffPoint) { .start = 4, .length = 0 },
     .search = (DiffPoint) { .start = 3, .length = 0 },
   };
@@ -226,7 +226,6 @@ Match* _matchWithARankStartAndEnd(int type, double rank, size_t start, size_t en
     result->ptr.full->length = end - start;
   } else {
     DiffMatchInfo matchInfo;
-    matchInfo.diffSize = 42;
     matchInfo.diffType = NULL;
     matchInfo.text.start = start;
     matchInfo.text.length = end - start;

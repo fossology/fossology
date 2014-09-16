@@ -42,6 +42,8 @@ You should have received a copy of the GNU General Public License along with thi
 typedef struct {
   long bulkId;
   long uploadTreeId;
+  long uploadTreeLeft;
+  long uploadTreeRight;
   long licenseId;
   int uploadId;
   int removing;

@@ -211,27 +211,32 @@ class ChangeLicenseUtility extends Object
    * @return string
    * creates two licenseListSelects and buttons to transfer licenses and two text boxes
    */
-  public function createChangeLicenseForm($uploadTreeId) {
+  public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
 
-    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+    if ($uploadTreeId>0) {
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $preSelectedLicenses = null;
 
-    $preSelectedLicenses = null;
-    if (!empty($clearingDecWithLicenses))
-    {
-      $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
-      if (!empty ($filteredFileClearings))
+      if (!empty($clearingDecWithLicenses))
       {
-        $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
+        $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
+        if (!empty ($filteredFileClearings))
+        {
+          $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
+        }
       }
-    }
 
-    if ($preSelectedLicenses === null)
-    {
-      $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
-    }
+      if ($preSelectedLicenses === null)
+      {
+        $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
+      }
 
-    $this->filterLists($licenseRefs, $preSelectedLicenses);
+
+      $this->filterLists($licenseRefs, $preSelectedLicenses);
+    } else {
+      $preSelectedLicenses = array();
+    }
 
     $output = "";
 
@@ -289,7 +294,7 @@ class ChangeLicenseUtility extends Object
   }
 
 
-  public function createBulkForm($uploadTreeId) {
+  public function createBulkForm($uploadTreeId=-1) {
     $output = "";
     $allLicenseRefs = $this->licenseDao->getLicenseRefs();
     $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
@@ -311,5 +316,4 @@ class ChangeLicenseUtility extends Object
 
     return $output;
   }
-
 }

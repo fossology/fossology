@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "highlight.h"
 
 PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId);
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right);
 char* queryPFileForFileId(fo_dbManager* dbManager, long int fileId);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
