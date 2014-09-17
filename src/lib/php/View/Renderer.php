@@ -38,7 +38,7 @@ class Renderer extends Object
    * @param template name
    * @return output
    */
-  function renderTemplate($templateName){
+  public function renderTemplate($templateName){
     $filename = $this->templatePath . $templateName . '.htm';
     if (!file_exists($filename))
     {
@@ -59,7 +59,7 @@ class Renderer extends Object
   /*
    * rewrite all templates
    */
-  function updateTemplates() {
+  public function updateTemplates() {
     $folder = $this->templatePath;
     $extension = 'htc';
     foreach(glob("$folder/*.$extension") as $file) {
@@ -68,9 +68,9 @@ class Renderer extends Object
   }
 
   /*
-   * make *.php from *.htc by tranforming i18n tags and {{ }} 
+   * make *.htm from *.htc by tranforming i18n tags and {{ }} 
    */
-  function makeTemplate($filename){
+  public function makeTemplate($filename){
     if (!file_exists($filename))
     {
       return false;
@@ -88,7 +88,7 @@ class Renderer extends Object
    * \param text with i18n tag
    * \return translation if input is well-structured
    */
-  function parseI18n($haystack)
+  private function parseI18n($haystack)
   {
     $res = '';
     $offset = 0;
