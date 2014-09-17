@@ -242,7 +242,7 @@ class ClearingView extends FO_Plugin
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
 
-      header('Location: ' . Traceback() . "&item=$uploadTreeId");
+      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
     }
 
     $uploadTreeTableName= GetUploadtreeTableName($uploadId);
@@ -253,7 +253,7 @@ class ClearingView extends FO_Plugin
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
 
-      header('Location: ' . Traceback() . "&item=$uploadTreeId");
+      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
     }
     return parent::OutputOpen($Type, $ToStdout);
   }
