@@ -74,7 +74,27 @@ function  showLengend() {
     setOption("legendShow", true);
 }
 
+function calculateDivHeight(){
+    var viewportHeight =  $( window ).height();
+    var usedPixels =  $('#leftrightalignment').offset();
+    var availablePixels = viewportHeight-usedPixels.top;
+    $('#leftrightalignment').height(availablePixels);
+    var fixedPixelsLeft = 40;
+    var availablePixelsLeft = availablePixels - fixedPixelsLeft;
+
+    var fixedPixelsRight = 350;
+    var availablePixelsRight = availablePixels - fixedPixelsRight;
+
+    $('.boxnew').height(availablePixelsLeft);
+    $('.scrollable').css({ maxHeight: availablePixelsRight*0.20 + 'px' });
+    $('.scrollable2').css({ maxHeight: availablePixelsRight*0.30 + 'px' });
+
+}
+
+
 $(document).ready(function(){
+
+ calculateDivHeight();
   $(".legendHider").click(function(){
         hideLegend();
   });
@@ -89,3 +109,5 @@ $(document).ready(function(){
         hideLegend();
   }
 });
+
+$(window).resize( calculateDivHeight );

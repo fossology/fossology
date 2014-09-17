@@ -329,8 +329,8 @@ class ClearingView extends FO_Plugin
 
     $buttons = "<button class=\"legendHider\">"._("Hide Legend")."</button><button class=\"legendShower\">"._("Show Legend")."</button>";
 
-    $output .= "<table width='100%' border='0' padding='0px'><tr><td  padding='0px' style='position:relative'><div class='centered'>$pageMenu $buttons</div>
-      <div class='boxnew'>$text</div>$legendBox</td><td class='headerBox'><div>$header</div></td></tr></table>";
+    $output .= "<div id='leftrightalignment' name='leftrightalignment'  ><table  border='0' padding='0px' style='height: 100%; width: 100%'><tr><td  padding='0px' style='position:relative; height: 100%'><div class='centered'>$pageMenu $buttons</div>
+      <div class='boxnew'>$text</div>$legendBox</td><td class='headerBox'><div>$header</div></td></tr></table></div>";
 
     $output .= $this->createJavaScriptBlock();
     print $output;
