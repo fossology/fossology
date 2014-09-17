@@ -329,8 +329,8 @@ class ClearingView extends FO_Plugin
 
     $buttons = "<button class=\"legendHider\">"._("Hide Legend")."</button><button class=\"legendShower\">"._("Show Legend")."</button>";
 
-    $output .= "<table width='100%' border='0' padding='0px'><tr><td  padding='0px' style='position:relative'><div class='centered'>$pageMenu $buttons</div>
-      <div class='boxnew'>$text</div>$legendBox</td><td class='headerBox'><div>$header</div></td></tr></table>";
+    $output .= "<div id='leftrightalignment' name='leftrightalignment'  ><table  border='0' padding='0px' style='height: 100%; width: 100%'><tr><td  padding='0px' style='position:relative; height: 100%'><div class='centered'>$pageMenu $buttons</div>
+      <div class='boxnew'>$text</div>$legendBox</td><td class='headerBox'><div>$header</div></td></tr></table></div>";
 
     $output .= $this->createJavaScriptBlock();
     print $output;
@@ -376,6 +376,23 @@ class ClearingView extends FO_Plugin
   {
     $text = _("Set the concluded licenses for this upload");
     menu_insert("Browse-Pfile::Clearing",0,$this->Name,$text);
+    menu_insert("ChangeLicense::View", 5, "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+    menu_insert("View::Audit", 35, $this->Name . Traceback_parm_keep(array("upload", "item", "show")), $text);
+    $text = _("View file information");
+    menu_insert("ChangeLicense::Info",1, "view_info". Traceback_parm_keep(array("upload","item","format")),$text);
+    $text = _("View Copyright/Email/Url info");
+    menu_insert("ChangeLicense::Copyright/Email/Url", 1, "copyrightview". Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
+    $text = _("Browse by buckets");
+    menu_insert("ChangeLicense::Bucket Browser",1,"bucketbrowser". Traceback_parm_keep(array("format","page","upload","item","bp"),$text));
+    $text = _("Copyright/Email/URL One-shot, real-time analysis");
+    menu_insert("ChangeLicense::One-Shot Copyright/Email/URL", 3, "agent_copyright_once", $text);
+    $text = _("Nomos One-shot, real-time license analysis");
+    menu_insert("ChangeLicense::One-Shot License", 3, "agent_nomos_once". Traceback_parm_keep(array("format","item")), $text);
+
+    menu_insert("ChangeLicense::[BREAK]",4);
+
+
+
 
     return 0;
   } // RegisterMenus()

@@ -1156,7 +1156,7 @@
 
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"group_fk\" IS 'group id';";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"group_fk\" int8;";
-  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "";
+  $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref';";

@@ -191,6 +191,28 @@ class DbManager extends Object
     return $this->dbDriver->fetchAll($res);
   }
 
+  /**
+   * @param string tableName
+   * @param string keyColumn
+   * @param string valueColumn
+   * @param string sqlLog
+   */
+  public function createMap($tableName,$keyColumn,$valueColumn,$sqlLog=''){
+  if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keyColumn,$valueColumn";
+    }
+    $this->prepare($sqlLog, "select status_pk,meaning from upload_status");
+    $res = $this->execute($sqlLog);
+    $types = array();
+    while ($row = $this->fetchArray($res))
+    {
+      $types[$row['status_pk']] = $row['meaning'];
+    }
+    $this->freeResult($res);
+    return $types;
+  }
+  
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
