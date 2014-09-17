@@ -120,6 +120,14 @@ class UploadDao extends Object
     pg_free_result($res);
     return $clearingTypes;
   }
+  
+  /**
+   * @return array
+   */
+  public function getStatusTypeMap()
+  {
+    return $this->dbManager->createMap('upload_status', 'status_pk', 'meaning');
+  }
 
   /**
    * @param $uploadId
