@@ -27,8 +27,8 @@ typedef struct {
 
 GArray* tokenize(char* inputString, const char* delimiters);
 
-int streamTokenize(char * inputChunk, int inputSize, const char * delimiters, 
-        GArray ** output, Token ** remainder);
+int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
+        GArray** output, Token** remainder);
 
 #define tokenEquals(a, b) (((Token*) a)->hashedContent == ((Token*) b)->hashedContent)
 

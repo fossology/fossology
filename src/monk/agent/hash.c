@@ -12,12 +12,12 @@ You should have received a copy of the GNU General Public License along with thi
 #include "hash.h"
 #include <stdio.h>
 
-uint32_t hash(char * string) {
+uint32_t hash(char* string) {
 
   uint32_t result = hash_init();
 
-  char * ptr = string;
-  
+  char* ptr = string;
+
   while (*ptr) {
     hash_add(ptr, &result);
     ptr++;
@@ -30,6 +30,6 @@ inline uint32_t hash_init() {
   return 5231;
 }
 
-inline void hash_add(char * value, uint32_t * currentHash) {
-  *currentHash = ((*currentHash << 6) + *currentHash) + * value;
+inline void hash_add(const char* value, uint32_t* currentHash) {
+  *currentHash = ((*currentHash << 6) + *currentHash) + *value;
 }
