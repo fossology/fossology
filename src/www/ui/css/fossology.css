@@ -225,8 +225,7 @@ html, body
     border: 5px solid #f2f2f2;
     display: inline-block;
     float: left;
-    /*height: 700px;*/
-    height: 100%;
+    height: 700px;
     overflow: auto;
     padding: 0px;
     position: relative;
@@ -240,16 +239,22 @@ html, body
 }
 
 .scrollable {
-    overflow: auto;
-    max-height: 20%;
+    /*overflow: auto;*/
+    /*max-height: 20%;*/
 }
 
 .scrollable2 {
-    overflow: auto;
-    max-height: 30%;
+    /*overflow: auto;*/
+    /*max-height: 30%;*/
 }
 
 .headerBox {
-    width: 40%;
-    /*max-width: 20%;*/
+    width: 99%;
+    background-color: #ffffff;
+    display: inline-block;
+    float: right;
+    height: 700px;
+    overflow: auto;
+    padding-left: 1px;
+    text-align: left;
 }
