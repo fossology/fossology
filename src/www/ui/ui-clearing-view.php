@@ -121,6 +121,7 @@ class ClearingView extends FO_Plugin
 
 
   /**
+   * @param $uploadId
    * @param $uploadTreeId
    * @param $selectedAgentId
    * @param $licenseId
@@ -128,7 +129,7 @@ class ClearingView extends FO_Plugin
    * @param $hasHighlights
    * @return string
    */
-  private function createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights)
+  private function createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights)
   {
     $output = "";
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
@@ -136,8 +137,10 @@ class ClearingView extends FO_Plugin
     if (!$fileTreeBounds->containsFiles())
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      list($outputTMP, $foundNothing) = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses);
+      list($outputTMP, $foundNothing) = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses); //TODO found nothing is now redundant... if ui_view_license gets deleted remove it
       $output .= $outputTMP;
+
+      $output .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);
 
       $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
       $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
@@ -193,7 +196,7 @@ class ClearingView extends FO_Plugin
 
 
 
-  private function createClearingButtons($uploadId,$uploadTreeId){
+  private function createClearingFormAndButtons($uploadId,$uploadTreeId){
 
     $text = _("Audit License");
     $output = "<h3>$text</h3>\n";
@@ -210,11 +213,6 @@ class ClearingView extends FO_Plugin
 
       $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
       $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";
-
-      $text = _("Clearing History:");
-      $output .= "<h3>$text</h3>";
-      $output .= $this->createClearingHistoryTable($uploadTreeId);
-
     } else
     {
       $text = _("Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.");
@@ -225,6 +223,19 @@ class ClearingView extends FO_Plugin
 
     return $output;
   }
+
+  private function createWrappedClearingHistoryTable($uploadId,$uploadTreeId) {
+    $permission = GetUploadPerm($uploadId);
+     if ($permission >= PERM_WRITE)
+    {
+      $text = _("Clearing History:");
+      $output = "<h3>$text</h3>";
+      $output .= $this->createClearingHistoryTable($uploadTreeId);
+      return $output;
+    }
+    return "";
+  }
+
 
   function OutputOpen($Type, $ToStdout)
   {
@@ -317,12 +328,13 @@ class ClearingView extends FO_Plugin
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
-    $header = "";
-    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
-    $header .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
-    $header .= "<br>";
-    $header .= $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-    $header .= $this->createClearingButtons($uploadId,$uploadTreeId);
+    $licenseInformation = "";
+    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
+    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
+    $licenseInformation .= "<br>";
+    $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+   // $licenseInformation .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);
+    $licenseInformation .= $this->createWrappedClearingHistoryTable($uploadId,$uploadTreeId);
     list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
@@ -337,7 +349,7 @@ class ClearingView extends FO_Plugin
                 <div class='boxnew'>$text</div>$legendBox
               </td>
               <td class='headerBox'>
-                 <div>$header</div>
+                 <div>$licenseInformation</div>
               </td>
             </tr>
         </table>

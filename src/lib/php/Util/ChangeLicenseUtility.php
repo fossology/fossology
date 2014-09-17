@@ -180,7 +180,11 @@ class ChangeLicenseUtility extends Object
     $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
     foreach ($licenseRefArray as $licenseRef)
     {
-      $output .= "<option value=\"" . $licenseRef->getId() . "\">" . $licenseRef->getFullName() . "</option>\n";
+      $output .= "<option value=\"" . $licenseRef->getId() . "\" ".
+                        " title= \"".$licenseRef->getFullName()."\" ".
+                  ">"
+                      . $licenseRef->getShortName() .
+                "</option>\n";
     }
     $output .= "</select>";
     return $output;
