@@ -521,7 +521,7 @@ class ui_browse_license extends FO_Plugin
         $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
         $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
-        $tableData[] = array($fileName, $licenseList, $editedLicenseList, $fileListLinks);
+        $tableData[] = array($fileName, $licenseList, $editedLicenseList,"R","8/1007", $fileListLinks);
       }
 
       $AddInfoText .= "<br/><span id='bulkIdResult' hidden></span>";
@@ -540,6 +540,8 @@ class ui_browse_license extends FO_Plugin
           array("sTitle" => _("Files"), "sClass" => "left"),
           array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
           array("sTitle" => _("Edited Results"), "sClass" => "left"),
+          array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus", "bSearchable" => false, "sWidth" => "5%"),
+          array("sTitle" => _("Files Cleared"), "sClass" => "left", "bSearchable" => false),
           array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "14.6%")
       );
 
