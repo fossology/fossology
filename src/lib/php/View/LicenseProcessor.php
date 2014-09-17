@@ -91,8 +91,8 @@ class LicenseProcessor extends Object
 
           $shortName = $license->getShortName();
 
-          $licenseFileId = $match->getClearingId();
-          $extractedMatches[$fileId][$agentName][$shortName][$agentId][$licenseFileId] = $content;
+          $highlightId = $match->getClearingId();
+          $extractedMatches[$fileId][$agentName][$shortName][$agentId][$highlightId] = $content;
         }
       }
     }

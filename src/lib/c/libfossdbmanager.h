@@ -140,6 +140,28 @@ int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName);
 char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string);
 
 /*!
+ * fo_dbManager_begin()
+ *
+ * \brief begins a transaction
+ *
+ * \param dbManager  an instance of DB manager to be used
+ *
+ * \return boolean indicating success
+ */
+int fo_dbManager_begin(fo_dbManager* dbManager);
+
+/*!
+ * fo_dbManager_commit()
+ *
+ * \brief commits the transaction
+ *
+ * \param dbManager  an instance of DB manager to be used
+ *
+ * \return boolean indicating success
+ */
+int fo_dbManager_commit(fo_dbManager* dbManager);
+
+/*!
  * fo_dbManager_Exec_printf()
  *
  * \brief Executes a query

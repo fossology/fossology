@@ -242,7 +242,7 @@ class ui_view extends FO_Plugin
    * \brief Given a file handle, display a "hex dump" of the file.
    * Output goes to stdout!
    */
-  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions)
+  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = null)
   {
     print $this->getHex($inputFile,$startOffset,$outputLength,$splitPositions);
   }
@@ -251,7 +251,7 @@ class ui_view extends FO_Plugin
    * \brief Given a file handle, display a "hex dump" of the file.
    * Output goes to stdout!
    */
-  function getHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions)
+  function getHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = null)
   {
     if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
     {

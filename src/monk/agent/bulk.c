@@ -190,53 +190,70 @@ int handleBulkMode(MonkState* state, long bulkId) {
 }
 
 void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
-  PGresult* highlightResult = fo_dbManager_ExecPrepared(
+  if (!fo_dbManager_begin(state->dbManager))
+    return;
+
+  PGresult* clearingDecisionIds = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
-      "saveBulkResult:highlight",
-      "INSERT INTO highlight_bulk(lrb_fk, pfile_fk, start, len) VALUES($1,$2,$3,$4)",
-      long, long, size_t, size_t
-    ),
-    state->bulkArguments->bulkId,
-    file->id,
-    matchInfo->text.start,
-    matchInfo->text.length
-  );
-
-  /* ignore errors */
-  if (highlightResult)
-    PQclear(highlightResult);
-
-  /* we add a clearing decision for each uploadtree_fk corresponding to this pfile_fk
-   * For each bulk scan scan we only have a n the other hand we have only one license per clearing decision
-   */
-  PGresult* clearingInsertResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      state->dbManager,
-      "saveBulkResult:clearing",
-      "WITH clearingIds AS ("
-      " INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
-      "  SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
-      "  FROM uploadtree, clearing_decision_types, clearing_decision_scopes"
-      "  WHERE upload_fk = $3 AND pfile_fk = $1 AND lft BETWEEN $6 AND $7"
-      "  AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
-      "  AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
-      " RETURNING clearing_pk "
-      ")"
-      "INSERT INTO clearing_licenses(clearing_fk, rf_fk, removed) "
-      "SELECT clearing_pk,$4,$5 FROM clearingIds",
-      long, long, int, long, int, long, long
+      "saveBulkResult:decision",
+      "INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
+      " SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
+      " FROM uploadtree, clearing_decision_types, clearing_decision_scopes"
+      " WHERE upload_fk = $3 AND pfile_fk = $1 AND lft BETWEEN $4 AND $5"
+      " AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
+      " AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
+      "RETURNING clearing_pk ",
+      long, int, long, int, long
     ),
     file->id,
     state->bulkArguments->userId,
     state->bulkArguments->uploadId,
-    license->refId,
-    state->bulkArguments->removing ? 1 : 0,
     state->bulkArguments->uploadTreeLeft,
     state->bulkArguments->uploadTreeRight
   );
 
-  /* ignore errors */
-  if (clearingInsertResult)
-    PQclear(clearingInsertResult);
+  if (clearingDecisionIds) {
+    for (int i=0; i<PQntuples(clearingDecisionIds);i++) {
+      long clearingId = atol(PQgetvalue(clearingDecisionIds,i,0));
+
+      PGresult* highlightResult = fo_dbManager_ExecPrepared(
+        fo_dbManager_PrepareStamement(
+          state->dbManager,
+          "saveBulkResult:highlight",
+          "INSERT INTO highlight_bulk(clearing_fk, lrb_fk, pfile_fk, start, len) VALUES($1,$2,$3,$4,$5)",
+          long, long, long, size_t, size_t
+        ),
+        clearingId,
+        state->bulkArguments->bulkId,
+        file->id,
+        matchInfo->text.start,
+        matchInfo->text.length
+      );
+
+      /* ignore errors */
+      if (highlightResult)
+        PQclear(highlightResult);
+
+      PGresult* clearingLicensesResult = fo_dbManager_ExecPrepared(
+        fo_dbManager_PrepareStamement(
+          state->dbManager,
+          "saveBulkResult:licenses",
+          "INSERT INTO clearing_licenses(clearing_fk, rf_fk, removed) "
+          "VALUES ($1,$2,$3)",
+          long, long, int
+        ),
+        clearingId,
+        license->refId,
+        state->bulkArguments->removing ? 1 : 0
+      );
+
+      /* ignore errors */
+      if (clearingLicensesResult)
+        PQclear(clearingLicensesResult);
+    }
+    PQclear(clearingDecisionIds);
+  }
+
+  fo_dbManager_commit(state->dbManager);
 }
