@@ -146,7 +146,7 @@ void test_extractLicenses_One() {
   CU_ASSERT_STRING_EQUAL(license.shortname, gpl3);
 
   assertTokens(license.tokens,
-          "GNU", "GENERAL", "PUBLIC", "LICENSE", "Version", "3,", NULL);
+          "gnu", "general", "public", "license", "version", "3,", NULL);
 
   freeLicenseArray(licenses);
   PQclear(licensesResult);
@@ -187,9 +187,9 @@ void test_extractLicenses_Two() {
   CU_ASSERT_STRING_EQUAL(license1.shortname, gpl2);
 
   assertTokens(license0.tokens,
-          "GNU", "GENERAL", "PUBLIC", "LICENSE", "Version", "3,", NULL);
+          "gnu", "general", "public", "license", "version", "3,", NULL);
   assertTokens(license1.tokens,
-          "GNU", "General", "Public", "License,", "version", "2", NULL);
+          "gnu", "general", "public", "license,", "version", "2", NULL);
 
   freeLicenseArray(licenses);
   PQclear(licensesResult);

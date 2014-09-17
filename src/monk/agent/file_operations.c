@@ -41,8 +41,7 @@ GArray * readTokensFromFile(char * fileName, char * delimiters) {
       break;
     }
   }
-  if ((remainder) && (remainder->length > 0))
-    g_array_append_val(tokens, *remainder);
+  streamTokenize(NULL, 0, NULL, &tokens, &remainder);
 
   if (remainder)
     free(remainder);

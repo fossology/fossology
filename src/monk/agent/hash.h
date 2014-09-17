@@ -13,11 +13,11 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include <stdint.h>
 
-uint32_t hash (char * string);
+uint32_t hash(char* string);
 
-uint32_t hash_init ();
+uint32_t hash_init();
 
-void hash_add (char * value, uint32_t * currentHash);
+void hash_add(const char* value, uint32_t* currentHash);
 
 #endif	/* HASH_H */
 

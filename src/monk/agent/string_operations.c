@@ -34,12 +34,18 @@ inline int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
-int streamTokenize(char * inputChunk, int inputSize, const char * delimiters,
-        GArray ** output, Token ** remainder) {
-  GArray * tokens = *output;
-  Token * stateToken;
+int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
+        GArray** output, Token** remainder) {
+  GArray* tokens = *output;
+  Token* stateToken;
 
   unsigned int initialTokenCount = tokens->len;
+
+  if (!inputChunk) {
+    stateToken = *remainder;
+    if ((stateToken) && (stateToken->length > 0))
+      g_array_append_val(tokens, *stateToken);
+  }
 
   if (!*remainder) {
     //initialize state
@@ -58,7 +64,7 @@ int streamTokenize(char * inputChunk, int inputSize, const char * delimiters,
     return -1;
   }
 
-  char * ptr = inputChunk;
+  const char* ptr = inputChunk;
 
   while (ptr - inputChunk < inputSize) {
     if (isDelim(*ptr, delimiters)) {
@@ -71,7 +77,8 @@ int streamTokenize(char * inputChunk, int inputSize, const char * delimiters,
         stateToken->removedBefore++;
       }
     } else {
-      hash_add(ptr, &(stateToken->hashedContent));
+      char lowerChar = g_ascii_tolower(*ptr);
+      hash_add(&lowerChar, &(stateToken->hashedContent));
       stateToken->length++;
     }
     ptr++;
@@ -83,19 +90,23 @@ int streamTokenize(char * inputChunk, int inputSize, const char * delimiters,
 GArray* tokenize(char* inputString, const char* delimiters) {
   GArray* tokenArray = tokens_new();
 
-  char* remainder = NULL;
-  char* currentPos = inputString;
-  Token token;
-  char * tokenString = strtok_r(inputString, delimiters, &remainder);
-  while (tokenString != NULL) {
-    token.hashedContent = hash(tokenString);
-    token.length = strlen(tokenString);
-    token.removedBefore = tokenString - currentPos;
+  Token* remainder = NULL;
 
-    currentPos += token.removedBefore + token.length;
-    g_array_append_val(tokenArray, token);
-    tokenString = strtok_r(NULL, delimiters, &remainder);
+  size_t inputLength = strlen(inputString);
+
+#define CHUNKS 4096
+  size_t chunksCount = inputLength / CHUNKS;
+  for (size_t i = 0; i < chunksCount; i++) {
+    int addedTokens = streamTokenize(inputString + i * CHUNKS, CHUNKS, delimiters, &tokenArray, &remainder);
+    if (addedTokens < 0) {
+      printf("WARNING: can not complete tokenizing of '%.30s...'\n", inputString);
+      break;
+    }
   }
+  streamTokenize(inputString + chunksCount * CHUNKS, MIN(CHUNKS, inputLength - chunksCount * CHUNKS),
+                 delimiters, &tokenArray, &remainder);
+  streamTokenize(NULL, 0, NULL, &tokenArray, &remainder);
+#undef CHUNKS
 
   return tokenArray;
 }

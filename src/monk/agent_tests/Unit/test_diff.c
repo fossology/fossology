@@ -390,18 +390,15 @@ int _test_lookForRemovals(char * text, char * search,
 
 void test_lookForReplacesNotOverflowing() {
   int max = MAX_ALLOWED_DIFF_LENGTH+1;
-  char * testText = malloc((max)*3+1);
-  char * testSearch = malloc((max)*3+1);
+  int length = max + 1;
+  char * testText = malloc((max)*2+1);
+  char * testSearch = malloc((max)*2+1);
 
   char * ptr1 =testSearch;
   char * ptr2 =testText;
-  for(int i = 0; i<max; i++) {
-    *ptr1='A'+(i%26);
-    *ptr2='a'+(i%26);
-    ptr1++;
-    ptr2++;
-    *ptr1='a'+((i/26)%26);
-    *ptr2='A'+((i/26)%26);
+  for(int i = 0; i<length; i++) {
+    *ptr1='a';
+    *ptr2='b';
     ptr1++;
     ptr2++;
     *ptr1='^';
@@ -409,11 +406,9 @@ void test_lookForReplacesNotOverflowing() {
     ptr1++;
     ptr2++;
   }
-  int matchPosition = max+1;
-  *(testSearch + 3*(matchPosition-1))='m';
-  *(testSearch + 3*(matchPosition-1)+1)='m';
-  *(testText + 3)='m';
-  *(testText+ 3+1)='m';
+  int matchPosition = length;
+  *(testSearch + 2*(matchPosition-1))='m';
+  *(testText + 2)='m';
   *ptr1 = '\0';
   *ptr2 = '\0';
 
