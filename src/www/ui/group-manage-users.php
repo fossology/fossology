@@ -26,7 +26,7 @@ define("TITLE_group_manage_users", _("Manage Group Users"));
  * \brief edit group user permissions
  */
 class group_manage_users extends FO_Plugin {
-  var $groupPermissions = array(-1 => "None", 0=>"User", 1=>"Admin");
+  var $groupPermissions = array(-1 => "None", 0=>"User", 1=>"Admin", 2=>"Advisor");
           
   function __construct(){
     $this->Name = "group_manage_users";
@@ -104,17 +104,17 @@ class group_manage_users extends FO_Plugin {
       }
       $this->VerifyAccess($user_pk, $group_pk);
 
-      if ($perm===0 or $perm===1)
-      {
-        $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
-                array($perm,$gum_pk),$stmt=__METHOD__.".updatePermInGUM");
-      } 
-      else if ($perm === -1)
+      if ($perm === -1)
       {
         $dbManager->prepare($stmt=__METHOD__.".delByGUM",
                           "delete from group_user_member where group_user_member_pk=$1");
         $dbManager->freeResult($dbManager->execute($stmt,array($gum_pk)));
       }
+      else if (array_key_exists ($perm, $this->groupPermissions))
+      {
+        $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
+                array($perm,$gum_pk),$stmt=__METHOD__.".updatePermInGUM");
+      } 
     }
     else if (!empty($newuser) && (!empty($group_pk)))
     {

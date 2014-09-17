@@ -126,8 +126,11 @@ function rejectorColumn ( source, type, val ) {
     if (source[1]){
       return 'rejected by <span title="'+source[3]+'">'+source[2]+'</span>';
     }
-    else{
+    else if (source[0]) {
       return '<a class="button" onclick="openRejectorModal('+source[0]+')"><img alt="move" src="images/icons/close_32.png" class="icon-small"/>reject</a>';
+    }
+    else {
+      return 'accepted';
     }
   }
   if (type==='sort') {
@@ -155,6 +158,10 @@ function mysuccess4(){
 }
 
 function changeTableEntry(sel, uploadId, columnName) {
+  if(columnName=='status_fk' && sel.value==4){
+    openRejectorModal(uploadId);
+  }
+  else {
     var post_data = {
         "columnName" : columnName,
         "uploadId": uploadId,
@@ -166,6 +173,7 @@ function changeTableEntry(sel, uploadId, columnName) {
         data: post_data,
         success: mysuccess
     });
+  }
 }
 
 function filterAssignee() {
