@@ -13,7 +13,7 @@ filter PBGRP = Applications/Engineering
 filter PBLIC = GPLv2
 
 # PBDEP is replaced by the list of dependencies
-filter PBDEP = file 
+filter PBDEP = file php-xml 
 
 # PBBUILDDEP is replaced by the list of build dependencies
 filter PBBUILDDEP = perl-Text-Template subversion file
