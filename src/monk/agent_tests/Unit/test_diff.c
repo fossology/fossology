@@ -37,7 +37,7 @@ int token_search_diff(char * text, char* search,
   GArray * removals = g_array_new(TRUE, FALSE, sizeof (size_t));
 
   size_t textStartPosition = 0;
-  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 0, 50, 1); //TODO test searchStartPosition
+  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 50, 1); //TODO test searchStartPosition
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
     return diffResult != NULL;
@@ -257,7 +257,7 @@ void test_token_search_diffs() {
           ));
 }
 
-int token_search(char * text, char* search, size_t expectedStart, size_t expectedNextPosition) {
+int token_search(char * text, char* search, size_t expectedStart) {
   char* textCopy = g_strdup(text);
   char* searchCopy = g_strdup(search);
 
@@ -266,16 +266,12 @@ int token_search(char * text, char* search, size_t expectedStart, size_t expecte
 
   size_t matchStart = 0;
   size_t textStartPosition = 0;
-  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 0, 0, 1);
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 0, 1);
 
   if (diffResult) {
     matchStart = g_array_index(diffResult->matchedInfo, DiffPoint, 0).start;
   }
   CU_ASSERT_EQUAL(expectedStart, matchStart);
-  CU_ASSERT_EQUAL(textStartPosition, expectedNextPosition);
-  if (textStartPosition != expectedNextPosition) {
-    printf("%zu != %zu\n", textStartPosition, expectedNextPosition);
-  }
 
   g_array_free(tokenizedText, TRUE);
   g_array_free(tokenizedSearch, TRUE);
@@ -286,18 +282,18 @@ int token_search(char * text, char* search, size_t expectedStart, size_t expecte
 }
 
 void test_token_search() {
-  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "one", 0, 1));
-  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "bar", 4, 5));
-  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "two", 1, 2));
-  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "3^foo", 2, 4));
+  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "one", 0));
+  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "bar", 4));
+  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "two", 1));
+  CU_ASSERT_TRUE(token_search("^one^^two^^3^^foo^^bar^", "3^foo", 2));
 
-  CU_ASSERT_FALSE(token_search("^^", "one", 0, 0));
-  CU_ASSERT_FALSE(token_search("^one^", "^^", 0, 1));
+  CU_ASSERT_FALSE(token_search("^^", "one", 0));
+  CU_ASSERT_FALSE(token_search("^one^", "^^", 0));
 
-  CU_ASSERT_FALSE(token_search("^one^^two^^3^^foo^^bar^", "3^^foo^two", 0, 3));
+  CU_ASSERT_FALSE(token_search("^one^^two^^3^^foo^^bar^", "3^^foo^two", 0));
 
-  CU_ASSERT_FALSE(token_search("^3^one^^two^^3^^foo^^bar^", "3^^foo", 0, 1));
-  CU_ASSERT_TRUE(token_search("one^^two^^3^^foo^^bar^", "3^^foo", 2, 4));
+  CU_ASSERT_FALSE(token_search("^3^one^^two^^3^^foo^^bar^", "3^^foo", 0));
+  CU_ASSERT_TRUE(token_search("one^^two^^3^^foo^^bar^", "3^^foo", 2));
 }
 
 void test_matchNTokens(){

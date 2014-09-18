@@ -80,7 +80,7 @@ int _matchEquals(Match* match, long refId, size_t start, size_t end){
 void test_findAllMatchesDisjoint(){
   File* file = getFileWithText("^e^a^b^c^d^e");
   GArray* licenses = getNLicensesWithText(3, "a", "b^c", "d");
-  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
   if (matches->len == 3){
@@ -94,10 +94,29 @@ void test_findAllMatchesDisjoint(){
   licenses_free(licenses);
 }
 
+void test_findDiffsAtBeginning(){
+  File* file = getFileWithText("^e^a^b^c^d^e");
+  GArray* licenses = getNLicensesWithText(3, "a", "e^b^c^d^e");
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
+
+  CU_ASSERT_EQUAL(matches->len, 2);
+  if (matches->len == 2){
+    CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 1, 2))
+    Match* expectedDiff = g_array_index(matches, Match*, 1);
+    CU_ASSERT_TRUE(_matchEquals(expectedDiff, 1, 2, 6));
+    CU_ASSERT_EQUAL_FATAL(expectedDiff->type, MATCH_TYPE_DIFF);
+    CU_ASSERT_EQUAL(expectedDiff->ptr.diff->matchedInfo->len, 2);
+  }
+
+  matchesArray_free(matches);
+  file_free(file);
+  licenses_free(licenses);
+}
+
 void test_findAllMatchesWithDiff(){
   File* file = getFileWithText("a^b^c^d^e^f");
   GArray* licenses = getNLicensesWithText(3, "a^c^d", "a^b^d^e", "d", "e^f");
-  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
   if (matches->len == 1){
@@ -112,7 +131,7 @@ void test_findAllMatchesWithDiff(){
 void test_findAllMatchesTwoGroups(){
   File* file = getFileWithText("a^b^c^d^e^f^g");
   GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^d", "d", "e", "f", "e^f^g");
-  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 2);
   if (matches->len == 2){
@@ -128,7 +147,7 @@ void test_findAllMatchesTwoGroups(){
 void test_findAllMatchesTwoGroupsWithDiff(){
   File* file = getFileWithText("a^b^c^d^e^f^g");
   GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^e", "d", "e", "f", "e^f^g");
-  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
   if (matches->len == 3){
@@ -145,7 +164,7 @@ void test_findAllMatchesTwoGroupsWithDiff(){
 void test_findAllMatchesAllIncluded(){
   File* file = getFileWithText("a^b^c^d");
   GArray* licenses = getNLicensesWithText(3, "a^b^c^d", "b^c", "d");
-  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1);
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
   if (matches->len == 1){
@@ -349,6 +368,7 @@ void test_filterMatchesWithTwoGroups(){
 
 CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with disjoint full matches:", test_findAllMatchesDisjoint},
+  {"Testing match of all licenses with diff at beginning", test_findDiffsAtBeginning},
   {"Testing match of all licenses with included full matches:", test_findAllMatchesAllIncluded},
   {"Testing match of all licenses with two included group:", test_findAllMatchesTwoGroups},
   {"Testing match of all licenses with two included group and diffs:", test_findAllMatchesTwoGroupsWithDiff},
