@@ -22,6 +22,7 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\View\Renderer;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
@@ -50,7 +51,7 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
     $dbManager = new DbManager( new Logger(__FILE__));
     $newEditedLicenseSelector = new NewestEditedLicenseSelector();
     $uploadDao =  new UploadDao($dbManager);
-    $clu = new ChangeLicenseUtility($newEditedLicenseSelector, $uploadDao, new LicenseDao($dbManager), new ClearingDao($dbManager,$newEditedLicenseSelector, $uploadDao) );
+    $clu = new ChangeLicenseUtility($newEditedLicenseSelector, $uploadDao, new LicenseDao($dbManager), new ClearingDao($dbManager,$newEditedLicenseSelector, $uploadDao), new Renderer() );
     $clu->filterLists($bigList, $smallList);
     
     $cloneBigListArray = $bigListArray;
@@ -71,19 +72,6 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
     assertThat($smallList,is(equalTo($shortListExpect)));
     assertThat($bigList,is(equalTo($bigListExpect)));
   }
-  
-  function testCreateLicenseSwitchButtons()
-
-  {
-    $dbManager = new DbManager( new Logger(__FILE__));
-    $newEditedLicenseSelector = new NewestEditedLicenseSelector();
-    $uploadDao =  new UploadDao($dbManager);
-    $clu = new ChangeLicenseUtility($newEditedLicenseSelector, $uploadDao, new LicenseDao($dbManager), new ClearingDao($dbManager,$newEditedLicenseSelector, $uploadDao) );
-    $buttons = $clu->createLicenseSwitchButtons();
-    assertThat(str_replace(' ', '', $buttons), containsString('moveLicense(this.form.licenseLeft,this.form.licenseRight)'));
-    assertThat(str_replace(' ', '', $buttons), containsString('moveLicense(this.form.licenseRight,this.form.licenseLeft)'));
-  }
-
   
 }
  
