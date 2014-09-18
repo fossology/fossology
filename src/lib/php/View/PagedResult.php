@@ -44,6 +44,7 @@ abstract class PagedResult
     $this->text = "";
     $this->startOffset = $startOffset;
     $this->currentOffset = $startOffset;
+    $this->empty = true;
   }
 
   /**
@@ -59,6 +60,7 @@ abstract class PagedResult
    */
   public function appendContentText($text)
   {
+    $this->empty = false;
     $this->currentOffset += strlen($text);
     $this->appendMetaText($this->renderContentText($text));
   }
@@ -92,7 +94,7 @@ abstract class PagedResult
    */
   public function isEmpty()
   {
-    return $this->currentOffset === $this->startOffset;
+    return $this->empty;
   }
 
   /**
