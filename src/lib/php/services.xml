@@ -72,6 +72,7 @@ without any warranty.
             <argument type="service" id="dao.upload"/>
             <argument type="service" id="dao.license"/>
             <argument type="service" id="dao.clearing"/>
+            <argument type="service" id="renderer"/>
         </service>
 
         <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">

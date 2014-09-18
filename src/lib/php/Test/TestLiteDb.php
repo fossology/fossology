@@ -37,7 +37,7 @@ class TestLiteDb
   /** @var string logFileName */
   private $logFileName;
 
-  function __construct()
+  function __construct($dbFileName = null)
   {
     if (!class_exists('Sqlite3'))
     {
@@ -45,12 +45,22 @@ class TestLiteDb
     }
 
     date_default_timezone_set("UTC");
-    $this->dbFileName = ":memory:"; // "fosstest_" . date("Ymdd") . "_" . rand() . '.db';
+    if (!isset($dbFileName))
+    {
+      $dbFileName = ":memory:";
+    } else
+    {
+      if (file_exists($dbFileName))
+      {
+        unlink($dbFileName);
+      }
+    }
+    $this->dbFileName = $dbFileName;
     
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
     $logger = $container->get('logger');
-//    $logger = new Logger('default');
+    $logger = new Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
     
