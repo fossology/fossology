@@ -22,13 +22,26 @@ You should have received a copy of the GNU General Public License along with thi
 #include "_squareVisitor.h"
 
 inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
-                                     int maxAllowedDiff, int minTrailingMatches) {
+                                     unsigned maxAllowedDiff, unsigned minTrailingMatches, unsigned maxLeadingDiff) {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
-  for (unsigned int i = 0; i < licenses->len; i++) {
-    License* license = &g_array_index(licenses, License, i);
+  GArray* textTokens = file->tokens;
+  guint textLength = textTokens->len;
 
-    findDiffMatches(file, license, matches, maxAllowedDiff, minTrailingMatches);
+  for (guint tPos=0; tPos<textLength; tPos++) {
+    for (guint i=0; i < licenses->len; i++) {
+      License* license = &g_array_index(licenses, License, i);
+      GArray* searchTokens = license->tokens;
+      guint searchLength = searchTokens->len;
+
+      for (guint sPos=0; (sPos<searchLength) && (sPos<=maxLeadingDiff); sPos++){
+        if (tokenEquals(&g_array_index(textTokens, Token, tPos),
+                        &g_array_index(searchTokens, Token, sPos))) {
+          findDiffMatches(file, license, tPos, sPos, matches, maxAllowedDiff, minTrailingMatches);
+          break;
+        }
+      }
+    }
   }
 
   GArray* filteredMatches = filterNonOverlappingMatches(matches);
@@ -74,7 +87,7 @@ void match_array_free(GArray* matches) {
 
 void matchFileWithLicenses(MonkState* state, File* file, GArray* licenses){
   GArray* matches = findAllMatchesBetween(file, licenses,
-                                          MAX_ALLOWED_DIFF_LENGTH, MIN_TRAILING_MATCHES);
+                                          MAX_ALLOWED_DIFF_LENGTH, MIN_TRAILING_MATCHES, MAX_LEADING_DIFF);
   processMatches(state, file, matches);
 
   // we are done: free memory
@@ -394,36 +407,41 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
   }
 }
 
-void findDiffMatches(File* file, License* license, GArray* matches,
+inline Match* diffResult2Match(DiffResult* diffResult, License* license){
+  Match* newMatch = malloc(sizeof(Match));
+  newMatch->license = license;
+
+  /* it's full only if we have no diffs and the license was not truncated */
+  if (diffResult->matchedInfo->len == 1 && (diffResult->matched == license->tokens->len)) {
+    newMatch->type = MATCH_TYPE_FULL;
+    newMatch->ptr.full = malloc(sizeof(DiffPoint));
+    *(newMatch->ptr.full) = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
+    diffResult_free(diffResult);
+  } else {
+    newMatch->type = MATCH_TYPE_DIFF;
+    newMatch->ptr.diff = diffResult;
+
+  }
+  return newMatch;
+}
+
+void findDiffMatches(File* file, License* license,
+                     size_t textStartPosition, size_t searchStartPosition,
+                     GArray* matches,
                      int maxAllowedDiff, int minTrailingMatches) {
-  size_t textStartPosition = 0;
-  size_t textLength = file->tokens->len;
-  DiffResult* diffResult;
 
-  do {
-    diffResult = findMatchAsDiffs(file->tokens, license->tokens,
-                                       &textStartPosition,
-                                       maxAllowedDiff,
-                                       minTrailingMatches);
-    if (diffResult) {
-      Match* newMatch = malloc(sizeof(Match));
-      newMatch->license = license;
-      if (diffResult->matchedInfo->len == 1) {
-        newMatch->type = MATCH_TYPE_FULL;
-        newMatch->ptr.full = malloc(sizeof(DiffPoint));
-        *(newMatch->ptr.full) = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
-        diffResult_free(diffResult);
-      } else {
-        newMatch->type = MATCH_TYPE_DIFF;
-        newMatch->ptr.diff = diffResult;
-      }
+  DiffResult* diffResult = findMatchAsDiffs(file->tokens, license->tokens,
+                                            textStartPosition, searchStartPosition,
+                                            maxAllowedDiff, minTrailingMatches);
 
-      if (match_rank(newMatch) > MIN_ALLOWED_RANK)
-        g_array_append_val(matches, newMatch);
-      else
-        match_free(newMatch);
-    }
-  } while (textStartPosition < textLength);
+  if (diffResult) {
+    Match* newMatch = diffResult2Match(diffResult, license);
+
+    if (match_rank(newMatch) > MIN_ALLOWED_RANK)
+      g_array_append_val(matches, newMatch);
+    else
+      match_free(newMatch);
+  }
 }
 
 #if GLIB_CHECK_VERSION(2,32,0)

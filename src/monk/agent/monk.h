@@ -28,8 +28,9 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define DELIMITERS " \t\n\r\f"
 
-#define MAX_ALLOWED_DIFF_LENGTH 200
+#define MAX_ALLOWED_DIFF_LENGTH 20
 #define MIN_TRAILING_MATCHES 5
+#define MAX_LEADING_DIFF 5
 #define MIN_ALLOWED_RANK 66
 
 #include <glib.h>

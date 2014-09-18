@@ -37,7 +37,7 @@ int token_search_diff(char * text, char* search,
   GArray * removals = g_array_new(TRUE, FALSE, sizeof (size_t));
 
   size_t textStartPosition = 0;
-  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 50, 1);
+  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 0, 50, 1); //TODO test searchStartPosition
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
     return diffResult != NULL;
@@ -266,7 +266,7 @@ int token_search(char * text, char* search, size_t expectedStart, size_t expecte
 
   size_t matchStart = 0;
   size_t textStartPosition = 0;
-  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 0, 1);
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 0, 0, 1);
 
   if (diffResult) {
     matchStart = g_array_index(diffResult->matchedInfo, DiffPoint, 0).start;
