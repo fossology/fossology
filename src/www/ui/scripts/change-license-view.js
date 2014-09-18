@@ -67,7 +67,7 @@ function hideLegend(){
     setOption("legendShow", false);
 }
 
-function  showLengend() {
+function showLengend() {
     $("#legendBox").show();
     $(".legendHider").show();
     $(".legendShower").hide();
@@ -96,13 +96,9 @@ function calculateDivHeight(){
 
 $(document).ready(function(){
 
-calculateDivHeight();
-  $(".legendHider").click(function(){
-        hideLegend();
-  });
-  $(".legendShower").click(function(){
-        showLengend()
-  });
+  calculateDivHeight();
+  $(".legendHider").click( hideLegend );
+  $(".legendShower").click( showLengend );
   var legendOption =  getOptionDefaultTrue("legendShow");
   if(legendOption) {
         showLengend();

@@ -276,6 +276,28 @@ class ClearingDao extends Object
 
   }
 
+
+  /**
+   * @param int $licenseId
+   * @param $uploadTreeId
+   * @param $userid
+   */
+  public function deleteClearingDecision($licenseId, $uploadTreeId, $userid)
+  {
+    // $tbd = array_search('To be determined', $this->getClearingTypeMap());
+    // TODO delete license
+  }
+
+    /**
+   * @param int $licenseId
+   * @param $uploadTreeId
+   * @param $userid
+   */
+  public function commentClearingDecision($licenseId, $uploadTreeId, $userid)
+  {
+    // TODO comment license item pair
+  }
+  
   /**
    * @param FileTreeBounds $fileTreeBounds
    * @return ClearingDecision[]

@@ -175,7 +175,7 @@ class Renderer extends Object
     $html = '';
     foreach($options as $key=>$disp)
     {
-      $html .= $innerglue.'<input type="radio" name="'.$id.'" id="'.$id.'" value="'.$key.'"';
+      $html .= $innerglue.'<input type="radio" name="'.$id.'" value="'.$key.'"';
       $innerglue = $separator;
       if ($key == $select)
       {

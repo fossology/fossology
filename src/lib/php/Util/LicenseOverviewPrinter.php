@@ -402,14 +402,19 @@ class LicenseOverviewPrinter extends Object
       /**
        * @var LicenseRef[] $auditedLicenses
        */
-      $output .= "<div class='scrollable'>";
+      $output .= '<table border="1"><tr>';
+      $innerglue = '';
       foreach ($auditedLicenses as $license)
       {
-        $output .= $this->printLicenseNameAsLink($license->getShortName(), $license->getFullName());
-        $output .= ", ";
+        $refId = $license->getId();
+        $output .= $innerglue;
+        $innerglue = '</tr><tr>';
+        $output .= '<td>'.$this->printLicenseNameAsLink($license->getShortName(), $license->getFullName()).'</td>';
+        $output .= '<td><textarea id="tedit'.$refId.'" cols="15" rows="2" onclick="activateLic('.$refId.')">TBD '.$refId.'</textarea></td>';
+        $output .= '<td><button hidden id="bedit'.$refId.'" onclick="performLicCommentRequest('.$refId.')">'._('Submit').'</button>';
+        $output .=    '<img onclick="performLicDelRequest('.$refId.')" id="aedit'.$refId.'" src="images/icons/close_32.png" alt="rm" title="'._('remove this license').'"/></td>';
       }
-      $output = substr($output, 0, count($output) - 3);
-      $output .= "</div>";
+      $output .= "</tr></table>";
       return $output;
     }
     else
