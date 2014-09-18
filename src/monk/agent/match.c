@@ -338,10 +338,13 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
 
 inline void processFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
   if (state->scanMode == MODE_SCHEDULER) {
+    fo_dbManager_begin(state->dbManager);
     long licenseFileId = saveToDb(state->dbManager, state->agentId,
                                   license->refId, file->id, 100);
     if (licenseFileId > 0)
       saveDiffHighlightToDb(state->dbManager, matchInfo, licenseFileId);
+    fo_dbManager_commit(state->dbManager);
+
 #ifdef DEBUG
     printf("found full match between \"%s\" (pFile=%ld) and \"%s\" (rf_pk=%ld)\n",
              getFileNameForFileId(state->dbManager, file->id), file->id, license->shortname, license->refId);
@@ -355,9 +358,12 @@ inline void processDiffMatch(MonkState* state, File* file, License* license, Dif
   unsigned short matchPercent = diffResult->percentual;
   convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
   if (state->scanMode == MODE_SCHEDULER) {
+    fo_dbManager_begin(state->dbManager);
     long licenseFileId = saveToDb(state->dbManager, state->agentId, license->refId, file->id, matchPercent);
     if (licenseFileId > 0)
       saveDiffHighlightsToDb(state->dbManager, diffResult->matchedInfo, licenseFileId);
+    fo_dbManager_commit(state->dbManager);
+
 #ifdef DEBUG
     printf("found diff match between \"%s\" (pFile=%ld) and \"%s\" (rf_pk=%ld); ",
            getFileNameForFileId(state->dbManager, file->id), file->id, license->shortname, license->refId);
