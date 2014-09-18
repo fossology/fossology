@@ -424,24 +424,20 @@ class LicenseOverviewPrinter extends Object
    */
   public function createWrappedRecentLicenseClearing($clearingDecWithLicenses)
   {
-    $foundNothing=false;
     $output = "<div id=\"recentLicenseClearing\" name=\"recentLicenseClearing\">";
     if (!empty($clearingDecWithLicenses))
     {
       $output_TMP = $this->createRecentLicenseClearing($clearingDecWithLicenses);
-      if(empty($output_TMP)) {
-        $foundNothing =true;
-      }
-      else {
+      if(!empty($output_TMP)) {
         $output .= $output_TMP;
       }
     }
     $output .= "</div>";
-    return array($output, $foundNothing );
+    return $output;
   }
 
 
-public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
+  public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
                                    $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){
     if (count($licenseMatches)==0)
     {
@@ -482,6 +478,6 @@ public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
           Traceback_uri() . "?mod=view-license&upload=$uploadId&item=$uploadTreeId&format=$format'>" . _("Exit") . "</a> " . _("specific license mode") . "<br/>";
     }
     return $output;
+  }
+  
 }
-
-} 
