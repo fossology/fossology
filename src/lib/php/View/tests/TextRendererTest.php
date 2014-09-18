@@ -80,6 +80,22 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
     assertThat($renderedText, is("<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">foo b</span>ar baz quux"));
   }
 
+  function testRenderHighlightAtEndOfFragment()
+  {
+    $highlight_length = 5;
+    $end_offset = self::START_OFFSET + strlen(self::FRAGMENT_TEXT);
+    $start_offset = $end_offset - $highlight_length;
+
+    $highlight1 = new Highlight($start_offset, $end_offset, Highlight::MATCH, 0, 0, 'ref1');
+
+    $splitPositions = array(
+        $start_offset => array(new SplitPosition(1, SplitPosition::START, $highlight1)),
+        $end_offset => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
+    $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
+
+    assertThat($renderedText, is("foo bar baz<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\"> quux</span>"));
+  }
+
   function testRenderHighlightWithinFragment()
   {
     $highlight1 = new Highlight(15, 18, Highlight::MATCH, 0, 0, 'ref1');
