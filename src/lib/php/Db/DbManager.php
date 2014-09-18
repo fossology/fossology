@@ -198,26 +198,26 @@ class DbManager extends Object
    * @param string sqlLog
    */
   public function createMap($tableName,$keyColumn,$valueColumn,$sqlLog=''){
-  if (empty($sqlLog))
+    if (empty($sqlLog))
     {
       $sqlLog = __METHOD__ . ".$tableName.$keyColumn,$valueColumn";
     }
-    $this->prepare($sqlLog, "select status_pk,meaning from upload_status");
+    $this->prepare($sqlLog, "select $keyColumn,$valueColumn from $tableName");
     $res = $this->execute($sqlLog);
-    $types = array();
+    $map = array();
     while ($row = $this->fetchArray($res))
     {
-      $types[$row['status_pk']] = $row['meaning'];
+      $map[$row[$keyColumn]] = $row[$valueColumn];
     }
     $this->freeResult($res);
-    return $types;
+    return $map;
   }
   
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
     {
-      $this->logger->addDebug(sprintf(" %0.3fms", 1000 * $seconds) . " for '$statementName' took ");
+      $this->logger->addDebug(sprintf(" %0.3fms", 1000 * $seconds) . " for '$statementName'");
     }
   }
 
