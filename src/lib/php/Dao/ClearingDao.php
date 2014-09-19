@@ -191,9 +191,14 @@ class ClearingDao extends Object
   /**
    * @return array
    */
-  public function getClearingTypeMap()
+  public function getClearingTypeMap($selectableOnly=false)
   {
-    return $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+    $map = $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+    if($selectableOnly)
+    {
+      $map = array(1=>$map[1], 2=>$map[2]);
+    }
+    return $map;
   }
   /**
    * @return DatabaseEnum[]

@@ -235,10 +235,13 @@ class ChangeLicenseUtility extends Object
     $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
     
+    $defaultScope = array_key_exists('scopeDefault', $_COOKIE) ? $_COOKIE['scopeShow'] : 2;
+    $defaultType = array_key_exists('typeDefault', $_COOKIE) ? $_COOKIE['typeShow'] : 1;
+    
     $clearingScopes = $this->clearingDao->getClearingScopeMap();
-    $this->renderer->vars['scopeRadio'] = $this->renderer->createRadioGroup('scope', $clearingScopes, 2, '', $separator=' &nbsp; ');
-    $clearingTypes = $this->clearingDao->getClearingTypeMap();
-    $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, 1, '', $separator=' &nbsp; ');
+    $this->renderer->vars['scopeRadio'] = $this->renderer->createRadioGroup('scope', $clearingScopes, $defaultScope, '', $separator=' &nbsp; ');
+    $clearingTypes = $this->clearingDao->getClearingTypeMap($selectableOnly=true);
+    $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType, '', $separator=' &nbsp; ');
     $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
     
     $output = $this->renderer->renderTemplate('change_license_modal');
