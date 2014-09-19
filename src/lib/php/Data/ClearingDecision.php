@@ -24,6 +24,15 @@ use DateTime;
 class ClearingDecision extends ClearingDecisionData
 {
 
+  const USER_DECISION = "User decision";
+  const TO_BE_DETERMINED = "To be determined";
+  const BULK_RECOGNITION = "bulk";
+
+  const SCOPE_GLOBAL = "global";
+  const SCOPE_UPLOAD = "upload";
+
+
+
   public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type, $scope, $date_added, $licenses, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;

@@ -49,7 +49,7 @@ class NewestEditedLicenseSelector extends Object
       $cd = null;
       if($extractTBD) {
       $first = reset($editedLicensesArray);
-        if (!empty($first) and $first->getType() == 'To be determined')
+        if (!empty($first) and $first->getType() == ClearingDecision::TO_BE_DETERMINED)
         {
           $cd = $first;
 

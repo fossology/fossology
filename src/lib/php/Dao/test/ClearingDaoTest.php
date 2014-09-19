@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
@@ -118,10 +119,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $cdArray = array(
         array(1, 100, 1000, 1, 1, 2, '2014-08-15T12:12:12'),
         array(2, 100, 1000, 2, 3, 1, '2014-08-15T10:43:58'),
-        array(3, 100, 1000, 3, 2, 2, '2014-08-14T14:33:45'),
-        array(4, 100, 1000, 4, 1, 2, '2014-08-14T11:14:22'),
-        array(5, 100, 1200, 1, 1, 1, '2014-08-15T12:49:52'),
-        array(6, 100, 1200, 1, 1, 2, '2014-08-15T13:05:43')
+        array(3, 100, 1000, 3, 1, 2, '2014-08-14T14:33:45'),
+        array(4, 100, 1000, 2, 1, 2, '2014-08-14T14:33:51'),
+        array(5, 100, 1000, 4, 2, 2, '2014-08-14T11:14:22'),
+        array(6, 100, 1200, 1, 1, 1, '2014-08-15T12:49:52'),
+        array(7, 100, 1200, 1, 1, 2, '2014-08-15T13:05:43')
     );
     foreach ($cdArray as $ur)
     {
@@ -133,10 +135,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $clicArray = array(
         array(1, 1, 0),
         array(1, 2, 0),
-        array(2, 4, 1),
+        array(2, 3, 0),
+        array(4, 4, 1),
         array(3, 4, 0),
-        array(5, 3, 0),
-        array(6, 2, 0)
+        array(6, 3, 1),
+        array(7, 2, 0)
     );
     foreach ($clicArray as $ur)
     {
@@ -148,10 +151,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->clearingDao->getRelevantLicenseDecisionEvents(1, 1000);
     assertThat($result, contains(
-        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
-        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 1, "FOO", 0),
-        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 2, "BAR", 0),
-        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0)
+        array(100, 1000, "2014-08-14T14:33:51", 2, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 4, "QUX", 1),
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::BULK_RECOGNITION, 3, "BAZ", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 1, "FOO", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 2, "BAR", 0),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::USER_DECISION, 3, "BAZ", 1)
     ));
   }
 
@@ -159,10 +163,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->clearingDao->getRelevantLicenseDecisionEvents(2, 1000);
     assertThat($result, contains(
-        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
-        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 1, "FOO", 0),
-        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 2, "BAR", 0),
-        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0)
+        array(100, 1000, "2014-08-14T14:33:51", 2, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 4, "QUX", 1),
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::BULK_RECOGNITION, 3, "BAZ", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 1, "FOO", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 2, "BAR", 0),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::USER_DECISION, 3, "BAZ", 1)
     ));
   }
 
@@ -170,24 +175,54 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->clearingDao->getRelevantLicenseDecisionEvents(1, 1200);
     assertThat($result, contains(
-        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
-        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0),
-        array(100, 1200, "2014-08-15T13:05:43", 1, 1, "upload", "User decision", 2, "BAR", 0)
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::BULK_RECOGNITION, 3, "BAZ", 0),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, ClearingDecision::SCOPE_GLOBAL, ClearingDecision::USER_DECISION, 3, "BAZ", 1),
+        array(100, 1200, "2014-08-15T13:05:43", 1, 1, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 2, "BAR", 0)
     ));
   }
 
-  public function testLicenseDecisionWithoutGroupOverlap()
+  public function testLicenseDecisionEventsWithoutGroupOverlap()
   {
     $result = $this->clearingDao->getRelevantLicenseDecisionEvents(3, 1000);
     assertThat(count($result), is(1));
     assertThat($result[0], is(
-        array(100, 1000, "2014-08-14T14:33:45", 3, 2, "upload", "To be determined", 4, "QUX", 0)
+        array(100, 1000, "2014-08-14T14:33:45", 3, 2, ClearingDecision::SCOPE_UPLOAD, ClearingDecision::USER_DECISION, 4, "QUX", 0)
     ));
   }
 
-  public function testLicenseDecisionWithoutMatch()
+  public function testLicenseDecisionEventsWithoutMatch()
   {
     $result = $this->clearingDao->getRelevantLicenseDecisionEvents(3, 1200);
+    assertThat($result, is(array()));
+  }
+
+  public function testCurrentLicenseDecisionViaGroupMembership()
+  {
+    $result = $this->clearingDao->getCurrentLicenseDecision(1, 1000);
+    assertThat($result, is(array("FOO" => 1, "BAR" => 2)));
+  }
+
+  public function testCurrentLicenseDecisionViaGroupMembershipShouldBeSymmetric()
+  {
+    $result = $this->clearingDao->getCurrentLicenseDecision(2, 1000);
+    assertThat($result, is(array("FOO" => 1, "BAR" => 2)));
+  }
+
+  public function testCurrentLicenseDecisionWithUploadScope()
+  {
+    $result = $this->clearingDao->getCurrentLicenseDecision(2, 1200);
+    assertThat($result, is(array("BAR" => 2)));
+  }
+
+  public function testCurrentLicenseDecisionWithoutGroupOverlap()
+  {
+    $result = $this->clearingDao->getCurrentLicenseDecision(3, 1000);
+    assertThat($result, is(array("QUX" => 4)));
+  }
+
+  public function testCurrentLicenseDecisionWithoutMatch()
+  {
+    $result = $this->clearingDao->getCurrentLicenseDecision(3, 1200);
     assertThat($result, is(array()));
   }
 }

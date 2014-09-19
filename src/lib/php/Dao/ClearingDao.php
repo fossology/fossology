@@ -163,7 +163,7 @@ class ClearingDao extends Object
 
     while ($rw = $this->dbManager->fetchArray($res))
     {
-      $licenses[] = new LicenseRef($rw['rf'], $rw['shortname'], $rw['fullname'], $rw ['removed'] == 't' );
+      $licenses[] = new LicenseRef($rw['rf'], $rw['shortname'], $rw['fullname'], $rw ['removed'] == 't');
     }
     pg_free_result($res);
     return $licenses;
@@ -187,7 +187,7 @@ class ClearingDao extends Object
     return $clearingTypes;
   }
 
-  
+
   /**
    * @return array
    */
@@ -200,6 +200,7 @@ class ClearingDao extends Object
     }
     return $map;
   }
+
   /**
    * @return DatabaseEnum[]
    */
@@ -226,7 +227,7 @@ class ClearingDao extends Object
   {
     return $this->dbManager->createMap('clearing_decision_scopes', 'scope_pk', 'meaning');
   }
-  
+
   /**
    * @param array $licenses
    * @param $uploadTreeId
@@ -246,7 +247,7 @@ class ClearingDao extends Object
          select uploadtree.* from uploadtree, thisItem where uploadtree.lft BETWEEN thisItem.lft AND thisItem.rgt AND ((uploadtree.ufile_mode & (3<<28))=0) AND uploadtree.pfile_fk != 0",
         array($uploadTreeId),
         $statementName);
-    $items= $this->dbManager->execute($statementName, array($uploadTreeId));
+    $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
     while ($item = $this->dbManager->fetchArray($items))
     {
@@ -254,20 +255,20 @@ class ClearingDao extends Object
       $pfileId = $item['pfile_fk'];
       $statementName2 = __METHOD__ . ".d";
       $this->dbManager->prepare($statementName2,
-      "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')");
+          "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')");
       $res = $this->dbManager->execute($statementName2, array($currentUploadTreeId));
       $this->dbManager->freeResult($res);
 
       $statementName = __METHOD__;
       $row = $this->dbManager->getSingleRow(
-        "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING clearing_pk",
-        array($currentUploadTreeId, $pfileId, $userid, $type, $scope, $comment, $remark),
-        $statementName);
+          "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING clearing_pk",
+          array($currentUploadTreeId, $pfileId, $userid, $type, $scope, $comment, $remark),
+          $statementName);
       $lastClearingId = $row['clearing_pk'];
 
       $statementN = __METHOD__ . ".l";
       $this->dbManager->prepare($statementN,
-      "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
+          "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
 
       foreach ($licenses as $license)
       {
@@ -289,11 +290,11 @@ class ClearingDao extends Object
    */
   public function deleteClearingDecision($licenseId, $uploadTreeId, $userid)
   {
-    // $tbd = array_search('To be determined', $this->getClearingTypeMap());
+    //$tbd = array_search(ClearingDecision::TO_BE_DETERMINED, $this->getClearingTypeMap());
     // TODO delete license
   }
 
-    /**
+  /**
    * @param int $licenseId
    * @param $uploadTreeId
    * @param $userid
@@ -302,7 +303,7 @@ class ClearingDao extends Object
   {
     // TODO comment license item pair
   }
-  
+
   /**
    * @param FileTreeBounds $fileTreeBounds
    * @return ClearingDecision[]
@@ -404,10 +405,30 @@ ORDER BY CD.date_added ASC, CL.rf_fk ASC, CL.removed ASC
     return $result;
   }
 
-  public function tmp()
+  public function getCurrentLicenseDecision($userId, $uploadId)
   {
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName, "SELECT * from clearing_decision");
-    return $this->dbManager->execute($statementName);
+    $events = $this->getRelevantLicenseDecisionEvents($userId, $uploadId);
+
+    $licenseDecision = array();
+
+    foreach ($events as $event)
+    {
+      if ($event[6] != ClearingDecision::TO_BE_DETERMINED)
+      {
+        $licenseId = $event[7];
+        $licenseShortName = $event[8];
+        $remove = $event[9] != 0;
+
+        if ($remove)
+        {
+          unset($licenseDecision[$licenseShortName]);
+        } else
+        {
+          $licenseDecision[$licenseShortName] = $licenseId;
+        }
+      }
+    }
+
+    return $licenseDecision;
   }
 }
