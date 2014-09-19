@@ -335,4 +335,15 @@ select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_na
     return $parent['uploadtree_pk'];
   }
 
+
+  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName="uploadtree"  )
+  {
+    $statementName = __METHOD__.$uploadTreeTableName;
+    $leftRight = $this->dbManager->getSingleRow(
+              "SELECT lft,rgt FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
+              array($uploadtreeID), $statementName
+    );
+
+    return array($leftRight['lft'], $leftRight['rgt']);
+  }
 }

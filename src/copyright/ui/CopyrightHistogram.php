@@ -17,12 +17,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\CopyrightDao;
+
 define("TITLE_copyrightHistogram", _("Copyright/Email/URL Browser NEW"));
 
 class CopyrightHistogram  extends FO_Plugin {
 
-
+  /**
+   * @var string
+   */
   private $uploadtree_tablename;
+
+  /**
+   * @var CopyrightDao
+   */
+
+  private  $copyrightDao;
 
   function __construct()
   {
@@ -36,169 +46,10 @@ class CopyrightHistogram  extends FO_Plugin {
 
     parent::__construct();
 
-  }
-
-  /**
-   * \brief Combine copyright holders by name  \n
-   * Input records contain: content and type \n
-   * Output records: copyright_count, content, type, hash \n
-   * where content has been simplified from
-   * the raw records and hash is the md5 of this
-   * new content.
-   * \return If $hash non zero, only rows with that hash will
-   * be returned.
-   */
-  function GroupHolders(&$rows, $hash)
-  {
-    /* Step 1: Clean up content, and add hash
-     */
-    $NumRows = count($rows);
-    for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
-    {
-      if (MassageContent($rows[$RowIdx], $hash))
-        unset($rows[$RowIdx]);
-      /* debug to compare original with new content
-       else
-      {
-      echo "<br>row $RowIdx: ".htmlentities($rows[$RowIdx]['content']) . "<br>";
-      echo "row $RowIdx: ".htmlentities($rows[$RowIdx]['original']) . "<br>";
-      }
-      */
-    }
-
-    /* Step 2: sort the array by the new content */
-    usort($rows, 'hist_rowcmp');
-
-    /* Step 3: group content (remove dups, add counts) */
-    $NumRows = count($rows);
-    for($RowIdx = 1; $RowIdx < $NumRows; $RowIdx++)
-    {
-      if ($rows[$RowIdx]['content'] == $rows[$RowIdx-1]['content'])
-      {
-        $rows[$RowIdx]['copyright_count'] = $rows[$RowIdx-1]['copyright_count'] + 1;
-        unset($rows[$RowIdx-1]);
-      }
-    }
-
-    /** sorting */
-    $ordercount = '-1';
-    $ordercopyright = '-1';
-
-    if (isset($_GET['orderc'])) $ordercount = $_GET['orderc'];
-    if (isset($_GET['ordercp'])) $ordercopyright = $_GET['ordercp'];
-    // sort by count
-    if (1 == $ordercount) usort($rows, 'hist_rowcmp_count_desc');
-    else if (0 == $ordercount) usort($rows, 'hist_rowcmp_count_asc');
-    // sort by copyrigyht statement
-    else if (1 == $ordercopyright) usort($rows, 'hist_rowcmp_desc');
-    else if (0 == $ordercopyright) usort($rows, 'hist_rowcmp');
-    else usort($rows, 'hist_rowcmp_count_desc'); // default as sorting by count desc
-
-    /* note $rows indexes may not be contiguous due to unset in step 3 */
-    return $rows;
-  }  /* End GroupHolders() */
+    global $container;
+    $this->copyrightDao = $container->get('dao.copyright');
 
 
-  /**
-   * /return rows to process, and $upload_pk
-   * If there are too many rows (see $MaxTreeRecs)
-   *  then a text error message is returned, not an array.
-   * If the optional $hash is supplied, only rows
-   * with that hash will be returned.
-   * @param $upload_pk
-   * @param $Uploadtree_pk
-   * @param $Agent_pk
-   * @param int $hash
-   * @param $filter
-   * @return array|string
-   */
-  function GetRows(&$upload_pk, $Uploadtree_pk, $Agent_pk, $hash = 0, $filter)
-  {
-    global $PG_CONN;
-
-    /*******  Get license names and counts  ******/
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM $this->uploadtree_tablename
-              WHERE uploadtree_pk = $Uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $lft = $row["lft"];
-    $rgt = $row["rgt"];
-    $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
-
-    /* Check for too many uploadtree rows to process.
-     * This is arbitrarily set to 100000.  The copyright display
-     * isn't very useful with more records and this check
-     * give the user immediate feedback, as opposed to
-     * waiting on a very long query.
-     * $MaxTreeRecs / 2 = number of uploadtree entries
-     */
-    $MaxTreeRecs = 200000;
-    if (($rgt - $lft) > $MaxTreeRecs)
-    {
-      $text = _("Too many rows to display");
-      return "<h2>$text</h2>";
-    }
-
-    $sql = "";
-    $sql_upload = "";
-    if ('uploadtree_a' == $this->uploadtree_tablename) {
-      $sql_upload = "upload_fk=$upload_pk and ";
-    }
-    if ($filter == "nolics")
-    {
-      /* find rf_pk for "No_license_found" or "Void" */
-      $rf_clause = "";
-      $NoLicStr = "No_license_found";
-      $VoidLicStr = "Void";
-      $sql_lr = "select rf_pk from license_ref where rf_shortname IN ('$NoLicStr', '$VoidLicStr')";
-      $result = pg_query($PG_CONN, $sql_lr);
-      DBCheckResult($result, $sql_lr, __FILE__, __LINE__);
-      if (pg_num_rows($result) > 0)
-      {
-        $rows = pg_fetch_all($result);
-        pg_free_result($result);
-        foreach($rows as $row)
-        {
-          if (!empty($rf_clause)) $rf_clause .= " or ";
-          $rf_clause .= " (rf_fk=$row[rf_pk])";
-        }
-
-        /* select copyright records that have No_license_found */
-        $sql = "SELECT substring(content from 1 for 150) as content, type from copyright, license_file,
-                (SELECT distinct(pfile_fk) as pf from $this->uploadtree_tablename
-                  where $sql_upload $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
-               where copyright.pfile_fk=license_file.pfile_fk and ($rf_clause)
-                     and copyright.pfile_fk=pf and copyright.agent_fk=$Agent_pk";
-      }
-    }
-
-    if (empty($sql))
-    {
-      /* get all the copyright records for this uploadtree.  */
-      $sql = "SELECT substring(content from 1 for 150) as content, type from copyright,
-              (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename
-                 where $sql_upload $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk";
-    }
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    if (pg_num_rows($result) == 0)
-    {
-      $text = _("No results to display.");
-      return "<h2>$text</h2>";
-    }
-
-    $rows = pg_fetch_all($result);
-    pg_free_result($result);
-
-    /* Combine results to attempt to group copyright holders */
-    $rows = $this->GroupHolders($rows, $hash);
-
-    return $rows;
   }
 
 //  /**
@@ -285,11 +136,82 @@ class CopyrightHistogram  extends FO_Plugin {
 
 
 
-private  function getCopyrightData($Uploadtree_pk, $Uri, $filter, $uploadtree_tablename, $Agent_pk) {
+private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadtree_tablename, $Agent_pk) {
+  list($ordercount, $ordercopyright) = $this->getOrderings();
 
+  $type = 'statement';
+  $rows = $this->copyrightDao->getCopyrights($upload_pk,$Uploadtree_pk, $uploadtree_tablename ,$Agent_pk, 0,$type,$filter);
+
+  $CopyrightCount = 0;
+  $UniqueCopyrightCount = 0;
+
+
+  /* The filtering in the table header links will be obsolete with datatables... So once we have that the whole function is obsolete as we can use the more general getSingleType */
+  $VCopyright = "<table border=1 width='100%' id='copyright'>\n";
+  $text = _("Count");
+  $text1 = _("Files");
+  $text2 = _("Copyright Statements");
+  $VCopyright .= "<tr><th>";
+  $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=count&orderc=$ordercount>$text</a>";
+  $VCopyright .= "</th>";
+  $VCopyright .= "<th width='10%'>$text1</th>";
+  $VCopyright .= "<th>";
+  $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=copyright&ordercp=$ordercopyright>$text2</a>";
+  $VCopyright .= "</th>";
+  $VCopyright .= "</th></tr>\n";
+
+  foreach ($rows as $row)
+  {
+    $hash = $row['hash'];
+    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, $hash, true ,$filter);
+  }
+
+  $VCopyright .= "</table>\n";
+  $VCopyright .= "<p>\n";
+  $text = _("Unique Copyrights");
+  $text1 = _("Total Copyrights");
+  $VCopyright .= "$text: $UniqueCopyrightCount<br>\n";
+  $NetCopyright = $CopyrightCount;
+  $VCopyright .= "$text1: $NetCopyright";
+
+  return $VCopyright;
 }
 
 
+private function getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $uploadtree_tablename, $Agent_pk){
+
+  $rows = $this->copyrightDao->getCopyrights($upload_pk,$Uploadtree_pk, $uploadtree_tablename ,$Agent_pk, 0,$type,$filter);
+
+  $text = _("Count");
+  $text1 = _("Files");
+
+
+  $count = 0;
+  $uniqueCount = 0;
+
+  $output = "<table border=1 width='100%'id='copyrightemail'>\n";
+  $output .= "<tr><th width='10%'>$text</th>";
+  $output .= "<th width='10%'>$text1</th>";
+  $output .= "<th>$decription</th></tr>\n";
+
+
+  foreach ($rows as $row)
+  {
+    $hash = $row['hash'];
+    $output .= $this->fillTableRow($row, $uniqueCount, $count, $Uploadtree_pk, $Agent_pk, $hash);
+  }
+
+
+  $output .= "</table>\n";
+  $output .= "<p>\n";
+
+  $output .= "$descriptionUnique: $uniqueCount<br>\n";
+  $output .= "$text1: $count";
+
+
+  return $output;
+
+}
 
 
   /**
@@ -301,91 +223,30 @@ private  function getCopyrightData($Uploadtree_pk, $Uri, $filter, $uploadtree_ta
    * @param $rows
    * @return array
    */
-  private function getTableContent($Uploadtree_pk, $filter, $Agent_pk)
+  private function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
 
-    $rows = $this->GetRows($upload_pk, $Uploadtree_pk, $Agent_pk, 0, $filter);
-    if (!is_array($rows)) return array($rows, "","","");
-    $errorMessage="";
 
-    list($ordercount, $ordercopyright) = $this->getOrderings();
 
-    $CopyrightCount = 0;
-    $UniqueCopyrightCount = 0;
+    $VCopyright  =  $this->getCopyrightData($upload_pk,$Uploadtree_pk,$filter,$this->uploadtree_tablename,$Agent_pk);
 
-    $VCopyright = "<table border=1 width='100%' id='copyright'>\n";
-    $text = _("Count");
-    $text1 = _("Files");
-    $text2 = _("Copyright Statements");
-    $text3 = _("Email");
-    $text4 = _("URL");
-    $VCopyright .= "<tr><th>";
-    $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=count&orderc=$ordercount>$text</a>";
-    $VCopyright .= "</th>";
-    $VCopyright .= "<th width='10%'>$text1</th>";
-    $VCopyright .= "<th>";
-    $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=copyright&ordercp=$ordercopyright>$text2</a>";
-    $VCopyright .= "</th>";
-    $VCopyright .= "</th></tr>\n";
 
-    $EmailCount = 0;
-    $UniqueEmailCount = 0;
+    $type = 'email';
+    $decription = _("Email");
+    $descriptionUnique = _("Unique Emails");
+    $descriptionTotal = _("Total Emails");
 
-    $VEmail = "<table border=1 width='100%'id='copyrightemail'>\n";
-    $VEmail .= "<tr><th width='10%'>$text</th>";
-    $VEmail .= "<th width='10%'>$text1</th>";
-    $VEmail .= "<th>$text3</th></tr>\n";
+    $VEmail =  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
-    $UrlCount = 0;
-    $UniqueUrlCount = 0;
 
-    $VUrl = "<table border=1 width='100%' id='copyrighturl'>\n";
-    $VUrl .= "<tr><th width='10%'>$text</th>";
-    $VUrl .= "<th width='10%'>$text1</th>";
-    $VUrl .= "<th>$text4</th></tr>\n";
+    $type = 'url';
+    $decription = _("URL");
+    $descriptionUnique = _("Unique URLs");
+    $descriptionTotal = _("Total URLs");
 
-    if (!is_array($rows))
-      $VCopyright .= "<tr><td colspan=3>$rows</td></tr>";
-    else
-      foreach ($rows as $row)
-      {
-        $hash = $row['hash'];
-        if ($row['type'] == 'statement')
-        {
-          $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, $hash, true ,$filter);
-        } else if ($row['type'] == 'email')
-        {
-          $VEmail .= $this->fillTableRow($row, $UniqueEmailCount, $EmailCount, $Uploadtree_pk, $Agent_pk, $hash);
-        } else if ($row['type'] == 'url')
-        {
-          $VUrl .= $this->fillTableRow($row, $UniqueUrlCount, $UrlCount, $Uploadtree_pk, $Agent_pk, $hash);
-        }
-      }
+    $VUrl=  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
-    $VCopyright .= "</table>\n";
-    $VCopyright .= "<p>\n";
-    $text = _("Unique Copyrights");
-    $text1 = _("Total Copyrights");
-    $VCopyright .= "$text: $UniqueCopyrightCount<br>\n";
-    $NetCopyright = $CopyrightCount;
-    $VCopyright .= "$text1: $NetCopyright";
-
-    $VEmail .= "</table>\n";
-    $VEmail .= "<p>\n";
-    $text = _("Unique Emails");
-    $text1 = _("Total Emails");
-    $VEmail .= "$text: $UniqueEmailCount<br>\n";
-    $NetEmail = $EmailCount;
-    $VEmail .= "$text1: $NetEmail";
-
-    $VUrl .= "</table>\n";
-    $VUrl .= "<p>\n";
-    $text = _("Unique URLs");
-    $text1 = _("Total URLs");
-    $VUrl .= "$text: $UniqueUrlCount<br>\n";
-    $NetUrl = $UrlCount;
-    $VUrl .= "$text1: $NetUrl";
-    return array($errorMessage, $VCopyright, $VEmail, $VUrl);
+    return array( $VCopyright, $VEmail, $VUrl);
   }
 
 
@@ -401,10 +262,9 @@ private  function getCopyrightData($Uploadtree_pk, $Uri, $filter, $uploadtree_ta
    * \param $uploadtree_tablename
    * \param $Agent_pk - agent id
    */
-  function ShowUploadHist($Uploadtree_pk, $Uri, $filter, $uploadtree_tablename, $Agent_pk)
+  function ShowUploadHist($upload_pk, $Uploadtree_pk, $Uri, $filter, $uploadtree_tablename, $Agent_pk)
   {
     $V=""; // total return value
-    $upload_pk = "";
 
     list($ChildCount, $VF) = $this->getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk);
     /***************************************
@@ -427,8 +287,7 @@ private  function getCopyrightData($Uploadtree_pk, $Uri, $filter, $uploadtree_ta
       return($ModLicView->Output() );
     }
 
-    list($errorMessage, $VCopyright, $VEmail, $VUrl) = $this->getTableContent($Uploadtree_pk, $filter, $Agent_pk);
-    if(!empty($errorMessage)) return $errorMessage;
+    list( $VCopyright, $VEmail, $VUrl) = $this->getTableContent($upload_pk,$Uploadtree_pk, $filter, $Agent_pk);
 
     /* Combine VF and VLic */
     $text = _("Jump to");
@@ -588,7 +447,7 @@ private  function getCopyrightData($Uploadtree_pk, $Uri, $filter, $uploadtree_ta
             $SelectFilter .= "</select>";
             $OutBuf .= $SelectFilter;
 
-            $OutBuf .= $this->ShowUploadHist($Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+            $OutBuf .= $this->ShowUploadHist($Upload,$Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
           }
           $OutBuf .= "</font>\n";
           $OutBuf .= $this->createJavaScriptBlock();
