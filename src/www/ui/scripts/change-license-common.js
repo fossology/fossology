@@ -27,10 +27,7 @@ function jsArrayFromHtmlOptions(pListBox) {
     var options = new Array(pListBox.options.length);
     for ( i = 0; i < options.length; i++){
         if(pListBox.options[i].value == magicNumberNoLicenseFound) continue;
-        options[i] = new Option(pListBox.options[i].text,
-            pListBox.options[i].value,
-            pListBox.options[i].defaultSelected,
-            pListBox.options[i].selected);
+         options[i] = pListBox.options[i];
     }
     return options;
 }
@@ -58,7 +55,13 @@ function moveLicense(theSelFrom, theSelTo) {
     var i;
     for (i = selLength - 1; i >= 0; i--) {
         if (theSelFrom.options[i].selected) {
-            theSelTo.options[theSelTo.options.length] = (new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
+            var newOption  = (new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
+            newOption.ondblclick = theSelFrom.options[i].ondblclick;
+            
+            
+            theSelTo.options[theSelTo.options.length] = theSelFrom.options[i];
+            
+            
             theSelFrom[i] = null;
         }
     }

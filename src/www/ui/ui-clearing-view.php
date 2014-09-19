@@ -25,6 +25,7 @@ use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
+use Fossology\Lib\View\Renderer;
 use Monolog\Logger;
 
 define("TITLE_clearingView", _("Change concluded License "));
@@ -75,7 +76,8 @@ class ClearingView extends FO_Plugin
    * @var LicenseRenderer
    */
   private $licenseRenderer;
-
+  /* @var Renderer */
+  private $renderer;
   /**
    * @var array colorMapping
    */
@@ -102,6 +104,7 @@ class ClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
+    $this->renderer = $container->get('renderer');
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -174,8 +177,6 @@ class ClearingView extends FO_Plugin
   }
 
 
-
-
   /**
    * @param $uploadTreeId
    * @return array of clearingHistory
@@ -190,8 +191,6 @@ class ClearingView extends FO_Plugin
 
     return $this->changeLicenseUtility->printClearingTable($tableName, $clearingDecWithLicenses, $user_pk);
   }
-
-
 
 
 
@@ -279,33 +278,26 @@ class ClearingView extends FO_Plugin
     {
       return;
     }
-    global $Plugins;
-    /**
-     * @var $view ui_view
-     */
-    $view = & $Plugins[plugin_find_id("view")];
-
     $licenseShortname = GetParm("lic", PARM_TEXT);
     if (!empty($licenseShortname)) // display the detailed license text of one license
     {
       $this->ViewLicenseText($licenseShortname);
       return;
     }
-
     $uploadId = GetParm("upload", PARM_INTEGER);
-
     if (empty($uploadId))
     {
       return;
     }
-
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {
       return;
     }
-
-
+    
+    global $Plugins;
+    /** @var $view ui_view */
+    $view = & $Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $folder = GetParm("folder", PARM_INTEGER);
@@ -320,11 +312,10 @@ class ClearingView extends FO_Plugin
 
     $hasHighlights = count($highlights) > 0;
 
-    $output = "";
     /* Get uploadtree table name */
     $uploadTreeTableName = GetUploadtreeTablename($uploadId);
 
-    $output .= Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
+    $output = Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
@@ -333,42 +324,17 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
     $licenseInformation .= "<br>";
     $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-   // $licenseInformation .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);
     $licenseInformation .= $this->createWrappedClearingHistoryTable($uploadId,$uploadTreeId);
-    list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
+    list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
-    $buttons = "<button class=\"legendHider\">"._("Hide Legend")."</button><button class=\"legendShower\">"._("Show Legend")."</button>";
-
-    $output .= "<div id='leftrightalignment' name='leftrightalignment'  >".
-         "<table  border='0' padding='0px' style='height: 100%; width: 100%'>
-            <tr>
-             <td  padding='0px' style='position:relative; height: 100%; maxWidth:70%; width:50%'>
-                <div class='centered'>$pageMenu $buttons</div>
-                <div class='boxnew'>$text</div>$legendBox
-              </td>
-              <td class='headerBox'>
-                 <div>$licenseInformation</div>
-              </td>
-            </tr>
-        </table>
-      </div>";
-
-    $output .= $this->createJavaScriptBlock();
+    $this->renderer->vars['pageMenu'] = $pageMenu;
+    $this->renderer->vars['textView'] = $textView;
+    $this->renderer->vars['legendBox'] = $legendBox;
+    $this->renderer->vars['licenseInformation'] = $licenseInformation;
+    $output .= $this->renderer->renderTemplate('ui_view');
     print $output;
-  }
-
-
-  private function createJavaScriptBlock()
-  {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/change-license-common.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/change-license-view.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/tools.js\" type=\"text/javascript\"></script>\n";
-    return $output;
   }
 
 
@@ -389,7 +355,6 @@ class ClearingView extends FO_Plugin
     }
     return $header;
   }
-
 
 
   /**
@@ -413,9 +378,6 @@ class ClearingView extends FO_Plugin
     menu_insert("ChangeLicense::One-Shot License", 3, "agent_nomos_once". Traceback_parm_keep(array("format","item")), $text);
 
     menu_insert("ChangeLicense::[BREAK]",4);
-
-
-
 
     return 0;
   } // RegisterMenus()

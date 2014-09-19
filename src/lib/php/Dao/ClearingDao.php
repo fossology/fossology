@@ -191,9 +191,14 @@ class ClearingDao extends Object
   /**
    * @return array
    */
-  public function getClearingTypeMap()
+  public function getClearingTypeMap($selectableOnly=false)
   {
-    return $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+    $map = $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+    if($selectableOnly)
+    {
+      $map = array(1=>$map[1], 2=>$map[2]);
+    }
+    return $map;
   }
   /**
    * @return DatabaseEnum[]
@@ -359,22 +364,22 @@ class ClearingDao extends Object
     return $licensesWithCount;
   }
 
-  public function getRelevantLicenseDecisionEvents($uploadTreeId)
+  public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
 SELECT
-CD.pfile_fk,
-CD.uploadtree_fk,
-CD.date_added,
-CD.user_fk,
-GU.group_fk,
-CDS.meaning AS scope,
-CDT.meaning AS type,
-CL.rf_fk,
-LR.rf_shortname,
-CL.removed
+  CD.pfile_fk,
+  CD.uploadtree_fk,
+  CD.date_added,
+  CD.user_fk,
+  GU.group_fk,
+  CDS.meaning AS scope,
+  CDT.meaning AS type,
+  CL.rf_fk,
+  LR.rf_shortname,
+  CL.removed
 FROM clearing_decision CD
 INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
 INNER JOIN clearing_licenses CL ON CD.clearing_pk = CL.clearing_fk
@@ -382,13 +387,17 @@ INNER JOIN clearing_decision_scopes CDS ON CD.scope_fk = CDS.scope_pk
 INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = CL.rf_fk
 INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
-WHERE CD2.uploadtree_fk=$1
+INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
+WHERE
+  CD2.uploadtree_fk=$1 AND
+  (CD.scope_fk == 1 OR CD.scope_fk== 2 AND CD.uploadtree_fk=$1) AND
+  GU2.user_fk=$2
 GROUP BY CD.uploadtree_fk, CL.rf_fk, CD.user_fk, GU.group_fk, CL.removed
-ORDER BY CD.date_added ASC
+ORDER BY CD.date_added ASC, CL.rf_fk ASC, CL.removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
-        array($uploadTreeId)
+        array($uploadTreeId, $userId)
     );
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

@@ -21,13 +21,11 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Db\Driver\SqliteE;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 use Mockery\MockInterface;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
-use SQLite3;
 
 class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -55,87 +53,142 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $logger = new Logger('default');
     $logger->pushHandler(new ErrorLogHandler());
 
-    $this->testDb = new TestLiteDb();
+    $this->testDb = new TestLiteDb("/tmp/fossology.sqlite");
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->clearingDao = new ClearingDao($this->dbManager, $this->licenseSelector, $this->uploadDao);
-    
+
     $this->testDb->createPlainTables(
-            array(
-                'clearing_decision',
-                'clearing_decision_scopes',
-                'clearing_decision_types',
-                'clearing_licenses',
-                'license_ref',
-                'users',
-                'group_user_member'
+        array(
+            'clearing_decision',
+            'clearing_decision_scopes',
+            'clearing_decision_types',
+            'clearing_licenses',
+            'license_ref',
+            'users',
+            'group_user_member'
         ));
-    
+
     $this->testDb->insertData(
-            array(
-                'clearing_decision_scopes',
-                'clearing_decision_types'
-            ));
-    
-    $this->dbManager->prepare($stmt='insert.users',
-                "INSERT INTO users (user_name, root_folder_fk) VALUES ($1,$2)");
-    $userArray = array( array('myself', 1), array('in_same_group', 2), array('in_trusted_group', 3), array('not_in_trusted_group', 4));
+        array(
+            'clearing_decision_scopes',
+            'clearing_decision_types'
+        ));
+
+    $this->dbManager->prepare($stmt = 'insert.users',
+        "INSERT INTO users (user_name, root_folder_fk) VALUES ($1,$2)");
+    $userArray = array(
+        array('myself', 1),
+        array('in_same_group', 2),
+        array('in_trusted_group', 3),
+        array('not_in_trusted_group', 4));
     foreach ($userArray as $ur)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
 
-    $this->dbManager->prepare($stmt='insert.gum',
-                "INSERT INTO group_user_member (group_fk, user_fk, group_perm) VALUES ($1,$2,$3)");
-    $gumArray = array( array(1, 1, 0), array(1, 2, 0), array(2, 3, 0), array(3, 4, 0));
+    $this->dbManager->prepare($stmt = 'insert.gum',
+        "INSERT INTO group_user_member (group_fk, user_fk, group_perm) VALUES ($1,$2,$3)");
+    $gumArray = array(
+        array(1, 1, 0),
+        array(1, 2, 0),
+        array(2, 3, 0),
+        array(3, 4, 0)
+    );
     foreach ($gumArray as $ur)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
-    
-    $this->dbManager->prepare($stmt='insert.ref',
-                "INSERT INTO license_ref (rf_shortname, rf_text) VALUES ($1,$2)");
-    $refArray = array( array('FOO', 'foo text'), array('BAR', 'bar text'), array('BAZ', 'baz text'), array('QUX', 'qux text'));
+
+    $this->dbManager->prepare($stmt = 'insert.ref',
+        "INSERT INTO license_ref (rf_pk, rf_shortname, rf_text) VALUES ($1, $2, $3)");
+    $refArray = array(
+        array(1, 'FOO', 'foo text'),
+        array(2, 'BAR', 'bar text'),
+        array(3, 'BAZ', 'baz text'),
+        array(4, 'QUX', 'qux text')
+    );
     foreach ($refArray as $ur)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
-    
-    $this->dbManager->prepare($stmt='insert.cd',
-                "INSERT INTO clearing_decision (pfile_fk, uploadtree_fk, user_fk, type_fk, scope_fk, date_added) VALUES ($1,$2,$3,$4,$5,$6)");
-    $cdArray = array( array(100, 1000, 1, 1, 1, '2014-08-15T12:12:12'),
-      array(100, 1000, 2, 1, 1, '2014-08-15T10:43:58'),
-      array(100, 1000, 3, 1, 1, '2014-08-14T14:33:45'),
-      array(100, 1000, 4, 1, 1, '2014-08-14T11:14:22'),
-      array(100, 1200, 1, 1, 1, '2014-08-15T12:12:12'));
+
+    $this->dbManager->prepare($stmt = 'insert.cd',
+        "INSERT INTO clearing_decision (clearing_pk, pfile_fk, uploadtree_fk, user_fk, type_fk, scope_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7)");
+    $cdArray = array(
+        array(1, 100, 1000, 1, 1, 2, '2014-08-15T12:12:12'),
+        array(2, 100, 1000, 2, 3, 1, '2014-08-15T10:43:58'),
+        array(3, 100, 1000, 3, 2, 2, '2014-08-14T14:33:45'),
+        array(4, 100, 1000, 4, 1, 2, '2014-08-14T11:14:22'),
+        array(5, 100, 1200, 1, 1, 1, '2014-08-15T12:49:52'),
+        array(6, 100, 1200, 1, 1, 2, '2014-08-15T13:05:43')
+    );
     foreach ($cdArray as $ur)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
 
-    $this->dbManager->prepare($stmt='insert.c_lic',
-                "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed) VALUES ($1,$2,$3)");
-    $clicArray = array( array(100, 1000, 1, 1, 1, '2014-08-15T12:12:12'),
-      array(1, 1, 0),
-      array(1, 2, 0),
-      array(2, 4, 1),
-      array(3, 4, 0),
-      array(5, 3, 0));
+    $this->dbManager->prepare($stmt = 'insert.c_lic',
+        "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed) VALUES ($1,$2,$3)");
+    $clicArray = array(
+        array(1, 1, 0),
+        array(1, 2, 0),
+        array(2, 4, 1),
+        array(3, 4, 0),
+        array(5, 3, 0),
+        array(6, 2, 0)
+    );
     foreach ($clicArray as $ur)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
   }
 
-  public function testDBStart()
+  public function testLicenseDecisionEventsViaGroupMembership()
   {
-    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(1000);
-    foreach ($result as $row)
-    {
-      print(implode(" ", $row) . "\n");
-    }
-    $this->markTestSkipped("not yet implemented");
+    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(1, 1000);
+    assertThat($result, contains(
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 1, "FOO", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 2, "BAR", 0),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0)
+    ));
   }
 
+  public function testLicenseDecisionEventsViaGroupMembershipShouldBeSymmetric()
+  {
+    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(2, 1000);
+    assertThat($result, contains(
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 1, "FOO", 0),
+        array(100, 1000, "2014-08-15T12:12:12", 1, 1, "upload", "User decision", 2, "BAR", 0),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0)
+    ));
+  }
+
+  public function testLicenseDecisionEventsUploadScope()
+  {
+    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(1, 1200);
+    assertThat($result, contains(
+        array(100, 1000, "2014-08-15T10:43:58", 2, 1, "global", "bulk", 4, "QUX", 1),
+        array(100, 1200, "2014-08-15T12:49:52", 1, 1, "global", "User decision", 3, "BAZ", 0),
+        array(100, 1200, "2014-08-15T13:05:43", 1, 1, "upload", "User decision", 2, "BAR", 0)
+    ));
+  }
+
+  public function testLicenseDecisionWithoutGroupOverlap()
+  {
+    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(3, 1000);
+    assertThat(count($result), is(1));
+    assertThat($result[0], is(
+        array(100, 1000, "2014-08-14T14:33:45", 3, 2, "upload", "To be determined", 4, "QUX", 0)
+    ));
+  }
+
+  public function testLicenseDecisionWithoutMatch()
+  {
+    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(3, 1200);
+    assertThat($result, is(array()));
+  }
 }
  

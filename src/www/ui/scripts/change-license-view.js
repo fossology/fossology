@@ -106,6 +106,19 @@ $(document).ready(function(){
    else {
         hideLegend();
   }
+  $("input[name=scope]").each( function(){
+      if(getOption("defaultScope")==$(this).val()){
+        $(this).attr("checked","checked");
+      }
+      $(this).click( function(){ setOption("defaultScope", $(this).val()); });
+    } );
+  $("input[name=type]").each( function(){
+      if(getOption("defaultType")==$(this).val()){
+        $(this).attr("checked","checked");
+      }
+      $(this).click( function(){ setOption("defaultType", $(this).val()); });
+    } );
+
 });
 
 $(window).resize( calculateDivHeight );

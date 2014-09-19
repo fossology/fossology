@@ -274,7 +274,9 @@ class ui_browse extends FO_Plugin {
     $statusFilter = $renderer->createSelect('statusSelector',$statusArray,0,' onchange="filterStatus()"');
     
     $V.= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
-            . "<tfoot><th></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tfoot>"
+           . "<thead><tr><th></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tr>"
+            . "<tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> </tr></thead>"
+            . "<tbody></tbody>". "<tfoot></tfoot>"
             . "</table>";
     $V.= "</table>";
 
@@ -477,11 +479,9 @@ class ui_browse extends FO_Plugin {
       "bRetrieve": true
     }';
 
-    
     $VF   = "<script>
               function createBrowseTable() {
                     var otable = $('#browsetbl').dataTable(". $dataTableConfig . ");
-                    // var settings = otable.fnSettings(); // for debugging
                     return otable;
                 }
             </script>";
@@ -492,11 +492,11 @@ class ui_browse extends FO_Plugin {
   
   private function createJavaScriptBlock()
   {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-//    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
+    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>";
+//    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>";
+    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>";
+    $output .= "\n<script src=\"scripts/browse.js\" type=\"text/javascript\"></script>";
+    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>";
     return $output;
   }
 
