@@ -25,6 +25,8 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
+require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
+
 class UploadDao extends Object
 {
   /**
@@ -120,13 +122,39 @@ class UploadDao extends Object
     pg_free_result($res);
     return $clearingTypes;
   }
-  
+
   /**
    * @return array
    */
   public function getStatusTypeMap()
   {
     return $this->dbManager->createMap('upload_status', 'status_pk', 'meaning');
+  }
+
+  /**
+   * \brief Get the uploadtree table name for this upload_pk
+   *        If upload_pk does not exist, return "uploadtree".
+   *
+   * \param $upload_pk
+   *
+   * \return uploadtree table name
+   */
+  function getUploadtreeTableName($uploadId)
+  {
+    if (!empty($uploadId))
+    {
+      $statementName = __METHOD__;
+      $row = $this->dbManager->getSingleRow(
+          "select uploadtree_tablename from upload where upload_pk=$1",
+          array($uploadId),
+          $statementName
+      );
+      if (!empty($row['uploadtree_tablename']))
+      {
+        return $row['uploadtree_tablename'];
+      }
+    }
+    return "uploadtree";
   }
 
   /**
@@ -149,14 +177,9 @@ class UploadDao extends Object
     return $this->getItemByDirection($uploadId, $item, self::DIR_BCK);
   }
 
-  /**
-   *
-   */
   const DIR_FWD = 1;
-  /**
-   *
-   */
   const DIR_BCK = -1;
+  const NOT_FOUND = null;
 
   /**
    * @param $uploadId
@@ -166,7 +189,7 @@ class UploadDao extends Object
    */
   public function getItemByDirection($uploadId, $item, $direction)
   {
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
 
     $itemEntry = $this->getUploadEntry($item, $uploadTreeTableName);
 
@@ -184,46 +207,67 @@ class UploadDao extends Object
     $parent = $itemEntry['parent'];
     $item = $itemEntry['uploadtree_pk'];
 
-    if (isset($parent)) {
-    $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeTableName);
-    $parentSize = $this->getParentSize($parent, $uploadTreeTableName);
-    } else {
-      if ($direction == self::DIR_FWD) {
+    if (isset($parent))
+    {
+      $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeTableName);
+      $parentSize = $this->getParentSize($parent, $uploadTreeTableName);
+    } else
+    {
+      if ($direction == self::DIR_FWD)
+      {
         return $this->enterFolder($item, $direction, $uploadTreeTableName);
       }
-      return null;
+      return self::NOT_FOUND;
     }
 
     $targetOffset = $currentIndex + ($direction == self::DIR_FWD ? 1 : -1);
     if ($targetOffset >= 0 && $targetOffset < $parentSize)
     {
-      // new item is contained within same parent
-
-      $newItem = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName);
-
-      $newItemEntry = $this->getUploadEntry($newItem, $uploadTreeTableName);
-
-      $newItem = $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
-
-      if ($newItem)
-      {
-        return $newItem;
-      } else
-      {
-        return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
-      }
+      return $this->findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeTableName);
     } else
     {
-      // leaving current directory
+      return $this->findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeTableName);
+    }
+  }
 
-      if (isset($parent))
-      {
-        $newItemEntry = $this->getUploadEntry($parent, $uploadTreeTableName);
-        return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
-      } else
-      {
-        return null;
-      }
+  /**
+   * @param $targetOffset
+   * @param $parent
+   * @param $direction
+   * @param $uploadTreeTableName
+   * @return mixed
+   */
+  protected function findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeTableName)
+  {
+    $newItem = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName);
+    $newItemEntry = $this->getUploadEntry($newItem, $uploadTreeTableName);
+
+    $newItem = $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
+
+    if ($newItem)
+    {
+      return $newItem;
+    } else
+    {
+      return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+    }
+  }
+
+  /**
+   * @param $parent
+   * @param $direction
+   * @param $uploadTreeTableName
+   * @return mixed|null
+   */
+  protected function findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeTableName)
+  {
+    if (isset($parent))
+    {
+      $newItemEntry = $this->getUploadEntry($parent, $uploadTreeTableName);
+      return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+    } else
+    {
+      return self::NOT_FOUND;
     }
   }
 
@@ -246,7 +290,7 @@ class UploadDao extends Object
       {
         return $this->enterFolder($newItem, $direction, $uploadTreeTableName);
       }
-      return false;
+      return self::NOT_FOUND;
     } else
     {
       return $newItem;
@@ -326,7 +370,8 @@ select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_na
    * @param $uploadId
    * @return mixed
    */
-  public function getUploadParent($uploadId ) {
+  public function getUploadParent($uploadId)
+  {
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
     $statementname = __METHOD__ . $uploadTreeTableName;

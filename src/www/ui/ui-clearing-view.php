@@ -137,7 +137,7 @@ class ClearingView extends FO_Plugin
     if (!$fileTreeBounds->containsFiles())
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      list($outputTMP, $foundNothing) = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses); //TODO found nothing is now redundant... if ui_view_license gets deleted remove it
+      $outputTMP = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses);
       $output .= $outputTMP;
 
       $output .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);

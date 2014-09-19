@@ -402,14 +402,19 @@ class LicenseOverviewPrinter extends Object
       /**
        * @var LicenseRef[] $auditedLicenses
        */
-      $output .= "<div class='scrollable'>";
+      $output .= '<table border="1"><tr>';
+      $innerglue = '';
       foreach ($auditedLicenses as $license)
       {
-        $output .= $this->printLicenseNameAsLink($license->getShortName(), $license->getFullName());
-        $output .= ", ";
+        $refId = $license->getId();
+        $output .= $innerglue;
+        $innerglue = '</tr><tr>';
+        $output .= '<td>'.$this->printLicenseNameAsLink($license->getShortName(), $license->getFullName()).'</td>';
+        $output .= '<td><textarea id="tedit'.$refId.'" cols="15" rows="2" onclick="activateLic('.$refId.')">TBD '.$refId.'</textarea></td>';
+        $output .= '<td><button hidden id="bedit'.$refId.'" onclick="performLicCommentRequest('.$refId.')">'._('Submit').'</button>';
+        $output .=    '<img onclick="performLicDelRequest('.$refId.')" id="aedit'.$refId.'" src="images/icons/close_32.png" alt="rm" title="'._('remove this license').'"/></td>';
       }
-      $output = substr($output, 0, count($output) - 3);
-      $output .= "</div>";
+      $output .= "</tr></table>";
       return $output;
     }
     else
@@ -424,24 +429,20 @@ class LicenseOverviewPrinter extends Object
    */
   public function createWrappedRecentLicenseClearing($clearingDecWithLicenses)
   {
-    $foundNothing=false;
     $output = "<div id=\"recentLicenseClearing\" name=\"recentLicenseClearing\">";
     if (!empty($clearingDecWithLicenses))
     {
       $output_TMP = $this->createRecentLicenseClearing($clearingDecWithLicenses);
-      if(empty($output_TMP)) {
-        $foundNothing =true;
-      }
-      else {
+      if(!empty($output_TMP)) {
         $output .= $output_TMP;
       }
     }
     $output .= "</div>";
-    return array($output, $foundNothing );
+    return $output;
   }
 
 
-public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
+  public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
                                    $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){
     if (count($licenseMatches)==0)
     {
@@ -482,6 +483,6 @@ public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
           Traceback_uri() . "?mod=view-license&upload=$uploadId&item=$uploadTreeId&format=$format'>" . _("Exit") . "</a> " . _("specific license mode") . "<br/>";
     }
     return $output;
+  }
+  
 }
-
-} 

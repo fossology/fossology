@@ -1,0 +1,41 @@
+<div class="modal" id="userModal" hidden>
+ <form name="licenseListSelect">
+  <table border="0">
+  <tr>
+   <td><i18n>Available licenses</i18n>:<br/>
+     {{ licenseLeftSelect }}
+   </td>
+
+   <td align="center" valign="middle">
+    <input type="button" value="&gt;" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" /><br />
+    <input type="button" value="&lt;" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+   </td>
+
+   <td><i18n>Selected licenses</i18n>:<br/>
+     {{ licenseRightSelect }}
+   </td>
+
+   <td>
+    <i18n>Comment (private)</i18n>:<br/>
+    <textarea name="comment" id="comment" type="text" cols="50" rows="8" maxlength="150"></textarea><br/><br/>
+    <i18n>Remark (public)</i18n>:<br/>
+    <textarea name="remark" id="remark" type="text" cols="50" rows="10" maxlength="150"></textarea>
+   </td>
+  </tr>
+  </table>
+
+
+  <fieldset style="display:inline">
+   <legend><i18n>License decision scope</i18n></legend>
+   {{ scopeRadio }}
+  </fieldset>
+  <fieldset style="display:inline">
+   <legend><i18n>License decision type</i18n></legend>
+   {{ typeRadio }} 
+  </fieldset> &nbsp; &nbsp; &nbsp;
+  <button  type="button" autofocus  onclick='performPostRequest()'>Submit</button> &nbsp;
+  <button  type="button" autofocus  onclick='performNoLicensePostRequest()'>No License contained</button> &nbsp;
+  <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
+  <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
+ </form>
+</div>

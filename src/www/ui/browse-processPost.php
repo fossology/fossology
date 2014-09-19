@@ -124,7 +124,7 @@ class browseProcessPost extends FO_Plugin
     {
       $this->changeStatus($uploadId, $value);
     }
-    else if ($columnName == 'assignee')
+    else if ($columnName=='assignee' && $this->userPerm)
     {
       $sql = "update upload SET assignee=$1 where upload_pk=$2";
       $this->dbManager->getSingleRow($sql,array($value, $uploadId),$sqlLog=__METHOD__);
@@ -232,7 +232,7 @@ class browseProcessPost extends FO_Plugin
    * @param $MenuPfileNoCompare
    * @param array $statusTypesAvailable
    * @param array $users
-   * @param unique
+   * @param string (unique)
    * @return array
    */
   private function showRow($Row, $Folder, $Show, $Uri, $MenuPfile, $MenuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter)
@@ -287,7 +287,13 @@ class browseProcessPost extends FO_Plugin
       $statusAction = " onchange =\"changeTableEntry(this, $uploadPk,'status_fk' )\" ";
       $currentStatus = $this->renderer->createSelect("Status".$this->userPerm."Of_$rowCounter",$statusTypesAvailable,$Row['status_fk'],$statusAction);
     }
-    $currentAssignee = $this->userDao->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", $uploadPk . ", 'assignee'");
+    if ($this->userPerm)
+    {
+      $currentAssignee = $this->userDao->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", $uploadPk . ", 'assignee'");
+    } else
+    {
+      $currentAssignee = array_key_exists($Row['assignee'], $users) ? $users[$Row['assignee']] : _('Unassigned');
+    }
     $rejectableUploadId = $this->userPerm ? $uploadPk : 0;
     $tupleIdRejectWhoWhy = array($rejectableUploadId, 4==$Row['status_fk'], $Row['who_id']?$users[$Row['who_id']]:null, $Row['reason']);
     $output = array($nameColumn, $currentStatus, $tupleIdRejectWhoWhy, $currentAssignee, $dateCol, $pairIdPrio);
@@ -373,7 +379,7 @@ class browseProcessPost extends FO_Plugin
       return '';
     }
     $this->filterParams[] = $var;
-    return ' AND $columnName=$'. count($this->filterParams).' ';
+    return " AND $columnName=$". count($this->filterParams).' ';
   }
 
   

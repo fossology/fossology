@@ -22,7 +22,6 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\ClearingDecWithLicenses;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
@@ -188,6 +187,14 @@ class ClearingDao extends Object
     return $clearingTypes;
   }
 
+  
+  /**
+   * @return array
+   */
+  public function getClearingTypeMap()
+  {
+    return $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+  }
   /**
    * @return DatabaseEnum[]
    */
@@ -207,6 +214,14 @@ class ClearingDao extends Object
     return $clearingScopes;
   }
 
+  /**
+   * @return array
+   */
+  public function getClearingScopeMap()
+  {
+    return $this->dbManager->createMap('clearing_decision_scopes', 'scope_pk', 'meaning');
+  }
+  
   /**
    * @param array $licenses
    * @param $uploadTreeId
@@ -261,6 +276,28 @@ class ClearingDao extends Object
 
   }
 
+
+  /**
+   * @param int $licenseId
+   * @param $uploadTreeId
+   * @param $userid
+   */
+  public function deleteClearingDecision($licenseId, $uploadTreeId, $userid)
+  {
+    // $tbd = array_search('To be determined', $this->getClearingTypeMap());
+    // TODO delete license
+  }
+
+    /**
+   * @param int $licenseId
+   * @param $uploadTreeId
+   * @param $userid
+   */
+  public function commentClearingDecision($licenseId, $uploadTreeId, $userid)
+  {
+    // TODO comment license item pair
+  }
+  
   /**
    * @param FileTreeBounds $fileTreeBounds
    * @return ClearingDecision[]

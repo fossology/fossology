@@ -152,9 +152,10 @@ class Renderer extends Object
     return "<?php echo $var; ?>";
   }
   
-  public function createSelect($id,$options,$select="",$actions="")
+  
+  public function createSelect($id,$options,$select='',$action='')
   {
-    $html = "<select name=\"$id\" id=\"$id\" $actions>";
+    $html = "<select name=\"$id\" id=\"$id\" $action>";
     foreach($options as $key=>$disp)
     {
       $html .= '<option value="'.$key.'"';
@@ -167,6 +168,24 @@ class Renderer extends Object
     $html .= '</select>';
     return $html;    
   }
+  
+  public function createRadioGroup($id,$options,$select='',$action='',$separator='<br/>')
+  {
+    $innerglue = '';
+    $html = '';
+    foreach($options as $key=>$disp)
+    {
+      $html .= $innerglue.'<input type="radio" name="'.$id.'" value="'.$key.'"';
+      $innerglue = $separator;
+      if ($key == $select)
+      {
+        $html .= ' checked';
+      }
+      $html .= $action."/>$disp";
+    }
+    return $html;    
+  }
+
 }
 
 if ('m'==@$argv[1]){

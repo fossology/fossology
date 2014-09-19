@@ -138,8 +138,8 @@ function performPostRequest() {
     var data = {
         "licenseNumbersToBeSubmitted": txt,
         "uploadTreeId": $('#uploadTreeId').val(),
-        "type": $('#type').val(),
-        "scope": $('#scope').val(),
+        "type": $('[name="type"]:checked').val(),
+        "scope": $('[name="scope"]:checked').val(),
         "comment": $('#comment').val(),
         "remark": $('#remark').val()
     };
@@ -158,4 +158,36 @@ function performNoLicensePostRequest() {
     selectNoLicenseFound(licenseLeft, licenseRight);
     performPostRequest();
     closeUserModal();
+}
+
+function activateLic(k){
+ $("#bedit"+k).show();
+ $("#aedit"+k).hide();
+}
+
+function performLicCommentRequest(k){
+    var data = {
+        "uploadTreeId": $('#uploadTreeId').val(),
+        "lic": k,
+        "comment": $('#tedit'+k).val()
+    };
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-processPost",
+        data: data,
+        success: clearingSuccess
+    });
+}
+
+function performLicDelRequest(k){
+    var data = {
+        "uploadTreeId": $('#uploadTreeId').val(),
+        "unlic": k
+    };
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-processPost",
+        data: data,
+        success: clearingSuccess
+    });
 }
