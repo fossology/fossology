@@ -177,8 +177,6 @@ class ClearingView extends FO_Plugin
   }
 
 
-
-
   /**
    * @param $uploadTreeId
    * @return array of clearingHistory

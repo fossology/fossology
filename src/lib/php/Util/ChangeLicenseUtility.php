@@ -171,11 +171,13 @@ class ChangeLicenseUtility extends Object
     $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
     foreach ($licenseRefArray as $licenseRef)
     {
-      $output .= "<option value=\"" . $licenseRef->getId() . "\" ".
-                        " title= \"".$licenseRef->getFullName()."\" ".
-                  ">"
-                      . $licenseRef->getShortName() .
-                "</option>\n";
+      $uri = Traceback_uri() . "?mod=view-license" . "&lic=" . urlencode($licenseRef->getShortName());
+      $title = _("License Text");
+      $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
+      $output .= '<option value="' . $licenseRef->getId() . '" title="'.$licenseRef->getFullName().'" '
+                      ."ondblclick=\"javascript:window.open('$uri','$title','$sizeInfo');\" >"
+                   . $licenseRef->getShortName() 
+                  . "</option>\n";
     }
     $output .= "</select>";
     return $output;
@@ -231,7 +233,7 @@ class ChangeLicenseUtility extends Object
       $preSelectedLicenses = array();
     }
 
-    
+        
     $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
     
