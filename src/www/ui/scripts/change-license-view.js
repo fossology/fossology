@@ -16,6 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+var defaultScope;
+var defaultType;
+
+
 function clearingSuccess(data) {
     $('#clearingHistoryTable').html(data.tableClearing);
     $('#recentLicenseClearing').html(data.recentLicenseClearing);
@@ -94,6 +98,9 @@ function calculateDivHeight(){
 }
 
 
+checkDefaultScope = function(){ $(this).prop("checked",$(this).val()==defaultScope);};
+checkDefaultType = function(){ $(this).prop("checked",$(this).val()==defaultType);};
+
 $(document).ready(function(){
 
   calculateDivHeight();
@@ -101,22 +108,28 @@ $(document).ready(function(){
   $(".legendShower").click( showLengend );
   var legendOption =  getOptionDefaultTrue("legendShow");
   if(legendOption) {
-        showLengend();
+    showLengend();
   }
-   else {
-        hideLegend();
+  else {
+    hideLegend();
   }
-  $("input[name=scope]").each( function(){
-      if(getOption("defaultScope")==$(this).val()){
-        $(this).attr("checked","checked");
-      }
-      $(this).click( function(){ setOption("defaultScope", $(this).val()); });
+  defaultScope=getOption("defaultScope");
+  defaultType=getOption("defaultType");
+  $("input[name=scope]").each( function() {
+      $(this).each(checkDefaultScope);
+      $(this).click( function(){
+          defaultScope = $(this).val();
+          setOption("defaultScope", defaultScope);
+          $("input[name=scope], input[name=scopeOutside]").each(checkDefaultScope);
+        });
     } );
-  $("input[name=type]").each( function(){
-      if(getOption("defaultType")==$(this).val()){
-        $(this).attr("checked","checked");
-      }
-      $(this).click( function(){ setOption("defaultType", $(this).val()); });
+  $("input[name=type]").each( function() {
+      $(this).each(checkDefaultType);
+      $(this).click( function(){
+          defaultType = $(this).val();
+          setOption("defaultType", defaultType);
+          $("input[name=type]").each(checkDefaultType);
+        });
     } );
 
 });

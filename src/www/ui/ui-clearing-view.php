@@ -204,8 +204,7 @@ class ClearingView extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
     if ($permission >= PERM_WRITE)
     {
-      $text = _("You do have write (or above permission) on this upload, thus you can change the license of this file.");
-      $output .= "<b>$text</b>";
+      $output .= $this->changeLicenseUtility->createScopeTypeSelect();
 
       $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
       $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
