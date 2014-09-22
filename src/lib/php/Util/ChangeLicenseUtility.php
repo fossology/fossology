@@ -266,7 +266,7 @@ class ChangeLicenseUtility extends Object
   public function createBulkForm($uploadTreeId=-1) {
     $output = "";
     $allLicenseRefs = $this->licenseDao->getLicenseRefs();
-    $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
+    $output .= '<div class="modal" id="bulkModal" hidden>';
     $output .= "<form name=\"bulkForm\">";
     $text = _("Bulk recognition");
     $output .= "<h2>$text</h2>";
@@ -275,14 +275,16 @@ class ChangeLicenseUtility extends Object
     $output .= "<option value=\"t\">Remove license</option>";
     $output .= "</select>";
     $output .= $this->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
+    $uri = Traceback_uri() . "?mod=view-license" . "&lic=";
+    $title = _("License Text");
+    $output .= " <button type=\"button\" onclick=\"popUpLicenseText('$uri','$title')\">"._('Show origin')."</button>";
     $text = _("reference text");
     $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
     $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
     $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
     $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
-    $output .= "</div>";
     $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
-
+    $output .= "</div>";
     return $output;
   }
 }

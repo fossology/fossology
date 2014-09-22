@@ -194,3 +194,8 @@ function performLicDelRequest(k){
         success: clearingSuccess
     });
 }
+
+function popUpLicenseText(popUpUri,title) {
+  sel = $("#bulkLicense :selected").text();
+  window.open(popUpUri+sel,title,'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
+}
