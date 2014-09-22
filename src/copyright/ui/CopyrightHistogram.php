@@ -52,6 +52,7 @@ class CopyrightHistogram  extends FO_Plugin {
 
   }
 
+
 //  /**
 //   * \brief Customize submenus.
 //   */
@@ -163,7 +164,7 @@ private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadt
   foreach ($rows as $row)
   {
     $hash = $row['hash'];
-    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, $hash, true ,$filter);
+    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, $hash, true ,$filter, $type);
   }
 
   $VCopyright .= "</table>\n";
@@ -189,16 +190,19 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
   $count = 0;
   $uniqueCount = 0;
 
-  $output = "<table border=1 width='100%'id='copyrightemail'>\n";
+  $output = "<table border=1 width='100%'id='copyright'.$type.>\n";
   $output .= "<tr><th width='10%'>$text</th>";
   $output .= "<th width='10%'>$text1</th>";
   $output .= "<th>$decription</th></tr>\n";
 
 
+  //TODO Replace this by general datatable
+
   foreach ($rows as $row)
   {
     $hash = $row['hash'];
-    $output .= $this->fillTableRow($row, $uniqueCount, $count, $Uploadtree_pk, $Agent_pk, $hash);
+    //TODO make this return arrays for each colum and append to array
+    $output .= $this->fillTableRow($row, $uniqueCount, $count, $Uploadtree_pk, $Agent_pk, $hash,false, "", $type);
   }
 
 
@@ -206,7 +210,7 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
   $output .= "<p>\n";
 
   $output .= "$descriptionUnique: $uniqueCount<br>\n";
-  $output .= "$text1: $count";
+  $output .= "$descriptionTotal: $count";
 
 
   return $output;
@@ -436,9 +440,12 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
             /* Select list for filters */
             $SelectFilter = "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$Upload, $Item)'>";
 
+            $Selected = ($filter == 'legal') ? "selected" : "";
             $text = _("Show all");
-            $Selected = ($filter == 'none') ? "selected" : "";
-            $SelectFilter .= "<option $Selected value='none'>$text";
+            $SelectFilter .= "<option $Selected value='all'>$text";
+
+            $text = _("Show all legal copyrights");
+            $SelectFilter .= "<option $Selected value='legal'>$text";
 
             $text = _("Show files without licenses");
             $Selected = ($filter == 'nolics') ? "selected" : "";
@@ -663,14 +670,14 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
    * @param string $filter
    * @return string
    */
-  private function fillTableRow( $row, &$uniqueCount, &$totalCount, $Uploadtree_pk, $Agent_pk, $hash, $normalizeString=false ,$filter="" )
+  private function fillTableRow( $row, &$uniqueCount, &$totalCount, $Uploadtree_pk, $Agent_pk, $hash, $normalizeString=false ,$filter="", $type )
   {
     $uniqueCount++;
     $totalCount += $row['copyright_count'];
     $output = "<tr><td align='right'>$row[copyright_count]</td>";
     $output .= "<td align='center'><a href='";
     $output .= Traceback_uri();
-    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $row['type'];
+    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $type;
     if (!empty($filter)) $URLargs .= "&filter=$filter";
     $output .= $URLargs . "'>Show</a></td>";
     $output .= "<td align='left'>";

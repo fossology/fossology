@@ -111,7 +111,7 @@ class CopyrightDao extends Object
 
     $join = "";
     $filterQuery ="";
-    if( $filter == "none" ) {
+    if( $filter == "legal" ) {
       $Copyright = "Copyright";
       $filterQuery  = " AND CP.content ILIKE ('$Copyright%') ";
     }
@@ -122,7 +122,9 @@ class CopyrightDao extends Object
       $join  = " INNER JOIN license_file AS LF on  CP.pfile_fk =LF.pfile_fk ";
       $filterQuery =" AND LF.rf_fk IN (select rf_pk from license_ref where rf_shortname IN ('$NoLicStr', '$VoidLicStr')) ";
     }
-
+    else if ($filter == "all") {  /* Not needed, but here to show that there is a filter all */
+        $filterQuery ="";
+    }
       $sql = "SELECT substring(CP.content FROM 1 for 150) AS content,  CP.ct_pk  as ct_pk  " .
              "FROM copyright AS CP " .
              "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
