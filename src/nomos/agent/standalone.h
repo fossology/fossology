@@ -62,9 +62,9 @@ extern int   fo_scheduler_userID();
 extern void  fo_scheduler_set_special(int option, int value);
 extern int   fo_scheduler_get_special(int option);
 extern char* fo_sysconfig(char* sectionname, char* variablename);
-extern int  fo_GetAgentKey   (PGconn *pgConn, char *agent_name, long unused, char *cpunused, char *agent_desc);
+extern int  fo_GetAgentKey   (PGconn *pgConn,const char *agent_name, long unused, const char *cpunused, const char *agent_desc);
 extern int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
-                         char *tableName, char *ars_status, int ars_success);
+                        const char *tableName, const char *ars_status, int ars_success);
 extern PGconn *fo_dbconnect(char *DBConfFile, char **ErrorBuf);
 extern int     fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb);
 extern int     fo_checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb);
