@@ -280,7 +280,7 @@ class ui_browse extends FO_Plugin {
             . "</table>";
     $V.= "</table>";
 
-    $V .= $this->ShowFolderCreateFileTable($Folder, $Show);
+    $V .= $this->showFolderCreateFileTable($Folder, $Show);
 
     return $V;
   }
@@ -424,24 +424,24 @@ class ui_browse extends FO_Plugin {
   
  
   private function rejectModal(){ 
-    $output2 = "<div>"._('Please enter a reason for rejection').":</div> 
+    $output2 = "<div>"._('Please enter a reason for status change.').":</div> 
               <textarea id='commentText' style='overflow:auto;resize:none;width:100%;height:80px;' name='commentText'></textarea></br>
-              [<a class='button' onclick='submitRejector()'>OK</a>]   &nbsp;&nbsp;&nbsp;
-              [<a class='button' onclick='closeRejectorModal()'>Cancel</a>] ";
+              [<a class='button' onclick='submitComment()'>OK</a>]   &nbsp;&nbsp;&nbsp;
+              [<a class='button' onclick='closeCommentModal()'>Cancel</a>] ";
     
     $output1 = "<form name=\"rejector\">$output2</form>\n";
-    $output = "<div class=\"modal\" id=\"rejectorModal\" hidden>$output1</div>";
+    $output = "<div class=\"modal\" id=\"commentModal\" hidden>$output1</div>";
     return $output;
   }
   
 
-  private function ShowFolderCreateFileTable($Folder, $Show)
+  private function showFolderCreateFileTable($Folder, $Show)
   {
     $tableColumns = '[
       { "sTitle" : "'._("Upload Name and Description").'", "sClass": "left" },
       { "sTitle" : "'._("Status").'", "sClass": "center" , "bSearchable": false},
-      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false, "bSearchable": false,
-                      "mRender": function ( source, type, val ) { return rejectorColumn( source, type, val );}
+      { "sTitle" : "'._("Comment").'", "sClass": "center", "bSortable": false, "bSearchable": false,
+                      "mRender": function ( source, type, val ) { return commentColumn( source, type, val );}
                   },
       { "sTitle" : "'._("Assigned to").'", "sClass": "center" , "bSearchable": false},
       { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string", "bSearchable": false},
