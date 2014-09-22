@@ -99,7 +99,7 @@ class browseProcessPost extends FO_Plugin
     else if(!empty($uploadId) && !empty($direction)) {
       $this->moveUploadToInfinity($uploadId,$direction=='top');
     }
-    else if($this->userPerm>=1 && !empty($uploadId) && !empty($commentText) && !empty($statusId)) {
+    else if(!empty($uploadId) && !empty($commentText) && !empty($statusId)) {
       $this->setStatusAndComment($uploadId,$statusId,$commentText);
     }
     else {
