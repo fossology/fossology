@@ -19,8 +19,9 @@
 var myKey = 0;
 var myVal = 0;
 
-var rejectorModal = null;
+var commentModal = null;
 var uploadId = 0;
+var statusId = 0;
 
 var assigneeSelected = 0;
 var statusSelected = 0;
@@ -32,7 +33,7 @@ $(document).ready(function() {
       initPrioClick();
       initPrioDraw();
   });
-  rejectorModal = $('#rejectorModal').plainModal();
+  commentModal = $('#commentModal').plainModal();
 } );
 
 function initPrioClick() {
@@ -107,36 +108,30 @@ function prioColumn ( source, type, val ) {
   return source[1];
 }
 
-function openRejectorModal(k) {
-  uploadId = k;
-  rejectorModal.plainModal('open');
+function openCommentModal(upload,status,comment) {
+  uploadId = upload;
+  statusId = status;
+  $("#commentText").val(comment);
+  commentModal.plainModal('open');
 }
 
-function closeRejectorModal() {
-  rejectorModal.plainModal('close');
+function closeCommentModal() {
+  commentModal.plainModal('close');
 }
 
 
-function rejectorColumn ( source, type, val ) {
+function commentColumn ( source, type, val ) {
   if (type === 'set') {
-    source[1] = val;
+    source[2] = val;
     return;
   }
   if (type === 'display') {
-    if (source[1]){
-      return 'rejected by <span title="'+source[3]+'">'+source[2]+'</span>';
+    if (source[0]){
+      return '<span ondblclick="openCommentModal('+source[0]+','+source[1]+',this.value)">'+source[2]+'</span>';
     }
-    else if (source[0]) {
-      return '<a class="button" onclick="openRejectorModal('+source[0]+')"><img alt="move" src="images/icons/close_32.png" class="icon-small"/>reject</a>';
-    }
-    else {
-      return 'accepted';
-    }
+    return source[2];
   }
-  if (type==='sort') {
-    return -source[1];
-  }
-  return source[1];
+  return source[2];
 }
 
 function mysuccess(){
@@ -145,7 +140,7 @@ function mysuccess(){
 }
 
 function mysuccess3(){
-  closeRejectorModal();
+  closeCommentModal();
   var oTable = createBrowseTable();
   oTable.fnDraw(false);
 }
@@ -158,8 +153,8 @@ function mysuccess4(){
 }
 
 function changeTableEntry(sel, uploadId, columnName) {
-  if(columnName=='status_fk' && sel.value==4){
-    openRejectorModal(uploadId);
+  if(columnName=='status_fk' && (sel.value==3 || sel.value==4)){
+    openCommentModal(uploadId, sel.value, '');
   }
   else {
     var post_data = {
@@ -201,10 +196,11 @@ function changePriority( move, beyond) {
     });
 }
 
-function submitRejector( ) {
+function submitComment( ) {
     var post_data = {
         "uploadId" : uploadId,
-        "commentText": $("#commentText").val()
+        "commentText": $("#commentText").val(),
+        "statusId": statusId
     };
     $.ajax({
         type: "POST",
