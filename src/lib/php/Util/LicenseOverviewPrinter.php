@@ -26,6 +26,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\View\HighlightRenderer;
+use Fossology\Lib\View\Renderer;
 
 class LicenseOverviewPrinter extends Object
 {
@@ -50,12 +51,18 @@ class LicenseOverviewPrinter extends Object
    */
   private $highlightRenderer;
 
-  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer)
+  /**
+   * @var Renderer
+   */
+  private $renderer;
+
+  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
     $this->highlightRenderer = $highlightRenderer;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -388,6 +395,10 @@ class LicenseOverviewPrinter extends Object
   public function createRecentLicenseClearing($clearingDecWithLicenses)
   {
     $output = "<h3>" . _("Concluded license") . "</h3>\n";
+
+    $output .= $this->createScopeTypeSelect();
+
+
      $cd= $this->clearingDao->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($clearingDecWithLicenses);
 
     /**
@@ -421,6 +432,15 @@ class LicenseOverviewPrinter extends Object
     {
       return "";
     }
+  }
+
+  public function createScopeTypeSelect()
+  {
+    $clearingDecisionTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
+    $typeRadio = $this->renderer->createRadioGroup('type', $clearingDecisionTypes, $defaultType = 2, '', $separator = ' &nbsp; ');
+    return '  <fieldset style="display:inline">
+   <legend>' . _('Clearing decision type') . '</legend>
+   ' . $typeRadio . '</fieldset>';
   }
 
   /**

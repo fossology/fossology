@@ -80,6 +80,7 @@ without any warranty.
             <argument type="service" id="dao.upload"/>
             <argument type="service" id="dao.clearing"/>
             <argument type="service" id="view.highlight_renderer"/>
+            <argument type="service" id="renderer"/>
         </service>
 
         <service id="buisinessrules.newest_license_selector" class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">

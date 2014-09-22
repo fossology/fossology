@@ -24,7 +24,6 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\View\Renderer;
 
@@ -202,20 +201,7 @@ class ChangeLicenseUtility extends Object
     return $licenseList;
   }
 
-  
-  public function createScopeTypeSelect(){
-    $clearingScopes = $this->clearingDao->getClearingScopeMap();
-    $scopeRadio = $this->renderer->createRadioGroup('scope', $clearingScopes, $defaultScope=2, '', $separator=' &nbsp; ');
-    $clearingTypes = $this->clearingDao->getClearingTypeMap($selectableOnly=true);
-    $typeRadio = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
-    return '  <fieldset style="display:inline">
-   <legend>'._('License decision scope').'</legend>
-   '.$scopeRadio.'
-  </fieldset>
-  <fieldset style="display:inline">
-   <legend>'._('License decision type').'</legend>
-   '.$typeRadio.'</fieldset>';
-  }
+
 
   /**
    * @param $uploadTreeId
@@ -250,10 +236,10 @@ class ChangeLicenseUtility extends Object
         
     $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
-    
-    $clearingScopes = $this->clearingDao->getClearingScopeMap();
+
+    $clearingScopes = $this->clearingDao->getClearingDecisionScopeMap();
     $this->renderer->vars['scopeRadio'] = $this->renderer->createRadioGroup('scope', $clearingScopes, $defaultScope=2, '', $separator=' &nbsp; ');
-    $clearingTypes = $this->clearingDao->getClearingTypeMap($selectableOnly=true);
+    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
     $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
     $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
     

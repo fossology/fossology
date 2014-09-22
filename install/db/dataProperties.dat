@@ -7,15 +7,21 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-$dataPropertiesStorage['clearing_decision_scopes.meaning'] = array(
+$dataPropertiesStorage['license_decision_scopes.meaning'] = array(
   'global',
   'upload'
 );
 
-$dataPropertiesStorage['clearing_decision_types.meaning'] = array(
+$dataPropertiesStorage['license_decision_types.meaning'] = array(
   'User decision',
-  'To be determined',
   'bulk'
+);
+
+$dataPropertiesStorage['clearing_decision_types.meaning'] = array(
+  'Not decided',
+  'No License known',
+  'To be discussed',
+  'Identified'
 );
 
 
