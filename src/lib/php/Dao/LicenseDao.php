@@ -209,11 +209,12 @@ class LicenseDao extends Object
 
   public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
   {
-    $statementName = __METHOD__ . '.' . $fileTreeBounds->getUploadTreeTableName() . ".$orderStatement.$agentId";
+    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref RIGHT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND uploadtree.lft BETWEEN $2 and $3";
+         FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
+         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
     if (!empty($agentId))
     {
       $sql .= ' AND agent_fk=$4';
