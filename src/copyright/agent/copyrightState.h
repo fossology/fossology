@@ -1,7 +1,9 @@
 #ifndef copyrightState_h
 #define copyrightState_h
 
-#include "libfossdbmanagerclass.hpp"
+//#include "libfossdbmanagerclass.hpp"
+#include "regexMatcher.h"
+#include <vector>
 
 class CopyrightState {
 public:
@@ -12,11 +14,14 @@ public:
   int getVerbosity();
   DbManager* getDbManager();
   PGconn * getConnection();
+  void addMatcher(RegexMatcher regexMatcher);
+  std::vector<RegexMatcher> getRegexMatchers();
 
 private:
-  DbManager*  dbManager;
+  fo::DbManager* dbManager;
   int agentId;
   int verbosity;
+  std::vector<RegexMatcher> regexMatchers;
 };
 
 #endif

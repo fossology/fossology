@@ -11,16 +11,13 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdio.h>
 
 extern "C"{
-#include <libfossology.h>
+#include "libfossology.h"
 }
 
 #include <iostream>
 #include "copyright.h"
 
-
 using namespace std;
-
-
 
 class File {
 public:
@@ -35,7 +32,6 @@ public:
   }
 };
 
-
 void queryAgentId(int& agent, PGconn* dbConn) {
   char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
@@ -49,9 +45,9 @@ void queryAgentId(int& agent, PGconn* dbConn) {
   free(agentRevision);
 
   if (agentId > 0)
-    agent= agentId;
+    agent = agentId;
   else
-    exit( 1);
+    exit(1);
 }
 
 void bail(CopyrightState* state, int exitval) {
@@ -61,7 +57,6 @@ void bail(CopyrightState* state, int exitval) {
   exit(exitval);
 }
 
-
 CopyrightState* getState(DbManager* dbManager, int verbosity){
   int agentID;
   queryAgentId(agentID, dbManager->getConnection());
@@ -69,41 +64,46 @@ CopyrightState* getState(DbManager* dbManager, int verbosity){
 }
 
 string readFileToString(const char* fileName){
-
-  return "content";
+  return "this is the copyright of Copyright";
 }
 
-class CopyrightMatches{
+vector<CopyrightMatch*> matchStringToRegexes(const string& content, CopyrightState* state) {
+  vector<CopyrightMatch*> matches;
+  vector<RegexMatcher> matchers = state->getRegexMatchers();
 
+  for (auto it = matchers.cbegin(); it != matchers.cend(); ++it) {
+    CopyrightMatch* newMatch = it->match(content);
+    matches.push_back(newMatch);
+  }
+
+  return matches;
+}
+
+
+void saveToDatabase(vector<CopyrightMatch*> matches, CopyrightState* state) {
+  for (auto it = matches.cbegin(); it != matches.cend(); ++it) {
+    for (unsigned matchI = 0; matchI < it->size(); ++matchI) {
+      cout << "match [" << matchI << "] = " << (*it)[matchI] << endl;
+    }
+  }
 };
 
-CopyrightMatches* matchStringToRegexes(const string  & content, CopyrightState* state) {
-
-return new CopyrightMatches();
-}
-
-
-void saveToDatabase(CopyrightMatches* matches, CopyrightState* state){};
-
 void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
-  File* file = new File() ;
+  File* file = new File();
   file->id = pFileId;
 
-  char * pFile  = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
+  char* pFile = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
 
   if(!pFile) {
-    cout<< "File not found " << pFileId << endl;
+    cout << "File not found " << pFileId << endl;
     bail(state, 8);
   }
 
-  file->fileName = fo_RepMkPath("files",pFile);
-
-
+  file->fileName = fo_RepMkPath("files", pFile);
 
   if (file->fileName != NULL) {
-
     string fileContent = readFileToString(file->fileName);
-    CopyrightMatches* matches = matchStringToRegexes(fileContent, state);
+    vector<CopyrightMatch*> matches = matchStringToRegexes(fileContent, state);
 
     saveToDatabase(matches, state);
   }
@@ -112,7 +112,7 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 }
 
 
-bool processUploadId ( CopyrightState* state, int uploadId) {
+bool processUploadId (CopyrightState* state, int uploadId) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->getDbManager()->getStruct_dbManager(), uploadId);
 
   if (PQntuples(fileIdResult) == 0) {
@@ -121,7 +121,6 @@ bool processUploadId ( CopyrightState* state, int uploadId) {
     return 0;
   }
 
-
   int count = PQntuples(fileIdResult);
   for (int i = 0; i < count; i++) {
     long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
@@ -129,7 +128,7 @@ bool processUploadId ( CopyrightState* state, int uploadId) {
     if (pFileId <= 0)
       continue;
 
-    matchPFileWithLicenses(threadLocalState, pFileId, licenses);
+    matchPFileWithLicenses(state, pFileId);
 
     fo_scheduler_heart(1);
   }
@@ -146,6 +145,8 @@ int main(int argc, char** argv) {
   int verbosity=8;
   CopyrightState* state;
   state = getState(dbManager, verbosity);
+
+  state->addMatcher(RegexMatcher("copyright"));
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());

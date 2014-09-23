@@ -22,3 +22,14 @@ int CopyrightState::getVerbosity(){return verbosity;};
 DbManager* CopyrightState::getDbManager(){return dbManager;};
 
 PGconn * CopyrightState::getConnection(){return dbManager->getConnection();};
+
+void CopyrightState::addMatcher(RegexMatcher regexMatcher)
+{
+  regexMatchers.push_back(regexMatcher);
+}
+
+std::vector< RegexMatcher > CopyrightState::getRegexMatchers()
+{
+  return regexMatchers;
+}
+
