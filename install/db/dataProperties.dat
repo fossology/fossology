@@ -7,11 +7,6 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-$dataPropertiesStorage['license_decision_scopes.meaning'] = array(
-  'global',
-  'upload'
-);
-
 $dataPropertiesStorage['license_decision_types.meaning'] = array(
   'User decision',
   'bulk'
@@ -23,7 +18,6 @@ $dataPropertiesStorage['clearing_decision_types.meaning'] = array(
   'To be discussed',
   'Identified'
 );
-
 
 $dataPropertiesStorage['upload_status.meaning'] = array(
   'open',
