@@ -84,13 +84,7 @@ void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   for (cpm it=matches.begin(); it!=matches.end(); ++it ){
     const CopyrightMatch& match = *it;
 
-    cout << "pFileId=" << pFileId << " has " << match.getType() << ": ";
-    for (unsigned matchI = 0; matchI < match.size(); ++matchI) {
-      if (matchI > 0)
-        cout << ", ";
-      cout << "[" << matchI << "] = " << match[matchI];
-    }
-    cout << endl;
+    cout << "pFileId=" << pFileId << " has " << match.getType() << ": " << match.content() << endl;
   }
 };
 
@@ -192,7 +186,7 @@ int main(int argc, char** argv) {
 
   state->addMatcher(RegexMatcher("statement", copyrightRegex));
   state->addMatcher(RegexMatcher("url", "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])"));
-  state->addMatcher(RegexMatcher("email", "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"));
+  state->addMatcher(RegexMatcher("email", "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?", 1));
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());

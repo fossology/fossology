@@ -11,7 +11,7 @@
 
 #include "regexMatcher.hpp"
 
-RegexMatcher::RegexMatcher(const char* type, const char* pattern) : Matcher(type)
+RegexMatcher::RegexMatcher(const char* type, const char* pattern, int regexIndex) : Matcher(type), regexIndex(regexIndex)
 {
   matchingRegex = rx::regex(pattern, rx::regex_constants::icase);
 }
@@ -25,7 +25,7 @@ std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) cons
   boost::match_results<std::string::const_iterator> what;
 
   while (rx::regex_search(begin, end, what,matchingRegex)) {
-    results.push_back(CopyrightMatch(what, getType()));
+    results.push_back(CopyrightMatch(what, getType(), regexIndex));
     begin = what[0].second;
   }
 

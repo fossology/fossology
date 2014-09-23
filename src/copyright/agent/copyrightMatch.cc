@@ -11,23 +11,30 @@
 
 #include "copyrightMatch.hpp"
 
-CopyrightMatch::CopyrightMatch(rx::smatch sm, const char* type) : _sm(sm), _type(type)
+CopyrightMatch::CopyrightMatch(rx::smatch sm, const char* type, int regexIndex) : sm(sm), regexIndex(regexIndex), type(type)
 {
 }
 
 CopyrightMatch::~CopyrightMatch(){};
 
-unsigned CopyrightMatch::size() const
+unsigned int CopyrightMatch::start() const
 {
-  return _sm.size();
+  return 0; //TODO return correct value
 }
 
-rx::smatch::const_reference CopyrightMatch::operator[](size_t i) const
+unsigned int CopyrightMatch::length() const
 {
-  return _sm[i];
+  return sm.length(regexIndex);
 }
+
+
+const std::string CopyrightMatch::content() const
+{
+  return sm.str(regexIndex);
+}
+
 
 const char* CopyrightMatch::getType() const
 {
-  return _type;
+  return type;
 }

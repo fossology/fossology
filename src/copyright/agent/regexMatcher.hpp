@@ -19,11 +19,12 @@
 
 class RegexMatcher : public virtual Matcher {
 public:
-    RegexMatcher(const char* type, const char* pattern);
+    RegexMatcher(const char* type, const char* pattern, int regexIndex = 0);
     virtual std::vector <CopyrightMatch> match(const std::string content) const;
     virtual ~RegexMatcher();
 private:
     rx::regex matchingRegex;
+    int regexIndex;
 };
 
 #endif // REGEXMATCHER_H
