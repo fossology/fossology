@@ -2352,9 +2352,14 @@
   $Schema["TABLE"]["license_decision_events"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_events"]["rf_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_decision_events"]["removed"]["DESC"] = "COMMENT ON COLUMN \"license_decision_events\".\"removed\" IS 'true: add license, false: remove license, null: only change comment';";
-  $Schema["TABLE"]["license_decision_events"]["removed"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"removed\" boolean;";
-  $Schema["TABLE"]["license_decision_events"]["removed"]["UPDATE"] = "";
+  $Schema["TABLE"]["license_decision_events"]["is_global"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"is_global\" boolean;";
+  $Schema["TABLE"]["license_decision_events"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"is_global\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["is_global"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["is_removed"]["DESC"] = "COMMENT ON COLUMN \"license_decision_events\".\"is_removed\" IS 'true: add license, false: remove license, null: only change comment';";
+  $Schema["TABLE"]["license_decision_events"]["is_removed"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"is_removed\" boolean;";
+  $Schema["TABLE"]["license_decision_events"]["is_removed"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_events"]["user_fk"]["DESC"] = "";
   $Schema["TABLE"]["license_decision_events"]["user_fk"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"user_fk\" int4;";

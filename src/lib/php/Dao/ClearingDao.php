@@ -374,7 +374,8 @@ SELECT
   LDT.meaning AS type,
   LD.rf_fk,
   LR.rf_shortname,
-  LD.removed
+  LD.is_global,
+  LD.is_removed
 FROM license_decision_events LD
 INNER JOIN license_decision_events LD2 ON LD.pfile_fk = LD2.pfile_fk
 INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
@@ -383,10 +384,10 @@ INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   LD2.uploadtree_fk=$1 AND
-  (LD.uploadtree_fk IS NULL OR LD.uploadtree_fk IS NOT NULL AND LD.uploadtree_fk=$1) AND
+  (LD.is_global OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY LD.uploadtree_fk, LD.rf_fk, LD.user_fk, GU.group_fk, LD.removed
-ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.removed ASC
+GROUP BY LD.license_decision_pk
+ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
@@ -411,13 +412,13 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.removed ASC
 
     foreach ($events as $event)
     {
-      if ($event[6] != ClearingDecision::TO_BE_DISCUSSED)
+      if ($event[5] != ClearingDecision::TO_BE_DISCUSSED)
       {
-        $licenseId = $event[7];
-        $licenseShortName = $event[8];
-        $remove = $event[9] != 0;
+        $licenseId = $event[6];
+        $licenseShortName = $event[7];
+        $isRemoved = $event[9] != 0;
 
-        if ($remove)
+        if ($isRemoved)
         {
           unset($licenseDecision[$licenseShortName]);
         } else
