@@ -203,7 +203,7 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
       " WHERE upload_fk = $3 AND pfile_fk = $1 AND lft BETWEEN $4 AND $5"
       " AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
       " AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
-      "RETURNING clearing_pk ",
+      "RETURNING clearing_decision_pk ",
       long, int, long, int, long
     ),
     file->id,

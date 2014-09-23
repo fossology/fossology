@@ -91,7 +91,6 @@ class ui_browse_license extends FO_Plugin
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     $this->renderer = $container->get('twig.environment');
-    new Twig_Environment();
     parent::__construct();
   }
 
@@ -684,9 +683,7 @@ class ui_browse_license extends FO_Plugin
 
   /**
    * @param $scannerAgents
-   * @param $dbManager
    * @param $uploadId
-   * @param $allScans
    * @return array
    */
   private function createHeader($scannerAgents, $uploadId)

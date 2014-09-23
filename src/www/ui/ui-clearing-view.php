@@ -25,7 +25,6 @@ use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
-use Fossology\Lib\View\Renderer;
 use Monolog\Logger;
 
 define("TITLE_clearingView", _("Change concluded License "));
@@ -53,7 +52,7 @@ class ClearingView extends FO_Plugin
   /** @var LicenseRenderer */
   private $licenseRenderer;
   /* @var Twig_Environment */
-  private $twig;
+  private $renderer;
   /** @var array colorMapping */
   var $colorMapping;
 
@@ -78,7 +77,7 @@ class ClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
-    $this->twig = $container->get('twig.environment');
+    $this->renderer = $container->get('twig.environment');
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -285,7 +284,7 @@ class ClearingView extends FO_Plugin
     $vars['legendBox'] = $legendBox;
     $vars['licenseInformation'] = $licenseInformation;
     $vars['clearingHistory'] = $clearingHistory;
-    $output .= $this->twig->loadTemplate('ui_view.htc')->render($vars);
+    $output .= $this->renderer->loadTemplate('ui_view.htc')->render($vars);
     print $output;
   }
 
@@ -307,7 +306,6 @@ class ClearingView extends FO_Plugin
     }
     return $header;
   }
-
 
   /**
  * \brief Customize submenus.
@@ -334,4 +332,5 @@ class ClearingView extends FO_Plugin
     return 0;
   } // RegisterMenus()
 }
+
 $NewPlugin = new ClearingView;

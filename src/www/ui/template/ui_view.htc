@@ -1,7 +1,9 @@
+{% extends include/base.html %}
+
 <div id="leftrightalignment" name="leftrightalignment">
  <table  border="0" padding="0" style="height:100%; width:100%">
   <tr>
-   <td padding="0" style="position:relative; height: 100%; maxWidth:70%; width:50%">blbblabalbjalja
+   <td padding="0" style="position:relative; height: 100%; maxWidth:70%; width:50%">
     <div class="centered">
      {{ pageMenu }}
      <button class="legendHider"><i18n>Hide Legend</i18n></button><button class="legendShower"><i18n>Show Legend</i18n></button>

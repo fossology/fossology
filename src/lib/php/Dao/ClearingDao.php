@@ -92,7 +92,7 @@ class ClearingDao extends Object
 
     $this->dbManager->prepare($statementName,
         "SELECT
-           CD.clearing_pk AS id,
+           CD.clearing_decision_pk AS id,
            CD.uploadtree_fk AS uploadtree_id,
            CD.pfile_fk AS pfile_id,
            users.user_name AS user_name,
@@ -111,7 +111,7 @@ class ClearingDao extends Object
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
          INNER JOIN uploadtree ut ON CD.pfile_fk = ut.pfile_fk
            WHERE ut.upload_fk=$1 and ut.lft BETWEEN $2 and $3
-         ORDER by CD.pfile_fk, CD.clearing_pk desc");
+         ORDER by CD.pfile_fk, CD.clearing_decision_pk desc");
 // the array needs to be sorted with the newest clearingDecision first.
     $result = $this->dbManager->execute($statementName, array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
     $clearingsWithLicensesArray = array();
@@ -267,7 +267,7 @@ class ClearingDao extends Object
 
       $statementName = __METHOD__;
       $this->dbManager->prepare($statementName,
-          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8, $9) RETURNING clearing_pk");
+          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8, $9) RETURNING clearing_decision_events_pk");
       $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $licenseId, $removed, $userid, $type, $scope, $comment, $remark));
       $this->dbManager->freeResult($res);
     }
@@ -358,6 +358,41 @@ class ClearingDao extends Object
     }
 
     return $licensesWithCount;
+  }
+
+  public function getRelevantClearingDecisionEvents($userId, $uploadTreeId)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "
+SELECT
+  CD.pfile_fk,
+  CD.uploadtree_fk,
+  CD.date_added,
+  CD.user_fk,
+  GU.group_fk,
+  CDT.meaning AS type,
+  CD.rf_fk,
+  LR.rf_shortname,
+  CD.is_global,
+  CD.is_removed
+FROM clearing_decision_events CD
+INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
+INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
+INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
+WHERE
+  CD.uploadtree_fk = $1 AND
+  GU2.user_fk=$2
+GROUP BY CD.clearing_decision_pk
+ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
+        ");
+    $res = $this->dbManager->execute(
+        $statementName,
+        array($uploadTreeId, $userId)
+    );
+    $result = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $result;
   }
 
   public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
