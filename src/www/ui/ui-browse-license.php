@@ -265,7 +265,7 @@ class ui_browse_license extends FO_Plugin
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
+      $this->vars['content'] = "<h2>$text<h2>";
       return;
     }
 
@@ -279,11 +279,6 @@ class ui_browse_license extends FO_Plugin
 
     if (empty($V)) // no cache exists
     {
-      switch ($this->OutputType)
-      {
-        case "XML":
-          break;
-        case "HTML":
           /* Show the folder path */
           $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 
@@ -294,50 +289,28 @@ class ui_browse_license extends FO_Plugin
             $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
           }
 
-          $V .= $this->createJavaScriptBlock();
-          break;
-        case "Text":
-          break;
-        default:
-      }
-
       $Cached = false;
     } else
       $Cached = true;
 
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    print "$V";
+    $this->vars['content'] = $V;
+
     $Time = microtime(true) - $uTime; // convert usecs to secs
     $text = _("Elapsed time: %.3f seconds");
-    printf("<br/><small>$text</small>", $Time);
+    $this->vars['content'] .= sprintf("<br/><small>$text</small>", $Time);
 
     if ($Cached)
     {
       $text = _("cached");
       $text1 = _("Update");
-      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $this->vars['content'] .= " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     } else
     {
       /*  Cache Report if this took longer than 1/2 second */
       if ($Time > 0.5)
         ReportCachePut($CacheKey, $V);
     }
-    return "";
-  }
-
-  private function createJavaScriptBlock()
-  {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
-    $output .= "<script src='scripts/change-license-common.js' type='text/javascript'></script>\n";
-    $output .= "<script src='scripts/change-license-browse.js' type='text/javascript'></script>\n";
-    $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
-    return $output;
+    return;
   }
 
   /**
@@ -756,6 +729,12 @@ class ui_browse_license extends FO_Plugin
     }
     return array($V, $allScans);
   }
+
+  public function getTemplateName()
+  {
+    return "browse_license.html";
+  }
+
 
 }
 

@@ -368,7 +368,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
           $V.= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
         }
         $V.= ">";
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
+        {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -381,7 +382,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
         if (!$First) {
           $V.= " | ";
         }
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
+        {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {

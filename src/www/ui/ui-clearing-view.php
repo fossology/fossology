@@ -177,7 +177,7 @@ class ClearingView extends FO_Plugin
   }
 
 
-  function OutputOpen($Type, $ToStdout)
+  function OutputOpen(&$vars)
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
@@ -206,7 +206,7 @@ class ClearingView extends FO_Plugin
 
       header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
     }
-    return parent::OutputOpen($Type, $ToStdout);
+    return parent::OutputOpen($vars);
   }
 
 
@@ -256,7 +256,7 @@ class ClearingView extends FO_Plugin
     /* Get uploadtree table name */
     $uploadTreeTableName = GetUploadtreeTablename($uploadId);
 
-    $output = Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
+    $output = Dir2Browse('license', $uploadTreeId, NULL, 0, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
@@ -279,13 +279,17 @@ class ClearingView extends FO_Plugin
     list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
-    $vars['pageMenu'] = $pageMenu;
-    $vars['textView'] = $textView;
-    $vars['legendBox'] = $legendBox;
-    $vars['licenseInformation'] = $licenseInformation;
-    $vars['clearingHistory'] = $clearingHistory;
-    $output .= $this->renderer->loadTemplate('ui_view.htc')->render($vars);
-    print $output;
+    $this->vars['path'] = $output;
+    $this->vars['pageMenu'] = $pageMenu;
+    $this->vars['textView'] = $textView;
+    $this->vars['legendBox'] = $legendBox;
+    $this->vars['licenseInformation'] = $licenseInformation;
+    $this->vars['clearingHistory'] = $clearingHistory;
+  }
+
+  public function getTemplateName()
+  {
+    return "view_license.html";
   }
 
 

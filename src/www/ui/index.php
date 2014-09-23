@@ -42,11 +42,17 @@ if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
 {
+  global $container;
+  $renderer = $container->get('twig.environment');
+
   /* Found a plugin, so call it! */
-  $Plugins[$PluginId]->OutputOpen("HTML",1);
+  $plugin = $Plugins[$PluginId];
+
+  $plugin->OutputOpen();
   // error_reporting(E_ALL | E_NOTICE);
-  $Plugins[$PluginId]->Output();
-  $Plugins[$PluginId]->OutputClose();
+  $output = $plugin->Output();
+
+  print $output ?: $renderer->loadTemplate($plugin->getTemplateName())->render($plugin->getVars());
 }
 else
 {

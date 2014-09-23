@@ -36,7 +36,6 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     $this->userName = "fossy";
     $this->userId = -1;
     $this->type = "User decision";
-    $this->scope = "global";
     $this->date_added = new DateTime("now", new DateTimeZone("Europe/Amsterdam"));
   }
 
@@ -47,16 +46,6 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function setClearingId($clearingId)
   {
     $this->clearingId = $clearingId;
-    return $this;
-  }
-
-  /**
-   * @param string $comment
-   * @return ClearingDecisionBuilder
-   */
-  public function setComment($comment)
-  {
-    $this->comment = $comment;
     return $this;
   }
 
@@ -91,16 +80,6 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
-   * @param string $reportinfo
-   * @return ClearingDecisionBuilder
-   */
-  public function setReportinfo($reportinfo)
-  {
-    $this->reportinfo = $reportinfo;
-    return $this;
-  }
-
-  /**
    * @param boolean $sameUpload
    * @return ClearingDecisionBuilder
    */
@@ -118,16 +97,6 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function setSameFolder($sameFolder)
   {
     $this->sameFolder = $sameFolder;
-    return $this;
-  }
-
-  /**
-   * @param string $scope
-   * @return ClearingDecisionBuilder
-   */
-  public function setScope($scope)
-  {
-    $this->scope = $scope;
     return $this;
   }
 
@@ -186,8 +155,8 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function build()
   {
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
-        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->date_added, $this->licenses, $this->comment, $this->reportinfo);
+        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type,
+        $this->date_added, $this->licenses);
   }
 
 }

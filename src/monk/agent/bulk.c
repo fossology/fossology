@@ -197,12 +197,11 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk)"
-      " SELECT uploadtree_pk, $1, $2, type_pk, scope_pk"
-      " FROM uploadtree, clearing_decision_types, clearing_decision_scopes"
+      "INSERT INTO clearing_decision(uploadtree_fk, pfile_fk, user_fk, type_fk)"
+      " SELECT uploadtree_pk, $1, $2, type_pk"
+      " FROM uploadtree, clearing_decision_types"
       " WHERE upload_fk = $3 AND pfile_fk = $1 AND lft BETWEEN $4 AND $5"
       " AND clearing_decision_types.meaning = '" BULK_DECISION_TYPE "'"
-      " AND clearing_decision_scopes.meaning = '" BULK_DECISION_SCOPE "'"
       "RETURNING clearing_decision_pk ",
       long, int, long, int, long
     ),

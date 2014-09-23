@@ -98,15 +98,11 @@ class ClearingDao extends Object
            users.user_name AS user_name,
            CD.user_fk AS user_id,
            CD_types.meaning AS type,
-           CD_scopes.meaning AS scope,
-           CD.comment AS comment,
-           CD.reportinfo AS reportinfo,
            CD.date_added AS date_added,
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
          FROM clearing_decision CD
          LEFT JOIN clearing_decision_types CD_types ON CD.type_fk=CD_types.type_pk
-         LEFT JOIN clearing_decision_scopes CD_scopes ON CD.scope_fk=CD_scopes.scope_pk
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
          INNER JOIN uploadtree ut ON CD.pfile_fk = ut.pfile_fk
@@ -128,9 +124,6 @@ class ClearingDao extends Object
           ->setUserName($row['user_name'])
           ->setUserId($row['user_id'])
           ->setType($row['type'])
-          ->setComment($row['comment'])
-          ->setReportinfo($row['reportinfo'])
-          ->setScope($row['scope'])
           ->setDateAdded($row['date_added'])
           ->build();
 
@@ -202,44 +195,16 @@ class ClearingDao extends Object
   }
 
   /**
-   * @return DatabaseEnum[]
-   */
-  public function getClearingScopes()
-  {
-    $clearingScopes = array();
-    $statementN = __METHOD__;
-
-    $this->dbManager->prepare($statementN, "select * from clearing_decision_scopes");
-    $res = $this->dbManager->execute($statementN);
-
-    while ($rw = pg_fetch_assoc($res))
-    {
-      $clearingScopes[] = new DatabaseEnum($rw['scope_pk'], $rw['meaning']);
-    }
-
-    return $clearingScopes;
-  }
-
-  /**
-   * @return array
-   */
-  public function getLicenseDecisionScopeMap()
-  {
-    return $this->dbManager->createMap('license_decision_scopes', 'scope_pk', 'meaning');
-  }
-
-  /**
    * @param $licenseId
    * @param $removed
    * @param $uploadTreeId
    * @param $userid
    * @param $type
-   * @param $scope
    * @param $comment
    * @param $remark
    * @internal param array $licenses
    */
-  public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
+  public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $comment, $remark)
   {
     $this->dbManager->begin();
 
@@ -267,8 +232,8 @@ class ClearingDao extends Object
 
       $statementName = __METHOD__;
       $this->dbManager->prepare($statementName,
-          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8, $9) RETURNING clearing_decision_events_pk");
-      $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $licenseId, $removed, $userid, $type, $scope, $comment, $remark));
+          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk, comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8) RETURNING clearing_decision_events_pk");
+      $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $licenseId, $removed, $userid, $type, $comment, $remark));
       $this->dbManager->freeResult($res);
     }
     $this->dbManager->freeResult($items);

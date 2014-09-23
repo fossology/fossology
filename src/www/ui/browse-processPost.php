@@ -20,8 +20,8 @@
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\View\Renderer;
 use Fossology\Lib\Util\DataTablesUtility;
+use Fossology\Lib\View\Renderer;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
@@ -107,13 +107,12 @@ class browseProcessPost extends FO_Plugin
       $show = GetParm('show', PARM_STRING);
       header('Content-type: text/json');
       list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->ShowFolderGetTableData($folder , $show);
-      print(json_encode(array(
+      return json_encode(array(
               'sEcho' => intval($_GET['sEcho']),
               'aaData' =>$aaData,
               'iTotalRecords' =>$iTotalRecords,
               'iTotalDisplayRecords' => $iTotalDisplayRecords
           )
-      )
       );
     }
   }

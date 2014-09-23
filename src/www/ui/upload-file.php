@@ -149,11 +149,7 @@ class upload_file extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    if ($this->OutputType != "HTML") {
-      return;
-    }
-    global $container;
-    $renderer = $container->get('renderer');
+
     /* If this is a POST, then process the request. */
     $folder_pk = GetParm('folder', PARM_INTEGER);
     $description = GetParm('description', PARM_TEXT); // may be null
@@ -178,17 +174,19 @@ class upload_file extends FO_Plugin {
     }
 
     /* Display instructions */
-    $renderer->vars['description'] = $description;
-    $renderer->vars['agentCheckBoxMake'] = '';
+    $this->vars['description'] = $description;
+    $this->vars['agentCheckBoxMake'] = '';
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $renderer->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
+      $this->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
     }        
-    $V .= $renderer->renderTemplate("upload_file");        
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
   }
+
+  public function getTemplateName()
+  {
+    return "upload_file.html";
+  }
+
+
 }
 $NewPlugin = new upload_file;
