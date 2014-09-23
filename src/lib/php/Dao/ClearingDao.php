@@ -421,7 +421,7 @@ WHERE
   LD2.uploadtree_fk=$1 AND
   (LD.is_global OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY LD.license_decision_pk
+GROUP BY LD.license_decision_events_pk
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(

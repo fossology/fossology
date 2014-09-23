@@ -117,7 +117,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO license_decision_events (license_decision_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_global, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
+        "INSERT INTO license_decision_events (license_decision_events_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_global, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
     $cdArray = array(
         array(1, 100, 1000, 1, 1, false, false, 1, '2014-08-15T12:12:12'),
         array(2, 100, 1000, 1, 2, false, false, 1, '2014-08-15T12:12:12'),

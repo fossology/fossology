@@ -2332,10 +2332,10 @@
   $Schema["TABLE"]["clearing_decision_events"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
   $Schema["TABLE"]["clearing_decision_events"]["date_added"]["UPDATE"] = "UPDATE clearing_decision_events SET date_added=now()";
 
-  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"license_decision_pk\" int4;";
-  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"license_decision_pk\" SET NOT NULL, ALTER COLUMN \"license_decision_pk\" SET DEFAULT nextval('license_decision_events_license_decision_event_pk_seq'::regclass);";
-  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["UPDATE"] = "UPDATE license_decision_events SET license_decision_pk=nextval('license_decision_events_license_decision_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_events_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_events_pk"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"license_decision_events_pk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_events_pk"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"license_decision_events_pk\" SET NOT NULL, ALTER COLUMN \"license_decision_events_pk\" SET DEFAULT nextval('license_decision_events_license_decision_event_pk_seq'::regclass);";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_events_pk"]["UPDATE"] = "UPDATE license_decision_events SET license_decision_events_pk=nextval('license_decision_events_license_decision_event_pk_seq'::regclass)";
 
   $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["DESC"] = "";
   $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"uploadtree_fk\" int4;";
