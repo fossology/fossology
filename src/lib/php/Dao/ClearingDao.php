@@ -371,21 +371,19 @@ SELECT
   LD.date_added,
   LD.user_fk,
   GU.group_fk,
-  LDS.meaning AS scope,
   LDT.meaning AS type,
   LD.rf_fk,
   LR.rf_shortname,
   LD.removed
 FROM license_decision_events LD
 INNER JOIN license_decision_events LD2 ON LD.pfile_fk = LD2.pfile_fk
-INNER JOIN license_decision_scopes LDS ON LD.scope_fk = LDS.scope_pk
 INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
 INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   LD2.uploadtree_fk=$1 AND
-  (LD.scope_fk == 1 OR LD.scope_fk== 2 AND LD.uploadtree_fk=$1) AND
+  (LD.uploadtree_fk IS NULL OR LD.uploadtree_fk IS NOT NULL AND LD.uploadtree_fk=$1) AND
   GU2.user_fk=$2
 GROUP BY LD.uploadtree_fk, LD.rf_fk, LD.user_fk, GU.group_fk, LD.removed
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.removed ASC

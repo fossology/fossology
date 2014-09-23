@@ -126,6 +126,37 @@ class ChangeLicenseUtility extends Object
     return $output;
   }
 
+  
+    /**
+   * @param ClearingDecision[] $clearingDecWithLicenses
+   * @param $user_pk
+   * @param $output
+   * @return array
+   */
+  function getClearingHistory($clearingDecWithLicenses, $user_pk)
+  {
+    $table = array();
+    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
+    {
+      $licenseNames = array();
+      foreach ($clearingDecWithLic->getLicenses() as $lic)
+      {
+        $licenseNames[] = $lic->getShortName();
+      }
+      $row = array(
+          $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
+          $clearingDecWithLic->getUserName(),
+          $clearingDecWithLic->getScope(),
+          $clearingDecWithLic->getType(),
+          implode(", ", $licenseNames),
+          ($user_pk == $clearingDecWithLic->getUserId()) ? $clearingDecWithLic->getComment() : '--private--',
+          $clearingDecWithLic->getReportinfo() );
+      $table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+    }
+    return $table;
+  }
+  
+  
   /**
    * @param LicenseRef[] $bigList
    * @param LicenseRef[] $smallList
@@ -237,7 +268,7 @@ class ChangeLicenseUtility extends Object
     $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
-    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
+    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap();
     $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
     $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
     
