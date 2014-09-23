@@ -1,4 +1,4 @@
-#include "copyrightState.h"
+#include "copyrightState.hpp"
 
 
 CopyrightState::CopyrightState(DbManager*  _dbManager,

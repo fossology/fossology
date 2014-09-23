@@ -9,23 +9,24 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "copyrightMatch.h"
+#include "copyrightMatch.hpp"
 
-CopyrightMatch::CopyrightMatch(cmatch cm, const char* type)
+CopyrightMatch::CopyrightMatch(std::smatch sm, const char* type) : _sm(sm), _type(type)
 {
-  _cm = cm;
-  _type = type;
 }
 
 unsigned CopyrightMatch::size()
 {
-  return _cm.size();
+  return _sm.size();
 }
 
+std::smatch CopyrightMatch::getSmatch( ) const {
+  return _sm;
+}
 
-const char* CopyrightMatch::operator[](int i)
+std::smatch::const_reference  CopyrightMatch::operator[](size_t i) const
 {
-  return _cm[i];
+  return _sm[i];
 }
 
 const char* CopyrightMatch::getType()

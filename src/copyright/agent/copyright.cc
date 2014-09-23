@@ -15,9 +15,10 @@ extern "C"{
 }
 
 #include <iostream>
-#include "copyright.h"
+#include "copyright.hpp"
 
 using namespace std;
+
 
 class File {
 public:
@@ -64,26 +65,32 @@ CopyrightState* getState(DbManager* dbManager, int verbosity){
 }
 
 string readFileToString(const char* fileName){
-  return "this is the copyright of Copyright";
+  return string("this copyright is the copyright copyright of Copyright");
 }
 
 vector<CopyrightMatch*> matchStringToRegexes(const string& content, CopyrightState* state) {
-  vector<CopyrightMatch*> matches;
-  vector<RegexMatcher> matchers = state->getRegexMatchers();
+  vector<CopyrightMatch*> result;
 
-  for (auto it = matchers.cbegin(); it != matchers.cend(); ++it) {
-    CopyrightMatch* newMatch = it->match(content);
-    matches.push_back(newMatch);
+  for (const auto& item: state->getRegexMatchers()){
+    CopyrightMatch* newMatch = item.match(content);
+   if(newMatch )
+     result.push_back(newMatch);
+   else {
+    cout << "No match" <<endl;
+   }
+
   }
 
-  return matches;
+  return result;
 }
 
 
-void saveToDatabase(vector<CopyrightMatch*> matches, CopyrightState* state) {
-  for (auto it = matches.cbegin(); it != matches.cend(); ++it) {
-    for (unsigned matchI = 0; matchI < it->size(); ++matchI) {
-      cout << "match [" << matchI << "] = " << (*it)[matchI] << endl;
+void saveToDatabase(const vector<CopyrightMatch*> & matches, CopyrightState* state) {
+
+  for (const auto& it: matches){
+    smatch mymatch = it->getSmatch();
+    for (unsigned matchI = 0; matchI < mymatch.size(); ++matchI) {
+      cout << "match [" << matchI << "] = " << mymatch[matchI] << std::endl;
     }
   }
 };
@@ -102,6 +109,7 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
   file->fileName = fo_RepMkPath("files", pFile);
 
   if (file->fileName != NULL) {
+    cout << "reading " << file->fileName << endl;
     string fileContent = readFileToString(file->fileName);
     vector<CopyrightMatch*> matches = matchStringToRegexes(fileContent, state);
 
@@ -118,7 +126,7 @@ bool processUploadId (CopyrightState* state, int uploadId) {
   if (PQntuples(fileIdResult) == 0) {
     PQclear(fileIdResult);
     fo_scheduler_heart(0);
-    return 0;
+    return false;
   }
 
   int count = PQntuples(fileIdResult);
@@ -133,7 +141,7 @@ bool processUploadId (CopyrightState* state, int uploadId) {
     fo_scheduler_heart(1);
   }
 
-  return false;
+  return true;
 }
 
 int main(int argc, char** argv) {
@@ -146,7 +154,7 @@ int main(int argc, char** argv) {
   CopyrightState* state;
   state = getState(dbManager, verbosity);
 
-  state->addMatcher(RegexMatcher("copyright"));
+  state->addMatcher(RegexMatcher("statement", "(.*)(copy)(.*)"));
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());

@@ -9,12 +9,23 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "matcher.hpp"
+#ifndef MATCHER_H
+#define MATCHER_H
 
-const char* Matcher::getType() const {
-  return type;
-}
+#include "copyrightMatch.hpp"
 
-Matcher::Matcher(const char* _type): type(_type){};
+class Matcher {
+public:
+  Matcher(const char* _type);
+  virtual ~Matcher();
 
-Matcher::~Matcher(){};
+  virtual bool matches(const std::string content){return true;};
+  virtual CopyrightMatch* match(const std::string content) const =0;
+
+  const char* getType() const;
+
+private:
+    const char* type;
+};
+
+#endif // MATCHER_H

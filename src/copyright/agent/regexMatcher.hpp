@@ -9,12 +9,20 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef REGEXMATCHER_H
+#define REGEXMATCHER_H
+
 #include "matcher.hpp"
+#include <iostream>
+#include <regex>
 
-const char* Matcher::getType() const {
-  return type;
-}
+class RegexMatcher : public virtual Matcher {
+public:
+    RegexMatcher(const char* type, const char* pattern);
+    virtual CopyrightMatch* match(const std::string content) const;
+    virtual ~RegexMatcher();
+private:
+    std::regex matchingRegex;
+};
 
-Matcher::Matcher(const char* _type): type(_type){};
-
-Matcher::~Matcher(){};
+#endif // REGEXMATCHER_H

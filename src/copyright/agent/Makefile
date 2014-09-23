@@ -9,17 +9,17 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 
 include $(VARS)
-
-CFLAGS_LOCAL =  $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
+# -Werror -Wextra
+CFLAGS_LOCAL = -std=c++11 $(ALL_CFLAGS) -I.  -Wall  -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp
+CFLAGS_LINK  = -std=c++11 $(ALL_CFLAGS) -lm -fopenmp
 
-CXX  = g++
+CXX  = g++ 
 
 EXE=copyright
 TESTDIR = ../agent_tests
-OBJECTS  = copyright.o copyrightState.o
+OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o
 COVERAGE = 
 
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
@@ -44,10 +44,7 @@ libcopyright_cov.a: $(COVERAGE)
 # object build rules #
 ######################
 
-copyright.o: %.o: %.cc %.h
-	$(CXX) -c $(CFLAGS_LOCAL) $(DEF) $<
-
-copyrightState.o: %.o: %.cc %.h
+%.o: %.cc %.hpp
 	$(CXX) -c $(CFLAGS_LOCAL) $(DEF) $<
 	
 $(COVERAGE): %_cov.o: %.c 
