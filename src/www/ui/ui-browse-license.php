@@ -23,9 +23,9 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 
 /**
  * \file ui-browse-license.php
@@ -90,6 +90,8 @@ class ui_browse_license extends FO_Plugin
     $this->licenseRenderer = $container->get('view.license_renderer');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
+    $this->renderer = $container->get('twig.environment');
+    new Twig_Environment();
     parent::__construct();
   }
 

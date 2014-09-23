@@ -12,6 +12,13 @@ without any warranty.
 <container xmlns="http://symfony.com/schema/dic/services"
         >
 
+    <parameters>
+        <parameter key="twig.environment.config" type="collection">
+            <parameter key="cache" type="string">www/ui/cache</parameter>
+        </parameter>
+        <parameter key="twig.loader.source_path" type="string">www/ui/template</parameter>
+    </parameters>
+
     <services>
         <service id="logger" class="\Monolog\Logger">
             <argument type="string">default</argument>
@@ -86,9 +93,14 @@ without any warranty.
         <service id="buisinessrules.newest_license_selector" class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
         </service>
 
+        <service id="twig.loader" class="Twig_Loader_Filesystem">
+            <argument>%twig.loader.source_path%</argument>
+        </service>
 
-
-
+        <service id="twig.environment" class="Twig_Environment">
+            <argument type="service" id="twig.loader"/>
+            <argument>%twig.environment.config%</argument>
+        </service>
 
     </services>
 </container>
