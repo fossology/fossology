@@ -52,8 +52,8 @@ class ClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var LicenseRenderer */
   private $licenseRenderer;
-  /* @var Renderer */
-  private $renderer;
+  /* @var Twig_Environment */
+  private $twig;
   /** @var array colorMapping */
   var $colorMapping;
 
@@ -78,7 +78,7 @@ class ClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
-    $this->renderer = $container->get('renderer');
+    $this->twig = $container->get('twig.environment');
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -280,12 +280,12 @@ class ClearingView extends FO_Plugin
     list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
-    $this->renderer->vars['pageMenu'] = $pageMenu;
-    $this->renderer->vars['textView'] = $textView;
-    $this->renderer->vars['legendBox'] = $legendBox;
-    $this->renderer->vars['licenseInformation'] = $licenseInformation;
-    $this->renderer->vars['clearingHistory'] = $clearingHistory;
-    $output .= $this->renderer->renderTemplate('ui_view');
+    $vars['pageMenu'] = $pageMenu;
+    $vars['textView'] = $textView;
+    $vars['legendBox'] = $legendBox;
+    $vars['licenseInformation'] = $licenseInformation;
+    $vars['clearingHistory'] = $clearingHistory;
+    $output .= $this->twig->loadTemplate('ui_view.htc')->render($vars);
     print $output;
   }
 

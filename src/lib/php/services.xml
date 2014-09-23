@@ -14,7 +14,8 @@ without any warranty.
 
     <parameters>
         <parameter key="twig.environment.config" type="collection">
-            <parameter key="cache" type="string">/tmp/twigcache</parameter>
+<!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
+            <parameter key="autoescape" type="constant">false</parameter>
         </parameter>
         <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
     </parameters>

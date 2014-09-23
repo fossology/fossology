@@ -26,15 +26,15 @@
 
 
   <fieldset style="display:inline">
-   <legend><i18n>License decision scope</i18n></legend>
-   {{ scopeRadio }}
-  </fieldset>
+   <legend><i18n>Decision scope</i18n></legend>
+    <input type="radio"/> global
+  </fieldset> &nbsp; &nbsp; &nbsp;
   <fieldset style="display:inline">
    <legend><i18n>License decision type</i18n></legend>
    {{ typeRadio }} 
   </fieldset> &nbsp; &nbsp; &nbsp;
-  <button  type="button" autofocus  onclick='performPostRequest()'>Submit</button> &nbsp;
-  <button  type="button" autofocus  onclick='performNoLicensePostRequest()'>No License contained</button> &nbsp;
+  <button  type="button" autofocus  onclick="performPostRequest()">Submit</button> &nbsp;
+  <button  type="button" autofocus  onclick="performNoLicensePostRequest()">No License contained</button> &nbsp;
   <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
   <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
   <div style="position:absolute;display:inline;"><div style="margin:13px; width:240px;">

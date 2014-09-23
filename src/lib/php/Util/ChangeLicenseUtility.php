@@ -237,8 +237,6 @@ class ChangeLicenseUtility extends Object
     $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
-    $clearingScopes = $this->clearingDao->getClearingDecisionScopeMap();
-    $this->renderer->vars['scopeRadio'] = $this->renderer->createRadioGroup('scope', $clearingScopes, $defaultScope=2, '', $separator=' &nbsp; ');
     $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
     $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
     $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
