@@ -20,10 +20,9 @@ class CopyrightMatch
 public:
     CopyrightMatch(rx::smatch sm, const char* type);
     ~CopyrightMatch();
-    const char* getType();
-    rx::smatch::const_reference  operator[](size_t i) const;
-    unsigned size();
-    rx::smatch getSmatch( ) const;
+    const char* getType() const;
+    rx::smatch::const_reference operator[](size_t i) const;
+    unsigned size() const;
 private:
     rx::smatch _sm;
     const char* _type;

@@ -66,10 +66,8 @@ CopyrightState* getState(DbManager* dbManager, int verbosity){
   return new CopyrightState(dbManager, agentID, verbosity);
 }
 
-vector<CopyrightMatch> matchStringToRegexes(const string& content, CopyrightState* state) {
-
+vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< RegexMatcher > matchers ) {
   vector<CopyrightMatch> result;
-  std::vector< RegexMatcher > matchers = state->getRegexMatchers();
 
   typedef  std::vector< RegexMatcher >::const_iterator rgm;
   for (rgm item = matchers.begin(); item != matchers.end(); ++item){
@@ -81,13 +79,18 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, CopyrightStat
 }
 
 
-void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state) {
-typedef vector<CopyrightMatch>::const_iterator cpm;
+void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) {
+  typedef vector<CopyrightMatch>::const_iterator cpm;
   for (cpm it=matches.begin(); it!=matches.end(); ++it ){
-    rx::smatch mymatch = (*it).getSmatch();
-    for (unsigned matchI = 0; matchI < mymatch.size(); ++matchI) {
-      cout << "match [" << matchI << "] = " << mymatch[matchI] << std::endl;
+    const CopyrightMatch& match = *it;
+
+    cout << "pFileId=" << pFileId << " has " << match.getType() << ": ";
+    for (unsigned matchI = 0; matchI < match.size(); ++matchI) {
+      if (matchI > 0)
+        cout << ", ";
+      cout << "[" << matchI << "] = " << match[matchI];
     }
+    cout << endl;
   }
 };
 
@@ -105,13 +108,14 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
   file->fileName = fo_RepMkPath("files", pFile);
 
   if (file->fileName != NULL) {
-    cout << "reading " << file->fileName << endl;
+    // cout << "reading " << file->fileName << endl;
     string fileContent = fo::getStringFromFile(file->fileName,-1);
-    vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state);
+    vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
 
-    saveToDatabase(matches, state);
+    saveToDatabase(matches, state, pFileId);
   }
 
+  free(pFile);
   delete(file);
 }
 
@@ -150,8 +154,46 @@ int main(int argc, char** argv) {
   CopyrightState* state;
   state = getState(dbManager, verbosity);
 
-  state->addMatcher(RegexMatcher("statement", "copy"));
-  state->addMatcher(RegexMatcher("statement", "right"));
+  const char* copyrightRegex = "("
+  "("
+  "(Copyright|(\\(C\\) Copyright([[:punct:]]?))) "
+  "("
+  "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
+  "|"
+  "([[:print:]]{0,10}|[[:print:]]*)" // TODO this is equivalent to [[:print:]]*
+  ")"
+  "("
+  "([[:digit:]]{4,4}([[:punct:]]|[[:space:]])[[:digit:]]{4,4})+ |[[:digit:]]{4,4}"
+  ")"
+  "(([[:space:]]|[[:punct:]]))" // TODO wth do we match all this junk?
+  "([[:print:]]*)" // TODO wth do we match all this junk?
+  ")|("
+  "Copyright([[:punct:]]*) \\(C\\) "
+  "("
+  "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp)*)"
+  "|"
+  "[[:print:]]*" // TODO this matches everything and overrides the previous ???
+  ")"
+  "("
+  "([[:digit:]]{4,4}([[:punct:]]|[[:space:]])[[:digit:]]{4,4})+ |[[:digit:]]{4,4}"
+  ")"
+  "(([[:space:]]|[[:punct:]]))"
+  "([[:print:]]*)"
+  ")|("
+  "(\\(C\\)) ([[:digit:]]{4,4}[[:punct:]]*[[:digit:]]{4,4})([[:print:]]){0,60}"
+  ")|("
+  "Copyrights [[:blank:]]*[a-zA-Z]([[:print:]]{0,60})"
+  ")|("
+  "(all[[:space:]]*rights[[:space:]]*reserved)"
+  ")|("
+  "(author|authors)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*[[:space:]]*([[:print:]]{0,60})|(contributors|contributor)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*[[:space:]]*([[:print:]]{0,60})|written[[:space:]]*by[[:space:]|[:punct:]]*([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60})|contributed[[:space:]]*by[[:space:]|[:punct:]]*([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60})"
+  ")"
+  ")";
+
+  state->addMatcher(RegexMatcher("statement", copyrightRegex));
+  state->addMatcher(RegexMatcher("url", "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])"));
+  state->addMatcher(RegexMatcher("email", "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"));
+
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());
 
@@ -170,10 +212,7 @@ int main(int argc, char** argv) {
   }
   fo_scheduler_heart(0);
 
-
-  delete (state);
-  delete(dbManager);
   /* after cleaning up agent, disconnect from */
   /* the scheduler, this doesn't return */
-  exit(0);
+  bail(state, 0);
 }

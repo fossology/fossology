@@ -24,8 +24,7 @@ std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) cons
   std::string::const_iterator end = content.end();
   boost::match_results<std::string::const_iterator> what;
 
-  std::string::const_iterator begin2 =begin;
-  while (regex_search(begin, end, what,matchingRegex)) {
+  while (rx::regex_search(begin, end, what,matchingRegex)) {
     results.push_back(CopyrightMatch(what, getType()));
     begin = what[0].second;
   }

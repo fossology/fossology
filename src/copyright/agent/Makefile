@@ -10,12 +10,10 @@ VARS=$(TOP)/Makefile.conf
 
 include $(VARS)
 # -Werror -Wextra
-CFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
-
-CXX  = g++ 
+CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
 
 EXE=copyright
 TESTDIR = ../agent_tests
@@ -23,7 +21,7 @@ OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch
 COVERAGE = 
 
 $(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
-	$(CXX) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 all:  $(CXXFOLIB) $(EXE)
 
@@ -45,10 +43,10 @@ libcopyright_cov.a: $(COVERAGE)
 ######################
 
 %.o: %.cc %.hpp
-	$(CXX) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
 $(COVERAGE): %_cov.o: %.c 
-	$(CXX) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #

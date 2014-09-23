@@ -9,9 +9,9 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME=hello
+MOD_NAME= copyright
 
-DIRS = agent 
+DIRS = agent ui
 TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
@@ -27,7 +27,7 @@ test: all
 
 # generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile, "monk")
+	$(call WriteVERSIONFile, "copyright")
 
 install: all
 	@echo "make $(MOD_NAME) install"

@@ -11,13 +11,11 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef LIBFOSSOLOGYCPP_HPP_
 #define LIBFOSSOLOGYCPP_HPP_
 
+extern "C" {
+  #include "libfossology.h"
+}
+
 #include "files.hpp"
 #include "libfossdbmanagerclass.hpp"
-
-
-
-
-
-
 
 #endif /* LIBFOSSOLOGYCPP_HPP_ */

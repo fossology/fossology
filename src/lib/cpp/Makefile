@@ -19,10 +19,7 @@ LIB=libfossologyCPP.a
 DEPENDENCY = $(CLIBDIR)/libfossology.a
 OBJS=files.o libfossdbmanagerclass.o
 
-
 COVERAGE=$(OBJS:%.o=%_cov.o)
-
-CXX = g++
 
 all: $(LIB) $(VARS) $(EXE)
 	echo "make $(LIB)"
@@ -46,7 +43,7 @@ install: install-dev install-lib install-exe
 
 install-dev: $(LIB)
 	$(INSTALL_DATA) libfossologyCPP.a $(DESTDIR)$(LIBEXECDIR)/libfossologyCPP.a
-	$(INSTALL_DATA) libfossologyCPP.h $(DESTDIR)$(INCLUDEDIR)/libfossologyCPP.h
+	$(INSTALL_DATA) libfossologyCPP.hpp $(DESTDIR)$(INCLUDEDIR)/libfossologyCPP.hpp
 
 install-exe: $(EXE)
 	for program in $(EXE); do \

@@ -17,21 +17,17 @@ CopyrightMatch::CopyrightMatch(rx::smatch sm, const char* type) : _sm(sm), _type
 
 CopyrightMatch::~CopyrightMatch(){};
 
-unsigned CopyrightMatch::size()
+unsigned CopyrightMatch::size() const
 {
   return _sm.size();
 }
 
-rx::smatch CopyrightMatch::getSmatch( ) const {
-  return _sm;
-}
-
-rx::smatch::const_reference  CopyrightMatch::operator[](size_t i) const
+rx::smatch::const_reference CopyrightMatch::operator[](size_t i) const
 {
   return _sm[i];
 }
 
-const char* CopyrightMatch::getType()
+const char* CopyrightMatch::getType() const
 {
   return _type;
 }
