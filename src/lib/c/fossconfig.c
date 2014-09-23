@@ -326,7 +326,7 @@ fo_conf* fo_config_load(char* rawname, GError** error) {
  * @param key c string that is the name of the key for the key/value pair
  * @return the c string representation of the value
  */
-char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error)
+char* fo_config_get(fo_conf* conf, const char* group, const char* key, GError** error)
 {
   GTree* tree;
   char* ret = NULL;

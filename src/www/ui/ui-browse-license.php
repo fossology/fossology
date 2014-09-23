@@ -195,7 +195,7 @@ class ui_browse_license extends FO_Plugin
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -338,20 +338,21 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * @param $uploadTreeId
    * @param $Uri
    * @param $tagId
    * @param FileTreeBounds $fileTreeBounds
    * @param $ModLicView
    * @param $UniqueTagArray
    * @param $selectedAgentId
+   * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
+  public function createFileListing($Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $fileTreeBounds->getUploadId();
+    $uploadTreeId = $fileTreeBounds->getUploadTreeId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
     $newestNomos=$this->getNewestAgent("nomos");
@@ -363,7 +364,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $AddInfoText = "";
-    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
+    $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
     $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($fileTreeBounds);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
