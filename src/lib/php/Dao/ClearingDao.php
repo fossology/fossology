@@ -229,13 +229,15 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param array $licenses
+   * @param $licenseId
+   * @param $removed
    * @param $uploadTreeId
    * @param $userid
    * @param $type
    * @param $scope
    * @param $comment
    * @param $remark
+   * @internal param array $licenses
    */
   public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
   {
