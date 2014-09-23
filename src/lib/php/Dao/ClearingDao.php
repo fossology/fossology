@@ -191,12 +191,12 @@ class ClearingDao extends Object
   /**
    * @return array
    */
-  public function getClearingTypeMap($selectableOnly=false)
+  public function getClearingDecisionTypeMap($selectableOnly = false)
   {
     $map = $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
-    if($selectableOnly)
+    if ($selectableOnly)
     {
-      $map = array(1=>$map[1], 2=>$map[2]);
+      $map = array(1 => $map[1], 2 => $map[2]);
     }
     return $map;
   }
@@ -223,9 +223,9 @@ class ClearingDao extends Object
   /**
    * @return array
    */
-  public function getClearingScopeMap()
+  public function getLicenseDecisionScopeMap()
   {
-    return $this->dbManager->createMap('clearing_decision_scopes', 'scope_pk', 'meaning');
+    return $this->dbManager->createMap('license_decision_scopes', 'scope_pk', 'meaning');
   }
 
   /**
@@ -237,7 +237,7 @@ class ClearingDao extends Object
    * @param $comment
    * @param $remark
    */
-  public function insertClearingDecision($licenses, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
+  public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $scope, $comment, $remark)
   {
     $this->dbManager->begin();
 
@@ -253,28 +253,21 @@ class ClearingDao extends Object
     {
       $currentUploadTreeId = $item['uploadtree_pk'];
       $pfileId = $item['pfile_fk'];
-      $statementName2 = __METHOD__ . ".d";
-      $this->dbManager->prepare($statementName2,
-          "delete from clearing_decision where uploadtree_fk = $1 and type_fk = (select type_pk from clearing_decision_types where meaning ='To be determined')");
-      $res = $this->dbManager->execute($statementName2, array($currentUploadTreeId));
+
+      $tbdColumnStatementName = __METHOD__ . "_TBD_column";
+      $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_types where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
+
+      $tbdColumnStatementName = __METHOD__ . ".d";
+      $this->dbManager->prepare($tbdColumnStatementName,
+          "delete from clearing_decision_events where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
+      $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $licenseId, $tbdDecisionTypeValue));
       $this->dbManager->freeResult($res);
 
       $statementName = __METHOD__;
-      $row = $this->dbManager->getSingleRow(
-          "insert into clearing_decision (uploadtree_fk,pfile_fk,user_fk,type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING clearing_pk",
-          array($currentUploadTreeId, $pfileId, $userid, $type, $scope, $comment, $remark),
-          $statementName);
-      $lastClearingId = $row['clearing_pk'];
-
-      $statementN = __METHOD__ . ".l";
-      $this->dbManager->prepare($statementN,
-          "insert into clearing_licenses (clearing_fk,rf_fk) values ($1,$2)");
-
-      foreach ($licenses as $license)
-      {
-        $res1 = $this->dbManager->execute($statementN, array($lastClearingId, $license));
-        $this->dbManager->freeResult($res1);
-      }
+      $this->dbManager->prepare($statementName,
+          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk,scope_fk,comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8, $9) RETURNING clearing_pk");
+      $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $licenseId, $removed, $userid, $type, $scope, $comment, $remark));
+      $this->dbManager->freeResult($res);
     }
     $this->dbManager->freeResult($items);
 
@@ -371,30 +364,29 @@ class ClearingDao extends Object
     $this->dbManager->prepare($statementName,
         "
 SELECT
-  CD.pfile_fk,
-  CD.uploadtree_fk,
-  CD.date_added,
-  CD.user_fk,
+  LD.pfile_fk,
+  LD.uploadtree_fk,
+  LD.date_added,
+  LD.user_fk,
   GU.group_fk,
-  CDS.meaning AS scope,
-  CDT.meaning AS type,
-  CL.rf_fk,
+  LDS.meaning AS scope,
+  LDT.meaning AS type,
+  LD.rf_fk,
   LR.rf_shortname,
-  CL.removed
-FROM clearing_decision CD
-INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
-INNER JOIN clearing_licenses CL ON CD.clearing_pk = CL.clearing_fk
-INNER JOIN clearing_decision_scopes CDS ON CD.scope_fk = CDS.scope_pk
-INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
-INNER JOIN license_ref LR ON LR.rf_pk = CL.rf_fk
-INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
+  LD.removed
+FROM license_decision_events LD
+INNER JOIN license_decision_events LD2 ON LD.pfile_fk = LD2.pfile_fk
+INNER JOIN license_decision_scopes LDS ON LD.scope_fk = LDS.scope_pk
+INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
+INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
+INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
-  CD2.uploadtree_fk=$1 AND
-  (CD.scope_fk == 1 OR CD.scope_fk== 2 AND CD.uploadtree_fk=$1) AND
+  LD2.uploadtree_fk=$1 AND
+  (LD.scope_fk == 1 OR LD.scope_fk== 2 AND LD.uploadtree_fk=$1) AND
   GU2.user_fk=$2
-GROUP BY CD.uploadtree_fk, CL.rf_fk, CD.user_fk, GU.group_fk, CL.removed
-ORDER BY CD.date_added ASC, CL.rf_fk ASC, CL.removed ASC
+GROUP BY LD.uploadtree_fk, LD.rf_fk, LD.user_fk, GU.group_fk, LD.removed
+ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
@@ -405,6 +397,12 @@ ORDER BY CD.date_added ASC, CL.rf_fk ASC, CL.removed ASC
     return $result;
   }
 
+
+  public function getCurrentLicenseDecisions(FileTreeBounds $fileTreeBounds)
+  {
+
+  }
+
   public function getCurrentLicenseDecision($userId, $uploadId)
   {
     $events = $this->getRelevantLicenseDecisionEvents($userId, $uploadId);
@@ -413,7 +411,7 @@ ORDER BY CD.date_added ASC, CL.rf_fk ASC, CL.removed ASC
 
     foreach ($events as $event)
     {
-      if ($event[6] != ClearingDecision::TO_BE_DETERMINED)
+      if ($event[6] != ClearingDecision::TO_BE_DISCUSSED)
       {
         $licenseId = $event[7];
         $licenseShortName = $event[8];

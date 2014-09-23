@@ -160,7 +160,6 @@ class ClearingView extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
     if ($permission >= PERM_WRITE)
     {
-      $output .= $this->changeLicenseUtility->createScopeTypeSelect();
 
       $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
       $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);

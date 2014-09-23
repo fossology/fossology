@@ -565,17 +565,6 @@
   $Schema["TABLE"]["clearing_decision"]["date_added"]["UPDATE"] = "UPDATE clearing_decision SET date_added=now()";
 
 
-  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"scope_pk\" int4;";
-  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"scope_pk\" SET NOT NULL, ALTER COLUMN \"scope_pk\" SET DEFAULT nextval('clearing_decision_scopes_type_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision_scopes"]["scope_pk"]["UPDATE"] = "UPDATE clearing_decision_scopes SET scope_pk=nextval('clearing_decision_scopes_type_seq'::regclass)";
-
-  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_scopes\" ADD COLUMN \"meaning\" varchar(30);";
-  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_scopes\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
-  $Schema["TABLE"]["clearing_decision_scopes"]["meaning"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"type_pk\" int4;";
   $Schema["TABLE"]["clearing_decision_types"]["type_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('clearing_decision_types_type_seq'::regclass);";
@@ -585,22 +574,6 @@
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_types\" ADD COLUMN \"meaning\" varchar(30);";
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_types\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
   $Schema["TABLE"]["clearing_decision_types"]["meaning"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"clearing_fk\" int4;";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"rf_fk\" int4;";
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" boolean;";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT FALSE;";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
@@ -2324,4 +2297,117 @@
   $Schema["TABLE"]["upload"]["status_comment"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_comment\" text;";
   $Schema["TABLE"]["upload"]["status_comment"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_comment\" DROP NOT NULL;";
   $Schema["TABLE"]["upload"]["status_comment"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["clearing_pk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_events"]["clearing_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"clearing_pk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["clearing_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"clearing_pk\" SET NOT NULL, ALTER COLUMN \"clearing_pk\" SET DEFAULT nextval('clearing_decision_events_clearing_id_seq'::regclass);";
+  $Schema["TABLE"]["clearing_decision_events"]["clearing_pk"]["UPDATE"] = "UPDATE clearing_decision_events SET clearing_pk=nextval('clearing_decision_events_clearing_id_seq'::regclass)";
+
+  $Schema["TABLE"]["clearing_decision_events"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_events"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"uploadtree_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_events"]["uploadtree_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_events"]["pfile_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_events"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_events"]["user_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["user_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_events"]["user_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_events\".\"type_fk\" IS 'Identifier for clearing_decision_events_types';";
+  $Schema["TABLE"]["clearing_decision_events"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"type_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_events"]["type_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["scope_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_events\".\"scope_fk\" IS 'Identifier for clearing_decision_events_scopes';";
+  $Schema["TABLE"]["clearing_decision_events"]["scope_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"scope_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision_events"]["scope_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"scope_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision_events"]["scope_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_decision_events"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision_events"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_decision_events\" ADD COLUMN \"date_added\" timestamptz;";
+  $Schema["TABLE"]["clearing_decision_events"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision_events\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
+  $Schema["TABLE"]["clearing_decision_events"]["date_added"]["UPDATE"] = "UPDATE clearing_decision_events SET date_added=now()";
+
+  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"license_decision_pk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"license_decision_pk\" SET NOT NULL, ALTER COLUMN \"license_decision_pk\" SET DEFAULT nextval('clearing_decision_license_events_clearing_id_seq'::regclass);";
+  $Schema["TABLE"]["license_decision_events"]["license_decision_pk"]["UPDATE"] = "UPDATE clearing_decision_license_events SET license_decision_pk=nextval('clearing_decision_license_events_clearing_id_seq'::regclass)";
+
+  $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"uploadtree_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["uploadtree_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["pfile_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"rf_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["rf_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["removed"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_license_events\".\"removed\" IS 'true: add license, false: remove license, null: only change comment';";
+  $Schema["TABLE"]["license_decision_events"]["removed"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"removed\" boolean;";
+  $Schema["TABLE"]["license_decision_events"]["removed"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"removed\" boolean;";
+  $Schema["TABLE"]["license_decision_events"]["removed"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["user_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["user_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["user_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"license_decision_events\".\"type_fk\" IS 'Identifier for license_decision_types';";
+  $Schema["TABLE"]["license_decision_events"]["type_fk"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"type_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["type_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["scope_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_license_events\".\"scope_fk\" IS 'Identifier for clearing_decision_license_events_scopes';";
+  $Schema["TABLE"]["license_decision_events"]["scope_fk"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"scope_fk\" int4;";
+  $Schema["TABLE"]["license_decision_events"]["scope_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"scope_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["scope_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["comment"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_license_events\".\"comment\" IS 'User comment';";
+  $Schema["TABLE"]["license_decision_events"]["comment"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"comment\" text;";
+  $Schema["TABLE"]["license_decision_events"]["comment"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"comment\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["comment"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision_license_events\".\"reportinfo\" IS 'public comment';";
+  $Schema["TABLE"]["license_decision_events"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"reportinfo\" text;";
+  $Schema["TABLE"]["license_decision_events"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"reportinfo\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_decision_events"]["reportinfo"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_decision_events"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_events"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_decision_license_events\" ADD COLUMN \"date_added\" timestamptz;";
+  $Schema["TABLE"]["license_decision_events"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision_license_events\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
+  $Schema["TABLE"]["license_decision_events"]["date_added"]["UPDATE"] = "UPDATE clearing_decision_license_events SET date_added=now()";
+
+
+  $Schema["TABLE"]["license_decision_types"]["type_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_types"]["type_pk"]["ADD"] = "ALTER TABLE \"license_decision_types\" ADD COLUMN \"type_pk\" int4;";
+  $Schema["TABLE"]["license_decision_types"]["type_pk"]["ALTER"] = "ALTER TABLE \"license_decision_types\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('license_decision_types_type_seq'::regclass);";
+  $Schema["TABLE"]["license_decision_types"]["type_pk"]["UPDATE"] = "UPDATE license_decision_types SET type_pk=nextval('license_decision_types_type_seq'::regclass)";
+
+  $Schema["TABLE"]["license_decision_types"]["meaning"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_types"]["meaning"]["ADD"] = "ALTER TABLE \"license_decision_types\" ADD COLUMN \"meaning\" varchar(30);";
+  $Schema["TABLE"]["license_decision_types"]["meaning"]["ALTER"] = "ALTER TABLE \"license_decision_types\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_decision_types"]["meaning"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["license_decision_scopes"]["scope_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_scopes"]["scope_pk"]["ADD"] = "ALTER TABLE \"license_decision_scopes\" ADD COLUMN \"scope_pk\" int4;";
+  $Schema["TABLE"]["license_decision_scopes"]["scope_pk"]["ALTER"] = "ALTER TABLE \"license_decision_scopes\" ALTER COLUMN \"scope_pk\" SET NOT NULL, ALTER COLUMN \"scope_pk\" SET DEFAULT nextval('license_decision_scopes_type_seq'::regclass);";
+  $Schema["TABLE"]["license_decision_scopes"]["scope_pk"]["UPDATE"] = "UPDATE license_decision_scopes SET scope_pk=nextval('license_decision_scopes_type_seq'::regclass)";
+
+  $Schema["TABLE"]["license_decision_scopes"]["meaning"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_scopes"]["meaning"]["ADD"] = "ALTER TABLE \"license_decision_scopes\" ADD COLUMN \"meaning\" varchar(30);";
+  $Schema["TABLE"]["license_decision_scopes"]["meaning"]["ALTER"] = "ALTER TABLE \"license_decision_scopes\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_decision_scopes"]["meaning"]["UPDATE"] = "";
+
 
