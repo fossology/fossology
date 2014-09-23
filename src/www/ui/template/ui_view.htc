@@ -15,7 +15,22 @@
      <h3><i18n>Clearing History</i18n></h3>
      <div class="scrollable2">
       <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
-      {{ clearingHistory }}
+       <tr>
+         <th><i18n>Date</i18n></th>
+         <th><i18n>Username</i18n></th>
+         <th><i18n>Scope</i18n></th>
+         <th><i18n>Type</i18n></th>
+         <th><i18n>Licenses</i18n></th>
+         <th><i18n>Comment</i18n></th>
+         <th><i18n>Remark</i18n></th>
+       </tr>
+       {% for row in clearingHistory %}
+       <tr{%if row.isInactive %} class="inactiveClearing"{% endif%}>
+        {% for col in row.content %}
+         <td>{{ col }}</td>
+        {% endfor %}
+       </tr>
+       {% endfor %}
      </table>
      <span class="inactiveClearing">Inactive concluded licenses decisions</span>
     </div>

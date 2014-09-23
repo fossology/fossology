@@ -274,7 +274,7 @@ class ClearingView extends FO_Plugin
       global $SysConf;
       $user_pk = $SysConf['auth']['UserId'];
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      $clearingHistory = $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk);
+      $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $user_pk);
     }
 
     list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
