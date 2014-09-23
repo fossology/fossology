@@ -22,17 +22,17 @@ TESTDIR = ../agent_tests
 OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o
 COVERAGE = 
 
-$(EXE): $(FOLIB) $(VARS) $(OBJECTS)
+$(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
 
-all:  $(FOLIB) $(EXE)
+all:  $(CXXFOLIB) $(EXE)
 
 #######################
 # library build rules #
 #######################
 
-$(FOLIB):
-	$(MAKE) -C $(FOLIBDIR)
+$(CXXFOLIB):
+	$(MAKE) -C $(CXXFOLIBDIR)
 
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)

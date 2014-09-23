@@ -31,6 +31,8 @@ $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)
 	$(AR) cr $@ $(OBJS) $$( $(AR) -t $(DEPENDENCY) )
 	
+$(DEPENDENCY):
+	$(MAKE) -C $(CLIBDIR)
 
 $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
