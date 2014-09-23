@@ -32,55 +32,29 @@ define("TITLE_clearingView", _("Change concluded License "));
 
 class ClearingView extends FO_Plugin
 {
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-  /**
-   * @var ClearingDao;
-   */
+  /** @var ClearingDao */
   private $clearingDao;
-  /**
-   * @var LicenseProcessor
-   */
+  /** @var LicenseProcessor */
   private $licenseProcessor;
-  /**
-   * @var ChangeLicenseUtility
-   */
+  /** @var ChangeLicenseUtility */
   private $changeLicenseUtility;
-  /**
-   * @var LicenseOverviewPrinter
-   */
+  /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-  /**
-   * @var HighlightDao
-   */
+  /** @var HighlightDao */
   private $highlightDao;
-
-  /**
-   * @var HighlightProcessor
-   */
+  /** @var HighlightProcessor */
   private $highlightProcessor;
-
-  /**
-   * @var LicenseRenderer
-   */
+  /** @var LicenseRenderer */
   private $licenseRenderer;
   /* @var Renderer */
   private $renderer;
-  /**
-   * @var array colorMapping
-   */
+  /** @var array colorMapping */
   var $colorMapping;
 
   function __construct()
@@ -176,25 +150,7 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
-
-  /**
-   * @param $uploadTreeId
-   * @return array of clearingHistory
-   */
-  private function createClearingHistoryTable($uploadTreeId)
-  {
-    global $SysConf;
-    $user_pk = $SysConf['auth']['UserId'];
-    $tableName = "clearingHistoryTable";
-    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-
-
-    return $this->changeLicenseUtility->printClearingTable($tableName, $clearingDecWithLicenses, $user_pk);
-  }
-
-
-
-
+  
   private function createClearingFormAndButtons($uploadId,$uploadTreeId){
 
     $text = _("Audit License");
@@ -220,18 +176,6 @@ class ClearingView extends FO_Plugin
     $output .= "<br>";
 
     return $output;
-  }
-
-  private function createWrappedClearingHistoryTable($uploadId,$uploadTreeId) {
-    $permission = GetUploadPerm($uploadId);
-     if ($permission >= PERM_WRITE)
-    {
-      $text = _("Clearing History:");
-      $output = "<h3>$text</h3>";
-      $output .= $this->createClearingHistoryTable($uploadTreeId);
-      return $output;
-    }
-    return "";
   }
 
 
@@ -323,15 +267,25 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
     $licenseInformation .= "<br>";
     $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-    $licenseInformation .= $this->createWrappedClearingHistoryTable($uploadId,$uploadTreeId);
-    list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
+    
+    $permission = GetUploadPerm($uploadId);
+    $clearingHistory = '';
+    if ($permission >= PERM_WRITE)
+    {
+      global $SysConf;
+      $user_pk = $SysConf['auth']['UserId'];
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $clearingHistory = $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk);
+    }
 
+    list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
     $this->renderer->vars['pageMenu'] = $pageMenu;
     $this->renderer->vars['textView'] = $textView;
     $this->renderer->vars['legendBox'] = $legendBox;
     $this->renderer->vars['licenseInformation'] = $licenseInformation;
+    $this->renderer->vars['clearingHistory'] = $clearingHistory;
     $output .= $this->renderer->renderTemplate('ui_view');
     print $output;
   }

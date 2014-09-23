@@ -11,6 +11,15 @@
    </td>
    <td class="headerBox">
     <div>{{ licenseInformation }}</div>
+    {% if clearingHistory %}
+     <h3><i18n>Clearing History</i18n></h3>
+     <div class="scrollable2">
+      <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
+      {{ clearingHistory }}
+     </table>
+     <span class="inactiveClearing">Inactive concluded licenses decisions</span>
+    </div>
+    {% endif %}
    </td>
   </tr>
  </table>
