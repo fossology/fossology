@@ -16,8 +16,10 @@ extern "C"{
 
 #include <iostream>
 #include "copyright.hpp"
+#include "files.hpp"
 
 using namespace std;
+
 
 
 class File {
@@ -42,7 +44,7 @@ void queryAgentId(int& agent, PGconn* dbConn) {
   };
 
   int agentId = fo_GetAgentKey(dbConn,
-                               AGENT_NAME, 0, agentRevision, AGENT_DESC);
+                     AGENT_NAME, 0, agentRevision, AGENT_DESC);
   free(agentRevision);
 
   if (agentId > 0)
@@ -64,31 +66,25 @@ CopyrightState* getState(DbManager* dbManager, int verbosity){
   return new CopyrightState(dbManager, agentID, verbosity);
 }
 
-string readFileToString(const char* fileName){
-  return string("this copyright is the copyright copyright of Copyright");
-}
+vector<CopyrightMatch> matchStringToRegexes(const string& content, CopyrightState* state) {
 
-vector<CopyrightMatch*> matchStringToRegexes(const string& content, CopyrightState* state) {
-  vector<CopyrightMatch*> result;
+  vector<CopyrightMatch> result;
+  std::vector< RegexMatcher > matchers = state->getRegexMatchers();
 
-  for (const auto& item: state->getRegexMatchers()){
-    CopyrightMatch* newMatch = item.match(content);
-   if(newMatch )
-     result.push_back(newMatch);
-   else {
-    cout << "No match" <<endl;
-   }
-
+  typedef  std::vector< RegexMatcher >::const_iterator rgm;
+  for (rgm item = matchers.begin(); item != matchers.end(); ++item){
+    vector<CopyrightMatch>  newMatch = item->match(content);
+    result.insert(result.end(), newMatch.begin(), newMatch.end() ) ;
   }
 
   return result;
 }
 
 
-void saveToDatabase(const vector<CopyrightMatch*> & matches, CopyrightState* state) {
-
-  for (const auto& it: matches){
-    smatch mymatch = it->getSmatch();
+void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state) {
+typedef vector<CopyrightMatch>::const_iterator cpm;
+  for (cpm it=matches.begin(); it!=matches.end(); ++it ){
+    rx::smatch mymatch = (*it).getSmatch();
     for (unsigned matchI = 0; matchI < mymatch.size(); ++matchI) {
       cout << "match [" << matchI << "] = " << mymatch[matchI] << std::endl;
     }
@@ -110,8 +106,8 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 
   if (file->fileName != NULL) {
     cout << "reading " << file->fileName << endl;
-    string fileContent = readFileToString(file->fileName);
-    vector<CopyrightMatch*> matches = matchStringToRegexes(fileContent, state);
+    string fileContent = fo::getStringFromFile(file->fileName,-1);
+    vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state);
 
     saveToDatabase(matches, state);
   }
@@ -154,8 +150,8 @@ int main(int argc, char** argv) {
   CopyrightState* state;
   state = getState(dbManager, verbosity);
 
-  state->addMatcher(RegexMatcher("statement", "(.*)(copy)(.*)"));
-
+  state->addMatcher(RegexMatcher("statement", "copy"));
+  state->addMatcher(RegexMatcher("statement", "right"));
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());
 

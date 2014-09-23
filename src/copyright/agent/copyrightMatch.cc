@@ -11,20 +11,22 @@
 
 #include "copyrightMatch.hpp"
 
-CopyrightMatch::CopyrightMatch(std::smatch sm, const char* type) : _sm(sm), _type(type)
+CopyrightMatch::CopyrightMatch(rx::smatch sm, const char* type) : _sm(sm), _type(type)
 {
 }
+
+CopyrightMatch::~CopyrightMatch(){};
 
 unsigned CopyrightMatch::size()
 {
   return _sm.size();
 }
 
-std::smatch CopyrightMatch::getSmatch( ) const {
+rx::smatch CopyrightMatch::getSmatch( ) const {
   return _sm;
 }
 
-std::smatch::const_reference  CopyrightMatch::operator[](size_t i) const
+rx::smatch::const_reference  CopyrightMatch::operator[](size_t i) const
 {
   return _sm[i];
 }

@@ -13,6 +13,8 @@
 #define MATCHER_H
 
 #include "copyrightMatch.hpp"
+#include <vector>
+
 
 class Matcher {
 public:
@@ -20,7 +22,7 @@ public:
   virtual ~Matcher();
 
   virtual bool matches(const std::string content){return true;};
-  virtual CopyrightMatch* match(const std::string content) const =0;
+  virtual std::vector <CopyrightMatch> match(const std::string content) const =0;
 
   const char* getType() const;
 

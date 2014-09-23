@@ -12,20 +12,20 @@
 #ifndef COPYRIGHTMATCH_H
 #define COPYRIGHTMATCH_H
 
-#include <regex>
+#include "regex.hpp"
 #include <string>
 
 class CopyrightMatch
 {
 public:
-    CopyrightMatch(std::smatch sm, const char* type);
+    CopyrightMatch(rx::smatch sm, const char* type);
     ~CopyrightMatch();
     const char* getType();
-    std::smatch::const_reference  operator[](size_t i) const;
+    rx::smatch::const_reference  operator[](size_t i) const;
     unsigned size();
-    std::smatch getSmatch( ) const;
+    rx::smatch getSmatch( ) const;
 private:
-    std::smatch _sm;
+    rx::smatch _sm;
     const char* _type;
 };
 

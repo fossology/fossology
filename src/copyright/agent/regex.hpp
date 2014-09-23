@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini
+ * Author: Daniele Fognini, Cedric Bodet, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
  *
@@ -9,19 +9,20 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef MATCHER_H
-#define MATCHER_H
+#ifndef REGEX_HPP_
+#define REGEX_HPP_
 
-#include "copyrightMatch.h"
+#define USEBOOST
+#ifdef USEBOOST
+  #include <boost/regex.hpp>
+  namespace rx = boost;
+#else
+  #include <regex>
+  namespace rx  = std;
+#endif
 
-class Matcher {
-public:
-    virtual bool matches(const char* content);
-    virtual CopyrightMatch* match(const char* content);
-    const char* getType();
 
-private:
-    char* type;
-};
 
-#endif // MATCHER_H
+
+
+#endif /* REGEX_HPP_ */

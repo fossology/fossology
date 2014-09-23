@@ -14,15 +14,16 @@
 
 #include "matcher.hpp"
 #include <iostream>
-#include <regex>
+#include "regex.hpp"
+#include <string>
 
 class RegexMatcher : public virtual Matcher {
 public:
     RegexMatcher(const char* type, const char* pattern);
-    virtual CopyrightMatch* match(const std::string content) const;
+    virtual std::vector <CopyrightMatch> match(const std::string content) const;
     virtual ~RegexMatcher();
 private:
-    std::regex matchingRegex;
+    rx::regex matchingRegex;
 };
 
 #endif // REGEXMATCHER_H

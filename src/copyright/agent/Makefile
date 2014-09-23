@@ -10,10 +10,10 @@ VARS=$(TOP)/Makefile.conf
 
 include $(VARS)
 # -Werror -Wextra
-CFLAGS_LOCAL = -std=c++11 $(ALL_CFLAGS) -I.  -Wall  -fopenmp
+CFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = -std=c++11 $(ALL_CFLAGS) -lm -fopenmp
+CFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
 
 CXX  = g++ 
 

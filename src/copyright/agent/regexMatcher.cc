@@ -13,20 +13,24 @@
 
 RegexMatcher::RegexMatcher(const char* type, const char* pattern) : Matcher(type)
 {
-  matchingRegex = std::regex(pattern); //, std::regex_constants::icase
+  matchingRegex = rx::regex(pattern, rx::regex_constants::icase);
 }
 
-CopyrightMatch* RegexMatcher::match(const std::string content) const {
-  std::cout << content << std::endl;
-  std::smatch sm;
+std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) const {
 
-  if(std::regex_match(content.cbegin(), content.cend(), sm, matchingRegex) ) {
-    std::cout << "string object with " << sm.size() << " matches\n";
-    for (unsigned matchI = 0; matchI < sm.size(); ++matchI) {
-      std::cout << "match [" << matchI << "] = " << sm[matchI] << std::endl;
-    }
-    return new CopyrightMatch(sm, getType()); }
-  else return NULL;
+  std::vector <CopyrightMatch> results;
+
+  std::string::const_iterator begin = content.begin();
+  std::string::const_iterator end = content.end();
+  boost::match_results<std::string::const_iterator> what;
+
+  std::string::const_iterator begin2 =begin;
+  while (regex_search(begin, end, what,matchingRegex)) {
+    results.push_back(CopyrightMatch(what, getType()));
+    begin = what[0].second;
+  }
+
+  return results;
 }
 
 RegexMatcher::~RegexMatcher(){};

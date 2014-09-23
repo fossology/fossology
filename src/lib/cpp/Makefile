@@ -1,43 +1,50 @@
-# FOSSology Makefile - lib/libfossology
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright Siemens AG 2014
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
 TOP=../../..
+
+CLIBDIR=../c/
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
-EXE=sqlCopyTest fossconfigTest reppath
-LIB=libfossology.a
-OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o libfossdbmanager.o
+EXE=
+LIB=libfossologyCPP.a
+DEPENDENCY = $(CLIBDIR)/libfossology.a
+OBJS=files.o libfossdbmanagerclass.o
+
+
 COVERAGE=$(OBJS:%.o=%_cov.o)
+
+CXX = g++
 
 all: $(LIB) $(VARS) $(EXE)
 	echo "make $(LIB)"
 
-$(LIB): $(OBJS) $(VARS)
-	$(AR) cr $@ $(OBJS)
-#	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
-
-libfossology_cov.a: $(COVERAGE)
-	$(AR) cr $@ $(COVERAGE)
+$(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
+	$(AR) -x $(DEPENDENCY)
+	$(AR) cr $@ $(OBJS) $$( $(AR) -t $(DEPENDENCY) )
+	
 
 $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
 
-%.o: %.c %.h
-	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
-#	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC
 
-$(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+%.o: %.cc %.hpp
+	$(CXX) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"
 
 install-dev: $(LIB)
-	$(INSTALL_DATA) libfossology.a $(DESTDIR)$(LIBEXECDIR)/libfossology.a
-	$(INSTALL_DATA) libfossology.h $(DESTDIR)$(INCLUDEDIR)/libfossology.h
+	$(INSTALL_DATA) libfossologyCPP.a $(DESTDIR)$(LIBEXECDIR)/libfossologyCPP.a
+	$(INSTALL_DATA) libfossologyCPP.h $(DESTDIR)$(INCLUDEDIR)/libfossologyCPP.h
 
 install-exe: $(EXE)
 	for program in $(EXE); do \
