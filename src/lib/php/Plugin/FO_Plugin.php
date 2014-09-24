@@ -360,9 +360,9 @@ class FO_Plugin
     }
     return;
   } // OutputOpen()
-
+ 
   /**
-   * \brief Similar to OutputClose, this ends the output type
+   * \brief This ends the output type
    * for this object.  However, this does NOT change any global
    * settings.  This is called when this object is a dependency
    * for another object.
@@ -374,25 +374,17 @@ class FO_Plugin
       return (0);
     }
     $V = "";
-    switch ($this->OutputType)
+    if ($this->OutputType=='HTML')
     {
-      case "XML":
-        $V = "</xml>\n";
-        break;
-      case "HTML":
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V = "</xml>\n";
     }
     if (!$this->OutputToStdout)
     {
-      return ($V);
+      return $V;
     }
     print $V;
     return;
-  } // OutputUnSet()
+  }
 
   /**
    * \brief This function is called when user output is
@@ -408,28 +400,20 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
     $V = "";
-    switch ($this->OutputType)
+    if ($this->OutputType=='HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        $V = $this->outputHtml();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V = $this->outputHtml();
     }
     if (!$this->OutputToStdout)
     {
-      return ($V);
+      return $V;
     }
     print $V;
     return;
-  } // Output()
+  }
 
   /**
    *
