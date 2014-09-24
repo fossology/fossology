@@ -12,12 +12,26 @@ You should have received a copy of the GNU General Public License along with thi
 #define FILES_HPP_
 
 #include <string>
+#include <glib.h>
 
 namespace fo {
 
+class File {
+public:
+  unsigned long id;
+  char* fileName;
+
+  File();
+  File(unsigned long _id, const char* _fileName);
+
+  std::string getContent(const unsigned long int maximumBytes = 1<<20);
+
+
+  ~File();
+};
+
 std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1<<20 );
 std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1<<20 );
-
 
 }
 

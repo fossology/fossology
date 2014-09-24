@@ -5,23 +5,29 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
+TOP=../../../..
 VARS=$(TOP)/Makefile.conf
-
+LOCALAGENTDIR=../../agent
+TESTDIR = $(TOP)/src/testing/lib/c
+TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 include $(VARS)
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
+CPPUNIT_PATH=/opt/cppunit
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR) 
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
+CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
 
-EXE=copyright
-TESTDIR = ../agent_tests
-OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o copyrightUtils.o database.o
+EXE=test_copyright
+
+OBJECTS  = test_regex.o test_RegMatcher.o
 COVERAGE = 
 
-$(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
-	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+
+$(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
+	${MAKE} -C ${TESTDIR}
+	$(CXX) run_tests.cc -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK)
 
 all:  $(CXXFOLIB) $(EXE)
 
@@ -32,17 +38,22 @@ all:  $(CXXFOLIB) $(EXE)
 $(CXXFOLIB):
 	$(MAKE) -C $(CXXFOLIBDIR)
 
+
+	
+agent:
+	$(MAKE) -C $(LOCALAGENTDIR)
+	
 libcopyright.a: $(OBJECTS)
-	ar cvr $@ $(OBJECTS)
+	$(MAKE) -C $(LOCALAGENTDIR) $@	
 	
 libcopyright_cov.a: $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 ######################
 # object build rules #
 ######################
 
-%.o: %.cc %.hpp
+%.o: %.cc
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
 $(COVERAGE): %_cov.o: %.c 
@@ -66,8 +77,13 @@ uninstall:
 test: all
 	$(MAKE) -C $(TESTDIR) $@
 
-coverage: all
-	$(MAKE) -C $(TESTDIR) $@
+coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
+	@echo "make copyright agent_tests coverage"
+	${MAKE} -C ${TESTDIR}
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	./$(EXE); \
+	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
+	genhtml  -o  results cov.txt
 
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core
