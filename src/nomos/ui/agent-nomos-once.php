@@ -169,7 +169,7 @@ class agent_nomos_once extends FO_Plugin {
     else if ($this->OutputType=='HTML') {
       $this->vars['content'] = $this->htmlContent();
     }
-    if (array_key_exists('unlink_flag',$_FILES['licfile'])) {
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
       unlink($tmp_name);
     }
     $_FILES['licfile'] = NULL;

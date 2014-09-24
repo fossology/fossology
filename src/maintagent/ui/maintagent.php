@@ -117,33 +117,18 @@ class maintagent extends FO_Plugin {
   }
 
 
-
-  /**
-   * \brief Generate the text for this plugin.
-   */
-  function Output() 
+  protected function htmlContent() 
   {
-    if ($this->State != PLUGIN_STATE_READY)  return;
-
     $V = "";
-
     /* If this is a POST, then process the request. */
     $queue = GetParm('queue', PARM_STRING);
-
     if (!empty($queue))
     {
       $Msg = $this->QueueJob();
       $V .= "<font style='background-color:gold'>" . $Msg . "</font>";
     }
-    
     $V .= $this->DisplayForm();
-
-
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
-    return;
+    return $V;
   }
 }
 

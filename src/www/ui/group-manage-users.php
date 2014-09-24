@@ -64,19 +64,8 @@ class group_manage_users extends FO_Plugin {
     }
   }
   
-  function OutputOpen($Type,$ToStdout){
-    $this->OutputType = $Type;
-    $this->OutputToStdout = $ToStdout;
-    if ($ToStdout != 1)
-    {
-      return parent::OutputOpen($Type, $ToStdout);
-    }
-  }
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
-  function Output() 
+  protected function htmlContent() 
   {
     global $SysConf;
 
@@ -215,14 +204,7 @@ class group_manage_users extends FO_Plugin {
     $text = _("Add new users on the last line.");
     $V .= "<br>" . $text;
 
-    if (!$this->OutputToStdout)
-    {
-      return $V;
-    }
-    print($this->OutputOpen($this->OutputType,0));
-    $this->OutputToStdout = 1;
-    print ($V);
-    return;
+    return $V;
   }
 }
 $NewPlugin = new group_manage_users;

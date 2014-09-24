@@ -20,12 +20,14 @@ define("TITLE_dashboard", _("Dashboard"));
 
 class dashboard extends FO_Plugin
 {
-  var $Name       = "dashboard";
-  var $Version    = "1.0";
-  var $Title      = TITLE_dashboard;
-  var $MenuList   = "Admin::Dashboard";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "dashboard";
+    $this->Title      = TITLE_dashboard;
+    $this->MenuList   = "Admin::Dashboard";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief Return each html row for DatabaseContents()
@@ -340,50 +342,33 @@ function GetLastAnalyzeTime($TableName)
     $V .= $Indent . _("FOSSology config") . ": " . $SYSCONFDIR . "<br>";
 
     return($V);
-  } // DiskFree()
+  }
 
-  /**
-   * \brief Generate output.
-   */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+
+  
+  protected function htmlContent() {
     $V="";
+    $V .= "<table border=0 width='100%'><tr>\n";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Contents");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseContents();
+    $V .= "</td>";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Metrics");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseMetrics();
+    $V .= "</td>";
+    $V .= "</tr></table>\n";
+    $text = _("Active FOSSology queries");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseQueries();
+    $text = _("Disk Space");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DiskFree();
 
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= "<table border=0 width='100%'><tr>\n";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Contents");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseContents();
-        $V .= "</td>";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Metrics");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseMetrics();
-        $V .= "</td>";
-        $V .= "</tr></table>\n";
-        $text = _("Active FOSSology queries");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseQueries();
-        $text = _("Disk Space");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DiskFree();
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    return;
-  } // Output()
+    return $V;
+  }
 
 }
 $NewPlugin = new dashboard;

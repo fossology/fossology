@@ -24,15 +24,17 @@ define("TITLE_foconfig", _("Configuration Variables"));
  */
 class foconfig extends FO_Plugin
 {
-  var $Name       = "foconfig";
-  var $Version    = "1.0";
-  var $Title      = TITLE_foconfig;
-  var $MenuList   = "Admin::Customize";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
   var $CreateAttempts = 0;
-  public $PluginLevel = 50;    // run before 'regular' plugins
 
+  function __construct()
+  {
+    $this->Name       = "foconfig";
+    $this->Title      = TITLE_foconfig;
+    $this->MenuList   = "Admin::Customize";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->PluginLevel = 50;    // run before 'regular' plugins
+    parent::__construct();
+  }
 
   /**
    * \brief Generate HTML output.
@@ -105,9 +107,6 @@ class foconfig extends FO_Plugin
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
 
-    //debugprint($newarray, "New array");
-    //debugprint($oldarray, "Old array");
-
     /* Compare new and old array
      * and update DB with new values */
     $UpdateMsg = "";
@@ -139,7 +138,7 @@ class foconfig extends FO_Plugin
             DBCheckResult($result, $sql, __FILE__, __LINE__);
             pg_free_result($result);
             if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
-            $UpdateMsg .= "$VarName";
+            $UpdateMsg .= $VarName;
           }
           /* the validation_function is not empty, but after checking, the value is invalid */
           else if (!$is_empty && (0 == $validation_function($VarValue)))
@@ -161,27 +160,14 @@ class foconfig extends FO_Plugin
     }
 
     $OutBuf = '';
-    switch($this->OutputType)
+    if($this->OutputType=='HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        if ($UpdateMsg) $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
-        $OutBuf .= $this->HTMLout();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      if ($UpdateMsg) $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+      $OutBuf .= $this->HTMLout();
     }
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
-    }
-    print($OutBuf);
-    return;
-  } // Output()
+    $this->vars['content'] = $OutBuf;
+  }
 
-};
+}
 $NewPlugin = new foconfig;
 $NewPlugin->Initialize();
-?>

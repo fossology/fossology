@@ -20,12 +20,14 @@ define("TITLE_admin_license_file", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
 {
-  var $Name       = "Admin_License";
-  var $Version    = "1.0";
-  var $Title      = TITLE_admin_license_file;
-  var $MenuList   = "Admin::License Admin";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "admin_license";
+    $this->Title      = TITLE_admin_license_file;
+    $this->MenuList   = "Admin::License Admin";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.
@@ -521,110 +523,63 @@ class admin_license_file extends FO_Plugin
     return $ob;
   }
 
-  /*
-   // tmp fcn to initally load md5s into ref table
-   function popmd5()
-   {
-   global $PG_CONN;
-   $sql = "select rf_pk, rf_text from license_ref where rf_md5 is null";
-   $result = pg_query($PG_CONN, $sql);
-   DBCheckResult($result, $sql, __FILE__, __LINE__);
-   while ($row = pg_fetch_assoc($result))
-   {
-   $licmd5 = md5($row['rf_text']);
-   $sql = "UPDATE license_ref set rf_md5='$licmd5' where rf_pk='$row[rf_pk]'";
-   $updresult = pg_query($PG_CONN, $sql);
-   DBCheckResult($updresult, $sql, __FILE__, __LINE__);
-   }
-   }
-   */
 
-
-  /**
-   * \brief Generate output.
-   */
-  function Output()
+  protected function htmlContent()
   {
-    global $PG_CONN;
     global $Plugins;
 
-    // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) 
-    { 
-      DBconnect(); 
-      if (!$PG_CONN) echo "NO DB connection"; 
-    }
-
-    if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
+    $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+    $errorstr = "License not added";
 
-    // tmp  $this->popmd5();
-    switch($this->OutputType)
+    // update the db
+    if (@$_POST["updateit"])
     {
-      case "XML":
-        break;
-      case "Text":
-        break;
-      case "HTML":
-        // micro menus
-        $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
-
-        //debugprint($_REQUEST, "_REQUEST");
-
-        $errorstr = "License not added";
-
-        // update the db
-        if (@$_POST["updateit"])
-        {
-          $resultstr = $this->Updatedb($_POST);
-          $V .= $resultstr;
-          if (strstr($resultstr, $errorstr)) {
-            $V .= $this->Updatefm(0);
-          } else {
-          $V .= $this->Inputfm();
-          }
-          break;
-        }
-
-        if (@$_REQUEST['add'] == 'y')
-        {
-          $V .= $this->Updatefm(0);
-          break;
-        }
-
-        // Add new rec to db
-        if (@$_POST["addit"])
-        {
-          $resultstr = $this->Adddb($_POST);
-          $V .= $resultstr;
-          if (strstr($resultstr, $errorstr)) {
-            $V .= $this->Updatefm(0);
-          } else {
-          $V .= $this->Inputfm();
-          }
-          break;
-        }
-
-        // bring up the update form
-        $rf_pk = @$_REQUEST['rf_pk'];
-        if ($rf_pk)
-        {
-          $V .= $this->Updatefm($rf_pk);
-          break;
-        }
-
+      $resultstr = $this->Updatedb($_POST);
+      $V .= $resultstr;
+      if (strstr($resultstr, $errorstr)) {
+        $V .= $this->Updatefm(0);
+      }
+      else {
         $V .= $this->Inputfm();
-        if (@$_POST["req_shortname"])
-        $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
-        break;
-      default:
-        break;
+      }
+      return $V;
     }
 
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    return;
-  } // Output()
+    if (@$_REQUEST['add'] == 'y')
+    {
+      $V .= $this->Updatefm(0);
+      return $V;
+    }
+
+    // Add new rec to db
+    if (@$_POST["addit"])
+    {
+      $resultstr = $this->Adddb($_POST);
+      $V .= $resultstr;
+      if (strstr($resultstr, $errorstr)) {
+        $V .= $this->Updatefm(0);
+      }
+      else {
+      $V .= $this->Inputfm();
+      }
+      return $V;
+    }
+
+    // bring up the update form
+    $rf_pk = @$_REQUEST['rf_pk'];
+    if ($rf_pk)
+    {
+      $V .= $this->Updatefm($rf_pk);
+      return $V;
+    }
+
+    $V .= $this->Inputfm();
+    if (@$_POST["req_shortname"])
+    $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
+
+    return $V;
+  }
 
 
   /**
@@ -660,8 +615,6 @@ class admin_license_file extends FO_Plugin
     return ($familynamearray);
   }
 
-
-};
+}
 
 $NewPlugin = new admin_license_file;
-?>
