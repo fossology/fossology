@@ -23,14 +23,16 @@
 
 define("TITLE_upload_properties", _("Edit Uploaded File Properties"));
 
-class upload_properties extends FO_Plugin 
+class upload_properties extends FO_Plugin
 {
-  var $Name = "upload_properties";
-  public $Title = TITLE_upload_properties;
-  var $Version = "1.0";
-  var $MenuList = "Organize::Uploads::Edit Properties";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "upload_properties";
+    $this->Title = TITLE_upload_properties;
+    $this->MenuList = "Organize::Uploads::Edit Properties";
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * @brief Update upload properties (name and description)
@@ -91,14 +93,9 @@ class upload_properties extends FO_Plugin
     return 1;
   }
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
-  function Output() 
+  protected function htmlContent() 
   {
     global $PG_CONN;
-    if ($this->State != PLUGIN_STATE_READY)  return;
-
     $V = "";
     $folder_pk = GetParm('folder', PARM_TEXT);
     $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
@@ -118,8 +115,7 @@ class upload_properties extends FO_Plugin
       if ($UploadPerm < PERM_WRITE)
       {
         $text = _("Permission Denied");
-        echo "<h2>$text<h2>";
-        return;
+        return "<h2>$text<h2>";
       }
     }
 
@@ -127,12 +123,12 @@ class upload_properties extends FO_Plugin
     if($rc == 0)
     {
       $text = _("Nothing to Change");
-      $V.= displayMessage($text);
+      $this->vars['message'] = $text;
     }
     else if($rc == 1)
     {
       $text = _("Upload Properties successfully changed");
-      $V.= displayMessage($text);
+      $this->vars['message'] = $text;
     }
 
     /* define js_url */
@@ -229,10 +225,7 @@ class upload_properties extends FO_Plugin
     $V.= "<input type='submit' value='$text!'>\n";
     $V.= "</form>\n";
 
-    if (!$this->OutputToStdout) return ($V);
-    print ("$V");
-    return;
+    return $V;
   }
 }
 $NewPlugin = new upload_properties;
-?>
