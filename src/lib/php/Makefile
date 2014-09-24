@@ -27,7 +27,6 @@ all: bootstrap
 
 # generate the postinstall script
 bootstrap: bootstrap-process_php
-	@php5 View/Renderer.php m;
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process

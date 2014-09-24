@@ -303,7 +303,7 @@ class FO_Plugin
    */
 
   /* Possible values: Text, HTML, or XML. */
-  var $OutputType = "Text";
+  var $OutputType = "HTML";
   var $OutputToStdout = 0;
 
   /**
@@ -360,9 +360,9 @@ class FO_Plugin
     }
     return;
   } // OutputOpen()
- 
+
   /**
-   * \brief This ends the output type
+   * \brief Similar to OutputClose, this ends the output type
    * for this object.  However, this does NOT change any global
    * settings.  This is called when this object is a dependency
    * for another object.
@@ -371,20 +371,19 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
     $V = "";
-    if ($this->OutputType=='HTML')
+    if ($this->OutputType=='XML')
     {
-      $V = "</xml>\n";
+      $V = "</xml>";
     }
     if (!$this->OutputToStdout)
     {
       return $V;
     }
     print $V;
-    return;
-  }
+  } // OutputUnSet()
 
   /**
    * \brief This function is called when user output is
@@ -400,29 +399,27 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return 0;
+      return (0);
     }
     $V = "";
     if ($this->OutputType=='HTML')
     {
-      $V = $this->outputHtml();
+      $this->vars['content'] = $this->htmlContent();
     }
     if (!$this->OutputToStdout)
     {
       return $V;
     }
     print $V;
-    return;
   }
 
   /**
    *
    * @return string
    */
-  function outputHtml()
+  protected function htmlContent()
   {
-    $html = "";
-    return $html;
+    return "";
   }
 
   public function getTemplateName()

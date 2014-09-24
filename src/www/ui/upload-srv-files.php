@@ -23,12 +23,15 @@ define("TITLE_upload_srv_files", _("Upload from Server"));
  * \brief upload files(directory) from server
  */
 class upload_srv_files extends FO_Plugin {
-  public $Name = "upload_srv_files";
-  public $Title = TITLE_upload_srv_files;
-  public $Version = "1.0";
-  public $MenuList = "Upload::From Server";
-  public $Dependency = array("agent_unpack");
-  public $DBaccess = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name = "upload_srv_files";
+    $this->Title = TITLE_upload_srv_files;
+    $this->MenuList = "Upload::From Server";
+    $this->Dependency = array("agent_unpack");
+    $this->DBaccess = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /** 
    * \brief chck if one file/dir has one permission
@@ -183,111 +186,88 @@ class upload_srv_files extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  protected function htmlContent() {
+    $SourceFiles = GetParm('sourcefiles', PARM_STRING);
+    $GroupNames = GetParm('groupnames', PARM_INTEGER);
+    $FolderPk = GetParm('folder', PARM_INTEGER);
+    $HostName = GetParm('host', PARM_STRING);
+    $Desc = GetParm('description', PARM_STRING); // may be null
+    $Name = GetParm('name', PARM_STRING); // may be null
+    $public = GetParm('public', PARM_TEXT); // may be null
+    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
     $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        $SourceFiles = GetParm('sourcefiles', PARM_STRING);
-        $GroupNames = GetParm('groupnames', PARM_INTEGER);
-        $FolderPk = GetParm('folder', PARM_INTEGER);
-        $HostName = GetParm('host', PARM_STRING);
-        $Desc = GetParm('description', PARM_STRING); // may be null
-        $Name = GetParm('name', PARM_STRING); // may be null
-        $public = GetParm('public', PARM_TEXT); // may be null
-        if (empty($public))
-          $public_perm = PERM_NONE;
-        else
-          $public_perm = PERM_READ;
-
-        if (!empty($SourceFiles) && !empty($FolderPk)) {
-          if (empty($HostName)) $HostName = "localhost";
-          $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm);
-          if (empty($rc)) {
-            // clear form fileds
-            $SourceFiles = NULL;
-            $GroupNames  = NULL;
-            $FolderPk    = NULL;
-            $Desc        = NULL;
-            $Name        = NULL;
-          }
-          else {
-            $text = _("Upload failed for");
-            $V.= displayMessage("$text $SourceFiles: $rc");
-          }
-        }
-        /* Display instructions */
-        $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
-        $V .= "<p><b>$text22</b><p>";
-
-        $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
-        $V.= _("This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n");
-        $V.= _("This option only uploads files located on the FOSSology web server.\n");
-        $V.= _("If your file is located elsewhere, then use one of the other upload options.\n");
-        /* Display the form */
-        $V.= "<form method='post'>\n"; // no url = this url
-        $V.= "<ol>\n";
-        $text = _("Select the folder for storing the upload:");
-        $V.= "<li>$text\n";
-        $V.= "<select name='folder'>\n";
-        //$V .= FolderListOption($FolderPk,0);
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select>\n";
-        $text = _("Select the directory or file(s) on the server to upload:");
-        $V.= "<p><li>$text<br />\n";
-        $hostlist = HostListOption();
-        if ($hostlist) { // if only one host, do not display it
-          $V.= "<select name='host'>\n";
-          $V.= $hostlist;
-          $V.= "</select>\n";
-        }
-        $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": Contents under a directory will be recursively included.");
-        $V.= "<strong>$text</strong>$text1\n";
-        $V.= _("'*' is supported to select multiple files (e.g. *.txt).\n");
-        $text = _("(Optional) Enter a description for this Upload:");
-        $V.= "<p><li>$text<br />\n";
-        $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
-        $text = _("(Optional) Enter a viewable name for this Upload:");
-        $V.= "<p><li>$text<br />\n";
-        $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name, ENT_QUOTES) . "' /><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If no name is provided, then the uploaded file name will be used.");
-        $V.= "<b>$text</b>$text1<P />\n";
-
-        $text1 = _("(Optional) Make Public");
-        $V.= "<li>";
-        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
-
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
-          $text = _("Select optional analysis");
-          $V.= "<li>$text<br />\n";
-          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-          $V.= AgentCheckBoxMake(-1, $Skip);
-        }
-        $V.= "</ol>\n";
-        $text = _("Upload");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
-        $V .= "<p><b>$text22</b><p>";
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    if (!empty($SourceFiles) && !empty($FolderPk)) {
+      if (empty($HostName)) $HostName = "localhost";
+      $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm);
+      if (empty($rc)) {
+        // clear form fileds
+        $SourceFiles = NULL;
+        $GroupNames  = NULL;
+        $FolderPk    = NULL;
+        $Desc        = NULL;
+        $Name        = NULL;
+      }
+      else {
+        $text = _("Upload failed for");
+        $this->vars['message'] = "$text $SourceFiles: $rc";
+      }
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
+    /* Display instructions */
+    $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+    $V .= "<p><b>$text22</b><p>";
+
+    $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
+    $V.= _("This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n");
+    $V.= _("This option only uploads files located on the FOSSology web server.\n");
+    $V.= _("If your file is located elsewhere, then use one of the other upload options.\n");
+    /* Display the form */
+    $V.= "<form method='post'>\n"; // no url = this url
+    $V.= "<ol>\n";
+    $text = _("Select the folder for storing the upload:");
+    $V.= "<li>$text\n";
+    $V.= "<select name='folder'>\n";
+    //$V .= FolderListOption($FolderPk,0);
+    $V.= FolderListOption(-1, 0);
+    $V.= "</select>\n";
+    $text = _("Select the directory or file(s) on the server to upload:");
+    $V.= "<p><li>$text<br />\n";
+    $hostlist = HostListOption();
+    if ($hostlist) { // if only one host, do not display it
+      $V.= "<select name='host'>\n";
+      $V.= $hostlist;
+      $V.= "</select>\n";
     }
-    print ("$V");
-    return;
+    $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
+    $text = _("NOTE");
+    $text1 = _(": Contents under a directory will be recursively included.");
+    $V.= "<strong>$text</strong>$text1\n";
+    $V.= _("'*' is supported to select multiple files (e.g. *.txt).\n");
+    $text = _("(Optional) Enter a description for this Upload:");
+    $V.= "<p><li>$text<br />\n";
+    $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
+    $text = _("(Optional) Enter a viewable name for this Upload:");
+    $V.= "<p><li>$text<br />\n";
+    $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name, ENT_QUOTES) . "' /><br />\n";
+    $text = _("NOTE");
+    $text1 = _(": If no name is provided, then the uploaded file name will be used.");
+    $V.= "<b>$text</b>$text1<P />\n";
+
+    $text1 = _("(Optional) Make Public");
+    $V.= "<li>";
+    $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
+
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+      $text = _("Select optional analysis");
+      $V.= "<li>$text<br />\n";
+      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $V.= AgentCheckBoxMake(-1, $Skip);
+    }
+    $V.= "</ol>\n";
+    $text = _("Upload");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+    $V .= "<p><b>$text22</b><p>";
+    return $V;
   }
-};
+}
 $NewPlugin = new upload_srv_files;
-?>
