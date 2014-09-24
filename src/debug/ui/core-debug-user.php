@@ -20,61 +20,41 @@ define("TITLE_debug_user", _("Debug User"));
 
 class debug_user extends FO_Plugin
 {
-  var $Name       = "debug_user";
-  var $Version    = "1.0";
-  var $Title      = TITLE_debug_user;
-  var $MenuList   = "Help::Debug::Debug User";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
-
-  /**
-   * \brief Generate output.
-   */
-  function Output()
+  function __construct()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    $V="";
+    $this->Name       = "debug_user";
+    $this->Title      = TITLE_debug_user;
+    $this->MenuList   = "Help::Debug::Debug User";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
+  
+  protected function htmlContent()
+  {
+    $V = "";
     global $PG_CONN;
-    switch($this->OutputType)
+      $sql = "SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $text = _("User Information");
+    $V .= "<H2>$text</H2>\n";
+    $V .= "<table border=1>\n";
+    $text = _("Field");
+    $text1 = _("Value");
+    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
+    foreach($R as $Key => $Val)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $sql = "SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $R = pg_fetch_assoc($result);
-        pg_free_result($result);
-        $text = _("User Information");
-        $V .= "<H2>$text</H2>\n";
-        $V .= "<table border=1>\n";
-        $text = _("Field");
-        $text1 = _("Value");
-        $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-        foreach($R as $Key => $Val)
-        {
-          if (empty($Key)) {
-            continue;
-          }
-          $V .= "<tr><td>" . htmlentities($Key) . "</td><td>" . htmlentities($Val) . "</td></tr>\n";
-        }
-        $V .= "</table>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      if (empty($Key)) {
+        continue;
+      }
+      $V .= "<tr><td>" . htmlentities($Key) . "</td><td>" . htmlentities($Val) . "</td></tr>\n";
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
-  } // Output()
+    $V .= "</table>\n";
 
-};
+    return $V;
+  }
+}
 $NewPlugin = new debug_user;
 $NewPlugin->Initialize();
-?>

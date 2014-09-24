@@ -20,11 +20,14 @@ define("TITLE_core_debug_fileloc", _("Global Variables"));
 
 class core_debug_fileloc extends FO_Plugin
 {
-  var $Name       = "debug-fileloc";
-  var $Title      = TITLE_core_debug_fileloc;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::Global Variables";
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "debug-fileloc";
+    $this->Title      = TITLE_core_debug_fileloc;
+    $this->MenuList   = "Help::Debug::Global Variables";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief This is where we check for
@@ -50,64 +53,36 @@ class core_debug_fileloc extends FO_Plugin
   /**
    * \brief Display the loaded menu and plugins.
    */
-  function Output()
+  protected function htmlContent()
   {
     global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $LOGDIR,
     $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $SVN_REV;
     $varray = array("BINDIR", "LIBDIR", "LIBEXECDIR", "INCLUDEDIR", "LOGDIR",
            "SYSCONFDIR", "PROJECTSTATEDIR", "PROJECT", "VERSION", "SVN_REV");
-
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    $V="";
     global $MenuList;
-    switch($this->OutputType)
+    $V = "";
+    $text = _(" Variable");
+    $var1 = _("memory_limit");
+    $val1 = ini_get('memory_limit');
+    $var2 = _("post_max_size");
+    $val2 = ini_get('post_max_size');
+    $var3 = _("upload_max_filesize");
+    $val3 = ini_get('upload_max_filesize');
+
+    $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>&nbsp";
+    foreach ($varray as $var)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $text = _(" Variable");
-    /**
-     *  Collect the various file upload values
-     **/
-        $var1 = _("memory_limit");
-        $val1 = ini_get('memory_limit');
-
-        $var2 = _("post_max_size");
-        $val2 = ini_get('post_max_size');
-
-        $var3 = _("upload_max_filesize");
-        $val3 = ini_get('upload_max_filesize');
-
-        $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>&nbsp";
-        foreach ($varray as $var)
-        $V .= "<tr><td>$var</td><td>&nbsp;</td><td>". $$var ."</td></tr>";
-    /**
-     * Display the file upload php settings following a blank row/line
-     */
-        $V .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
-        $V .= "<tr><td>$var1</td><td>&nbsp;</td><td>$val1</td></tr>";
-        $V .= "<tr><td>$var2</td><td>&nbsp;</td><td>$val2</td></tr>";
-        $V .= "<tr><td>$var3</td><td>&nbsp;</td><td>$val3</td></tr>";
-
-        $V .= "</table>";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V .= "<tr><td>$var</td><td>&nbsp;</td><td>" . $$var . "</td></tr>";
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
-  } // Output()
+    $V .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+    $V .= "<tr><td>$var1</td><td>&nbsp;</td><td>$val1</td></tr>";
+    $V .= "<tr><td>$var2</td><td>&nbsp;</td><td>$val2</td></tr>";
+    $V .= "<tr><td>$var3</td><td>&nbsp;</td><td>$val3</td></tr>";
 
+    $V .= "</table>";
+    return $V;
+  }
 
-};
+}
 $NewPlugin = new core_debug_fileloc;
 $NewPlugin->Initialize();
-
-?>
