@@ -11,12 +11,10 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef MONK_AGENT_MONK_H
 #define MONK_AGENT_MONK_H
 
-#define AGENT_NAME "copyright" ///< the name of the agent, used to get agent key
-#define AGENT_DESC "copyright agent" ///< what program this is
-#define AGENT_ARS  "copyright_ars"
 
-#include "copyrightState.hpp"
-#include "regTypes.hpp"
+
+#include "copyrightUtils.hpp"
+
 
 extern "C"  {
 #include "libfossagent.h"

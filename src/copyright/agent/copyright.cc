@@ -10,133 +10,14 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include <stdio.h>
 
-extern "C"{
-#include "libfossology.h"
-}
+
 
 #include <iostream>
 #include "copyright.hpp"
-#include "files.hpp"
 
 using namespace std;
 
 
-
-class File {
-public:
-  long id;
-  char* fileName;
-
-  File() :id(0), fileName(NULL) {}
-
-  ~File(){
-    if(fileName!=NULL)
-      free(fileName);
-  }
-};
-
-void queryAgentId(int& agent, PGconn* dbConn) {
-  char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
-  char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
-  char* agentRevision;
-  if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV)) {
-    exit(-1);
-  };
-
-  int agentId = fo_GetAgentKey(dbConn,
-                     AGENT_NAME, 0, agentRevision, AGENT_DESC);
-  free(agentRevision);
-
-  if (agentId > 0)
-    agent = agentId;
-  else
-    exit(1);
-}
-
-void bail(CopyrightState* state, int exitval) {
-  delete(state->getDbManager());
-  delete(state);
-  fo_scheduler_disconnect(exitval);
-  exit(exitval);
-}
-
-CopyrightState* getState(DbManager* dbManager, int verbosity){
-  int agentID;
-  queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity);
-}
-
-vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< RegexMatcher > matchers ) {
-  vector<CopyrightMatch> result;
-
-  typedef  std::vector< RegexMatcher >::const_iterator rgm;
-  for (rgm item = matchers.begin(); item != matchers.end(); ++item){
-    vector<CopyrightMatch>  newMatch = item->match(content);
-    result.insert(result.end(), newMatch.begin(), newMatch.end() ) ;
-  }
-
-  return result;
-}
-
-
-void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) {
-  typedef vector<CopyrightMatch>::const_iterator cpm;
-  for (cpm it=matches.begin(); it!=matches.end(); ++it ){
-    const CopyrightMatch& match = *it;
-
-    cout << "pFileId=" << pFileId << " has " << match.getType() << ": " << match.content() << endl;
-  }
-};
-
-void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
-  File* file = new File();
-  file->id = pFileId;
-
-  char* pFile = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
-
-  if(!pFile) {
-    cout << "File not found " << pFileId << endl;
-    bail(state, 8);
-  }
-
-  file->fileName = fo_RepMkPath("files", pFile);
-
-  if (file->fileName != NULL) {
-    // cout << "reading " << file->fileName << endl;
-    string fileContent = fo::getStringFromFile(file->fileName,-1);
-    vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
-
-    saveToDatabase(matches, state, pFileId);
-  }
-
-  free(pFile);
-  delete(file);
-}
-
-
-bool processUploadId (CopyrightState* state, int uploadId) {
-  PGresult* fileIdResult = queryFileIdsForUpload(state->getDbManager()->getStruct_dbManager(), uploadId);
-
-  if (PQntuples(fileIdResult) == 0) {
-    PQclear(fileIdResult);
-    fo_scheduler_heart(0);
-    return false;
-  }
-
-  int count = PQntuples(fileIdResult);
-  for (int i = 0; i < count; i++) {
-    long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
-
-    if (pFileId <= 0)
-      continue;
-
-    matchPFileWithLicenses(state, pFileId);
-
-    fo_scheduler_heart(1);
-  }
-
-  return true;
-}
 
 int main(int argc, char** argv) {
   /* before parsing argv and argc make sure */
