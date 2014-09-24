@@ -20,8 +20,8 @@
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\View\Renderer;
 use Fossology\Lib\Util\DataTablesUtility;
+use Fossology\Lib\View\Renderer;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
@@ -82,6 +82,7 @@ class browseProcessPost extends FO_Plugin
 
     $columnName = GetParm('columnName', PARM_STRING);
     $uploadId = GetParm('uploadId', PARM_INTEGER);
+    $statusId = GetParm('statusId', PARM_INTEGER);
     $value = GetParm('value', PARM_INTEGER);
     $moveUpload = GetParm("move", PARM_INTEGER);
     $beyondUpload = GetParm("beyond", PARM_INTEGER);
@@ -95,24 +96,23 @@ class browseProcessPost extends FO_Plugin
     {
       $this->moveUploadBeyond($moveUpload, $beyondUpload);
     }
-    else if(!empty($uploadId) and !empty($direction)) {
+    else if(!empty($uploadId) && !empty($direction)) {
       $this->moveUploadToInfinity($uploadId,$direction=='top');
     }
-    else if($this->userPerm>=1 && !empty($uploadId) and !empty($commentText)) {
-      $this->rejector($uploadId,$commentText);
+    else if(!empty($uploadId) && !empty($commentText) && !empty($statusId)) {
+      $this->setStatusAndComment($uploadId,$statusId,$commentText);
     }
     else {
       $folder = GetParm('folder', PARM_STRING);
       $show = GetParm('show', PARM_STRING);
       header('Content-type: text/json');
       list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->ShowFolderGetTableData($folder , $show);
-      print(json_encode(array(
+      return json_encode(array(
               'sEcho' => intval($_GET['sEcho']),
               'aaData' =>$aaData,
               'iTotalRecords' =>$iTotalRecords,
               'iTotalDisplayRecords' => $iTotalDisplayRecords
           )
-      )
       );
     }
   }
@@ -138,7 +138,7 @@ class browseProcessPost extends FO_Plugin
   private function changeStatus($uploadId, $value){
     if($value==4 && $this->userPerm)
     {
-      $this->rejector($uploadId, $commentText = '');
+      $this->setStatusAndComment($uploadId, $value, $commentText = '');
     }
     else if($value==4) {
       throw new Exception('missing permission');
@@ -294,9 +294,9 @@ class browseProcessPost extends FO_Plugin
     {
       $currentAssignee = array_key_exists($Row['assignee'], $users) ? $users[$Row['assignee']] : _('Unassigned');
     }
-    $rejectableUploadId = $this->userPerm ? $uploadPk : 0;
-    $tupleIdRejectWhoWhy = array($rejectableUploadId, 4==$Row['status_fk'], $Row['who_id']?$users[$Row['who_id']]:null, $Row['reason']);
-    $output = array($nameColumn, $currentStatus, $tupleIdRejectWhoWhy, $currentAssignee, $dateCol, $pairIdPrio);
+    $rejectableUploadId = ($this->userPerm || $Row['status_fk'] < 4) ? $uploadPk : 0;
+    $tripleComment = array($rejectableUploadId, $Row['status_fk'], htmlspecialchars($Row['status_comment']));
+    $output = array($nameColumn, $currentStatus, $tripleComment, $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
 
@@ -320,13 +320,10 @@ class browseProcessPost extends FO_Plugin
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
         AND lft IS NOT NULL
-        LEFT JOIN upload_rejected ON upload_rejected.upload_fk=upload_pk
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
 
-    $statementString =  "SELECT upload.*,uploadtree.*,"
-        . "upload_rejected.reason,upload_rejected.user_fk who_id $unorderedQuery
-        $filter $orderString";
+    $statementString =  "SELECT upload.*,uploadtree.* $unorderedQuery $filter $orderString";
     $params = $this->filterParams;
     $params[] = $offset;
     $statementString .= ' OFFSET $'.count($params);
@@ -383,16 +380,15 @@ class browseProcessPost extends FO_Plugin
   }
 
   
-  private function rejector($uploadId, $commentText)
+  private function setStatusAndComment($uploadId, $statusId, $commentText)
   {
-    $this->dbManager->begin();
-    $sql = "UPDATE upload SET status_fk=$1 WHERE upload_pk=$2";
-    $this->dbManager->getSingleRow($sql,array(4, $uploadId),$stmt=__METHOD__.'.status');
-    $this->dbManager->getSingleRow($sql='DELETE FROM upload_rejected WHERE upload_fk=$1',array( $uploadId),
-            $stmt=__METHOD__.'.delete.rejecthistory');
-    $sql = "INSERT INTO upload_rejected (upload_fk,reason,user_fk) VALUES ($1,$2,$3)";
-    $this->dbManager->getSingleRow($sql,array($uploadId, $commentText, $_SESSION['UserId']),$stmt=__METHOD__.'.rejected');
-    $this->dbManager->commit();
+    print_r("$statusId, $commentText, $uploadId");
+    $sql = "UPDATE upload SET status_fk=$1, status_comment=$2 WHERE upload_pk=$3";
+    $this->dbManager->getSingleRow($sql,array($statusId, $commentText, $uploadId),$stmt=__METHOD__);
+    $sel = $this->dbManager->getSingleRow("select status_comment from upload where upload_pk=$1",array($uploadId),$stmt=__METHOD__.'.question');
+    print_r('#'.$sel['status_comment']);
+    
+    // do we need to log $_SESSION['UserId'] ?
   }
 
   public function moveUploadToInfinity($uploadId, $top)

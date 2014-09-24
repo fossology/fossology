@@ -21,6 +21,8 @@ namespace Fossology\Lib\Data;
 
 
 class ClearingDecisionData {
+
+
   /**
    * @var bool
    */

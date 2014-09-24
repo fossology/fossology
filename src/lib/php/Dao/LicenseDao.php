@@ -166,11 +166,11 @@ class LicenseDao extends Object
    * @param $selectedAgentId
    * @return array
    */
-  public function getLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId=null, $filterLicenses=array('VOID'))//'No_license_found',
+  public function getTopLevelLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
-    $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
+    $param = array($fileTreeBounds->getUploadTreeId());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
@@ -183,11 +183,12 @@ class LicenseDao extends Object
            max(agent_pk) as agent_id,
            rf_match_pct as match_percentage
          FROM license_file_ref
-         INNER JOIN $uploadTreeTableName utree ON license_file_ref.pfile_fk=utree.pfile_fk
-         INNER JOIN agent ON agent_fk=agent_pk
-         WHERE utree.upload_fk=$1 and utree.lft BETWEEN $2 and $3
-           AND license_file_ref.pfile_fk=utree.pfile_fk
-            $noLicenseFoundStmt";
+         INNER JOIN $uploadTreeTableName utree ON license_file_ref.pfile_fk = utree.pfile_fk
+         INNER JOIN agent ON agent_fk = agent_pk
+         WHERE parent = $1
+           AND license_file_ref.pfile_fk = utree.pfile_fk
+           $noLicenseFoundStmt";
+
     if (!empty($selectedAgentId)){
       $sql .= " AND agent_pk=$4";
       $param[] = $selectedAgentId;
@@ -209,11 +210,12 @@ class LicenseDao extends Object
 
   public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
   {
-    $statementName = __METHOD__ . '.' . $fileTreeBounds->getUploadTreeTableName() . ".$orderStatement.$agentId";
+    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref RIGHT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND uploadtree.lft BETWEEN $2 and $3";
+         FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
+         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
     if (!empty($agentId))
     {
       $sql .= ' AND agent_fk=$4';

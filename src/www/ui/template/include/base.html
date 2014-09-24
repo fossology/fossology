@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    {% block head %}
+    {% include "include/head.html" %}
+    <title>{% block title %}{{ title }}{% endblock %}</title>
+    {{ metadata }}
+    {{ styles }}
+    {% endblock %}
+</head>
+<body>
+{% block menu %}
+{{ menu }}
+{% endblock %}
+
+{% block content %}
+{{ content }}
+{% endblock %}
+
+{% block foot %}
+{% include "include/foot.html" %}
+{% endblock %}
+</body>
+</html>

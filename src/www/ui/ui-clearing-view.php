@@ -31,54 +31,29 @@ define("TITLE_clearingView", _("Change concluded License "));
 
 class ClearingView extends FO_Plugin
 {
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-  /**
-   * @var ClearingDao;
-   */
+  /** @var ClearingDao */
   private $clearingDao;
-  /**
-   * @var LicenseProcessor
-   */
+  /** @var LicenseProcessor */
   private $licenseProcessor;
-  /**
-   * @var ChangeLicenseUtility
-   */
+  /** @var ChangeLicenseUtility */
   private $changeLicenseUtility;
-  /**
-   * @var LicenseOverviewPrinter
-   */
+  /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-  /**
-   * @var HighlightDao
-   */
+  /** @var HighlightDao */
   private $highlightDao;
-
-  /**
-   * @var HighlightProcessor
-   */
+  /** @var HighlightProcessor */
   private $highlightProcessor;
-
-  /**
-   * @var LicenseRenderer
-   */
+  /** @var LicenseRenderer */
   private $licenseRenderer;
-
-  /**
-   * @var array colorMapping
-   */
+  /* @var Twig_Environment */
+  private $renderer;
+  /** @var array colorMapping */
   var $colorMapping;
 
   function __construct()
@@ -102,6 +77,7 @@ class ClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
+    $this->renderer = $container->get('twig.environment');
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -173,29 +149,7 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
-
-
-
-  /**
-   * @param $uploadTreeId
-   * @return array of clearingHistory
-   */
-  private function createClearingHistoryTable($uploadTreeId)
-  {
-    global $SysConf;
-    $user_pk = $SysConf['auth']['UserId'];
-    $tableName = "clearingHistoryTable";
-    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-
-
-    return $this->changeLicenseUtility->printClearingTable($tableName, $clearingDecWithLicenses, $user_pk);
-  }
-
-
-
-
-
-
+  
   private function createClearingFormAndButtons($uploadId,$uploadTreeId){
 
     $text = _("Audit License");
@@ -205,8 +159,6 @@ class ClearingView extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
     if ($permission >= PERM_WRITE)
     {
-      $text = _("You do have write (or above permission) on this upload, thus you can change the license of this file.");
-      $output .= "<b>$text</b>";
 
       $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
       $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
@@ -224,20 +176,8 @@ class ClearingView extends FO_Plugin
     return $output;
   }
 
-  private function createWrappedClearingHistoryTable($uploadId,$uploadTreeId) {
-    $permission = GetUploadPerm($uploadId);
-     if ($permission >= PERM_WRITE)
-    {
-      $text = _("Clearing History:");
-      $output = "<h3>$text</h3>";
-      $output .= $this->createClearingHistoryTable($uploadTreeId);
-      return $output;
-    }
-    return "";
-  }
 
-
-  function OutputOpen($Type, $ToStdout)
+  function OutputOpen(&$vars)
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
@@ -266,7 +206,7 @@ class ClearingView extends FO_Plugin
 
       header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
     }
-    return parent::OutputOpen($Type, $ToStdout);
+    return parent::OutputOpen($vars);
   }
 
 
@@ -279,33 +219,26 @@ class ClearingView extends FO_Plugin
     {
       return;
     }
-    global $Plugins;
-    /**
-     * @var $view ui_view
-     */
-    $view = & $Plugins[plugin_find_id("view")];
-
     $licenseShortname = GetParm("lic", PARM_TEXT);
     if (!empty($licenseShortname)) // display the detailed license text of one license
     {
       $this->ViewLicenseText($licenseShortname);
       return;
     }
-
     $uploadId = GetParm("upload", PARM_INTEGER);
-
     if (empty($uploadId))
     {
       return;
     }
-
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {
       return;
     }
-
-
+    
+    global $Plugins;
+    /** @var $view ui_view */
+    $view = & $Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $folder = GetParm("folder", PARM_INTEGER);
@@ -320,11 +253,10 @@ class ClearingView extends FO_Plugin
 
     $hasHighlights = count($highlights) > 0;
 
-    $output = "";
     /* Get uploadtree table name */
     $uploadTreeTableName = GetUploadtreeTablename($uploadId);
 
-    $output .= Dir2Browse('license', $uploadTreeId, NULL, 1, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
+    $output = Dir2Browse('license', $uploadTreeId, NULL, 0, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
@@ -333,42 +265,31 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
     $licenseInformation .= "<br>";
     $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-   // $licenseInformation .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);
-    $licenseInformation .= $this->createWrappedClearingHistoryTable($uploadId,$uploadTreeId);
-    list($pageMenu,$text) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
+    
+    $permission = GetUploadPerm($uploadId);
+    $clearingHistory = '';
+    if ($permission >= PERM_WRITE)
+    {
+      global $SysConf;
+      $user_pk = $SysConf['auth']['UserId'];
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $user_pk);
+    }
 
+    list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
-    $buttons = "<button class=\"legendHider\">"._("Hide Legend")."</button><button class=\"legendShower\">"._("Show Legend")."</button>";
-
-    $output .= "<div id='leftrightalignment' name='leftrightalignment'  >".
-         "<table  border='0' padding='0px' style='height: 100%; width: 100%'>
-            <tr>
-             <td  padding='0px' style='position:relative; height: 100%; maxWidth:70%; width:50%'>
-                <div class='centered'>$pageMenu $buttons</div>
-                <div class='boxnew'>$text</div>$legendBox
-              </td>
-              <td class='headerBox'>
-                 <div>$licenseInformation</div>
-              </td>
-            </tr>
-        </table>
-      </div>";
-
-    $output .= $this->createJavaScriptBlock();
-    print $output;
+    $this->vars['path'] = $output;
+    $this->vars['pageMenu'] = $pageMenu;
+    $this->vars['textView'] = $textView;
+    $this->vars['legendBox'] = $legendBox;
+    $this->vars['licenseInformation'] = $licenseInformation;
+    $this->vars['clearingHistory'] = $clearingHistory;
   }
 
-
-  private function createJavaScriptBlock()
+  public function getTemplateName()
   {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/change-license-common.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/change-license-view.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/tools.js\" type=\"text/javascript\"></script>\n";
-    return $output;
+    return "view_license.html";
   }
 
 
@@ -389,8 +310,6 @@ class ClearingView extends FO_Plugin
     }
     return $header;
   }
-
-
 
   /**
  * \brief Customize submenus.
@@ -414,10 +333,8 @@ class ClearingView extends FO_Plugin
 
     menu_insert("ChangeLicense::[BREAK]",4);
 
-
-
-
     return 0;
   } // RegisterMenus()
 }
+
 $NewPlugin = new ClearingView;

@@ -23,9 +23,9 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 
 /**
  * \file ui-browse-license.php
@@ -90,6 +90,7 @@ class ui_browse_license extends FO_Plugin
     $this->licenseRenderer = $container->get('view.license_renderer');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
+    $this->renderer = $container->get('twig.environment');
     parent::__construct();
   }
 
@@ -194,7 +195,7 @@ class ui_browse_license extends FO_Plugin
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uploadtree_pk, $Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -264,7 +265,7 @@ class ui_browse_license extends FO_Plugin
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
+      $this->vars['content'] = "<h2>$text<h2>";
       return;
     }
 
@@ -278,11 +279,6 @@ class ui_browse_license extends FO_Plugin
 
     if (empty($V)) // no cache exists
     {
-      switch ($this->OutputType)
-      {
-        case "XML":
-          break;
-        case "HTML":
           /* Show the folder path */
           $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 
@@ -293,50 +289,28 @@ class ui_browse_license extends FO_Plugin
             $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
           }
 
-          $V .= $this->createJavaScriptBlock();
-          break;
-        case "Text":
-          break;
-        default:
-      }
-
       $Cached = false;
     } else
       $Cached = true;
 
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    print "$V";
+    $this->vars['content'] = $V;
+
     $Time = microtime(true) - $uTime; // convert usecs to secs
     $text = _("Elapsed time: %.3f seconds");
-    printf("<br/><small>$text</small>", $Time);
+    $this->vars['content'] .= sprintf("<br/><small>$text</small>", $Time);
 
     if ($Cached)
     {
       $text = _("cached");
       $text1 = _("Update");
-      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $this->vars['content'] .= " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     } else
     {
       /*  Cache Report if this took longer than 1/2 second */
       if ($Time > 0.5)
         ReportCachePut($CacheKey, $V);
     }
-    return "";
-  }
-
-  private function createJavaScriptBlock()
-  {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
-    $output .= "<script src='scripts/change-license-common.js' type='text/javascript'></script>\n";
-    $output .= "<script src='scripts/change-license-browse.js' type='text/javascript'></script>\n";
-    $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
-    return $output;
+    return;
   }
 
   /**
@@ -364,20 +338,21 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * @param $uploadTreeId
    * @param $Uri
    * @param $tagId
    * @param FileTreeBounds $fileTreeBounds
    * @param $ModLicView
    * @param $UniqueTagArray
    * @param $selectedAgentId
+   * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($uploadTreeId, $Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
+  public function createFileListing($Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $fileTreeBounds->getUploadId();
+    $uploadTreeId = $fileTreeBounds->getUploadTreeId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
     $newestNomos=$this->getNewestAgent("nomos");
@@ -389,7 +364,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $AddInfoText = "";
-    $pfileLicenses = $this->licenseDao->getLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
+    $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
     $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($fileTreeBounds);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
@@ -682,9 +657,7 @@ class ui_browse_license extends FO_Plugin
 
   /**
    * @param $scannerAgents
-   * @param $dbManager
    * @param $uploadId
-   * @param $allScans
    * @return array
    */
   private function createHeader($scannerAgents, $uploadId)
@@ -757,6 +730,12 @@ class ui_browse_license extends FO_Plugin
     }
     return array($V, $allScans);
   }
+
+  public function getTemplateName()
+  {
+    return "browse_license.html";
+  }
+
 
 }
 

@@ -42,7 +42,7 @@
  \todo This function is not checking if the agent is enabled.  And it is not setting 
        agent version when an agent record is inserted.
  */
-FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, char *rev, char *agent_desc)
+FUNCTION int fo_GetAgentKey(PGconn *pgConn, const char * agent_name, long Upload_pk, const char *rev, const char *agent_desc)
 {
   int Agent_pk=-1;    /* agent identifier */
   char sql[256];
@@ -91,7 +91,7 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, char * agent_name, long Upload_pk, c
          On sql failure, return 0, and the error will be written to stdout.
  */
 FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
-                         char *tableName, char *ars_status, int ars_success)
+                         const char *tableName, const char *ars_status, int ars_success)
 {
   char sql[1024];
   PGresult *result;
@@ -149,7 +149,7 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
 
  \return 0 on failure
  */
-FUNCTION int fo_CreateARSTable(PGconn *pgConn, char *tableName)
+FUNCTION int fo_CreateARSTable(PGconn *pgConn, const char *tableName)
 {
   char sql[1024];
   PGresult *result;

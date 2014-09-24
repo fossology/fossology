@@ -97,10 +97,10 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
     $this->pfileId=10;
     $this->userName="tester";
     $this->userId=11;
-    $this->type="To be determined";
+    $this->type = ClearingDecision::TO_BE_DISCUSSED;
     $this->comment="Test comment";
     $this->reportinfo ="Test reportinfo";
-    $this->scope="upload";
+    $this->scope = LicenseDecision::SCOPE_UPLOAD;
     $this->date_added = "2012-07-08 11:14:15.638276";
   }
 

@@ -1,56 +1,63 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
-use Fossology\Lib\Db\DbManager;
 
 define("TITLE_ui_menu", _("Menus"));
 
 class ui_menu extends FO_Plugin
 {
-  var $Name       = "menus";
-  var $Title      = TITLE_ui_menu;
-  var $Version    = "1.0";
+  var $Name = "menus";
+  var $Title = TITLE_ui_menu;
+  var $Version = "1.0";
   var $MenuTarget = "treenav";
-  var $LoginFlag  = 0;
+  var $LoginFlag = 0;
 
-  var $_CSSdone   = 0; /* has the CSS been displayed? */
+  var $_CSSdone = 0; /* has the CSS been displayed? */
+
+  const FULL_MENU_DEBUG = 'fullmenudebug';
 
   function PostInitialize()
   {
     global $Plugins;
-    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    if ($this->State != PLUGIN_STATE_VALID)
+    {
+      return (0);
+    } // don't run
     // Make sure dependencies are met
-    foreach($this->Dependency as $key => $val)
+    foreach ($this->Dependency as $key => $val)
     {
       $id = plugin_find_id($val);
-      if ($id < 0) { Destroy(); return(0); }
+      if ($id < 0)
+      {
+        Destroy();
+        return (0);
+      }
     }
-     
+
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Upload",70);
-    menu_insert("Main::Jobs",60);
-    menu_insert("Main::Organize",50);
-    menu_insert("Main::Help",-1);
-    menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://www.fossology.org/projects/fossology/wiki/User_Documentation'>Documentation</a>");
+    menu_insert("Main::Upload", 70);
+    menu_insert("Main::Jobs", 60);
+    menu_insert("Main::Organize", 50);
+    menu_insert("Main::Help", -1);
+    menu_insert("Main::Help::Documentation", 0, NULL, NULL, NULL, "<a href='http://www.fossology.org/projects/fossology/wiki/User_Documentation'>Documentation</a>");
 
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
-    return($this->State == PLUGIN_STATE_READY);
+    return ($this->State == PLUGIN_STATE_READY);
   }
 
   /**
@@ -65,7 +72,7 @@ class ui_menu extends FO_Plugin
     $V = "";
     $V .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $V .= "<ul id='menu-$Indent'>\n";
-    
+
     foreach ($Menu as $M)
     {
       $V .= '<li>';
@@ -75,7 +82,7 @@ class ui_menu extends FO_Plugin
         $V .= $M->HTML;
       } else /* create HTML */
       {
-        $V .= $this->createHtmlFromMenuEntry($M,$Indent);
+        $V .= $this->createHtmlFromMenuEntry($M, $Indent);
       }
 
       if (!empty($M->SubMenu))
@@ -86,12 +93,13 @@ class ui_menu extends FO_Plugin
     $V .= "</ul>\n";
     $V .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
     $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $V);
-    return($NewV);
+    return ($NewV);
   }
 
 
-  function createHtmlFromMenuEntry($M,$Indent)
+  function createHtmlFromMenuEntry($M, $Indent)
   {
+    $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
     $V = "";
     if (!empty($M->URI))
     {
@@ -104,25 +112,23 @@ class ui_menu extends FO_Plugin
       {
         $V .= '" target="' . $M->Target . '">';
       }
-      if (@$_SESSION['fullmenudebug'] == 1)
+      if ($isFullMenuDebug)
       {
         $V .= $M->FullName . "(" . $M->Order . ")";
       } else
       {
         $V .= $M->Name;
       }
-    }
-    else
+    } else
     {
       $V .= '<a href="#">';
       if (empty($M->SubMenu))
       {
         $V .= "<font color='#C0C0C0'>";
-        if (@$_SESSION['fullmenudebug'] == 1)
+        if ($isFullMenuDebug)
         {
           $V .= $M->FullName . "(" . $M->Order . ")";
-        }
-        //else { $V .= $M->Name; }
+        } //else { $V .= $M->Name; }
         else
         {
           $V .= '';
@@ -130,7 +136,7 @@ class ui_menu extends FO_Plugin
         $V .= "</font>";
       } else
       {
-        if (@$_SESSION['fullmenudebug'] == 1)
+        if ($isFullMenuDebug)
         {
           $V .= $M->FullName . "(" . $M->Order . ")";
         } else
@@ -147,27 +153,24 @@ class ui_menu extends FO_Plugin
     $V .= "</a>\n";
     return $V;
   }
-  
-  
-  
-  
-  
-  
-  
+
 
   /**
    * \brief Create the output CSS.
    */
   function OutputCSS()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      return (0);
+    }
     $V = "";
 
     $V .= "<style type=\"text/css\">\n";
     /* Depth 0 is special: position is relative, colors are blue */
     $Depth = 0;
     $Label = "";
-    $Menu = menu_find("Main",$MenuDepth);
+    $Menu = menu_find("Main", $MenuDepth);
     $Border = "border-color:#CCC #CCC #CCC #CCC; border-width:1px 1px 1px 1px;";
     $Padding = "padding:4px 0px 4px 4px;";
     $FOSScolor1 = "#c50830";
@@ -235,7 +238,7 @@ class ui_menu extends FO_Plugin
     }
 
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
-    for( ; $Depth < $MenuDepth; $Depth++)
+    for (; $Depth < $MenuDepth; $Depth++)
     {
       $V .= "\n/* CSS for Depth $Depth */\n";
       $V .= $Label . " ul#menu-" . $Depth . "\n";
@@ -263,7 +266,7 @@ class ui_menu extends FO_Plugin
     /** csshover.htc provides ":hover" support for IE **/
     $V .= "body { behavior:url(csshover.htc); }\n";
     /** table definition needed to get rid of extra space under items **/
-    for($i=1; $i < $MenuDepth; $i++)
+    for ($i = 1; $i < $MenuDepth; $i++)
     {
       $V .= "#menu-$i table {height:0px; border-collapse:collapse; margin:0; padding:0; }\n";
       $V .= "#menu-$i td {height:0px; border:none; margin:0; padding:0; }\n";
@@ -272,96 +275,91 @@ class ui_menu extends FO_Plugin
     $V .= "<![endif]-->\n";
 
     $this->_CSSdone = 1;
-    return($V);
+    return ($V);
   } // OutputCSS()
 
   /**
    * \brief Create the output.
    */
-  function Output($Title=NULL)
+  function Output($Title = NULL)
   {
     global $SysConf;
 
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    $V="";
-    if (empty($Title)) { $Title = _("Welcome to FOSSology"); }
-    switch($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
-      case "XML":
-        break;
-      case "HTML":
-        /* Banner Message? */
-        if (@$SysConf['SYSCONFIG']['BannerMsg'])
-        {
-          $V .= "<h4 style='background-color:#ffbbbb'>" . $SysConf['SYSCONFIG']['BannerMsg'] . "</h4>";
-        }
-
-        if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
-        $Menu = menu_find("Main",$MenuDepth);
-
-        /** Same height at FOSSology logo **/
-        $V .= "<table border=0 width='100%'>";
-        $V .= "<tr>";
-        /* custom or default logo? */
-        if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-        {
-          $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
-          $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
-        }
-        else
-        {
-          $LogoLink = 'http://fossology.org';
-          //$LogoImg = Traceback_uri() ."images/fossology-logo.gif";
-          $LogoImg = "images/fossology-logo.gif";
-        }
-
-        $V .= "<td width='150' rowspan='2'><a href='$LogoLink' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$LogoImg' border=0></a></td>";
-
-        $V .= "<td colspan='2'>";
-        $V .= $this->menu_html($Menu,0);
-        $V .= "</td>";
-        $V .= "</tr><tr>";
-        $V .= "<td>";
-        $V .= "<font size='+2'><b>$Title</b></font>";
-        $V .= "</td>";
-
-        $V .= "<td align='right' valign='bottom'>";
-        /* Handle login information */
-        if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
-        {
-          if ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"))
-          {
-            $text = _("login");
-            $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
-          }
-          else
-          {
-            $V .= $this->createHtmlFromUser();
-          }
-
-          /* Use global system SupportEmail variables, if addr and label are set */
-          if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
-          {
-            $V .= " | ";
-            $V .= "<small><a href='mailto:" . $SysConf['SYSCONFIG']['SupportEmailAddr'] . "?subject=" . $SysConf['SYSCONFIG']['SupportEmailSubject'] . "'>" . $SysConf['SYSCONFIG']['SupportEmailLabel'] . "</a>";
-          }
-        }
-        $V .= "</td>";
-        $V .= "</tr>";
-        $V .= "</table>";
-        $V .= "<hr />";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      return (0);
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
-    return;
+    $V = "";
+    if (empty($Title))
+    {
+      $Title = _("Welcome to FOSSology");
+    }
+    /* Banner Message? */
+    if (@$SysConf['SYSCONFIG']['BannerMsg'])
+    {
+      $V .= "<h4 style='background-color:#ffbbbb'>" . $SysConf['SYSCONFIG']['BannerMsg'] . "</h4>";
+    }
+
+    $Menu = menu_find("Main", $MenuDepth);
+
+    /** Same height at FOSSology logo **/
+    $V .= "<table border=0 width='100%'>";
+    $V .= "<tr>";
+    /* custom or default logo? */
+    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
+    {
+      $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
+      $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
+    } else
+    {
+      $LogoLink = 'http://fossology.org';
+      //$LogoImg = Traceback_uri() ."images/fossology-logo.gif";
+      $LogoImg = "images/fossology-logo.gif";
+    }
+
+    $V .= "<td width='150' rowspan='2'><a href='$LogoLink' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$LogoImg' border=0></a></td>";
+
+    $V .= "<td colspan='2'>";
+    $V .= $this->menu_html($Menu, 0);
+    $V .= "</td>";
+    $V .= "</tr><tr>";
+    $V .= "<td>";
+    $V .= "<font size='+2'><b>$Title</b></font>";
+    $V .= "</td>";
+
+    $V .= "<td align='right' valign='bottom'>";
+    /* Handle login information */
+    if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
+    {
+      if ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"))
+      {
+        $text = _("login");
+        $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
+      } else
+      {
+        $V .= $this->createHtmlFromUser();
+      }
+
+      /* Use global system SupportEmail variables, if addr and label are set */
+      if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
+      {
+        $V .= " | ";
+        $V .= "<small><a href='mailto:" . $SysConf['SYSCONFIG']['SupportEmailAddr'] . "?subject=" . $SysConf['SYSCONFIG']['SupportEmailSubject'] . "'>" . $SysConf['SYSCONFIG']['SupportEmailLabel'] . "</a>";
+      }
+    }
+    $V .= "</td>";
+    $V .= "</tr>";
+    $V .= "</table>";
+    $V .= "<hr />";
+    if (!$this->OutputToStdout)
+    {
+      return ($V);
+    }
+    return $V;
   }
-  
-  function createHtmlFromUser(){
+
+  function createHtmlFromUser()
+  {
     global $container;
     $dbManager = $container->get("db.manager");
     $renderer = $container->get("renderer");
@@ -372,7 +370,7 @@ class ui_menu extends FO_Plugin
       $html = "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
     $gettextUser = _("User");
     $gettextGroup = _('Group');
-    
+
     $html .= "<table style='align:left;'><tr><td align='right'><small>$gettextUser:</small></td><td>" . @$_SESSION['User'] . "</td></tr>";
     $html .= "<tr><td align='right'><small>$gettextGroup:</small></td><td>";
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
@@ -383,17 +381,16 @@ class ui_menu extends FO_Plugin
     while ($row = $dbManager->fetchArray($res))
     {
       $allAssignedGroups[$row['group_pk']] = $row['group_name'];
-    }       
+    }
     $dbManager->freeResult($res);
     if (count($allAssignedGroups) > 1)
     {
       $html .= "<form action='" . Traceback_uri() . "?mod=" . Traceback_parm() . "' method='post'>";
-      $html .= $renderer->createSelect('selectMemberGroup', $allAssignedGroups, $_SESSION['GroupId'], $action=" onChange='this.form.submit()'");
+      $html .= $renderer->createSelect('selectMemberGroup', $allAssignedGroups, $_SESSION['GroupId'], $action = " onChange='this.form.submit()'");
       $html .= "</form>";
-    }
-    else
+    } else
     {
-      $html .= @$_SESSION['GroupName'] ;
+      $html .= @$_SESSION['GroupName'];
     }
     $html .= '</td></tr></table>';
     return $html;

@@ -49,7 +49,7 @@ fo_conf* fo_config_load(char* fname, GError** error);
 void     fo_config_free(fo_conf* conf);
 void     fo_config_join(fo_conf* dst, fo_conf* src, GError** error);
 
-char* fo_config_get(fo_conf* conf, char* group, char* key, GError** error);
+char* fo_config_get(fo_conf* conf, const char* group, const char* key, GError** error);
 char* fo_config_get_list(fo_conf* conf, char* group, char* key, int idx, GError** error);
 int   fo_config_is_list(fo_conf* conf, char* group, char* key, GError** error);
 int   fo_config_list_length(fo_conf* conf, char* group, char* key, GError** error);

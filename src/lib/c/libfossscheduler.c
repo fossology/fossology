@@ -499,7 +499,7 @@ int fo_scheduler_userID()
  * @param variablename the name of the variable
  * @return the value of the variable
  */
-char* fo_sysconfig(char* sectionname, char* variablename) {
+char* fo_sysconfig(const char* sectionname, const char* variablename) {
   GError* error = NULL;
   char* ret;
 

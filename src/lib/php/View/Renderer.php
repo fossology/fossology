@@ -78,6 +78,7 @@ class Renderer extends Object
     $output = file_get_contents($filename);
     $output = $this->parseI18n($output);
     $output = $this->parseVars($output);
+    $output = $this->parseIfs($output);
     $phpfilename = preg_replace('/\\.[^.\\s]{3,4}$/', '.htm', $filename);
     $success = file_put_contents($phpfilename,$output);
     return (false!==$success);
@@ -126,15 +127,14 @@ class Renderer extends Object
       /* $close>=6 is sure, but this way no missleading */
       if (!$close && !strpos($haystack,'{{ ',$offset))
       {
-        return $haystack;
+        return $res.substr($haystack,$open);
       }
-      if (!$close)
-        $key = substr($haystack,$offset);
-      else
-        $key = substr($haystack,$offset,$close-$offset);
+      if (!$close){
+        $res .= '{{ ';
+        continue;
+      }
+      $key = substr($haystack,$offset,$close-$offset);
       $res .= $this->translateVar($key);
-      if(!$close)
-        return res;
       $offset = $close+3; // strlen(' }}')==3
     }
     return $res.substr($haystack,$offset);
@@ -150,6 +150,50 @@ class Renderer extends Object
       $var = '$this->vars["'.$matches[1].'"]["'.$matches[2].'"]';
     }
     return "<?php echo $var; ?>";
+  }
+  
+    /**
+   * \brief evaluates conditions in format {% if x %} {% endif %}
+   */
+  private function parseIfs($haystack){
+    $res = '';
+    $offset = 0;
+    while (false!==($open=strpos($haystack,'{% if ',$offset)))
+    {
+      $res .= substr($haystack,$offset,$open-$offset);
+      $offset = $open+strlen('{% if ');
+      $close = strpos($haystack,' %}',$offset);
+      /* $close>=6 is sure, but this way no missleading */
+      if (!$close && !strpos($haystack,'{% if ',$offset))
+      {
+        return $res.substr($haystack,$open);
+      }
+      if (!$close){
+        $res .= '{% if ';
+        continue;
+      }
+      $key = substr($haystack,$offset,$close-$offset);
+      $offset = $close+strlen(' %}');
+      $fi = strpos($haystack,'{% endif %}',$offset);
+      if(false===$fi){
+        return $res.substr($haystack,$open);
+      }
+      $res .= $this->translateIf($key,substr($haystack,$offset,$fi-$offset));
+      $offset = $fi+strlen('{% endif %}');
+    }
+    return $res.substr($haystack,$offset);
+  }
+  
+  /*
+   * \brief handles {% if ... %} {% endif %}
+   */
+  private function translateIf($subject,$inner){
+    if (preg_match($pattern='/^[a-zA-Z0-9]+$/', $subject) )
+      $var = '$this->vars["'.$subject.'"]';
+    else if (preg_match($pattern='/^([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)$/', $subject, $matches) ){
+      $var = '$this->vars["'.$matches[1].'"]["'.$matches[2].'"]';
+    }
+    return "<?php if($var) { ?>$inner<?php } ?>";
   }
   
   
@@ -175,7 +219,7 @@ class Renderer extends Object
     $html = '';
     foreach($options as $key=>$disp)
     {
-      $html .= $innerglue.'<input type="radio" name="'.$id.'" id="'.$id.'" value="'.$key.'"';
+      $html .= $innerglue.'<input type="radio" name="'.$id.'" value="'.$key.'"';
       $innerglue = $separator;
       if ($key == $select)
       {

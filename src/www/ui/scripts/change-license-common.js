@@ -27,10 +27,7 @@ function jsArrayFromHtmlOptions(pListBox) {
     var options = new Array(pListBox.options.length);
     for ( i = 0; i < options.length; i++){
         if(pListBox.options[i].value == magicNumberNoLicenseFound) continue;
-        options[i] = new Option(pListBox.options[i].text,
-            pListBox.options[i].value,
-            pListBox.options[i].defaultSelected,
-            pListBox.options[i].selected);
+         options[i] = pListBox.options[i];
     }
     return options;
 }
@@ -58,7 +55,13 @@ function moveLicense(theSelFrom, theSelTo) {
     var i;
     for (i = selLength - 1; i >= 0; i--) {
         if (theSelFrom.options[i].selected) {
-            theSelTo.options[theSelTo.options.length] = (new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
+            var newOption  = (new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
+            newOption.ondblclick = theSelFrom.options[i].ondblclick;
+            
+            
+            theSelTo.options[theSelTo.options.length] = theSelFrom.options[i];
+            
+            
             theSelFrom[i] = null;
         }
     }
@@ -138,8 +141,8 @@ function performPostRequest() {
     var data = {
         "licenseNumbersToBeSubmitted": txt,
         "uploadTreeId": $('#uploadTreeId').val(),
-        "type": $('#type').val(),
-        "scope": $('#scope').val(),
+        "type": $('[name="type"]:checked').val(),
+        "scope": $('[name="scope"]:checked').val(),
         "comment": $('#comment').val(),
         "remark": $('#remark').val()
     };
@@ -158,4 +161,41 @@ function performNoLicensePostRequest() {
     selectNoLicenseFound(licenseLeft, licenseRight);
     performPostRequest();
     closeUserModal();
+}
+
+function activateLic(k){
+ $("#bedit"+k).show();
+ $("#aedit"+k).hide();
+}
+
+function performLicCommentRequest(k){
+    var data = {
+        "uploadTreeId": $('#uploadTreeId').val(),
+        "lic": k,
+        "comment": $('#tedit'+k).val()
+    };
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-processPost",
+        data: data,
+        success: clearingSuccess
+    });
+}
+
+function performLicDelRequest(k){
+    var data = {
+        "uploadTreeId": $('#uploadTreeId').val(),
+        "unlic": k
+    };
+    $.ajax({
+        type: "POST",
+        url: "?mod=change-license-processPost",
+        data: data,
+        success: clearingSuccess
+    });
+}
+
+function popUpLicenseText(popUpUri,title) {
+  sel = $("#bulkLicense :selected").text();
+  window.open(popUpUri+sel,title,'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
 }

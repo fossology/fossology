@@ -233,7 +233,7 @@ class fo_libschema
             $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
-        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
+        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'] && isset($modification['ALTER']))
         {
           $sql = $modification['ALTER'];
           if ($debug)
@@ -241,6 +241,8 @@ class fo_libschema
             print "$sql\n";
           } else
           {
+            var_dump($modification);
+            print "$sql\n";
             $this->dbman->queryOnce($sql);
             if (!empty($modification['UPDATE']))
             {

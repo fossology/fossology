@@ -1,0 +1,52 @@
+{% extends "default.html" %}
+
+{% block content %}
+<p>
+    <b>
+        <i18n>Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
+            uploaded files.
+        </i18n>
+    </b>
+    <i18n>To manage your own group go into</i18n>
+    <b>Admin &gt; Groups &gt; Manage Group Users</b>.
+    <i18n>To manage permissions for this one upload, go to</i18n>
+    <b>Admin &gt; Upload Permissions</b>.
+<p>
+    <i18n>This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
+        your computer to FOSSology.
+    </i18n>
+    <i18n>Your FOSSology server has imposed a maximum upload file size of</i18n>
+    <?php echo ini_get('upload_max_filesize'); ?>bytes.
+
+<form enctype="multipart/form-data" method="post">
+    <ol>
+        <li>
+            <i18n>Select the folder for storing the uploaded file:</i18n>
+            <select name="folder">
+                <?php echo FolderListOption(-1, 0); ?>
+            </select>
+        <li>
+            <i18n>Select the file to upload:</i18n>
+            <br/>
+            <input name="getfile" size="60" type="file"/><br/>
+        <li>
+            <i18n>(Optional) Enter a description of this file:</i18n>
+            <br/>
+            <input type="text" name="description" size="60" value="{{ description }}"/>
+
+            <p/>
+        <li><input type="checkbox" name="public" value="public"/>
+            <i18n>(Optional) Make Public</i18n>
+            <?php if ($this->vars['agentCheckBoxMake']){ ?>
+        <li>
+            <i18n>Select optional analysis</i18n>
+            <br/>
+            {{ agentCheckBoxMake }}
+            <?php } ?>
+    </ol>
+    <i18n>After you press Upload, please be patient while your file is transferring.</i18n>
+    <br/>
+
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="<i18n>Upload</i18n>"/>
+</form>
+{% endblock %}

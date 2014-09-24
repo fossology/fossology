@@ -26,6 +26,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\View\HighlightRenderer;
+use Fossology\Lib\View\Renderer;
 
 class LicenseOverviewPrinter extends Object
 {
@@ -50,12 +51,18 @@ class LicenseOverviewPrinter extends Object
    */
   private $highlightRenderer;
 
-  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer)
+  /**
+   * @var Renderer
+   */
+  private $renderer;
+
+  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
     $this->highlightRenderer = $highlightRenderer;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -388,6 +395,10 @@ class LicenseOverviewPrinter extends Object
   public function createRecentLicenseClearing($clearingDecWithLicenses)
   {
     $output = "<h3>" . _("Concluded license") . "</h3>\n";
+
+    $output .= $this->createScopeTypeSelect();
+
+
      $cd= $this->clearingDao->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($clearingDecWithLicenses);
 
     /**
@@ -402,20 +413,34 @@ class LicenseOverviewPrinter extends Object
       /**
        * @var LicenseRef[] $auditedLicenses
        */
-      $output .= "<div class='scrollable'>";
+      $output .= '<table border="1"><tr>';
+      $innerglue = '';
       foreach ($auditedLicenses as $license)
       {
-        $output .= $this->printLicenseNameAsLink($license->getShortName(), $license->getFullName());
-        $output .= ", ";
+        $refId = $license->getId();
+        $output .= $innerglue;
+        $innerglue = '</tr><tr>';
+        $output .= '<td>'.$this->printLicenseNameAsLink($license->getShortName(), $license->getFullName()).'</td>';
+        $output .= '<td><textarea id="tedit'.$refId.'" cols="15" rows="2" onclick="activateLic('.$refId.')">TBD '.$refId.'</textarea></td>';
+        $output .= '<td><button hidden id="bedit'.$refId.'" onclick="performLicCommentRequest('.$refId.')">'._('Submit').'</button>';
+        $output .=    '<img onclick="performLicDelRequest('.$refId.')" id="aedit'.$refId.'" src="images/icons/close_32.png" alt="rm" title="'._('remove this license').'"/></td>';
       }
-      $output = substr($output, 0, count($output) - 3);
-      $output .= "</div>";
+      $output .= "</tr></table>";
       return $output;
     }
     else
     {
       return "";
     }
+  }
+
+  public function createScopeTypeSelect()
+  {
+    $clearingDecisionTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
+    $typeRadio = $this->renderer->createRadioGroup('type', $clearingDecisionTypes, $defaultType = 2, '', $separator = ' &nbsp; ');
+    return '  <fieldset style="display:inline">
+   <legend>' . _('Clearing decision type') . '</legend>
+   ' . $typeRadio . '</fieldset>';
   }
 
   /**

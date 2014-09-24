@@ -20,7 +20,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\ClearingDecWithLicenses;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -103,7 +102,15 @@ class changeLicenseProcessPost extends FO_Plugin
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
     $uploadTreeId = $_POST['uploadTreeId'];
-    $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $uploadTreeId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+    if(array_key_exists('lic',$_POST)){
+      $this->clearingDao->commentClearingDecision($_POST['unlic'], $uploadTreeId, $userId);
+    }
+    else if(array_key_exists('unlic',$_POST)){
+      $this->clearingDao->insertClearingDecision($_POST['unlic'], $uploadTreeId, $userId);
+    }
+    else if(array_key_exists('type',$_POST)){
+      $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $uploadTreeId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+    }
     $clearingDecWithLicences = $this->clearingDao->getFileClearings($uploadTreeId);
 
     /** after changing one license, purge all the report cache */

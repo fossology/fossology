@@ -122,14 +122,14 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function testToBeDeterminedIsIgnored()
   {
-    $editedLicensesArray = array($this->clearingDec(0, true, 'upload', "Test", 'To be determined'));
+    $editedLicensesArray = array($this->clearingDec(0, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED));
     assertThat($this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($editedLicensesArray), is(array()));
   }
 
   public function testOlderGlobalWinsAgainstTBD()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "Test", 'To be determined'),
+        $this->clearingDec(2, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED),
         $this->clearingDec(1, false, 'global', "A", 'User decision'),
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
@@ -140,8 +140,8 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testOlderLocalWinsAgainstTBD()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "Test", 'To be determined'),
-        $this->clearingDec(1, true, 'upload', "A", 'User decision'),
+        $this->clearingDec(2, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED),
+        $this->clearingDec(1, true, 'upload', "A", LicenseDecision::USER_DECISION),
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
@@ -151,9 +151,9 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testOlderLocalWinsAgainstNewerGlobalAndTBD()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "Test", 'To be determined'),
-        $this->clearingDec(1, true, 'global', "A", 'User decision'),
-        $this->clearingDec(0, true, 'upload', "B", 'User decision')
+        $this->clearingDec(2, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED),
+        $this->clearingDec(1, true, 'global', "A", LicenseDecision::USER_DECISION),
+        $this->clearingDec(0, true, 'upload', "B", LicenseDecision::USER_DECISION)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
@@ -163,9 +163,9 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testOlderGlobalWinsAgainstNewerLocalForDifferentFileAndTBD()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "Test", 'To be determined'),
-        $this->clearingDec(1, false, 'upload', "A", 'User decision'),
-        $this->clearingDec(0, false, 'global', "B", 'User decision')
+        $this->clearingDec(2, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED),
+        $this->clearingDec(1, false, 'upload', "A", LicenseDecision::USER_DECISION),
+        $this->clearingDec(0, false, 'global', "B", LicenseDecision::USER_DECISION)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
@@ -175,20 +175,20 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function testClearingDecisionTBDIsInActive()
   {
-    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", 'To be determined')), is(true));
+    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", ClearingDecision::TO_BE_DISCUSSED)), is(true));
   }
 
   public function testClearingDecisionUserDecisionIsNotInActive()
   {
-    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", 'User decision')), is(false));
+    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", LicenseDecision::USER_DECISION)), is(false));
   }
 
 
   public function testShowToBeDeterminedLicenses()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "B", 'To be determined'),
-        $this->clearingDec(1, false, 'upload', "A", 'User decision'),
+        $this->clearingDec(2, true, LicenseDecision::SCOPE_UPLOAD, "B", ClearingDecision::TO_BE_DISCUSSED),
+        $this->clearingDec(1, false, 'upload', "A", LicenseDecision::USER_DECISION),
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray, true);
 

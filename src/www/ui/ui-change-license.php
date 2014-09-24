@@ -75,31 +75,7 @@ class change_license extends FO_Plugin
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
   }
 
-//  /**
-//   * \brief Customize submenus.
-//   */
-//  function RegisterMenus()
-//  {
-//    $text = _("Change license");
-//    menu_insert("View::Audit", 35, $this->Name . Traceback_parm_keep(array("upload", "item", "show")), $text);
-//
-//    menu_insert("ChangeLicense::Info",1, "view_info". Traceback_parm_keep(array("upload","item","format")),$text);
-//    menu_insert("ChangeLicense::View Copyright/Email/Url", 1, "copyrightview". Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
-//    menu_insert("ChangeLicense::Bucket Browser",1,"bucketbrowser". Traceback_parm_keep(array("format","page","upload","item","bp"),$text));
-//    menu_insert("ChangeLicense::One-Shot Copyright/Email/URL", 3, $this->Name, $text);
-//    menu_insert("ChangeLicense::One-Shot License", 3, "agent_nomos_once". Traceback_parm_keep(array("format","item")), $text);
-//
-//    menu_insert("ChangeLicense::[BREAK]",4);
-//
-//    menu_insert("ChangeLicense::View", 5, "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
-//
-//  }
 
-
-  function cleanStrings($input)
-  {
-    return trim(pg_escape_string(urldecode($input)));
-  }
 
   /**
    * \brief display the license changing page
@@ -236,7 +212,7 @@ class change_license extends FO_Plugin
     $output .= "</p></td>";
 
     $output .= "<td align=\"center\" valign=\"middle\">";
-    $output .= $this->changeLicenseUtility->createLicenseSwitchButtons();
+    $output .= " (Li ce ns eS wi tc hB ut to ns) ";
     $output .= "</td>";
 
     $text = _("Selected licenses:");
@@ -255,8 +231,7 @@ class change_license extends FO_Plugin
     $output .= "</tr>";
     $output .= "<tr><td colspan='2'>";
     $output .= "" . _("License decision scope") . "<br/>";
-    $clearingScopes = $this->clearingDao->getClearingScopes();
-    $output .= DatabaseEnum::createDatabaseEnumSelect("scope", $clearingScopes, 3);
+    $output .= "<input type='checkbox' name='scope' id='scope'/> Decision scope";
     $output .= "</td>";
 
     $output .= "<td colspan='2'>" . _("License decision type") . "<br/>";

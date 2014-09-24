@@ -102,6 +102,27 @@ class RendererTest extends \PHPUnit_Framework_TestCase
     unlink($filenamePure.'.htc');
     unlink($filenamePure.'.htm');
   }
+  
+  public function testMakeTemplateIf()
+  {
+    $filenamePure = dirname(__FILE__).'/plain';
+    $filehandler = fopen($filenamePure.'.htc',"w+");
+    $cont = "Nine is {% if x %}six{% endif %}teen.";
+    fwrite($filehandler,$cont);
+    fclose($filehandler);
+    if (file_exists($filenamePure . '.htm'))
+    {
+      unlink($filenamePure . '.htm');
+    }
+
+    $renderer = new Renderer(dirname(__FILE__).'/');
+    $renderer->makeTemplate($filenamePure . '.htc');
+    $txt = file_get_contents($filenamePure.'.htm');
+    assertThat($txt,is('Nine is <?php if($this->vars["x"]) { ?>six<?php } ?>teen.'));
+    
+    unlink($filenamePure.'.htc');
+    unlink($filenamePure.'.htm');
+  }
 
   
   public function testCreateSelect()
