@@ -323,7 +323,6 @@ class ui_view extends FO_Plugin
     }
     print $this->getView($inputFile , $BackMod,
          $ShowHeader , $ShowText, $highlightEntries , $insertBacklink);
-
   }
 
   /**
@@ -430,7 +429,7 @@ class ui_view extends FO_Plugin
             {
               /* Need to refresh the screen */
               $text = _("Unpack added to job queue");
-              $V .= displayMessage($text);
+              $this->vars['message'] = $text;
               $flag = 1;
               $text = _("Reunpack job is running: you can see it in");
               $text1 = _("jobqueue");
@@ -438,7 +437,7 @@ class ui_view extends FO_Plugin
             } else
             {
               $text = _("Unpack of Upload failed");
-              $V .= displayMessage("$text: $rc");
+              $this->vars['message'] = "$text: $rc";
             }
             $output .= $V;
           }
@@ -507,60 +506,15 @@ class ui_view extends FO_Plugin
     }
 
     if ($openedFin) fclose($inputFile);
-    if($getPageMenuInline) return array($PageMenu, $output);
+    if($getPageMenuInline)
+      return array($PageMenu, $output);
     else
       return $output;
   } // ShowView()
 
-  /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content.
-   * (OutputOpen and Output are separated so one plugin
-   * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
-   */
-  function Output()
+  protected function htmlContent()
   {
-    global $PG_CONN;
-
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return "";
-    }
-    if (!$PG_CONN)
-    {
-      DBconnect();
-      if (!$PG_CONN)
-      {
-        echo "NO DB connection";
-      }
-    }
-
-    $V = "";
-    switch ($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        if ($this->OutputToStdout)
-        {
-          $this->ShowView(NULL, "browse");
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    print($V);
-    return "";
+    return $this->ShowView(NULL, "browse");
   }
 
   /**
@@ -590,22 +544,9 @@ class ui_view extends FO_Plugin
           list($Type, $Junk) = explode("/", $Meta, 2);
           if ($Type == 'text')
           {
+            $Format = 'text';
+          } else {
             $Format = 'flow';
-          } else switch ($Meta)
-          {
-            case "application/octet-string":
-            case "application/x-awk":
-            case "application/x-csh":
-            case "application/x-javascript":
-            case "application/x-perl":
-            case "application/x-shellscript":
-            case "application/x-rpm-spec":
-            case "application/xml":
-            case "message/rfc822":
-              $Format = 'flow';
-              break;
-            default:
-              $Format = 'flow';
           }
         }
         break;

@@ -25,22 +25,23 @@ use Fossology\Lib\Data\Highlight;
 define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
 
 class agent_nomos_once extends FO_Plugin {
-
-  public $Name = "agent_nomos_once";
-  public $Title = TITLE_agent_nomos_once;
-  public $Version = "1.0";
-  /* note: no menulist needed, it's insterted in the code below */
-  public $Dependency = array();
-  public $NoHTML = 0;  // always print text output for now
-  /** For anyone to access, without login, use: **/
-  public $DBaccess   = PLUGIN_DB_NONE;
-  public $LoginFlag  = 0;
-
   public $HighlightInfoKeywords = array();
   public $HighlightInfoLicenses = array();
-  /** To require login access, use: **/
-  //  public $DBaccess = PLUGIN_DB_WRITE;
-  //  public $LoginFlag = 1;
+
+  function __construct()
+  {
+    $this->Name = "agent_nomos_once";
+    $this->Title = TITLE_agent_nomos_once;
+    $this->Dependency = array();
+    $this->NoHTML = 0;  // always print text output for now
+    /** For anyone to access, without login, use: **/
+    $this->DBaccess   = PLUGIN_DB_NONE;
+    /** To require login access, use: **/
+    //  public $DBaccess = PLUGIN_DB_WRITE;
+    //  public $LoginFlag = 1;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
 
   /**
    * @brief Analyze one uploaded file.
@@ -71,18 +72,13 @@ class agent_nomos_once extends FO_Plugin {
    */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    } // don't run
+      return 0;
+    }
     $ShowHeader = GetParm('showheader', PARM_INTEGER);
     if (empty($ShowHeader)) {
       $ShowHeader = 0;
     }
-    if (GetParm("mod", PARM_STRING) == $this->Name) {
-      $ThisMod = 1;
-    }
-    else {
-      $ThisMod = 0;
-    }
+    $ThisMod = (GetParm("mod", PARM_STRING) == $this->Name) ? 1 : 0;
     /*
      * This if stmt is true only for wget.
      * For wget, populate the $_FILES array, just like the UI post would do.
@@ -148,113 +144,102 @@ class agent_nomos_once extends FO_Plugin {
    * \brief Generate the text for this plugin.
    */
   function Output() {
-    global $Plugins;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
 
-    /* Ignore php Notice is array keys don't exist */
-    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
-    $tmp_name = $_FILES['licfile']['tmp_name'];
-    error_reporting($errlev);
+    $tmp_name = '';
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
+    {
+      $tmp_name = $_FILES['licfile']['tmp_name'];
+    }
 
     /* For REST API:
      wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
     */
-    if ($this->NoHTML && file_exists($tmp_name))
+    if ($this->OutputType!='HTML' && file_exists($tmp_name))
     {
-      echo $this->AnalyzeFile($tmp_name);
-      echo "\n";
+      echo $this->AnalyzeFile($tmp_name)."\n";
       unlink($tmp_name);
       return;
     }
     if (file_exists($tmp_name)) {
-      $text = _("A one shot license analysis shows the following license(s) in file");
-      $keep = "$text <em>{$_FILES['licfile']['name']}:</em> ";
-      $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
-      $_FILES['licfile'] = NULL;
-      print $keep;
+      $this->vars['content'] = $this->htmlAnalyzedContent($tmp_name);
+    }
+    else if ($this->OutputType=='HTML') {
+      $this->vars['content'] = $this->htmlContent();
+    }
+    if (array_key_exists('unlink_flag',$_FILES['licfile'])) {
+      unlink($tmp_name);
+    }
+    $_FILES['licfile'] = NULL;
+  }
+  
+  private function htmlAnalyzedContent($tmp_name){
+    $text = _("A one shot license analysis shows the following license(s) in file");
+    $keep = "$text <em>{$_FILES['licfile']['name']}:</em> ";
+    $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
+    $this->vars['message'] = $keep;
 
-      if (!empty($_FILES['licfile']['unlink_flag'])) {
-        unlink($tmp_name);
-      }
+    global $Plugins;
+    /** @var ui_view $view */
+    $view = & $Plugins[plugin_find_id("view") ];
+    $ModBack = GetParm("modback",PARM_STRING);
 
-      /** @var ui_view $view */
-      $view = & $Plugins[plugin_find_id("view") ];
-      $ModBack = GetParm("modback",PARM_STRING);
-      
-      $highlights = array();
+    $highlights = array();
 
-      for ($index = 0; $index < count($this->HighlightInfoKeywords['position']); $index++)
-      {
-        $position = $this->HighlightInfoKeywords['position'][$index];
-        $length = $this->HighlightInfoKeywords['length'][$index];
+    for ($index = 0; $index < count($this->HighlightInfoKeywords['position']); $index++)
+    {
+      $position = $this->HighlightInfoKeywords['position'][$index];
+      $length = $this->HighlightInfoKeywords['length'][$index];
 
-        $highlights[] = new Highlight($position, $position + $length, Highlight::KEYWORD);
-      }
-
-      for ($index = 0; $index < count($this->HighlightInfoLicenses['position']); $index++)
-      {
-        $position = $this->HighlightInfoLicenses['position'][$index];
-        $length = $this->HighlightInfoLicenses['length'][$index];
-        $name = $this->HighlightInfoLicenses['name'][$index];
-
-        $highlights[] = new Highlight($position, $position + $length, Highlight::SIGNATURE, $name);
-      }
-      
-      $inputFile = fopen($tmp_name, "r");
-      if ($inputFile) {
-        $view->ShowView($inputFile, $ModBack, 0, 0, NULL, True, False, $highlights);
-        fclose($inputFile);
-      }
-      return "";
+      $highlights[] = new Highlight($position, $position + $length, Highlight::KEYWORD);
     }
 
-    $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* Display instructions */
-        $V.= _("This analyzer allows you to upload a single file for license analysis.\n");
-        $V.= _("The limitations:\n");
-        $V.= "<ul>\n";
-        $V.= _("<li>The analysis is done in real-time. Large files may take a while." .
-             " This method is not recommended for files larger than a few hundred kilobytes.\n");
-        $text = _("Files that contain files are");
-        $text1 = _("not");
-        $text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
-        $V.= "<li>$text <b>$text1</b> $text2\n";
-        $text = _("Results are");
-        $text1 = _("not");
-        $text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
-        $V.= "<li>$text <b>$text1</b> $text2\n";
-        $V.= "</ul>\n";
-        /* Display the form */
-        $V.= "<form enctype='multipart/form-data' method='post'>\n";
-        $V.= "<ul>\n";
-        $V.= _("<li>Select the file to upload:<br />\n");
-        $V.= "<input name='licfile' size='60' type='file' /><br />\n";
-        $V.= "</ul>\n";
-        $V.= "<input type='hidden' name='showheader' value='1'>";
-        $text = _("Analyze");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
+    for ($index = 0; $index < count($this->HighlightInfoLicenses['position']); $index++)
+    {
+      $position = $this->HighlightInfoLicenses['position'][$index];
+      $length = $this->HighlightInfoLicenses['length'][$index];
+      $name = $this->HighlightInfoLicenses['name'][$index];
 
+      $highlights[] = new Highlight($position, $position + $length, Highlight::SIGNATURE, $name);
+    }
 
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    $inputFile = fopen($tmp_name, "r");
+    if ($inputFile) {
+      $rtn = $view->getView($inputFile, $ModBack, 0, NULL, $highlights);
+      fclose($inputFile);
+      return $rtn;
     }
-    if (!empty($_FILES['licfile']['unlink_flag'])) {
-      unlink($_FILES['licfile']['tmp_name']);
-    }
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ($V);
+  }
+  
+  protected function htmlContent()
+  {
+    $V = _("This analyzer allows you to upload a single file for license analysis.\n");
+    $V.= _("The limitations:\n");
+    $V.= "<ul>\n";
+    $V.= _("<li>The analysis is done in real-time. Large files may take a while." .
+         " This method is not recommended for files larger than a few hundred kilobytes.\n");
+    $text = _("Files that contain files are");
+    $text1 = _("not");
+    $text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
+    $V.= "<li>$text <b>$text1</b> $text2\n";
+    $text = _("Results are");
+    $text1 = _("not");
+    $text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
+    $V.= "<li>$text <b>$text1</b> $text2\n";
+    $V.= "</ul>\n";
+    /* Display the form */
+    $V.= "<form enctype='multipart/form-data' method='post'>\n";
+    $V.= "<ul>\n";
+    $V.= _("<li>Select the file to upload:<br />\n");
+    $V.= "<input name='licfile' size='60' type='file' /><br />\n";
+    $V.= "</ul>\n";
+    $V.= "<input type='hidden' name='showheader' value='1'>";
+    $text = _("Analyze");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+    return $V;
   }
 }
 

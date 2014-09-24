@@ -404,7 +404,7 @@ class FO_Plugin
     $V = "";
     if ($this->OutputType=='HTML')
     {
-      $this->vars['content'] = $this->htmlContent();
+      $v = $this->vars['content'] = $this->htmlContent();
     }
     if (!$this->OutputToStdout)
     {
