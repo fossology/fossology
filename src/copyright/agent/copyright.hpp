@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #define AGENT_ARS  "copyright_ars"
 
 #include "copyrightState.hpp"
+#include "regTypes.hpp"
 
 extern "C"  {
 #include "libfossagent.h"

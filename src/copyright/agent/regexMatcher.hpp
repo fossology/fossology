@@ -19,7 +19,7 @@
 
 class RegexMatcher : public virtual Matcher {
 public:
-    RegexMatcher(const char* type, const char* pattern, int regexIndex = 0);
+    RegexMatcher(const std::string  type,const std::string  pattern, int regexIndex = 0);
     virtual std::vector <CopyrightMatch> match(const std::string content) const;
     virtual ~RegexMatcher();
 private:

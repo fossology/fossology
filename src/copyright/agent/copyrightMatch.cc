@@ -11,7 +11,7 @@
 
 #include "copyrightMatch.hpp"
 
-CopyrightMatch::CopyrightMatch(rx::smatch sm, const char* type, int regexIndex) : sm(sm), regexIndex(regexIndex), type(type)
+CopyrightMatch::CopyrightMatch(rx::smatch sm, const std::string type, int regexIndex) : sm(sm), regexIndex(regexIndex), type(type)
 {
 }
 
@@ -34,7 +34,7 @@ const std::string CopyrightMatch::content() const
 }
 
 
-const char* CopyrightMatch::getType() const
+const std::string CopyrightMatch::getType() const
 {
   return type;
 }

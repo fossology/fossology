@@ -148,45 +148,9 @@ int main(int argc, char** argv) {
   CopyrightState* state;
   state = getState(dbManager, verbosity);
 
-  const char* copyrightRegex = "("
-  "("
-  "(Copyright|(\\(C\\) Copyright([[:punct:]]?))) "
-  "("
-  "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
-  "|"
-  "([[:print:]]{0,10}|[[:print:]]*)" // TODO this is equivalent to [[:print:]]*
-  ")"
-  "("
-  "([[:digit:]]{4,4}([[:punct:]]|[[:space:]])[[:digit:]]{4,4})+ |[[:digit:]]{4,4}"
-  ")"
-  "(([[:space:]]|[[:punct:]]))" // TODO wth do we match all this junk?
-  "([[:print:]]*)" // TODO wth do we match all this junk?
-  ")|("
-  "Copyright([[:punct:]]*) \\(C\\) "
-  "("
-  "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp)*)"
-  "|"
-  "[[:print:]]*" // TODO this matches everything and overrides the previous ???
-  ")"
-  "("
-  "([[:digit:]]{4,4}([[:punct:]]|[[:space:]])[[:digit:]]{4,4})+ |[[:digit:]]{4,4}"
-  ")"
-  "(([[:space:]]|[[:punct:]]))"
-  "([[:print:]]*)"
-  ")|("
-  "(\\(C\\)) ([[:digit:]]{4,4}[[:punct:]]*[[:digit:]]{4,4})([[:print:]]){0,60}"
-  ")|("
-  "Copyrights [[:blank:]]*[a-zA-Z]([[:print:]]{0,60})"
-  ")|("
-  "(all[[:space:]]*rights[[:space:]]*reserved)"
-  ")|("
-  "(author|authors)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*[[:space:]]*([[:print:]]{0,60})|(contributors|contributor)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*[[:space:]]*([[:print:]]{0,60})|written[[:space:]]*by[[:space:]|[:punct:]]*([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60})|contributed[[:space:]]*by[[:space:]|[:punct:]]*([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60})"
-  ")"
-  ")";
-
-  state->addMatcher(RegexMatcher("statement", copyrightRegex));
-  state->addMatcher(RegexMatcher("url", "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])"));
-  state->addMatcher(RegexMatcher("email", "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?", 1));
+  state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+  state->addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+  state->addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1));
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());

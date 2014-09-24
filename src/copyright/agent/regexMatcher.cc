@@ -11,7 +11,7 @@
 
 #include "regexMatcher.hpp"
 
-RegexMatcher::RegexMatcher(const char* type, const char* pattern, int regexIndex) : Matcher(type), regexIndex(regexIndex)
+RegexMatcher::RegexMatcher(const std::string type, const std::string  pattern, int regexIndex) : Matcher(type), regexIndex(regexIndex)
 {
   matchingRegex = rx::regex(pattern, rx::regex_constants::icase);
 }

@@ -11,10 +11,10 @@
 
 #include "matcher.hpp"
 
-const char* Matcher::getType() const {
+const std::string Matcher::getType() const {
   return type;
 }
 
-Matcher::Matcher(const char* _type): type(_type){};
+Matcher::Matcher(const std::string _type): type(_type){};
 
 Matcher::~Matcher(){};

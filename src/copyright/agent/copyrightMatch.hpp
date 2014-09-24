@@ -18,16 +18,16 @@
 class CopyrightMatch
 {
 public:
-    CopyrightMatch(rx::smatch sm, const char* type, int regexIndex);
+    CopyrightMatch(rx::smatch sm, std::string type, int regexIndex);
     ~CopyrightMatch();
-    const char* getType() const;
+    const std::string getType() const;
     const std::string content() const;
     unsigned start() const;
     unsigned length() const;
 private:
     rx::smatch sm;
     int regexIndex;
-    const char* type;
+    std::string type;
 };
 
 #endif // COPYRIGHTMATCH_H
