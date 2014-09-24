@@ -19,21 +19,14 @@
 define("TITLE_admin_folder_delete", _("Delete Folder"));
 
 class admin_folder_delete extends FO_Plugin {
-  public $Name = "admin_folder_delete";
-  public $Title = TITLE_admin_folder_delete;
-  public $MenuList = "Organize::Folders::Delete Folder";
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-
-  /**
-   * \brief Register additional menus.
-   */
-  function RegisterMenus() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    } // don't run
-
+  function __construct()
+  {
+    $this->Name = "admin_folder_delete";
+    $this->Title = TITLE_admin_folder_delete;
+    $this->MenuList = "Organize::Folders::Delete Folder";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
   }
 
   /**
@@ -79,79 +72,58 @@ class admin_folder_delete extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  protected function htmlContent() {
     global $PG_CONN;
-
     $V = "";
-    $R = "";
+    /* If this is a POST, then process the request. */
+    $folder = GetParm('folder', PARM_INTEGER);
+    if (!empty($folder)) {
+      $rc = $this->Delete($folder);
+      $sql = "SELECT * FROM folder where folder_pk = '$folder';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $Folder = pg_fetch_assoc($result);
+      pg_free_result($result);
+      if (empty($rc)) {
+        /* Need to refresh the screen */
+        $text = _("Deletion of folder ");
+        $text1 = _(" added to job queue");
+        $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
+      }
+      else {
+        $text = _("Deletion of ");
+        $text1 = _(" failed: ");
+        $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
+      }
+    }
+    $V.= "<form method='post'>\n"; // no url = this url
+    $text  =  _("Select the folder to");
+    $text1 = _("delete");
+    $V.= "$text <em>$text1</em>.\n";
+    $V.= "<ul>\n";
+    $text = _("This will");
+    $text1 = _("delete");
+    $text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
+    $V.= "<li>$text <em>$text1</em> $text2\n";
+    $text = _("Be very careful with your selection since you can delete a lot of work!");
+    $V.= "<li>$text\n";
+    $text = _("All analysis only associated with the deleted uploads will also be deleted.");
+    $V.= "<li>$text\n";
+    $text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
+    $V.= "<li>$text\n";
+    $V.= "</ul>\n";
+    $text = _("Select the folder to delete:  ");
+    $V.= "<P>$text\n";
+    $V.= "<select name='folder'>\n";
+    $text = _("select folder");
+    $V.= "<option value=''>[$text]</option>\n";
+    $V.= FolderListOption(-1, 0);
+    $V.= "</select><P />\n";
+    $text = _("Delete");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
 
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $folder = GetParm('folder', PARM_INTEGER);
-        if (!empty($folder)) {
-          $rc = $this->Delete($folder);
-          $sql = "SELECT * FROM folder where folder_pk = '$folder';";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $Folder = pg_fetch_assoc($result);
-          pg_free_result($result);
-          if (empty($rc)) {
-            /* Need to refresh the screen */
-            $text = _("Deletion of folder ");
-            $text1 = _(" added to job queue");
-            $R.= displayMessage($text . $Folder['folder_name'] . $text1);
-          }
-          else {
-            $text = _("Deletion of ");
-            $text1 = _(" failed: ");
-            $R.= displayMessage($text . $Folder['folder_name'] . $text1 . $rc);
-          }
-        }
-        $V.= "$R\n";
-        $V.= "<form method='post'>\n"; // no url = this url
-        $text  =  _("Select the folder to");
-        $text1 = _("delete");
-        $V.= "$text <em>$text1</em>.\n";
-        $V.= "<ul>\n";
-        $text = _("This will");
-        $text1 = _("delete");
-        $text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
-        $V.= "<li>$text <em>$text1</em> $text2\n";
-        $text = _("Be very careful with your selection since you can delete a lot of work!");
-        $V.= "<li>$text\n";
-        $text = _("All analysis only associated with the deleted uploads will also be deleted.");
-        $V.= "<li>$text\n";
-        $text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
-        $V.= "<li>$text\n";
-        $V.= "</ul>\n";
-        $text = _("Select the folder to delete:  ");
-        $V.= "<P>$text\n";
-        $V.= "<select name='folder'>\n";
-        $text = _("select folder");
-        $V.= "<option value=''>[$text]</option>\n";
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select><P />\n";
-        $text = _("Delete");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
-    return;
+    return $V;
   }
-};
+}
 $NewPlugin = new admin_folder_delete;
-?>
