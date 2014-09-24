@@ -289,13 +289,8 @@ class FO_Plugin
    */
   function Destroy()
   {
-    if ($this->State != PLUGIN_STATE_INVALID)
-    {
-      ; // Put your cleanup here
-    }
     $this->State = PLUGIN_STATE_INVALID;
-    return;
-  } // Destroy()
+  }
 
   /**
    * The output functions generate "output" for use in a text CLI or web page.
@@ -399,18 +394,19 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
-    $V = "";
+    $output = "";
     if ($this->OutputType=='HTML')
     {
-      $v = $this->vars['content'] = $this->htmlContent();
+      $output = $this->htmlContent();
     }
     if (!$this->OutputToStdout)
     {
-      return $V;
+      $this->vars['content'] = $output;
+      return; // $output;
     }
-    print $V;
+    print $output;
   }
 
   /**
