@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace fo {
 
-std::string getStringFromFile(const char *filename, const long int maximumBytes )
+std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes )
 {
 
 
@@ -34,7 +34,7 @@ std::string getStringFromFile(const char *filename, const long int maximumBytes 
 }
 
 
-std::string getStringFromFile(std::string filename, const long int maximumBytes  ){
+std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes) {
   return getStringFromFile(filename.c_str(), maximumBytes);
 };
 

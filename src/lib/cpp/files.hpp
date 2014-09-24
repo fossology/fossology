@@ -15,8 +15,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace fo {
 
-std::string getStringFromFile(const char *filename, const long int maximumBytes = 1<<20 );
-std::string getStringFromFile(std::string filename, const long int maximumBytes = 1<<20 );
+std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1<<20 );
+std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1<<20 );
 
 
 }

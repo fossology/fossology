@@ -35,7 +35,7 @@ $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
 
 
-%.o: %.cc %.hpp
+$(OBJS): %.o: %.cc %.hpp
 	$(CXX) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
