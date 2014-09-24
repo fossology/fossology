@@ -225,6 +225,33 @@ char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatem
   return g_string_free(resultCreator, FALSE);
 }
 
+int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName) {
+  int result = 0;
+
+  char* escapedTableName = fo_dbManager_StringEscape(dbManager, tableName);
+
+  if (escapedTableName) {
+    PGresult* queryResult = fo_dbManager_Exec_printf(
+      dbManager,
+      "select count(*) from information_schema.tables where table_catalog='%s' and table_name='%s'",
+      PQdb(dbManager->dbConnection),
+      escapedTableName
+    );
+
+    if (queryResult) {
+      if (PQntuples(queryResult)==1) {
+        if (atol(PQgetvalue(queryResult, 0, 0)) == 1) {
+          result = 1;
+        }
+      }
+      PQclear(queryResult);
+    }
+    free(escapedTableName);
+  }
+
+  return result;
+}
+
 PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...) {
   char* sqlQueryString;
   PGconn* dbConnection = dbManager->dbConnection;
@@ -257,7 +284,7 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
   return result;
 }
 
-char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string) {
+char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string) {
   size_t length = strlen(string);
   char* dest = malloc(2*length + 1);
 

@@ -12,6 +12,8 @@ extern "C" {
 #include "libfossdbmanager.h"
 }
 
+#include <cstdarg>
+
 class  DbManager{
 public :
 DbManager(int* argc, char** argv);
@@ -22,16 +24,11 @@ DbManager(fo_dbManager* __dbManager);
   DbManager* spawn();
 
   fo_dbManager* getStruct_dbManager();
+  bool tableExists(const char* tableName);
+  PGresult* queryPrintf(const char* queryStringFormat, ...);
 
 private:
   fo_dbManager* _dbManager;
-
-
 };
-
-
-
-
-
 
 #endif /* LIBFOSSDBMANAGERCLASS_HPP_ */

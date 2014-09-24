@@ -17,6 +17,7 @@ extern "C"{
 #include <iostream>
 #include "copyright.hpp"
 #include "files.hpp"
+#include "database.hpp"
 
 using namespace std;
 
@@ -54,8 +55,10 @@ void queryAgentId(int& agent, PGconn* dbConn) {
 }
 
 void bail(CopyrightState* state, int exitval) {
-  delete(state->getDbManager());
-  delete(state);
+  if (state) {
+    delete(state->getDbManager());
+    delete(state);
+  }
   fo_scheduler_disconnect(exitval);
   exit(exitval);
 }
@@ -63,6 +66,13 @@ void bail(CopyrightState* state, int exitval) {
 CopyrightState* getState(DbManager* dbManager, int verbosity){
   int agentID;
   queryAgentId(agentID, dbManager->getConnection());
+
+  if (!checkTables(dbManager)) {
+    if (!createTables(dbManager)) {
+      return NULL;
+    }
+  }
+
   return new CopyrightState(dbManager, agentID, verbosity);
 }
 
@@ -102,8 +112,7 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
   file->fileName = fo_RepMkPath("files", pFile);
 
   if (file->fileName != NULL) {
-    // cout << "reading " << file->fileName << endl;
-    string fileContent = fo::getStringFromFile(file->fileName,-1);
+    string fileContent = fo::getStringFromFile(file->fileName, 0);
     vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
 
     saveToDatabase(matches, state, pFileId);
@@ -117,6 +126,7 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 bool processUploadId (CopyrightState* state, int uploadId) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->getDbManager()->getStruct_dbManager(), uploadId);
 
+  //TODO correctly hande errors and free fileIdResult
   if (PQntuples(fileIdResult) == 0) {
     PQclear(fileIdResult);
     fo_scheduler_heart(0);
@@ -148,6 +158,10 @@ int main(int argc, char** argv) {
   CopyrightState* state;
   state = getState(dbManager, verbosity);
 
+  if (!state) {
+    std::cout << "FATAL: initialization failed" << std::endl;
+    bail(state, 9);
+  }
   const char* copyrightRegex = "("
   "("
   "(Copyright|(\\(C\\) Copyright([[:punct:]]?))) "

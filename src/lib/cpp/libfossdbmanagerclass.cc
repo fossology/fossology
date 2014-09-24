@@ -32,7 +32,27 @@ DbManager* DbManager::spawn(){
   return new DbManager(fo_dbManager_fork(_dbManager));
 }
 
-
 fo_dbManager* DbManager::getStruct_dbManager(){
   return _dbManager;
+}
+
+bool DbManager::tableExists(const char* tableName) {
+  return fo_dbManager_tableExists(_dbManager, tableName);
+}
+
+PGresult* DbManager::queryPrintf(const char* queryStringFormat, ...) {
+  va_list args;
+  va_start(args, queryStringFormat);
+  char* queryString = g_strdup_vprintf(queryStringFormat, args);
+  va_end(args);
+
+  if (queryString) {
+    PGresult* result = fo_dbManager_Exec_printf(_dbManager, queryString);
+
+    g_free(queryString);
+
+    return result;
+  } else {
+    return NULL;
+  }
 }
