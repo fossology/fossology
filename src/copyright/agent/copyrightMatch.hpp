@@ -12,21 +12,21 @@
 #ifndef COPYRIGHTMATCH_H
 #define COPYRIGHTMATCH_H
 
-#include "regex.hpp"
 #include <string>
 
 class CopyrightMatch
 {
 public:
-    CopyrightMatch(rx::smatch sm, std::string type, int regexIndex);
+    CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
     ~CopyrightMatch();
     const std::string getType() const;
-    const std::string content() const;
-    unsigned start() const;
-    unsigned length() const;
+    const std::string getContent() const;
+    unsigned getStart() const;
+    unsigned getLength() const;
 private:
-    rx::smatch sm;
-    int regexIndex;
+    std::string content;
+    unsigned start;
+    unsigned length;
     std::string type;
 };
 

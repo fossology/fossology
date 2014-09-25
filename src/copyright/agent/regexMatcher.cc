@@ -22,10 +22,17 @@ std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) cons
 
   std::string::const_iterator begin = content.begin();
   std::string::const_iterator end = content.end();
-  boost::match_results<std::string::const_iterator> what;
+  rx::match_results<std::string::const_iterator> what;
 
-  while (rx::regex_search(begin, end, what,matchingRegex)) {
-    results.push_back(CopyrightMatch(what, getType(), regexIndex));
+  while (rx::regex_search(begin, end, what, matchingRegex)) {
+    results.push_back(
+      CopyrightMatch(
+        what.str(regexIndex),
+        getType(),
+        what.position(regexIndex) + (begin - content.begin()),
+        what.length(regexIndex)
+      )
+    );
     begin = what[0].second;
   }
 
