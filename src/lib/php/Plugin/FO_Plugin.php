@@ -420,11 +420,23 @@ class FO_Plugin
 
   public function getTemplateName()
   {
-    return "default.html";
+    return "include/base.html";
   }
 
   public function getVars()
   {
     return $this->vars;
   }
+
+  public function renderTemplate($templateName = null, $vars = null)
+  {
+    $templateName = $templateName ?: $this->getTemplateName();
+    $vars = $vars ?: $this->vars;
+
+    global $container;
+    $renderer = $container->get('twig.environment');
+
+    return $renderer->loadTemplate($templateName)->render($vars);
+  }
+
 }

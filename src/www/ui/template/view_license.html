@@ -1,4 +1,4 @@
-{% extends "default.html" %}
+{% extends "include/base.html" %}
 
 {% block content %}
 <div style='border: thin dotted gray; background-color:lightyellow'>
@@ -29,8 +29,8 @@
 {% endblock %}
 
 
-{% block footer %}
-<script src="scripts/jquery-1.11.1.min.js" type="text/javascript"></script>
+{% block foot %}
+{{ parent() }}
 <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
 <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
 <script src="scripts/change-license-common.js" type="text/javascript"></script>

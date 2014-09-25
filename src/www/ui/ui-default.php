@@ -39,17 +39,12 @@ class ui_default extends FO_Plugin
       return;
     }
 
-    $this->vars['content'] = "<ul>
-  <li><i18n>Upload files into the fossology repository.</i18n></li>
-  <li><i18n>Unpack files (zip, tar, bz2, iso's, and many others) into its component files.</i18n></li>
-  <li><i18n>Browse upload file trees.</i18n></li>
-  <li><i18n>View file contents and meta data.</i18n></li>
-  <li><i18n>Scan for software licenses.</i18n></li>
-  <li><i18n>Scan for copyrights and other author information.</i18n></li>
-  <li><i18n>View side-by-side license and bucket differences between file trees.</i18n></li>
-  <li><i18n>Tag and attach notes to files.</i18n></li>
-  <li><i18n>Report files based on your own custom classification scheme.</i18n></li>
-</ul>";
+    if (empty($_SESSION['UserId']) && plugin_find_id("auth") > 0)
+    {
+      $this->vars['baseUrl'] = Traceback_uri();
+    }
+
+    return $this->renderTemplate("default.html");
   }
 }
 

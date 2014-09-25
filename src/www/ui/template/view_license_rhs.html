@@ -1,6 +1,11 @@
-  {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
-  {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
-  {% if previousItem or nextItem %} <br/> {% endif %}
+
+
+  {% if previousItem or nextItem %}
+  <div>
+    {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
+    {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
+  </div>
+  {% endif %}
   
 
   {% include 'change_license_modal.html' %}
@@ -8,41 +13,63 @@
   {{ licenseInformation }}
   {% if clearingHistory %}
   <h3>
+
+    
+    <div>
+
+        <table border="1" id="licenseDecisionTable">
+            <tr>
+                <th>
+                    <i18n>License</i18n>
+                </th>
+                <th>
+                    <i18n>Source</i18n>
+                </th>
+                <th>
+                    <i18n>Action</i18n>
+                </th>
+            </tr>
+        </table>
+    </div>
+
+
+<h3>
     <i18n>Clearing History</i18n>
-  </h3>
-  <div class="scrollable2">
+</h3>
+<div class="scrollable2">
     <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
-      <tr>
-          <th>
-              <i18n>Date</i18n>
-          </th>
-          <th>
-              <i18n>Username</i18n>
-          </th>
-          <th>
-              <i18n>Scope</i18n>
-          </th>
-          <th>
-              <i18n>Type</i18n>
-          </th>
-          <th>
-              <i18n>Licenses</i18n>
-          </th>
-          <th>
-              <i18n>Comment</i18n>
-          </th>
-          <th>
-              <i18n>Remark</i18n>
-          </th>
-      </tr>
-      {% for row in clearingHistory %}
-      <tr {%if row.isInactive %} class="inactiveClearing"{% endif%}>
-      {% for col in row.content %}
+        <tr>
+            <th>
+                <i18n>Date</i18n>
+            </th>
+            <th>
+                <i18n>Username</i18n>
+            </th>
+            <th>
+                <i18n>Scope</i18n>
+            </th>
+            <th>
+                <i18n>Type</i18n>
+            </th>
+            <th>
+                <i18n>Licenses</i18n>
+            </th>
+            <th>
+                <i18n>Comment</i18n>
+            </th>
+            <th>
+                <i18n>Remark</i18n>
+            </th>
+        </tr>
+        {% for row in clearingHistory %}
+        <tr
+        {%if row.isInactive %} class="inactiveClearing"{% endif%}>
+        {% for col in row.content %}
         <td>{{ col }}</td>
-      {% endfor %}
-      </tr>
-      {% endfor %}
+        {% endfor %}
+        </tr>
+        {% endfor %}
     </table>
-   <span class="inactiveClearing">Inactive concluded licenses decisions</span>
-  </div>
-  {% endif %}
+    <span class="inactiveClearing">Inactive concluded licenses decisions</span>
+</div>
+{% endif %}

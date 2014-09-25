@@ -202,6 +202,7 @@ class ClearingView extends FO_Plugin
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
+
     $this->vars['uri'] = Traceback_uri(). Traceback_parm_keep(array('mod','upload','folder'));
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
@@ -266,9 +267,7 @@ class ClearingView extends FO_Plugin
     }
     $licenseInformation .= $output;
  
-    
-    
-    
+
     
     $permission = GetUploadPerm($uploadId);
     $clearingHistory = '';
@@ -296,8 +295,7 @@ class ClearingView extends FO_Plugin
     return "view_license.html";
   }
 
-
-  /**
+/*
  * \brief Customize submenus.
  */
   function RegisterMenus()

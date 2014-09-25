@@ -74,27 +74,20 @@ class ui_welcome extends FO_Plugin
    * @return string rendered template
    */
   function outputHtml() {
-    global $container;
-    $twig=$container->get('twig.environment');
     $show = GetParm('show', PARM_STRING);
-    global $container;
     if ($show=='licensebrowser'){
-      return $twig->loadTemplate("licensebrowser.htc")->render(array());
+      return $this->renderTemplate("licensebrowser.html");
     }
     $Login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
     {
       $Login = "<a href='$SiteURI?mod=auth'>$Login</a>";
     }
-    $vars['login'] = $Login;
-    $vars['SiteURI'] = Traceback_uri();
-    return $twig->loadTemplate('welcome.htc')->render(array('login'=> $Login,'SiteURI' => Traceback_uri() ));
+    $this->vars['login'] = $Login;
+    $this->vars['SiteURI'] = Traceback_uri();
 
-    
-    
-    //return $renderer->renderTemplate("welcome");
+    return $this->renderTemplate('welcome.html');
   }
- 
 }
 
 $NewPlugin = new ui_welcome;
