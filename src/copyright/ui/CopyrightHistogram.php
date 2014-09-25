@@ -99,15 +99,11 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
   $output .= "</table>\n";
 
       $tableColumns = '[
-      { "sTitle" : "'._("Count").'", "sClass": "left" },
-      { "sTitle" : "'._("Files").'", "sClass": "center", "bSortable": false, "bSearchable": false },
-      { "sTitle" : "'.$description.'", "sClass": "center"}
+      { "sTitle" : "'._("Count").'", "sClass": "right" ,"sWidth" : "5%" },
+      { "sTitle" : "'.$description.'", "sClass": "left"}
     ]';
     $tableSorting = json_encode($this->returnSortOrder());
-//  $.getJSON( sSource, aoData, fnCallback ).fail( function() {
-//              if (confirm("You are not logged in. Go to login page?"))
-//                window.location.href="'.  Traceback_uri(). '?mod=auth";
-//            });
+
 
 
       $dataTableConfig =
@@ -119,7 +115,9 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
               aoData.push( { "name":"agent" , "value" : "'.$Agent_pk.'" } );
               aoData.push( { "name":"type" , "value" : "'.$type.'" } );
               aoData.push( { "name":"filter" , "value" : "'.$filter.'" } );
-            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+              $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+              if (confirm("You are not logged in. Go to login page?"))
+                window.location.href="'.  Traceback_uri(). '?mod=auth";
             });
           },
       "aoColumns": '.$tableColumns.',
@@ -600,7 +598,7 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
   static public function returnSortOrder () {
     $defaultOrder = array (
         array(0, "desc"),
-        array(2, "desc"),
+        array(1, "desc"),
     );
     return $defaultOrder;
   }

@@ -19,6 +19,9 @@
 
 
 use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\DataTablesUtility;
 
 define("TITLE_copyrightHistogramProcessPost", _("Private: Browse post"));
 class CopyrightHistogramProcessPost  extends FO_Plugin {
@@ -27,11 +30,21 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
    */
   private $uploadtree_tablename;
 
-    /**
-   * @var CopyrightDao
+  /** @var array */
+  private $filterParams;
+  /**
+   * @var DbManager
    */
+  private $dbManager;
 
-  private  $copyrightDao;
+
+  /**
+   * @var UploadDao
+   */
+  private $uploadDao;
+
+  /** @var DataTablesUtility $dataTablesUtility */
+  private $dataTablesUtility;
 
   function __construct()
   {
@@ -46,7 +59,10 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 
     parent::__construct();
     global $container;
-    $this->copyrightDao = $container->get('dao.copyright');
+    $this->dataTablesUtility = $container->get('utils.data_tables_utility');
+    $this->uploadDao = $container->get('dao.upload');
+    $this->dbManager = $container->get('db.manager');
+    $this->filterParams=array();
   }
 
 
@@ -61,10 +77,6 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
     }
 
     $upload = GetParm("upload",PARM_INTEGER);
-    $item = GetParm("item",PARM_INTEGER);
-    $agent_pk = GetParm("agent",PARM_STRING);
-    $type = GetParm("type",PARM_STRING);
-    $filter = GetParm("filter",PARM_STRING);
     /* check upload permissions */
     $UploadPerm = GetUploadPerm($upload);
     if ($UploadPerm < PERM_READ)
@@ -73,6 +85,18 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
       echo "<h2>$text<h2>";
       return;
     }
+
+
+
+    $item = GetParm("item",PARM_INTEGER);
+    $agent_pk = GetParm("agent",PARM_STRING);
+    $type = GetParm("type",PARM_STRING);
+    $filter = GetParm("filter",PARM_STRING);
+
+
+
+
+
 
     $this->uploadtree_tablename = GetUploadtreeTableName($upload);
 
@@ -104,12 +128,12 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 //    $uniqueCount++;  I need to get this from extra queries
 //    $totalCount += $row['copyright_count'];
     $output = array();
-    $output[] =$row['copyright_count'];
+
     $link = "<a href='";
     $link .= Traceback_uri();
     $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $type;
     if (!empty($filter)) $URLargs .= "&filter=$filter";
-    $link .= $URLargs . "'>Show</a>";
+    $link .= $URLargs . "'>".$row['copyright_count']."</a>";
     $output[]=$link;
 
 
@@ -132,7 +156,7 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 
   private function GetTableData($upload, $item, $agent_pk, $type, $filter)
   {
-    $rows = $this->copyrightDao->getCopyrights($upload,$item,  $this->uploadtree_tablename ,$agent_pk, 0,$type,$filter);
+    list ($rows, $iTotalDisplayRecords,$iTotalRecords ) = $this->getCopyrights($upload,$item,  $this->uploadtree_tablename ,$agent_pk, 0,$type,$filter);
     $aaData=array();
     if(!empty($rows))
     {
@@ -142,17 +166,122 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
       }
     }
 
-//    $output .= "</table>\n";
-//    $output .= "<p>\n";
-//
-//    $output .= "$descriptionUnique: $uniqueCount<br>\n";
-//    $output .= "$descriptionTotal: $count";
-
-
-    $iTotalRecords=8;
-    $iTotalDisplayRecords=10;
     return array($aaData, $iTotalRecords, $iTotalDisplayRecords);
 
+  }
+
+
+    private function getOrderString(){
+
+    $columnNamesInDatabase=array('copyright_count', 'content');
+
+    $defaultOrder = CopyrightHistogram::returnSortOrder();
+
+    $orderString = $this->dataTablesUtility->getSortingString($_GET,$columnNamesInDatabase, $defaultOrder);
+
+    return $orderString;
+  }
+
+  private function getSearchString()
+  {
+    $searchPattern = GetParm('sSearch', PARM_STRING);
+    if (empty($searchPattern))
+    {
+      return '';
+    }
+    $this->filterParams[] = "%$searchPattern%";
+    return ' AND upload_filename ilike $'.count($this->filterParams).' ';
+  }
+
+
+
+  public function getCopyrights( $upload_pk, $Uploadtree_pk, $uploadTreeTableName , $Agent_pk, $hash = 0, $type, $filter)
+  {
+    $offset = GetParm('iDisplayStart',PARM_INTEGER);
+    $limit = GetParm('iDisplayLength',PARM_INTEGER);
+
+
+    $orderString = $this->getOrderString();
+    $this->filterParams = array();
+    $searchFilter = $this->getSearchString();
+
+    list($left, $right) = $this->uploadDao->getLeftAndRight($Uploadtree_pk, $uploadTreeTableName);
+
+    //! Set the default to none
+    if($filter=="")  $filter = "none";
+
+    $sql_upload = "";
+    if ('uploadtree_a' == $uploadTreeTableName) {
+      $sql_upload = " AND UT.upload_fk=$upload_pk ";
+    }
+
+    $join = "";
+    $filterQuery ="";
+    if( $filter == "legal" ) {
+      $Copyright = "Copyright";
+      $filterQuery  = " AND CP.content ILIKE ('$Copyright%') ";
+    }
+    else if ($filter == "nolics"){
+
+      $NoLicStr = "No_license_found";
+      $VoidLicStr = "Void";
+      $join  = " INNER JOIN license_file AS LF on  CP.pfile_fk =LF.pfile_fk ";
+      $filterQuery =" AND LF.rf_fk IN (select rf_pk from license_ref where rf_shortname IN ('$NoLicStr', '$VoidLicStr')) ";
+    }
+    else if ($filter == "all") {  /* Not needed, but here to show that there is a filter all */
+      $filterQuery ="";
+    }
+
+    $params = array($left,$right,$type,$Agent_pk);
+
+    $filterParms = $params;
+    foreach($this->filterParams as $par)
+    {
+      $filterParms[]=$par;
+    }
+    $unorderedQuery= "FROM copyright AS CP " .
+    "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
+    $join.
+    "WHERE " .
+    " ( UT.lft  BETWEEN  $1 AND  $2 ) " .
+    "AND CP.type = $3 ".
+    " AND CP.agent_fk= $4 ".
+    $sql_upload;
+    $totalFilter = $filterQuery. " ". $searchFilter;
+
+    $grouping = " GROUP BY content, hash ";
+
+    $countQuery = "select count(*) from (SELECT substring(CP.content FROM 1 for 150) AS content, hash, count(*) $unorderedQuery  $totalFilter $grouping ) as K";
+
+    $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
+        $filterParms, __METHOD__ . ".count");
+    $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
+
+    $countAllQuery = "select count(*) from (SELECT substring(CP.content FROM 1 for 150) AS content, hash, count(*) $unorderedQuery$grouping ) as K";
+
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__ . "count.all");
+    $iTotalRecords = $iTotalRecordsRow['count'];
+
+    $range= "";
+
+    $filterParms[] = $offset;
+    $range .= ' OFFSET $'.count($filterParms);
+    $filterParms[] = $limit;
+    $range .= ' LIMIT $'.count($filterParms);
+
+    $sql = "SELECT substring(CP.content FROM 1 for 150) AS content, hash,  count(*)  as copyright_count  " .
+        $unorderedQuery .$totalFilter . $grouping  . $orderString. $range;
+
+    $statement = __METHOD__ . $filter.$uploadTreeTableName;
+
+
+    $this->dbManager->prepare($statement,$sql);
+
+    $result = $this->dbManager->execute($statement,$filterParms);
+    $rows = pg_fetch_all($result);
+    pg_free_result($result);
+
+    return array($rows, $iTotalDisplayRecords,$iTotalRecords );
   }
 
 
