@@ -34,7 +34,7 @@ std::string getStringFromFile(const char *filename, const unsigned long int maxi
 }
 
 
-std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes  ){
+std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes) {
   return getStringFromFile(filename.c_str(), maximumBytes);
 };
 

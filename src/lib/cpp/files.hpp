@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace fo {
 
-
-
-
 class File {
 public:
   unsigned long id;
@@ -32,8 +29,6 @@ public:
 
   ~File();
 };
-
-
 
 std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1<<20 );
 std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1<<20 );

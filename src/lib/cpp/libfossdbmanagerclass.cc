@@ -1,9 +1,13 @@
 /*
- * libfossdbmanagerclass.cc
- *
- *  Created on: Sep 22, 2014
- *      Author: ”J. Najjar”
- */
+Author: Johannes Najjar, Daniele Fognini
+Copyright (C) 2014, Siemens AG
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+*/
 
 #include "libfossdbmanagerclass.hpp"
 
@@ -23,16 +27,36 @@ DbManager::~DbManager(){
   fo_dbManager_finish(_dbManager);
 };
 
-PGconn* DbManager::getConnection(){
+PGconn* DbManager::getConnection() const {
   return fo_dbManager_getWrappedConnection(_dbManager);
 }
 
 
-DbManager* DbManager::spawn(){
+DbManager* DbManager::spawn() const {
   return new DbManager(fo_dbManager_fork(_dbManager));
 }
 
-
-fo_dbManager* DbManager::getStruct_dbManager(){
+fo_dbManager* DbManager::getStruct_dbManager() const {
   return _dbManager;
+}
+
+bool DbManager::tableExists(const char* tableName) const {
+  return fo_dbManager_tableExists(_dbManager, tableName);
+}
+
+PGresult* DbManager::queryPrintf(const char* queryStringFormat, ...) const {
+  va_list args;
+  va_start(args, queryStringFormat);
+  char* queryString = g_strdup_vprintf(queryStringFormat, args);
+  va_end(args);
+
+  if (queryString) {
+    PGresult* result = fo_dbManager_Exec_printf(_dbManager, queryString);
+
+    g_free(queryString);
+
+    return result;
+  } else {
+    return NULL;
+  }
 }

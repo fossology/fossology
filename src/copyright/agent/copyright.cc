@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 using namespace std;
 
-
-
 int main(int argc, char** argv) {
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
@@ -28,6 +26,11 @@ int main(int argc, char** argv) {
   int verbosity=8;
   CopyrightState* state;
   state = getState(dbManager, verbosity);
+
+  if (!state) {
+    std::cout << "FATAL: initialization failed" << std::endl;
+    bail(state, 9);
+  }
 
   state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
   state->addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));

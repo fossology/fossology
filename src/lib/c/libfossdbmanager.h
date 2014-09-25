@@ -137,7 +137,7 @@ int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName);
  * \sa for example see fo_dbManager_Exec_printf()
  *
  */
-char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string);
+char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string);
 
 /*!
  * fo_dbManager_Exec_printf()
@@ -224,6 +224,8 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* 
  * \return query result or NULL on failure
  */
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
+
+int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName);
 
 // visible for testing
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params);

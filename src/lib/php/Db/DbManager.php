@@ -24,17 +24,20 @@ use Monolog\Logger;
 
 class DbManager extends Object
 {
-  /** * @var Driver */
+  /** @var Driver */
   private $dbDriver;
 
-  /** * @var array */
+  /** @var array */
   private $preparedStatements;
 
-  /** * @var Logger */
+  /** @var Logger */
   private $logger;
 
-  /** * @var array */
+  /** @var array */
   private $cumulatedTime = array();
+
+  /** @var array */
+  private $queryCount = array();
 
   function __construct(Logger $logger)
   {
@@ -64,6 +67,7 @@ class DbManager extends Object
     $startTime = microtime($get_as_float = true);
     $res = $this->dbDriver->prepare($statementName, $sqlStatement);
     $this->cumulatedTime[$statementName] = microtime($get_as_float = true) - $startTime;
+    $this->queryCount[$statementName] = 0;
     $this->logger->addDebug("prepare '$statementName' took " . sprintf("%0.3fms", 1000 * $this->cumulatedTime[$statementName]));
     $this->checkResult($res, "$sqlStatement -- $statementName");
     $this->preparedStatements[$statementName] = $sqlStatement;
@@ -83,7 +87,7 @@ class DbManager extends Object
     $startTime = microtime($get_as_float = true);
     $res = $this->dbDriver->execute($statementName, $params);
     $execTime = microtime($get_as_float = true) - $startTime;
-    $this->cumulatedTime[$statementName] += $execTime;
+    $this->collectStatistics($statementName, $execTime);
     // $this->logger->addDebug("execute '$statementName took " . sprintf("%0.3fms", 1000*$execTime));
     $this->checkResult($res, "$statementName: " . $this->preparedStatements[$statementName] . ' -- -- ' . print_r($params, true));
     return $res;
@@ -177,8 +181,30 @@ class DbManager extends Object
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
     {
-      $this->logger->addDebug(sprintf(" %0.3fms", 1000 * $seconds) . " for '$statementName' took ");
+      $queryCount = $this->queryCount[$statementName];
+      $this->logger->addDebug("executing '$statementName' took "
+          . $this->formatMilliseconds($seconds)
+          . " ($queryCount queries" . ($queryCount > 0 ? ", avg " . $this->formatMilliseconds($seconds / $queryCount) : "") . ")");
     }
+  }
+
+  /**
+   * @param $seconds
+   * @return string
+   */
+  protected function formatMilliseconds($seconds)
+  {
+    return sprintf(" %0.3fms", 1000 * $seconds);
+  }
+
+  /**
+   * @param $statementName
+   * @param $execTime
+   */
+  protected function collectStatistics($statementName, $execTime)
+  {
+    $this->cumulatedTime[$statementName] += $execTime;
+    $this->queryCount[$statementName]++;
   }
 
 
