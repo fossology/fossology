@@ -13,8 +13,10 @@
 #define DATABASE_HPP
 
 #include "libfossdbmanagerclass.hpp"
+#include "cleanEntries.hpp"
 
 bool checkTables(DbManager* dbManager);
 bool createTables(DbManager* dbManager);
+bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
 
 #endif // DATABASE_HPP

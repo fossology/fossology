@@ -21,8 +21,14 @@ typedef struct {
 } ColumnDef;
 
 ColumnDef columns[] = {
-  {"a", "integer", ""},
-  {"b", "bigint", ""}
+  {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('copyright_ct_pk_seq'::regclass)"}, //TODO abstract name
+  {"agent_fk", "bigint", "NOT NULL"},
+  {"pfile_fk", "bigint", "NOT NULL"},
+  {"content", "text", ""},
+  {"hash", "text", ""},
+  {"type", "text", "CHECK (type in ('statement', 'email', 'url'))"}, //TODO abstract or remove
+  {"copy_startbyte", "integer", ""},
+  {"copy_endbyte", "integer", ""},
 };
 
 const char* getColumnListString() {
@@ -51,7 +57,7 @@ const char* getColumnCreationString() {
 
 bool createTables(DbManager* dbManager) {
 
-#define CHECK_OR_RETURN(query) \
+#define CHECK_OR_RETURN_FALSE(query) \
   do {\
     PGresult* queryResult = (query); \
     if ((queryResult)) {\
@@ -61,23 +67,64 @@ bool createTables(DbManager* dbManager) {
     }\
   } while(0)
 
-  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnCreationString()));
-
-  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"  //TODO abstract name
                                          " START WITH 1"
                                          " INCREMENT BY 1"
                                          " NO MAXVALUE"
                                          " NO MINVALUE"
                                          " CACHE 1"));
 
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnCreationString()));
+
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
+   "CREATE INDEX copyright_agent_fk_index"  //TODO abstract name
+   " ON copyright"  //TODO abstract name
+   " USING BTREE (agent_fk)"  //TODO abstract name
+  ));
+
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
+   "CREATE INDEX copyright_pfile_fk_index"  //TODO abstract name
+   " ON copyright"  //TODO abstract name
+   " USING BTREE (pfile_fk)"  //TODO abstract name
+  ));
+
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
+    "ALTER TABLE ONLY copyright"  //TODO abstract name
+    " ADD CONSTRAINT agent_fk"  //TODO abstract name
+    " FOREIGN KEY (agent_fk)"  //TODO abstract name
+    " REFERENCES agent(agent_pk) ON DELETE CASCADE" //TODO abstract name
+  ));
+
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
+    "ALTER TABLE ONLY copyright" //TODO abstract name
+    " ADD CONSTRAINT pfile_fk" //TODO abstract name
+    " FOREIGN KEY (pfile_fk)" //TODO abstract name
+    " REFERENCES pfile(pfile_pk) ON DELETE CASCADE" //TODO abstract name
+  ));
+
   return true;
 }
 
-
 bool checkTables(DbManager* dbManager) {
   if (dbManager->tableExists(tableName)) {
-    CHECK_OR_RETURN(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), tableName));
+    CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), tableName));
+  } else {
+    return false;
   }
 
   return true;
+}
+
+bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
+  //TODO implement prepared stmts
+  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
+    "INSERT INTO %s(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
+    " VALUES(%ld,%ld,'%s','%s','%s',%d,%d)",
+    tableName,
+    entry.agent_fk, entry.pfile_fk,
+    entry.content.c_str(),
+    entry.hash.c_str(),
+    entry.type.c_str(),
+    entry.copy_startbyte, entry.copy_endbyte
+  ));
 }

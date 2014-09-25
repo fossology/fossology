@@ -40,7 +40,7 @@ CopyrightState* getState(DbManager* dbManager, int verbosity);
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector< RegexMatcher > matchers ) ;
 
 
-void saveToDatabase(const std::vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) ;
+bool saveToDatabase(const std::vector< CopyrightMatch >& matches, CopyrightState* state, long pFileId) ;
 
 void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state);
 void matchPFileWithLicenses(CopyrightState* state, long pFileId) ;

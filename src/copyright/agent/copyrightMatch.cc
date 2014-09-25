@@ -19,7 +19,7 @@ CopyrightMatch::~CopyrightMatch(){};
 
 unsigned int CopyrightMatch::start() const
 {
-  return 0; //TODO return correct value
+  return sm.position(regexIndex);
 }
 
 unsigned int CopyrightMatch::length() const

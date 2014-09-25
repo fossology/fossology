@@ -10,7 +10,7 @@ TOP=../../..
 CLIBDIR=../c/
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
+CXXFLAGS_LOCAL=-fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
@@ -31,12 +31,12 @@ $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 $(DEPENDENCY):
 	$(MAKE) -C $(CLIBDIR)
 
-$(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
+$(EXE): %: %.cc $(LIB) $(VARS)
+	$(CXX) $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(LIB) -o $@
 
 
 $(OBJS): %.o: %.cc %.hpp
-	$(CXX) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
+	$(CXX) -c $< $(CONFDEF)  $(CXXFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"
