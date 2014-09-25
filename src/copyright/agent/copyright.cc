@@ -26,10 +26,11 @@ int main(int argc, char** argv) {
   int verbosity=8;
   CopyrightState* state;
   state = getState(dbManager, verbosity);
-
-  if (!state) {
-    std::cout << "FATAL: initialization failed" << std::endl;
-    bail(state, 9);
+  if (!checkTables(dbManager)) {
+    if (!createTables(dbManager)) {
+      std::cout << "FATAL: initialization failed" << std::endl;
+      bail(state, 9);
+    }
   }
 
   state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));

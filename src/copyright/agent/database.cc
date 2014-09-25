@@ -14,10 +14,40 @@
 
 const static char* tableName = "copyright";
 
-bool createTables(DbManager* dbManager) {
-  PGresult* createQueryResult = dbManager->queryPrintf("CREATE table %s()", tableName);
+const static char* columns[] = {"a integer", "b bigint"};
 
-  return createQueryResult != NULL;
+const char* getColumnListString() {
+  std::string result;
+  for (size_t i=0; i< (sizeof(columns)/sizeof(char*)); ++i) {
+    if (i!=0)
+      result += ", ";
+    result += columns[i];
+  }
+  return result.c_str();
+}
+
+bool createTables(DbManager* dbManager) {
+
+#define CHECK_OR_RETURN(query) \
+  do {\
+    PGresult* queryResult = (query); \
+    if ((queryResult)) {\
+      PQclear((queryResult));\
+    } else {\
+      return false;\
+    }\
+  } while(0)
+
+  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnListString()));
+
+  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"
+                                         " START WITH 1"
+                                         " INCREMENT BY 1"
+                                         " NO MAXVALUE"
+                                         " NO MINVALUE"
+                                         " CACHE 1"));
+
+  return true;
 }
 
 
