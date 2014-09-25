@@ -41,7 +41,7 @@ void bail(CopyrightState* state, int exitval) {
 CopyrightState* getState(DbManager* dbManager, int verbosity){
   int agentID;
   queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity);
+  return new CopyrightState(dbManager, agentID, verbosity, "copyright");
 }
 
 vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< RegexMatcher > matchers ) {
@@ -76,7 +76,7 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
 
     if(CleanDatabaseEntry(entry)) {
       ++count;
-      if (!insertInDatabase(state->getDbManager(), entry)) {
+      if (!state->copyrightDatabaseHandler.insertInDatabase(state->getDbManager(), entry)) {
         state->getDbManager()->rollback();
         return false;
       };
@@ -84,7 +84,7 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   }
 
   if (count==0) {
-    insertNoResultInDatabase(state->getDbManager(), state->getAgentId(), pFileId);
+    state->copyrightDatabaseHandler.insertNoResultInDatabase(state->getDbManager(), state->getAgentId(), pFileId);
   }
 
   return state->getDbManager()->commit();
@@ -116,7 +116,7 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 
 
 bool processUploadId (CopyrightState* state, int uploadId) {
-  vector<long> fileIds = queryFileIdsForUpload(state->getDbManager(), state->getAgentId(), uploadId);
+  vector<long> fileIds = state->queryFileIdsForUpload(uploadId);
 
   for (vector<long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
     long pFileId = *it;

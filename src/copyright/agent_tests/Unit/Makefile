@@ -75,7 +75,7 @@ uninstall:
 
 
 test: all
-	$(MAKE) -C $(TESTDIR) $@
+	./$(EXE)
 
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"

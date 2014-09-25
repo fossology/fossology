@@ -91,6 +91,7 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
     // I do not understand the above, I would assume they want to replace any of the characters with space
     // but the function replaces the sequence ...
     // This is a slow variant that does that. We need some | if we want to replace all of them
+    // TODO
     input.content = boost::regex_replace(input.content, boost::regex(":;<=>()"), newtext);
 
   }

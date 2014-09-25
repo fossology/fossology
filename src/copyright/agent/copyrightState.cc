@@ -1,9 +1,8 @@
 #include "copyrightState.hpp"
 
 
-CopyrightState::CopyrightState(DbManager*  _dbManager,
-            int _agentId,
-            int _verbosity):
+CopyrightState::CopyrightState(DbManager* _dbManager, int _agentId, int _verbosity, const char* name):
+                              copyrightDatabaseHandler(name),
                               dbManager(_dbManager),
                               agentId(_agentId),
                               verbosity(_verbosity)
@@ -12,7 +11,6 @@ CopyrightState::CopyrightState(DbManager*  _dbManager,
 }
 
 CopyrightState::~CopyrightState(){
-//  fo_dbManager_finish(dbManager); This has to be done by hand outside, as a dbManager can be shared between States
 }
 
 
@@ -31,5 +29,9 @@ void CopyrightState::addMatcher(RegexMatcher regexMatcher)
 std::vector< RegexMatcher > CopyrightState::getRegexMatchers()
 {
   return regexMatchers;
+}
+
+std::vector< long > CopyrightState::queryFileIdsForUpload(long uploadId) {
+ return copyrightDatabaseHandler.queryFileIdsForUpload(dbManager, agentId, uploadId);
 }
 

@@ -10,28 +10,43 @@
  */
 
 #include "database.hpp"
-#include <iostream> // TODO removeme
 
-const static char* tableName = "copyright";
+const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
+{
+    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('copyright_ct_pk_seq'::regclass)"},
+    {"agent_fk", "bigint", "NOT NULL"},
+    {"pfile_fk", "bigint", "NOT NULL"},
+    {"content", "text", ""},
+    {"hash", "text", ""},
+    {"type", "text", ""}, //TODO removed constrain: "CHECK (type in ('statement', 'email', 'url'))"},
+    {"copy_startbyte", "integer", ""},
+    {"copy_endbyte", "integer", ""},
+  };
 
-typedef struct {
-  const char* name;
-  const char* type;
-  const char* creationFlags;
-} ColumnDef;
+CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname)
+{
+  name = g_strdup(aname);
 
-ColumnDef columns[] = {
-  {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('copyright_ct_pk_seq'::regclass)"}, //TODO abstract name
-  {"agent_fk", "bigint", "NOT NULL"},
-  {"pfile_fk", "bigint", "NOT NULL"},
-  {"content", "text", ""},
-  {"hash", "text", ""},
-  {"type", "text", ""}, // TODO do we need this constrain?  "CHECK (type in ('statement', 'email', 'url'))"},
-  {"copy_startbyte", "integer", ""},
-  {"copy_endbyte", "integer", ""},
-};
+  insertInDatabaseQuery = g_strdup_printf(
+    "INSERT INTO %s(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
+    " VALUES($1,$2,$3,$4,$5,$6,$7)",
+    name
+  );
 
-const char* getColumnListString() {
+  insertNoResultInDatabaseQuery = g_strdup_printf(
+    "INSERT INTO %s(agent_fk, pfile_fk) VALUES($1,$2)",
+    name
+  );
+}
+
+CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
+  g_free(name);
+  g_free(insertInDatabaseQuery);
+  g_free(insertNoResultInDatabaseQuery);
+}
+
+
+const char* CopyrightDatabaseHandler::getColumnListString() {
   std::string result;
   for (size_t i=0; i<(sizeof(columns)/sizeof(ColumnDef)); ++i) {
     if (i!=0)
@@ -41,7 +56,7 @@ const char* getColumnListString() {
   return result.c_str();
 }
 
-const char* getColumnCreationString() {
+const char* CopyrightDatabaseHandler::getColumnCreationString() {
   std::string result;
   for (size_t i=0; i< (sizeof(columns)/sizeof(ColumnDef)); ++i) {
     if (i!=0)
@@ -55,55 +70,59 @@ const char* getColumnCreationString() {
   return result.c_str();
 }
 
-bool createTables(DbManager* dbManager) {
+bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
 
-#define CHECK_OR_RETURN_FALSE(query) \
+#define RETURN_IF_FALSE(query) \
   do {\
     if (!(query)) {\
       return false;\
     }\
   } while(0)
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"  //TODO abstract name
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq" // keep only one sequence
                                          " START WITH 1"
                                          " INCREMENT BY 1"
                                          " NO MAXVALUE"
                                          " NO MINVALUE"
-                                         " CACHE 1"));
+                                         " CACHE 1", name));
 
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnCreationString()));
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name, getColumnCreationString()));
 
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
-   "CREATE INDEX copyright_agent_fk_index"  //TODO abstract name
-   " ON copyright"  //TODO abstract name
-   " USING BTREE (agent_fk)"  //TODO abstract name
+  RETURN_IF_FALSE(dbManager->queryPrintf(
+   "CREATE INDEX %s_agent_fk_index"
+   " ON %s"
+   " USING BTREE (agent_fk)",
+   name, name
   ));
 
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
-   "CREATE INDEX copyright_pfile_fk_index"  //TODO abstract name
-   " ON copyright"  //TODO abstract name
-   " USING BTREE (pfile_fk)"  //TODO abstract name
+  RETURN_IF_FALSE(dbManager->queryPrintf(
+   "CREATE INDEX %s_pfile_fk_index"
+   " ON %s"
+   " USING BTREE (pfile_fk)",
+   name, name
   ));
 
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
-    "ALTER TABLE ONLY copyright"  //TODO abstract name
-    " ADD CONSTRAINT agent_fk"  //TODO abstract name
-    " FOREIGN KEY (agent_fk)"  //TODO abstract name
-    " REFERENCES agent(agent_pk) ON DELETE CASCADE" //TODO abstract name
+  RETURN_IF_FALSE(dbManager->queryPrintf(
+    "ALTER TABLE ONLY %s"
+    " ADD CONSTRAINT agent_fk"
+    " FOREIGN KEY (agent_fk)"
+    " REFERENCES agent(agent_pk) ON DELETE CASCADE",
+    name
   ));
 
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
-    "ALTER TABLE ONLY copyright" //TODO abstract name
-    " ADD CONSTRAINT pfile_fk" //TODO abstract name
-    " FOREIGN KEY (pfile_fk)" //TODO abstract name
-    " REFERENCES pfile(pfile_pk) ON DELETE CASCADE" //TODO abstract name
+  RETURN_IF_FALSE(dbManager->queryPrintf(
+    "ALTER TABLE ONLY %s"
+    " ADD CONSTRAINT pfile_fk"
+    " FOREIGN KEY (pfile_fk)"
+    " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
+    name
   ));
 
   return true;
 }
 
-bool checkTables(DbManager* dbManager) {
-  if (dbManager->tableExists(tableName)) {
-    CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), tableName));
+bool CopyrightDatabaseHandler::checkTables(DbManager* dbManager) {
+  if (dbManager->tableExists(name)) {
+    RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), name));
   } else {
     return false;
   }
@@ -111,7 +130,7 @@ bool checkTables(DbManager* dbManager) {
   return true;
 }
 
-std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId) {
+std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId) {
   QueryResult queryResult = dbManager->queryPrintf(
     "SELECT pfile_pk"
     " FROM ("
@@ -119,10 +138,11 @@ std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int u
     "  FROM uploadtree"
     "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
     " ) AS SS "
-    "left outer join copyright on (PF = pfile_fk and agent_fk = %d) "
+    "left outer join %s on (PF = pfile_fk and agent_fk = %d) "
     "inner join pfile on (PF = pfile_pk) "
     "WHERE ct_pk IS null or agent_fk <> %d",
     uploadId,
+    name,
     agentId,
     agentId
   );
@@ -130,26 +150,24 @@ std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int u
   return queryResult.getSimpleResults<long>(0, atol);
 }
 
-bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId) {
+bool CopyrightDatabaseHandler::insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId) {
   return dbManager->execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager->getStruct_dbManager(),
       "insertNoResultInDatabase",
-      "INSERT INTO copyright(agent_fk, pfile_fk)"// TODO abstract
-      " VALUES($1,$2)",
+      insertNoResultInDatabaseQuery,
       long, long
     ),
     agentId, pFileId
   );
 }
 
-bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
+bool CopyrightDatabaseHandler::insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
   return dbManager->execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager->getStruct_dbManager(),
       "insertInDatabase",
-      "INSERT INTO copyright(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)" // TODO abstract
-      " VALUES($1,$2,$3,$4,$5,$6,$7)",
+      insertInDatabaseQuery,
       long, long, char*, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,

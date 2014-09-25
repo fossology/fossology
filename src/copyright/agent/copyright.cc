@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
   int verbosity=8;
   CopyrightState* state;
   state = getState(dbManager, verbosity);
-  if (!checkTables(dbManager)) {
-    if (!createTables(dbManager)) {
+  if (!state->copyrightDatabaseHandler.checkTables(dbManager)) {
+    if (!state->copyrightDatabaseHandler.createTables(dbManager)) {
       std::cout << "FATAL: initialization failed" << std::endl;
       bail(state, 9);
     }
