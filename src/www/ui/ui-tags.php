@@ -20,11 +20,13 @@ define("TITLE_ui_tag", _("Tag"));
 
 class ui_tag extends FO_Plugin
 {
-  var $Name       = "tag";
-  var $Title      = TITLE_ui_tag;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name       = "tag";
+    $this->Title      = TITLE_ui_tag;
+    $this->DBaccess   = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.
@@ -68,18 +70,6 @@ class ui_tag extends FO_Plugin
       $tag_desc = GetParm('tag_desc', PARM_TEXT);
       $tag_dir = GetParm('tag_dir', PARM_TEXT);
     }
-
-    /* Debug
-     print "<pre>";
-     print "Create Tag: TagName is:$tag_name\n";
-     print "Create Tag: TagNotes is:$tag_notes\n";
-     print "Create Tag: TagFile is:$tag_file\n";
-     print "Create Tag: TagPackage is:$tag_package\n";
-     print "Create Tag: TagContainer is:$tag_container\n";
-     print "Upload: $Upload\n";
-     print "Item: $Item\n";
-     print "</pre>";
-     */
 
     if (empty($tag_name))
     {
@@ -173,8 +163,6 @@ class ui_tag extends FO_Plugin
       pg_free_result($result);
     }
 
-    //echo sizeof($pfileArray);
-
     if (!empty($tag_dir))
     {
       $sql = "SELECT tag_uploadtree_pk FROM tag_uploadtree WHERE tag_fk = $tag_pk AND uploadtree_fk = $Item;";
@@ -251,17 +239,6 @@ class ui_tag extends FO_Plugin
     $tag_desc = GetParm('tag_desc', PARM_TEXT);
     $tag_dir = GetParm('tag_dir', PARM_TEXT);
 
-    /* Debug
-     print "<pre>";
-     print "Edit Tag: TagName is:$tag_name\n";
-     print "Edit Tag: TagNotes is:$tag_notes\n";
-     print "Edit Tag: TagFile is:$tag_file\n";
-     print "Edit Tag: TagPackage is:$tag_package\n";
-     print "Edit Tag: TagContainer is:$tag_container\n";
-     print "Upload: $Upload\n";
-     print "Item: $Item\n";
-     print "</pre>";*/
-
     if (empty($tag_name))
     {
       $text = _("TagName must be specified. Tag Not Updated.");
@@ -336,49 +313,21 @@ class ui_tag extends FO_Plugin
     { return; }
     $tag_file_pk = GetParm('tag_file_pk', PARM_INTEGER);
 
-    /* Get ufile_name from uploadtree_pk */
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
               WHERE uploadtree_pk = $Item";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    $ufile_name = $row["ufile_name"];
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    /* Don't needed to delete from tag table
-     $sql = "SELECT tag_fk FROM tag_file WHERE tag_file_pk=$tag_file_pk;";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     if (pg_num_rows($result) < 1)
-     {
-     pg_free_result($result);
-     $text = _("Can't find this tag, Tag Not deleted.");
-     return ($text);
-     }
-     $row = pg_fetch_assoc($result);
-     $tag_pk = $row['tag_fk'];
-     pg_free_result($result);
-
-     pg_exec("BEGIN;");
-     */
     if (Isdir($ufile_mode))
-    $sql = "DELETE FROM tag_uploadtree WHERE tag_uploadtree_pk = $tag_file_pk;";
+      $sql = "DELETE FROM tag_uploadtree WHERE tag_uploadtree_pk = $tag_file_pk";
     else
-    $sql = "DELETE FROM tag_file WHERE tag_file_pk = $tag_file_pk;";
+      $sql = "DELETE FROM tag_file WHERE tag_file_pk = $tag_file_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-
-    /*  Delete only association, not the tag itself.
-     $sql = "DELETE FROM tag WHERE tag_pk = $tag_pk;";
-     $result = pg_query($PG_CONN, $sql);
-     DBCheckResult($result, $sql, __FILE__, __LINE__);
-     pg_free_result($result);
-
-     pg_exec("COMMIT;");
-     */
-    return (NULL);
   }
 
   /**
@@ -706,12 +655,9 @@ class ui_tag extends FO_Plugin
     if ($ShowHeader)
     {
       $V .= Dir2Browse("browse",$Item,NULL,1,"Browse");
-    } // if ShowHeader
-     
-    /* Display exist tags for this file */
-    $V .=  $this->ShowExistTags($Upload,$Item);
+    }
 
-    /* Add AJAX script */
+    $V .=  $this->ShowExistTags($Upload,$Item);
     $V .= $this->ShowAjaxPage();
 
     if ($action == 'edit')
@@ -736,75 +682,50 @@ class ui_tag extends FO_Plugin
     return($V);
   }
 
-  /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content.
-   * (OutputOpen and Output are separated so one plugin
-   * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
-   */
-  function Output()
+
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $action = GetParm('action', PARM_TEXT);
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        if ($action == 'add')
-        {
-          $rc = $this->CreateTag(NULL);
-          if (!empty($rc))
-          {
-            $text = _("Create Tag Failed");
-            $V .= displayMessage("$text: $rc");
-          } else {
-            $text = _("Create Tag Successful!");
-            $V .= displayMessage($text);
-          }
-        }
-        if ($action == 'update')
-        {
-          $rc = $this->EditTag();
-          if (!empty($rc))
-          {
-            $text = _("Edit Tag Failed");
-            $V .= displayMessage("$text: $rc");
-          }else{
-            $text = _("Edit Tag Successful!");
-            $V .= displayMessage($text);
-          }
-        }
-        if ($action == 'delete')
-        {
-          $rc = $this->DeleteTag();
-          if (!empty($rc))
-          {
-            $text = _("Delete Tag Failed");
-            $V .= displayMessage("$text: $rc");
-          }else{
-            $text = _("Delete Tag Successful!");
-            $V .= displayMessage($text);
-          }
-        }
-        $V .= $this->ShowTaggingPage(1,1,$action);
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
-    return;
-  } // Output()
 
-};
+    if ($action == 'add')
+    {
+      $rc = $this->CreateTag(NULL);
+      if (!empty($rc))
+      {
+        $text = _("Create Tag Failed");
+        $this->vars['message'] = "$text: $rc";
+      } else {
+        $this->vars['message'] = _("Create Tag Successful!");
+      }
+    }
+    if ($action == 'update')
+    {
+      $rc = $this->EditTag();
+      if (!empty($rc))
+      {
+        $text = _("Edit Tag Failed");
+        $this->vars['message'] = "$text: $rc";
+      }else{
+        $this->vars['message'] = _("Edit Tag Successful!");
+      }
+    }
+    if ($action == 'delete')
+    {
+      $rc = $this->DeleteTag();
+      if (!empty($rc))
+      {
+        $text = _("Delete Tag Failed");
+        $this->vars['message'] = "$text: $rc";
+      }else{
+        $this->vars['message'] = _("Delete Tag Successful!");
+      }
+    }
+    $V .= $this->ShowTaggingPage(1,1,$action);
+
+    return $V;
+  }
+
+}
 $NewPlugin = new ui_tag;
 $NewPlugin->Initialize();
-?>
