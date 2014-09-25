@@ -52,91 +52,6 @@ class CopyrightHistogram  extends FO_Plugin {
 
   }
 
-
-//  /**
-//   * \brief Customize submenus.
-//   */
-//  function RegisterMenus()
-//  {
-//    // For all other menus, permit coming back here.
-//    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
-//    $Item = GetParm("item",PARM_INTEGER);
-//    $Upload = GetParm("upload",PARM_INTEGER);
-//    if (!empty($Item) && !empty($Upload))
-//    {
-//      if (GetParm("mod",PARM_STRING) == $this->Name)
-//      {
-//        menu_insert("Browse::Copyright/Email/URL NEW",1);
-//        menu_insert("Browse::[BREAK]",100);
-//      }
-//      else
-//      {
-//        $text = _("View copyright/email/url histogram");
-//        menu_insert("Browse::Copyright/Email/URL NEW",10,$URI,$text);
-//      }
-//    }
-//  } // RegisterMenus()
-
-//  //TODO
-//  private function ShowFolderCreateHistogramTable($Folder, $Show)
-//  {
-//    $tableColumns = '[
-//      { "sTitle" : "'._("Upload Name and Description").'", "sClass": "left" },
-//      { "sTitle" : "'._("Status").'", "sClass": "center" , "bSearchable": false},
-//      { "sTitle" : "'._("Reject-job").'", "sClass": "center", "bSortable": false, "bSearchable": false,
-//                      "mRender": function ( source, type, val ) { return rejectorColumn( source, type, val );}
-//                  },
-//      { "sTitle" : "'._("Assigned to").'", "sClass": "center" , "bSearchable": false},
-//      { "sTitle" : "'._("Upload Date").'", "sClass": "center" , "sType": "string", "bSearchable": false},
-//      { "sTitle" : "'._("Priority").'", "sClass": "center priobucket", "bSearchable": false,
-//                      "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); }
-//                  }
-//    ]';
-//
-//    $tableSorting = json_encode($this->returnSortOrder());
-////    $tableLanguage = '[
-////        { "sInfo" : "Showing _START_ to _END_ of _TOTAL_ files" },
-////        { "sSearch" : "Search _INPUT_ in filenames" },
-////        { "sLengthMenu" : "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files" }
-////    ]';
-//
-//
-//    $dataTableConfig =
-//        '{  "bServerSide": true,
-//            "sAjaxSource": "?mod=browse-processPost",
-//            "fnServerData": function ( sSource, aoData, fnCallback ) {
-//                 aoData.push( { "name":"folder" , "value" : "'.$Folder.'" } );
-//            aoData.push( { "name":"show" , "value" : "'.$Show.'" } );
-//            aoData.push( { "name":"assigneeSelected" , "value" : assigneeSelected } );
-//            aoData.push( { "name":"statusSelected" , "value" : statusSelected } );
-//            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
-//              if (confirm("You are not logged in. Go to login page?"))
-//                window.location.href="'.  Traceback_uri(). '?mod=auth";
-//            });
-//          },
-//      "aoColumns": '.$tableColumns.',
-//      "aaSorting": '.$tableSorting.',
-//      "iDisplayLength": 50,
-//      "bProcessing": true,
-//      "bStateSave": true,
-//      "bRetrieve": true
-//    }';
-//
-//
-//    $VF   = "<script>
-//              function createBrowseTable() {
-//                    var otable = $('#browsetbl').dataTable(". $dataTableConfig . ");
-//                    // var settings = otable.fnSettings(); // for debugging
-//                    return otable;
-//                }
-//            </script>";
-//
-//    return $VF;
-//
-//  }
-
-
-
 private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadtree_tablename, $Agent_pk) {
   list($ordercount, $ordercopyright) = $this->getOrderings();
 
@@ -163,8 +78,7 @@ private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadt
 
   foreach ($rows as $row)
   {
-    $hash = $row['hash'];
-    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, $hash, true ,$filter, $type);
+    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, true ,$filter, $type);
   }
 
   $VCopyright .= "</table>\n";
@@ -179,38 +93,53 @@ private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadt
 }
 
 
-private function getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $uploadtree_tablename, $Agent_pk){
+private function getSingleType($type,$description,$descriptionUnique,$descriptionTotal, $upload_pk, $uploadtreeId, $filter, $uploadtree_tablename, $Agent_pk){
 
-  $rows = $this->copyrightDao->getCopyrights($upload_pk,$Uploadtree_pk, $uploadtree_tablename ,$Agent_pk, 0,$type,$filter);
-
-  $text = _("Count");
-  $text1 = _("Files");
-
-
-  $count = 0;
-  $uniqueCount = 0;
-
-  $output = "<table border=1 width='100%'id='copyright'.$type.>\n";
-  $output .= "<tr><th width='10%'>$text</th>";
-  $output .= "<th width='10%'>$text1</th>";
-  $output .= "<th>$decription</th></tr>\n";
-
-
-  //TODO Replace this by general datatable
-
-  foreach ($rows as $row)
-  {
-    $hash = $row['hash'];
-    //TODO make this return arrays for each colum and append to array
-    $output .= $this->fillTableRow($row, $uniqueCount, $count, $Uploadtree_pk, $Agent_pk, $hash,false, "", $type);
-  }
-
-
+  $output = "<table border=1 width='100%'id='copyright".$type."'>\n";
   $output .= "</table>\n";
-  $output .= "<p>\n";
 
-  $output .= "$descriptionUnique: $uniqueCount<br>\n";
-  $output .= "$descriptionTotal: $count";
+      $tableColumns = '[
+      { "sTitle" : "'._("Count").'", "sClass": "left" },
+      { "sTitle" : "'._("Files").'", "sClass": "center", "bSortable": false, "bSearchable": false },
+      { "sTitle" : "'.$description.'", "sClass": "center"}
+    ]';
+    $tableSorting = json_encode($this->returnSortOrder());
+//  $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+//              if (confirm("You are not logged in. Go to login page?"))
+//                window.location.href="'.  Traceback_uri(). '?mod=auth";
+//            });
+
+
+      $dataTableConfig =
+        '{  "bServerSide": true,
+            "sAjaxSource": "?mod=copyrightHistogram-processPost",
+            "fnServerData": function ( sSource, aoData, fnCallback ) {
+              aoData.push( { "name":"upload" , "value" : "'.$upload_pk.'" } );
+              aoData.push( { "name":"item" , "value" : "'.$uploadtreeId.'" } );
+              aoData.push( { "name":"agent" , "value" : "'.$Agent_pk.'" } );
+              aoData.push( { "name":"type" , "value" : "'.$type.'" } );
+              aoData.push( { "name":"filter" , "value" : "'.$filter.'" } );
+            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+            });
+          },
+      "aoColumns": '.$tableColumns.',
+      "aaSorting": '.$tableSorting.',
+      "iDisplayLength": 50,
+      "bProcessing": true,
+      "bStateSave": true,
+      "bRetrieve": true
+    }';
+
+
+    $output   .= "<script>
+              function createTable".$type."() {
+                    var otable = $('#copyright".$type."').dataTable(". $dataTableConfig . ");
+                    // var settings = otable.fnSettings(); // for debugging
+                    return otable;
+                }
+            </script>";
+
+
 
 
   return $output;
@@ -230,10 +159,13 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
   private function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
 
+    $type = 'statement';
+    $decription = _("Copyright");
+    $descriptionUnique = _("Unique Copyrights");
+    $descriptionTotal = _("Total Copyrights");
 
 
-    $VCopyright  =  $this->getCopyrightData($upload_pk,$Uploadtree_pk,$filter,$this->uploadtree_tablename,$Agent_pk);
-
+    $VCopyright  =  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
     $type = 'email';
     $decription = _("Email");
@@ -498,6 +430,7 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
     $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
     $output .="\n<script src=\"scripts/jquery.dataTables.editable.js\" type=\"text/javascript\"></script>\n";
     $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/copyrightHist.js\" type=\"text/javascript\"></script>\n";
     return $output;
   }
 
@@ -659,63 +592,18 @@ private function getSingleType($type,$decription,$descriptionUnique,$description
     return array($ordercount, $ordercopyright);
   }
 
-  /**
-   * @param $row
-   * @param $uniqueCount
-   * @param $totalCount
-   * @param $Uploadtree_pk
-   * @param $Agent_pk
-   * @param $hash
-   * @param bool $normalizeString
-   * @param string $filter
-   * @return string
-   */
-  private function fillTableRow( $row, &$uniqueCount, &$totalCount, $Uploadtree_pk, $Agent_pk, $hash, $normalizeString=false ,$filter="", $type )
-  {
-    $uniqueCount++;
-    $totalCount += $row['copyright_count'];
-    $output = "<tr><td align='right'>$row[copyright_count]</td>";
-    $output .= "<td align='center'><a href='";
-    $output .= Traceback_uri();
-    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $hash . "&type=" . $type;
-    if (!empty($filter)) $URLargs .= "&filter=$filter";
-    $output .= $URLargs . "'>Show</a></td>";
-    $output .= "<td align='left'>";
 
 
-    if($normalizeString) {
-      /* strip out characters we don't want to see
-       This is a hack until the agent stops writing these chars to the db.
-      */
-      $S = $row['content'];
-      $S = htmlentities($S);
-      $S = str_replace("&Acirc;", "", $S); // comes from utf-8 copyright symbol
-      $output .= $S;
-    }
-    else  {
 
-      $output .= htmlentities($row['content']);
-    }
 
-    $output .= "</td>";
-    $output .= "</tr>\n";
 
-    return $output;
+  static public function returnSortOrder () {
+    $defaultOrder = array (
+        array(0, "desc"),
+        array(2, "desc"),
+    );
+    return $defaultOrder;
   }
-
-
-
-
-//  static public function returnSortOrder () {
-//    $defaultOrder = array (
-//        array(5, "desc"),
-//        array(0, "asc"),
-//        array(3, "desc"),
-//        array(1, "desc"),
-//        array(4, "desc")
-//    );
-//    return $defaultOrder;
-//  }
 };
 
 $NewPlugin = new CopyrightHistogram;

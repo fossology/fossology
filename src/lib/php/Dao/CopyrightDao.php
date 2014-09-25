@@ -125,7 +125,7 @@ class CopyrightDao extends Object
     else if ($filter == "all") {  /* Not needed, but here to show that there is a filter all */
         $filterQuery ="";
     }
-      $sql = "SELECT substring(CP.content FROM 1 for 150) AS content,  CP.ct_pk  as ct_pk  " .
+      $sql = "SELECT substring(CP.content FROM 1 for 150) AS content, hash,  count(*)  as copyright_count  " .
              "FROM copyright AS CP " .
              "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
               $join.
@@ -135,7 +135,7 @@ class CopyrightDao extends Object
                   $sql_upload.
                   $filterQuery.
                 " AND CP.agent_fk= $4 ".
-                " GROUP BY content, ct_pk ";
+                " GROUP BY content, hash ";
 
 
     $statement = __METHOD__ . $filter.$uploadTreeTableName;
@@ -146,7 +146,7 @@ class CopyrightDao extends Object
     $result = $this->dbManager->execute($statement,$params);
     $rows = pg_fetch_all($result);
     pg_free_result($result);
-    $rows = $this->GroupHolders($rows, $hash, $type);
+    //$rows = $this->GroupHolders($rows, $hash, $type);
 
     return $rows;
   }

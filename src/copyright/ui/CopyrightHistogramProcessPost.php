@@ -18,8 +18,21 @@
  ***********************************************************/
 
 
+use Fossology\Lib\Dao\CopyrightDao;
+
 define("TITLE_copyrightHistogramProcessPost", _("Private: Browse post"));
 class CopyrightHistogramProcessPost  extends FO_Plugin {
+    /**
+   * @var string
+   */
+  private $uploadtree_tablename;
+
+    /**
+   * @var CopyrightDao
+   */
+
+  private  $copyrightDao;
+
   function __construct()
   {
     $this->Name = "copyrightHistogram-processPost";
@@ -32,6 +45,8 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
     $this->NoMenu = 0;
 
     parent::__construct();
+    global $container;
+    $this->copyrightDao = $container->get('dao.copyright');
   }
 
 
@@ -45,13 +60,13 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
       return(0);
     }
 
-    $Folder = GetParm("folder",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
+    $upload = GetParm("upload",PARM_INTEGER);
+    $item = GetParm("item",PARM_INTEGER);
+    $agent_pk = GetParm("agent",PARM_STRING);
+    $type = GetParm("type",PARM_STRING);
     $filter = GetParm("filter",PARM_STRING);
-
     /* check upload permissions */
-    $UploadPerm = GetUploadPerm($Upload);
+    $UploadPerm = GetUploadPerm($upload);
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
@@ -59,13 +74,11 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
       return;
     }
 
-    /* Get uploadtree_tablename */
-    $uploadtree_tablename = GetUploadtreeTableName($Upload);
-    $this->uploadtree_tablename = $uploadtree_tablename;
+    $this->uploadtree_tablename = GetUploadtreeTableName($upload);
 
 
     header('Content-type: text/json');
-    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($folder , $show);
+    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type, $filter);
     print(json_encode(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' =>$aaData,
@@ -74,6 +87,71 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
         )
     )
     );
+
+  }
+
+  /**
+   * @param $row
+   * @param $Uploadtree_pk
+   * @param $Agent_pk
+   * @param bool $normalizeString
+   * @param string $filter
+   * @param $type
+   * @return array
+   */
+  private function fillTableRow( $row,  $Uploadtree_pk, $Agent_pk, $normalizeString=false ,$filter="", $type )
+  {
+//    $uniqueCount++;  I need to get this from extra queries
+//    $totalCount += $row['copyright_count'];
+    $output = array();
+    $output[] =$row['copyright_count'];
+    $link = "<a href='";
+    $link .= Traceback_uri();
+    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $type;
+    if (!empty($filter)) $URLargs .= "&filter=$filter";
+    $link .= $URLargs . "'>Show</a>";
+    $output[]=$link;
+
+
+    if($normalizeString) {
+      /* strip out characters we don't want to see
+       This is a hack until the agent stops writing these chars to the db.
+      */
+      $S = $row['content'];
+      $S = htmlentities($S);
+      $S = str_replace("&Acirc;", "", $S); // comes from utf-8 copyright symbol
+      $output []= $S;
+    }
+    else  {
+
+      $output []= htmlentities($row['content']);
+    }
+    return $output;
+  }
+
+
+  private function GetTableData($upload, $item, $agent_pk, $type, $filter)
+  {
+    $rows = $this->copyrightDao->getCopyrights($upload,$item,  $this->uploadtree_tablename ,$agent_pk, 0,$type,$filter);
+    $aaData=array();
+    if(!empty($rows))
+    {
+      foreach ($rows as $row)
+      {
+        $aaData [] = $this->fillTableRow($row,  $item, $agent_pk, false, $filter, $type);
+      }
+    }
+
+//    $output .= "</table>\n";
+//    $output .= "<p>\n";
+//
+//    $output .= "$descriptionUnique: $uniqueCount<br>\n";
+//    $output .= "$descriptionTotal: $count";
+
+
+    $iTotalRecords=8;
+    $iTotalDisplayRecords=10;
+    return array($aaData, $iTotalRecords, $iTotalDisplayRecords);
 
   }
 
