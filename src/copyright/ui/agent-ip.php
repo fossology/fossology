@@ -21,7 +21,7 @@
  * \brief Interface ip agent to job queue
  */
 
-define("TITLE_agent_ip", _("Copyright/Email/URL Analysis"));
+define("TITLE_agent_ip", _("IP Analysis"));
 
 class agent_ip extends FO_Plugin
 {

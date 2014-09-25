@@ -21,7 +21,7 @@
  * \brief Interface ecc agent to job queue
  */
 
-define("TITLE_agent_ecc", _("Copyright/Email/URL Analysis"));
+define("TITLE_agent_ecc", _("Ecc Analysis"));
 
 class agent_ecc extends FO_Plugin
 {
