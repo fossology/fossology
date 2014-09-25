@@ -60,7 +60,7 @@ public:
   bool isFailed() const;
   int getRowCount() const;
   std::vector<std::string> getRow(int i) const;
-  template<typename T> std::vector<T> getSimpleResults(int columnN);
+  template<typename T> std::vector<T> getSimpleResults(int columnN, T (functionP)(const char*));
 
   QueryResult(QueryResult && queryResult);
   operator bool() const;
@@ -69,5 +69,18 @@ private:
   QueryResult(PGresult* ptr);
   unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
 };
+
+template<typename T> std::vector<T> QueryResult::getSimpleResults(int columnN, T (functionP)(const char*)) {
+  std::vector<T> result;
+  PGresult* r = ptr.get();
+
+  if (columnN<PQnfields(r)) {
+    for (int i=0; i<getRowCount(); i++) {
+      result.push_back(functionP(PQgetvalue(r, i, columnN)));
+    }
+  }
+
+  return result;
+}
 
 #endif /* LIBFOSSDBMANAGERCLASS_HPP_ */

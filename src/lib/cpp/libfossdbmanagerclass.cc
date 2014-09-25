@@ -130,16 +130,3 @@ std::vector< std::string > QueryResult::getRow(int i) const{
 
   return result;
 }
-
-template<> std::vector<long> QueryResult::getSimpleResults(int columnN) {
-  std::vector<long> result;
-  PGresult* r = ptr.get();
-
-  if (columnN<PQnfields(r)) {
-    for (int i=0; i<getRowCount(); i++) {
-      result.push_back(atol(PQgetvalue(r, i, columnN)));
-    }
-  }
-
-  return result;
-}

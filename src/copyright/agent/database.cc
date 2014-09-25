@@ -127,7 +127,7 @@ std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int u
     agentId
   );
 
-  return queryResult.getSimpleResults<long>(0);
+  return queryResult.getSimpleResults<long>(0, atol);
 }
 
 bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId) {
