@@ -260,11 +260,9 @@ class ClearingView extends FO_Plugin
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
-    $licenseInformation = "";
-    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
-    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
-    $licenseInformation .= "<br>";
-    $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+    $this->vars['backLink'] = $this->createTargetLink($Uri, $folder, $uploadId, $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId));
+    $this->vars['fwdLink'] = $this->createTargetLink($Uri, $folder, $uploadId, $this->uploadDao->getNextItem($uploadId, $uploadTreeId));
+    $licenseInformation = $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
     
     $permission = GetUploadPerm($uploadId);
     $clearingHistory = '';
@@ -298,17 +296,12 @@ class ClearingView extends FO_Plugin
    * @param $folder
    * @param $uploadId
    * @param $forwardUploadTreePk
-   * @param $buttonString
+   * @internal param $buttonString
    * @return string
    */
-  private function createForwardButton($Uri, $folder,$uploadId,  $forwardUploadTreePk, $buttonString) {
-    if (isset($forwardUploadTreePk) ) {
-      $header = "<b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$forwardUploadTreePk\">$buttonString</a></b>";
-    }
-    else {
-      $header ="";
-    }
-    return $header;
+  private function createTargetLink($Uri, $folder, $uploadId, $forwardUploadTreePk)
+  {
+    return isset($forwardUploadTreePk) ? "$Uri&folder=$folder&upload=$uploadId&item=$forwardUploadTreePk" : "";
   }
 
   /**
