@@ -39,15 +39,6 @@ if (first == std::string::npos)
 return str.substr(first, (last-first)+1);
 }
 
-
-
-void print_md5_sum(unsigned char* md) {
-    int i;
-    for(i=0; i <MD5_DIGEST_LENGTH; i++) {
-            printf("%02x",md[i]);
-    }
-}
-
 void getMD5(DatabaseEntry& input){
   /* Step 1B: rearrange copyright statements to try and put the holder first,
    * followed by the rest of the statement, less copyright years.
