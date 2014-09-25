@@ -85,20 +85,29 @@ QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const {
   va_start(args, queryFormat);
   char* queryString = g_strdup_vprintf(queryFormat, args);
   va_end(args);
-  QueryResult result(fo_dbManager_Exec_printf(_dbManager, queryString));
 
-  return result;
+  return QueryResult(fo_dbManager_Exec_printf(_dbManager, queryString));
 }
 
-QueryResult::QueryResult(PGresult* pgResult): ptr(std::move(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult))) {};
+QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const {
+  va_list args;
+  va_start(args, stmt);
+  PGresult* pgResult = fo_dbManager_ExecPreparedv(stmt, args);
+  va_end(args);
 
-QueryResult::~QueryResult() {};
+  return QueryResult(pgResult);
+}
+
+QueryResult::QueryResult(PGresult* pgResult): ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult)) {};
 
 QueryResult::QueryResult(QueryResult&& other) : ptr(std::move(other.ptr)) {};
 
-
 bool QueryResult::isFailed() const {
   return ptr.get() == NULL;
+}
+
+QueryResult::operator bool() const {
+  return !isFailed();
 }
 
 int QueryResult::getRowCount() const {
@@ -116,6 +125,19 @@ std::vector< std::string > QueryResult::getRow(int i) const{
   if (i>=0 && i<getRowCount()) {
     for (int j=0; j<PQnfields(r); j++) {
       result.push_back(std::string(PQgetvalue(r, i, j)));
+    }
+  }
+
+  return result;
+}
+
+template<> std::vector<long> QueryResult::getSimpleResults(int columnN) {
+  std::vector<long> result;
+  PGresult* r = ptr.get();
+
+  if (columnN<PQnfields(r)) {
+    for (int i=0; i<getRowCount(); i++) {
+      result.push_back(atol(PQgetvalue(r, i, columnN)));
     }
   }
 

@@ -61,6 +61,7 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   if (!state->getDbManager()->begin())
     return false;
 
+  size_t count = 0;
   typedef vector<CopyrightMatch>::const_iterator cpm;
   for (cpm it=matches.begin(); it!=matches.end(); ++it ){
     const CopyrightMatch& match = *it;
@@ -74,15 +75,18 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
     entry.type = match.getType();
 
     if(CleanDatabaseEntry(entry)) {
-
-     // cout << "pFileId=" << entry.pfile_fk << " has " << entry.type << ": " << entry.content << " hash " << entry.hash << endl; // TODO log or removeme
+      ++count;
       if (!insertInDatabase(state->getDbManager(), entry)) {
         state->getDbManager()->rollback();
         return false;
       };
     }
   }
-  //TODO commit transaction
+
+  if (count==0) {
+    insertNoResultInDatabase(state->getDbManager(), state->getAgentId(), pFileId);
+  }
+
   return state->getDbManager()->commit();
 };
 
@@ -93,7 +97,6 @@ void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state){
 }
 
 void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
-
   char* pFile = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
 
   if(!pFile) {
@@ -104,7 +107,6 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
   fo::File* file = new fo::File(pFileId, fo_RepMkPath("files", pFile));
 
   if (file->fileName != NULL) {
-    // cout << "reading " << file->fileName << endl; //TODO removeme
     matchFileWithLicenses(pFileId, file, state);
   }
 
@@ -114,17 +116,10 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 
 
 bool processUploadId (CopyrightState* state, int uploadId) {
-  PGresult* fileIdResult = queryFileIdsForUpload(state->getDbManager()->getStruct_dbManager(), uploadId);
+  vector<long> fileIds = queryFileIdsForUpload(state->getDbManager(), state->getAgentId(), uploadId);
 
-  if (PQntuples(fileIdResult) == 0) {
-    PQclear(fileIdResult);
-    fo_scheduler_heart(0);
-    return false;
-  }
-
-  int count = PQntuples(fileIdResult);
-  for (int i = 0; i < count; i++) {
-    long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
+  for (vector<long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
+    long pFileId = *it;
 
     if (pFileId <= 0)
       continue;

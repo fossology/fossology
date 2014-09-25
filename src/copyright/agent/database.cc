@@ -26,7 +26,7 @@ ColumnDef columns[] = {
   {"pfile_fk", "bigint", "NOT NULL"},
   {"content", "text", ""},
   {"hash", "text", ""},
-  {"type", "text", "CHECK (type in ('statement', 'email', 'url'))"}, //TODO abstract or remove
+  {"type", "text", ""}, // TODO do we need this constrain?  "CHECK (type in ('statement', 'email', 'url'))"},
   {"copy_startbyte", "integer", ""},
   {"copy_endbyte", "integer", ""},
 };
@@ -57,23 +57,9 @@ const char* getColumnCreationString() {
 
 bool createTables(DbManager* dbManager) {
 
-// TODO removeme
-#if 0
 #define CHECK_OR_RETURN_FALSE(query) \
   do {\
-    PGresult* queryResult = (query); \
-    if ((queryResult)) {\
-      PQclear((queryResult));\
-    } else {\
-      return false;\
-    }\
-  } while(0)
-#endif
-
-#define CHECK_OR_RETURN_FALSE(query) \
-  do {\
-    QueryResult queryResult = std::move((query)); \
-    if (queryResult.isFailed()) {\
+    if (!(query)) {\
       return false;\
     }\
   } while(0)
@@ -125,18 +111,51 @@ bool checkTables(DbManager* dbManager) {
   return true;
 }
 
+std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId) {
+  QueryResult queryResult = dbManager->queryPrintf(
+    "SELECT pfile_pk"
+    " FROM ("
+    "  SELECT distinct(pfile_fk) AS PF"
+    "  FROM uploadtree"
+    "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
+    " ) AS SS "
+    "left outer join copyright on (PF = pfile_fk and agent_fk = %d) "
+    "inner join pfile on (PF = pfile_pk) "
+    "WHERE ct_pk IS null or agent_fk <> %d",
+    uploadId,
+    agentId,
+    agentId
+  );
+
+  return queryResult.getSimpleResults<long>(0);
+}
+
+bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId) {
+  return dbManager->execPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager->getStruct_dbManager(),
+      "insertNoResultInDatabase",
+      "INSERT INTO copyright(agent_fk, pfile_fk)"// TODO abstract
+      " VALUES($1,$2)",
+      long, long
+    ),
+    agentId, pFileId
+  );
+}
+
 bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
-  //TODO implement prepared stmts
-  CHECK_OR_RETURN_FALSE(dbManager->queryPrintf(
-    "INSERT INTO %s(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
-    " VALUES(%ld,%ld,'%s','%s','%s',%d,%d)",
-    tableName,
+  return dbManager->execPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager->getStruct_dbManager(),
+      "insertInDatabase",
+      "INSERT INTO copyright(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)" // TODO abstract
+      " VALUES($1,$2,$3,$4,$5,$6,$7)",
+      long, long, char*, char*, char*, int, int
+    ),
     entry.agent_fk, entry.pfile_fk,
     entry.content.c_str(),
     entry.hash.c_str(),
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
-  ));
-
-  return true;
+  );
 }

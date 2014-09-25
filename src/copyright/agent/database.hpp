@@ -13,6 +13,7 @@
 #define DATABASE_HPP
 
 #include <string>
+#include <vector>
 
 #include "libfossdbmanagerclass.hpp"
 #include "cleanEntries.hpp"
@@ -20,5 +21,7 @@
 bool checkTables(DbManager* dbManager);
 bool createTables(DbManager* dbManager);
 bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
+bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId);
+std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId);
 
 #endif // DATABASE_HPP

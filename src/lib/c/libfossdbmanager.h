@@ -224,6 +224,7 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* 
  * \return query result or NULL on failure
  */
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
+PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args);
 
 int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName);
 

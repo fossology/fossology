@@ -40,6 +40,7 @@ public :
   bool rollback() const;
 
   QueryResult queryPrintf(const char* queryFormat, ...) const;
+  QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
 private:
   fo_dbManager* _dbManager;
@@ -56,12 +57,13 @@ class QueryResult {
   friend class DbManager;
 
 public:
-  ~QueryResult();
-
   bool isFailed() const;
   int getRowCount() const;
   std::vector<std::string> getRow(int i) const;
+  template<typename T> std::vector<T> getSimpleResults(int columnN);
+
   QueryResult(QueryResult && queryResult);
+  operator bool() const;
 
 private:
   QueryResult(PGresult* ptr);
