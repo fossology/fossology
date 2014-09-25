@@ -5,3 +5,10 @@
 {% endfor %}
 </select>
 {% endmacro %}
+
+{% macro radioGroup(id,options,select,action,separator) %}
+{% for key,disp in options %}
+ {% if !loop.first %}{{ separator }}{% endif %}
+ <input type="radio" name="{{ id }}" value="{{ key }}" {%if key == select %} selected{% endif %}{{ action }}>{{ disp }}
+{% endfor %}
+{% endmacro %}
