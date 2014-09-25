@@ -113,15 +113,18 @@ class DbManager extends Object
     {
       return;
     }
+    $lastError = "";
     if ($this->dbDriver->isConnected())
     {
-      $this->logger->addCritical($this->dbDriver->getLastError());
+      $lastError = $this->dbDriver->getLastError();
+      $this->logger->addCritical($lastError);
     } else
     {
       $this->logger->addCritical("DB connection lost.");
     }
     echo "<br/><pre>$sqlStatement</pre><pre>";
     debug_print_backtrace();
+    print "\n" . $lastError;
     echo "</pre><hr>";
     exit(1);
   }

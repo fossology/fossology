@@ -184,32 +184,37 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testCurrentLicenseDecisionViaGroupMembership()
   {
-    $result = $this->clearingDao->getCurrentLicenseDecision(1, 1000);
-    assertThat($result, is(array("FOO" => 1, "BAR" => 2)));
+    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision(1, 1000);
+    assertThat($added, is(array("FOO" => 1, "BAR" => 2)));
+    assertThat($removed, is(array("QUX" => 4, "BAZ" => 3)));
   }
 
   public function testCurrentLicenseDecisionViaGroupMembershipShouldBeSymmetric()
   {
-    $result = $this->clearingDao->getCurrentLicenseDecision(2, 1000);
-    assertThat($result, is(array("FOO" => 1, "BAR" => 2)));
+    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision(2, 1000);
+    assertThat($added, is(array("FOO" => 1, "BAR" => 2)));
+    assertThat($removed, is(array("QUX" => 4, "BAZ" => 3)));
   }
 
   public function testCurrentLicenseDecisionWithUploadScope()
   {
-    $result = $this->clearingDao->getCurrentLicenseDecision(2, 1200);
-    assertThat($result, is(array("BAR" => 2)));
+    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision(2, 1200);
+    assertThat($added, is(array("BAR" => 2)));
+    assertThat($removed, is(array("BAZ" => 3)));
   }
 
   public function testCurrentLicenseDecisionWithoutGroupOverlap()
   {
-    $result = $this->clearingDao->getCurrentLicenseDecision(3, 1000);
-    assertThat($result, is(array("QUX" => 4)));
+    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision(3, 1000);
+    assertThat($added, is(array("QUX" => 4)));
+    assertThat($removed, is(array()));
   }
 
   public function testCurrentLicenseDecisionWithoutMatch()
   {
-    $result = $this->clearingDao->getCurrentLicenseDecision(3, 1200);
-    assertThat($result, is(array()));
+    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision(3, 1200);
+    assertThat($added, is(array()));
+    assertThat($removed, is(array()));
   }
 }
  

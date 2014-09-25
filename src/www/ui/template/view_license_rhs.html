@@ -1,48 +1,61 @@
-
-
-  {% if previousItem or nextItem %}
-  <div>
+{% if previousItem or nextItem %}
+<div class="groupBox">
     {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
     {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
-  </div>
-  {% endif %}
+</div>
+{% endif %}
 
-  <div style="clear:both">
-      <table border="1" id="licenseDecisionTable">
-          <tr>
-              {% for licenseDecisionHeader in licenseDecisionsHeaders %}
-              <th>
-                  <i18n>{{ licenseDecisionHeader }}</i18n>
-              </th>
-              {% endfor %}
-          </tr>
-          {% for licenseDecision in licenseDecisions %}
-          <tr>
-              {% for licenseDecisionEntry in licenseDecision %}
-              <td>
-                  {{ licenseDecisionEntry }}
-              </td>
-              {% endfor %}
-          </tr>
-          {% endfor %}
-      </table>
-  </div>
+<div class="groupBox">
+    <fieldset style="display:inline">
+        <legend>
+            <i18n>License decision scope</i18n>
+        </legend>
+        <input type="checkbox"/> global
+    </fieldset>
+    <fieldset style="display:inline">
+        <legend>
+            <i18n>Clearing decision type</i18n>
+        </legend>
+        {{ typeRadio }}
+    </fieldset>
+</div>
 
-  
-  {{ licenseInformation }}
-  
-  
-  <h3><i18n>Audit license</i18n></h3>
- {% if auditDenied %}
-   <i18n>Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.</i18n>
- {% else %}
-  <button type=\"button\" onclick='openUserModal()'><i18n>User Decision</i18n></button> &nbsp;
-  <button type=\"button\" onclick='openBulkModal()'><i18n>Bulk Recognition</i18n></button><br/>
-  {% include 'change_license_modal.html' %}
-  {% include 'view_license_bulk.html' %}
- {% endif %}
-  
-  {% if clearingHistory %}
+<div class="groupBox">
+    <table border="1" id="licenseDecisionTable">
+        <thead>
+        <tr>
+            {% for licenseDecisionHeader in licenseDecisionsHeaders %}
+            <th>
+                <i18n>{{ licenseDecisionHeader }}</i18n>
+            </th>
+            {% endfor %}
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<div style="clear:both">
+
+    {% if auditDenied %}
+    <i18n>Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this
+        file.
+    </i18n>
+    {% else %}
+    <button type=\"button\" onclick='openUserModal()'>
+        <i18n>User Decision</i18n>
+    </button>
+    &nbsp;
+    <button type=\"button\" onclick='openBulkModal()'>
+        <i18n>Bulk Recognition</i18n>
+    </button>
+    <br/>
+    {% include 'change_license_modal.html' %}
+    {% include 'view_license_bulk.html' %}
+    {% endif %}
+
+</div>
+
+{% if clearingHistory %}
 
 
 <h3>

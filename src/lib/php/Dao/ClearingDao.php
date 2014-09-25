@@ -23,7 +23,6 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -244,14 +243,45 @@ class ClearingDao extends Object
 
 
   /**
-   * @param int $licenseId
    * @param $uploadTreeId
-   * @param $userid
+   * @param $userId
+   * @param int $licenseId
+   * @param $type
+   * @param $is_global
    */
-  public function deleteClearingDecision($licenseId, $uploadTreeId, $userid)
+  public function removeLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $is_global)
   {
-    //$tbd = array_search(ClearingDecision::TO_BE_DETERMINED, $this->getClearingTypeMap());
+    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $is_global, true, "", "");
     // TODO delete license
+  }
+
+  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $is_global, $is_removed, $reportInfo, $comment)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "
+insert into license_decision_events (
+  uploadtree_fk,
+  pfile_fk,
+  user_fk,
+  rf_fk,
+  type_fk,
+  is_global,
+  is_removed,
+  reportinfo,
+  comment
+) VALUES (
+  $1,
+  (select pfile_fk from uploadtree where uploadtree_pk=$1),
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8)");
+    $res = $this->dbManager->execute($statementName, array($uploadTreeId, $userId, $licenseId, $type, $is_global ? 't' : 'f', $is_removed ? 't' : 'f', $reportInfo, $comment));
+    $this->dbManager->freeResult($res);
   }
 
   /**
@@ -386,7 +416,7 @@ WHERE
   LD2.uploadtree_fk=$1 AND
   (LD.is_global OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY LD.license_decision_events_pk
+GROUP BY LD.license_decision_events_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_global, LD.is_removed
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -404,30 +434,33 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
 
   }
 
-  public function getCurrentLicenseDecision($userId, $uploadId)
+  public function getCurrentLicenseDecision($userId, $itemId)
   {
-    $events = $this->getRelevantLicenseDecisionEvents($userId, $uploadId);
+    $events = $this->getRelevantLicenseDecisionEvents($userId, $itemId);
 
-    $licenseDecision = array();
+    $addedLicenses = array();
+    $removedLicenses = array();
 
     foreach ($events as $event)
     {
-      if ($event[5] != ClearingDecision::TO_BE_DISCUSSED)
+      if ($event['type'] != ClearingDecision::TO_BE_DISCUSSED)
       {
-        $licenseId = $event[6];
-        $licenseShortName = $event[7];
-        $isRemoved = $event[9] != 0;
+        $licenseId = $event['rf_fk'];
+        $licenseShortName = $event['rf_shortname'];
+        $isRemoved = $event['is_removed'] === 't';
 
         if ($isRemoved)
         {
-          unset($licenseDecision[$licenseShortName]);
+          unset($addedLicenses[$licenseShortName]);
+          $removedLicenses[$licenseShortName] = $licenseId;
         } else
         {
-          $licenseDecision[$licenseShortName] = $licenseId;
+          unset($removedLicenses[$licenseShortName]);
+          $addedLicenses[$licenseShortName] = $licenseId;
         }
       }
     }
 
-    return $licenseDecision;
+    return array($addedLicenses, $removedLicenses);
   }
 }

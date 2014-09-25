@@ -164,13 +164,14 @@ class AgentsDao extends Object
     return $listOfRunningAgents;
   }
 
-  private function getLatestAgentResultForUpload($uploadId, $agentNames)
+  public function getLatestAgentResultForUpload($uploadId, $agentNames)
   {
+    $agentLatestMap = array();
     foreach ($agentNames as $agentName)
     {
       $sql = "
 SELECT
-  agent_fk,
+  agent_pk,
   ars_success,
   ars_endtime,
   agent_name
@@ -178,19 +179,21 @@ FROM " . $agentName . "_ars ARS
 INNER JOIN agent A ON ARS.agent_fk = A.agent_pk
 WHERE upload_fk=$1
   AND A.agent_name = $2
-ORDER BY agent_fk DESC LIMIT 1";
+ORDER BY agent_fk DESC";
 
       $statementName = __METHOD__ . ".$agentName";
-      $row = $this->dbManager->getSingleRow($sql, $statementName, array($uploadId, $agentName));
+      $this->dbManager->prepare($statementName, $sql);
+      $res = $this->dbManager->execute($statementName, array($uploadId, $agentName));
 
-      if ($row)
+      foreach ($this->dbManager->fetchAll($res) as $row)
       {
-        $key = $row['ars_success'] ? 'good' : ($row['ars_endtime'] ? 'bad' : 'n/a');
-        $latestArs[$key] = $row['agent_fk'];
+        if ($row['ars_success'])
+        {
+          $agentLatestMap[$agentName] = intval($row['agent_pk']);
+          break;
+        }
       }
       $this->dbManager->freeResult($res);
-
-      $agentLatestMap[$agentName] = array('latest' => $latestAgentId, 'ars' => $latestArs);
     }
     return $agentLatestMap;
   }

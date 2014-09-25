@@ -404,9 +404,9 @@ class FO_Plugin
     if (!$this->OutputToStdout)
     {
       $this->vars['content'] = $output;
-      return; // $output;
+      return;
     }
-    print $output;
+    return $output;
   }
 
   /**
