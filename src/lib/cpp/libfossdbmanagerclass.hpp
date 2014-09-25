@@ -64,7 +64,7 @@ public:
   QueryResult(QueryResult && queryResult);
 
 private:
-  QueryResult(unptr::unique_ptr<PGresult, PGresultDeleter>&& ptr);
+  QueryResult(PGresult* ptr);
   unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
 };
 

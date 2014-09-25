@@ -85,12 +85,12 @@ QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const {
   va_start(args, queryFormat);
   char* queryString = g_strdup_vprintf(queryFormat, args);
   va_end(args);
-  QueryResult result(unptr::unique_ptr<PGresult, PGresultDeleter>(fo_dbManager_Exec_printf(_dbManager, queryString)));
+  QueryResult result(fo_dbManager_Exec_printf(_dbManager, queryString));
 
   return result;
 }
 
-QueryResult::QueryResult(unptr::unique_ptr<PGresult, PGresultDeleter>&& _ptr): ptr(std::move(_ptr)) {};
+QueryResult::QueryResult(PGresult* pgResult): ptr(std::move(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult))) {};
 
 QueryResult::~QueryResult() {};
 
