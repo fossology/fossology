@@ -44,6 +44,42 @@ bool DbManager::tableExists(const char* tableName) const {
   return fo_dbManager_tableExists(_dbManager, tableName);
 }
 
+bool DbManager::begin() const {
+  // TODO merge with new features and use fo_dbManager_begin()
+  PGresult* queryResult = fo_dbManager_Exec_printf(getStruct_dbManager(), "BEGIN");
+
+  if (queryResult) {
+    PQclear(queryResult);
+    return true;
+  }
+
+  return false;
+}
+
+bool DbManager::commit() const {
+  // TODO merge with new features and use fo_dbManager_commit()
+  PGresult* queryResult = fo_dbManager_Exec_printf(getStruct_dbManager(), "COMMIT");
+
+  if (queryResult) {
+    PQclear(queryResult);
+    return true;
+  }
+
+  return false;
+}
+
+bool DbManager::rollback() const {
+  // TODO merge with new features and create a fo_dbManager_rollback()
+  PGresult* queryResult = fo_dbManager_Exec_printf(getStruct_dbManager(), "ROLLBACK");
+
+  if (queryResult) {
+    PQclear(queryResult);
+    return true;
+  }
+
+  return false;
+}
+
 PGresult* DbManager::queryPrintf(const char* queryStringFormat, ...) const {
   va_list args;
   va_start(args, queryStringFormat);

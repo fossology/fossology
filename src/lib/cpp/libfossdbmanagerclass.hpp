@@ -30,6 +30,9 @@ DbManager(fo_dbManager* __dbManager);
   fo_dbManager* getStruct_dbManager() const;
   bool tableExists(const char* tableName) const;
   PGresult* queryPrintf(const char* queryFormat, ...) const;
+  bool begin() const;
+  bool commit() const;
+  bool rollback() const;
 
 private:
   fo_dbManager* _dbManager;

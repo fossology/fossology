@@ -127,4 +127,6 @@ bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
   ));
+
+  return true;
 }

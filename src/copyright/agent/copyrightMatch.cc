@@ -12,7 +12,7 @@
 #include "copyrightMatch.hpp"
 
 CopyrightMatch::CopyrightMatch(std::string content, std::string type, unsigned int start, unsigned int length):
- content(content), type(type), start(start), length(length)
+ content(content), start(start), length(length), type(type)
 {}
 
 CopyrightMatch::~CopyrightMatch(){};

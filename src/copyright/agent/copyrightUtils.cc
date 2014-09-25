@@ -58,8 +58,10 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< 
 
 
 bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) {
+  if (!state->getDbManager()->begin())
+    return false;
+
   typedef vector<CopyrightMatch>::const_iterator cpm;
-  // TODO begin transaction
   for (cpm it=matches.begin(); it!=matches.end(); ++it ){
     const CopyrightMatch& match = *it;
 
@@ -75,13 +77,13 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
 
      // cout << "pFileId=" << entry.pfile_fk << " has " << entry.type << ": " << entry.content << " hash " << entry.hash << endl; // TODO log or removeme
       if (!insertInDatabase(state->getDbManager(), entry)) {
-        // TODO abort transaction
+        state->getDbManager()->rollback();
         return false;
       };
     }
   }
   //TODO commit transaction
-  return true;
+  return state->getDbManager()->commit();
 };
 
 void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state){
