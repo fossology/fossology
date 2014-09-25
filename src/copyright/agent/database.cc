@@ -48,17 +48,17 @@ CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
 }
 
 
-const char* CopyrightDatabaseHandler::getColumnListString() {
+std::string CopyrightDatabaseHandler::getColumnListString() {
   std::string result;
   for (size_t i=0; i<(sizeof(columns)/sizeof(ColumnDef)); ++i) {
     if (i!=0)
       result += ", ";
     result += columns[i].name;
   }
-  return result.c_str();
+  return result;
 }
 
-const char* CopyrightDatabaseHandler::getColumnCreationString() {
+std::string CopyrightDatabaseHandler::getColumnCreationString() {
   std::string result;
   for (size_t i=0; i< (sizeof(columns)/sizeof(ColumnDef)); ++i) {
     if (i!=0)
@@ -69,7 +69,7 @@ const char* CopyrightDatabaseHandler::getColumnCreationString() {
     result += " ";
     result += columns[i].creationFlags;
   }
-  return result.c_str();
+  return result;
 }
 
 bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
@@ -89,7 +89,7 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
                                           " CACHE 1"));
   }
 
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name, getColumnCreationString()));
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name, getColumnCreationString().c_str()));
 
   RETURN_IF_FALSE(dbManager->queryPrintf(
    "CREATE INDEX %s_agent_fk_index"
@@ -126,7 +126,7 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
 
 bool CopyrightDatabaseHandler::checkTables(DbManager* dbManager) {
   if (dbManager->tableExists(name)) {
-    RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), name));
+    RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString().c_str(), name));
   } else {
     return false;
   }

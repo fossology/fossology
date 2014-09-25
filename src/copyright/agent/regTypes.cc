@@ -54,7 +54,6 @@ const std::string regCopyright::getRegex() {
 };
 
 
-
 const  std::string regURL::getType(){
   return std::string("url");
 };
@@ -73,5 +72,55 @@ const  std::string regEmail::getType(){
 const std::string regEmail::getRegex() {
  return std::string(
              "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
+ );
+};
+
+
+
+const  std::string regIp::getType(){
+  return std::string("ip");
+};
+
+const std::string regIp::getRegex() {
+ return std::string(
+   "("
+   "patent[ability|ed|ee|ing]*"
+   "|(US|EU)[[:space:]]*(PAT|patents)"
+   "|(USPTO|PCT)"
+   "|invent[ion|or|ive]"
+   "|filed"
+   "|(innovation|infringement)"
+   "|intellectual[[:space:]]*property"
+   "|prior[[:space:]]*art"
+   "|field[-]of[-]use[[:space:]]*limitation"
+   "|fair[[:space:]]*use"
+   ")"
+   "([[:space:]|[:punct:]])+"
+   "[[:alpha:]]*"
+   "[[:punct:]]*"
+   "[[:alpha:]]*"
+   "[[:space:]]*"
+   "[[:print:]]{0,60}"
+ );
+};
+
+
+const  std::string regEcc::getType(){
+  return std::string("ecc");
+};
+
+const std::string regEcc::getRegex() {
+ return std::string(
+   //TODO copy the correct one: see TODO below
+   "(eccn|tsu|ecc)"
+   "([[:space:]|[:punct:]])+"
+   "[[:alpha:]]*"
+   "[[:punct:]]*"
+   "[[:alpha:]]*"
+   "[[:space:]]*"
+   "[[:print:]]{0,60}"
+
+   //TODO this is the original but has a syntax error. It can be made as easy as the ip one
+   //"(((?#Regular expression to identify 'eccn,tsu,ecc,ccl,wco' in the files)(eccn|tsu|ecc|ccl|wco)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|(?#Regular expression to identify 'export control'keywords in the files)(export[[:space:]]+control([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'Customs'keyword in the files)customs[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'foreign regulations'keywords in the files)foreign[[:space:]]+trade[[:space:]]+regulations[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'foreign trade' keyword in the files)foreign[[:space:]]+trade[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'Commerce control' keywords in the files)commerce[[:space:]]+control[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'Country of origin'in the files)country[[:space:]]+of[[:space:]]+origin[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'export administration'in the files)export[[:space:]]+administration[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'krypt/crypt' keyword in the files)(krypt|crypt)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'Information security' keyword in the files)information[[:space]]+security[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular exoression to identify 'Encryption'keyword in the files)encryption[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'nuclear,surveillance,military,defense,marine,avionics,laser'in the input files)(nuclear|surveillance|military|defense|marine|avionics|laser)[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|((?#Regular expression to identify 'Propulsion system' in the files)propulsion[[:space:]]+systems[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|(space[[:space:]]+vehicles[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60}))|(dual[[:space:]]+use[[:space:]|[:punct:]]+([a-zA-Z]*[[:punct:]]*[a-zA-Z]*)*([[:print:]]{0,60})))"
  );
 };

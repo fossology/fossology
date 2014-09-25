@@ -38,6 +38,8 @@ void bail(CopyrightState* state, int exitval) ;
 
 CopyrightState* getState(DbManager* dbManager, int verbosity);
 
+void fillMatchers(CopyrightState* state);
+
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector< RegexMatcher > matchers ) ;
 
 

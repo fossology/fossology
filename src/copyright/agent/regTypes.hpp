@@ -27,4 +27,13 @@ namespace regEmail{
    const std::string getType();
 }
 
+namespace regEcc{
+   const std::string getRegex();
+   const std::string getType();
+}
+
+namespace regIp{
+   const std::string getRegex();
+   const std::string getType();
+}
 #endif /* REGCOPYRIGHT_H_ */

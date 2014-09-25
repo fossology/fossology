@@ -44,6 +44,22 @@ CopyrightState* getState(DbManager* dbManager, int verbosity){
   return new CopyrightState(dbManager, agentID, verbosity, IDENTITY);
 }
 
+void fillMatchers(CopyrightState* state) {
+#ifdef IDENTITY_COPYRIGHT
+  state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+  state->addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+  state->addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
+#endif
+
+#ifdef IDENTITY_IP
+  state->addMatcher(RegexMatcher(regIp::getType(), regIp::getRegex()));
+#endif
+
+#ifdef IDENTITY_ECC
+  state->addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
+#endif
+}
+
 vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< RegexMatcher > matchers ) {
   vector<CopyrightMatch> result;
 

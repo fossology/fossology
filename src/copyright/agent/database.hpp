@@ -40,8 +40,8 @@ private:
   char* insertInDatabaseQuery;
   char* insertNoResultInDatabaseQuery;
 
-  const char* getColumnListString();
-  const char* getColumnCreationString();
+  std::string getColumnListString();
+  std::string getColumnCreationString();
 };
 
 #endif // DATABASE_HPP

@@ -33,9 +33,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
-  state->addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
-  state->addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1));
+  fillMatchers(state);
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());

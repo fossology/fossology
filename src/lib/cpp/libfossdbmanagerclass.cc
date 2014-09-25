@@ -90,7 +90,10 @@ QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const {
   char* queryString = g_strdup_vprintf(queryFormat, args);
   va_end(args);
 
-  return QueryResult(fo_dbManager_Exec_printf(_dbManager, queryString));
+  QueryResult result(fo_dbManager_Exec_printf(_dbManager, queryString));
+
+  g_free(queryString);
+  return result;
 }
 
 QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const {
