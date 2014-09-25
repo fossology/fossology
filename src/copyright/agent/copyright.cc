@@ -40,16 +40,13 @@ int main(int argc, char** argv) {
 
     if (uploadId == 0) continue;
 
-    int arsId = fo_WriteARS(state->getConnection(),
-                            0, uploadId, state->getAgentId(), AGENT_ARS, NULL, 0);
+    int arsId = writeARS(state, 0, uploadId, 0);
 
     if (!processUploadId(state, uploadId))
       bail(state, 2);
 
-
     fo_scheduler_heart(1);
-    fo_WriteARS(state->getConnection(),
-                arsId, uploadId, state->getAgentId(), AGENT_ARS, NULL, 1);
+    writeARS(state, arsId, uploadId, 1);
   }
   fo_scheduler_heart(0);
 

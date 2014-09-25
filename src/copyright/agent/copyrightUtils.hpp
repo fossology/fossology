@@ -36,6 +36,8 @@ void queryAgentId(int& agent, PGconn* dbConn) ;
 
 void bail(CopyrightState* state, int exitval) ;
 
+int writeARS(CopyrightState* state, int arsId, long uploadId, int success);
+
 CopyrightState* getState(DbManager* dbManager, int verbosity);
 
 void fillMatchers(CopyrightState* state);

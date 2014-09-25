@@ -31,6 +31,10 @@ void queryAgentId(int& agent, PGconn* dbConn) {
     exit(1);
 }
 
+int writeARS(CopyrightState* state, int arsId, long uploadId, int success) {
+  return fo_WriteARS(state->getConnection(), arsId, uploadId, state->getAgentId(), AGENT_ARS, NULL, success);
+}
+
 void bail(CopyrightState* state, int exitval) {
   delete(state->getDbManager());
   delete(state);
