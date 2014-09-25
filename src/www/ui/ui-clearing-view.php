@@ -117,8 +117,6 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
- 
-
 
   function OutputOpen()
   {
@@ -136,18 +134,19 @@ class ClearingView extends FO_Plugin
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
 
-      header('Location: ' . Traceback_uri() . Traceback_parm_keep(array('mod','upload', 'show')). "&item=$uploadTreeId");
+      header('Location: ' . Traceback_uri() . Traceback_parm_keep(array('mod', 'upload', 'show')) . "&item=$uploadTreeId");
     }
 
-    $uploadTreeTableName= GetUploadtreeTableName($uploadId);
-    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName );
-    if(Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']) ) {
-       $parent = $this->uploadDao->getUploadParent($uploadId);
+    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
+    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
+    {
+      $parent = $this->uploadDao->getUploadParent($uploadId);
       if (!isset($parent)) return;
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
 
-      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
+      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
     return parent::OutputOpen();
   }
@@ -174,10 +173,10 @@ class ClearingView extends FO_Plugin
     {
       return;
     }
-    
+
     global $Plugins;
     /** @var $view ui_view */
-    $view = & $Plugins[plugin_find_id("view")];
+    $view = &$Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $selectedAgentId = GetParm("agentId", PARM_INTEGER);
@@ -194,25 +193,25 @@ class ClearingView extends FO_Plugin
     /* Get uploadtree table name */
     $uploadTreeTableName = GetUploadtreeTablename($uploadId);
 
-    $this->vars['uri'] = Traceback_uri(). Traceback_parm_keep(array('mod','upload','folder'));
+    $this->vars['uri'] = Traceback_uri() . Traceback_parm_keep(array('mod', 'upload', 'folder'));
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
-    
+
     $permission = GetUploadPerm($uploadId);
     $licenseInformation = "";
 
-    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox=0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
-    
+    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
+
     $output = '';
     /* @var Fossology\Lib\Dao\FileTreeBounds */
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
 
     $licenseDecisionMap = array();
-    $licenseIds = array();    
+    $licenseIds = array();
     if (!$fileTreeBounds->containsFiles())
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      $extractedLicenseBulkMatches  = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
+      $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
       $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
       $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
@@ -231,8 +230,8 @@ class ClearingView extends FO_Plugin
         $licenseIds[$licenseShortName] = $licenseId;
         $licenseDecisionMap[$licenseShortName][$agentName][$agentId][] = $licenseMatch->getPercent();
       }
-      
-      
+
+
       if ($permission >= PERM_WRITE)
       {
         $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
@@ -245,22 +244,33 @@ class ClearingView extends FO_Plugin
 
     }
     $licenseInformation .= $output;
- 
+
     $licenseDecisions = array();
     foreach ($licenseDecisionMap as $licenseShortName => $agentMap)
     {
       $agents = array();
       foreach ($agentMap as $agentName => $agentResultMap)
       {
-        $agentResults = array();
-        foreach ($agentResultMap as $agentId => $percentage)
+        $agentEntry = $agentName . ": ";
+        foreach ($agentResultMap as $agentId => $percentages)
         {
-          $agentResults[] = array($agentId, $percentage);
+          $percentageEntries = array();
+          $index = 0;
+          foreach ($percentages as $percentage)
+          {
+            $entry = "<a href=\"" . $this->vars['uri'] . "&item=$uploadTreeId&agentId=$agentId#highlight\">#" . ++$index . "</a>";
+            if ($percentage)
+            {
+              $entry .= "($percentage %)";
+            }
+            $percentageEntries[] = $entry;
+          }
+          $agentEntry .= implode(", ", $percentageEntries);
         }
-        $agents[] = $agentName;
+        $agents[] = $agentEntry;
       }
-
-      $licenseDecisions[] = array($licenseShortName, $agents);
+      $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:\" onclick=\"javascript:window.open('/repo/?mod=view-license&amp;lic=$licenseShortName','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
+      $licenseDecisions[] = array($licenseShortNameWithLink, implode("<br/>", $agents));
     }
 
 
@@ -273,13 +283,15 @@ class ClearingView extends FO_Plugin
       $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $user_pk);
     }
 
-    list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
-    
+    list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
+
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
+    $this->vars['licenseDecisionsHeaders'] = array('License', 'Source', 'Text for report', 'Comment', 'Action');
+
     $this->vars['licenseDecisions'] = $licenseDecisions;
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
@@ -290,27 +302,27 @@ class ClearingView extends FO_Plugin
     return "view_license.html";
   }
 
-/*
- * \brief Customize submenus.
- */
+  /*
+   * \brief Customize submenus.
+   */
   function RegisterMenus()
   {
     $text = _("Set the concluded licenses for this upload");
-    menu_insert("Browse-Pfile::Clearing",0,$this->Name,$text);
+    menu_insert("Browse-Pfile::Clearing", 0, $this->Name, $text);
     menu_insert("ChangeLicense::View", 5, "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
     menu_insert("View::Audit", 35, $this->Name . Traceback_parm_keep(array("upload", "item", "show")), $text);
     $text = _("View file information");
-    menu_insert("ChangeLicense::Info",1, "view_info". Traceback_parm_keep(array("upload","item","format")),$text);
+    menu_insert("ChangeLicense::Info", 1, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
     $text = _("View Copyright/Email/Url info");
-    menu_insert("ChangeLicense::Copyright/Email/Url", 1, "copyrightview". Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
+    menu_insert("ChangeLicense::Copyright/Email/Url", 1, "copyrightview" . Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
     $text = _("Browse by buckets");
-    menu_insert("ChangeLicense::Bucket Browser",1,"bucketbrowser". Traceback_parm_keep(array("format","page","upload","item","bp"),$text));
+    menu_insert("ChangeLicense::Bucket Browser", 1, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
     $text = _("Copyright/Email/URL One-shot, real-time analysis");
     menu_insert("ChangeLicense::One-Shot Copyright/Email/URL", 3, "agent_copyright_once", $text);
     $text = _("Nomos One-shot, real-time license analysis");
-    menu_insert("ChangeLicense::One-Shot License", 3, "agent_nomos_once". Traceback_parm_keep(array("format","item")), $text);
+    menu_insert("ChangeLicense::One-Shot License", 3, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
 
-    menu_insert("ChangeLicense::[BREAK]",4);
+    menu_insert("ChangeLicense::[BREAK]", 4);
 
     return 0;
   } // RegisterMenus()

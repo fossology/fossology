@@ -164,30 +164,31 @@ class AgentsDao extends Object
     return $listOfRunningAgents;
   }
 
-  private function getLatestAgentResultFor($uploadId, $agentNames)
+  private function getLatestAgentResultForUpload($uploadId, $agentNames)
   {
     foreach ($agentNames as $agentName)
     {
-      $latestAgentId = GetAgentKey($agentName, "why is this agent missing?");
-      if (empty($latestAgentId))
-      {
-        throw new \Exception('currupted match');
-      }
+      $sql = "
+SELECT
+  agent_fk,
+  ars_success,
+  ars_endtime,
+  agent_name
+FROM " . $agentName . "_ars ARS
+INNER JOIN agent A ON ARS.agent_fk = A.agent_pk
+WHERE upload_fk=$1
+  AND A.agent_name = $2
+ORDER BY agent_fk DESC LIMIT 1";
 
-      global $container;
-      /* @param DbManager */
-      $dbManager = $container->get("db.manager");
-      $sql = "SELECT agent_fk,ars_success,ars_endtime FROM " . $agentName . "_ars WHERE upload_fk=$1 ORDER BY agent_fk";
-      $stmt = __METHOD__ . ".$agentName";
-      $dbManager->prepare($stmt, $sql);
-      $res = $dbManager->execute($stmt, array($uploadId));
-      $latestArs = array();
-      while ($row = $dbManager->fetchArray($res))
+      $statementName = __METHOD__ . ".$agentName";
+      $row = $this->dbManager->getSingleRow($sql, $statementName, array($uploadId, $agentName));
+
+      if ($row)
       {
         $key = $row['ars_success'] ? 'good' : ($row['ars_endtime'] ? 'bad' : 'n/a');
         $latestArs[$key] = $row['agent_fk'];
       }
-      $dbManager->freeResult($res);
+      $this->dbManager->freeResult($res);
 
       $agentLatestMap[$agentName] = array('latest' => $latestAgentId, 'ars' => $latestArs);
     }
