@@ -6,11 +6,21 @@
     {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
   </div>
   {% endif %}
-  
 
-  {% include 'change_license_modal.html' %}
   
   {{ licenseInformation }}
+  
+  
+  <h3><i18n>Audit license</i18n></h3>
+ {% if auditDenied %}
+   <i18n>Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.</i18n>
+ {% else %}
+  <button type=\"button\" onclick='openUserModal()'><i18n>User Decision</i18n></button> &nbsp;
+  <button type=\"button\" onclick='openBulkModal()'><i18n>Bulk Recognition</i18n></button><br/>
+  {% include 'change_license_modal.html' %}
+  {% include 'view_license_bulk.html' %}
+ {% endif %}
+  
   {% if clearingHistory %}
         <table border="1" id="licenseDecisionTable">
             <tr>

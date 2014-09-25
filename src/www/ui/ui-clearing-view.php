@@ -197,6 +197,7 @@ class ClearingView extends FO_Plugin
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
     
+    $permission = GetUploadPerm($uploadId);
     $licenseInformation = "";
 
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox=0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
@@ -212,33 +213,19 @@ class ClearingView extends FO_Plugin
       $output .= $outputTMP;
 
 
-    $text = _("Audit License");
-    $output .= "<h3>$text</h3>\n";
 
-    /** check if the current user has the permission to change license */
-    $permission = GetUploadPerm($uploadId);
-    if ($permission >= PERM_WRITE)
-    {
-      $this->vars = array_merge($this->vars,
-              $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
-    
-    
-      
-      $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
-      $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
+      /** check if the current user has the permission to change license */
 
-      $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
-      $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";
-    } else
-    {
-      $text = _("Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.");
-      $output .= "<b>$text</b>";
-    }
+      if ($permission >= PERM_WRITE)
+      {
+        $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
+        $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm($uploadTreeId));
 
-    $output .= "<br>";
+      } else
+      {
+        $this->vars['auditDenied'] = true;
+      }
 
-
-      
 
       $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
       $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
@@ -251,9 +238,7 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $output;
  
 
-    
-    $permission = GetUploadPerm($uploadId);
-    $clearingHistory = '';
+    $clearingHistory = array();
     if ($permission >= PERM_WRITE)
     {
       global $SysConf;
@@ -265,6 +250,7 @@ class ClearingView extends FO_Plugin
     list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
+    $this->vars['itemId'] = $uploadTreeId;
     $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;

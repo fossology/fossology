@@ -20,13 +20,16 @@ define("TITLE_core_auth", _("Login"));
 
 class core_auth extends FO_Plugin
 {
-  var $Name = "auth";
-  var $Title = TITLE_core_auth;
-  var $Version = "1.0";
-  var $PluginLevel = 1000; /* make this run first! */
-  var $Dependency = array();
-  var $LoginFlag = 0;
   public static $origReferer;
+  
+  function __construct()
+  {
+    $this->Name = "auth";
+    $this->Title = TITLE_core_auth;
+    $this->PluginLevel = 1000; /* make this run first! */
+    $this->LoginFlag = 0;
+    parent::__construct();
+  }
 
   /**
    * \brief getter to retreive value of static var
@@ -45,7 +48,6 @@ class core_auth extends FO_Plugin
    */
   function Install()
   {
-
     global $PG_CONN;
 
     if (empty($PG_CONN))
@@ -283,21 +285,14 @@ class core_auth extends FO_Plugin
   {
     global $container;
 
-    if (empty($User))
-    {
-      return;
-    }
-    if ($User == 'Default User')
+    if (empty($User) || $User == 'Default User')
     {
       return;
     }
     $dbManager = $container->get('db.manager');
 
-    $dbManager->prepare($stmt = __METHOD__ . 'select.user',
-        $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1");
-    $result = $dbManager->execute($stmt, array($User));
-    $R = $dbManager->fetchArray($result);
-    $dbManager->freeResult($result);
+    $R = $dbManager->getSingleRow("SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
+                                array($User),$logNote=__METHOD__ . 'select.user');
     if (empty($R['user_name']))
     {
       return;
@@ -356,8 +351,7 @@ class core_auth extends FO_Plugin
       $Uri = $Redirect;
     }
     /* Redirect window */
-    $V = "<script language='javascript'>\n" . " window.open('$Referer','_top');\n" . "</script>\n";
-    return $V;
+    header("Location: $Referer");
   }
 
   /**
@@ -372,19 +366,16 @@ class core_auth extends FO_Plugin
       return;
     }
     $V = "";
-    if ($_SESSION['User'] == "Default User")
+    if (!array_key_exists('User',$_SESSION) || $_SESSION['User'] == "Default User")
     {
       $User = GetParm("username", PARM_TEXT);
       $Pass = GetParm("password", PARM_TEXT);
       $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
-      if (empty($Referer)) $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
-      if (!empty($User))
+      if (empty($Referer))
       {
-        $VP = $this->CheckUser($User, $Pass, $Referer);
-      } else
-      {
-        $VP = "";
+        $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
       }
+      $VP = !empty($User) ? $this->CheckUser($User, $Pass, $Referer) : '';
       if (!empty($VP))
       {
         $V .= $VP;

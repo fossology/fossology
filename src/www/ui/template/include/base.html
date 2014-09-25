@@ -14,9 +14,11 @@
 {% endblock %}
 
 {% block micromenu %}
-<div style='border: thin dotted gray; background-color:lightyellow'>
+{% if micromenu %}
+<div style='border: thin dotted gray; background-color:lightyellow;'>
   {{ micromenu }}
 </div>
+{% endif %}
 {% endblock %}
 
 {% block message %}
@@ -27,7 +29,7 @@
  </div>
  <script type='text/javascript'>
   function rmMsg(){
-   var div = document.getElementById("dmessage")
+   var div = document.getElementById("dmessage");
    var parent = div.parentNode;
    parent.removeChild(div);
   }

@@ -162,6 +162,21 @@ class LicenseDao extends Object
   }
 
   /**
+   * @return array 
+   */
+  public function getLicenseArray()
+  {
+    $statementName = __METHOD__;
+
+    $this->dbManager->prepare($statementName,
+        "select rf_pk id,rf_shortname shortname,rf_fullname fullname from license_ref order by rf_shortname");
+    $result = $this->dbManager->execute($statementName);
+    $licenseRefs = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
+    return $licenseRefs;
+  }
+  
+  /**
    * @param FileTreeBounds $fileTreeBounds
    * @param $selectedAgentId
    * @return array
