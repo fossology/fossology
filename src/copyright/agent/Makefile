@@ -13,11 +13,11 @@ include $(VARS)
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
+CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp -lcrypto
 
 EXE=copyright
 TESTDIR = ../agent_tests
-OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o copyrightUtils.o database.o
+OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o copyrightUtils.o cleanEntries.o database.o
 COVERAGE = 
 
 $(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)

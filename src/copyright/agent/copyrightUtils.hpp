@@ -25,6 +25,7 @@
 #include "files.hpp"
 #include "regTypes.hpp"
 #include "database.hpp"
+#include "cleanEntries.hpp"
 
 extern "C"{
 #include "libfossology.h"

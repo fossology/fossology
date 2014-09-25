@@ -62,7 +62,19 @@ void saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   for (cpm it=matches.begin(); it!=matches.end(); ++it ){
     const CopyrightMatch& match = *it;
 
-    cout << "pFileId=" << pFileId << " has " << match.getType() << ": " << match.content() << endl;
+    DatabaseEntry entry;
+    entry.agent_fk=state->getAgentId();
+    entry.content=match.content();
+    entry.copy_endbyte=match.start() + match.length();
+    entry.copy_startbyte = match.start();
+    entry.pfile_fk = pFileId;
+    entry.type = match.getType();
+
+    if(CleanDatabaseEntry(entry)) {
+
+      cout << "pFileId=" << entry.pfile_fk << " has " << entry.type << ": " << entry.content << " hash " << entry.hash << endl;
+
+    }
   }
 };
 
