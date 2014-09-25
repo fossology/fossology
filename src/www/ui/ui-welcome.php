@@ -49,7 +49,6 @@ class ui_welcome extends FO_Plugin
     
     $topMenuList = "Main::" . $this->MenuList;
     menu_insert($topMenuList.'::Overview', $this->MenuOrder-10, $this->Name."&show=welcome");
-    menu_insert($topMenuList.'::Datatables', $this->MenuOrder, $this->Name."&show=datatables");
     menu_insert($topMenuList.'::License Browser', $this->MenuOrder, $this->Name."&show=licensebrowser");
   }
   
@@ -75,25 +74,20 @@ class ui_welcome extends FO_Plugin
    * @return string rendered template
    */
   function outputHtml() {
-    global $container;
-    $renderer = $container->get('renderer');
     $show = GetParm('show', PARM_STRING);
-    if ($show=='datatables'){
-      return $renderer->renderTemplate("datatables");
-    }
     if ($show=='licensebrowser'){
-      return $renderer->renderTemplate("licensebrowser");
+      return $this->renderTemplate("licensebrowser.html");
     }
     $Login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
     {
       $Login = "<a href='$SiteURI?mod=auth'>$Login</a>";
     }
-    $renderer->vars['login'] = $Login;
-    $renderer->vars['SiteURI'] = Traceback_uri();;
-    return $renderer->renderTemplate("welcome");
+    $this->vars['login'] = $Login;
+    $this->vars['SiteURI'] = Traceback_uri();
+
+    return $this->renderTemplate('welcome.html');
   }
- 
 }
 
 $NewPlugin = new ui_welcome;

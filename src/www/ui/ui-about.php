@@ -30,24 +30,27 @@ define("_TEXT", _("This program is free software; you can redistribute it and/or
  */
 class ui_about extends FO_Plugin
 {
-  var $Name       = "about";
-  var $Title      = TITLE_ui_about;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::About";
-  var $DBaccess   = PLUGIN_DB_NONE;
-  var $LoginFlag  = 0;
-
   var $_Project = _PROJECT;
   var $_Copyright=_COPYRIGHT;
   var $_Text=_TEXT;
 
+  function __construct()
+  {
+    $this->Name       = "about";
+    $this->Title      = TITLE_ui_about;
+    $this->MenuList   = "Help::About";
+    $this->DBaccess   = PLUGIN_DB_NONE;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
+  
   /**
    * \brief Generate output for this plug-in.
    */ 
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
+    $V = '';
     switch($this->OutputType)
     {
       case "XML":
@@ -56,18 +59,7 @@ class ui_about extends FO_Plugin
         $V .= "<text>$this->_Text</text>\n";
         break;
       case "HTML":
-        global $VERSION;
-        global $SVN_REV;
-        $text = _("FOSSology version");
-        $text1 = _("code revision");
-        $V .= "<b>$text $VERSION ($text1 $SVN_REV)</b>\n";
-        global $container;
-        $dbManager = $container->get('db.manager');
-        $licenseRefTable = $dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1" ,array("License by Nomos."));
-        $V .= " with $licenseRefTable[cnt] known licenses in database";
-        $V .= "<P/>\n";
-        $V .= "$this->_Copyright<P>\n";
-        $V .= str_replace("\n","\n<P>\n",$this->_Text);
+        $V = $this->htmlContent();
         break;
       case "Text":
         $V .= "$this->_Project\n";
@@ -77,12 +69,25 @@ class ui_about extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    return;
+    $this->vars['content'] = $V;
   }
-
-};
+  
+  protected function htmlContent()
+  {
+    global $VERSION;
+    global $SVN_REV;
+    $text = _("FOSSology version");
+    $text1 = _("code revision");
+    $html = "<b>$text $VERSION ($text1 $SVN_REV)</b>\n";
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $licenseRefTable = $dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1" ,array("License by Nomos."));
+    $html .= " with $licenseRefTable[cnt] known licenses in database";
+    $html .= "<P/>\n";
+    $html .= "$this->_Copyright<P>\n";
+    $html .= str_replace("\n","\n<P>\n",$this->_Text);
+    return $html;
+  }
+}
 $NewPlugin = new ui_about;
 $NewPlugin->Initialize();
-?>

@@ -20,12 +20,15 @@ define("TITLE_folder_create", _("Create a new Fossology folder"));
 
 class folder_create extends FO_Plugin
 {
-  var $Name = "folder_create";
-  var $Title = TITLE_folder_create;
-  var $Version = "1.0";
-  var $MenuList = "Organize::Folders::Create";
-  var $Dependency = array ();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "folder_create";
+    $this->Title = TITLE_folder_create;
+    $this->MenuList = "Organize::Folders::Create";
+    $this->Dependency = array ();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Given a parent folder ID, a name and description,
@@ -41,7 +44,6 @@ class folder_create extends FO_Plugin
    */
   function Create($ParentId, $NewFolder, $Desc)
   {
-    global $Plugins;
     global $PG_CONN;
 
     /* Check the name */
@@ -109,77 +111,51 @@ class folder_create extends FO_Plugin
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return;
-    }
     $V = "";
-    $R = "";
-    switch ($this->OutputType)
+    /* If this is a POST, then process the request. */
+    $ParentId = GetParm('parentid', PARM_INTEGER);
+    $NewFolder = GetParm('newname', PARM_TEXT);
+    $Desc = GetParm('description', PARM_TEXT);
+    if (!empty ($ParentId) && !empty ($NewFolder))
     {
-      case "XML" :
-        break;
-      case "HTML" :
-        /* If this is a POST, then process the request. */
-        $ParentId = GetParm('parentid', PARM_INTEGER);
-        $NewFolder = GetParm('newname', PARM_TEXT);
-        $Desc = GetParm('description', PARM_TEXT);
-        if (!empty ($ParentId) && !empty ($NewFolder))
-        {
-
-          $rc = $this->Create($ParentId, $NewFolder, $Desc);
-
-          $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
-          if ($rc == 1)
-          {
-            /* Need to refresh the screen */
-            $text = _("Folder");
-            $text1 = _("Created");
-            $R .= displayMessage("$text $NewFolder $text1");
-          } else
-          if ($rc == 4)
-          {
-            $text = _("Folder");
-            $text1 = _("Exists");
-            $R .= displayMessage("$text $NewFolder $text1");
-          }
-        }
-        /* Display the form */
-        $V .= "$R\n";
-        $V .= "<form method='POST'>\n"; // no url = this url
-        $V .= "<ol>\n";
-        $text = _("Select the parent folder:  \n");
-        $V .= "<li>$text";
-        $V .= "<select name='parentid'>\n";
-        $root_folder_pk = GetUserRootFolder();
-        $V.= FolderListOption($root_folder_pk, 0);
-        $V .= "</select><P />\n";
-        $text = _("Enter the new folder name:  \n");
-        $V .= "<li>$text";
-        $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
-        $text = _("Enter a meaningful description:  \n");
-        $V .= "<br><li>$text";
-        $V .= "<INPUT type='text' name='description' size=80 />\n";
-        $V .= "</ol>\n";
-        $text = _("Create");
-        $V .= "<input type='submit' value='$text!'>\n";
-        $V .= "</form>\n";
-        break;
-      case "Text" :
-        break;
-      default :
-        break;
+      $rc = $this->Create($ParentId, $NewFolder, $Desc);
+      if ($rc == 1)
+      {
+        /* Need to refresh the screen */
+        $text = _("Folder");
+        $text1 = _("Created");
+        $this->vars['message'] = "$text $NewFolder $text1";
+      }
+      else if ($rc == 4)
+      {
+        $text = _("Folder");
+        $text1 = _("Exists");
+        $this->vars['message'] = "$text $NewFolder $text1";
+      }
     }
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    print ("$V");
-    return;
+    /* Display the form */
+    $V .= "<form method='POST'>\n"; // no url = this url
+    $V .= "<ol>\n";
+    $text = _("Select the parent folder:  \n");
+    $V .= "<li>$text";
+    $V .= "<select name='parentid'>\n";
+    $root_folder_pk = GetUserRootFolder();
+    $V.= FolderListOption($root_folder_pk, 0);
+    $V .= "</select><P />\n";
+    $text = _("Enter the new folder name:  \n");
+    $V .= "<li>$text";
+    $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
+    $text = _("Enter a meaningful description:  \n");
+    $V .= "<br><li>$text";
+    $V .= "<INPUT type='text' name='description' size=80 />\n";
+    $V .= "</ol>\n";
+    $text = _("Create");
+    $V .= "<input type='submit' value='$text!'>\n";
+    $V .= "</form>\n";
+    return $V;
   }
-};
+}
 $NewPlugin = new folder_create;
 $NewPlugin->Initialize();
-?>

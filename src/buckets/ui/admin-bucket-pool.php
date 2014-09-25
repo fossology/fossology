@@ -25,12 +25,14 @@ define("TITLE_admin_bucket_pool", _("Duplicate Bucketpool"));
 
 class admin_bucket_pool extends FO_Plugin
 {
-  var $Name       = "admin_bucket_pool";
-  var $Version    = "1.0";
-  var $Title      = TITLE_admin_bucket_pool;
-  var $MenuList   = "Admin::Buckets::Duplicate Bucketpool";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "admin_bucket_pool";
+    $this->Title      = TITLE_admin_bucket_pool;
+    $this->MenuList   = "Admin::Buckets::Duplicate Bucketpool";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * @brief Clone a bucketpool and its bucketdef records.
@@ -113,13 +115,9 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
    * The user must then manually modify the bucketpool and/or bucketdef
    * records to create their new (modified) bucketpool.
    */
-  function Output()
+  protected function htmlContent()
   {
     global $PROJECTSTATEDIR;
-
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
 
     /* get the bucketpool_pk to clone */
     $bucketpool_pk = GetParm("default_bucketpool_fk",PARM_INTEGER);
@@ -130,62 +128,58 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
       $msg = "";
       $newbucketpool_pk = $this->CloneBucketpool($bucketpool_pk, $UpdateDefault, $msg);
       $text = _("Your new bucketpool_pk is");
-      echo "$text $newbucketpool_pk<hr>";
+      $this->vars['message'] = "$text $newbucketpool_pk";
     }
 
-    echo "<p>";
-    echo _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
-understand");
-    echo " <a href='http://www.fossology.org/projects/fossology/wiki/Buckets'>";
-    echo _("Creating Bucket Pools");
-    echo "</a> ";
-    echo _("before continuing.");
-    echo _(" It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results.");
-    echo "<p>";
-    echo _("Steps to modify a bucketpool:");
-    echo "<ol>";
-    echo "<li>";
-    echo _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
-    echo "<li>";
-    echo _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
-    echo "<li>";
-    echo _("Duplicate any bucket scripts that you defined in $PROJECTSTATEDIR.");
-    echo "<li>";
-    echo _("Manually edit the new bucketpool record, if desired.");
-    echo "<li>";
-    echo _("Manually insert/update/delete the new bucketdef records.");
-    echo "<li>";
-    echo _("Manually insert a new buckets record in the agent table.");
-    echo "<li>";
-    echo _("Queue up the new bucket job in Jobs > Schedule Agents.");
-    echo "<li>";
-    echo _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
-    echo "<li>";
-    echo _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
-    echo "<li>";
-    echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one (manual sql step).");
-    echo "</ol>";
-    echo "<hr>";
+    $V = "<p>";
+    $V .= _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you understand");
+    $V .= " <a href='http://www.fossology.org/projects/fossology/wiki/Buckets'>";
+    $V .= _("Creating Bucket Pools");
+    $V .= "</a> ";
+    $V .= _("before continuing.");
+    $V .= _(" It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results.");
+    $V .= "<p>";
+    $V .= _("Steps to modify a bucketpool:");
+    $V .= "<ol>";
+    $V .= "<li>";
+    $V .= _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
+    $V .= "<li>";
+    $V .= _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
+    $V .= "<li>";
+    $V .= _("Duplicate any bucket scripts that you defined in $PROJECTSTATEDIR.");
+    $V .= "<li>";
+    $V .= _("Manually edit the new bucketpool record, if desired.");
+    $V .= "<li>";
+    $V .= _("Manually insert/update/delete the new bucketdef records.");
+    $V .= "<li>";
+    $V .= _("Manually insert a new buckets record in the agent table.");
+    $V .= "<li>";
+    $V .= _("Queue up the new bucket job in Jobs > Schedule Agents.");
+    $V .= "<li>";
+    $V .= _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
+    $V .= "<li>";
+    $V .= _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
+    $V .= "<li>";
+    $V .= _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one (manual sql step).");
+    $V .= "</ol>";
+    $V .= "<hr>";
 
-    echo "<form method='POST'>";
-    $Val = "";
+    $V .= "<form method='POST'>";
     $text = _("Choose the bucketpool to duplicate");
-    echo "$text ";
-    echo SelectBucketPool($Val);
+    $V .= "$text ";
+    $Val = "";
+    $V .= SelectBucketPool($Val);
 
-    echo "<p>";
+    $V .= "<p>";
     $text = _("Update my default bucketpool");
-    echo "<input type='checkbox' name='updatedefault' checked> $text.";
-    echo "<p>";
+    $V .= "<input type='checkbox' name='updatedefault' checked> $text.";
+    $V .= "<p>";
     $text = _("Submit");
-    echo "<input type='submit' value='$text'>";
-    echo "</form>";
-
-    return;
-  } // Output()
-
-};
+    $V .= "<input type='submit' value='$text'>";
+    $V .= "</form>";
+    return $V;
+  }
+}
 
 $NewPlugin = new admin_bucket_pool;
 $NewPlugin->Initialize();
-?>

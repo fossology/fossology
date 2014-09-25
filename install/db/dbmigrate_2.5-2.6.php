@@ -112,6 +112,7 @@ function blowAudit($verbose)
 function migrate_25_26($verbose)
 {
   setActiveGroup($verbose);
-  $nInsertedDecisions = blowAudit($verbose);
+  //$nInsertedDecisions = blowAudit($verbose);
+  $nInsertedDecisions = 0;
   return $nInsertedDecisions;
 }

@@ -1,0 +1,62 @@
+{% extends "include/base.html" %}
+
+{% block content %}
+<b>
+    <i18n>FOSSology</i18n>
+</b>
+<i18n>is a framework for software analysis tools.</i18n>
+<i18n>With it, you can:</i18n>
+<ul>
+    <li>
+        <i18n>Upload files into the fossology repository.</i18n>
+    </li>
+    <li>
+        <i18n>Unpack files (zip, tar, bz2, iso's, and many others) into its component files.</i18n>
+    </li>
+    <li>
+        <i18n>Browse upload file trees.</i18n>
+    </li>
+    <li>
+        <i18n>View file contents and meta data.</i18n>
+    </li>
+    <li>
+        <i18n>Scan for software licenses.</i18n>
+    </li>
+    <li>
+        <i18n>Scan for copyrights and other author information.</i18n>
+    </li>
+    <li>
+        <i18n>View side-by-side license and bucket differences between file trees.</i18n>
+    </li>
+    <li>
+        <i18n>Tag and attach notes to files.</i18n>
+    </li>
+    <li>
+        <i18n>Report files based on your own custom classification scheme.</i18n>
+    </li>
+</ul>
+<p></p>
+<b>
+    <i18n>Where to Begin...</i18n>
+</b><br/>
+<i18n>The menu at the top contains all the primary capabilities of FOSSology.</i18n>
+<ul>
+    <li>
+        <b>
+            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth"><i18n>Login</i18n></a>{% else %}
+            <i18n>Login</i18n>{% endif %}</b>:
+        <i18n>Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
+            even add new users.
+        </i18n>
+    </li>
+</ul>
+{% endblock %}
+
+{% block footer %}
+{ parent() }
+<script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+<script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+<script src="scripts/change-license-common.js" type="text/javascript"></script>
+<script src="scripts/change-license-view.js" type="text/javascript"></script>
+<script src="scripts/tools.js" type="text/javascript"></script>
+{% endblock %}

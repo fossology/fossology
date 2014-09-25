@@ -24,7 +24,6 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\View\Renderer;
 
@@ -127,6 +126,37 @@ class ChangeLicenseUtility extends Object
     return $output;
   }
 
+  
+    /**
+   * @param ClearingDecision[] $clearingDecWithLicenses
+   * @param $user_pk
+   * @param $output
+   * @return array
+   */
+  function getClearingHistory($clearingDecWithLicenses, $user_pk)
+  {
+    $table = array();
+    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
+    {
+      $licenseNames = array();
+      foreach ($clearingDecWithLic->getLicenses() as $lic)
+      {
+        $licenseNames[] = $lic->getShortName();
+      }
+      $row = array(
+          $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
+          $clearingDecWithLic->getUserName(),
+          $clearingDecWithLic->getScope(),
+          $clearingDecWithLic->getType(),
+          implode(", ", $licenseNames),
+          ($user_pk == $clearingDecWithLic->getUserId()) ? $clearingDecWithLic->getComment() : '--private--',
+          $clearingDecWithLic->getReportinfo() );
+      $table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+    }
+    return $table;
+  }
+  
+  
   /**
    * @param LicenseRef[] $bigList
    * @param LicenseRef[] $smallList
@@ -203,10 +233,10 @@ class ChangeLicenseUtility extends Object
   }
 
 
+
   /**
    * @param $uploadTreeId
-   * @return string
-   * creates two licenseListSelects and buttons to transfer licenses and two text boxes
+   * @return array
    */
   public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
@@ -233,45 +263,22 @@ class ChangeLicenseUtility extends Object
       $preSelectedLicenses = array();
     }
 
-        
-    $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
-    $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
-    
-    $defaultScope = array_key_exists('scopeDefault', $_COOKIE) ? $_COOKIE['scopeShow'] : 2;
-    $defaultType = array_key_exists('typeDefault', $_COOKIE) ? $_COOKIE['typeShow'] : 1;
-    
-    $clearingScopes = $this->clearingDao->getClearingScopeMap();
-    $this->renderer->vars['scopeRadio'] = $this->renderer->createRadioGroup('scope', $clearingScopes, $defaultScope, '', $separator=' &nbsp; ');
-    $clearingTypes = $this->clearingDao->getClearingTypeMap($selectableOnly=true);
-    $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType, '', $separator=' &nbsp; ');
-    $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
-    
-    $output = $this->renderer->renderTemplate('change_license_modal');
+    $rendererVars = array();
+    $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
+    $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
-    return $output;
+    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap();
+    $rendererVars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
+
+    return $rendererVars;
   }
 
 
   public function createBulkForm($uploadTreeId=-1) {
-    $output = "";
-    $allLicenseRefs = $this->licenseDao->getLicenseRefs();
-    $output .= "<div class=\"modal\" id=\"bulkModal\" hidden>";
-    $output .= "<form name=\"bulkForm\">";
-    $text = _("Bulk recognition");
-    $output .= "<h2>$text</h2>";
-    $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
-    $output .= "<option value=\"f\">Add license</option>";
-    $output .= "<option value=\"t\">Remove license</option>";
-    $output .= "</select>";
-    $output .= $this->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
-    $text = _("reference text");
-    $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
-    $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
-    $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
-    $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
-    $output .= "</div>";
-    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
-
-    return $output;
+    $rendererVars = array();
+    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=view-license";
+    $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();
+    // print_r($rendererVars['licenseArray']);
+    return $rendererVars;
   }
 }

@@ -28,6 +28,6 @@
 PGconn *fo_dbconnect(char *DBConfFile, char **ErrorBuf);
 int     fo_checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb); 
 int     fo_checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb);
-int     fo_tableExists(PGconn *pgConn, char *tableName);
+int     fo_tableExists(PGconn *pgConn, const char *tableName);
 
 #endif  /* LIBFOSSDB_H */

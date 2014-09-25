@@ -35,12 +35,6 @@ define("TITLE_showjobs", _("Show Jobs"));
 
 class showjobs extends FO_Plugin
 {
-  var $Name       = "showjobs";
-  var $Title      = TITLE_showjobs;
-  var $Version    = "1.0";
-  var $MenuOrder  = 5;
-  var $Dependency = array("browse");
-  var $DBaccess   = PLUGIN_DB_WRITE;
   var $MaxUploadsPerPage = 10;  /* max number of uploads to display on a page */
   var $nhours = 672;  /* 672=24*28 (4 weeks) What is considered a recent number of hours for "My Recent Jobs" */
 
@@ -53,9 +47,16 @@ class showjobs extends FO_Plugin
 	"Failed" => "#FF6666"	// "red"
 	);
 
-  /***********************************************************
-   RegisterMenus(): Customize submenus.
-   ***********************************************************/
+  function __construct()
+  {
+    $this->Name       = "showjobs";
+    $this->Title      = TITLE_showjobs;
+    $this->MenuOrder  = 5;
+    $this->Dependency = array("browse");
+    $this->DBaccess   = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
+
   function RegisterMenus()
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
@@ -777,13 +778,9 @@ if (!empty($Row["job_upload_fk"]))
     return $Color;
   }  /* GetColor()  */
 
-  /***********************************************************
-   Output(): This function returns the job queue status.
-   ***********************************************************/
-  function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
 
+  protected function htmlContent()
+  {
     $V="";
     $Page = "";
     $UploadPk = GetParm('upload',PARM_INTEGER);
@@ -797,103 +794,86 @@ if (!empty($Row["job_upload_fk"]))
       if ($UploadPerm < PERM_WRITE) 
       {
         $text = _("Permission Denied");
-        echo "<h2>$text<h2>";
-        return;
+        return "<h2>$text<h2>";
       }
     }
 
-    switch($this->OutputType)
+    
+    // micro menus
+    $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+
+    /* Process any actions */
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
     {
-      case "XML":
-	    break;
-      case "HTML":
-        // micro menus
-        $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
-
-        /* Process any actions */
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+      $jq_pk = GetParm("jobid",PARM_INTEGER);
+      $Action = GetParm("action",PARM_STRING);
+      $UploadPk = GetParm("upload",PARM_INTEGER);
+      if (!empty($UploadPk))
+      {
+        $UploadPerm = GetUploadPerm($UploadPk);
+        if ($UploadPerm < PERM_WRITE) 
         {
-          $jq_pk = GetParm("jobid",PARM_INTEGER);
-          $Action = GetParm("action",PARM_STRING);
-          $UploadPk = GetParm("upload",PARM_INTEGER);
-          if (!empty($UploadPk))
-          {
-            $UploadPerm = GetUploadPerm($UploadPk);
-            if ($UploadPerm < PERM_WRITE) 
-            {
-              $text = _("Permission Denied");
-              echo "<h2>$text<h2>";
-              return;
-            }
-          }
-          $Page = GetParm('page',PARM_INTEGER);
-          if (empty($Page)) $Page = 0;
-          $jqtype = GetParm("jqtype",PARM_STRING);
-          $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
-          $Job = GetParm('job',PARM_INTEGER);
-          switch($Action)
-          {
-            case 'pause':
-              if (empty($jq_pk)) break;
-              $Command = "pause $jq_pk";
-              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-              if ($rv == false) $V .= _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
-              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-    		  break;
-    	    case 'restart':
-              if (empty($jq_pk)) break;
-              $Command = "restart $jq_pk";
-              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-              if ($rv == false) $V .= _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
-              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
-	    	  break;
-            case 'cancel':
-              if (empty($jq_pk)) break;
-              $Msg = "\"" . _("Killed by") . " " . @$_SESSION['User'] . "\"";
-              $Command = "kill $jq_pk $Msg";
-              $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
-              if ($rv == false) $V .= _("Unable to cancel job.") . $response_from_scheduler . $error_info;
-              echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+          $text = _("Permission Denied");
+          echo "<h2>$text<h2>";
+          return;
+        }
+      }
+      $Page = GetParm('page',PARM_INTEGER);
+      if (empty($Page)) $Page = 0;
+      $jqtype = GetParm("jqtype",PARM_STRING);
+      $ThisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$UploadPk";
+      $Job = GetParm('job',PARM_INTEGER);
+      switch($Action)
+      {
+        case 'pause':
+          if (empty($jq_pk)) break;
+          $Command = "pause $jq_pk";
+          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+          if ($rv == false) $V .= _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
+          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
               break;
-	        default:
-		      break;
-	      }
-	    }
-
-        if (!empty($Job))
-    	  $V .= $this->ShowJobDB($Job);
-        else 
-        {
-          if ($UploadPk) 
-          {
-            $upload_pks = array($UploadPk);
-            $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
+        case 'restart':
+          if (empty($jq_pk)) break;
+          $Command = "restart $jq_pk";
+          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+          if ($rv == false) $V .= _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
+          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+              break;
+        case 'cancel':
+          if (empty($jq_pk)) break;
+          $Msg = "\"" . _("Killed by") . " " . @$_SESSION['User'] . "\"";
+          $Command = "kill $jq_pk $Msg";
+          $rv = fo_communicate_with_scheduler($Command, $response_from_scheduler, $error_info);
+          if ($rv == false) $V .= _("Unable to cancel job.") . $response_from_scheduler . $error_info;
+          echo "<script type=\"text/javascript\"> window.location.replace(\"$ThisURL\"); </script>";
+          break;
+            default:
+                  break;
           }
-         else
-          {
-            $Jobs = $this->MyJobs($this->nhours);
-          } 
-          $JobsInfo = $this->GetJobInfo($Jobs, $Page);
-
-          /* Sort jobs by job_pk (so most recent comes out first) */
-          usort($JobsInfo, "CompareJobsInfo");
-
-    	  $V .= $this->Show($JobsInfo, $Page);
         }
 
-    	break;
-      case "Text":
-    	break;
-      default:
-    	break;
+    if (!empty($Job))
+      $V .= $this->ShowJobDB($Job);
+    else 
+    {
+      if ($UploadPk) 
+      {
+        $upload_pks = array($UploadPk);
+        $Jobs = $this->Uploads2Jobs($upload_pks, $Page);
+      }
+     else
+      {
+        $Jobs = $this->MyJobs($this->nhours);
+      } 
+      $JobsInfo = $this->GetJobInfo($Jobs, $Page);
+      usort($JobsInfo, "CompareJobsInfo");
+
+      $V .= $this->Show($JobsInfo, $Page);
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
-    return;
+
+    return $V;
   }
 
-};
+}
 $NewPlugin = new showjobs;
 $NewPlugin->Initialize();
-
-?>

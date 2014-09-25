@@ -35,13 +35,14 @@ define("TITLE_ajax_filebucket", _("List Uploads as Options"));
 
 class ajax_filebucket extends FO_Plugin
 {
-  var $Name       = "ajax_filebucket";
-  var $Title      = TITLE_ajax_filebucket;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $NoHTML     = 1; /* This plugin needs no HTML content help */
-  var $LoginFlag = 0;
+  function __construct()
+  {
+    $this->Name       = "ajax_filebucket";
+    $this->Title      = TITLE_ajax_filebucket;
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+    parent::__construct();
+  }
 
   /**
    * \brief Display the loaded menu and plugins.
@@ -49,16 +50,12 @@ class ajax_filebucket extends FO_Plugin
   function Output()
   {
     global $PG_CONN;
-    global $Plugins;
 
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    //$uTime = microtime(true);
-
-    // make sure there is a db connection
     if (!$PG_CONN) {
-      echo "NO DB connection";
+      return "NO DB connection";
     }
 
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
@@ -76,19 +73,14 @@ class ajax_filebucket extends FO_Plugin
     foreach ($children as $child)
     {
       if (BucketInTree($bucket_pk, $child['uploadtree_pk']))
-      $outstr .= ",$child[uploadtree_pk]";
+      {
+        $outstr .= ",$child[uploadtree_pk]";
+      }
     }
 
-    if (!$this->OutputToStdout) {
-      return($outstr);
-    }
-    print("$outstr");
-    return;
-  } // Output()
+    return $outstr;
+  }
 
-
-};
+}
 $NewPlugin = new ajax_filebucket;
 $NewPlugin->Initialize();
-
-?>

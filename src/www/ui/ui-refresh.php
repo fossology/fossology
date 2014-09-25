@@ -18,9 +18,12 @@
 
 class ui_refresh extends FO_Plugin
 {
-  var $Name       = "refresh";
-  var $Version    = "1.0";
-  var $LoginFlag  =  0;
+  function __construct()
+  {
+    $this->Name       = "refresh";
+    $this->LoginFlag  =  0;
+    parent::__construct();
+  }
 
   /**
    * \brief Generate a Refresh URL.
@@ -28,8 +31,8 @@ class ui_refresh extends FO_Plugin
   function GetRefresh()
   {
     $Mod = GetParm("mod",PARM_STRING);
-    $Opt = Traceback_parm(0);
-    $Opt = preg_replace("/&/","--",$Opt);
+    $parm = Traceback_parm(0);
+    $Opt = preg_replace("/&/","--",$parm);
     $V = "mod=" . $this->Name . "&remod=$Mod" . "&reopt=$Opt";
     return($V);
   } // GetRefresh()
@@ -53,27 +56,13 @@ class ui_refresh extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
     global $Plugins;
     $P = &$Plugins[plugin_find_id("Default")];
     $GoMod = GetParm("remod",PARM_STRING);
     $GoOpt = GetParm("reopt",PARM_STRING);
     $GoOpt = preg_replace("/--/","&",$GoOpt);
     return($P->Output($GoMod,$GoOpt));
-  } // Output()
-
-  /**
-   * \brief This function is called when user output is
-   * finished.
-   */
-  function OutputClose()
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    global $Plugins;
-    $P = &$Plugins[plugin_find_id("Default")];
-    return($P->OutputClose());
-  } // OutputClose()
-};
+  }
+}
 $NewPlugin = new ui_refresh;
 $NewPlugin->Initialize();
-?>

@@ -97,10 +97,10 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
     $this->pfileId=10;
     $this->userName="tester";
     $this->userId=11;
-    $this->type="To be determined";
+    $this->type = ClearingDecision::TO_BE_DISCUSSED;
     $this->comment="Test comment";
     $this->reportinfo ="Test reportinfo";
-    $this->scope="upload";
+    $this->scope = LicenseDecision::SCOPE_UPLOAD;
     $this->date_added = "2012-07-08 11:14:15.638276";
   }
 
@@ -174,30 +174,6 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
       -> setType ($this->type)
       -> build();
     assertThat($clearingDec->getType(), is($this->type));
-  }
-
-  public function testComment()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setComment ($this->comment)
-      -> build();
-    assertThat($clearingDec->getComment(), is($this->comment));
-  }
-
-  public function testReportinfo()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setReportinfo ($this->reportinfo)
-      -> build();
-    assertThat($clearingDec->getReportinfo(), is($this->reportinfo));
-  }
-
-  public function testScope()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setScope ($this->scope)
-      -> build();
-    assertThat($clearingDec->getScope(), is($this->scope));
   }
 
   public function testDateAdded()

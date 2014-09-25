@@ -23,23 +23,21 @@ define("TITLE_delete_group", _("Delete Group"));
  * \brief add a new group
  */
 class group_delete extends FO_Plugin {
-  var $Name = "group_delete";
-  var $Title = TITLE_delete_group;
-  var $MenuList = "Admin::Groups::Delete Group";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
-  var $LoginFlag = 1;  /* Don't allow Default User to add a group */
-
-
-  /**
-   * \brief Generate the text for this plugin.
-   */
-  function Output() 
+  function __construct()
   {
-    global $PG_CONN;
-    global $SysConf;
+    $this->Name = "group_delete";
+    $this->Title = TITLE_delete_group;
+    $this->MenuList = "Admin::Groups::Delete Group";
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
+    parent::__construct();
+  }
 
-    if ($this->State != PLUGIN_STATE_READY)  return;
+
+
+  protected function htmlContent() 
+  {
+    global $SysConf;
 
     $user_pk = $SysConf['auth']['UserId'];
 
@@ -57,11 +55,11 @@ class group_delete extends FO_Plugin {
         /* Need to refresh the screen */
         $text = _("Group");
         $text1 = _("Deleted");
-        $V.= displayMessage("$text {$GroupArray[$Group]} $text1.");
+        $this->vars['message'] = "$text {$GroupArray[$Group]} $text1.";
       } 
       else 
       {
-        $V.= displayMessage($rc);
+        $this->vars['message'] = $rc;
       }
     }
 
@@ -69,8 +67,6 @@ class group_delete extends FO_Plugin {
     $text = _("Delete a Group");
     $V.= "<h4>$text</h4>\n";
     $V.= "<form name='formy' method='POST' action=" . Traceback_uri() ."?mod=group_delete>\n";
-
-    /* Get array of users */
     $UserArray = Table2Array('user_pk', 'user_name', 'users');
 
     /* Remove from $GroupArray any active users.  A user must always have a group by the same name */
@@ -82,27 +78,21 @@ class group_delete extends FO_Plugin {
     if (empty($GroupArray))
     {
       $text = _("You have no groups you can delete.");
-      echo "<p>$text<p>";
-      return;
+      return "<p>$text<p>";
     }
     reset($GroupArray);
     if (empty($group_pk)) $group_pk = key($GroupArray);
 
-    $text = _("Select the group to delete:  \n");
-    $V.= "$text";
+    $V .= _("Select the group to delete").":  \n";
 
-    /*** Display group select list, on change request new page with group= in url ***/
+    /* Display group select list, on change request new page with group= in url */
     $V .= Array2SingleSelect($GroupArray, "grouppk", $group_pk, false, false);
 
     $text = _("Delete");
     $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
 
-    if (!$this->OutputToStdout)  return ($V);
-
-    print ("$V");
-    return;
+    return $V;
   }
-};
+}
 $NewPlugin = new group_delete;
-?>

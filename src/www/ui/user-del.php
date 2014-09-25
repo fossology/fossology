@@ -24,12 +24,15 @@ define("TITLE_user_del", _("Delete A User"));
  */
 class user_del extends FO_Plugin
 {
-  var $Name       = "user_del";
-  var $Title      = TITLE_user_del;
-  var $MenuList   = "Admin::Users::Delete";
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "user_del";
+    $this->Title      = TITLE_user_del;
+    $this->MenuList   = "Admin::Users::Delete";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+
+    parent::__construct();
+  }
 
   /**
    * \brief Delete a user.
@@ -92,83 +95,68 @@ class user_del extends FO_Plugin
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
     global $PG_CONN;
     $V="";
-    switch($this->OutputType)
+    /* If this is a POST, then process the request. */
+    $User = GetParm('userid',PARM_TEXT);
+    $Confirm = GetParm('confirm',PARM_INTEGER);
+    if (!empty($User))
     {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $User = GetParm('userid',PARM_TEXT);
-        $Confirm = GetParm('confirm',PARM_INTEGER);
-        if (!empty($User))
-        {
-          if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-          else { $rc = $this->Delete($User); }
-          if (empty($rc))
-          {
-            /* Need to refresh the screen */
-            $text = _("User deleted.");
-            $V .= displayMessage($text);
-          }
-          else
-          {
-            $V .= displayMessage($rc);
-          }
-        }
-
-        /* Get the user list */
-        $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $row = pg_fetch_assoc($result);
-        if (empty($row['user_name']))
-        {
-          $V .= _("No users to delete.");
-        }
-        else
-        {
-          /* Build HTML form */
-          $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
-          $V .= "<form name='formy' method='POST'>\n"; // no url = this url
-          $V .= _("To delete a user, enter the following information:<P />\n");
-          $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
-          $Val = htmlentities(GetParm('userid',PARM_TEXT),ENT_QUOTES);
-          $V .= "<ol>\n";
-          $V .= _("<li>Select the user to delete.<br />");
-          $V .= "<select name='userid'>\n";
-          $count = pg_num_rows($result);
-          for($i=0; $i < $count and $row = pg_fetch_assoc($result, $i) and !empty($row['user_name']); $i++)
-          {
-            $V .= "<option value='" . $row['user_pk'] . "'>";
-            $V .= $row['user_name'];
-            $V .= "</option>\n";
-          }
-          $V .= "</select>\n";
-
-          $text = _("Confirm user deletion");
-          $V .= "<P /><li>$text: <input type='checkbox' name='confirm' value='1'>";
-          $V .= "</ol>\n";
-
-          $text = _("Delete");
-          $V .= "<input type='submit' value='$text!'>\n";
-          $V .= "</form>\n";
-        }
-        pg_free_result($result);
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
+      else { $rc = $this->Delete($User); }
+      if (empty($rc))
+      {
+        /* Need to refresh the screen */
+        $text = _("User deleted.");
+        $this->vars['message'] = $text;
+      }
+      else
+      {
+        $this->vars['message'] = $rc;
+      }
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
-    return;
+
+    /* Get the user list */
+    $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    if (empty($row['user_name']))
+    {
+      $V .= _("No users to delete.");
+    }
+    else
+    {
+      /* Build HTML form */
+      $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
+      $V .= "<form name='formy' method='POST'>\n"; // no url = this url
+      $V .= _("To delete a user, enter the following information:<P />\n");
+      $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
+      $Val = htmlentities(GetParm('userid',PARM_TEXT),ENT_QUOTES);
+      $V .= "<ol>\n";
+      $V .= _("<li>Select the user to delete.<br />");
+      $V .= "<select name='userid'>\n";
+      while( $row = pg_fetch_assoc($result))
+      {
+        $V .= "<option value='" . $row['user_pk'] . "'>";
+        $V .= $row['user_name'];
+        $V .= "</option>\n";
+      }
+      $V .= "</select>\n";
+
+      $text = _("Confirm user deletion");
+      $V .= "<P /><li>$text: <input type='checkbox' name='confirm' value='1'>";
+      $V .= "</ol>\n";
+
+      $text = _("Delete");
+      $V .= "<input type='submit' value='$text!'>\n";
+      $V .= "</form>\n";
+    }
+    pg_free_result($result);
+
+    return $V;
   }
-};
+}
 $NewPlugin = new user_del;
-?>

@@ -23,12 +23,15 @@ define("TITLE_add_group", _("Add Group"));
  * \brief add a new group
  */
 class group_add extends FO_Plugin {
-  var $Name = "group_add";
-  var $Title = TITLE_add_group;
-  var $MenuList = "Admin::Groups::Add Group";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
-  var $LoginFlag = 1;  /* Don't allow Default User to add a group */
+  function __construct()
+  {
+    $this->Name = "group_add";
+    $this->Title = TITLE_add_group;
+    $this->MenuList = "Admin::Groups::Add Group";
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
+    parent::__construct();
+  }
 
 
   /**
@@ -93,18 +96,11 @@ class group_add extends FO_Plugin {
     pg_free_result($result);
 
     return (NULL);
-  } // Add()
+  }
 
 
-  /**
-   * \brief Generate the text for this plugin.
-   */
-  function Output() 
+  protected function htmlContent() 
   {
-    global $PG_CONN;
-
-    if ($this->State != PLUGIN_STATE_READY)  return;
-
     $V = "";
     /* If this is a POST, then process the request. */
     $Group = GetParm('groupname', PARM_TEXT);
@@ -113,14 +109,13 @@ class group_add extends FO_Plugin {
       $rc = $this->Add($Group);
       if (empty($rc)) 
       {
-        /* Need to refresh the screen */
         $text = _("Group");
         $text1 = _("added");
-        $V.= displayMessage("$text $Group $text1.");
+        $this->vars['message'] = "$text $Group $text1.";
       } 
       else 
       {
-        $V.= displayMessage($rc);
+        $this->vars['message'] = $rc;
       }
     }
 
@@ -136,11 +131,7 @@ class group_add extends FO_Plugin {
     $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
 
-    if (!$this->OutputToStdout)  return ($V);
-
-    print ("$V");
-    return;
+    return $V;
   }
-};
+}
 $NewPlugin = new group_add;
-?>

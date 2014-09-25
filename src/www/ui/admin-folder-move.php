@@ -19,12 +19,15 @@
 define("TITLE_folder_move", _("Move Folder"));
 
 class folder_move extends FO_Plugin {
-  var $Name = "folder_move";
-  var $Title = TITLE_folder_move;
-  var $Version = "1.0";
-  var $MenuList = "Organize::Folders::Move";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "folder_move";
+    $this->Title = TITLE_folder_move;
+    $this->MenuList = "Organize::Folders::Move";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Given a folder's ID and a TargetId, move
@@ -34,7 +37,6 @@ class folder_move extends FO_Plugin {
    * \return 1 if renamed, 0 if failed.
    */
   function Move($FolderId, $NewParentId) {
-    global $Plugins;
     global $PG_CONN;
     /* Check the name */
     if (empty($NewParentId)) {
@@ -84,73 +86,54 @@ class folder_move extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  protected function htmlContent() {
     $V = "";
-    global $Plugins;
     global $PG_CONN;
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
-        $TargetFolderId = GetParm('targetfolderid', PARM_INTEGER);
-        if (!empty($OldFolderId) && !empty($TargetFolderId)) {
-          $rc = $this->Move($OldFolderId, $TargetFolderId);
-          if ($rc == 1) {
-            /* create sucess mesage */
-            $sql = "SELECT * FROM folder where folder_pk = '$TargetFolderId';";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            $NRow = pg_fetch_assoc($result);
-            pg_free_result($result);
-            $sql = "SELECT * FROM folder where folder_pk = '$OldFolderId';";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            $ORow = pg_fetch_assoc($result);
-            pg_free_result($result);
-            $text=_("Moved folder ");
-            $text1=_(" to folder ");
-            $success = $text . $ORow['folder_name'] . $text1 . $NRow['folder_name'];
-            $V.= displayMessage($success);
-          }
-          else {
-            $text=_("Could not move folder!: ");
-            $V.= displayMessage($text.$rc);
-          }
-        }
-        /* Display the form */
-        $V.= "<form method='post'>\n"; // no url = this url
-        $V.= "<ol>\n";
-        $text = _("Select the source folder to move:  \n");
-        $V.= "<li>$text";
-        $V.= "<select name='oldfolderid'>\n";
-        $V.= FolderListOption(-1, 0, 0);
-        $V.= "</select><P />\n";
-        $text = _("Select the destination folder:  \n");
-        $V.= "<li>$text";
-        $V.= "<select name='targetfolderid'>\n";
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select><P />\n";
-        $V.= "</ol>\n";
-        $text = _("Move");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    /* If this is a POST, then process the request. */
+    $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
+    $TargetFolderId = GetParm('targetfolderid', PARM_INTEGER);
+    if (!empty($OldFolderId) && !empty($TargetFolderId)) {
+      $rc = $this->Move($OldFolderId, $TargetFolderId);
+      if ($rc == 1) {
+        /* create sucess mesage */
+        $sql = "SELECT * FROM folder where folder_pk = '$TargetFolderId';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $NRow = pg_fetch_assoc($result);
+        pg_free_result($result);
+        $sql = "SELECT * FROM folder where folder_pk = '$OldFolderId';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $ORow = pg_fetch_assoc($result);
+        pg_free_result($result);
+        $text=_("Moved folder ");
+        $text1=_(" to folder ");
+        $success = $text . $ORow['folder_name'] . $text1 . $NRow['folder_name'];
+        $this->vars['message'] = $success;
+      }
+      else {
+        $text=_("Could not move folder!: ");
+        $this->vars['message'] = $text.$rc;
+      }
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
-    return;
+    /* Display the form */
+    $V.= "<form method='post'>\n"; // no url = this url
+    $V.= "<ol>\n";
+    $text = _("Select the source folder to move:  \n");
+    $V.= "<li>$text";
+    $V.= "<select name='oldfolderid'>\n";
+    $V.= FolderListOption(-1, 0, 0);
+    $V.= "</select><P />\n";
+    $text = _("Select the destination folder:  \n");
+    $V.= "<li>$text";
+    $V.= "<select name='targetfolderid'>\n";
+    $V.= FolderListOption(-1, 0);
+    $V.= "</select><P />\n";
+    $V.= "</ol>\n";
+    $text = _("Move");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+    return $V;
   }
-};
+}
 $NewPlugin = new folder_move;
-?>

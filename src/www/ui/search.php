@@ -318,163 +318,150 @@ class search extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $Plugins;
-    global $PG_CONN;
 
-    $uTime = microtime(true);
     $CriteriaCount = 0;
     $V="";
     $GETvars="";
     $Item = GetParm("item",PARM_INTEGER);
     
-    switch($this->OutputType)
+    if ($this->OutputType != 'HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        /* Show path if searching an item tree  (don't show on global searches) */
-        if ($Item) 
-        {
-          $V .= Dir2Browse($this->Name,$Item,NULL,1,NULL) . "<P />\n";
-          $GETvars .= "&item=$Item";
-        }
-
-        $searchtype = GetParm("searchtype",PARM_STRING);
-        $GETvars .= "&searchtype=" . urlencode($searchtype);
-
-        $Filename = GetParm("filename",PARM_RAW);
-        if (!empty($Filename)) 
-        {
-          $CriteriaCount++;
-          $GETvars .= "&filename=" . urlencode($Filename);
-        }
-
-        $tag = GetParm("tag",PARM_RAW);
-        if (!empty($tag))
-        {
-          $CriteriaCount++;
-          $GETvars .= "&tag=" . urlencode($tag);
-        }
-
-        $SizeMin = GetParm("sizemin",PARM_TEXT);
-        if (!empty($SizeMin) && ($SizeMin >= 0))
-        { 
-          $SizeMin=intval($SizeMin); 
-          $CriteriaCount++;
-          $GETvars .= "&sizemin=$SizeMin";
-        }
-
-        $SizeMax = GetParm("sizemax",PARM_TEXT);
-        if (!empty($SizeMax) && ($SizeMax >= 0))
-        { 
-          $SizeMax=intval($SizeMax); 
-          $CriteriaCount++;
-          $GETvars .= "&sizemax=$SizeMax";
-        }
-
-        $License = GetParm("license",PARM_RAW);
-        if (!empty($License))
-        {
-          $CriteriaCount++;
-          $GETvars .= "&license=" . urlencode($License);
-        }
-        $Copyright = GetParm("copyright",PARM_RAW);
-        if (!empty($Copyright))
-        {
-          $CriteriaCount++;
-          $GETvars .= "&copyright=" . urlencode($Copyright);
-        }
-
-        $Page = GetParm("page",PARM_INTEGER);
-
-        /*******  Input form  *******/
-        $V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
-
-        /* searchtype:  'allfiles' or 'containers' */
-        $ContainersChecked = "";
-        $DirectoryChecked = "";
-        $AllFilesChecked = "";
-        if ($searchtype == 'containers') 
-          $ContainersChecked = "checked=\"checked\"";
-        else if ($searchtype == 'directory')
-          $DirectoryChecked = "checked=\"checked\"";
-        else
-          $AllFilesChecked = "checked=\"checked\"";
-        $text = _("Limit search to (Note: can not limit license and copyright search on containers)");
-        $text1 = _("Containers only (rpms, tars, isos, etc), including directories.");
-        $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
-        $text2 = _("Containers only (rpms, tars, isos, etc), excluding directories.");
-        $V .= "<br> <input type='radio' name='searchtype' value='directory' $DirectoryChecked><b>$text2</b>\n";
-        $text3 = _("All Files");
-        $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text3</b>\n";
-
-        $V .= "<p><u><i><b>" . _("You must choose one or more search criteria (not case sensitive).") . "</b></i></u>";
-        $V .= "<ul>\n";
-
-        /* filename */
-        $text = _("Enter the filename to find: ");
-        $V .= "<li><b>$text</b>";
-        $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-        $V .= "<br>" . _("You can use '%' as a wild-card. ");
-        $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
-
-        /* tag  */
-        $text = _("Tag to find");
-        $V .= "<li><b>$text:</b>  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
-
-        /* file size >= */
-        $text = _("File size is");
-        $text1 = _(" bytes\n");
-        $V .= "<li><b>$text &ge; </b><input name='sizemin' size=10 value='$SizeMin'>$text1";
-
-        /* file size <= */
-        $text = _("File size is");
-        $text1 = _(" bytes\n");
-        $V .= "<li><b>$text &le; </b><input name='sizemax' size=10 value='$SizeMax'>$text1";
-        $V .= "</ul>\n";
-
-        $V .= "<ul>\n";
-        
-        $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters (not case sensitive).") . "</b></i></u>";
-        /* license */
-        $text = _("License");
-        $V .= "<li><b>$text: </b><input name='license' value='$License'>";
-        $V .= "<br>" . _("For example, 'AGPL%'.");
-        $text = _("Copyright");
-        $V .= "<li><b>$text: </b><input name='copyright' value='$Copyright'>";
-        $V .= "<br>" . _("For example, 'fsf'.");
-
-        $V .= "</ul>\n";
-
-        $V .= "<input type='hidden' name='item' value='$Item'>\n";
-        $text = _("Search");
-        $V .= "<input type='submit' value='$text'>\n";
-        $V .= "</form>\n";
-        /*******  END Input form  *******/
-
-        if ($CriteriaCount)
-        {
-          if (empty($Page)) { $Page = 0; }
-          $V .= "<hr>\n";
-          $text = _("Files matching");
-          $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-          $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
-          $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
-        } 
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      return;
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    $Time = microtime(true) - $uTime;  // convert usecs to secs
-    $text = _("Elapsed time: %.2f seconds");
-    printf( "<p><small>$text</small>", $Time);
-    return;
-  } // Output()
 
-};
+    /* Show path if searching an item tree  (don't show on global searches) */
+    if ($Item) 
+    {
+      $V .= Dir2Browse($this->Name,$Item,NULL,1,NULL) . "<P />\n";
+      $GETvars .= "&item=$Item";
+    }
+
+    $searchtype = GetParm("searchtype",PARM_STRING);
+    $GETvars .= "&searchtype=" . urlencode($searchtype);
+
+    $Filename = GetParm("filename",PARM_RAW);
+    if (!empty($Filename)) 
+    {
+      $CriteriaCount++;
+      $GETvars .= "&filename=" . urlencode($Filename);
+    }
+
+    $tag = GetParm("tag",PARM_RAW);
+    if (!empty($tag))
+    {
+      $CriteriaCount++;
+      $GETvars .= "&tag=" . urlencode($tag);
+    }
+
+    $SizeMin = GetParm("sizemin",PARM_TEXT);
+    if (!empty($SizeMin) && ($SizeMin >= 0))
+    { 
+      $SizeMin=intval($SizeMin); 
+      $CriteriaCount++;
+      $GETvars .= "&sizemin=$SizeMin";
+    }
+
+    $SizeMax = GetParm("sizemax",PARM_TEXT);
+    if (!empty($SizeMax) && ($SizeMax >= 0))
+    { 
+      $SizeMax=intval($SizeMax); 
+      $CriteriaCount++;
+      $GETvars .= "&sizemax=$SizeMax";
+    }
+
+    $License = GetParm("license",PARM_RAW);
+    if (!empty($License))
+    {
+      $CriteriaCount++;
+      $GETvars .= "&license=" . urlencode($License);
+    }
+    $Copyright = GetParm("copyright",PARM_RAW);
+    if (!empty($Copyright))
+    {
+      $CriteriaCount++;
+      $GETvars .= "&copyright=" . urlencode($Copyright);
+    }
+
+    $Page = GetParm("page",PARM_INTEGER);
+
+    /*******  Input form  *******/
+    $V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
+
+    /* searchtype:  'allfiles' or 'containers' */
+    $ContainersChecked = "";
+    $DirectoryChecked = "";
+    $AllFilesChecked = "";
+    if ($searchtype == 'containers') 
+      $ContainersChecked = "checked=\"checked\"";
+    else if ($searchtype == 'directory')
+      $DirectoryChecked = "checked=\"checked\"";
+    else
+      $AllFilesChecked = "checked=\"checked\"";
+    $text = _("Limit search to (Note: can not limit license and copyright search on containers)");
+    $text1 = _("Containers only (rpms, tars, isos, etc), including directories.");
+    $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
+    $text2 = _("Containers only (rpms, tars, isos, etc), excluding directories.");
+    $V .= "<br> <input type='radio' name='searchtype' value='directory' $DirectoryChecked><b>$text2</b>\n";
+    $text3 = _("All Files");
+    $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text3</b>\n";
+
+    $V .= "<p><u><i><b>" . _("You must choose one or more search criteria (not case sensitive).") . "</b></i></u>";
+    $V .= "<ul>\n";
+
+    /* filename */
+    $text = _("Enter the filename to find: ");
+    $V .= "<li><b>$text</b>";
+    $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
+    $V .= "<br>" . _("You can use '%' as a wild-card. ");
+    $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
+
+    /* tag  */
+    $text = _("Tag to find");
+    $V .= "<li><b>$text:</b>  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
+
+    /* file size >= */
+    $text = _("File size is");
+    $text1 = _(" bytes\n");
+    $V .= "<li><b>$text &ge; </b><input name='sizemin' size=10 value='$SizeMin'>$text1";
+
+    /* file size <= */
+    $text = _("File size is");
+    $text1 = _(" bytes\n");
+    $V .= "<li><b>$text &le; </b><input name='sizemax' size=10 value='$SizeMax'>$text1";
+    $V .= "</ul>\n";
+
+    $V .= "<ul>\n";
+
+    $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters (not case sensitive).") . "</b></i></u>";
+    /* license */
+    $text = _("License");
+    $V .= "<li><b>$text: </b><input name='license' value='$License'>";
+    $V .= "<br>" . _("For example, 'AGPL%'.");
+    $text = _("Copyright");
+    $V .= "<li><b>$text: </b><input name='copyright' value='$Copyright'>";
+    $V .= "<br>" . _("For example, 'fsf'.");
+
+    $V .= "</ul>\n";
+
+    $V .= "<input type='hidden' name='item' value='$Item'>\n";
+    $text = _("Search");
+    $V .= "<input type='submit' value='$text'>\n";
+    $V .= "</form>\n";
+    /*******  END Input form  *******/
+
+    if ($CriteriaCount)
+    {
+      if (empty($Page)) { $Page = 0; }
+      $V .= "<hr>\n";
+      $text = _("Files matching");
+      $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
+      $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+      $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
+    } 
+
+    $this->vars['content'] = $V;
+  }
+
+}
 $NewPlugin = new search;
 $NewPlugin->Initialize();
-?>

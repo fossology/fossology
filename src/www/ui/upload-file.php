@@ -130,7 +130,7 @@ class upload_file extends FO_Plugin {
       $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
       $Msg .= "$text $Name $text1 ";
       $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
-      print displayMessage($Msg,$keep);
+      $this->vars['message'] = $Msg.$keep;
       return (NULL);
     }
     else 
@@ -149,11 +149,7 @@ class upload_file extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    if ($this->OutputType != "HTML") {
-      return;
-    }
-    global $container;
-    $renderer = $container->get('renderer');
+
     /* If this is a POST, then process the request. */
     $folder_pk = GetParm('folder', PARM_INTEGER);
     $description = GetParm('description', PARM_TEXT); // may be null
@@ -173,22 +169,25 @@ class upload_file extends FO_Plugin {
       }
       else {
         $text = _("Upload failed for file");
-        $V.= displayMessage("$text {$_FILES['getfile']['name']}: $rc");
+        $this->vars['message'] = "$text {$_FILES['getfile']['name']}: $rc";
       }
     }
 
     /* Display instructions */
-    $renderer->vars['description'] = $description;
-    $renderer->vars['agentCheckBoxMake'] = '';
+    $this->vars['description'] = $description;
+    $this->vars['upload_max_filesize'] = ini_get('upload_max_filesize');
+    $this->vars['folderListOptions'] = FolderListOption(-1, 0);
+    $this->vars['agentCheckBoxMake'] = '';
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $renderer->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
+      $this->vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
     }        
-    $V .= $renderer->renderTemplate("upload_file");        
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
   }
+
+  public function getTemplateName()
+  {
+    return "upload_file.html";
+  }
+
 }
 $NewPlugin = new upload_file;

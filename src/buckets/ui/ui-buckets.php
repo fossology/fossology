@@ -25,13 +25,17 @@ define("TITLE_ui_buckets", _("Bucket Browser"));
 
 class ui_buckets extends FO_Plugin
 {
-  var $Name       = "bucketbrowser";
-  var $Title      = TITLE_ui_buckets;
-  var $Version    = "1.0";
-  var $Dependency = array("browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
   var $uploadtree_tablename = "";
+
+  function __construct()
+  {
+    $this->Name       = "bucketbrowser";
+    $this->Title      = TITLE_ui_buckets;
+    $this->Dependency = array("browse","view");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
 
   /**
    * \brief Create and configure database tables
@@ -507,12 +511,9 @@ return;
   /**
    * \brief This function returns the scheduler status.
    */
-  function Output()
+  protected function htmlContent()
   {
     $uTime = microtime(true);
-    if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
-    }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -520,11 +521,14 @@ return;
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
-      return;
+      return "<h2>$text<h2>";
     }
 
     $Item = GetParm("item",PARM_INTEGER);
+    if ( !$Item)
+    {
+     return _('No item selected'); 
+    }
     $updcache = GetParm("updcache",PARM_INTEGER);
     $tagbucket = GetParm("tagbucket",PARM_INTEGER);
 
@@ -555,69 +559,44 @@ return;
       $nomosagent_pk = GetParm("napk",PARM_INTEGER);
       $this->TagBucket($Upload, $Item, $bucketagent_pk, $bucket_pk, $bucketpool_pk, $nomosagent_pk);
     }
-
-    if (empty($V) )  // no cache exists
+    
+    $Cached = !empty($V);
+    if(!$Cached)
     {
-      switch($this->OutputType)
+      $V .= "<font class='text'>\n";
+
+      $Children = GetNonArtifactChildren($Item, $this->uploadtree_tablename);
+      if (count($Children) == 0) // no children, display View micromenu
+        $V .= Dir2Browse($this->Name,$Item,NULL,1,"View", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+      else // has children, display Browse micormenu
+        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+
+      if (!empty($Upload))
       {
-        case "XML":
-          break;
-        case "HTML":
-          $V .= "<font class='text'>\n";
-
-          /************************/
-          /* Show the folder path */
-          /************************/
-          /* Get ALL the items under this Uploadtree_pk */
-          $Children = GetNonArtifactChildren($Item, $this->uploadtree_tablename);
-          if (count($Children) == 0) // no children, display View micromenu
-            $V .= Dir2Browse($this->Name,$Item,NULL,1,"View", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
-          else // has children, display Browse micormenu
-            $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
-
-          if (!empty($Upload))
-          {
-            $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-            $V .= $this->ShowUploadHist($Item,$Uri);
-          }
-          $V .= "</font>\n";
-          $text = _("Loading...");
-          /*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
-          break;
-        case "Text":
-          break;
-        default:
+        $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+        $V .= $this->ShowUploadHist($Item,$Uri);
       }
-
-      $Cached = false;
+      $V .= "</font>\n";
+      $text = _("Loading...");
     }
-    else
-    $Cached = true;
 
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     $text = _("Elapsed time: %.2f seconds");
-    printf( "<p><small>$text</small>", $Time);
+    $V .= sprintf( "<p><small>$text</small>", $Time);
 
     if ($Cached){
       $text = _("cached");
       $text1 = _("Update");
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
-    }else
-    {
-      /*  Cache Report if this took longer than 1/2 second*/
-      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
     }
-
-    return;
+    else if ($Time > 0.5)
+    {
+      ReportCachePut($CacheKey, $V);
+    }
+    return $V;
   }
 
-};
+}
 
 $NewPlugin = new ui_buckets;
 $NewPlugin->Initialize();
-
-?>

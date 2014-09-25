@@ -1,0 +1,87 @@
+
+
+  {% if previousItem or nextItem %}
+  <div>
+    {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
+    {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
+  </div>
+  {% endif %}
+
+  <div style="clear:both">
+      <table border="1" id="licenseDecisionTable">
+          <tr>
+              {% for licenseDecisionHeader in licenseDecisionsHeaders %}
+              <th>
+                  <i18n>{{ licenseDecisionHeader }}</i18n>
+              </th>
+              {% endfor %}
+          </tr>
+          {% for licenseDecision in licenseDecisions %}
+          <tr>
+              {% for licenseDecisionEntry in licenseDecision %}
+              <td>
+                  {{ licenseDecisionEntry }}
+              </td>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+  </div>
+
+  
+  {{ licenseInformation }}
+  
+  
+  <h3><i18n>Audit license</i18n></h3>
+ {% if auditDenied %}
+   <i18n>Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.</i18n>
+ {% else %}
+  <button type=\"button\" onclick='openUserModal()'><i18n>User Decision</i18n></button> &nbsp;
+  <button type=\"button\" onclick='openBulkModal()'><i18n>Bulk Recognition</i18n></button><br/>
+  {% include 'change_license_modal.html' %}
+  {% include 'view_license_bulk.html' %}
+ {% endif %}
+  
+  {% if clearingHistory %}
+
+
+<h3>
+    <i18n>Clearing History</i18n>
+</h3>
+<div class="scrollable2">
+    <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
+        <tr>
+            <th>
+                <i18n>Date</i18n>
+            </th>
+            <th>
+                <i18n>Username</i18n>
+            </th>
+            <th>
+                <i18n>Scope</i18n>
+            </th>
+            <th>
+                <i18n>Type</i18n>
+            </th>
+            <th>
+                <i18n>Licenses</i18n>
+            </th>
+            <th>
+                <i18n>Comment</i18n>
+            </th>
+            <th>
+                <i18n>Remark</i18n>
+            </th>
+        </tr>
+        {% for row in clearingHistory %}
+        <tr
+        {%if row.isInactive %} class="inactiveClearing"{% endif%}>
+        {% for col in row.content %}
+        <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <span class="inactiveClearing">Inactive concluded licenses decisions</span>
+</div>
+{% endif %}

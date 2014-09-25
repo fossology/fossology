@@ -45,7 +45,7 @@ typedef struct stat stat_t;
 #include "../../ununpack/agent/checksum.h"
 
 #define MAXCMD  2048
-#define FILEPATH 5000
+#define FILEPATH 2048
 
 extern char SQL[MAXCMD];
 

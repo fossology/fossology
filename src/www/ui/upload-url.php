@@ -23,13 +23,17 @@ define("TITLE_upload_url", _("Upload from URL"));
  * \brief upload from url
  */
 class upload_url extends FO_Plugin {
-  public $Name = "upload_url";
-  public $Title = TITLE_upload_url;
-  public $Version = "1.0";
-  public $MenuList = "Upload::From URL";
-  //public $Dependency = array("agent_unpack"); // TODO to display, temporarily comment out
-  public $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "upload_url";
+    $this->Title = TITLE_upload_url;
+    $this->MenuList = "Upload::From URL";
+    // $this->Dependency = array("agent_unpack"); // TODO to display, temporarily comment out
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
+  
   /**
    * \brief Process the upload request.
    * \param $Folder
@@ -149,128 +153,107 @@ class upload_url extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  function htmlContent() {
     $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $Folder = GetParm('folder', PARM_INTEGER);
-        $GetURL = GetParm('geturl', PARM_TEXT);
-        $Desc = GetParm('description', PARM_TEXT); // may be null
-        $Name = GetParm('name', PARM_TEXT); // may be null
-        $Accept = GetParm('accept', PARM_TEXT); // may be null
-        $Reject = GetParm('reject', PARM_TEXT); // may be null
-        $Level = GetParm('level', PARM_TEXT); // may be null
-        $public = GetParm('public', PARM_TEXT); // may be null
-        if (empty($public))
-          $public_perm = PERM_NONE;
-        else
-          $public_perm = PERM_READ;
+    /* If this is a POST, then process the request. */
+    $Folder = GetParm('folder', PARM_INTEGER);
+    $GetURL = GetParm('geturl', PARM_TEXT);
+    $Desc = GetParm('description', PARM_TEXT); // may be null
+    $Name = GetParm('name', PARM_TEXT); // may be null
+    $Accept = GetParm('accept', PARM_TEXT); // may be null
+    $Reject = GetParm('reject', PARM_TEXT); // may be null
+    $Level = GetParm('level', PARM_TEXT); // may be null
+    $public = GetParm('public', PARM_TEXT); // may be null
+    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
 
-        if (!empty($GetURL) && !empty($Folder)) {
-          $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm);
-          if (empty($rc)) {
-            /* Need to refresh the screen */
-            $GetURL = NULL;
-            $Desc = NULL;
-            $Name = NULL;
-            $Accept = NULL;
-            $Reject = NULL;
-            $Level = NULL;
-          }
-          else {
-            $text = _("Upload failed for");
-            $V.= displayMessage("$text $GetURL: $rc");
-          }
-        }
-
-        /* Set default values */
-        if (empty($Level)) {
-          $Level = 1;
-        }
-        /* Set default values */
-        if (empty($GetURL)) {
-          $GetURL = 'http://';
-        }
-        /* Display instructions */
-        $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
-        $V .= "<p><b>$text22</b><p>";
-        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) or a directory from a remote web or FTP server to FOSSology.\n");
-        $V.= _("The file or directory to upload must be accessible via a URL and must not require human interaction ");
-        $V.= _("such as login credentials.\n");
-        /* Display the form */
-        $V.= "<form method='post'>\n"; // no url = this url
-        $V.= "<ol>\n";
-        $text = _("Select the folder for storing the uploaded file (directory):");
-        $V.= "<li>$text\n";
-        $V.= "<select name='folder'>\n";
-        $V.= FolderListOption(-1, 0);
-        $V.= "</select><P />\n";
-        $text = _("Enter the URL to the file (directory):");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file (directory). The URL can begin with HTTP://, HTTPS://, or FTP://.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("(Optional) Enter a description of this file (directory):");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-        $text = _("(Optional) Enter a viewable name for this file (directory):");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $text = _("NOTE");
-        $text1 = _(": If no name is provided, then the uploaded file (directory) name will be used.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to accept:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='accept' size=60 value='" . htmlentities($Accept) . "'/><P />\n";
-        $text = _("NOTE");
-        $text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of acclist, it will be treated as a pattern, rather than a suffix.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to reject:");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='reject' size=60 value='" . htmlentities($Reject) . "'/><P />\n";
-        $text = _("NOTE");
-        $text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of rejlist, it will be treated as a pattern, rather than a suffix.");
-        $V.= "<b>$text</b>$text1<P />\n";
-        $text = _("(Optional) maximum recursion depth (inf or 0 for infinite):");
-        $V.= "<li>$text<br />\n";
-        $V.= "<INPUT type='text' name='level' size=60 value='" . htmlentities($Level) . "'/><P />\n";
-
-        $text1 = _("(Optional) Make Public");
-        $V.= "<li>";
-        $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
-
-        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
-          $text = _("Select optional analysis");
-          $V.= "<li>$text<br />\n";
-          $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-          $V.= AgentCheckBoxMake(-1, $Skip);
-
-        }
-        $V.= "</ol>\n";
-        $text = _("Upload");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
-        $V .= "<p><b>$text22</b>";
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    if (!empty($GetURL) && !empty($Folder)) {
+      $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm);
+      if (empty($rc)) {
+        /* Need to refresh the screen */
+        $GetURL = NULL;
+        $Desc = NULL;
+        $Name = NULL;
+        $Accept = NULL;
+        $Reject = NULL;
+        $Level = NULL;
+      }
+      else {
+        $text = _("Upload failed for");
+        $this->vars['message'] = "$text $GetURL: $rc";
+      }
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
+
+    /* Set default values */
+    if (empty($Level)) {
+      $Level = 1;
     }
-    print ("$V");
-    return;
+    /* Set default values */
+    if (empty($GetURL)) {
+      $GetURL = 'http://';
+    }
+    /* Display instructions */
+    $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+    $V .= "<p><b>$text22</b><p>";
+    $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) or a directory from a remote web or FTP server to FOSSology.\n");
+    $V.= _("The file or directory to upload must be accessible via a URL and must not require human interaction ");
+    $V.= _("such as login credentials.\n");
+    /* Display the form */
+    $V.= "<form method='post'>\n"; // no url = this url
+    $V.= "<ol>\n";
+    $text = _("Select the folder for storing the uploaded file (directory):");
+    $V.= "<li>$text\n";
+    $V.= "<select name='folder'>\n";
+    $V.= FolderListOption(-1, 0);
+    $V.= "</select><P />\n";
+    $text = _("Enter the URL to the file (directory):");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
+    $text = _("NOTE");
+    $text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file (directory). The URL can begin with HTTP://, HTTPS://, or FTP://.");
+    $V.= "<b>$text</b>$text1<P />\n";
+    $text = _("(Optional) Enter a description of this file (directory):");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
+    $text = _("(Optional) Enter a viewable name for this file (directory):");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
+    $text = _("NOTE");
+    $text1 = _(": If no name is provided, then the uploaded file (directory) name will be used.");
+    $V.= "<b>$text</b>$text1<P />\n";
+    $text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to accept:");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='accept' size=60 value='" . htmlentities($Accept) . "'/><P />\n";
+    $text = _("NOTE");
+    $text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of acclist, it will be treated as a pattern, rather than a suffix.");
+    $V.= "<b>$text</b>$text1<P />\n";
+    $text = _("(Optional) Enter comma-separated lists of file name suffixes or patterns to reject:");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='reject' size=60 value='" . htmlentities($Reject) . "'/><P />\n";
+    $text = _("NOTE");
+    $text1 = _(": If any of the wildcard characters, *, ?, [ or ], appear in an element of rejlist, it will be treated as a pattern, rather than a suffix.");
+    $V.= "<b>$text</b>$text1<P />\n";
+    $text = _("(Optional) maximum recursion depth (inf or 0 for infinite):");
+    $V.= "<li>$text<br />\n";
+    $V.= "<INPUT type='text' name='level' size=60 value='" . htmlentities($Level) . "'/><P />\n";
+
+    $text1 = _("(Optional) Make Public");
+    $V.= "<li>";
+    $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
+
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+      $text = _("Select optional analysis");
+      $V.= "<li>$text<br />\n";
+      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $V.= AgentCheckBoxMake(-1, $Skip);
+
+    }
+    $V.= "</ol>\n";
+    $text = _("Upload");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+    $V .= "<p><b>$text22</b>";
+
+    return $V;
   }
-};
+}
 $NewPlugin = new upload_url;
-?>
