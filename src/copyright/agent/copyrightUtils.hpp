@@ -24,6 +24,7 @@
 #include "copyrightState.hpp"
 #include "files.hpp"
 #include "regTypes.hpp"
+#include "cleanEntries.hpp"
 
 extern "C"{
 #include "libfossology.h"
