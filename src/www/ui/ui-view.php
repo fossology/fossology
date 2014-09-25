@@ -317,11 +317,7 @@ class ui_view extends FO_Plugin
   function ShowView($inputFile = NULL, $BackMod = "browse",
                     $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = array(), $insertBacklink = false)
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return;
-    }
-    print $this->getView($inputFile , $BackMod,
+    return $this->getView($inputFile , $BackMod,
          $ShowHeader , $ShowText, $highlightEntries , $insertBacklink);
   }
 
@@ -395,8 +391,8 @@ class ui_view extends FO_Plugin
         $Opt .= "&show=$Show";
       }
       /* No item */
-      $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename) . "<P />\n";
-      $output.=$header;
+      $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename);
+      $this->vars['submenu'] = $header;
     } // if ShowHeader
 
     /***********************************
@@ -477,7 +473,7 @@ class ui_view extends FO_Plugin
           }
         }
       }
-    };
+    }
 
     if (!empty($ShowText))
     {

@@ -39,11 +39,11 @@ class ui_default extends FO_Plugin
       return;
     }
 
-    if (empty($_SESSION['UserId']) && plugin_find_id("auth") > 0)
+    if ($_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
       $this->vars['baseUrl'] = Traceback_uri();
     }
-
+   
     return $this->renderTemplate("default.html");
   }
 }

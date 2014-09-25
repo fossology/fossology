@@ -155,12 +155,8 @@ class ClearingView extends FO_Plugin
   /**
    * \brief display the license changing page
    */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return;
-    }
     $licenseShortname = GetParm("lic", PARM_TEXT);
     if (!empty($licenseShortname)) // display the detailed license text of one license
     {
@@ -183,7 +179,6 @@ class ClearingView extends FO_Plugin
     $view = & $Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
-    $folder = GetParm("folder", PARM_INTEGER);
     $selectedAgentId = GetParm("agentId", PARM_INTEGER);
     $highlightId = GetParm("highlightId", PARM_INTEGER);
     $ModBack = GetParm("modback", PARM_STRING);
@@ -198,27 +193,15 @@ class ClearingView extends FO_Plugin
     /* Get uploadtree table name */
     $uploadTreeTableName = GetUploadtreeTablename($uploadId);
 
-    $output = Dir2Browse('license', $uploadTreeId, NULL, 0, "ChangeLicense", -1, '', '', $uploadTreeTableName) . "\n";
-
-    $Uri = Traceback_uri() . "?mod=view-license";
-
-
     $this->vars['uri'] = Traceback_uri(). Traceback_parm_keep(array('mod','upload','folder'));
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
     
     $licenseInformation = "";
-//    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->vars['previousItem'], "&lt;" );
-//    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->vars['nextItem'], "&gt;" );
-//    $licenseInformation .= "<br>";
 
+    $this->vars['submenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox=1, "ChangeLicense", -1, '', '', $uploadTreeTableName);
     
-    
-    
-    
-    
-
-    $output = "";
+    $output = '';
     /* @var Fossology\Lib\Dao\FileTreeBounds */
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
 
@@ -286,7 +269,7 @@ class ClearingView extends FO_Plugin
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $legendBox;
-    $this->vars['licenseInformation'] = $licenseInformation;
+    $this->vars['licenseInformation'] = '';//$licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }
 

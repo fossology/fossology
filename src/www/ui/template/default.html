@@ -35,7 +35,7 @@
         <i18n>Report files based on your own custom classification scheme.</i18n>
     </li>
 </ul>
-<p/>
+<p></p>
 <b>
     <i18n>Where to Begin...</i18n>
 </b><br/>
@@ -43,12 +43,9 @@
 <ul>
     <li>
         <b>
-            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth">
-            <i18n>Login</i18n>
-        </a> {% else %}
-            <i18n>Login</i18n>
-            {% endif %}</b>
-        <i18n>: Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
+            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth"><i18n>Login</i18n></a>{% else %}
+            <i18n>Login</i18n>{% endif %}</b>:
+        <i18n>Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
             even add new users.
         </i18n>
     </li>
