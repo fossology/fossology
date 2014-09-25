@@ -391,8 +391,8 @@ class ui_view extends FO_Plugin
         $Opt .= "&show=$Show";
       }
       /* No item */
-      $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename);
-      $this->vars['submenu'] = $header;
+      $header = Dir2Browse($BackMod, $Item, NULL, $showBox=0, "View", -1, '', '', $uploadtree_tablename);
+      $this->vars['micromenu'] = $header;
     } // if ShowHeader
 
     /***********************************

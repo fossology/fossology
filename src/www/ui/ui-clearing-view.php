@@ -199,7 +199,7 @@ class ClearingView extends FO_Plugin
     
     $licenseInformation = "";
 
-    $this->vars['submenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox=1, "ChangeLicense", -1, '', '', $uploadTreeTableName);
+    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox=0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
     
     $output = '';
     /* @var Fossology\Lib\Dao\FileTreeBounds */
@@ -269,7 +269,7 @@ class ClearingView extends FO_Plugin
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $legendBox;
-    $this->vars['licenseInformation'] = '';//$licenseInformation;
+    $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }
 
