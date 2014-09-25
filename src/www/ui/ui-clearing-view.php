@@ -97,39 +97,6 @@ class ClearingView extends FO_Plugin
 
 
   /**
-   * @param $uploadId
-   * @param $uploadTreeId
-   * @param $selectedAgentId
-   * @param $licenseId
-   * @param $highlightId
-   * @param $hasHighlights
-   * @return string
-   */
-  private function createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights)
-  {
-    $output = "";
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-
-    if (!$fileTreeBounds->containsFiles())
-    {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      $outputTMP = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses);
-      $output .= $outputTMP;
-
-      $output .= $this->createClearingFormAndButtons($uploadId,$uploadTreeId);
-
-      $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
-      $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
-
-      $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-
-      $extractedLicenseBulkMatches  = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
-      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-    }
-    return $output;
-  }
-
-  /**
    * @param $uploadTreeId
    * @param $licenseId
    * @param $selectedAgentId
@@ -149,35 +116,10 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
-  
-  private function createClearingFormAndButtons($uploadId,$uploadTreeId){
-
-    $text = _("Audit License");
-    $output = "<h3>$text</h3>\n";
-
-    /** check if the current user has the permission to change license */
-    $permission = GetUploadPerm($uploadId);
-    if ($permission >= PERM_WRITE)
-    {
-
-      $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
-      $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
-
-      $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
-      $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";
-    } else
-    {
-      $text = _("Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.");
-      $output .= "<b>$text</b>";
-    }
-
-    $output .= "<br>";
-
-    return $output;
-  }
+ 
 
 
-  function OutputOpen(&$vars)
+  function OutputOpen()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
@@ -193,7 +135,7 @@ class ClearingView extends FO_Plugin
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
 
-      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
+      header('Location: ' . Traceback_uri() . Traceback_parm_keep(array('mod','upload', 'show')). "&item=$uploadTreeId");
     }
 
     $uploadTreeTableName= GetUploadtreeTableName($uploadId);
@@ -206,7 +148,7 @@ class ClearingView extends FO_Plugin
 
       header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")). "&item=$uploadTreeId");
     }
-    return parent::OutputOpen($vars);
+    return parent::OutputOpen();
   }
 
 
@@ -260,11 +202,73 @@ class ClearingView extends FO_Plugin
 
     $Uri = Traceback_uri() . "?mod=view-license";
 
+    $this->vars['uri'] = Traceback_uri(). Traceback_parm_keep(array('mod','upload','folder'));
+    $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
+    $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
+    
     $licenseInformation = "";
-    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getPreviousItem($uploadId, $uploadTreeId), "&lt;" );
-    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->uploadDao->getNextItem($uploadId, $uploadTreeId), "&gt;" );
-    $licenseInformation .= "<br>";
-    $licenseInformation .= $this->createLicenseHeader($uploadId, $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+//    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->vars['previousItem'], "&lt;" );
+//    $licenseInformation .= $this->createForwardButton($Uri,$folder,$uploadId,$this->vars['nextItem'], "&gt;" );
+//    $licenseInformation .= "<br>";
+
+    
+    
+    
+    
+    
+
+    $output = "";
+    /* @var Fossology\Lib\Dao\FileTreeBounds */
+    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+
+    if (!$fileTreeBounds->containsFiles())
+    {
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $outputTMP = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses);
+      $output .= $outputTMP;
+
+
+    $text = _("Audit License");
+    $output .= "<h3>$text</h3>\n";
+
+    /** check if the current user has the permission to change license */
+    $permission = GetUploadPerm($uploadId);
+    if ($permission >= PERM_WRITE)
+    {
+      $this->vars = array_merge($this->vars,
+              $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
+    
+    
+      
+      $output .= $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId);
+      $output .= $this->changeLicenseUtility->createBulkForm($uploadTreeId);
+
+      $output .= "<br><button type=\"button\" onclick='openUserModal()'>User Decision</button>";
+      $output .= "<br><button type=\"button\" onclick='openBulkModal()'>Bulk Recognition</button>";
+    } else
+    {
+      $text = _("Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this file.");
+      $output .= "<b>$text</b>";
+    }
+
+    $output .= "<br>";
+
+
+      
+
+      $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+      $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
+
+      $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+
+      $extractedLicenseBulkMatches  = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
+      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+    }
+    $licenseInformation .= $output;
+ 
+    
+    
+    
     
     $permission = GetUploadPerm($uploadId);
     $clearingHistory = '';
@@ -292,24 +296,6 @@ class ClearingView extends FO_Plugin
     return "view_license.html";
   }
 
-
-  /**
-   * @param $Uri
-   * @param $folder
-   * @param $uploadId
-   * @param $forwardUploadTreePk
-   * @param $buttonString
-   * @return string
-   */
-  private function createForwardButton($Uri, $folder,$uploadId,  $forwardUploadTreePk, $buttonString) {
-    if (isset($forwardUploadTreePk) ) {
-      $header = "<b><a class=\"buttonLink\" href=\"$Uri&folder=$folder&upload=$uploadId&item=$forwardUploadTreePk\">$buttonString</a></b>";
-    }
-    else {
-      $header ="";
-    }
-    return $header;
-  }
 
   /**
  * \brief Customize submenus.

@@ -1,4 +1,11 @@
-  <div>{{ licenseInformation }}</div>
+  {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
+  {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
+  {% if previousItem or nextItem %} <br/> {% endif %}
+  
+
+  {% include 'change_license_modal.html' %}
+  
+  {{ licenseInformation }}
   {% if clearingHistory %}
   <h3>
     <i18n>Clearing History</i18n>

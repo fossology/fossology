@@ -46,7 +46,8 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setSameFolder($isLocal)
         ->setSameUpload($isLocal)
         ->setType($ud)
-        ->setScope($scope);
+            ;
+//        $clearingDecision>setScope($scope);
 
       $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
       $clearingDecision->setLicenses(array($licref));

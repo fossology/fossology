@@ -23,7 +23,7 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
-use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;

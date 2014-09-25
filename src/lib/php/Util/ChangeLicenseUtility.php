@@ -236,8 +236,7 @@ class ChangeLicenseUtility extends Object
 
   /**
    * @param $uploadTreeId
-   * @return string
-   * creates two licenseListSelects and buttons to transfer licenses and two text boxes
+   * @return array
    */
   public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
@@ -264,17 +263,15 @@ class ChangeLicenseUtility extends Object
       $preSelectedLicenses = array();
     }
 
-        
-    $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
-    $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
+    $rendererVars = array();    
+    $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
+    $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
     $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap();
-    $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
-    $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
-    
-    $output = $this->renderer->renderTemplate('change_license_modal');
-
-    return $output;
+    $rendererVars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
+    $rendererVars['uploadTreeId'] = $uploadTreeId;
+ 
+    return $rendererVars;
   }
 
 
