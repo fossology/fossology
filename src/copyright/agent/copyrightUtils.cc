@@ -41,7 +41,7 @@ void bail(CopyrightState* state, int exitval) {
 CopyrightState* getState(DbManager* dbManager, int verbosity){
   int agentID;
   queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity, "copyright");
+  return new CopyrightState(dbManager, agentID, verbosity, IDENTITY);
 }
 
 vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< RegexMatcher > matchers ) {

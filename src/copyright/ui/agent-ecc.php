@@ -17,23 +17,23 @@
 ***********************************************************/
 
 /**
- * \file agent.php
- * \brief Interface copyright agent to job queue
+ * \file agent-ecc.php
+ * \brief Interface ecc agent to job queue
  */
 
-define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
+define("TITLE_agent_ecc", _("Copyright/Email/URL Analysis"));
 
-class agent_copyright extends FO_Plugin
+class agent_ecc extends FO_Plugin
 {
-  public $Name = "agent_copyright";
-  public $Title = TITLE_agent_copyright;
+  public $Name = "agent_ecc";
+  public $Title = TITLE_agent_ecc;
   public $Version = "1.0";
   public $Dependency = array();
   public $DBaccess = PLUGIN_DB_WRITE;
-  public $AgentName = "copyright";   // agent.agent_name
+  public $AgentName = "ecc";   // agent.agent_name
 
   /**
-   * \brief Register copyright agent in "Agents" menu
+   * \brief Register ecc agent in "Agents" menu
    */
   function RegisterMenus()
   {
@@ -54,12 +54,12 @@ class agent_copyright extends FO_Plugin
    **/
   function AgentHasResults($upload_pk)
   {
-    return CheckARS($upload_pk, $this->AgentName, "copyright scanner", "copyright_ars");
+    return CheckARS($upload_pk, $this->AgentName, "ecc scanner", "ecc_ars");
   } // AgentHasResults()
 
 
   /**
-   * \brief Queue the copyright agent.
+   * \brief Queue the ecc agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
@@ -81,4 +81,5 @@ class agent_copyright extends FO_Plugin
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 }
-$NewPlugin = new agent_copyright;
+$NewPlugin = new agent_ecc;
+?>

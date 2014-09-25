@@ -13,7 +13,9 @@
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
 {
-    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('copyright_ct_pk_seq'::regclass)"},
+// keep only one sequence
+#define SEQUENCE_NAME "copyright_ct_pk_seq"
+    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
     {"agent_fk", "bigint", "NOT NULL"},
     {"pfile_fk", "bigint", "NOT NULL"},
     {"content", "text", ""},
@@ -78,12 +80,14 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
       return false;\
     }\
   } while(0)
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq" // keep only one sequence
-                                         " START WITH 1"
-                                         " INCREMENT BY 1"
-                                         " NO MAXVALUE"
-                                         " NO MINVALUE"
-                                         " CACHE 1", name));
+  if (!dbManager->sequenceExists(SEQUENCE_NAME)) {
+    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAME
+                                          " START WITH 1"
+                                          " INCREMENT BY 1"
+                                          " NO MAXVALUE"
+                                          " NO MINVALUE"
+                                          " CACHE 1"));
+  }
 
   RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name, getColumnCreationString()));
 

@@ -15,15 +15,34 @@ DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp -lcrypto
 
-EXE=copyright
 TESTDIR = ../agent_tests
-OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o copyrightUtils.o cleanEntries.o database.o
+
+DEF_ID_COP   = -DIDENTITY_COPYRIGHT
+DEF_ID_ECC   = -DIDENTITY_ECC
+DEF_ID_IP    = -DIDENTITY_IP
+
+EXE_COP = copyright
+EXE_IP = ip
+EXE_ECC = ecc
+EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
+
+OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o cleanEntries.o database.o
+OBJECTS_COP  = copyrightUtils_cop.o
+OBJECTS_IP  = copyrightUtils_ip.o
+OBJECTS_ECC  = copyrightUtils_ecc.o
+
 COVERAGE = 
 
-$(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
-	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
-
 all:  $(CXXFOLIB) $(EXE)
+
+$(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
+	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_IP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_IP)
+	$(CXX) $(OBJECTS) $(OBJECTS_IP) $(DEF_ID_IP) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_ECC): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_ECC)
+	$(CXX) $(OBJECTS) $(OBJECTS_ECC) $(DEF_ID_ECC) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 #######################
 # library build rules #
@@ -32,8 +51,8 @@ all:  $(CXXFOLIB) $(EXE)
 $(CXXFOLIB):
 	$(MAKE) -C $(CXXFOLIBDIR)
 
-libcopyright.a: $(OBJECTS)
-	ar cvr $@ $(OBJECTS)
+libcopyright.a: $(OBJECTS) $(OBJECT_COP)
+	ar cvr $@ $(OBJECTS) $(OBJECT_COP)
 	
 libcopyright_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
@@ -42,25 +61,36 @@ libcopyright_cov.a: $(COVERAGE)
 # object build rules #
 ######################
 
-%.o: %.cc %.hpp
+$(OBJECTS): %.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
-$(COVERAGE): %_cov.o: %.c 
-	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+$(OBJECTS_COP): %.o: $(OBJECTS_COP:_cop.o=.cc) $(OBJECTS_COP:_cop.o=.hpp)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $(OBJECTS_COP) $<
+	
+$(OBJECTS_IP): %.o: $(OBJECTS_IP:_ip.o=.cc) $(OBJECTS_IP:_ip.o=.hpp)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF) -o $(OBJECTS_IP) $<
+	
+$(OBJECTS_ECC): %.o: $(OBJECTS_ECC:_ecc.o=.cc) $(OBJECTS_ECC:_ecc.o=.hpp)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $(OBJECTS_ECC) $<
+	
+$(COVERAGE): %_cov.o: %.cc %.hpp
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #
 #######################
 
-install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(CONFDIR)/mods-enabled
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+install: $(EXE)
+	for mod_name in $(EXE); do \
+		echo "make $$mod_name agent install"; \
+		$(INSTALL_PROGRAM) $$mod_name $(DESTDIR)$(MODDIR)/$$mod_name/agent/$$mod_name; \
+	done
 
 uninstall:
-	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
+	for mod_name in $(EXE); do \
+		echo "make $$mod_name agent uninstall"; \
+		rm -rf $(DESTDIR)$(MODDIR)/$$mod_name/agent; \
+	done
 
 
 test: all

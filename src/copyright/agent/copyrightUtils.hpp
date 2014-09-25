@@ -12,10 +12,11 @@
 #ifndef COPYRIGHTUTILS_HPP_
 #define COPYRIGHTUTILS_HPP_
 
+#include "identity.hpp"
 
-#define AGENT_NAME "copyright" ///< the name of the agent, used to get agent key
-#define AGENT_DESC "copyright agent" ///< what program this is
-#define AGENT_ARS  "copyright_ars"
+#define AGENT_NAME IDENTITY ///< the name of the agent, used to get agent key
+#define AGENT_DESC IDENTITY " agent" ///< what program this is
+#define AGENT_ARS  IDENTITY "_ars"
 
 #include <string>
 #include <vector>

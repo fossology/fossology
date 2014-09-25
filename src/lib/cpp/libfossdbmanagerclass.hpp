@@ -36,6 +36,7 @@ public :
 
   fo_dbManager* getStruct_dbManager() const;
   bool tableExists(const char* tableName) const;
+  bool sequenceExists(const char* name) const;
   bool begin() const;
   bool commit() const;
   bool rollback() const;

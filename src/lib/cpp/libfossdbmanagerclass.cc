@@ -44,6 +44,10 @@ bool DbManager::tableExists(const char* tableName) const {
   return fo_dbManager_tableExists(_dbManager, tableName);
 }
 
+bool DbManager::sequenceExists(const char* name) const {
+  return fo_dbManager_exists(_dbManager, "sequence", name);
+}
+
 bool DbManager::begin() const {
   // TODO merge with new features and use fo_dbManager_begin()
   PGresult* queryResult = fo_dbManager_Exec_printf(getStruct_dbManager(), "BEGIN");

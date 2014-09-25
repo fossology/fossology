@@ -227,6 +227,7 @@ PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStat
 PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args);
 
 int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName);
+int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name);
 
 // visible for testing
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params);

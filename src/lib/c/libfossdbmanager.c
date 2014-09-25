@@ -226,16 +226,22 @@ char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatem
 }
 
 int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName) {
+  return fo_dbManager_exists(dbManager, "table", tableName);
+}
+
+int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name) {
   int result = 0;
 
-  char* escapedTableName = fo_dbManager_StringEscape(dbManager, tableName);
+  char* escapedName = fo_dbManager_StringEscape(dbManager, name);
 
-  if (escapedTableName) {
+  if (escapedName) {
     PGresult* queryResult = fo_dbManager_Exec_printf(
       dbManager,
-      "select count(*) from information_schema.tables where table_catalog='%s' and table_name='%s'",
+      "select count(*) from information_schema.%ss where %s_catalog='%s' and %s_name='%s'",
+      type, type,
       PQdb(dbManager->dbConnection),
-      escapedTableName
+      type,
+      escapedName
     );
 
     if (queryResult) {
@@ -246,7 +252,7 @@ int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName) {
       }
       PQclear(queryResult);
     }
-    free(escapedTableName);
+    free(escapedName);
   }
 
   return result;
