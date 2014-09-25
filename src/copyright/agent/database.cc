@@ -14,14 +14,37 @@
 
 const static char* tableName = "copyright";
 
-const static char* columns[] = {"a integer", "b bigint"};
+typedef struct {
+  const char* name;
+  const char* type;
+  const char* creationFlags;
+} ColumnDef;
+
+ColumnDef columns[] = {
+  {"a", "integer", ""},
+  {"b", "bigint", ""}
+};
 
 const char* getColumnListString() {
   std::string result;
-  for (size_t i=0; i< (sizeof(columns)/sizeof(char*)); ++i) {
+  for (size_t i=0; i<(sizeof(columns)/sizeof(ColumnDef)); ++i) {
     if (i!=0)
       result += ", ";
-    result += columns[i];
+    result += columns[i].name;
+  }
+  return result.c_str();
+}
+
+const char* getColumnCreationString() {
+  std::string result;
+  for (size_t i=0; i< (sizeof(columns)/sizeof(ColumnDef)); ++i) {
+    if (i!=0)
+      result += ", ";
+    result += columns[i].name;
+    result += " ";
+    result += columns[i].type;
+    result += " ";
+    result += columns[i].creationFlags;
   }
   return result.c_str();
 }
@@ -38,7 +61,7 @@ bool createTables(DbManager* dbManager) {
     }\
   } while(0)
 
-  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnListString()));
+  CHECK_OR_RETURN(dbManager->queryPrintf("CREATE table %s(%s)", tableName, getColumnCreationString()));
 
   CHECK_OR_RETURN(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"
                                          " START WITH 1"
@@ -52,7 +75,9 @@ bool createTables(DbManager* dbManager) {
 
 
 bool checkTables(DbManager* dbManager) {
-  bool tableExists = dbManager->tableExists(tableName);
+  if (dbManager->tableExists(tableName)) {
+    CHECK_OR_RETURN(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString(), tableName));
+  }
 
-  return tableExists;
+  return true;
 }
