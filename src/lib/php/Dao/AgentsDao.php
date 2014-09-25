@@ -148,18 +148,50 @@ class AgentsDao extends Object
 
     $listOfRunningAgents = array();
 
-    if ($listOfAllJobs === false)
+    if ($listOfAllJobs !== false)
     {
-      return $listOfRunningAgents;
-    }
-
-    foreach ($listOfAllJobs as $job)
-    {
-      if ($job ['ars_success'] === 't') break;
-      else $listOfRunningAgents[] = $job['agent_fk'];
+      foreach ($listOfAllJobs as $job)
+      {
+        if ($job ['ars_success'] === 't')
+        {
+          break;
+        } else
+        {
+          $listOfRunningAgents[] = $job['agent_fk'];
+        }
+      }
     }
     return $listOfRunningAgents;
   }
 
+  private function getLatestAgentResultFor($uploadId, $agentNames)
+  {
+    foreach ($agentNames as $agentName)
+    {
+      $latestAgentId = GetAgentKey($agentName, "why is this agent missing?");
+      if (empty($latestAgentId))
+      {
+        throw new \Exception('currupted match');
+      }
+
+      global $container;
+      /* @param DbManager */
+      $dbManager = $container->get("db.manager");
+      $sql = "SELECT agent_fk,ars_success,ars_endtime FROM " . $agentName . "_ars WHERE upload_fk=$1 ORDER BY agent_fk";
+      $stmt = __METHOD__ . ".$agentName";
+      $dbManager->prepare($stmt, $sql);
+      $res = $dbManager->execute($stmt, array($uploadId));
+      $latestArs = array();
+      while ($row = $dbManager->fetchArray($res))
+      {
+        $key = $row['ars_success'] ? 'good' : ($row['ars_endtime'] ? 'bad' : 'n/a');
+        $latestArs[$key] = $row['agent_fk'];
+      }
+      $dbManager->freeResult($res);
+
+      $agentLatestMap[$agentName] = array('latest' => $latestAgentId, 'ars' => $latestArs);
+    }
+    return $agentLatestMap;
+  }
 
 } 

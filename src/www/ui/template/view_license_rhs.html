@@ -6,25 +6,46 @@
     {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
   </div>
   {% endif %}
-  
+
+  <div style="clear:both">
+      <table border="1" id="licenseDecisionTable">
+          <tr>
+              <th>
+                  <i18n>License</i18n>
+              </th>
+              <th>
+                  <i18n>Source</i18n>
+              </th>
+              <th>
+                  <i18n>Action</i18n>
+              </th>
+          </tr>
+          {% for licenseDecision in licenseDecisions %}
+          <tr>
+              <td>
+                  <a title="License Reference" href="javascript:;"
+                     onclick="javascript:window.open('/repo/?mod=view-license&amp;lic={{ licenseDecision[0] }}','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');">
+                      {{ licenseDecision[0] }}
+                  </a>
+              </td>
+              <td>
+                  {% for agent in licenseDecision[1] %}
+                  {{agent}}<br/>
+                  {% endfor %}
+              </td>
+              <td>
+
+              </td>
+          </tr>
+          {% endfor %}
+      </table>
+  </div>
+
 
   {% include 'change_license_modal.html' %}
   
   {{ licenseInformation }}
   {% if clearingHistory %}
-        <table border="1" id="licenseDecisionTable">
-            <tr>
-                <th>
-                    <i18n>License</i18n>
-                </th>
-                <th>
-                    <i18n>Source</i18n>
-                </th>
-                <th>
-                    <i18n>Action</i18n>
-                </th>
-            </tr>
-        </table>
 
 
 <h3>

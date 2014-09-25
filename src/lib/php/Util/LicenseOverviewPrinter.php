@@ -123,7 +123,24 @@ class LicenseOverviewPrinter extends Object
     }
     return $agentLatestMap;    
   }
-  
+
+  function buildLicenseDecisions($licenseMatches, $uploadId, $uploadTreeId,
+                                 $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
+  {
+    $licenseDecisions = array();
+    foreach ($licenseMatches as $fileId => $agents)
+    {
+      ksort($agents);
+      $breakCounter = 0;
+      foreach ($agents as $agentName => $foundLicenses)
+      {
+        if ($breakCounter++ > 0) $output .= "<br/>";
+        $latestAgentId = $agentLatestMap[$agentName]['latest'];
+        $output .= $this->renderMatches($foundLicenses, $agentName, $latestAgentId, $agentLatestMap[$agentName]['ars'],
+            $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
+      }
+    }
+  }
   /**
    * @param $licenseMatches
    * @param $uploadId

@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
@@ -265,10 +266,53 @@ class ClearingView extends FO_Plugin
     list($pageMenu,$textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
     $legendBox = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
 
+    $licenseDecisionMap = array();
+    $licenseIds = array();
+    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    if (!$fileTreeBounds->containsFiles())
+    {
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+      $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
+
+      foreach ($licenseFileMatches as $licenseMatch)
+      {
+        /** @var $licenseMatch LicenseMatch */
+        $licenseRef = $licenseMatch->getLicenseRef();
+        $licenseShortName = $licenseRef->getShortName();
+        $licenseId = $licenseRef->getId();
+        $agentRef = $licenseMatch->getAgentRef();
+        $agentName = $agentRef->getAgentName();
+        $agentId = $agentRef->getAgentId();
+
+        $licenseIds[$licenseShortName] = $licenseId;
+        $licenseDecisionMap[$licenseShortName][$agentName][$agentId][] = $licenseMatch->getPercent();
+      }
+    }
+
+    $licenseDecisions = array();
+    foreach ($licenseDecisionMap as $licenseShortName => $agentMap)
+    {
+      $agents = array();
+      foreach ($agentMap as $agentName => $agentResultMap)
+      {
+        $agentResults = array();
+        foreach ($agentResultMap as $agentId => $percentage)
+        {
+          $agentResults[] = array($agentId, $percentage);
+        }
+        $agents[] = $agentName;
+      }
+
+      $licenseDecisions[] = array($licenseShortName, $agents);
+    }
+
+
     $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $legendBox;
+    $this->vars['licenseDecisions'] = $licenseDecisions;
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }
