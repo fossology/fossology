@@ -1,5 +1,5 @@
 /*
-Author: Johannes Najjar, Daniele Fognini
+Author: Johannes Najjar, Cedric Bodet, Andreas Wuerl, Daniele Fognini
 Copyright (C) 2014, Siemens AG
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -80,19 +80,44 @@ bool DbManager::rollback() const {
   return false;
 }
 
-PGresult* DbManager::queryPrintf(const char* queryStringFormat, ...) const {
+QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const {
   va_list args;
-  va_start(args, queryStringFormat);
-  char* queryString = g_strdup_vprintf(queryStringFormat, args);
+  va_start(args, queryFormat);
+  char* queryString = g_strdup_vprintf(queryFormat, args);
   va_end(args);
+  QueryResult result(unptr::unique_ptr<PGresult, PGresultDeleter>(fo_dbManager_Exec_printf(_dbManager, queryString)));
 
-  if (queryString) {
-    PGresult* result = fo_dbManager_Exec_printf(_dbManager, queryString);
+  return result;
+}
 
-    g_free(queryString);
+QueryResult::QueryResult(unptr::unique_ptr<PGresult, PGresultDeleter>&& _ptr): ptr(std::move(_ptr)) {};
 
-    return result;
-  } else {
-    return NULL;
+QueryResult::~QueryResult() {};
+
+QueryResult::QueryResult(QueryResult&& other) : ptr(std::move(other.ptr)) {};
+
+
+bool QueryResult::isFailed() const {
+  return ptr.get() == NULL;
+}
+
+int QueryResult::getRowCount() const {
+  if (ptr) {
+    return PQntuples(ptr.get());
   }
+
+  return -1;
+}
+
+std::vector< std::string > QueryResult::getRow(int i) const{
+  std::vector< std::string > result;
+  PGresult* r = ptr.get();
+
+  if (i>=0 && i<getRowCount()) {
+    for (int j=0; j<PQnfields(r); j++) {
+      result.push_back(std::string(PQgetvalue(r, i, j)));
+    }
+  }
+
+  return result;
 }

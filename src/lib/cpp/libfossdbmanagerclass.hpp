@@ -1,5 +1,5 @@
 /*
-Author: Johannes Najjar
+Author: Johannes Najjar, Cedric Bodet, Andreas Wuerl, Daniele Fognini
 Copyright (C) 2014, Siemens AG
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -17,11 +17,17 @@ extern "C" {
 }
 
 #include <cstdarg>
+#include <vector>
+#include <string>
+
+#include "uniquePtr.hpp"
+
+class QueryResult;
 
 class DbManager {
 public :
-DbManager(int* argc, char** argv);
-DbManager(fo_dbManager* __dbManager);
+  DbManager(int* argc, char** argv);
+  DbManager(fo_dbManager* dbManager);
   ~DbManager();
 
   PGconn* getConnection() const;
@@ -29,13 +35,37 @@ DbManager(fo_dbManager* __dbManager);
 
   fo_dbManager* getStruct_dbManager() const;
   bool tableExists(const char* tableName) const;
-  PGresult* queryPrintf(const char* queryFormat, ...) const;
   bool begin() const;
   bool commit() const;
   bool rollback() const;
 
+  QueryResult queryPrintf(const char* queryFormat, ...) const;
+
 private:
   fo_dbManager* _dbManager;
+};
+
+class PGresultDeleter {
+public:
+  void operator()(PGresult* p) {
+    PQclear(p);
+  }
+};
+
+class QueryResult {
+  friend class DbManager;
+
+public:
+  ~QueryResult();
+
+  bool isFailed() const;
+  int getRowCount() const;
+  std::vector<std::string> getRow(int i) const;
+  QueryResult(QueryResult && queryResult);
+
+private:
+  QueryResult(unptr::unique_ptr<PGresult, PGresultDeleter>&& ptr);
+  unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
 };
 
 #endif /* LIBFOSSDBMANAGERCLASS_HPP_ */

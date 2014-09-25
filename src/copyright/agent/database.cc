@@ -57,6 +57,8 @@ const char* getColumnCreationString() {
 
 bool createTables(DbManager* dbManager) {
 
+// TODO removeme
+#if 0
 #define CHECK_OR_RETURN_FALSE(query) \
   do {\
     PGresult* queryResult = (query); \
@@ -66,7 +68,15 @@ bool createTables(DbManager* dbManager) {
       return false;\
     }\
   } while(0)
+#endif
 
+#define CHECK_OR_RETURN_FALSE(query) \
+  do {\
+    QueryResult queryResult = std::move((query)); \
+    if (queryResult.isFailed()) {\
+      return false;\
+    }\
+  } while(0)
   CHECK_OR_RETURN_FALSE(dbManager->queryPrintf("CREATE SEQUENCE copyright_ct_pk_seq"  //TODO abstract name
                                          " START WITH 1"
                                          " INCREMENT BY 1"
