@@ -10,44 +10,19 @@
   <div style="clear:both">
       <table border="1" id="licenseDecisionTable">
           <tr>
+              {% for licenseDecisionHeader in licenseDecisionsHeaders %}
               <th>
-                  <i18n>License</i18n>
+                  <i18n>{{ licenseDecisionHeader }}</i18n>
               </th>
-              <th>
-                  <i18n>Source</i18n>
-              </th>
-              <th>
-                  <i18n>Text for report</i18n>
-              </th>
-              <th>
-                  <i18n>Comment</i18n>
-              </th>
-              <th>
-                  <i18n>Action</i18n>
-              </th>
+              {% endfor %}
           </tr>
           {% for licenseDecision in licenseDecisions %}
           <tr>
+              {% for licenseDecisionEntry in licenseDecision %}
               <td>
-                  <a title="License Reference" href="javascript:;"
-                     onclick="javascript:window.open('/repo/?mod=view-license&amp;lic={{ licenseDecision[0] }}','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');">
-                      {{ licenseDecision[0] }}
-                  </a>
+                  {{ licenseDecisionEntry }}
               </td>
-              <td>
-                  {% for agent in licenseDecision[1] %}
-                  {{agent}}<br/>
-                  {% endfor %}
-              </td>
-              <td>
-
-              </td>
-              <td>
-
-              </td>
-              <td>
-
-              </td>
+              {% endfor %}
           </tr>
           {% endfor %}
       </table>
