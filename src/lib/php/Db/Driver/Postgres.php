@@ -121,6 +121,10 @@ class Postgres implements Driver
    */
   public function fetchAll($res)
   {
+    if (pg_num_rows($res) == 0)
+    {
+      return array();
+    }
     return pg_fetch_all($res);
   }
 
