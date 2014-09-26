@@ -201,7 +201,7 @@ class ChangeLicenseUtility extends Object
     $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
     foreach ($licenseRefArray as $licenseRef)
     {
-      $uri = Traceback_uri() . "?mod=view-license" . "&lic=" . urlencode($licenseRef->getShortName());
+      $uri = Traceback_uri() . "?mod=popup-license" . "&lic=" . urlencode($licenseRef->getShortName());
       $title = _("License Text");
       $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
       $output .= '<option value="' . $licenseRef->getId() . '" title="'.$licenseRef->getFullName().'" '
@@ -273,7 +273,7 @@ class ChangeLicenseUtility extends Object
 
   public function createBulkForm($uploadTreeId=-1) {
     $rendererVars = array();
-    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=view-license";
+    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
     $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();
     // print_r($rendererVars['licenseArray']);
     return $rendererVars;

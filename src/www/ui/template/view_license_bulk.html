@@ -8,9 +8,7 @@
  
  <select name="bulkLicense" id="bulkLicense" style="min-width:200px" >
  {% for license in licenseArray %}
-  <option value="{{ license.id }}" title="{{ license.fullname|e }}" 
-          ondblclick="javascript:window.open('{{ bulkUri }}&lic={{ license.shortname|e('url') }}','<i18n>License Text</i18n>','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
-          >{{ license.shortname|e }}</option>
+  <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
  {% endfor %}
  </select>
 

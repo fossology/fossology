@@ -42,8 +42,6 @@ class changeLicenseBulk extends FO_Plugin
   {
     $this->Name = "change-license-bulk";
     $this->Title = TITLE_changeLicenseBulk;
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->OutputType = 'JSON';
     $this->LoginFlag = 0;

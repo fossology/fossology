@@ -56,8 +56,6 @@ class ClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var LicenseRenderer */
   private $licenseRenderer;
-  /* @var Twig_Environment */
-  private $renderer;
   /** @var array colorMapping */
   var $colorMapping;
 
@@ -65,8 +63,6 @@ class ClearingView extends FO_Plugin
   {
     $this->Name = "view-license";
     $this->Title = TITLE_clearingView;
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -83,7 +79,6 @@ class ClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
-    $this->renderer = $container->get('twig.environment');
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -162,12 +157,6 @@ class ClearingView extends FO_Plugin
    */
   protected function htmlContent()
   {
-    $licenseShortname = GetParm("lic", PARM_TEXT);
-    if (!empty($licenseShortname)) // display the detailed license text of one license
-    {
-      $this->ViewLicenseText($licenseShortname);
-      return;
-    }
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
     {
@@ -377,18 +366,16 @@ class ClearingView extends FO_Plugin
     {
       $licenseRef = $licenseMatch->getLicenseRef();
       $licenseShortName = $licenseRef->getShortName();
-      if ($licenseShortName !== "No_license_found")
+      if ($licenseShortName === "No_license_found")
       {
-        $licenseId = $licenseRef->getId();
-
-        $licenseIds[$licenseShortName] = $licenseId;
-
-        $agentRef = $licenseMatch->getAgentRef();
-        $agentName = $agentRef->getAgentName();
-        $agentId = $agentRef->getAgentId();
-
-        $agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = $licenseMatch->getPercent();
+        continue;
       }
+      $licenseIds[$licenseShortName] = $licenseRef->getId();
+      $agentRef = $licenseMatch->getAgentRef();
+      $agentName = $agentRef->getAgentName();
+      $agentId = $agentRef->getAgentId();
+
+      $agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = $licenseMatch->getPercent();
     }
 
     $agentsWithResults = array();
@@ -404,7 +391,6 @@ class ClearingView extends FO_Plugin
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
 
-    $ignoredShortnames = array("No_license_found");
     $licenseDecisions = array();
     foreach ($agentDetectedLicenses as $licenseShortName => $agentMap)
     {
@@ -441,7 +427,7 @@ class ClearingView extends FO_Plugin
           $agents[] = $agentEntry;
         }
         $licenseId = $licenseIds[$licenseShortName];
-        $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('/repo/?mod=view-license&amp;lic=$licenseShortName','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
+        $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('/repo/?mod=popup-license&amp;lic=$licenseShortName','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
         $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_32.png\">" . ($selectedByUser ? "" : "auto") . " </a>";
         $licenseDecisions[] = array($licenseShortNameWithLink, implode("<br/>", $agents), "", "", $actionLink);
       }
