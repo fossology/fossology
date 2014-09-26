@@ -16,6 +16,7 @@ $dataPropertiesStorage['clearing_decision_types.meaning'] = array(
   'Not decided',
   'No License known',
   'To be discussed',
+  'Irrelevant',
   'Identified'
 );
 
