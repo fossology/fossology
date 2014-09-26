@@ -72,17 +72,17 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
 
   std::string newtext = " ";
 
-  input.content = boost::regex_replace(input.content, boost::regex("[\\x0-\\x1f]"), newtext);
+  input.content = rx::regex_replace(input.content, rx::regex("[\\x0-\\x1f]"), newtext);
 
     //This is ugly, we should not use strings, neither here nor in the database to distinguish types
   if (input.type.compare("statement") == 0 )
   {
     /* !"#$%&' */
-    input.content = boost::regex_replace(input.content, boost::regex("([\\x21-\\x27])|([*@])"), newtext);
+    input.content = rx::regex_replace(input.content, rx::regex("([\\x21-\\x27])|([*@])"), newtext);
     /*  numbers-numbers, two or more digits, ', ' */
 
-//TODO    input.content = boost::regex_replace(input.content, boost::regex("(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)"), newtext);
-//TODO    input.content = boost::regex_replace(input.content, boost::regex(" : "), newtext);// free :, probably followed a date
+//TODO    input.content = rx::regex_replace(input.content, rx::regex("(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)"), newtext);
+//TODO    input.content = rx::regex_replace(input.content, rx::regex(" : "), newtext);// free :, probably followed a date
   }
   else
   if (input.type.compare("email") == 0 )
@@ -92,12 +92,12 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
     // but the function replaces the sequence ...
     // This is a slow variant that does that. We need some | if we want to replace all of them
     // TODO
-    input.content = boost::regex_replace(input.content, boost::regex(":;<=>()"), newtext);
+    input.content = rx::regex_replace(input.content, rx::regex(":;<=>()"), newtext);
 
   }
 
   /* remove double spaces */
-  input.content = boost::regex_replace(input.content, boost::regex("\\s\\s+"), newtext);
+  input.content = rx::regex_replace(input.content, rx::regex("\\s\\s+"), newtext);
   /* remove leading/trailing whitespace and some punctuation */
   input.content = trim(input.content, "\t \n\r<>./\"\'");
 
