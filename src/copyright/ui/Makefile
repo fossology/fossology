@@ -16,22 +16,32 @@
 ######################################################################
 TOP=../../..
 include $(TOP)/Makefile.conf
-MOD_NAME=copyright
+MOD_NAMES=copyright ip ecc
 MOD_SUBDIR=ui
 
 all:
-	@echo "make copyright ui"
+	@echo "make $(MON_NAMES) ui"
 
 install:
-	echo "make copyright ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	for MOD_NAME in $(MOD_NAMES); do \
+	echo "make $$MOD_NAME ui install"; \
+	mkdir -p $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+	$(INSTALL_DATA) ./*-$$MOD_NAME.php $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+	done
+	#TODO deduplicate php files
+	#TODO this is broken but currently works
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)
+	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ecc.php
+	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ip.php
+
 
 uninstall:
-	echo "make copyright ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	for MOD_NAME in $(MOD_NAMES); do \
+	echo "make $$MOD_NAME ui uninstall"; \
+	rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+	done
 
 clean:
-	echo "make copyright ui clean"
+	echo "make $(MON_NAMES) ui clean"
 
 .PHONY: install uninstall  all clean

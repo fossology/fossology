@@ -27,6 +27,37 @@
 
 #define FUNCTION
 
+FUNCTION PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
+  return fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryFileIdsForUpload",
+      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
+      int),
+    uploadId
+  );
+}
+
+FUNCTION char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
+  PGresult* fileNameResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryPFileForFileId",
+      "select pfile_sha1 || '.' || pfile_md5 ||'.'|| pfile_size AS pfilename from pfile where pfile_pk=$1",
+      long),
+    fileId
+  );
+
+  if (PQntuples(fileNameResult) == 0) {
+    PQclear(fileNameResult);
+    return NULL;
+  }
+
+  char* pFile = strdup(PQgetvalue(fileNameResult, 0, 0));
+  PQclear(fileNameResult);
+  return pFile;
+}
+
 
 /*!
  \brief Get the latest enabled agent key (agent_pk) from the database.
