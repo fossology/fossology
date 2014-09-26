@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "string_operations.h"
 #include "hash.h"
+#include "monk.h"
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
 
@@ -77,8 +78,13 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
         stateToken->removedBefore++;
       }
     } else {
-      char lowerChar = g_ascii_tolower(*ptr);
-      hash_add(&lowerChar, &(stateToken->hashedContent));
+#ifndef MONK_CASE_INSENSITIVE
+      const char* newCharPtr = ptr;
+#else
+      char newChar = g_ascii_tolower(*ptr);
+      const char* newCharPtr = &newChar;
+#endif
+      hash_add(newCharPtr, &(stateToken->hashedContent));
       stateToken->length++;
     }
     ptr++;
