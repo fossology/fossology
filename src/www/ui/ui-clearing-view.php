@@ -418,6 +418,10 @@ class ClearingView extends FO_Plugin
           $agentEntry = $agentName . ": ";
           foreach ($agentResultMap as $agentId => $percentages)
           {
+            if (!array_key_exists($agentName, $agentLatestMap))
+            {
+              continue;
+            }
             if ($agentLatestMap[$agentName] === $agentId)
             {
               $percentageEntries = array();

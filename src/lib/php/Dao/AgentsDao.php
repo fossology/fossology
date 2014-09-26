@@ -185,7 +185,7 @@ ORDER BY agent_fk DESC";
       $this->dbManager->prepare($statementName, $sql);
       $res = $this->dbManager->execute($statementName, array($uploadId, $agentName));
 
-      foreach ($this->dbManager->fetchAll($res) as $row)
+      while ($row = $this->dbManager->fetchArray($res))
       {
         if ($row['ars_success'])
         {

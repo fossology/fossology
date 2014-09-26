@@ -394,7 +394,7 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
-        "
+        $sql="
 SELECT
   LD.pfile_fk,
   LD.uploadtree_fk,
