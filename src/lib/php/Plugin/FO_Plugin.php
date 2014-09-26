@@ -297,7 +297,7 @@ class FO_Plugin
    * For agents, the outputs generate status information.
    */
 
-  /* Possible values: Text, HTML, or XML. */
+  /* Possible values: Text, HTML, XML, JSON */
   var $OutputType = "HTML";
   var $OutputToStdout = 0;
 

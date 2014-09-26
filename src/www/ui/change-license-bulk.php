@@ -45,7 +45,7 @@ class changeLicenseBulk extends FO_Plugin
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
@@ -93,7 +93,6 @@ class changeLicenseBulk extends FO_Plugin
         $bulkId = $licenseRefBulkIdResult['lrb_pk'];
         $job_pk = JobAddJob($userId, $uploadName, $uploadId);
 
-        global $Plugins;
         $MonkBulkPlugin = plugin_find("agent_monk_bulk");
         $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $bulkId);
       } else {
@@ -107,10 +106,10 @@ class changeLicenseBulk extends FO_Plugin
 
     if (empty($ErrorMsg) && ($jq_pk>0)) {
       header('Content-type: text/json');
-      print json_encode(array("jqid" => $jq_pk));
+      return json_encode(array("jqid" => $jq_pk));
     } else {
       header('Content-type: text/json', true, 500);
-      print json_encode(array("error" => $ErrorMsg));
+      return json_encode(array("error" => $ErrorMsg));
     }
   } // Output()
 
