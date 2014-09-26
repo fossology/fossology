@@ -1,3 +1,5 @@
+{% import "include/macro.html" as macro %}
+
 {% if previousItem or nextItem %}
 <div class="groupBox">
     {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
@@ -10,28 +12,23 @@
         <legend>
             <i18n>License decision scope</i18n>
         </legend>
-        <input type="checkbox"/> global
+        <input type="checkbox" name="global_license_decision"/> global
     </fieldset>
-    <fieldset style="display:inline">
+    <fieldset style="display: inline;">
         <legend>
             <i18n>Clearing decision type</i18n>
         </legend>
-        {{ typeRadio }}
+        {% for clearingType in clearingTypes %}
+        <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
+        value="{{ loop.index }}">
+        {{ clearingType }}
+        </input>
+        {% endfor %}
     </fieldset>
 </div>
 
 <div class="groupBox">
-    <table border="1" id="licenseDecisionTable">
-        <thead>
-        <tr>
-            {% for licenseDecisionHeader in licenseDecisionsHeaders %}
-            <th>
-                <i18n>{{ licenseDecisionHeader }}</i18n>
-            </th>
-            {% endfor %}
-        </tr>
-        </thead>
-    </table>
+    {{ macro.table("licenseDecisionsTable", licenseDecisionsHeaders) }}
 </div>
 
 <div style="clear:both">
@@ -55,8 +52,9 @@
 
 </div>
 
-{% if clearingHistory %}
+<input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}"/>
 
+{% if clearingHistory %}
 
 <h3>
     <i18n>Clearing History</i18n>

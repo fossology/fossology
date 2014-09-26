@@ -267,9 +267,6 @@ class ChangeLicenseUtility extends Object
     $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
     $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
-    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap();
-    $rendererVars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
-
     return $rendererVars;
   }
 

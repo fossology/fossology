@@ -300,7 +300,7 @@ class ClearingView extends FO_Plugin
 
     $script = "<script>
               function createLicenseDecisionTable() {
-                    var otable = $('#licenseDecisionTable').dataTable(" . $dataTableConfig . ");
+                    var otable = $('#licenseDecisionsTable').dataTable(" . $dataTableConfig . ");
                     return otable;
                 }
 
@@ -324,6 +324,8 @@ class ClearingView extends FO_Plugin
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
     $this->vars['licenseDecisionsHeaders'] = array('License', 'Source', 'Text for report', 'Comment', 'Action');
+    $this->vars['clearingTypes'] = $this->clearingDao->getClearingDecisionTypeMap();
+    $this->vars['selectedClearingType'] = 'Identified';
 
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;

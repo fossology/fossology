@@ -128,16 +128,10 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
 
 function performPostRequest() {
     var txt = [];
-    $('#licenseRight').find('option').each(function () {
+    $('#licenseLeft').find(':selected').each(function () {
         txt.push(this.value);
     });
 
-    if (txt.length == 0) {
-        txt.push(magicNumberNoLicenseFoundInt);
-        selectNoLicenseFound(licenseLeft, licenseRight);
-    }
-
-    $('#licenseNumbersToBeSubmitted').val(txt);
     var data = {
         "licenseNumbersToBeSubmitted": txt,
         "uploadTreeId": $('#uploadTreeId').val(),
