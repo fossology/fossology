@@ -130,7 +130,7 @@ class upload_file extends FO_Plugin {
       $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
       $Msg .= "$text $Name $text1 ";
       $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
-      print displayMessage($Msg,$keep);
+      $this->vars['message'] = $Msg.$keep;
       return (NULL);
     }
     else 
@@ -169,12 +169,14 @@ class upload_file extends FO_Plugin {
       }
       else {
         $text = _("Upload failed for file");
-        $V.= displayMessage("$text {$_FILES['getfile']['name']}: $rc");
+        $this->vars['message'] = "$text {$_FILES['getfile']['name']}: $rc";
       }
     }
 
     /* Display instructions */
     $this->vars['description'] = $description;
+    $this->vars['upload_max_filesize'] = ini_get('upload_max_filesize');
+    $this->vars['folderListOptions'] = FolderListOption(-1, 0);
     $this->vars['agentCheckBoxMake'] = '';
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
@@ -186,7 +188,6 @@ class upload_file extends FO_Plugin {
   {
     return "upload_file.html";
   }
-
 
 }
 $NewPlugin = new upload_file;

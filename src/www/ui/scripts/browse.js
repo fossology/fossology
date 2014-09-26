@@ -209,3 +209,58 @@ function submitComment( ) {
         success: mysuccess3
     });
 }
+
+function ShowHide(name) {
+  if (name.length < 1) { return; }
+  var Element, State;
+  if (document.getElementById) // standard
+    { Element = document.getElementById(name); }
+  else if (document.all) // IE 4, 5, beta 6
+    { Element = document.all[name]; }
+  else // if (document.layers) // Netscape 4 and older
+    { Element = document.layers[name]; }
+  State = Element.style;
+  if (State.display == 'none') { State.display='block'; }
+  else { State.display='none'; }
+}
+  
+function Expand() {
+  var E = document.getElementsByTagName('div');
+  for(var i = 0; i < E.length; i++)
+    {
+    if (E[i].id.substr(0,8) == 'TreeDiv-')
+      {
+      var Element, State;
+      if (document.getElementById) // standard
+        { Element = document.getElementById(E[i].id); }
+      else if (document.all) // IE 4, 5, beta 6
+        { Element = document.all[E[i].id]; }
+      else // if (document.layers) // Netscape 4 and older
+        { Element = document.layers[E[i].id]; }
+      State = Element.style;
+      State.display='block';
+      }
+    }
+  }
+  
+function Collapse()
+{
+  var E = document.getElementsByTagName('div');
+  var First=1;
+  for(var i = 0; i < E.length; i++)
+    {
+    if (E[i].id.substr(0,8) == 'TreeDiv-')
+      {
+      var Element, State;
+      if (document.getElementById) // standard
+        { Element = document.getElementById(E[i].id); }
+      else if (document.all) // IE 4, 5, beta 6
+        { Element = document.all[E[i].id]; }
+      else // if (document.layers) // Netscape 4 and older
+        { Element = document.layers[E[i].id]; }
+      State = Element.style;
+      if (First) { State.display='block'; First=0; } 
+      else { State.display='none'; } 
+      }
+    }
+ }

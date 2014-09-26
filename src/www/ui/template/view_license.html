@@ -1,9 +1,6 @@
-{% extends "default.html" %}
+{% extends "include/base.html" %}
 
 {% block content %}
-<div style='border: thin dotted gray; background-color:lightyellow'>
-    {{ path }}
-</div>
 <div id="leftrightalignment" name="leftrightalignment">
     <table border="0" padding="0" style="height:100%; width:100%">
         <tr>
@@ -21,48 +18,7 @@
                 {{ legendBox }}
             </td>
             <td class="headerBox">
-                <div>{{ licenseInformation }}</div>
-                {% if clearingHistory %}
-                <h3>
-                    <i18n>Clearing History</i18n>
-                </h3>
-                <div class="scrollable2">
-                    <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
-                        <tr>
-                            <th>
-                                <i18n>Date</i18n>
-                            </th>
-                            <th>
-                                <i18n>Username</i18n>
-                            </th>
-                            <th>
-                                <i18n>Scope</i18n>
-                            </th>
-                            <th>
-                                <i18n>Type</i18n>
-                            </th>
-                            <th>
-                                <i18n>Licenses</i18n>
-                            </th>
-                            <th>
-                                <i18n>Comment</i18n>
-                            </th>
-                            <th>
-                                <i18n>Remark</i18n>
-                            </th>
-                        </tr>
-                        {% for row in clearingHistory %}
-                        <tr
-                        {%if row.isInactive %} class="inactiveClearing"{% endif%}>
-                        {% for col in row.content %}
-                        <td>{{ col }}</td>
-                        {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </table>
-                    <span class="inactiveClearing">Inactive concluded licenses decisions</span>
-                </div>
-                {% endif %}
+                {% include 'view_license_rhs.html' %}
             </td>
         </tr>
     </table>
@@ -70,11 +26,14 @@
 {% endblock %}
 
 
-{% block footer %}
-<script src="scripts/jquery-1.11.1.min.js" type="text/javascript"></script>
+{% block foot %}
+{{ parent() }}
+<script src="scripts/jquery.dataTables-1.9.4.min.js" type="text/javascript"></script>
 <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
 <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
 <script src="scripts/change-license-common.js" type="text/javascript"></script>
 <script src="scripts/change-license-view.js" type="text/javascript"></script>
 <script src="scripts/tools.js" type="text/javascript"></script>
+<script src="scripts/clearing.js" type="text/javascript"></script>
+{{ script }}
 {% endblock %}

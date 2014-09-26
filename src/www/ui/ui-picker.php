@@ -44,14 +44,18 @@ define("TITLE_ui_picker", _("File Picker"));
 
 class ui_picker extends FO_Plugin
 {
-  var $Name       = "picker";
-  var $Title      = TITLE_ui_picker;
-  var $Version    = "1.0";
-  // var $MenuList= "Jobs::License";
-  var $Dependency = array("browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
   var $HighlightColor = '#4bfe78';
+
+  function __construct()
+  {
+    $this->Name       = "picker";
+    $this->Title      = TITLE_ui_picker;
+    $this->Dependency = array("browse","view");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
+
 
   /**
    * \brief Create and configure database tables
@@ -91,8 +95,6 @@ class ui_picker extends FO_Plugin
    */
   function Initialize()
   {
-    global $_GET;
-
     if ($this->State != PLUGIN_STATE_INVALID) {
       return(1);
     } // don't re-run
@@ -627,12 +629,6 @@ class ui_picker extends FO_Plugin
      * So if they want to compare a .bz2 with a .gz, they will have to
      * use the Browse Window.
      */
-/* too slow
-    $SuggestionsHTML = $this->SuggestionsPick($PathStr, $uploadtree_pk, $rtncount);
-    $text = "Suggestions";
-    $OutBuf .= "<hr><h3>$text ($rtncount):</h3>";
-    $OutBuf .= $SuggestionsHTML;
-*/
 
     /* Browse window */
     $text = _("Browse");
@@ -660,7 +656,6 @@ class ui_picker extends FO_Plugin
      * eg. source update
      */
     $this->Create_file_picker();
-
 
     $RtnMod = GetParm("rtnmod",PARM_TEXT);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
@@ -700,7 +695,6 @@ class ui_picker extends FO_Plugin
      */
     if (!empty($user_pk) && !empty($RtnMod) && !empty($uploadtree_pk) && !empty($uploadtree_pk2))
     {
-      // Record pick
       $sql = "insert into file_picker (user_fk, uploadtree_fk1, uploadtree_fk2, last_access_date)
              values($user_pk, $uploadtree_pk, $uploadtree_pk2, now())";
       // ignore errors (most probably a duplicate key)
@@ -714,37 +708,25 @@ class ui_picker extends FO_Plugin
 
     $OutBuf = "";
 
-    switch($this->OutputType)
+    if ($this->OutputType=='HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        if (empty($uploadtree_pk))
-        $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
+      if (empty($uploadtree_pk))
+      $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
         else
-        {
-          $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
-          $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk,
-          $PathArray);
-        }
-        break;
-      case "Text":
-        break;
-      default:
+      {
+        $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
+        $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);
+      }
     }
 
-
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
+    if ($this->OutputToStdout) {
+      print $OutBuf;
+      return;
     }
-    print "$OutBuf";
-
-    return;
+    $this->vars['content'] = $OutBuf;
   }
 
 }
 
 $NewPlugin = new ui_picker;
 $NewPlugin->Initialize();
-
-?>

@@ -233,6 +233,13 @@ html, body
     width: 99%;
 }
 
+.groupBox {
+    clear: both;
+    margin-top: 20px;
+    position: relative;
+    top: -20px;
+}
+
 .headerNew {
    vertical-align: top;
    overflow: auto;

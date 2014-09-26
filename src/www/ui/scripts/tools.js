@@ -51,3 +51,8 @@ function getOptionDefaultTrue(name) {
         return theCookie === "true";
     }
 }
+
+function failed() {
+    if (confirm("You are not logged in. Go to login page?"))
+        window.location.href = "?mod=auth";
+}

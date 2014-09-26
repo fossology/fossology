@@ -1,0 +1,28 @@
+{% macro select(id,options,select,action) %}
+<select name="{{ id }}" id="{{ id }}" {{ action }}>
+{% for key,disp in options %}
+<option value="{{ key }}" {%if key == select %} selected{% endif %}>{{ disp }}</option>
+{% endfor %}
+</select>
+{% endmacro %}
+
+{% macro radioGroup(id,options,select,action,separator) %}
+{% for key,disp in options %}
+{% if not loop.first %}{{ separator }}{% endif %}
+<input type="radio" name="{{ id }}" value="{{ key }}" {%if key == select %} selected{% endif %}{{ action }}>{{ disp }}
+{% endfor %}
+{% endmacro %}
+
+{% macro table(id, headers) %}
+<table border="1" id="{{ id }}">
+    <thead>
+    <tr>
+        {% for header in headers %}
+        <th>
+            <i18n>{{ header }}</i18n>
+        </th>
+        {% endfor %}
+    </tr>
+    </thead>
+</table>
+{% endmacro %}

@@ -25,12 +25,16 @@ define("TITLE_upload_permissions", _("Edit Uploaded File Permissions"));
 
 class upload_permissions extends FO_Plugin 
 {
-  var $Name = "upload_permissions";
-  public $Title = TITLE_upload_permissions;
-  var $Version = "1.0";
-  var $MenuList = "Admin::Upload Permissions";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "upload_permissions";
+    $this->Title = TITLE_upload_permissions;
+    $this->Version = "1.0";
+    $this->MenuList = "Admin::Upload Permissions";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
 
   /* @brief Display group membership
@@ -97,10 +101,7 @@ class upload_permissions extends FO_Plugin
   }
 
 
-  /*********************************************
-   Output(): Generate the text for this plugin.
-   *********************************************/
-  function Output() 
+  protected function htmlContent() 
   {
     global $PG_CONN;
     global $PERM_NAMES;
@@ -118,7 +119,6 @@ class upload_permissions extends FO_Plugin
     $public_perm = GetArrayVal('public', $_GET);
     if ($public_perm == "") $public_perm = -1;
 
-    // start building the output buffer
     $V = "";
 
     /* If perm_upload_pk is passed in, update either the perm or group_pk */
@@ -197,13 +197,6 @@ class upload_permissions extends FO_Plugin
     // Get list of all upload records in this folder that the user has PERM_ADMIN
     $UploadList = FolderListUploads_perm($folder_pk, PERM_ADMIN);
 
-/*
-if (empty($UploadList))
-{
-echo "You have no uploads in this folder for which you are an admin.  Hit the back button";
-return;
-}
-*/
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.
     // Note that $UploadList may be empty so $UploadArray will be empty
@@ -211,8 +204,10 @@ return;
     foreach($UploadList as $UploadRec) 
     {
       $SelectText = htmlentities($UploadRec['name']);
-      if (!empty($UploadRec['upload_ts'])) 
+      if (!empty($UploadRec['upload_ts']))
+      {
         $SelectText .= ", " . substr($UploadRec['upload_ts'], 0, 19);
+      }
       $UploadArray[$UploadRec['upload_pk']] = $SelectText;
     }
 
@@ -313,9 +308,7 @@ return;
 
     $V .= "<hr>";
     $V .= $this->DisplayGroupMembership();
-    if (!$this->OutputToStdout) return ($V);
-    print ("$V");
-    return;
+    return $V;
   }
 }
 $NewPlugin = new upload_permissions;

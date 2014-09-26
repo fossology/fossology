@@ -20,55 +20,64 @@ define("TITLE_core_debug", _("Debug Plugins"));
 
 class core_debug extends FO_Plugin
 {
-  var $Name       = "debug";
-  var $Title      = TITLE_core_debug;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::Debug Plugins";
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "debug";
+    $this->Title      = TITLE_core_debug;
+    $this->MenuList   = "Help::Debug::Debug Plugins";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * \brief display the loaded menu and plugins.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      return 0;
     }
+    if ($this->OutputToStdout && $this->OutputType=="Text") {
+      global $Plugins;
+      print_r($Plugins);
+    }
+    $output = "";
+    if ($this->OutputType=='HTML')
+    {
+      $output = $this->htmlContent();
+    }
+    if (!$this->OutputToStdout)
+    {
+      $this->vars['content'] = $output;
+      return; // $output;
+    }
+    print $output;
+  }
+  
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
+  protected function htmlContent()
+  {
     $V="";
     global $Plugins;
-    switch($this->OutputType)
+
+    $text = _("Plugin Summary");
+    $V .= "<H2>$text</H2>";
+    foreach ($Plugins as $key => $val)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $text = _("Plugin Summary");
-        $V .= "<H2>$text</H2>";
-        foreach ($Plugins as $key => $val)
-        {
-          $V .=  "$key : $val->Name (state=$val->State)<br>\n";
-        }
-        $text = _("Plugin State Details");
-        $V .= "<H2>$text</H2>";
-        $V .= "<pre>";
-        $V .= print_r($Plugins,1);
-        $V .= "</pre>";
-        break;
-      case "Text":
-        print_r($Plugins);
-        break;
-      default:
-        break;
+      $V .=  "$key : $val->Name (state=$val->State)<br>\n";
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print("$V");
-    return;
-  } // Output()
+    $text = _("Plugin State Details");
+    $V .= "<H2>$text</H2>";
+    $V .= "<pre>";
+    $V .= print_r($Plugins,1);
+    $V .= "</pre>";
 
+    return $V;
+  }
 
-};
+}
 $NewPlugin = new core_debug;
 $NewPlugin->Initialize();
-
-?>

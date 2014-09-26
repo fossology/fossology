@@ -19,12 +19,15 @@
 define("TITLE_folder_properties", _("Edit Folder Properties"));
 
 class folder_properties extends FO_Plugin {
-  var $Name = "folder_properties";
-  var $Title = TITLE_folder_properties;
-  var $Version = "1.0";
-  var $MenuList = "Organize::Folders::Edit Properties";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
+  function __construct()
+  {
+    $this->Name = "folder_properties";
+    $this->Title = TITLE_folder_properties;
+    $this->MenuList = "Organize::Folders::Edit Properties";
+    $this->Dependency = array();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Given a folder's ID and a name, alter
@@ -71,78 +74,61 @@ class folder_properties extends FO_Plugin {
     DBCheckResult($result, $Sql, __FILE__, __LINE__);
     pg_free_result($result);
     return (1);
-  } // Edit()
+  }
 
   /**
    * \brief Generate the text for this plugin.
    */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
+  protected function htmlContent() {
     $V = "";
     global $PG_CONN;
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
-        if (empty($FolderSelectId)) {
-          $FolderSelectId = FolderGetTop();
-        }
-        $FolderId = GetParm('oldfolderid', PARM_INTEGER);
-        $NewName = GetParm('newname', PARM_TEXT);
-        $NewDesc = GetParm('newdesc', PARM_TEXT);
-        if (!empty($FolderId)) {
-          $FolderSelectId = $FolderId;
-          $rc = $this->Edit($FolderId, $NewName, $NewDesc);
-          if ($rc == 1) {
-            /* Need to refresh the screen */
-            $text=_("Folder Properties changed");
-            $V.= displayMessage($text);
-          }
-        }
-        $V.= _("<p>The folder properties that can be changed are the folder name and
-     description.  First select the folder to edit. Then enter the new values.
-     If no value is entered, then the corresponding field will not be changed.</p>");
-        /* Get the folder info */
-        $sql = "SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $Folder = pg_fetch_assoc($result);
-        pg_free_result($result);
-        /* Display the form */
-        $V.= "<form method='post'>\n"; // no url = this url
-        $V.= "<ol>\n";
-        $text = _("Select the folder to edit:  \n");
-        $V.= "<li>$text";
-        $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
-        $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
-        $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
-        $V.= "</select><P />\n";
-        $text = _("Change folder name:  \n");
-        $V.= "<li>$text";
-        $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['folder_name'], ENT_COMPAT) . "\" />\n";
-        $text = _("Change folder description:  \n");
-        $V.= "<P /><li>$text";
-        $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
-        $V.= "</ol>\n";
-        $text = _("Edit");
-        $V.= "<input type='submit' value='$text!'>\n";
-        $V.= "</form>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+
+    /* If this is a POST, then process the request. */
+    $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
+    if (empty($FolderSelectId)) {
+      $FolderSelectId = FolderGetTop();
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
+    $FolderId = GetParm('oldfolderid', PARM_INTEGER);
+    $NewName = GetParm('newname', PARM_TEXT);
+    $NewDesc = GetParm('newdesc', PARM_TEXT);
+    if (!empty($FolderId)) {
+      $FolderSelectId = $FolderId;
+      $rc = $this->Edit($FolderId, $NewName, $NewDesc);
+      if ($rc == 1) {
+        /* Need to refresh the screen */
+        $text=_("Folder Properties changed");
+        $V.= displayMessage($text);
+      }
     }
-    print ("$V");
-    return;
+    $V.= _("<p>The folder properties that can be changed are the folder name and
+       description.  First select the folder to edit. Then enter the new values.
+       If no value is entered, then the corresponding field will not be changed.</p>");
+    /* Get the folder info */
+    $sql = "SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $Folder = pg_fetch_assoc($result);
+    pg_free_result($result);
+    /* Display the form */
+    $V.= "<form method='post'>\n"; // no url = this url
+    $V.= "<ol>\n";
+    $text = _("Select the folder to edit:  \n");
+    $V.= "<li>$text";
+    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
+    $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
+    $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
+    $V.= "</select><P />\n";
+    $text = _("Change folder name:  \n");
+    $V.= "<li>$text";
+    $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['folder_name'], ENT_COMPAT) . "\" />\n";
+    $text = _("Change folder description: \n");
+    $V.= "<P /><li>$text";
+    $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
+    $V.= "</ol>\n";
+    $text = _("Edit");
+    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "</form>\n";
+    return $V;
   }
-};
+}
 $NewPlugin = new folder_properties;
-?>

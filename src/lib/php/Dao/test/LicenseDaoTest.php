@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;

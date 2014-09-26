@@ -148,18 +148,54 @@ class AgentsDao extends Object
 
     $listOfRunningAgents = array();
 
-    if ($listOfAllJobs === false)
+    if ($listOfAllJobs !== false)
     {
-      return $listOfRunningAgents;
-    }
-
-    foreach ($listOfAllJobs as $job)
-    {
-      if ($job ['ars_success'] === 't') break;
-      else $listOfRunningAgents[] = $job['agent_fk'];
+      foreach ($listOfAllJobs as $job)
+      {
+        if ($job ['ars_success'] === 't')
+        {
+          break;
+        } else
+        {
+          $listOfRunningAgents[] = $job['agent_fk'];
+        }
+      }
     }
     return $listOfRunningAgents;
   }
 
+  public function getLatestAgentResultForUpload($uploadId, $agentNames)
+  {
+    $agentLatestMap = array();
+    foreach ($agentNames as $agentName)
+    {
+      $sql = "
+SELECT
+  agent_pk,
+  ars_success,
+  ars_endtime,
+  agent_name
+FROM " . $agentName . "_ars ARS
+INNER JOIN agent A ON ARS.agent_fk = A.agent_pk
+WHERE upload_fk=$1
+  AND A.agent_name = $2
+ORDER BY agent_fk DESC";
+
+      $statementName = __METHOD__ . ".$agentName";
+      $this->dbManager->prepare($statementName, $sql);
+      $res = $this->dbManager->execute($statementName, array($uploadId, $agentName));
+
+      while ($row = $this->dbManager->fetchArray($res))
+      {
+        if ($row['ars_success'])
+        {
+          $agentLatestMap[$agentName] = intval($row['agent_pk']);
+          break;
+        }
+      }
+      $this->dbManager->freeResult($res);
+    }
+    return $agentLatestMap;
+  }
 
 } 

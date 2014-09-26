@@ -28,13 +28,15 @@ define("TITLE_ajax_admin_scheduler", _("URL"));
  **/
 class ajax_admin_scheduler extends FO_Plugin
 {
-  public $Name = "ajax_admin_scheduler";
-  public $Title = TITLE_ajax_admin_scheduler;
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-  public $NoHTML     = 1; /* This plugin needs no HTML content help */
-  public $LoginFlag = 0;
+  function __construct()
+  {
+    $this->Name = "ajax_admin_scheduler";
+    $this->Title = TITLE_ajax_admin_scheduler;
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 0;
+    parent::__construct();
+  }
+
 
   /**
    * \brief get the job list for the specified operation
@@ -117,52 +119,54 @@ class ajax_admin_scheduler extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) return;
-
-    $V = "";
-    switch ($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $operation = GetParm('operation', PARM_TEXT);
-        $job_list_option = $this->JobListOption($operation);
-        if ('pause' == $operation || 'restart' == $operation)
-        {
-          $text = _("Select a job");
-          $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
-        }
-        else if ('verbose'  == $operation)
-        {
-          $verbose_list_option = $this->VerboseListOption();
-          $text1 = _("Select the scheduler or a job");
-          $text2 = _("Select a verbosity level");
-          $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
-        }
-        else if ('status'  == $operation)
-        {
-          $text = _("Select the scheduler or a job");
-          $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
-        }
-        else if ('priority'  == $operation)
-        {
-          $priority_list_option = $this->PriorityListOption();
-          $text1 = _("Select a job");
-          $text2 = _("Select a priority level");
-          $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      return 0;
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
+    $output = '';
+    if ($this->OutputType=='HTML')
+    {
+      $output = $this->htmlContent();
     }
-    print ("$V");
-    return;
-  } // Output()
-};
+    if (!$this->OutputToStdout)
+    {
+      $this->vars['content'] = $output;
+      return $output." ";
+    }
+    print $output;
+  }
+  
+  
+  protected function htmlContent()
+  {
+    $V = '';
+    $operation = GetParm('operation', PARM_TEXT);
+    $job_list_option = $this->JobListOption($operation);
+    if ('pause' == $operation || 'restart' == $operation)
+    {
+      $text = _("Select a job");
+      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
+    }
+    else if ('verbose'  == $operation)
+    {
+      $verbose_list_option = $this->VerboseListOption();
+      $text1 = _("Select the scheduler or a job");
+      $text2 = _("Select a verbosity level");
+      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
+    }
+    else if ('status'  == $operation)
+    {
+      $text = _("Select the scheduler or a job");
+      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
+    }
+    else if ('priority'  == $operation)
+    {
+      $priority_list_option = $this->PriorityListOption();
+      $text1 = _("Select a job");
+      $text2 = _("Select a priority level");
+      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
+    }
+    return $V;
+  }
+}
 $NewPlugin = new ajax_admin_scheduler();
-?>

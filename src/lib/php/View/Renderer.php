@@ -232,7 +232,8 @@ class Renderer extends Object
 
 }
 
-if ('m'==@$argv[1]){
+if (isset($argv) && 'm' == @$argv[1])
+{
  $renderer = new Renderer();
  $renderer->updateTemplates();
 }

@@ -25,27 +25,22 @@ function clearingSuccess(data) {
     $('#recentLicenseClearing').html(data.recentLicenseClearing);
 }
 
-var bulkModal;
-var userModal;
-$(document).ready(function() {
-  bulkModal = $('#bulkModal').plainModal();
-  userModal = $('#userModal').plainModal();
-});
-
 function openBulkModal() {
-  bulkModal.plainModal('open');
+  $('#userModal').hide();
+  $('#bulkModal').show();
 }
 
 function closeBulkModal() {
-  bulkModal.plainModal('close');
+  $('#bulkModal').hide();
 }
 
 function openUserModal() {
-  userModal.plainModal('open');
+  $('#bulkModal').hide();
+  $('#userModal').show();
 }
 
 function closeUserModal() {
-  userModal.plainModal('close');
+  $('#userModal').hide();
 }
 
 function reloadClearingTable(){
@@ -82,16 +77,8 @@ function calculateDivHeight(){
     var viewportHeight =  $( window ).height();
     var usedPixels =  $('#leftrightalignment').offset();
     var availablePixels = viewportHeight-usedPixels.top;
-//    $('#leftrightalignment').height(availablePixels);
     var fixedPixelsLeft = 40;
     var availablePixelsLeft = availablePixels - fixedPixelsLeft;
-//
-//    var fixedPixelsRight = 350;
-//    var availablePixelsRight = availablePixels - fixedPixelsRight;
-//
-//    $('.boxnew').height(availablePixelsLeft);
-//    $('.scrollable').css({ maxHeight: availablePixelsRight*0.20 + 'px' });
-//    $('.scrollable2').css({ maxHeight: availablePixelsRight*0.30 + 'px' });
 
     $('.headerBox').css({ height:availablePixelsLeft + 'px' });
     $('.boxnew').css({ height:availablePixelsLeft + 'px' });

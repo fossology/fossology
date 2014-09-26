@@ -31,30 +31,24 @@ define("TITLE_ajax_schedule_agent", _("Schedule agent"));
  */
 class ajax_schedule_agent extends FO_Plugin
 {
-  var $Name       = "schedule_agent";
-  var $Title      = TITLE_ajax_schedule_agent;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $NoHTML     = 1; /* This plugin needs no HTML content help */
+  function __construct()
+  {
+    $this->Name       = "schedule_agent";
+    $this->Title      = TITLE_ajax_schedule_agent;
+    $this->DBaccess   = PLUGIN_DB_READ;
+    parent::__construct();
+  }
+
 
   /**
    * \brief Display the loaded menu and plugins.
    */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
     $V="";
     global $Plugins;
     global $PG_CONN;
     global $SysConf;
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
         $UploadPk = GetParm("upload",PARM_INTEGER);
         $Agent = GetParm("agent",PARM_STRING);
         if (empty($UploadPk) && empty($Agent)) {
@@ -105,21 +99,14 @@ class ajax_schedule_agent extends FO_Plugin
           $V .= displayMessage($text.$rv.$ErrorMsg);
         }
 
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
-  } // Output()
+    return $V;
+  }
+  
+  function getTemplateName()
+  {
+    return "plain.html";
+  }
 
-};
+}
 $NewPlugin = new ajax_schedule_agent;
 $NewPlugin->Initialize();
-
-?>

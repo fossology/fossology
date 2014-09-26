@@ -236,8 +236,7 @@ class ChangeLicenseUtility extends Object
 
   /**
    * @param $uploadTreeId
-   * @return string
-   * creates two licenseListSelects and buttons to transfer licenses and two text boxes
+   * @return array
    */
   public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
@@ -264,42 +263,19 @@ class ChangeLicenseUtility extends Object
       $preSelectedLicenses = array();
     }
 
-        
-    $this->renderer->vars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
-    $this->renderer->vars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
+    $rendererVars = array();
+    $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
+    $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
 
-    $clearingTypes = $this->clearingDao->getClearingDecisionTypeMap();
-    $this->renderer->vars['typeRadio'] = $this->renderer->createRadioGroup('type', $clearingTypes, $defaultType=2, '', $separator=' &nbsp; ');
-    $this->renderer->vars['uploadTreeId'] = $uploadTreeId;
-    
-    $output = $this->renderer->renderTemplate('change_license_modal');
-
-    return $output;
+    return $rendererVars;
   }
 
 
   public function createBulkForm($uploadTreeId=-1) {
-    $output = "";
-    $allLicenseRefs = $this->licenseDao->getLicenseRefs();
-    $output .= '<div class="modal" id="bulkModal" hidden>';
-    $output .= "<form name=\"bulkForm\">";
-    $text = _("Bulk recognition");
-    $output .= "<h2>$text</h2>";
-    $output .= "<select name=\"bulkRemoving\" id=\"bulkRemoving\">";
-    $output .= "<option value=\"f\">Add license</option>";
-    $output .= "<option value=\"t\">Remove license</option>";
-    $output .= "</select>";
-    $output .= $this->createListSelect("bulkLicense", $allLicenseRefs, false, 1);
-    $uri = Traceback_uri() . "?mod=view-license" . "&lic=";
-    $title = _("License Text");
-    $output .= " <button type=\"button\" onclick=\"popUpLicenseText('$uri','$title')\">"._('Show origin')."</button>";
-    $text = _("reference text");
-    $output .= "<br>$text:<br><textarea name=\"bulkRefText\" id=\"bulkRefText\" type=\"text\" cols=\"80\" rows=\"12\"></textarea><br>";
-    $output .= "<br><button type=\"button\" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>";
-    $output .= "<br><span id=\"bulkIdResult\" name=\"bulkIdResult\" hidden></span>";
-    $output .= "<br><span id=\"bulkJobResult\" name=\"bulkJobResult\" hidden>a bulk job has completed</span>";
-    $output .= "<input name=\"uploadTreeId\" id=\"uploadTreeId\" type=\"hidden\" value=\"" . $uploadTreeId . "\" />\n </form>\n";
-    $output .= "</div>";
-    return $output;
+    $rendererVars = array();
+    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=view-license";
+    $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();
+    // print_r($rendererVars['licenseArray']);
+    return $rendererVars;
   }
 }

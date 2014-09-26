@@ -120,7 +120,7 @@ class agent_copyright_once extends FO_Plugin {
 
     $inputFile = fopen($tempFileName, "r");
     if ($inputFile) {
-      $view->ShowView($inputFile, $ModBack, 0, 0, NULL, True, False, $highlights); // do not show Header and micro menus
+      $view->ShowView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
       fclose($inputFile);
     }
     if(!chdir($ui_dir)) {
@@ -207,12 +207,14 @@ class agent_copyright_once extends FO_Plugin {
     /* For REST API:
        wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_copyright_once
     */
-    /* Ignore php Notice is array keys don't exist */
-    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
-    $tmp_name = $_FILES['licfile']['tmp_name'];
-    error_reporting($errlev);
 
-    if ($this->NoHTML && file_exists($tmp_name))
+    $tmp_name = '';
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
+    {
+      $tmp_name = $_FILES['licfile']['tmp_name'];
+    }
+
+    if ($this->OutputType!='HTML' && file_exists($tmp_name))
     {
       $copyright_res = $this->AnalyzeOne();
       foreach ($copyright_res as $copyright)
@@ -223,54 +225,42 @@ class agent_copyright_once extends FO_Plugin {
       return;
     }
 
-    $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        if (file_exists(@$_FILES['licfile']['tmp_name'])) {
-          if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
-            /* Size is not too big.  */
-            print $this->AnalyzeOne() . "\n";
-          }
-          if (!empty($_FILES['licfile']['unlink_flag'])) {
-            unlink($_FILES['licfile']['tmp_name']);
-          }
-          return;
+    if ($this->OutputType=='HTML') {
+      /* If this is a POST, then process the request. */
+      if ($tmp_name) {
+        if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
+          /* Size is not too big.  */
+          $this->vars['content'] = $this->AnalyzeOne() . "\n";
         }
-
-        /* Display instructions */
-        $V.= _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
-        $V.= "<ul>\n";
-        $V.= "<li>" . _("The analysis is done in real-time.");
-        $V.= "<li>" . _("Files that contain files are <b>not</b> unpacked. If you upload a container like a gzip file, then only that binary file will be scanned.\n");
-        $V.= "<li>" . _("Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
-        $V.= "</ul>\n";
-        /* Display the form */
-        $V.= "<form enctype='multipart/form-data' method='post'>\n";
-        $V.= _("Select the file to upload:");
-        $V.= "<br><input name='licfile' size='60' type='file' /><br />\n";
-        $V.= "<input type='hidden' name='showheader' value='1'>";
-
-        $text = _("Upload and scan");
-        $V.= "<p><input type='submit' value='$text'>\n";
-        $V.= "</form>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+        return;
+      }
+      $this->vars['content'] = $this->htmlContent();
     }
-    if (!empty($_FILES['licfile']['unlink_flag'])) {
-      unlink($_FILES['licfile']['tmp_name']);
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
+      unlink($tmp_name);
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ($V);
-    return;
+    $_FILES['licfile'] = NULL;
   }
-};
+  
+  protected function htmlContent()
+  {
+    $V = _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
+    $V.= "<ul>\n";
+    $V.= "<li>" . _("The analysis is done in real-time.");
+    $V.= "<li>" . _("Files that contain files are <b>not</b> unpacked. If you upload a container like a gzip file, then only that binary file will be scanned.\n");
+    $V.= "<li>" . _("Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+    $V.= "</ul>\n";
+    /* Display the form */
+    $V.= "<form enctype='multipart/form-data' method='post'>\n";
+    $V.= _("Select the file to upload:");
+    $V.= "<br><input name='licfile' size='60' type='file' /><br />\n";
+    $V.= "<input type='hidden' name='showheader' value='1'>";
+
+    $text = _("Upload and scan");
+    $V.= "<p><input type='submit' value='$text'>\n";
+    $V.= "</form>\n";
+    return $V;
+  }
+}
 
 $NewPlugin = new agent_copyright_once();

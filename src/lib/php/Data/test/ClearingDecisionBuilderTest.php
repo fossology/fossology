@@ -176,30 +176,6 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
     assertThat($clearingDec->getType(), is($this->type));
   }
 
-  public function testComment()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setComment ($this->comment)
-      -> build();
-    assertThat($clearingDec->getComment(), is($this->comment));
-  }
-
-  public function testReportinfo()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setReportinfo ($this->reportinfo)
-      -> build();
-    assertThat($clearingDec->getReportinfo(), is($this->reportinfo));
-  }
-
-  public function testScope()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setScope ($this->scope)
-      -> build();
-    assertThat($clearingDec->getScope(), is($this->scope));
-  }
-
   public function testDateAdded()
   {
     $clearingDec = ClearingDecisionBuilder::create()

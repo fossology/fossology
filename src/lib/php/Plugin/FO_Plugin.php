@@ -289,13 +289,8 @@ class FO_Plugin
    */
   function Destroy()
   {
-    if ($this->State != PLUGIN_STATE_INVALID)
-    {
-      ; // Put your cleanup here
-    }
     $this->State = PLUGIN_STATE_INVALID;
-    return;
-  } // Destroy()
+  }
 
   /**
    * The output functions generate "output" for use in a text CLI or web page.
@@ -303,7 +298,7 @@ class FO_Plugin
    */
 
   /* Possible values: Text, HTML, or XML. */
-  var $OutputType = "Text";
+  var $OutputType = "HTML";
   var $OutputToStdout = 0;
 
   /**
@@ -371,27 +366,18 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
     $V = "";
-    switch ($this->OutputType)
+    if ($this->OutputType=='XML')
     {
-      case "XML":
-        $V = "</xml>\n";
-        break;
-      case "HTML":
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V = "</xml>";
     }
     if (!$this->OutputToStdout)
     {
-      return ($V);
+      return $V;
     }
     print $V;
-    return;
   } // OutputUnSet()
 
   /**
@@ -408,46 +394,49 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
-    $V = "";
-    switch ($this->OutputType)
+    $output = "";
+    if ($this->OutputType=='HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        $V = $this->outputHtml();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $output = $this->htmlContent();
     }
     if (!$this->OutputToStdout)
     {
-      return ($V);
+      $this->vars['content'] = $output;
+      return;
     }
-    print $V;
-    return;
-  } // Output()
+    return $output;
+  }
 
   /**
    *
    * @return string
    */
-  function outputHtml()
+  protected function htmlContent()
   {
-    $html = "";
-    return $html;
+    return "";
   }
 
   public function getTemplateName()
   {
-    return "default.html";
+    return "include/base.html";
   }
 
   public function getVars()
   {
     return $this->vars;
   }
+
+  public function renderTemplate($templateName = null, $vars = null)
+  {
+    $templateName = $templateName ?: $this->getTemplateName();
+    $vars = $vars ?: $this->vars;
+
+    global $container;
+    $renderer = $container->get('twig.environment');
+
+    return $renderer->loadTemplate($templateName)->render($vars);
+  }
+
 }

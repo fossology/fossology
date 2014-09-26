@@ -20,43 +20,24 @@ define("TITLE_debug_flush_cache", _("Flush Cache"));
 
 class debug_flush_cache extends FO_Plugin
 {
-  var $Name       = "debug_flush_cache";
-  var $Version    = "1.0";
-  var $Title      = TITLE_debug_flush_cache;
-  var $MenuList   = "Help::Debug::Flush Cache";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "debug_flush_cache";
+    $this->Title      = TITLE_debug_flush_cache;
+    $this->MenuList   = "Help::Debug::Flush Cache";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief Generate output.
    */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    $V="";
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        ReportCachePurgeAll();
-        $V .= _("All cached pages have been removed.\n");
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
-  } // Output()
+    ReportCachePurgeAll();
+    return _("All cached pages have been removed.");
+  }
 
-};
+}
 $NewPlugin = new debug_flush_cache;
 $NewPlugin->Initialize();
-?>

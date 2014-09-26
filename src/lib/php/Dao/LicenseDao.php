@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\FileTreeBounds;
+use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
@@ -50,7 +50,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
-   * @param \Fossology\Lib\Data\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getFileLicenseMatches(FileTreeBounds $fileTreeBounds)
@@ -95,7 +95,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the tried bulk recognitions for a single file or uploadtree (currently unused)
    *
-   * @param \Fossology\Lib\Data\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getBulkFileLicenseMatches(FileTreeBounds $fileTreeBounds)
@@ -161,6 +161,21 @@ class LicenseDao extends Object
     return $licenseRefs;
   }
 
+  /**
+   * @return array 
+   */
+  public function getLicenseArray()
+  {
+    $statementName = __METHOD__;
+
+    $this->dbManager->prepare($statementName,
+        "select rf_pk id,rf_shortname shortname,rf_fullname fullname from license_ref order by rf_shortname");
+    $result = $this->dbManager->execute($statementName);
+    $licenseRefs = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
+    return $licenseRefs;
+  }
+  
   /**
    * @param FileTreeBounds $fileTreeBounds
    * @param $selectedAgentId

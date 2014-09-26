@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\DatabaseEnum;
-use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -381,12 +380,12 @@ select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_na
   }
 
 
-  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName="uploadtree"  )
+  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
-    $statementName = __METHOD__.$uploadTreeTableName;
+    $statementName = __METHOD__ . $uploadTreeTableName;
     $leftRight = $this->dbManager->getSingleRow(
-              "SELECT lft,rgt FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
-              array($uploadtreeID), $statementName
+        "SELECT lft,rgt FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
+        array($uploadtreeID), $statementName
     );
 
     return array($leftRight['lft'], $leftRight['rgt']);

@@ -25,14 +25,18 @@ define("TITLE_ui_diff_buckets", _("Compare Buckets Browser"));
 
 class ui_diff_buckets extends FO_Plugin
 {
-  var $Name       = "bucketsdiff";
-  var $Title      = TITLE_ui_diff_buckets;
-  var $Version    = "1.0";
-  var $Dependency = array("browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
-  var $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
-  var $threshold  = 150;  /* cut point for removing by eval order, hardcode for v1  */
+  var  $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
+  var  $threshold  = 150;  /* cut point for removing by eval order, hardcode for v1  */
+
+  function __construct()
+  {
+    $this->Name       = "bucketsdiff";
+    $this->Title      = TITLE_ui_diff_buckets;
+    $this->Dependency = array("browse","view");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
 
   /**
    * \brief Create and configure database tables
@@ -44,17 +48,6 @@ class ui_diff_buckets extends FO_Plugin
 
     return(0);
   } // Install()
-
-  /**
-   * @brief Customize submenus.
-   */
-  function RegisterMenus()
-  {
-    /* at this stage you have to call this plugin with a direct URL
-       that displays both trees to compare.
-     */
-    return 0;
-  } // RegisterMenus()
 
 
   /**
@@ -647,7 +640,6 @@ return;
 
     $uTime = microtime(true);
     $V="";
-/**/
     $UpdCache = GetParm("updcache",PARM_INTEGER);
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
@@ -666,11 +658,37 @@ return;
     }
     else
       $V = ReportCacheGet($CacheKey);
-/**/
 
-    if (empty($V))  // no cache exists
+    $Cached = !empty($V);
+    if (!$Cached)
     {
-    $filter = GetParm("filter",PARM_STRING);
+      $V = $this->htmlContent();
+    }
+
+    if (!$this->OutputToStdout) { return($V); }
+    print "$V";
+    $Time = microtime(true) - $uTime;  // convert usecs to secs
+    $text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
+
+    if ($Cached) 
+    {
+      $text = _("cached");
+      $text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    }
+    else if ($Time > 0.5)
+    {
+      ReportCachePut($CacheKey, $V);
+    }
+    return;
+  }
+
+  
+  protected function htmlContent()
+  {
+  
+      $filter = GetParm("filter",PARM_STRING);
     if (empty($filter)) $filter = "none";
     $FreezeCol = GetParm("freeze",PARM_INTEGER);  // which column to freeze?  1 or 2 or null
     $ClickedCol = GetParm("col",PARM_INTEGER);  // which column was clicked on?  1 or 2 or null
@@ -776,50 +794,17 @@ JSOUT;
       $this->FilterChildren($filter, $Master, $BucketDefArray);
     }
 
-      switch($this->OutputType)
+      if($this->OutputType=='HTML')
       {
-      case "XML":
-        break;
-      case "HTML":
         if ($ErrMsg)
           $V .= $ErrMsg;
         else
           $V .= $this->HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2, $BucketDefArray);
-        break;
-      case "Text":
-        break;
-      default:
       }
-      $Cached = false;
-    }
-    else
-      $Cached = true;
-
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
-    $Time = microtime(true) - $uTime;  // convert usecs to secs
-    $text = _("Elapsed time: %.2f seconds");
-    printf( "<small>$text</small>", $Time);
-
-/**/
-    if ($Cached) 
-    {
-      $text = _("cached");
-      $text1 = _("Update");
-      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
-    }
-    else
-    {
-      //  Cache Report if this took longer than 1/2 second
-      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
-    }
-/**/
-    return;
-  }  /* End Output() */
-
-}  /* End Class */
+      return $V;
+  }    
+  
+}
 
 $NewPlugin = new ui_diff_buckets;
 $NewPlugin->Initialize();
-
-?>

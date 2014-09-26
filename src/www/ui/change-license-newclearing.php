@@ -15,11 +15,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecWithLicenses;
-use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
@@ -28,19 +26,16 @@ define("TITLE_changeLicensNewclearing", _("Private: get new clearing information
 class changeLicenseNewClearing extends FO_Plugin
 {
 
-  /**
-   * @var ChangeLicenseUtility
-   */
+  /** @var ChangeLicenseUtility */
   private $changeLicenseUtility;
 
-  /**
-   * @var LicenseOverviewPrinter
-   */
+  /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
 
-  /**
-   * @var ClearingDao;
-   */
+  /** @var UploadDao */
+  private $uploadDao;
+
+  /** @var ClearingDao; */
   private $clearingDao;
 
   function __construct()
@@ -57,6 +52,7 @@ class changeLicenseNewClearing extends FO_Plugin
     parent::__construct();
 
     global $container;
+    $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');

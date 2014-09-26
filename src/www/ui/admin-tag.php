@@ -25,12 +25,15 @@ define("TITLE_admin_tag", _("Creat Tag"));
 
 class admin_tag extends FO_Plugin
 {
-  var $Name       = "admin_tag";
-  var $Title      = TITLE_admin_tag;
-  var $MenuList = "Admin::Tag::Create Tag";
-  var $Version = "1.3";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "admin_tag";
+    $this->Title      = TITLE_admin_tag;
+    $this->MenuList = "Admin::Tag::Create Tag";
+    $this->Version = "1.3";
+    $this->DBaccess = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief Create Tag without tagging anything
@@ -133,53 +136,30 @@ class admin_tag extends FO_Plugin
     $VC .= "</form>\n";
     return $VC;
   }
-  /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content.
-   * (OutputOpen and Output are separated so one plugin
-   * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
-   */
-  function Output()
+
+  
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $action = GetParm('action', PARM_TEXT);
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        if ($action == 'add')
-        {
-          $rc = $this->CreateTag();
-          if (!empty($rc))
-          {
-            $text = _("Create Tag Failed");
-            $V .= displayMessage("$text: $rc");
-          } else {
-            $text = _("Create Tag Successful!");
-            $V .= displayMessage($text);
-          }
-        }
-        $V .= $this->ShowCreateTagPage();
-        /* Display exist tags for this file */
-        $V .=  $this->ShowExistTags();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
-    return;
-  } // Output()
 
-};
+    if ($action == 'add')
+    {
+      $rc = $this->CreateTag();
+      if (!empty($rc))
+      {
+        $text = _("Create Tag Failed");
+        $V .= displayMessage("$text: $rc");
+      } else {
+        $text = _("Create Tag Successful!");
+        $V .= displayMessage($text);
+      }
+    }
+    $V .= $this->ShowCreateTagPage();
+    $V .= $this->ShowExistTags();
+    return $V;
+  }
+
+}
 $NewPlugin = new admin_tag;
 $NewPlugin->Initialize();
-?>

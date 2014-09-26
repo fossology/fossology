@@ -237,7 +237,7 @@ class ui_browse extends FO_Plugin
     }
     return ($V);
   } // ShowItem()
-
+  
   /**
    * \brief Given a upload_pk, list every item in it.
    * If it is an individual file, then list the file contents.
@@ -246,7 +246,6 @@ class ui_browse extends FO_Plugin
   {
     $V = "<table border=1 width='100%'>";
     $V .= "<tr><td valign='top' width='20%'>\n";
-    $V .= FolderListScript();
     $text = _("Folder Navigation");
     $V .= "<div align='center'><H3>$text</H3></div>\n";
     $V .= "<div align='center'><small>";
