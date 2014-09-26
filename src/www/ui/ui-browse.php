@@ -289,7 +289,7 @@ class ui_browse extends FO_Plugin
     $statusFilter = $renderer->createSelect('statusSelector', $statusArray, 0, ' onchange="filterStatus()"');
 
     $V .= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
-        . "<thead><tr><th></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tr>"
+        . "<thead><tr><th id='insert_browsetbl_filter'></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tr>"
         . "<tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> </tr></thead>"
         . "<tbody></tbody>" . "<tfoot></tfoot>"
         . "</table>";

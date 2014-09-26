@@ -27,7 +27,8 @@ var assigneeSelected = 0;
 var statusSelected = 0;
 
 $(document).ready(function() {
-  table =createBrowseTable();
+  table = createBrowseTable();
+  $('#insert_browsetbl_filter').append($('#browsetbl_filter'));
   initPrioClick();
   table.on('draw', function(){
       initPrioClick();
