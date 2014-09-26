@@ -155,7 +155,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function build()
   {
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
-        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type,
+        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
         $this->date_added, $this->licenses);
   }
 

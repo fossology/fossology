@@ -30,25 +30,16 @@ use Monolog\Logger;
 
 class ClearingDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-  /**
-   * @var NewestEditedLicenseSelector
-   */
+  /** @var NewestEditedLicenseSelector */
   public $newestEditedLicenseSelector;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
+  /** @var int */
+  private $uploadTreeId = 0;
 
   /**
    * @param DbManager $dbManager
@@ -60,6 +51,25 @@ class ClearingDao extends Object
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
   }
+  
+  function setUploadTreeId($uploadtreeId)
+  {
+    if ($uploadtreeId == 0 || $this->uploadTreeId == $uploadtreeId)
+    {
+      return;
+    }
+    if ($this->uploadTreeId != 0)
+    {
+      throw new Exception('uploadtreeId already initialized');
+    }
+    $this->uploadTreeId = $uploadtreeId;
+  }
+  
+  
+  function getUploadtreeId()
+  {
+    return $this->uploadTreeId;
+  }
 
   /**
    * \brief get all the licenses for a single file or uploadtree
@@ -67,9 +77,10 @@ class ClearingDao extends Object
    * @param $uploadTreeId
    * @return ClearingDecision[]
    */
-  function getFileClearings($uploadTreeId)
+  function getFileClearings($uploadTreeId=0)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    $this->setUploadTreeId($uploadTreeId);
+    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($this->getUploadtreeId());
     return $this->getFileClearingsFolder($fileTreeBounds);
   }
 
@@ -205,6 +216,7 @@ class ClearingDao extends Object
    */
   public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $comment, $remark)
   {
+    $this->setUploadTreeId($uploadTreeId);
     $this->dbManager->begin();
 
     $statementName = __METHOD__ . ".s";
@@ -391,9 +403,15 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
     return $result;
   }
 
-  public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
+  public function getRelevantLicenseDecisionEvents($userId, $itemId=0)
   {
+    $this->setUploadTreeId($itemId);
+    $uploadTreeId = $this->getUploadtreeId();
+    
+    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1",array($itemId),
+            $sqlNote=__METHOD__.'.get.item');
  
+   // TODO move type.meaning from DB to data
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         $sql="
@@ -406,23 +424,22 @@ SELECT
   LDT.meaning AS type,
   LD.rf_fk,
   LR.rf_shortname,
+  (LD.uploadtree_fk is null) is_global,
   LD.is_removed
 FROM license_decision_events LD
-INNER JOIN license_decision_events LD2 ON LD.pfile_fk = LD2.pfile_fk
 INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
 INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
-  LD2.uploadtree_fk=$1 AND
-  (LD IS NULL OR LD.uploadtree_fk = $1) AND
+  (LD.uploadtree_fk IS NULL AND LD.pfile_fk=$3 OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
 GROUP BY LD.license_decision_events_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
-        array($uploadTreeId, $userId)
+        array($uploadTreeId, $userId, $item['pfile_fk'])
     );
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
@@ -450,7 +467,7 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
       }
       $licenseId = $event['rf_fk'];
       $licenseShortName = $event['rf_shortname'];
-      $isRemoved = $event['is_removed'] === 't';
+      $isRemoved = $event['is_removed'];
 
       if ($isRemoved)
       {

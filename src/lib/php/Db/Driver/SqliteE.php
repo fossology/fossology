@@ -144,7 +144,7 @@ class SqliteE implements Driver
   public function fetchAll($res)
   {
     $result = array();
-    while ($row = $res->fetchArray(SQLITE3_NUM))
+    while ($row = $res->fetchArray(SQLITE3_ASSOC)) // do not SQLITE3_NUM !
     {
       $result[] = $row;
     }

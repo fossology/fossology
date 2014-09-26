@@ -60,7 +60,7 @@ function moveLicense(theSelFrom, theSelTo, bRemove) {
   });
   var data = {
       "licenseNumbersToBeSubmitted": txt,
-      "uploadTreeId": $('#uploadTreeId').val(),
+      "item": $('#uploadTreeId').val(),
       "type": $('[name="type"]:checked').val(),
       "scope": $('[name="scope"]:checked').val(),
       "comment": $('#comment').val(),

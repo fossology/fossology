@@ -107,30 +107,35 @@ class changeLicenseProcessPost extends FO_Plugin
 
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
-    $uploadTreeId = $_POST['uploadTreeId'];
+    $itemId = $_POST['uploadTreeId'];
+    $remove = boolval( GetParm('remove', PARM_STRING) );
+       
+        
     if(array_key_exists('lic',$_POST)){
-      $this->clearingDao->commentClearingDecision($_POST['unlic'], $uploadTreeId, $userId);
+      $this->clearingDao->commentClearingDecision($_POST['unlic'], $itemId, $userId);
     }
     else if(array_key_exists('unlic',$_POST)){
-      $this->clearingDao->insertClearingDecision($_POST['unlic'], $uploadTreeId, $userId);
+      $this->clearingDao->insertClearingDecision($_POST['unlic'], $itemId, $userId);
     }
     else if(array_key_exists('type',$_POST)){
-      $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $uploadTreeId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+      if($remove)
+        $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+      else
+        $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
     }
-    $clearingDecWithLicences = $this->clearingDao->getFileClearings($uploadTreeId);
+    $clearingDecWithLicences = $this->clearingDao->getFileClearings($itemId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
 
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
-   // $this->ChangeBuckets(); // change bucket accordingly
-
-   // TODO: change with event table
-
+    // $this->ChangeBuckets(); // change bucket accordingly
+  
+    
     print(json_encode(array(
       'tableClearing' => $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicences, $userId),
       'recentLicenseClearing' => $this->licenseOverviewPrinter->createRecentLicenseClearing($clearingDecWithLicences))));
-  } // Output()
+  }
 
 
 }

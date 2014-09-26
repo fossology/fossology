@@ -69,7 +69,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'clearing_licenses',
             'license_ref',
             'users',
-            'group_user_member'
+            'group_user_member',
+            'uploadtree'
         ));
 
     $this->testDb->insertData(
@@ -116,16 +117,27 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
 
+    $this->dbManager->prepare($stmt = 'insert.uploadtree',
+        "INSERT INTO uploadtree (pfile_fk, uploadtree_pk) VALUES ($1, $2)");
+    $utArray = array(
+        array( 100, 1000),
+        array( 100, 1200)
+    );
+    foreach ($utArray as $ur)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+    }
+    
     $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO license_decision_events (license_decision_events_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_global, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
+        "INSERT INTO license_decision_events (license_decision_events_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
     $cdArray = array(
-        array(1, 100, 1000, 1, 1, false, false, 1, '2014-08-15T12:12:12'),
-        array(2, 100, 1000, 1, 2, false, false, 1, '2014-08-15T12:12:12'),
-        array(3, 100, 1000, 3, 4, false, false, 1, '2014-08-14T14:33:45'),
-        array(4, 100, 1000, 2, 3, true, false, 2, '2014-08-15T10:43:58'),
-        array(5, 100, 1000, 2, 4, false, true, 1, '2014-08-14T14:33:51'),
-        array(6, 100, 1200, 1, 3, true, true, 1, '2014-08-15T12:49:52'),
-        array(7, 100, 1200, 1, 2, false, false, 1, '2014-08-15T13:05:43')
+        array(1, 100, 1000, 1, 1,  false, 1, '2014-08-15T12:12:12'),
+        array(2, 100, 1000, 1, 2,  false, 1, '2014-08-15T12:12:12'),
+        array(3, 100, 1000, 3, 4,  false, 1, '2014-08-14T14:33:45'),
+        array(4, 100, null, 2, 3,  false, 2, '2014-08-15T10:43:58'),
+        array(5, 100, 1000, 2, 4,  true, 1, '2014-08-14T14:33:51'),
+        array(6, 100, null, 1, 3,  true, 1, '2014-08-15T12:49:52'),
+        array(7, 100, 1200, 1, 2,  false, 1, '2014-08-15T13:05:43')
     );
     foreach ($cdArray as $ur)
     {
