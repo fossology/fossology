@@ -30,10 +30,8 @@ class ajaxJobInfo extends FO_Plugin
   {
     $this->Name = "jobinfo";
     $this->Title = TITLE_jobinfo;
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_READ;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
@@ -53,9 +51,6 @@ class ajaxJobInfo extends FO_Plugin
     }
 
     $userId = $_SESSION['UserId'];
-
- //   $groupId = $_SESSION['GroupId'];
-
     $jqIds = (array)$_POST['jqIds'];
 
     $result = array();
@@ -75,12 +70,12 @@ class ajaxJobInfo extends FO_Plugin
 
     if (!empty($result)) {
       header('Content-type: text/json');
-      print json_encode($result);
+      return json_encode($result);
     } else {
       header('Content-type: text/json', true, 500);
-      print json_encode(array("error" => "no info"));
+      return json_encode(array("error" => "no info"));
     }
-  } // Output()
+  }
 
 }
 
