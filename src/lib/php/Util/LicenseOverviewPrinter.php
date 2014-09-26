@@ -396,7 +396,7 @@ class LicenseOverviewPrinter extends Object
     $output = "<a title='$text' href='javascript:;'";
     $output .= " onClick=\"javascript:window.open('";
     $output .= Traceback_uri();
-    $output .= "?mod=view-license";
+    $output .= "?mod=popup-license";
     $output .= "&lic=";
     $output .= urlencode($licenseShortName);
     $output .= "','$text2','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";

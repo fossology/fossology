@@ -20,12 +20,16 @@ define("TITLE_ui_view_info", _("View File Information"));
 
 class ui_view_info extends FO_Plugin
 {
-  var $Name       = "view_info";
-  var $Title      = TITLE_ui_view_info;
-  var $Version    = "1.0";
-  var $Dependency = array("browse");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
+  function __construct()
+  {
+    $this->Name       = "view_info";
+    $this->Title      = TITLE_ui_view_info;
+    $this->Dependency = array("browse");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.
@@ -599,47 +603,23 @@ class ui_view_info extends FO_Plugin
     return $VT;
   }
 
-  /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content.
-   * (OutputOpen and Output are separated so one plugin
-   * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
-   */
-  function Output()
+  protected function htmlContent()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    //$Folder = GetParm("folder",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($Upload);
+    $uploadId = GetParm("upload",PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($uploadId);
     if ($UploadPerm < PERM_READ) return;
 
-    $Item = GetParm("item",PARM_INTEGER);
-
+    $itemId = GetParm("item",PARM_INTEGER);
+    $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
+    
     $V="";
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= Dir2Browse("browse", $Item, NULL, 1, "View-Meta");  
-        $V .= $this->ShowTagInfo($Upload, $Item);
-        $V .= $this->ShowPackageinfo($Upload, $Item, 1);
-        $V .= $this->ShowMetaView($Upload, $Item);
-        $V .= $this->ShowSightings($Upload, $Item);
-        $V .= $this->ShowView($Upload, $Item);
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
-    return;
+    $V .= $this->ShowTagInfo($uploadId, $itemId);
+    $V .= $this->ShowPackageinfo($uploadId, $itemId, 1);
+    $V .= $this->ShowMetaView($uploadId, $itemId);
+    $V .= $this->ShowSightings($uploadId, $itemId);
+    $V .= $this->ShowView($uploadId, $itemId);
+
+    return $V;
   }
 
 }
