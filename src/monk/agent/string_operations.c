@@ -93,7 +93,7 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
   return tokens->len - initialTokenCount;
 }
 
-GArray* tokenize(char* inputString, const char* delimiters) {
+GArray* tokenize(const char* inputString, const char* delimiters) {
   GArray* tokenArray = tokens_new();
 
   Token* remainder = NULL;

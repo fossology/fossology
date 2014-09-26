@@ -11,7 +11,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -lm $(TESTLIB) -Werror -fopenmp
+CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -fopenmp -lm $(TESTLIB) -Werror
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
 

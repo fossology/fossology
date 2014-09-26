@@ -387,8 +387,8 @@ int _test_lookForRemovals(char * text, char * search,
 void test_lookForReplacesNotOverflowing() {
   int max = MAX_ALLOWED_DIFF_LENGTH+1;
   int length = max + 1;
-  char * testText = malloc((max)*2+1);
-  char * testSearch = malloc((max)*2+1);
+  char * testText = malloc((length)*2+1);
+  char * testSearch = malloc((length)*2+1);
 
   char * ptr1 =testSearch;
   char * ptr2 =testText;

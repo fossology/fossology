@@ -25,7 +25,7 @@ typedef struct {
 
 #define tokens_new() g_array_new(TRUE, FALSE, sizeof (Token))
 
-GArray* tokenize(char* inputString, const char* delimiters);
+GArray* tokenize(const char* inputString, const char* delimiters);
 
 int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
         GArray** output, Token** remainder);
