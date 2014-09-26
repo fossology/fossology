@@ -53,7 +53,7 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
@@ -103,7 +103,7 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 
     header('Content-type: text/json');
     list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type, $filter);
-    print(json_encode(array(
+    return (json_encode(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' =>$aaData,
             'iTotalRecords' =>$iTotalRecords,

@@ -127,8 +127,7 @@ class copyright_view extends FO_Plugin
       return;
     }
 
-    $view->ShowView(NULL, $ModBack, 1, 1, $this->legendBox(false), true, true, $highlights);
-    return;
+    return $view->ShowView(NULL, $ModBack, 1, 1, $this->legendBox(false), true, true, $highlights);
   }
 
   /**
