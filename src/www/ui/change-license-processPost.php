@@ -49,10 +49,9 @@ class changeLicenseProcessPost extends FO_Plugin
   {
     $this->Name = "change-license-processPost";
     $this->Title = TITLE_changeLicProcPost;
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
+    $this->OutputToStdout = 1;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
@@ -90,6 +89,13 @@ class changeLicenseProcessPost extends FO_Plugin
     }
   }
 
+  function OutputOpen()
+  {
+    header('Content-type: text/json');
+    parent::OutputOpen();
+  }
+  
+  
   /**
    * \brief Display the loaded menu and plugins.
    */
@@ -119,7 +125,7 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
    // $this->ChangeBuckets(); // change bucket accordingly
 
-    header('Content-type: text/json');
+   // TODO: change with event table
 
     print(json_encode(array(
       'tableClearing' => $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicences, $userId),

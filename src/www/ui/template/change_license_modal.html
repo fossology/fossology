@@ -2,10 +2,18 @@
  <form name="licenseListSelect">
   <table border="0">
   <tr>
-   <td><i18n>Available licenses</i18n>:<br/>
-     {{ licenseLeftSelect }}
-   </td>
-
+   <td><i18n>Available licenses</i18n>:</td>
+   <td></td>
+   <td><i18n>Selected licenses</i18n>:</td>
+  </tr>
+  <tr>
+    <td>{{ licenseLeftSelect }}</td>
+    <td>
+      <button type="button" onclick="moveLicense('#licenseLeft', '#licenseRight', false)">&gt;</button>
+      <br/>
+      <button type="button" onclick="moveLicense('#licenseRight', '#licenseLeft', true)">&lt;</button>
+    </td>
+    <td>{{ licenseRightSelect }}</td>
   </tr>
   </table>
 

@@ -226,11 +226,11 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $output;
    
     $tableColumns = '[
-      { "sTitle" : "' . _("License") . '", "sClass": "left" },
-      { "sTitle" : "' . _("Source") . '", "sClass": "left", "bSortable": false, "bSearchable": false},
-      { "sTitle" : "' . _("Text for report") . '", "sClass": "center", "bSortable": false, "bSearchable": false},
-      { "sTitle" : "' . _("Comment") . '", "sClass": "center", "bSortable": false, "bSearchable": false},
-      { "sTitle" : "' . _("Action") . '", "sClass": "center", "bSortable": false, "bSearchable": false}
+      { "sTitle" : "' . _("License") . '", "sClass": "left"},
+      { "sTitle" : "' . _("Source") . '", "sClass": "left", "bSortable": false},
+      { "sTitle" : "' . _("Text for report") . '", "sClass": "center", "bSortable": false},
+      { "sTitle" : "' . _("Comment") . '", "sClass": "center", "bSortable": false},
+      { "sTitle" : "' . _("Action") . '", "sClass": "center", "bSortable": false}
     ]';
     
     $dataTableConfig =
@@ -250,6 +250,7 @@ class ClearingView extends FO_Plugin
       "bStateSave": true,
       "bRetrieve": true,
       "bPaginate": false,
+      "bFilter": false
     }';
 
     $script = "<script>

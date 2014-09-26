@@ -85,7 +85,6 @@ class AjaxClearingView extends FO_Plugin
   }
 
 
-
   /**
    * @param $uploadTreeId
    * @param $licenseId
@@ -221,6 +220,7 @@ class AjaxClearingView extends FO_Plugin
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
 
+    $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
     $licenseDecisions = array();
     foreach ($agentDetectedLicenses as $licenseShortName => $agentMap)
     {
@@ -234,30 +234,28 @@ class AjaxClearingView extends FO_Plugin
           $agentEntry = $agentName . ": ";
           foreach ($agentResultMap as $agentId => $percentages)
           {
-            if (!array_key_exists($agentName, $agentLatestMap))
+            if (!array_key_exists($agentName, $agentLatestMap) || $agentLatestMap[$agentName] != $agentId)
             {
               continue;
             }
-            if ($agentLatestMap[$agentName] === $agentId)
+            $percentageEntries = array();
+            $index = 0;
+            foreach ($percentages as $percentage)
             {
-              $percentageEntries = array();
-              $index = 0;
-              foreach ($percentages as $percentage)
+              $entry = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId#highlight\">#" . ++$index . "</a>";
+              if ($percentage)
               {
-                $entry = "<a href=\"" . $this->vars['uri'] . "&item=$uploadTreeId&agentId=$agentId#highlight\">#" . ++$index . "</a>";
-                if ($percentage)
-                {
-                  $entry .= "($percentage %)";
-                }
-                $percentageEntries[] = $entry;
+                $entry .= "($percentage %)";
               }
-              $agentEntry .= implode(", ", $percentageEntries);
+              $percentageEntries[] = $entry;
             }
+            $agentEntry .= implode(", ", $percentageEntries);
           }
           $agents[] = $agentEntry;
         }
         $licenseId = $licenseIds[$licenseShortName];
-        $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('/repo/?mod=popup-license&amp;lic=$licenseShortName','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
+        $uri = Traceback_uri().'?mod=popup-license&lic='.$licenseShortName;
+        $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('$uri','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
         $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_32.png\">" . ($selectedByUser ? "" : "auto") . " </a>";
         $licenseDecisions[] = array($licenseShortNameWithLink, implode("<br/>", $agents), "", "", $actionLink);
       }
