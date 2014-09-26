@@ -81,8 +81,8 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
     input.content = boost::regex_replace(input.content, boost::regex("([\\x21-\\x27])|([*@])"), newtext);
     /*  numbers-numbers, two or more digits, ', ' */
 
-    input.content = boost::regex_replace(input.content, boost::regex("(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)"), newtext);
-    input.content = boost::regex_replace(input.content, boost::regex(" : "), newtext);// free :, probably followed a date
+//TODO    input.content = boost::regex_replace(input.content, boost::regex("(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)"), newtext);
+//TODO    input.content = boost::regex_replace(input.content, boost::regex(" : "), newtext);// free :, probably followed a date
   }
   else
   if (input.type.compare("email") == 0 )

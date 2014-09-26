@@ -14,14 +14,15 @@ const  std::string regCopyright::getType(){
 
 
 const std::string regCopyright::getRegex() {
-#define MAYBE_NAMES "([[:alpha:]]*([-, ]*))*"
+#define MAYBE_NAMES "[[:alpha:]]+(([-, ]{1,3})[[:alpha:]]+)*"
+#define DATESLIST "([[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*)?"
 #define COPYR_SYM "\\(C\\)"
 #define COPYR_TXT "copyright(s)?"
 #define SPACES    "[[:space:]]+"
-#define DATESLIST "([[:digit:]]{4,4}(([[:punct:]]|[[:space:]])[[:digit:]]{4,4})*)?"
+
  return std::string(
   "("
-    "(" COPYR_TXT "|" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM ")"
+    "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT ")"
     "[[:space:][:punct:]]*"
     "("
     "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
