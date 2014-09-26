@@ -18,8 +18,9 @@ const  std::string regCopyright::getType(){
 
 
 const std::string regCopyright::getRegex() {
-#define NAMESLIST "[[:alpha:]]+(([-, ]{1,3})[[:alpha:]]+)*"
-#define DATESLIST "([[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*)?"
+#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,}))"
+#define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
+#define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
 #define COPYR_SYM "\\(C\\)"
 #define COPYR_TXT "copyright(s)?"
 #define SPACES    "[[:space:]]+"
@@ -27,16 +28,16 @@ const std::string regCopyright::getRegex() {
  return std::string(
   "("
     "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT ")"
-    "[[:space:][:punct:]]*"
     "("
-    "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
+      "[[:space:][:punct:]]+"
+      "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
     ")?"
     "("
-      "[[:space:][:punct:]]*"
+      "[[:space:][:punct:]]+"
       DATESLIST
     ")?"
     "("
-      "[[:space:][:punct:]]*"
+      "[[:space:][:punct:]]+"
       NAMESLIST
     ")"
   ")|("
@@ -46,7 +47,7 @@ const std::string regCopyright::getRegex() {
       "(author|contributor)s?"
       "|(written|contributed)" SPACES "by"
     ")"
-    "[[:space:][:punct:]]*"
+    "[[:space:][:punct:]]+"
     NAMESLIST
   ")"
  );
