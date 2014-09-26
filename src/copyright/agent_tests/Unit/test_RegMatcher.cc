@@ -40,8 +40,8 @@ public:
     content = string(
                 "© 2007 Hugh Jackman\n\
 Copyright 2004 my company\n\
-Copyrights by any strange people\n\ 
-(C) 2007-2011, 2013 my favourite company Google\n\
+Copyrights by any strange people\n\
+(C) copyright 2007-2011, 2013 my favourite company Google\n\
 GPL v2\n\
 This file is protected unter US patents 1 , 2 ,3\n\
 Do not modify this document\n"
@@ -60,6 +60,9 @@ protected:
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
 
+    CopyrightMatch match = matches[0];
+
+    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my compan"), match.getContent());
   };
 
 

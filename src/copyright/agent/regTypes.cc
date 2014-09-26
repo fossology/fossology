@@ -1,8 +1,12 @@
 /*
- * regCopyright.cpp
+ * Copyright (C) 2014, Siemens AG
+ * Author: Johannes Najjar, Daniele Fognini
  *
- *  Created on: Sep 24, 2014
- *      Author: ”J. Najjar”
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #include "regTypes.hpp"
@@ -14,7 +18,7 @@ const  std::string regCopyright::getType(){
 
 
 const std::string regCopyright::getRegex() {
-#define MAYBE_NAMES "[[:alpha:]]+(([-, ]{1,3})[[:alpha:]]+)*"
+#define NAMESLIST "[[:alpha:]]+(([-, ]{1,3})[[:alpha:]]+)*"
 #define DATESLIST "([[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*)?"
 #define COPYR_SYM "\\(C\\)"
 #define COPYR_TXT "copyright(s)?"
@@ -33,7 +37,7 @@ const std::string regCopyright::getRegex() {
     ")?"
     "("
       "[[:space:][:punct:]]*"
-      MAYBE_NAMES
+      NAMESLIST
     ")"
   ")|("
     "(all" SPACES "rights" SPACES "reserved)"
@@ -43,7 +47,7 @@ const std::string regCopyright::getRegex() {
       "|(written|contributed)" SPACES "by"
     ")"
     "[[:space:][:punct:]]*"
-    MAYBE_NAMES
+    NAMESLIST
   ")"
  );
 };
@@ -82,7 +86,7 @@ const std::string regIp::getRegex() {
     "(patent(ability|ed|ee|ing))"
     "|((US|EU)" SPACES "(PAT|patents))"
     "|(USPTO|PCT)"
-    "|(invent[ion|or|ive])"
+    "|(invent(ion|or|ive))"
     "|(filed)"
     "|(innovation|infringement)"
     "|(intellectual" SPACES "property)"
@@ -90,12 +94,12 @@ const std::string regIp::getRegex() {
     "|(field[-]of[-]use" SPACES "limitation)"
     "|(fair" SPACES "use)"
    ")"
-   "[[:space:][:punct:]]+"
+   "[[:space:][:punct:]]+" // TODO what's the purpose of this???
    "[[:alpha:]]*"
    "[[:punct:]]*"
    "[[:alpha:]]*"
    "[[:space:]]*"
-   "[[:print:]]{0,60}"
+   "[[:print:]]{0,60}"     // \TODO
  );
 };
 
@@ -122,10 +126,10 @@ const std::string regEcc::getRegex() {
     "|(space" SPACES "vehicles)"
     "|(dual" SPACES "use)"
    ")"
-   "[[:space:][:punct:]]+"
+   "[[:space:][:punct:]]+" // TODO what's the purpose of this???
    "[[:alpha:]]*"
    "[[:punct:]]*"
    "[[:alpha:]]*"
-   "[[:print:]]{0,60}"
+   "[[:print:]]{0,60}"     // \TODO
  );
 };
