@@ -21,7 +21,7 @@ const std::string regCopyright::getRegex() {
 #define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,}))"
 #define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
 #define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
-#define COPYR_SYM "\\(C\\)"
+#define COPYR_SYM "(\\(C\\)|©)"
 #define COPYR_TXT "copyright(s)?"
 #define SPACES    "[[:space:]]+"
 
@@ -44,8 +44,8 @@ const std::string regCopyright::getRegex() {
     "(all" SPACES "rights" SPACES "reserved)"
   ")|("
     "("
-      "(author|contributor)s?"
-      "|(written|contributed)" SPACES "by"
+      "((author|contributor)s?)"
+      "|((written|contributed)" SPACES "by)"
     ")"
     "[[:space:][:punct:]]+"
     NAMESLIST
