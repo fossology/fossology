@@ -18,7 +18,6 @@
  */
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -258,6 +257,9 @@ class ClearingView extends FO_Plugin
                     var otable = $('#licenseDecisionsTable').dataTable(" . $dataTableConfig . ");
                     return otable;
                 }
+               $(document).ready(function () {
+               createLicenseDecisionTable();
+}               );
             </script>";
 
     $this->vars['script'] = $script;
