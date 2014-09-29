@@ -16,6 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
@@ -56,6 +57,8 @@ class ClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var LicenseRenderer */
   private $licenseRenderer;
+  /** @var ClearingDecisionEventProcessor */
+  private $clearingDecisionEventProcessor;
   /** @var bool */
   private $invalidParm = false;
 
@@ -83,6 +86,8 @@ class ClearingView extends FO_Plugin
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
+
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
   }
 
 
@@ -188,6 +193,15 @@ class ClearingView extends FO_Plugin
     {
       return;
     }
+
+    global $SysConf;
+    $userId = $SysConf['auth']['UserId'];
+
+    $lastItem = GetParm("lastItem", PARM_INTEGER);
+    if (!empty($lastItem))
+    {
+      $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
+    }
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
@@ -211,7 +225,6 @@ class ClearingView extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
     $licenseInformation = "";
 
-
     $output = '';
     /* @var Fossology\Lib\Dao\FileTreeBounds */
 
@@ -223,7 +236,7 @@ class ClearingView extends FO_Plugin
       $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
       $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
-      $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+      $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($fileTreeBounds);
       $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
 
       foreach ($licenseFileMatches as $licenseMatch)
@@ -254,16 +267,10 @@ class ClearingView extends FO_Plugin
     }
     $licenseInformation .= $output;
 
-
-    //$this->vars['uri'] = Traceback_uri();
-
-
     $clearingHistory = array();
     if ($permission >= PERM_WRITE)
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      global $SysConf;
-      $userId = $SysConf['auth']['UserId'];
       $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $userId);
     }
 

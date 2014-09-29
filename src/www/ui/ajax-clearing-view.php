@@ -16,6 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\FileTreeBounds;
@@ -53,6 +54,8 @@ class AjaxClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
+  /** @var ClearingDecisionEventProcessor */
+  private $clearingDecisionEventProcessor;
 
   /** @var LicenseRenderer */
 
@@ -82,6 +85,8 @@ class AjaxClearingView extends FO_Plugin
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
+
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
   }
 
   /**
@@ -172,10 +177,11 @@ class AjaxClearingView extends FO_Plugin
 
     if ($action)
     {
+      $orderAscending = $_GET['sSortDir_0'] === "asc";
       switch ($action)
       {
         case "licenses":
-          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $_GET['sSortDir_0'] == "asc");
+          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
 
           $licenses = array();
           foreach ($licenseRefs as $licenseRef)
@@ -194,7 +200,8 @@ class AjaxClearingView extends FO_Plugin
                   'iTotalDisplayRecords' => count($licenses)));
 
         case "licenseDecisions":
-          $aaData = $this->getCurrentLicenseDecisions($uploadId, $userId, $fileTreeBounds);
+          $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
+
           return json_encode(
               array(
                   'sEcho' => intval($_GET['sEcho']),
@@ -214,108 +221,67 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
-   * @param $uploadId
-   * @param $userId
    * @param FileTreeBounds $fileTreeBounds
+   * @param $userId
    * @return array
    */
-  protected function getCurrentLicenseDecisions($uploadId, $userId, FileTreeBounds $fileTreeBounds)
+  protected function getCurrentLicenseDecisions(FileTreeBounds $fileTreeBounds, $userId, $orderAscending)
   {
-    $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
     $uploadTreeId = $fileTreeBounds->getUploadTreeId();
+    $uploadId = $fileTreeBounds->getUploadId();
     $reportInfo = "";
     $comment = "";
 
-    $agentDetectedLicenses = array();
-    foreach ($licenseFileMatches as $licenseMatch)
-    {
-      $licenseRef = $licenseMatch->getLicenseRef();
-      $licenseShortName = $licenseRef->getShortName();
-      if ($licenseShortName === "No_license_found")
-      {
-        continue;
-      }
-      $agentRef = $licenseMatch->getAgentRef();
-      $agentName = $agentRef->getAgentName();
-      $agentId = $agentRef->getAgentId();
-
-      $agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = array(
-          'id' => $licenseRef->getId(),
-          'percent' => $licenseMatch->getPercent()
-      );
-    }
-
-    $agentsWithResults = array();
-    foreach ($agentDetectedLicenses as $licenseShortName => $agentMap)
-    {
-      foreach ($agentMap as $agentName => $agentResultMap)
-      {
-        $agentsWithResults[$agentName] = $agentName;
-      }
-    }
-
-    $agentLatestMap = $this->agentsDao->getLatestAgentResultForUpload($uploadId, $agentsWithResults);
-
-    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
-
-    $currentLicenses = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
-    asort($currentLicenses);
-
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
-    $licenseDecisions = array();
-    foreach ($currentLicenses as $licenseShortName)
+
+    $licenseDecisions = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+
+    ksort($licenseDecisions, SORT_STRING);
+
+    if ($orderAscending)
     {
-      $licenseId = 0;
-
-      if (!array_key_exists($licenseShortName, $removedLicenses))
-      {
-        $types = array();
-
-        if (array_key_exists($licenseShortName, $addedLicenses))
-        {
-          $addedLicense = $addedLicenses[$licenseShortName];
-          $types[] = $addedLicense['type'];
-          $licenseId = $addedLicense['id'];
-        }
-
-        if (array_key_exists($licenseShortName, $agentDetectedLicenses))
-        {
-          foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $agentResultMap)
-          {
-            $agentEntry = $agentName . ": ";
-            foreach ($agentResultMap as $agentId => $licenseProperties)
-            {
-              if (!array_key_exists($agentName, $agentLatestMap) || $agentLatestMap[$agentName] != $agentId)
-              {
-                continue;
-              }
-              $percentageEntries = array();
-              $index = 0;
-              foreach ($licenseProperties as $licenseProperty)
-              {
-                $licenseId = $licenseProperty['id'];
-                $entry = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId#highlight\">#" . ++$index . "</a>";
-                if (array_key_exists('percentage', $licenseProperty))
-                {
-                  $percentage = $licenseProperty['percentage'];
-                  $entry .= "($percentage %)";
-                }
-                $percentageEntries[] = $entry;
-              }
-              $agentEntry .= implode(", ", $percentageEntries);
-            }
-            $types[] = $agentEntry;
-          }
-        }
-
-        $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
-        $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
-        $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
-        $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
-        $licenseDecisions[] = array($licenseShortNameWithLink, implode("<br/>", $types), $reportInfoField, $commentField, $actionLink);
-      }
+      $licenseDecisions = array_reverse($licenseDecisions);
     }
-    return $licenseDecisions;
+
+    $table = array();
+    foreach ($licenseDecisions as $licenseShortName => $licenseDecision)
+    {
+      $licenseId = $licenseDecision['licenseId'];
+
+      $types = array();
+
+      $entries = $licenseDecision['entries'];
+      if (array_key_exists('direct', $entries))
+      {
+        $types[] = $entries['direct']['type'];
+      }
+
+      foreach ($entries['agents'] as $agentEntry)
+      {
+        $matchTexts = array();
+        foreach ($agentEntry['matches'] as $match)
+        {
+          $agentId = $match['agentId'];
+          $matchId = $match['matchId'];
+          $index = $match['index'];
+          $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight\">#$index</a>";
+          if (array_key_exists('percentage', $match))
+          {
+            $matchText .= "(" . $match['percentage'] . " %)";
+          }
+          $matchTexts[] = $matchText;
+        }
+
+        $types[] = $agentEntry['name'] . ": " . implode(', ', $matchTexts);
+      }
+
+      $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
+      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
+      $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
+      $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
+      $table[] = array($licenseShortNameWithLink, implode("<br/>", $types), $reportInfoField, $commentField, $actionLink);
+    }
+    return $table;
   }
 }
 

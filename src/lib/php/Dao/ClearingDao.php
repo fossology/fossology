@@ -423,10 +423,12 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
         $sqlNote = __METHOD__ . '.get.item');
 
     // TODO move type.meaning from DB to data
+    // Why? We are using type meaning in agents as well and should have a single relation name <-> ordinal
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         $sql = "
 SELECT
+  LD.license_decision_events_pk as license_decision_event_id,
   LD.pfile_fk,
   LD.uploadtree_fk,
   LD.date_added,
@@ -478,12 +480,14 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
       {
         continue;
       }
+      $decisionEventId = intval($event['license_decision_event_id']);
       $licenseId = intval($event['rf_fk']);
       $type = $event['type'];
       $reportInfo = $event['reportinfo'];
       $comment = $event['comment'];
       $licenseProperties = array(
-          'id' => $licenseId,
+          'decisionEventId' => $decisionEventId,
+          'licenseId' => $licenseId,
           'type' => $type,
           'reportinfo' => $reportInfo,
           'comment' => $comment

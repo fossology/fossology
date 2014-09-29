@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
@@ -80,7 +79,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
 
     $licDao = new LicenseDao($this->dbManager);
     $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
-    $matches = $licDao->getFileLicenseMatches($fileTreeBounds);
+    $matches = $licDao->getAgentFileLicenseMatches($fileTreeBounds);
     
     $licenseRef = new LicenseRef($licenseRefNumber, $lic0['rf_shortname'], $lic0['rf_fullname']);
     $agentRef = new AgentRef($agentId, $agentName, $agentRev);
