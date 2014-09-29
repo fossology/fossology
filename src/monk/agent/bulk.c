@@ -213,7 +213,12 @@ int handleBulkMode(MonkState* state, long bulkId) {
   }
 }
 
-void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
+  if (matches->len == 0)
+    return;
+
+  long licenseId = state->bulkArguments->licenseId;
+
   if (!fo_dbManager_begin(state->dbManager))
     return;
 
@@ -223,16 +228,20 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
       "saveBulkResult:decision",
       "INSERT INTO license_decision_events(uploadtree_fk, pfile_fk, user_fk, type_fk, rf_fk, is_removed)"
       " SELECT uploadtree_pk, $1, $2, $3, $4, $5"
-      " FROM uploadtree, license_decision_types"
+      " FROM uploadtree"
       " WHERE upload_fk = $6 AND pfile_fk = $1 AND lft BETWEEN $7 AND $8"
       "RETURNING license_decision_events_pk",
-      long, int, int, long, int, int, long, long
+      long,
+      int, int, long, int,
+      int, long, long
     ),
     file->id,
+
     state->bulkArguments->userId,
     state->bulkArguments->decisionType,
-    license->refId,
+    licenseId,
     state->bulkArguments->removing ? 1 : 0,
+
     state->bulkArguments->uploadId,
     state->bulkArguments->uploadTreeLeft,
     state->bulkArguments->uploadTreeRight
@@ -242,24 +251,40 @@ void onFullMatch_Bulk(MonkState* state, File* file, License* license, DiffMatchI
     for (int i=0; i<PQntuples(clearingDecisionIds);i++) {
       long clearingId = atol(PQgetvalue(clearingDecisionIds,i,0));
 
-      PGresult* highlightResult = fo_dbManager_ExecPrepared(
-        fo_dbManager_PrepareStamement(
-          state->dbManager,
-          "saveBulkResult:highlight",
-          "INSERT INTO highlight_bulk(license_decision_events_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
-          long, long, size_t, size_t
-        ),
-        clearingId,
-        state->bulkArguments->bulkId,
-        matchInfo->text.start,
-        matchInfo->text.length
-      );
+      for (guint j=0; j<matches->len; j++) {
+        Match* match = match_array_get(matches, j);
 
-      /* ignore errors */
-      if (highlightResult)
-        PQclear(highlightResult);
+        if (match->type != MATCH_TYPE_FULL)
+          continue;
+
+        DiffPoint* highlightTokens = match->ptr.full;
+        DiffPoint highlight = getFullHighlightFor(file->tokens, highlightTokens->start, highlightTokens->length);
+
+        PGresult* highlightResult = fo_dbManager_ExecPrepared(
+          fo_dbManager_PrepareStamement(
+            state->dbManager,
+            "saveBulkResult:highlight",
+            "INSERT INTO highlight_bulk(license_decision_events_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
+            long, long, size_t, size_t
+          ),
+          clearingId,
+          state->bulkArguments->bulkId,
+          highlight.start,
+          highlight.length
+        );
+
+        if (highlightResult) {
+          PQclear(highlightResult);
+        } else {
+          fo_dbManager_rollback(state->dbManager);
+          return;
+        }
+      }
     }
     PQclear(clearingDecisionIds);
+  } else {
+    fo_dbManager_rollback(state->dbManager);
+    return;
   }
 
   fo_dbManager_commit(state->dbManager);
