@@ -1,10 +1,10 @@
 <script>
     selectedLicensesTableColumns = [
-        {"sTitle": "<i18n>License</i18n>", "sClass": "left"},
-        {"sTitle": "<i18n>Source</i18n>", "sClass": "left", "bSortable": false},
-        {"sTitle": "<i18n>Text</i18n>", "sClass": "center", "bSortable": false},
-        {"sTitle": "<i18n>Comment</i18n>", "sClass": "center", "bSortable": false},
-        {"sTitle": "<i18n>Action</i18n>", "sClass": "center", "bSortable": false}
+        {"sTitle": "{{ 'License'|t }}", "sClass": "left"},
+        {"sTitle": "{{ 'Source'|t }}", "sClass": "left", "bSortable": false},
+        {"sTitle": "{{ 'Text'|t }}", "sClass": "center", "bSortable": false},
+        {"sTitle": "{{ 'Comment'|t }}", "sClass": "center", "bSortable": false},
+        {"sTitle": "{{ 'Action'|t }}", "sClass": "center", "bSortable": false}
     ];
 
     uploadId = {{ uploadId }};
@@ -36,8 +36,8 @@
     }
 
     addLicenseTableColumns = [
-        {"sTitle": "<i18n>License</i18n>", "sClass": "left"},
-        {"sTitle": "<i18n>Action</i18n>", "sClass": "center", "bSortable": false}
+        {"sTitle": "{{ 'License'|t }}", "sClass": "left"},
+        {"sTitle": "{{ 'Action'|t }}", "sClass": "center", "bSortable": false}
     ];
 
     addLicenseTableConfig = {

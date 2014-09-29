@@ -101,6 +101,13 @@ without any warranty.
         <service id="twig.environment" class="Twig_Environment">
             <argument type="service" id="twig.loader"/>
             <argument>%twig.environment.config%</argument>
+            <call method="addExtension">
+              <argument type="service" id="twig.i18n_filter" />
+            </call>
+        </service>
+
+        <service id="twig.i18n_filter" class="\Fossology\Lib\Twig\I18nFilter">
+            <tag name="twig.extension" />
         </service>
 
     </services>

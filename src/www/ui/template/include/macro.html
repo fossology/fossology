@@ -19,7 +19,7 @@
     <tr>
         {% for header in headers %}
         <th>
-            <i18n>{{ header }}</i18n>
+            {{ '{{ header }}'|t }}
         </th>
         {% endfor %}
     </tr>
