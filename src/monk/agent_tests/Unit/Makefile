@@ -50,7 +50,7 @@ $(OBJECTS): %.o: %.c
 libmonk.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libmonk_cov.a: 
+libmonk_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:

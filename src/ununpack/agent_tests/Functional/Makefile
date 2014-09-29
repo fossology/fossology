@@ -20,7 +20,7 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 DATA=../unpack-test-data.tar.bz2
 
-TESTFILE = tests.xml 
+TESTFILE = tests.xml
 AGENTDIR = ../../agent/
 
 # list of the external test data files required by this test

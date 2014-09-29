@@ -22,11 +22,11 @@ DIRS = c php cpp
 TESTDIR = c
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-		 
-all: 
+
+all:
 	$(call dirloop, )
 
-test: 
+test:
 	$(call dirloop,test)
 
 install: all
@@ -39,4 +39,4 @@ uninstall:
 clean:
 	$(call dirloop,clean)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test

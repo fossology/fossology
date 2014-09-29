@@ -18,7 +18,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-TESTFILE = cliParamsTest4Mimetype.php 
+TESTFILE = cliParamsTest4Mimetype.php
 EXE_DIR = ../../agent/
 
 all:

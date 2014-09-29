@@ -44,7 +44,7 @@ all: $(EXE)
 $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
 	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(CFLAGS_LOCAL) -o $@
 
-$(OBJS): %.o: %.c 
+$(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 # target to retrieve remote test data if it doesn't already exist
@@ -94,4 +94,4 @@ clean:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test libununpack_cov.a libununpack.a 
+.PHONY: all install uninstall clean test libununpack_cov.a libununpack.a

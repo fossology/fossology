@@ -27,7 +27,7 @@ dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 all: VERSIONFILE
 	$(call dirloop, )
 
-test: 
+test:
 	$(MAKE) -C $(TESTDIR) test
 
 VERSIONFILE:

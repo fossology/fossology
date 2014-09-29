@@ -51,7 +51,7 @@ test: fossology_testconfig $(EXE)
 	
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
- 
+
 coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
 	@echo "make scheduler test coverage"
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
@@ -87,4 +87,4 @@ uninstall:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test

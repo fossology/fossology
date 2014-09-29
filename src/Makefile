@@ -46,7 +46,7 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
-phpvendors: 
+phpvendors:
 	composer install
 
 composer_install:

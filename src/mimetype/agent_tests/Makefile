@@ -18,15 +18,15 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = Unit Functional 
+DIRS = Unit Functional
 COVDIR = Unit
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all:
 	$(call dirloop, )
 
-test: 
+test:
 	$(call dirloop, test)
 
 coverage:

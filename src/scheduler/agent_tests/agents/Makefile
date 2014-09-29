@@ -20,7 +20,7 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -Werror
-DEF = 
+DEF =
 
 MODDIR = mods-enabled
 

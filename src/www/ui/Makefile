@@ -53,7 +53,7 @@ install: all
 	for file in $(OTHERFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-  
+
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \

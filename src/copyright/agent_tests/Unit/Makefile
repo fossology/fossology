@@ -13,7 +13,7 @@ TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 include $(VARS)
 # -Werror -Wextra
 CPPUNIT_PATH=/opt/cppunit
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR) 
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR)
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
@@ -21,7 +21,7 @@ CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc+
 EXE=test_copyright
 
 OBJECTS  = test_regex.o test_RegMatcher.o
-COVERAGE = 
+COVERAGE =
 
 
 
@@ -56,7 +56,7 @@ libcopyright_cov.a: $(COVERAGE)
 %.o: %.cc
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
-$(COVERAGE): %_cov.o: %.c 
+$(COVERAGE): %_cov.o: %.c
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################

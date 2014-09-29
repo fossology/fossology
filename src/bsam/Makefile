@@ -25,7 +25,7 @@ dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 all: VERSIONFILE
 	@echo "make $(MOD_NAME)"
 
-test: 
+test:
 	@echo "make $(MOD_NAME) test"
 
 VERSIONFILE:

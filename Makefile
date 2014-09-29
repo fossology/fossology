@@ -40,7 +40,7 @@ utils: build-utils
 
 # generate the VERSION file
 TOP = .
-VERSIONFILE: 
+VERSIONFILE:
 	$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first

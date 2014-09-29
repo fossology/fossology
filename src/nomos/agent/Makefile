@@ -12,7 +12,7 @@ PRE=PRECHECK
 PDATA=_split_words
 LICFIX=GENSEARCHDATA
 
-OBJS=licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o 
+OBJS=licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o
 GENOBJS=_precheck.o _autodata.o
 HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 COVERAGE=$(OBJS:%.o=%_cov.o)
@@ -23,7 +23,7 @@ CFLAGS_LOCALO= $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 all: encode nomos libnomos.a
 
-debug: nomos-gl 
+debug: nomos-gl
 
 nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
@@ -35,10 +35,10 @@ nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
 nomos-g.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -c  -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO) 
+	$(CC) -c  -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO)
 
 $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
-	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS) 
+	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 $(COVERAGE) $(GENOBJS_COV): %_cov.o: %.c $(HDRS) $(DB) $(VARS)
 	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS) $(FLAG_COV) -o $@

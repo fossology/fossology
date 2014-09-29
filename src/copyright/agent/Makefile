@@ -31,7 +31,7 @@ OBJECTS_COP  = copyrightUtils_cop.o
 OBJECTS_IP  = copyrightUtils_ip.o
 OBJECTS_ECC  = copyrightUtils_ecc.o
 
-COVERAGE = 
+COVERAGE =
 
 all:  $(CXXFOLIB) $(EXE)
 

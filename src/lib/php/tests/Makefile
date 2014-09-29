@@ -18,7 +18,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-all: 
+all:
 
 test: all phpvendors
 	@echo "make unit test for commom php files"
@@ -35,4 +35,4 @@ clean:
 # note do not remove *.xml, it remove the php unit config file tests.xml
 	rm -rf lib-php-Xunit-Results.xml results
 
-.PHONY: all test coverage clean 
+.PHONY: all test coverage clean

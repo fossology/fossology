@@ -67,5 +67,5 @@ install:
 uninstall:
 	@echo "make library tests nothing to uninstall"
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test
 include $(TOP)/Makefile.deps

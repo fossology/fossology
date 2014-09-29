@@ -25,10 +25,10 @@ TESTDIR = ui_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all:
 	$(call dirloop, )
 
-test: 
+test:
 	$(MAKE) -C $(TESTDIR) test
 
 coverage:
@@ -46,7 +46,7 @@ install: all
 uninstall:
 	@echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME) 
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 

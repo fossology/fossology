@@ -20,20 +20,20 @@ include $(VARS)
 
 MOD_NAME = scheduler
 
-DIRS = agent 
+DIRS = agent
 
 TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-		 
+
 all: VERSIONFILE
 	@echo "make scheduler"
 	$(call dirloop, )
 
-test: 
+test:
 	$(MAKE) -C $(TESTDIR) test
 
-coverage: 
+coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 VERSIONFILE:

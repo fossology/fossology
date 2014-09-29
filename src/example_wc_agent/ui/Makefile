@@ -18,10 +18,10 @@
 MOD_NAME=example_wc_agent
 MOD_SUBDIR=ui
 
-all: 
+all:
 	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR)"
 
-test: 
+test:
 	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) test"
 
 coverage:

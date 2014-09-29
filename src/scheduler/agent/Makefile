@@ -62,13 +62,13 @@ HEAD = agent.h \
        job.h \
        logging.h \
        interface.h \
-       sqlstatements.h 
-       
+       sqlstatements.h
+
 ##########################
 # executable build rules #
 ##########################
 
-all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology 
+all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology
 
 $(EXE): %: %.c $(LIB) $(VARS) $(HEAD) $(DEPEN) $(FOLIB)
 	$(CC) $< $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
@@ -167,4 +167,4 @@ coverage:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test coverage 
+.PHONY: all install uninstall clean test coverage

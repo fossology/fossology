@@ -25,10 +25,10 @@ DIR = $(realpath .)
 MOD_NAME=debug
 MOD_SUBDIR=ui
 
-all: 
+all:
 	@echo "make nothing in $(DIR)"
 
-test: 
+test:
 	@echo "make test nothing in $(DIR)"
 
 coverage:

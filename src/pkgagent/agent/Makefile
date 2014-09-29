@@ -53,7 +53,7 @@ uninstall:
 	@echo "make pkgagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-test: all 
+test: all
 	$(MAKE) -C $(TESTDIRS) test
 
 coverage: pkgagent_cov.o

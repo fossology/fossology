@@ -21,7 +21,7 @@ MOD_TEST_DIR=Functional
 
 all:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR)"
-  
+
 test: all
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR) test"
 

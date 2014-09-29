@@ -26,10 +26,10 @@ TESTDIR = ui_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
-all: 
+all:
 	echo "all: Nothing to do for ui_tests"
 
-test: 
+test:
 	echo "test: Place holder for launching UI functional tests"
 
 coverage:
@@ -44,4 +44,4 @@ uninstall:
 clean:
 	echo "Place holder for clean, UI Functional tests"
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test

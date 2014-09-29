@@ -1,4 +1,4 @@
-# FOSSology Makefile - test for mimetype 
+# FOSSology Makefile - test for mimetype
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 TOP=../../../..
 VARS=$(TOP)/Makefile.conf
@@ -28,7 +28,7 @@ $(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_li
 $(TEST_OBJ_RUN): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
-$(TEST_OBJ): %.o: %.c 
+$(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@ -g
 
 cunit_lib:
@@ -55,7 +55,7 @@ libmimetype.a:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result 
+	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result
 
 include $(DEPS)
 

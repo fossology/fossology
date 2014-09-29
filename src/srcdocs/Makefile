@@ -16,7 +16,7 @@
 ######################################################################
 
 # Uses:
-#   doxygen 
+#   doxygen
 #   schemaSpy  (http://schemaspy.sourceforge.net/)
 #   java       (apt-get install default-jre)
 #   postgres JDBC (apt-get install libpg-java)

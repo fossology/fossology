@@ -26,10 +26,10 @@ $(EXE): libwget_agent.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) 
 	@echo "make wget agent tests"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) -o $@
 
-$(TEST_OBJ_RUN): %.o: %.c 
+$(TEST_OBJ_RUN): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-$(TEST_OBJ): %.o: %.c 
+$(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
 cunit_lib:
@@ -56,7 +56,7 @@ libwget_agent.a:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result 
+	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result
 
 include $(DEPS)
 
