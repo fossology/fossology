@@ -2340,10 +2340,10 @@
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_decision_events"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_events"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_events\" ADD COLUMN \"is_global\" boolean;";
-  $Schema["TABLE"]["license_decision_events"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_events\" ALTER COLUMN \"is_global\" SET NOT NULL;";
-  $Schema["TABLE"]["license_decision_events"]["is_global"]["UPDATE"] = "";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_global\" boolean;";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"is_global\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"comment\" IS 'User comment';";
   $Schema["TABLE"]["license_decision_event"]["comment"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"comment\" text;";
