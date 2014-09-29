@@ -27,7 +27,7 @@ test: all
 
 # generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile, "monk")
+	$(call WriteVERSIONFile,"monk")
 
 install: all
 	@echo "make $(MOD_NAME) install"

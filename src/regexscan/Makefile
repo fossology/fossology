@@ -33,7 +33,7 @@ test:
 
 # generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile, $(MOD_NAME))
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
