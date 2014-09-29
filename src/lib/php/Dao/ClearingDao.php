@@ -92,7 +92,7 @@ class ClearingDao extends Object
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
          FROM clearing_decision CD
-         LEFT JOIN clearing_decision_types CD_types ON CD.type_fk=CD_types.type_pk
+         LEFT JOIN clearing_decision_type CD_types ON CD.type_fk=CD_types.type_pk
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
          INNER JOIN uploadtree ut ON CD.pfile_fk = ut.pfile_fk
@@ -160,7 +160,7 @@ class ClearingDao extends Object
     $clearingTypes = array();
     $statementN = __METHOD__;
 
-    $this->dbManager->prepare($statementN, "select * from clearing_decision_types");
+    $this->dbManager->prepare($statementN, "select * from clearing_decision_type");
     $res = $this->dbManager->execute($statementN);
     while ($rw = pg_fetch_assoc($res))
     {
@@ -176,7 +176,7 @@ class ClearingDao extends Object
    */
   public function getClearingDecisionTypeMap($selectableOnly = false)
   {
-    $map = $this->dbManager->createMap('clearing_decision_types', 'type_pk', 'meaning');
+    $map = $this->dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
     if ($selectableOnly)
     {
       $map = array(1 => $map[1], 2 => $map[2]);
@@ -212,7 +212,7 @@ class ClearingDao extends Object
       $pfileId = $item['pfile_fk'];
 
       $tbdColumnStatementName = __METHOD__ . "_TBD_column";
-      $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_types where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
+      $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_type where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
 
       $tbdColumnStatementName = __METHOD__ . ".d";
       $this->dbManager->prepare($tbdColumnStatementName,
@@ -316,16 +316,16 @@ SELECT
   GU.group_fk,
   CDT.meaning AS type,
   CD.is_global,
-FROM clearing_decisions CD
-INNER JOIN clearing_decisions CD2 ON CD.pfile_fk = CD2.pfile_fk
-INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
+FROM clearing_decision CD
+INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
+INNER JOIN clearing_decision_type CDT ON CD.type_fk = CDT.type_pk
 INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   CD2.uploadtree_fk=$1 AND
   (CD.is_global OR CD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY CD.license_decision_events_pk
+GROUP BY CD.license_decision_event_pk
 ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -361,15 +361,15 @@ SELECT
   LD.is_removed,
   LD.reportinfo,
   LD.comment
-FROM license_decision_events LD
-INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
+FROM license_decision_event LD
+INNER JOIN license_decision_type LDT ON LD.type_fk = LDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
 INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   (LD.uploadtree_fk IS NULL AND LD.pfile_fk=$3 OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY LD.license_decision_events_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed, LD.reportinfo, LD.comment
+GROUP BY LD.license_decision_event_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed, LD.reportinfo, LD.comment
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -458,7 +458,7 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
-insert into license_decision_events (
+insert into license_decision_event (
   uploadtree_fk,
   pfile_fk,
   user_fk,

@@ -69,7 +69,7 @@ int setLeftAndRight(MonkState* state) {
 int queryDecisionType(MonkState* state) {
   PGresult* bulkDecisionType = fo_dbManager_Exec_printf(
     state->dbManager,
-    "SELECT type_pk FROM license_decision_types WHERE meaning = '" BULK_DECISION_TYPE "'"
+    "SELECT type_pk FROM license_decision_type WHERE meaning = '" BULK_DECISION_TYPE "'"
   );
 
   int result = 0;
@@ -226,11 +226,11 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO license_decision_events(uploadtree_fk, pfile_fk, user_fk, type_fk, rf_fk, is_removed)"
+      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, type_fk, rf_fk, is_removed)"
       " SELECT uploadtree_pk, $1, $2, $3, $4, $5"
       " FROM uploadtree"
       " WHERE upload_fk = $6 AND pfile_fk = $1 AND lft BETWEEN $7 AND $8"
-      "RETURNING license_decision_events_pk",
+      "RETURNING license_decision_event_pk",
       long,
       int, int, long, int,
       int, long, long
@@ -264,7 +264,7 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
           fo_dbManager_PrepareStamement(
             state->dbManager,
             "saveBulkResult:highlight",
-            "INSERT INTO highlight_bulk(license_decision_events_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
+            "INSERT INTO highlight_bulk(license_decision_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
             long, long, size_t, size_t
           ),
           clearingId,

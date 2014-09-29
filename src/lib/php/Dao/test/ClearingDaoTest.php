@@ -63,9 +63,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
         array(
             'clearing_decision',
             'clearing_decision_events',
-            'clearing_decision_types',
-            'license_decision_events',
-            'license_decision_types',
+            'clearing_decision_type',
+            'license_decision_event',
+            'license_decision_type',
             'clearing_licenses',
             'license_ref',
             'users',
@@ -75,8 +75,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->testDb->insertData(
         array(
-            'clearing_decision_types',
-            'license_decision_types'
+            'clearing_decision_type',
+            'license_decision_type'
         ));
 
     $this->dbManager->prepare($stmt = 'insert.users',
@@ -129,7 +129,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
     
     $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO license_decision_events (license_decision_events_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
+        "INSERT INTO license_decision_event (license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
     $cdArray = array(
         array(1, 100, 1000, 1, 1,  false, 1, '2014-08-15T12:12:12'),
         array(2, 100, 1000, 1, 2,  false, 1, '2014-08-15T12:12:12'),
