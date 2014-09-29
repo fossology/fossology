@@ -54,6 +54,9 @@ class ClearingView extends FO_Plugin
   /** @var HighlightProcessor */
   private $highlightProcessor;
   /** @var LicenseRenderer */
+  private $licenseRenderer;
+  /** @var bool */
+  private $invalidParm = false;
 
   function __construct()
   {
@@ -120,11 +123,18 @@ class ClearingView extends FO_Plugin
     if (empty($uploadTreeId))
     {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent)) return;
+      if (!isset($parent)) {
+        $this->invalidParm = true;
+        return;
+      }
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+      if( $uploadTreeId=== UploadDao::NOT_FOUND ) {
+        $this->invalidParm = true;
+        return;
+      }
 
-      header('Location: ' . Traceback_uri() . Traceback_parm_keep(array('mod', 'upload', 'show')) . "&item=$uploadTreeId");
+      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
@@ -132,16 +142,35 @@ class ClearingView extends FO_Plugin
     if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
     {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent)) return;
+      if (!isset($parent)) {
+        $this->invalidParm = true;
+        return;
+      }
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+      if( $uploadTreeId=== UploadDao::NOT_FOUND ) {
+        $this->invalidParm = true;
+        return;
+      }
 
-      header('Location: ?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      header('Location: ' . Traceback_uri(). '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
     
     return parent::OutputOpen();
   }
+  
 
+  /**
+   * @brief extends standard Output to handle empty uploads
+   */
+  function Output()
+  {
+    if( $this->invalidParm ){
+      $this->vars['content'] = 'This upload contains no files!<br><a href="'. Traceback_uri().'?mod=browse">Go back to browse view</a>';
+      return $this->renderTemplate("include/base.html");
+    }
+    parent::Output();    
+  }
   
   /**
    * \brief display the license changing page
