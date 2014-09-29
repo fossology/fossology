@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include <limits.h>
 
 void test_database() {
-  PGconn * dbConnection = dbRealConnect();
+  PGconn* dbConnection = dbRealConnect();
   if (!dbConnection) {
     CU_FAIL("no db connection");
     return;

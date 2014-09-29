@@ -36,16 +36,16 @@ void test_tokenize() {
 
 void test_streamTokenize() {
   char* test = g_strdup("^foo^^ba");
-  const char * delimiters = "^";
+  const char* delimiters = "^";
 
   GArray* token = tokens_new();
 
-  Token * remainder = NULL;
+  Token* remainder = NULL;
 
-  char * endPtr = test + strlen(test);
+  char* endPtr = test + strlen(test);
 
   int chunkSize = 2;
-  char * ptr = test;
+  char* ptr = test;
   while (*ptr && ptr <= endPtr) {
     unsigned int tokenCount = token->len;
     int thisChunkSize = MIN(chunkSize, endPtr - ptr);
@@ -76,17 +76,17 @@ void test_streamTokenize() {
 
 void test_streamTokenizeEventuallyGivesUp() {
   char* test = g_strdup("^foo^^ba");
-  const char * delimiters = "^";
+  const char* delimiters = "^";
 
   GArray* token = tokens_new();
 
-  Token * remainder = NULL;
+  Token* remainder = NULL;
 
-  char * endPtr = test + strlen(test);
+  char* endPtr = test + strlen(test);
 
   printf("test: expecting a warning: ");
   int chunkSize = 5;
-  char * ptr = test;
+  char* ptr = test;
   int addedTokens = 0;
   uint32_t i = 0;
   while ((i < 1 << 27) && (*ptr) && (ptr <= endPtr)) {
@@ -115,7 +115,7 @@ void test_streamTokenizeEventuallyGivesUp() {
   free(test);
 }
 
-void assertTokenPosition(char * string, int count, ...) {
+void assertTokenPosition(char* string, int count, ...) {
   char* test = g_strdup(string);
 
   GArray* tokens = tokenize(test, "^");
@@ -177,7 +177,7 @@ void test_token_equal() {
   free(search);
 }
 
-void test_stringBuilder(){
+void test_stringBuilder() {
   StringBuilder* stringBuilder = stringBuilder_new();
 
   stringBuilder_printf(stringBuilder, "test null, ");

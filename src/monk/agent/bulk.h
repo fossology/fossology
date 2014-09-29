@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #ifndef MONK_AGENT_BULK_H
 #define MONK_AGENT_BULK_H
 
@@ -22,4 +23,4 @@ int queryBulkArguments(long bulkId, MonkState* state);
 int handleBulkMode(MonkState* state, long bulkId);
 void processMatches_Bulk(MonkState* state, File* file, GArray* matches);
 
-#endif
+#endif // MONK_AGENT_BULK_H

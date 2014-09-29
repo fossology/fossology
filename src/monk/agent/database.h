@@ -26,4 +26,4 @@ int saveHighlightToDb(fo_dbManager* dbManager, char* type, DiffPoint* highlight,
 int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long int licenseFileId);
 int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId);
 
-#endif
+#endif // MONK_AGENT_DATABASE_H
