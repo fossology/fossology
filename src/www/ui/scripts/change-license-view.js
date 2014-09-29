@@ -45,12 +45,8 @@ function closeUserModal() {
 
 function reloadClearingTable(){
     // TODO reload also highlights
-    $.ajax({
-        type: "POST",
-        url: "?mod=change-license-newclearing",
-        data: { "uploadTreeId": $('#uploadTreeId').val() },
-        success: clearingSuccess
-    });
+    var table = createLicenseDecisionTable();
+    table.fnDraw(false);
     $('#bulkIdResult').hide();
 }
 
