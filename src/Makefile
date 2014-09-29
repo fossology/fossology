@@ -7,7 +7,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent delagent wget_agent mimetype maintagent www debug decider reportgen
+DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent delagent wget_agent mimetype maintagent www debug decider reportgen ninka
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can

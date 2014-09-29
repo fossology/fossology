@@ -61,6 +61,7 @@ src/monk/agent/monk
 src/monk/agent/squareBuilder
 src/monk/agent_tests/Unit/results/
 src/monk/agent_tests/Unit/test_monk
+src/ninka/agent/ninka
 src/nomos/agent/_STRFILTER
 src/nomos/agent/_autodefs.h
 src/nomos/agent/_strings.data
