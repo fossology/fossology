@@ -48,54 +48,20 @@ class CopyrightHistogram  extends FO_Plugin {
 
     global $container;
     $this->copyrightDao = $container->get('dao.copyright');
+    $this->renderer = $container->get('twig.environment');
 
+    $this->vars['name']=$this->Name;
 
   }
 
-private  function getCopyrightData($upload_pk, $Uploadtree_pk, $filter, $uploadtree_tablename, $Agent_pk) {
-  list($ordercount, $ordercopyright) = $this->getOrderings();
-
-  $type = 'statement';
-  $rows = $this->copyrightDao->getCopyrights($upload_pk,$Uploadtree_pk, $uploadtree_tablename ,$Agent_pk, 0,$type,$filter);
-
-  $CopyrightCount = 0;
-  $UniqueCopyrightCount = 0;
 
 
-  /* The filtering in the table header links will be obsolete with datatables... So once we have that the whole function is obsolete as we can use the more general getSingleType */
-  $VCopyright = "<table border=1 width='100%' id='copyright'>\n";
-  $text = _("Count");
-  $text1 = _("Files");
-  $text2 = _("Copyright Statements");
-  $VCopyright .= "<tr><th>";
-  $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=count&orderc=$ordercount>$text</a>";
-  $VCopyright .= "</th>";
-  $VCopyright .= "<th width='10%'>$text1</th>";
-  $VCopyright .= "<th>";
-  $VCopyright .= "<a href=?mod=" . "$this->Name" . Traceback_parm_keep(array("upload", "item", "filter", "agent")) . "&orderBy=copyright&ordercp=$ordercopyright>$text2</a>";
-  $VCopyright .= "</th>";
-  $VCopyright .= "</th></tr>\n";
-
-  foreach ($rows as $row)
-  {
-    $VCopyright .= $this->fillTableRow($row, $UniqueCopyrightCount, $CopyrightCount, $Uploadtree_pk, $Agent_pk, true ,$filter, $type);
-  }
-
-  $VCopyright .= "</table>\n";
-  $VCopyright .= "<p>\n";
-  $text = _("Unique Copyrights");
-  $text1 = _("Total Copyrights");
-  $VCopyright .= "$text: $UniqueCopyrightCount<br>\n";
-  $NetCopyright = $CopyrightCount;
-  $VCopyright .= "$text1: $NetCopyright";
-
-  return $VCopyright;
-}
 
 
-private function getSingleType($type,$description,$descriptionUnique,$descriptionTotal, $upload_pk, $uploadtreeId, $filter, $uploadtree_tablename, $Agent_pk){
 
-  $output = "<table border=1 width='100%'id='copyright".$type."'>\n";
+private function getTableForSingleType($type,$description,$descriptionUnique,$descriptionTotal, $upload_pk, $uploadtreeId, $filter, $uploadtree_tablename, $Agent_pk){
+
+  $output = "<table border=1 width='100%' id='copyright".$type."'>\n";
   $output .= "</table>\n";
 
       $tableColumns = '[
@@ -104,7 +70,13 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     ]';
     $tableSorting = json_encode($this->returnSortOrder());
 
-
+      $tableLanguage = '[
+      {"sInfo" : "Showing _START_ to _END_ of _TOTAL_ '.$descriptionTotal.'"},
+      {"sSearch": "Search _INPUT_ " },
+         { "sInfoPostFix" : "" },
+         {"sLengthMenu" : "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files" }
+      ]';
+//      "oLanguage": '.$tableLanguage.',
 
       $dataTableConfig =
         '{  "bServerSide": true,
@@ -163,14 +135,14 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     $descriptionTotal = _("Total Copyrights");
 
 
-    $VCopyright  =  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
+    $VCopyright  =  $this->getTableForSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
     $type = 'email';
     $decription = _("Email");
     $descriptionUnique = _("Unique Emails");
     $descriptionTotal = _("Total Emails");
 
-    $VEmail =  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
+    $VEmail =  $this->getTableForSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
 
     $type = 'url';
@@ -178,7 +150,7 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     $descriptionUnique = _("Unique URLs");
     $descriptionTotal = _("Total URLs");
 
-    $VUrl=  $this->getSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
+    $VUrl=  $this->getTableForSingleType($type,$decription,$descriptionUnique,$descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $this->uploadtree_tablename, $Agent_pk);
 
     return array( $VCopyright, $VEmail, $VUrl);
   }
@@ -201,25 +173,29 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     $V=""; // total return value
 
     list($ChildCount, $VF) = $this->getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk);
-    /***************************************
-    Problem: $ChildCount can be zero!
-    This happens if you have a container that does not
-    unpack to a directory.  For example:
-    file.gz extracts to archive.txt that contains a license.
-    Same problem seen with .pdf and .Z files.
-    Solution: if $ChildCount == 0, then just view the license!
-    $ChildCount can also be zero if the directory is empty.
-     ***************************************/
-    if ($ChildCount == 0)
-    {
-      $isADirectory = $this->isADirectory($Uploadtree_pk);
-      if ($isADirectory) {
-        return;
-      }
-      global $Plugins;
-      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
-      return($ModLicView->Output() );
-    }
+    $this->vars['childcount'] = $ChildCount;
+    $this->vars['fileListing'] = $VF;
+
+    //TODO
+//    /***************************************
+//    Problem: $ChildCount can be zero!
+//    This happens if you have a container that does not
+//    unpack to a directory.  For example:
+//    file.gz extracts to archive.txt that contains a license.
+//    Same problem seen with .pdf and .Z files.
+//    Solution: if $ChildCount == 0, then just view the license!
+//    $ChildCount can also be zero if the directory is empty.
+//     ***************************************/
+//    if ($ChildCount == 0)
+//    {
+//      $isADirectory = $this->isADirectory($Uploadtree_pk);
+//      if ($isADirectory) {
+//        return;
+//      }
+//      global $Plugins;
+//      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
+//      return($ModLicView->Output() );
+//    }
 
     list( $VCopyright, $VEmail, $VUrl) = $this->getTableContent($upload_pk,$Uploadtree_pk, $filter, $Agent_pk);
 
@@ -243,17 +219,19 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
 
 
 
-  /**
-   * \brief This function returns the scheduler status.
-   */
-  function Output()
+  function OutputOpen()
   {
-    $uTime = microtime(true);
+
     if ($this->State != PLUGIN_STATE_READY) {
       return(0);
     }
+
+    return parent::OutputOpen();
+  }
+
+  protected function htmlContent()
+  {
     $OutBuf="";
-    $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $filter = GetParm("filter",PARM_STRING);
@@ -271,166 +249,106 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     $uploadtree_tablename = GetUploadtreeTableName($Upload);
     $this->uploadtree_tablename = $uploadtree_tablename;
 
-    /* Use Traceback_parm_keep to ensure that all parameters are in order */
-    /********  disable cache to see if this is fast enough without it *****
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder", "orderBy", "orderc", "ordercp")) . "&show=$Show";
-    if ($this->UpdCache != 0)
-    {
-    $OutBuf .= "";
-    $Err = ReportCachePurgeByKey($CacheKey);
-    }
-    else
-    $OutBuf .= ReportCacheGet($CacheKey);
-     ***********************************************/
+//     $OutBuf .= "<font class='text'>\n";
 
-    if (empty($OutBuf) )  // no cache exists
-    {
-      switch($this->OutputType)
+      /************************/
+      /* Show the folder path */
+      /************************/
+
+    $this->vars['dir2browse'] =  Dir2Browse($this->Name,$Item,NULL,1,"Browse",-1,'','',$uploadtree_tablename);
+      if (!empty($Upload))
       {
-        case "XML":
-          break;
-        case "HTML":
-          $OutBuf .= "\n<script language='javascript'>\n";
-          /* function to replace this page specifying a new filter parameter */
-          $OutBuf .= "function ChangeFilter(selectObj, upload, item){";
-          $OutBuf .= "  var selectidx = selectObj.selectedIndex;";
-          $OutBuf .= "  var filter = selectObj.options[selectidx].value;";
-          $OutBuf .= '  window.location.assign("?mod=' . $this->Name .'&upload="+upload+"&item="+item +"&filter=" + filter); ';
-          $OutBuf .= "}</script>\n";
+        /** advanced interface allowing user to select dataset (agent version) */
+        $Agent_name = "copyright";
+        $dataset = "copyright_dataset";
+        $arstable = "copyright_ars";
+        /** get proper agent_id */
+        $Agent_pk = GetParm("agent", PARM_INTEGER);
+        if (empty($Agent_pk))
+        {
+          $Agent_pk = LatestAgentpk($Upload, $arstable);
+        }
 
-          $OutBuf .= "<font class='text'>\n";
+        if ($Agent_pk == 0)
+        {
+          /** schedule copyright */
+          $OutBuf .= ActiveHTTPscript("Schedule");
+          $OutBuf .= "<script language='javascript'>\n";
+          $OutBuf .= "function Schedule_Reply()\n";
+          $OutBuf .= "  {\n";
+          $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
+          $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+          $OutBuf .= "  }\n";
+          $OutBuf .= "</script>\n";
 
-          /************************/
-          /* Show the folder path */
-          /************************/
-          $OutBuf .= Dir2Browse($this->Name,$Item,NULL,1,"Browse",-1,'','',$uploadtree_tablename) . "<P />\n";
-          if (!empty($Upload))
+          $OutBuf .= "<form name='formy' method='post'>\n";
+          $OutBuf .= "<div id='msgdiv'>\n";
+          $OutBuf .= _("No data available.");
+          $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+          $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_copyright \")'>\n";
+          $OutBuf .= "</input>";
+          $OutBuf .= "</div> \n";
+          $OutBuf .= "</form>\n";
+
+        }
+
+        else
+        {
+          $AgentSelect = AgentSelect($Agent_name, $Upload, true, $dataset, $dataset, $Agent_pk,
+              "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
+
+          /** change the copyright  result when selecting one version of copyright */
+          if (!empty($AgentSelect))
           {
-            /** advanced interface allowing user to select dataset (agent version) */
-            $Agent_name = "copyright";
-            $dataset = "copyright_dataset";
-            $arstable = "copyright_ars";
-            /** get proper agent_id */
-            $Agent_pk = GetParm("agent", PARM_INTEGER);
-            if (empty($Agent_pk))
+            $action = Traceback_uri() . "?mod=copyrighthist&upload=$Upload&item=$Item";
+
+            $OutBuf .= "<script type='text/javascript'>
+            function addArsGo(formid, selectid)
             {
-              $Agent_pk = LatestAgentpk($Upload, $arstable);
+              var selectobj = document.getElementById(selectid);
+              var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
+              document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
+              document.getElementById(formid).submit();
+              return;
             }
+          </script>";
 
-            if ($Agent_pk == 0)
-            {
-              /** schedule copyright */
-              $OutBuf .= ActiveHTTPscript("Schedule");
-              $OutBuf .= "<script language='javascript'>\n";
-              $OutBuf .= "function Schedule_Reply()\n";
-              $OutBuf .= "  {\n";
-              $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
-              $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
-              $OutBuf .= "  }\n";
-              $OutBuf .= "</script>\n";
-
-              $OutBuf .= "<form name='formy' method='post'>\n";
-              $OutBuf .= "<div id='msgdiv'>\n";
-              $OutBuf .= _("No data available.");
-              $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
-              $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_copyright \")'>\n";
-              $OutBuf .= "</input>";
-              $OutBuf .= "</div> \n";
-              $OutBuf .= "</form>\n";
-              break;
-            }
-
-            $AgentSelect = AgentSelect($Agent_name, $Upload, true, $dataset, $dataset, $Agent_pk,
-                "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
-
-            /** change the copyright  result when selecting one version of copyright */
-            if (!empty($AgentSelect))
-            {
-              $action = Traceback_uri() . "?mod=copyrighthist&upload=$Upload&item=$Item";
-
-              $OutBuf .= "<script type='text/javascript'>
-                function addArsGo(formid, selectid)
-                {
-                  var selectobj = document.getElementById(selectid);
-                  var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
-                  document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
-                  document.getElementById(formid).submit();
-                  return;
-                }
-              </script>";
-
-              /* form to select new dataset, show dataset */
-              $OutBuf .= "<form action='$action' id='newds' method='POST'>\n";
-              $OutBuf .= $AgentSelect;
-              $OutBuf .= "</form>";
-            }
-
-            $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-
-            /* Select list for filters */
-            $SelectFilter = "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$Upload, $Item)'>";
-
-            $Selected = ($filter == 'legal') ? "selected" : "";
-            $text = _("Show all");
-            $SelectFilter .= "<option $Selected value='all'>$text";
-
-            $text = _("Show all legal copyrights");
-            $SelectFilter .= "<option $Selected value='legal'>$text";
-
-            $text = _("Show files without licenses");
-            $Selected = ($filter == 'nolics') ? "selected" : "";
-            $SelectFilter .= "<option $Selected value='nolics'>$text";
-
-            $SelectFilter .= "</select>";
-            $OutBuf .= $SelectFilter;
-
-            $OutBuf .= $this->ShowUploadHist($Upload,$Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+            /* form to select new dataset, show dataset */
+            $OutBuf .= "<form action='$action' id='newds' method='POST'>\n";
+            $OutBuf .= $AgentSelect;
+            $OutBuf .= "</form>";
           }
-          $OutBuf .= "</font>\n";
-          $OutBuf .= $this->createJavaScriptBlock();
-          break;
-        case "Text":
-          break;
-        default:
+
+          $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+
+          /* Select list for filters */
+          $SelectFilter = "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$Upload, $Item)'>";
+
+          $Selected = ($filter == 'legal') ? "selected" : "";
+          $text = _("Show all");
+          $SelectFilter .= "<option $Selected value='all'>$text";
+
+          $text = _("Show all legal copyrights");
+          $SelectFilter .= "<option $Selected value='legal'>$text";
+
+          $text = _("Show files without licenses");
+          $Selected = ($filter == 'nolics') ? "selected" : "";
+          $SelectFilter .= "<option $Selected value='nolics'>$text";
+
+          $SelectFilter .= "</select>";
+          $OutBuf .= $SelectFilter;
+
+          $OutBuf .= $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+        }
       }
+      $OutBuf .= "</font>\n";
 
-      /*  Cache Report */
-      /********  disable cache to see if this is fast enough without it *****
-      $Cached = false;
-      ReportCachePut($CacheKey, $OutBuf);
-       **************************************************/
-    }
-    else
-      $Cached = true;
+    $this->vars['pageContent'] = $OutBuf;
 
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
-    }
-    print "$OutBuf";
-    $Time = microtime(true) - $uTime;  // convert usecs to secs
-    $text = _("Elapsed time: %.2f seconds");
-    printf( "<small>$text</small>", $Time);
-
-    /********  disable cache to see if this is fast enough without it *****
-    $text = _("cached");
-    $text1 = _("Update");
-    if ($Cached) echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
-     **************************************************/
     return;
   }
 
 
-  private function createJavaScriptBlock()
-  {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.jeditable.mini.js\" type=\"text/javascript\"></script>\n";
-    //    $output .="\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>\n";
-    $output .="\n<script src=\"scripts/jquery.dataTables.editable.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/copyrightHist.js\" type=\"text/javascript\"></script>\n";
-    return $output;
-  }
 
   /**
    * @param $Uploadtree_pk
@@ -554,46 +472,6 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     return $isADirectory;
   }
 
-  /**
-   * @return array
-   */
-  private function getOrderings()
-  {
-    $orderBy = array('count', 'copyright');
-    static $ordercount = 1;
-    static $ordercopyright = 1;
-    $order = "";
-    /** sorting by count/copyright statement */
-    if (isset($_GET['orderBy']) && in_array($_GET['orderBy'], $orderBy))
-    {
-      $order = $_GET['orderBy'];
-      if (isset($_GET['orderc'])) $ordercount = $_GET['orderc'];
-      if (isset($_GET['ordercp'])) $ordercopyright = $_GET['ordercp'];
-      if ('count' == $order && 1 == $ordercount)
-      {
-        $ordercount = 0;
-        return array($ordercount, $ordercopyright);
-      } else if ('count' == $order && 0 == $ordercount)
-      {
-        $ordercount = 1;
-        return array($ordercount, $ordercopyright);
-      } else if ('copyright' == $order && 1 == $ordercopyright)
-      {
-        $ordercopyright = 0;
-        return array($ordercount, $ordercopyright);
-      } else if ('copyright' == $order && 0 == $ordercopyright)
-      {
-        $ordercopyright = 1;
-        return array($ordercount, $ordercopyright);
-      }return array($ordercount, $ordercopyright);
-    }
-    return array($ordercount, $ordercopyright);
-  }
-
-
-
-
-
 
   static public function returnSortOrder () {
     $defaultOrder = array (
@@ -602,7 +480,37 @@ private function getSingleType($type,$description,$descriptionUnique,$descriptio
     );
     return $defaultOrder;
   }
+
+
+
+
+  public function getTemplateName()
+  {
+    return "copyrighthist.html";
+  }
+
+  function RegisterMenus()
+  {
+    // For all other menus, permit coming back here.
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
+    $Item = GetParm("item",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (!empty($Item) && !empty($Upload))
+    {
+      if (GetParm("mod",PARM_STRING) == $this->Name)
+      {
+        menu_insert("Browse::NewCopyright/Email/URL",1);
+        menu_insert("Browse::[BREAK]",100);
+      }
+      else
+      {
+        $text = _("View copyright/email/url histogram");
+        menu_insert("Browse::NewCopyright/Email/URL",10,$URI,$text);
+      }
+    }
+  } // RegisterMenus()
+
 };
 
 $NewPlugin = new CopyrightHistogram;
-$NewPlugin->Initialize();
+//$NewPlugin->Initialize();
