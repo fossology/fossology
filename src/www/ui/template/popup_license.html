@@ -25,7 +25,7 @@
   <h2>License Text</h2>
   {{ text|e }}
   {% else %}
-  <i18n>Original license text is not in the FOSSology database.</i18n>
+  {{ 'Original license text is not in the FOSSology database.'|t }}
   {% endif %}
 </div>
 {% endblock %}
