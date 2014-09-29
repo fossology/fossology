@@ -36,7 +36,7 @@ class CopyrightHistogram  extends FO_Plugin {
 
   function __construct()
   {
-    $this->Name = "copyrighthistogram";
+    $this->Name = "copyrighthist";
     $this->Title = TITLE_copyrightHistogram;
     $this->Version = "1.0";
     $this->Dependency = array();
@@ -510,13 +510,13 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::NewCopyright/Email/URL",1);
+        menu_insert("Browse::Copyright/Email/URL",1);
         menu_insert("Browse::[BREAK]",100);
       }
       else
       {
         $text = _("View copyright/email/url histogram");
-        menu_insert("Browse::NewCopyright/Email/URL",10,$URI,$text);
+        menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
       }
     }
   } // RegisterMenus()
