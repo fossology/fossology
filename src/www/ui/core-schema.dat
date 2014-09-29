@@ -2076,7 +2076,7 @@
   $Schema["SEQUENCE"]["license_decision_events_license_decision_event_pk_seq"] = "CREATE SEQUENCE \"license_decision_events_license_decision_event_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_decision_types_type_seq"] = "CREATE SEQUENCE \"license_decision_types_type_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_decision_pk_seq\" START 1;";
-
+  $Schema["SEQUENCE"]["copyright_audit_ca_pk_seq"] = "CREATE SEQUENCE \"copyright_audit_ca_pk_seq\" START 1;";
 
   $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
@@ -2392,3 +2392,43 @@
   $Schema["TABLE"]["license_decision_types"]["meaning"]["UPDATE"] = "";
 
 
+  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"ct_fk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"ct_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["copyright_audit"]["oldtext"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["oldtext"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"oldtext\" text;";
+  $Schema["TABLE"]["copyright_audit"]["oldtext"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"oldtext\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["oldtext"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["copyright_audit"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["user_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"user_fk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["user_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"user_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["user_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["copyright_audit"]["date"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["date"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"date\" timestamptz;";
+  $Schema["TABLE"]["copyright_audit"]["date"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"date\" SET NOT NULL, ALTER COLUMN \"date\" SET DEFAULT now();";
+  $Schema["TABLE"]["copyright_audit"]["date"]["UPDATE"] = "UPDATE copyright_audit SET date=now()";
+
+
+  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"ca_pk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"ca_pk\" SET NOT NULL, ALTER COLUMN \"ca_pk\" SET DEFAULT nextval('copyright_audit_ca_pk_seq'::regclass);";
+  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["UPDATE"] = "UPDATE copyright_audit SET ca_pk=nextval('copyright_audit_ca_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"uploadtree_pk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"uploadtree_pk\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["UPDATE"] = "";

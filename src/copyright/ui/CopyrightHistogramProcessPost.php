@@ -122,14 +122,30 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
         }
 
         $content = GetParm("value", PARM_STRING);
+        global $SysConf;
+        $userId = $SysConf['auth']['UserId'];
         $this->dbManager->begin();
-        $updateQuerry1 = "UPDATE copyright as CPR SET  content = $1  FROM copyright AS CP INNER JOIN $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
-               WHERE CPR.hash =$2 and ( UT.lft  BETWEEN  $3 AND  $4 ) $sql_upload";
 
-        $this->dbManager->getSingleRow($updateQuerry1, array($content ,$hash, $left,$right), "updateCopyrightContent");
-        $updateQuerry2 =  "UPDATE copyright as CPR SET  hash = $1  FROM copyright AS CP $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
-              WHERE CPR.hash =$2 and ( UT.lft  BETWEEN  $3 AND  $4 ) $sql_upload";
-        $this->dbManager->getSingleRow($updateQuerry2, array(md5($content) ,$hash, $left,$right), "updateCopyrightHash");
+          $params  = array($hash, $left,$right);
+          $commonClause = "FROM copyright AS CP INNER JOIN $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk";
+          $commonClause2 ="and ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload";
+          $getQuerry  = "SELECT * $commonClause  WHERE CP.hash =$1 $commonClause2";
+          $statementName = "getData";
+          $this->dbManager->prepare($statementName,$getQuerry);
+          $oldData = $this->dbManager->execute($statementName,$params);
+
+          $updateParams = array_merge($params,array( $content,  md5($content)));
+          $updateQuerry = "UPDATE copyright as CPR SET  content = $4 , hash = $5 $commonClause  WHERE CPR.hash =$1 $commonClause2";
+          $this->dbManager->getSingleRow($updateQuerry, $updateParams, "updateCopyrightContent");
+
+          $insertQuerry  = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
+
+
+          while ($row = pg_fetch_assoc($oldData))
+          {
+            $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload,$item,$row['pfile_fk']), "writeHist");
+          }
+
         $this->dbManager->commit();
         header('Content-type: text/json');
         return 'Successfully saved';
