@@ -345,6 +345,7 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
     $this->dbManager->prepare($statementName,
         $sql = "
 SELECT
+  LD.license_decision_event_pk,
   LD.pfile_fk,
   LD.uploadtree_fk,
   LD.date_added,
