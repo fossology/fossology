@@ -1256,8 +1256,13 @@ returns true if plugin should continue with sending AJAX request, false will abo
                 }
             }
 
+            // AndrewFix
+            // $('tr', dt.nTBody).live( 'click', function(e) {
+            // $(dt.nTBody).on('click', 'tr', function(e) { 
+
             //Add handler to the inline delete buttons
-            $(".table-action-deletelink", oTable).live("click", _fnOnRowDeleteInline);
+            //$(".table-action-deletelink", oTable).live("click", _fnOnRowDeleteInline); // backup
+            $(oTable).on("click", '.table-action-deletelink', _fnOnRowDeleteInline);
 
             if (!properties.bUseKeyTable) {
             //Set selected class on row that is clicked
@@ -1300,7 +1305,12 @@ returns true if plugin should continue with sending AJAX request, false will abo
                         var oActionFormLink = $(".table-action-" + sAction);
                         if (oActionFormLink.length != 0) {
 
-                            oActionFormLink.live("click", function () {
+                            // AndrewFix
+                            // $('tr', dt.nTBody).live( 'click', function(e) {
+                            // $(dt.nTBody).on('click', 'tr', function(e) { 
+
+                            // oActionFormLink.live("click", function () // backup
+                            oActionFormLink.on("click", function () {
 
 
                                 var sClass = this.className;

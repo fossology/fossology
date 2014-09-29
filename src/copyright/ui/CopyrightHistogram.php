@@ -61,11 +61,11 @@ class CopyrightHistogram  extends FO_Plugin {
 
 private function getTableForSingleType($type,$description,$descriptionUnique,$descriptionTotal, $upload_pk, $uploadtreeId, $filter, $uploadtree_tablename, $Agent_pk){
 
-  $output = "<table border=1 width='100%' id='copyright".$type."'>\n";
-  $output .= "</table>\n";
+  $output = "<div><table border=1 width='100%' id='copyright".$type."'>\n";
+  $output .= "</table>&nbsp;&nbsp;&nbsp;<button id=\"btnDeleteMemRow".$type."\">Delete ".$description."</button></div><br/>\n";
 
       $tableColumns = '[
-      { "sTitle" : "'._("Count").'", "sClass": "right" ,"sWidth" : "5%" },
+      { "sTitle" : "'._("Count").'", "sClass": "right read_only" ,"sWidth" : "5%" },
       { "sTitle" : "'.$description.'", "sClass": "left"}
     ]';
     $tableSorting = json_encode($this->returnSortOrder());
@@ -80,7 +80,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
       $dataTableConfig =
         '{  "bServerSide": true,
-            "sAjaxSource": "?mod=copyrightHistogram-processPost",
+            "sAjaxSource": "?mod=copyrightHistogram-processPost&action=getData",
             "fnServerData": function ( sSource, aoData, fnCallback ) {
               aoData.push( { "name":"upload" , "value" : "'.$upload_pk.'" } );
               aoData.push( { "name":"item" , "value" : "'.$uploadtreeId.'" } );
@@ -100,10 +100,21 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
       "bRetrieve": true
     }';
 
+  $editableConfiguration  = '{
+    "sReadOnlyCellClass": "read_only",
+    "sUpdateURL": "?mod=copyrightHistogram-processPost&action=update&type='.$type.'" ,
+    "sDeleteURL": "?mod=copyrightHistogram-processPost&action=delete&type='.$type.'",
+    "sDeleteRowButtonId": "btnDeleteMemRow'.$type.'",
+   "fnOnDeleted" : function(result) { createTable'.$type.'().fnDraw(false);  }
+    }';
+
+
+
+
 
     $output   .= "<script>
               function createTable".$type."() {
-                    var otable = $('#copyright".$type."').dataTable(". $dataTableConfig . ");
+                    var otable = $('#copyright".$type."').dataTable(". $dataTableConfig . ").makeEditable($editableConfiguration);
                     // var settings = otable.fnSettings(); // for debugging
                     return otable;
                 }
@@ -177,25 +188,25 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
     $this->vars['fileListing'] = $VF;
 
     //TODO
-//    /***************************************
-//    Problem: $ChildCount can be zero!
-//    This happens if you have a container that does not
-//    unpack to a directory.  For example:
-//    file.gz extracts to archive.txt that contains a license.
-//    Same problem seen with .pdf and .Z files.
-//    Solution: if $ChildCount == 0, then just view the license!
-//    $ChildCount can also be zero if the directory is empty.
-//     ***************************************/
-//    if ($ChildCount == 0)
-//    {
-//      $isADirectory = $this->isADirectory($Uploadtree_pk);
-//      if ($isADirectory) {
-//        return;
-//      }
-//      global $Plugins;
-//      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
-//      return($ModLicView->Output() );
-//    }
+    /***************************************
+    Problem: $ChildCount can be zero!
+    This happens if you have a container that does not
+    unpack to a directory.  For example:
+    file.gz extracts to archive.txt that contains a license.
+    Same problem seen with .pdf and .Z files.
+    Solution: if $ChildCount == 0, then just view the license!
+    $ChildCount can also be zero if the directory is empty.
+     ***************************************/
+    if ($ChildCount == 0)
+    {
+      $isADirectory = $this->isADirectory($Uploadtree_pk);
+      if ($isADirectory) {
+        return;
+      }
+      global $Plugins;
+      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
+      return($ModLicView->Output() );
+    }
 
     list( $VCopyright, $VEmail, $VUrl) = $this->getTableContent($upload_pk,$Uploadtree_pk, $filter, $Agent_pk);
 
