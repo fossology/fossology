@@ -14,20 +14,19 @@
 
 #include <string>
 
-class CopyrightMatch
-{
+class CopyrightMatch {
 public:
-    CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
-    ~CopyrightMatch();
-    const std::string getType() const;
-    const std::string getContent() const;
-    unsigned getStart() const;
-    unsigned getLength() const;
+  CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
+  ~CopyrightMatch();
+  const std::string getType() const;
+  const std::string getContent() const;
+  unsigned getStart() const;
+  unsigned getLength() const;
 private:
-    std::string content;
-    unsigned start;
-    unsigned length;
-    std::string type;
+  std::string content;
+  unsigned start;
+  unsigned length;
+  std::string type;
 };
 
 #endif // COPYRIGHTMATCH_H

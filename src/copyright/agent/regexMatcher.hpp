@@ -9,8 +9,8 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef REGEXMATCHER_H
-#define REGEXMATCHER_H
+#ifndef REGEXMATCHER_HPP
+#define REGEXMATCHER_HPP
 
 #include "matcher.hpp"
 #include <iostream>
@@ -19,12 +19,12 @@
 
 class RegexMatcher : public virtual Matcher {
 public:
-    RegexMatcher(const std::string  type,const std::string  pattern, int regexIndex = 0);
-    virtual std::vector <CopyrightMatch> match(const std::string content) const;
-    virtual ~RegexMatcher();
+  RegexMatcher(const std::string type, const std::string pattern, int regexIndex = 0);
+  virtual std::vector<CopyrightMatch> match(const std::string content) const;
+  virtual ~RegexMatcher();
 private:
-    rx::regex matchingRegex;
-    int regexIndex;
+  rx::regex matchingRegex;
+  int regexIndex;
 };
 
-#endif // REGEXMATCHER_H
+#endif // REGEXMATCHER_HPP

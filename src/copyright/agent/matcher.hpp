@@ -9,8 +9,8 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef MATCHER_H
-#define MATCHER_H
+#ifndef MATCHER_HPP
+#define MATCHER_HPP
 
 #include "copyrightMatch.hpp"
 #include <vector>
@@ -18,11 +18,11 @@
 
 class Matcher {
 public:
-  Matcher(const std::string  _type);
+  Matcher(const std::string _type);
   virtual ~Matcher();
 
   virtual bool matches(const std::string content){return true;};
-  virtual std::vector <CopyrightMatch> match(const std::string content) const =0;
+  virtual std::vector<CopyrightMatch> match(const std::string content) const = 0;
 
   const std::string getType() const;
 
@@ -30,4 +30,4 @@ private:
   std::string type;
 };
 
-#endif // MATCHER_H
+#endif // MATCHER_HPP

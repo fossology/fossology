@@ -11,8 +11,7 @@
 
 #include "database.hpp"
 
-const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
-{
+const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] = {
 // keep only one sequence
 #define SEQUENCE_NAME "copyright_ct_pk_seq"
     {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
@@ -23,10 +22,9 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
     {"type", "text", ""}, //TODO removed constrain: "CHECK (type in ('statement', 'email', 'url'))"},
     {"copy_startbyte", "integer", ""},
     {"copy_endbyte", "integer", ""},
-  };
+};
 
-CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname)
-{
+CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname) {
   name = g_strdup(aname);
 
   insertInDatabaseQuery = g_strdup_printf(
@@ -46,7 +44,6 @@ CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
   g_free(insertInDatabaseQuery);
   g_free(insertNoResultInDatabaseQuery);
 }
-
 
 std::string CopyrightDatabaseHandler::getColumnListString() {
   std::string result;

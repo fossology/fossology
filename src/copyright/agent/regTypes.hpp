@@ -9,35 +9,34 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef REGCOPYRIGHT_H_
-#define REGCOPYRIGHT_H_
+#ifndef REGTYPES_HPP
+#define REGTYPES_HPP
 
 #include <string>
 
-namespace regCopyright{
+namespace regCopyright {
    const std::string getRegex();
    const std::string getType();
 }
 
-
-namespace regURL{
+namespace regURL {
    const std::string getRegex();
    const std::string getType();
 }
 
-
-namespace regEmail{
+namespace regEmail {
    const std::string getRegex();
    const std::string getType();
 }
 
-namespace regEcc{
+namespace regEcc {
    const std::string getRegex();
    const std::string getType();
 }
 
-namespace regIp{
+namespace regIp {
    const std::string getRegex();
    const std::string getType();
 }
-#endif /* REGCOPYRIGHT_H_ */
+
+#endif // REGTYPES_HPP

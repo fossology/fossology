@@ -9,8 +9,8 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef COPYRIGHTUTILS_HPP_
-#define COPYRIGHTUTILS_HPP_
+#ifndef COPYRIGHTUTILS_HPP
+#define COPYRIGHTUTILS_HPP
 
 #include "identity.hpp"
 
@@ -32,9 +32,9 @@ extern "C"{
 #include "libfossology.h"
 }
 
-void queryAgentId(int& agent, PGconn* dbConn) ;
+void queryAgentId(int& agent, PGconn* dbConn);
 
-void bail(CopyrightState* state, int exitval) ;
+void bail(CopyrightState* state, int exitval);
 
 int writeARS(CopyrightState* state, int arsId, long uploadId, int success);
 
@@ -42,17 +42,14 @@ CopyrightState* getState(DbManager* dbManager, int verbosity);
 
 void fillMatchers(CopyrightState* state);
 
-std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector< RegexMatcher > matchers ) ;
+std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 
-
-bool saveToDatabase(const std::vector< CopyrightMatch >& matches, CopyrightState* state, long pFileId) ;
+bool saveToDatabase(const std::vector<CopyrightMatch>& matches, CopyrightState* state, long pFileId);
 
 void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state);
-void matchPFileWithLicenses(CopyrightState* state, long pFileId) ;
 
+void matchPFileWithLicenses(CopyrightState* state, long pFileId);
 
-bool processUploadId (CopyrightState* state, int uploadId) ;
+bool processUploadId(CopyrightState* state, int uploadId);
 
-
-
-#endif /* COPYRIGHTUTILS_HPP_ */
+#endif // COPYRIGHTUTILS_HPP
