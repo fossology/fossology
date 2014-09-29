@@ -2,22 +2,22 @@
 
 {% if previousItem or nextItem %}
 <div class="groupBox">
-    {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}">&lt;</a> {% endif %}
-    {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}">&gt;</a> {% endif %}
+    {% if previousItem %} <a class="buttonLink" href="{{ uri }}&item={{ previousItem }}&lastItem={{ itemId }}">&lt;</a> {% endif %}
+    {% if nextItem %} <a class="buttonLink" href="{{ uri }}&item={{ nextItem }}&lastItem={{ itemId }}">&gt;</a> {% endif %}
 </div>
 {% endif %}
 
 <div class="groupBox">
     <fieldset style="display:inline">
         <legend>
-            <i18n>License decision scope</i18n>
+            {{ 'License decision scope'|t }}
         </legend>
         <input type="checkbox" name="global_license_decision"/> global
     </fieldset>
     <br/>
     <fieldset style="display: inline;">
         <legend>
-            <i18n>Clearing decision type</i18n>
+            {{ 'Clearing decision type'|t }}
         </legend>
         {% for clearingType in clearingTypes %}
         <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
@@ -33,26 +33,31 @@
     {{ macro.table("licenseDecisionsTable", licenseDecisionsHeaders) }}
 </div>
 
-<div style="clear:both">
+<div class="groupBox">
 
     {% if auditDenied %}
-    <i18n>Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this
+    {{ 'Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this
         file.
-    </i18n>
+    '|t }}
     {% else %}
     <button type=\"button\" onclick='openUserModal()'>
-        <i18n>User Decision</i18n>
+        {{ 'User Decision ...'|t }}
     </button>
     &nbsp;
     <button type=\"button\" onclick='openBulkModal()'>
-        <i18n>Bulk Recognition</i18n>
+        {{ 'Bulk Recognition ...'|t }}
     </button>
     <br/>
 
+    <div style="padding-top: 10px;">
+
     <div class="modal" id="userModal" hidden>
+        <div style="padding-bottom: 10px">
         {{ macro.table("licenseSelectionTable") }}
+        </div>
     </div>
     {% include 'view_license_bulk.html' %}
+    </div>
     {% endif %}
 
 </div>
@@ -62,31 +67,31 @@
 {% if clearingHistory %}
 
 <h3>
-    <i18n>Clearing History</i18n>
+    {{ 'Clearing History'|t }}
 </h3>
 <div class="scrollable2">
     <table border="1" id="clearingHistoryTable" name="clearingHistoryTable">
         <tr>
             <th>
-                <i18n>Date</i18n>
+                {{ 'Date'|t }}
             </th>
             <th>
-                <i18n>Username</i18n>
+                {{ 'Username'|t }}
             </th>
             <th>
-                <i18n>Scope</i18n>
+                {{ 'Scope'|t }}
             </th>
             <th>
-                <i18n>Type</i18n>
+                {{ 'Type'|t }}
             </th>
             <th>
-                <i18n>Licenses</i18n>
+                {{ 'Licenses'|t }}
             </th>
             <th>
-                <i18n>Comment</i18n>
+                {{ 'Comment'|t }}
             </th>
             <th>
-                <i18n>Remark</i18n>
+                {{ 'Remark'|t }}
             </th>
         </tr>
         {% for row in clearingHistory %}

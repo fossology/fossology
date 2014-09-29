@@ -51,7 +51,7 @@ class ClearingDao extends Object
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
   }
-  
+
   function setUploadTreeId($uploadtreeId)
   {
     if ($uploadtreeId == 0 || $this->uploadTreeId == $uploadtreeId)
@@ -64,8 +64,8 @@ class ClearingDao extends Object
     }
     $this->uploadTreeId = $uploadtreeId;
   }
-  
-  
+
+
   function getUploadtreeId()
   {
     return $this->uploadTreeId;
@@ -77,7 +77,7 @@ class ClearingDao extends Object
    * @param $uploadTreeId
    * @return ClearingDecision[]
    */
-  function getFileClearings($uploadTreeId=0)
+  function getFileClearings($uploadTreeId = 0)
   {
     $this->setUploadTreeId($uploadTreeId);
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($this->getUploadtreeId());
@@ -261,13 +261,24 @@ class ClearingDao extends Object
    * @param $type
    * @param $isGlobal
    */
+  public function addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
+  {
+    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, false);
+  }
+
+  /**
+   * @param $uploadTreeId
+   * @param $userId
+   * @param int $licenseId
+   * @param $type
+   * @param $isGlobal
+   */
   public function removeLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
   {
     $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
-    // TODO delete license
   }
 
-  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $is_removed, $reportInfo='', $comment='')
+  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $is_removed, $reportInfo = '', $comment = '')
   {
     if ($isGlobal)
     {
@@ -403,18 +414,18 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
     return $result;
   }
 
-  public function getRelevantLicenseDecisionEvents($userId, $itemId=0)
+  public function getRelevantLicenseDecisionEvents($userId, $itemId = 0)
   {
     $this->setUploadTreeId($itemId);
     $uploadTreeId = $this->getUploadtreeId();
-    
-    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1",array($itemId),
-            $sqlNote=__METHOD__.'.get.item');
- 
-   // TODO move type.meaning from DB to data
+
+    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1", array($itemId),
+        $sqlNote = __METHOD__ . '.get.item');
+
+    // TODO move type.meaning from DB to data
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
-        $sql="
+        $sql = "
 SELECT
   LD.pfile_fk,
   LD.uploadtree_fk,
@@ -425,7 +436,9 @@ SELECT
   LD.rf_fk,
   LR.rf_shortname,
   (LD.uploadtree_fk is null) is_global,
-  LD.is_removed
+  LD.is_removed,
+  LD.reportinfo,
+  LD.comment
 FROM license_decision_events LD
 INNER JOIN license_decision_types LDT ON LD.type_fk = LDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
@@ -434,7 +447,7 @@ INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   (LD.uploadtree_fk IS NULL AND LD.pfile_fk=$3 OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY LD.license_decision_events_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed
+GROUP BY LD.license_decision_events_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed, LD.reportinfo, LD.comment
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -465,18 +478,27 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
       {
         continue;
       }
-      $licenseId = $event['rf_fk'];
+      $licenseId = intval($event['rf_fk']);
+      $type = $event['type'];
+      $reportInfo = $event['reportinfo'];
+      $comment = $event['comment'];
+      $licenseProperties = array(
+          'id' => $licenseId,
+          'type' => $type,
+          'reportinfo' => $reportInfo,
+          'comment' => $comment
+      );
       $licenseShortName = $event['rf_shortname'];
       $isRemoved = $event['is_removed'];
 
-      if ($isRemoved)
+      if ($isRemoved === "t")
       {
         unset($addedLicenses[$licenseShortName]);
-        $removedLicenses[$licenseShortName] = $licenseId;
+        $removedLicenses[$licenseShortName] = $licenseProperties;
       } else
       {
         unset($removedLicenses[$licenseShortName]);
-        $addedLicenses[$licenseShortName] = $licenseId;
+        $addedLicenses[$licenseShortName] = $licenseProperties;
       }
     }
 

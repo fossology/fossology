@@ -748,10 +748,10 @@
   $Schema["TABLE"]["highlight"]["rf_len"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["DESC"] = "";
-  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"clearing_fk\" int8;";
-  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"clearing_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["highlight_bulk"]["clearing_fk"]["UPDATE"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["license_decision_events_fk"]["DESC"] = "";
+  $Schema["TABLE"]["highlight_bulk"]["license_decision_events_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"license_decision_events_fk\" int8;";
+  $Schema["TABLE"]["highlight_bulk"]["license_decision_events_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"license_decision_events_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["highlight_bulk"]["license_decision_events_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["DESC"] = "";
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"lrb_fk\" int8;";
@@ -1845,8 +1845,6 @@
 
 
 
-
-
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
@@ -2092,6 +2090,7 @@
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
+  $Schema["CONSTRAINT"]["license_decision_events_pkey"] = "ALTER TABLE \"license_decision_events\" ADD CONSTRAINT \"license_decision_events_pkey\" PRIMARY KEY (\"license_decision_events_pk\");";
   $Schema["CONSTRAINT"]["license_decision_types_pkey"] = "ALTER TABLE \"license_decision_types\" ADD CONSTRAINT \"license_decision_types_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_types_pkey"] = "ALTER TABLE \"clearing_decision_types\" ADD CONSTRAINT \"clearing_decision_types_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";

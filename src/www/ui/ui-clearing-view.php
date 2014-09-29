@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -254,7 +255,7 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $output;
 
 
-    $this->vars['uri'] = Traceback_uri();
+    //$this->vars['uri'] = Traceback_uri();
 
 
     $clearingHistory = array();
@@ -276,7 +277,7 @@ class ClearingView extends FO_Plugin
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
     $this->vars['clearingTypes'] = $this->clearingDao->getClearingDecisionTypeMap();
-    $this->vars['selectedClearingType'] = 'Identified';
+    $this->vars['selectedClearingType'] = ClearingDecision::NOT_DECIDED;
 
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;

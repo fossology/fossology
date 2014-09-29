@@ -238,6 +238,7 @@ html, body
     margin-top: 20px;
     position: relative;
     top: -20px;
+    padding: 10px;
 }
 
 .headerNew {

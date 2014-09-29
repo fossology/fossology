@@ -1,9 +1,9 @@
 <div class="modal" id="bulkModal" hidden>
  <form name="bulkForm">
- <h2><i18n>Bulk recognition</i18n></h2>
+ <h2>{{ 'Bulk recognition'|t }}</h2>
  <select name="bulkRemoving" id="bulkRemoving">
-  <option value="f"><i18n>Add license</i18n></option>
-  <option value="t"><i18n>Remove license</i18n></option>
+  <option value="f">{{ 'Add license'|t }}</option>
+  <option value="t">{{ 'Remove license'|t }}</option>
  </select>
  
  <select name="bulkLicense" id="bulkLicense" style="min-width:200px" >
@@ -12,8 +12,8 @@
  {% endfor %}
  </select>
 
- <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&lic=','<i18n>License Text</i18n>')"><i18n>Show origin</i18n></button>
- <br><i18n>reference text</i18n>:<br><textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
+ <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&lic=','{{ 'License Text'|t }}')">{{ 'Show origin'|t }}</button>
+ <br>{{ 'reference text'|t }}:<br><textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
  <br><button type="button" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>
  <br><span id="bulkIdResult" name="bulkIdResult" hidden></span>
  <br><span id="bulkJobResult" name="bulkJobResult" hidden>a bulk job has completed</span>

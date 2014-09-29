@@ -140,11 +140,11 @@ class HighlightDao extends Object
   private function getHighlightBulk($uploadTreeId, $licenseId, $agentId, $highlighId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT clearing_fk,start,len, rf_fk
+    $sql = "SELECT license_decision_events_fk,start,len, rf_fk
              FROM highlight_bulk INNER JOIN license_ref_bulk
              ON license_ref_bulk.lrb_pk = highlight_bulk.lrb_fk
              WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
-             ANd rf_fk = $2";
+             AND rf_fk = $2";
     $params = array($uploadTreeId, $licenseId);
     if (!empty($agentId))
     {
@@ -156,7 +156,7 @@ class HighlightDao extends Object
     {
       $stmt .= ".Highlight";
       $params[] = $highlighId;
-      $sql .= " AND highlight_bulk.clearing_fk = $" . count($params);
+      $sql .= " AND highlight_bulk.license_decision_events_fk = $" . count($params);
     }
     $this->dbManager->prepare($stmt, $sql);
     $result = $this->dbManager->execute($stmt, $params);

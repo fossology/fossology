@@ -3,42 +3,42 @@
 {% block content %}
 
 <p>
-    <i18n>On the top, you see for each scanner</i18n>
+    {{ 'On the top, you see for each scanner'|t }}
     ...
 <ul>
     <li>
-        <i18n>if it ever run on this upload</i18n>
+        {{ 'if it ever run on this upload'|t }}
     </li>
     <li>
-        <i18n>the revision of the latest results
-            <i18n>
+        {{ 'the revision of the latest results
+            {{ '
     </li>
     <li>
-        <i18n>the newest revision</i18n>
+        {{ 'the newest revision'|t }}
     </li>
     <li>
-        <i18n>a link to restart the scanner if latest results are not from newest revision</i18n>
+        {{ 'a link to restart the scanner if latest results are not from newest revision'|t }}
     </li>
 </ul>
-<i18n>If there are results from different revisions, you can select the results of these runs.</i18n>
+{{ 'If there are results from different revisions, you can select the results of these runs.'|t }}
 </p>
 
 <p>
-    <i18n>
+    {{ '
         On the left side, you see a list of all found licenses.
         The counters show how often a license is found by scanners and how often it was concluded.
         Click on the license name to search for where the license is found in the file listing.
-    </i18n>
+    '|t }}
 </p>
 
 <p>
-    <i18n>
+    {{ '
         On the right side, you see a list of all files or directories in the current directory.
         You also the licenses found by any scanner and what scanners found it.
         Also old results may be included if they differ from current revision of the scanner.
         Results from an older version are marked.
         You can search for any string in the file names or license names.
-    </i18n>
+    '|t }}
 </p>
 
 {% endblock %}

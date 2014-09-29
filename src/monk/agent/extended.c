@@ -81,8 +81,6 @@ void onNoMatch(MonkState* state, File* file) {
 void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
   if (state->scanMode == MODE_CLI) {
     onFullMatch_Cli(file, license, matchInfo);
-  } else {
-    onFullMatch_Bulk(state, file, license, matchInfo);
   }
 }
 
