@@ -223,46 +223,9 @@ class ClearingView extends FO_Plugin
 
     }
     $licenseInformation .= $output;
-   
-    $tableColumns = '[
-      { "sTitle" : "' . _("License") . '", "sClass": "left"},
-      { "sTitle" : "' . _("Source") . '", "sClass": "left", "bSortable": false},
-      { "sTitle" : "' . _("Text for report") . '", "sClass": "center", "bSortable": false},
-      { "sTitle" : "' . _("Comment") . '", "sClass": "center", "bSortable": false},
-      { "sTitle" : "' . _("Action") . '", "sClass": "center", "bSortable": false}
-    ]';
-    
-    $dataTableConfig =
-        '{  "bServerSide": true,
-       "sAjaxSource": "?mod=conclude-license&do=licenseDecisions",
-       "fnServerData": function ( sSource, aoData, fnCallback ) {
-            aoData.push( { "name": "upload" , "value" : "' . $uploadId . '" } );
-            aoData.push( { "name": "item" , "value" : "' . $uploadTreeId . '" } );
-            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
-              if (confirm("You are not logged in. Go to login page?"))
-                window.location.href="' . Traceback_uri() . '?mod=auth";
-            });
-          },
-      "aoColumns": ' . $tableColumns . ',
-      "iDisplayLength": 25,
-      "bProcessing": true,
-      "bStateSave": true,
-      "bRetrieve": true,
-      "bPaginate": false,
-      "bFilter": false
-    }';
 
-    $script = "<script>
-              function createLicenseDecisionTable() {
-                    var otable = $('#licenseDecisionsTable').dataTable(" . $dataTableConfig . ");
-                    return otable;
-                }
-               $(document).ready(function () {
-               createLicenseDecisionTable();
-}               );
-            </script>";
 
-    $this->vars['script'] = $script;
+    $this->vars['uri'] = Traceback_uri();
 
 
     $clearingHistory = array();
@@ -277,6 +240,7 @@ class ClearingView extends FO_Plugin
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
     list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
+    $this->vars['uploadId'] = $uploadId;
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;

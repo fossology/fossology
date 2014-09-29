@@ -1,0 +1,82 @@
+<script>
+    selectedLicensesTableColumns = [
+        {"sTitle": "<i18n>License</i18n>", "sClass": "left"},
+        {"sTitle": "<i18n>Source</i18n>", "sClass": "left", "bSortable": false},
+        {"sTitle": "<i18n>Text</i18n>", "sClass": "center", "bSortable": false},
+        {"sTitle": "<i18n>Comment</i18n>", "sClass": "center", "bSortable": false},
+        {"sTitle": "<i18n>Action</i18n>", "sClass": "center", "bSortable": false}
+    ];
+
+    uploadId = {
+    {
+        uploadId
+    }
+    }
+    ;
+    itemId = {
+    {
+        itemId
+    }
+    }
+    ;
+
+    selectedLicensesTableConfig = {
+        "bServerSide": true,
+        "sAjaxSource": "?mod=conclude-license&do=licenseDecisions",
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            aoData.push({"name": "upload", "value": uploadId});
+            aoData.push({"name": "item", "value": itemId});
+            $.getJSON(sSource, aoData, fnCallback).fail(function () {
+                if (confirm("You are not logged in. Go to login page?"))
+                    window.location.href = "' . {{ uri }} . '?mod=auth";
+            });
+        },
+        "aoColumns": selectedLicensesTableColumns,
+        "iDisplayLength": 25,
+        "bProcessing": true,
+        "bStateSave": true,
+        "bRetrieve": true,
+        "bPaginate": false,
+        "bFilter": false
+    };
+
+    function createLicenseDecisionTable() {
+        otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig);
+        return otable;
+    }
+
+    addLicenseTableColumns = [
+        {"sTitle": "<i18n>License</i18n>", "sClass": "left"},
+        {"sTitle": "<i18n>Action</i18n>", "sClass": "center", "bSortable": false}
+    ];
+
+    addLicenseTableConfig = {
+        "bServerSide": true,
+        "sAjaxSource": "?mod=conclude-license&do=licenses",
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            aoData.push({"name": "upload", "value": uploadId});
+            aoData.push({"name": "item", "value": itemId});
+            $.getJSON(sSource, aoData, fnCallback).fail(function () {
+                if (confirm("You are not logged in. Go to login page?"))
+                    window.location.href = "' . {{ uri }} . '?mod=auth";
+            });
+        },
+        "aoColumns": addLicenseTableColumns,
+        "iDisplayLength": 25,
+        "bProcessing": true,
+        "bStateSave": true,
+        "bRetrieve": true,
+        "bPaginate": false,
+        "bFilter": true
+    };
+
+    function createLicenseSelectionTable() {
+        otable = $('#licenseSelectionTable').dataTable(addLicenseTableConfig);
+        return otable;
+    }
+
+    $(document).ready(function () {
+        createLicenseDecisionTable();
+        createLicenseSelectionTable();
+    });
+</script>

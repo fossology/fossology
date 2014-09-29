@@ -14,6 +14,7 @@
         </legend>
         <input type="checkbox" name="global_license_decision"/> global
     </fieldset>
+    <br/>
     <fieldset style="display: inline;">
         <legend>
             <i18n>Clearing decision type</i18n>
@@ -23,6 +24,7 @@
         value="{{ loop.index }}">
         {{ clearingType }}
         </input>
+        <br/>
         {% endfor %}
     </fieldset>
 </div>
@@ -46,7 +48,10 @@
         <i18n>Bulk Recognition</i18n>
     </button>
     <br/>
-    {% include 'change_license_modal.html' %}
+
+    <div class="modal" id="userModal" hidden>
+        {{ macro.table("licenseSelectionTable") }}
+    </div>
     {% include 'view_license_bulk.html' %}
     {% endif %}
 

@@ -22,7 +22,6 @@ use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
@@ -110,12 +109,12 @@ class AjaxClearingView extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return null;
     }
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
     {
-      return;
+      return null;
     }
     header('Content-type: text/json');
   }
@@ -163,6 +162,21 @@ class AjaxClearingView extends FO_Plugin
     {
       switch ($action)
       {
+        case "licenses":
+          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $_GET['sSortDir_0'] == "asc");
+
+          $licenses = array();
+          foreach ($licenseRefs as $licenseRef)
+          {
+            $licenses[] = array($licenseRef->getShortName(), $licenseRef->getFullName(), $licenseRef->getId());
+          }
+          return json_encode(
+              array(
+                  'sEcho' => intval($_GET['sEcho']),
+                  'aaData' => $licenses,
+                  'iTotalRecords' => count($licenses),
+                  'iTotalDisplayRecords' => count($licenses)));
+
         case "licenseDecisions":
           $aaData = $this->getCurrentLicenseDecisions($uploadId, $userId, $fileTreeBounds);
           return json_encode(

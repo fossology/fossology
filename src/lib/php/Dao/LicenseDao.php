@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
@@ -144,13 +143,16 @@ class LicenseDao extends Object
   /**
    * @return LicenseRef[]
    */
-  public function getLicenseRefs()
+  public function getLicenseRefs($search = null, $orderAscending = true)
   {
-    $statementName = __METHOD__;
+    $searchCondition = $search ? "WHERE lower(rf_shortname) like($1)" : "";
+
+    $order = $orderAscending ? "ASC" : "DESC";
+    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_" . $order;
 
     $this->dbManager->prepare($statementName,
-        "select rf_pk,rf_shortname,rf_fullname from license_ref order by rf_shortname");
-    $result = $this->dbManager->execute($statementName);
+        "select rf_pk,rf_shortname,rf_fullname from license_ref $searchCondition order by rf_shortname $order");
+    $result = $this->dbManager->execute($statementName, $search ? array('%' . strtolower($search) . '%') : array());
 
     $licenseRefs = array();
     while ($row = $this->dbManager->fetchArray($result))
