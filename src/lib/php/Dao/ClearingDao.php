@@ -232,62 +232,6 @@ class ClearingDao extends Object
 
   }
 
-
-  /**
-   * @param $uploadTreeId
-   * @param $userId
-   * @param int $licenseId
-   * @param $type
-   * @param $isGlobal
-   */
-  public function addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
-  {
-    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, false);
-  }
-
-  /**
-   * @param $uploadTreeId
-   * @param $userId
-   * @param int $licenseId
-   * @param $type
-   * @param $isGlobal
-   */
-  public function removeLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
-  {
-    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
-  }
-
-  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $is_removed, $reportInfo = '', $comment = '')
-  {
-    if ($isGlobal)
-    {
-      $uploadTreeId = NULL;
-    }
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName,
-        "
-insert into license_decision_events (
-  uploadtree_fk,
-  pfile_fk,
-  user_fk,
-  rf_fk,
-  type_fk,
-  is_removed,
-  reportinfo,
-  comment
-) VALUES (
-  $1,
-  (select pfile_fk from uploadtree where uploadtree_pk=$1),
-  $2,
-  $3,
-  $4,
-  $5,
-  $6,
-  $7)");
-    $res = $this->dbManager->execute($statementName, array($uploadTreeId, $userId, $licenseId, $type, $is_removed ? 't' : 'f', $reportInfo, $comment));
-    $this->dbManager->freeResult($res);
-  }
-
   /**
    * @param int $licenseId
    * @param $uploadTreeId
@@ -359,7 +303,7 @@ insert into license_decision_events (
     return $licensesWithCount;
   }
 
-  public function getRelevantClearingDecisionEvents($userId, $uploadTreeId)
+  public function getRelevantClearingDecision($userId, $uploadTreeId)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -371,17 +315,17 @@ SELECT
   CD.user_fk,
   GU.group_fk,
   CDT.meaning AS type,
-  CD.rf_fk,
-  LR.rf_shortname,
-  CD.is_removed
-FROM clearing_decision_events CD
+  CD.is_global,
+FROM clearing_decisions CD
+INNER JOIN clearing_decisions CD2 ON CD.pfile_fk = CD2.pfile_fk
 INNER JOIN clearing_decision_types CDT ON CD.type_fk = CDT.type_pk
 INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
-  CD.uploadtree_fk = $1 AND
+  CD2.uploadtree_fk=$1 AND
+  (CD.is_global OR CD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY CD.clearing_decision_pk
+GROUP BY CD.license_decision_events_pk
 ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -395,16 +339,16 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
 
   public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
   {
+    // TODO remove query for pfileId
     $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1", array($uploadTreeId),
         $sqlNote = __METHOD__ . '.get.item');
 
     // TODO move type.meaning from DB to data
-    // Why? We are using type meaning in agents as well and should have a single relation name <-> ordinal
+    // No!   We are using type meaning in agents as well and should have a single relation name <-> ordinal
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         $sql = "
 SELECT
-  LD.license_decision_events_pk as license_decision_event_id,
   LD.pfile_fk,
   LD.uploadtree_fk,
   LD.date_added,
@@ -484,4 +428,56 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
 
     return array($addedLicenses, $removedLicenses);
   }
+
+  /**
+   * @param $uploadTreeId
+   * @param $userId
+   * @param int $licenseId
+   * @param $type
+   * @param $isGlobal
+   */
+  public function addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
+  {
+    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, false);
+  }
+
+  /**
+   * @param $uploadTreeId
+   * @param $userId
+   * @param int $licenseId
+   * @param $type
+   * @param $isGlobal
+   */
+  public function removeLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal)
+  {
+    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
+  }
+
+  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $is_removed, $reportInfo = '', $comment = '')
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "
+insert into license_decision_events (
+  uploadtree_fk,
+  pfile_fk,
+  user_fk,
+  rf_fk,
+  type_fk,
+  is_removed,
+  reportinfo,
+  comment
+) VALUES (
+  $1,
+  (select pfile_fk from uploadtree where uploadtree_pk=$1),
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7)");
+    $res = $this->dbManager->execute($statementName, array($uploadTreeId, $userId, $licenseId, $type, $is_removed ? 't' : 'f', $reportInfo, $comment));
+    $this->dbManager->freeResult($res);
+  }
+
 }

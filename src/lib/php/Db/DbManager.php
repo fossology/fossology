@@ -199,10 +199,11 @@ class DbManager extends Object
   }
 
   /**
-   * @param string tableName
-   * @param string keyColumn
-   * @param string valueColumn
-   * @param string sqlLog
+   * @param string $tableName
+   * @param string $keyColumn
+   * @param string $valueColumn
+   * @param string $sqlLog
+   * @return array
    */
   public function createMap($tableName,$keyColumn,$valueColumn,$sqlLog=''){
     if (empty($sqlLog))
@@ -250,5 +251,9 @@ class DbManager extends Object
     $this->queryCount[$statementName]++;
   }
 
+  public function booleanFromDb($booleanString)
+  {
+    return $this->dbDriver->booleanFromDb($booleanString);
+  }
 
 }

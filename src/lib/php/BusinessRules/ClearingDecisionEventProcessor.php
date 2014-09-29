@@ -106,14 +106,13 @@ class ClearingDecisionEventProcessor {
   /**
    * @param FileTreeBounds $fileTreeBounds
    * @param int $userId
+   * @return array
    */
   public function getCurrentLicenseDecisions(FileTreeBounds $fileTreeBounds, $userId) {
     $uploadTreeId = $fileTreeBounds->getUploadTreeId();
     $uploadId = $fileTreeBounds->getUploadId();
 
     $agentDetectedLicenses = $this->getAgentDetectedLicenses($fileTreeBounds);
-
-    $agentsWithResults = $this->getAgentsWithResults($agentDetectedLicenses);
 
     $agentLatestMap = $this->getLatestAgents($agentDetectedLicenses, $uploadId);
 

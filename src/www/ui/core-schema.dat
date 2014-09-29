@@ -544,6 +544,11 @@
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" boolean;";
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"is_global\" SET NOT NULL, ALTER COLUMN \"is_global\" SET DEFAULT false;";
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["UPDATE"] = "";
+
   $Schema["TABLE"]["clearing_decision"]["date_added"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"date_added\" timestamptz;";
   $Schema["TABLE"]["clearing_decision"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";

@@ -144,4 +144,14 @@ class Postgres implements Driver
     return;
   }
 
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    return $booleanValue === 't';
+  }
+
+
 }

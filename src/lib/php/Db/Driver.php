@@ -81,4 +81,10 @@ interface Driver
    */
   public function commit();
 
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue);
+
 }
