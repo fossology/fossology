@@ -153,5 +153,14 @@ class Postgres implements Driver
     return $booleanValue === 't';
   }
 
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 't' : 'f';
+  }
+
 
 }

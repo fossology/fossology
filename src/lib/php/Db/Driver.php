@@ -87,4 +87,10 @@ interface Driver
    */
   public function booleanFromDb($booleanValue);
 
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue);
+
 }

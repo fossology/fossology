@@ -339,10 +339,6 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
 
   public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
   {
-    // TODO remove query for pfileId
-    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1", array($uploadTreeId),
-        $sqlNote = __METHOD__ . '.get.item');
-
     // TODO move type.meaning from DB to data
     // No!   We are using type meaning in agents as well and should have a single relation name <-> ordinal
     $statementName = __METHOD__;
@@ -357,24 +353,26 @@ SELECT
   LDT.meaning AS type,
   LD.rf_fk,
   LR.rf_shortname,
-  (LD.uploadtree_fk is null) is_global,
+  LD.is_global,
   LD.is_removed,
   LD.reportinfo,
   LD.comment
 FROM license_decision_event LD
+INNER JOIN license_decision_event LD2 ON LD.pfile_fk = LD2.pfile_fk
 INNER JOIN license_decision_type LDT ON LD.type_fk = LDT.type_pk
 INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
 INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
-  (LD.uploadtree_fk IS NULL AND LD.pfile_fk=$3 OR LD.uploadtree_fk = $1) AND
+  LD2.uploadtree_fk=$1 AND
+  (LD.is_global OR LD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
 GROUP BY LD.license_decision_event_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LD.is_removed, LD.reportinfo, LD.comment
 ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
-        array($uploadTreeId, $userId, $item['pfile_fk'])
+        array($uploadTreeId, $userId)
     );
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
@@ -453,7 +451,7 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
     $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
   }
 
-  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $is_removed, $reportInfo = '', $comment = '')
+  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -464,6 +462,7 @@ insert into license_decision_event (
   user_fk,
   rf_fk,
   type_fk,
+  is_global,
   is_removed,
   reportinfo,
   comment
@@ -475,8 +474,12 @@ insert into license_decision_event (
   $4,
   $5,
   $6,
-  $7)");
-    $res = $this->dbManager->execute($statementName, array($uploadTreeId, $userId, $licenseId, $type, $is_removed ? 't' : 'f', $reportInfo, $comment));
+  $7,
+  $8)");
+    $res = $this->dbManager->execute($statementName, array(
+        $uploadTreeId, $userId, $licenseId, $type,
+        $this->dbManager->booleanToDb($isGlobal),
+        $this->dbManager->booleanToDb($isRemoved), $reportInfo, $comment));
     $this->dbManager->freeResult($res);
   }
 
