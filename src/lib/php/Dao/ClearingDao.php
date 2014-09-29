@@ -52,35 +52,15 @@ class ClearingDao extends Object
     $this->uploadDao = $uploadDao;
   }
 
-  function setUploadTreeId($uploadtreeId)
-  {
-    if ($uploadtreeId == 0 || $this->uploadTreeId == $uploadtreeId)
-    {
-      return;
-    }
-    if ($this->uploadTreeId != 0)
-    {
-      throw new Exception('uploadtreeId already initialized');
-    }
-    $this->uploadTreeId = $uploadtreeId;
-  }
-
-
-  function getUploadtreeId()
-  {
-    return $this->uploadTreeId;
-  }
-
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
    * @param $uploadTreeId
    * @return ClearingDecision[]
    */
-  function getFileClearings($uploadTreeId = 0)
+  function getFileClearings($uploadTreeId)
   {
-    $this->setUploadTreeId($uploadTreeId);
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($this->getUploadtreeId());
+    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
     return $this->getFileClearingsFolder($fileTreeBounds);
   }
 
@@ -216,7 +196,6 @@ class ClearingDao extends Object
    */
   public function insertClearingDecision($licenseId, $removed, $uploadTreeId, $userid, $type, $comment, $remark)
   {
-    $this->setUploadTreeId($uploadTreeId);
     $this->dbManager->begin();
 
     $statementName = __METHOD__ . ".s";
@@ -414,12 +393,9 @@ ORDER BY CD.date_added ASC, CD.rf_fk ASC, CD.is_removed ASC
     return $result;
   }
 
-  public function getRelevantLicenseDecisionEvents($userId, $itemId = 0)
+  public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
   {
-    $this->setUploadTreeId($itemId);
-    $uploadTreeId = $this->getUploadtreeId();
-
-    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1", array($itemId),
+    $item = $this->dbManager->getSingleRow("SELECT * FROM uploadtree WHERE uploadtree_pk=$1", array($uploadTreeId),
         $sqlNote = __METHOD__ . '.get.item');
 
     // TODO move type.meaning from DB to data
