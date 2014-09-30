@@ -15,9 +15,10 @@ without any warranty.
     <parameters>
         <parameter key="twig.environment.config" type="collection">
 <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
+            <parameter key="cache" type="constant">false</parameter>
             <parameter key="autoescape" type="constant">false</parameter>
+            <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
         </parameter>
-        <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
     </parameters>
 
     <services>
@@ -106,6 +107,7 @@ without any warranty.
         
         <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
             <argument type="service" id="twig.loader"/>
+            <argument id="option">%twig.environment.config%</argument>
         </service>
 
     </services>
