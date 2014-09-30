@@ -173,8 +173,7 @@ class SqliteE implements Driver
    */
   public function booleanFromDb($booleanValue)
   {
-    // TODO check this value
-    return $booleanValue === '1';
+    return $booleanValue === 1;
   }
 
   /**
