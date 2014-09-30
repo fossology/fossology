@@ -15,8 +15,6 @@
  <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&lic=','{{ 'License Text'|t }}')">{{ 'Show origin'|t }}</button>
  <br>{{ 'reference text'|t }}:<br><textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
  <br><button type="button" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>
- <br><span id="bulkIdResult" name="bulkIdResult" hidden></span>
- <br><span id="bulkJobResult" name="bulkJobResult" hidden>a bulk job has completed</span>
  <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
  </form>
 </div>
