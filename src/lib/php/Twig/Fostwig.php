@@ -18,17 +18,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Twig;
 
-class I18nFilter extends \Twig_Extension
+class Fostwig extends \Twig_Environment
 {
-    public function getFilters()
+  function __construct($loader,
+          $options=array('autoescape'=>false,
+                         'cache'=>'/tmp/twigcache',
+                         'twig.loader.source_path'=>'../../www/ui/template')
+      )
+  {
+    if (array_key_exists('twig.loader.source_path', $options) && substr($options['twig.loader.source_path'], 0, 1) !== '/')
     {
-        return array(
-            new \Twig_SimpleFilter('t', 'gettext')
-        );
+      $options['twig.loader.source_path'] = dirname(__DIR__) . '/' . $options['twig.loader.source_path'];
     }
-
-    public function getName()
-    {
-        return 'i18n_filter';
-    }
+    $loader->setPaths($options['twig.loader.source_path']);
+    parent::__construct($loader, $options);
+    $this->addFilter(new \Twig_SimpleFilter('t', 'gettext'));
+  }
 }

@@ -101,19 +101,11 @@ without any warranty.
         </service>
 
         <service id="twig.loader" class="Twig_Loader_Filesystem">
-            <argument>%twig.loader.source_path%</argument>
+            <argument type="string" id="paths">.</argument>
         </service>
-
-        <service id="twig.environment" class="Twig_Environment">
+        
+        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
             <argument type="service" id="twig.loader"/>
-            <argument>%twig.environment.config%</argument>
-            <call method="addExtension">
-              <argument type="service" id="twig.i18n_filter" />
-            </call>
-        </service>
-
-        <service id="twig.i18n_filter" class="\Fossology\Lib\Twig\I18nFilter">
-            <tag name="twig.extension" />
         </service>
 
     </services>
