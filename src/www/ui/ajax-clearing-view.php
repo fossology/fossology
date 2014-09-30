@@ -168,6 +168,12 @@ class AjaxClearingView extends FO_Plugin
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
 
+   // $orderAscending = $_GET['sSortDir_0'] === "asc";
+    $sort0 = GetParm("sSortDir_0", PARM_STRING);
+    if(isset($sort0)) {
+      $orderAscending =  $sort0 === "asc";
+    }
+
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
 
@@ -177,10 +183,12 @@ class AjaxClearingView extends FO_Plugin
 
     if ($action)
     {
-      $orderAscending = $_GET['sSortDir_0'] === "asc";
+
       switch ($action)
       {
         case "licenses":
+
+
           $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
 
           $licenses = array();
@@ -255,26 +263,28 @@ class AjaxClearingView extends FO_Plugin
       {
         $types[] = $entries['direct']['type'];
       }
-
-      foreach ($entries['agents'] as $agentEntry)
+      // can a licenseDecision have both?
+      if (array_key_exists('agents', $entries))
       {
-        $matchTexts = array();
-        foreach ($agentEntry['matches'] as $match)
+        foreach ($entries['agents'] as $agentEntry)
         {
-          $agentId = $match['agentId'];
-          $matchId = $match['matchId'];
-          $index = $match['index'];
-          $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight\">#$index</a>";
-          if (array_key_exists('percentage', $match))
+          $matchTexts = array();
+          foreach ($agentEntry['matches'] as $match)
           {
-            $matchText .= "(" . $match['percentage'] . " %)";
+            $agentId = $match['agentId'];
+            $matchId = $match['matchId'];
+            $index = $match['index'];
+            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight\">#$index</a>";
+            if (array_key_exists('percentage', $match))
+            {
+              $matchText .= "(" . $match['percentage'] . " %)";
+            }
+            $matchTexts[] = $matchText;
           }
-          $matchTexts[] = $matchText;
+
+          $types[] = $agentEntry['name'] . ": " . implode(', ', $matchTexts);
         }
-
-        $types[] = $agentEntry['name'] . ": " . implode(', ', $matchTexts);
       }
-
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
       $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
