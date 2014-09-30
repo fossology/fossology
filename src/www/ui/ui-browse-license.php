@@ -243,8 +243,8 @@ class ui_browse_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    $V .= $this->changeLicenseUtility->createChangeLicenseForm();
-    $V .= $this->changeLicenseUtility->createBulkForm();
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm());
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm());
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);
@@ -276,22 +276,15 @@ class ui_browse_license extends FO_Plugin
     $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 
+    $this->vars['micromenu'] = Dir2Browse($this->Name, $Item, NULL, $showBox=0, "Browse", -1, '', '', $this->uploadtree_tablename);
 
-    if (empty($V)) // no cache exists
+    $Cached = !empty($V);
+    if (!$Cached && !empty($Upload))
     {
-          /* Show the folder path */
-          $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
-
-          if (!empty($Upload))
-          {
-            $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
-            $V .= js_url();
-            $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
-          }
-
-      $Cached = false;
-    } else
-      $Cached = true;
+      $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+      $V .= js_url();
+      $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
+    }
 
     $this->vars['content'] = $V;
 
