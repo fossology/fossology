@@ -274,7 +274,7 @@ class AjaxClearingView extends FO_Plugin
             $agentId = $match['agentId'];
             $matchId = $match['matchId'];
             $index = $match['index'];
-            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight\">#$index</a>";
+            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight\">#$index</a>";
             if (array_key_exists('percentage', $match))
             {
               $matchText .= "(" . $match['percentage'] . " %)";
