@@ -91,7 +91,8 @@ class LicenseRenderer
    */
   public function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
   {
-
+    $agentId = GetParm('agentId', PARM_INTEGER);
+            
     $allScannerLicenseNames = array_keys($scannerLics);
     $allEditedLicenseNames = array_keys($editedLics);
 
@@ -148,6 +149,10 @@ class LicenseRenderer
           $scannerCountLink = "<a href='";
           $scannerCountLink .= Traceback_uri();
           $tagClause = ($tagId) ? "&tag=$tagId" : "";
+          if ($agentId)
+          {
+            $tagClause .= "&agentId=$agentId";
+          }
           $scannerCountLink .= "?mod=license_list_files&item=$uploadTreeId&lic=" . urlencode($licenseShortName) . $tagClause . "'>$count</a>";
         } else
         {

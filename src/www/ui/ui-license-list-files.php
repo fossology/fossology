@@ -120,7 +120,13 @@ class LicenseListFiles extends FO_Plugin
         */
         
         // Count is uploadtree recs, not pfiles
-        $CountArray = CountFilesWithLicense("any", $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
+        
+        $agentId = GetParm('agentId', PARM_INTEGER);
+        if (empty($agentId))
+        {
+          $agentId = "any";
+        }
+        $CountArray = CountFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
 
         if (empty($CountArray)) {
           $V .=  _("<b> No files found for license $rf_shortname !</b>\n");
@@ -138,7 +144,7 @@ class LicenseListFiles extends FO_Plugin
         $limit = ($Page < 0) ? "ALL":$Max;
         $order = " order by ufile_name asc";
         /** should delete $filesresult yourself */
-        $filesresult = GetFilesWithLicense("any", $rf_shortname, $uploadtree_pk,
+        $filesresult = GetFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk,
                                            $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);
         $NumFiles = pg_num_rows($filesresult);
 
