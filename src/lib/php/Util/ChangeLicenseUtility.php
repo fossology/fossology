@@ -86,7 +86,6 @@ class ChangeLicenseUtility extends Object
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @param $user_pk
-   * @param $output
    * @return string
    */
   function printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk)
@@ -112,25 +111,16 @@ class ChangeLicenseUtility extends Object
         $licenseNames[] = $lic->getShortName();
       }
       $output .= "<td>" . implode(", ", $licenseNames) . "</td>";
-      if ($user_pk == $clearingDecWithLic->getUserId())
-      {
-        $output .= "<td>" . $clearingDecWithLic->getComment() . "</td>";
-      } else
-      {
-        $output .= "<td>--private--</td>";
-      }
-      $output .= "<td>" . $clearingDecWithLic->getReportinfo() . "</td>";
 
       $output .= "</tr>";
     }
     return $output;
   }
 
-  
-    /**
+
+  /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @param $user_pk
-   * @param $output
    * @return array
    */
   function getClearingHistory($clearingDecWithLicenses, $user_pk)
@@ -141,17 +131,22 @@ class ChangeLicenseUtility extends Object
       $licenseNames = array();
       foreach ($clearingDecWithLic->getLicenses() as $lic)
       {
-        $licenseNames[] = $lic->getShortName();
+        $licenseShortName = $lic->getShortName();
+        if ($lic->getRemoved()) {
+          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
+        }
+        $licenseNames[$lic->getShortName()] = $licenseShortName;
       }
+      ksort($licenseNames, SORT_STRING);
       $row = array(
           $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
           $clearingDecWithLic->getUserName(),
           $clearingDecWithLic->getScope(),
           $clearingDecWithLic->getType(),
-          implode(", ", $licenseNames),
-          ($user_pk == $clearingDecWithLic->getUserId()) ? $clearingDecWithLic->getComment() : '--private--',
-          $clearingDecWithLic->getReportinfo() );
-      $table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+          implode(", ", $licenseNames));
+      //$table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+      $table[] = array("content"=>$row);
+
     }
     return $table;
   }
@@ -221,7 +216,7 @@ class ChangeLicenseUtility extends Object
   private function getAgentSuggestedLicenses($uploadTreeId)
   {
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
-    $licenses = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+    $licenses = $this->licenseDao->getAgentFileLicenseMatches($fileTreeBounds);
     $licenseList = array();
 
     foreach ($licenses as $licenseMatch)

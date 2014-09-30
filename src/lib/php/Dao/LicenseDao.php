@@ -52,7 +52,7 @@ class LicenseDao extends Object
    * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
-  function getFileLicenseMatches(FileTreeBounds $fileTreeBounds)
+  function getAgentFileLicenseMatches(FileTreeBounds $fileTreeBounds)
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName";

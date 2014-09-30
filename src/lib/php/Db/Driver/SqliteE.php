@@ -166,4 +166,25 @@ class SqliteE implements Driver
     $this->dbConnection->query("COMMIT");
     return;
   }
+
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    // TODO check this value
+    return $booleanValue === '1';
+  }
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 1 : 0;
+  }
+
+
 }

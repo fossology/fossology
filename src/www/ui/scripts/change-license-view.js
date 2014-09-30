@@ -70,14 +70,17 @@ function showLengend() {
 }
 
 function calculateDivHeight(){
+    var viewportWidth = $(window).width();
     var viewportHeight =  $( window ).height();
+
     var usedPixels =  $('#leftrightalignment').offset();
     var availablePixels = viewportHeight-usedPixels.top;
     var fixedPixelsLeft = 40;
     var availablePixelsLeft = availablePixels - fixedPixelsLeft;
+    var availableWidth = viewportWidth / 2 - 20;
 
-    $('.headerBox').css({ height:availablePixelsLeft + 'px' });
-    $('.boxnew').css({ height:availablePixelsLeft + 'px' });
+    $('.headerBox').css({ height:availablePixelsLeft + 'px', width: availableWidth + 'px' });
+    $('.boxnew').css({ height:availablePixelsLeft + 'px', width: availableWidth + 'px' });
 }
 
 
