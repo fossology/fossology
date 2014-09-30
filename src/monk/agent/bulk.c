@@ -222,12 +222,12 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
   if (!fo_dbManager_begin(state->dbManager))
     return;
 
-  PGresult* clearingDecisionIds = fo_dbManager_ExecPrepared(
+  PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
       "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, type_fk, rf_fk, is_removed, is_global)"
-      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, 0"
+      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, 'f'"
       " FROM uploadtree"
       " WHERE upload_fk = $6 AND pfile_fk = $1 AND lft BETWEEN $7 AND $8"
       "RETURNING license_decision_event_pk",
@@ -247,9 +247,9 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     state->bulkArguments->uploadTreeRight
   );
 
-  if (clearingDecisionIds) {
-    for (int i=0; i<PQntuples(clearingDecisionIds);i++) {
-      long clearingId = atol(PQgetvalue(clearingDecisionIds,i,0));
+  if (licenseDecisionIds) {
+    for (int i=0; i<PQntuples(licenseDecisionIds);i++) {
+      long licenseDecisionEventId = atol(PQgetvalue(licenseDecisionIds,i,0));
 
       for (guint j=0; j<matches->len; j++) {
         Match* match = match_array_get(matches, j);
@@ -267,7 +267,7 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
             "INSERT INTO highlight_bulk(license_decision_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
             long, long, size_t, size_t
           ),
-          clearingId,
+          licenseDecisionEventId,
           state->bulkArguments->bulkId,
           highlight.start,
           highlight.length
@@ -281,7 +281,7 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
         }
       }
     }
-    PQclear(clearingDecisionIds);
+    PQclear(licenseDecisionIds);
   } else {
     fo_dbManager_rollback(state->dbManager);
     return;
