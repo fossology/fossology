@@ -52,7 +52,6 @@ class NewestEditedLicenseSelector extends Object
         if (!empty($first) and $first->getType() == ClearingDecision::TO_BE_DISCUSSED)
         {
           $cd = $first;
-
         }
       }
 
@@ -94,7 +93,7 @@ class NewestEditedLicenseSelector extends Object
    */
   public function isInactive($clearingDecWithLicAndContext)
   {
-    return $clearingDecWithLicAndContext->getType() !== 'User decision' or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
+    return $clearingDecWithLicAndContext->getType() !== ClearingDecision::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
   }
 
   // these two functions have to be kept consistent to each other
@@ -110,14 +109,14 @@ class NewestEditedLicenseSelector extends Object
     //! misleading folder content overviews in the license browser and in the count of license findings
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == 'User decision' and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
+      if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
       {
         return $clearingDecWithLicenses;
       }
     }
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == 'User decision' and $clearingDecWithLicenses->getScope() == 'global')
+      if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
       {
         return $clearingDecWithLicenses;
       }
@@ -134,13 +133,7 @@ class NewestEditedLicenseSelector extends Object
     $clearingDecWithLicensesAndContextArray = array();
     foreach ($editedLicensesArray as $editedLicense)
     {
-      if (empty($clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()]))
-      {
-        $clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()] = array($editedLicense);
-      } else
-      {
         $clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()][] = $editedLicense;
-      }
     }
     return $clearingDecWithLicensesAndContextArray;
   }

@@ -36,6 +36,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     $this->userName = "fossy";
     $this->userId = -1;
     $this->type = "User decision";
+    $this->scope = "upload";
     $this->date_added = new DateTime("now", new DateTimeZone("Europe/Amsterdam"));
   }
 
@@ -107,6 +108,16 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function setType($type)
   {
     $this->type = $type;
+    return $this;
+  }
+
+  /**
+   * @param $scope
+   * @return $this
+   */
+  public function setScope($scope)
+  {
+    $this->scope = $scope;
     return $this;
   }
 

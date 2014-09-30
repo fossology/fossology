@@ -15,12 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
@@ -115,13 +110,13 @@ class changeLicenseProcessPost extends FO_Plugin
       $this->clearingDao->commentClearingDecision($_POST['unlic'], $itemId, $userId);
     }
     else if(array_key_exists('unlic',$_POST)){
-      $this->clearingDao->insertClearingDecision($_POST['unlic'], $itemId, $userId);
+      $this->clearingDao->insertClearingDecisionTest($_POST['unlic'], $itemId, $userId);
     }
     else if(array_key_exists('type',$_POST)){
       if($remove)
-        $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+        $this->clearingDao->insertClearingDecisionTest($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
       else
-        $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
+        $this->clearingDao->insertClearingDecisionTest($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
     }
     $clearingDecWithLicences = $this->clearingDao->getFileClearings($itemId);
 

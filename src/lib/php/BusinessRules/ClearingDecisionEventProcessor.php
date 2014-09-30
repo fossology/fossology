@@ -121,22 +121,16 @@ class ClearingDecisionEventProcessor {
     $currentLicenses = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
 
     $licenseDecisions = array();
+    $removed = array();
     foreach ($currentLicenses as $licenseShortName)
     {
-
-      if (array_key_exists($licenseShortName, $removedLicenses))
-      {
-        continue;
-      }
-
       $entries = array();
       $licenseId = 0;
 
       if (array_key_exists($licenseShortName, $addedLicenses))
       {
         $addedLicense = $addedLicenses[$licenseShortName];
-        $entries['direct']['type'] = $addedLicense['type'];
-        $entries['direct']['decisionEventId'] = $addedLicense['decisionEventId'];
+        $entries['direct'] = $addedLicense;
         $licenseId = $addedLicense['licenseId'];
       }
 
@@ -174,12 +168,19 @@ class ClearingDecisionEventProcessor {
           }
         }
       }
-      $licenseDecisions[$licenseShortName] = array(
-        'licenseId' => $licenseId,
-        'entries' => $entries
+
+      $licenseResult = array(
+          'licenseId' => $licenseId,
+          'entries' => $entries
       );
+      if (array_key_exists($licenseShortName, $removedLicenses))
+      {
+        $removed[$licenseShortName] = $licenseResult;
+      } else {
+        $licenseDecisions[$licenseShortName] = $licenseResult;
+      }
     }
-    return $licenseDecisions;
+    return array($licenseDecisions, $removed);
   }
 
 

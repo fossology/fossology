@@ -91,7 +91,6 @@ class ClearingView extends FO_Plugin
   }
 
 
-
   /**
    * @param $uploadTreeId
    * @param $licenseId
@@ -129,13 +128,15 @@ class ClearingView extends FO_Plugin
     if (empty($uploadTreeId))
     {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent)) {
+      if (!isset($parent))
+      {
         $this->invalidParm = true;
         return;
       }
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
-      if( $uploadTreeId=== UploadDao::NOT_FOUND ) {
+      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      {
         $this->invalidParm = true;
         return;
       }
@@ -148,36 +149,39 @@ class ClearingView extends FO_Plugin
     if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
     {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent)) {
+      if (!isset($parent))
+      {
         $this->invalidParm = true;
         return;
       }
 
       $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
-      if( $uploadTreeId=== UploadDao::NOT_FOUND ) {
+      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      {
         $this->invalidParm = true;
         return;
       }
 
-      header('Location: ' . Traceback_uri(). '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
-    
+
     return parent::OutputOpen();
   }
-  
+
 
   /**
    * @brief extends standard Output to handle empty uploads
    */
   function Output()
   {
-    if( $this->invalidParm ){
-      $this->vars['content'] = 'This upload contains no files!<br><a href="'. Traceback_uri().'?mod=browse">Go back to browse view</a>';
+    if ($this->invalidParm)
+    {
+      $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
       return $this->renderTemplate("include/base.html");
     }
-    parent::Output();    
+    parent::Output();
   }
-  
+
   /**
    * \brief display the license changing page
    */
@@ -200,7 +204,62 @@ class ClearingView extends FO_Plugin
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     if (!empty($lastItem))
     {
-      $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
+      $type = GetParm("clearingTypes", PARM_INTEGER);
+
+      if ($type > 1)
+      {
+        $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
+        $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $lastItem);
+
+        $fileTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+
+        list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+
+        $lastDecision = null;
+        if ($clearingDecision)
+        {
+          $lastDecision = $clearingDecision['date_added'];
+        }
+
+
+        $insertDecision = false;
+        foreach (array_merge($added, $removed) as $licenseShortName => $entry)
+        {
+          if (isset($entry['entries']['direct'])) {
+            $entryTimestamp = $entry['entries']['direct']['dateAdded'];
+            $comparison = strcmp($lastDecision, $entryTimestamp);
+            if ($comparison < 0)
+            {
+              $insertDecision = true;
+              break;
+            }
+          } else {
+            $insertDecision = true;
+            break;
+          }
+        }
+
+        $removedSinceLastDecision = array();
+        foreach ($events as $event) {
+          $licenseShortName = $event['rf_shortname'];
+          if ($event['is_removed'] && !array_key_exists($licenseShortName, $added)) {
+            $entryTimestamp = $event['date_added'];
+            $comparison = strcmp($lastDecision, $entryTimestamp);
+            if ($comparison < 0)
+            {
+              $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
+              $insertDecision = true;
+            }
+          }
+        }
+
+        if ($insertDecision)
+        {
+          $global = GetParm("globalDecision", PARM_STRING) === "on";
+
+          $this->clearingDao->insertClearingDecision($lastItem, $userId, $type, $global, $added, $removedSinceLastDecision);
+        }
+      }
     }
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
@@ -208,7 +267,7 @@ class ClearingView extends FO_Plugin
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
-    
+
     global $Plugins;
     /** @var $view ui_view */
     $view = &$Plugins[plugin_find_id("view")];
@@ -221,7 +280,7 @@ class ClearingView extends FO_Plugin
 
     $highlights = $this->getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
     $hasHighlights = count($highlights) > 0;
-    
+
     $permission = GetUploadPerm($uploadId);
     $licenseInformation = "";
 
