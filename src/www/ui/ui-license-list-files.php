@@ -67,7 +67,6 @@ class LicenseListFiles extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $Plugins;
 
     $V="";
     $Time = time();
@@ -110,6 +109,16 @@ class LicenseListFiles extends FO_Plugin
         $PkgsOnly = false;
         $CheckOnly = false;
 
+        /*
+        global $Plugins;
+        $latestNomos=LatestAgentpk($UploadtreeRec['upload_fk'], "nomos_ars");
+        $newestNomos=$Plugins[plugin_find('license') ]->getNewestAgent("nomos");
+        $latestMonk=LatestAgentpk($uploadId, "monk_ars");
+        $newestMonk=$Plugins[plugin_find('license') ]->getNewestAgent("monk");
+        $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
+            'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
+        */
+        
         // Count is uploadtree recs, not pfiles
         $CountArray = CountFilesWithLicense("any", $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
 
@@ -192,7 +201,7 @@ class LicenseListFiles extends FO_Plugin
         foreach ($sorted_file_result as $row)
         {
           $pfile_pk = $row['pfile_fk'];
-          $licstring = GetFileLicenses_string("any", $pfile_pk, $row['uploadtree_pk'], $uploadtree_tablename);
+          $licstring = GetFileLicenses_string($row['agent_pk'], $pfile_pk, $row['uploadtree_pk'], $uploadtree_tablename);
           $URLlicstring = urlencode($licstring);
 
           // Allow user to exclude files with this extension
@@ -249,7 +258,7 @@ class LicenseListFiles extends FO_Plugin
 
             // show the entire license list as a single string with links to the files
             // in this container with that license.
-            $V .= "<td>$licstring</td></tr>";
+            $V .= "<td>$row[agent_name]: $licstring</td></tr>";
             $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
           }
           $LastPfilePk = $pfile_pk;

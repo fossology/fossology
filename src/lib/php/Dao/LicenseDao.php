@@ -173,7 +173,7 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= "GROUP BY license_shortname";
+    $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
     {
       $sql .= $orderStatement;
