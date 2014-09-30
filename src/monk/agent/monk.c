@@ -46,10 +46,13 @@ void queryAgentId(MonkState* state) {
 inline int processUploadId(MonkState* state, int uploadId, GArray* licenses){
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
 
+  if (!fileIdResult)
+    return 0;
+
   if (PQntuples(fileIdResult) == 0) {
     PQclear(fileIdResult);
     fo_scheduler_heart(0);
-    return 0;
+    return 1;
   }
 
   int threadError = 0;
