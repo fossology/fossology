@@ -8,7 +8,7 @@
         {% if previousItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
         {% endif %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Update</button>
+        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
         {% if nextItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
         {% endif %}
