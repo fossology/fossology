@@ -422,7 +422,7 @@ class ui_browse extends FO_Plugin
       $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
     } else
     {
-      $html .= $this->createJavaScriptBlock();
+      $this->createJavaScriptBlock();
       $html .= $this->ShowFolder($Folder, $show);
     }
     return "<font class='text'>\n$html</font>\n" . $this->rejectModal();
