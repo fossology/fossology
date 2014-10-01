@@ -49,7 +49,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\Data\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getAgentFileLicenseMatches(FileTreeBounds $fileTreeBounds)
@@ -94,7 +94,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the tried bulk recognitions for a single file or uploadtree (currently unused)
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\Data\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getBulkFileLicenseMatches(FileTreeBounds $fileTreeBounds)

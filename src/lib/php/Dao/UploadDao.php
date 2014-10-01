@@ -88,7 +88,7 @@ public function __construct(DbManager $dbManager)
 
   /**
    * @param $uploadTreeId
-   * @param $uploadTreeTableName
+   * @param $uploadId
    * @return FileTreeBounds
    */
   public function getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId)
