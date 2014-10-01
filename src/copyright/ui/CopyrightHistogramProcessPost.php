@@ -135,20 +135,16 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
           $params  = array($hash, $left,$right);
           $commonClause = "FROM copyright AS CP INNER JOIN $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk";
           $commonClause2 ="and ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload";
-          $getQuerry  = "SELECT * $commonClause  WHERE CP.hash =$1 $commonClause2";
+          $getQuerry  = "SELECT * $commonClause WHERE CP.hash =$1 $commonClause2";
           $statementName = "getData";
           $this->dbManager->prepare($statementName,$getQuerry);
           $oldData = $this->dbManager->execute($statementName,$params);
 
           $updateParams = array_merge($params,array( $content));
-          $updateQuerry = "UPDATE copyright as CPR SET  content = $4 , hash = md5 ($4) $commonClause  WHERE CPR.hash =$1 $commonClause2";
-          $this->dbManager->getSingleRow($updateQuerry, $updateParams, "updateCopyrightContent");
-
-          $insertQuerry  = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
-
-
-          while ($row = pg_fetch_assoc($oldData))
-          {
+          $updateQuerry = "UPDATE copyright as CPR SET content = $2, hash = md5 ($2) WHERE CPR.hash = $1 AND pfile_fk = $3";
+          $insertQuerry  = "INSERT into copyright_audit(ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk) values ($1,$2,$3,$4,$5,$6)";
+          while ($row = pg_fetch_assoc($oldData)) {
+            $this->dbManager->getSingleRow($updateQuerry, array($hash,$content,$row['pfile_fk']), "updateCopyrightContent");
             $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload,$item,$row['pfile_fk']), "writeHist");
           }
 
@@ -252,15 +248,15 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
     return $orderString;
   }
 
-  private function getSearchString()
+  private function addSearchFilter(&$filterParams)
   {
     $searchPattern = GetParm('sSearch', PARM_STRING);
     if (empty($searchPattern))
     {
       return '';
     }
-    $this->filterParams[] = "%$searchPattern%";
-    return ' AND upload_filename ilike $'.count($this->filterParams).' ';
+    $filterParams[] = "%$searchPattern%";
+    return ' AND CP.content ilike $'.count($filterParams).' ';
   }
 
 
@@ -273,7 +269,6 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 
     $orderString = $this->getOrderString();
     $this->filterParams = array();
-    $searchFilter = $this->getSearchString();
 
     list($left, $right) = $this->uploadDao->getLeftAndRight($Uploadtree_pk, $uploadTreeTableName);
 
@@ -312,6 +307,7 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
     {
       $filterParms[]=$par;
     }
+    $searchFilter = $this->addSearchFilter($filterParms);
     $unorderedQuery= "FROM copyright AS CP " .
     "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
     $join.
