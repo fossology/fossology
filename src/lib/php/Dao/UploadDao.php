@@ -54,6 +54,7 @@ class UploadDao extends Object
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
+    $uploadEntry['tablename'] = $uploadTreeTableName;
     return $uploadEntry;
   }
 
