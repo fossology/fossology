@@ -15,18 +15,18 @@
     <script type="text/javascript">
 
         tableColumns = [
-            {"sTitle": {{ "Upload Name and Description" }}, "sClass": "left"},
-            {"sTitle": {{ "Status" }}, "sClass": "center", "bSearchable": false},
+            {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
+            {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
             {
-                "sTitle": {{ "Comment" }}, "sClass": "center", "bSortable": false, "bSearchable": false,
+                "sTitle": "{{ "Comment" }}", "sClass": "center", "bSortable": false, "bSearchable": false,
                 "mRender": function (source, type, val) {
                     return commentColumn(source, type, val);
                 }
             },
-            {"sTitle": {{ "Assigned to" }}, "sClass": "center", "bSearchable": false},
-            {"sTitle": {{ "Upload Date" }}, "sClass": "center", "sType": "string", "bSearchable": false},
+            {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
+            {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
             {
-                "sTitle": {{ "Priority" }}, "sClass": "center priobucket", "bSearchable": false,
+                "sTitle": "{{ "Priority" }}", "sClass": "center priobucket", "bSearchable": false,
                 "mRender": function (source, type, val) {
                     return prioColumn(source, type, val);
                 }
@@ -55,8 +55,8 @@
             "bServerSide": true,
             "sAjaxSource": "?mod=browse-processPost",
             "fnServerData": function (sSource, aoData, fnCallback) {
-                aoData.push({"name": "folder", "value": {{ folder }}});
-                aoData.push({"name": "show", "value": {{ show }}});
+                aoData.push({"name": "folder", "value": "{{ folder }}"});
+                aoData.push({"name": "show", "value": "{{ show }}"});
                 aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
                 aoData.push({"name": "statusSelected", "value": statusSelected});
                 $.getJSON(sSource, aoData, fnCallback).fail(function () {
@@ -76,6 +76,10 @@
             var otable = $('#browsetbl').dataTable(dataTableConfig);
             return otable;
         }
+
+        $(document).ready(function () {
+            createBrowseTable();
+        })
 
     </script>";
 {% endblock %}

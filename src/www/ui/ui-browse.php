@@ -343,7 +343,7 @@ class ui_browse extends FO_Plugin
 
     $V .= $this->outputItemHtml($Item, $folder_pk, $Upload);
     $this->vars['content'] = $V;
-    $this->renderTemplate('ui-browse.html.twig');
+    return $this->renderTemplate('ui-browse.html.twig');
   }
 
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
