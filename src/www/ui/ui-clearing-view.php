@@ -276,7 +276,7 @@ class ClearingView extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "view_license.html";
+    return "ui-clearing-view.html";
   }
 
   /*
