@@ -169,7 +169,6 @@ class copyright_view extends FO_Plugin
 
     global $Plugins;
     /** @var ui_view $view */
-    echo "<hr>". plugin_find_id("view")."<hr>";
     $view = &$Plugins[plugin_find_id("view")]; 
     $theView = $view->getView(NULL, $ModBack, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;

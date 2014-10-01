@@ -341,7 +341,7 @@ class ui_view extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return "";
+      return "s";
     }
     global $Plugins;
 
@@ -349,57 +349,31 @@ class ui_view extends FO_Plugin
     if (!empty($Upload))
     {
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ) return;
+      if ($UploadPerm < PERM_READ) return "p";
     }
 
-    $Folder = GetParm("folder", PARM_INTEGER);
-    $Show = GetParm("show", PARM_STRING);
     $Item = GetParm("item", PARM_INTEGER);
     $Page = GetParm("page", PARM_INTEGER);
     $licenseId = GetParm("licenseId", PARM_INTEGER);
-    if (!$inputFile && (empty($Item) || empty($Upload)))
+    if (!$inputFile && empty($Item))
     {
-      return "";
+      return "i";
     }
 
     $uploadtree_tablename = GetUploadtreeTablename($Upload);
 
-    $Format = $this->getFormatParameter($Item);
-
-    $output="";
-    /**********************************
-     * Display micro header
-     **********************************/
     if ($ShowHeader)
     {
-      $Uri = Traceback_uri() . "?mod=browse";
-      $Opt = "";
-      if (!empty($Item))
-      {
-        $Opt .= "&item=$Item";
-      }
-      if (!empty($Upload))
-      {
-        $Opt .= "&upload=$Upload";
-      }
-      if (!empty($Folder))
-      {
-        $Opt .= "&folder=$Folder";
-      }
-      if (!empty($Show))
-      {
-        $Opt .= "&show=$Show";
-      }
+      $Uri = Traceback_uri() . "?mod=browse" .  Traceback_parm_keep(array('item','show','folder','upload')) ;
       /* No item */
       $header = Dir2Browse($BackMod, $Item, NULL, $showBox=0, "View", -1, '', '', $uploadtree_tablename);
       $this->vars['micromenu'] = $header;
-    } // if ShowHeader
+    }
 
-    /***********************************
-     * Display file contents
-     ***********************************/
-    $V = "";
+    /* Display file contents */
+    $output="";
     $openedFin = False;
+    $Format = $this->getFormatParameter($Item);
     if (empty($inputFile))
     {
       $inputFile = @fopen(RepPathItem($Item), "rb");
@@ -435,7 +409,6 @@ class ui_view extends FO_Plugin
               $text = _("Unpack of Upload failed");
               $this->vars['message'] = "$text: $rc";
             }
-            $output .= $V;
           }
         } else
         {
@@ -506,7 +479,7 @@ class ui_view extends FO_Plugin
       return array($PageMenu, $output);
     else
       return $output;
-  } // ShowView()
+  }
 
   protected function htmlContent()
   {
