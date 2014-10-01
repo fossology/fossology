@@ -60,7 +60,7 @@ class PopupLicense extends FO_Plugin
     }
     $this->vars['url'] = $licenseUrl;
     $this->vars['text'] = $license->getText();
-    return $this->renderTemplate($templateName = 'popup_license.html');
+    return $this->renderTemplate($templateName = 'popup_license.html.twig');
   }
 }
 

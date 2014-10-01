@@ -521,7 +521,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
   public function getTemplateName()
   {
-    return "copyrighthist.html";
+    return "copyrighthist.html.twig";
   }
 
   function RegisterMenus()

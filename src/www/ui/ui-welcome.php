@@ -76,7 +76,7 @@ class ui_welcome extends FO_Plugin
   function outputHtml() {
     $show = GetParm('show', PARM_STRING);
     if ($show=='licensebrowser'){
-      return $this->renderTemplate("licensebrowser.html");
+      return $this->renderTemplate("licensebrowser.html.twig");
     }
     $Login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
@@ -86,7 +86,7 @@ class ui_welcome extends FO_Plugin
     $this->vars['login'] = $Login;
     $this->vars['SiteURI'] = Traceback_uri();
 
-    return $this->renderTemplate('welcome.html');
+    return $this->renderTemplate('welcome.html.twig');
   }
 }
 

@@ -202,7 +202,7 @@ class copyright_view extends FO_Plugin
   
   function getTemplateName()
   {
-    return 'ui-cp-view.html';
+    return 'ui-cp-view.html.twig';
   }
   
 }
