@@ -1,10 +1,10 @@
 <script>
     selectedLicensesTableColumns = [
-        {"sTitle": "{{ 'License'|t }}", "sClass": "left"},
-        {"sTitle": "{{ 'Source'|t }}", "sClass": "left", "bSortable": false},
+        {"sTitle": "{{ 'License'|t }}", "sClass": "left read_only"},
+        {"sTitle": "{{ 'Source'|t }}", "sClass": "left read_only", "bSortable": false},
         {"sTitle": "{{ 'Text'|t }}", "sClass": "center", "bSortable": false},
         {"sTitle": "{{ 'Comment'|t }}", "sClass": "center", "bSortable": false},
-        {"sTitle": "{{ 'Action'|t }}", "sClass": "center", "bSortable": false}
+        {"sTitle": "{{ 'Action'|t }}", "sClass": "center read_only", "bSortable": false}
     ];
 
     uploadId = {{ uploadId }};
@@ -18,7 +18,7 @@
             aoData.push({"name": "item", "value": itemId});
             $.getJSON(sSource, aoData, fnCallback).fail(function () {
                 if (confirm("You are not logged in. Go to login page?"))
-                    window.location.href = "' . {{ uri }} . '?mod=auth";
+                    window.location.href = "?mod=auth";
             });
         },
         "aoColumns": selectedLicensesTableColumns,
@@ -30,8 +30,17 @@
         "bFilter": false
     };
 
+    $editableConfiguration  = {
+        "sReadOnlyCellClass": "read_only",
+        "sUpdateURL": "?mod=conclude-license&do=updateLicenseDecisions" ,
+        "fnPnEditing": function(input) {return input[0].value;},
+        "fnOnEdited": function (){} ,
+        "fnOnDeleted": function(result) { createTable().fnDraw(false);},
+        "sSuccessResponse": "success"
+    };
+
     function createLicenseDecisionTable() {
-        otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig);
+        otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable($editableConfiguration);
         return otable;
     }
 
@@ -48,7 +57,7 @@
             aoData.push({"name": "item", "value": itemId});
             $.getJSON(sSource, aoData, fnCallback).fail(function () {
                 if (confirm("You are not logged in. Go to login page?"))
-                    window.location.href = "' . {{ uri }} . '?mod=auth";
+                    window.location.href = "?mod=auth";
             });
         },
         "aoColumns": addLicenseTableColumns,

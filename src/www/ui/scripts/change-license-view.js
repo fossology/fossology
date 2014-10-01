@@ -27,7 +27,7 @@ function clearingSuccess(data) {
 
 function openBulkModal() {
   $('#userModal').hide();
-  $('#bulkModal').show();
+  $('#bulkModal').toggle();
 }
 
 function closeBulkModal() {
@@ -35,8 +35,11 @@ function closeBulkModal() {
 }
 
 function openUserModal() {
-  $('#bulkModal').hide();
-  $('#userModal').show();
+    $('#bulkModal').hide();
+    $('#userModal').toggle();
+    if( $('#userModal').is(":visible") ) {
+       $('#licenseSelectionTable_filter label input').focus();
+    }
 }
 
 function closeUserModal() {

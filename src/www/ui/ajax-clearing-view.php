@@ -133,7 +133,7 @@ class AjaxClearingView extends FO_Plugin
     {
       return null;
     }
-    header('Content-type: text/json');
+
   }
 
 
@@ -149,63 +149,73 @@ class AjaxClearingView extends FO_Plugin
       $this->vars['content'] = $output;
       return;
     }
+    if ($output === "success") {
+      header('Content-type: text/plain');
+      return $output;
+    }
+    header('Content-type: text/json');
     return $output;
   }
 
 
   protected function jsonContent()
   {
-    $uploadId = GetParm("upload", PARM_INTEGER);
-    if (empty($uploadId))
-    {
-      return;
-    }
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
-    {
-      return;
-    }
-
-    $licenseId = GetParm("licenseId", PARM_INTEGER);
-
-   // $orderAscending = $_GET['sSortDir_0'] === "asc";
-    $sort0 = GetParm("sSortDir_0", PARM_STRING);
-    if(isset($sort0)) {
-      $orderAscending =  $sort0 === "asc";
-    }
-
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
-
-    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
     $action = GetParm("do", PARM_STRING);
-
     if ($action)
     {
-
       switch ($action)
       {
         case "licenses":
+        case "licenseDecisions":
+        case "addLicense":
+        case "removeLicense":
+        $uploadId = GetParm("upload", PARM_INTEGER);
+        if (empty($uploadId))
+        {
+          return;
+        }
+        $uploadTreeId = GetParm("item", PARM_INTEGER);
+        if (empty($uploadTreeId))
+        {
+          return;
+        }
+
+        $licenseId = GetParm("licenseId", PARM_INTEGER);
+
+        // $orderAscending = $_GET['sSortDir_0'] === "asc";
+        $sort0 = GetParm("sSortDir_0", PARM_STRING);
+        if(isset($sort0)) {
+          $orderAscending =  $sort0 === "asc";
+        }
+
+        $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+        $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
 
-          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
-
-          $licenses = array();
-          foreach ($licenseRefs as $licenseRef)
+          switch ($action)
           {
-            $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseRef->getShortName());
-            $licenseId = $licenseRef->getId();
-            $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+          case "licenses":
+            $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
+            list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+            $licenses = array();
+            foreach ($licenseRefs as $licenseRef)
+            {
+              $currentShortName = $licenseRef->getShortName();
+              if(array_key_exists($currentShortName, $licenseDecisions )) continue;
+              $shortNameWithFullTextLink = $this->getLicenseFullTextLink($currentShortName);
+              $licenseId = $licenseRef->getId();
+              $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
-            $licenses[] = array($shortNameWithFullTextLink, $actionLink);
-          }
-          return json_encode(
-              array(
-                  'sEcho' => intval($_GET['sEcho']),
-                  'aaData' => $licenses,
-                  'iTotalRecords' => count($licenses),
-                  'iTotalDisplayRecords' => count($licenses)));
+              $licenses[] = array($shortNameWithFullTextLink, $actionLink);
+            }
+            return json_encode(
+                array(
+                    'sEcho' => intval($_GET['sEcho']),
+                    'aaData' => $licenses,
+                    'iTotalRecords' => count($licenses),
+                    'iTotalDisplayRecords' => count($licenses)));
 
         case "licenseDecisions":
           $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
@@ -224,6 +234,18 @@ class AjaxClearingView extends FO_Plugin
         case "removeLicense":
           $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, false);
           return json_encode(array());
+      }
+      case "updateLicenseDecisions":
+        $id = GetParm("id", PARM_STRING);
+        if(isset($id))
+        {
+          list ($uploadId, $uploadTreeId, $licenseId) = explode(',', $id);
+
+          $what = GetParm("columnName", PARM_STRING);
+          $changeTo = GetParm("value", PARM_STRING);
+          $this->clearingDao->updateLicenseDecision($uploadTreeId, $userId, $licenseId,  $what, $changeTo);
+        }
+      return "success";
       }
     }
   }
@@ -266,8 +288,8 @@ class AjaxClearingView extends FO_Plugin
         $reportInfo =$entries['direct']['reportinfo'];
         $comment = $entries['direct']['comment'];
       }
-      // can a licenseDecision have both? I think not
-      else if (array_key_exists('agents', $entries))
+
+      if (array_key_exists('agents', $entries))
       {
         foreach ($entries['agents'] as $agentEntry)
         {
@@ -290,15 +312,18 @@ class AjaxClearingView extends FO_Plugin
       }
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
-//      $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
-//      $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
 
+      $reportInfoField = $reportInfo;
+      $commentField =$comment;
 
-
-      $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
-      $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
-//      htmlentities($row['content']);
-      $table[] = array($licenseShortNameWithLink, implode("<br/>", $types), $reportInfoField, $commentField, $actionLink);
+      $idArray=array($uploadId, $uploadTreeId, $licenseId);
+      $id = implode(',',$idArray);
+      $table[] = array( 'DT_RowId' => $id,
+                        '0'=> $licenseShortNameWithLink,
+                        '1'=> implode("<br/>", $types),
+                        '2'=> $reportInfoField,
+                        '3'=> $commentField,
+                        '4'=> $actionLink);
     }
     return $table;
   }

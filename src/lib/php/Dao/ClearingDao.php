@@ -504,8 +504,52 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
     $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
   }
 
+public function updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo) {
+
+  $this->dbManager->begin();
+
+  $statementGetOldata = "Select * from license_decision_event where uploadtree_fk=$1 and rf_fk=$2  order by license_decision_event_pk desc limit 1 ";
+//  and is_removed<>$3
+  $statementName = __METHOD__.'getOld';
+  $params = array($uploadTreeId, $licenseId); //, $this->dbManager->booleanToDb(true)
+  $row = $this->dbManager->getSingleRow($statementGetOldata,$params,$statementName);
+
+  if(!$row) {  //The license was not added as user decision yet -> we promote it here
+    $type=1;
+    $isGlobal = false;
+    $this->addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal);
+    $row['type_fk']=$type;
+    $row['is_global']=$isGlobal;
+    $row['comment']="";
+    $row['reportinfo']="";
+  }
+
+  if($what=='Text') {
+      $reportInfo=$changeTo;
+      $comment =$row['comment'];
+  }
+  else {
+    $reportInfo =$row['reportinfo'];
+    $comment=$changeTo;
+
+  }
+  $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], $row['is_global'], null, $reportInfo , $comment);
+
+  $this->dbManager->commit();
+
+}
+
   public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
+    $insertisGlobal =$this->dbManager->booleanToDb($isGlobal);
+    if($isRemoved!=null)
+    {
+      $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
+    }
+    else
+    {
+      $insertIsRemoved =null;
+    }
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
@@ -531,8 +575,8 @@ insert into license_decision_event (
   $8)");
     $res = $this->dbManager->execute($statementName, array(
         $uploadTreeId, $userId, $licenseId, $type,
-        $this->dbManager->booleanToDb($isGlobal),
-        $this->dbManager->booleanToDb($isRemoved), $reportInfo, $comment));
+        $insertisGlobal,
+        $insertIsRemoved, $reportInfo, $comment));
     $this->dbManager->freeResult($res);
   }
 
