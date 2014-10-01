@@ -54,16 +54,14 @@ class ChangeLicenseUtility extends Object
    * @param $uploadDao
    * @param $licenseDao
    * @param $clearingDao
-   * @param Renderer $renderer
    */
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao , Renderer $renderer)
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao)
   {
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
-    $this->renderer = $renderer;
   }
 
   /**
