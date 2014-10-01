@@ -133,15 +133,17 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
         $this->dbManager->begin();
 
           $params  = array($hash, $left,$right);
-          $commonClause = "FROM copyright AS CP INNER JOIN $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk";
-          $commonClause2 ="and ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload";
-          $getQuerry  = "SELECT * $commonClause  WHERE CP.hash =$1 $commonClause2";
+          $uploadtableClause = " $this->uploadtree_tablename AS UT ";
+          $pfileClause = " CP.pfile_fk = UT.pfile_fk ";
+          $whereClause3 =  " WHERE CP.hash =$1 ";
+          $leftRightClause ="   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload ";
+          $getQuerry  = "SELECT * FROM copyright AS CP INNER JOIN $uploadtableClause ON $pfileClause  $whereClause3 and $leftRightClause";
           $statementName = "getData";
           $this->dbManager->prepare($statementName,$getQuerry);
           $oldData = $this->dbManager->execute($statementName,$params);
 
           $updateParams = array_merge($params,array( $content));
-          $updateQuerry = "UPDATE copyright as CPR SET  content = $4 , hash = md5 ($4) $commonClause  WHERE CPR.hash =$1 $commonClause2";
+          $updateQuerry = "UPDATE copyright as CP SET  content = $4 , hash = md5 ($4) FROM $uploadtableClause  $whereClause3 and $pfileClause and $leftRightClause";
           $this->dbManager->getSingleRow($updateQuerry, $updateParams, "updateCopyrightContent");
 
           $insertQuerry  = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
