@@ -57,7 +57,7 @@
             aoData.push({"name": "item", "value": itemId});
             $.getJSON(sSource, aoData, fnCallback).fail(function () {
                 if (confirm("You are not logged in. Go to login page?"))
-                    window.location.href = "' . {{ uri }} . '?mod=auth";
+                    window.location.href = "?mod=auth";
             });
         },
         "aoColumns": addLicenseTableColumns,

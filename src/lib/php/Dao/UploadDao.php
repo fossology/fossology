@@ -38,7 +38,7 @@ class UploadDao extends Object
    */
   private $logger;
 
-  function __construct(DbManager $dbManager)
+public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
@@ -49,11 +49,12 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return array
    */
-  function getUploadEntry($uploadTreeId, $uploadTreeTableName = "uploadtree")
+  public function getUploadEntry($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
+    $uploadEntry['tablename'] = $uploadTreeTableName;
     return $uploadEntry;
   }
 
@@ -61,7 +62,7 @@ class UploadDao extends Object
    * @param $uploadId
    * @return array
    */
-  function getUploadInfo($uploadId)
+  public function getUploadInfo($uploadId)
   {
     $stmt = __METHOD__;
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM upload WHERE upload_pk = $1",
@@ -74,7 +75,7 @@ class UploadDao extends Object
    * @param $uploadTreeTableName
    * @return FileTreeBounds
    */
-  function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
+  public function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
     $uploadEntry = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if ($uploadEntry === FALSE)
@@ -83,6 +84,17 @@ class UploadDao extends Object
       return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
     }
     return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
+  }
+
+  /**
+   * @param $uploadTreeId
+   * @param $uploadTreeTableName
+   * @return FileTreeBounds
+   */
+  public function getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    return $this->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
   }
 
   /**
@@ -138,7 +150,7 @@ class UploadDao extends Object
    *
    * \return uploadtree table name
    */
-  function getUploadtreeTableName($uploadId)
+public function getUploadtreeTableName($uploadId)
   {
     if (!empty($uploadId))
     {

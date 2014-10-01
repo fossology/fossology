@@ -100,27 +100,59 @@ class AjaxClearingView extends FO_Plugin
     return $licenseShortNameWithLink;
   }
 
-
   /**
+   * @param $orderAscending
+   * @param $fileTreeBounds
+   * @param $userId
+   * @param $uploadId
    * @param $uploadTreeId
-   * @param $licenseId
-   * @param $selectedAgentId
-   * @param $highlightId
-   * @return array
+   * @return string
    */
-  private function getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId)
+  protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
-    if ($selectedAgentId > 0)
+    $fileTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+
+    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
+    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+    $licenses = array();
+    foreach ($licenseRefs as $licenseRef)
     {
-      $this->highlightProcessor->addReferenceTexts($highlightEntries);
-    } else
-    {
-      $this->highlightProcessor->flattenHighlights($highlightEntries, array("K", "K "));
+      $currentShortName = $licenseRef->getShortName();
+      if (array_key_exists($currentShortName, $licenseDecisions)) continue;
+      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($currentShortName);
+      $theLicenseId = $licenseRef->getId();
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $theLicenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+
+      $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
-    return $highlightEntries;
+    return json_encode(
+        array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $licenses,
+            'iTotalRecords' => count($licenses),
+            'iTotalDisplayRecords' => count($licenses)));
   }
 
+  /**
+   * @param $orderAscending
+   * @param $userId
+   * @param $uploadId
+   * @param $uploadTreeId
+   * @internal param $fileTreeBounds
+   * @return string
+   */
+  protected function doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId)
+  {
+    $fileTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId,$uploadId);
+    $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
+
+    return json_encode(
+        array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $aaData,
+            'iTotalRecords' => count($aaData),
+            'iTotalDisplayRecords' => count($aaData)));
+  }
 
   function OutputOpen()
   {
@@ -149,7 +181,8 @@ class AjaxClearingView extends FO_Plugin
       $this->vars['content'] = $output;
       return;
     }
-    if ($output === "success") {
+    if ($output === "success")
+    {
       header('Content-type: text/plain');
       return $output;
     }
@@ -171,59 +204,36 @@ class AjaxClearingView extends FO_Plugin
         case "licenseDecisions":
         case "addLicense":
         case "removeLicense":
-        $uploadId = GetParm("upload", PARM_INTEGER);
-        if (empty($uploadId))
-        {
-          return;
-        }
-        $uploadTreeId = GetParm("item", PARM_INTEGER);
-        if (empty($uploadTreeId))
-        {
-          return;
-        }
-
-        $licenseId = GetParm("licenseId", PARM_INTEGER);
-
-        // $orderAscending = $_GET['sSortDir_0'] === "asc";
-        $sort0 = GetParm("sSortDir_0", PARM_STRING);
-        if(isset($sort0)) {
-          $orderAscending =  $sort0 === "asc";
-        }
-
-        $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-        $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
-
-
-          switch ($action)
+          $uploadId = GetParm("upload", PARM_INTEGER);
+          if (empty($uploadId))
           {
-          case "licenses":
-          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
-
-          $licenses = array();
-          foreach ($licenseRefs as $licenseRef)
-          {
-          $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseRef->getShortName());
-          $licenseId = $licenseRef->getId();
-          $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
-
-          $licenses[] = array($shortNameWithFullTextLink, $actionLink);
+            return;
           }
-          return json_encode(
-              array(
-                  'sEcho' => intval($_GET['sEcho']),
-                  'aaData' => $licenses,
-                  'iTotalRecords' => count($licenses),
-                  'iTotalDisplayRecords' => count($licenses)));
+          $uploadTreeId = GetParm("item", PARM_INTEGER);
+          if (empty($uploadTreeId))
+          {
+            return;
+          }
+
+          $licenseId = GetParm("licenseId", PARM_INTEGER);
+
+          // $orderAscending = $_GET['sSortDir_0'] === "asc";
+          $sort0 = GetParm("sSortDir_0", PARM_STRING);
+          if (isset($sort0))
+          {
+            $orderAscending = $sort0 === "asc";
+          }
+
+
+
+      }
+      switch ($action)
+      {
+        case "licenses":
+          return $this->doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "licenseDecisions":
-          $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
-
-          return json_encode(
-              array(
-                  'sEcho' => intval($_GET['sEcho']),
-                  'aaData' => $aaData,
-                  'iTotalRecords' => count($aaData),
-                  'iTotalDisplayRecords' => count($aaData)));
+          return $this->doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "addLicense":
           $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, 1, false);
@@ -232,18 +242,17 @@ class AjaxClearingView extends FO_Plugin
         case "removeLicense":
           $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, false);
           return json_encode(array());
-      }
-      case "updateLicenseDecisions":
-        $id = GetParm("id", PARM_STRING);
-        if(isset($id))
-        {
-          list ($uploadId, $uploadTreeId, $licenseId) = explode(',', $id);
 
-          $what = GetParm("columnName", PARM_STRING);
-          $changeTo = GetParm("value", PARM_STRING);
-          $this->clearingDao->updateLicenseDecision($uploadTreeId, $userId, $licenseId,  $what, $changeTo);
-        }
-      return "success";
+        case "updateLicenseDecisions":
+          $id = GetParm("id", PARM_STRING);
+          if (isset($id))
+          {
+            list ($uploadTreeId, $licenseId) = explode(',', $id);
+            $what = GetParm("columnName", PARM_STRING);
+            $changeTo = GetParm("value", PARM_STRING);
+            $this->clearingDao->updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo);
+          }
+          return "success";
       }
     }
   }
@@ -283,7 +292,7 @@ class AjaxClearingView extends FO_Plugin
       if (array_key_exists('direct', $entries))
       {
         $types[] = $entries['direct']['type'];
-        $reportInfo =$entries['direct']['reportinfo'];
+        $reportInfo = $entries['direct']['reportinfo'];
         $comment = $entries['direct']['comment'];
       }
 
@@ -312,16 +321,16 @@ class AjaxClearingView extends FO_Plugin
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
 
       $reportInfoField = $reportInfo;
-      $commentField =$comment;
+      $commentField = $comment;
 
-      $idArray=array($uploadId, $uploadTreeId, $licenseId);
-      $id = implode(',',$idArray);
-      $table[] = array( 'DT_RowId' => $id,
-                        '0'=> $licenseShortNameWithLink,
-                        '1'=> implode("<br/>", $types),
-                        '2'=> $reportInfoField,
-                        '3'=> $commentField,
-                        '4'=> $actionLink);
+      $idArray = array($uploadTreeId, $licenseId);
+      $id = implode(',', $idArray);
+      $table[] = array('DT_RowId' => $id,
+          '0' => $licenseShortNameWithLink,
+          '1' => implode("<br/>", $types),
+          '2' => $reportInfoField,
+          '3' => $commentField,
+          '4' => $actionLink);
     }
     return $table;
   }

@@ -35,8 +35,11 @@ function closeBulkModal() {
 }
 
 function openUserModal() {
-  $('#bulkModal').hide();
-  $('#userModal').toggle();
+    $('#bulkModal').hide();
+    $('#userModal').toggle();
+    if( $('#userModal').is(":visible") ) {
+       $('#licenseSelectionTable_filter label input').focus();
+    }
 }
 
 function closeUserModal() {
