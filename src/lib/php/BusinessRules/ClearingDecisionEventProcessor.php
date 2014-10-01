@@ -163,7 +163,8 @@ class ClearingDecisionEventProcessor {
             }
             $entries['agents'][] = array(
               'name' => $agentName,
-              'matches' => $matches
+              'matches' => $matches,
+              'properties' => $licenseProperties
             );
           }
         }
