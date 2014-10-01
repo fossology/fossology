@@ -266,3 +266,7 @@ html, body
     padding-left: 1px;
     text-align: left;
 }
+
+.selectedRow {
+    font-weight: bold;
+}

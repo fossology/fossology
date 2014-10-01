@@ -31,7 +31,7 @@ CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname)
 
   insertInDatabaseQuery = g_strdup_printf(
     "INSERT INTO %s(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
-    " VALUES($1,$2,$3,$4,$5,$6,$7)",
+    " VALUES($1,$2,$3,md5($3),$4,$5,$6)",
     name
   );
 
@@ -172,11 +172,10 @@ bool CopyrightDatabaseHandler::insertInDatabase(DbManager* dbManager, DatabaseEn
       dbManager->getStruct_dbManager(),
       "insertInDatabase",
       insertInDatabaseQuery,
-      long, long, char*, char*, char*, int, int
+      long, long, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,
     entry.content.c_str(),
-    entry.hash.c_str(),
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
   );

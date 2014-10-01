@@ -198,7 +198,7 @@ returns true if plugin should continue with sending AJAX request, false will abo
             if (properties.bDisableEditing)
                 return;
             var oDefaultEditableSettings = {
-                event: 'dblclick',
+                event: 'click',
 
                 "onsubmit": function (settings, original) {
                     sOldValue = original.revert;
@@ -681,7 +681,7 @@ returns true if plugin should continue with sending AJAX request, false will abo
                 oTRSelected = $("td.focus", oTable)[0].parents("tr")[0];
             }
             */
-            if (response == properties.sSuccessResponse || response == "") {
+            if (response == properties.sSuccessResponse || response == "" || (response.success)) {
                 oTable.fnDeleteRow(oTRSelected);
                 fnDisableDeleteButton();
                 fnSetDisplayStart();

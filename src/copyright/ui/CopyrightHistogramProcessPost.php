@@ -122,6 +122,12 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
         }
 
         $content = GetParm("value", PARM_STRING);
+
+        if (!$content) {
+          header('Content-type: text/plain');
+          return 'empty content not allowed';
+        }
+
         global $SysConf;
         $userId = $SysConf['auth']['UserId'];
         $this->dbManager->begin();
@@ -134,8 +140,8 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
           $this->dbManager->prepare($statementName,$getQuerry);
           $oldData = $this->dbManager->execute($statementName,$params);
 
-          $updateParams = array_merge($params,array( $content,  md5($content)));
-          $updateQuerry = "UPDATE copyright as CPR SET  content = $4 , hash = $5 $commonClause  WHERE CPR.hash =$1 $commonClause2";
+          $updateParams = array_merge($params,array( $content));
+          $updateQuerry = "UPDATE copyright as CPR SET  content = $4 , hash = md5 ($4) $commonClause  WHERE CPR.hash =$1 $commonClause2";
           $this->dbManager->getSingleRow($updateQuerry, $updateParams, "updateCopyrightContent");
 
           $insertQuerry  = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
@@ -147,8 +153,8 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
           }
 
         $this->dbManager->commit();
-        header('Content-type: text/json');
-        return 'Successfully saved';
+        header('Content-type: text/plain');
+        return 'success';
       }
     }
     else if ($action == 'delete') {
@@ -202,27 +208,18 @@ class CopyrightHistogramProcessPost  extends FO_Plugin {
 
     $output['DT_RowId'] = $upload . ",".$Uploadtree_pk.",".$row['hash'];
 
+    $hash = $row['hash'];
+
     $link = "<a href='";
     $link .= Traceback_uri();
-    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $type;
+    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=$hash&type=$type";
     if (!empty($filter)) $URLargs .= "&filter=$filter";
     $link .= $URLargs . "'>".$row['copyright_count']."</a>";
     $output['0']=$link;
 
+    $output ['1']= $row['content'];
 
-    if($normalizeString) {
-      /* strip out characters we don't want to see
-       This is a hack until the agent stops writing these chars to the db.
-      */
-      $S = $row['content'];
-      $S = htmlentities($S);
-      $S = str_replace("&Acirc;", "", $S); // comes from utf-8 copyright symbol
-      $output ['1']= $S;
-    }
-    else  {
-
-      $output ['1']= htmlentities($row['content']);
-    }
+    $output ['2']= "<a id='delete$type$hash' onClick='delete$type($upload,$Uploadtree_pk,\"$hash\");' href='javascript:;'><img src=\"images/icons/close_16.png\">delete</a><span hidden='true' id='update$type$hash'></span>";
     return $output;
   }
 
