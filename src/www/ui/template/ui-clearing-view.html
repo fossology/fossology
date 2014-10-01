@@ -2,9 +2,9 @@
 
 {% block content %}
 <div id="leftrightalignment" name="leftrightalignment">
-    <table border="0" padding="0" style="height:100%; width:100%">
+    <table border="0" style="padding:0px; height:100%; width:100%">
         <tr>
-            <td padding="0" style="position:relative; height: 100%; width:50%">
+            <td style="padding:0px; position:relative; height: 100%; width:50%">
                 <div class="centered">
                     {{ pageMenu }}
                     <button class="legendHider">
@@ -15,10 +15,15 @@
                     </button>
                 </div>
                 <div class="boxnew">{{ textView }}</div>
-                {{ legendBox }}
+                <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
+                  <b>{{ 'Legend'|t }}</b><br/>
+                  {{ legendBox }}
+                </div>
             </td>
             <td class="headerBox">
+              {% block rhs %}
                 {% include 'ui-clearing-view_rhs.html' %}
+              {% endblock %}
             </td>
         </tr>
     </table>
