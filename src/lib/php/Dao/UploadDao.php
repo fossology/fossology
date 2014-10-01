@@ -54,6 +54,7 @@ public function __construct(DbManager $dbManager)
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
+    $uploadEntry['tablename'] = $uploadTreeTableName;
     return $uploadEntry;
   }
 

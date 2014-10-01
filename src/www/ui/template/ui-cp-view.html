@@ -5,14 +5,15 @@
 
 <form method="post">
   <input name="lastItem" type="hidden" value="{{ itemId }}"/>
+  <input name="upload" type="hidden" value="{{ uploadId }}"/>
 
   <div class="groupBox">
       {% if previousItem %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
+      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ previousItem }}';">&lt;</button>
       {% endif %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Update'|t }}</button>
+      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ itemId }}';">{{ 'Update'|t }}</button>
       {% if nextItem %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
+      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ nextItem }}';">&gt;</button>
       {% endif %}
   </div>
 
@@ -36,7 +37,5 @@
 
   </div>
 </form>
-
-
 
 {% endblock %}

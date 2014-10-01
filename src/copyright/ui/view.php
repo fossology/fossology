@@ -94,14 +94,16 @@ class copyright_view extends FO_Plugin
       $this->invalidParm = true;
       return (0);
     }
+    $uploadId = GetParm("upload", PARM_INTEGER);
     $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
+    if (empty($uploadTreeId) || empty($uploadId))
     {
       $this->invalidParm = true;
       return;
     }
 
-    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
+    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId,$uploadTreeTableName);
     if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
     {
       $parent = $this->uploadDao->getUploadParent($this->uploadEntry['upload_fk']);
@@ -148,7 +150,7 @@ class copyright_view extends FO_Plugin
     }
 
     $uploadId = $this->uploadEntry['upload_fk'];
-    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->uploadEntry['tablename'];
     $permission = GetUploadPerm($uploadId);
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
@@ -174,6 +176,7 @@ class copyright_view extends FO_Plugin
     list($pageMenu, $textView)  = $theView;
 
     $this->vars['itemId'] = $uploadTreeId;
+    $this->vars['uploadId'] = $uploadId;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->legendBox();
