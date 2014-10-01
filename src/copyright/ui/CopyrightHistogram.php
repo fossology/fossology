@@ -62,11 +62,12 @@ class CopyrightHistogram  extends FO_Plugin {
 private function getTableForSingleType($type,$description,$descriptionUnique,$descriptionTotal, $upload_pk, $uploadtreeId, $filter, $uploadtree_tablename, $Agent_pk){
 
   $output = "<div><table border=1 width='100%' id='copyright".$type."'>\n";
-  $output .= "</table>&nbsp;&nbsp;&nbsp;<button id=\"btnDeleteMemRow".$type."\">Delete ".$description."</button></div><br/>\n";
+  $output .= "</table></div><br/>\n";
 
       $tableColumns = '[
       { "sTitle" : "'._("Count").'", "sClass": "right read_only" ,"sWidth" : "5%" },
-      { "sTitle" : "'.$description.'", "sClass": "left"}
+      { "sTitle" : "'.$description.'", "sClass": "left"},
+      { "sTitle" : "", "sClass" : "center read_only", "sWidth" : "10%", "bSortable" : false }
     ]';
     $tableSorting = json_encode($this->returnSortOrder());
 
@@ -102,10 +103,22 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
   $editableConfiguration  = '{
     "sReadOnlyCellClass": "read_only",
+    "sSelectedRowClass" : "selectedRow",
     "sUpdateURL": "?mod=copyrightHistogram-processPost&action=update&type='.$type.'" ,
-    "sDeleteURL": "?mod=copyrightHistogram-processPost&action=delete&type='.$type.'",
-    "sDeleteRowButtonId": "btnDeleteMemRow'.$type.'",
-   "fnOnDeleted" : function(result) { createTable'.$type.'().fnDraw(false);  }
+    "fnOnEditing" : function(input) {
+                      var value = input[0].value;
+                      var isValid = (value) && !(/^\s*$/.test(value));
+                      if (isValid) {
+                         var id = input.parents("tr:first")[0].id;
+                         var hash = id.split(",")[2];
+                         $("#delete'.$type.'" + hash).hide();
+                         var updateElement = $("#update'.$type.'" + hash);
+                         updateElement.text("updating...");
+                         updateElement.show();
+                      }
+                      return isValid;
+                    },
+    "sSuccessResponse" : "success",
     }';
 
 
@@ -117,9 +130,20 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
                     var otable = $('#copyright".$type."').dataTable(". $dataTableConfig . ").makeEditable($editableConfiguration);
                     // var settings = otable.fnSettings(); // for debugging
                     return otable;
-                }
-            </script>";
+                };
 
+              function delete".$type."(upload,item,hash) {
+                 $.ajax({
+                   type: 'POST',
+                   dataType: 'text',
+                   url: '?mod=copyrightHistogram-processPost&action=delete&type=$type',
+                   data: { id : upload + ',' + item + ',' + hash },
+                   success: function(data) { $('#copyright$type').dataTable().fnDraw(false); },
+                   error: function() { alert('error'); }
+                 });
+              }
+            </script>";
+ // TODO change comma separeted data to real json
 
 
 
