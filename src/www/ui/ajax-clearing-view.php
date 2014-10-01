@@ -197,23 +197,25 @@ class AjaxClearingView extends FO_Plugin
           switch ($action)
           {
           case "licenses":
-          $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
+            $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
+            list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+            $licenses = array();
+            foreach ($licenseRefs as $licenseRef)
+            {
+              $currentShortName = $licenseRef->getShortName();
+              if(array_key_exists($currentShortName, $licenseDecisions )) continue;
+              $shortNameWithFullTextLink = $this->getLicenseFullTextLink($currentShortName);
+              $licenseId = $licenseRef->getId();
+              $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
-          $licenses = array();
-          foreach ($licenseRefs as $licenseRef)
-          {
-          $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseRef->getShortName());
-          $licenseId = $licenseRef->getId();
-          $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
-
-          $licenses[] = array($shortNameWithFullTextLink, $actionLink);
-          }
-          return json_encode(
-              array(
-                  'sEcho' => intval($_GET['sEcho']),
-                  'aaData' => $licenses,
-                  'iTotalRecords' => count($licenses),
-                  'iTotalDisplayRecords' => count($licenses)));
+              $licenses[] = array($shortNameWithFullTextLink, $actionLink);
+            }
+            return json_encode(
+                array(
+                    'sEcho' => intval($_GET['sEcho']),
+                    'aaData' => $licenses,
+                    'iTotalRecords' => count($licenses),
+                    'iTotalDisplayRecords' => count($licenses)));
 
         case "licenseDecisions":
           $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
