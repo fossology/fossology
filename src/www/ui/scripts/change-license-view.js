@@ -27,7 +27,7 @@ function clearingSuccess(data) {
 
 function openBulkModal() {
   $('#userModal').hide();
-  $('#bulkModal').show();
+  $('#bulkModal').toggle();
 }
 
 function closeBulkModal() {
@@ -36,7 +36,7 @@ function closeBulkModal() {
 
 function openUserModal() {
   $('#bulkModal').hide();
-  $('#userModal').show();
+  $('#userModal').toggle();
 }
 
 function closeUserModal() {
