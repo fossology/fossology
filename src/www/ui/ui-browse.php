@@ -17,6 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\View\Renderer;
+
 define("TITLE_ui_browse", _("Browse"));
 
 class ui_browse extends FO_Plugin
@@ -270,22 +273,14 @@ class ui_browse extends FO_Plugin
     $V .= "<div align='center'><H3>$text</H3></div>\n";
 
     global $container;
+    /**
+     * @var Renderer
+     */
     $renderer = $container->get('renderer');
-    $userDao = $container->get('dao.user');
-    $assigneeArray = $userDao->getUserChoices();
-    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
-    $assigneeArray[1] = _('Unassigned');
-    $assigneeArray[0] = '';
+    $assigneeArray = $this->getAssigneeArray();
+
     $assigneeFilter = $renderer->createSelect('assigneeSelector', $assigneeArray, 0, ' onchange="filterAssignee()"');
-    $statusArray = array(0 => '');
-    $dbManager = $container->get('db.manager');
-    $dbManager->prepare($stmt = __METHOD__ . ".status", 'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
-    $res = $dbManager->execute($stmt);
-    while ($row = $dbManager->fetchArray($res))
-    {
-      $statusArray[$row['status_pk']] = $row['meaning'];
-    }
-    $dbManager->freeResult($res);
+    $statusArray = $this->getStatusArray();
     $statusFilter = $renderer->createSelect('statusSelector', $statusArray, 0, ' onchange="filterStatus()"');
 
     $V .= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
@@ -521,6 +516,39 @@ class ui_browse extends FO_Plugin
         array(4, "desc")
     );
     return $defaultOrder;
+  }
+
+  /**
+   * @return array
+   */
+  protected function getStatusArray()
+  {
+    global $container;
+    $statusArray = array(0 => '');
+    $dbManager = $container->get('db.manager');
+    $dbManager->prepare($stmt = __METHOD__ . ".status", 'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
+    $res = $dbManager->execute($stmt);
+    while ($row = $dbManager->fetchArray($res))
+    {
+      $statusArray[$row['status_pk']] = $row['meaning'];
+    }
+    $dbManager->freeResult($res);
+    return $statusArray;
+  }
+
+  /**
+   * @return array
+   */
+  protected function getAssigneeArray()
+  {
+    global $container;
+    /** @var UserDao $userDao */
+    $userDao = $container->get('dao.user');
+    $assigneeArray = $userDao->getUserChoices();
+    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
+    $assigneeArray[1] = _('Unassigned');
+    $assigneeArray[0] = '';
+    return $assigneeArray;
   }
 
 }
