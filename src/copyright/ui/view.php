@@ -29,27 +29,21 @@ define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
 
 class copyright_view extends FO_Plugin
 {
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var CopyrightDao
-   */
+  /** @var CopyrightDao */
   private $copyrightDao;
-
-  /**
-   * @var HighlightRenderer
-   */
+  /** @var HighlightRenderer */
   private $highlightRenderer;
+  /** bool */
+  private $invalidParm = false;
+  /** array */
+  private $uploadEntry;
 
   function __construct()
   {
     $this->Name = "copyrightview";
     $this->Title = TITLE_copyright_view;
-    $this->Version = "1.0";
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
@@ -92,25 +86,73 @@ class copyright_view extends FO_Plugin
     }
   } // RegisterMenus()
 
+  
+  function OutputOpen()
+  {
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      $this->invalidParm = true;
+      return (0);
+    }
+    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    if (empty($uploadTreeId))
+    {
+      $this->invalidParm = true;
+      return;
+    }
+
+    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
+    if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
+    {
+      $parent = $this->uploadDao->getUploadParent($this->uploadEntry['upload_fk']);
+      if (!isset($parent))
+      {
+        $this->invalidParm = true;
+        return;
+      }
+
+      $uploadTreeId = $this->uploadDao->getNextItem($this->uploadEntry['upload_fk'], $parent);
+      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      {
+        $this->invalidParm = true;
+        return;
+      }
+
+      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("show")) . "&item=$uploadTreeId");
+    }
+
+    return parent::OutputOpen();
+  }  
+  
+  
   /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content. \n
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
+   * @brief extends standard Output to handle empty uploads
    */
   function Output()
   {
-    global $PG_CONN;
-    if ($this->State != PLUGIN_STATE_READY)
+    if ($this->invalidParm)
+    {
+      $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
+      return $this->renderTemplate("include/base.html");
+    }
+    parent::Output();
+  }
+  
+  
+  protected function htmlContent()
+  {
+    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    if (empty($uploadTreeId))
     {
       return;
     }
-    global $Plugins;
-    /** @var ui_view $view */
-    $view = & $Plugins[plugin_find_id("view")];
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
-    $Upload = GetParm("upload", PARM_INTEGER);
+
+    $uploadId = $this->uploadEntry['upload_fk'];
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $permission = GetUploadPerm($uploadId);
+    $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
+    $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
+    $this->vars['micromenu'] = Dir2Browse('copyright', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
 
     $ModBack = GetParm("modback", PARM_STRING);
     if (empty($ModBack))
@@ -122,12 +164,21 @@ class copyright_view extends FO_Plugin
 
     if (count($highlights) < 1)
     {
-      $text = _("No copyright data is available for this file.");
-      print $text;
-      return;
+      $this->vars['message'] = _("No copyright data is available for this file.");
     }
 
-    return $view->ShowView(NULL, $ModBack, 1, 1, $this->legendBox(false), true, true, $highlights);
+    global $Plugins;
+    /** @var ui_view $view */
+    echo "<hr>". plugin_find_id("view")."<hr>";
+    $view = &$Plugins[plugin_find_id("view")]; 
+    $theView = $view->getView(NULL, $ModBack, $showHeader=0, "", $highlights, false, true);
+    list($pageMenu, $textView)  = $theView;
+
+    $this->vars['itemId'] = $uploadTreeId;
+    $this->vars['pageMenu'] = $pageMenu;
+    $this->vars['textView'] = $textView;
+    $this->vars['legendBox'] = $this->legendBox();
+    $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
   }
 
   /**
@@ -137,17 +188,22 @@ class copyright_view extends FO_Plugin
   {
     $colorMapping = $this->highlightRenderer->colorMapping;
 
-    $output = '<b>' . _("Legend") . ':</b><br/>';
+    $output = '';
     $output .= _("file text");
-    foreach (array(Highlight::COPYRIGHT => 'copyright remark', Highlight::URL => 'URL', Highlight::EMAIL => 'eMail address')
+    foreach (array(Highlight::COPYRIGHT => 'copyright remark', Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address')
              as $colorKey => $txt)
     {
       $output .= '<br/>' . $this->highlightRenderer->createStyle($colorKey, $txt, $colorMapping) . $txt . '</span>';
     }
-    return '<div style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:fixed; right:5px; bottom:5px;">' . $output . '</div>';
+    return $output;
   }
+  
+  function getTemplateName()
+  {
+    return 'ui-cp-view.html';
+  }
+  
 }
-
 
 $NewPlugin = new copyright_view;
 $NewPlugin->Initialize();
