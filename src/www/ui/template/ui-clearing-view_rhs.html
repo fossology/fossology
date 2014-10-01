@@ -5,15 +5,12 @@
     <input name="lastItem" type="hidden" value="{{ itemId }}"/>
 
     <div class="groupBox">
-        {% if previousItem or nextItem %}
         {% if previousItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
         {% endif %}
+        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Update</button>
         {% if nextItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
-        {% endif %}
-        {% else %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">Update</button>
         {% endif %}
     </div>
 
@@ -70,7 +67,7 @@
                 {{ macro.table("licenseSelectionTable") }}
             </div>
         </div>
-        {% include 'view_license_bulk.html' %}
+        {% include 'ui-clearing-view_bulk.html' %}
     </div>
     {% endif %}
 

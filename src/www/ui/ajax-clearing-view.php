@@ -237,8 +237,7 @@ class AjaxClearingView extends FO_Plugin
   {
     $uploadTreeId = $fileTreeBounds->getUploadTreeId();
     $uploadId = $fileTreeBounds->getUploadId();
-    $reportInfo = "";
-    $comment = "";
+
 
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
@@ -257,14 +256,18 @@ class AjaxClearingView extends FO_Plugin
       $licenseId = $licenseDecision['licenseId'];
 
       $types = array();
+      $reportInfo = "";
+      $comment = "";
 
       $entries = $licenseDecision['entries'];
       if (array_key_exists('direct', $entries))
       {
         $types[] = $entries['direct']['type'];
+        $reportInfo =$entries['direct']['reportinfo'];
+        $comment = $entries['direct']['comment'];
       }
-      // can a licenseDecision have both?
-      if (array_key_exists('agents', $entries))
+      // can a licenseDecision have both? I think not
+      else if (array_key_exists('agents', $entries))
       {
         foreach ($entries['agents'] as $agentEntry)
         {
@@ -274,7 +277,7 @@ class AjaxClearingView extends FO_Plugin
             $agentId = $match['agentId'];
             $matchId = $match['matchId'];
             $index = $match['index'];
-            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight\">#$index</a>";
+            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight\">#$index</a>";
             if (array_key_exists('percentage', $match))
             {
               $matchText .= "(" . $match['percentage'] . " %)";
@@ -287,8 +290,14 @@ class AjaxClearingView extends FO_Plugin
       }
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
+//      $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
+//      $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
+
+
+
       $reportInfoField = "<input type=\"text\" name\"reportinfo\">$reportInfo</input>";
       $commentField = "<input type=\"text\" name=\"comment\">$comment</input>";
+//      htmlentities($row['content']);
       $table[] = array($licenseShortNameWithLink, implode("<br/>", $types), $reportInfoField, $commentField, $actionLink);
     }
     return $table;

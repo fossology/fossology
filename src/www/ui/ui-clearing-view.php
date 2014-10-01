@@ -23,7 +23,6 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
@@ -202,65 +201,12 @@ class ClearingView extends FO_Plugin
     $userId = $SysConf['auth']['UserId'];
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
+
     if (!empty($lastItem))
     {
-      $type = GetParm("clearingTypes", PARM_INTEGER);
-
-      if ($type > 1)
-      {
-        $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
-        $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $lastItem);
-
-        $fileTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
-
-        list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
-
-        $lastDecision = null;
-        if ($clearingDecision)
-        {
-          $lastDecision = $clearingDecision['date_added'];
-        }
-
-
-        $insertDecision = false;
-        foreach (array_merge($added, $removed) as $licenseShortName => $entry)
-        {
-          if (isset($entry['entries']['direct'])) {
-            $entryTimestamp = $entry['entries']['direct']['dateAdded'];
-            $comparison = strcmp($lastDecision, $entryTimestamp);
-            if ($comparison < 0)
-            {
-              $insertDecision = true;
-              break;
-            }
-          } else {
-            $insertDecision = true;
-            break;
-          }
-        }
-
-        $removedSinceLastDecision = array();
-        foreach ($events as $event) {
-          $licenseShortName = $event['rf_shortname'];
-          if ($event['is_removed'] && !array_key_exists($licenseShortName, $added)) {
-            $entryTimestamp = $event['date_added'];
-            $comparison = strcmp($lastDecision, $entryTimestamp);
-            if ($comparison < 0)
-            {
-              $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
-              $insertDecision = true;
-            }
-          }
-        }
-
-        if ($insertDecision)
-        {
-          $global = GetParm("globalDecision", PARM_STRING) === "on";
-
-          $this->clearingDao->insertClearingDecision($lastItem, $userId, $type, $global, $added, $removedSinceLastDecision);
-        }
-      }
+      $this->updateLastItem($userId, $lastItem);
     }
+
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
@@ -287,37 +233,16 @@ class ClearingView extends FO_Plugin
     $output = '';
     /* @var Fossology\Lib\Dao\FileTreeBounds */
 
-    $licenseDecisionMap = array();
-    $licenseIds = array();
     if (!$fileTreeBounds->containsFiles())
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
       $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
       $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
-      $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($fileTreeBounds);
-      $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
-
-      foreach ($licenseFileMatches as $licenseMatch)
-      {
-        /** @var $licenseMatch LicenseMatch */
-        $licenseRef = $licenseMatch->getLicenseRef();
-        $licenseShortName = $licenseRef->getShortName();
-        $licenseId = $licenseRef->getId();
-        $agentRef = $licenseMatch->getAgentRef();
-        $agentName = $agentRef->getAgentName();
-        $agentId = $agentRef->getAgentId();
-
-        $licenseIds[$licenseShortName] = $licenseId;
-        $licenseDecisionMap[$licenseShortName][$agentName][$agentId][] = $licenseMatch->getPercent();
-      }
-
-
       if ($permission >= PERM_WRITE)
       {
         $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
         $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm($uploadTreeId));
-
       } else
       {
         $this->vars['auditDenied'] = true;
@@ -351,7 +276,7 @@ class ClearingView extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "view_license.html";
+    return "ui-clearing-view.html";
   }
 
   /*
@@ -377,6 +302,82 @@ class ClearingView extends FO_Plugin
     menu_insert("ChangeLicense::[BREAK]", 4);
 
     return 0;
+  }
+
+  /**
+   * @param $userId
+   * @param $lastItem
+   * @return array
+   */
+  protected function updateLastItem($userId, $lastItem)
+  {
+    $type = GetParm("clearingTypes", PARM_INTEGER);
+
+    if ($type > 1)
+    {
+      $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
+      $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $lastItem);
+
+      $fileTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+
+      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+
+      $lastDecision = null;
+      if ($clearingDecision)
+      {
+        $lastDecision = $clearingDecision['date_added'];
+      }
+
+
+      $insertDecision = false;
+      foreach (array_merge($added, $removed) as $licenseShortName => $entry)
+      {
+        if (isset($entry['entries']['direct']))
+        {
+          $entryTimestamp = $entry['entries']['direct']['dateAdded'];
+          $comparison = strcmp($lastDecision, $entryTimestamp);
+          if ($comparison < 0)
+          {
+            $insertDecision = true;
+            break;
+          }
+        } else
+        {
+          $insertDecision = true;
+          break;
+        }
+      }
+
+      $removedSinceLastDecision = array();
+      foreach ($events as $event)
+      {
+        $licenseShortName = $event['rf_shortname'];
+        if ($event['is_removed'] && !array_key_exists($licenseShortName, $added))
+        {
+          $entryTimestamp = $event['date_added'];
+          $comparison = strcmp($lastDecision, $entryTimestamp);
+          if ($comparison < 0)
+          {
+            $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
+            $insertDecision = true;
+          }
+        }
+      }
+
+      if ($type === 2) {
+        // handle "No license known"
+        $insertDecision = true;
+        $added = array();
+        $removedSinceLastDecision = array();
+      }
+
+      if ($insertDecision)
+      {
+        $global = GetParm("globalDecision", PARM_STRING) === "on";
+
+        $this->clearingDao->insertClearingDecision($lastItem, $userId, $type, $global, $added, $removedSinceLastDecision);
+      }
+    }
   }
 }
 
