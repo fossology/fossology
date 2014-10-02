@@ -25,7 +25,6 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\View\Renderer;
 
 class ChangeLicenseUtility extends Object
 {
