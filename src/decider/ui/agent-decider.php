@@ -84,6 +84,7 @@ class agent_fodecider extends FO_Plugin
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
+    $Dependencies[] = "agent_adj2nest";
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   }
 }

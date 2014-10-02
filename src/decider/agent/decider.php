@@ -23,34 +23,33 @@ define("ALARM_SECS", 30);
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 
-global $PG_CONN;
 
-global $container;
-global $SysConf;
+function init()
+{
+  $GLOBALS['processed'] = 0;
+  $GLOBALS['alive'] = false;
 
-$dbManager = $container->get('db.manager');
+  $args = getopt("scheduler_start", array("userID:"));
 
-/* Load command-line options */
-$args = getopt("scheduler_start", array("userID:"));
+  $userId = $args['userID'];
+  $GLOBALS['userId'] = $userId;
 
-$GLOBALS['userId'] = $args['userID'];
+  global $container;
 
-$res = $dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk = $1", array($userId));
-$GLOBALS['userName'] = $res['user_name'];
+  $dbManager = $container->get('db.manager');
+  $GLOBALS['dbManager'] = $dbManager;
 
-global $userId;
-global $userName;
+  $res = $dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk = $1", array($userId));
 
-if (!$userId || !$userName) {
-  print "FAILED: invalid user\n";
-  exit(1);
+
+  $GLOBALS['userName'] = $res['user_name'];
 }
 
 function heartbeat_handler($signo)
 {
   global $processed;
   global $alive;
-  echo "HEART: ".$processed."".$alive."\n";
+  echo "HEART: ".$processed." ".($alive ? 1 : 0)."\n";
   $alive = false;
   pcntl_alarm(ALARM_SECS);
 }
@@ -60,6 +59,7 @@ function heartbeat($newProcessed)
   global $processed;
   global $alive;
 
+  $processed += $newProcessed;
   $alive = true;
   pcntl_signal_dispatch();
 }
@@ -69,6 +69,7 @@ pcntl_alarm(ALARM_SECS);
 
 function bail($exitvalue)
 {
+  heartbeat_handler(SIGALRM);
   echo "BYE $exitvalue\n";
   exit($exitvalue);
 }
@@ -83,17 +84,29 @@ function greet()
 
 function processUploadId($uploadId)
 {
-  echo "burning CPU on $uploadId\n";
+  global $userId;
+  global $userName;
 
-  while (true) {
-    sleep(10);
-  };
+  global $dbManager;
+
+  $count = $dbManager->getSingleRow("SELECT count(*) AS count FROM uploadtree WHERE upload_fk = $1",
+  array($uploadId));
+
+  heartbeat($count['count']);
 }
 
 greet();
+init();
+
+
+
 while (false !== ($line = fgets(STDIN)))
 {
-  if ("CLOSE" === $line)
+  if ("CLOSE\n" === $line)
+  {
+    bail(0);
+  }
+  if ("END\n" === $line)
   {
     bail(0);
   }
@@ -102,8 +115,6 @@ while (false !== ($line = fgets(STDIN)))
 
   if ($uploadId > 0)
     processUploadId($uploadId);
-
-  echo $line;
 }
 
 bail(0);
