@@ -20,7 +20,7 @@ MOD_NAMES=copyright ip ecc
 MOD_SUBDIR=ui
 
 all:
-	@echo "make $(MON_NAMES) ui"
+	@echo "make $(MOD_NAMES) ui"
 
 install:
 	for MOD_NAME in $(MOD_NAMES); do \
