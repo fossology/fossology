@@ -22,7 +22,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
@@ -102,7 +102,7 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param $orderAscending
-   * @param $fileTreeBounds
+   * @param $itemTreeBounds
    * @param $userId
    * @param $uploadId
    * @param $uploadTreeId
@@ -110,10 +110,10 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
-    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
@@ -138,13 +138,13 @@ class AjaxClearingView extends FO_Plugin
    * @param $userId
    * @param $uploadId
    * @param $uploadTreeId
-   * @internal param $fileTreeBounds
+   * @internal param $itemTreeBounds
    * @return string
    */
   protected function doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId,$uploadId);
-    $aaData = $this->getCurrentLicenseDecisions($fileTreeBounds, $userId, $orderAscending);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId,$uploadId);
+    $aaData = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId, $orderAscending);
 
     return json_encode(
         array(
@@ -258,19 +258,19 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param $userId
    * @return array
    */
-  protected function getCurrentLicenseDecisions(FileTreeBounds $fileTreeBounds, $userId, $orderAscending)
+  protected function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
   {
-    $uploadTreeId = $fileTreeBounds->getUploadTreeId();
-    $uploadId = $fileTreeBounds->getUploadId();
+    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
+    $uploadId = $itemTreeBounds->getUploadId();
 
 
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
     ksort($licenseDecisions, SORT_STRING);
 

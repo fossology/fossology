@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\DatabaseEnum;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -88,7 +88,7 @@ public function __construct(DbManager $dbManager)
   /**
    * @param $uploadTreeId
    * @param $uploadTreeTableName
-   * @return FileTreeBounds
+   * @return ItemTreeBounds
    */
   public function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
@@ -96,15 +96,15 @@ public function __construct(DbManager $dbManager)
     if ($uploadEntry === FALSE)
     {
       $this->logger->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
-      return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
+      return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
     }
-    return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
+    return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
   }
 
   /**
    * @param $uploadTreeId
    * @param $uploadId
-   * @return FileTreeBounds
+   * @return ItemTreeBounds
    */
   public function getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId)
   {
@@ -113,19 +113,19 @@ public function __construct(DbManager $dbManager)
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return int
    */
-  public function countPlainFiles(FileTreeBounds $fileTreeBounds)
+  public function countPlainFiles(ItemTreeBounds $itemTreeBounds)
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $row = $this->dbManager->getSingleRow("SELECT count(*) as count FROM $uploadTreeTableName
         WHERE upload_fk = $1
           AND lft BETWEEN $2 AND $3
           AND ((ufile_mode & (3<<28))=0)
           AND pfile_fk != 0",
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()), $stmt);
+        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), $stmt);
     $fileCount = intval($row["count"]);
     return $fileCount;
   }

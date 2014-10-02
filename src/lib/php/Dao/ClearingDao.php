@@ -24,7 +24,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -61,8 +61,8 @@ class ClearingDao extends Object
    */
   function getFileClearings($uploadTreeId)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-    return $this->getFileClearingsFolder($fileTreeBounds);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    return $this->getFileClearingsFolder($itemTreeBounds);
   }
 
   function booleanFromPG($in)
@@ -74,10 +74,10 @@ class ClearingDao extends Object
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return ClearingDecision[]
    */
-  function getFileClearingsFolder(FileTreeBounds $fileTreeBounds)
+  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds)
   {
     $statementName = __METHOD__;
 
@@ -101,7 +101,7 @@ class ClearingDao extends Object
            WHERE ut.upload_fk=$1 and ut.lft BETWEEN $2 and $3
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc");
 // the array needs to be sorted with the newest clearingDecision first.
-    $result = $this->dbManager->execute($statementName, array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
+    $result = $this->dbManager->execute($statementName, array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
     $clearingsWithLicensesArray = array();
 
     while ($row = $this->dbManager->fetchArray($result))
@@ -246,47 +246,47 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return ClearingDecision[]
    */
-  public function getGoodClearingDecPerFileId(FileTreeBounds $fileTreeBounds)
+  public function getGoodClearingDecPerFileId(ItemTreeBounds $itemTreeBounds)
   {
-    $licenseCandidates = $this->getFileClearingsFolder($fileTreeBounds);
+    $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
     $filteredLicenses = $this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
     return $filteredLicenses;
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getEditedLicenseShortNamesFullList(FileTreeBounds $fileTreeBounds)
+  public function getEditedLicenseShortNamesFullList(ItemTreeBounds $itemTreeBounds)
   {
 
-    $licenseCandidates = $this->getFileClearingsFolder($fileTreeBounds);
+    $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates);
     return $licenses;
   }
 
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return string[]
    */
-  public function getEditedLicenseShortnamesContained(FileTreeBounds $fileTreeBounds)
+  public function getEditedLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds)
   {
-    $licenses = $this->getEditedLicenseShortNamesFullList($fileTreeBounds);
+    $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
 
     return array_unique($licenses);
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getEditedLicenseShortnamesContainedWithCount(FileTreeBounds $fileTreeBounds)
+  public function getEditedLicenseShortnamesContainedWithCount(ItemTreeBounds $itemTreeBounds)
   {
-    $licenses = $this->getEditedLicenseShortNamesFullList($fileTreeBounds);
+    $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
     $uniqueLicenses = array_unique($licenses);
     $licensesWithCount = array();
 

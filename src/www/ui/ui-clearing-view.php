@@ -208,7 +208,7 @@ class ClearingView extends FO_Plugin
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
     $options = array('skipNoLicense' => $_COOKIE['option_skipNoLicense']==="true" );
 
@@ -234,11 +234,11 @@ class ClearingView extends FO_Plugin
 
     $output = '';
 
-    if (!$fileTreeBounds->containsFiles())
+    if (!$itemTreeBounds->containsFiles())
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
       $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
-      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
       if ($permission >= PERM_WRITE)
       {
@@ -319,9 +319,9 @@ class ClearingView extends FO_Plugin
       $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
       $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $lastItem);
 
-      $fileTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+      $itemTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
 
-      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($fileTreeBounds, $userId);
+      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
       $lastDecision = null;
       if ($clearingDecision)

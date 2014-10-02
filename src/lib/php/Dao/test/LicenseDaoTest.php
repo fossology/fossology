@@ -22,7 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 
@@ -79,8 +79,8 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->execute($stmt,array($agentId, $agentName, $agentRev, 'true'));
 
     $licDao = new LicenseDao($this->dbManager);
-    $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
-    $matches = $licDao->getAgentFileLicenseMatches($fileTreeBounds);
+    $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
+    $matches = $licDao->getAgentFileLicenseMatches($itemTreeBounds);
     
     $licenseRef = new LicenseRef($licenseRefNumber, $lic0['rf_shortname'], $lic0['rf_fullname']);
     $agentRef = new AgentRef($agentId, $agentName, $agentRev);
@@ -168,8 +168,8 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
             VALUES ($uploadtreeId, $uploadId, $pfileId, $left, $right)");
 
     $licDao = new LicenseDao($this->dbManager);
-    $fileTreeBounds = new FileTreeBounds($uploadtreeId,"uploadtree",$uploadId,$left,$right);
-    $licenses = $licDao->getLicenseShortnamesContained($fileTreeBounds);
+    $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadId,$left,$right);
+    $licenses = $licDao->getLicenseShortnamesContained($itemTreeBounds);
     
     asort($licAll);    
     assertThat($licenses, is(array_values($licAll)));

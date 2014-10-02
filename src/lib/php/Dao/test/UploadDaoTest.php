@@ -71,10 +71,10 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
         . " VALUES ($uploadTreeId, NULL, $uploadId, 1, 33792, $left, 2, 'WXwindows.txt');",
         __METHOD__ . '.insert.data');
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-    $this->assertInstanceOf('Fossology\Lib\Dao\Data\FileTreeBounds', $fileTreeBounds);
-    $this->assertEquals($expected = $uploadId, $fileTreeBounds->getUploadId());
-    $this->assertEquals($expected = $left, $fileTreeBounds->getLeft());
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    $this->assertInstanceOf('Fossology\Lib\Dao\Data\ItemTreeBounds', $itemTreeBounds);
+    $this->assertEquals($expected = $uploadId, $itemTreeBounds->getUploadId());
+    $this->assertEquals($expected = $left, $itemTreeBounds->getLeft());
   }
 
   public function testGetNextItemWithEmptyArchive()

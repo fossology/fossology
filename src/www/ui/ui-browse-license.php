@@ -21,7 +21,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\View\LicenseProcessor;
@@ -168,9 +168,9 @@ class ui_browse_license extends FO_Plugin
 
     $ModLicView = & $Plugins[plugin_find_id("view-license")];
 
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
 
-    $left = $fileTreeBounds->getLeft();
+    $left = $itemTreeBounds->getLeft();
     if (empty($left))
     {
       $text = _("Job unpack/adj2nest hasn't completed.");
@@ -194,8 +194,8 @@ class ui_browse_license extends FO_Plugin
     $V .= $this->buildAgentSelector($allScans);
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -333,7 +333,7 @@ class ui_browse_license extends FO_Plugin
   /**
    * @param $Uri
    * @param $tagId
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param $ModLicView
    * @param $UniqueTagArray
    * @param $selectedAgentId
@@ -341,11 +341,11 @@ class ui_browse_license extends FO_Plugin
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($Uri, $tagId, FileTreeBounds $fileTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
+  public function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
   {
     /** change the license result when selecting one version of nomos */
-    $uploadId = $fileTreeBounds->getUploadId();
-    $uploadTreeId = $fileTreeBounds->getUploadTreeId();
+    $uploadId = $itemTreeBounds->getUploadId();
+    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
     $newestNomos=$this->getNewestAgent("nomos");
@@ -357,8 +357,8 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $AddInfoText = "";
-    $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($fileTreeBounds, $selectedAgentId, array());
-    $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($fileTreeBounds);
+    $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
+    $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($itemTreeBounds);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -549,15 +549,15 @@ class ui_browse_license extends FO_Plugin
   /**
    * @param $uploadTreeId
    * @param $tagId
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $agentId
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, FileTreeBounds $fileTreeBounds, $agentId)
+  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId)
   {
-    $FileCount = $this->uploadDao->countPlainFiles($fileTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($fileTreeBounds, $orderStmt = "", $agentId);
-    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($fileTreeBounds);
+    $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
+    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($itemTreeBounds);
 
     return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
