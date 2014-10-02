@@ -29,6 +29,7 @@ require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
 class UploadDao extends Object
 {
+
   /**
    * @var DbManager
    */
@@ -43,6 +44,19 @@ public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
+  }
+
+  /**
+   * @param $uploadTreeId
+   * @param string $uploadTreeView
+   * @return array
+   */
+  public function getUploadEntryFromView($uploadTreeId, $uploadTreeView)
+  {
+    $stmt = __METHOD__ . ".$uploadTreeView";
+    $uploadEntry = $this->dbManager->getSingleRow("$uploadTreeView SELECT * FROM  UploadTreeView WHERE uploadtree_pk = $1",
+        array($uploadTreeId), $stmt);
+    return $uploadEntry;
   }
 
   /**
@@ -174,9 +188,9 @@ public function getUploadtreeTableName($uploadId)
    * @param $item
    * @return mixed
    */
-  public function getNextItem($uploadId, $item)
+  public function getNextItem($uploadId, $item, $options = null )
   {
-    return $this->getItemByDirection($uploadId, $item, self::DIR_FWD);
+    return $this->getItemByDirection($uploadId, $item, self::DIR_FWD, $options);
   }
 
   /**
@@ -184,9 +198,9 @@ public function getUploadtreeTableName($uploadId)
    * @param $item
    * @return mixed
    */
-  public function getPreviousItem($uploadId, $item)
+  public function getPreviousItem($uploadId, $item, $options = null)
   {
-    return $this->getItemByDirection($uploadId, $item, self::DIR_BCK);
+    return $this->getItemByDirection($uploadId, $item, self::DIR_BCK, $options);
   }
 
   const DIR_FWD = 1;
@@ -199,35 +213,36 @@ public function getUploadtreeTableName($uploadId)
    * @param $direction
    * @return mixed
    */
-  public function getItemByDirection($uploadId, $item, $direction)
+  public function getItemByDirection($uploadId, $item, $direction, $options)
   {
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    $uploadTreeView = $this->getUploadTreeView($uploadId, $item, $options, $uploadTreeTableName);
 
-    $itemEntry = $this->getUploadEntry($item, $uploadTreeTableName);
+    $itemEntry = $this->getUploadEntryFromView($item, $uploadTreeView);
 
-    return $this->findNextItem($itemEntry, $direction, $uploadTreeTableName);
+    return $this->findNextItem($itemEntry, $direction, $uploadTreeView);
   }
 
   /**
    * @param $itemEntry
    * @param $direction
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function findNextItem($itemEntry, $direction, $uploadTreeTableName)
+  protected function findNextItem($itemEntry, $direction, $uploadTreeView)
   {
     $parent = $itemEntry['parent'];
     $item = $itemEntry['uploadtree_pk'];
 
     if (isset($parent))
     {
-      $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeTableName);
-      $parentSize = $this->getParentSize($parent, $uploadTreeTableName);
+      $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeView);
+      $parentSize = $this->getParentSize($parent, $uploadTreeView);
     } else
     {
       if ($direction == self::DIR_FWD)
       {
-        return $this->enterFolder($item, $direction, $uploadTreeTableName);
+        return $this->enterFolder($item, $direction, $uploadTreeView);
       }
       return self::NOT_FOUND;
     }
@@ -235,10 +250,10 @@ public function getUploadtreeTableName($uploadId)
     $targetOffset = $currentIndex + ($direction == self::DIR_FWD ? 1 : -1);
     if ($targetOffset >= 0 && $targetOffset < $parentSize)
     {
-      return $this->findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeTableName);
+      return $this->findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeView);
     } else
     {
-      return $this->findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeTableName);
+      return $this->findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView);
     }
   }
 
@@ -246,37 +261,41 @@ public function getUploadtreeTableName($uploadId)
    * @param $targetOffset
    * @param $parent
    * @param $direction
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeTableName)
+  protected function findNextItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeView)
   {
-    $newItem = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName);
-    $newItemEntry = $this->getUploadEntry($newItem, $uploadTreeTableName);
+    $newItem = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeView);
 
-    $newItem = $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
+//    if (empty($newItem)) {
+//      return $this->findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView);
+//    }
+    $newItemEntry = $this->getUploadEntryFromView($newItem, $uploadTreeView);
+
+    $newItem = $this->handleNewItem($newItemEntry, $direction, $uploadTreeView);
 
     if ($newItem)
     {
       return $newItem;
     } else
     {
-      return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+      return $this->findNextItem($newItemEntry, $direction, $uploadTreeView);
     }
   }
 
   /**
    * @param $parent
    * @param $direction
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed|null
    */
-  protected function findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeTableName)
+  protected function findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView)
   {
     if (isset($parent))
     {
-      $newItemEntry = $this->getUploadEntry($parent, $uploadTreeTableName);
-      return $this->findNextItem($newItemEntry, $direction, $uploadTreeTableName);
+      $newItemEntry = $this->getUploadEntryFromView($parent, $uploadTreeView);
+      return $this->findNextItem($newItemEntry, $direction, $uploadTreeView);
     } else
     {
       return self::NOT_FOUND;
@@ -287,10 +306,10 @@ public function getUploadtreeTableName($uploadId)
   /**
    * @param $newItemEntry
    * @param $direction
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function handleNewItem($newItemEntry, $direction, $uploadTreeTableName)
+  protected function handleNewItem($newItemEntry, $direction, $uploadTreeView)
   {
     $newItem = $newItemEntry['uploadtree_pk'];
 
@@ -300,7 +319,7 @@ public function getUploadtreeTableName($uploadId)
       $folderSize = $newItemEntry['rgt'] - $newItemEntry['lft'];
       if ($folderSize > 1)
       {
-        return $this->enterFolder($newItem, $direction, $uploadTreeTableName);
+        return $this->enterFolder($newItem, $direction, $uploadTreeView);
       }
       return self::NOT_FOUND;
     } else
@@ -312,38 +331,41 @@ public function getUploadtreeTableName($uploadId)
   /**
    * @param $item
    * @param $direction
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function enterFolder($item, $direction, $uploadTreeTableName)
+  protected function enterFolder($item, $direction, $uploadTreeView)
   {
     $name_order = ($direction == self::DIR_FWD ? 'ASC' : 'DESC');
 
     $statementName = __METHOD__ . "descent_" . $name_order;
-    $newItemResult = $this->dbManager->getSingleRow("
-select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_name $name_order limit 1", array($item), $statementName);
+    $newItemResult = $this->dbManager->getSingleRow("$uploadTreeView
+select uploadtree_pk from uploadTreeView where parent=$1 order by ufile_name $name_order limit 1", array($item), $statementName);
 
-    $newItemEntry = $this->getUploadEntry($newItemResult['uploadtree_pk'], $uploadTreeTableName);
-
-    return $this->handleNewItem($newItemEntry, $direction, $uploadTreeTableName);
+    $newItemEntry = $this->getUploadEntryFromView($newItemResult['uploadtree_pk'], $uploadTreeView);
+    if($newItemEntry == null) return self::NOT_FOUND;
+    return $this->handleNewItem($newItemEntry, $direction, $uploadTreeView);
   }
 
 
   /**
    * @param $parent
    * @param $item
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function getItemIndex($parent, $item, $uploadTreeTableName)
+  protected function getItemIndex($parent, $item, $uploadTreeView)
   {
-    $currentIndexResult = $this->dbManager->getSingleRow("
+
+    $sql  ="$uploadTreeView
 select row_number from (
   select
     row_number() over (order by ufile_name),
     uploadtree_pk
-  from $uploadTreeTableName where parent=$1
-) as index where uploadtree_pk=$2", array($parent, $item), __METHOD__ . "_current_offset");
+  from uploadTreeView where parent=$1
+) as index where uploadtree_pk=$2";
+
+    $currentIndexResult = $this->dbManager->getSingleRow($sql, array($parent, $item), __METHOD__ . "_current_offset".$uploadTreeView);
 
     $currentIndex = $currentIndexResult['row_number'] - 1;
     return $currentIndex;
@@ -351,12 +373,12 @@ select row_number from (
 
   /**
    * @param $parent
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function getParentSize($parent, $uploadTreeTableName)
+  protected function getParentSize($parent, $uploadTreeView)
   {
-    $currentCountResult = $this->dbManager->getSingleRow("select count(*) from $uploadTreeTableName where parent=$1", array($parent), __METHOD__ . "_current_count");
+    $currentCountResult = $this->dbManager->getSingleRow("$uploadTreeView select count(*) from uploadTreeView where parent=$1", array($parent), __METHOD__ . "_current_count");
     $currentCount = $currentCountResult['count'];
     return $currentCount;
   }
@@ -364,14 +386,18 @@ select row_number from (
   /**
    * @param $parent
    * @param $targetOffset
-   * @param $uploadTreeTableName
+   * @param $uploadTreeView
    * @return mixed
    */
-  protected function getNewItemByIndex($parent, $targetOffset, $uploadTreeTableName)
+  protected function getNewItemByIndex($parent, $targetOffset, $uploadTreeView)
   {
-    $statementName = __METHOD__ . "_offset";
-    $newItemResult = $this->dbManager->getSingleRow("
-select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_name offset $2 limit 1", array($parent, $targetOffset), $statementName);
+
+    $statementName = __METHOD__ ;
+    $theQuery ="$uploadTreeView SELECT uploadtree_pk from uploadTreeView
+                        where parent=$1  order by ufile_name offset $2 limit 1";
+
+    $newItemResult = $this->dbManager->getSingleRow($theQuery
+        , array($parent, $targetOffset), $statementName);
 
     $newItem = $newItemResult['uploadtree_pk'];
     return $newItem;
@@ -402,5 +428,66 @@ select uploadtree_pk from $uploadTreeTableName where parent=$1 order by ufile_na
     );
 
     return array($leftRight['lft'], $leftRight['rgt']);
+  }
+
+  /**
+   * @param $uploadId
+   * @param $uploadTreeTableName
+   * @return string
+   */
+  protected function getDefaultUploadTreeView($uploadId, $uploadTreeTableName)
+  {
+    $sql_upload = "";
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $sql_upload = " WHERE ut.upload_fk=$uploadId ";
+    }
+    $uploadTreeView = "WITH UploadTreeView  As ( SELECT * FROM $uploadTreeTableName UT $sql_upload)";
+    return $uploadTreeView;
+  }
+
+  /**
+   * @param $uploadId
+   * @param $item
+   * @param $options
+   * @param $uploadTreeTableName
+   * @return string
+   */
+  protected function getUploadTreeView($uploadId, $item, $options, $uploadTreeTableName)
+  {
+    if ($options === null)
+    {
+      $uploadTreeView = $this->getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+      return $uploadTreeView;
+    } else
+    {
+      if ($options['skipNoLicense'])
+      {
+        $sql_upload = "";
+        if ('uploadtree_a' == $uploadTreeTableName)
+        {
+          $sql_upload = " AND ut.upload_fk=$uploadId ";
+        }
+        $uploadTreeView = " WITH UploadTreeView AS (
+                            select
+                              *
+                            from $uploadTreeTableName ut
+                            where
+                              (
+                              EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
+                                    OR
+                                    ut.ufile_mode & (1<<29) <> 0
+                                    OR
+                                    ut.uploadtree_pk = $item
+                              )
+                              $sql_upload
+                            )";
+        return $uploadTreeView;
+      } else
+      {
+        $uploadTreeView = $this->getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+        return $uploadTreeView;
+      }
+    }
   }
 }

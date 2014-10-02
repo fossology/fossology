@@ -103,7 +103,7 @@ class copyright_view extends FO_Plugin
     }
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
-    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId,$uploadTreeTableName);
+    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
     {
       $parent = $this->uploadDao->getUploadParent($this->uploadEntry['upload_fk']);
