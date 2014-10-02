@@ -208,10 +208,10 @@ class LicenseDao extends Object
            $noLicenseFoundStmt";
 
     if (!empty($selectedAgentId)){
-      $sql .= " AND agent_pk=$4";
+      $sql .= " AND agent_pk=$2";
       $param[] = $selectedAgentId;
     }
-    $sql .= "GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
+    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
          ORDER BY match_percentage ASC, license_shortname ASC";
     
     $this->dbManager->prepare($statementName, $sql);
@@ -239,7 +239,7 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= "GROUP BY license_shortname";
+    $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
     {
       $sql .= $orderStatement;
