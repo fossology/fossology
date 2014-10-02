@@ -10,15 +10,16 @@ without any warranty.
 -->
 
 <container xmlns="http://symfony.com/schema/dic/services"
-        >
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
         <parameter key="twig.environment.config" type="collection">
-<!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
+            <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
             <parameter key="cache" type="constant">false</parameter>
             <parameter key="autoescape" type="constant">false</parameter>
-            <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
         </parameter>
+        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
     </parameters>
 
     <services>
@@ -74,7 +75,7 @@ without any warranty.
         <service id="view.text_renderer" class="\Fossology\Lib\View\TextRenderer">
             <argument type="service" id="view.highlight_renderer"/>
         </service>
-        
+
         <service id="renderer" class="\Fossology\Lib\View\Renderer">
             <argument type="string"></argument>
         </service>
@@ -97,23 +98,38 @@ without any warranty.
             <argument type="service" id="renderer"/>
         </service>
 
-        <service id="businessrules.newest_license_selector" class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
+        <service id="businessrules.newest_license_selector"
+                 class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
         </service>
 
-        <service id="businessrules.clearing_decision_event_processor" class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
+        <service id="businessrules.clearing_decision_event_processor"
+                 class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
             <argument type="service" id="dao.license"/>
             <argument type="service" id="dao.agents"/>
             <argument type="service" id="dao.clearing"/>
         </service>
 
         <service id="twig.loader" class="Twig_Loader_Filesystem">
-            <argument type="string" id="paths">.</argument>
+            <argument id="option">%twig.loader.source_path%</argument>
         </service>
-        
-        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
+
+        <service id="twig.environment" class="\Twig_Environment">
             <argument type="service" id="twig.loader"/>
             <argument id="option">%twig.environment.config%</argument>
+            <call method="addExtension">
+                <argument type="service" id="twig.extension.i18n"/>
+            </call>
         </service>
+
+        <service id="twig.extension.i18n" class="\Twig_Extensions_Extension_I18n">
+            <tag name="twig.extension" />
+        </service>
+
+
+<!--        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
+            <argument type="service" id="twig.loader"/>
+            <argument id="option">%twig.environment.config%</argument>
+        </service>-->
 
     </services>
 </container>

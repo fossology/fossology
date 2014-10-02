@@ -11,7 +11,7 @@
       {% if previousItem %}
       <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ previousItem }}';">&lt;</button>
       {% endif %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ itemId }}';">{{ 'Update'|t }}</button>
+      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ itemId }}';">{{ 'Update'| trans }}</button>
       {% if nextItem %}
       <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ nextItem }}';">&gt;</button>
       {% endif %}
@@ -20,19 +20,19 @@
   <div class="groupBox">
     <fieldset style="display:inline">
         <legend>
-            {{ 'Issue Type'|t }}
+            {{ 'Issue Type'| trans }}
         </legend>
-        <input type="radio" name="iType" value="0"/> {{ 'Not decided'|t }} <br/>
-        <input type="radio" name="iType" value="1"/> {{ 'Not relevant'|t }} <br/>
-        <input type="radio" name="iType" value="2"/> {{ 'To be decided'|t }} <br/>
-        <input type="radio" name="iType" value="3"/> {{ 'Identified issue'|t }} <br/>
+        <input type="radio" name="iType" value="0"/> {{ 'Not decided'| trans }} <br/>
+        <input type="radio" name="iType" value="1"/> {{ 'Not relevant'| trans }} <br/>
+        <input type="radio" name="iType" value="2"/> {{ 'To be decided'| trans }} <br/>
+        <input type="radio" name="iType" value="3"/> {{ 'Identified issue'| trans }} <br/>
     </fieldset>
     <br/>
-   {{ 'Description'|t }}: <br/>
+   {{ 'Description'| trans }}: <br/>
    <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'what')">what</textarea><br/>
-   {{ 'Text finding'|t }}: <br/>
+   {{ 'Text finding'| trans }}: <br/>
    <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'in text')">in text</textarea><br/>
-   {{ 'Comment'|t }}: <br/>
+   {{ 'Comment'| trans }}: <br/>
    <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'comment')">comment</textarea><br/>
 
   </div>

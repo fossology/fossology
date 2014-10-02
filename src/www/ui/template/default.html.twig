@@ -2,52 +2,52 @@
 
 {% block content %}
 <b>
-    {{ 'FOSSology'|t }}
+    {{ 'FOSSology'| trans }}
 </b>
-{{ 'is a framework for software analysis tools.'|t }}
-{{ 'With it, you can:'|t }}
+{{ 'is a framework for software analysis tools.'| trans }}
+{{ 'With it, you can:'| trans }}
 <ul>
     <li>
-        {{ 'Upload files into the fossology repository.'|t }}
+        {{ 'Upload files into the fossology repository.'| trans }}
     </li>
     <li>
-        {{ 'Unpack files (zip, tar, bz2, iso\'s, and many others) into its component files.'|t }}
+        {{ 'Unpack files (zip, tar, bz2, iso\'s, and many others) into its component files.'| trans }}
     </li>
     <li>
-        {{ 'Browse upload file trees.'|t }}
+        {{ 'Browse upload file trees.'| trans }}
     </li>
     <li>
-        {{ 'View file contents and meta data.'|t }}
+        {{ 'View file contents and meta data.'| trans }}
     </li>
     <li>
-        {{ 'Scan for software licenses.'|t }}
+        {{ 'Scan for software licenses.'| trans }}
     </li>
     <li>
-        {{ 'Scan for copyrights and other author information.'|t }}
+        {{ 'Scan for copyrights and other author information.'| trans }}
     </li>
     <li>
-        {{ 'View side-by-side license and bucket differences between file trees.'|t }}
+        {{ 'View side-by-side license and bucket differences between file trees.'| trans }}
     </li>
     <li>
-        {{ 'Tag and attach notes to files.'|t }}
+        {{ 'Tag and attach notes to files.'| trans }}
     </li>
     <li>
-        {{ 'Report files based on your own custom classification scheme.'|t }}
+        {{ 'Report files based on your own custom classification scheme.'| trans }}
     </li>
 </ul>
 <p></p>
 <b>
-    {{ 'Where to Begin...'|t }}
+    {{ 'Where to Begin...'| trans }}
 </b><br/>
-{{ 'The menu at the top contains all the primary capabilities of FOSSology.'|t }}
+{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}
 <ul>
     <li>
         <b>
-            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth">{{ 'Login'|t }}</a>{% else %}
-            {{ 'Login'|t }}{% endif %}</b>:
+            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth">{{ 'Login'| trans }}</a>{% else %}
+            {{ 'Login'| trans }}{% endif %}</b>:
         {{ 'Depending on your account\'s access rights, you may be able to upload files, schedule analysis tasks, or
             even add new users.
-        '|t }}
+        '| trans }}
     </li>
 </ul>
 {% endblock %}

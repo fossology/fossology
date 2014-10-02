@@ -3,24 +3,24 @@
 {% block content %}
 
 <p>
-    {{ 'On the top, you see for each scanner'|t }}
+    {{ 'On the top, you see for each scanner'| trans }}
     ...
 <ul>
     <li>
-        {{ 'if it ever run on this upload'|t }}
+        {{ 'if it ever run on this upload'| trans }}
     </li>
     <li>
         {{ 'the revision of the latest results
             {{ '
     </li>
     <li>
-        {{ 'the newest revision'|t }}
+        {{ 'the newest revision'| trans }}
     </li>
     <li>
-        {{ 'a link to restart the scanner if latest results are not from newest revision'|t }}
+        {{ 'a link to restart the scanner if latest results are not from newest revision'| trans }}
     </li>
 </ul>
-{{ 'If there are results from different revisions, you can select the results of these runs.'|t }}
+{{ 'If there are results from different revisions, you can select the results of these runs.'| trans }}
 </p>
 
 <p>
@@ -28,7 +28,7 @@
         On the left side, you see a list of all found licenses.
         The counters show how often a license is found by scanners and how often it was concluded.
         Click on the license name to search for where the license is found in the file listing.
-    '|t }}
+    '| trans }}
 </p>
 
 <p>
@@ -38,7 +38,7 @@
         Also old results may be included if they differ from current revision of the scanner.
         Results from an older version are marked.
         You can search for any string in the file names or license names.
-    '|t }}
+    '| trans }}
 </p>
 
 {% endblock %}

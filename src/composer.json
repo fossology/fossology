@@ -11,7 +11,8 @@
         "monolog/monolog": "1.10.*",
         "symfony/config": "2.5.*",
         "symfony/dependency-injection": "2.5.*",
-        "twig/twig": "1.*"
+        "twig/twig": "1.*",
+        "twig/extensions": "1.*"
     },
 
     "require-dev": {

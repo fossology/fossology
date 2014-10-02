@@ -4,27 +4,38 @@
 <form method="post">
     <input name="lastItem" type="hidden" value="{{ itemId }}"/>
 
-    <div class="groupBox">
-        {% if previousItem %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
-        {% endif %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
-        {% if nextItem %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
-        {% endif %}
-    </div>
+    <table>
+        <tr>
+            <td>
+            <div class="groupBox">
+                {% if previousItem %}
+                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
+                {% endif %}
+                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+                {% if nextItem %}
+                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
+                {% endif %}
+            </div>
+            </td>
+            <td>
+                <input type="checkbox" name="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>
+                <input type="checkbox" name="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>
+            </td>
+        </tr>
+        </table>
+
 
     <div class="groupBox">
         <fieldset style="display:inline">
             <legend>
-                {{ 'License decision scope'|t }}
+                {{ 'License decision scope'| trans }}
             </legend>
             <input type="checkbox" name="globalDecision"/> global
         </fieldset>
         <br/>
         <fieldset style="display: inline;">
             <legend>
-                {{ 'Clearing decision type'|t }}
+                {{ 'Clearing decision type'| trans }}
             </legend>
             {% for clearingType in clearingTypes %}
             <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
@@ -46,14 +57,14 @@
     {% if auditDenied %}
     {{ 'Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this
     file.
-    '|t }}
+    '| trans }}
     {% else %}
     <button type=\"button\" onclick='openUserModal()'>
-        {{ 'User Decision ...'|t }}
+        {{ 'User Decision ...'| trans }}
     </button>
     &nbsp;
     <button type=\"button\" onclick='openBulkModal()'>
-        {{ 'Bulk Recognition ...'|t }}
+        {{ 'Bulk Recognition ...'| trans }}
     </button>
     &nbsp;
     <span id="bulkIdResult" name="bulkIdResult" hidden></span>
@@ -77,26 +88,26 @@
 <div class="groupBox">
 
     <h3>
-        {{ 'Clearing History'|t }}
+        {{ 'Clearing History'| trans }}
     </h3>
 
     <div class="scrollable2">
         <table border="1" cellpadding="5px" id="clearingHistoryTable" name="clearingHistoryTable">
             <tr>
                 <th>
-                    {{ 'Date'|t }}
+                    {{ 'Date'| trans }}
                 </th>
                 <th>
-                    {{ 'Username'|t }}
+                    {{ 'Username'| trans }}
                 </th>
                 <th>
-                    {{ 'Scope'|t }}
+                    {{ 'Scope'| trans }}
                 </th>
                 <th>
-                    {{ 'Type'|t }}
+                    {{ 'Type'| trans }}
                 </th>
                 <th>
-                    {{ 'Licenses'|t }}
+                    {{ 'Licenses'| trans }}
                 </th>
             </tr>
             {% for row in clearingHistory %}

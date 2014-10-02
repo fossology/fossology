@@ -58,19 +58,7 @@ function scheduleBulkScan() {
 }
 
 
-function hideLegend(){
-    $("#legendBox").hide();
-    $(".legendShower").show();
-    $(".legendHider").hide();
-    setOption("legendShow", false);
-}
 
-function showLengend() {
-    $("#legendBox").show();
-    $(".legendHider").show();
-    $(".legendShower").hide();
-    setOption("legendShow", true);
-}
 
 function calculateDivHeight(){
     var viewportWidth = $(window).width();
@@ -86,41 +74,8 @@ function calculateDivHeight(){
     $('.boxnew').css({ height:availablePixelsLeft + 'px', width: availableWidth + 'px' });
 }
 
-
-checkDefaultScope = function(){ $(this).prop("checked",$(this).val()==defaultScope);};
-checkDefaultType = function(){ $(this).prop("checked",$(this).val()==defaultType);};
-
 $(document).ready(function(){
-
   calculateDivHeight();
-  $(".legendHider").click( hideLegend );
-  $(".legendShower").click( showLengend );
-  var legendOption =  getOptionDefaultTrue("legendShow");
-  if(legendOption) {
-    showLengend();
-  }
-  else {
-    hideLegend();
-  }
-  defaultScope=getOption("defaultScope");
-  defaultType=getOption("defaultType");
-  $("input[name=scope]").each( function() {
-      $(this).each(checkDefaultScope);
-      $(this).click( function(){
-          defaultScope = $(this).val();
-          setOption("defaultScope", defaultScope);
-          $("input[name=scope], input[name=scopeOutside]").each(checkDefaultScope);
-        });
-    } );
-  $("input[name=type]").each( function() {
-      $(this).each(checkDefaultType);
-      $(this).click( function(){
-          defaultType = $(this).val();
-          setOption("defaultType", defaultType);
-          $("input[name=type]").each(checkDefaultType);
-        });
-    } );
-
 });
 
 $(window).resize( calculateDivHeight );
