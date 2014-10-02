@@ -36,7 +36,7 @@ class CopyrightHistogram  extends FO_Plugin {
 
   function __construct()
   {
-    $this->Name = "copyrighthist";
+    $this->Name = "copyright-hist";
     $this->Title = TITLE_copyrightHistogram;
     $this->Version = "1.0";
     $this->Dependency = array();
@@ -81,7 +81,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
       $dataTableConfig =
         '{  "bServerSide": true,
-            "sAjaxSource": "?mod=copyrightHistogram-processPost&action=getData",
+            "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
             "fnServerData": function ( sSource, aoData, fnCallback ) {
               aoData.push( { "name":"upload" , "value" : "'.$upload_pk.'" } );
               aoData.push( { "name":"item" , "value" : "'.$uploadtreeId.'" } );
@@ -105,7 +105,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
   $editableConfiguration  = '{
     "sReadOnlyCellClass": "read_only",
     "sSelectedRowClass" : "selectedRow",
-    "sUpdateURL": "?mod=copyrightHistogram-processPost&action=update&type='.$type.'" ,
+    "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type='.$type.'" ,
     "fnOnEditing" : function(input) {
                       var value = input[0].value;
                       var isValid = (value) && !(/^\s*$/.test(value));
@@ -137,7 +137,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
                  $.ajax({
                    type: 'POST',
                    dataType: 'text',
-                   url: '?mod=copyrightHistogram-processPost&action=delete&type=$type',
+                   url: '?mod=ajax-copyright-hist&action=delete&type=$type',
                    data: { id : upload + ',' + item + ',' + hash },
                    success: function(data) { $('#copyright$type').dataTable().fnDraw(false); },
                    error: function() { alert('error'); }

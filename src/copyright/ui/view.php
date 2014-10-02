@@ -42,7 +42,7 @@ class copyright_view extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "copyrightview";
+    $this->Name = "copyright-view";
     $this->Title = TITLE_copyright_view;
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
@@ -154,12 +154,12 @@ class copyright_view extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
-    $this->vars['micromenu'] = Dir2Browse('copyright', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
+    $this->vars['micromenu'] = Dir2Browse('copyright-hist', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
 
     $ModBack = GetParm("modback", PARM_STRING);
     if (empty($ModBack))
     {
-      $ModBack = 'copyrighthist';
+      $ModBack = 'copyright-hist';
     }
 
     $highlights = $this->copyrightDao->getCopyrightHighlights($uploadTreeId);
