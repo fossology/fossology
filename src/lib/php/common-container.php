@@ -9,6 +9,8 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 $container = new ContainerBuilder();
 
+$container->setParameter('application_root', dirname(dirname(__DIR__)));
+
 $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
 $loader->load('services.xml');
 
