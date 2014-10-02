@@ -12,6 +12,8 @@ $container = new ContainerBuilder();
 $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
 $loader->load('services.xml');
 
+$container->compile();
+
 $GLOBALS['container'] = $container;
 
 $logger = $container->get('logger');

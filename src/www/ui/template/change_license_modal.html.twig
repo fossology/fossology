@@ -2,14 +2,14 @@
  <form name="licenseListSelect">
   <table border="0">
   <tr>
-   <td>{{ 'Available licenses'|t }}:</td>
+   <td>{{ 'Available licenses'| trans }}:</td>
   </tr>
   <tr>
     <td>{{ licenseLeftSelect }}</td>
   </tr>
   </table>
 
-  {{ 'Hint'|t }}: {{ 'Double-click on license opens a popup with the full text.'|t }}<br/>
+  {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}<br/>
      &nbsp; &nbsp; &nbsp;
      <button type="button" autofocus onclick="performPostRequest()">Add selected licenses</button>
      &nbsp;

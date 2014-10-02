@@ -18,8 +18,8 @@ without any warranty.
             <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
             <parameter key="cache" type="constant">false</parameter>
             <parameter key="autoescape" type="constant">false</parameter>
-            <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
         </parameter>
+        <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
     </parameters>
 
     <services>
@@ -110,15 +110,26 @@ without any warranty.
         </service>
 
         <service id="twig.loader" class="Twig_Loader_Filesystem">
-            <argument type="string" id="paths">.</argument>
+            <argument id="option">%twig.loader.source_path%</argument>
         </service>
+
+        <service id="twig.environment" class="\Twig_Environment">
+            <argument type="service" id="twig.loader"/>
+            <argument id="option">%twig.environment.config%</argument>
+            <call method="addExtension">
+                <argument type="service" id="twig.extension.i18n"/>
+            </call>
+        </service>
+
         <service id="twig.extension.i18n" class="\Twig_Extensions_Extension_I18n">
             <tag name="twig.extension" />
         </service>
-        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
+
+
+<!--        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
             <argument type="service" id="twig.loader"/>
             <argument id="option">%twig.environment.config%</argument>
-        </service>
+        </service>-->
 
     </services>
 </container>
