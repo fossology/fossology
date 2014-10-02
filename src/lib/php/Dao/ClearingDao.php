@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;

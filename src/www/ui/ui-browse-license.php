@@ -18,9 +18,9 @@
  ***********************************************************/
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ChangeLicenseUtility;
@@ -726,7 +726,7 @@ class ui_browse_license extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "browse_license.html";
+    return "browse_license.html.twig";
   }
 
 

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
@@ -49,7 +50,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\Data\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getAgentFileLicenseMatches(FileTreeBounds $fileTreeBounds)
@@ -94,7 +95,7 @@ class LicenseDao extends Object
   /**
    * \brief get all the tried bulk recognitions for a single file or uploadtree (currently unused)
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param \Fossology\Lib\Dao\Data\FileTreeBounds $fileTreeBounds
    * @return LicenseMatch[]
    */
   function getBulkFileLicenseMatches(FileTreeBounds $fileTreeBounds)

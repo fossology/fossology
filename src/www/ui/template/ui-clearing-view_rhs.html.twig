@@ -1,4 +1,4 @@
-{% import "include/macro.html" as macro %}
+{% import "include/macro.html.twig" as macro %}
 
 
 <form method="post">
@@ -8,7 +8,7 @@
         {% if previousItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
         {% endif %}
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Update</button>
+        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
         {% if nextItem %}
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
         {% endif %}
@@ -67,7 +67,7 @@
                 {{ macro.table("licenseSelectionTable") }}
             </div>
         </div>
-        {% include 'ui-clearing-view_bulk.html' %}
+        {% include 'ui-clearing-view_bulk.html.twig' %}
     </div>
     {% endif %}
 

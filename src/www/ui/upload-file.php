@@ -186,7 +186,7 @@ class upload_file extends FO_Plugin {
 
   public function getTemplateName()
   {
-    return "upload_file.html";
+    return "upload_file.html.twig";
   }
 
 }

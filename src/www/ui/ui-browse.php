@@ -17,10 +17,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\TreeDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\View\Renderer;
+
 define("TITLE_ui_browse", _("Browse"));
 
 class ui_browse extends FO_Plugin
 {
+  /** @var UploadDao */
+  private $uploadDao;
+
+  /** @var FolderDao */
+  private $folderDao;
+
+  /** @var TreeDao */
+  private $treeDao;
 
   function __construct()
   {
@@ -32,6 +46,11 @@ class ui_browse extends FO_Plugin
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
 
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+    $this->folderDao = $container->get('dao.folder');
+    $this->treeDao = $container->get('dao.tree');
+
     parent::__construct();
   }
 
@@ -40,49 +59,15 @@ class ui_browse extends FO_Plugin
    */
   function Install()
   {
-    global $PG_CONN;
-    if (empty($PG_CONN))
-    {
-      return (1);
-    } /* No DB */
-
     /****************
      * The top-level folder must exist.
      ****************/
     /* check if the table needs population */
-    $sql = "SELECT * FROM folder WHERE folder_pk=1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if ($row['folder_pk'] != "1")
+    if (!$this->folderDao->hasTopLevelFolder())
     {
-      $sql = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      /* Now fix the sequence number so the first insert does not fail */
-      $sql = "SELECT max(folder_pk) AS max FROM folder LIMIT 1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
-      pg_free_result($result);
-      $Max = intval($row['max']);
-      if ($Max < 1)
-      {
-        $Max = 1;
-      } else
-      {
-        $Max++;
-      }
-      $sql = "SELECT setval('folder_folder_pk_seq',$Max);";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
+      $this->folderDao->insertFolder(1, 'Software Repository', 'Top Folder');
+      $this->folderDao->insertFolderContents(1,0,0);
+      $this->folderDao->fixFolderSequence();
     }
     return (0);
   } // Install()
@@ -244,6 +229,7 @@ class ui_browse extends FO_Plugin
    */
   function ShowFolder($Folder, $Show)
   {
+    $V="YESSS";
     $V = "<table border=1 width='100%'>";
     $V .= "<tr><td valign='top' width='20%'>\n";
     $text = _("Folder Navigation");
@@ -270,22 +256,14 @@ class ui_browse extends FO_Plugin
     $V .= "<div align='center'><H3>$text</H3></div>\n";
 
     global $container;
+    /**
+     * @var Renderer
+     */
     $renderer = $container->get('renderer');
-    $userDao = $container->get('dao.user');
-    $assigneeArray = $userDao->getUserChoices();
-    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
-    $assigneeArray[1] = _('Unassigned');
-    $assigneeArray[0] = '';
+    $assigneeArray = $this->getAssigneeArray();
+
     $assigneeFilter = $renderer->createSelect('assigneeSelector', $assigneeArray, 0, ' onchange="filterAssignee()"');
-    $statusArray = array(0 => '');
-    $dbManager = $container->get('db.manager');
-    $dbManager->prepare($stmt = __METHOD__ . ".status", 'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
-    $res = $dbManager->execute($stmt);
-    while ($row = $dbManager->fetchArray($res))
-    {
-      $statusArray[$row['status_pk']] = $row['meaning'];
-    }
-    $dbManager->freeResult($res);
+    $statusArray = $this->getStatusArray();
     $statusFilter = $renderer->createSelect('statusSelector', $statusArray, 0, ' onchange="filterStatus()"');
 
     $V .= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
@@ -295,7 +273,8 @@ class ui_browse extends FO_Plugin
         . "</table>";
     $V .= "</table>";
 
-    $V .= $this->showFolderCreateFileTable($Folder, $Show);
+    $this->vars['folder'] = $Folder;
+    $this->vars['show'] = $Show;
 
     return $V;
   }
@@ -364,6 +343,7 @@ class ui_browse extends FO_Plugin
 
     $V .= $this->outputItemHtml($Item, $folder_pk, $Upload);
     $this->vars['content'] = $V;
+    return $this->renderTemplate('ui-browse.html.twig');
   }
 
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
@@ -427,7 +407,6 @@ class ui_browse extends FO_Plugin
       $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
     } else
     {
-      $html .= $this->createJavaScriptBlock();
       $html .= $this->ShowFolder($Folder, $show);
     }
     return "<font class='text'>\n$html</font>\n" . $this->rejectModal();
@@ -442,85 +421,40 @@ class ui_browse extends FO_Plugin
               [<a class='button' onclick='closeCommentModal()'>Cancel</a>] ";
 
     $output1 = "<form name=\"rejector\">$output2</form>\n";
-    $output = "<div class=\"modal\" id=\"commentModal\" hidden>$output1</div>";
-    return $output;
+    return "<div class=\"modal\" id=\"commentModal\" hidden>$output1</div>";
   }
 
-
-  private function showFolderCreateFileTable($Folder, $Show)
+  /**
+   * @return array
+   */
+  protected function getStatusArray()
   {
-    $tableColumns = '[
-      { "sTitle" : "' . _("Upload Name and Description") . '", "sClass": "left" },
-      { "sTitle" : "' . _("Status") . '", "sClass": "center" , "bSearchable": false},
-      { "sTitle" : "' . _("Comment") . '", "sClass": "center", "bSortable": false, "bSearchable": false,
-                      "mRender": function ( source, type, val ) { return commentColumn( source, type, val );}
-                  },
-      { "sTitle" : "' . _("Assigned to") . '", "sClass": "center" , "bSearchable": false},
-      { "sTitle" : "' . _("Upload Date") . '", "sClass": "center" , "sType": "string", "bSearchable": false},
-      { "sTitle" : "' . _("Priority") . '", "sClass": "center priobucket", "bSearchable": false,
-                      "mRender": function ( source, type, val ) { return prioColumn( source, type, val ); }
-                  }
-    ]';
-
-    $tableSorting = json_encode($this->returnSortOrder());
-//    $tableLanguage = '[
-//        { "sInfo" : "Showing _START_ to _END_ of _TOTAL_ files" },
-//        { "sSearch" : "Search _INPUT_ in filenames" },
-//        { "sLengthMenu" : "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files" }
-//    ]';
-
-
-    $dataTableConfig =
-        '{  "bServerSide": true,
-       "sAjaxSource": "?mod=browse-processPost",
-       "fnServerData": function ( sSource, aoData, fnCallback ) {
-            aoData.push( { "name":"folder" , "value" : "' . $Folder . '" } );
-            aoData.push( { "name":"show" , "value" : "' . $Show . '" } );
-            aoData.push( { "name":"assigneeSelected" , "value" : assigneeSelected } );
-            aoData.push( { "name":"statusSelected" , "value" : statusSelected } );
-            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
-              if (confirm("You are not logged in. Go to login page?"))
-                window.location.href="' . Traceback_uri() . '?mod=auth";
-            });
-          },
-      "aoColumns": ' . $tableColumns . ',
-      "aaSorting": ' . $tableSorting . ',
-      "iDisplayLength": 50,
-      "bProcessing": true,
-      "bStateSave": true,
-      "bRetrieve": true
-    }';
-
-    $VF = "<script>
-              function createBrowseTable() {
-                    var otable = $('#browsetbl').dataTable(" . $dataTableConfig . ");
-                    return otable;
-                }
-            </script>";
-
-    return $VF;
-
+    global $container;
+    $statusArray = array(0 => '');
+    $dbManager = $container->get('db.manager');
+    $dbManager->prepare($stmt = __METHOD__ . ".status", 'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
+    $res = $dbManager->execute($stmt);
+    while ($row = $dbManager->fetchArray($res))
+    {
+      $statusArray[$row['status_pk']] = $row['meaning'];
+    }
+    $dbManager->freeResult($res);
+    return $statusArray;
   }
 
-  private function createJavaScriptBlock()
+  /**
+   * @return array
+   */
+  protected function getAssigneeArray()
   {
-    $this->vars['scripts'] =
-        "<script src=\"scripts/jquery.dataTables.js\" type=\"text/javascript\"></script>
-         <script src=\"scripts/browse.js\" type=\"text/javascript\"></script>
-         <script src=\"scripts/jquery.plainmodal.min.js\" type=\"text/javascript\"></script>";
-  }
-
-
-  static public function returnSortOrder()
-  {
-    $defaultOrder = array(
-        array(5, "desc"),
-        array(0, "asc"),
-        array(3, "desc"),
-        array(1, "desc"),
-        array(4, "desc")
-    );
-    return $defaultOrder;
+    global $container;
+    /** @var UserDao $userDao */
+    $userDao = $container->get('dao.user');
+    $assigneeArray = $userDao->getUserChoices();
+    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
+    $assigneeArray[1] = _('Unassigned');
+    $assigneeArray[0] = '';
+    return $assigneeArray;
   }
 
 }

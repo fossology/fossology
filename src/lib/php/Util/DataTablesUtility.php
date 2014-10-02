@@ -19,10 +19,10 @@
 
 namespace Fossology\Lib\Util;
 
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class DataTablesUtility extends Object {
+class DataTablesUtility extends Object
+{
   /**
    * @var Logger
    */
@@ -38,20 +38,22 @@ class DataTablesUtility extends Object {
    * @param string[] $columNamesInDatabase
    * @return null|string[]
    */
-  public function getSortingParametersFromArray( $inputArray, $columNamesInDatabase,  $defaultSearch = array() ) {
-      if(array_key_exists('iSortingCols',$inputArray)) {
-          if($inputArray['iSortingCols'] > count($columNamesInDatabase)) {
-            $this->logger->addWarning("did have enough columNames for ". $inputArray['iSortingCols'] . " sort columns.");
-            return null;
-          }
-
-        return $this->getSortingParametersFromArrayImpl( $inputArray, $columNamesInDatabase,  $defaultSearch );
-
+  public function getSortingParametersFromArray($inputArray, $columNamesInDatabase, $defaultSearch = array())
+  {
+    if (array_key_exists('iSortingCols', $inputArray))
+    {
+      if ($inputArray['iSortingCols'] > count($columNamesInDatabase))
+      {
+        $this->logger->addWarning("did have enough columNames for " . $inputArray['iSortingCols'] . " sort columns.");
+        return null;
       }
-      else {
-         $this->logger->addWarning("did not find iSortingCols in inputArray");
-        return  null;
-      }
+      return $this->getSortingParametersFromArrayImpl($inputArray, $columNamesInDatabase, $defaultSearch);
+
+    } else
+    {
+      $this->logger->addWarning("did not find iSortingCols in inputArray");
+      return null;
+    }
   }
 
 
@@ -60,53 +62,54 @@ class DataTablesUtility extends Object {
    * @param string[] $columNamesInDatabase
    * @return string[]
    */
-  private function getSortingParametersFromArrayImpl( $inputArray, $columNamesInDatabase ,  $defaultSearch = array()){
+  private function getSortingParametersFromArrayImpl($inputArray, $columNamesInDatabase, $defaultSearch = array())
+  {
 
-    $orderArray=array();
-    $sortedCols=array();
-    for($i=0; $i < $inputArray['iSortingCols']; $i++) {
+    $orderArray = array();
+    $sortedCols = array();
+    for ($i = 0; $i < $inputArray['iSortingCols']; $i++)
+    {
 
-      $whichCol= 'iSortCol_'.$i;
-      $colNumber=$inputArray[$whichCol];
-      $sortedCols[]=intval($colNumber);
-
-
-      $isSortable = $inputArray['bSortable_'.$i];
-      if($isSortable !== "true") continue;
+      $whichCol = 'iSortCol_' . $i;
+      $colNumber = $inputArray[$whichCol];
+      $sortedCols[] = intval($colNumber);
 
 
+      $isSortable = $inputArray['bSortable_' . $i];
+      if ($isSortable !== "true") continue;
 
 
       $name = $columNamesInDatabase[$colNumber];
 
-      $whichDir = 'sSortDir_'.$i;
+      $whichDir = 'sSortDir_' . $i;
       $order = $inputArray[$whichDir];
-      $orderArray[] = $name." ".$order;
+      $orderArray[] = $name . " " . $order;
     }
 
-    foreach($defaultSearch as $search) {
+    foreach ($defaultSearch as $search)
+    {
       $colNumber = $search[0];
       $order = $search[1];
-      if(in_array($colNumber,$sortedCols ) ) continue;
-      $isSortable = $inputArray['bSortable_'.$colNumber];
-      if($isSortable !== "true") continue;
+      if (in_array($colNumber, $sortedCols)) continue;
+      $isSortable = $inputArray['bSortable_' . $colNumber];
+      if ($isSortable !== "true") continue;
 
       $name = $columNamesInDatabase[$colNumber];
-      $orderArray[] = $name." ".$order;
+      $orderArray[] = $name . " " . $order;
     }
-
-
     return $orderArray;
   }
 
 
-  public function getSortingString($inputArray, $columNamesInDatabase,  $defaultSearch = array()){
+  public function getSortingString($inputArray, $columNamesInDatabase, $defaultSearch = array())
+  {
 
-    $orderArray= $this->getSortingParametersFromArray( $inputArray, $columNamesInDatabase ,  $defaultSearch);
+    $orderArray = $this->getSortingParametersFromArray($inputArray, $columNamesInDatabase, $defaultSearch);
     $orderString = "";
-    if(!empty($orderArray) ) {
-        $orderString .= "ORDER BY ";
-        $orderString .= implode(", ", $orderArray);
+    if (!empty($orderArray))
+    {
+      $orderString .= "ORDER BY ";
+      $orderString .= implode(", ", $orderArray);
     }
     return $orderString;
   }

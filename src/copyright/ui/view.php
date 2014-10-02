@@ -135,7 +135,7 @@ class copyright_view extends FO_Plugin
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.html");
+      return $this->renderTemplate("include/base.html.twig");
     }
     parent::Output();
   }
@@ -202,7 +202,7 @@ class copyright_view extends FO_Plugin
   
   function getTemplateName()
   {
-    return 'ui-cp-view.html';
+    return 'ui-cp-view.html.twig';
   }
   
 }

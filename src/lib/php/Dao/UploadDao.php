@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -88,7 +89,7 @@ public function __construct(DbManager $dbManager)
 
   /**
    * @param $uploadTreeId
-   * @param $uploadTreeTableName
+   * @param $uploadId
    * @return FileTreeBounds
    */
   public function getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId)

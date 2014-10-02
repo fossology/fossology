@@ -22,7 +22,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\FileTreeBounds;
+use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Dao\LicenseDao;
 
 class ClearingDecisionEventProcessor {

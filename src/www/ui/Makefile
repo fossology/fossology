@@ -25,7 +25,7 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 DIRS=css images locale scripts ajaxPHP
 
-UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html)$$" `
+UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html|twig)$$" `
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php \
                 group-manage-self.php group-manage.php ajax-perms.php
 
