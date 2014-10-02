@@ -19,7 +19,7 @@ without any warranty.
             <parameter key="cache" type="constant">false</parameter>
             <parameter key="autoescape" type="constant">false</parameter>
         </parameter>
-        <parameter key="twig.loader.source_path" type="string">../../www/ui/template</parameter>
+        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
     </parameters>
 
     <services>
