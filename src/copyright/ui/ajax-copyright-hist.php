@@ -32,8 +32,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   private $uploadtree_tablename;
 
-  /** @var array */
-  private $filterParams;
   /**
    * @var DbManager
    */
@@ -50,7 +48,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "copyrightHistogram-processPost";
+    $this->Name = "ajax-copyright-hist";
     $this->Title = TITLE_copyrightHistogramProcessPost;
     $this->Version = "1.0";
     $this->Dependency = array();
@@ -64,7 +62,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $this->dataTablesUtility = $container->get('utils.data_tables_utility');
     $this->uploadDao = $container->get('dao.upload');
     $this->dbManager = $container->get('db.manager');
-    $this->filterParams = array();
   }
 
 
@@ -135,17 +132,16 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
         global $SysConf;
         $userId = $SysConf['auth']['UserId'];
-        $this->dbManager->begin();
 
         $statementName = __METHOD__;
         $combinedQuerry = "UPDATE copyright AS CPR
-                                   SET  content = $4 , hash = md5 ($4)
-                                   FROM  copyright as CP
-                                   INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
-                                   WHERE CPR.ct_pk = CP.ct_pk
-                                      AND CP.hash =$1
-                                      AND   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload
-                                   returning CP.* ";
+                                SET  content = $4 , hash = md5 ($4)
+                              FROM  copyright as CP
+                              INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
+                              WHERE CPR.ct_pk = CP.ct_pk
+                                AND CP.hash =$1
+                                AND   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload
+                              RETURNING CP.* ";
 
         $this->dbManager->prepare($statementName, $combinedQuerry);
         $oldData = $this->dbManager->execute($statementName, array($hash, $left, $right, $content));
@@ -156,7 +152,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
           $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload, $item, $row['pfile_fk']), __METHOD__."writeHist");
         }
         $this->dbManager->freeResult($oldData);
-        $this->dbManager->commit();
         header('Content-type: text/plain');
         return 'success';
       }
@@ -217,7 +212,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $link = "<a href='";
     $link .= Traceback_uri();
-    $URLargs = "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=$hash&type=$type";
+    $URLargs = "?mod=copyright-list&agent=$Agent_pk&item=$Uploadtree_pk&hash=$hash&type=$type";
     if (!empty($filter)) $URLargs .= "&filter=$filter";
     $link .= $URLargs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
@@ -231,7 +226,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   private function GetTableData($upload, $item, $agent_pk, $type, $filter)
   {
-    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, 0, $type, $filter);
+    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter);
     $aaData = array();
     if (!empty($rows))
     {
@@ -258,27 +253,25 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return $orderString;
   }
 
-  private function getSearchString()
+  private function addSearchFilter(&$filterParams)
   {
     $searchPattern = GetParm('sSearch', PARM_STRING);
     if (empty($searchPattern))
     {
       return '';
     }
-    $this->filterParams[] = "%$searchPattern%";
-    return ' AND upload_filename ilike $' . count($this->filterParams) . ' ';
+    $filterParams[] = "%$searchPattern%";
+    return ' AND CP.content ilike $'.count($filterParams).' ';
   }
 
 
-  public function getCopyrights($upload_pk, $Uploadtree_pk, $uploadTreeTableName, $Agent_pk, $hash = 0, $type, $filter)
+  public function getCopyrights($upload_pk, $Uploadtree_pk, $uploadTreeTableName, $Agent_pk, $type, $filter)
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
 
 
     $orderString = $this->getOrderString();
-    $this->filterParams = array();
-    $searchFilter = $this->getSearchString();
 
     list($left, $right) = $this->uploadDao->getLeftAndRight($Uploadtree_pk, $uploadTreeTableName);
 
@@ -314,10 +307,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $params = array($left, $right, $type, $Agent_pk);
 
     $filterParms = $params;
-    foreach ($this->filterParams as $par)
-    {
-      $filterParms[] = $par;
-    }
+    $searchFilter = $this->addSearchFilter($filterParms);
     $unorderedQuery = "FROM copyright AS CP " .
         "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
         $join .

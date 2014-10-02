@@ -27,12 +27,25 @@ define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
 
 class copyright_list extends FO_Plugin
 {
-  var $Name       = "copyrightlist";
-  var $Title      = TITLE_copyright_list;
-  var $Version    = "1.0";
-  var $Dependency = array("copyrighthist");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
+  /**
+   * @var DbManager
+   */
+  private $dbManager;
+
+  function __construct()
+  {
+    $this->Name = "copyright-list";
+    $this->Title = TITLE_copyright_list;
+    $this->Version = "1.0";
+    $this->Dependency = array("copyright-hist");
+    $this->DBaccess = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+    $this->NoMenu = 0;
+
+    parent::__construct();
+    global $container;
+    $this->dbManager = $container->get('db.manager');
+  }
 
   /**
    * \brief Customize submenus.
@@ -62,10 +75,8 @@ class copyright_list extends FO_Plugin
 
   /**
    * \return return rows to process, and $upload_pk
-   * If there are too many rows (see $MaxTreeRecs)
-   * then a text error message is returned, not an array.
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk )
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type)
   {
     global $PG_CONN;
 
@@ -81,37 +92,19 @@ class copyright_list extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    /* Check for too many uploadtree recs to display.
-     * This is arbitrarily set to 100000.  The copyright display
-     * isn't very useful with more records and this check
-     * give the user immediate feedback, as opposed to
-     * waiting on a very long query.
-     * $MaxTreeRecs / 2 = number of uploadtree entries
-     */
-    $MaxTreeRecs = 200000;
-    if (($rgt - $lft) > $MaxTreeRecs)
-    {
-      $text = _("Too many rows to display");
-      return "<h2>$text</h2>";
-    }
-
     /* get all the copyright records for this uploadtree.  */
     $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
               from copyright,
               (SELECT uploadtree_pk, pfile_fk as PF, ufile_name from uploadtree 
-                 where upload_fk=$upload_pk 
-                   and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk order by uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+                 where upload_fk=$1
+                   and uploadtree.lft BETWEEN $2 and $3) as SS
+              where PF=pfile_fk and agent_fk=$4 and hash=$5 and type=$6 order by uploadtree_pk";
+    $statement = __METHOD__;
+    $this->dbManager->prepare($statement, $sql);
+    $result = $this->dbManager->execute($statement,array($upload_pk, $lft, $rgt, $Agent_pk, $hash, $type));
 
-    if (pg_num_rows($result) == 0)
-    {
-      return _("No results to display.");
-    }
-
-    $rows = pg_fetch_all($result);
-    pg_free_result($result);
+    $rows = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
 
     return $rows;
   }
@@ -123,7 +116,7 @@ class copyright_list extends FO_Plugin
    * \param $NumRows - the number of instances.
    * \return new array and $NumRows
    */
-  function GetRequestedRows($rows, $hash, $type, $excl, &$NumRows, $filter)
+  function GetRequestedRows($rows, $excl, &$NumRows, $filter)
   {
     global $PG_CONN;
 
@@ -155,13 +148,6 @@ class copyright_list extends FO_Plugin
     for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
     {
       $row = $rows[$RowIdx];
-      /* Remove undesired types */
-      if ($rows[$RowIdx]['type'] != $type)
-      {
-        unset($rows[$RowIdx]);
-        continue;
-      }
-
       /* remove excluded files */
       if ($excl)
       {
@@ -190,10 +176,6 @@ class copyright_list extends FO_Plugin
       }
 
 
-      /* rewrite content for easier human assimilation */
-      if (MassageContent($rows[$RowIdx], $hash)) {
-      unset($rows[$RowIdx]);
-      }
     }
 
     /* reset array keys, keep order (uploadtree_pk) */
@@ -225,10 +207,20 @@ class copyright_list extends FO_Plugin
     return $rows2;
   }
 
+  function OutputOpen()
+  {
+
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
+
+    return parent::OutputOpen();
+  }
+
   /**
    * \brief Display the loaded menu and plugins.
    */
-  function Output()
+  function htmlContent()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;
@@ -255,8 +247,7 @@ class copyright_list extends FO_Plugin
     $filter = GetParm("filter",PARM_RAW);
     if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk))
     {
-      $text = _("is missing required parameters");
-      echo $this->Name . " $text.";
+      $this->vars['pageContent'] = $this->Name . _("is missing required parameters");
       return;
     }
 
@@ -265,8 +256,7 @@ class copyright_list extends FO_Plugin
     $UploadPerm = GetUploadPerm($Row['upload_fk']);
     if ($UploadPerm < PERM_READ)
     {
-      $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
+      $this->vars['pageContent'] = "<h2>" . _("Permission Denied") . "</h2>";
       return;
     }
 
@@ -277,130 +267,124 @@ class copyright_list extends FO_Plugin
     }
 
     /* get all rows */
-    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk);
+    $upload_pk = -1;
+    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type);
 
     /* Get uploadtree_tablename */
     $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
 
     /* slim down to all rows with this hash and type,  and filter */
     $NumInstances = 0;
-    $rows = $this->GetRequestedRows($rows, $hash, $type, $excl, $NumInstances, $filter);
+    $rows = $this->GetRequestedRows($rows, $excl, $NumInstances, $filter);
 
     //debugprint($rows, "rows");
 
-    switch($this->OutputType)
+    // micro menus
+    $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+
+    $RowCount = count($rows);
+    if ($RowCount)
     {
-      case "XML":
-        break;
+      $Content = htmlentities($rows[0]['content']);
+      $Offset = ($Page < 0) ? 0 : $Page*$Max;
+      $PkgsOnly = false;
+      $text = _("files");
+      $text1 = _("unique");
+      $text3 = _("copyright");
+      $text4 = _("email");
+      $text5 = _("url");
+      switch ($type)
+      {
+        case "statement":
+          $TypeStr = "$text3";
+          break;
+        case "email":
+          $TypeStr = "$text4";
+          break;
+        case "url":
+          $TypeStr = "$text5";
+          break;
+      }
+      $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
-      case "HTML":
-        // micro menus
-        $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+      $OutBuf .= ": <b>$Content</b>";
 
-        $RowCount = count($rows);
-        if ($RowCount)
-        {
-          $Content = htmlentities($rows[0]['content']);
-          $Offset = ($Page < 0) ? 0 : $Page*$Max;
-          $PkgsOnly = false;
-          $text = _("files");
-          $text1 = _("unique");
-          $text3 = _("copyright");
-          $text4 = _("email");
-          $text5 = _("url");
-          switch ($type)
-          {
-            case "statement":
-              $TypeStr = "$text3";
-              break;
-            case "email":
-              $TypeStr = "$text4";
-              break;
-            case "url":
-              $TypeStr = "$text5";
-              break;
-          }
-          $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
+      $text = _("Display excludes files with these extensions");
+      if (!empty($excl)) $OutBuf .= "<br>$text: $excl";
 
-          $OutBuf .= ": <b>$Content</b>";
+      /* Get the page menu */
+      if (($RowCount >= $Max) && ($Page >= 0))
+      {
+        $PagingMenu = "<P />\n" . MenuPage($Page,intval((($RowCount+$Offset)/$Max))) . "<P />\n";
+        $OutBuf .= $PagingMenu;
+      }
+      else
+      {
+        $PagingMenu = "";
+      }
 
-          $text = _("Display excludes files with these extensions");
-          if (!empty($excl)) $OutBuf .= "<br>$text: $excl";
+      /* Offset is +1 to start numbering from 1 instead of zero */
+      $LinkLast = "copyright-view&agent=$agent_pk";
+      $ShowBox = 1;
+      $ShowMicro=NULL;
 
-          /* Get the page menu */
-          if (($RowCount >= $Max) && ($Page >= 0))
-          {
-            $PagingMenu = "<P />\n" . MenuEndlessPage($Page,intval((($RowCount+$Offset)/$Max))) . "<P />\n";
-            $OutBuf .= $PagingMenu;
-          }
-          else
-          {
-            $PagingMenu = "";
-          }
+      // base url
+      $ucontent = rawurlencode($Content);
+      $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
 
-          /* Offset is +1 to start numbering from 1 instead of zero */
-          $RowNum = $Offset;
-          $LinkLast = "copyrightview&agent=$agent_pk";
-          $ShowBox = 1;
-          $ShowMicro=NULL;
+      // display rows
+      $RowNum = 0;
+      foreach($rows as $row)
+      {
+        ++$RowNum;
+        if ($RowNum < $Offset)
+          continue;
 
-          // base url
-          $ucontent = rawurlencode($Content);
-          $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
-
-          // display rows
-          foreach($rows as $row)
-          {
-            // Allow user to exclude files with this extension
-            $FileExt = GetFileExt($row['ufile_name']);
-            if (empty($excl))
-            $URL = $baseURL . "&excl=$FileExt";
-            else
-            $URL = $baseURL . "&excl=$excl:$FileExt";
-
-            $text = _("Exclude this file type");
-            $Header = "<a href=$URL>$text.</a>";
-
-            $ok = true;
-            if ($excl)
-            {
-              $ExclArray = explode(":", $excl);
-              if (in_array($FileExt, $ExclArray)) $ok = false;
-            }
-
-            if ($ok) $OutBuf .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header, '', $uploadtree_tablename);
-          }
-
-        }
+        // Allow user to exclude files with this extension
+        $FileExt = GetFileExt($row['ufile_name']);
+        if (empty($excl))
+          $URL = $baseURL . "&excl=$FileExt";
         else
+          $URL = $baseURL . "&excl=$excl:$FileExt";
+
+        $text = _("Exclude this file type");
+        $Header = "<a href=$URL>$text.</a>";
+
+        $ok = true;
+        if ($excl)
         {
-          $OutBuf .= _("No files found");
+          $ExclArray = explode(":", $excl);
+          if (in_array($FileExt, $ExclArray)) $ok = false;
         }
 
-        if (!empty($PagingMenu)) {
-          $OutBuf .= $PagingMenu . "\n";
-        }
-        $OutBuf .= "<hr>\n";
-        $Time = microtime(true) - $Time;
-        $text = _("Elapsed time");
-        $text1 = _("seconds");
-        $OutBuf .= sprintf("<small>$text: %.2f $text1</small>\n", $Time);
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+        if ($ok) $OutBuf .= Dir2Browse("copyright-hist", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
+      }
+
     }
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
+    else
+    {
+      $OutBuf .= _("No files found");
     }
-    print($OutBuf);
+
+    if (!empty($PagingMenu)) {
+      $OutBuf .= $PagingMenu . "\n";
+    }
+    $OutBuf .= "<hr>\n";
+    $Time = microtime(true) - $Time;
+    $text = _("Elapsed time");
+    $text1 = _("seconds");
+    $OutBuf .= sprintf("<small>$text: %.2f $text1</small>\n", $Time);
+
+    $this->vars['pageContent'] = $OutBuf;
     return;
+
   } // Output()
 
+    function getTemplateName()
+  {
+    return 'copyrightlist.html.twig';
+  }
 
 };
 $NewPlugin = new copyright_list;
 $NewPlugin->Initialize();
-
-?>

@@ -99,6 +99,13 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
   ));
 
   RETURN_IF_FALSE(dbManager->queryPrintf(
+   "CREATE INDEX %s_hash_index"
+   " ON %s"
+   " USING BTREE (hash)",
+   name, name
+  ));
+
+  RETURN_IF_FALSE(dbManager->queryPrintf(
    "CREATE INDEX %s_pfile_fk_index"
    " ON %s"
    " USING BTREE (pfile_fk)",

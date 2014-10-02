@@ -10,8 +10,6 @@
  */
 
 #include "cleanEntries.hpp"
-#include <openssl/md5.h>
-
 
 /* Trims a string of any characters provided in the char list */
 std::string trim(std::string str, std::string charlist = " \t\f\v\n\r")
@@ -31,31 +29,6 @@ if (first == std::string::npos)
 }
 
 return str.substr(first, (last-first)+1);
-}
-
-void getMD5(DatabaseEntry& input){
-  /* Step 1B: rearrange copyright statements to try and put the holder first,
-   * followed by the rest of the statement, less copyright years.
-   */
-  /* Not yet implemented
-   if ($row['type'] == 'statement') $content = $this->StmtReorder($content);
-   */
-  //This has to be calculated from the database
-  //$row['copyright_count'] = 1;
-  //TODO find a nicer way to write this...
-  unsigned char* result = NULL;
-  const unsigned char* tmp = reinterpret_cast<const unsigned char*>(input.content.c_str());
-  result = MD5(tmp, strlen(input.content.c_str()), result);
-  if (result)
-  {
-
-    char mdString[33];
-
-     for(int i = 0; i < 16; i++)
-          sprintf(&mdString[i*2], "%02x", (unsigned int)result[i]);
-
-    input.hash = std::string(mdString);
-  }
 }
 
 /**
@@ -115,7 +88,6 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
   //$row['copyright_count'] = 1;
 
   //TODO find a nicer way to write this...
-  getMD5(input);
 //  $row['hash'] = md5($row['content']);
 
   return true;
