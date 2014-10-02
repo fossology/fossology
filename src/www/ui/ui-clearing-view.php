@@ -233,7 +233,6 @@ class ClearingView extends FO_Plugin
     $licenseInformation = "";
 
     $output = '';
-    /* @var Fossology\Lib\Dao\Data\FileTreeBounds */
 
     if (!$fileTreeBounds->containsFiles())
     {

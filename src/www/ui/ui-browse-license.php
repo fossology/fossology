@@ -18,10 +18,10 @@
  ***********************************************************/
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\Data\FileTreeBounds;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\FileTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\View\LicenseProcessor;
