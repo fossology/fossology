@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\FileTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 

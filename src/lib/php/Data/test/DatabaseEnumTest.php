@@ -18,8 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Util;
 
-use Fossology\Lib\Data\DatabaseEnum;
-
 namespace Fossology\Lib\Data;
 
 

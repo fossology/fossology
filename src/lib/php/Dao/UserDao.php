@@ -20,11 +20,10 @@
 namespace Fossology\Lib\Dao;
 
 
-use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
-use Monolog\Logger;
 use Fossology\Lib\View\Renderer;
+use Monolog\Logger;
 
 class UserDao extends Object {
 
