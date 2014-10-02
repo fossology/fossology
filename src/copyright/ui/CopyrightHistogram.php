@@ -98,6 +98,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
       "iDisplayLength": 50,
       "bProcessing": true,
       "bStateSave": true,
+      "sCookiePrefix" : "fossology_",
       "bRetrieve": true
     }';
 
@@ -143,8 +144,6 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
                  });
               }
             </script>";
- // TODO change comma separeted data to real json
-
 
 
   return $output;
