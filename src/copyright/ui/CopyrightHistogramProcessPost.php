@@ -135,17 +135,16 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
         global $SysConf;
         $userId = $SysConf['auth']['UserId'];
-        $this->dbManager->begin();
 
         $statementName = __METHOD__;
         $combinedQuerry = "UPDATE copyright AS CPR
-                                   SET  content = $4 , hash = md5 ($4)
-                                   FROM  copyright as CP
-                                   INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
-                                   WHERE CPR.ct_pk = CP.ct_pk
-                                      AND CP.hash =$1
-                                      AND   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload
-                                   returning CP.* ";
+                                SET  content = $4 , hash = md5 ($4)
+                              FROM  copyright as CP
+                              INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
+                              WHERE CPR.ct_pk = CP.ct_pk
+                                AND CP.hash =$1
+                                AND   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload
+                              RETURNING CP.* ";
 
         $this->dbManager->prepare($statementName, $combinedQuerry);
         $oldData = $this->dbManager->execute($statementName, array($hash, $left, $right, $content));
@@ -156,7 +155,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
           $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload, $item, $row['pfile_fk']), __METHOD__."writeHist");
         }
         $this->dbManager->freeResult($oldData);
-        $this->dbManager->commit();
         header('Content-type: text/plain');
         return 'success';
       }
