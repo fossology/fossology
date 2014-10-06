@@ -109,7 +109,7 @@ class changeLicenseProcessPost extends FO_Plugin
     if(array_key_exists('lic',$_POST)){
       $this->clearingDao->commentClearingDecision($_POST['unlic'], $itemId, $userId);
     }
-    else if(array_key_exists('unlic',$_POST)){
+    else if(array_key_exists('unlic',$_POST)){  //??
       $this->clearingDao->insertClearingDecisionTest($_POST['unlic'], $itemId, $userId);
     }
     else if(array_key_exists('type',$_POST)){

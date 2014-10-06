@@ -25,6 +25,31 @@ function initializeOption(myvalue) {
 
 function setOptionOnChange( name ) {
     setOption(name, $('input[name=FileSelection]:radio:checked').val());
+
+    var uploadId = $('#upload').val();
+    var uploadTreeId = $('#lastItem').val();
+
+    setNextPrev(uploadId, uploadTreeId);
+
+}
+
+function setNextPrev(uploadId, uploadTreeId) {
+    $.getJSON("?mod=conclude-license&do=setNextPrev&upload=" + uploadId + "&item=" + uploadTreeId)
+    .done(function (data) {
+            var next = $('#next');
+            next.show();
+            next.click(function(){
+                           window.location.href = data.uri + '&item=' + data.next;
+                       });
+            var prev = $('#prev');
+            prev.show();
+            //prev.onclick = 'form.action =' + data.uri+ '&item='+data.prev ;
+            prev.click(function(){
+                window.location.href = data.uri + '&item=' + data.prev;
+            });
+        })
+        .fail(failed);
+
 }
 
 $(document).ready(function(){
