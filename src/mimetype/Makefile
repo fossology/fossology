@@ -20,7 +20,7 @@ include $(VARS)
 
 DIRS = agent ui
 TESTDIR = agent_tests
-MOD_NAME=mimetype
+MOD_NAME = mimetype
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 

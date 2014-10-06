@@ -17,7 +17,7 @@
 
 #
 # Makefile for noms/ui
-TOP=../../..
+TOP = ../../..
 include $(TOP)/Makefile.conf
 
 all:

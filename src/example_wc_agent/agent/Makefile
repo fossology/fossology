@@ -1,14 +1,14 @@
 # FOSSology Makefile - agent/example_wc_agent
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
-TOP=../../../
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../../
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS)
-EXE=wc_agent
-MOD_NAME=example_wc_agent
-MOD_SUBDIR=agent
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS)
+EXE = wc_agent
+MOD_NAME = example_wc_agent
+MOD_SUBDIR = agent
 
 all: $(EXE)
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)"

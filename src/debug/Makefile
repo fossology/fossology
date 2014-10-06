@@ -15,10 +15,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../
-VARS=$(TOP)/Makefile.conf
+TOP = ../../
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=debug
+MOD_NAME = debug
 
 DIRS = ui
 TESTDIR = ui_tests

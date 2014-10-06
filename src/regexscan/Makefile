@@ -21,7 +21,7 @@ include $(VARS)
 DIRS = agent
 #DIRS = agent ui
 #TESTDIR = agent_tests
-MOD_NAME=regexscan
+MOD_NAME = regexscan
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 

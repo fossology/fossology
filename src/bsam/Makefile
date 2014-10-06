@@ -17,7 +17,7 @@
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=bsam
+MOD_NAME = bsam
 
 DIRS = ui
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done

@@ -24,9 +24,9 @@ CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
                $(TESTLIB) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
-OBJS = test_fossconfig.o    \
+OBJS = test_fossconfig.o \
        test_fossscheduler.o \
-       test_libfossdb.o     \
+       test_libfossdb.o \
        test_libfossdbmanager.o \
 
 all: test

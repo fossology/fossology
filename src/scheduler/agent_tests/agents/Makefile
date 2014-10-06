@@ -25,11 +25,11 @@ DEF =
 MODDIR = mods-enabled
 
 FO_CONF = fossology.conf
-V_LIST  = variables.list
+V_LIST = variables.list
 C_FILES = $(wildcard *.c)
-EXES    = $(patsubst %.c, %, $(C_FILES))
+EXES = $(patsubst %.c, %, $(C_FILES))
 
-USER  = `whoami`
+USER = `whoami`
 GROUP = `id -ng`
 
 ##########################

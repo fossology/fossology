@@ -15,12 +15,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS)
-EXE=regexscan
+CFLAGS_LOCAL = $(ALL_CFLAGS)
+EXE = regexscan
 
 $(EXE): regexscan.c $(FOLIB) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@

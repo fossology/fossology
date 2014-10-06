@@ -14,16 +14,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS)
+DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
+CFLAGS_LOCAL = $(DEF) $(ALL_CFLAGS) $(DEFS)
 
-EXE=buckets
-OBJS=validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
-HDRS=buckets.h
+EXE = buckets
+OBJS = validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
+HDRS = buckets.h
 
 all: $(EXE)
 	@echo "make bucket agent"

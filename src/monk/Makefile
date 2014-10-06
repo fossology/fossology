@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME=monk
+MOD_NAME = monk
 
 DIRS = agent ui agent_tests
 TESTDIR = agent_tests

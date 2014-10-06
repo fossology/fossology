@@ -15,15 +15,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../../
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../../
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 
 include $(VARS)
 
 DIR = $(realpath .)
-MOD_NAME=debug
-MOD_SUBDIR=ui
+MOD_NAME = debug
+MOD_SUBDIR = ui
 
 all:
 	@echo "make nothing in $(DIR)"

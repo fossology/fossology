@@ -1,14 +1,14 @@
 # FOSSology Makefile - utils/freshmeat
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-LIBFILES=lib_projxml.h.php
-BINFILES=GetFM diffm.php get-projects.php mktop1k.php wrapGFM
-fmPATHFILE=fm-paths.php
-FMDir=FMDir
+LIBFILES = lib_projxml.h.php
+BINFILES = GetFM diffm.php get-projects.php mktop1k.php wrapGFM
+fmPATHFILE = fm-paths.php
+FMDir = FMDir
 
 all: $(fmPATHFILE)
 

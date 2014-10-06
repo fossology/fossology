@@ -1,11 +1,11 @@
 # FOSSology Makefile - ./src/testing/lib/c
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-LIB=libfocunit.a
-OBJS=libfocunit.o
+LIB = libfocunit.a
+OBJS = libfocunit.o
 
 all: $(LIB) $(VARS)
 	echo "make $(LIB)"

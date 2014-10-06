@@ -15,18 +15,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../..
+TOP = ../../..
 
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
 
-CFLAGS_LOCAL=$(ALL_CFLAGS) -lpq -lssl -lcrypto
+CFLAGS_LOCAL = $(ALL_CFLAGS) -lpq -lssl -lcrypto
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
-EXE=delagent
-HDRS=delagent.h
+EXE = delagent
+HDRS = delagent.h
 
 all: $(EXE)
 	@echo "make delagent agent and test"

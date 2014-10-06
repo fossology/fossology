@@ -21,7 +21,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS =  ui_tests
+DIRS = ui_tests
 TESTDIR = ui_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done

@@ -7,7 +7,7 @@
 
 #
 # Makefile for monk/ui
-TOP=../../..
+TOP = ../../..
 include $(TOP)/Makefile.conf
 
 all:

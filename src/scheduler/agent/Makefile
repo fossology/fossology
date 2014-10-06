@@ -20,15 +20,15 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-#GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
+#GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
 AR = ar
-GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -lgobject-2.0
+GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -lgobject-2.0
 CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEPEN = Makefile logging.h
-DEF   = -DLOG_DIR='"$(LOGDIR)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
-        -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
-        -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
+DEF = -DLOG_DIR='"$(LOGDIR)"' \
+      -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
+      -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
+      -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 
 LIB = libscheduler.a
 COV = libscheduler_cov.a
@@ -37,7 +37,7 @@ FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' \
         -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
         -DPROCESS_NAME='"$(EXE)"'
 
-INITFILE=init.d/fossology
+INITFILE = init.d/fossology
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 #######################
@@ -53,7 +53,7 @@ OBJS = scheduler.o \
        job.o \
        logging.o \
 
-COVERAGE=$(OBJS:%.o=%_cov.o)
+COVERAGE = $(OBJS:%.o=%_cov.o)
 
 HEAD = agent.h \
        event.h \
@@ -93,7 +93,7 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 main.o: %.o: %.c $(HEAD)
 	$(CC) -c $(CFLAGS_LOCAL) $(FODEF) $(DEF) $<
 
-scheduler.o: %.o: %.c %.h $(HEAD)  $(DEPEN)
+scheduler.o: %.o: %.c %.h $(HEAD) $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(FODEF) $(DEF) $<
 
 agent.o: %.o: %.c %.h job.h database.h scheduler.h $(DEPEN)
@@ -118,7 +118,7 @@ logging.o: %.o: %.c $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 
-$(COVERAGE): %_cov.o: %.c $(HEAD)  $(DEPEN)
+$(COVERAGE): %_cov.o: %.c $(HEAD) $(DEPEN)
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(FODEF) $(DEF) -o $@
 
 #######################

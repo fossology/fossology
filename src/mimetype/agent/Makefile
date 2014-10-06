@@ -1,17 +1,17 @@
 # FOSSology Makefile - agents/mimetype
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
-EXE=mimetype
-OBJECTS=finder.o
-HDIR=$(OBJS:.o=.h)
-TESTDIR=../agent_tests
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+EXE = mimetype
+OBJECTS = finder.o
+HDIR = $(OBJS:.o=.h)
+TESTDIR = ../agent_tests
 
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(EXE)
 

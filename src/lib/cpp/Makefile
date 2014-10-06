@@ -5,21 +5,21 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
+TOP = ../../..
 
-CLIBDIR=../c/
-VARS=$(TOP)/Makefile.conf
+CLIBDIR = ../c/
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 CXXFLAGS_LOCAL=-fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
 
-CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
-EXE=
-LIB=libfossologyCPP.a
+CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
+          -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
+EXE =
+LIB = libfossologyCPP.a
 DEPENDENCY = $(CLIBDIR)/libfossology.a
-OBJS=files.o libfossdbmanagerclass.o
+OBJS = files.o libfossdbmanagerclass.o
 
-COVERAGE=$(OBJS:%.o=%_cov.o)
+COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
 	echo "make $(LIB)"
@@ -36,7 +36,7 @@ $(EXE): %: %.cc $(LIB) $(VARS)
 
 
 $(OBJS): %.o: %.cc %.hpp
-	$(CXX) -c $< $(CONFDEF)  $(CXXFLAGS_LOCAL)
+	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"

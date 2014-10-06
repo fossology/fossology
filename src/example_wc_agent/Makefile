@@ -17,7 +17,7 @@
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=example_wc_agent
+MOD_NAME = example_wc_agent
 
 DIRS = agent ui
 TESTDIR = agent_tests ui_tests

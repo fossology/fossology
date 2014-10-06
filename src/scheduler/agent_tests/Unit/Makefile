@@ -19,18 +19,18 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-LOCALAGENTDIR=../../agent
+LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgthread-2.0 -lgio-2.0
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
-DEF   = -DLOG_DIR='"$(LOGDIR)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
-        -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
-        -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' \
-        -DPROJECT_USER='"$(PROJECTUSER)"' \
-        -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
-        -DPROCESS_NAME='"$(EXE)"'
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
+DEF = -DLOG_DIR='"$(LOGDIR)"' \
+      -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
+      -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
+      -DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"' \
+      -DPROJECT_USER='"$(PROJECTUSER)"' \
+      -DPROJECT_GROUP='"$(PROJECTGROUP)"' \
+      -DPROCESS_NAME='"$(EXE)"'
 
 LIB = libscheduler.a
 EXE = test_scheduler
@@ -39,13 +39,13 @@ FOCUNIT = libfocunit.a
 
 OBJECTS = testHost.o \
           testInterface.o \
-          testAgent.o  \
-          testEvent.o  \
+          testAgent.o \
+          testEvent.o \
           testDatabase.o \
           testJob.o \
           testScheduler.o
 
-all:  $(EXE)
+all: $(EXE)
 test: fossology_testconfig $(EXE)
 	./$(EXE)
 	
@@ -57,7 +57,7 @@ coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EX
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	genhtml -o results cov.txt
 
 $(LIB):
 	$(MAKE) -C $(LOCALAGENTDIR) $@

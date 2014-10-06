@@ -1,7 +1,7 @@
 # FOSSology Makefile - db/
 # Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
-TOP=../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 all: dbcreate

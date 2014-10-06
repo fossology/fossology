@@ -15,18 +15,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 # FOSSology Makefile - agents/wget_agent
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-TESTDIR=../agent_tests
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
-EXE=wget_agent
-CHKHDR=../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
-CHKSRC=$(CHKHDR:%.h=%.c)
-OBJECTS=wget_agent.o
-HDIR=$(OBJS:.o=.h)
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+TESTDIR = ../agent_tests
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
+EXE = wget_agent
+CHKHDR = ../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
+CHKSRC = $(CHKHDR:%.h=%.c)
+OBJECTS = wget_agent.o
+HDIR = $(OBJS:.o=.h)
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(EXE)
 

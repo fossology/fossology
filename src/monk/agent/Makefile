@@ -5,24 +5,24 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 
 include $(VARS)
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
-EXE=monk
+EXE = monk
 TESTDIR = ../agent_tests
-OBJECTS  = monk.o string_operations.o file_operations.o database.o\
-           license.o highlight.o match.o hash.o diff.o extended.o\
-           cli.o bulk.o \
-           _squareVisitor.o
-COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o\
-           database_cov.o license_cov.o highlight_cov.o match_cov.o\
+OBJECTS = monk.o string_operations.o file_operations.o database.o \
+          license.o highlight.o match.o hash.o diff.o extended.o \
+          cli.o bulk.o \
+          _squareVisitor.o
+COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o \
+           database_cov.o license_cov.o highlight_cov.o match_cov.o \
            cli_cov.o bulk_cov.o \
            hash_cov.o diff_cov.o extended_cov.o _squareVisitor_cov.o
 

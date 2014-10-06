@@ -28,7 +28,7 @@
 #include "database.hpp"
 #include "cleanEntries.hpp"
 
-extern "C"{
+extern "C" {
 #include "libfossology.h"
 }
 

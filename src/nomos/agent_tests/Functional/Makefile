@@ -16,7 +16,7 @@
 ######################################################################
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 EXE_DIR = ../../agent/

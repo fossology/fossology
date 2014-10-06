@@ -17,7 +17,7 @@
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=buckets
+MOD_NAME = buckets
 
 DIRS = agent ui
 TESTDIR = agent_tests

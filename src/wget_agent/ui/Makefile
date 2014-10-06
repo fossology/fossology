@@ -15,11 +15,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=wget_agent
-MOD_SUBDIR=ui
+MOD_NAME = wget_agent
+MOD_SUBDIR = ui
 
 all:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"

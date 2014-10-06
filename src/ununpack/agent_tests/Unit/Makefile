@@ -1,20 +1,20 @@
 # FOSSology Makefile - ununpack/agent_tests
 # Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-AGENTDIR=../../agent
-CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
-CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
-TEST_LIB_DIR=$(TOP)/src/testing/db/c
-TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
-DATA=../unpack-test-data.tar.bz2
+AGENTDIR = ../../agent
+CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
+CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
+TEST_LIB_DIR = $(TOP)/src/testing/db/c
+TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
+DATA = ../unpack-test-data.tar.bz2
 
-CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
-EXE=run_tests
+CFLAGS_LOCAL = -lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+EXE = run_tests
 
-OBJS=	run_tests.o \
+OBJS =	run_tests.o \
 		test_CopyFile.o \
 		test_FindCmd.o \
 		test_Prune.o \
@@ -81,7 +81,7 @@ coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
 	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(AGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o results cov.txt
+	genhtml -o results cov.txt
 
 libununpack_cov.a:
 	$(MAKE) -C $(AGENTDIR) $@

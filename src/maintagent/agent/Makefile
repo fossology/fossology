@@ -14,16 +14,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS)
+DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
+CFLAGS_LOCAL = $(DEF) $(ALL_CFLAGS) $(DEFS)
 
-EXE=maintagent
-OBJS=usage.o utils.o process.o
-HDRS=maintagent.h
+EXE = maintagent
+OBJS = usage.o utils.o process.o
+HDRS = maintagent.h
 
 all: $(EXE)
 	@echo "make maintagent agent"
@@ -44,11 +44,11 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make maintagent  agent install"
+	@echo "make maintagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make maintagent  agent uninstall"
+	@echo "make maintagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

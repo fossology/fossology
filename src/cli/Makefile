@@ -1,16 +1,16 @@
 # FOSSology Makefile - cli/
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=cp2foss.php fossjobs.php schema-export.php fo_nomos_license_list.php fo_copyright_list.php fo_bucket_list.php
-WRAP=cp2foss fossjobs schema-export fo_nomos_license_list fo_copyright_list fo_bucket_list
-DOCS=cp2foss.pod fossjobs.pod
-MAN1FILES=$(DOCS:%.pod=%.1)
-HTMLFILES=$(DOCS:%.pod=%.html)
-TEXTFILES=$(DOCS:%.pod=%.txt)
+EXE = cp2foss.php fossjobs.php schema-export.php fo_nomos_license_list.php fo_copyright_list.php fo_bucket_list.php
+WRAP = cp2foss fossjobs schema-export fo_nomos_license_list fo_copyright_list fo_bucket_list
+DOCS = cp2foss.pod fossjobs.pod
+MAN1FILES = $(DOCS:%.pod=%.1)
+HTMLFILES = $(DOCS:%.pod=%.html)
+TEXTFILES = $(DOCS:%.pod=%.txt)
 
 #########################
 # iPATHFILE build rules #
@@ -55,7 +55,7 @@ install: all
 	
 #$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
 # create BINDIR if not exsit
-	if [ ! -e $(DESTDIR)$(BINDIR) ] ; then \
+	if [ ! -e $(DESTDIR)$(BINDIR) ]; then \
 		mkdir -p $(DESTDIR)$(BINDIR); \
 	fi	
 # create wrappers in BINDIR

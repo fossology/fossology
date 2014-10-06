@@ -14,16 +14,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS)
+DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
+CFLAGS_LOCAL = $(DEF) $(ALL_CFLAGS) $(DEFS)
 
-EXE=demomod
-OBJS=usage.o utils.o process.o
-HDRS=demomod.h
+EXE = demomod
+OBJS = usage.o utils.o process.o
+HDRS = demomod.h
 
 all: $(EXE)
 	@echo "make demomod agent"
@@ -44,11 +44,11 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make demomod  agent install"
+	@echo "make demomod agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make demomod  agent uninstall"
+	@echo "make demomod agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

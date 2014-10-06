@@ -15,7 +15,7 @@
 #include <vector>
 #include "copyrightUtils.hpp"
 
-extern "C"  {
+extern "C" {
 #include "libfossagent.h"
 }
 

@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-AGENT_DIR   = ../../agent
+AGENT_DIR = ../../agent
 TEST_AGENTS = ../agents/
 
 regression = ./Functional.py

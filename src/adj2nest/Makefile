@@ -18,7 +18,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME=adj2nest
+MOD_NAME = adj2nest
 
 DIRS = agent ui
 TESTDIR = agent_tests

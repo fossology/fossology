@@ -5,15 +5,15 @@
 #  fo-postinstall
 #  SYSCONFDIR/db.conf
 
-TOP=..
-VARS=$(TOP)/Makefile.conf
+TOP = ..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CONFPATH=$(SYSCONFDIR)
+CONFPATH = $(SYSCONFDIR)
 # default version is the scm revision number
 -DVERSION=$(SCM_REV)
 
-all:	fo-postinstall defconf/Db.conf defconf/fossology.conf db/dbcreate
+all: fo-postinstall defconf/Db.conf defconf/fossology.conf db/dbcreate
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -37,18 +37,18 @@ install: all
 	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	$(MAKE) -s -C db install
 	echo "Making configuration directories"; \
-	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
+	if [ ! -e $(DESTDIR)$(CONFPATH) ]; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
-	if [ ! -e $(DESTDIR)$(CONFPATH)/mods-enabled ] ; then \
+	if [ ! -e $(DESTDIR)$(CONFPATH)/mods-enabled ]; then \
 		mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
 		/bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
 	fi
-	if [ ! -e $(DESTDIR)$(CONFPATH)/conf ] ; then \
+	if [ ! -e $(DESTDIR)$(CONFPATH)/conf ]; then \
 		mkdir -p $(DESTDIR)$(CONFPATH)/conf; \
 	fi
 	echo "Installing configuration files..."
-	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 640 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
 	else \
@@ -56,7 +56,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 	
-	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
 	 	$(INSTALL) -m 666 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
 	else \
@@ -64,7 +64,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 	
-	if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/sampleheader.txt"; \
 	 	$(INSTALL) -m 666 defconf/sampleheader.txt $(DESTDIR)$(CONFPATH)/sampleheader.txt; \
 	else \
@@ -72,7 +72,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 	
-	if [ ! -f $(DESTDIR)$(CONFPATH)/samplefooter.txt -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/samplefooter.txt -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/samplefooter.txt"; \
 	 	$(INSTALL) -m 666 defconf/samplefooter.txt $(DESTDIR)$(CONFPATH)/samplefooter.txt; \
 	else \
@@ -80,7 +80,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 	
-	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf"; \
 	 	$(INSTALL) -m 666 fo-apache.conf $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf; \
 	else \
@@ -88,7 +88,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
-	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf -o "$(OVERWRITE)" ] ; then \
+	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf"; \
 	 	$(INSTALL) -m 666 src-install-apache-example.conf $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf; \
 	else \
@@ -105,7 +105,7 @@ uninstall:
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
-			echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing";\
+			echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing"; \
 		else \
 			rmdir $(DESTDIR)$(LIBEXECDIR); \
 		fi; \

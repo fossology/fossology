@@ -10,7 +10,7 @@
 #####################################################################
 
 include  ../../Makefile.conf
-SHELL=/bin/bash
+SHELL = /bin/bash
 
 # NOTE: most definitions come from ../Makefile.conf  These paths 
 # are specific to the Freshmeat process.
@@ -29,10 +29,10 @@ SHELL=/bin/bash
 # use the path expect it.
 #
 # For example if the storage is located at: /srv/storage/fossology
-# FMDATADIR=/srv/storage/fossology/
+# FMDATADIR = /srv/storage/fossology/
 #
 
-FMDATADIR=/tmp/
+FMDATADIR = /tmp/
 
-FMDIR=$(FMDATADIR)Freshmeat
+FMDIR = $(FMDATADIR)Freshmeat
 

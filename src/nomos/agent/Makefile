@@ -1,25 +1,25 @@
 # FOSSology Makefile - agent/nomos
 # Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = nomos
 
-SPEC=STRINGS.in
-CHECK=CHECKSTR
-PRE=PRECHECK
-PDATA=_split_words
-LICFIX=GENSEARCHDATA
+SPEC = STRINGS.in
+CHECK = CHECKSTR
+PRE = PRECHECK
+PDATA =_split_words
+LICFIX = GENSEARCHDATA
 
-OBJS=licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o
-GENOBJS=_precheck.o _autodata.o
-HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
-COVERAGE=$(OBJS:%.o=%_cov.o)
-GENOBJS_COV=$(GENOBJS:%.o=%_cov.o)
+OBJS = licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o
+GENOBJS = _precheck.o _autodata.o
+HDRS = nomos.h $(OBJS:.o=.h) _autodefs.h
+COVERAGE = $(OBJS:%.o=%_cov.o)
+GENOBJS_COV = $(GENOBJS:%.o=%_cov.o)
 
-CFLAGS_LOCAL= $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror
-CFLAGS_LOCALO= $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror
+CFLAGS_LOCALO = $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 all: encode nomos libnomos.a
 
@@ -30,12 +30,12 @@ nomos: nomos.o $(OBJS) $(GENOBJS)
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
-	
+
 nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
 nomos-g.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -c  -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO)
+	$(CC) -c -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO)
 
 $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS)
@@ -67,7 +67,7 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 install: all
 	@echo "make nomos agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-#	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
+#	$(INSTALL_PROGRAM) encode $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
 	@echo "make nomos agent uninstall"
@@ -81,7 +81,7 @@ coverage:
 	@echo "NOTICE: no coverage available for nomos"
 
 clean:
-	rm -f encode nomos  core *.a *.gc* \
+	rm -f encode nomos core *.a *.gc* \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK

@@ -17,11 +17,11 @@
 
 # Makefile for lib/php
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$" `
+FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$"`
 
 all: bootstrap
 

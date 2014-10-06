@@ -1,10 +1,10 @@
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-LIB=libfodbreposysconf.a
-OBJS=libfodbreposysconf.o
+LIB = libfodbreposysconf.a
+OBJS = libfodbreposysconf.o
 
 all: $(LIB) $(VARS)
 	@echo "make $(LIB)"

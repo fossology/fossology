@@ -1,22 +1,22 @@
 # FOSSology Makefile - agents/ununpack
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
-EXE=departition ununpack
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+EXE = departition ununpack
 
-CHKHDR= checksum.h md5.h sha1.h
-CHKSRC=$(CHKHDR:%.h=%.c) traverse.c utils.c
-UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
-UUSRC=$(UUHDR:%.h=%.c)
+CHKHDR = checksum.h md5.h sha1.h
+CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
+UUHDR = ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
+UUSRC = $(UUHDR:%.h=%.c)
 
-TESTDIR=tests
-OBJECTS= checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+TESTDIR = tests
+OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE)
 
@@ -48,7 +48,7 @@ uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
 	rm -rf $(DESTDIR)$(MODDIR)/ununpack
 
-$(OBJECTS): %.o: %.c  $(UUHDR)
+$(OBJECTS): %.o: %.c $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL)
 
 

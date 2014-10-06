@@ -7,7 +7,7 @@
 
 TOP = ../../../..
 include $(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
@@ -35,10 +35,10 @@ test: $(EXE)
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
 	@echo "make monk agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	genhtml -o results cov.txt
 
 $(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}

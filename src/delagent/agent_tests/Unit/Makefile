@@ -15,20 +15,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-LOCALAGENTDIR=../../agent
-CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
-CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
-TEST_LIB_DIR=$(TOP)/src/testing/db/c
-TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
+LOCALAGENTDIR = ../../agent
+CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
+CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
+TEST_LIB_DIR = $(TOP)/src/testing/db/c
+TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
-CFLAGS_LOCAL=-lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
-EXE=test_delagent
-TEST_OBJ_RUN=testRun.o
-TEST_OBJ=testListFolders.o testDeleteFolders.o testReadParameter.o
+CFLAGS_LOCAL = -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
+EXE = test_delagent
+TEST_OBJ_RUN = testRun.o
+TEST_OBJ = testListFolders.o testDeleteFolders.o testReadParameter.o
 
 # these are the external test data files needed by the tests
 # at the moment they will be found in the delagent/ directory, but this
@@ -83,7 +83,7 @@ coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
-	genhtml  -o results cov.txt
+	genhtml -o results cov.txt
 
 delagent_cov.o:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
@@ -92,6 +92,6 @@ delagent.o:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result
+	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
 
 include $(DEPS)

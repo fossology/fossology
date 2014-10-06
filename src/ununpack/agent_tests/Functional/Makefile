@@ -18,7 +18,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-DATA=../unpack-test-data.tar.bz2
+DATA = ../unpack-test-data.tar.bz2
 
 TESTFILE = tests.xml
 AGENTDIR = ../../agent/
@@ -61,7 +61,7 @@ coverage:
 	@echo "no coverage for ununpack/agent_test/Functional"
 
 clean:
-	rm -rf ununpack-Xunit.xml  ../unpack-test-data.tar.bz2 ../test-data
+	rm -rf ununpack-Xunit.xml ../unpack-test-data.tar.bz2 ../test-data
 
 include $(DEPS)
 

@@ -8,15 +8,15 @@
 ######################################################################
 TOP = ../../../..
 include $(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lfocunit -lcunit -I$(TESTDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB) -std=c99
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB) -std=c99
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_nomos
 
-OBJECTS = test_nomos_gap.o  test_DoctoredBuffer.o \
+OBJECTS = test_nomos_gap.o test_DoctoredBuffer.o \
           $(NULL)
 # test_nomos_gap.o
 all: $(EXE)
@@ -29,10 +29,10 @@ test: $(EXE)
 coverage: agent run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
 	@echo "make nomos agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	genhtml -o results cov.txt
 
 $(EXE): agent $(OBJECTS) libnomos.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}

@@ -5,35 +5,35 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 
 include $(VARS)
 # -Werror -Wextra
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -Wextra -Weffc++ -fopenmp
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
 
 TESTDIR = ../agent_tests
 
-DEF_ID_COP   = -DIDENTITY_COPYRIGHT
-DEF_ID_ECC   = -DIDENTITY_ECC
-DEF_ID_IP    = -DIDENTITY_IP
+DEF_ID_COP = -DIDENTITY_COPYRIGHT
+DEF_ID_ECC = -DIDENTITY_ECC
+DEF_ID_IP = -DIDENTITY_IP
 
 EXE_COP = copyright
 EXE_IP = ip
 EXE_ECC = ecc
 EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
 
-OBJECTS  = copyright.o copyrightState.o matcher.o regexMatcher.o  copyrightMatch.o regTypes.o cleanEntries.o database.o
-OBJECTS_COP  = copyrightUtils_cop.o
-OBJECTS_IP  = copyrightUtils_ip.o
-OBJECTS_ECC  = copyrightUtils_ecc.o
+OBJECTS = copyright.o copyrightState.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o database.o
+OBJECTS_COP = copyrightUtils_cop.o
+OBJECTS_IP = copyrightUtils_ip.o
+OBJECTS_ECC = copyrightUtils_ecc.o
 
 COVERAGE =
 
-all:  $(CXXFOLIB) $(EXE)
+all: $(CXXFOLIB) $(EXE)
 
 $(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
 	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@

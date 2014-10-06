@@ -5,22 +5,22 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../../..
-VARS=$(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+LOCALAGENTDIR = ../../agent
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 include $(VARS)
 # -Werror -Wextra
-CPPUNIT_PATH=/opt/cppunit
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR)
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
+CPPUNIT_PATH = /opt/cppunit
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR)
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
 
-EXE=test_copyright
+EXE = test_copyright
 
-OBJECTS  = test_regex.o test_RegMatcher.o
+OBJECTS = test_regex.o test_RegMatcher.o
 COVERAGE =
 
 
@@ -29,7 +29,7 @@ $(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
 	${MAKE} -C ${TESTDIR}
 	$(CXX) run_tests.cc -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK)
 
-all:  $(CXXFOLIB) $(EXE)
+all: $(CXXFOLIB) $(EXE)
 
 #######################
 # library build rules #
@@ -80,10 +80,10 @@ test: all
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	genhtml -o results cov.txt
 
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core
