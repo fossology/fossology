@@ -43,7 +43,7 @@ coverage:
 	@echo "NOTICE: no coverage available for decider"
 
 clean:
-	rm -f *.o core $(WRAP)
+	rm -f *.o core $(EXE) $(WRAP)
 
 include $(DEPS)
 
