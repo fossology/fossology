@@ -33,25 +33,25 @@ class Agent extends Object
     $GLOBALS['processed'] = 0;
     $GLOBALS['alive'] = false;
 
+    /* initialize the environment */
     cli_Init();
 
     global $container;
     $this->dbManager = $container->get('db.manager');
 
     $this->agentId = $this->queryAgentId();
-
-    $this->scheduler_connect();
   }
 
   function scheduler_connect()
   {
     $args = getopt("scheduler_start", array("userID:"));
 
-    $this->userId = $args['userID'];
+    if (array_key_exists('userId', $args))
+      $this->userId = $args['userID'];
 
     $this->initArsTable();
 
-    $this->schedueler_greet();
+    $this->scheduler_greet();
 
     pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
     pcntl_alarm(ALARM_SECS);
@@ -87,7 +87,7 @@ class Agent extends Object
     exit($exitvalue);
   }
 
-  function schedueler_greet()
+  function scheduler_greet()
   {
     echo "VERSION: ".$this->version."\n";
     echo "OK\n";
