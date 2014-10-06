@@ -21,8 +21,9 @@ define("ALARM_SECS", 30);
 
 class Agent extends Object
 {
-  private $agentVersion;
   private $agentName;
+  private $agentVersion;
+  private $agentRev;
   private $agentDesc;
   private $agentArs;
   private $agentId;

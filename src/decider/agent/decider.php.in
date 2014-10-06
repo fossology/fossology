@@ -71,10 +71,14 @@ class DeciderAgent extends Agent
     $queryResult = $this->dbManager->execute($statementName, $params);
 
     while ($uploadEntry = $this->dbManager->fetchArray($queryResult)) {
-      if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']) || Isartifact($uploadEntry['ufile_mode']))
+      $pfileId = $uploadEntry['pfile_fk'];
+      $fileMode = $uploadEntry['ufile_mode'];
+      $uploadTreeId = $uploadEntry['uploadtree_pk'];
+
+      if (Isdir($fileMode) || Iscontainer($fileMode) || Isartifact($fileMode) || empty($pfileId))
         continue;
 
-      if (!($this->decideUploadTreeId($uploadEntry['uploadtree_pk'], $uploadEntry['pfile_fk'])))
+      if (!($this->decideUploadTreeId($uploadTreeId, $pfileId)))
       {
         $this->dbManager->freeResult($queryResult);
         return false;

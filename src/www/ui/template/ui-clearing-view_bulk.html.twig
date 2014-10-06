@@ -15,8 +15,8 @@
  <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&lic=','{{ 'License Text'| trans }}')">{{ 'Show origin'| trans }}</button>
  <br>{{ 'reference text'| trans }}:<br><textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
  <select name="bulkScope" id="bulkScope">
-  <option value="u">{{ 'In whole Upload'| trans }}</option>
-  <option value="f">{{ 'In current Folder'| trans }}</option>
+  <option value="f">{{ 'scan only current Folder'| trans }}</option>
+  <option value="u">{{ 'scan whole Upload'| trans }}</option>
  </select>
  <br><button type="button" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>
  <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
