@@ -1,0 +1,3 @@
+<?
+define("AGENT_VERSION", "{$VERSION}");
+define("AGENT_REV", "{$SVN_REV}");

@@ -29,6 +29,7 @@ class Agent extends Object
   private $agentId;
 
   protected $userId;
+  protected $jobId;
 
   /** @var DbManager dbManager */
   protected $dbManager;
@@ -57,12 +58,10 @@ class Agent extends Object
 
   function scheduler_connect()
   {
-    $args = getopt("scheduler_start", array("userID:"));
+    $args = getopt("scheduler_start", array("userID:","jobId:"));
 
-    if (array_key_exists('userId', $args))
-      $this->userId = $args['userID'];
-    else
-      $this->userId = null;
+    $this->userId = @$args['userID'];
+    $this->jobId = @$args['jobId'];
 
     $this->initArsTable();
 

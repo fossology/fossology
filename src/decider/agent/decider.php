@@ -11,8 +11,8 @@
  */
 
 define("AGENT_NAME", "decider");
-define("AGENT_VERSION", "{$VERSION}");
-define("AGENT_REV", "{$SVN_REV}");
+
+include_once(__DIR__."/version.php");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
@@ -48,6 +48,9 @@ class DeciderAgent extends Agent
   {
     $userId = $this->userId;
 
+
+
+
     return true;
   }
 
@@ -67,6 +70,10 @@ class DeciderAgent extends Agent
       $statementName .= "leftRight";
     }
 
+    $jobId = $this->jobId;
+    $jobIds = array(); //TODO;
+    $decidedByMonk = $this->clearingDao->getChangedItemsBy($jobIds);
+
     $this->dbManager->prepare($statementName, $selectQuery);
     $queryResult = $this->dbManager->execute($statementName, $params);
 
@@ -78,7 +85,7 @@ class DeciderAgent extends Agent
       if (Isdir($fileMode) || Iscontainer($fileMode) || Isartifact($fileMode) || empty($pfileId))
         continue;
 
-      if (!($this->decideUploadTreeId($uploadTreeId, $pfileId)))
+      if (!($this->decideUploadTreeId($uploadTreeId, $pfileId, $decidedByMonk)))
       {
         $this->dbManager->freeResult($queryResult);
         return false;

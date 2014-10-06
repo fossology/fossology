@@ -2335,6 +2335,10 @@
   $Schema["TABLE"]["license_decision_event"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["user_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["license_decision_event"]["job_fk"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_event"]["job_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"job_fk\" int4;";
+  $Schema["TABLE"]["license_decision_event"]["job_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"type_fk\" IS 'Identifier for license_decision_type';";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"type_fk\" int4;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";

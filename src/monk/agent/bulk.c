@@ -21,6 +21,8 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "monk.h"
 
+#include "libfossagent.h"
+
 int setLeftAndRight(MonkState* state) {
   PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
@@ -209,18 +211,19 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, type_fk, rf_fk, is_removed, is_global)"
-      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, 'f'"
+      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, job_fk, type_fk, rf_fk, is_removed, is_global)"
+      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, $6, 'f'"
       " FROM uploadtree"
-      " WHERE upload_fk = $6 AND pfile_fk = $1 AND lft BETWEEN $7 AND $8"
+      " WHERE upload_fk = $7 AND pfile_fk = $1 AND lft BETWEEN $8 AND $9"
       "RETURNING license_decision_event_pk",
       long,
-      int, int, long, int,
+      int, int, int, long, int,
       int, long, long
     ),
     file->id,
 
     state->bulkArguments->userId,
+    state->jobId,
     state->bulkArguments->decisionType,
     licenseId,
     state->bulkArguments->removing ? 1 : 0,

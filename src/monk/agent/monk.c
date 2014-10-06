@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
   fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
 
   queryAgentId(state);
+  state->jobId = fo_scheduler_jobId();
 
   if (argc > 1) {
     if (!handleArguments(state, argc, argv))

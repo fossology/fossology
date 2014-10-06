@@ -10,12 +10,12 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=decider.php
+EXE=decider.php version.php
 WRAP=decider
 
-all: decider.php
+all: version.php
 
-decider.php: decider-process_php
+version.php: version-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -43,7 +43,7 @@ coverage:
 	@echo "NOTICE: no coverage available for decider"
 
 clean:
-	rm -f *.o core $(EXE) $(WRAP)
+	rm -f *.o core version.php $(WRAP)
 
 include $(DEPS)
 

@@ -185,6 +185,7 @@ char* fo_scheduler_next();
 
 char* fo_scheduler_current();
 int   fo_scheduler_userID();
+int   fo_scheduler_jobId();
 void  fo_scheduler_set_special(int option, int value);
 int   fo_scheduler_get_special(int option);
 char* fo_sysconfig(const char* sectionname, const char* variablename);

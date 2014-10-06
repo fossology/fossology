@@ -58,6 +58,7 @@ typedef struct {
     int agentId;
     int scanMode;
     int verbosity;
+    int jobId;
     BulkArguments* bulkArguments;
 } MonkState;
 
