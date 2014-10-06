@@ -46,10 +46,6 @@ class agent_fodecider extends FO_Plugin
    */
   function RegisterMenus()
   {
-    //TODO do we need this menu?
-    if ($this->State == PLUGIN_STATE_READY) {
-      menu_insert("Agents::" . $this->Title, 0, $this->Name);
-    }
     return 0;
   }
 
