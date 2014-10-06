@@ -74,7 +74,7 @@ class FolderDao extends Object
   public function fixFolderSequence() {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
-        "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 FROM folder LIMIT 1");
+        "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 FROM folder LIMIT 1))");
     $res = $this->dbManager->execute($statementName);
     $this->dbManager->freeResult($res);
   }
