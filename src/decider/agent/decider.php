@@ -11,9 +11,12 @@
  */
 
 define("ALARM_SECS", 30);
+define("AGENT_NAME", "decider");
+define("AGENT_DESC", "decider agent");
+define("AGENT_ARS", AGENT_NAME . "_ars");
 
 /**
- * \file cp2foss.php // TODO
+ * \file decider.php
  */
 
 /**
@@ -39,10 +42,9 @@ function init()
   $dbManager = $container->get('db.manager');
   $GLOBALS['dbManager'] = $dbManager;
 
-  $res = $dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk = $1", array($userId));
+  $GLOBALS['agentId'] = queryAgentId(AGENT_NAME, AGENT_DESC);
 
-
-  $GLOBALS['userName'] = $res['user_name'];
+  initArsTable(AGENT_ARS);
 }
 
 function heartbeat_handler($signo)
@@ -82,6 +84,55 @@ function greet()
   echo "OK\n";
 }
 
+function createArsTable($tableName)
+{
+  global $dbManager;
+
+  $dbManager->queryOnce("CREATE TABLE ".$tableName."() INHERITS(ars_master);
+  ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);
+  ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE");
+}
+
+function initArsTable($tableName)
+{
+  if (!DB_TableExists($tableName)) {
+    createArsTable($tableName);
+  };
+}
+
+function writeArsRecord($arsTableName,$uploadId,$arsId=0,$success=false,$status="")
+{
+  global $dbManager;
+  global $agentId;
+
+  if ($arsId) {
+    $dbManager->queryOnce("UPDATE $arsTableName SET ars_success='".($success ? "t" : "f")."', ars_endtime=now() ".(
+      !empty($status) ? ", ars_status = $status" : ""
+      )." WHERE ars_pk = $arsId");
+  } else {
+    $row = $dbManager->getSingleRow("INSERT INTO $arsTableName(agent_fk,upload_fk) VALUES ($agentId,$uploadId) RETURNING ars_pk");
+    if ($row !== false)
+    {
+      return $row['ars_pk'];
+    }
+  }
+}
+
+function queryAgentId($agentName, $agentDesc)
+{
+  global $dbManager;
+
+  $row = $dbManager->getSingleRow("SELECT agent_pk FROM agent WHERE agent_name = $1 order by agent_ts desc limit 1", array($agentName), __METHOD__."select");
+
+  if ($row === false)
+  {
+    $row = $dbManager->getSingleRow("INSERT INTO agent(agent_name,agent_desc) VALUES ($1,$2) RETURNING agent_pk", array($agentName, $agentDesc), __METHOD__."insert");
+    return $row['agent_pk'];
+  }
+
+  return $row['agent_pk'];
+}
+
 function processUploadId($uploadId)
 {
   global $userId;
@@ -93,12 +144,12 @@ function processUploadId($uploadId)
   array($uploadId));
 
   heartbeat($count['count']);
+
+  return true;
 }
 
 greet();
 init();
-
-
 
 while (false !== ($line = fgets(STDIN)))
 {
@@ -114,7 +165,11 @@ while (false !== ($line = fgets(STDIN)))
   $uploadId = intval($line);
 
   if ($uploadId > 0)
-    processUploadId($uploadId);
+  {
+    $arsId = writeArsRecord(AGENT_ARS, $uploadId);
+    $success = processUploadId($uploadId);
+    writeArsRecord(AGENT_ARS, $uploadId, $arsId, $success);
+  }
 }
 
 bail(0);
