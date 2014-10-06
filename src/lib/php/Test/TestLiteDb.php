@@ -59,6 +59,7 @@ class TestLiteDb
     
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
+    global $container;
     $logger = $container->get('logger');
     $logger = new Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';

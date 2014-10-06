@@ -18,23 +18,20 @@
 
 
 
-function initializeOption(selector , value) {
-    selector.prop('checked', value);
+function initializeOption(myvalue) {
+    var radios  = $("input[name=FileSelection]:radio");
+    radios.filter('[value='+myvalue+']').attr('checked',true);
 }
 
-function setOptionOnChange( selector, name ) {
-    setOption(name, selector.checked);
+function setOptionOnChange( name ) {
+    setOption(name, $('input[name=FileSelection]:radio:checked').val());
 }
 
 $(document).ready(function(){
-  initializeOption (  $('#skipNoClearingFiles'),getOptionDefaultTrue("skipNoClearing"));
-    $('#skipNoClearingFiles').bind('change', function () {
-        setOptionOnChange(this, "skipNoClearing");
+    var theOption = getOption("skipFile");
+    if(theOption === "") theOption = "none";
+  initializeOption ( theOption);
+    $('input[name=FileSelection]:radio').bind('change', function () {
+        setOptionOnChange("skipFile");
     });
-
-   initializeOption ( $('#skipNoLicenseFiles'), getOptionDefaultTrue("skipNoLicense"));
-    $('#skipNoLicenseFiles').bind('change', function () {
-        setOptionOnChange(this, "skipNoLicense");
-    });
-
 });

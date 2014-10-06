@@ -18,8 +18,13 @@
             </div>
             </td>
             <td>
-                <input type="checkbox" name="skipNoLicenseFiles" id="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>
-                <input type="checkbox" name="skipNoClearingFiles" id="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>
+                <p>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="none"> {% trans "Go through all files" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="noLicense"> {% trans "Go through all files with licenses" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="alreadyCleared"> {% trans "Go through all files with licenses and no clearing result" %}<br>
+                </p>
+                {#<input type="checkbox" name="skipNoLicenseFiles" id="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>#}
+                {#<input type="checkbox" name="skipNoClearingFiles" id="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>#}
             </td>
         </tr>
         </table>

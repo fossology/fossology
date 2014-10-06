@@ -210,7 +210,7 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $options = array('skipNoLicense' => $_COOKIE['option_skipNoLicense']==="true" );
+    $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
 
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
