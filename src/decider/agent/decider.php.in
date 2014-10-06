@@ -11,7 +11,8 @@
  */
 
 define("AGENT_NAME", "decider");
-define("VERSION", "trunk");
+define("AGENT_VERSION", "{$VERSION}");
+define("AGENT_REV", "{$SVN_REV}");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
@@ -30,15 +31,10 @@ class DeciderAgent extends Agent
 
   function __construct()
   {
-    parent::__construct(AGENT_NAME, VERSION);
+    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("U:",array(""));
-
-    if (array_key_exists('U', $args)) {
-      $this->uploadTreeId = $args['U'];
-    } else {
-      $this->uploadTreeId = null;
-    }
+    $this->uploadTreeId = @$args['U'];
 
     global $container;
     $this->uploadDao = $container->get('dao.upload');

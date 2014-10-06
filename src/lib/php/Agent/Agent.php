@@ -21,7 +21,7 @@ define("ALARM_SECS", 30);
 
 class Agent extends Object
 {
-  private $version;
+  private $agentVersion;
   private $agentName;
   private $agentDesc;
   private $agentArs;
@@ -34,10 +34,11 @@ class Agent extends Object
 
   private $isConnected;
 
-  function __construct($agentName, $version) {
+  function __construct($agentName, $version, $revision) {
     $this->agentName = $agentName;
-    $this->version = $version;
+    $this->agentVersion = $version;
     $this->agentDesc = $agentName. " agent";
+    $this->agentRev = $version.".".$revision;
     $this->agentArs = $agentName . "_ars";
     $this->isConnected = false;
 
@@ -102,7 +103,7 @@ class Agent extends Object
 
   function scheduler_greet()
   {
-    echo "VERSION: ".$this->version."\n";
+    echo "VERSION: ".$this->agentVersion."\n";
     echo "OK\n";
   }
 
@@ -147,7 +148,7 @@ class Agent extends Object
 
     if ($row === false)
     {
-      $row = $this->dbManager->getSingleRow("INSERT INTO agent(agent_name,agent_desc) VALUES ($1,$2) RETURNING agent_pk", array($this->agentName, $this->agentDesc), __METHOD__."insert");
+      $row = $this->dbManager->getSingleRow("INSERT INTO agent(agent_name,agent_desc,agent_rev) VALUES ($1,$2,$3) RETURNING agent_pk", array($this->agentName, $this->agentDesc, $this->agentRev), __METHOD__."insert");
       return $row['agent_pk'];
     }
 

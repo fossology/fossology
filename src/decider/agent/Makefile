@@ -13,7 +13,9 @@ include $(VARS)
 EXE=decider.php
 WRAP=decider
 
-all:
+all: decider.php
+
+decider.php: decider-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
