@@ -18,11 +18,7 @@ all:
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
-# generate the postinstall script
-fo_wrapper_install:
-	@echo pretend i am working on cli
-
-install: all fo_wrapper_install
+install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/decider/agent/
 	for file in $(EXE); do \
 		echo "installing $$file"; \
