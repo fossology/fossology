@@ -482,10 +482,12 @@ public function getUploadtreeTableName($uploadId)
           case "alreadyCleared":
             $conditionQuerry = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
             if($options['skipThese'] == "alreadyCleared") {
-              $uploadEntry= $this->getUploadEntry($item,$uploadTreeTableName);
-              $pfileId = $uploadEntry['pfile_fk'];  //I think a subquery would not be faster as we would have to do it each time we create the view
+//              $uploadEntry= $this->getUploadEntry($item,$uploadTreeTableName);
+//              $pfileId = $uploadEntry['pfile_fk'];  //I think a subquery would not be faster as we would have to do it each time we create the view
               $conditionQuerry  =  "( $conditionQuerry
-              AND  NOT EXISTS  (SELECT license_decision_event_pk FROM license_decision_event lde where uploadtree_fk = $item OR ( lde.pfile_fk = $pfileId AND lde.is_global = TRUE  ) ) )";
+              AND  NOT EXISTS  (SELECT license_decision_event_pk
+                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
+                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
             }
             $sql_upload = "";
             if ('uploadtree_a' == $uploadTreeTableName)
