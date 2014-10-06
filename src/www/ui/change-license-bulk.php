@@ -81,6 +81,10 @@ class changeLicenseBulk extends FO_Plugin
       $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
       $uploadName = $uploadInfo['upload_filename'];
 
+      if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode'])) {
+        $uploadTreeId = $uploadEntry['parent'];
+      }
+
       $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
         "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
         VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
@@ -91,8 +95,9 @@ class changeLicenseBulk extends FO_Plugin
         $bulkId = $licenseRefBulkIdResult['lrb_pk'];
         $job_pk = JobAddJob($userId, $uploadName, $uploadId);
 
-        $MonkBulkPlugin = plugin_find("agent_monk_bulk");
-        $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $bulkId);
+        $deciderPlugin = plugin_find("agent_decider");
+        $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
+        $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $uploadTreeId);
       } else {
         $ErrorMsg = "can not insert bulk reference";
       }

@@ -13,30 +13,79 @@
 define("AGENT_NAME", "decider");
 define("VERSION", "trunk");
 
-/**
- * \file decider.php
- */
-
-/**
- * include common-cli.php directly, common.php can not include common-cli.php
- * becuase common.php is included before UI_CLI is set
- */
-
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 
 class DeciderAgent extends Agent
 {
+  private $uploadTreeId;
+  /** @var UploadDao */
+  private $uploadDao;
+  /** @var ClearingDecisionEventProcessor */
+  private $clearingDecisionEventProcessor;
+   /** @var ClearingDao */
+  private $clearingDao;
+
   function __construct()
   {
     parent::__construct(AGENT_NAME, VERSION);
+
+    $args = getopt("U:",array(""));
+
+    if (array_key_exists('U', $args)) {
+      $this->uploadTreeId = $args['U'];
+    } else {
+      $this->uploadTreeId = null;
+    }
+
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+
+    $this->clearingDao = $container->get('dao.clearing');
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
+
+  }
+
+  function decideUploadTreeId($uploadTreeId, $pfileId)
+  {
+    $userId = $this->userId;
+
+    return true;
   }
 
   function processUploadId($uploadId)
   {
-    $count = $this->dbManager->getSingleRow("SELECT count(*) AS count FROM uploadtree WHERE upload_fk = $1",
-    array($uploadId));
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $selectQuery = "SELECT * FROM $uploadTreeTableName WHERE upload_fk = $1";
+    $params = array($uploadId);
+    $statementName = __METHOD__.$uploadTreeTableName;
 
-    $this->heartbeat($count['count']);
+    if ($this->uploadTreeId !== null)
+    {
+      list($lft, $rgt) = $this->uploadDao->getLeftAndRight($this->uploadTreeId, $uploadTreeTableName);
+      $selectQuery .= " AND lft BETWEEN $2 AND $3";
+      $params[] = $lft;
+      $params[] = $rgt;
+      $statementName .= "leftRight";
+    }
+
+    $this->dbManager->prepare($statementName, $selectQuery);
+    $queryResult = $this->dbManager->execute($statementName, $params);
+
+    while ($uploadEntry = $this->dbManager->fetchArray($queryResult)) {
+      if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']) || Isartifact($uploadEntry['ufile_mode']))
+        continue;
+
+      if (!($this->decideUploadTreeId($uploadEntry['uploadtree_pk'], $uploadEntry['pfile_fk'])))
+      {
+        $this->dbManager->freeResult($queryResult);
+        return false;
+      }
+      $this->heartbeat(1);
+    }
+    $this->dbManager->freeResult($queryResult);
 
     return true;
   }

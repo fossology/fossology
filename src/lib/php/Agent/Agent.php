@@ -17,8 +17,9 @@ class Agent extends Object
   private $agentArs;
   private $agentId;
 
-  private $userId;
+  protected $userId;
 
+  /** @var DbManager dbManager */
   protected $dbManager;
 
   private $isConnected;
@@ -48,6 +49,8 @@ class Agent extends Object
 
     if (array_key_exists('userId', $args))
       $this->userId = $args['userID'];
+    else
+      $this->userId = null;
 
     $this->initArsTable();
 
@@ -124,6 +127,8 @@ class Agent extends Object
         return $row['ars_pk'];
       }
     }
+
+    return -1;
   }
 
   function queryAgentId()
@@ -163,11 +168,17 @@ class Agent extends Object
       if ($uploadId > 0)
       {
         $arsId = $this->writeArsRecord($uploadId);
+
+        if ($arsId<0)
+          $this->bail(2);
+
         $success = $this->processUploadId($uploadId);
         $this->writeArsRecord($uploadId, $arsId, $success);
         if (!$success)
           $this->bail(1);
       }
+
+      $this->heartbeat(0);
     }
   }
 }

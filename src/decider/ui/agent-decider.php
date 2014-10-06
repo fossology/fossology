@@ -28,6 +28,8 @@ class agent_fodecider extends FO_Plugin
 {
   public $AgentName;
 
+  const UPLOADTREEIDFLAG = "-U";
+
   function __construct() {
     $this->Name = "agent_decider";
     $this->Title = TITLE_agent_fodecider;
@@ -44,6 +46,7 @@ class agent_fodecider extends FO_Plugin
    */
   function RegisterMenus()
   {
+    //TODO do we need this menu?
     if ($this->State == PLUGIN_STATE_READY) {
       menu_insert("Agents::" . $this->Title, 0, $this->Name);
     }
@@ -62,7 +65,7 @@ class agent_fodecider extends FO_Plugin
    **/
   function AgentHasResults($upload_pk)
   {
-    return CheckARS($upload_pk, $this->AgentName, "decider agent", "decider_ars");
+    return 0; /* this agent can be re run multiple times */
   }
 
   /**
@@ -82,10 +85,17 @@ class agent_fodecider extends FO_Plugin
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
+  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $uploadTreeId=null)
   {
     $Dependencies[] = "agent_adj2nest";
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+    if ($uploadTreeId !== null)
+    {
+      $args = $this::UPLOADTREEIDFLAG . $uploadTreeId;
+    } else
+    {
+      $args = "";
+    }
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
   }
 }
 

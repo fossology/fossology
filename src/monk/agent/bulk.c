@@ -22,28 +22,11 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 
 int setLeftAndRight(MonkState* state) {
-  /* if we are scanning from a file we want to extend left and right to its parent
-   * (we want to scan all its siblings), if it is a container we want all the contents
-   */
-
   PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "setLeftAndRight",
-      "WITH isFile AS ("
-      "SELECT 1 FROM uploadtree WHERE (ufile_mode&x'3C000000'::int)=0 AND uploadtree_pk = $1 LIMIT 1"
-      "),"
-      "dirResult AS ("
-      "SELECT lft, rgt FROM uploadtree WHERE"
-      " NOT EXISTS(SELECT * FROM isFile)"
-      " AND uploadtree_pk = $1"
-      "),"
-      "fileResult AS ("
-      "SELECT lft, rgt FROM uploadtree WHERE"
-      " EXISTS(SELECT * FROM isFile)"
-      " AND uploadtree_pk = (SELECT parent FROM uploadtree WHERE uploadtree_pk = $1)"
-      ")"
-      "SELECT * FROM fileResult UNION SELECT * FROM dirResult",
+      "SELECT lft, rgt FROM uploadtree WHERE uploadtree_pk = $1",
       long
     ),
     state->bulkArguments->uploadTreeId
