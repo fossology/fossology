@@ -100,6 +100,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
         "removing": $('#bulkRemoving').val(),
         "refText": $('#bulkRefText').val(),
         "licenseId": $('#bulkLicense').val(),
+        "bulkScope" : $('#bulkScope').val(),
         "uploadTreeId": $('#uploadTreeId').val()
     };
 

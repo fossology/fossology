@@ -72,6 +72,7 @@ class changeLicenseBulk extends FO_Plugin
     $refText = $_POST['refText'];
     $licenseId = intval($_POST['licenseId']);
     $removing = $_POST['removing'];
+    $bulkScope = $_POST['bulkScope'];
 
     $license = $this->licenseDao->getLicenseById($licenseId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
@@ -81,8 +82,18 @@ class changeLicenseBulk extends FO_Plugin
       $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
       $uploadName = $uploadInfo['upload_filename'];
 
-      if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode'])) {
-        $uploadTreeId = $uploadEntry['parent'];
+      if ($bulkScope === "u")
+      {
+        $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+        $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
+                                              array($uploadId), __METHOD__."adam".$uploadTreeTable);
+        $uploadTreeId = $row['uploadtree_pk'];
+      }
+      else
+      {
+        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode'])) {
+          $uploadTreeId = $uploadEntry['parent'];
+        }
       }
 
       $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
