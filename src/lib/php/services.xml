@@ -125,11 +125,5 @@ without any warranty.
             <tag name="twig.extension" />
         </service>
 
-
-<!--        <service id="twig.environment" class="\Fossology\Lib\Twig\Fostwig">
-            <argument type="service" id="twig.loader"/>
-            <argument id="option">%twig.environment.config%</argument>
-        </service>-->
-
     </services>
 </container>

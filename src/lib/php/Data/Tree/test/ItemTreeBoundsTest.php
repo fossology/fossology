@@ -18,15 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao\Data;
 
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class FileTreeBoundsTest extends \PHPUnit_Framework_TestCase
 {
 
   /**
-   * @var FileTreeBounds
+   * @var ItemTreeBounds
    */
-  private $fileTreeBounds;
+  private $itemTreeBounds;
 
   private $uploadTreeTableName = "uploadTreeTable";
 
@@ -40,45 +40,45 @@ class FileTreeBoundsTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->fileTreeBounds = new FileTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->right);
+    $this->itemTreeBounds = new ItemTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->right);
   }
 
   public function testGetUploadTreeTableName()
   {
-    assertThat($this->fileTreeBounds->getUploadTreeTableName(), is($this->uploadTreeTableName));
+    assertThat($this->itemTreeBounds->getUploadTreeTableName(), is($this->uploadTreeTableName));
   }
 
   public function testGetUploadTreeID()
   {
-    assertThat($this->fileTreeBounds->getUploadTreeId(), is($this->uploadTreeId));
+    assertThat($this->itemTreeBounds->getUploadTreeId(), is($this->uploadTreeId));
   }
 
   public function testGetUploadId()
   {
-    assertThat($this->fileTreeBounds->getUploadId(), is($this->uploadId));
+    assertThat($this->itemTreeBounds->getUploadId(), is($this->uploadId));
   }
 
   public function testGetLeft()
   {
-    assertThat($this->fileTreeBounds->getLeft(), is($this->left));
+    assertThat($this->itemTreeBounds->getLeft(), is($this->left));
   }
 
   public function testGetRight()
   {
-    assertThat($this->fileTreeBounds->getRight(), is($this->right));
+    assertThat($this->itemTreeBounds->getRight(), is($this->right));
   }
 
   public function testContainsFiles()
   {
-    assertThat($this->fileTreeBounds->containsFiles(), is(true));
+    assertThat($this->itemTreeBounds->containsFiles(), is(true));
 
-    $this->fileTreeBounds = new FileTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->left + 2);
+    $this->itemTreeBounds = new ItemTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->left + 2);
 
-    assertThat($this->fileTreeBounds->containsFiles(), is(true));
+    assertThat($this->itemTreeBounds->containsFiles(), is(true));
 
-    $this->fileTreeBounds = new FileTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->left + 1);
+    $this->itemTreeBounds = new ItemTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->left + 1);
 
-    assertThat($this->fileTreeBounds->containsFiles(), is(false));
+    assertThat($this->itemTreeBounds->containsFiles(), is(false));
   }
 }
  

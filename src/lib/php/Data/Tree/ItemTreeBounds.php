@@ -21,7 +21,7 @@ namespace Fossology\Lib\Data\Tree;
 
 use Fossology\Lib\Util\Object;
 
-class FileTreeBounds extends Object
+class ItemTreeBounds extends Object
 {
   /**
    * @var string

@@ -212,8 +212,8 @@ class ChangeLicenseUtility extends Object
    */
   private function getAgentSuggestedLicenses($uploadTreeId)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
-    $licenses = $this->licenseDao->getAgentFileLicenseMatches($fileTreeBounds);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
+    $licenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
     $licenseList = array();
 
     foreach ($licenses as $licenseMatch)

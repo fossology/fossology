@@ -23,7 +23,7 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\Tree\FileTreeBounds;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class ClearingDecisionEventProcessor {
 
@@ -43,14 +43,14 @@ class ClearingDecisionEventProcessor {
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getAgentDetectedLicenses(FileTreeBounds $fileTreeBounds)
+  public function getAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
 
-    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($fileTreeBounds);
+    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
     foreach ($licenseFileMatches as $licenseMatch)
     {
       $licenseRef = $licenseMatch->getLicenseRef();
@@ -104,15 +104,15 @@ class ClearingDecisionEventProcessor {
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
    * @return array
    */
-  public function getCurrentLicenseDecisions(FileTreeBounds $fileTreeBounds, $userId) {
-    $uploadTreeId = $fileTreeBounds->getUploadTreeId();
-    $uploadId = $fileTreeBounds->getUploadId();
+  public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId) {
+    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
+    $uploadId = $itemTreeBounds->getUploadId();
 
-    $agentDetectedLicenses = $this->getAgentDetectedLicenses($fileTreeBounds);
+    $agentDetectedLicenses = $this->getAgentDetectedLicenses($itemTreeBounds);
 
     $agentLatestMap = $this->getLatestAgents($agentDetectedLicenses, $uploadId);
 
