@@ -180,6 +180,8 @@ class ClearingDecisionEventProcessor {
         $licenseDecisions[$licenseShortName] = $licenseResult;
       }
     }
+
+    //TODO return also jq_job_fk
     return array($licenseDecisions, $removed);
   }
 

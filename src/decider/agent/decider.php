@@ -44,55 +44,26 @@ class DeciderAgent extends Agent
 
   }
 
-  function decideUploadTreeId($uploadTreeId, $pfileId)
-  {
-    $userId = $this->userId;
-
-
-
-
-    return true;
-  }
-
   function processUploadId($uploadId)
   {
-    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $selectQuery = "SELECT * FROM $uploadTreeTableName WHERE upload_fk = $1";
-    $params = array($uploadId);
-    $statementName = __METHOD__.$uploadTreeTableName;
 
-    if ($this->uploadTreeId !== null)
-    {
-      list($lft, $rgt) = $this->uploadDao->getLeftAndRight($this->uploadTreeId, $uploadTreeTableName);
-      $selectQuery .= " AND lft BETWEEN $2 AND $3";
-      $params[] = $lft;
-      $params[] = $rgt;
-      $statementName .= "leftRight";
-    }
+    return true;
+
 
     $jobId = $this->jobId;
-    $jobIds = array(); //TODO;
-    $decidedByMonk = $this->clearingDao->getChangedItemsBy($jobIds);
+    $jobIds = array(); //TODO jq_job_fk from monk bulk;
 
-    $this->dbManager->prepare($statementName, $selectQuery);
-    $queryResult = $this->dbManager->execute($statementName, $params);
+    foreach ($this->clearingDao->getItemsChangedBy($jobIds) as $uploadTreeId)
+    {
+      $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+      list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($itemTreeBounds, $this->userId);
 
-    while ($uploadEntry = $this->dbManager->fetchArray($queryResult)) {
-      $pfileId = $uploadEntry['pfile_fk'];
-      $fileMode = $uploadEntry['ufile_mode'];
-      $uploadTreeId = $uploadEntry['uploadtree_pk'];
 
-      if (Isdir($fileMode) || Iscontainer($fileMode) || Isartifact($fileMode) || empty($pfileId))
-        continue;
 
-      if (!($this->decideUploadTreeId($uploadTreeId, $pfileId, $decidedByMonk)))
-      {
-        $this->dbManager->freeResult($queryResult);
-        return false;
-      }
-      $this->heartbeat(1);
+
+
     }
-    $this->dbManager->freeResult($queryResult);
+
 
     return true;
   }

@@ -71,6 +71,8 @@ class ClearingDao extends Object
   }
 
 
+
+
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
