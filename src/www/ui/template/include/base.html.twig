@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     {% block head %}
-    {% include "include/head.twig" %}
+    {% include "include/head.html.twig" %}
     <title>{% block title %}{{ title|e }}{% endblock %}</title>
     {{ metadata }}
     {{ styles }}
@@ -43,7 +43,7 @@
 {% endblock %}
 
 {% block foot %}
-{% include "include/foot.twig" %}
+{% include "include/foot.html.twig" %}
 {% endblock %}
 </body>
 </html>

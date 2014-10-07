@@ -1,4 +1,4 @@
-{% import "include/macro.twig" as macro %}
+{% import "include/macro.html.twig" as macro %}
 
 
 <form method="post">
@@ -87,7 +87,7 @@
                 {{ macro.table("licenseSelectionTable") }}
             </div>
         </div>
-        {% include 'ui-clearing-view_bulk.twig' %}
+        {% include 'ui-clearing-view_bulk.html.twig' %}
     </div>
     {% endif %}
 

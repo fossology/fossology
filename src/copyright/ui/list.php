@@ -36,6 +36,7 @@ class copyright_list extends FO_Plugin
   {
     $this->Name = "copyright-list";
     $this->Title = TITLE_copyright_list;
+    $this->Version = "1.0";
     $this->Dependency = array("copyright-hist");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
@@ -381,7 +382,7 @@ class copyright_list extends FO_Plugin
 
     function getTemplateName()
   {
-    return 'copyrightlist.twig';
+    return 'copyrightlist.html.twig';
   }
 
 };

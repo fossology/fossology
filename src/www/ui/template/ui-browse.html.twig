@@ -1,8 +1,8 @@
-{% extends "include/base.twig" %}
+{% extends "include/base.html.twig" %}
 
 {% block content %}
-    {% include 'change_license_modal.twig' %}
-    {% include 'ui-clearing-view_bulk.twig' %}
+    {% include 'change_license_modal.html.twig' %}
+    {% include 'ui-clearing-view_bulk.html.twig' %}
     {{ parent() }}
 {% endblock %}
 
