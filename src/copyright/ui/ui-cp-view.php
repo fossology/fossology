@@ -62,6 +62,26 @@ class copyright_view extends FO_Plugin
    */
   function RegisterMenus()
   {
+
+    // For this menu, I prefer having this in one place
+    $text = _("View Copyright/Email/Url info");
+    menu_insert("ViewCopyright::View", 35, $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+
+    $text = _("View file information");
+    menu_insert("ViewCopyright::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
+
+    $text = _("Browse by buckets");
+    menu_insert("ViewCopyright::Bucket Browser", 4, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
+    $text = _("Copyright/Email/URL One-shot, real-time analysis");
+    menu_insert("ViewCopyright::One-Shot Copyright/Email/URL",2, "agent_copyright_once", $text);
+    $text = _("Nomos One-shot, real-time license analysis");
+    menu_insert("ViewCopyright::One-Shot License", 2, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
+    $text = _("Set the concluded licenses for this upload");
+    menu_insert("ViewCopyright::Audit", 5, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
+    menu_insert("ViewCopyright::[BREAK]", 6);
+
+
+
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $Item = GetParm("item", PARM_INTEGER);
