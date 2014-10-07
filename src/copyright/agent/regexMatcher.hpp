@@ -12,10 +12,10 @@
 #ifndef REGEXMATCHER_HPP
 #define REGEXMATCHER_HPP
 
-#include "matcher.hpp"
 #include <iostream>
-#include "regex.hpp"
 #include <string>
+#include "matcher.hpp"
+#include "regex.hpp"
 
 class RegexMatcher : public virtual Matcher {
 public:

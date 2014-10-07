@@ -12,9 +12,9 @@
 #ifndef MATCHER_HPP
 #define MATCHER_HPP
 
-#include "copyrightMatch.hpp"
-#include <vector>
 #include <string>
+#include <vector>
+#include "copyrightMatch.hpp"
 
 class Matcher {
 public:

@@ -17,6 +17,7 @@ void queryAgentId(int& agent, PGconn* dbConn) {
   char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
   char* agentRevision;
+
   if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV)) {
     exit(-1);
   };
@@ -42,9 +43,9 @@ void bail(CopyrightState* state, int exitval) {
 }
 
 CopyrightState* getState(DbManager* dbManager, int verbosity) {
-  int agentID;
-  queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity, IDENTITY);
+  int agentId;
+  queryAgentId(agentId, dbManager->getConnection());
+  return new CopyrightState(dbManager, agentId, verbosity, IDENTITY);
 }
 
 void fillMatchers(CopyrightState* state) {
@@ -75,13 +76,13 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexM
   return result;
 }
 
-bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) {
+bool saveToDatabase(const vector<CopyrightMatch>& matches, CopyrightState* state, long pFileId) {
   if (!state->getDbManager()->begin())
     return false;
 
   size_t count = 0;
   typedef vector<CopyrightMatch>::const_iterator cpm;
-  for (cpm it=matches.begin(); it!=matches.end(); ++it) {
+  for (cpm it = matches.begin(); it != matches.end(); ++it) {
     const CopyrightMatch& match = *it;
 
     DatabaseEntry entry;

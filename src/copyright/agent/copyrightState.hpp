@@ -12,10 +12,10 @@
 #ifndef COPYRIGHTSTATE_HPP
 #define COPYRIGHTSTATE_HPP
 
+#include <vector>
 #include "libfossdbmanagerclass.hpp"
 #include "regexMatcher.hpp"
 #include "database.hpp"
-#include <vector>
 
 class CopyrightState {
 public:

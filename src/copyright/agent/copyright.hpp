@@ -12,12 +12,11 @@
 #ifndef COPYRIGHT_HPP
 #define COPYRIGHT_HPP
 
+#include <vector>
 #include "copyrightUtils.hpp"
 
 extern "C"  {
 #include "libfossagent.h"
 }
-
-#include <vector>
 
 #endif // COPYRIGHT_HPP
