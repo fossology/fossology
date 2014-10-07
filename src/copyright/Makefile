@@ -34,7 +34,7 @@ VERSIONFILE:
 install: all
 	$(call DIR_LOOP,install);
 	for MOD_NAME in $(MOD_NAMES); do \
-		echo "make $$MOD_NAME install"; \
+		@echo "make $$MOD_NAME install"; \
 		$(INSTALL_DATA) VERSION-$$MOD_NAME $(DESTDIR)$(MODDIR)/$$MOD_NAME/VERSION; \
 		$(INSTALL_DATA) $$MOD_NAME.conf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$$MOD_NAME.conf; \
 		mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
@@ -46,7 +46,7 @@ install: all
 uninstall:
 	$(call DIR_LOOP,uninstall)
 	for MOD_NAME in $(MON_NAMES); do \
-		echo "make $$MOD_NAME uninstall"; \
+		@echo "make $$MOD_NAME uninstall"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME; \
 		rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD_NAME; \
 	done

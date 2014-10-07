@@ -82,13 +82,13 @@ $(COVERAGE): %_cov.o: %.cc %.hpp
 
 install: $(EXE)
 	for mod_name in $(EXE); do \
-		echo "make $$mod_name agent install"; \
+		@echo "make $$mod_name agent install"; \
 		$(INSTALL_PROGRAM) $$mod_name $(DESTDIR)$(MODDIR)/$$mod_name/agent/$$mod_name; \
 	done
 
 uninstall:
 	for mod_name in $(EXE); do \
-		echo "make $$mod_name agent uninstall"; \
+		@echo "make $$mod_name agent uninstall"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$mod_name/agent; \
 	done
 

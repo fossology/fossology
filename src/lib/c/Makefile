@@ -16,7 +16,7 @@ OBJS = libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fos
 COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	echo "make $(LIB)"
+	@echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
@@ -36,7 +36,7 @@ $(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 install: install-dev install-lib install-exe
-	echo "make $(LIB) install"
+	@echo "make $(LIB) install"
 
 install-dev: $(LIB)
 	$(INSTALL_DATA) libfossology.a $(DESTDIR)$(LIBEXECDIR)/libfossology.a
@@ -53,7 +53,7 @@ install-lib:
 # uninstall only cleans up the files, not the directories that might have
 # been created
 uninstall: uninstall-dev uninstall-lib uninstall-exe
-	echo "make $(LIB) uninstall"
+	@echo "make $(LIB) uninstall"
 
 uninstall-dev:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/libfossology.a
@@ -70,7 +70,7 @@ test: all
 	$(MAKE) -C tests
 
 clean:
-	echo "make $(LIB) clean "
+	@echo "make $(LIB) clean "
 	rm -f *.a $(EXE) *.o core *.gc*
 
 .PHONY: all clean test

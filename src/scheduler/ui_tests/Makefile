@@ -15,7 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 all:
-	echo "Scheduler UI tests not implemented in makefile yet"
+	@echo "Scheduler UI tests not implemented in makefile yet"
 clean:
 install:
 uninstall:

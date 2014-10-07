@@ -26,10 +26,10 @@ clean:
 	$(call DIR_LOOP,clean)
 
 install:
-	echo "no make copyright ui install"
+	@echo "no make copyright ui install"
 
 uninstall:
-	echo "no make copyright ui uninstall"
+	@echo "no make copyright ui uninstall"
 
 PHONY: all test coverage clean install uninstall
 

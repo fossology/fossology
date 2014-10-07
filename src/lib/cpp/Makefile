@@ -23,7 +23,7 @@ OBJS = files.o libfossdbmanagerclass.o
 COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	echo "make $(LIB)"
+	@echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)
@@ -39,7 +39,7 @@ $(OBJS): %.o: %.cc %.hpp
 	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
-	echo "make $(LIB) install"
+	@echo "make $(LIB) install"
 
 install-dev: $(LIB)
 	$(INSTALL_DATA) libfossologyCPP.a $(DESTDIR)$(LIBEXECDIR)/libfossologyCPP.a
@@ -56,7 +56,7 @@ install-lib:
 # uninstall only cleans up the files, not the directories that might have
 # been created
 uninstall: uninstall-dev uninstall-lib uninstall-exe
-	echo "make $(LIB) uninstall"
+	@echo "make $(LIB) uninstall"
 
 uninstall-dev:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/libfossology.a
@@ -73,7 +73,7 @@ test: all
 	$(MAKE) -C tests
 
 clean:
-	echo "make $(LIB) clean "
+	@echo "make $(LIB) clean "
 	rm -f *.a $(EXE) *.o core *.gc*
 
 .PHONY: all clean test

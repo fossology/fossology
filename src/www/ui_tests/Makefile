@@ -28,21 +28,21 @@ TESTDIR = ui_tests
 DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	echo "all: Nothing to do for ui_tests"
+	@echo "all: Nothing to do for ui_tests"
 
 test:
-	echo "test: Place holder for launching UI functional tests"
+	@echo "test: Place holder for launching UI functional tests"
 
 coverage:
-	echo "No make coverage for ui_tests"
+	@echo "No make coverage for ui_tests"
 
 install: all
-	echo "No install needed for UI Functional tests"
+	@echo "No install needed for UI Functional tests"
 
 uninstall:
-	echo "Nothinhg to uninstall for UI Functional tests"
+	@echo "Nothinhg to uninstall for UI Functional tests"
 
 clean:
-	echo "Place holder for clean, UI Functional tests"
+	@echo "Place holder for clean, UI Functional tests"
 
 .PHONY: all install uninstall clean test

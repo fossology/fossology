@@ -23,15 +23,15 @@ MOD_NAME = bsam
 MOD_SUBDIR = ui
 
 all:
-	echo "make $(MOD_NAME)/$(MOD_SUBDIR)"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)"
 
 install:
-	echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
 	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 .PHONY: all install uninstall

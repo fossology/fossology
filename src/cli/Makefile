@@ -61,7 +61,7 @@ install: all
 	fi
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
-		echo "Making wrapper for $$file"; \
+		@echo "Making wrapper for $$file"; \
 		ln -sf $(LIBEXECDIR)/fo_wrapper $(DESTDIR)$(BINDIR)/$$file; \
 	done
 

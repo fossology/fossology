@@ -9,7 +9,7 @@ LIB = libfocunit.a
 OBJS = libfocunit.o
 
 all: $(LIB) $(VARS)
-	echo "make $(LIB)"
+	@echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
@@ -18,7 +18,7 @@ $(OBJS): %.o: %.c %.h
 	$(CC) -c $<
 
 clean:
-	echo "make $(LIB) clean"
+	@echo "make $(LIB) clean"
 	rm -f $(LIB) *.o
 
 .PHONY: all clean

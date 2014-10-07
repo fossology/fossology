@@ -27,7 +27,7 @@ all:
 
 install:
 	for MOD_NAME in $(MOD_NAMES); do \
-		echo "make $$MOD_NAME ui install"; \
+		@echo "make $$MOD_NAME ui install"; \
 		mkdir -p $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 		$(INSTALL_DATA) ./*-$$MOD_NAME.php $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 	done
@@ -39,11 +39,11 @@ install:
 
 uninstall:
 	for MOD_NAME in $(MOD_NAMES); do \
-		echo "make $$MOD_NAME ui uninstall"; \
+		@echo "make $$MOD_NAME ui uninstall"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 	done
 
 clean:
-	echo "make $(MON_NAMES) ui clean"
+	@echo "make $(MON_NAMES) ui clean"
 
 .PHONY: all install uninstall clean

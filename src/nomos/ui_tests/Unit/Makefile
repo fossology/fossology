@@ -26,14 +26,14 @@ include $(VARS)
 
 test:
 	@echo "make nomos Unit agent_tests"
-	echo "No Unit Tests for Nomos"
+	@echo "No Unit Tests for Nomos"
 
 coverage:
 	@echo "make copyright agent_tests coverage"
-	echo "No Coverage tests for Nomos"
+	@echo "No Coverage tests for Nomos"
 
 clean:
-	echo "Make nomos clean"
+	@echo "Make nomos clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
 install:

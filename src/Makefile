@@ -51,7 +51,7 @@ phpvendors:
 	composer install
 
 composer_install:
-	echo "current dir: '${PWD}'"
+	@echo "current dir: '${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
 	(cd $(DESTDIR)$(MODDIR); composer install --no-dev)
 
