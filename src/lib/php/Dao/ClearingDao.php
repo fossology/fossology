@@ -92,7 +92,7 @@ class ClearingDao extends Object
            CD.user_fk AS user_id,
            CD_types.meaning AS type_meaning,
            CD.is_global AS is_global,
-           CD.date_added AS date_added,
+           EXTRACT(EPOCH FROM CD.date_added) AS date_added,
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
          FROM clearing_decision CD
@@ -327,7 +327,7 @@ class ClearingDao extends Object
 SELECT
   CD.pfile_fk,
   CD.uploadtree_fk,
-  CD.date_added,
+  EXTRACT(EPOCH FROM CD.date_added) AS date_added,
   CD.user_fk,
   GU.group_fk,
   CDT.meaning AS type,
@@ -406,8 +406,9 @@ SELECT
   LD.license_decision_event_pk,
   LD.pfile_fk,
   LD.uploadtree_fk,
-  LD.date_added,
+  EXTRACT(EPOCH FROM LD.date_added) as date_added,
   LD.user_fk,
+  LD.job_fk,
   GU.group_fk,
   LDT.meaning AS type,
   LD.rf_fk,
@@ -466,6 +467,7 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
       $decisionEventId = intval($event['license_decision_event_pk']);
       $licenseId = intval($event['rf_fk']);
       $type = $event['type'];
+      $jobId = $event['job_fk'];
       $dateAdded = $event['date_added'];
       $reportInfo = $event['reportinfo'];
       $comment = $event['comment'];
@@ -474,6 +476,7 @@ ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
           'licenseId' => $licenseId,
           'type' => $type,
           'dateAdded' => $dateAdded,
+          'jobId' => $jobId,
           'reportinfo' => $reportInfo,
           'comment' => $comment
       );
@@ -592,6 +595,25 @@ insert into license_decision_event (
         $insertisGlobal,
         $insertIsRemoved, $reportInfo, $comment));
     $this->dbManager->freeResult($res);
+  }
+
+  public function getItemsChangedBy($jobId)
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare(
+      $statementName,
+      "SELECT uploadtree_fk FROM license_decision_event WHERE job_fk = $1"
+    );
+
+    $res = $this->dbManager->execute($statementName, array($jobId));
+
+    $items = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $items[] = $row['uploadtree_fk'];
+    }
+    $this->dbManager->freeResult($res);
+
+    return $items;
   }
 
 }

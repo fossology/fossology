@@ -308,72 +308,10 @@ class ClearingView extends FO_Plugin
   protected function updateLastItem($userId, $lastItem)
   {
     $type = GetParm("clearingTypes", PARM_INTEGER);
+    $global = GetParm("globalDecision", PARM_STRING) === "on";
 
-    if ($type > 1)
-    {
-      $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $lastItem);
-      $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $lastItem);
-
-      $itemTreeBounds = $this->uploadDao->getFileTreeBounds($lastItem);
-
-      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
-      $lastDecision = null;
-      if ($clearingDecision)
-      {
-        $lastDecision = $clearingDecision['date_added'];
-      }
-
-
-      $insertDecision = false;
-      foreach (array_merge($added, $removed) as $licenseShortName => $entry)
-      {
-        if (isset($entry['entries']['direct']))
-        {
-          $entryTimestamp = $entry['entries']['direct']['dateAdded'];
-          $comparison = strcmp($lastDecision, $entryTimestamp);
-          if ($comparison < 0)
-          {
-            $insertDecision = true;
-            break;
-          }
-        } else
-        {
-          $insertDecision = true;
-          break;
-        }
-      }
-
-      $removedSinceLastDecision = array();
-      foreach ($events as $event)
-      {
-        $licenseShortName = $event['rf_shortname'];
-        if ($event['is_removed'] && !array_key_exists($licenseShortName, $added))
-        {
-          $entryTimestamp = $event['date_added'];
-          $comparison = strcmp($lastDecision, $entryTimestamp);
-          if ($comparison < 0)
-          {
-            $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
-            $insertDecision = true;
-          }
-        }
-      }
-
-      if ($type === 2) {
-        // handle "No license known"
-        $insertDecision = true;
-        $added = array();
-        $removedSinceLastDecision = array();
-      }
-
-      if ($insertDecision)
-      {
-        $global = GetParm("globalDecision", PARM_STRING) === "on";
-
-        $this->clearingDao->insertClearingDecision($lastItem, $userId, $type, $global, $added, $removedSinceLastDecision);
-      }
-    }
+    $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }
 }
 

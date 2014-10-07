@@ -37,7 +37,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     $this->userId = -1;
     $this->type = "User decision";
     $this->scope = "upload";
-    $this->date_added = new DateTime("now", new DateTimeZone("Europe/Amsterdam"));
+    $this->date_added = new DateTime();
   }
 
   /**
@@ -56,7 +56,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setDateAdded($date_added)
   {
-    $this->date_added = new DateTime($date_added);
+    $this->date_added->setTimestamp($date_added);
     return $this;
   }
 

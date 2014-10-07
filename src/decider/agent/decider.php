@@ -12,6 +12,10 @@
 
 define("AGENT_NAME", "decider");
 
+use Fossology\Lib\Data\ClearingDecision;
+define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
+define("CLEARING_DECISION_IS_GLOBAL", false);
+
 include_once(__DIR__."/version.php");
 
 use Fossology\Lib\Agent\Agent;
@@ -29,6 +33,9 @@ class DeciderAgent extends Agent
    /** @var ClearingDao */
   private $clearingDao;
 
+  private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
+  private $decisionType;
+
   function __construct()
   {
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
@@ -42,18 +49,66 @@ class DeciderAgent extends Agent
     $this->clearingDao = $container->get('dao.clearing');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
 
+    $row = $this->dbManager->getSingleRow("SELECT type_pk FROM clearing_decision_type WHERE meaning = $1", array(CLEARING_DECISION_TYPE));
+    if ($row === false)
+    {
+      print "ERROR: could not initialize clearing type for ". CLEARING_DECISION_TYPE;
+      $this->bail(6);
+    }
+    else
+    {
+      $this->decisionType = $row['type_pk'];
+    }
+  }
+
+  private function hasOnlyNewerEventsInJob($events, $date, $jobId)
+  {
+    foreach($events as $licName => $properties)
+    {
+      $eventDate = $properties['dateAdded'];
+      if (($eventDate > $date) && ($properties['jobId'] !== $jobId))
+        return false;
+    }
+
+    return true;
+  }
+
+  private function getDateOfLastRelevantClearing($userId, $uploadTreeId){
+    $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
+    if (array_key_exists('date_added', $lastDecision))
+      $lastDecisionDate = $lastDecision['date_added'];
+    else
+      $lastDecisionDate = 0;
+    return $lastDecisionDate;
   }
 
   function processUploadId($uploadId)
   {
-    return true;
-
     $jobId = $this->jobId;
+    $userId = $this->userId;
 
-    foreach ($this->clearingDao->getItemsChangedBy($jobId) as $uploadTreeId)
+    $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
+    foreach ($changedItems as $uploadTreeId)
     {
       $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-      list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($itemTreeBounds, $this->userId);
+
+      $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
+
+      list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
+
+      $canAutoDecide = true;
+      $canAutoDecide &= $this->hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
+      $canAutoDecide &= $this->hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
+
+      if ($canAutoDecide)
+      {
+        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->decisionType, $this->decisionIsGlobal);
+        $this->heartbeat(1);
+      }
+      else
+      {
+        $this->heartbeat(0);
+      }
     }
 
     return true;
