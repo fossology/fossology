@@ -28,7 +28,7 @@ test: all
 VERSIONFILE:
 	for MOD_NAME in $(MOD_NAMES); do \
 		$(call WriteVERSIONFile,$$MOD_NAME); \
-		mv VERSION VERSION-$$MOD_NAME; \
+		cat VERSION > VERSION-$$MOD_NAME; \
 	done
 
 install: all
