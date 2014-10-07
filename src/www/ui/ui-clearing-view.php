@@ -210,10 +210,6 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
-
-    $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
-    $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;

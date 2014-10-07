@@ -1,24 +1,16 @@
 {% import "include/macro.html.twig" as macro %}
 
 
-<form method="post">
+<form method="post" id="uiClearingForm">
     <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
     <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
     <table>
         <tr>
             <td>
             <div class="groupBox">
-                {% if previousItem %}
-                    <button type="submit" name="update"  id="next" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
-                {% else %}
-                    <button type="submit" name="update" id="next" hidden onclick="form.action = '';">&lt;</button>
-                {% endif %}
+                <button type="submit" name="update"  id="prev" hidden >&lt;</button>
                 <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
-                {% if nextItem %}
-                  <button type="submit" name="update" id="prev" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
-                {% else %}
-                  <button type="submit" name="update" id="prev" hidden onclick="form.action = '';" >&gt;</button>
-                {% endif %}
+                <button type="submit" name="update" id="next" hidden  >&gt;</button>
             </div>
             </td>
             <td>

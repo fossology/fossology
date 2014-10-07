@@ -115,9 +115,6 @@ class changeLicenseProcessPost extends FO_Plugin
     // $this->ChangeBuckets(); // change bucket accordingly
 
     print (json_encode("success"));
-//    print(json_encode(array(
-//      'tableClearing' => $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicences, $userId),
-//      'recentLicenseClearing' => $this->licenseOverviewPrinter->createRecentLicenseClearing($clearingDecWithLicences))));
   }
 
 
