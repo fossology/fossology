@@ -469,7 +469,7 @@ public function getUploadtreeTableName($uploadId)
             ";
 
        $result = $this->dbManager->getSingleRow($sql
-        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__);
+        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__.$uploadTreeView);
 
     $output = $result['count'];
     return $output;
@@ -482,7 +482,7 @@ public function getUploadtreeTableName($uploadId)
         array('skipThese' =>  "alreadyCleared" ),
         $itemTreeBounds->getUploadTreeTableName(), false);
 
-    $filesCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
+    $filesThatShouldStillBeCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
 
     $noLicenseUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
                              $itemTreeBounds->getUploadTreeId(),
@@ -491,6 +491,7 @@ public function getUploadtreeTableName($uploadId)
 
     $filesToBeCleared =$this->getContainingFileCount($itemTreeBounds, $noLicenseUploadTreeView);
 
+    $filesCleared =$filesToBeCleared - $filesThatShouldStillBeCleared ;
     return array($filesCleared,$filesToBeCleared );
 
   }
@@ -571,11 +572,14 @@ public function getUploadtreeTableName($uploadId)
       case "noLicense":
         return $conditionQueryHasLicense;
       case "alreadyCleared":
+//        $conditionQuery = "( $conditionQueryHasLicense
+//              AND  NOT EXISTS  (SELECT license_decision_event_pk
+//                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
+//                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
         $conditionQuery = "( $conditionQueryHasLicense
-              AND  NOT EXISTS  (SELECT license_decision_event_pk
-                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
-                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
-
+              AND  NOT EXISTS  (SELECT clearing_decision_pk
+                                    FROM clearing_decision cd where ut.uploadtree_pk = cd.uploadtree_fk
+                                    OR ( cd.pfile_fk = ut.pfile_fk AND cd.is_global = TRUE  ) ) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)";
