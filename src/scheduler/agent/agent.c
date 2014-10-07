@@ -238,7 +238,7 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
   {
     host = (host_t*) iter->data;
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
-    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, jq_cmd_args);
+    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, jq_cmd_args);
     agent_init(scheduler, host, job);
   }
 
@@ -647,7 +647,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     if (strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
       shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->type->raw_cmd, agent->owner->jq_cmd_args,
-                  agent->owner->id, &argc, &args);
+                  agent->owner->parent_id, &argc, &args);
 
       tmp = args[0];
       args[0] = g_strdup_printf(AGENT_BINARY, scheduler->sysconfigdir,
@@ -670,7 +670,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     {
       args = g_new0(char*, 5);
       len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --scheduler_start --jobId=%d", agent->host->agent_dir,
-      AGENT_CONF, agent->type->name, agent->type->raw_cmd, agent->owner->user_id, agent->owner->id);
+      AGENT_CONF, agent->type->name, agent->type->raw_cmd, agent->owner->user_id, agent->owner->parent_id);
 
       if (len>=sizeof(buffer)) {
         *(buffer + sizeof(buffer) - 1) = '\0';

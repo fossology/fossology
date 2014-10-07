@@ -46,24 +46,15 @@ class DeciderAgent extends Agent
 
   function processUploadId($uploadId)
   {
-
     return true;
 
-
     $jobId = $this->jobId;
-    $jobIds = array(); //TODO jq_job_fk from monk bulk;
 
-    foreach ($this->clearingDao->getItemsChangedBy($jobIds) as $uploadTreeId)
+    foreach ($this->clearingDao->getItemsChangedBy($jobId) as $uploadTreeId)
     {
       $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
       list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($itemTreeBounds, $this->userId);
-
-
-
-
-
     }
-
 
     return true;
   }

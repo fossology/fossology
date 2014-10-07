@@ -816,6 +816,7 @@ void database_update_event(scheduler_t* scheduler, void* unused)
       continue;
     }
     job = job_init(scheduler->job_list, scheduler->job_queue, type, host, j_id,
+        atoi(parent),
         atoi(PQget(pri_result, 0, "user_pk")),
         atoi(PQget(pri_result, 0, "job_priority")), jq_cmd_args);
     job_set_data(scheduler, job,  value, (pfile && pfile[0] != '\0'));
