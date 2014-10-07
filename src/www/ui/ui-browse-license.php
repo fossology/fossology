@@ -726,7 +726,7 @@ class ui_browse_license extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "browse_license.html.twig";
+    return "browse_license.twig";
   }
 
 

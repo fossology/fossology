@@ -420,7 +420,7 @@ class FO_Plugin
 
   public function getTemplateName()
   {
-    return "include/base.html.twig";
+    return "include/base.twig";
   }
 
   public function getVars()
