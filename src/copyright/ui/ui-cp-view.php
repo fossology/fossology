@@ -21,7 +21,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\View\HighlightRenderer;
 
 /**
- * \file view.php
+ * \file ui-cp-view.php
  * \brief View Copyright/Email/Url Analysis on an Analyzed file
  */
 
@@ -152,8 +152,6 @@ class copyright_view extends FO_Plugin
     $uploadId = $this->uploadEntry['upload_fk'];
     $uploadTreeTableName = $this->uploadEntry['tablename'];
     $permission = GetUploadPerm($uploadId);
-    $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId);
-    $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId);
     $this->vars['micromenu'] = Dir2Browse('copyright-hist', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
 
     $ModBack = GetParm("modback", PARM_STRING);
@@ -181,6 +179,9 @@ class copyright_view extends FO_Plugin
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->legendBox();
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
+    $this->vars['optionName'] = "skipFileCopyRight";
+    $this->vars['formName'] = "CopyRightForm";
+    $this->vars['ajaxAction'] = "setNextPrevCopyRight";
   }
 
   /**

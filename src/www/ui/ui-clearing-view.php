@@ -221,7 +221,9 @@ class ClearingView extends FO_Plugin
     $highlightId = GetParm("highlightId", PARM_INTEGER);
 
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
-
+    $this->vars['optionName'] = "skipFile";
+    $this->vars['formName'] = "uiClearingForm";
+    $this->vars['ajaxAction'] = "setNextPrev";
     $highlights = $this->getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
     $hasHighlights = count($highlights) > 0;
 
@@ -287,7 +289,7 @@ class ClearingView extends FO_Plugin
     $text = _("View file information");
     menu_insert("ChangeLicense::Info", 1, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
     $text = _("View Copyright/Email/Url info");
-    menu_insert("ChangeLicense::Copyright/Email/Url", 1, "copyrightview" . Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
+    menu_insert("ChangeLicense::Copyright/Email/Url", 1, "copyright-view" . Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
     $text = _("Browse by buckets");
     menu_insert("ChangeLicense::Bucket Browser", 1, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
     $text = _("Copyright/Email/URL One-shot, real-time analysis");

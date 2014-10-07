@@ -227,7 +227,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
         return;
       }
       global $Plugins;
-      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
+      $ModLicView = &$Plugins[plugin_find_id("copyright-view")];
       return($ModLicView->Output() );
     }
 
@@ -419,7 +419,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
-      $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
+      $ModLicView = &$Plugins[plugin_find_id("copyright-view")];
       /* Determine the hyperlink for non-containers to view-license  */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
       {

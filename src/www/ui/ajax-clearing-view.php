@@ -205,6 +205,7 @@ class AjaxClearingView extends FO_Plugin
         case "addLicense":
         case "removeLicense":
         case "setNextPrev":
+        case "setNextPrevCopyRight":
           $uploadId = GetParm("upload", PARM_INTEGER);
           if (empty($uploadId))
           {
@@ -244,10 +245,22 @@ class AjaxClearingView extends FO_Plugin
           return json_encode(array());
 
         case "setNextPrev":
-          $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
+        case "setNextPrevCopyRight":
+          if($action == "setNextPrevCopyRight") {
+            $modName= "copyright-view";
+            $opt = "option_skipFileCopyRight";
+          }
+          else {
+            $modName= "view-license";
+            $opt = "option_skipFile";
+          }
+
+          $options = array('skipThese' =>  GetParm($opt, PARM_STRING) );
             $prev =  $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
             $next =  $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
-          return json_encode(array('prev'=>$prev, 'next'=>$next, 'uri' => Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder')) ));
+
+
+          return json_encode(array('prev'=>$prev, 'next'=>$next, 'uri' => Traceback_uri() . "?mod=".$modName . Traceback_parm_keep(array('upload', 'folder')) ));
 
         case "updateLicenseDecisions":
           $id = GetParm("id", PARM_STRING);
