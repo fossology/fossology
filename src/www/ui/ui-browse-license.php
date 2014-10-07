@@ -426,12 +426,12 @@ class ui_browse_license extends FO_Plugin
         /* show licenses under file name */
         $licenseList = "";
         $editedLicenseList = "";
+        $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
         if ($isContainer)
         {
-          $containerFileTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
-          $licenses = $this->licenseDao->getLicenseShortnamesContained($containerFileTreeBounds , array());
+          $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds , array());
           $licenseList = implode(', ', $licenses);
-          $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($containerFileTreeBounds);
+          $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
           $editedLicenseList .= implode(', ', $editedLicenses);
         } else
         {
@@ -489,7 +489,15 @@ class ui_browse_license extends FO_Plugin
         $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
         $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
-        $tableData[] = array($fileName, $licenseList, $editedLicenseList,"R","8/1007", $fileListLinks);
+        list($filesCleared,$filesToBeCleared )= $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+
+        if($filesCleared == $filesToBeCleared) {
+          $img ="<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
+        }
+        else
+          $img ="<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
+
+        $tableData[] = array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);
       }
 
       $AddInfoText .= "<br/><span id='bulkIdResult' hidden></span>";
@@ -508,9 +516,9 @@ class ui_browse_license extends FO_Plugin
           array("sTitle" => _("Files"), "sClass" => "left"),
           array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
           array("sTitle" => _("Edited Results"), "sClass" => "left"),
-          array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus", "bSearchable" => false, "sWidth" => "5%"),
-          array("sTitle" => _("Files Cleared"), "sClass" => "left", "bSearchable" => false),
-          array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "14.6%")
+          array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%"),
+          array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
+          array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
       );
 
       $tableSorting = array(

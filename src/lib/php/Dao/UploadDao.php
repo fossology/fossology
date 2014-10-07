@@ -458,13 +458,52 @@ public function getUploadtreeTableName($uploadId)
   }
 
   /**
+   * @var ItemTreeBounds $itemTreeBounds
+   * @param $uploadTreeView
+   * @return mixed
+   */
+  protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds,$uploadTreeView){
+
+    $sql = "$uploadTreeView
+            SELECT count(*) from uploadTreeView where lft BETWEEN $1 and $2
+            ";
+
+       $result = $this->dbManager->getSingleRow($sql
+        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__);
+
+    $output = $result['count'];
+    return $output;
+  }
+
+  public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds){
+
+    $noLicenseUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
+                             $itemTreeBounds->getUploadTreeId(),
+                             array('skipThese' =>  "noLicense" ),
+                             $itemTreeBounds->getUploadTreeTableName(), false);
+
+    $filesCleared =$this->getContainingFileCount($itemTreeBounds, $noLicenseUploadTreeView);
+
+    $alreadyClearedUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
+        $itemTreeBounds->getUploadTreeId(),
+        array('skipThese' =>  "alreadyCleared" ),
+        $itemTreeBounds->getUploadTreeTableName(), false);
+
+    $filesToBeCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
+
+    return array($filesCleared,$filesToBeCleared );
+
+  }
+
+
+  /**
    * @param $uploadId
    * @param $item
    * @param $options
    * @param $uploadTreeTableName
    * @return string
    */
-  protected function getUploadTreeView($uploadId, $item, $options, $uploadTreeTableName)
+  protected function getUploadTreeView($uploadId, $item, $options, $uploadTreeTableName, $alwaysDirsAndSelf = true)
   {
     if ($options === null)
     {
@@ -482,6 +521,16 @@ public function getUploadtreeTableName($uploadId)
           case "noLicense":
           case "alreadyCleared":
           case "noCopyright":
+           if($alwaysDirsAndSelf)  {
+             $dirQuery="           OR
+                                    ut.ufile_mode & (1<<29) <> 0
+                                        OR
+                                    ut.uploadtree_pk = $item";
+           }
+           else {
+             $dirQuery="";
+           }
+
           $conditionQuery = $this->getConditionQuery($skipThese);
             $sql_upload = "";
             if ('uploadtree_a' == $uploadTreeTableName)
@@ -495,10 +544,7 @@ public function getUploadtreeTableName($uploadId)
                                 where
                                   (
                                    $conditionQuery
-                                        OR
-                                    ut.ufile_mode & (1<<29) <> 0
-                                        OR
-                                    ut.uploadtree_pk = $item
+                                   $dirQuery
                                   )
                                   $sql_upload
                                 )";
