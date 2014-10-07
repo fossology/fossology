@@ -24,10 +24,10 @@ MOD_NAME = adj2nest
 DIRS = agent ui
 TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
 	$(MAKE) -C $(TESTDIR) test
@@ -37,18 +37,18 @@ VERSIONFILE:
 
 install: all
 	@echo "make $(MOD_NAME) install"
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
 	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 	rm -f VERSION
 
 .PHONY: all install uninstall clean test VERSIONFILE

@@ -25,10 +25,10 @@ DIRS = agent
 #DIRS = agent ui
 #TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
 	$(MAKE) -C $(TESTDIR) test
@@ -40,7 +40,7 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
@@ -50,12 +50,12 @@ install: all
 	fi
 
 uninstall:
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
 	rm -f VERSION
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 
 .PHONY: all install uninstall clean test VERSIONFILE

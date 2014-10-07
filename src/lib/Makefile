@@ -22,22 +22,22 @@ include $(VARS)
 DIRS = c php cpp
 TESTDIR = c
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop,test)
+	$(call DIR_LOOP,test)
 
 install: all
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 
 uninstall:
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/lib/
 
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 
 .PHONY: all install uninstall clean test

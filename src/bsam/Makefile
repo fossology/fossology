@@ -22,7 +22,8 @@ include $(VARS)
 MOD_NAME = bsam
 
 DIRS = ui
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	@echo "make $(MOD_NAME)"
@@ -38,7 +39,7 @@ coverage:
 
 install: all
 	@echo "make $(MOD_NAME) install"
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
@@ -47,7 +48,7 @@ install: all
 
 uninstall:
 	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 

@@ -14,10 +14,10 @@ MOD_NAMES = copyright ip ecc
 DIRS = agent ui
 TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 coverage: all
 	$(MAKE) -C $(TESTDIR)/Unit coverage
@@ -32,7 +32,7 @@ VERSIONFILE:
 	done
 
 install: all
-	$(call dirloop,install);
+	$(call DIR_LOOP,install);
 	for MOD_NAME in $(MOD_NAMES); do \
 		echo "make $$MOD_NAME install"; \
 		$(INSTALL_DATA) VERSION-$$MOD_NAME $(DESTDIR)$(MODDIR)/$$MOD_NAME/VERSION; \
@@ -44,7 +44,7 @@ install: all
 	done
 
 uninstall:
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	for MOD_NAME in $(MON_NAMES); do \
 		echo "make $$MOD_NAME uninstall"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME; \
@@ -53,6 +53,6 @@ uninstall:
 
 clean:
 	rm -f VERSION*
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 
 .PHONY: all install uninstall clean test VERSIONFILE

@@ -24,11 +24,11 @@ MOD_NAME = scheduler
 DIRS = agent
 TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	@echo "make scheduler"
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
 	$(MAKE) -C $(TESTDIR) test
@@ -41,15 +41,15 @@ VERSIONFILE:
 
 install: all
 	@echo "make scheduler install"
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 
 uninstall:
 	@echo "make scheduler uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 
 clean:
 	@echo "make scheduler clean"
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 	rm -rf VERSION
 
 .PHONY: all install uninstall clean test coverage

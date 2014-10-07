@@ -16,18 +16,18 @@
 ######################################################################
 
 DIRS = Unit Functional
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop, test)
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(call dirloop, coverage)
+	$(call DIR_LOOP,coverage)
 
 clean:
-	$(call dirloop, clean)
+	$(call DIR_LOOP,clean)
 
 .PHONY: all test coverage clean

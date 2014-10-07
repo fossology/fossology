@@ -25,7 +25,7 @@ include $(VARS)
 DIRS = ui_tests
 TESTDIR = ui_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
 	echo "all: Nothing to do for ui_tests"
