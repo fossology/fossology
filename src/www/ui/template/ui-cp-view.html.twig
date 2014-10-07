@@ -1,41 +1,49 @@
-{% extends "ui-clearing-view.html.twig" %}
+{% extends "include/base.html.twig" %}
 
-
-{% block rhs %}
-
-<form method="post">
-  <input name="lastItem" type="hidden" value="{{ itemId }}"/>
-  <input name="upload" type="hidden" value="{{ uploadId }}"/>
-
-  <div class="groupBox">
-      {% if previousItem %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ previousItem }}';">&lt;</button>
-      {% endif %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ itemId }}';">{{ 'Update'| trans }}</button>
-      {% if nextItem %}
-      <button type="submit" name="update" onclick="form.action = '{{ uri }}&upload={{ uploadId }}&item={{ nextItem }}';">&gt;</button>
-      {% endif %}
-  </div>
-
-  <div class="groupBox">
-    <fieldset style="display:inline">
-        <legend>
-            {{ 'Issue Type'| trans }}
-        </legend>
-        <input type="radio" name="iType" value="0"/> {{ 'Not decided'| trans }} <br/>
-        <input type="radio" name="iType" value="1"/> {{ 'Not relevant'| trans }} <br/>
-        <input type="radio" name="iType" value="2"/> {{ 'To be decided'| trans }} <br/>
-        <input type="radio" name="iType" value="3"/> {{ 'Identified issue'| trans }} <br/>
-    </fieldset>
-    <br/>
-   {{ 'Description'| trans }}: <br/>
-   <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'what')">what</textarea><br/>
-   {{ 'Text finding'| trans }}: <br/>
-   <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'in text')">in text</textarea><br/>
-   {{ 'Comment'| trans }}: <br/>
-   <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'comment')">comment</textarea><br/>
-
-  </div>
-</form>
-
+{% block content %}
+    <div id="leftrightalignment" name="leftrightalignment">
+        <table border="0" style="padding:0px; height:100%; width:100%">
+            <tr>
+                <td style="padding:0px; position:relative; height: 100%; width:50%">
+                    <div class="centered">
+                        {{ pageMenu }}
+                        <button class="legendHider">
+                            {{ 'Hide Legend'| trans }}
+                        </button>
+                        <button class="legendShower">
+                            {{ 'Show Legend'| trans }}
+                        </button>
+                    </div>
+                    <div class="boxnew">{{ textView }}</div>
+                    <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
+                        <b>{{ 'Legend'| trans }}</b><br/>
+                        {{ legendBox }}
+                    </div>
+                </td>
+                <td class="headerBox">
+                    {% block rhs %}
+                        {% include 'ui-cp-view_rhs.html.twig' %}
+                    {% endblock %}
+                </td>
+            </tr>
+        </table>
+    </div>
 {% endblock %}
+{% block foot %}
+{{ parent() }}
+
+<script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="scripts/jquery.dataTables.editable.js" type="text/javascript"></script>
+<script src="scripts/jquery.jeditable.js" type="text/javascript"></script>
+<script src="scripts/jquery.validate.js" type="text/javascript"></script>
+<script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+<script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+<script src="scripts/change-license-common.js" type="text/javascript"></script>
+<script src="scripts/change-license-view.js" type="text/javascript"></script>
+<script src="scripts/legend.js" type="text/javascript"></script>
+<script src="scripts/tools.js" type="text/javascript"></script>
+{% include "nextOptions_scripts.html.twig" %}
+
+{{ script }}
+{% endblock %}
+

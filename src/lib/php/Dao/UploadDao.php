@@ -40,7 +40,7 @@ class UploadDao extends Object
    */
   private $logger;
 
-public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
@@ -472,23 +472,17 @@ public function getUploadtreeTableName($uploadId)
       return $uploadTreeView;
     } else
     {
-      if (isset($options['skipThese']))
+      $skipThese = $options['skipThese'];
+      if (isset($skipThese))
       {
-        switch($options['skipThese'])
+        switch($skipThese)
         {
           case "none":
             break;
           case "noLicense":
           case "alreadyCleared":
-            $conditionQuerry = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
-            if($options['skipThese'] == "alreadyCleared") {
-//              $uploadEntry= $this->getUploadEntry($item,$uploadTreeTableName);
-//              $pfileId = $uploadEntry['pfile_fk'];  //I think a subquery would not be faster as we would have to do it each time we create the view
-              $conditionQuerry  =  "( $conditionQuerry
-              AND  NOT EXISTS  (SELECT license_decision_event_pk
-                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
-                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
-            }
+          case "noCopyright":
+          $conditionQuery = $this->getConditionQuery($skipThese);
             $sql_upload = "";
             if ('uploadtree_a' == $uploadTreeTableName)
             {
@@ -500,7 +494,7 @@ public function getUploadtreeTableName($uploadId)
                                 from $uploadTreeTableName ut
                                 where
                                   (
-                                   $conditionQuerry
+                                   $conditionQuery
                                         OR
                                     ut.ufile_mode & (1<<29) <> 0
                                         OR
@@ -509,8 +503,6 @@ public function getUploadtreeTableName($uploadId)
                                   $sql_upload
                                 )";
             return $uploadTreeView;
-
-
         }
       }
       //default case, if cookie is not set or set to none
@@ -518,5 +510,32 @@ public function getUploadtreeTableName($uploadId)
       return $uploadTreeView;
 
     }
+  }
+
+  /**
+   * @param $skipThese
+   * @return string
+   */
+  private function getConditionQuery($skipThese)
+  {
+    $conditionQueryHasLicense = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
+
+    switch($skipThese)
+    {
+      case "noLicense":
+        return $conditionQueryHasLicense;
+      case "alreadyCleared":
+        $conditionQuery = "( $conditionQueryHasLicense
+              AND  NOT EXISTS  (SELECT license_decision_event_pk
+                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
+                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
+
+        return $conditionQuery;
+      case "noCopyright":
+        $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)";
+       return $conditionQuery;
+    }
+
+
   }
 }

@@ -1,3 +1,4 @@
+<script>
 /***********************************************************
  * Copyright (C) 2014 Siemens AG
  * Author: J.Najjar
@@ -40,9 +41,9 @@ function setOptionOnChange( name ) {
 }
 
 function setNextPrev(uploadId, uploadTreeId) {
-    $.getJSON("?mod=conclude-license&do=setNextPrev&upload=" + uploadId + "&item=" + uploadTreeId)
+    $.getJSON("?mod=conclude-license&do={{ ajaxAction }}&upload=" + uploadId + "&item=" + uploadTreeId)
     .done(function (data) {
-            var form =  $('#uiClearingForm');
+            var form =  $('#{{ formName }}');
             var next = $('#next');
             if(data.next !== null) {
                 next.show();
@@ -69,10 +70,12 @@ function setNextPrev(uploadId, uploadTreeId) {
 }
 
 $(document).ready(function(){
-    var theOption = getOption("skipFile");
+    var theOption = getOption("{{ optionName }}");
     if(theOption === "") theOption = "none";
   initializeOption ( theOption);
     $('input[name=FileSelection]:radio').bind('change', function () {
-        setOptionOnChange("skipFile");
+        setOptionOnChange("{{ optionName }}");
     });
 });
+
+</script>

@@ -21,7 +21,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -29,13 +29,12 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
-
   /** @var UploadDao */
   private $uploadDao;
 
   public function setUp()
   {
-    $this->testDb = new TestLiteDb("/tmp/fossology.sqlite");
+    $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->testDb->createPlainTables(
@@ -54,7 +53,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
-
+    echo "P";
     $this->uploadDao = new UploadDao($this->dbManager);
   }
 
