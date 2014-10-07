@@ -51,33 +51,6 @@ function compareText(opt1, opt2) {
 }
 
 
-function moveLicense(theSelFrom, theSelTo, bRemove) {
-  var txt = [];
-  $(theSelFrom+' :selected').each(function () {
-      txt.push(this.value);
-      $(theSelTo).append($(this).clone());
-      $(this).remove();
-  });
-  var data = {
-      "licenseNumbersToBeSubmitted": txt,
-      "item": $('#uploadTreeId').val(),
-      "type": $('[name="type"]:checked').val(),
-      "scope": $('[name="scope"]:checked').val(),
-      "comment": $('#comment').val(),
-      "remark": $('#remark').val(),
-      "remove": bRemove
-  };
-  $.ajax({
-      type: "POST",
-      url: "?mod=change-license-processPost",
-      data: data,
-      success: clearingSuccess
-  });
-
-  sortList(theSelFrom);
-  sortList(theSelTo);
-}
-
 function selectNoLicenseFound(left, right) {
     var selLength = right.length;
     var i;
@@ -137,7 +110,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
 
 function performPostRequest() {
     var txt = [];
-    $('#licenseRight').each(function () {
+    $('#licenseLeft option:selected').each(function () {
         txt.push(this.value);
     });
 
@@ -160,43 +133,7 @@ function performPostRequest() {
     closeUserModal();
 }
 
-function performNoLicensePostRequest() {
-    selectNoLicenseFound(licenseLeft, licenseRight);
-    performPostRequest();
-    closeUserModal();
-}
 
-function activateLic(k){
- $("#bedit"+k).show();
- $("#aedit"+k).hide();
-}
-
-function performLicCommentRequest(k){
-    var data = {
-        "uploadTreeId": $('#uploadTreeId').val(),
-        "lic": k,
-        "comment": $('#tedit'+k).val()
-    };
-    $.ajax({
-        type: "POST",
-        url: "?mod=change-license-processPost",
-        data: data,
-        success: clearingSuccess
-    });
-}
-
-function performLicDelRequest(k){
-    var data = {
-        "uploadTreeId": $('#uploadTreeId').val(),
-        "unlic": k
-    };
-    $.ajax({
-        type: "POST",
-        url: "?mod=change-license-processPost",
-        data: data,
-        success: clearingSuccess
-    });
-}
 
 function popUpLicenseText(popUpUri,title) {
   sel = $("#bulkLicense :selected").text();

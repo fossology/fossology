@@ -242,7 +242,6 @@ class ClearingView extends FO_Plugin
 
       if ($permission >= PERM_WRITE)
       {
-        $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
         $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm($uploadTreeId));
       } else
       {
