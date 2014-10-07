@@ -15,8 +15,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# Makefile for nomos UI functional tests
 test:
 	@echo "Make UI Functional Tests"
 	@echo "src/nomos/ui_tests/Functional: Tests cannot be run by makefile"

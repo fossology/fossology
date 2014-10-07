@@ -15,9 +15,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# Makefile for nomos agent Unit tests
-
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)

@@ -5,8 +5,6 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-#
-# Makefile for monk/ui
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)

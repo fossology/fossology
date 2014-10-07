@@ -15,8 +15,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# Makefile for nomos
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)

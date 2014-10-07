@@ -15,9 +15,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# nomos/ui_tests Makefile
-
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
