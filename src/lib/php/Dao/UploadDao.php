@@ -477,19 +477,19 @@ public function getUploadtreeTableName($uploadId)
 
   public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds){
 
-    $noLicenseUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
-                             $itemTreeBounds->getUploadTreeId(),
-                             array('skipThese' =>  "noLicense" ),
-                             $itemTreeBounds->getUploadTreeTableName(), false);
-
-    $filesCleared =$this->getContainingFileCount($itemTreeBounds, $noLicenseUploadTreeView);
-
     $alreadyClearedUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
         $itemTreeBounds->getUploadTreeId(),
         array('skipThese' =>  "alreadyCleared" ),
         $itemTreeBounds->getUploadTreeTableName(), false);
 
-    $filesToBeCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
+    $filesCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
+
+    $noLicenseUploadTreeView = $this->getUploadTreeView($itemTreeBounds->getUploadId(),
+                             $itemTreeBounds->getUploadTreeId(),
+                             array('skipThese' =>  "noLicense" ),
+                             $itemTreeBounds->getUploadTreeTableName(), false);
+
+    $filesToBeCleared =$this->getContainingFileCount($itemTreeBounds, $noLicenseUploadTreeView);
 
     return array($filesCleared,$filesToBeCleared );
 
