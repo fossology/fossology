@@ -21,6 +21,12 @@
 function initializeOption(myvalue) {
     var radios  = $("input[name=FileSelection]:radio");
     radios.filter('[value='+myvalue+']').attr('checked',true);
+
+
+    var uploadId = $('#upload').val();
+    var uploadTreeId = $('#lastItem').val();
+
+    setNextPrev(uploadId, uploadTreeId);
 }
 
 function setOptionOnChange( name ) {
@@ -36,17 +42,27 @@ function setOptionOnChange( name ) {
 function setNextPrev(uploadId, uploadTreeId) {
     $.getJSON("?mod=conclude-license&do=setNextPrev&upload=" + uploadId + "&item=" + uploadTreeId)
     .done(function (data) {
+            var form =  $('#uiClearingForm');
             var next = $('#next');
-            next.show();
-            next.click(function(){
-                           window.location.href = data.uri + '&item=' + data.next;
-                       });
+            if(data.next !== null) {
+                next.show();
+                next.click(function () {
+                    form.attr('action', data.uri + '&item=' + data.next);
+                });
+            }
+            else  {
+                next.hide();
+            }
             var prev = $('#prev');
-            prev.show();
-            //prev.onclick = 'form.action =' + data.uri+ '&item='+data.prev ;
-            prev.click(function(){
-                window.location.href = data.uri + '&item=' + data.prev;
-            });
+            if(data.prev !== null) {
+                prev.show();
+                prev.click(function () {
+                    form.attr('action', data.uri + '&item=' + data.prev);
+                });
+            }
+            else {
+                prev.hide();
+            }
         })
         .fail(failed);
 
