@@ -24,6 +24,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\LicenseDecision;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -212,7 +213,7 @@ class ClearingDao extends Object
     $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
     $tbdColumnStatementName = __METHOD__ . "_TBD_column";
-    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_type where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
+    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from license_decision_type where meaning = $1", array(LicenseDecision::USER_DECISION), $tbdColumnStatementName);
     $type = $tbdDecisionTypeValue['type_pk'];
 
     $tbdColumnStatementName = __METHOD__ . ".d";

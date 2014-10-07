@@ -49,6 +49,10 @@ class DeciderAgent extends Agent
     $this->clearingDao = $container->get('dao.clearing');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
 
+    $this->initializeDecisionType();
+  }
+
+  private function initializeDecisionType() {
     $row = $this->dbManager->getSingleRow("SELECT type_pk FROM clearing_decision_type WHERE meaning = $1", array(CLEARING_DECISION_TYPE));
     if ($row === false)
     {

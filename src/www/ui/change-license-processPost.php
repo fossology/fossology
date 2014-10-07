@@ -24,7 +24,7 @@ define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 class changeLicenseProcessPost extends FO_Plugin
 {
 
-  /** @var ClearingDao; */
+  /** @var ClearingDao */
   private $clearingDao;
 
   /**
