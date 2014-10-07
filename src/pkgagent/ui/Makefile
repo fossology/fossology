@@ -18,6 +18,7 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 MOD_NAME = pkgagent
 MOD_SUBDIR = ui
 
@@ -34,4 +35,3 @@ uninstall:
 
 clean:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
-

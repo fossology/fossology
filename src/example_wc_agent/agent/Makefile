@@ -1,5 +1,6 @@
 # FOSSology Makefile - agent/example_wc_agent
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../../
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps

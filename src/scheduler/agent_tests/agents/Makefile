@@ -14,6 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
@@ -44,8 +45,9 @@ test: $(FO_CONF) $(EXES) fossology_testconfig
 
 $(EXES): %: %.c $(FOLIB)
 	@echo $@:
-	@if [ ! -d $(MODDIR)/$@ ] ; then \
-	  mkdir -p $(MODDIR)/$@/agent/; fi;
+	@if [ ! -d $(MODDIR)/$@ ]; then \
+		mkdir -p $(MODDIR)/$@/agent/; \
+	fi
 	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL)
 	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
 	@echo "[default]\ncommand=$@\nmax=-1\nspecial[]=\n" > $(MODDIR)/$@/$@.conf

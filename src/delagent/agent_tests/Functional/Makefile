@@ -14,6 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
@@ -38,15 +39,15 @@ testdata:
 	@# if not in /var/www/testfiles, wget it from fossology.org
 	mkdir ../testdata -p
 	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../testdata/$(test_file) ]; then \
-	        echo "../testdata/$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles/delagent"; \
-	        cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
-	    fi; \
+		if [ -e ../testdata/$(test_file) ]; then \
+			echo "../testdata/$(test_file) exists"; \
+		elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
+			echo "$(test_file) found in /var/www/testfiles/delagent"; \
+			cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
+		else \
+			echo "$(test_file) does not exist. need to wget from fossology.org"; \
+			wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
+		fi; \
 	)
 
 test: all testdata
@@ -55,7 +56,6 @@ test: all testdata
 
 coverage:
 	@echo "no coverage for agent_tests/Functional"
-
 
 clean:
 	rm -f *.xml

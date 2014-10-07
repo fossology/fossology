@@ -18,6 +18,7 @@
 TOP = ../../
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 MOD_NAME = debug
 
 DIRS = ui
@@ -40,15 +41,14 @@ install: all
 	$(call dirloop,install)
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
-
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@echo "make $(MOD_NAME) uninstall"
 	$(call dirloop,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
-
 
 clean:
 	$(call dirloop,clean)

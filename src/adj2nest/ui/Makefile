@@ -18,6 +18,7 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 MOD_NAME = adj2nest
 MOD_SUBDIR = ui
 

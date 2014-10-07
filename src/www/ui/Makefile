@@ -21,6 +21,7 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 DIRS = css images locale scripts ajaxPHP
@@ -37,15 +38,13 @@ all:
 #	php5 fo-render.php m
 
 install: all
-
-	mkdir -p $(DESTDIR)$(WEBDIR)/ui; \
+	mkdir -p $(DESTDIR)$(WEBDIR)/ui
 	for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
-
 	for file in $(OBSOLETEFILES); do \
-	  rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
-	  rm -f $$file; \
+		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
+		rm -f $$file; \
 	done
 	for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
@@ -53,11 +52,11 @@ install: all
 	for file in $(OTHERFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
-	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
+		ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@rm -rf $(DESTDIR)$(WEBDIR)

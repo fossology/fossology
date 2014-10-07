@@ -1,6 +1,7 @@
 # FOSSology Makefile - agent/nomossa
 # This is to make a version of nomos that does not require any of the fossology build dependencies.
 # Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
@@ -22,14 +23,14 @@ CFLAGS_LOCAL = -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 `pkg-config glib-2.0 --
 
 all: encode nomos
 
-debug: nomos-gl 
+debug: nomos-gl
 
 nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $(EXE)
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c $< $(CFLAGS_LOCAL) $(DEFS)
-	
+
 nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
@@ -42,6 +43,7 @@ $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 #
 # Non "standard" preprocessing stuff starts here...
 #
+
 encode: encode.o
 	$(CC) $(CFLAGS) -o $@ $@.c
 

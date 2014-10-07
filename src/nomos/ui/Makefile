@@ -18,7 +18,8 @@
 #
 # Makefile for noms/ui
 TOP = ../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
 
 all:
 	@echo "make nomos ui"

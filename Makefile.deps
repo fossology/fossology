@@ -30,11 +30,11 @@ fossology_testconfig: fossology_testconfig_notice
 	$(eval export FOSSOLOGY_TESTCONFIG := $(shell $(TOP)/src/testing/db/create_test_database.php))
 	@echo "Got FOSSOLOGY_TESTCONFIG = '$(FOSSOLOGY_TESTCONFIG)' in Makefile.deps"
 	@if [ -d '$(FOSSOLOGY_TESTCONFIG)' ]; then \
-	    echo "Test directory is: '$(FOSSOLOGY_TESTCONFIG)'"; \
-	    exit 0; \
+		echo "Test directory is: '$(FOSSOLOGY_TESTCONFIG)'"; \
+		exit 0; \
 	else \
-	    echo "A failure occured: $(FOSSOLOGY_TESTCONFIG)"; \
-	    exit 1; \
+		echo "A failure occured: $(FOSSOLOGY_TESTCONFIG)"; \
+		exit 1; \
 	fi
 
 # provide a notice to the user since the preceding target can take a long

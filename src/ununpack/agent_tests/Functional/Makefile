@@ -14,10 +14,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 DATA = ../unpack-test-data.tar.bz2
 
 TESTFILE = tests.xml
@@ -39,15 +41,15 @@ testdata:
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
 	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../$(test_file) ]; then \
-	        echo "../$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles"; \
-	        cp /var/www/testfiles/$(test_file) ../; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
-	    fi; \
+		if [ -e ../$(test_file) ]; then \
+			echo "../$(test_file) exists"; \
+		elif [ -e /var/www/testfiles/$(test_file) ]; then \
+			echo "$(test_file) found in /var/www/testfiles"; \
+			cp /var/www/testfiles/$(test_file) ../; \
+		else \
+			echo "$(test_file) does not exist. need to wget from fossology.org"; \
+			wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
+		fi; \
 	)
 
 test: all testdata fossology_testconfig

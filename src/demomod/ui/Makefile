@@ -18,7 +18,6 @@
 TOP = ../../../
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
-
 include $(VARS)
 
 DIR = $(realpath .)

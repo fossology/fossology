@@ -19,7 +19,6 @@ TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
 CONFPATH = $(SYSCONFDIR)
 
-
 ## Targets
 # build
 all: $(BUILDDIRS) VERSIONFILE
@@ -52,12 +51,11 @@ $(INSTALLDIRS):
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
-	
+
 # test depends on everything being built first
 test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
-
 
 coverage: $(COVDIRS)
 $(COVDIRS):
@@ -69,9 +67,9 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
-
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
+
 # release stuff
 tar: dist-testing
 dist-testing:
@@ -80,7 +78,6 @@ dist-testing:
 tar-release: dist
 dist:
 	utils/fo-mktar
-
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)

@@ -14,11 +14,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 LANG = C
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 TESTDIRS = ../agent_tests
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
 
@@ -68,7 +70,7 @@ pkgagent_cov.o: pkgagent.c pkgagent.h
 
 clean:
 	@echo "make pkgagent agent clean"
-	rm -f $(EXE) *.o core *.gc*; \
+	rm -f $(EXE) *.o core *.gc*
 	$(MAKE) -C $(TESTDIRS) clean
 
 include $(DEPS)

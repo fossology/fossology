@@ -19,6 +19,7 @@ TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
@@ -47,15 +48,15 @@ testdata:
 	@# if not in /var/www/testfiles, wget it from fossology.org
 	mkdir ../testdata -p
 	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../testdata/$(test_file) ]; then \
-	        echo "../testdata/$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles/delagent"; \
-	        cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
-            fi; \
+		if [ -e ../testdata/$(test_file) ]; then \
+			echo "../testdata/$(test_file) exists"; \
+		elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
+			echo "$(test_file) found in /var/www/testfiles/delagent"; \
+			cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
+		else \
+			echo "$(test_file) does not exist. need to wget from fossology.org"; \
+			wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
+		fi; \
 	)
 
 $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLIB)
@@ -67,7 +68,7 @@ $(TEST_OBJ_RUN): %.o: %.c
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
-	
+
 test: all $(EXE) testdata
 	@echo "execute delagent test"
 	./$(EXE)

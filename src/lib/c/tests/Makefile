@@ -14,10 +14,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../../..
-include $(TOP)/Makefile.conf
-SRCDIR = ..
 
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
+
+SRCDIR = ..
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
@@ -27,7 +30,7 @@ EXE = testlibs
 OBJS = test_fossconfig.o \
        test_fossscheduler.o \
        test_libfossdb.o \
-       test_libfossdbmanager.o \
+       test_libfossdbmanager.o
 
 all: test
 test: $(EXE)
@@ -67,5 +70,6 @@ install:
 uninstall:
 	@echo "make library tests nothing to uninstall"
 
+include $(DEPS)
+
 .PHONY: all install uninstall clean test
-include $(TOP)/Makefile.deps

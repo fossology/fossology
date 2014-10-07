@@ -1,11 +1,14 @@
 # FOSSology Makefile - lib/libfossology
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
 
-CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
+CFLAGS_LOCAL = -fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
+
+CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
+		  -DFOSSGROUP='"$(PROJECTGROUP)"' \
           -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
 EXE = sqlCopyTest fossconfigTest reppath
 LIB = libfossology.a
@@ -41,7 +44,7 @@ install-dev: $(LIB)
 
 install-exe: $(EXE)
 	for program in $(EXE); do \
-	  $(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		$(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 # If we ever do shared libs, they will go here
@@ -58,7 +61,7 @@ uninstall-dev:
 
 uninstall-exe:
 	for program in $(EXE); do \
-	  rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 uninstall-lib:

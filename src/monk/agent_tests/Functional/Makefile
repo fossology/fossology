@@ -26,6 +26,6 @@ coverage:
 
 clean:
 
-.PHONY: all test coverage clean
-
 include $(DEPS)
+
+.PHONY: all test coverage clean

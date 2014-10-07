@@ -34,5 +34,5 @@ uninstall:
 
 clean:
 	@echo "make uninstall nothing in $(DIR)"
-	
+
 .PHONY: all install uninstall clean test coverage

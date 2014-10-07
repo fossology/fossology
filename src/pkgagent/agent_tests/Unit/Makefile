@@ -1,9 +1,11 @@
 # FOSSology Makefile - test for agents/pkgagent
 # Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
@@ -15,6 +17,7 @@ EXE = test_pkgagent
 CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 TEST_OBJ = testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o
+
 all: $(EXE)
 $(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
 	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
@@ -52,4 +55,3 @@ pkgagent.o:
 
 clean:
 	rm -fr $(EXE) *.o core *.xml *.txt results
-

@@ -18,6 +18,7 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LOCAL = $(ALL_CFLAGS)
 EXE = adj2nest
@@ -37,12 +38,12 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
 
 test: all
 	@echo "*** No tests available for src/$(EXE) ***"

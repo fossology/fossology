@@ -8,7 +8,8 @@
 #
 # Makefile for monk/ui
 TOP = ../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
 
 all:
 	@echo "make monk ui"

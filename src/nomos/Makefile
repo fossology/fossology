@@ -21,9 +21,10 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
+MOD_NAME = nomos
+
 DIRS = agent ui
 TESTDIR = agent_tests
-MOD_NAME=nomos
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
@@ -44,10 +45,11 @@ install: all
 	$(call dirloop,install)
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-	
+
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@echo "make $(MOD_NAME) uninstall"

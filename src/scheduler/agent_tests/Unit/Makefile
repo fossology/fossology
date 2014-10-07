@@ -14,6 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
@@ -46,9 +47,10 @@ OBJECTS = testHost.o \
           testScheduler.o
 
 all: $(EXE)
+
 test: fossology_testconfig $(EXE)
 	./$(EXE)
-	
+
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
 
@@ -68,7 +70,6 @@ $(COV):
 $(FOCUNIT):
 	$(MAKE) -C $(TESTDIR) $@
 
-
 ######################
 # object build rules #
 ######################
@@ -82,6 +83,7 @@ clean:
 
 install:
 	@echo "make copyright agent_tests nothing to install"
+
 uninstall:
 	@echo "make copyright agent_tests nothing to uninstall"
 

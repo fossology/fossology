@@ -36,6 +36,7 @@ install: all
 	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
 	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	$(MAKE) -s -C db install
+
 	echo "Making configuration directories"; \
 	if [ ! -e $(DESTDIR)$(CONFPATH) ]; then \
 		mkdir -p $(DESTDIR)$(CONFPATH); \
@@ -44,49 +45,52 @@ install: all
 		mkdir -p $(DESTDIR)$(CONFPATH)/mods-enabled; \
 		/bin/chmod 775 $(DESTDIR)$(CONFPATH)/mods-enabled; \
 	fi
+
 	if [ ! -e $(DESTDIR)$(CONFPATH)/conf ]; then \
 		mkdir -p $(DESTDIR)$(CONFPATH)/conf; \
 	fi
+
 	echo "Installing configuration files..."
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
 	 	$(INSTALL) -m 640 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
-	
+	fi
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
 	 	$(INSTALL) -m 666 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
-	
+	fi
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/sampleheader.txt"; \
 	 	$(INSTALL) -m 666 defconf/sampleheader.txt $(DESTDIR)$(CONFPATH)/sampleheader.txt; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/sampleheader.txt already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
-	
+	fi
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/samplefooter.txt -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/samplefooter.txt"; \
 	 	$(INSTALL) -m 666 defconf/samplefooter.txt $(DESTDIR)$(CONFPATH)/samplefooter.txt; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/samplefooter.txt already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
-	
+	fi
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf"; \
 	 	$(INSTALL) -m 666 fo-apache.conf $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
+	fi
 
 	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf"; \
@@ -94,7 +98,7 @@ install: all
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-	fi \
+	fi
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
@@ -125,6 +129,6 @@ test: all
 	@echo "NOTICE: no tests available for install"
 
 coverage:
-        @echo "NOTICE: no coverage available for install"
+	@echo "NOTICE: no coverage available for install"
 
 .PHONY: all install uninstall clean test coverage

@@ -32,7 +32,6 @@ PgJDBC = /usr/share/java/postgresql-jdbc3-8.4.jar
 all: doxygen schemaspy
 
 doxygen:
-
 	doxygen fodox.conf > fodox.log 2> fodox.errs
 
 schemaspy:

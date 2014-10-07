@@ -14,11 +14,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-AGENTDIR = ../../agent
 
+AGENTDIR = ../../agent
 TESTFILE = cliParamsTest4WgetAgent.php
 
 all:
@@ -30,7 +31,6 @@ test: all
 
 coverage:
 	@echo "no coverage for agent_tests/Functional"
-
 
 clean:
 	rm -f *.xml

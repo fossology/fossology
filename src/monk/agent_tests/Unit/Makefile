@@ -6,7 +6,10 @@
 # without any warranty.
 
 TOP = ../../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+DEPS = ${TOP}/Makefile.deps
+include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
@@ -59,9 +62,10 @@ clean:
 
 install:
 	@echo "make monk agent_tests nothing to install"
+
 uninstall:
 	@echo "make monk agent_tests nothing to uninstall"
 
-.PHONY: all install uninstall clean test coverage
-include ${TOP}/Makefile.deps
+include ${DEPS}
 
+.PHONY: all install uninstall clean test coverage

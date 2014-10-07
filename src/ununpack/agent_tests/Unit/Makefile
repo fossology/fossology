@@ -1,9 +1,11 @@
 # FOSSology Makefile - ununpack/agent_tests
 # Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 AGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
@@ -56,15 +58,15 @@ testdata:
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
 	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../$(test_file) ]; then \
-	        echo "../$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles"; \
-	        cp /var/www/testfiles/$(test_file) ../; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
-	    fi; \
+		if [ -e ../$(test_file) ]; then \
+			echo "../$(test_file) exists"; \
+		elif [ -e /var/www/testfiles/$(test_file) ]; then \
+			echo "$(test_file) found in /var/www/testfiles"; \
+			cp /var/www/testfiles/$(test_file) ../; \
+		else \
+			echo "$(test_file) does not exist. need to wget from fossology.org"; \
+			wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
+		fi; \
 	)
 
 $(FOCUNIT):

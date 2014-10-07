@@ -6,13 +6,14 @@
 # without any warranty.
 
 TOP = ../../..
-
-CLIBDIR = ../c/
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-CXXFLAGS_LOCAL=-fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
 
-CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
+CLIBDIR = ../c/
+CXXFLAGS_LOCAL = -fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
+
+CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
+          -DFOSSGROUP='"$(PROJECTGROUP)"' \
           -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
 EXE =
 LIB = libfossologyCPP.a
@@ -27,13 +28,12 @@ all: $(LIB) $(VARS) $(EXE)
 $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)
 	$(AR) cr $@ $(OBJS) $$( $(AR) -t $(DEPENDENCY) )
-	
+
 $(DEPENDENCY):
 	$(MAKE) -C $(CLIBDIR)
 
 $(EXE): %: %.cc $(LIB) $(VARS)
 	$(CXX) $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(LIB) -o $@
-
 
 $(OBJS): %.o: %.cc %.hpp
 	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL)
@@ -47,7 +47,7 @@ install-dev: $(LIB)
 
 install-exe: $(EXE)
 	for program in $(EXE); do \
-	  $(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		$(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 # If we ever do shared libs, they will go here
@@ -64,7 +64,7 @@ uninstall-dev:
 
 uninstall-exe:
 	for program in $(EXE); do \
-	  rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 uninstall-lib:

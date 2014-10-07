@@ -1,5 +1,6 @@
 # FOSSology Makefile - utils/freshmeat
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
@@ -27,7 +28,7 @@ $(fmPATHFILE): ../Makefile.utils
 
 install: all
 	for file in $(BINFILES); do \
-	   $(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	$(INSTALL_DATA) $(LIBFILES) $(DESTDIR)$(LIBDIR)/$(LIBFILES)
@@ -35,10 +36,9 @@ install: all
 	$(INSTALL_DATA) $(fmPATHFILE) $(DESTDIR)$(LIBDIR)/$(fmPATHFILE)
 	$(INSTALL_DATA) $(FMDir) $(DESTDIR)$(INCLUDEDIR)/$(FMDir)
 
-
 uninstall:
 	for file in $(BINFILES); do \
-	   rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	rm -f $(DESTDIR)$(LIBDIR)/$(LIBFILES)

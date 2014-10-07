@@ -17,6 +17,7 @@
 #
 # ui_tests makefile
 #
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)

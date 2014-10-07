@@ -7,7 +7,6 @@
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
-
 include $(VARS)
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
@@ -40,7 +39,7 @@ $(FOLIB):
 
 libmonk.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
-	
+
 libmonk_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
@@ -104,12 +103,12 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
 
 test: all
 	$(MAKE) -C $(TESTDIR) $@

@@ -1,9 +1,11 @@
 # FOSSology Makefile - test for mimetype
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
@@ -33,7 +35,7 @@ $(TEST_OBJ): %.o: %.c
 
 cunit_lib:
 	$(MAKE) -C $(CUNIT_LIB_DIR)
-	
+
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 

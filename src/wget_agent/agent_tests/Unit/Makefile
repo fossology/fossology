@@ -1,9 +1,11 @@
 # FOSSology Makefile - test for wget_agent
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../../../
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
@@ -37,7 +39,7 @@ cunit_lib:
 
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
-			
+
 test: all $(EXE)
 	@echo "execute wget agent test"
 	./$(EXE)

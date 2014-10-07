@@ -14,8 +14,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
 MOD_NAME = bsam
 MOD_SUBDIR = ui
 
@@ -31,4 +34,4 @@ uninstall:
 	echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
-.PHONY: install uninstall  all
+.PHONY: all install uninstall

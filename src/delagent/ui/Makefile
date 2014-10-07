@@ -16,7 +16,8 @@
 ######################################################################
 
 TOP = ../../..
-include $(TOP)/Makefile.conf
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
 
 all:
 	@echo "make delagent ui"
@@ -34,4 +35,3 @@ clean:
 	@echo "make delagent ui clean"
 
 .PHONY: all install uninstall clean
-

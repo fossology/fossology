@@ -16,11 +16,11 @@
 ######################################################################
 
 TOP = ../../..
-
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-TESTDIRS=../agent_tests
+
+TESTDIRS = ../agent_tests
 
 CFLAGS_LOCAL = $(ALL_CFLAGS) -lpq -lssl -lcrypto
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)

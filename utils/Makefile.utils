@@ -31,8 +31,5 @@ SHELL = /bin/bash
 # For example if the storage is located at: /srv/storage/fossology
 # FMDATADIR = /srv/storage/fossology/
 #
-
 FMDATADIR = /tmp/
-
 FMDIR = $(FMDATADIR)Freshmeat
-

@@ -51,7 +51,7 @@ OBJS = scheduler.o \
        host.o \
        interface.o \
        job.o \
-       logging.o \
+       logging.o
 
 COVERAGE = $(OBJS:%.o=%_cov.o)
 
@@ -117,7 +117,6 @@ job.o: %.o: %.c %.h agent.h database.h $(DEPEN)
 logging.o: %.o: %.c $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-
 $(COVERAGE): %_cov.o: %.c $(HEAD) $(DEPEN)
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(FODEF) $(DEF) -o $@
 
@@ -130,20 +129,21 @@ install: all install-conf
 	$(INSTALL_PROGRAM) fo_cli $(DESTDIR)$(MODDIR)/scheduler/agent/fo_cli
 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
-	  ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled; \
+	fi
 
 install-conf:
 	@mkdir -p $(CONFDIR)/mods-enabled
-	#@ echo "Installing config files in $(CONFDIR)/"
-	#@if [ ! -f $(CONFDIR)/$(CONFFILE) -o "$(OVERWRITE)" ] ; then \
-	#  mkdir -p $(CONFDIR)/$(dir $(CONFFILE)); \
-	#  cp $(CONFFILE) $(CONFDIR)/; \
+	#@echo "Installing config files in $(CONFDIR)/"
+	#@if [ ! -f $(CONFDIR)/$(CONFFILE) -o "$(OVERWRITE)" ]; then \
+	#	mkdir -p $(CONFDIR)/$(dir $(CONFFILE)); \
+	#	cp $(CONFFILE) $(CONFDIR)/; \
 	#fi
-	@ echo "Installing init script in $(DESTDIR)$(INITDIR)/"
-	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) ] ; then \
-	  mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
+	@echo "Installing init script in $(DESTDIR)$(INITDIR)/"
+	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) ]; then \
+		mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
 	fi
-	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE);
+	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 
 #####################
 # other build rules #

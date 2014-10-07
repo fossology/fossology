@@ -1,5 +1,6 @@
 # FOSSology Makefile - cli/
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
@@ -37,7 +38,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 fo_wrapper: fo_wrapper-process_php
 	@chmod +x fo_wrapper.php
 	@for file in $(WRAP); do \
-	  ln -sf fo_wrapper.php $$file; \
+		ln -sf fo_wrapper.php $$file; \
 	done
 
 %.txt: %.pod
@@ -52,25 +53,25 @@ install: all
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
-	
+
 #$(INSTALL_DATA) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
 # create BINDIR if not exsit
 	if [ ! -e $(DESTDIR)$(BINDIR) ]; then \
 		mkdir -p $(DESTDIR)$(BINDIR); \
-	fi	
+	fi
 # create wrappers in BINDIR
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-	  ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(BINDIR)/$$file; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
 uninstall:
 	for file in $(EXE); do \
 		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
-	  rm -f $(DESTDIR)$(LIBEXECDIR)/$$file; \
+		rm -f $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_wrapper
-	
+
 	rm -rf $(DESTDIR)$(MODDIR)/cli
 
 	for file in $(MAN1FILES); do \

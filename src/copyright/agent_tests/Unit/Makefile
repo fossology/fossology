@@ -7,10 +7,11 @@
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
 LOCALAGENTDIR = ../../agent
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
-include $(VARS)
 # -Werror -Wextra
 CPPUNIT_PATH = /opt/cppunit
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR)
@@ -22,8 +23,6 @@ EXE = test_copyright
 
 OBJECTS = test_regex.o test_RegMatcher.o
 COVERAGE =
-
-
 
 $(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
 	${MAKE} -C ${TESTDIR}
@@ -38,14 +37,12 @@ all: $(CXXFOLIB) $(EXE)
 $(CXXFOLIB):
 	$(MAKE) -C $(CXXFOLIBDIR)
 
-
-	
 agent:
 	$(MAKE) -C $(LOCALAGENTDIR)
-	
+
 libcopyright.a: $(OBJECTS)
-	$(MAKE) -C $(LOCALAGENTDIR) $@	
-	
+	$(MAKE) -C $(LOCALAGENTDIR) $@
+
 libcopyright_cov.a: $(COVERAGE)
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
@@ -55,7 +52,7 @@ libcopyright_cov.a: $(COVERAGE)
 
 %.o: %.cc
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
-	
+
 $(COVERAGE): %_cov.o: %.c
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
@@ -67,12 +64,12 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
 	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
 
 test: all
 	./$(EXE)

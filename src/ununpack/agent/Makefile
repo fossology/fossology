@@ -1,9 +1,11 @@
 # FOSSology Makefile - agents/ununpack
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
@@ -27,15 +29,15 @@ ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all $(VARS)
-	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ] ; then \
-	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
+	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ]; then \
+		rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
 	fi
 	@mkdir -p $(CONFDIR)/mods-enabled
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
-	
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
+		ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled; \
+	fi
 
 # create wrapper for departition in BINDIR
 	@mkdir -p $(DESTDIR)$(BINDIR)
@@ -51,7 +53,6 @@ uninstall: $(VARS)
 $(OBJECTS): %.o: %.c $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL)
 
-
 $(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
@@ -61,7 +62,6 @@ libununpack.a: $(OBJECTS)
 libununpack_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
-
 test: libununpack.a
 	$(MAKE) -C $(TESTDIR) test
 
@@ -69,7 +69,7 @@ coverage: libununpack_cov.a
 	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
-	rm -f $(EXE) *.o core *.a *.gc*; \
+	rm -f $(EXE) *.o core *.a *.gc*
 
 include $(DEPS)
 
