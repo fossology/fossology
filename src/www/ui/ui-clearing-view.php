@@ -176,7 +176,7 @@ class ClearingView extends FO_Plugin
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.html.twig");
+      return $this->renderTemplate("include/base.twig");
     }
     parent::Output();
   }
@@ -210,7 +210,7 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $options = array('skipNoLicense' => $_COOKIE['option_skipNoLicense']==="true" );
+    $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
 
     $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
     $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
@@ -277,7 +277,7 @@ class ClearingView extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "ui-clearing-view.html.twig";
+    return "ui-clearing-view.twig";
   }
 
   /*

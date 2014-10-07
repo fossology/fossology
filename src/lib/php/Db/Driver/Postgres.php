@@ -33,7 +33,7 @@ class Postgres implements Driver
 
   /**
    * @brief PostgreSQL uses no more than NAMEDATALEN-1 characters of an identifier; hence long statementNames
-   *        needs to be hashed to be shorter and do not collidate due to equivalence of truncated strings
+   *        needs to be hashed to be shorter and do not collide due to equivalence of truncated strings
    * @param string $stmt
    * @return string
    */

@@ -1,25 +1,34 @@
-{% import "include/macro.html.twig" as macro %}
+{% import "include/macro.twig" as macro %}
 
 
 <form method="post">
-    <input name="lastItem" type="hidden" value="{{ itemId }}"/>
-
+    <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
+    <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
     <table>
         <tr>
             <td>
             <div class="groupBox">
                 {% if previousItem %}
-                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
+                    <button type="submit" name="update"  id="next" onclick="form.action = '{{ uri }}&item={{ previousItem }}';">&lt;</button>
+                {% else %}
+                    <button type="submit" name="update" id="next" hidden onclick="form.action = '';">&lt;</button>
                 {% endif %}
                 <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
                 {% if nextItem %}
-                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
+                  <button type="submit" name="update" id="prev" onclick="form.action = '{{ uri }}&item={{ nextItem }}';">&gt;</button>
+                {% else %}
+                  <button type="submit" name="update" id="prev" hidden onclick="form.action = '';" >&gt;</button>
                 {% endif %}
             </div>
             </td>
             <td>
-                <input type="checkbox" name="skipNoLicenseFiles" id="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>
-                <input type="checkbox" name="skipNoClearingFiles" id="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>
+                <p>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="none"> {% trans "Go through all files" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="noLicense"> {% trans "Go through all files with licenses" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="alreadyCleared"> {% trans "Go through all files with licenses and no clearing result" %}<br>
+                </p>
+                {#<input type="checkbox" name="skipNoLicenseFiles" id="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>#}
+                {#<input type="checkbox" name="skipNoClearingFiles" id="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>#}
             </td>
         </tr>
         </table>
@@ -78,7 +87,7 @@
                 {{ macro.table("licenseSelectionTable") }}
             </div>
         </div>
-        {% include 'ui-clearing-view_bulk.html.twig' %}
+        {% include 'ui-clearing-view_bulk.twig' %}
     </div>
     {% endif %}
 

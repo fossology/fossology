@@ -204,6 +204,7 @@ class AjaxClearingView extends FO_Plugin
         case "licenseDecisions":
         case "addLicense":
         case "removeLicense":
+        case "setNextPrev":
           $uploadId = GetParm("upload", PARM_INTEGER);
           if (empty($uploadId))
           {
@@ -217,14 +218,13 @@ class AjaxClearingView extends FO_Plugin
 
           $licenseId = GetParm("licenseId", PARM_INTEGER);
 
-          // $orderAscending = $_GET['sSortDir_0'] === "asc";
           $sort0 = GetParm("sSortDir_0", PARM_STRING);
           if (isset($sort0))
           {
             $orderAscending = $sort0 === "asc";
           }
 
-
+          $global = GetParm("global", PARM_STRING) === "true";
 
       }
       switch ($action)
@@ -236,12 +236,18 @@ class AjaxClearingView extends FO_Plugin
           return $this->doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "addLicense":
-          $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, 1, false);
+          $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global); //$global was always false, why?
           return json_encode(array());
 
         case "removeLicense":
-          $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, false);
+          $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global);
           return json_encode(array());
+
+        case "setNextPrev":
+          $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
+            $prev =  $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+            $next =  $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+          return json_encode(array('prev'=>$prev, 'next'=>$next, 'uri' => Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder')) ));
 
         case "updateLicenseDecisions":
           $id = GetParm("id", PARM_STRING);
