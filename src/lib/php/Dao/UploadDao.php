@@ -532,7 +532,7 @@ public function getUploadtreeTableName($uploadId)
 
         return $conditionQuery;
       case "noCopyright":
-        $conditionQuery = "";
+        $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)";
        return $conditionQuery;
     }
 
