@@ -27,7 +27,8 @@ class ClearingDecision extends ClearingDecisionData
   const NOT_DECIDED = "Not decided";
   const NO_LICENSE_KNOWN = "No license known";
   const TO_BE_DISCUSSED = "To be discussed";
-  const IDENTIFIED = "To be discussed";
+  const IRRELEVANT = "Irrelevant";
+  const IDENTIFIED = "Identified";
 
 
   public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type, $scope, $date_added, $licenses, $comment = "", $reportinfo = "")
