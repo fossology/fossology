@@ -81,7 +81,8 @@ class NewestEditedLicenseSelector extends Object
         /**
          * @var LicenseRef $licRef
          */
-        $licenses[] = $licRef->getShortName();
+        if (!($licRef->getRemoved()))
+          $licenses[] = $licRef->getShortName();
       }
     }
     return $licenses;

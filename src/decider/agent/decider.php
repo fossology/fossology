@@ -86,6 +86,34 @@ class DeciderAgent extends Agent
     return $lastDecisionDate;
   }
 
+  private function filterOnlyEventsAfter(&$events, $date)
+  {
+    $filtered = false;
+    foreach($events as $licenseShortName => $properties)
+    {
+      if ($properties['dateAdded'] < $date)
+      {
+        $filtered = true;
+        unset($events[$licenseShortName]);
+      }
+    }
+    return $filtered;
+  }
+
+  private function filterOnlyAutomaticEvents(&$events, $date)
+  {
+    $filtered = false;
+    foreach($events as $licenseShortName => $properties)
+    {
+      if ($properties['jobId'] == null)
+      {
+        $filtered = true;
+        unset($events[$licenseShortName]);
+      }
+    }
+    return $filtered;
+  }
+
   function processUploadId($uploadId)
   {
     $jobId = $this->jobId;
@@ -94,15 +122,35 @@ class DeciderAgent extends Agent
     $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
     foreach ($changedItems as $uploadTreeId)
     {
+      $this->dbManager->begin();  /* start transaction */
+
       $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
 
       $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
+      $canAutoDecide = true;
       list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
 
-      $canAutoDecide = true;
-      $canAutoDecide &= $this->hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
-      $canAutoDecide &= $this->hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
+      /*
+      if ($lastDecisionDate === 0)
+      {
+        $this->filterOnlyEventsAfter($added, $lastDecisionDate);
+        $this->filterOnlyEventsAfter($removed, $lastDecisionDate);
+
+        $addedLicenses = array_keys($added);
+        $removedLicenses = array_keys($removed);
+
+        $this->filterOnlyAutomaticEvents($added);
+        $this->filterOnlyAutomaticEvents($removed);
+
+        $agentDetectedLicenses = array_keys($this->clearingDecisionEventProcessor->getAgentDetectedLicenses($itemTreeBounds, $userId));
+
+      }
+      else
+      {*/
+        $canAutoDecide &= $this->hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
+        $canAutoDecide &= $this->hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
+      //}
 
       if ($canAutoDecide)
       {
@@ -113,6 +161,8 @@ class DeciderAgent extends Agent
       {
         $this->heartbeat(0);
       }
+
+      $this->dbManager->commit();  /* end transaction */
     }
 
     return true;

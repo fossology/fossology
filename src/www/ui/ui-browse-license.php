@@ -475,11 +475,23 @@ class ui_browse_license extends FO_Plugin
           }
           if (array_key_exists($fileId, $editedPfileLicenses))
           {
-            $editedLicenseList .= implode(", ", array_map(function ($licenseRef) use ($uploadId, $childUploadTreeId)
-            {
-              /** @var LicenseRef $licenseRef */
-              return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-            }, $editedPfileLicenses[$fileId]->getLicenses()));
+            $addedLicenses = array_filter(
+              $editedPfileLicenses[$fileId]->getLicenses(),
+              function ($licenseRef) {
+                /** @var LicenseRef $licenseRef */
+                return !($licenseRef->getRemoved());
+              });
+
+            $editedLicenseList .= implode(", ",
+              array_map(
+                function ($licenseRef) use ($uploadId,$childUploadTreeId)
+                {
+                  /** @var LicenseRef $licenseRef */
+                  return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
+                },
+                $addedLicenses
+              )
+            );
           }
         }
         $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
