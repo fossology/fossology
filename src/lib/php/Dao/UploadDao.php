@@ -40,7 +40,7 @@ class UploadDao extends Object
    */
   private $logger;
 
-public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
