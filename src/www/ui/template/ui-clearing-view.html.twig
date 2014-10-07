@@ -1,4 +1,4 @@
-{% extends "include/base.twig" %}
+{% extends "include/base.html.twig" %}
 
 {% block content %}
 <div id="leftrightalignment" name="leftrightalignment">
@@ -22,7 +22,7 @@
             </td>
             <td class="headerBox">
               {% block rhs %}
-                {% include 'ui-clearing-view_rhs.twig' %}
+                {% include 'ui-clearing-view_rhs.html.twig' %}
               {% endblock %}
             </td>
         </tr>
@@ -46,7 +46,7 @@
 <script src="scripts/nextOptions.js" type="text/javascript"></script>
 <script src="scripts/tools.js" type="text/javascript"></script>
 
-{% include "ui-clearing-view_scripts.twig" %}
+{% include "ui-clearing-view_scripts.html.twig" %}
 
 {{ script }}
 {% endblock %}

@@ -176,7 +176,7 @@ class ClearingView extends FO_Plugin
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.twig");
+      return $this->renderTemplate("include/base.html.twig");
     }
     parent::Output();
   }
@@ -210,10 +210,6 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $options = array('skipThese' =>  GetParm("option_skipFile", PARM_STRING) );
-
-    $this->vars['previousItem'] = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
-    $this->vars['nextItem'] = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "ChangeLicense", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;
@@ -242,7 +238,6 @@ class ClearingView extends FO_Plugin
 
       if ($permission >= PERM_WRITE)
       {
-        $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm($uploadTreeId));
         $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm($uploadTreeId));
       } else
       {
@@ -277,7 +272,7 @@ class ClearingView extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "ui-clearing-view.twig";
+    return "ui-clearing-view.html.twig";
   }
 
   /*

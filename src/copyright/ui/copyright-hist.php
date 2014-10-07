@@ -38,6 +38,8 @@ class CopyrightHistogram  extends FO_Plugin {
   {
     $this->Name = "copyright-hist";
     $this->Title = TITLE_copyrightHistogram;
+    $this->Version = "1.0";
+    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -518,7 +520,7 @@ private function getTableForSingleType($type,$description,$descriptionUnique,$de
 
   public function getTemplateName()
   {
-    return "copyrighthist.twig";
+    return "copyrighthist.html.twig";
   }
 
   function RegisterMenus()

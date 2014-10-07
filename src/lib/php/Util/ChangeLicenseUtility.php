@@ -233,32 +233,8 @@ class ChangeLicenseUtility extends Object
   public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
 
-    if ($uploadTreeId>0) {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      $preSelectedLicenses = null;
-
-      if (!empty($clearingDecWithLicenses))
-      {
-        $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
-        if (!empty ($filteredFileClearings))
-        {
-          $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
-        }
-      }
-
-      if ($preSelectedLicenses === null)
-      {
-        $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
-      }
-      $this->filterLists($licenseRefs, $preSelectedLicenses);
-    } else {
-      $preSelectedLicenses = array();
-    }
-
     $rendererVars = array();
     $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
-    $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
-
     return $rendererVars;
   }
 

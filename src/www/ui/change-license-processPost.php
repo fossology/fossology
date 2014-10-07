@@ -101,33 +101,18 @@ class changeLicenseProcessPost extends FO_Plugin
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
     $itemId = $_POST['uploadTreeId'];
-    $remove = boolval( GetParm('remove', PARM_STRING) );
-       
-        
-    if(array_key_exists('lic',$_POST)){
-      $this->clearingDao->commentClearingDecision($_POST['unlic'], $itemId, $userId);
-    }
-    else if(array_key_exists('unlic',$_POST)){  //??
-      $this->clearingDao->insertClearingDecisionTest($_POST['unlic'], $itemId, $userId);
-    }
-    else if(array_key_exists('type',$_POST)){
-      if($remove)
-        $this->clearingDao->insertClearingDecisionTest($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
-      else
-        $this->clearingDao->insertClearingDecisionTest($_POST['licenseNumbersToBeSubmitted'], $itemId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
-    }
-    $clearingDecWithLicences = $this->clearingDao->getFileClearings($itemId);
+    $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
+
+    if(isset($licenses))
+    $this->clearingDao->insertClearingDecisionTest($licenses, false, $itemId, $userId); //,  $_POST['comment'], $_POST['remark']
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
 
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
-  
-    
-    print(json_encode(array(
-      'tableClearing' => $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicences, $userId),
-      'recentLicenseClearing' => $this->licenseOverviewPrinter->createRecentLicenseClearing($clearingDecWithLicences))));
+
+    print (json_encode("success"));
   }
 
 

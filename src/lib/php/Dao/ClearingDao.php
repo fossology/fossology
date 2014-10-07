@@ -190,7 +190,7 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param $licenseId
+   * @param $licenses
    * @param $removed
    * @param $uploadTreeId
    * @param $userid
@@ -199,7 +199,7 @@ class ClearingDao extends Object
    * @param $remark
    * @internal param array $licenses
    */
-  public function insertClearingDecisionTest($licenseId, $removed, $uploadTreeId, $userid, $type, $comment, $remark)
+  public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid, $comment="", $remark="")
   {
     $this->dbManager->begin();
 
@@ -211,25 +211,36 @@ class ClearingDao extends Object
         $statementName);
     $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
+    $tbdColumnStatementName = __METHOD__ . "_TBD_column";
+    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_type where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
+    $type = $tbdDecisionTypeValue['type_pk'];
+
+    $tbdColumnStatementName = __METHOD__ . ".d";
+    $this->dbManager->prepare($tbdColumnStatementName,
+        "delete from license_decision_event where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
+
+
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "insert into license_decision_event
+                      (uploadtree_fk,pfile_fk,user_fk, rf_fk, is_removed, is_global, type_fk, comment,reportinfo)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9)");
+
     while ($item = $this->dbManager->fetchArray($items))
     {
       $currentUploadTreeId = $item['uploadtree_pk'];
       $pfileId = $item['pfile_fk'];
 
-      $tbdColumnStatementName = __METHOD__ . "_TBD_column";
-      $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from clearing_decision_type where meaning = $1", array(ClearingDecision::TO_BE_DISCUSSED), $tbdColumnStatementName);
+      foreach ($licenses as $license)
+      {
+        $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $license, $type));
+        $this->dbManager->freeResult($res);
 
-      $tbdColumnStatementName = __METHOD__ . ".d";
-      $this->dbManager->prepare($tbdColumnStatementName,
-          "delete from clearing_decision_events where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
-      $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $licenseId, $tbdDecisionTypeValue));
-      $this->dbManager->freeResult($res);
 
-      $statementName = __METHOD__;
-      $this->dbManager->prepare($statementName,
-          "insert into clearing_decision_events (uploadtree_fk,pfile_fk,user_fk, rf_fk, removed, type_fk, comment,reportinfo) VALUES ($1,$2,$3,$4,$5,$6,$7, $8) RETURNING clearing_decision_events_pk");
-      $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $licenseId, $removed, $userid, $type, $comment, $remark));
-      $this->dbManager->freeResult($res);
+        $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $userid, $license, $this->dbManager->booleanToDb($removed),$this->dbManager->booleanToDb(false), $type, $comment, $remark));
+        $this->dbManager->freeResult($res);
+
+      }
     }
     $this->dbManager->freeResult($items);
 
