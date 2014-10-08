@@ -187,64 +187,60 @@ class ClearingDecisionEventProcessor {
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $isGlobal)
   {
     $item = $itemBounds->getUploadTreeId();
-    if ($type > 1)
+    if ($type <= 1)
     {
-      $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
-      $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
+      return;
+    }  
+    $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
+    $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
-      list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
+    list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
 
-      $lastDecision = null;
-      if ($clearingDecision)
+    $lastDecision = null;
+    if ($clearingDecision)
+    {
+      $lastDecision = $clearingDecision['date_added'];
+    }
+
+    $insertDecision = false;
+    foreach (array_merge($added, $removed) as $licenseShortName => $entry)
+    {
+      if (!isset($entry['entries']['direct']))
       {
-        $lastDecision = $clearingDecision['date_added'];
-      }
-
-
-      $insertDecision = false;
-      foreach (array_merge($added, $removed) as $licenseShortName => $entry)
-      {
-        if (isset($entry['entries']['direct']))
-        {
-          $entryTimestamp = $entry['entries']['direct']['dateAdded'];
-          if ($lastDecision < $entryTimestamp)
-          {
-            $insertDecision = true;
-            break;
-          }
-        } else
-        {
-          $insertDecision = true;
-          break;
-        }
-      }
-
-      $removedSinceLastDecision = array();
-      foreach ($events as $event)
-      {
-        $licenseShortName = $event['rf_shortname'];
-        if ($event['is_removed'] && !array_key_exists($licenseShortName, $added))
-        {
-          $entryTimestamp = $event['date_added'];
-          if ($lastDecision < $entryTimestamp)
-          {
-            $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
-            $insertDecision = true;
-          }
-        }
-      }
-
-      if ($type === 2) {
-        // handle "No license known"
         $insertDecision = true;
-        $added = array();
-        $removedSinceLastDecision = array();
+        break;
       }
 
-      if ($insertDecision)
+      $entryTimestamp = $entry['entries']['direct']['dateAdded'];
+      if ($lastDecision < $entryTimestamp)
       {
-        $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
+        $insertDecision = true;
+        break;
       }
+    }
+
+    $removedSinceLastDecision = array();
+    foreach ($events as $event)
+    {
+      $licenseShortName = $event['rf_shortname'];
+      $entryTimestamp = $event['date_added'];
+      if ($event['is_removed'] && !array_key_exists($licenseShortName, $added) && $lastDecision < $entryTimestamp)
+      {
+        $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event['rf_fk'];
+        $insertDecision = true;
+      }
+    }
+
+    if ($type === 2) {
+      // handle "No license known"
+      $insertDecision = true;
+      $added = array();
+      $removedSinceLastDecision = array();
+    }
+
+    if ($insertDecision)
+    {
+      $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
     }
   }
 
