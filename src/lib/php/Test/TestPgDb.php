@@ -123,16 +123,19 @@ class TestPgDb
   {
     pg_close($this->connection);
     $this->connection = null;
+    /*
     $ckCmd = "psql -c '\q' fossology -U fossy";
     exec($ckCmd, $ckOut, $ckRtn);
     if($ckRtn != 0)
     {
       throw new Exception("ERROR: postgresql isn't running, not deleting database ".$this->dbName."\n");
     }
-    $existCmd = "psql -l  fossology -U fossy|grep -q ".$this->dbName;
+    */
+/*    $existCmd = "psql -l  fossology -U fossy|grep -q ".$this->dbName;
     exec($existCmd, $existkOut, $existRtn);
     if($existRtn == 0)
     {
+ */
       $pkillCmd = "sudo pkill -f -u postgres fossy || true";
       exec($pkillCmd, $killOut, $killRtn);
       $dropCmd = "sudo su postgres -c 'echo \"drop database ".$this->dbName.";\"|psql'";
@@ -141,11 +144,13 @@ class TestPgDb
       {
         throw new Exception("ERROR: failed to delete database ".$this->dbName."\n");
       }
-    }
+  /*
+      }
     else
     {
       echo "NOTE: database ".$this->dbName." does not exist, nothing to delete\n";
     }
+ */
     $this->dbManager = null;    
   }
 
