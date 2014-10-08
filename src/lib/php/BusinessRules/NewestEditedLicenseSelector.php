@@ -39,27 +39,22 @@ class NewestEditedLicenseSelector extends Object
    * @param ClearingDecision[] $editedLicensesArray
    * @return ClearingDecision[]
    */
-  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray, $extractTBD=false)
+  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray)
   {
-    $clearingDecWithLicensesAndContextArray = $this->groupClearingDWLAArrayPerPfileId($editedLicensesArray);
+    $editedLicensesArrayGrouped = array();
+    foreach ($editedLicensesArray as $editedLicense)
+    {
+      $editedLicensesArrayGrouped[$editedLicense->getPfileId()][] = $editedLicense;
+    }
 
     $goodLicenseDecisions = array();
-    foreach ($clearingDecWithLicensesAndContextArray as $fileId => $editedLicensesArray)
+    foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
-      $cd = null;
-      if($extractTBD) {
-      $first = reset($editedLicensesArray);
-        if (!empty($first) and $first->getType() == ClearingDecision::TO_BE_DISCUSSED)
-        {
-          $cd = $first;
-        }
-      }
-
-      if($cd == null)
+      $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
+      if ($cd != null)
       {
-        $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
+        $goodLicenseDecisions[$fileId] = $cd;
       }
-      if ($cd != null) $goodLicenseDecisions[$fileId] = $cd;
     }
 
     return $goodLicenseDecisions;
@@ -69,18 +64,16 @@ class NewestEditedLicenseSelector extends Object
    * @param ClearingDecision[] $editedLicensesArray
    * @return string[]
    */
-  public function extractGoodLicenses($editedLicensesArray, $extractTBD=false)
+  public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray, $extractTBD);
+    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray);
 
     $licenses = array();
     foreach ($licensesPerId as $fileID => $licInfo)
     {
       foreach ($licInfo->getLicenses() as $licRef)
       {
-        /**
-         * @var LicenseRef $licRef
-         */
+        /** @var LicenseRef $licRef */
         if (!($licRef->getRemoved()))
           $licenses[] = $licRef->getShortName();
       }
@@ -123,19 +116,5 @@ class NewestEditedLicenseSelector extends Object
       }
     }
     return null;
-  }
-
-  /**
-   * @param ClearingDecision[] $editedLicensesArray
-   * @return array[string]ClearingDecision[]
-   */
-  public function groupClearingDWLAArrayPerPfileId($editedLicensesArray)
-  {
-    $clearingDecWithLicensesAndContextArray = array();
-    foreach ($editedLicensesArray as $editedLicense)
-    {
-        $clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()][] = $editedLicense;
-    }
-    return $clearingDecWithLicensesAndContextArray;
   }
 }

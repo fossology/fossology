@@ -48,8 +48,8 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setType($ud)
         ->setScope($scope);
 
-      $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
-      $clearingDecision->setLicenses(array($licref));
+    $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
+    $clearingDecision->setLicenses(array($licref));
 
     return $clearingDecision->build();
   }
@@ -80,9 +80,9 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function testFoundIsNotEmpty()
   {
-    $editedLicensesArray = array($this->clearingDec(0, false, 'global', "Test", 'User decision'));
+    $cd = $this->clearingDec(0, false, 'global', "Test", 'User decision');
+    $editedLicensesArray = array($cd);
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
-
     assertThat(implode(", ", $licenses), is("TestshortName"));
   }
 
@@ -190,7 +190,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->clearingDec(2, true, LicenseDecision::SCOPE_UPLOAD, "B", ClearingDecision::TO_BE_DISCUSSED),
         $this->clearingDec(1, false, 'upload', "A", LicenseDecision::USER_DECISION),
     );
-    $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray, true);
+    $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
     assertThat(implode(", ", $licenses), is("BshortName"));
   }
