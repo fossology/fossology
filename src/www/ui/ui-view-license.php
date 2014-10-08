@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
@@ -176,17 +177,29 @@ class ui_view_license extends FO_Plugin
     {
       return;
     }
+    $uploadId  = GetParm("upload", PARM_INTEGER);
 
-    $licenseId = GetParm("licenseId", PARM_INTEGER);
-    $selectedAgentId = GetParm("agentId", PARM_INTEGER);
-    $highlightId = GetParm("highlightId", PARM_INTEGER);
+    if (empty($uploadId))
+    {
+      return;
+    }
+
     $ModBack = GetParm("modback", PARM_STRING);
     if (empty($ModBack))
     {
       $ModBack = "license";
     }
 
-    $highlights = $this->getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
+    $licenseId = GetParm("licenseId", PARM_INTEGER);
+    $selectedAgentId = GetParm("agentId", PARM_INTEGER);
+    $highlightId = GetParm("highlightId", PARM_INTEGER);
+
+
+    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+
+    $fileTreeBounds  = $this->uploadDao->getFileTreeBounds($uploadTreeId,$uploadTreeTableName);
+
+    $highlights = $this->getSelectedHighlighting($fileTreeBounds, $licenseId, $selectedAgentId, $highlightId);
 
     $hasHighlights = count($highlights) > 0;
     $output = $this->createLicenseHeader($uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
@@ -205,15 +218,15 @@ class ui_view_license extends FO_Plugin
   }
 
   /**
-   * @param $uploadTreeId
+   * @param FileTreeBounds $fileTreeBounds
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
    * @return array
    */
-  private function getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId)
+  private function getSelectedHighlighting( FileTreeBounds $fileTreeBounds, $licenseId, $selectedAgentId, $highlightId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
+    $highlightEntries = $this->highlightDao->getHighlightEntries($fileTreeBounds, $licenseId, $selectedAgentId, $highlightId);
     if ($selectedAgentId > 0)
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
