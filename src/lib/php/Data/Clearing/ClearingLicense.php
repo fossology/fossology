@@ -45,7 +45,7 @@ class ClearingLicense implements LicenseAlike {
    */
   function getId()
   {
-    $this->licenseRef->getId();
+    return $this->licenseRef->getId();
   }
 
   /**
@@ -53,7 +53,7 @@ class ClearingLicense implements LicenseAlike {
    */
   function getFullName()
   {
-    $this->licenseRef->getFullName();
+    return $this->licenseRef->getFullName();
   }
 
   /**
@@ -61,7 +61,7 @@ class ClearingLicense implements LicenseAlike {
    */
   function getShortName()
   {
-    $this->licenseRef->getShortName();
+    return $this->licenseRef->getShortName();
   }
 
   /**

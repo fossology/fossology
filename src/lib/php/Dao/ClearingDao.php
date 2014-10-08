@@ -26,6 +26,7 @@ use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -120,7 +121,7 @@ class ClearingDao extends Object
       $clearingsWithLicensesArray[] = $clearingDec;
     }
 
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     return $clearingsWithLicensesArray;
   }
 
@@ -134,7 +135,7 @@ class ClearingDao extends Object
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
         "select
-               license_ref.rf_pk as rf,
+               license_ref.rf_pk as id,
                license_ref.rf_shortname as shortname,
                license_ref.rf_fullname  as fullname,
                clearing_licenses.removed  as removed
@@ -146,7 +147,7 @@ class ClearingDao extends Object
 
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $licenseRef = new LicenseRef($row['rf_fk'], $row['rf_shortname'], $row['rf_fullname']);
+      $licenseRef = new LicenseRef($row['id'], $row['shortname'], $row['fullname']);
       $clearingLicenses[] = new ClearingLicense($licenseRef, $row ['removed'] == 't');
     }
     $this->dbManager->freeResult($res);
@@ -349,6 +350,14 @@ ORDER BY CD.date_added DESC LIMIT 1
     return count($result) > 0 ? $result[0] : array();
   }
 
+  /**
+   * @param $uploadTreeId
+   * @param $userId
+   * @param $type
+   * @param $isGlobal
+   * @param LicenseDecisionResult[] $licenses
+   * @param LicenseDecisionResult[] $removedLicenses
+   */
   public function insertClearingDecision($uploadTreeId, $userId, $type, $isGlobal, $licenses, $removedLicenses)
   {
     $this->dbManager->begin();
@@ -379,11 +388,11 @@ insert into clearing_decision (
     $statementNameLicenseInsert = __METHOD__ . ".insertLicense";
     $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO  clearing_licenses (clearing_fk, rf_fk, removed) VALUES($1, $2, $3)");
     foreach ($licenses as $license) {
-      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license['licenseId'], $this->dbManager->booleanToDb(false)));
+      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getLicenseId(), $this->dbManager->booleanToDb(false)));
       $this->dbManager->freeResult($res);
     }
     foreach ($removedLicenses as $license) {
-      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license['licenseId'], $this->dbManager->booleanToDb(true)));
+      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getLicenseId(), $this->dbManager->booleanToDb(true)));
       $this->dbManager->freeResult($res);
     }
 
@@ -436,11 +445,10 @@ insert into clearing_decision (
         $statementName,
         array($uploadTreeId, $userId)
     );
-    $result = $this->dbManager->fetchAll($res);
 
     $events = array();
 
-    foreach ($result as &$row) {
+    while ($row = $this->dbManager->fetchArray($res)) {
       foreach (array('is_global', 'is_removed') as $columnName) {
         $row[$columnName] = $this->dbManager->booleanFromDb($row[$columnName]);
       }

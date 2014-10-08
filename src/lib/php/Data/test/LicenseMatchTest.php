@@ -118,7 +118,7 @@ class LicenseMatchTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testGetPercent(){
-    assertThat($this->licenseMatch->getPercent(), is($this->percent));
+    assertThat($this->licenseMatch->getPercentage(), is($this->percent));
   }
 }
  

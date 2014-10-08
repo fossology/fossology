@@ -71,7 +71,7 @@ class ClearingDecisionEventProcessor
           'licenseRef' => $licenseRef,
           'agentRef' => $agentRef,
           'matchId' => $licenseMatch->getLicenseFileId(),
-          'percent' => $licenseMatch->getPercent()
+          'percentage' => $licenseMatch->getPercentage()
       );
     }
 
@@ -197,15 +197,16 @@ class ClearingDecisionEventProcessor
     }
 
     $insertDecision = false;
-    foreach (array_merge($added, $removed) as $licenseShortName => $entry)
+    foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
     {
-      if (!isset($entry['entries'][self::NON_AGENT_DECISION]))
+      /** @var LicenseDecisionResult $licenseDecisionResult */
+      if (!$licenseDecisionResult->hasLicenseDecisionEvent())
       {
         $insertDecision = true;
         break;
       }
 
-      $entryTimestamp = $entry['entries'][self::NON_AGENT_DECISION]['dateAdded'];
+      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getEpoch();
       if ($lastDecision === null || $lastDecision < $entryTimestamp)
       {
         $insertDecision = true;
@@ -220,7 +221,7 @@ class ClearingDecisionEventProcessor
       $entryTimestamp = $event->getEpoch();
       if ($event->isRemoved() && !array_key_exists($licenseShortName, $added) && $lastDecision < $entryTimestamp)
       {
-        $removedSinceLastDecision[$licenseShortName]['licenseId'] = $event->getLicenseId();
+        $removedSinceLastDecision[$licenseShortName] = $event;
         $insertDecision = true;
       }
     }

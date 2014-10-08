@@ -291,14 +291,9 @@ class AjaxClearingView extends FO_Plugin
 
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+    list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
-    ksort($licenseDecisions, SORT_STRING);
-
-    if ($orderAscending)
-    {
-      $licenseDecisions = array_reverse($licenseDecisions);
-    }
+    $licenseDecisions = $this->sortByKeys($licenseDecisions, $orderAscending);
 
     $table = array();
     foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
@@ -318,26 +313,7 @@ class AjaxClearingView extends FO_Plugin
         $comment = $licenseDecisionEvent->getComment();
       }
 
-      $agentResults = array();
-      foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent)
-      {
-        $agentId = $agentDecisionEvent->getAgentId();
-        $matchId = $agentDecisionEvent->getMatchId();
-        $percentage = $agentDecisionEvent->getPercentage();
-        $agentResults[$agentDecisionEvent->getAgentName()][] = array(
-            "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",
-            "text" => $percentage ? " (" . $percentage . " %)" : ""
-        );
-      }
-      foreach ($agentResults as $agentName => $agentResult) {
-        $matchTexts = array();
-
-        foreach ($agentResult as $index => $agentData) {
-          $uri =  $agentData['uri'];
-          $matchTexts[] = "<a href=\"$uri\">" . ($index + 1) . "</a>" . $agentData['text'];
-        }
-        $types[] = $agentName . ": " . implode(', ', $matchTexts);
-      }
+      $types = array_merge($types, $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId));
 
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
@@ -354,7 +330,79 @@ class AjaxClearingView extends FO_Plugin
           '3' => $commentField,
           '4' => $actionLink);
     }
+
+    foreach ($this->sortByKeys($removedLicenses, $orderAscending) as $licenseShortName => $licenseDecisionResult)
+    {
+      if ($licenseDecisionResult->getAgentDecisionEvents()) {
+        $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
+        $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
+        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+
+        $idArray = array($uploadTreeId, $licenseId);
+        $id = implode(',', $idArray);
+        $table[] = array('DT_RowId' => $id,
+            '0' => $licenseShortNameWithLink,
+            '1' => implode("<br/>", $agents),
+            '2' => "n/a",
+            '3' => "n/a",
+            '4' => $actionLink);
+      }
+    }
+
     return $table;
+  }
+
+  /**
+   * @param LicenseDecisionResult $licenseDecisionResult
+   * @param $uberUri
+   * @param $uploadTreeId
+   * @return array
+   */
+  protected function getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId)
+  {
+    $agentResults = array();
+    foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent)
+    {
+      $licenseId = $agentDecisionEvent->getLicenseId();
+      $agentId = $agentDecisionEvent->getAgentId();
+      $matchId = $agentDecisionEvent->getMatchId();
+      $percentage = $agentDecisionEvent->getPercentage();
+      $agentResults[$agentDecisionEvent->getAgentName()][] = array(
+          "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",
+          "text" => $percentage ? " (" . $percentage . " %)" : ""
+      );
+    }
+
+    $results = array();
+    foreach ($agentResults as $agentName => $agentResult)
+    {
+      $matchTexts = array();
+
+      foreach ($agentResult as $index => $agentData)
+      {
+        $uri = $agentData['uri'];
+        $matchTexts[] = "<a href=\"$uri\">#" . ($index + 1) . "</a>" . $agentData['text'];
+      }
+      $results[] = $agentName . ": " . implode(', ', $matchTexts);
+    }
+    return $results;
+  }
+
+  /**
+   * @param $orderAscending
+   * @param $licenseDecisions
+   * @return array
+   */
+  protected function sortByKeys(&$licenseDecisions, $orderAscending)
+  {
+    ksort($licenseDecisions, SORT_STRING);
+
+    if ($orderAscending)
+    {
+      $licenseDecisions = array_reverse($licenseDecisions);
+      return $licenseDecisions;
+    }
+    return $licenseDecisions;
   }
 }
 
