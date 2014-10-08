@@ -232,9 +232,17 @@ class ClearingView extends FO_Plugin
 
     $output = '';
 
-    if (!$itemTreeBounds->containsFiles())
+    $isSingleFile = !$itemTreeBounds->containsFiles();
+    $hasWritePermission = $permission >= PERM_WRITE;
+
+    $clearingDecWithLicenses = null;
+    if ($isSingleFile || $hasWritePermission)
     {
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+    }
+
+    if ($isSingleFile)
+    {
       $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
       $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
@@ -250,9 +258,8 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $output;
 
     $clearingHistory = array();
-    if ($permission >= PERM_WRITE)
+    if ($hasWritePermission)
     {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
       $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $userId);
     }
 

@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -90,7 +91,6 @@ class ui_browse_license extends FO_Plugin
     $this->licenseRenderer = $container->get('view.license_renderer');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
-    $this->renderer = $container->get('twig.environment');
     parent::__construct();
   }
 
@@ -478,8 +478,8 @@ class ui_browse_license extends FO_Plugin
             $addedLicenses = array_filter(
               $editedPfileLicenses[$fileId]->getLicenses(),
               function ($licenseRef) {
-                /** @var LicenseRef $licenseRef */
-                return !($licenseRef->getRemoved());
+                /** @var ClearingLicense $licenseRef */
+                return !($licenseRef->isRemoved());
               });
 
             $editedLicenseList .= implode(", ",

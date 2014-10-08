@@ -129,7 +129,7 @@ class ChangeLicenseUtility extends Object
       foreach ($clearingDecWithLic->getLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        if ($lic->getRemoved()) {
+        if ($lic->isRemoved()) {
           $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
         }
         $licenseNames[$lic->getShortName()] = $licenseShortName;

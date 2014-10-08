@@ -12,16 +12,17 @@
 
 define("AGENT_NAME", "decider");
 
+use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+
 define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__."/version.php");
-
-use Fossology\Lib\Agent\Agent;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 
 class DeciderAgent extends Agent
 {
@@ -65,12 +66,13 @@ class DeciderAgent extends Agent
     }
   }
 
-  static protected function hasOnlyNewerEventsInJob($events, $date, $jobId)
+  static protected function hasOnlyNewerEvents($events, $date)
   {
-    foreach($events as $licName => $properties)
+    foreach($events as $licenseShortName => $licenseDecisionEvent)
     {
-      $eventDate = $properties['dateAdded'];
-      if (($properties['jobId'] !== $jobId) && (($date !== null)&&($eventDate > $date)))
+      /** @var LicenseDecisionEvent $licenseDecisionEvent */
+      $eventDate = $licenseDecisionEvent->getEpoch();
+      if ((($date !== null)&&($eventDate > $date)))
         return false;
     }
 
@@ -108,7 +110,7 @@ class DeciderAgent extends Agent
       $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
       $canAutoDecide = true;
-      list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
+      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($userId, $uploadTreeId);
 
       /* TODO @1
        *
@@ -120,8 +122,8 @@ class DeciderAgent extends Agent
        *
        * what do we do?
        */
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($added, $lastDecisionDate);
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($removed, $lastDecisionDate);
 
       if (($canAutoDecide) && ($lastDecisionDate === null))
       {

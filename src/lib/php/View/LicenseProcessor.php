@@ -40,7 +40,7 @@ class LicenseProcessor extends Object
       $content = array(
           'licenseId' => $licenseRef->getId(),
           'agentRev' => $agentRef->getAgentRevision(),
-          'percent' => $match->getPercent(),
+          'percent' => $match->getPercentage(),
           'agentId' => $agentRef->getAgentId());
 
 
@@ -69,7 +69,7 @@ class LicenseProcessor extends Object
       if($match->getType()=="bulk") {
         foreach($match->getLicenses() as $license) {
 
-          if($license->getRemoved()) {
+          if($license->isRemoved()) {
 
             $agentName = _("Bulk removal");
             $agentId = 1;

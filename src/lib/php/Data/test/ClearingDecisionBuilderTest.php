@@ -91,7 +91,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
   {
     $this->sameUpload=true;
     $this->sameFolder=true;
-    $this->licenses = array (new LicenseRef(8,"testSN", "testFN") ,new LicenseRef(100,"test2SN", "test2FN"), new LicenseRef(1007,"test3SN", "test3FN")  );
+    $this->licenses = array (new LicenseRef(8, "testSN", "testFN") ,new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN")  );
     $this->clearingId=8;
     $this->uploadTreeId=9;
     $this->pfileId=10;

@@ -21,7 +21,7 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
-use DateTimeZone;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 class ClearingDecisionBuilder extends  ClearingDecisionData
 {
@@ -61,7 +61,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingLicense[] $licenses
    * @return ClearingDecisionBuilder
    */
   public function setLicenses($licenses)
