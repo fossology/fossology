@@ -29,12 +29,6 @@ use Fossology\Lib\Util\Object;
  */
 class NewestEditedLicenseSelector extends Object
 {
-
-  function __construct()
-  {
-  }
-
-
   /**
    * @param ClearingDecision[] $editedLicensesArray
    * @return ClearingDecision[]
