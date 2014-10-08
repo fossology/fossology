@@ -99,10 +99,10 @@ class DeciderAgent extends Agent
     return true;
   }
 
-  function processUploadId($uploadId)
+  function processLicenseDecisionEventOfCurrentJob()
   {
-    $jobId = $this->jobId;
     $userId = $this->userId;
+    $jobId = $this->jobId;
 
     $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
     foreach ($changedItems as $uploadTreeId)
@@ -155,6 +155,12 @@ class DeciderAgent extends Agent
 
       $this->dbManager->commit();  /* end transaction */
     }
+  }
+
+
+  function processUploadId($uploadId)
+  {
+    $this->processLicenseDecisionEventOfCurrentJob();
 
     return true;
   }
@@ -162,5 +168,5 @@ class DeciderAgent extends Agent
 
 $agent = new DeciderAgent();
 $agent->scheduler_connect();
-$agent->run_schedueler_event_loop();
+$agent->run_scheduler_event_loop();
 $agent->bail(0);

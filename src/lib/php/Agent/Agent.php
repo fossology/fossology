@@ -34,7 +34,7 @@ class Agent extends Object
   /** @var DbManager dbManager */
   protected $dbManager;
 
-  private $isConnected;
+  private $schedulerMode;
 
   function __construct($agentName, $version, $revision) {
     $this->agentName = $agentName;
@@ -42,7 +42,7 @@ class Agent extends Object
     $this->agentDesc = $agentName. " agent";
     $this->agentRev = $version.".".$revision;
     $this->agentArs = $agentName . "_ars";
-    $this->isConnected = false;
+    $this->schedulerMode = false;
 
     $GLOBALS['processed'] = 0;
     $GLOBALS['alive'] = false;
@@ -58,19 +58,22 @@ class Agent extends Object
 
   function scheduler_connect()
   {
-    $args = getopt("scheduler_start", array("userID:","jobId:"));
+    $args = getopt("", array("userID:","jobId:","scheduler_start"));
+
+    $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = @$args['userID'];
     $this->jobId = @$args['jobId'];
 
     $this->initArsTable();
 
-    $this->scheduler_greet();
+    if ($this->schedulerMode)
+    {
+      $this->scheduler_greet();
 
-    pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
-    pcntl_alarm(ALARM_SECS);
-
-    $this->isConnected = true;
+      pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
+      pcntl_alarm(ALARM_SECS);
+    }
   }
 
   static function heartbeat_handler($signo)
@@ -85,19 +88,25 @@ class Agent extends Object
 
   function heartbeat($newProcessed)
   {
-    global $processed;
-    global $alive;
+    if ($this->schedulerMode)
+    {
+      global $processed;
+      global $alive;
 
-    $processed += $newProcessed;
+      $processed += $newProcessed;
 
-    $alive = true;
-    pcntl_signal_dispatch();
+      $alive = true;
+      pcntl_signal_dispatch();
+    }
   }
 
   function bail($exitvalue)
   {
-    Agent::heartbeat_handler(SIGALRM);
-    echo "BYE $exitvalue\n";
+    if ($this->schedulerMode)
+    {
+      Agent::heartbeat_handler(SIGALRM);
+      echo "BYE $exitvalue\n";
+    }
     exit($exitvalue);
   }
 
@@ -159,21 +168,24 @@ class Agent extends Object
     return false;
   }
 
-  function run_schedueler_event_loop(){
-    if (!$this->isConnected)
-      return false;
-
-    while (false !== ($line = fgets(STDIN)))
+  private function scheduler_current()
+  {
+    ($line = fgets(STDIN));
+    if ("CLOSE\n" === $line)
     {
-      if ("CLOSE\n" === $line)
-      {
-        $this->bail(0);
-      }
-      if ("END\n" === $line)
-      {
-        $this->bail(0);
-      }
+      $this->bail(0);
+    }
+    if ("END\n" === $line)
+    {
+      $this->bail(0);
+    }
 
+    return $line;
+  }
+
+  function run_scheduler_event_loop(){
+    while (false !== ($line = $this->scheduler_current()))
+    {
       $uploadId = intval($line);
 
       if ($uploadId > 0)
