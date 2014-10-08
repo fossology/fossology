@@ -30,21 +30,19 @@ use Monolog\Logger;
 
 class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 {
-
   /** @var TestLiteDb */
   private $testDb;
-
   /** @var DbManager */
   private $dbManager;
-
   /** @var NewestEditedLicenseSelector|MockInterface */
   private $licenseSelector;
-
   /** @var UploadDao|MockInterface */
   private $uploadDao;
-
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var int */
+  private $now;
+  
 
   public function setUp()
   {
@@ -122,14 +120,15 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->insertInto('uploadtree','pfile_fk, uploadtree_pk',$params,$logStmt = 'insert.uploadtree');
     }
     
+    $this->now = time();
     $cdArray = array(
-        array(1, 100, 1000, 1, 1, false, false, 1, '2014-08-15T12:12:12'),
-        array(2, 100, 1000, 1, 2, false, false, 1, '2014-08-15T12:12:12'),
-        array(3, 100, 1000, 3, 4, false, false, 1, '2014-08-14T14:33:45'),
-        array(4, 100, 1000, 2, 3, false, true, 2, '2014-08-15T10:43:58'),
-        array(5, 100, 1000, 2, 4, true, false, 1, '2014-08-14T14:33:51'),
-        array(6, 100, 1200, 1, 3, true, true, 1, '2014-08-15T12:49:52'),
-        array(7, 100, 1200, 1, 2, false, false, 1, '2014-08-15T13:05:43')
+        array(1, 100, 1000, 1, 1, false, false, 1, date('c',$this->now-888)),
+        array(2, 100, 1000, 1, 2, false, false, 1, date('c',$this->now-888)),
+        array(3, 100, 1000, 3, 4, false, false, 1, date('c',$this->now-1234)),
+        array(4, 100, 1000, 2, 3, false, true, 2, date('c',$this->now-900)),
+        array(5, 100, 1000, 2, 4, true, false, 1, date('c',$this->now-999)),
+        array(6, 100, 1200, 1, 3, true, true, 1, date('c',$this->now-654)),
+        array(7, 100, 1200, 1, 2, false, false, 1, date('c',$this->now-543))
     );
     foreach ($cdArray as $params)
     {
@@ -149,11 +148,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1000));
     assertThat($result, contains(
-        array(5, 100, 1000, "2014-08-14T14:33:51", 2, 1, LicenseDecision::USER_DECISION, 4, "QUX", 0, 1, null, null),
-        array(4, 100, 1000, "2014-08-15T10:43:58", 2, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
-        array(1, 100, 1000, "2014-08-15T12:12:12", 1, 1, LicenseDecision::USER_DECISION, 1, "FOO", 0, 0, null, null),
-        array(2, 100, 1000, "2014-08-15T12:12:12", 1, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null),
-        array(6, 100, 1200, "2014-08-15T12:49:52", 1, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null)
+        array(5, 100, 1000, $this->now-999, 2, null, 1, LicenseDecision::USER_DECISION, 4, "QUX", 0, 1, null, null),
+        array(4, 100, 1000, $this->now-900, 2, null, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
+        array(1, 100, 1000, $this->now-888, 1, null, 1, LicenseDecision::USER_DECISION, 1, "FOO", 0, 0, null, null),
+        array(2, 100, 1000, $this->now-888, 1, null, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null),
+        array(6, 100, 1200, $this->now-654, 1, null, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null)
     ));
   }
 
@@ -161,11 +160,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(2, 1000));
     assertThat($result, contains(
-        array(5, 100, 1000, "2014-08-14T14:33:51", 2, 1, LicenseDecision::USER_DECISION, 4, "QUX", 0, 1, null, null),
-        array(4, 100, 1000, "2014-08-15T10:43:58", 2, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
-        array(1, 100, 1000, "2014-08-15T12:12:12", 1, 1, LicenseDecision::USER_DECISION, 1, "FOO", 0, 0, null, null),
-        array(2, 100, 1000, "2014-08-15T12:12:12", 1, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null),
-        array(6, 100, 1200, "2014-08-15T12:49:52", 1, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null)
+        array(5, 100, 1000, $this->now-999, 2, null, 1, LicenseDecision::USER_DECISION, 4, "QUX", 0, 1, null, null),
+        array(4, 100, 1000, $this->now-900, 2, null, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
+        array(1, 100, 1000, $this->now-888, 1, null, 1, LicenseDecision::USER_DECISION, 1, "FOO", 0, 0, null, null),
+        array(2, 100, 1000, $this->now-888, 1, null, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null),
+        array(6, 100, 1200, $this->now-654, 1, null, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null)
     ));
   }
 
@@ -173,9 +172,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1200));
     assertThat($result, contains(
-        array(4, 100, 1000, "2014-08-15T10:43:58", 2, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
-        array(6, 100, 1200, "2014-08-15T12:49:52", 1, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null),
-        array(7, 100, 1200, "2014-08-15T13:05:43", 1, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null)
+        array(4, 100, 1000, $this->now-900, 2, null, 1, LicenseDecision::BULK_RECOGNITION, 3, "BAZ", 1, 0, null, null),
+        array(6, 100, 1200, $this->now-654, 1, null, 1, LicenseDecision::USER_DECISION, 3, "BAZ", 1, 1, null, null),
+        array(7, 100, 1200, $this->now-543, 1, null, 1, LicenseDecision::USER_DECISION, 2, "BAR", 0, 0, null, null)
     ));
   }
 
@@ -184,7 +183,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(3, 1000));
     assertThat(count($result), is(1));
     assertThat($result[0], is(
-        array(3, 100, 1000, "2014-08-14T14:33:45", 3, 2, LicenseDecision::USER_DECISION, 4, "QUX", 0, 0, null, null)
+        array(3, 100, 1000, $this->now-1234, 3, null, 2, LicenseDecision::USER_DECISION, 4, "QUX", 0, 0, null, null)
     ));
   }
 

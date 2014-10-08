@@ -321,8 +321,7 @@ class AjaxClearingView extends FO_Plugin
       $reportInfoField = $reportInfo;
       $commentField = $comment;
 
-      $idArray = array($uploadTreeId, $licenseId);
-      $id = implode(',', $idArray);
+      $id = "$uploadTreeId,$licenseId";
       $table[] = array('DT_RowId' => $id,
           '0' => $licenseShortNameWithLink,
           '1' => implode("<br/>", $types),
