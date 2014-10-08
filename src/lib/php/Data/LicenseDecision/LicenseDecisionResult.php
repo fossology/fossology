@@ -16,10 +16,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao\Data\LicenseDecision;
+namespace Fossology\Lib\Data\LicenseDecision;
 
+
+use Fossology\Lib\Exception;
 
 class LicenseDecisionResult implements LicenseDecision {
+  const AGENT_DECISION_TYPE = 'agent';
+
   /**
    * @var LicenseDecisionEvent
    */
@@ -31,37 +35,38 @@ class LicenseDecisionResult implements LicenseDecision {
   private $agentDecisionEvents;
 
   /**
-   * @param LicenseDecisionEvent $licenseDecisionEvent
+   * @param null|LicenseDecisionEvent $licenseDecisionEvent
    * @param AgentLicenseDecisionEvent[] $agentDecisionEvents
    */
-  public function __construct(LicenseDecisionEvent $licenseDecisionEvent, $agentDecisionEvents=array()) {
+  public function __construct($licenseDecisionEvent, $agentDecisionEvents=array()) {
 
     $this->licenseDecisionEvent = $licenseDecisionEvent;
     $this->agentDecisionEvents = $agentDecisionEvents;
   }
 
   /**
+   * @throws Exception
    * @return int
    */
-  function getId()
+  function getLicenseId()
   {
-    // TODO: Implement getId() method.
+    return $this->getLicenseDecision()->getLicenseId();
   }
 
   /**
    * @return string
    */
-  function getFullName()
+  function getLicenseFullName()
   {
-    // TODO: Implement getFullName() method.
+    return $this->getLicenseDecision()->getLicenseFullName();
   }
 
   /**
    * @return string
    */
-  function getShortName()
+  function getLicenseShortName()
   {
-    // TODO: Implement getShortName() method.
+    return $this->getLicenseDecision()->getLicenseShortName();
   }
 
   /**
@@ -69,7 +74,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getComment()
   {
-    // TODO: Implement getComment() method.
+    return $this->getLicenseDecision()->getComment();
   }
 
   /**
@@ -77,7 +82,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getEpoch()
   {
-    // TODO: Implement getEpoch() method.
+    return $this->getLicenseDecision()->getEpoch();
   }
 
   /**
@@ -85,7 +90,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getEventId()
   {
-    // TODO: Implement getEventId() method.
+    return $this->getLicenseDecision()->getEventId();
   }
 
   /**
@@ -93,23 +98,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getEventType()
   {
-    // TODO: Implement getEventType() method.
-  }
-
-  /**
-   * @return int
-   */
-  public function getLicenseId()
-  {
-    // TODO: Implement getLicenseId() method.
-  }
-
-  /**
-   * @return string
-   */
-  public function getLicenseShortName()
-  {
-    // TODO: Implement getLicenseShortName() method.
+    return $this->getLicenseDecision()->getEventType();
   }
 
   /**
@@ -117,7 +106,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getReportinfo()
   {
-    // TODO: Implement getReportinfo() method.
+    return $this->getLicenseDecision()->getReportinfo();
   }
 
   /**
@@ -125,7 +114,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function isGlobal()
   {
-    // TODO: Implement isGlobal() method.
+    return $this->getLicenseDecision()->isGlobal();
   }
 
   /**
@@ -133,6 +122,46 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function isRemoved()
   {
-    // TODO: Implement isRemoved() method.
+    return $this->getLicenseDecision()->isRemoved();
   }
+
+  /**
+   * @throws Exception
+   * @return LicenseDecision
+   */
+  private function getLicenseDecision()
+  {
+    if (isset($this->licenseDecisionEvent)) {
+      return $this->licenseDecisionEvent;
+    }
+    foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
+      return $agentDecisionEvent;
+    }
+    throw new Exception("could not determine license");
+  }
+
+  /**
+   * @return bool
+   */
+  public function hasLicenseDecisionEvent()
+  {
+    return isset($this->licenseDecisionEvent);
+  }
+
+  /**
+   * @return array|AgentLicenseDecisionEvent[]
+   */
+  public function getAgentDecisionEvents()
+  {
+    return $this->agentDecisionEvents;
+  }
+
+  /**
+   * @return LicenseDecisionEvent
+   */
+  public function getLicenseDecisionEvent()
+  {
+    return $this->licenseDecisionEvent;
+  }
+
 }

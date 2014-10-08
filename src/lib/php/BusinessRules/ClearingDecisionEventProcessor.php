@@ -21,17 +21,14 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\Data\LicenseDecision\AgentLicenseDecisionEvent;
-use Fossology\Lib\Dao\Data\LicenseDecision\LicenseDecisionEvent;
-use Fossology\Lib\Dao\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class ClearingDecisionEventProcessor
 {
-  const NON_AGENT_DECISION = 'direct';
-  const AGENT_DECISION = 'agents';
-
   /** @var LicenseDao */
   private $licenseDao;
 

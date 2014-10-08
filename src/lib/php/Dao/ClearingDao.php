@@ -20,12 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Dao\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;

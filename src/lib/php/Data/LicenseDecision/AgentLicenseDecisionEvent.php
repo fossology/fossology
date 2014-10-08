@@ -16,14 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao\Data\LicenseDecision;
+namespace Fossology\Lib\Data\LicenseDecision;
 
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\License\LicenseAlike;
 use Fossology\Lib\Data\LicenseRef;
 
-class AgentLicenseDecisionEvent implements LicenseAlike {
+class AgentLicenseDecisionEvent implements LicenseDecision {
   /**
    * @var LicenseRef
    */
@@ -58,24 +57,108 @@ class AgentLicenseDecisionEvent implements LicenseAlike {
   /**
    * @return int
    */
-  public function getId()
+  public function getLicenseId()
   {
-    $this->licenseRef->getId();
+    return $this->licenseRef->getId();
   }
 
   /**
    * @return string
    */
-  public function getFullName()
+  public function getLicenseShortName()
   {
-    $this->licenseRef->getFullName();
+    return $this->licenseRef->getShortName();
   }
 
   /**
    * @return string
    */
-  public function getShortName()
+  public function getLicenseFullName()
   {
-    $this->licenseRef->getShortName();
+    return $this->licenseRef->getFullName();
+  }
+
+  /**
+   * @return string
+   */
+  public function getComment()
+  {
+    return "";
+  }
+
+  /**
+   * @return float
+   */
+  public function getEpoch()
+  {
+    // TODO
+    return 0.0;
+  }
+
+  /**
+   * @return int
+   */
+  public function getEventId()
+  {
+    // TODO
+    return 0;
+  }
+
+  /**
+   * @return string
+   */
+  public function getEventType()
+  {
+    return LicenseDecisionResult::AGENT_DECISION_TYPE;
+  }
+
+  /**
+   * @return string
+   */
+  public function getReportinfo()
+  {
+    return "";
+  }
+
+  /**
+   * @return boolean
+   */
+  public function isGlobal()
+  {
+    return true;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function isRemoved()
+  {
+    return false;
+  }
+
+  /**
+   * @return string
+   */
+  public function getAgentName()
+  {
+    return $this->agentRef->getAgentName();
+  }
+
+  /**
+   * @return int
+   */
+  public function getAgentId()
+  {
+    return $this->agentRef->getAgentId();
+  }
+
+  public function getMatchId()
+  {
+    return $this->matchId;
+  }
+
+  public function getPercentage()
+  {
+    return $this->percentage;
   }
 }

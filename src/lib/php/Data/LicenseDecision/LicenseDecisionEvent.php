@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao\Data\LicenseDecision;
+namespace Fossology\Lib\Data\LicenseDecision;
 
 use Fossology\Lib\Data\LicenseRef;
 
@@ -105,7 +105,7 @@ class LicenseDecisionEvent implements LicenseDecision
    */
   public function getLicenseId()
   {
-    return $this->licenseId;
+    return $this->licenseRef->getId();
   }
 
   /**
@@ -113,7 +113,15 @@ class LicenseDecisionEvent implements LicenseDecision
    */
   public function getLicenseShortName()
   {
-    return $this->licenseShortName;
+    return $this->licenseRef->getShortName();
+  }
+
+  /**
+   * @return string
+   */
+  public function getLicenseFullName()
+  {
+    return $this->licenseRef->getFullName();
   }
 
   /**

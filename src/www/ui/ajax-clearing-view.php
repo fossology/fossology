@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -143,7 +144,7 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId,$uploadId);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
     $aaData = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId, $orderAscending);
 
     return json_encode(
@@ -246,21 +247,22 @@ class AjaxClearingView extends FO_Plugin
 
         case "setNextPrev":
         case "setNextPrevCopyRight":
-          if($action == "setNextPrevCopyRight") {
-            $modName= "copyright-view";
+          if ($action == "setNextPrevCopyRight")
+          {
+            $modName = "copyright-view";
             $opt = "option_skipFileCopyRight";
-          }
-          else {
-            $modName= "view-license";
+          } else
+          {
+            $modName = "view-license";
             $opt = "option_skipFile";
           }
 
-          $options = array('skipThese' =>  GetParm($opt, PARM_STRING) );
-            $prev =  $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
-            $next =  $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+          $options = array('skipThese' => GetParm($opt, PARM_STRING));
+          $prev = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+          $next = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
 
 
-          return json_encode(array('prev'=>$prev, 'next'=>$next, 'uri' => Traceback_uri() . "?mod=".$modName . Traceback_parm_keep(array('upload', 'folder')) ));
+          return json_encode(array('prev' => $prev, 'next' => $next, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
 
         case "updateLicenseDecisions":
           $id = GetParm("id", PARM_STRING);
@@ -299,43 +301,44 @@ class AjaxClearingView extends FO_Plugin
     }
 
     $table = array();
-    foreach ($licenseDecisions as $licenseShortName => $licenseDecision)
+    foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
     {
-      $licenseId = $licenseDecision['licenseId'];
+      /** @var LicenseDecisionResult $licenseDecisionResult */
+      $licenseId = $licenseDecisionResult->getLicenseId();
 
       $types = array();
       $reportInfo = "";
       $comment = "";
 
-      $entries = $licenseDecision['entries'];
-      if (array_key_exists('direct', $entries))
+      if ($licenseDecisionResult->hasLicenseDecisionEvent())
       {
-        $types[] = $entries['direct']['type'];
-        $reportInfo = $entries['direct']['reportinfo'];
-        $comment = $entries['direct']['comment'];
+        $licenseDecisionEvent = $licenseDecisionResult->getLicenseDecisionEvent();
+        $types[] = $licenseDecisionEvent->getEventType();
+        $reportInfo = $licenseDecisionEvent->getReportinfo();
+        $comment = $licenseDecisionEvent->getComment();
       }
 
-      if (array_key_exists('agents', $entries))
+      $agentResults = array();
+      foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent)
       {
-        foreach ($entries['agents'] as $agentEntry)
-        {
-          $matchTexts = array();
-          foreach ($agentEntry['matches'] as $match)
-          {
-            $agentId = $match['agentId'];
-            $matchId = $match['matchId'];
-            $index = $match['index'];
-            $matchText = "<a href=\"" . $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight\">#$index</a>";
-            if (array_key_exists('percentage', $match))
-            {
-              $matchText .= "(" . $match['percentage'] . " %)";
-            }
-            $matchTexts[] = $matchText;
-          }
+        $agentId = $agentDecisionEvent->getAgentId();
+        $matchId = $agentDecisionEvent->getMatchId();
+        $percentage = $agentDecisionEvent->getPercentage();
+        $agentResults[$agentDecisionEvent->getAgentName()][] = array(
+            "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",
+            "text" => $percentage ? " (" . $percentage . " %)" : ""
+        );
+      }
+      foreach ($agentResults as $agentName => $agentResult) {
+        $matchTexts = array();
 
-          $types[] = $agentEntry['name'] . ": " . implode(', ', $matchTexts);
+        foreach ($agentResult as $index => $agentData) {
+          $uri =  $agentData['uri'];
+          $matchTexts[] = "<a href=\"$uri\">" . ($index + 1) . "</a>" . $agentData['text'];
         }
+        $types[] = $agentName . ": " . implode(', ', $matchTexts);
       }
+
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
 
