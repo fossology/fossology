@@ -336,6 +336,7 @@ class AjaxClearingView extends FO_Plugin
       if ($licenseDecisionResult->getAgentDecisionEvents()) {
         $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
+        $licenseId = $licenseDecisionResult->getLicenseId();
         $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
