@@ -90,7 +90,7 @@ class ClearingDao extends Object
 
     $sql_upload="";
     if ('uploadtree_a' == $uploadTreeTable) {
-      $sql_upload = "upload_fk=$1  and ";
+      $sql_upload = "ut.upload_fk=$1  and ";
     }
 
     $secondJoin = " INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
