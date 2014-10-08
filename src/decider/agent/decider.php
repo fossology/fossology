@@ -65,53 +65,38 @@ class DeciderAgent extends Agent
     }
   }
 
-  private function hasOnlyNewerEventsInJob($events, $date, $jobId)
+  static protected function hasOnlyNewerEventsInJob($events, $date, $jobId)
   {
     foreach($events as $licName => $properties)
     {
       $eventDate = $properties['dateAdded'];
-      if (($eventDate > $date) && ($properties['jobId'] !== $jobId))
+      if (($properties['jobId'] !== $jobId) && (($date !== null)&&($eventDate <= $date)))
         return false;
     }
 
     return true;
   }
 
-  private function getDateOfLastRelevantClearing($userId, $uploadTreeId){
+  protected function getDateOfLastRelevantClearing($userId, $uploadTreeId){
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
     if (array_key_exists('date_added', $lastDecision))
       $lastDecisionDate = $lastDecision['date_added'];
     else
-      $lastDecisionDate = 0;
+      $lastDecisionDate = null;
     return $lastDecisionDate;
   }
 
-  private function filterOnlyEventsAfter(&$events, $date)
-  {
-    $filtered = false;
-    foreach($events as $licenseShortName => $properties)
-    {
-      if ($properties['dateAdded'] < $date)
-      {
-        $filtered = true;
-        unset($events[$licenseShortName]);
-      }
-    }
-    return $filtered;
-  }
 
-  private function filterOnlyAutomaticEvents(&$events, $date)
+  /* true if small is a subset of big */
+  static protected function array_contains($big, $small)
   {
-    $filtered = false;
-    foreach($events as $licenseShortName => $properties)
-    {
-      if ($properties['jobId'] == null)
-      {
-        $filtered = true;
-        unset($events[$licenseShortName]);
-      }
+    foreach($small as $key => $value) {
+      if (!array_key_exists($key, $big))
+        return false;
+      if ($big[$key] != $value)
+        return false;
     }
-    return $filtered;
+    return true;
   }
 
   function processUploadId($uploadId)
@@ -131,30 +116,36 @@ class DeciderAgent extends Agent
       $canAutoDecide = true;
       list($added, $removed) = $this->clearingDao->getCurrentLicenseDecision($userId, $uploadTreeId);
 
-      /*
-      if ($lastDecisionDate === 0)
+      /* TODO @1
+       *
+       * a concurrent bulk scan could have created an event
+       * and its decider could have not yet arrived here
+       *
+       * we get two events which should be auto-decided,
+       * but neither decider has an opportunity
+       *
+       * what do we do?
+       */
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
+
+      if (($canAutoDecide) && ($lastDecisionDate === null))
       {
-        $this->filterOnlyEventsAfter($added, $lastDecisionDate);
-        $this->filterOnlyEventsAfter($removed, $lastDecisionDate);
+        /* if there was no previous decision
+         * we check that the events from this job (TODO @1 ?)
+         * at least confirm or remove all the licenses found by the scanners
+         */
 
-        $addedLicenses = array_keys($added);
-        $removedLicenses = array_keys($removed);
+        $changedLicenses = array_merge(array_keys($added),array_keys($removed));
 
-        $this->filterOnlyAutomaticEvents($added);
-        $this->filterOnlyAutomaticEvents($removed);
+        $agentDetectedLicenses = array_keys($this->clearingDecisionEventProcessor->getAgentDetectedLicenses($itemTreeBounds));
 
-        $agentDetectedLicenses = array_keys($this->clearingDecisionEventProcessor->getAgentDetectedLicenses($itemTreeBounds, $userId));
-
+        $canAutoDecide = (DeciderAgent::array_contains($changedLicenses, $agentDetectedLicenses));
       }
-      else
-      {*/
-        $canAutoDecide &= $this->hasOnlyNewerEventsInJob($added, $lastDecisionDate, $jobId);
-        $canAutoDecide &= $this->hasOnlyNewerEventsInJob($removed, $lastDecisionDate, $jobId);
-      //}
 
       if ($canAutoDecide)
       {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->decisionType, $this->decisionIsGlobal);
+        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $this->decisionType, $this->decisionIsGlobal);
         $this->heartbeat(1);
       }
       else
