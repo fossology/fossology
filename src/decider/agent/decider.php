@@ -70,7 +70,7 @@ class DeciderAgent extends Agent
     foreach($events as $licName => $properties)
     {
       $eventDate = $properties['dateAdded'];
-      if (($properties['jobId'] !== $jobId) && (($date !== null)&&($eventDate <= $date)))
+      if (($properties['jobId'] !== $jobId) && (($date !== null)&&($eventDate > $date)))
         return false;
     }
 
