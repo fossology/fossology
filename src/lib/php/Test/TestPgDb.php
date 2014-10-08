@@ -190,16 +190,12 @@ class TestPgDb
       if( $invert^!in_array($tableName, $tableList) ){
         continue;
       }
-      $columns = array();
-      // $pattern = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;"";
-      foreach ($tableCols as $col => $attributes)
+      $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
+      foreach ($tableCols as $attributes)
       {
-        $sql = $attributes["ADD"];
-        $alterSql = explode('"', $sql);
-        $columns[$alterSql[3]] = "$alterSql[3] " . substr($alterSql[4], 0, -1);
+        $this->dbManager->queryOnce($attributes["ADD"]);
+//        $this->dbManager->queryOnce($attributes["ALTER"]);
       }
-      $createSql = "CREATE TABLE $tableName (" . implode(',', $columns) . ')';
-      $this->dbManager->queryOnce($createSql);
     }
   }
   
@@ -228,10 +224,6 @@ class TestPgDb
         $offset = $nextOffset;
         continue;
       }
-      $sql = str_replace(' false,', " 'false',", $sql);
-      $sql = str_replace(' true,', " 'true',", $sql);
-      $sql = str_replace(' false)', " 'false')", $sql);
-      $sql = str_replace(' true)', " 'true')", $sql);
       $this->dbManager->queryOnce($sql);
       $offset = $nextOffset;
     }
@@ -247,9 +239,7 @@ class TestPgDb
 
     for ($i = 1; $i < count($splitted); $i++)
     {
-      $partial = $splitted[$i];
-      $sql = $delimiter . str_replace(' false,', " 'false',", $partial);
-      $sql = str_replace(' true,', " 'true',", $sql);
+      $sql = $splitted[$i];
       $this->dbManager->queryOnce($sql);
       if ($i > $limit)
       {
