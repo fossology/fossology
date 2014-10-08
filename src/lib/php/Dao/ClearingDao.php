@@ -40,8 +40,6 @@ class ClearingDao extends Object
   public $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
-  /** @var int */
-  private $uploadTreeId = 0;
 
   /**
    * @param DbManager $dbManager
@@ -65,12 +63,6 @@ class ClearingDao extends Object
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
     return $this->getFileClearingsFolder($itemTreeBounds);
   }
-
-  function booleanFromPG($in)
-  {
-    return $in == 't';
-  }
-
 
 
 
@@ -110,8 +102,8 @@ class ClearingDao extends Object
     while ($row = $this->dbManager->fetchArray($result))
     {
       $clearingDec = ClearingDecisionBuilder::create()
-          ->setSameUpload($this->booleanFromPG($row['same_upload']))
-          ->setSameFolder($this->booleanFromPG($row['is_local']))
+          ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
+          ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
           ->setLicenses($this->getFileClearingLicenses($row['id']))
           ->setClearingId($row['id'])
           ->setUploadTreeId($row['uploadtree_id'])
