@@ -65,4 +65,15 @@ interface Driver
    */
   public function fetchArray($res);
 
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue);
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue);
 }

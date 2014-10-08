@@ -115,4 +115,21 @@ class Postgres implements Driver
     return pg_fetch_array($res);
   }
 
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    return $booleanValue === 't';
+  }
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 't' : 'f';
+  }
 }

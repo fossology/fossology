@@ -136,4 +136,21 @@ class SqliteE implements Driver
     return $res->fetchArray();
   }
 
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    return $booleanValue === 1;
+  }
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 1 : 0;
+  }
 }

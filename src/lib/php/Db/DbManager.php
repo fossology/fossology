@@ -207,5 +207,13 @@ class DbManager extends Object
     $this->queryCount[$statementName]++;
   }
 
+  public function booleanFromDb($booleanValue)
+  {
+    return $this->dbDriver->booleanFromDb($booleanValue);
+  }
 
+  public function booleanToDb($booleanValue)
+  {
+    return $this->dbDriver->booleanToDb($booleanValue);
+  }
 }

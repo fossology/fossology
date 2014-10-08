@@ -64,7 +64,8 @@ class CopyRightDaoTest extends \PHPUnit_Framework_TestCase
 you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 698, 899)
 ",
             __METHOD__.'.insert.data');*/
-    $highlight0 = reset($copyrightDao->getCopyrightHighlights($uploadTreeId=1));
+    $tmp=$copyrightDao->getCopyrightHighlights($uploadTreeId=1);
+    $highlight0 = reset($tmp);
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     $this->assertEquals($expected=899, $highlight0->getEnd());    
   }

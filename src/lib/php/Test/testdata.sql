@@ -73,10 +73,10 @@ INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, ty
 INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (9, 22, 3, 2, 2, 1, '', '', '2014-08-07 10:04:19.403175+00');
 INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (10, 19, 8, 2, 1, 2, '', '', '2014-08-07 10:05:34.48741+00');
 INSERT INTO clearing_decision (clearing_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (11, 20, 6, 2, 1, 1, '', '', '2014-08-07 10:06:29.394152+00');
-INSERT INTO clearing_decision_scopes (type, meaning) VALUES (1, 'global');
-INSERT INTO clearing_decision_scopes (type, meaning) VALUES (2, 'upload');
-INSERT INTO clearing_decision_types (type, meaning) VALUES (1, 'User decision');
-INSERT INTO clearing_decision_types (type, meaning) VALUES (2, 'To be determined');
+INSERT INTO clearing_decision_scopes (scope_pk, meaning) VALUES (1, 'global');
+INSERT INTO clearing_decision_scopes (scope_pk, meaning) VALUES (2, 'upload');
+INSERT INTO clearing_decision_types (type_pk, meaning) VALUES (1, 'User decision');
+INSERT INTO clearing_decision_types (type_pk, meaning) VALUES (2, 'To be determined');
 INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (1, 199);
 INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (2, 454);
 INSERT INTO clearing_licenses (clearing_fk, rf_fk) VALUES (3, 544);

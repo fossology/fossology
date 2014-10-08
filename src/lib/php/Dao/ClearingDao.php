@@ -75,12 +75,6 @@ class ClearingDao extends Object
     return $this->getFileClearingsFolder($fileTreeBounds);
   }
 
-  function booleanFromPG($in)
-  {
-    return $in == 't';
-  }
-
-
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
@@ -89,10 +83,22 @@ class ClearingDao extends Object
    */
   function getFileClearingsFolder(FileTreeBounds $fileTreeBounds)
   {
-    $statementName = __METHOD__;
 
-    $this->dbManager->prepare($statementName,
-        "SELECT
+    //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
+    //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
+    $uploadTreeTable=$fileTreeBounds->getUploadTreeTableName();
+
+    $sql_upload="";
+    if ('uploadtree_a' == $uploadTreeTable) {
+      $sql_upload = "upload_fk=$1  and ";
+    }
+
+    $secondJoin = " INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
+           WHERE $sql_upload ut.lft BETWEEN $2 and $3 ";
+
+    $statementName = __METHOD__.$uploadTreeTable;
+
+    $sql="SELECT
            CD.clearing_pk AS id,
            CD.uploadtree_fk AS uploadtree_id,
            CD.pfile_fk AS pfile_id,
@@ -110,18 +116,22 @@ class ClearingDao extends Object
          LEFT JOIN clearing_decision_scopes CD_scopes ON CD.scope_fk=CD_scopes.scope_pk
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
-         INNER JOIN uploadtree ut ON CD.pfile_fk = ut.pfile_fk
-           WHERE ut.upload_fk=$1 and ut.lft BETWEEN $2 and $3
-         ORDER by CD.pfile_fk, CD.clearing_pk desc");
-// the array needs to be sorted with the newest clearingDecision first.
+         $secondJoin
+         GROUP BY id,uploadtree_id,pfile_id,user_name,user_id,type,scope,comment,reportinfo,date_added,same_upload,is_local
+         ORDER by CD.pfile_fk, CD.clearing_pk desc";
+
+    $this->dbManager->prepare($statementName,
+     $sql);
+
+    // the array needs to be sorted with the newest clearingDecision first.
     $result = $this->dbManager->execute($statementName, array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
     $clearingsWithLicensesArray = array();
 
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $clearingDec = ClearingDecisionBuilder::create()
-          ->setSameUpload($this->booleanFromPG($row['same_upload']))
-          ->setSameFolder($this->booleanFromPG($row['is_local']))
+          ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
+          ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
           ->setLicenses($this->getFileClearingLicenses($row['id']))
           ->setClearingId($row['id'])
           ->setUploadTreeId($row['uploadtree_id'])
@@ -137,8 +147,7 @@ class ClearingDao extends Object
 
       $clearingsWithLicensesArray[] = $clearingDec;
     }
-
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     return $clearingsWithLicensesArray;
   }
 
@@ -165,7 +174,7 @@ class ClearingDao extends Object
     {
       $licenses[] = new LicenseRef($rw['rf'], $rw['shortname'], $rw['fullname']);
     }
-    pg_free_result($res);
+    $this->dbManager->freeResult($res);
     return $licenses;
   }
 
@@ -281,9 +290,11 @@ class ClearingDao extends Object
    * @param FileTreeBounds $fileTreeBounds
    * @return array
    */
-  public function getEditedLicenseShortnamesContainedWithCount(FileTreeBounds $fileTreeBounds)
+  public function getEditedLicenseShortnamesContainedWithCount(FileTreeBounds $fileTreeBounds, $licenses=null)
   {
+    if(empty($licenses))
     $licenses = $this->getEditedLicenseShortNamesFullList($fileTreeBounds);
+
     $uniqueLicenses = array_unique($licenses);
     $licensesWithCount = array();
 
