@@ -66,7 +66,7 @@ class TestPgDb
       $howmany = fwrite($pgpassHandle, $contents);
       if($howmany === FALSE)
       {
-        throw new Exception("FATAL! Could not write .pgpass file to $pgpassHandle" );
+        throw new \Exception("FATAL! Could not write .pgpass file to $pgpassHandle" );
       }
       fclose($pgpassHandle);
     }
@@ -77,7 +77,7 @@ class TestPgDb
     
     if(!mkdir($this->sys_conf,0755,TRUE))
     {
-      throw new Exception("FATAL! Cannot create test repository at ".$this->sys_conf);
+      throw new \Exception("FATAL! Cannot create test repository at ".$this->sys_conf);
     }
     if(chmod($this->sys_conf, 0755) === FALSE )
     {
@@ -86,7 +86,7 @@ class TestPgDb
     $conf = "dbname=$dbName;\nhost=localhost;\nuser=fossy;\npassword=fossy;\n";
     if(file_put_contents($this->sys_conf . "/Db.conf", $conf) === FALSE)
     {
-      throw new Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
+      throw new \Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
     }
     
     
@@ -96,13 +96,13 @@ class TestPgDb
 
     if(!chdir($TESTROOT . '/db'))
     {
-      throw new Exception("FATAL! could no cd to $TESTROOT/db\n");
+      throw new \Exception("FATAL! could no cd to $TESTROOT/db\n");
     }
     $cmd = "sudo ./ftdbcreate.sh $dbName 2>&1";
     exec($cmd, $cmdOut, $cmdRtn);
     if($cmdRtn != 0)
     {
-      throw new Exception("Error could not create Data Base $dbName in $TESTROOT ($cmdRtn)\n");
+      throw new \Exception("Error could not create Data Base $dbName in $TESTROOT ($cmdRtn)\n");
     }
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
