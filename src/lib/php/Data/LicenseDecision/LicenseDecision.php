@@ -1,7 +1,6 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,75 +15,54 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+namespace Fossology\Lib\Dao\Data\LicenseDecision;
 
-namespace Fossology\Lib\Data;
+use Fossology\Lib\Data\License\LicenseAlike;
 
-
-use DateTime;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
-
-class ClearingDecisionData {
+interface LicenseDecision extends LicenseAlike
+{
+  /**
+   * @return string
+   */
+  public function getComment();
 
   /**
-   * @var bool
+   * @return float
    */
-  protected $sameUpload;
+  public function getEpoch();
 
   /**
-   * @var bool
+   * @return int
    */
-  protected $sameFolder;
+  public function getEventId();
 
   /**
-   * @var ClearingLicense[]
+   * @return string
    */
-  protected $licenses;
+  public function getEventType();
 
   /**
-   * @var int
+   * @return int
    */
-  protected $clearingId;
+  public function getLicenseId();
 
   /**
-   * @var int
+   * @return string
    */
-  protected $uploadTreeId;
+  public function getLicenseShortName();
 
   /**
-   * @var int
+   * @return string
    */
-  protected $pfileId;
-  /**
-   * @var string
-   */
-  protected $userName;
-  /**
-   * @var int
-   */
-  protected $userId;
+  public function getReportinfo();
 
   /**
-   * @var string
+   * @return boolean
    */
-  protected $type;
+  public function isGlobal();
 
   /**
-   * @var string
+   * @return boolean
    */
-  protected $comment;
-
-  /**
-   * @var string
-   */
-  protected $reportinfo;
-
-  /**
-   * @var string
-   */
-  protected $scope;
-
-  /**
-   * @var DateTime
-   */
-  protected $date_added;
-} 
+  public function isRemoved();
+}

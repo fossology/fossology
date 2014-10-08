@@ -1,7 +1,6 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,32 +16,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Dao\Data\LicenseDecision;
 
 
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\License\LicenseAlike;
+use Fossology\Lib\Data\LicenseRef;
 
-class LicenseRef implements LicenseAlike
-{
-  /** @var int */
-  private $id;
-
-  /** @var string */
-  private $shortName;
-
-  /** @var string */
-  private $fullName;
+class AgentLicenseDecisionEvent implements LicenseAlike {
+  /**
+   * @var LicenseRef
+   */
+  private $licenseRef;
+  /**
+   * @var AgentRef
+   */
+  private $agentRef;
+  /**
+   * @var int
+   */
+  private $matchId;
+  /**
+   * @var int
+   */
+  private $percentage;
 
   /**
-   * @param $licenseId
-   * @param $licenseShortName
-   * @param $licenseName
+   * @param LicenseRef $licenseRef
+   * @param AgentRef $agentRef
+   * @param int $matchId
+   * @param null|int $percentage
    */
-  function __construct($licenseId, $licenseShortName, $licenseName)
-  {
-    $this->id = $licenseId;
-    $this->shortName = $licenseShortName;
-    $this->fullName = $licenseName ? : $licenseShortName;
+  public function __construct(LicenseRef $licenseRef, AgentRef $agentRef, $matchId, $percentage) {
+
+    $this->licenseRef = $licenseRef;
+    $this->agentRef = $agentRef;
+    $this->matchId = $matchId;
+    $this->percentage = $percentage;
   }
 
   /**
@@ -50,7 +60,7 @@ class LicenseRef implements LicenseAlike
    */
   public function getId()
   {
-    return $this->id;
+    $this->licenseRef->getId();
   }
 
   /**
@@ -58,7 +68,7 @@ class LicenseRef implements LicenseAlike
    */
   public function getFullName()
   {
-    return $this->fullName;
+    $this->licenseRef->getFullName();
   }
 
   /**
@@ -66,12 +76,6 @@ class LicenseRef implements LicenseAlike
    */
   public function getShortName()
   {
-    return $this->shortName;
+    $this->licenseRef->getShortName();
   }
-  
-  public function __toString()
-  {
-    return 'LicenseRef('.$this->id.')';
-  }
-
 }

@@ -69,7 +69,7 @@ class LicenseProcessor extends Object
       if($match->getType()=="bulk") {
         foreach($match->getLicenses() as $license) {
 
-          if($license->getRemoved()) {
+          if($license->isRemoved()) {
 
             $agentName = _("Bulk removal");
             $agentId = 1;

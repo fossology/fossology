@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 class ClearingDecision extends ClearingDecisionData
 {
@@ -73,7 +74,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return \Fossology\Lib\Data\LicenseRef[]
+   * @return ClearingLicense[]
    */
   public function getLicenses()
   {

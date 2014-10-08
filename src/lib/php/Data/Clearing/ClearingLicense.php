@@ -1,7 +1,6 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,61 +16,59 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Data\Clearing;
 
 
 use Fossology\Lib\Data\License\LicenseAlike;
+use Fossology\Lib\Data\LicenseRef;
 
-class LicenseRef implements LicenseAlike
-{
-  /** @var int */
-  private $id;
+class ClearingLicense implements LicenseAlike {
 
-  /** @var string */
-  private $shortName;
+  /** @var LicenseRef */
+  private $licenseRef;
 
-  /** @var string */
-  private $fullName;
+  /** @var bool */
+  private $removed;
 
   /**
-   * @param $licenseId
-   * @param $licenseShortName
-   * @param $licenseName
+   * @param LicenseRef $licenseRef
+   * @param boolean $removed
    */
-  function __construct($licenseId, $licenseShortName, $licenseName)
-  {
-    $this->id = $licenseId;
-    $this->shortName = $licenseShortName;
-    $this->fullName = $licenseName ? : $licenseShortName;
+  public function __construct(LicenseRef $licenseRef, $removed) {
+
+    $this->licenseRef = $licenseRef;
+    $this->removed = $removed;
   }
 
   /**
    * @return int
    */
-  public function getId()
+  function getId()
   {
-    return $this->id;
+    $this->licenseRef->getId();
   }
 
   /**
    * @return string
    */
-  public function getFullName()
+  function getFullName()
   {
-    return $this->fullName;
+    $this->licenseRef->getFullName();
   }
 
   /**
    * @return string
    */
-  public function getShortName()
+  function getShortName()
   {
-    return $this->shortName;
-  }
-  
-  public function __toString()
-  {
-    return 'LicenseRef('.$this->id.')';
+    $this->licenseRef->getShortName();
   }
 
+  /**
+   * @return boolean
+   */
+  public function isRemoved()
+  {
+    return $this->removed;
+  }
 }
