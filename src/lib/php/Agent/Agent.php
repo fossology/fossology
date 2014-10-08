@@ -19,7 +19,7 @@ require_once(dirname(dirname(__FILE__))."/common-cli.php");
 
 define("ALARM_SECS", 30);
 
-class Agent extends Object
+abstract class Agent extends Object
 {
   private $agentName;
   private $agentVersion;
@@ -164,9 +164,7 @@ class Agent extends Object
     return $row['agent_pk'];
   }
 
-  function processUploadId($uploadId){
-    return false;
-  }
+  abstract protected function processUploadId($uploadId);
 
   private function scheduler_current()
   {

@@ -90,13 +90,7 @@ class DeciderAgent extends Agent
   /* true if small is a subset of big */
   static protected function array_contains($big, $small)
   {
-    foreach($small as $key => $value) {
-      if (!array_key_exists($key, $big))
-        return false;
-      if ($big[$key] != $value)
-        return false;
-    }
-    return true;
+    return count(array_diff($small,$big)) == 0;
   }
 
   function processLicenseDecisionEventOfCurrentJob()
