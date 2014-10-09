@@ -46,23 +46,23 @@ function setNextPrev(uploadId, uploadTreeId) {
             var form =  $('#{{ formName }}');
             var next = $('#next');
             if(data.next !== null) {
-                next.show();
+                next.prop('disabled', false);
                 next.click(function () {
                     form.attr('action', data.uri + '&item=' + data.next);
                 });
             }
             else  {
-                next.hide();
+                next.prop('disabled', true);
             }
             var prev = $('#prev');
             if(data.prev !== null) {
-                prev.show();
+                prev.prop('disabled', false);
                 prev.click(function () {
                     form.attr('action', data.uri + '&item=' + data.prev);
                 });
             }
             else {
-                prev.hide();
+                prev.prop('disabled', true);
             }
         })
         .fail(failed);
