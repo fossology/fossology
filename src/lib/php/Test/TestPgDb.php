@@ -85,11 +85,8 @@ class TestPgDb
     }    
     else
     {
-      $TESTROOT = dirname(dirname(dirname(dirname(__FILE__))))."/testing";
-      $fosstestSql = file_get_contents($TESTROOT.'/db/fosstestinit.sql');
+      $fosstestSql = file_get_contents( dirname(__FILE__).'/fosstestinit.sql');
       $fossSql = str_replace('fosstest',$dbName,$fosstestSql);
-      $fossSql = str_replace('CREATE OR REPLACE LANGUAGE plpgsql;','',$fossSql);
-      $fossSql = str_replace("COMMENT ON SCHEMA public IS 'Standard public schema';",'',$fossSql);
       $pathSql = $this->sys_conf.'/dbinit.sql';
       file_put_contents($pathSql,$fossSql);
       exec($cmd="psql -Ufossy fossology < $pathSql", $cmdOut, $cmdRtn); //  2>&1
