@@ -69,7 +69,7 @@ class DbManager extends Object
     {
       if ($this->preparedStatements[$statementName] !== $sqlStatement)
       {
-        Fatal("Existing Statement mismatch: $statementName", __FILE__, __LINE__);
+        throw new \Exception("Existing Statement mismatch: $statementName");
       }
       return;
     }
@@ -91,7 +91,7 @@ class DbManager extends Object
   {
     if (!array_key_exists($statementName, $this->preparedStatements))
     {
-      Fatal("Unknown Statement", __FILE__, __LINE__);
+      throw new \Exception("Unknown Statement");
     }
     $startTime = microtime($get_as_float = true);
     $res = $this->dbDriver->execute($statementName, $params);
