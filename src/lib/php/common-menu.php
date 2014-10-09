@@ -160,8 +160,8 @@ function menu_cmp(&$a, &$b) {
  * If $URI is blank, nothing is added.
  *
  * @param $menuItems
- * @param $Path
- * @param $PathRemainder
+ * @param $path
+ * @param $pathRemainder
  * @param $LastOrder
  * @param $Target
  * @param $URI
@@ -169,16 +169,18 @@ function menu_cmp(&$a, &$b) {
  * @param $Title
  * @return int the max depth of menu
  */
-function menu_insert_r(&$menuItems, $Path, $PathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
+function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
 {
-  list($pathElement, $PathRemainder) = explode(MENU_PATH_SEPARATOR, $PathRemainder, 2);
-  $hasPathComponent = isset($pathElement) && $pathElement !== "";
+  $splitPath = explode(MENU_PATH_SEPARATOR, $pathRemainder, 2);
+  $pathElement = count($splitPath) > 0 ? $splitPath[0] : null;
+  $pathRemainder = count($splitPath) > 1 ? $splitPath[1] : null;
+  $hasPathComponent = $pathElement !== null && $pathElement !== "";
 
   if (!$hasPathComponent) {
     return 0;
   }
 
-  $isLeaf = !isset($PathRemainder);
+  $isLeaf = $pathRemainder === null;
   $menuItemsExist = isset($menuItems) && is_array($menuItems);
 
   $currentMenuItem = NULL;
@@ -196,8 +198,8 @@ function menu_insert_r(&$menuItems, $Path, $PathRemainder, $LastOrder, $Target, 
     }
   }
 
-  $Path[] = $pathElement;
-  $FullName = str_replace(" ", "_", implode(MENU_PATH_SEPARATOR, $Path));
+  $path[] = $pathElement;
+  $FullName = str_replace(" ", "_", implode(MENU_PATH_SEPARATOR, $path));
 
   $sortItems = false;
   $currentItemIsMissing = empty($currentMenuItem);
@@ -228,7 +230,7 @@ function menu_insert_r(&$menuItems, $Path, $PathRemainder, $LastOrder, $Target, 
     $currentMenuItem->Title = $Title;
   }
   else {
-    $Depth = menu_insert_r($currentMenuItem->SubMenu, $Path, $PathRemainder, $LastOrder, $Target, $URI, $HTML, $Title);
+    $Depth = menu_insert_r($currentMenuItem->SubMenu, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, $Title);
     $currentMenuItem->MaxDepth = max ($currentMenuItem->MaxDepth, $Depth + 1);
   }
 
@@ -236,7 +238,7 @@ function menu_insert_r(&$menuItems, $Path, $PathRemainder, $LastOrder, $Target, 
     usort($menuItems, 'menu_cmp');
   }
 
-  array_pop($Path);
+  array_pop($path);
   return ($currentMenuItem->MaxDepth);
 } // menu_insert_r()
 
