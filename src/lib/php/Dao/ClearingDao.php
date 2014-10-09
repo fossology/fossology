@@ -285,7 +285,6 @@ class ClearingDao extends Object
    */
   public function getEditedLicenseShortNamesFullList(ItemTreeBounds $itemTreeBounds)
   {
-
     $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates);
     return $licenses;
