@@ -293,7 +293,6 @@ class AjaxClearingView extends FO_Plugin
 
     list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
-    $licenseDecisions = $this->sortByKeys($licenseDecisions, $orderAscending);
 
     $table = array();
     foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
@@ -322,7 +321,7 @@ class AjaxClearingView extends FO_Plugin
       $commentField = $comment;
 
       $id = "$uploadTreeId,$licenseId";
-      $table[] = array('DT_RowId' => $id,
+      $table[$licenseShortName] = array('DT_RowId' => $id,
           '0' => $licenseShortNameWithLink,
           '1' => implode("<br/>", $types),
           '2' => $reportInfoField,
@@ -330,7 +329,7 @@ class AjaxClearingView extends FO_Plugin
           '4' => $actionLink);
     }
 
-    foreach ($this->sortByKeys($removedLicenses, $orderAscending) as $licenseShortName => $licenseDecisionResult)
+    foreach ($removedLicenses as $licenseShortName => $licenseDecisionResult)
     {
       if ($licenseDecisionResult->getAgentDecisionEvents()) {
         $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
@@ -340,7 +339,7 @@ class AjaxClearingView extends FO_Plugin
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);
-        $table[] = array('DT_RowId' => $id,
+        $table[$licenseShortName] = array('DT_RowId' => $id,
             '0' => $licenseShortNameWithLink,
             '1' => implode("<br/>", $agents),
             '2' => "n/a",
@@ -348,6 +347,8 @@ class AjaxClearingView extends FO_Plugin
             '4' => $actionLink);
       }
     }
+
+    $table = array_values($this->sortByKeys($table, $orderAscending));
 
     return $table;
   }
@@ -390,19 +391,19 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param $orderAscending
-   * @param $licenseDecisions
+   * @param $arrayToBeSortedByKeys
    * @return array
    */
-  protected function sortByKeys(&$licenseDecisions, $orderAscending)
+  protected function sortByKeys($arrayToBeSortedByKeys, $orderAscending)
   {
-    ksort($licenseDecisions, SORT_STRING);
+    ksort($arrayToBeSortedByKeys, SORT_STRING);
 
     if ($orderAscending)
     {
-      $licenseDecisions = array_reverse($licenseDecisions);
-      return $licenseDecisions;
+      $arrayToBeSortedByKeys = array_reverse($arrayToBeSortedByKeys);
+      return $arrayToBeSortedByKeys;
     }
-    return $licenseDecisions;
+    return $arrayToBeSortedByKeys;
   }
 }
 

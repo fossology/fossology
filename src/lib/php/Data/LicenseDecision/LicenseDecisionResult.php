@@ -37,8 +37,12 @@ class LicenseDecisionResult implements LicenseDecision {
   /**
    * @param null|LicenseDecisionEvent $licenseDecisionEvent
    * @param AgentLicenseDecisionEvent[] $agentDecisionEvents
+   * @throws Exception
    */
   public function __construct($licenseDecisionEvent, $agentDecisionEvents=array()) {
+    if (!isset($licenseDecisionEvent) && count($agentDecisionEvents == 0)) {
+      throw new Exception("cannot create LicenseDecisionEvent without any event contained");
+    }
 
     $this->licenseDecisionEvent = $licenseDecisionEvent;
     $this->agentDecisionEvents = $agentDecisionEvents;
@@ -137,6 +141,7 @@ class LicenseDecisionResult implements LicenseDecision {
     foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
       return $agentDecisionEvent;
     }
+    print "licenseDecisionEvent: $this->licenseDecisionEvent\n";
     throw new Exception("could not determine license");
   }
 

@@ -35,22 +35,12 @@ EOF
 }
 
 _testAllNone(){
-  out="$( _runmonk -v "$@" | grep 'no match' )"
+  out="$( _runmonk -v "$@" | grep 'No_license_found' | wc -l )"
 
   if [ -z "${out}" ]; then
     fail "no result for $*"
   else
-    while IFS='"' read t1 a t2; do
-      found=''
-      for file; do
-        if [ "x$file" = "x$a" ]; then
-          found='yes'
-        fi
-      done
-      assertEquals "$found" "yes"
-    done <<EOF
-$out
-EOF
+   assertEquals $out "$#"
   fi
 }
 

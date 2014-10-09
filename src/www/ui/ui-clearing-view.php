@@ -23,6 +23,7 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
@@ -91,15 +92,15 @@ class ClearingView extends FO_Plugin
 
 
   /**
-   * @param $uploadTreeId
+   * @param ItemTreeBounds $itemTreeBounds
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
    * @return array
    */
-  private function getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId)
+  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
     if ($selectedAgentId > 0)
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
@@ -224,7 +225,7 @@ class ClearingView extends FO_Plugin
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($uploadTreeId, $licenseId, $selectedAgentId, $highlightId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
     $hasHighlights = count($highlights) > 0;
 
     $permission = GetUploadPerm($uploadId);

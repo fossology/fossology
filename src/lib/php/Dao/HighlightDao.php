@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -58,21 +59,24 @@ class HighlightDao extends Object
   }
 
   /**
-   * @param int $uploadTreeId
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int $licenseId
    * @param int $agentId
    * @param null $highlightId
    * @return array
-   */ 
-  private function getHighlightDiffs($uploadTreeId, $licenseId = null, $agentId = null, $highlightId = null)
+   */
+  private function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
+    $params =array($itemTreeBounds->getUploadTreeId());
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+
     $sql = "SELECT start,len,type,rf_fk,rf_start,rf_len
             FROM license_file
               INNER JOIN highlight ON license_file.fl_pk = highlight.fl_fk
-              INNER JOIN uploadtree ON uploadtree.pfile_fk = license_file.pfile_fk
+              INNER JOIN $uploadTreeTableName ut ON ut.pfile_fk = license_file.pfile_fk
               WHERE uploadtree_pk = $1 AND (type LIKE 'M_' OR type = 'L')";
-    $params = array($uploadTreeId);
-    $stmt = __METHOD__;
+
+    $stmt = __METHOD__.$uploadTreeTableName;
     if (!empty($licenseId))
     {
       $params[] = $licenseId;
@@ -111,18 +115,20 @@ class HighlightDao extends Object
     $this->dbManager->freeResult($result);
     return $highlightEntries;
   }
-  
-  /*
-   * @param int $uploadTreeId
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
    */
-  private function getHighlightKeywords($uploadTreeId)
+  private function getHighlightKeywords(ItemTreeBounds $itemTreeBounds)
   {
-    $stmt = __METHOD__;
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $stmt = __METHOD__.$uploadTreeTableName;
     $sql = "SELECT start,len
              FROM highlight_keyword
-             WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)";
+             WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
     $this->dbManager->prepare($stmt, $sql);
-    $result = $this->dbManager->execute($stmt, array($uploadTreeId));
+    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getUploadTreeId()));
     $highlightEntries = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
@@ -134,28 +140,34 @@ class HighlightDao extends Object
     return $highlightEntries;
   }
 
-  /*
-   * @param int $uploadTreeId
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param $licenseId
+   * @param $agentId
+   * @param $highlightId
+   * @return array
    */
-  private function getHighlightBulk($uploadTreeId, $licenseId, $agentId, $highlighId)
+  private function getHighlightBulk(ItemTreeBounds $itemTreeBounds, $licenseId, $agentId, $highlightId)
   {
-    $stmt = __METHOD__;
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+
+    $stmt = __METHOD__.$uploadTreeTableName;
     $sql = "SELECT license_decision_event_fk,start,len, rf_fk
              FROM highlight_bulk INNER JOIN license_ref_bulk
              ON license_ref_bulk.lrb_pk = highlight_bulk.lrb_fk
-             WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
+             WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)
              AND rf_fk = $2";
-    $params = array($uploadTreeId, $licenseId);
+    $params = array($itemTreeBounds->getUploadTreeId(), $licenseId);
     if (!empty($agentId))
     {
       $stmt .= ".Agent";
       $params[] = $agentId == 2 ? "f" : "t";
       $sql .= " AND license_ref_bulk.removing = $" . count($params);
     }
-    if (!empty($highlighId))
+    if (!empty($highlightId))
     {
       $stmt .= ".Highlight";
-      $params[] = $highlighId;
+      $params[] = $highlightId;
       $sql .= " AND highlight_bulk.license_decision_event_fk = $" . count($params);
     }
     $this->dbManager->prepare($stmt, $sql);
@@ -172,18 +184,18 @@ class HighlightDao extends Object
     $this->dbManager->freeResult($result);
     return $highlightEntries;
   }
-  
+
   /**
-   * @param int $item
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int $licenseId
    * @param int $agentId
    * @param null $highlightId
    * @return array
-   */ 
-  public function getHighlightEntries($item, $licenseId = null, $agentId = null, $highlightId = null){
-    $highlightDiffs = $this->getHighlightDiffs($item, $licenseId, $agentId, $highlightId);
-    $highlightKeywords = $this->getHighlightKeywords($item);
-    $highlightBulk = $this->getHighlightBulk($item, $licenseId, $agentId, $highlightId);
+   */
+  public function getHighlightEntries(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null){
+    $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
+    $highlightKeywords = $this->getHighlightKeywords($itemTreeBounds);
+    $highlightBulk = $this->getHighlightBulk($itemTreeBounds, $licenseId, $agentId, $highlightId);
     $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
     return $highlightEntries;
   }

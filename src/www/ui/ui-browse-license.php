@@ -194,8 +194,9 @@ class ui_browse_license extends FO_Plugin
     $V .= $this->buildAgentSelector($allScans);
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId);
+    $licenseCandidates = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $licenseCandidates);
+    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -341,7 +342,7 @@ class ui_browse_license extends FO_Plugin
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId)
+  public function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
@@ -358,7 +359,7 @@ class ui_browse_license extends FO_Plugin
     $VF = ""; // return values for file listing
     $AddInfoText = "";
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    $editedPfileLicenses = $this->clearingDao->getGoodClearingDecPerFileId($itemTreeBounds);
+    $editedPfileLicenses = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -573,11 +574,12 @@ class ui_browse_license extends FO_Plugin
    * @param int|null $agentId
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId)
+  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $licenseCandidates)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($itemTreeBounds);
+    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($itemTreeBounds, $this->clearingDao
+                          ->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates));
 
     return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }

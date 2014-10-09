@@ -220,7 +220,7 @@ class DbManager extends Object
     $this->freeResult($res);
     return $map;
   }
-  
+
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
@@ -260,7 +260,7 @@ class DbManager extends Object
   {
     return $this->dbDriver->booleanToDb($booleanValue);
   }
-  
+
   /**
    * @param string
    * @param string
