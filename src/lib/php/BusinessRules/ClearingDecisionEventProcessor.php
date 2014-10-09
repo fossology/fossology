@@ -165,14 +165,17 @@ class ClearingDecisionEventProcessor
         }
       }
 
-      $licenseDecisionResult = new LicenseDecisionResult($licenseDecisionEvent, $agentLicenseDecisionEvents);
+      if (($licenseDecisionEvent !== null) || (count($agentLicenseDecisionEvents) > 0))
+      {
+        $licenseDecisionResult = new LicenseDecisionResult($licenseDecisionEvent, $agentLicenseDecisionEvents);
 
-      if (array_key_exists($licenseShortName, $removedLicenses))
-      {
-        $removed[$licenseShortName] = $licenseDecisionResult;
-      } else
-      {
-        $licenseDecisions[$licenseShortName] = $licenseDecisionResult;
+        if (array_key_exists($licenseShortName, $removedLicenses))
+        {
+          $removed[$licenseShortName] = $licenseDecisionResult;
+        } else
+        {
+          $licenseDecisions[$licenseShortName] = $licenseDecisionResult;
+        }
       }
     }
 
