@@ -18,12 +18,12 @@
             aoData.push({"name": "item", "value": itemId});
             $.getJSON(sSource, aoData, fnCallback).fail(failed);
         },
-        "aoColumns": selectedLicensesTableColumns,
-        "fnCreatedRow": function( nRow, aData, iDataIndex ) {
-            if(nRow.className == 'removed read_only') {
+        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+            if (nRow.classList.contains('removed')) {
                 $('td', nRow).addClass('read_only');
             }
         },
+        "aoColumns": selectedLicensesTableColumns,
         "iDisplayLength": 25,
         "bProcessing": true,
         "bStateSave": true,
