@@ -198,8 +198,18 @@ html, body
 .simpleTable .odd  { background-color: #E2E4FF; }
 .simpleTable .even { background-color: white; }
 
-.simpleTable .removed .odd  { background-color: #E2A0A0; }
-.simpleTable .removed .even { background-color: #F0B0B0; }
+table.dataTable tr.odd.removed td.sorting_1 {
+    background-color: #ef9e9c;
+}
+table.dataTable tr.odd.removed {
+    background-color: #faa6a4;
+}
+table.dataTable tr.even.removed td.sorting_1 {
+    background-color: #ffb9b9;
+}
+table.dataTable tr.even.removed {
+    background-color: #ffc9c9;
+}
 
 .inactiveClearing
     {
