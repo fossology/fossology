@@ -16,10 +16,7 @@
         "fnServerData": function (sSource, aoData, fnCallback) {
             aoData.push({"name": "upload", "value": uploadId});
             aoData.push({"name": "item", "value": itemId});
-            $.getJSON(sSource, aoData, fnCallback).fail(function () {
-                if (confirm("You are not logged in. Go to login page?"))
-                    window.location.href = "?mod=auth";
-            });
+            $.getJSON(sSource, aoData, fnCallback).fail(failed);
         },
         "aoColumns": selectedLicensesTableColumns,
         "iDisplayLength": 25,
@@ -56,10 +53,7 @@
         "fnServerData": function (sSource, aoData, fnCallback) {
             aoData.push({"name": "upload", "value": uploadId});
             aoData.push({"name": "item", "value": itemId});
-            $.getJSON(sSource, aoData, fnCallback).fail(function () {
-                if (confirm("You are not logged in. Go to login page?"))
-                    window.location.href = "?mod=auth";
-            });
+            $.getJSON(sSource, aoData, fnCallback).fail(failed);
         },
         "fnCreatedRow": function( nRow, aData, iDataIndex ) {
             $('tr.read_only', nRow).find('*').addClass('read_only');
