@@ -1141,6 +1141,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
+    else if (INFILE(_LT_AGPL_NAMED)) {
+      cp = AGPLVERS();
+      INTERESTING(lDebug ? "AGPL(named)" : cp);
+      lmem[_mGPL] = 1;
+    }
+
     /*
      * Some packages have a single file containing both a GPL and an LGPL
      * license.  Therefore, these checks should NOT be exclusive.
@@ -1378,7 +1384,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
       else if ((GPL_INFILE(_LT_GPL3ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER) 
             || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref2))
-            && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
+            && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED) && 
+            !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED))
       {
         INTERESTING("GPL-3.0+");
         lmem[_mGPL] = 1;
@@ -1599,7 +1606,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
       else
-        if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
+        if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && GPL_INFILE(_PHR_GPL3_OR_LATER)) {
+          INTERESTING("GPL-3.0+-with-autoconf-exception");
+          lmem[_mGPL] = 1;
+        }
+        else if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
           INTERESTING("GPL-3.0-with-autoconf-exception");
           lmem[_mGPL] = 1;
         }
@@ -6976,7 +6987,7 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_PHR_FSF_V1_ONLY) || INFILE(_TITLE_AFFERO_V1_ONLY)) {
     lstr = "AGPL-1.0";
   }
-  else if (INFILE(_PHR_AFFERO_V3_OR_LATER) ||
+  else if (INFILE(_PHR_AFFERO_V3_OR_LATER) || INFILE(_TITLE_AFFERO_V3_OR_LATER_ref1) ||
       INFILE(_TITLE_AFFERO_V3_OR_LATER)) {
     if (INFILE(_LT_AFFERO_V3)) {
       lstr = lDebug ? "Affero-v3(#1)" : "AGPL-3.0";
