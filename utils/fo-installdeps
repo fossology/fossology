@@ -102,7 +102,7 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
-            curl libxml2-dev libcunit1-dev \
+            libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
@@ -128,13 +128,13 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 
+            libxml2 libmxml-dev
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
-            libxml2 \
+            libxml2 libmxml-dev \
             perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
@@ -144,7 +144,7 @@ if [ $BUILDTIME ]; then
          fi                     
          yum $YesOpt install \
             postgresql-devel \
-            gcc make file libxml2 \
+            gcc make file libxml2 libmxml-dev \
             perl-Text-Template subversion
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
@@ -163,7 +163,7 @@ if [ $RUNTIME ]; then
         echo "doing runtime"
          apt-get $YesOpt install apache2 libapache2-mod-php5
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
-            libxml2 \
+            libxml2 libmxml-dev \
             binutils php-gettext
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
@@ -189,7 +189,7 @@ if [ $RUNTIME ]; then
       Mandriva)
          [ $AGENT ] || urpmi postgresql-server httpd
             urpmi php php-pear php-pgsql postgresql \
-               libxml2 \
+               libxml2 libmxml-dev \
                cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
                mkisofs p7zip poppler-utils rpm tar unzip gzip
          echo "NOTE: unrar is available in PLF, please install it via urpmi if"
@@ -204,7 +204,7 @@ if [ $RUNTIME ]; then
             postgresql \
             php php-pear php-pgsql php-process \
             smtpdaemon \
-            libxml2 \
+            libxml2 libmxml-dev \
             binutils 
 
          # enable, possible init, and start postgresql
@@ -241,7 +241,7 @@ if [ $RUNTIME ]; then
             postgresql \
             php php-pear php-pgsql php-process\
             smtpdaemon \
-            file libxml2 \
+            file libxml2 libmxml-dev \
             binutils 
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
