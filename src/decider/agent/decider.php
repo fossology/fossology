@@ -15,9 +15,9 @@ define("AGENT_NAME", "decider");
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 
 define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
@@ -110,28 +110,13 @@ class DeciderAgent extends Agent
       $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
       $canAutoDecide = true;
-      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($userId, $uploadTreeId);
+      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
-      /* TODO @1
-       *
-       * a concurrent bulk scan could have created an event
-       * and its decider could have not yet arrived here
-       *
-       * we get two events which should be auto-decided,
-       * but neither decider has an opportunity
-       *
-       * what do we do?
-       */
       $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($added, $lastDecisionDate);
       $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($removed, $lastDecisionDate);
 
       if (($canAutoDecide) && ($lastDecisionDate === null))
       {
-        /* if there was no previous decision
-         * we check that the events from this job (TODO @1 ?)
-         * at least confirm or remove all the licenses found by the scanners
-         */
-
         $changedLicenses = array_merge(array_keys($added),array_keys($removed));
 
         $agentDetectedLicenses = array_keys($this->clearingDecisionEventProcessor->getAgentDetectedLicenses($itemTreeBounds));
