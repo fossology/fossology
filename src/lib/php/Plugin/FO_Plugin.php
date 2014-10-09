@@ -378,7 +378,19 @@ class FO_Plugin
       return $V;
     }
     print $V;
-  } // OutputUnSet()
+  }
+  
+  function renderOutput(){
+    $output = $this->Output();
+    if($output){
+      print $output;
+      return;
+    }
+    global $container;
+    $renderer = $container->get('twig.environment');
+    print $renderer->loadTemplate($this->getTemplateName())->render($this->getVars());
+  }
+
 
   /**
    * \brief This function is called when user output is
