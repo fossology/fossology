@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
@@ -26,6 +27,7 @@ use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -466,7 +468,21 @@ insert into clearing_decision (
         $row[$columnName] = $this->dbManager->booleanFromDb($row[$columnName]);
       }
       $licenseRef = new LicenseRef($row['rf_fk'], $row['rf_shortname'], $row['rf_fullname']);
-      $events[] = new LicenseDecisionEvent($row['license_decision_event_pk'], $licenseRef, $row['event_type'], $row['date_added'], $row['reportinfo'], $row['comment'], $row['is_global'], $row['is_removed']);
+      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
+      $licenseDecisionEventBuilder->setEventId($row['license_decision_event_pk'])
+                                  ->setPfileId( $row['pfile_fk'])
+                                  ->setUploadTreeId($row['uploadtree_fk'])
+                                  ->setDateFromTimeStamp($row['date_added'])
+                                  ->setUserId($row['user_fk'])
+                                  ->setGroupId($row['group_fk'])
+                                  ->setEventType($row['event_type'])
+                                  ->setLicenseRef($licenseRef)
+                                  ->setGlobal($row['is_global'])
+                                  ->setRemoved($row['is_removed'])
+                                  ->setReportinfo($row['reportinfo'])
+                                  ->setComment($row['comment']);
+
+      $events[] =$licenseDecisionEventBuilder->build();
     }
 
     $this->dbManager->freeResult($res);

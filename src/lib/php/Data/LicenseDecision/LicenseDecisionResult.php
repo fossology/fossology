@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use DateTime;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 
 class LicenseDecisionResult implements LicenseDecision {
@@ -46,6 +48,14 @@ class LicenseDecisionResult implements LicenseDecision {
 
     $this->licenseDecisionEvent = $licenseDecisionEvent;
     $this->agentDecisionEvents = $agentDecisionEvents;
+  }
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef()
+  {
+    return $this->getLicenseDecision()->getLicenseRef();
   }
 
   /**
@@ -82,11 +92,11 @@ class LicenseDecisionResult implements LicenseDecision {
   }
 
   /**
-   * @return float
+   * @return DateTime
    */
-  public function getEpoch()
+  public function getDate()
   {
-    return $this->getLicenseDecision()->getEpoch();
+    return $this->getLicenseDecision()->getDate();
   }
 
   /**

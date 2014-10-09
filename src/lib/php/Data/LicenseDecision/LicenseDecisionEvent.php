@@ -18,28 +18,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\LicenseDecision;
 
+use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 
-class LicenseDecisionEvent implements LicenseDecision
+class LicenseDecisionEvent implements  LicenseDecision
 {
 
   /** @var int */
   private $eventId;
 
-  /** @var LicenseRef */
-  private $licenseRef;
+  /** @var int */
+  private $pfileId;
+
+  /** @var int */
+  private $uploadTreeId;
+
+  /** @var DateTime  */
+  private $date;
+
+  /** @var int */
+  private $userId;
+
+  /** @var int */
+  private $groupId;
 
   /** @var string */
   private $eventType;
 
-  /** @var double */
-  private $epoch;
-
-  /** @var string */
-  private $reportinfo;
-
-  /** @var string */
-  private $comment;
+  /** @var LicenseRef */
+  private $licenseRef;
 
   /** @var boolean */
   private $global;
@@ -47,25 +54,27 @@ class LicenseDecisionEvent implements LicenseDecision
   /** @var boolean */
   private $removed;
 
-  /**
-   * @param string $eventId
-   * @param LicenseRef $licenseRef
-   * @param string $eventType
-   * @param string $epoch
-   * @param string $reportinfo
-   * @param string $comment
-   * @param boolean $global
-   * @param boolean $removed
-   */
-  public function __construct($eventId, LicenseRef $licenseRef, $eventType, $epoch, $reportinfo, $comment, $global, $removed) {
-    $this->eventId = intval($eventId);
-    $this->licenseRef = $licenseRef;
+  /** @var string */
+  private $reportinfo;
+
+  /** @var string */
+  private $comment;
+
+
+  public function __construct($eventId, $pfileId, $uploadTreeId, $date, $userId, $groupId, $eventType,LicenseRef $licenseRef, $global, $removed, $reportinfo, $comment) {
+
+    $this->eventId = $eventId;
+    $this->pfileId = $pfileId;
+    $this->uploadTreeId = $uploadTreeId;
+    $this->date = $date;
+    $this->userId = $userId;
+    $this->groupId = $groupId;
     $this->eventType = $eventType;
-    $this->epoch = $epoch;
-    $this->reportinfo = $reportinfo;
-    $this->comment = $comment;
+    $this->licenseRef = $licenseRef;
     $this->global = $global;
     $this->removed = $removed;
+    $this->reportinfo = $reportinfo;
+    $this->comment = $comment;
   }
 
   /**
@@ -77,11 +86,11 @@ class LicenseDecisionEvent implements LicenseDecision
   }
 
   /**
-   * @return float
+   * @return DateTime
    */
-  public function getEpoch()
+  public function getDate()
   {
-    return $this->epoch;
+    return $this->date;
   }
 
   /**
@@ -98,6 +107,70 @@ class LicenseDecisionEvent implements LicenseDecision
   public function getEventType()
   {
     return $this->eventType;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function isGlobal()
+  {
+    return $this->global;
+  }
+
+  /**
+   * @return int
+   */
+  public function getGroupId()
+  {
+    return $this->groupId;
+  }
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef()
+  {
+    return $this->licenseRef;
+  }
+
+  /**
+   * @return int
+   */
+  public function getPfileId()
+  {
+    return $this->pfileId;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function isRemoved()
+  {
+    return $this->removed;
+  }
+
+  /**
+   * @return string
+   */
+  public function getReportinfo()
+  {
+    return $this->reportinfo;
+  }
+
+  /**
+   * @return int
+   */
+  public function getUploadTreeId()
+  {
+    return $this->uploadTreeId;
+  }
+
+  /**
+   * @return int
+   */
+  public function getUserId()
+  {
+    return $this->userId;
   }
 
   /**
@@ -124,51 +197,4 @@ class LicenseDecisionEvent implements LicenseDecision
     return $this->licenseRef->getFullName();
   }
 
-  /**
-   * @return string
-   */
-  public function getReportinfo()
-  {
-    return $this->reportinfo;
-  }
-
-  /**
-   * @return boolean
-   */
-  public function isGlobal()
-  {
-    return $this->global;
-  }
-
-  /**
-   * @return boolean
-   */
-  public function isRemoved()
-  {
-    return $this->removed;
-  }
-
-  /**
-   * @return int
-   */
-  function getId()
-  {
-    // TODO: Implement getId() method.
-  }
-
-  /**
-   * @return string
-   */
-  function getFullName()
-  {
-    // TODO: Implement getFullName() method.
-  }
-
-  /**
-   * @return string
-   */
-  function getShortName()
-  {
-    // TODO: Implement getShortName() method.
-  }
 }
