@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define _GNU_SOURCE
 #include <string.h>
 
-#include<stdlib.h>
 #include<sys/stat.h>
 #include<sys/types.h>
 #include<sys/wait.h>
@@ -41,7 +40,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 #include "sql_statements.h"
-#include "list.h"
 #ifdef SVN_REV_S
 char BuildVersion[]="reportgen build version: " VERSION_S " r(" SVN_REV_S ").\n";
 #else
@@ -422,332 +420,6 @@ char* getFullFilePath(long uploadTreeId)
   return g_string_free(pathBuilder, FALSE);
 }
 
-char*** all_unique_lics_arr=NULL;
-int all_unique_lics_index=0;
-char*** mapping_custom_lic_to_report_text=NULL;
-int custom_lic_index=0;
-
-int addNewLicAndFileToUniqueArr(char* ulic_name,char* filepath) //returns 1 if licname,filepath pair is new, 0 otherwise
-{
-  if (ulic_name==NULL || filepath==NULL) return 0;
-	int filepathlength=0;
-  int i;
-	int flag=0;
-	int indx=0;
-
-	for (i=0;i<all_unique_lics_index;i++)
-	{
-		if (strcmp(all_unique_lics_arr[i][0],ulic_name)==0)
-		{
-			filepathlength=strlen(all_unique_lics_arr[i][1])+2;
-			flag=1; //lic name is not new, file path may be
-			indx=i;
-		}		
-	}
-	if (flag==1)
-	{	
-		char* searchpath=(char*)malloc(sizeof(char)*(strlen(filepath)+1+2));
-		sprintf(searchpath,"%s,\n",filepath);
-
-		if (strstr(all_unique_lics_arr[indx][1],searchpath)!=NULL)
-		{
-			if(searchpath)
-			{
-				free(searchpath);
-			}
-			return 0;
-		}
-		if(searchpath)
-		{
-			free(searchpath);
-		}
-	}
-	if (i==all_unique_lics_index)
-	{
-		if (flag==0) //new license name has to be added
-		{					
-			all_unique_lics_arr=(char***)realloc(all_unique_lics_arr,sizeof(char**)*(all_unique_lics_index+1));
-			all_unique_lics_arr[all_unique_lics_index]=(char**)malloc(sizeof(char*)*(2));//1 for lic name, 2 for file path arr
-			all_unique_lics_arr[all_unique_lics_index][0]=(char*)malloc(sizeof(char)*(strlen(ulic_name)+1));
-			strcpy(all_unique_lics_arr[all_unique_lics_index][0],ulic_name);
-			all_unique_lics_arr[all_unique_lics_index][1]=(char*)malloc(sizeof(char)*(strlen(filepath)+1+2));
-			sprintf(all_unique_lics_arr[all_unique_lics_index][1],"%s,\n",filepath);			
-			all_unique_lics_index++;
-		}
-		else //file path to be appended
-		{			
-			all_unique_lics_arr[indx][1]=(char*)realloc(all_unique_lics_arr[indx][1],sizeof(char)*(filepathlength+1+strlen(filepath)+2));
-            strcat(all_unique_lics_arr[indx][1],filepath);
-			strcat(all_unique_lics_arr[indx][1],",\n");
-		}
-	}
-	return 1;
-}
-void mappingCustomTextLicenseNamesToReportText(char* customTextLicenseName,char* reporttext)
-{
-	mapping_custom_lic_to_report_text=(char***)realloc(mapping_custom_lic_to_report_text,sizeof(char**)*(custom_lic_index+1));
-	mapping_custom_lic_to_report_text[custom_lic_index]=(char**)malloc(sizeof(char*)*2);
-	mapping_custom_lic_to_report_text[custom_lic_index][0]=(char*)malloc(sizeof(char)*(strlen(customTextLicenseName)+1));
-	strcpy(mapping_custom_lic_to_report_text[custom_lic_index][0],customTextLicenseName);
-	mapping_custom_lic_to_report_text[custom_lic_index][1]=(char*)malloc(sizeof(char)*(strlen(reporttext)+1));
-	strcpy(mapping_custom_lic_to_report_text[custom_lic_index][1],reporttext);
-	custom_lic_index++;			
-}
-
-char* getReportText(char* customLicenseName)
-{
-	int i;	
-	for (i=0;i<custom_lic_index;i++)
-	{		
-		if (strcmp(mapping_custom_lic_to_report_text[i][0],customLicenseName)==0)
-		{
-			return mapping_custom_lic_to_report_text[i][1];
-		}
-	}	
-	return NULL;
-}
-
-/*
- * all bulk recognition licenses are saved with a shortname of the form
- *  {licenseShortName}\31:{userId}:{uploadid}:{uploadtreeId}[#{number}]
- *
- * All references to a match (for example report text) use this suffixed shortname.
- * The not-suffixed version shall be used only for texts shown to the user
- */
-char* removeSuffix(char* licenseName) {
-  char* unusedRest;
-  char* licenseNameCpy = g_strdup(licenseName);
-  return strtok_r(licenseNameCpy, "\31", &unusedRest);
-}
-
-int addNewLicAndFileToUniqueArrCheckingForReportText(long uploadtreePK, char* licenseName, int* custom_text_count) {
-  PGresult* reporttextResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "selectReportText",
-      "select report_text from report where uploadtree_pk=$1 and license_name=$2 and length(report_text)>0",
-      long, char*
-    ),
-    uploadtreePK,
-    licenseName
-  );
-  if (reporttextResult) {
-    char* printableName = removeSuffix(licenseName);
-    if (PQntuples(reporttextResult)>0)
-    {
-      char* searchnamelic = g_strdup_printf("%s\n[Custom Text %d]",printableName,*custom_text_count);
-      (*custom_text_count)++;
-      if (addNewLicAndFileToUniqueArr(searchnamelic,getFullFilePath(uploadtreePK))==1)
-      {
-        mappingCustomTextLicenseNamesToReportText(searchnamelic,PQgetvalue(reporttextResult,0,0));
-        fo_scheduler_heart(1);
-      }
-    }
-    else
-    {
-      if (addNewLicAndFileToUniqueArr(printableName,getFullFilePath(uploadtreePK))==1)
-      {
-        fo_scheduler_heart(1);
-      }
-    }
-    free(printableName);
-    PQclear(reporttextResult);
-  }
-  return 1;
-}
-
-int isDeletedByUser(char* licenseName, long uploadTreeId, int userId){
-  PGresult* result = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "selectDeleted",
-      "SELECT deleted_lic FROM license_ref_users WHERE upload_pk_id=$1 AND user_id=$2 "
-      " AND (deleted_lic LIKE $3 "
-            "OR deleted_lic LIKE $3 || ':%' "
-            "OR deleted_lic LIKE '%:' || $3 || ':%' "
-            "OR deleted_lic LIKE '%:' || $3 )",
-      long, int, char*),
-    uploadTreeId, userId, licenseName
-  );
-
-  if (!result)
-    return -1; // consider deleted on query error
-
-  if (PQntuples(result)>0)
-  {
-    PQclear(result);
-    return 1;
-  }
-  PQclear(result);
-  return 0;
-}
-
-/*
- * add licenses found by scanners
- * they must not be marked as deleted by the user
- */
-int addLicensesForScanners(long uploadTreeId, int user_pk, int* custom_text_count) {
-  int thisFileHasLicenses = 0;
-
-  PGresult* shortNamesResults = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "selectShortnameFromScanRes",
-      "SELECT distinct(rf_shortname) "
-      "FROM license_file_ref "
-      "WHERE pfile_fk = (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1)",
-      long
-    ),
-    uploadTreeId
-  );
-  if (shortNamesResults) {
-    int j;
-    for (j=0; j<PQntuples(shortNamesResults); j++)
-    {
-      char* licenseName = PQgetvalue(shortNamesResults,j,0);
-
-      if (isDeletedByUser(licenseName, uploadTreeId, user_pk)) {
-        continue;
-      }
-
-      addNewLicAndFileToUniqueArrCheckingForReportText(uploadTreeId, licenseName, custom_text_count);
-      thisFileHasLicenses = 1;
-    }
-    PQclear(shortNamesResults);
-  }
-
-  return thisFileHasLicenses;
-}
-
-/*
- * add all licenses found by bulk recognition
- */
-int addLicensesForBulk(long uploadTreeId, int user_pk, int* custom_text_count) {
-  int thisFileHasLicenses = 0;
-
-  char* uploadTreeIdStr = g_strdup_printf("%ld", uploadTreeId);
-  PGresult* bulkIdentificationResults = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "selectShortnameFromBulk",
-      "SELECT rf_shortname FROM license_ref "
-      "WHERE"
-      " rf_detector_type = 150 "
-      "AND ("
-      " rf_notes LIKE $1"
-      " OR rf_notes LIKE '%,' || $1"
-      " OR rf_notes LIKE $1 || ',%'"
-      " OR rf_notes LIKE '%,' || $1 || ',%'"
-      ")",
-      char*
-    ),
-    uploadTreeIdStr
-  );
-  free(uploadTreeIdStr);
-  if (bulkIdentificationResults) {
-    int j=0;
-    for (j=0; j<PQntuples(bulkIdentificationResults); j++)
-    {
-      char* licenseName = PQgetvalue(bulkIdentificationResults,j,0);
-      addNewLicAndFileToUniqueArrCheckingForReportText(uploadTreeId, licenseName, custom_text_count);
-      thisFileHasLicenses = 1;
-    }
-    PQclear(bulkIdentificationResults);
-  }
-
-  return thisFileHasLicenses;
-}
-
-/*
- * add all extra licenses decided by the user
- */
-int addLicensesForUserDecided(long uploadTreeId, int user_pk, int* custom_text_count) {
-  int thisFileHasLicenses = 0;
-
-  PGresult* decidedPairsResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "selectDecided",
-      "SELECT license_names, upload_pk_id "
-      "FROM license_ref_users "
-      "INNER JOIN license_ref_status "
-      "ON"
-      " license_ref_users.upload_pk_id = license_ref_status.uploadtree_pk "
-      "AND"
-      " license_ref_users.user_id = license_ref_status.user_id "
-      "WHERE"
-      " license_ref_status.uploadtree_pk=$1 "
-      "AND"
-      " license_ref_users.user_id=$2 "
-      "AND"
-      " license_ref_status.status=3",
-      long, int
-    ),
-    uploadTreeId,
-    user_pk
-  );
-  if (decidedPairsResult) {
-    int i;
-    for (i=0; i<PQntuples(decidedPairsResult); i++)
-    {
-      long uploadTreeId = atol(PQgetvalue(decidedPairsResult, i, 1));
-      char* licenses = g_strdup(PQgetvalue(decidedPairsResult, i, 0));
-
-      char* strtokRemainder;
-
-      char* licenseName = strtok_r(licenses,">", &strtokRemainder);
-
-      while (licenseName != NULL) {
-        addNewLicAndFileToUniqueArrCheckingForReportText(uploadTreeId, licenseName, custom_text_count);
-        thisFileHasLicenses = 1;
-        licenseName = strtok_r(NULL,">", &strtokRemainder);
-      }
-    }
-    PQclear(decidedPairsResult);
-  }
-
-  return thisFileHasLicenses;
-}
-
-
-int addLicensesForAll(long uploadTreeId, int user_pk, int* custom_text_count) {
-  int thisFileHasLicenses = 0;
-  thisFileHasLicenses |= addLicensesForScanners(uploadTreeId, user_pk, custom_text_count);
-  thisFileHasLicenses |= addLicensesForBulk(uploadTreeId, user_pk, custom_text_count);
-  thisFileHasLicenses |= addLicensesForUserDecided(uploadTreeId, user_pk, custom_text_count);
-
-  /* write no license otherwise */
-  if (!thisFileHasLicenses) {
-    addNewLicAndFileToUniqueArrCheckingForReportText(uploadTreeId, "No_license_found", custom_text_count);
-  }
-  return 1;
-}
-
-
-NODE update_fullName(NODE first)
-{
-   NODE cur;
-   cur = first;
-   while(cur!=NULL)
-    {
-       char* sql_rfFullName = (char*)calloc(DECLEN,1);
-       sprintf(sql_rfFullName,"select rf_fullname from license_ref where rf_shortname='%s'",cur->lics);
-			 PGresult* pgres_rfFullName = PQexec(pgConn,sql_rfFullName);
-       if(PQgetvalue(pgres_rfFullName,0,0))
-			 {
-			    strcpy(cur->lics_fullName,PQgetvalue(pgres_rfFullName,0,0));
-			 }
-			 cur = cur->link;
-	     if(sql_rfFullName)
-		   {
-          free(sql_rfFullName);
-		      sql_rfFullName =NULL;
-		   }
-    }
-  return first;
-}
-
-
 //TODO removeme
 
 #if 0
@@ -826,8 +498,6 @@ void json_parse(json_object * jobj) {
 }
 #endif
 
-//TODO \
-
 int main(int argc, char** argv)
 {  
 FILE *fp1;
@@ -868,7 +538,6 @@ mxml_node_t *numberingxml;
 mxml_node_t *p = NULL;
 mxml_node_t *r = NULL;
 mxml_node_t *t = NULL;
-NODE first = NULL;
 int K=0;
 int custom_text_count=1;
 char* tbcol4[4];
@@ -1122,56 +791,7 @@ createrowdata(tr_nomos, tbcol3[0], "Number of Occurences");
 createrowdata(tr_nomos, tbcol3[1], "License Short Name");
 createrowdata(tr_nomos, tbcol3[2], "License Name");
 
-char* sql_nomos_decided=(char*)malloc(4*DECLEN);
-
-//getting agent_fk 
-char* sql_agent_fk =(char*)malloc(DECLEN);
-sprintf(sql_agent_fk, "select agent_fk from nomos_ars where upload_fk=%d ORDER BY ars_endtime DESC LIMIT 1",uploadId);
-PGresult* pgres_agent_fk = PQexec(pgConn,sql_agent_fk);
-int get_agent_fk = atoi( PQgetvalue(pgres_agent_fk,0,0));
-
-sprintf(sql_nomos_decided, "SELECT DISTINCT(tab.rf_shortname) AS license_names, tab.rf_fullname AS license_full_names, count(tab.rf_shortname) AS license_counts FROM (SELECT distinct(license_file_ref.pfile_fk), rf_shortname, rf_fullname FROM license_file_ref,uploadtree_a,license_ref_status WHERE license_file_ref.pfile_fk=uploadtree_a.pfile_fk AND license_file_ref.pfile_fk=license_ref_status.pfile_fk AND license_ref_status.status = '3' AND upload_fk=%d AND agent_fk=%d GROUP BY license_file_ref.pfile_fk, rf_shortname, rf_fullname ) AS tab GROUP BY rf_shortname, rf_fullname ORDER BY license_counts DESC;" ,uploadId, get_agent_fk);
-
-PGresult* pgres_nomos = PQexec(pgConn,sql_nomos_decided);
-
-int sql_lic_result_count = PQntuples(pgres_nomos);
-if (sql_nomos_decided)
-{  
-	 free(sql_nomos_decided);
-}  
-
-if(sql_agent_fk)
 {
-   free(sql_agent_fk); 
-}
-
-char* sql_userDecided = (char*)malloc(DECLEN);
-sprintf(sql_userDecided, "SELECT license_names, upload_pk_id FROM license_ref_users INNER JOIN license_ref_status ON license_ref_users.upload_pk_id =license_ref_status.uploadtree_pk WHERE license_ref_status.status=3 and upload_pk=%d",uploadId);
-PGresult* pgres_userDecided = PQexec(pgConn,sql_userDecided);
-int userDecidedCount = PQntuples(pgres_userDecided);
-if(userDecidedCount){
-  int i=0;
-  for(i=0; i < userDecidedCount; i++)
-  {
-      char* licenses = PQgetvalue(pgres_userDecided,i,0);
-      char* strtokPtr;
-      char* licenseName = strtok_r(licenses,">", &strtokPtr);
-      while (licenseName != NULL) {
-          first = insert(licenseName, first); 
-          licenseName = strtok_r(NULL,">", &strtokPtr);
-     }
-  }
-first = processList(first);
-first = update_fullName(first);
-}
-
-int i=0;
-mxml_node_t** tr_nomos_table=NULL;
-int k_nomos=0;
-
-int newCount = traverseList(first); 
-if(sql_lic_result_count)
-{  
    int count=0;
    for(i=0;i<sql_lic_result_count;i++){
    tr_nomos_table = (mxml_node_t**) realloc(tr_nomos_table, sizeof( mxml_node_t*)*(k_nomos+1));
@@ -1233,17 +853,11 @@ if(newCount > 0)
       else
 	 cur= cur->link;
      }
-  deleteList(first);
 }
 
-PQclear(pgres_nomos); //end of nomos license.
-PQclear(pgres_agent_fk);
 
 
 
-
-
-//addning Gloabl License
 mxml_node_t* p6 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p6,NULL, "Global Licenses","0","2");
 
@@ -1696,7 +1310,7 @@ if(sql_eccCommentCount)
 		tr_eccTable[k_ecc] = ( mxml_node_t*)createrowproperty(tbl_ecc);
 		
 		char* rfEcc=NULL;
-	  rfEcc = (char*)malloc(sizeof(char)*(strlen(PQgetvalue(pgres_ecc,i,0))+1));
+	  rfEcc = malloc(sizeof(char)*(strlen(PQgetvalue(pgres_ecc,i,0))+1));
 		strcpy(rfEcc, PQgetvalue(pgres_ecc,i,0));
 		rfEcc[ strlen( PQgetvalue(pgres_ecc,i,0))] = '\0';
 		createrowdata(tr_eccTable[k_ecc], "4189", rfEcc);
@@ -1915,7 +1529,7 @@ strcat(xmlfilename, COREXML);
 fcore = fopen(xmlfilename, "w");
 free(xmlfilename);
 
-xmlfilename = (char*)malloc(sizeof(char)*(strlen(hiddenrelspath)+strlen(HIDDENRELSXML)+1));
+xmlfilename = malloc(strlen(hiddenrelspath)+strlen(HIDDENRELSXML)+1);
 strcpy(xmlfilename, hiddenrelspath);
 strcat(xmlfilename,HIDDENRELSXML);
 fhiddenrels = fopen(xmlfilename, "w");

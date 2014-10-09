@@ -1,4 +1,6 @@
 #include <json/json.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define READMAX 1024*1024            ///< farthest into a file to look for copyrights
 #define THRESHOLD 10                 ///< tuned threshold for testing purposes

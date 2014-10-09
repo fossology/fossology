@@ -16,7 +16,7 @@ CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp -lmxml -L ./libmxml.a `pkg-config json
 
 EXE = reportgen
 
-OBJECTS  = utils.o main.o list.o
+OBJECTS  = utils.o main.o
 COVERAGE = 
 
 TESTDIR = ../agent_tests
