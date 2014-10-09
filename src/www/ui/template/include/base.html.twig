@@ -22,19 +22,17 @@
 {% endblock %}
 
 {% block message %}
-{% if message %}
  <div id="dmessage" style="border-bottom: 1px dashed gray;">
   <button name='eraseme' value='close' onclick='rmMsg()'>{{ 'Close'| trans }}</button>
-  {{ message }}
+{% if message %}  {{ message }} {% endif %}
  </div>
  <script type='text/javascript'>
   function rmMsg(){
    var div = document.getElementById("dmessage");
-   var parent = div.parentNode;
-   parent.removeChild(div);
+   div.style.display = 'none';
   }
+{% if message %}{% else %} rmMsg(); {% endif %}
  </script>
-{% endif %}
 {% endblock %}
 
 
