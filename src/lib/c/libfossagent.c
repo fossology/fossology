@@ -62,7 +62,7 @@ PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
 
   char* uploadtreeTableName = getUploadTreeTableName(dbManager, uploadId);
 
-  if(strcmp (uploadtreeTableName, "uploadtree_a")){
+  if(strcmp (uploadtreeTableName, "uploadtree_a")==0){
     char* queryName = g_strdup_printf ("queryFileIdsForUpload.%s",uploadtreeTableName);
     char* sql ;
     sql = g_strdup_printf ("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
