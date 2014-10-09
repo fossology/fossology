@@ -103,7 +103,7 @@ if [ $BUILDTIME ]; then
          echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
             curl libxml2-dev libcunit1-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0
+            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
