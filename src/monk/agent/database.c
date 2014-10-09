@@ -60,6 +60,8 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
 }
 
 char* getFileNameForFileId(fo_dbManager* dbManager, long pFileId) {
+ //TODO refactor to use filetreeBounds struct as input
+ 
   char* result;
   PGresult* resultUploadFilename = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
