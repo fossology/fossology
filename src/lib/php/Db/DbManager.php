@@ -199,10 +199,11 @@ class DbManager extends Object
   }
 
   /**
-   * @param string tableName
-   * @param string keyColumn
-   * @param string valueColumn
-   * @param string sqlLog
+   * @param string $tableName
+   * @param string $keyColumn
+   * @param string $valueColumn
+   * @param string $sqlLog
+   * @return array
    */
   public function createMap($tableName,$keyColumn,$valueColumn,$sqlLog=''){
     if (empty($sqlLog))
@@ -219,7 +220,7 @@ class DbManager extends Object
     $this->freeResult($res);
     return $map;
   }
-  
+
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
@@ -250,5 +251,44 @@ class DbManager extends Object
     $this->queryCount[$statementName]++;
   }
 
+  public function booleanFromDb($booleanValue)
+  {
+    return $this->dbDriver->booleanFromDb($booleanValue);
+  }
+
+  public function booleanToDb($booleanValue)
+  {
+    return $this->dbDriver->booleanToDb($booleanValue);
+  }
+
+  /**
+   * @param string
+   * @param string
+   * @param array
+   * @param string
+   */
+  public function insertInto($tableName,$keys,$params,$sqlLog='')
+  {
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $sql = "INSERT INTO $tableName ($keys) VALUES (";
+    $nKeys = substr_count($keys,',')+1;
+    for ($i = 1; $i < $nKeys; $i++)
+    {
+      $sql .= '$'.$i.',';
+    }
+    $sql .= '$'.$nKeys.')';
+    for($i=0;$i<$nKeys;$i++){
+      if(is_bool($params[$i]))
+      {
+        $params[$i] = $this->dbDriver->booleanToDb($params[$i]);
+      }
+    }
+    $this->prepare($sqlLog,$sql);
+    $res = $this->execute($sqlLog,$params);
+    $this->freeResult($res);
+  }
 
 }

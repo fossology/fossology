@@ -67,13 +67,13 @@ class LicenseOverviewPrinter extends Object
 
   /**
    * @param $hasDiff
-   * @return string rendered legend box
+   * @return string rendered legend box content
    */
   function legendBox($hasDiff)
   {
     $colorMapping = $this->highlightRenderer->colorMapping;
 
-    $output = '<b>' . _("Legend") . ':</b><br/>';
+    $output = '';
     if ($hasDiff)
     {
       $output .= _("license text");
@@ -87,7 +87,7 @@ class LicenseOverviewPrinter extends Object
     {
       $output .= '<span style="background:' . $colorMapping['any'] . '">' . _("license relevant text") . "</span>";
     }
-    return '<div  id="legendBox" name="legendBox"  style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">' . $output . '</div>'; //position:absolute; right:5px; bottom:5px;
+    return $output; 
   }
 
   /**
@@ -396,7 +396,7 @@ class LicenseOverviewPrinter extends Object
     $output = "<a title='$text' href='javascript:;'";
     $output .= " onClick=\"javascript:window.open('";
     $output .= Traceback_uri();
-    $output .= "?mod=view-license";
+    $output .= "?mod=popup-license";
     $output .= "&lic=";
     $output .= urlencode($licenseShortName);
     $output .= "','$text2','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";

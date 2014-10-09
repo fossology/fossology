@@ -53,6 +53,12 @@ function getOptionDefaultTrue(name) {
 }
 
 function failed() {
-    if (confirm("You are not logged in. Go to login page?"))
+    if (confirm("You are not logged in. Go to login page?")) {
         window.location.href = "?mod=auth";
+    }
+}
+
+function rmDefaultText ( caller , dflt ) {
+    if ($(caller).val()==dflt)
+        $(caller).val('');
 }

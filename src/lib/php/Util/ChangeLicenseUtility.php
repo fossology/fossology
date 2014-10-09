@@ -25,7 +25,6 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\View\Renderer;
 
 class ChangeLicenseUtility extends Object
 {
@@ -54,16 +53,14 @@ class ChangeLicenseUtility extends Object
    * @param $uploadDao
    * @param $licenseDao
    * @param $clearingDao
-   * @param Renderer $renderer
    */
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao , Renderer $renderer)
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao)
   {
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
-    $this->renderer = $renderer;
   }
 
   /**
@@ -86,7 +83,6 @@ class ChangeLicenseUtility extends Object
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @param $user_pk
-   * @param $output
    * @return string
    */
   function printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk)
@@ -112,25 +108,16 @@ class ChangeLicenseUtility extends Object
         $licenseNames[] = $lic->getShortName();
       }
       $output .= "<td>" . implode(", ", $licenseNames) . "</td>";
-      if ($user_pk == $clearingDecWithLic->getUserId())
-      {
-        $output .= "<td>" . $clearingDecWithLic->getComment() . "</td>";
-      } else
-      {
-        $output .= "<td>--private--</td>";
-      }
-      $output .= "<td>" . $clearingDecWithLic->getReportinfo() . "</td>";
 
       $output .= "</tr>";
     }
     return $output;
   }
 
-  
-    /**
+
+  /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @param $user_pk
-   * @param $output
    * @return array
    */
   function getClearingHistory($clearingDecWithLicenses, $user_pk)
@@ -141,17 +128,22 @@ class ChangeLicenseUtility extends Object
       $licenseNames = array();
       foreach ($clearingDecWithLic->getLicenses() as $lic)
       {
-        $licenseNames[] = $lic->getShortName();
+        $licenseShortName = $lic->getShortName();
+        if ($lic->isRemoved()) {
+          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
+        }
+        $licenseNames[$lic->getShortName()] = $licenseShortName;
       }
+      ksort($licenseNames, SORT_STRING);
       $row = array(
           $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
           $clearingDecWithLic->getUserName(),
           $clearingDecWithLic->getScope(),
           $clearingDecWithLic->getType(),
-          implode(", ", $licenseNames),
-          ($user_pk == $clearingDecWithLic->getUserId()) ? $clearingDecWithLic->getComment() : '--private--',
-          $clearingDecWithLic->getReportinfo() );
-      $table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+          implode(", ", $licenseNames));
+      //$table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
+      $table[] = array("content"=>$row);
+
     }
     return $table;
   }
@@ -201,7 +193,7 @@ class ChangeLicenseUtility extends Object
     $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
     foreach ($licenseRefArray as $licenseRef)
     {
-      $uri = Traceback_uri() . "?mod=view-license" . "&lic=" . urlencode($licenseRef->getShortName());
+      $uri = Traceback_uri() . "?mod=popup-license" . "&lic=" . urlencode($licenseRef->getShortName());
       $title = _("License Text");
       $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
       $output .= '<option value="' . $licenseRef->getId() . '" title="'.$licenseRef->getFullName().'" '
@@ -220,8 +212,8 @@ class ChangeLicenseUtility extends Object
    */
   private function getAgentSuggestedLicenses($uploadTreeId)
   {
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
-    $licenses = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
+    $licenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
     $licenseList = array();
 
     foreach ($licenses as $licenseMatch)
@@ -241,39 +233,15 @@ class ChangeLicenseUtility extends Object
   public function createChangeLicenseForm($uploadTreeId=-1) {
     $licenseRefs = $this->licenseDao->getLicenseRefs();
 
-    if ($uploadTreeId>0) {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
-      $preSelectedLicenses = null;
-
-      if (!empty($clearingDecWithLicenses))
-      {
-        $filteredFileClearings = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($clearingDecWithLicenses, true);
-        if (!empty ($filteredFileClearings))
-        {
-          $preSelectedLicenses = reset($filteredFileClearings)->getLicenses();
-        }
-      }
-
-      if ($preSelectedLicenses === null)
-      {
-        $preSelectedLicenses = $this->getAgentSuggestedLicenses($uploadTreeId);
-      }
-      $this->filterLists($licenseRefs, $preSelectedLicenses);
-    } else {
-      $preSelectedLicenses = array();
-    }
-
     $rendererVars = array();
     $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
-    $rendererVars['licenseRightSelect'] = $this->createListSelect("licenseRight", $preSelectedLicenses);
-
     return $rendererVars;
   }
 
 
   public function createBulkForm($uploadTreeId=-1) {
     $rendererVars = array();
-    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=view-license";
+    $rendererVars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
     $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();
     // print_r($rendererVars['licenseArray']);
     return $rendererVars;

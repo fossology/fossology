@@ -1,0 +1,52 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+<p>
+    <b>
+        {{ 'Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
+            uploaded files.
+        '| trans }}
+    </b>
+    {{ 'To manage your own group go into'| trans }}
+    <b>Admin &gt; Groups &gt; Manage Group Users</b>.
+    {{ 'To manage permissions for this one upload, go to'| trans }}
+    <b>Admin &gt; Upload Permissions</b>.
+<p>
+    {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
+        your computer to FOSSology.
+    '| trans }}
+    {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
+    {{ upload_max_filesize }}bytes.
+
+<form enctype="multipart/form-data" method="post">
+    <ol>
+        <li>
+            {{ 'Select the folder for storing the uploaded file:'| trans }}
+            <select name="folder">
+              {{ folderListOptions }}
+            </select>
+        <li>
+            {{ 'Select the file to upload:'| trans }}
+            <br/>
+            <input name="getfile" type="file"/><br/>
+        <li>
+            {{ '(Optional) Enter a description of this file:'| trans }}
+            <br/>
+            <input type="text" name="description" size="60" value="{{ description }}"/>
+
+            <p/>
+        <li><input type="checkbox" name="public" value="public"/>
+            {{ '(Optional) Make Public'| trans }}
+            {% if agentCheckBoxMake %}
+        <li>
+            {{ 'Select optional analysis'| trans }}
+            <br/>
+            {{ agentCheckBoxMake }}
+            {% endif %}
+    </ol>
+    {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    <br/>
+
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+</form>
+{% endblock %}

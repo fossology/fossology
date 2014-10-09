@@ -29,12 +29,15 @@ define("TITLE_ajax_tags", _("List Tags"));
 
 class ajax_tags extends FO_Plugin
 {
-  var $Name       = "tag_get";
-  var $Title      = TITLE_ajax_tags;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $NoHTML     = 1; /* This plugin needs no HTML content help */
+  function __construct()
+  {
+    $this->Name       = "tag_get";
+    $this->Title      = TITLE_ajax_tags;
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
+
+    parent::__construct();
+  }
 
   /**
    * \brief Display the loaded menu and plugins.
@@ -44,39 +47,27 @@ class ajax_tags extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $Item = GetParm("uploadtree_pk",PARM_INTEGER);
-        /* get uploadtree_tablename from $Item */
-        $uploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk='$Item'");
-        $uploadRec = GetSingleRec("upload", "where upload_pk='$uploadtreeRec[upload_fk]'");
-        if (empty($uploadRec['uploadtree_tablename']))
-          $uploadtree_tablename = "uploadtree";
-        else
-          $uploadtree_tablename = $uploadRec['uploadtree_tablename'];
 
-        $List = GetAllTags($Item, true, $uploadtree_tablename);
-        foreach($List as $L)
-        {
-          $V .= $L['tag_name'] . ",";
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    $item = GetParm("uploadtree_pk",PARM_INTEGER);
+    /* get uploadtree_tablename from $Item */
+    $uploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk='$item'");
+    $uploadRec = GetSingleRec("upload", "where upload_pk='$uploadtreeRec[upload_fk]'");
+    if (empty($uploadRec['uploadtree_tablename']))
+      $uploadtree_tablename = "uploadtree";
+    else
+      $uploadtree_tablename = $uploadRec['uploadtree_tablename'];
+
+    $List = GetAllTags($item, true, $uploadtree_tablename);
+    foreach($List as $L)
+    {
+      $V .= $L['tag_name'] . ",";
     }
+
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
     return;
-  } // Output()
+  }
 
-
-};
+}
 $NewPlugin = new ajax_tags;
 $NewPlugin->Initialize();
-
-?>

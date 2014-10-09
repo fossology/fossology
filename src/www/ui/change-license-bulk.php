@@ -42,10 +42,8 @@ class changeLicenseBulk extends FO_Plugin
   {
     $this->Name = "change-license-bulk";
     $this->Title = TITLE_changeLicenseBulk;
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
@@ -74,6 +72,7 @@ class changeLicenseBulk extends FO_Plugin
     $refText = $_POST['refText'];
     $licenseId = intval($_POST['licenseId']);
     $removing = $_POST['removing'];
+    $bulkScope = $_POST['bulkScope'];
 
     $license = $this->licenseDao->getLicenseById($licenseId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
@@ -82,6 +81,20 @@ class changeLicenseBulk extends FO_Plugin
     if ($uploadId > 0) {
       $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
       $uploadName = $uploadInfo['upload_filename'];
+
+      if ($bulkScope === "u")
+      {
+        $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+        $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
+                                              array($uploadId), __METHOD__."adam".$uploadTreeTable);
+        $uploadTreeId = $row['uploadtree_pk'];
+      }
+      else
+      {
+        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode'])) {
+          $uploadTreeId = $uploadEntry['parent'];
+        }
+      }
 
       $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
         "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
@@ -93,9 +106,9 @@ class changeLicenseBulk extends FO_Plugin
         $bulkId = $licenseRefBulkIdResult['lrb_pk'];
         $job_pk = JobAddJob($userId, $uploadName, $uploadId);
 
-        global $Plugins;
-        $MonkBulkPlugin = plugin_find("agent_monk_bulk");
-        $jq_pk = $MonkBulkPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $bulkId);
+        $deciderPlugin = plugin_find("agent_decider");
+        $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
+        $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $uploadTreeId);
       } else {
         $ErrorMsg = "can not insert bulk reference";
       }
@@ -107,10 +120,10 @@ class changeLicenseBulk extends FO_Plugin
 
     if (empty($ErrorMsg) && ($jq_pk>0)) {
       header('Content-type: text/json');
-      print json_encode(array("jqid" => $jq_pk));
+      return json_encode(array("jqid" => $jq_pk));
     } else {
       header('Content-type: text/json', true, 500);
-      print json_encode(array("error" => $ErrorMsg));
+      return json_encode(array("error" => $ErrorMsg));
     }
   } // Output()
 

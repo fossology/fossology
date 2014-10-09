@@ -91,7 +91,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
   {
     $this->sameUpload=true;
     $this->sameFolder=true;
-    $this->licenses = array (new LicenseRef(8,"testSN", "testFN") ,new LicenseRef(100,"test2SN", "test2FN"), new LicenseRef(1007,"test3SN", "test3FN")  );
+    $this->licenses = array (new LicenseRef(8, "testSN", "testFN") ,new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN")  );
     $this->clearingId=8;
     $this->uploadTreeId=9;
     $this->pfileId=10;
@@ -101,7 +101,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
     $this->comment="Test comment";
     $this->reportinfo ="Test reportinfo";
     $this->scope = LicenseDecision::SCOPE_UPLOAD;
-    $this->date_added = "2012-07-08 11:14:15.638276";
+    $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s',"2012-07-08 11:14:15");
   }
 
   public function testSameUpload()
@@ -179,13 +179,10 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
   public function testDateAdded()
   {
     $clearingDec = ClearingDecisionBuilder::create()
-      -> setDateAdded ($this->date_added)
+      -> setDateAdded ($this->date_added->getTimestamp())
       -> build();
-    assertThat($clearingDec->getDateAdded(), is(new DateTime($this->date_added)));
+    assertThat($clearingDec->getDateAdded(), is($this->date_added));
   }
-
-
-
 
 }
  

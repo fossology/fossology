@@ -340,12 +340,9 @@ class browseProcessPost extends FO_Plugin
 
   private function getOrderString()
   {
-
     $columnNamesInDatabase = array('upload_filename', 'status_fk', 'UNUSED', 'assignee', 'upload_ts', 'priority');
 
-    $defaultOrder = ui_browse::returnSortOrder();
-
-    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
+    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
 
     return $orderString;
   }

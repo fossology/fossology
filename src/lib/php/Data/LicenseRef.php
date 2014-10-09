@@ -20,46 +20,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-class LicenseRef
-{
-  /**
-   * @var int
-   */
-  private $id;
-  /**
-   * @var string
-   */
-  private $shortName;
-  /**
-   * @var string
-   */
-  private $fullName;
+use Fossology\Lib\Data\License\LicenseAlike;
 
-  /**
-   * @var boolean
-   */
-  private $removed;
+class LicenseRef implements LicenseAlike
+{
+  /** @var int */
+  private $id;
+
+  /** @var string */
+  private $shortName;
+
+  /** @var string */
+  private $fullName;
 
   /**
    * @param $licenseId
    * @param $licenseShortName
    * @param $licenseName
-   * @param bool $removed
    */
-  function __construct($licenseId, $licenseShortName, $licenseName, $removed =false)
+  function __construct($licenseId, $licenseShortName, $licenseName)
   {
     $this->id = $licenseId;
     $this->shortName = $licenseShortName;
     $this->fullName = $licenseName ? : $licenseShortName;
-    $this->removed = $removed;
-  }
-
-  /**
-   * @return boolean
-   */
-  public function getRemoved()
-  {
-    return $this->removed;
   }
 
   /**

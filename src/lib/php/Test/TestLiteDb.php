@@ -30,7 +30,7 @@ use SQLite3;
 
 class TestLiteDb
 {
-  /** * @var dbManager */
+  /** * @var DbManager */
   private $dbManager;
   /** @var string dbFileName */
   private $dbFileName;
@@ -59,12 +59,11 @@ class TestLiteDb
     
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
-    $logger = $container->get('logger');
+    global $container;
+    // $logger = $container->get('logger');
     $logger = new Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
-    
-//    $dbManager = new DbManager($logger);
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
     $container->get('db.manager')->setDriver(new SqliteE($sqlite3Connection));
@@ -80,7 +79,7 @@ class TestLiteDb
     $this->dbManager = null;    
   }
   
-   private function dirnameRec($path, $depth = 1)
+  private function dirnameRec($path, $depth = 1)
   {
     for ($i = 0; $i < $depth; $i++)
     {

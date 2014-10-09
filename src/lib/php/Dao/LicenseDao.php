@@ -20,10 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Dao\FileTreeBounds;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -50,12 +50,12 @@ class LicenseDao extends Object
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return LicenseMatch[]
    */
-  function getFileLicenseMatches(FileTreeBounds $fileTreeBounds)
+  function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds)
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
     $this->dbManager->prepare($statementName,
@@ -76,7 +76,7 @@ class LicenseDao extends Object
           ORDER BY license_shortname ASC, percent_match DESC");
 
     $result = $this->dbManager->execute($statementName,
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
+        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
 
     $matches = array();
 
@@ -95,12 +95,12 @@ class LicenseDao extends Object
   /**
    * \brief get all the tried bulk recognitions for a single file or uploadtree (currently unused)
    *
-   * @param \Fossology\Lib\Dao\FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @return LicenseMatch[]
    */
-  function getBulkFileLicenseMatches(FileTreeBounds $fileTreeBounds)
+  function getBulkFileLicenseMatches(ItemTreeBounds $itemTreeBounds)
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
     $this->dbManager->prepare($statementName,
@@ -117,7 +117,7 @@ class LicenseDao extends Object
           ORDER BY license_file_id ASC");
 
     $result = $this->dbManager->execute($statementName,
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
+        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
 
     $matches = array();
 
@@ -144,13 +144,16 @@ class LicenseDao extends Object
   /**
    * @return LicenseRef[]
    */
-  public function getLicenseRefs()
+  public function getLicenseRefs($search = null, $orderAscending = true)
   {
-    $statementName = __METHOD__;
+    $searchCondition = $search ? "WHERE lower(rf_shortname) like($1)" : "";
+
+    $order = $orderAscending ? "ASC" : "DESC";
+    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_" . $order;
 
     $this->dbManager->prepare($statementName,
-        "select rf_pk,rf_shortname,rf_fullname from license_ref order by rf_shortname");
-    $result = $this->dbManager->execute($statementName);
+        "select rf_pk,rf_shortname,rf_fullname from license_ref $searchCondition order by rf_shortname $order");
+    $result = $this->dbManager->execute($statementName, $search ? array('%' . strtolower($search) . '%') : array());
 
     $licenseRefs = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -177,15 +180,15 @@ class LicenseDao extends Object
   }
   
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param $selectedAgentId
    * @return array
    */
-  public function getTopLevelLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
+  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
-    $param = array($fileTreeBounds->getUploadTreeId());
+    $param = array($itemTreeBounds->getUploadTreeId());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
@@ -205,10 +208,10 @@ class LicenseDao extends Object
            $noLicenseFoundStmt";
 
     if (!empty($selectedAgentId)){
-      $sql .= " AND agent_pk=$4";
+      $sql .= " AND agent_pk=$2";
       $param[] = $selectedAgentId;
     }
-    $sql .= "GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
+    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
          ORDER BY match_percentage ASC, license_shortname ASC";
     
     $this->dbManager->prepare($statementName, $sql);
@@ -223,11 +226,11 @@ class LicenseDao extends Object
   }
 
 
-  public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
+  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId=null)
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
-    $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
+    $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
          FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
          WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
@@ -236,7 +239,7 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= "GROUP BY license_shortname";
+    $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
     {
       $sql .= $orderStatement;
@@ -252,9 +255,9 @@ class LicenseDao extends Object
     return $assocLicenseHist;
   }
 
-  public function getLicenseShortnamesContained(FileTreeBounds $fileTreeBounds, $filterLicenses=array('VOID')) //'No_license_found',
+  public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $filterLicenses=array('VOID')) //'No_license_found',
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
@@ -271,7 +274,7 @@ class LicenseDao extends Object
               GROUP BY rf_shortname
               ORDER BY rf_shortname ASC");
     $result = $this->dbManager->execute($statementName,
-        array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()));
+        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
 
     $licenses = array();
     while ($row = $this->dbManager->fetchArray($result))

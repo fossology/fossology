@@ -20,8 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-class ClearingDecisionData {
+use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 
+class ClearingDecisionData {
 
   /**
    * @var bool
@@ -34,7 +36,7 @@ class ClearingDecisionData {
   protected $sameFolder;
 
   /**
-   * @var LicenseRef[]
+   * @var ClearingLicense[]
    */
   protected $licenses;
 

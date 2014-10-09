@@ -297,7 +297,7 @@ class FO_Plugin
    * For agents, the outputs generate status information.
    */
 
-  /* Possible values: Text, HTML, or XML. */
+  /* Possible values: Text, HTML, XML, JSON */
   var $OutputType = "HTML";
   var $OutputToStdout = 0;
 
@@ -420,7 +420,7 @@ class FO_Plugin
 
   public function getTemplateName()
   {
-    return "include/base.html";
+    return "include/base.html.twig";
   }
 
   public function getVars()

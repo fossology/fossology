@@ -19,8 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -28,13 +29,12 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
-
   /** @var UploadDao */
   private $uploadDao;
 
   public function setUp()
   {
-    $this->testDb = new TestLiteDb("/tmp/fossology.sqlite");
+    $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->testDb->createPlainTables(
@@ -53,7 +53,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
-
+    echo "P";
     $this->uploadDao = new UploadDao($this->dbManager);
   }
 
@@ -71,10 +71,12 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
         . " VALUES ($uploadTreeId, NULL, $uploadId, 1, 33792, $left, 2, 'WXwindows.txt');",
         __METHOD__ . '.insert.data');
-    $fileTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-    $this->assertInstanceOf('Fossology\Lib\Dao\FileTreeBounds', $fileTreeBounds);
-    $this->assertEquals($expected = $uploadId, $fileTreeBounds->getUploadId());
-    $this->assertEquals($expected = $left, $fileTreeBounds->getLeft());
+    /** @var ItemTreeBounds $itemTreeBounds */
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    $this->assertInstanceOf('Fossology\Lib\Data\Tree\ItemTreeBounds', $itemTreeBounds);
+
+    $this->assertEquals($expected = $uploadId, $itemTreeBounds->getUploadId());
+    $this->assertEquals($expected = $left, $itemTreeBounds->getLeft());
   }
 
   public function testGetNextItemWithEmptyArchive()

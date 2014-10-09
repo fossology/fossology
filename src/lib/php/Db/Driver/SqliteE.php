@@ -144,7 +144,7 @@ class SqliteE implements Driver
   public function fetchAll($res)
   {
     $result = array();
-    while ($row = $res->fetchArray(SQLITE3_NUM))
+    while ($row = $res->fetchArray(SQLITE3_ASSOC)) // do not SQLITE3_NUM !
     {
       $result[] = $row;
     }
@@ -166,4 +166,24 @@ class SqliteE implements Driver
     $this->dbConnection->query("COMMIT");
     return;
   }
+
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    return $booleanValue === 1;
+  }
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 1 : 0;
+  }
+
+
 }

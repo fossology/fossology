@@ -79,6 +79,7 @@ typedef struct
     gchar*   message;   ///< message that will be sent with job notification email
     int32_t  priority;  ///< importance of the job, maps directory to unix priority
     int32_t  verbose;   ///< the verbose level for all of the agents in this job
+    int32_t  parent_id; ///< the identifier for the parent of this job (its queue id)
     int32_t  id;        ///< the identifier for this job
     int32_t  user_id;   ///< the id of the user that created the job
 } job_t;
@@ -88,7 +89,7 @@ typedef struct
 /* ************************************************************************** */
 
 job_t* job_init(GTree* job_list, GSequence* job_queue, char* type, char* host,
-    int id, int user_id, int priority, char *jq_cmd_args);
+    int id, int parent_id, int user_id, int priority, char *jq_cmd_args);
 void   job_destroy(job_t* job);
 
 /* ************************************************************************** */

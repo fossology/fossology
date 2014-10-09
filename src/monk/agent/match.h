@@ -33,6 +33,8 @@ typedef struct {
 
 
 void match_array_free(GArray* matches);
+Match* match_array_get(GArray* matches, guint i);
+
 void match_free(Match* match);
 
 #if GLIB_CHECK_VERSION(2,32,0)

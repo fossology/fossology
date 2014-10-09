@@ -1,0 +1,17 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+{% include 'change_license_modal.html.twig' %}
+{% include 'ui-clearing-view_bulk.html.twig' %}
+{{ parent() }}
+{% endblock %}
+
+{% block foot %}
+{{ parent() }}
+<script src="scripts/jquery.dataTables-1.9.4.min.js" type="text/javascript"></script>
+<script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+<script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+<script src='scripts/change-license-common.js' type='text/javascript'></script>
+<script src='scripts/change-license-browse.js' type='text/javascript'></script>
+<script src='scripts/license.js' type='text/javascript'></script>
+{% endblock %}

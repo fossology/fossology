@@ -75,9 +75,9 @@ function blowAudit($verbose)
   }
   $auditDecisions = pg_fetch_all($res);
   $dbManager->freeResult($res);
-  $scope = $dbManager->getSingleRow('SELECT scope_pk FROM clearing_decision_scopes WHERE meaning=$1',array('global'));
+  $scope = $dbManager->getSingleRow('SELECT scope_pk FROM clearing_decision_scope WHERE meaning=$1',array('global'));
   $scope = $scope['scope_pk'];
-  $type = $dbManager->getSingleRow('SELECT type_pk FROM clearing_decision_types WHERE meaning=$1',array('userDecision'));
+  $type = $dbManager->getSingleRow('SELECT type_pk FROM clearing_decision_type WHERE meaning=$1',array('userDecision'));
   $type = $scope['type_pk'];
   $dbManager->prepare($stmt='insertClearingDecision',
           'INSERT INTO clearing_decision'

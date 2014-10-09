@@ -103,7 +103,7 @@ class ui_menu extends FO_Plugin
     $V = "";
     if (!empty($M->URI))
     {
-      $V .= '<a href="' . Traceback_uri() . "?mod=" . $M->URI;
+      $V .= '<a  id="'.htmlentities($M->Name) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
       if (empty($M->Target) || ($M->Target == ""))
       {
         // $V .= '" target="basenav">';
@@ -121,7 +121,7 @@ class ui_menu extends FO_Plugin
       }
     } else
     {
-      $V .= '<a href="#">';
+      $V .= '<a id="'.md5($M->Name) .'" href="#">';
       if (empty($M->SubMenu))
       {
         $V .= "<font color='#C0C0C0'>";

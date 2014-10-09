@@ -1,6 +1,6 @@
 /*
  Copyright (C) 2014, Siemens AG
- Author: Daniele Fognini, Johannes Najjar
+ Author: Daniele Fognini, Johannes Najjar, Steffen Weber 
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -50,24 +50,6 @@ function compareText(opt1, opt2) {
     return opt1.text < opt2.text ? -1 : opt1.text > opt2.text ? 1 : 0;
 }
 
-function moveLicense(theSelFrom, theSelTo) {
-    var selLength = theSelFrom.length;
-    var i;
-    for (i = selLength - 1; i >= 0; i--) {
-        if (theSelFrom.options[i].selected) {
-            var newOption  = (new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
-            newOption.ondblclick = theSelFrom.options[i].ondblclick;
-            
-            
-            theSelTo.options[theSelTo.options.length] = theSelFrom.options[i];
-            
-            
-            theSelFrom[i] = null;
-        }
-    }
-    sortList(theSelFrom);
-    sortList(theSelTo);
-}
 
 function selectNoLicenseFound(left, right) {
     var selLength = right.length;
@@ -91,6 +73,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
         "removing": $('#bulkRemoving').val(),
         "refText": $('#bulkRefText').val(),
         "licenseId": $('#bulkLicense').val(),
+        "bulkScope" : $('#bulkScope').val(),
         "uploadTreeId": $('#uploadTreeId').val()
     };
 
@@ -128,7 +111,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
 
 function performPostRequest() {
     var txt = [];
-    $('#licenseLeft').find(':selected').each(function () {
+    $('#licenseLeft option:selected').each(function () {
         txt.push(this.value);
     });
 
@@ -151,45 +134,30 @@ function performPostRequest() {
     closeUserModal();
 }
 
-function performNoLicensePostRequest() {
-    selectNoLicenseFound(licenseLeft, licenseRight);
-    performPostRequest();
-    closeUserModal();
-}
 
-function activateLic(k){
- $("#bedit"+k).show();
- $("#aedit"+k).hide();
-}
-
-function performLicCommentRequest(k){
-    var data = {
-        "uploadTreeId": $('#uploadTreeId').val(),
-        "lic": k,
-        "comment": $('#tedit'+k).val()
-    };
-    $.ajax({
-        type: "POST",
-        url: "?mod=change-license-processPost",
-        data: data,
-        success: clearingSuccess
-    });
-}
-
-function performLicDelRequest(k){
-    var data = {
-        "uploadTreeId": $('#uploadTreeId').val(),
-        "unlic": k
-    };
-    $.ajax({
-        type: "POST",
-        url: "?mod=change-license-processPost",
-        data: data,
-        success: clearingSuccess
-    });
-}
 
 function popUpLicenseText(popUpUri,title) {
   sel = $("#bulkLicense :selected").text();
   window.open(popUpUri+sel,title,'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
+}
+
+function addLicense(uploadId, uploadTreeId, licenseId) {
+    $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
+        .done(function (data) {
+            var table = createLicenseDecisionTable();
+            table.fnDraw(false);
+        })
+        .fail(failed);
+
+}
+
+
+function removeLicense(uploadId, uploadTreeId, licenseId) {
+    $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
+        .done(function (data) {
+            var table = createLicenseDecisionTable();
+            table.fnDraw(false);
+          })
+        .fail(failed);
+
 }

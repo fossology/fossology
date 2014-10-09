@@ -88,7 +88,7 @@ class LicenseMatch extends Object
   /**
    * @return int|null
    */
-  public function getPercent()
+  public function getPercentage()
   {
     return $this->percent;
   }

@@ -168,16 +168,26 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
   }
 
-  $agentCondition = $agent_pk != "any" ? "and agent_fk=$agent_pk" : "";
+  $agentCondition = '';
+  if (is_array($agent_pk))
+  {
+    $agentCondition = ' AND agent_fk IN (' . implode(',', $agent_pk) . ')';
+  } 
+  else if ($agent_pk != "any")
+  {
+    $agentCondition = "and agent_fk=$agent_pk";
+  }
 
-  $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name
-          from license_file, $TagTable
+  $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
+          from license_file, agent, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
                  where upload_fk=$upload_pk and lft BETWEEN $lft and $rgt 
-                 and ((ufile_mode & (1<<28))=0) and ((ufile_mode & (1<<29))=0)) as SS
+                 and ufile_mode & (3<<28) = 0 )  as SS
           where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
-                $TagClause
-  $order limit $limit offset $offset";
+              AND agent_pk=agent_fk
+              $TagClause
+          GROUP BY uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name
+          $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   return $result;

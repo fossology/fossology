@@ -15,6 +15,8 @@ VERSION
 .*.sw?
 *~
 /src/vendor
+src/composer.lock
+testReport/*
 
 # compiled or derived files
 install/db/dbcreate

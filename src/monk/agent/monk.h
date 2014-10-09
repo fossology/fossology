@@ -47,6 +47,7 @@ typedef struct {
   long uploadTreeLeft;
   long uploadTreeRight;
   long licenseId;
+  int decisionType;
   int uploadId;
   int removing;
   int userId;
@@ -59,6 +60,7 @@ typedef struct {
     int agentId;
     int scanMode;
     int verbosity;
+    int jobId;
     BulkArguments* bulkArguments;
 } MonkState;
 

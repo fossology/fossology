@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "highlight.h"
 #include "diff.h"
 #include "math.h"
+#include "bulk.h"
 #include "_squareVisitor.h"
 
 inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
@@ -84,6 +85,11 @@ void match_array_free(GArray* matches) {
 #endif
     g_array_free(matches, TRUE);
 }
+
+Match* match_array_get(GArray* matches, guint i) {
+  return g_array_index(matches, Match*, i);
+}
+
 
 void matchFileWithLicenses(MonkState* state, File* file, GArray* licenses){
   GArray* matches = findAllMatchesBetween(file, licenses,
@@ -260,7 +266,7 @@ inline GArray* groupOverlapping(GArray* matches) {
   if (matches->len == 0)
     return result;
 
-  Match* firstMatch = g_array_index(matches, Match*, 0);
+  Match* firstMatch = match_array_get(matches, 0);
   size_t currentGroupEnd = match_getEnd(firstMatch);
 
   GArray* currentGroup = g_array_new(TRUE, FALSE, sizeof(GArray*));
@@ -268,7 +274,7 @@ inline GArray* groupOverlapping(GArray* matches) {
   g_array_append_val(currentGroup, firstMatch);
 
   for (guint i = 1; i < matches->len; ++i) {
-    Match* currentMatch = g_array_index(matches, Match*, i);
+    Match* currentMatch = match_array_get(matches, i);
     size_t currentMatchEnd = match_getEnd(currentMatch);
 
     if (currentMatchEnd > currentGroupEnd) {
@@ -285,10 +291,10 @@ inline GArray* groupOverlapping(GArray* matches) {
 
 // match must not be empty
 Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare){
-  Match* result = g_array_index(matches, Match*, 0);
+  Match* result = match_array_get(matches, 0);
 
   for (guint j = 0; j < matches->len; j++) {
-    Match* match = g_array_index(matches, Match*, j);
+    Match* match = match_array_get(matches, j);
     if ((*compare)(&match, &result) == 1) {
       result = match;
     }
@@ -407,9 +413,13 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
     return;
   }
 
-  for (size_t matchIndex = 0; matchIndex < matches->len; matchIndex++)  {
-    Match* match = g_array_index(matches, Match*, matchIndex);
-    processMatch(state, file, match);
+  if (state->scanMode == MODE_BULK) {
+    processMatches_Bulk(state, file, matches);
+  } else {
+    for (size_t matchIndex = 0; matchIndex < matches->len; matchIndex++)  {
+      Match* match = match_array_get(matches, matchIndex);
+      processMatch(state, file, match);
+    }
   }
 }
 

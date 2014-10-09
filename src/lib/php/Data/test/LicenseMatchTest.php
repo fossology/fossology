@@ -19,9 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\LicenseMatch;
-
 class LicenseMatchTest extends \PHPUnit_Framework_TestCase {
 
   //Fields of LicenseMatch
@@ -84,7 +81,7 @@ class LicenseMatchTest extends \PHPUnit_Framework_TestCase {
     $this->id = 8;
     $this->shortName = "testSN";
     $this->fullName =  "testFN";
-    $this->licenseRef= new LicenseRef($this->id,$this->shortName,$this->fullName);
+    $this->licenseRef= new LicenseRef($this->id, $this->shortName, $this->fullName);
 
     $this->agentId = 12;
     $this->agentName= "Monk";
@@ -121,7 +118,7 @@ class LicenseMatchTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testGetPercent(){
-    assertThat($this->licenseMatch->getPercent(), is($this->percent));
+    assertThat($this->licenseMatch->getPercentage(), is($this->percent));
   }
 }
  

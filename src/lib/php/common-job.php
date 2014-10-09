@@ -451,15 +451,22 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
     if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0 ) return $jq_pk;
 
     /* queue up dependencies */
-    foreach ($Dependencies as $PluginName)
+    foreach ($Dependencies as $Dependency)
     {
+      if (is_array($Dependency)) {
+        $PluginName = $Dependency['name'];
+        $DepArgs = $Dependency['args'];
+      } else {
+        $PluginName = $Dependency;
+        $DepArgs = null;
+      }
       $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
       if (!$DepPlugin)
       {
         $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
         return -1;
       }
-      if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty)) == -1)
+      if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
         return -1;
     }
 

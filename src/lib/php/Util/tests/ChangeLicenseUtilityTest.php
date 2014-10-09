@@ -22,10 +22,9 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\View\Renderer;
-use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\View\Renderer;
 use Monolog\Logger;
 
 

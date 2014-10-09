@@ -1,0 +1,124 @@
+{% import "include/macro.html.twig" as macro %}
+
+
+<form method="post" id="uiClearingForm">
+    <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
+    <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
+    <table>
+        <tr>
+            <td>
+            <div class="groupBox">
+                <button type="submit" name="update"  id="prev" hidden >&lt;</button>
+                <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+                <button type="submit" name="update" id="next" hidden  >&gt;</button>
+            </div>
+            </td>
+            <td>
+                <p>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="none"> {% trans "Go through all files" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="noLicense"> {% trans "Go through all files with licenses" %}<br>
+                    <input type="radio" name="FileSelection" id="FileSelection" value="alreadyCleared"> {% trans "Go through all files with licenses and no clearing result" %}<br>
+                </p>
+                {#<input type="checkbox" name="skipNoLicenseFiles" id="skipNoLicenseFiles" value="skipNoLicenseFiles"> {% trans "Skip files with no licenses" %}<br>#}
+                {#<input type="checkbox" name="skipNoClearingFiles" id="skipNoClearingFiles" value="skipNoClearingFiles"> {% trans "Skip files with no clearing" %}<br>#}
+            </td>
+        </tr>
+        </table>
+
+
+    <div class="groupBox">
+        <fieldset style="display:inline">
+            <legend>
+                {{ 'License decision scope'| trans }}
+            </legend>
+            <input type="checkbox" name="globalDecision"/> global
+        </fieldset>
+        <br/>
+        <fieldset style="display: inline;">
+            <legend>
+                {{ 'Clearing decision type'| trans }}
+            </legend>
+            {% for clearingType in clearingTypes %}
+            <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
+            value="{{ loop.index }}">
+            {{ clearingType }}
+            </input>
+            <br/>
+            {% endfor %}
+        </fieldset>
+    </div>
+</form>
+
+<div class="groupBox">
+    {{ macro.table("licenseDecisionsTable", licenseDecisionsHeaders) }}
+</div>
+
+<div class="groupBox">
+
+    {% if auditDenied %}
+    {{ 'Sorry, you do not have write (or above) permission on this upload, thus you cannot change the license of this
+    file.
+    '| trans }}
+    {% else %}
+    <button type=\"button\" onclick='openUserModal()'>
+        {{ 'User Decision ...'| trans }}
+    </button>
+    &nbsp;
+    <button type=\"button\" onclick='openBulkModal()'>
+        {{ 'Bulk Recognition ...'| trans }}
+    </button>
+    &nbsp;
+    <span id="bulkIdResult" name="bulkIdResult" hidden></span>
+
+    <br/>
+
+    <div style="padding-top: 10px;">
+
+        <div class="modal" id="userModal" hidden>
+            <div style="padding-bottom: 10px">
+                {{ macro.table("licenseSelectionTable") }}
+            </div>
+        </div>
+        {% include 'ui-clearing-view_bulk.html.twig' %}
+    </div>
+    {% endif %}
+
+</div>
+
+{% if clearingHistory %}
+<div class="groupBox">
+
+    <h3>
+        {{ 'Clearing History'| trans }}
+    </h3>
+
+    <div class="scrollable2">
+        <table border="1" cellpadding="5px" id="clearingHistoryTable" name="clearingHistoryTable">
+            <tr>
+                <th>
+                    {{ 'Date'| trans }}
+                </th>
+                <th>
+                    {{ 'Username'| trans }}
+                </th>
+                <th>
+                    {{ 'Scope'| trans }}
+                </th>
+                <th>
+                    {{ 'Type'| trans }}
+                </th>
+                <th>
+                    {{ 'Licenses'| trans }}
+                </th>
+            </tr>
+            {% for row in clearingHistory %}
+            <tr>
+            {% for col in row.content %}
+            <td>{{ col }}</td>
+            {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endif %}

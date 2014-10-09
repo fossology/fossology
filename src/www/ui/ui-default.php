@@ -44,7 +44,7 @@ class ui_default extends FO_Plugin
       $this->vars['baseUrl'] = Traceback_uri();
     }
    
-    return $this->renderTemplate("default.html");
+    return $this->renderTemplate("default.html.twig");
   }
 }
 

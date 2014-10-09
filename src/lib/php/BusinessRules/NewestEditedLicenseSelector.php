@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
 /**
@@ -29,60 +28,39 @@ use Fossology\Lib\Util\Object;
  */
 class NewestEditedLicenseSelector extends Object
 {
-
-  function __construct()
-  {
-  }
-
-
   /**
    * @param ClearingDecision[] $editedLicensesArray
    * @return ClearingDecision[]
    */
-  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray, $extractTBD=false)
+  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray)
   {
-    $clearingDecWithLicensesAndContextArray = $this->groupClearingDWLAArrayPerPfileId($editedLicensesArray);
-
-    $goodLicenseDecisions = array();
-    foreach ($clearingDecWithLicensesAndContextArray as $fileId => $editedLicensesArray)
+    $editedLicensesArrayGrouped = array();
+    foreach ($editedLicensesArray as $editedLicense)
     {
-      $cd = null;
-      if($extractTBD) {
-      $first = reset($editedLicensesArray);
-        if (!empty($first) and $first->getType() == ClearingDecision::TO_BE_DISCUSSED)
-        {
-          $cd = $first;
-
-        }
+      $pfileId = $editedLicense->getPfileId();
+      if (!array_key_exists($pfileId, $editedLicensesArrayGrouped)) {
+        $editedLicensesArrayGrouped[$pfileId] = $editedLicense;
       }
-
-      if($cd == null)
-      {
-        $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
-      }
-      if ($cd != null) $goodLicenseDecisions[$fileId] = $cd;
     }
 
-    return $goodLicenseDecisions;
+    return $editedLicensesArrayGrouped;
   }
 
   /**
    * @param ClearingDecision[] $editedLicensesArray
    * @return string[]
    */
-  public function extractGoodLicenses($editedLicensesArray, $extractTBD=false)
+  public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray, $extractTBD);
+    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray);
 
     $licenses = array();
     foreach ($licensesPerId as $fileID => $licInfo)
     {
       foreach ($licInfo->getLicenses() as $licRef)
       {
-        /**
-         * @var LicenseRef $licRef
-         */
-        $licenses[] = $licRef->getShortName();
+        if (!($licRef->isRemoved()))
+          $licenses[] = $licRef->getShortName();
       }
     }
     return $licenses;
@@ -94,7 +72,7 @@ class NewestEditedLicenseSelector extends Object
    */
   public function isInactive($clearingDecWithLicAndContext)
   {
-    return $clearingDecWithLicAndContext->getType() !== 'User decision' or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
+    return $clearingDecWithLicAndContext->getType() !== ClearingDecision::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
   }
 
   // these two functions have to be kept consistent to each other
@@ -110,38 +88,18 @@ class NewestEditedLicenseSelector extends Object
     //! misleading folder content overviews in the license browser and in the count of license findings
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == 'User decision' and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
+      if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
       {
         return $clearingDecWithLicenses;
       }
     }
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == 'User decision' and $clearingDecWithLicenses->getScope() == 'global')
+      if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
       {
         return $clearingDecWithLicenses;
       }
     }
     return null;
-  }
-
-  /**
-   * @param ClearingDecision[] $editedLicensesArray
-   * @return array[string]ClearingDecision[]
-   */
-  public function groupClearingDWLAArrayPerPfileId($editedLicensesArray)
-  {
-    $clearingDecWithLicensesAndContextArray = array();
-    foreach ($editedLicensesArray as $editedLicense)
-    {
-      if (empty($clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()]))
-      {
-        $clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()] = array($editedLicense);
-      } else
-      {
-        $clearingDecWithLicensesAndContextArray[$editedLicense->getPfileId()][] = $editedLicense;
-      }
-    }
-    return $clearingDecWithLicensesAndContextArray;
   }
 }

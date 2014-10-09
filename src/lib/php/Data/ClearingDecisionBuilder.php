@@ -21,7 +21,7 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
-use DateTimeZone;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 class ClearingDecisionBuilder extends  ClearingDecisionData
 {
@@ -36,7 +36,8 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     $this->userName = "fossy";
     $this->userId = -1;
     $this->type = "User decision";
-    $this->date_added = new DateTime("now", new DateTimeZone("Europe/Amsterdam"));
+    $this->scope = "upload";
+    $this->date_added = new DateTime();
   }
 
   /**
@@ -55,12 +56,12 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setDateAdded($date_added)
   {
-    $this->date_added = new DateTime($date_added);
+    $this->date_added->setTimestamp($date_added);
     return $this;
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingLicense[] $licenses
    * @return ClearingDecisionBuilder
    */
   public function setLicenses($licenses)
@@ -111,6 +112,16 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
+   * @param $scope
+   * @return $this
+   */
+  public function setScope($scope)
+  {
+    $this->scope = $scope;
+    return $this;
+  }
+
+  /**
    * @param int $uploadTreeId
    * @return ClearingDecisionBuilder
    */
@@ -155,7 +166,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   public function build()
   {
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
-        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type,
+        $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
         $this->date_added, $this->licenses);
   }
 

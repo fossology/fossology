@@ -245,6 +245,49 @@ int fo_dbManager_commit(fo_dbManager* dbManager) {
   return result;
 }
 
+int fo_dbManager_rollback(fo_dbManager* dbManager) {
+  int result = 0;
+  PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "ROLLBACK");
+  if (queryResult) {
+    result = 1;
+    PQclear(queryResult);
+  }
+  return result;
+}
+
+int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName) {
+  return fo_dbManager_exists(dbManager, "table", tableName);
+}
+
+int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name) {
+  int result = 0;
+
+  char* escapedName = fo_dbManager_StringEscape(dbManager, name);
+
+  if (escapedName) {
+    PGresult* queryResult = fo_dbManager_Exec_printf(
+      dbManager,
+      "select count(*) from information_schema.%ss where %s_catalog='%s' and %s_name='%s'",
+      type, type,
+      PQdb(dbManager->dbConnection),
+      type,
+      escapedName
+    );
+
+    if (queryResult) {
+      if (PQntuples(queryResult)==1) {
+        if (atol(PQgetvalue(queryResult, 0, 0)) == 1) {
+          result = 1;
+        }
+      }
+      PQclear(queryResult);
+    }
+    free(escapedName);
+  }
+
+  return result;
+}
+
 PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...) {
   char* sqlQueryString;
   PGconn* dbConnection = dbManager->dbConnection;
@@ -277,7 +320,7 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
   return result;
 }
 
-char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string) {
+char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string) {
   size_t length = strlen(string);
   char* dest = malloc(2*length + 1);
 
@@ -290,19 +333,26 @@ char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string) {
     return NULL;
   }
 }
-
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...) {
   if (!preparedStatement) {
     return NULL;
   }
+  va_list vars;
+  va_start(vars, preparedStatement);
+  PGresult* result = fo_dbManager_ExecPreparedv(preparedStatement, vars);
+  va_end(vars);
+
+  return result;
+}
+PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args) {
+  if (!preparedStatement) {
+    return NULL;
+  }
+
+  char** parameters = buildStringArray(preparedStatement->paramc, preparedStatement->params, args);
 
   fo_dbManager* dbManager = preparedStatement->dbManager;
   PGconn* dbConnection = dbManager->dbConnection;
-
-  va_list vars;
-  va_start(vars, preparedStatement);
-  char** parameters = buildStringArray(preparedStatement->paramc, preparedStatement->params, vars);
-  va_end(vars);
 
 #ifdef DEBUG
   char* printedStatement = fo_dbManager_printStatement(preparedStatement);

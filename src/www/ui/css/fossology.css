@@ -238,6 +238,7 @@ html, body
     margin-top: 20px;
     position: relative;
     top: -20px;
+    padding: 10px;
 }
 
 .headerNew {
@@ -264,4 +265,8 @@ html, body
     overflow: auto;
     padding-left: 1px;
     text-align: left;
+}
+
+.selectedRow {
+    font-weight: bold;
 }

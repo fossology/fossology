@@ -33,7 +33,7 @@ class Postgres implements Driver
 
   /**
    * @brief PostgreSQL uses no more than NAMEDATALEN-1 characters of an identifier; hence long statementNames
-   *        needs to be hashed to be shorter and do not collidate due to equivalence of truncated strings
+   *        needs to be hashed to be shorter and do not collide due to equivalence of truncated strings
    * @param string $stmt
    * @return string
    */
@@ -143,5 +143,24 @@ class Postgres implements Driver
     pg_query($this->dbConnection, "COMMIT");
     return;
   }
+
+  /**
+   * @param $booleanValue
+   * @return boolean
+   */
+  public function booleanFromDb($booleanValue)
+  {
+    return $booleanValue === 't';
+  }
+
+  /**
+   * @param boolean $booleanValue
+   * @return mixed
+   */
+  public function booleanToDb($booleanValue)
+  {
+    return $booleanValue ? 't' : 'f';
+  }
+
 
 }

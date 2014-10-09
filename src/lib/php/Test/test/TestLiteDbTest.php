@@ -18,8 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Test;
 
-use Fossology\Lib\Test\TestLiteDb;
-
 class TestLiteDbTest extends \PHPUnit_Framework_TestCase
 {
 

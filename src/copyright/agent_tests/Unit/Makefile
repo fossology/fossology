@@ -1,69 +1,91 @@
-######################################################################
-# Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
-TOP = ../../../..
-include $(TOP)/Makefile.conf
+# Copyright Siemens AG 2014
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
+TOP=../../../..
+VARS=$(TOP)/Makefile.conf
 LOCALAGENTDIR=../../agent
-
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB)
-DEF = -DDATADIR='"$(DATADIR)"'
-EXE = test_copyright
+TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
+include $(VARS)
+# -Werror -Wextra
+CPPUNIT_PATH=/opt/cppunit
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR) 
+DEF          = -DDATADIR='"$(MODDIR)"'
+CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
+CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
 
-OBJECTS = test_cvector.o \
-          test_copyright.o \
-          test_radixtree.o \
+EXE=test_copyright
 
-all: $(EXE)
-	@echo "make copyright Unit agent_tests"
+OBJECTS  = test_regex.o test_RegMatcher.o
+COVERAGE = 
 
-test: $(EXE)
-	@echo "make copyright Unit agent_tests"
+
+
+$(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
+	${MAKE} -C ${TESTDIR}
+	$(CXX) run_tests.cc -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK)
+
+all:  $(CXXFOLIB) $(EXE)
+
+#######################
+# library build rules #
+#######################
+
+$(CXXFOLIB):
+	$(MAKE) -C $(CXXFOLIBDIR)
+
+
+	
+agent:
+	$(MAKE) -C $(LOCALAGENTDIR)
+	
+libcopyright.a: $(OBJECTS)
+	$(MAKE) -C $(LOCALAGENTDIR) $@	
+	
+libcopyright_cov.a: $(COVERAGE)
+	$(MAKE) -C $(LOCALAGENTDIR) $@
+
+######################
+# object build rules #
+######################
+
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
+	
+$(COVERAGE): %_cov.o: %.c 
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+
+#######################
+# install build rules #
+#######################
+
+install: all
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
+	@mkdir -p $(CONFDIR)/mods-enabled
+	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
+	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
+
+uninstall:
+	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
+	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
+
+
+test: all
 	./$(EXE)
 
-coverage: run_tests.c $(OBJECTS) libcopyright_cov.a ${FOLIB}
+coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
-$(EXE): $(OBJECTS) libcopyright.a run_tests.c ${FOLIB}
-	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL)
-
-$(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
-
-libcopyright.a:
-	$(MAKE) -C $(LOCALAGENTDIR) $@
-
-libcopyright_cov.a: 
-	$(MAKE) -C $(LOCALAGENTDIR) $@
-
 clean:
-	@echo "make copyright agent_tests clean"
-	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
+	rm -f $(EXE) *.o *.a *.gcno *.gcda core
 
-install:
-	@echo "make copyright agent_tests nothing to install"
-uninstall:
-	@echo "make copyright agent_tests nothing to uninstall"
-
-.PHONY: all install uninstall clean test 
-include ${TOP}/Makefile.deps
+.PHONY: all install uninstall clean test

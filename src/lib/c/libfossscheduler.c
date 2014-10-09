@@ -41,6 +41,7 @@ int   alive;           ///< if the agent has updated with a hearbeat
 int   valid;           ///< if the information stored in buffer is valid
 int   sscheduler;      ///< whether the agent was started by the scheduler
 int   userID;          ///< the id of the user that created the job
+int   jobId;           ///< the id of the job
 char* module_name;     ///< the name of the agent
 
 const static char* sql_check = "\
@@ -177,6 +178,7 @@ void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** 
       {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
       {"userID",            0, 0, G_OPTION_ARG_INT,    &userID,       ""},
       {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,   ""},
+      {"jobId",             0, 0, G_OPTION_ARG_INT,    &jobId,        ""},
       {NULL}
   };
 
@@ -477,6 +479,16 @@ int fo_scheduler_get_special(int option)
   if(fscanf(stdin, "VALUE: %d\n", &value) != 1)
     return 0;
   return value;
+}
+
+/**
+ * @brief Gets the id of the job that the agent is running
+ *
+ * @return the job id
+ */
+int fo_scheduler_jobId()
+{
+  return jobId;
 }
 
 /**

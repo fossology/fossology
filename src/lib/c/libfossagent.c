@@ -27,6 +27,91 @@
 
 #define FUNCTION
 
+char* getUploadTreeTableName (fo_dbManager* dbManager, int uploadId) {
+char* result;
+PGresult* resTableName= fo_dbManager_ExecPrepared(
+                            fo_dbManager_PrepareStamement(
+                              dbManager,
+                              "getUploadTreeTableName",
+                              "SELECT uploadtree_tablename from upload where upload_pk=$1 limit 1",
+                              int),
+                            uploadId
+                          );
+  if (!resTableName) {
+    result = g_strdup("uploadtree");
+    return result;
+    }
+
+  if (PQntuples(resTableName) == 0) {
+    PQclear(resTableName);
+     result = g_strdup("uploadtree");
+     return result;
+  }
+
+
+  result = strdup(PQgetvalue(resTableName, 0, 0));
+  PQclear(resTableName);
+  return result;
+
+}
+
+
+PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
+
+  PGresult* result;
+
+  char* uploadtreeTableName = getUploadTreeTableName(dbManager, uploadId);
+
+  if(strcmp (uploadtreeTableName, "uploadtree_a")==0){
+    char* queryName = g_strdup_printf ("queryFileIdsForUpload.%s",uploadtreeTableName);
+    char* sql ;
+    sql = g_strdup_printf ("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
+                uploadtreeTableName);
+
+    result = fo_dbManager_ExecPrepared(
+              fo_dbManager_PrepareStamement(
+                dbManager,
+                queryName,
+                sql,
+                int),
+              uploadId
+            );
+
+    g_free(sql);
+    g_free(queryName);
+  }
+  else {
+
+    result = fo_dbManager_Exec_printf(dbManager,
+                "select distinct(pfile_fk) from %s where (ufile_mode&x'3C000000'::int)=0",
+                              uploadtreeTableName
+                );
+  }
+
+  g_free(uploadtreeTableName);
+
+  return result;
+}
+
+char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
+  PGresult* fileNameResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "queryPFileForFileId",
+      "select pfile_sha1 || '.' || pfile_md5 ||'.'|| pfile_size AS pfilename from pfile where pfile_pk=$1",
+      long),
+    fileId
+  );
+
+  if (PQntuples(fileNameResult) == 0) {
+    PQclear(fileNameResult);
+    return NULL;
+  }
+
+  char* pFile = strdup(PQgetvalue(fileNameResult, 0, 0));
+  PQclear(fileNameResult);
+  return pFile;
+}
 
 /*!
  \brief Get the latest enabled agent key (agent_pk) from the database.
