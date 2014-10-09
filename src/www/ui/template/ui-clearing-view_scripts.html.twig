@@ -19,6 +19,11 @@
             $.getJSON(sSource, aoData, fnCallback).fail(failed);
         },
         "aoColumns": selectedLicensesTableColumns,
+        "fnCreatedRow": function( nRow, aData, iDataIndex ) {
+            if(nRow.className == 'removed read_only') {
+                $('td', nRow).addClass('read_only');
+            }
+        },
         "iDisplayLength": 25,
         "bProcessing": true,
         "bStateSave": true,
@@ -54,9 +59,6 @@
             aoData.push({"name": "upload", "value": uploadId});
             aoData.push({"name": "item", "value": itemId});
             $.getJSON(sSource, aoData, fnCallback).fail(failed);
-        },
-        "fnCreatedRow": function( nRow, aData, iDataIndex ) {
-            $('tr.read_only', nRow).find('*').addClass('read_only');
         },
         "aoColumns": addLicenseTableColumns,
         "iDisplayLength": 25,

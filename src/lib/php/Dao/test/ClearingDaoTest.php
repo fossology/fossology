@@ -21,10 +21,10 @@ namespace Fossology\Lib\Dao;
 
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\Clearing\ClearingDecision;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -34,7 +34,7 @@ use Monolog\Logger;
 
 class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 {
-  /** @var TestPgDb */
+  /** @var  TestPgDb */
   private $testDb;
   /** @var DbManager */
   private $dbManager;
