@@ -34,7 +34,7 @@ RMFILES = FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|c
 all:
 #	php5 fo-render.php m
 
-install: all
+install:
 	mkdir -p $(DESTDIR)$(WEBDIR)/ui
 	for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
@@ -50,16 +50,16 @@ install: all
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
-	@mkdir -p $(CONFDIR)/mods-enabled
+	mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 		ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled; \
 	fi
 
 uninstall:
-	@rm -rf $(DESTDIR)$(WEBDIR)
-	@rm -f $(CONFDIR)/mods-enabled/www
+	rm -rf $(DESTDIR)$(WEBDIR)
+	rm -f $(CONFDIR)/mods-enabled/www
 
 clean:
 	rm -f *.o core $(iPATHFILE)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

@@ -19,21 +19,19 @@ MOD_NAME = example_wc_agent
 MOD_SUBDIR = ui
 
 all:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR)"
-
-test:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) test"
-
-coverage:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) coverage"
-
-clean:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) clean"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 install:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) install"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 uninstall:
-	@echo "$make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
-.PHONY: all test coverage clean install uninstall
+clean:
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
+
+.PHONY: all install uninstall clean

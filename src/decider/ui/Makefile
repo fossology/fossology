@@ -5,22 +5,28 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-include $(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+MOD_NAME = decider
+MOD_SUBDIR = ui
 
 all:
-	@echo "make decider ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 install:
-	@echo "make decider ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/decider/ui
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/decider/ui/
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make decider ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/decider/ui
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make decider ui clean"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean

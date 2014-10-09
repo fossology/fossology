@@ -19,19 +19,24 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
+MOD_NAME = nomos
+MOD_SUBDIR = ui
+
 all:
-	@echo "make nomos ui"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 install:
-	@echo "make nomos ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/nomos/ui
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/nomos/ui/
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make nomos ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/nomos/ui
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make nomos ui clean"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean

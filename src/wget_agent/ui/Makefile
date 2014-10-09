@@ -23,16 +23,20 @@ MOD_NAME = wget_agent
 MOD_SUBDIR = ui
 
 all:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) all"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
-install: all
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
-	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
+install:
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
+	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
+
+.PHONY: all install uninstall clean

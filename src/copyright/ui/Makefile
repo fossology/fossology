@@ -23,11 +23,12 @@ MOD_NAMES = copyright ip ecc
 MOD_SUBDIR = ui
 
 all:
-	@echo "make $(MOD_NAMES) ui"
+	@echo "make {$(MOD_NAMES)}/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 install:
-	for MOD_NAME in $(MOD_NAMES); do \
-		@echo "make $$MOD_NAME ui install"; \
+	@for MOD_NAME in $(MOD_NAMES); do \
+		@echo "make $$MOD_NAME ui $@"; \
 		mkdir -p $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 		$(INSTALL_DATA) ./*-$$MOD_NAME.php $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 	done
@@ -38,12 +39,13 @@ install:
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ip.php
 
 uninstall:
-	for MOD_NAME in $(MOD_NAMES); do \
-		@echo "make $$MOD_NAME ui uninstall"; \
+	@for MOD_NAME in $(MOD_NAMES); do \
+		@echo "make $$MOD_NAME ui $@"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
 	done
 
 clean:
-	@echo "make $(MON_NAMES) ui clean"
+	@echo "make {$(MOD_NAMES)}/$(MOD_SUBDIR) $@"
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean
