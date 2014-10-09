@@ -52,8 +52,15 @@ function getOptionDefaultTrue(name) {
     }
 }
 
-function failed() {
-    if (confirm("You are not logged in. Go to login page?")) {
+function failed(jqXHR, textStatus, error) {
+    var err = textStatus + ", " + error;
+    console.log( "Request Failed: " + err );
+    respondTxt = jqXHR.responseText;
+    if (respondTxt.indexOf('Module unavailable or your login session timed out.')!=0) {
+        $('#dmessage').append(respondTxt);
+        $('#dmessage').css('display','block');
+    }
+    else if (confirm("You are not logged in. Go to login page?")) {
         window.location.href = "?mod=auth";
     }
 }
