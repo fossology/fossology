@@ -40,7 +40,7 @@ class LicenseDecisionResult implements LicenseDecision {
    * @throws Exception
    */
   public function __construct($licenseDecisionEvent, $agentDecisionEvents=array()) {
-    if (!isset($licenseDecisionEvent) && count($agentDecisionEvents == 0)) {
+    if (($licenseDecisionEvent === null) && (count($agentDecisionEvents) == 0)) {
       throw new Exception("cannot create LicenseDecisionEvent without any event contained");
     }
 
@@ -143,6 +143,14 @@ class LicenseDecisionResult implements LicenseDecision {
     }
     print "licenseDecisionEvent: $this->licenseDecisionEvent\n";
     throw new Exception("could not determine license");
+  }
+
+  /**
+   * @return bool
+   */
+  public function hasAgentDecisionEvent()
+  {
+    return !empty($this->agentDecisionEvents);
   }
 
   /**
