@@ -22,8 +22,8 @@ namespace Fossology\Lib\Dao;
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -46,7 +46,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $clearingDao;
   /** @var int */
   private $now;
-  
+
 
   public function setUp()
   {
@@ -141,7 +141,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
-    
+
     $this->now = time();
     $cdArray = array(
         array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now-888)),
@@ -191,7 +191,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $tmp[]=$row->isRemoved();
       $tmp[]=$row->isGlobal();
       $tmp[]=$row->getEventType();
-      $tmp[]=$row->getDate();
+      $tmp[]=$row->getDateTime();
 
 
       $output[] = $tmp;

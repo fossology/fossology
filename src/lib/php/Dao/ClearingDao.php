@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
@@ -163,7 +162,7 @@ class ClearingDao extends Object
     while ($row = $this->dbManager->fetchArray($res))
     {
       $licenseRef = new LicenseRef($row['id'], $row['shortname'], $row['fullname']);
-      $clearingLicenses[] = new ClearingLicense($licenseRef, $row ['removed'] == 't');
+      $clearingLicenses[] = new ClearingLicense($licenseRef, $this->dbManager->booleanFromDb($row['removed']));
     }
     $this->dbManager->freeResult($res);
     return $clearingLicenses;
@@ -467,7 +466,7 @@ insert into clearing_decision (
       foreach (array('is_global', 'is_removed') as $columnName) {
         $row[$columnName] = $this->dbManager->booleanFromDb($row[$columnName]);
       }
-      $licenseRef = new LicenseRef($row['rf_fk'], $row['rf_shortname'], $row['rf_fullname']);
+      $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
       $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
       $licenseDecisionEventBuilder->setEventId($row['license_decision_event_pk'])
                                   ->setPfileId( $row['pfile_fk'])

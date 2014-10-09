@@ -30,7 +30,7 @@ interface LicenseDecision
   /**
    * @return DateTime
    */
-  public function getDate();
+  public function getDateTime();
 
   /**
    * @return string

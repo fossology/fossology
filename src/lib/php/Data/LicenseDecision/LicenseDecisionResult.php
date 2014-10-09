@@ -94,9 +94,9 @@ class LicenseDecisionResult implements LicenseDecision {
   /**
    * @return DateTime
    */
-  public function getDate()
+  public function getDateTime()
   {
-    return $this->getLicenseDecision()->getDate();
+    return $this->getLicenseDecision()->getDateTime();
   }
 
   /**

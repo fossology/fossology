@@ -21,7 +21,7 @@ namespace Fossology\Lib\Data\LicenseDecision;
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 
-class LicenseDecisionEvent implements  LicenseDecision
+class LicenseDecisionEvent implements LicenseDecision
 {
 
   /** @var int */
@@ -33,8 +33,8 @@ class LicenseDecisionEvent implements  LicenseDecision
   /** @var int */
   private $uploadTreeId;
 
-  /** @var DateTime  */
-  private $date;
+  /** @var DateTime */
+  private $dateTime;
 
   /** @var int */
   private $userId;
@@ -61,12 +61,26 @@ class LicenseDecisionEvent implements  LicenseDecision
   private $comment;
 
 
-  public function __construct($eventId, $pfileId, $uploadTreeId, $date, $userId, $groupId, $eventType,LicenseRef $licenseRef, $global, $removed, $reportinfo, $comment) {
-
+  /**
+   * @param int $eventId
+   * @param int $pfileId
+   * @param int $uploadTreeId
+   * @param DateTime $dateTime
+   * @param int $userId
+   * @param int $groupId
+   * @param string $eventType
+   * @param LicenseRef $licenseRef
+   * @param boolean $global
+   * @param boolean $removed
+   * @param string $reportinfo
+   * @param string $comment
+   */
+  public function __construct($eventId, $pfileId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $global, $removed, $reportinfo, $comment)
+  {
     $this->eventId = $eventId;
     $this->pfileId = $pfileId;
     $this->uploadTreeId = $uploadTreeId;
-    $this->date = $date;
+    $this->dateTime = $dateTime;
     $this->userId = $userId;
     $this->groupId = $groupId;
     $this->eventType = $eventType;
@@ -88,9 +102,9 @@ class LicenseDecisionEvent implements  LicenseDecision
   /**
    * @return DateTime
    */
-  public function getDate()
+  public function getDateTime()
   {
-    return $this->date;
+    return $this->dateTime;
   }
 
   /**

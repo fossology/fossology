@@ -210,7 +210,7 @@ class ClearingDecisionEventProcessor
         break;
       }
 
-      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDate();
+      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
       if ($lastDecision === null || $lastDecision < $entryTimestamp)
       {
         $insertDecision = true;
@@ -222,7 +222,7 @@ class ClearingDecisionEventProcessor
     foreach ($events as $event)
     {
       $licenseShortName = $event->getLicenseShortName();
-      $entryTimestamp = $event->getDate();
+      $entryTimestamp = $event->getDateTime();
       if ($event->isRemoved() && !array_key_exists($licenseShortName, $added) && $lastDecision < $entryTimestamp)
       {
         $removedSinceLastDecision[$licenseShortName] = $event;

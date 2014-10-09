@@ -123,7 +123,7 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   /**
    * @return DateTime
    */
-  public function getDate(){
+  public function getDateTime(){
     return new DateTime();
   }
 

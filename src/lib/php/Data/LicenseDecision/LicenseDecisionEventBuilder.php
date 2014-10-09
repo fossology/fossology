@@ -37,7 +37,7 @@ class LicenseDecisionEventBuilder extends Object
   private $uploadTreeId;
 
   /** @var DateTime */
-  private $date;
+  private $dateTime;
 
   /** @var int */
   private $userId;
@@ -68,16 +68,15 @@ class LicenseDecisionEventBuilder extends Object
     $this->eventId = 0;
     $this->pfileId = 0;
     $this->uploadTreeId = 0;
-    $this->date = new DateTime();
+    $this->dateTime = null;
     $this->userId = 1;
     $this->groupId = 1;
-    $this->eventType = "User decision";
-    $this->licenseRef = new LicenseRef(0, "No_license_known", "No_license_known");
+    $this->eventType = LicenseDecision::USER_DECISION;
+    $this->licenseRef = null;
     $this->global = null;
     $this->removed = false;
     $this->reportinfo = "";
     $this->comment = "";
-
   }
 
   /**
@@ -85,7 +84,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function build()
   {
-    return new LicenseDecisionEvent($this->eventId, $this->pfileId, $this->uploadTreeId, $this->date, $this->userId,
+    return new LicenseDecisionEvent($this->eventId, $this->pfileId, $this->uploadTreeId, $this->dateTime, $this->userId,
         $this->groupId, $this->eventType, $this->licenseRef, $this->global, $this->removed, $this->reportinfo, $this->comment);
   }
 
@@ -100,12 +99,15 @@ class LicenseDecisionEventBuilder extends Object
   }
 
   /**
-   * @param string $date
+   * @param string $dateTime
    * @return $this
    */
-  public function setDateFromTimeStamp($date)
+  public function setDateFromTimeStamp($dateTime)
   {
-    $this->date->setTimestamp($date);
+    if ($this->dateTime === null) {
+      $this->dateTime = new DateTime();
+    }
+    $this->dateTime->setTimestamp($dateTime);
     return $this;
   }
 
@@ -115,7 +117,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function setEventId($eventId)
   {
-    $this->eventId = $eventId;
+    $this->eventId = intval($eventId);
     return $this;
   }
 
@@ -145,7 +147,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function setGroupId($groupId)
   {
-    $this->groupId = $groupId;
+    $this->groupId = intval($groupId);
     return $this;
   }
 
@@ -153,7 +155,7 @@ class LicenseDecisionEventBuilder extends Object
    * @param LicenseRef $licenseRef
    * @return $this
    */
-  public function setLicenseRef($licenseRef)
+  public function setLicenseRef(LicenseRef $licenseRef)
   {
     $this->licenseRef = $licenseRef;
     return $this;
@@ -165,7 +167,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function setPfileId($pfileId)
   {
-    $this->pfileId = $pfileId;
+    $this->pfileId = intval($pfileId);
     return $this;
   }
 
@@ -195,7 +197,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function setUploadTreeId($uploadTreeId)
   {
-    $this->uploadTreeId = $uploadTreeId;
+    $this->uploadTreeId = intval($uploadTreeId);
     return $this;
   }
 
@@ -205,7 +207,7 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function setUserId($userId)
   {
-    $this->userId = $userId;
+    $this->userId = intval($userId);
     return $this;
   }
 
