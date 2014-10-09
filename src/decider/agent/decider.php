@@ -26,7 +26,8 @@ include_once(__DIR__."/version.php");
 
 class DeciderAgent extends Agent
 {
-  private $uploadTreeId;
+  /** @var int */
+  private $conflictStrategyId;
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDecisionEventProcessor */
@@ -41,8 +42,8 @@ class DeciderAgent extends Agent
   {
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
-    $args = getopt("U:",array(""));
-    $this->uploadTreeId = @$args['U'];
+    $args = getopt("k:",array(""));
+    $this->conflictStrategyId = @$args['k'];
 
     global $container;
     $this->uploadDao = $container->get('dao.upload');
@@ -66,14 +67,15 @@ class DeciderAgent extends Agent
     }
   }
 
-  static protected function hasOnlyNewerEvents($events, $date)
+  static protected function hasOnlyNewerUserEvents($events, $date)
   {
-    foreach($events as $licenseShortName => $licenseDecisionEvent)
+    foreach($events as $licenseShortName => $licenseDecisionResult)
     {
-      /** @var LicenseDecisionEvent $licenseDecisionEvent */
-      $eventDate = $licenseDecisionEvent->getEpoch();
-      if ((($date !== null)&&($eventDate > $date)))
-        return false;
+      /** @var LicenseDecisionResult $licenseDecisionResult */
+      $eventDate = $licenseDecisionResult->getEpoch();
+      if ((($date === null) || ($eventDate > $date)))
+        if (($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
+          return false;
     }
 
     return true;
@@ -112,17 +114,8 @@ class DeciderAgent extends Agent
       $canAutoDecide = true;
       list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($added, $lastDecisionDate);
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerEvents($removed, $lastDecisionDate);
-
-      if (($canAutoDecide) && ($lastDecisionDate === null))
-      {
-        $changedLicenses = array_merge(array_keys($added),array_keys($removed));
-
-        $agentDetectedLicenses = array_keys($this->clearingDecisionEventProcessor->getAgentDetectedLicenses($itemTreeBounds));
-
-        $canAutoDecide = (DeciderAgent::array_contains($changedLicenses, $agentDetectedLicenses));
-      }
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerUserEvents($added, $lastDecisionDate);
+      $canAutoDecide &= DeciderAgent::hasOnlyNewerUserEvents($removed, $lastDecisionDate);
 
       if ($canAutoDecide)
       {
@@ -131,6 +124,7 @@ class DeciderAgent extends Agent
       }
       else
       {
+        //TODO implement conflict resolving strategies
         $this->heartbeat(0);
       }
 
