@@ -198,6 +198,9 @@ html, body
 .simpleTable .odd  { background-color: #E2E4FF; }
 .simpleTable .even { background-color: white; }
 
+.simpleTable .removed .odd  { background-color: #E2A0A0; }
+.simpleTable .removed .even { background-color: #F0B0B0; }
+
 .inactiveClearing
     {
       background-color: #bebebe;
