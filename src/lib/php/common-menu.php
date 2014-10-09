@@ -19,6 +19,7 @@
  * \file common-menu.php
  * \brief common menu functions
  */
+const MENU_PATH_SEPARATOR = "::";
 
 /**
  * \brief
@@ -31,7 +32,8 @@ class menu {
   var $Order = 0; // Used for ordering menu items
   var $Target = NULL; // recommended name of window for showing results
   var $MaxDepth = 0; // How deep is SubMenu?
-  var $SubMenu = NULL; // list to submenu list
+  var $SubMenu = NULL;
+  public $FullName; // list to submenu list
 
 };
 /*********************************
@@ -157,100 +159,85 @@ function menu_cmp(&$a, &$b) {
  * This is VERY recursive and returns the new menu.
  * If $URI is blank, nothing is added.
  *
- * \param &$Menu     menu list needed to add to
- * \param $Path      path of the new menu item
- * \param $LastOrder is used for grouping items in order.
- * \param $Target    target of the new menu item
- * \param $URI       URL link of the new menu item
- * \param $HTML      HTML of the new menu item
- * \param $Depth     depth of the submenu
- * \param $FullName  FullName of the menu item e.g. (Help::About)
- * \param $Title     Title of the new menu item
- *
- * \return the max depth of menu
+ * @param $menuItems
+ * @param $Path
+ * @param $PathRemainder
+ * @param $LastOrder
+ * @param $Target
+ * @param $URI
+ * @param $HTML
+ * @param $Title
+ * @return int the max depth of menu
  */
-function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) 
+function menu_insert_r(&$menuItems, $Path, $PathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
 {
-  $AddNew = 0;
-  $NeedSort = 0;
-  $PathParts = explode("::", $Path, 2);
-  if (!isset($PathParts[0]) || !strcmp($PathParts[0], "")) {
-    return (0);
-  } // nothing to do
-  if (!isset($PathParts[1])) {
-    $LastPart = 1;
+  list($pathElement, $PathRemainder) = explode(MENU_PATH_SEPARATOR, $PathRemainder, 2);
+  $hasPathComponent = isset($pathElement) && $pathElement !== "";
+
+  if (!$hasPathComponent) {
+    return 0;
   }
-  else {
-    $LastPart = 0;
-  }
-  /*****
-   $Menu is the top of the list.
-   $M is an object in the list.
-   *****/
-  /* Check if the name exists in the array */
-  $M = NULL;
-  if (is_array($Menu)) {
-    foreach($Menu as $Key => $Val) {
+
+  $isLeaf = !isset($PathRemainder);
+  $menuItemsExist = isset($menuItems) && is_array($menuItems);
+
+  $currentMenuItem = NULL;
+  if ($menuItemsExist) {
+    foreach($menuItems as &$menuItem) {
       // need to escape the [ ] or the string will not match
-      if (!strcmp($Val->Name, $PathParts[0]) && strcmp($Val->Name, "\[BREAK\]")) {
-        $M = & $Menu[$Key];
+      if (!strcmp($menuItem->Name, $pathElement) && strcmp($menuItem->Name, "\\[BREAK\\]")) {
+        $currentMenuItem = $menuItem;
         break;
       }
-      else if (!strcmp($Val->Name, "\[BREAK\]") && ($Val->Order == $LastOrder)) {
-        $M = & $Menu[$Key];
+      else if (!strcmp($menuItem->Name, "\\[BREAK\\]") && ($menuItem->Order == $LastOrder)) {
+        $currentMenuItem = $menuItem;
         break;
       }
     }
   }
-  /* if it does not exist in the array, then add it */
-  if (empty($M)) {
-    $AddNew = 1;
-    $NeedSort = 1;
-    $M = new menu;
-    $M->Name = $PathParts[0];
-    $M->FullName = $FullName;
+
+  $Path[] = $pathElement;
+  $FullName = str_replace(" ", "_", implode(MENU_PATH_SEPARATOR, $Path));
+
+  $sortItems = false;
+  $currentItemIsMissing = empty($currentMenuItem);
+  if ($currentItemIsMissing) {
+    $currentMenuItem = new menu;
+    $currentMenuItem->Name = $pathElement;
+    $currentMenuItem->FullName = $FullName;
+
+    if (!$menuItemsExist)
+    {
+      $menuItems = array();
+    }
+    array_push($menuItems, $currentMenuItem);
+    $sortItems = true;
   }
+
   /* $M is set! See if we need to traverse submenus */
-  if ($LastPart != 1) {
-    $Depth = menu_insert_r($M->SubMenu, $PathParts[1], $LastOrder, $Target, $URI, $HTML, $Depth + 1, $FullName, $Title);
-    $NewDepth = $Depth + 1;
-    if ($M->MaxDepth < $NewDepth) {
-      $M->MaxDepth = $NewDepth;
+  if ($isLeaf) {
+    if ($LastOrder != 0) {
+      if ($currentMenuItem->Order != $LastOrder) {
+        $sortItems = true;
+      }
+      $currentMenuItem->Order = $LastOrder;
     }
+    $currentMenuItem->Target = $Target;
+    $currentMenuItem->URI = $URI;
+    $currentMenuItem->HTML = $HTML;
+    $currentMenuItem->Title = $Title;
   }
   else {
-    /* No traversal -- save the final values */
-    /** If the menu order is already set, don't reset it to the default **/
-    if ($LastOrder != 0) {
-      if ($M->Order != $LastOrder) {
-        $NeedSort = 1;
-      }
-      $M->Order = $LastOrder;
-    }
-    $M->Target = $Target;
-    $M->URI = $URI;
-    $M->HTML = $HTML;
-    $M->FullName = $FullName;
-    $M->Title = $Title;
+    $Depth = menu_insert_r($currentMenuItem->SubMenu, $Path, $PathRemainder, $LastOrder, $Target, $URI, $HTML, $Title);
+    $currentMenuItem->MaxDepth = max ($currentMenuItem->MaxDepth, $Depth + 1);
   }
-  if ($AddNew == 1) {
-    if (isset($Menu)) {
-      array_push($Menu, $M);
-    }
-    else {
-      $Menu = array(
-      $M
-      );
-    }
+
+  if ($sortItems) {
+    usort($menuItems, 'menu_cmp');
   }
-  if ($NeedSort == 1) {
-    usort($Menu, 'menu_cmp');
-  }
-  global $MenuMaxDepth;
-  if ($Depth + 1 > $MenuMaxDepth) {
-    $MenuMaxDepth = $Depth + 1;
-  }
-  return ($M->MaxDepth);
+
+  array_pop($Path);
+  return ($currentMenuItem->MaxDepth);
 } // menu_insert_r()
 
 
@@ -268,8 +255,7 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
 function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) 
 {
   global $MenuList;
-  $FullName = $Path;
-  menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
+  menu_insert_r($MenuList, array(), $Path, $LastOrder, $Target, $URI, $HTML, $Title);
 } // menu_insert()
 
 
@@ -296,7 +282,7 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
   if (empty($Name)) {
     return ($Menu);
   }
-  $PathParts = explode("::", $Name, 2);
+  $PathParts = explode(PATH_SEPARATOR, $Name, 2);
   foreach($Menu as $Key => $Val) {
     if ($Val->Name == $PathParts[0]) {
       if (empty($PathParts[1])) {

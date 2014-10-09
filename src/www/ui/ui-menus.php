@@ -97,13 +97,13 @@ class ui_menu extends FO_Plugin
   }
 
 
-  function createHtmlFromMenuEntry($M, $Indent)
+  function createHtmlFromMenuEntry(menu $M, $Indent)
   {
     $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
     $V = "";
     if (!empty($M->URI))
     {
-      $V .= '<a  id="'.htmlentities($M->Name) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
+      $V .= '<a  id="'. htmlentities($M->FullName) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
       if (empty($M->Target) || ($M->Target == ""))
       {
         // $V .= '" target="basenav">';
@@ -121,7 +121,7 @@ class ui_menu extends FO_Plugin
       }
     } else
     {
-      $V .= '<a id="'.md5($M->Name) .'" href="#">';
+      $V .= '<a id="'. htmlentities($M->FullName) .'" href="#">';
       if (empty($M->SubMenu))
       {
         $V .= "<font color='#C0C0C0'>";
