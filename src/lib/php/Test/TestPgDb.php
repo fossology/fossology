@@ -69,16 +69,16 @@ class TestPgDb
       throw new \Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
     }
 
-    exec($cmd="psql -Ufossy -l | grep -q $dbName", $cmdOut, $cmdRtn);
+    exec($cmd="psql -Ufossy -h localhost -l | grep -q $dbName", $cmdOut, $cmdRtn);
     if($cmdRtn == 0)
     {
       echo "NOTE: $dbName database already exists, not creating";
-      exec($cmd="createlang -Ufossy -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
+      exec($cmd="createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
       if($cmdRtn == 0)
         echo "NOTE: plpgsql already exists in $dbName database\n";
       else
       {
-        exec($cmd="createlang -Ufossy plpgsql $dbName", $cmdOut, $cmdRtn);
+        exec($cmd="createlang -Ufossy -h localhost plpgsql $dbName", $cmdOut, $cmdRtn);
         if($cmdRtn != 0)
           throw new \Exception("ERROR: failed to add plpgsql to $dbName database");
       }
@@ -89,7 +89,7 @@ class TestPgDb
       $fossSql = str_replace('fosstest',$dbName,$fosstestSql);
       $pathSql = $this->sys_conf.'/dbinit.sql';
       file_put_contents($pathSql,$fossSql);
-      exec($cmd="psql -Ufossy fossology < $pathSql", $cmdOut, $cmdRtn); //  2>&1
+      exec($cmd="psql -Ufossy -h localhost fossology < $pathSql", $cmdOut, $cmdRtn); //  2>&1
       if ($cmdRtn != 0)
       {
         throw new \Exception("ERROR: Database failed during configuration.");
@@ -142,11 +142,11 @@ class TestPgDb
       throw new \Exception('Could not close connection');
     $this->connection = null;
     
-    $existCmd = "psql -Ufossy -l | grep -q ".$this->dbName;
+    $existCmd = "psql -Ufossy -h localhost -l | grep -q ".$this->dbName;
     exec($existCmd, $existkOut, $existRtn);
     if($existRtn == 0)
     {
-      $dropCmd = "dropdb -Ufossy ".$this->dbName;
+      $dropCmd = "dropdb -Ufossy -h localhost ".$this->dbName;
       exec($dropCmd, $dropOut, $dropRtn);
       if($dropRtn != 0 )
       {
