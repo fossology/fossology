@@ -23,7 +23,6 @@ MOD_NAMES = copyright ip ecc
 MOD_SUBDIR = ui
 
 all:
-	@echo "make {$(MOD_NAMES)}/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 install:
@@ -45,7 +44,6 @@ uninstall:
 	done
 
 clean:
-	@echo "make {$(MOD_NAMES)}/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 .PHONY: all install uninstall clean

@@ -19,19 +19,15 @@ MOD_NAME = example_wc_agent
 MOD_SUBDIR = ui
 
 all:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 install:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 uninstall:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) $@"
 	@echo "nothing to do"
 
 .PHONY: all install uninstall clean
