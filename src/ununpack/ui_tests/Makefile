@@ -15,8 +15,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP = ../..
-VARS = $(TOP)/Makefile.conf
-#include $(VARS)
+all:
+	@echo "nothing to do"
 
-echo "unpack ui_tests/Makefile has not been implemented"
+test:
+	@echo "nothing to do"
+
+coverage:
+	@echo "nothing to do"
+
+install:
+	@echo "nothing to do"
+
+uninstall:
+	@echo "nothing to do"
+
+clean:
+	@echo "nothing to do"
+
+.PHONY: all test coverage install uninstall clean

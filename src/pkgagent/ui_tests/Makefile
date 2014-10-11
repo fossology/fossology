@@ -14,11 +14,23 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 all:
-	@echo "No pkgagent ui_tests"
-clean:
-	@echo "No pkgagent ui_tests clean"
+	@echo "nothing to do"
+
+test:
+	@echo "nothing to do"
+
+coverage:
+	@echo "nothing to do"
+
 install:
-	@echo "No pkgagent ui_tests install"
+	@echo "nothing to do"
+
 uninstall:
-	@echo "No pkgagent ui_tests uninstall"
+	@echo "nothing to do"
+
+clean:
+	@echo "nothing to do"
+
+.PHONY: all test coverage install uninstall clean

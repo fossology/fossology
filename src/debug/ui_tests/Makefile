@@ -15,24 +15,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-DIR = $(realpath .)
-
 all:
-	@echo "make nothing in $(DIR)"
+	@echo "nothing to do"
 
 test:
-	@echo "make test nothing in $(DIR)"
+	@echo "nothing to do"
 
 coverage:
-	@echo "make coverage nothing in $(DIR)"
+	@echo "nothing to do"
 
 install:
-	@echo "make install nothing in $(DIR)"
+	@echo "nothing to do"
 
 uninstall:
-	@echo "make uninstall nothing in $(DIR)"
+	@echo "nothing to do"
 
 clean:
-	@echo "make uninstall nothing in $(DIR)"
+	@echo "nothing to do"
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage install uninstall clean

@@ -15,9 +15,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-MOD_NAME=example_wc_agent
-MOD_SUBDIR=ui_tests
-MOD_TEST_DIR=Functional
+MOD_NAME = example_wc_agent
+MOD_SUBDIR = ui_tests
+MOD_TEST_DIR = Functional
 
 all:
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)/$(MOD_TEST_DIR)"

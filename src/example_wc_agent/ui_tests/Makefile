@@ -16,6 +16,7 @@
 ######################################################################
 
 DIRS = Unit Functional
+
 DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
@@ -27,7 +28,13 @@ test:
 coverage:
 	$(call DIR_LOOP,coverage)
 
+install:
+	@echo "nothing to do"
+
+uninstall:
+	@echo "nothing to do"
+
 clean:
 	$(call DIR_LOOP,clean)
 
-.PHONY: all test coverage clean
+.PHONY: all test coverage install uninstall clean

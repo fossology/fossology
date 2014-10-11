@@ -15,27 +15,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP = ../../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
-
-DIRS = Unit Functional
-
-DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
-
 all:
-	$(call DIR_LOOP, )
-
-install:
-	$(call DIR_LOOP,install)
+	@echo "nothing to do"
 
 test:
-	$(call DIR_LOOP,test)
+	@echo "nothing to do"
 
 coverage:
-	$(call DIR_LOOP,coverage)
+	@echo "nothing to do"
+
+install:
+	@echo "nothing to do"
+
+uninstall:
+	@echo "nothing to do"
 
 clean:
-	$(call DIR_LOOP,clean)
+	@echo "nothing to do"
 
-.PHONY: all test coverage clean
+.PHONY: all test coverage install uninstall clean

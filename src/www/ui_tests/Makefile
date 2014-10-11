@@ -15,31 +15,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP = ../../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
-
-DIRS = ui_tests
-TESTDIR = ui_tests
-
-DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
-
 all:
-	@echo "all: Nothing to do for ui_tests"
+	@echo "nothing to do"
 
 test:
-	@echo "test: Place holder for launching UI functional tests"
+	@echo "nothing to do"
 
 coverage:
-	@echo "No make coverage for ui_tests"
+	@echo "nothing to do"
 
-install: all
-	@echo "No install needed for UI Functional tests"
+install:
+	@echo "nothing to do"
 
 uninstall:
-	@echo "Nothinhg to uninstall for UI Functional tests"
+	@echo "nothing to do"
 
 clean:
-	@echo "Place holder for clean, UI Functional tests"
+	@echo "nothing to do"
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage install uninstall clean
