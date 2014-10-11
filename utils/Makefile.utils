@@ -1,6 +1,6 @@
 # FOSSology/utils Makefile configuration
 # Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-# 
+#
 # Site specific defaults for the fossology.org site for
 # gathering nightly Freshmeat data.
 # make sure to customize them as needed for your site installation.

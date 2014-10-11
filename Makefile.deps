@@ -1,6 +1,6 @@
 # FOSSology Makefile dependencies
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This file contains some targets used in multiple places in the build
 # tree, mostly for dependencies. They can't go in Makefile.conf because
 # we don't want them to be the first target. To use them in a Makefile
@@ -20,7 +20,7 @@ $(FOLIB):
 # This value will be the SYSCONFIG directory where a temporary database
 # connection (specified in Db.conf) and temporary repository location
 # (specified in fossology.conf) will be placed
-# 
+#
 # The create_test_database.php script creates a FOSSology test database
 # and FOSSology test repository, and prints a single line on standard
 # output that is the location of the FOSSology sysconfdir for the test
