@@ -17,7 +17,7 @@ use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 
 define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
@@ -72,7 +72,7 @@ class DeciderAgent extends Agent
     foreach($events as $licenseShortName => $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
-      $eventDate = $licenseDecisionResult->getEpoch();
+      $eventDate = $licenseDecisionResult->getDateTime();
       if ((($date === null) || ($eventDate > $date)))
         if (($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
           return false;
