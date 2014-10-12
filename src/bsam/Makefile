@@ -23,7 +23,7 @@ MOD_NAME = bsam
 
 DIRS = ui
 
-DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	@echo "make $(MOD_NAME)"

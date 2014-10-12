@@ -24,7 +24,7 @@ MOD_NAME = debug
 DIRS = ui
 TESTDIR = ui_tests
 
-DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
 	$(call DIR_LOOP, )

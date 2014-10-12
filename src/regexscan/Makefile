@@ -25,7 +25,7 @@ DIRS = agent
 #DIRS = agent ui
 #TESTDIR = agent_tests
 
-DIR_LOOP = for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
