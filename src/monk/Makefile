@@ -25,9 +25,8 @@ coverage: all
 test: all
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"monk")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
 	@echo "make $(MOD_NAME) install"

@@ -33,9 +33,8 @@ test:
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"wget_agent")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
 	echo "make $(MOD_NAME) install"

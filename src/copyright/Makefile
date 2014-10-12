@@ -24,7 +24,6 @@ coverage: all
 test: all
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
 VERSIONFILE:
 	for MOD_NAME in $(MOD_NAMES); do \
 		$(call WriteVERSIONFile,$$MOD_NAME); \

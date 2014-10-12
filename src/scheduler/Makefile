@@ -18,6 +18,8 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
+MOD_NAME = scheduler
+
 DIRS = agent 
 
 TESTDIR = agent_tests
@@ -34,9 +36,8 @@ test:
 coverage: 
 	$(MAKE) -C $(TESTDIR) coverage
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"scheduler")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
 	@echo "make scheduler install"

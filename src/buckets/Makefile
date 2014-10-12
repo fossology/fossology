@@ -30,9 +30,8 @@ all: VERSIONFILE
 test: 
 	$(call dirloop,test)
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"buckets")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 coverage:
 	$(call dirloop,coverage)

@@ -31,9 +31,8 @@ all: VERSIONFILE
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"adj2nest")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
 	@echo "make $(MOD_NAME) install"

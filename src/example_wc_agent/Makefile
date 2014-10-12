@@ -33,9 +33,8 @@ test:
 coverage:
 	$(MAKE) -C $(TESTDIR) coveraga
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"example_wc_agent")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
 	$(call dirloop,install)

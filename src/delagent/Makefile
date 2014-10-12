@@ -30,7 +30,6 @@ all: VERSIONFILE
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
 VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
 

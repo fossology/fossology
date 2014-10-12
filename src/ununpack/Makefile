@@ -30,9 +30,8 @@ all: VERSIONFILE
 test: 
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"ununpack")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 coverage:
 	$(MAKE) -C $(TESTDIR) coverage
