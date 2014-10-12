@@ -49,6 +49,7 @@ src/copyright/agent/ip
 src/copyright/agent_tests/Unit/test_copyright
 src/decider/agent/version.php
 src/delagent/agent/delagent
+src/delagent/agent_tests/Functional/delagent-Xunit.xml
 src/demomod/agent/demomod
 src/lib/c/fossconfigTest
 src/lib/c/libdb.patch
@@ -62,6 +63,8 @@ src/lib/php/id.patch
 src/lib/php/tests/lib-php-Xunit-Results.xml
 src/maintagent/agent/maintagent
 src/mimetype/agent/mimetype
+src/mimetype/agent_tests/Functional/mimetype-Xunit.xml
+src/mimetype/agent_tests/Unit/test_mimetype
 src/mimetype/mimetype
 src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
@@ -85,6 +88,7 @@ src/nomos/agent_tests/Functional/fossology.rc
 src/nomos/agent_tests/Functional/nomos-Xunit.xml
 src/nomos/agent_tests/Functional/nomos-regression-test.html
 src/nomos/agent_tests/Functional/report.d
+src/nomos/agent_tests/Unit/test_nomos
 src/pkgagent/agent/pkgagent
 src/regexscan/agent/regexscan
 src/scheduler/agent/defconf/init.d/fossology
@@ -92,5 +96,9 @@ src/scheduler/agent/fo_cli
 src/scheduler/agent/fo_scheduler
 src/ununpack/agent/departition
 src/ununpack/agent/ununpack
+src/ununpack/agent_tests/Unit/run_tests
 src/wget_agent/agent/wget_agent
+src/wget_agent/agent_tests/Unit/test_wget_agent
 src/www/ui/template/*.htm
+utils/freshmeat/FMDir
+utils/freshmeat/fm-paths.php
