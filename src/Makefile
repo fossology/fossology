@@ -11,7 +11,7 @@ DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
-# run 'make $(operation)-$(subdir)'. Yet another convencience, a target of
+# run 'make $(operation)-$(subdir)'. Yet another convenience, a target of
 # '$(subdir)' is equivalent to 'build-$(subdir)'
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
