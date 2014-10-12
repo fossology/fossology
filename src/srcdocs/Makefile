@@ -40,4 +40,4 @@ schemaspy:
 clean:
 	rm -rf www *~ fodox.errs fodox.log
 
-.PHONY: all clean doxygen schmaspy
+.PHONY: all doxygen schmaspy clean

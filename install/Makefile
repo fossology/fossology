@@ -126,9 +126,9 @@ clean:
 	$(MAKE) -s -C db clean
 
 test: all
-	@echo "NOTICE: no tests available for install"
+	@echo "nothing to do"
 
-coverage:
-	@echo "NOTICE: no coverage available for install"
+coverage: all
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean test coverage

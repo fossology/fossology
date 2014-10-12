@@ -63,7 +63,6 @@ $(COVDIRS):
 
 clean: $(CLEANDIRS)
 	rm -f variable.list VERSION
-
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 

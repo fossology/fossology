@@ -52,6 +52,6 @@ test: all
 clean:
 	rm -f $(fmPATHFILE) $(FMDir) *.o core
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)
