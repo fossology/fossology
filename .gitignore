@@ -51,6 +51,7 @@ src/decider/agent/version.php
 src/delagent/agent/delagent
 src/delagent/agent_tests/Functional/delagent-Xunit.xml
 src/demomod/agent/demomod
+src/example_wc_agent/agent/wc_agent
 src/lib/c/fossconfigTest
 src/lib/c/libdb.patch
 src/lib/c/reppath

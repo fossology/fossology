@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
 
   /** initialize the scheduler connection */
-  fo_scheduler_connect(&argc, argv);
+  fo_scheduler_connect(&argc, argv, NULL);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"iCc:")) != -1)
