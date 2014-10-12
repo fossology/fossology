@@ -5,6 +5,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
+include ../Makefile.utils
 
 LIBFILES = lib_projxml.h.php
 BINFILES = GetFM diffm.php get-projects.php mktop1k.php wrapGFM
@@ -13,7 +14,7 @@ FMDir = FMDir
 
 all: $(fmPATHFILE)
 
-$(fmPATHFILE): ../Makefile.utils
+$(fmPATHFILE):
 	@echo "Building $(fmPATHFILE)"
 	@echo "<?php" > $(fmPATHFILE)
 	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(fmPATHFILE)
