@@ -25,7 +25,6 @@ CHKSRC = $(CHKHDR:%.h=%.c)
 all: $(EXE)
 
 $(EXE): libwget_agent.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) cunit_lib test_lib
-	@echo "make wget agent tests"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
@@ -40,26 +39,24 @@ cunit_lib:
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
-test: all $(EXE)
-	@echo "execute wget agent test"
+test: all
 	./$(EXE)
 
 coverage: libwget_agent_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) cunit_lib test_lib
-	@echo "execute wget agent test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent_cov.a $(CHKSRC) $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 libwget_agent_cov.a:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 libwget_agent.a:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
+	rm -rf $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
+
+.PHONY: all test coverage clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

@@ -11,7 +11,6 @@ CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
-DATA = ../unpack-test-data.tar.bz2
 
 CFLAGS_LOCAL = -lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE = run_tests
@@ -72,11 +71,8 @@ testdata:
 $(FOCUNIT):
 	$(MAKE) -C $(CUNIT_LIB_DIR) $@
 
-test: all testdata $(EXE)
-	@echo "Make test ununpack"
-	cd ../; \
-	tar -xf unpack-test-data.tar.bz2; \
-	cd ./Unit; \
+test: all testdata
+	cd ..; tar -xf unpack-test-data.tar.bz2
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
@@ -92,8 +88,8 @@ libununpack.a:
 	$(MAKE) -C $(AGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) *.o core *.xml *.txt results test-result ../unpack-test-data.tar.bz2 ../test-data
+	rm -rf $(EXE) *.o core *.xml *.txt results test-result ../unpack-test-data.tar.bz2 ../test-data
+
+.PHONY: all test coverage clean libununpack_cov.a libununpack.a
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test libununpack_cov.a libununpack.a

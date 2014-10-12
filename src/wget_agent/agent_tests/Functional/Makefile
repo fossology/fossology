@@ -23,14 +23,13 @@ AGENTDIR = ../../agent
 TESTFILE = cliParamsTest4WgetAgent.php
 
 all:
-	$(MAKE) -C $(AGENTDIR)/ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 test: all
-	@echo "make wget_agent functional test"
 	phpunit --log-junit wget_agent-Xunit.xml $(TESTFILE)
 
 coverage:
-	@echo "no coverage for agent_tests/Functional"
+	@echo "nothing to do"
 
 clean:
 	rm -f *.xml

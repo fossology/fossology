@@ -23,29 +23,25 @@ include $(VARS)
 AGENT_DIR = ../../agent
 TEST_AGENTS = ../agents/
 
-regression = ./Functional.py
-test_src = Functional.xml
-test_dst = scheduler-Xunit.xml
-
-##########################
-# executable build rules #
-##########################
+REGRESSION = ./Functional.py
+TEST_SRC = Functional.xml
+TEST_DST = scheduler-Xunit.xml
 
 all:
+	@echo "nothing to do"
 
 test: fossology_testconfig
 	$(MAKE) -C $(TOP)/src
-	$(MAKE) -C $(AGENT_DIR)/
-	$(MAKE) -C $(TEST_AGENTS)/ test
-	$(regression) --tests=$(test_src) --results=$(test_dst)
+	$(MAKE) -C $(AGENT_DIR)
+	$(MAKE) -C $(TEST_AGENTS) test
+	$(REGRESSION) --tests=$(TEST_SRC) --results=$(TEST_DST)
 
-#####################
-# other build rules #
-#####################
+coverage:
+	@echo "nothing to do"
 
 clean:
-	rm -f $(test_dst) *.pyc
+	rm -f $(TEST_DST) *.pyc
+
+.PHONY: all test coverage clean $(PHP_FILES) $(FO_LIB)
 
 include $(DEPS)
-
-.PHONY: all test $(PHP_FILES) $(FO_LIB)

@@ -20,7 +20,6 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = Unit Functional
-COVDIR = Unit
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
@@ -31,15 +30,9 @@ test:
 	$(call DIR_LOOP,test)
 
 coverage:
-	$(MAKE) -C $(COVDIR) coverage
+	$(call DIR_LOOP,coverage)
 
 clean:
 	$(call DIR_LOOP,clean)
-
-install:
-	@echo "No installs for nomos agent_tests"
-
-uninstall:
-	@echo "No uninstalls for nomos agent_tests"
 
 .PHONY: all test coverage clean

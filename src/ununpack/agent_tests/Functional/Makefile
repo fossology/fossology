@@ -22,7 +22,6 @@ include $(VARS)
 
 DATA = ../unpack-test-data.tar.bz2
 
-TESTFILE = tests.xml
 AGENTDIR = ../../agent/
 
 # list of the external test data files required by this test
@@ -30,7 +29,7 @@ AGENTDIR = ../../agent/
 TEST_FILES = unpack-test-data.tar.bz2
 
 all:
-	$(MAKE) -C $(AGENTDIR)/ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 # target to retrieve remote test data if it doesn't already exist
 # make sure your /etc/wgetrc file is configured correctly!
@@ -53,18 +52,15 @@ testdata:
 	)
 
 test: all testdata fossology_testconfig
-	@echo "ununpack agent functional test"
-	cd ..; \
-	tar -xf unpack-test-data.tar.bz2; \
-	cd ./Functional; \
-	phpunit --log-junit ununpack-Xunit.xml --configuration $(TESTFILE)
+	cd ..; tar -xf unpack-test-data.tar.bz2
+	phpunit --log-junit ununpack-Xunit.xml --configuration tests.xml
 
 coverage:
-	@echo "no coverage for ununpack/agent_test/Functional"
+	@echo "nothing to do"
 
 clean:
 	rm -rf ununpack-Xunit.xml ../unpack-test-data.tar.bz2 ../test-data
 
-include $(DEPS)
-
 .PHONY: all test coverage clean
+
+include $(DEPS)

@@ -3,7 +3,6 @@
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 LOCALAGENTDIR = ../../agent
@@ -19,27 +18,9 @@ CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 TEST_OBJ = testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o
 
 all: $(EXE)
-$(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
-	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
 
-$(TEST_OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
-
-testGetMetadata.o:testGetMetadata.c
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
-		$(CC) -c $(CFLAGS_LOCAL_RPM) $<; \
-	else \
-		$(CC) -c $(CFLAGS_LOCAL_RPM_4_4) $<; \
-	fi
-
-test: all $(EXE)
+test: all
 	./$(EXE)
-
-cunit_lib:
-	$(MAKE) -C $(CUNIT_LIB_DIR)
-
-test_lib:
-	$(MAKE) -C $(TEST_LIB_DIR)
 
 coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
 	$(CC) -o $(EXE) $(LOCALAGENTDIR)/pkgagent_cov.o $(TEST_OBJ) testGetMetadata.o $(FLAG_COV) $(CFLAGS_LOCAL); \
@@ -47,11 +28,32 @@ coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
+$(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
+	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
+
+$(TEST_OBJ): %.o: %.c
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
+testGetMetadata.o: testGetMetadata.c
+	@if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
+		$(CC) -c $(CFLAGS_LOCAL_RPM) $<; \
+	else \
+		$(CC) -c $(CFLAGS_LOCAL_RPM_4_4) $<; \
+	fi
+
+cunit_lib:
+	$(MAKE) -C $(CUNIT_LIB_DIR)
+
+test_lib:
+	$(MAKE) -C $(TEST_LIB_DIR)
+
 pkgagent_cov.o:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 pkgagent.o:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) *.o core *.xml *.txt results
+	rm -rf $(EXE) *.o core *.xml *.txt results
+
+.PHONY: all test coverage clean

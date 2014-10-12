@@ -46,7 +46,7 @@ testdata:
 	@# if it exists, do nothing.
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
-	mkdir ../testdata -p
+	mkdir -p ../testdata
 	@$(foreach test_file, $(TEST_FILES), \
 		if [ -e ../testdata/$(test_file) ]; then \
 			echo "../testdata/$(test_file) exists"; \
@@ -60,7 +60,6 @@ testdata:
 	)
 
 $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLIB)
-	@echo "make delagent agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
@@ -69,8 +68,7 @@ $(TEST_OBJ_RUN): %.o: %.c
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
-test: all $(EXE) testdata
-	@echo "execute delagent test"
+test: all testdata
 	./$(EXE)
 
 cunit_lib:
@@ -80,19 +78,20 @@ test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
 coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
-	@echo "execute delagent test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 delagent_cov.o:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 delagent.o:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
+	rm -rf $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result ../testdata
+
+.PHONY: all test coverage clean
 
 include $(DEPS)

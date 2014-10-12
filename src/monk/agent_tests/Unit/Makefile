@@ -29,14 +29,12 @@ OBJECTS = test_string_operations.o \
           test_database.o \
           utils.o
 
-all:
+all: $(EXE)
 
-test: $(EXE)
-	@echo "make monk Unit agent_tests"
+test: all
 	./$(EXE)
 
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
-	@echo "make monk agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
@@ -57,15 +55,8 @@ libmonk_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	@echo "make monk agent_tests clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
-install:
-	@echo "make monk agent_tests nothing to install"
-
-uninstall:
-	@echo "make monk agent_tests nothing to uninstall"
+.PHONY: all test coverage clean
 
 include ${DEPS}
-
-.PHONY: all install uninstall clean test coverage

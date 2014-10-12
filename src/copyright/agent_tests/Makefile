@@ -5,25 +5,24 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP = ../../../..
+TOP = ../../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE_DIR = ../../agent/
+DIRS = Unit
 
-all: $(FOLIB)
-	$(MAKE) -C $(EXE_DIR)
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
-test: all
-	./shunit2 cli_test.sh
+all:
+	$(call DIR_LOOP, )
+
+test:
+	$(call DIR_LOOP,test)
 
 coverage:
-	@echo "nothing to do"
+	$(call DIR_LOOP,coverage)
 
 clean:
-	@echo "nothing to do"
+	$(call DIR_LOOP,clean)
 
 .PHONY: all test coverage clean
-
-include $(DEPS)

@@ -48,18 +48,17 @@ OBJECTS = testHost.o \
 
 all: $(EXE)
 
-test: fossology_testconfig $(EXE)
+test: all fossology_testconfig
 	./$(EXE)
 
-$(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
-	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
-
 coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
-	@echo "make scheduler test coverage"
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
+
+$(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
+	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
 
 $(LIB):
 	$(MAKE) -C $(LOCALAGENTDIR) $@
@@ -70,23 +69,12 @@ $(COV):
 $(FOCUNIT):
 	$(MAKE) -C $(TESTDIR) $@
 
-######################
-# object build rules #
-######################
-
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 clean:
-	@echo "make copyright agent_tests clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno *.log results
 
-install:
-	@echo "make copyright agent_tests nothing to install"
-
-uninstall:
-	@echo "make copyright agent_tests nothing to uninstall"
+.PHONY: all test coverage clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

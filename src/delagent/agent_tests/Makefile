@@ -35,10 +35,4 @@ coverage:
 clean:
 	$(call DIR_LOOP,clean)
 
-install:
-	@echo "No delagent agent_tests install"
-
-uninstall:
-	@echo "No delagent agent_tests uninstall"
-
 .PHONY: all test coverage clean

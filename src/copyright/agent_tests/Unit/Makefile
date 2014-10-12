@@ -30,10 +30,6 @@ $(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
 
 all: $(CXXFOLIB) $(EXE)
 
-#######################
-# library build rules #
-#######################
-
 $(CXXFOLIB):
 	$(MAKE) -C $(CXXFOLIBDIR)
 
@@ -46,36 +42,16 @@ libcopyright.a: $(OBJECTS)
 libcopyright_cov.a: $(COVERAGE)
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-######################
-# object build rules #
-######################
-
 %.o: %.cc
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 
 $(COVERAGE): %_cov.o: %.c
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
-#######################
-# install build rules #
-#######################
-
-install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(CONFDIR)/mods-enabled
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-		ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled; \
-	fi
-
-uninstall:
-	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
 test: all
 	./$(EXE)
 
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
-	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
 	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
@@ -85,4 +61,4 @@ coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage clean

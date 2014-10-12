@@ -24,7 +24,6 @@ TEST_OBJ = ./finder/testDBCheckMime.o \
 all: $(EXE)
 
 $(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
-	@echo "make mimetype agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
@@ -39,26 +38,24 @@ cunit_lib:
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
-test: all $(EXE)
-	@echo "execute mimetype test"
+test: all
 	./$(EXE)
 
 coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
-	@echo "execute mimetype test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 libmimetype_cov.a:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 libmimetype.a:
-	$(MAKE) -C $(LOCALAGENTDIR)/ $@
+	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
+	rm -rf $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
+
+.PHONY: all test coverage clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

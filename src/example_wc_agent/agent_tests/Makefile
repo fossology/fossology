@@ -15,7 +15,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
 DIRS = Unit Functional
+
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:

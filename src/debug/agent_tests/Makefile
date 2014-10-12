@@ -15,24 +15,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-DIR = $(realpath .)
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+DIRS = Unit Functional
+
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	@echo "make nothing in $(DIR)"
+	$(call DIR_LOOP, )
 
 test:
-	@echo "make test nothing in $(DIR)"
+	$(call DIR_LOOP,test)
 
 coverage:
-	@echo "make coverage nothing in $(DIR)"
-
-install:
-	@echo "make install nothing in $(DIR)"
-
-uninstall:
-	@echo "make uninstall nothing in $(DIR)"
+	$(call DIR_LOOP,coverage)
 
 clean:
-	@echo "make uninstall nothing in $(DIR)"
+	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage clean

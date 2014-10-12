@@ -27,7 +27,7 @@ AGENTDIR = ../../agent
 TEST_FILES = testdb_all.tar
 
 all:
-	$(MAKE) -C $(AGENTDIR)/ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 # target to retrieve remote test data if it doesn't already exist
 # make sure your /etc/wgetrc file is configured correctly!
@@ -37,7 +37,7 @@ testdata:
 	@# if it exists, do nothing.
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
-	mkdir ../testdata -p
+	mkdir -p ../testdata
 	@$(foreach test_file, $(TEST_FILES), \
 		if [ -e ../testdata/$(test_file) ]; then \
 			echo "../testdata/$(test_file) exists"; \
@@ -51,13 +51,12 @@ testdata:
 	)
 
 test: all testdata
-	@echo "make delagent functional test"
 	phpunit --log-junit delagent-Xunit.xml $(TESTFILE)
 
 coverage:
-	@echo "no coverage for agent_tests/Functional"
+	@echo "nothing to do"
 
 clean:
-	rm -f *.xml
+	rm -rf *.xml ../testdata
 
 .PHONY: all test coverage clean

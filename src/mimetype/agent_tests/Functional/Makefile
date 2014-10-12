@@ -26,12 +26,10 @@ all:
 	$(MAKE) -C $(EXE_DIR)
 
 test: all
-	@echo "make mimetyme agent functional test"
 	phpunit --log-junit mimetype-Xunit.xml $(TESTFILE)
 
 coverage:
-	@echo "no coverage in mimetype for agent_test/Functional"
-
+	@echo "nothing to do"
 
 clean:
 	rm -f *.xml

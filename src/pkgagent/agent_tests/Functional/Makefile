@@ -23,14 +23,13 @@ TESTFILE = ft_cliPkgagentTest.php
 AGENTDIR = ../../agent
 
 all:
-	$(MAKE) -C $(AGENTDIR)/ $@
+	$(MAKE) -C $(AGENTDIR) $@
 
 test: all
-	@echo "make pkgagent functional test"
 	phpunit --log-junit pkgagent-Xunit.xml $(TESTFILE)
 
 coverage:
-	@echo "no coverage for agent_tests/Functional"
+	@echo "nothing to do"
 
 clean:
 	rm -f *.xml

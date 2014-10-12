@@ -14,9 +14,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 all:
-	@echo "No adj2nest Functional tests"
+	@echo "nothing to do"
+
 test:
+	@echo "nothing to do"
+
+coverage:
+	@echo "nothing to do"
+
 clean:
-install:
-uninstall:
+	@echo "nothing to do"
+
+.PHONY: all test coverage clean

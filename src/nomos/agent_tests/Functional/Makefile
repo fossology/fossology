@@ -26,15 +26,11 @@ all: $(FOLIB)
 	$(MAKE) -C $(EXE_DIR)
 
 test: all
-	@echo "make nomos agent functional test"
-	cd ../Functional; \
-	pwd; \
-	ls -l; \
 	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
 #	./shunit2 --plugin example OneShot_test.sh
 
 coverage:
-	@echo "no code coverage for nomos in agent_test/Functional"
+	@echo "nothing to do"
 
 # note DO NOT put *.xml in the clean rule; it will remove the tests.xml file
 # which is needed to run the tests!
@@ -43,6 +39,6 @@ clean:
 	rm -f fossology.rc
 	rm -f scan.out* report.d* LastGoodNomosTestfilesScan.s output.txt
 
-include $(DEPS)
-
 .PHONY: all test coverage clean
+
+include $(DEPS)

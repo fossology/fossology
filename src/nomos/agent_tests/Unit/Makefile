@@ -24,14 +24,11 @@ OBJECTS = test_nomos_gap.o test_DoctoredBuffer.o \
           $(NULL)
 # test_nomos_gap.o
 all: $(EXE)
-	@echo "make nomos Unit agent_tests"
 
-test: $(EXE)
-	@echo "make nomos Unit agent_tests"
+test: all
 	./$(EXE)
 
 coverage: agent run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
-	@echo "make nomos agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
@@ -55,15 +52,8 @@ libnomos_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	@echo "make nomos agent_tests clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
-install:
-	@echo "make nomos agent_tests nothing to install"
-
-uninstall:
-	@echo "make nomos agent_tests nothing to uninstall"
+.PHONY: all test coverage clean
 
 include ${DEPS}
-
-.PHONY: all install uninstall clean test
