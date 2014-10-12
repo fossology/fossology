@@ -24,13 +24,7 @@ test:
 coverage:
 	@echo "nothing to do"
 
-install:
-	@echo "nothing to do"
-
-uninstall:
-	@echo "nothing to do"
-
 clean:
 	@echo "nothing to do"
 
-.PHONY: all test coverage install uninstall clean
+.PHONY: all test coverage clean
