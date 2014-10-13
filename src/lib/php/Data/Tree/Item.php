@@ -22,9 +22,6 @@ namespace Fossology\Lib\Data\Tree;
 class Item {
 
   /** @var int */
-  private $id;
-
-  /** @var int */
   private $parentId;
 
   /** @var int */
@@ -39,8 +36,7 @@ class Item {
   /** @var ItemTreeBounds */
   private $itemTreeBounds;
 
-  public function __construct($id, $parentId, $fileId, $fileMode, $fileName, ItemTreeBounds $itemTreeBounds) {
-    $this->id = $id;
+  public function __construct(ItemTreeBounds $itemTreeBounds, $parentId, $fileId, $fileMode, $fileName) {
     $this->parentId = $parentId;
     $this->fileId = $fileId;
     $this->fileMode = $fileMode;
@@ -53,7 +49,7 @@ class Item {
    */
   public function getId()
   {
-    return $this->id;
+    return $this->itemTreeBounds->getUploadTreeId();
   }
 
   /**
@@ -94,6 +90,19 @@ class Item {
   public function getFileTreeBounds()
   {
     return $this->itemTreeBounds;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isFile()
+  {
+    return !Isartifact($this->fileMode) && !Isdir($this->fileMode) && !Iscontainer($this->fileMode);
+  }
+
+  public function containsFileTreeItems()
+  {
+    return $this->itemTreeBounds->containsFiles();
   }
 
 }

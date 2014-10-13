@@ -23,9 +23,6 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
-use Mockery\MockInterface;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Logger;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -105,7 +102,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareUploadTree($subentries);
 
     $nextItem = $this->uploadDao->getNextItem(1, 1);
-    assertThat($nextItem, is(6));
+    assertThat($nextItem->getId(), is(6));
   }
 
   public function testGetPreviousItemWithSingleFile()
@@ -123,7 +120,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareUploadTree($subentries);
 
     $nextItem = $this->uploadDao->getNextItem(1, 1);
-    assertThat($nextItem, is(8));
+    assertThat($nextItem->getId(), is(8));
   }
 
   public function testGetPreviousItemWithNestedFile()
@@ -141,7 +138,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareUploadTree($subentries);
 
     $nextItem = $this->uploadDao->getNextItem(1, 1);
-    assertThat($nextItem, is(8));
+    assertThat($nextItem->getId(), is(8));
   }
 
   public function testGetPreviousItemWithFileAfterEmptyDirectory()
@@ -160,7 +157,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareUploadTree($subentries);
 
     $nextItem = $this->uploadDao->getNextItem(1, 6);
-    assertThat($nextItem, is(7));
+    assertThat($nextItem->getId(), is(7));
   }
 
   public function testGetPreviousItemWithMultipleFiles()
@@ -170,7 +167,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareUploadTree($subentries);
 
     $nextItem = $this->uploadDao->getPreviousItem(1, 6);
-    assertThat($nextItem, is(8));
+    assertThat($nextItem->getId(), is(8));
   }
 
   /**
