@@ -26,7 +26,6 @@ DIRS = ui
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	@echo "make $(MOD_NAME)"
 
 test:
 	@echo "make $(MOD_NAME) test"
@@ -38,7 +37,6 @@ coverage:
 	@echo "make $(MOD_NAME) coverage"
 
 install: all
-	@echo "make $(MOD_NAME) install"
 	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
@@ -47,13 +45,11 @@ install: all
 	fi
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
 	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
 	rm -f VERSION
-	@echo "make $(MOD_NAME) clean"
 
 .PHONY: all install uninstall clean test VERSIONFILE

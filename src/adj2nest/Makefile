@@ -36,13 +36,11 @@ VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make $(MOD_NAME) install"
 	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
 	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)

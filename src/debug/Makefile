@@ -36,7 +36,6 @@ coverage:
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	@echo "make $(MOD_NAME) install"
 	@mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	$(call DIR_LOOP,install)
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
@@ -45,7 +44,6 @@ install: all
 	fi
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
 	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)

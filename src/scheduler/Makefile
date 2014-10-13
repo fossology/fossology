@@ -27,7 +27,6 @@ TESTDIR = agent_tests
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	@echo "make scheduler"
 	$(call DIR_LOOP, )
 
 test:
@@ -40,15 +39,12 @@ VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make scheduler install"
 	$(call DIR_LOOP,install)
 
 uninstall:
-	@echo "make scheduler uninstall"
 	$(call DIR_LOOP,uninstall)
 
 clean:
-	@echo "make scheduler clean"
 	$(call DIR_LOOP,clean)
 	rm -rf VERSION
 

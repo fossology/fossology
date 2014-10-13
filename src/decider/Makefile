@@ -29,7 +29,6 @@ VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make $(MOD_NAME) install"
 	$(call DIR_LOOP,install)
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
@@ -39,7 +38,6 @@ install: all
 
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
 	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
