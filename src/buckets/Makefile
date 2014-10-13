@@ -53,7 +53,7 @@ uninstall:
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
-	rm -f VERSION
 	$(call DIR_LOOP,clean)
+	rm -f VERSION
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean

@@ -51,6 +51,6 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,clean)
-	rm -rf VERSION
+	rm -f VERSION
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean
