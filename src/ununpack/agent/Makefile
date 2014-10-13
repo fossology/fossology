@@ -16,7 +16,6 @@ CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
 UUHDR = ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
 UUSRC = $(UUHDR:%.h=%.c)
 
-TESTDIR = tests
 OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
@@ -62,15 +61,9 @@ libununpack.a: $(OBJECTS)
 libununpack_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
-test: libununpack.a
-	$(MAKE) -C $(TESTDIR) test
-
-coverage: libununpack_cov.a
-	$(MAKE) -C $(TESTDIR) coverage
-
 clean:
 	rm -f $(EXE) *.o core *.a *.gc*
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

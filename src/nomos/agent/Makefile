@@ -73,12 +73,6 @@ uninstall:
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-test: all
-	@echo "*** No tests available for agent/$(EXE) ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for nomos"
-
 clean:
 	rm -f encode nomos core *.a *.gc* \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
@@ -91,6 +85,6 @@ libnomos.a: $(OBJS) $(GENOBJS)
 libnomos_cov.a: $(COVERAGE) $(GENOBJS)
 	ar cvr $@ $(COVERAGE) $(GENOBJS)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

@@ -15,8 +15,6 @@ DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
 
-TESTDIR = ../agent_tests
-
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
 DEF_ID_IP = -DIDENTITY_IP
@@ -90,13 +88,7 @@ uninstall:
 		rm -rf $(DESTDIR)$(MODDIR)/$$mod_name/agent; \
 	done
 
-test: all
-	$(MAKE) -C $(TESTDIR) $@
-
-coverage: all
-	$(MAKE) -C $(TESTDIR) $@
-
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

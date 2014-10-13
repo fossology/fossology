@@ -36,15 +36,9 @@ uninstall:
 	  rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
 	done
 
-test: all
-	@echo "no tests"
-
-coverage:
-	@echo "NOTICE: no coverage available for decider"
-
 clean:
 	rm -f *.o core version.php $(WRAP)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

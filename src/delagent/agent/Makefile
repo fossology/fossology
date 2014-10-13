@@ -20,8 +20,6 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-TESTDIRS = ../agent_tests
-
 CFLAGS_LOCAL = $(ALL_CFLAGS) -lpq -lssl -lcrypto
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
@@ -42,19 +40,12 @@ install: all
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-test: all
-	$(MAKE) -C $(TESTDIRS) test
-
-coverage: delagent_cov.o
-	$(MAKE) -C $(TESTDIRS) coverage
-
 delagent_cov.o: util.c $(HDRS)
 	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 clean:
 	rm -f $(EXE) *.o core *.gc*
-	$(MAKE) -C $(TESTDIRS) clean
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all install uninstall clean
 
 include $(DEPS)

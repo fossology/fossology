@@ -45,13 +45,7 @@ uninstall:
 	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
 
-test: all
-	@echo "*** No tests available for src/$(EXE) ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for adj2nest"
-
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

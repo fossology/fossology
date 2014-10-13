@@ -28,15 +28,9 @@ install: all
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
-test: all
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) test"
-
-coverage: test
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
-
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all install uninstall clean
 
 include $(DEPS)

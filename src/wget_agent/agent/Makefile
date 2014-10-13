@@ -21,7 +21,6 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-TESTDIR = ../agent_tests
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 EXE = wget_agent
 CHKHDR = ../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
@@ -53,15 +52,9 @@ libwget_agent.a: $(OBJECTS)
 libwget_agent_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
-test: libwget_agent.a
-	$(MAKE) -C $(TESTDIR) test
-
-coverage: libwget_agent_cov.a
-	$(MAKE) -C $(TESTDIR) coverage
-
 clean:
 	rm -f $(EXE) *.o core *.a *.gc*
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

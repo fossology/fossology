@@ -21,7 +21,6 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-TESTDIRS = ../agent_tests
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
 
 EXE = pkgagent
@@ -51,12 +50,6 @@ install: all
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-test: all
-	$(MAKE) -C $(TESTDIRS) test
-
-coverage: pkgagent_cov.o
-	$(MAKE) -C $(TESTDIRS) coverage
-
 pkgagent_cov.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
 		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
@@ -66,8 +59,7 @@ pkgagent_cov.o: pkgagent.c pkgagent.h
 
 clean:
 	rm -f $(EXE) *.o core *.gc*
-	$(MAKE) -C $(TESTDIRS) clean
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

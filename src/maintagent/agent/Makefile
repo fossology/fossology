@@ -52,4 +52,4 @@ uninstall:
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test $(FOLIB) coverage
+.PHONY: all install uninstall clean $(FOLIB)

@@ -10,7 +10,6 @@ CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CF
 EXE = mimetype
 OBJECTS = finder.o
 HDIR = $(OBJS:.o=.h)
-TESTDIR = ../agent_tests
 
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
@@ -24,12 +23,6 @@ install: all
 
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
-
-test: all
-	$(MAKE) -C $(TESTDIR) test
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL)
@@ -46,6 +39,6 @@ libmimetype_cov.a: $(COVERAGE)
 clean:
 	rm -f $(EXE) *.o core *.a *.gc*
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean
 
 include $(DEPS)

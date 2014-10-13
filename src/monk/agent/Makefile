@@ -15,7 +15,6 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
 EXE = monk
-TESTDIR = ../agent_tests
 OBJECTS = monk.o string_operations.o file_operations.o database.o \
           license.o highlight.o match.o hash.o diff.o extended.o \
           cli.o bulk.o \
@@ -110,14 +109,8 @@ uninstall:
 	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
 	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
 
-test: all
-	$(MAKE) -C $(TESTDIR) $@
-
-coverage: all
-	$(MAKE) -C $(TESTDIR) $@
-
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core _squareVisitor.h _squareVisitor.c \
 	squareBuilder _squareVisitor.h.gen
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

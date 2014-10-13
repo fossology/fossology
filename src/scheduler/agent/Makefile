@@ -159,12 +159,7 @@ uninstall:
 	rm -f $(CONFDIR)/mods-enabled/scheduler
 	rm -f $(CONFDIR)/mods-enabled/fo_cli
 
-test: all
-	@echo "NOTICE: no tests available for 2.0 scheduler"
 
-coverage:
-	@echo "NOTICE: no coverage available for 2.0 scheduler"
-
-.PHONY: all install uninstall clean test coverage
+.PHONY: all install uninstall clean
 
 include $(DEPS)
