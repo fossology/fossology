@@ -16,9 +16,6 @@ all: $(EXE)
 $(EXE): %: %.c $(FOLIB) $(DB) $(REPO) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-#######################
-# library build rules #
-#######################
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 

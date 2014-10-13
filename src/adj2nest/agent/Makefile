@@ -21,7 +21,6 @@ include $(VARS)
 
 CFLAGS_LOCAL = $(ALL_CFLAGS)
 EXE = adj2nest
-MOD_SUBDIR = agent
 
 $(EXE): adj2nest.c $(FOLIB) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) $(DEFS) -o $@
@@ -31,6 +30,7 @@ all: $(EXE)
 #######################
 # library build rules #
 #######################
+
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
@@ -38,7 +38,7 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o core

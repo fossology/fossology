@@ -1,5 +1,19 @@
-# FOSSology Makefile - agents/ununpack
+######################################################################
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+######################################################################
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
@@ -8,7 +22,6 @@ include $(VARS)
 
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE = departition ununpack
-MOD_SUBDIR = agent
 
 CHKHDR = checksum.h md5.h sha1.h
 CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
@@ -34,7 +47,7 @@ install: all $(VARS)
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 
 # create wrapper for departition in BINDIR
-	@mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR)
 	@echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/departition
 	@echo "MODDIR=$(MODDIR)" >> $(DESTDIR)$(BINDIR)/departition
 	@echo "\$$MODDIR/ununpack/agent/departition \$$@" >> $(DESTDIR)$(BINDIR)/departition
@@ -42,7 +55,7 @@ install: all $(VARS)
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
-	rm -rf $(DESTDIR)$(MODDIR)/ununpack/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/ununpack/agent
 
 $(OBJECTS): %.o: %.c $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL)

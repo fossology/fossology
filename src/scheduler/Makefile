@@ -40,6 +40,7 @@ VERSIONFILE:
 
 install: all
 	$(call DIR_LOOP,install)
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
 
 uninstall:

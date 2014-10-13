@@ -15,7 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP = ../../
+TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
@@ -36,7 +36,7 @@ coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	@mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	$(call DIR_LOOP,install)
 	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \

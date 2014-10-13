@@ -38,7 +38,7 @@ install: all
 
 uninstall:
 	$(call DIR_LOOP,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/lib/
+	rm -rf $(DESTDIR)$(MODDIR)/lib
 
 clean:
 	$(call DIR_LOOP,clean)

@@ -34,14 +34,14 @@ $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
 delagent.o: util.c $(HDRS)
 	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
 
+delagent_cov.o: util.c $(HDRS)
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEFS) -o $@
+
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
-
-delagent_cov.o: util.c $(HDRS)
-	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 clean:
 	rm -f $(EXE) *.o core *.gc*

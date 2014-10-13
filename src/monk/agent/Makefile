@@ -15,7 +15,6 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
 EXE = monk
-MOD_SUBDIR = agent
 OBJECTS = monk.o string_operations.o file_operations.o database.o \
           license.o highlight.o match.o hash.o diff.o extended.o \
           cli.o bulk.o \
@@ -103,7 +102,7 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/$(MOD_SUBDIR)
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core _squareVisitor.h _squareVisitor.c \

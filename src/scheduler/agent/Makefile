@@ -149,16 +149,15 @@ install-conf:
 # other build rules #
 #####################
 
-clean:
-	rm -f $(MAIN) $(EXE) $(CLI) *.o core *.a *.gc* defconf/init.d/fossology
-
 uninstall:
-	rm -f $(OBJS) *.a
+	rm -f $(OBJS)
 	rm -rf $(DESTDIR)$(MODDIR)/scheduler defconf/init.d/fossology
 	rm -rf $(DESTDIR)$(MODDIR)/schedulerCLI
 	rm -f $(CONFDIR)/mods-enabled/scheduler
 	rm -f $(CONFDIR)/mods-enabled/fo_cli
 
+clean:
+	rm -f $(MAIN) $(EXE) $(CLI) *.o core *.a *.gc* defconf/init.d/fossology
 
 .PHONY: all install uninstall clean
 

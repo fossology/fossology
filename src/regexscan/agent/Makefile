@@ -19,18 +19,14 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LOCAL = $(ALL_CFLAGS)
 EXE = regexscan
+
+all: $(EXE)
 
 $(EXE): regexscan.c $(FOLIB) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-all: $(EXE)
-
-#######################
-# library build rules #
-#######################
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 

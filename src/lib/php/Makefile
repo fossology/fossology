@@ -37,16 +37,16 @@ install: all
 	$(INSTALL_DATA) services.xml $(DESTDIR)$(MODDIR)/lib/php/services.xml
 
 uninstall:
-	@echo "Removing php libs"; \
+	@echo "Removing php libs"
 	rm -rf $(DESTDIR)$(MODDIR)/lib/php
 
 clean:
 	rm -f *.o core bootstrap.php
 
 test:
-	make -C tests test
+	$(MAKE) -C tests test
 
 coverage:
-	make -C tests coverage
+	$(MAKE) -C tests coverage
 
 .PHONY: all install uninstall clean test

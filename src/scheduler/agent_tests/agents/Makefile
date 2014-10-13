@@ -33,20 +33,19 @@ EXES = $(patsubst %.c, %, $(C_FILES))
 USER = `whoami`
 GROUP = `id -ng`
 
-##########################
-# executable build rules #
-##########################
-
 all: $(FOLIB)
 
 test: $(FO_CONF) $(EXES) fossology_testconfig
 	cp $(FOSSOLOGY_TESTCONFIG)/Db.conf .
 	cp $(FOSSOLOGY_TESTCONFIG)/VERSION .
 
+coverage:
+	@echo "nothing to do"
+
 $(EXES): %: %.c $(FOLIB)
 	@echo $@:
 	@if [ ! -d $(MODDIR)/$@ ]; then \
-		mkdir -p $(MODDIR)/$@/agent/; \
+		mkdir -p $(MODDIR)/$@/agent; \
 	fi
 	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL)
 	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
@@ -58,13 +57,9 @@ $(FO_CONF): $(V_LIST)
 $(V_LIST):
 	@echo "PROJECTGROUP=$(GROUP)\nPROJECTUSER=$(USER)" > $(V_LIST)
 
-#####################
-# other build rules #
-#####################
-
 clean:
 	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log Db.conf VERSION
 
-.PHONY: all $(MODDIR) $(EXE) $(FOLIB)
+.PHONY: all test coverage clean $(MODDIR) $(EXE) $(FOLIB)
 
 include $(DEPS)

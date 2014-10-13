@@ -33,7 +33,7 @@ install: all
 
 uninstall:
 	for file in $(WRAP); do \
-	  rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
 	done
 
 clean:
