@@ -331,10 +331,32 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     );
   }
 
-  public function testBla() {
+  public function testGetNextItemUsesRecursiveAndRegularSearchAsFallback() {
     $this->prepareUploadTree($this->getTestFileStructure());
 
+    // L1 -> N1
     $nextItem = $this->uploadDao->getNextItem(32, 3666);
+    assertThat($nextItem->getId(), is(3665));
+  }
+
+  public function testGetPrevItemUsesRecursiveAndRegularSearchAsFallback() {
+    $this->prepareUploadTree($this->getTestFileStructure());
+
+    $nextItem = $this->uploadDao->getPreviousItem(32, 3666);
+    assertThat($nextItem->getId(), is(3671));
+  }
+
+  public function testGetNextItemUsesRecursiveOnly() {
+    $this->prepareUploadTree($this->getTestFileStructure());
+
+    $nextItem = $this->uploadDao->getNextItem(32, 3674);
+    assertThat($nextItem->getId(), is(3676));
+  }
+
+  public function testGetPrevItemUsesRecursiveOnly() {
+    $this->prepareUploadTree($this->getTestFileStructure());
+
+    $nextItem = $this->uploadDao->getPreviousItem(32, 3674);
     assertThat($nextItem->getId(), is(3665));
   }
 }

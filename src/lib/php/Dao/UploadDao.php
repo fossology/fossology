@@ -225,9 +225,10 @@ class UploadDao extends Object
 
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
+    $enterFolders = $direction == self::DIR_FWD;
     while (true)
     {
-      $nextItem = $this->findNextItem($item, $direction, $uploadTreeView);
+      $nextItem = $this->findNextItem($item, $direction, $uploadTreeView, $enterFolders);
 
       if ($nextItem !== null)
       {
@@ -239,6 +240,7 @@ class UploadDao extends Object
       if (isset($parent))
       {
         $item = $this->getUploadEntryFromView($parent, $uploadTreeView);
+        $enterFolders = false;
       } else
       {
         return self::NOT_FOUND;
@@ -252,65 +254,71 @@ class UploadDao extends Object
    * @param $uploadTreeView
    * @return mixed
    */
-  protected function findNextItem(Item $item, $direction, UploadTreeView $uploadTreeView)
+  protected function findNextItem(Item $item, $direction, UploadTreeView $uploadTreeView, $enterFolders = true)
   {
-    $isFile = $item->isFile();
-    $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
-
-    $parent = $isFile ? $item->getParentId() : $item->getId();
-    $parentSize = $this->getParentSize($parent, $uploadTreeView);
-    $targetIndex = $isFile ?
-        $this->getItemIndex($parent, $item, $uploadTreeView) + $indexIncrement :
-        ($direction == self::DIR_FWD ? 0 : $parentSize - 1);
-
-    if ($parent === null && $direction !== self::DIR_FWD)
+    if ($item->getParentId() === null && $direction !== self::DIR_FWD)
     {
       return self::NOT_FOUND;
     }
 
+    $enterItem = !$item->isFile() && $enterFolders;
+
+    $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
+
+    $parent = $item->getParentId();
+    $parentSize = $this->getParentSize($parent, $uploadTreeView);
+    $targetIndex = $this->getItemIndex($item, $uploadTreeView);
+
     $nextItem = null;
-
-    while ($targetIndex >= 0 && $targetIndex < $parentSize && $nextItem === null)
+    $firstIteration = true;
+    while (($targetIndex >= 0 && $targetIndex < $parentSize))
     {
-      $nextItem = $this->getNewItemByIndex($parent, $targetIndex, $uploadTreeView);
-      $targetIndex += $indexIncrement;
-
-      if ($nextItem === null)
+      if ($firstIteration)
       {
-        continue;
+        $firstIteration = false;
+        if ($enterItem)
+        {
+          $itemId = $item->getId();
+          $itemParentSize = $this->getParentSize($itemId, $uploadTreeView);
+          if ($itemParentSize > 0)
+          {
+            $nextItem = $this->getNewItemByIndex($itemId, $direction == self::DIR_FWD ? 0 : $itemParentSize - 1, $uploadTreeView);
+          }
+        }
+      } else
+      {
+        $nextItem = $this->getNewItemByIndex($parent, $targetIndex, $uploadTreeView);
       }
 
-      if (!$nextItem->isFile())
+      if ($nextItem !== null && !$nextItem->isFile())
       {
         $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
       }
+
+      if ($nextItem !== null)
+      {
+        return $nextItem;
+      }
+
+      $targetIndex += $indexIncrement;
     }
-    return $nextItem;
   }
 
   /**
-   * @param $parent
-   * @param $direction
-   * @param $uploadTreeView
-   * @return mixed|null
-   */
-  protected function findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView)
-  {
-
-  }
-
-
-  /**
-   * @param int $parent
    * @param Item $item
    * @param UploadTreeView $uploadTreeView
    * @return int
    */
-  protected function getItemIndex($parent, Item $item, UploadTreeView $uploadTreeView)
+  protected function getItemIndex(Item $item, UploadTreeView $uploadTreeView)
   {
-    $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
+    if ($item->getParentId() === null)
+    {
+      return 0;
+    } else
+    {
+      $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
 
-    $sql = "$uploadTreeViewQuery
+      $sql = "$uploadTreeViewQuery
     select row_number from (
       select
         row_number() over (order by ufile_name),
@@ -318,10 +326,10 @@ class UploadDao extends Object
       from uploadTreeView where parent=$1
     ) as index where uploadtree_pk=$2";
 
-    $currentIndexResult = $this->dbManager->getSingleRow($sql, array($parent, $item->getId()), __METHOD__ . "_current_offset" . $uploadTreeViewQuery);
+      $result = $this->dbManager->getSingleRow($sql, array($item->getParentId(), $item->getId()), __METHOD__ . "_current_offset" . $uploadTreeViewQuery);
 
-    $currentIndex = $currentIndexResult['row_number'] - 1;
-    return $currentIndex;
+      return intval($result['row_number']) - 1;
+    }
   }
 
   /**
@@ -331,15 +339,20 @@ class UploadDao extends Object
    */
   protected function getParentSize($parent, UploadTreeView $uploadTreeView)
   {
-    $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
+    if ($parent === null)
+    {
+      return 1;
+    } else
+    {
+      $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
 
-    $currentCountResult = $this->dbManager->getSingleRow("$uploadTreeViewQuery
+      $result = $this->dbManager->getSingleRow("$uploadTreeViewQuery
         select count(*)
                from uploadTreeView
                where parent=$1",
-        array($parent), __METHOD__ . "_current_count");
-    $currentCount = $currentCountResult['count'];
-    return $currentCount;
+          array($parent), __METHOD__ . "_current_count");
+      return intval($result['count']);
+    }
   }
 
   /**
@@ -473,7 +486,11 @@ class UploadDao extends Object
   protected
   function createItem($uploadEntry, $uploadTreeTableName)
   {
-    $itemTreeBounds = new ItemTreeBounds($uploadEntry['uploadtree_pk'], $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
+    $itemTreeBounds = new ItemTreeBounds(
+        intval($uploadEntry['uploadtree_pk']),
+        $uploadTreeTableName,
+        intval($uploadEntry['upload_fk']),
+        intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
 
     $parent = $uploadEntry['parent'];
     $item = new Item(
