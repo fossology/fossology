@@ -162,9 +162,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->prepare($stmt = 'insert.cd',
         "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6)");
     $cdArray = array(
-        array(1, 1000, 5, 1, 5, '2014-08-15T12:12:12'),
-        array(2, 1000, 7, 1, 5, '2014-08-15T12:12:12'),
-        array(3, 1000, 9, 3, 5, '2014-08-16T14:33:45')
+        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now-888)),
+        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now-888)),
+        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now-1234))
     );
     foreach ($cdArray as $ur)
     {
@@ -207,7 +207,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   private function getMyDate( $in ) {
     $date = new DateTime();
-    return $date->setTimestamp($in)->format('Y-m-d H:i:s');
+    return $date->setTimestamp($in)->format('Y-m-d H:i:s T');
   }
 
   private function getMyDate2( $in ) {
@@ -280,9 +280,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $clearingDec = $this->clearingDao->getFileClearingsFolder( $itemTreeBounds);
     $result = $this->fixClearingDecArray($clearingDec);
     assertThat($result, contains(
-        array(3, 1000, 9, 3, 'upload', 'Identified',  new DateTime('2014-08-16T14:33:45'), false, true),
-        array(2, 1000, 7, 1, 'upload', 'Identified',  new DateTime('2014-08-15T12:12:12'), true,  true),
-        array(1, 1000, 5, 1, 'upload', 'Identified',  new DateTime('2014-08-15T12:12:12'), false, false)
+        array(3, 1000, 9, 3, 'upload', 'Identified', $this->getMyDate2( $this->now-1234), false, true),
+        array(2, 1000, 7, 1, 'upload', 'Identified', $this->getMyDate2( $this->now-888), true,  true),
+        array(1, 1000, 5, 1, 'upload', 'Identified', $this->getMyDate2( $this->now-888), false, false)
         ));
   }
 
