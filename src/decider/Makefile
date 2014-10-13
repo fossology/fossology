@@ -32,8 +32,8 @@ install: all
 	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 

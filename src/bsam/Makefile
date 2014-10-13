@@ -39,8 +39,8 @@ VERSIONFILE:
 install: all
 	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 

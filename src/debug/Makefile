@@ -38,8 +38,8 @@ coverage: all
 install: all
 	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	$(call DIR_LOOP,install)
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
 		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 
