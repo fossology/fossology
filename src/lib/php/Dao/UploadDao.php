@@ -225,7 +225,24 @@ class UploadDao extends Object
 
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
-    return $this->findNextItem($item, $direction, $uploadTreeView);
+    while (true) {
+      $nextItem = $this->findNextItem($item, $direction, $uploadTreeView);
+
+      if ($nextItem !== null)
+      {
+        return $nextItem;
+      }
+
+        $parent = $item->getParentId();
+
+        if (isset($parent))
+        {
+          $item = $this->getUploadEntryFromView($parent, $uploadTreeView);
+        } else
+        {
+          return self::NOT_FOUND;
+        }
+    }
   }
 
   /**
@@ -236,52 +253,44 @@ class UploadDao extends Object
    */
   protected function findNextItem(Item $item, $direction, UploadTreeView $uploadTreeView)
   {
-    $parent = $item->getParentId();
+    $isFile = $item->isFile();
+    $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
 
-    if (isset($parent))
+    if ($isFile)
     {
-      $currentIndex = $this->getItemIndex($parent, $item, $uploadTreeView);
+      $parent = $item->getParentId();
       $parentSize = $this->getParentSize($parent, $uploadTreeView);
-
-      $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
-
-      $targetOffset = $currentIndex + $indexIncrement;
-      $result = null;
-
-      while (($targetOffset >= 0 && $targetOffset < $parentSize))
-      {
-        $result = $this->findItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeView);
-
-        if ($result !== null)
-        {
-          return $result;
-        }
-
-        $targetOffset += $indexIncrement;
-      }
-      return $this->findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView);
+      $targetIndex = $this->getItemIndex($parent, $item, $uploadTreeView) + $indexIncrement;
     } else
     {
-      if ($direction == self::DIR_FWD)
+      $parent = $item->getId();
+      $parentSize = $this->getParentSize($parent, $uploadTreeView);
+      $targetIndex = $direction == self::DIR_FWD ? 0 : $parentSize - 1;
+
+      if ($item->getParentId() === null && $direction !== self::DIR_FWD)
       {
-        return $this->enterFolder($item, $direction, $uploadTreeView);
+        return self::NOT_FOUND;
       }
-      return self::NOT_FOUND;
     }
-  }
 
-  /**
-   * @param $targetOffset
-   * @param $parent
-   * @param $direction
-   * @param $uploadTreeView
-   * @return mixed
-   */
-  protected function findItemInCurrentParent($targetOffset, $parent, $direction, $uploadTreeView)
-  {
-    $item = $this->getNewItemByIndex($parent, $targetOffset, $uploadTreeView);
+    $nextItem = null;
 
-    return $this->handleNewItem($item, $direction, $uploadTreeView);
+    while ($targetIndex >= 0 && $targetIndex < $parentSize && $nextItem === null)
+    {
+      $nextItem = $this->getNewItemByIndex($parent, $targetIndex, $uploadTreeView);
+      $targetIndex += $indexIncrement;
+
+      if ($nextItem === null)
+      {
+        continue;
+      }
+
+      if (!$nextItem->isFile())
+      {
+        $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
+      }
+    }
+    return $nextItem;
   }
 
   /**
@@ -292,64 +301,7 @@ class UploadDao extends Object
    */
   protected function findNextItemOutsideCurrentParent($parent, $direction, $uploadTreeView)
   {
-    if (isset($parent))
-    {
-      $newItemEntry = $this->getUploadEntryFromView($parent, $uploadTreeView);
-      return $this->findNextItem($newItemEntry, $direction, $uploadTreeView);
-    } else
-    {
-      return self::NOT_FOUND;
-    }
-  }
 
-
-  /**
-   * @param Item $item
-   * @param $direction
-   * @param UploadTreeView $uploadTreeView
-   * @return Item|null
-   */
-  protected function handleNewItem(Item $item, $direction, UploadTreeView $uploadTreeView)
-  {
-    if (!$item->isFile())
-    {
-      if ($item->containsFileTreeItems())
-      {
-        return $this->enterFolder($item, $direction, $uploadTreeView);
-      }
-      return self::NOT_FOUND;
-    } else
-    {
-      return $item;
-    }
-  }
-
-  /**
-   * @param $item
-   * @param $direction
-   * @param $uploadTreeView
-   * @return mixed
-   */
-  protected function enterFolder(Item $item, $direction, UploadTreeView $uploadTreeView)
-  {
-    $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
-
-    $nameOrder = ($direction == self::DIR_FWD ? 'ASC' : 'DESC');
-
-    $statementName = __METHOD__ . "descent_" . $nameOrder;
-    $newItemResult = $this->dbManager->getSingleRow(
-        "$uploadTreeViewQuery
-          select * from uploadTreeView
-          where parent=$1
-          order by ufile_name $nameOrder limit 1",
-        array($item->getId()), $statementName);
-
-    if ($newItemResult === null)
-      return self::NOT_FOUND;
-
-    return $this->handleNewItem(
-        $this->createItem($newItemResult, $uploadTreeView->getUploadTreeTableName()),
-        $direction, $uploadTreeView);
   }
 
 
@@ -436,7 +388,8 @@ class UploadDao extends Object
   }
 
 
-  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
+  public
+  function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
     $statementName = __METHOD__ . $uploadTreeTableName;
     $leftRight = $this->dbManager->getSingleRow(
@@ -452,7 +405,8 @@ class UploadDao extends Object
    * @param $uploadTreeView
    * @return mixed
    */
-  protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
+  protected
+  function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
   {
     $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
     $sql = "$uploadTreeViewQuery
@@ -466,7 +420,8 @@ class UploadDao extends Object
     return $output;
   }
 
-  public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
+  public
+  function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
   {
 
     $alreadyClearedUploadTreeView = $this->getFileOnlyUploadTreeView($itemTreeBounds->getUploadId(),
@@ -492,7 +447,8 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
+  protected
+  function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
   {
     return new UploadTreeView($uploadId, $options, $uploadTreeTableName);
   }
@@ -504,7 +460,8 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
+  protected
+  function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
   {
     return new UploadTreeView($uploadId, $options, $uploadTreeTableName, "           OR
                                     ut.ufile_mode & (1<<29) <> 0
@@ -518,7 +475,8 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return Item
    */
-  protected function createItem($uploadEntry, $uploadTreeTableName)
+  protected
+  function createItem($uploadEntry, $uploadTreeTableName)
   {
     $itemTreeBounds = new ItemTreeBounds($uploadEntry['uploadtree_pk'], $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
 
