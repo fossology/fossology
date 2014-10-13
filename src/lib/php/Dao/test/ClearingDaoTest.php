@@ -143,7 +143,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $this->now = time();
-    $cdArray = array(
+    $ldArray = array(
         array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now-888)),
         array(2, 100, 1000, 1, 2, false, false, 1, $this->getMyDate($this->now-888)),
         array(3, 100, 1000, 3, 4, false, false, 1, $this->getMyDate($this->now-1234)),
@@ -152,7 +152,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
         array(6, 100, 1200, 1, 3, true, true, 1, $this->getMyDate($this->now-654)),
         array(7, 100, 1200, 1, 2, false, false, 1, $this->getMyDate($this->now-543))
     );
-    foreach ($cdArray as $params)
+    foreach ($ldArray as $params)
     {
       $this->dbManager->insertInto('license_decision_event',
            'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, is_global, type_fk, date_added',
@@ -171,6 +171,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
     }
 
+  }
+  
+  function tearDown()
+  {
+    $this->testDb = null;
+    $this->dbManager = null;
   }
 
   /**
@@ -244,7 +250,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     ));
   }
 
-
   /**
    * @var ClearingDecision[] $input
    * @return array[]
@@ -267,8 +272,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
     return $output;
   }
-
-
 
   public function testGetFileClearingsFolder()
   {
