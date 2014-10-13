@@ -104,7 +104,7 @@ class TestPgDb
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
-    $this->dbManager = &$container->get('db.manager');
+    $this->dbManager = $container->get('db.manager');
     $this->dropAllTables();
   }
   
