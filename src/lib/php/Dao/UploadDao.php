@@ -225,7 +225,8 @@ class UploadDao extends Object
 
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
-    while (true) {
+    while (true)
+    {
       $nextItem = $this->findNextItem($item, $direction, $uploadTreeView);
 
       if ($nextItem !== null)
@@ -233,15 +234,15 @@ class UploadDao extends Object
         return $nextItem;
       }
 
-        $parent = $item->getParentId();
+      $parent = $item->getParentId();
 
-        if (isset($parent))
-        {
-          $item = $this->getUploadEntryFromView($parent, $uploadTreeView);
-        } else
-        {
-          return self::NOT_FOUND;
-        }
+      if (isset($parent))
+      {
+        $item = $this->getUploadEntryFromView($parent, $uploadTreeView);
+      } else
+      {
+        return self::NOT_FOUND;
+      }
     }
   }
 
