@@ -457,6 +457,10 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
 
 int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char* keyName)
 {
+  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
+  if ((jobj==NULL) || ((int)jobj < 0))
+    return 0;
+
   int result = 0;
 
   json_object_object_foreach(jobj, key, val) {
@@ -883,10 +887,8 @@ PQclear(ResQ1);
 //end of global licenses
 
 
-mxml_node_t* p7 = (mxml_node_t*)createnumsection(body,"0","2");
-addparaheading(p7,NULL, "Other Licenses - DO NOT USE","0","2");
-mxml_node_t* p8 = (mxml_node_t*)createnumsection(body,"0","2");
-addparaheading(p8,NULL, "Other Licenses","0","2");
+addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses - DO NOT USE","0","2");
+addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 //table 3 for other license data
 
 rg_table* tableOthers = table_new(body, 3, "2000", "6000", "2000");
@@ -895,9 +897,7 @@ table_addRow(tableOthers, "license", "text", "files");
   char* jsonLicenses = getClearedLicenses();
   json_object * jobj = json_tokener_parse(jsonLicenses);
 
-  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
-  if ((jobj==NULL) || ((int)jobj < 0) ||
-    !addRowsFromJson_NameTextFiles(tableOthers, jobj, "licenses"))
+  if (!addRowsFromJson_NameTextFiles(tableOthers, jobj, "licenses"))
   {
     printf("cannot parse json string: %s\n", jsonLicenses);
     fo_scheduler_disconnect(1);
@@ -910,8 +910,7 @@ table_addRow(tableOthers, "license", "text", "files");
 
 // endrow
 
-mxml_node_t* p9 = (mxml_node_t*)createnumsection(body,"0","2");
-addparaheading(p9,NULL, "Copyrights","0","2");
+addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
 //table 4 for other license data
 
 rg_table* tableCopyright = table_new(body, 3, "2000", "6000", "2000");
@@ -920,9 +919,7 @@ table_addRow(tableCopyright, "copyright", "text", "files");
   char* jsonCopyright = getClearedCopyright();
   json_object * jobj = json_tokener_parse(jsonCopyright);
 
-  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
-  if ((jobj==NULL) || ((int)jobj < 0) ||
-    !addRowsFromJson_NameTextFiles(tableCopyright, jobj, "statements"))
+  if (!addRowsFromJson_NameTextFiles(tableCopyright, jobj, "statements"))
   {
     printf("cannot parse json string: %s\n", jsonCopyright);
     fo_scheduler_disconnect(1);
@@ -933,173 +930,15 @@ table_addRow(tableCopyright, "copyright", "text", "files");
   g_free(jsonCopyright);
 }
 
-
-#if 0
-mxml_node_t* tbl4 = (mxml_node_t*)createtable(body, "9000");
-createtablegrid(tbl4,tbcol6,3);
-
-mxml_node_t* tr41 = NULL;
-
-char* copyright_content=(char*)malloc(sizeof(char)*(220+1+DECLEN));
-sprintf(copyright_content,"SELECT DISTINCT(copyright.content) FROM copyright INNER JOIN uploadtree ON uploadtree.pfile_fk = copyright.pfile_fk AND uploadtree.upload_fk = '%d' AND copyright.content LIKE ('Copyright%%')",uploadId);
-PGresult* copyright_results=PQexec(pgConn,copyright_content);
-
-if (copyright_content)
-{
-	free(copyright_content);
-}
-
-int copyresultcount = PQntuples(copyright_results);
-
-mxml_node_t** tr33=(mxml_node_t**) malloc(sizeof(mxml_node_t*)*(copyresultcount+3));
-K=0;
-int cnt=0;
-mxml_node_t* tbl_ = NULL;
-mxml_node_t* trH1=NULL;
-mxml_node_t* trH2=NULL;
-mxml_node_t* _tbl = NULL;
-int type_int=0;
-int previous_type=-2;
-while (cnt<copyresultcount)
-{ 
-	tr33[K]=NULL;
-	if (strcmp(PQgetvalue(copyright_results,cnt,0),"email")==0)
-	{       
-		type_int=0;
-	}	
-	else if (strcmp(PQgetvalue(copyright_results,cnt,0),"statement")==0)
-	{
-		type_int=1;	   	 
-	}
-	else 
-	{
-		type_int=2;
-	}    
-	if (type_int!=previous_type+1 && type_int==0)
-	{			
-                tr41 = (mxml_node_t*)createrowproperty(tbl4);
-                createrowdata(tr41, tbcol6[0], "Copyright");
-                createrowdata(tr41, tbcol6[1], "Copyright Emails");
-                createrowdata(tr41, tbcol6[2], "Files");			
-		previous_type++;
-	}
-	else if (type_int!=previous_type+1 && type_int==1)
-	{
-		addparagraph(body, NULL, "  ");
-		addparagraph(body, NULL, "  ");
-		tbl_ = (mxml_node_t*)createtable(body, "9000");
-		createtablegrid(tbl_,tbcol6,3);
-		trH1 = (mxml_node_t*)createrowproperty(tbl_);
-		createrowdata(trH1, tbcol6[0], "Copyright");
-		createrowdata(trH1, tbcol6[1], "Copyright Statements");
-		createrowdata(trH1, tbcol6[2], "Files");
-		previous_type++;
-	}
-	else if (type_int!=previous_type+1 && type_int==2)
-	{
-		addparagraph(body, NULL, "  ");
-		addparagraph(body, NULL, "  ");
-		_tbl = (mxml_node_t*)createtable(body, "9000");
-		createtablegrid(_tbl,tbcol6,3);		
-		trH2 = (mxml_node_t*)createrowproperty(_tbl);
-		createrowdata(trH2, tbcol6[0], "Copyright");
-		createrowdata(trH2, tbcol6[1], "Copyright URLs");
-		createrowdata(trH2, tbcol6[2], "Files");
-		previous_type++;		
-	}			
-     if (type_int==0)
-	{
-      tr33[K] = (mxml_node_t*)createrowproperty(tbl4);
-	}
-	if (type_int==1)
-	{
-		tr33[K] = (mxml_node_t*)createrowproperty(tbl_);	
-	}
-	if (type_int==2)
-	{
-		tr33[K] = (mxml_node_t*)createrowproperty(_tbl);
-	}
-	
-   	createrowdata(tr33[K], tbcol6[0], " ");
-   	char* curcopyres = PQgetvalue(copyright_results,cnt,0);
-   	int copyreslen = strlen(curcopyres);
-        char* rfCPRText=(char*)malloc(sizeof(char)*(copyreslen+1));
-	strcpy(rfCPRText,curcopyres);
-	rfCPRText[copyreslen]='\0';
-	char* tempcprtext = rfCPRText;
-	int indx;
-	for (indx=0;rfCPRText[indx]!='\0';indx++) //Now removing non ascii characters (if any)
-	{
-		if (!(isalpha(rfCPRText[indx]) || isdigit(rfCPRText[indx]) || rfCPRText[indx]==' ' || rfCPRText[indx]=='\n' || rfCPRText[indx]=='\r'
-		      || ispunct(rfCPRText[indx]))) 
-		{               
-			rfCPRText[indx]=' ';		
-		}
-	}
-	createrowdata(tr33[K], tbcol6[0],rfCPRText); 
-	if(tempcprtext)
-		free(tempcprtext);
-  
-  char* contentCopyright=PQgetvalue(copyright_results,cnt,0);
-
-  // TODO filter by user_id ??
-  PGresult* uploadTreeIdQueryResults = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "allUploadsFromPfile",
-            "SELECT DISTINCT(uploadtree.uploadtree_pk) FROM copyright INNER JOIN uploadtree ON uploadtree.pfile_fk = copyright.pfile_fk AND uploadtree.upload_fk = $1 AND copyright.content LIKE $2",int,
-      char*),uploadId,contentCopyright
-  );
-
-  char* CR_FilePath = NULL;
-  if (uploadTreeIdQueryResults) {
-    int count = PQntuples(uploadTreeIdQueryResults);
-    if (count > 0) {
-      int i=0;
-      GString* gstring = g_string_new("");
-      do {
-        if (i>0) g_string_append(gstring,",\n");
-        g_string_append(gstring,
-                        getFullFilePath(atoi(PQgetvalue(uploadTreeIdQueryResults, i, 0))));
-        i++;
-      } while (i<count);
-      CR_FilePath = g_string_free(gstring, FALSE);
-    }
-    PQclear(uploadTreeIdQueryResults);
-  }
-  if(CR_FilePath)
-  {
-    createrowdata(tr33[K], tbcol6[2], CR_FilePath);
-    free(CR_FilePath);
-  }
-  else
-  {
-    createrowdata(tr33[K], tbcol6[2], "N.A.");
-  }
-
- 	fo_scheduler_heart(1);
-	cnt++;
-	K++;
-}
-
-PQclear(copyright_results);
-
-#endif
-
-mxml_node_t* p10 = (mxml_node_t*)createnumsection(body,"0","2");
-addparaheading(p10,NULL, "Special considerations","0","2");
-mxml_node_t* p101 = (mxml_node_t*)createnumsection(body,"1","2");
-addparaheading(p101, NULL, "Known Security Vulnerabilities:","1","2");
+addparaheading(createnumsection(body,"0","2"),NULL, "Special considerations","0","2");
+addparaheading(createnumsection(body,"1","2"), NULL, "Known Security Vulnerabilities:","1","2");
 //table 5 for known security vulnerabilities
-mxml_node_t* tbl5 = (mxml_node_t*)createtable(body, "9638");
-createtablegrid(tbl5,tbcol3,3);
-mxml_node_t* tr51 = (mxml_node_t*)createrowproperty(tbl5);
-createrowdata(tr51, "4819", "");
-createrowdata(tr51, "4819", "");
-createrowdata(tr51, "4819", "");
-
+rg_table* tableSecurity = table_new(body, 3, "3000", "3000", "3000");
+table_addRow(tableSecurity, "", "", ""); //TODO why?
 
 //table 6 for known patent issues
+//TODO ip
+#if 0
 mxml_node_t* p102 = (mxml_node_t*)createnumsection(body,"1","2");
 addparaheading(p102, NULL, "Known Patent Issues","1","2");
 mxml_node_t* tbl_patentIssue = (mxml_node_t*)createtable(body, "9638");
@@ -1108,55 +947,12 @@ mxml_node_t* tr_patentIssue = (mxml_node_t*)createrowproperty(tbl_patentIssue);
 createrowdata(tr_patentIssue, "4819", "Identified Patent");
 createrowdata(tr_patentIssue, "4819", "Comments");
 createrowdata(tr_patentIssue, "4819", "FilePath");
+#endif
 
-char* sql_patentIssue = (char*)malloc(4*DECLEN);
-sprintf(sql_patentIssue, "select uploadtree_pk,identified_ip,comment from ip_ref_status where upload_pk=%d and ip_ref_status.status=3;",uploadId);
-
-PGresult* pgres_patentIssue = PQexec(pgConn,sql_patentIssue);
-int sql_patentIssueCount = PQntuples(pgres_patentIssue);
-if (sql_patentIssue)
-{  
-	free(sql_patentIssue);
-}  
-
-mxml_node_t** tr_patentIssueTable=NULL;
-int k_patentIssue=0;
-int i;
-if(sql_patentIssueCount)
-{
-	for(i=0; i<sql_patentIssueCount; i++){
-		tr_patentIssueTable = (mxml_node_t**) realloc(tr_patentIssueTable, sizeof( mxml_node_t*)*(k_patentIssue+1));
-		tr_patentIssueTable[k_patentIssue] = ( mxml_node_t*)createrowproperty(tbl_patentIssue);
-		
-		char* rfPatentIssue = NULL;
-		rfPatentIssue = (char*) malloc( sizeof(char) * (strlen(PQgetvalue(pgres_patentIssue,i,1)) +1));
-		strcpy(rfPatentIssue,PQgetvalue(pgres_patentIssue,i,1));
-		rfPatentIssue[strlen(PQgetvalue(pgres_patentIssue,i,1))]='\0';
-		createrowdata(tr_patentIssueTable[k_patentIssue], "4189",rfPatentIssue);
-		
-		char* rfPatentIssue1=NULL;
-	  rfPatentIssue1=(char*)malloc(sizeof(char)*(strlen(PQgetvalue(pgres_patentIssue,i,2))+1));
-		strcpy(rfPatentIssue1,PQgetvalue(pgres_patentIssue,i,2));
-		rfPatentIssue1[strlen(PQgetvalue(pgres_patentIssue,i,2))]='\0';
-		createrowdata(tr_patentIssueTable[k_patentIssue], "4189",rfPatentIssue1);
-		
-		char * fullPath = NULL;
-		fullPath = (char*) malloc(sizeof(getFullFilePath(atoi(PQgetvalue(pgres_patentIssue, i, 0)))));
-		fullPath = getFullFilePath(atoi(PQgetvalue(pgres_patentIssue, i, 0)));
-		createrowdata(tr_patentIssueTable[k_patentIssue], "4819", fullPath);
-	  if(fullpath)
-		{
-		   free(fullPath);
-		}
-		free(rfPatentIssue);
-		free(rfPatentIssue1);
-		k_patentIssue++;
-	}
-}  
-PQclear(pgres_patentIssue); 
 //end of known Patent Issue
 
-//ecc Issue
+//TODO ecc Issue
+#if 0
 mxml_node_t* p103 = (mxml_node_t*)createnumsection(body,"1","2");
 addparaheading(p103, NULL, "Known ECC Issues","1","2");
 mxml_node_t* tbl_ecc = (mxml_node_t*)createtable(body, "9638");
@@ -1165,75 +961,8 @@ mxml_node_t* tr_ecc = (mxml_node_t*)createrowproperty(tbl_ecc);
 createrowdata(tr_ecc, "4189", "Identified ECC Issue");
 createrowdata(tr_ecc, "4189", "Comments");
 createrowdata(tr_ecc, "4189", "FilePath");
+#endif
 
-char* sql_ecc=(char*)malloc(4*DECLEN);
-sprintf(sql_ecc, "SELECT DISTINCT(ecc.content),comment FROM ecc INNER JOIN ecc_ref_status ON ecc_ref_status.pfile_fk = ecc.pfile_fk AND ecc_ref_status.upload_pk = %d where ecc_ref_status.status=3;",uploadId);
-
-PGresult* pgres_ecc = PQexec(pgConn,sql_ecc);
-int sql_eccCommentCount = PQntuples(pgres_ecc);
-if (sql_ecc)
-{  
-	free(sql_ecc);
-}  
-mxml_node_t** tr_eccTable=NULL;
-
-int k_ecc=0;
-if(sql_eccCommentCount)
-{
-	for(i=0; i < sql_eccCommentCount; i++){
-		tr_eccTable = (mxml_node_t**)realloc(tr_eccTable, sizeof( mxml_node_t*)*(k_ecc+1));
-		tr_eccTable[k_ecc] = ( mxml_node_t*)createrowproperty(tbl_ecc);
-		
-		char* rfEcc=NULL;
-	  rfEcc = malloc(sizeof(char)*(strlen(PQgetvalue(pgres_ecc,i,0))+1));
-		strcpy(rfEcc, PQgetvalue(pgres_ecc,i,0));
-		rfEcc[ strlen( PQgetvalue(pgres_ecc,i,0))] = '\0';
-		createrowdata(tr_eccTable[k_ecc], "4189", rfEcc);
-	
-		char* rfEcc1=NULL;
-	  rfEcc1=(char*)malloc(sizeof(char)*(strlen(PQgetvalue(pgres_ecc,i,1))+1));
-		strcpy(rfEcc1,PQgetvalue(pgres_ecc,i,1));
-		rfEcc1[strlen(PQgetvalue(pgres_ecc,i,1))]='\0';
-		createrowdata(tr_eccTable[k_ecc], "4189" ,rfEcc1);
-    
-		char* contentEcc=PQgetvalue(pgres_ecc,i,0);
-    char* sql_eccPath=(char*)malloc(4*DECLEN);
-    sprintf(sql_eccPath, "SELECT DISTINCT(uploadtree.uploadtree_pk) FROM ecc INNER JOIN uploadtree ON uploadtree.pfile_fk = ecc.pfile_fk AND uploadtree.upload_fk = %d AND ecc.content LIKE '%s'",uploadId,contentEcc);
-    PGresult* pgres_eccPath = PQexec(pgConn,sql_eccPath);
-    int sql_eccCommentPathCount = PQntuples(pgres_eccPath);
-    if (sql_eccPath)
-    {  
-	     free(sql_eccPath);
-    }  
-    char* ecc_filePath = NULL;
-    if (sql_eccCommentPathCount) {
-		int i=0;
-		GString* gstring = g_string_new("");
-		do {
-	    if (i>0) g_string_append(gstring,",\n");
-		   g_string_append(gstring,
-			 getFullFilePath(atoi(PQgetvalue(pgres_eccPath, i, 0))));
-		   i++;
-		  } while (i<sql_eccCommentPathCount);
-		  ecc_filePath = g_string_free(gstring, FALSE);
-	  }
-	  PQclear(pgres_eccPath);
-
-    if(ecc_filePath)
-    {
-	    createrowdata(tr_eccTable[k_ecc], "4189", ecc_filePath);
-	    free(ecc_filePath);
-    }
-    else
-    {
-	     createrowdata(tr_eccTable[k_ecc], "4189", "N.A.");
-    }
-		free(rfEcc);
-		free(rfEcc1);
-		k_ecc++;
-   }
-}  
-PQclear(pgres_ecc); 
 //end of known ECC Issue
 
 mxml_node_t* p11 = (mxml_node_t*)createnumsection(body,"0","2");
@@ -1276,7 +1005,7 @@ mxml_node_t** tr_notesTable=NULL;
 int k_notes=0;
 if(sql_notesCommentCount)
 {
-	for(i=0; i<sql_notesCommentCount; i++){
+	for(int i=0; i<sql_notesCommentCount; i++){
 		tr_notesTable = (mxml_node_t**) realloc(tr_notesTable, sizeof( mxml_node_t*)*(k_notes+1));
 		tr_notesTable[k_notes] = ( mxml_node_t*)createrowproperty(tbl_notes);
 		
@@ -1493,6 +1222,7 @@ for (uloop2=0;uloop2<3;uloop2++)
 table_free(tableOthers);
 table_free(tableHistog);
 table_free(tableCopyright);
+table_free(tableSecurity);
 
 /*free timestampstring*/
 if(formattedtime)

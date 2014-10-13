@@ -6,7 +6,7 @@
 #include "utils.h"
 
 typedef struct {
-  GArray* cells;
+  GArray* cells;  //TODO remove
   gchar** widths;
   gchar* stringWidth;
   mxml_node_t* node;
@@ -80,5 +80,5 @@ void table_addRow(rg_table* table, ...)
   }
   va_end(args);
 
-  g_array_append_val(table->cells, row);
+  g_array_append_val(table->cells, row); //TODO remove
 }
