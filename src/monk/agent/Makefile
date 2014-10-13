@@ -15,6 +15,7 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
 EXE = monk
+MOD_SUBDIR = agent
 OBJECTS = monk.o string_operations.o file_operations.o database.o \
           license.o highlight.o match.o hash.o diff.o extended.o \
           cli.o bulk.o \
@@ -100,14 +101,9 @@ $(COVERAGE): %_cov.o: %.c
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(CONFDIR)/mods-enabled
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-		ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled; \
-	fi
 
 uninstall:
-	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/$(MOD_SUBDIR)
 
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core _squareVisitor.h _squareVisitor.c \

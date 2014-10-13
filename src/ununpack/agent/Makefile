@@ -6,10 +6,9 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE = departition ununpack
+MOD_SUBDIR = agent
 
 CHKHDR = checksum.h md5.h sha1.h
 CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
@@ -31,12 +30,8 @@ install: all $(VARS)
 	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ]; then \
 		rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
 	fi
-	@mkdir -p $(CONFDIR)/mods-enabled
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
-	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-		ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled; \
-	fi
 
 # create wrapper for departition in BINDIR
 	@mkdir -p $(DESTDIR)$(BINDIR)
@@ -47,7 +42,7 @@ install: all $(VARS)
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
-	rm -rf $(DESTDIR)$(MODDIR)/ununpack
+	rm -rf $(DESTDIR)$(MODDIR)/ununpack/$(MOD_SUBDIR)
 
 $(OBJECTS): %.o: %.c $(UUHDR)
 	$(CC) -c $< $(CFLAGS_LOCAL)
