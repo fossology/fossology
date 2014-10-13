@@ -29,10 +29,10 @@ DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 VERSIONFILE:
@@ -54,7 +54,7 @@ uninstall:
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
-	rm -f VERSION
 	$(call DIR_LOOP,clean)
+	rm -f VERSION
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

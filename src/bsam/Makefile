@@ -27,14 +27,14 @@ DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 
-test:
-	@echo "make $(MOD_NAME) test"
+test: all
+	@echo "nothing to do"
+
+coverage: all
+	@echo "nothing to do"
 
 VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
-
-coverage:
-	@echo "make $(MOD_NAME) coverage"
 
 install: all
 	$(call DIR_LOOP,install)
@@ -52,4 +52,4 @@ uninstall:
 clean:
 	rm -f VERSION
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

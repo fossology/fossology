@@ -29,10 +29,10 @@ DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 VERSIONFILE:
@@ -50,4 +50,4 @@ clean:
 	$(call DIR_LOOP,clean)
 	rm -rf VERSION
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage VERSIONFILE install uninstall clean

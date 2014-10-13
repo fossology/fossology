@@ -21,6 +21,12 @@ $(iPATHFILE):
 
 all: $(iPATHFILE) docs fo_wrapper
 
+test: all
+	@echo "*** Tests are still run by hand for cli/ ***"
+
+coverage: all
+	@echo "nothing to do"
+
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
@@ -78,16 +84,10 @@ uninstall:
 		rm -f $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
 
-test: all
-	@echo "*** Tests are still run by hand for cli/ ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for cli"
-
 clean:
 	# pod2html leaves temporary files: see debian bug #378328
 	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp fo_wrapper.php $(WRAP)
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage docs install uninstall clean
 
 include $(DEPS)

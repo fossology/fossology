@@ -22,18 +22,19 @@ include $(VARS)
 MOD_NAME = example_wc_agent
 
 DIRS = agent ui
-TESTDIR = agent_tests ui_tests
+TEST_DIRS = agent_tests ui_tests
 
-DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+DIR_LOOP      = @set -e; for dir in $(DIRS);      do $(MAKE) -s -C $$dir $(1); done
+TEST_DIR_LOOP = @set -e; for dir in $(TEST_DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
-test:
-	$(MAKE) -C $(TESTDIR) test
+test: all
+	$(call TEST_DIR_LOOP,test)
 
-coverage:
-	$(MAKE) -C $(TESTDIR) coveraga
+coverage: all
+	$(call TEST_DIR_LOOP,coverage)
 
 VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
@@ -56,4 +57,4 @@ clean:
 	$(call DIR_LOOP,clean)
 	rm -f VERSION
 
-.PHONY: all install uninstall clean test coverage VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

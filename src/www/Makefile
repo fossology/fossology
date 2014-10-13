@@ -19,7 +19,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = ui ui_tests
+DIRS = ui
 TESTDIR = ui_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
@@ -27,10 +27,10 @@ DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 all:
 	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
@@ -42,4 +42,4 @@ uninstall:
 clean:
 	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage install uninstall clean

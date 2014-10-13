@@ -22,22 +22,20 @@ include $(VARS)
 MOD_NAME = regexscan
 
 DIRS = agent
-#DIRS = agent ui
-#TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
-test:
-	$(MAKE) -C $(TESTDIR) test
+test: all
+	@echo "nothing to do"
+
+coverage: all
+	@echo "nothing to do"
 
 VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))
-
-coverage:
-	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
 	$(call DIR_LOOP,install)
@@ -57,4 +55,4 @@ clean:
 	rm -f VERSION
 	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

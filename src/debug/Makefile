@@ -29,10 +29,10 @@ DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 all:
 	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
@@ -51,4 +51,4 @@ uninstall:
 clean:
 	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage install uninstall clean
