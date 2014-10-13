@@ -71,6 +71,6 @@ coverage: libununpack_cov.a
 clean:
 	rm -f $(EXE) *.o core *.a *.gc*
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

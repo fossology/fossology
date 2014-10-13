@@ -55,6 +55,6 @@ clean:
 	rm -f $(EXE) *.o core *.gc*
 	$(MAKE) -C $(TESTDIRS) clean
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test coverage
+
+include $(DEPS)

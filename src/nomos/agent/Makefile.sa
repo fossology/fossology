@@ -81,6 +81,6 @@ clean:
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

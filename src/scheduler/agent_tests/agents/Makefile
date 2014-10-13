@@ -65,6 +65,6 @@ $(V_LIST):
 clean:
 	rm -rf $(MODDIR) $(V_LIST) $(FO_CONF) *.log Db.conf VERSION
 
-include $(DEPS)
-
 .PHONY: all $(MODDIR) $(EXE) $(FOLIB)
+
+include $(DEPS)

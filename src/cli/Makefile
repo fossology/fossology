@@ -88,6 +88,6 @@ clean:
 	# pod2html leaves temporary files: see debian bug #378328
 	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp fo_wrapper.php $(WRAP)
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

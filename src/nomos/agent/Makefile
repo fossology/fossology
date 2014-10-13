@@ -91,6 +91,6 @@ libnomos.a: $(OBJS) $(GENOBJS)
 libnomos_cov.a: $(COVERAGE) $(GENOBJS)
 	ar cvr $@ $(COVERAGE) $(GENOBJS)
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

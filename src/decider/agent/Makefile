@@ -45,6 +45,6 @@ coverage:
 clean:
 	rm -f *.o core version.php $(WRAP)
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

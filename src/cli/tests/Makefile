@@ -36,6 +36,6 @@ clean:
 phpvendors:
 	$(MAKE) -C $(TOP)/src $@
 
-include $(DEPS)
-
 .PHONY: all test coverage clean
+
+include $(DEPS)

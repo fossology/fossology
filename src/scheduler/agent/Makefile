@@ -165,6 +165,6 @@ test: all
 coverage:
 	@echo "NOTICE: no coverage available for 2.0 scheduler"
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test coverage
+
+include $(DEPS)

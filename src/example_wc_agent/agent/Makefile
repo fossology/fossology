@@ -37,6 +37,6 @@ coverage: test
 clean:
 	rm -f $(EXE) *.o core
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test coverage
+
+include $(DEPS)

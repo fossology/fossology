@@ -70,6 +70,6 @@ install:
 uninstall:
 	@echo "make library tests nothing to uninstall"
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)

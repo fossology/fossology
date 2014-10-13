@@ -46,6 +46,6 @@ libmimetype_cov.a: $(COVERAGE)
 clean:
 	rm -f $(EXE) *.o core *.a *.gc*
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)
