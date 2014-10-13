@@ -22,6 +22,7 @@ void table_free(rg_table* table)
     {
       g_free(row[j]);
     }
+    free(row);
   }
   g_array_free(table->cells, TRUE);
 

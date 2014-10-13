@@ -2,6 +2,7 @@
 #define XML
 
 #include <mxml.h>
+#include <glib.h>
 
 #define TABLELOOK "04A0"
 

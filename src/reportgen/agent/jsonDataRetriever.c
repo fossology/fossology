@@ -7,12 +7,12 @@
 #error
 #endif
 
-#define GETCLEAREDCMD INSTALLDIR "/getCleared"
+#define GETCLEAREDCMD   INSTALLDIR "/getCleared"
+#define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy"
 
-char* getClearedLicenses()
+static char* pipeRun(const char* cmdLine)
 {
-  FILE* pipe = popen(GETCLEAREDCMD, "r");
-
+  FILE* pipe = popen(cmdLine, "r");
 
   //TODO replace _POSIX_C_SOURCE and popen with more secure dup2+fork
 
@@ -28,4 +28,14 @@ char* getClearedLicenses()
   pclose(pipe);
 
   return g_string_free(stringBuffer, FALSE);
+}
+
+char* getClearedLicenses()
+{
+  return pipeRun(GETCLEAREDCMD);
+}
+
+char* getClearedCopyright()
+{
+  return pipeRun(GETCLEAREDCOPY);
 }

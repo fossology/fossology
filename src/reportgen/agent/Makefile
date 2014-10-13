@@ -10,7 +10,7 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = reportgen
-EXE_COPY = getCleared
+EXE_COPY = getCleared getClearedCopy
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
 DEF          = -DDATADIR='"$(MODDIR)"'
@@ -40,7 +40,9 @@ $(OBJECTS): %.o: %.c %.h
 install: all
 	@echo "make reportgen agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	$(INSTALL_PROGRAM) $(EXE_COPY) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE_COPY)
+	for file in $(EXE_COPY); do\
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file; \
+	done
 	# TODO use php fo_wrapper
 
 

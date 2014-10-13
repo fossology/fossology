@@ -438,84 +438,6 @@ char* getFullFilePath(long uploadTreeId)
   return g_string_free(pathBuilder, FALSE);
 }
 
-//TODO removeme
-
-#if 0
-  void print_json_value(json_object *jobj){
-  enum json_type type;
-  printf("type: ",type);
-  type = json_object_get_type(jobj); /*Getting the type of the json object*/
-  switch (type) {
-    case json_type_boolean: printf("json_type_booleann");
-    printf("value: %s\n", json_object_get_boolean(jobj)? "true": "false");
-    break;
-    case json_type_double: printf("json_type_doublen");
-    printf("          value: %lf\n", json_object_get_double(jobj));
-    break;
-    case json_type_int: printf("json_type_intn");
-    printf("          value: %d\n", json_object_get_int(jobj));
-    break;
-    case json_type_string: printf("json_type_stringn");
-    printf("          value: %s\n", json_object_get_string(jobj));
-    break;
-  }
-
-}
-
-void json_parse_array( json_object *jobj, char *key) {
-  void json_parse(json_object * jobj); /*Forward Declaration*/
-  enum json_type type;
-
-  json_object *jarray = jobj; /*Simply get the array*/
-  if(key) {
-    jarray = json_object_object_get(jobj, key); /*Getting the array if it is a key value pair*/
-  }
-
-  int arraylen = json_object_array_length(jarray); /*Getting the length of the array*/
-  printf("Array Length: %d\n",arraylen);
-  int i;
-  json_object * jvalue;
-
-  for (i=0; i< arraylen; i++){
-    jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-    type = json_object_get_type(jvalue);
-    if (type == json_type_array) {
-      json_parse_array(jvalue, NULL);
-    }
-    else if (type != json_type_object) {
-      printf("value[%d]: ",i);
-      print_json_value(jvalue);
-    }
-    else {
-      json_parse(jvalue);
-    }
-  }
-}
-
-/*Parsing the json object*/
-void json_parse(json_object * jobj) {
-  enum json_type type;
-  json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-    printf("type: ",type);
-    type = json_object_get_type(val);
-    switch (type) {
-      case json_type_boolean:
-      case json_type_double:
-      case json_type_int:
-      case json_type_string: print_json_value(val);
-      break;
-      case json_type_object: printf("json_type_objectn");
-      jobj = json_object_object_get(jobj, key);
-      json_parse(jobj);
-      break;
-      case json_type_array: printf("type: json_type_array, ");
-      json_parse_array(jobj, key);
-      break;
-    }
-  }
-}
-#endif
-
 char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
   GString* fileNamesAppender = g_string_new("");
   int lenght = json_object_array_length(jsonArray);
@@ -531,6 +453,56 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
     }
   }
   return g_string_free(fileNamesAppender, FALSE);
+}
+
+int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char* keyName)
+{
+  int result = 0;
+
+  json_object_object_foreach(jobj, key, val) {
+    if ((strcmp(keyName, key)==0) && json_object_is_type(val, json_type_array)) {
+      int length = json_object_array_length(val);
+
+      for (int j=0; j<length; j++)
+      {
+        json_object* val1 = json_object_array_get_idx(val, j);
+        if (!json_object_is_type(val1, json_type_object)) {
+          printf("wrong type for index %d in '%s'\n", j,  key);
+          return 0;
+        }
+        char* licenseName = NULL;
+        char* licenseText = NULL;
+        char* fileNames = NULL;
+        json_object_object_foreach(val1, key2, val2) {
+          if (((strcmp(key2, "name"))==0) && json_object_is_type(val2, json_type_string))
+          {
+            licenseName = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "text"))==0) && json_object_is_type(val2, json_type_string))
+          {
+            licenseText = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "files"))==0) && json_object_is_type(val2, json_type_array))
+          {
+            fileNames = implodeJsonArray(val2, ",\n");
+          }
+          else
+          {
+            printf("unexpected key/typeof(value) pair for key '%s'\n", key2);
+            return 0;
+          }
+        }
+
+        if (licenseName && licenseText && fileNames)
+          table_addRow(table, licenseName, licenseText, fileNames);
+
+        if (fileNames) g_free(fileNames);
+      }
+      result = 1;
+    }
+  }
+
+  return result;
 }
 
 int main(int argc, char** argv)
@@ -573,8 +545,6 @@ mxml_node_t *numberingxml;
 mxml_node_t *p = NULL;
 mxml_node_t *r = NULL;
 mxml_node_t *t = NULL;
-int K=0;
-int custom_text_count=1;
 char* tbcol4[4];
 char* tbcol3[3];
 char* tbcolSkewed[3];
@@ -743,6 +713,7 @@ if (day1)
 	free(day1);
 }
 
+// TODO set correct user and group name
 char* usergroupid_name=(char*)malloc(sizeof(char)*(285+DECLEN+1));
 sprintf(usergroupid_name,"select username,group_user_member,groups.group_name from user_login,groups where groups.group_pk=group_user_member and logintime = (select max(logintime) from user_login where user_pk in (select job_user_fk from job where job_pk=(select max(job_pk) from job where job_upload_fk=%d)))",uploadId);
 PGresult* username_gid_query=PQexec(pgConn,usergroupid_name);
@@ -818,82 +789,50 @@ for(uloop=0;uloop<4;uloop++)
  * Nomos decided licenses should appear in the report
  *
 */
-mxml_node_t* p5 = (mxml_node_t*)createnumsection(body,"0","2");
+mxml_node_t* p5 = createnumsection(body,"0","2");
 addparaheading(p5,NULL, "Results of License Scan","0","2");
-mxml_node_t* tbl_nomos = (mxml_node_t*)createtable(body, "9638");
-createtablegrid(tbl_nomos,tbcol3,3);
-mxml_node_t* tr_nomos = (mxml_node_t*)createrowproperty(tbl_nomos);
-createrowdata(tr_nomos, tbcol3[0], "Number of Occurences");
-createrowdata(tr_nomos, tbcol3[1], "License Short Name");
-createrowdata(tr_nomos, tbcol3[2], "License Name");
 
-//TODO
-#if 0
+rg_table* tableHistog = table_new(body, 3, "1638", "3000", "5000");
+table_addRow(tableHistog, "Number of Occurrences", "License Short Name", "License Name");
+
+PGresult* histogram =
+fo_dbManager_ExecPrepared(
+  fo_dbManager_PrepareStamement(
+    dbManager,
+    "scanResultHistogram",
+    "SELECT COUNT(*),rf_shortname,rf_fullname FROM"
+    " license_file_ref LEFT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk "
+    "WHERE uploadtree.upload_fk = $1 "
+    "GROUP BY rf_shortname, rf_fullname "
+    "ORDER BY count DESC",
+    int),
+  uploadId
+);
+
+if (histogram)
 {
-   int count=0;
-   for(i=0;i<sql_lic_result_count;i++){
-   tr_nomos_table = (mxml_node_t**) realloc(tr_nomos_table, sizeof( mxml_node_t*)*(k_nomos+1));
-   tr_nomos_table[k_nomos] = ( mxml_node_t*)createrowproperty(tbl_nomos);
-	 //geting license short name
-    count = search(PQgetvalue(pgres_nomos,i,0), first);
-    if(count)
-    {
-	 int newCount = atoi(PQgetvalue(pgres_nomos,i,2))+ count;
-	 char buff[8];
-	 sprintf(buff,"%d",newCount);  
-         createrowdata(tr_nomos_table[k_nomos], "1638", buff);
-     }
-     else
-     {
-         createrowdata( tr_nomos_table[k_nomos], "1638", PQgetvalue(pgres_nomos,i,2));
-     }
-     char* rfText=NULL;
-     rfText = (char*) malloc( sizeof(char)*( strlen(PQgetvalue(pgres_nomos,i,0)) +1));
-     strcpy(rfText,PQgetvalue(pgres_nomos,i,0));
-     rfText[strlen(PQgetvalue(pgres_nomos,i,0))]='\0';
-     createrowdata(tr_nomos_table[k_nomos], "3000",rfText);
-     //getting license full name
-     char* rftext1=NULL;
-     rftext1=(char*)malloc(sizeof(char)*(strlen(PQgetvalue(pgres_nomos,i,1))+1));
-     strcpy(rftext1,PQgetvalue(pgres_nomos,i,1));
-     rftext1[strlen(PQgetvalue(pgres_nomos,i,1))]='\0';
-     createrowdata(tr_nomos_table[k_nomos], "5000",rftext1);
-   
-     free(rfText);
-     free(rftext1);
-     k_nomos++;
+  int count = PQntuples(histogram);
+
+  for (int i=0; i<count; i++)
+  {
+    table_addRow(tableHistog,
+                 PQgetvalue(histogram, i, 0),
+                 PQgetvalue(histogram, i, 1),
+                 PQgetvalue(histogram, i, 2)
+    );
   }
+
+  PQclear(histogram);
 }
-if(newCount > 0)
+else
 {
-   NODE cur;
-   cur = first;
-   char buff[4];
-   while(cur!=NULL)
-   {
-      if(cur->count)
-      {
-         tr_nomos_table = (mxml_node_t**) realloc(tr_nomos_table, sizeof( mxml_node_t*)*(k_nomos+1));
-         tr_nomos_table[k_nomos] = ( mxml_node_t*)createrowproperty(tbl_nomos);
-         sprintf(buff,"%d",cur->count);
-         createrowdata(tr_nomos_table[k_nomos], "1638", buff);
-         createrowdata(tr_nomos_table[k_nomos], "3000", cur->lics);
-         if(cur->lics_fullName)
-         {
-	    createrowdata(tr_nomos_table[k_nomos], "5000", cur->lics_fullName);
-         }
-         else
-	    createrowdata(tr_nomos_table[k_nomos], "5000", " ");
-			
-         cur = cur->link;
-         k_nomos++;
-      }
-      else
-	 cur= cur->link;
-     }
+  printf("FATAL: could not get histogram\n");
+  fo_scheduler_disconnect(5);
+  exit(5);
 }
 
-
+//TODO Global licenses
+#if 0
 
 mxml_node_t* p6 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p6,NULL, "Global Licenses","0","2");
@@ -951,60 +890,51 @@ addparaheading(p8,NULL, "Other Licenses","0","2");
 //table 3 for other license data
 
 rg_table* tableOthers = table_new(body, 3, "2000", "6000", "2000");
+table_addRow(tableOthers, "license", "text", "files");
+{
+  char* jsonLicenses = getClearedLicenses();
+  json_object * jobj = json_tokener_parse(jsonLicenses);
 
-//TODO call php and collect json
-
-char* jsonLicenses = getClearedLicenses();
-
-json_object * jobj = json_tokener_parse(jsonLicenses);
-if ((jobj==NULL) || ((int)jobj < 0)) { // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
-  printf("json cannot be parsed\n");
-  exit(1);
-}
-
-json_object_object_foreach(jobj, key, val) {
-  if ((strcmp("licenses", key)==0) && json_object_is_type(val, json_type_object)) {
-    char* licenseName = NULL;
-    char* licenseText = NULL;
-    char* fileNames = NULL;
-    json_object_object_foreach(val, key1, val1) {
-      if (((strcmp(key1, "shortName"))==0) && json_object_is_type(val1, json_type_string))
-      {
-        licenseName = json_object_get_string(val1);
-      }
-      else
-      if (((strcmp(key1, "text"))==0) && json_object_is_type(val1, json_type_string))
-      {
-        licenseText = json_object_get_string(val1);
-      }
-      else
-      if (((strcmp(key1, "files"))==0) && json_object_is_type(val1, json_type_array))
-      {
-        fileNames = implodeJsonArray(val1, ",\n");
-      }
-      else
-      {
-        exit(9);
-      }
-    }
-    
-    if (licenseName && licenseText && fileNames)
-      table_addRow(tableOthers, licenseName, licenseText, fileNames);
-
-    if (fileNames) g_free(fileNames);
-  } else {
-    exit(10);
+  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
+  if ((jobj==NULL) || ((int)jobj < 0) ||
+    !addRowsFromJson_NameTextFiles(tableOthers, jobj, "licenses"))
+  {
+    printf("cannot parse json string: %s\n", jsonLicenses);
+    fo_scheduler_disconnect(1);
+    exit(1);
   }
-}
-json_object_put(jobj);
-g_free(jsonLicenses);
 
+  json_object_put(jobj);
+  g_free(jsonLicenses);
+}
 
 // endrow
 
 mxml_node_t* p9 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p9,NULL, "Copyrights","0","2");
 //table 4 for other license data
+
+rg_table* tableCopyright = table_new(body, 3, "2000", "6000", "2000");
+table_addRow(tableCopyright, "copyright", "text", "files");
+{
+  char* jsonCopyright = getClearedCopyright();
+  json_object * jobj = json_tokener_parse(jsonCopyright);
+
+  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
+  if ((jobj==NULL) || ((int)jobj < 0) ||
+    !addRowsFromJson_NameTextFiles(tableCopyright, jobj, "statements"))
+  {
+    printf("cannot parse json string: %s\n", jsonCopyright);
+    fo_scheduler_disconnect(1);
+    exit(1);
+  }
+
+  json_object_put(jobj);
+  g_free(jsonCopyright);
+}
+
+
+#if 0
 mxml_node_t* tbl4 = (mxml_node_t*)createtable(body, "9000");
 createtablegrid(tbl4,tbcol6,3);
 
@@ -1153,6 +1083,8 @@ while (cnt<copyresultcount)
 }
 
 PQclear(copyright_results);
+
+#endif
 
 mxml_node_t* p10 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p10,NULL, "Special considerations","0","2");
@@ -1551,17 +1483,6 @@ if (fullpath)
   free(fullpath);
 }
 
-int ki=0;
-for (ki=0;ki<copyresultcount;ki++)
-{
-	if (tr33[ki]) free(tr33[ki]);
-}
-
-if (tr33)
-{
- free(tr33);
-}
-
 int uloop2;
 for (uloop2=0;uloop2<3;uloop2++)
 {
@@ -1569,204 +1490,10 @@ for (uloop2=0;uloop2<3;uloop2++)
   free(tbcolSkewed[uloop2]);
 }
 
-if (xml)			
-free(xml);
-
-if(document)
-free(document);
-
-if(header)
-free(header);
-
-if(footer)
-free(footer);
-
-if(refhandle)
-free(refhandle);
-
-if(fonthandle)
-free(fonthandle);
-
-if(stylehandle)
-free(stylehandle);
-
-if(numberinghandle)
-free(numberinghandle);
-
-if(contenthandle)
-free(contenthandle);
-
-if(contentxml)
-free(contentxml);
-
-if(apphandle)
-free(apphandle);
-
-if(appxml)
-free(appxml);
-
-if(corehandle)
-free(corehandle);
-
-if(corexml)
-free(corexml);
-
-if(hiddenrelshandle)
-free(hiddenrelshandle);
-
-if(hiddenrelsxml)
-free(hiddenrelsxml);
-
-if(hxml)
-free(hxml);
-
-if(fxml)
-free(fxml);
-
-if(refxml)
-free(refxml);
-
-if(body)
-free(body);
-
-if(fontxml)
-free(fontxml);
-
-if(stylexml)
-free(stylexml);
-
-if(numberingxml)
-free(numberingxml);
-
-if(p)
-free(p);
-
-if(r)
-free(r);
-
-if(t)
-free(t);
-
-if(p1)
-free(p1);
-
-if(p2)
-free(p2);
-
-if(p3)
-free(p3);
-
-if(p4)
-free(p4);
-
-if(tbl1)
-free(tbl1);
-
-if(tr1)
-free(tr1);
-
-if(tr2)
-free(tr2);
-
-if(p5)
-free(p5);
-
-//if(p6)
-//free(p6);
-
-//if(tbl2)
-//free(tbl2);
-
-//if(tr22)
-//free(tr22);
-
-
-if(tbl_nomos)
-free(tbl_nomos);
-
-if(tr_nomos)
-free(tr_nomos);
-
-//if(tr_nomos1)
-//free(tr_nomos1);
-
-//if(tr_gl)
-//free(tr_gl);
-
-
-if(p7)
-free(p7);
-
-if(p8)
-free(p8);
-
 table_free(tableOthers);
+table_free(tableHistog);
+table_free(tableCopyright);
 
-if(p9)
-free(p9);
-
-if(tbl4)
-free(tbl4);
-
-if (tbl_)
-free(tbl_);
-
-if (_tbl)
-free(_tbl);
-
-if (trH1)
-free(trH1);
-
-if (trH2)
-free(trH2);
-
-if(tr41)
-free(tr41);
-
-if(p10)
-free(p10);
-
-if(p101)
-free(p101);
-
-if(tbl5)
-free(tbl5);
-
-if(tr51)
-free(tr51);
-
-if(p102)
-free(p102);
-
-if(tbl_patentIssue)
-free(tbl_patentIssue);
-
-if(tr_patentIssue)
-free(tr_patentIssue);
-
-if(p11)
-free(p11);
-
-if(p111)
-free(p111);
-
-if(p11b)
-free(p11b);
-
-if(p11b1)
-free(p11b1);
-
-if(p112)
-free(p112);
-
-if(p113)
-free(p113);
-
-if(p12)
-free(p12);
-
-if(p13)
-free(p13);
 /*free timestampstring*/
 if(formattedtime)
 {
@@ -1780,7 +1507,17 @@ if(fullpathWithoutSlash)
 	fullpathWithoutSlash = NULL;
 }
 
-
+mxmlDelete(xml);
+mxmlDelete(hxml);
+mxmlDelete(fxml);
+mxmlDelete(refxml);
+mxmlDelete(fontxml);
+mxmlDelete(stylexml);
+mxmlDelete(numberingxml);
+mxmlDelete(contentxml);
+mxmlDelete(appxml);
+mxmlDelete(corexml);
+mxmlDelete(hiddenrelsxml);
 fo_WriteARS(pgConn, ars_pk, uploadPk, agent_pk, AGENT_ARS, NULL, 0);
 }
 
