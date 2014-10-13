@@ -7244,6 +7244,10 @@ k
 %KEY%	"(condit|vers)ion"
 %STR%	"version 2\.?1 February 1999"
 #
+%ENTRY%	_TITLE_LGPLV21_2
+%KEY%	"licen[cs]"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (version |v)2\.?1"
+#
 %ENTRY%	_TITLE_LGPL3
 %KEY%	"(condit|vers)ion"
 %STR%	"version 3 29 June 2007"

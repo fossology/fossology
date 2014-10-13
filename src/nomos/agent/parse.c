@@ -1369,7 +1369,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "LGPL(or)" : cp);
         lmem[_mLGPL] = 1;
       }
-      else if (INFILE(_PHR_LGPL21_ONLY_ref)) {
+      else if (INFILE(_PHR_LGPL21_ONLY_ref) || INFILE(_TITLE_LGPLV21_2)) {
         INTERESTING("LGPL-2.1");
         lmem[_mLGPL] = 1;
       }
