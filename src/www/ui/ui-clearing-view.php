@@ -295,7 +295,11 @@ class ClearingView extends FO_Plugin
     menu_insert("ChangeLicense::View", 35, "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
     menu_insert("View::Audit", 35, $this->Name . Traceback_parm_keep(array("upload", "item", "show")), $text);
     $text = _("View file information");
-    menu_insert("ChangeLicense::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
+    menu_insert("ChangeLicense::Info", 13, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
+    menu_insert("ChangeLicense::[BREAK]", 7);
+    
+    $text = _("View patent info");
+    menu_insert("ChangeLicense::IP", 6, "ip-view" . Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
     $text = _("View Copyright/Email/Url info");
     menu_insert("ChangeLicense::Copyright/Email/Url", 5, "copyright-view" . Traceback_parm_keep(array("show", "page", "upload", "item")), $text);
     $text = _("Browse by buckets");
@@ -304,8 +308,6 @@ class ClearingView extends FO_Plugin
     menu_insert("ChangeLicense::One-Shot Copyright/Email/URL", 2, "agent_copyright_once", $text);
     $text = _("Nomos One-shot, real-time license analysis");
     menu_insert("ChangeLicense::One-Shot License", 2, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
-
-    menu_insert("ChangeLicense::[BREAK]", 6);
 
     return 0;
   }

@@ -62,6 +62,10 @@ without any warranty.
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
         </service>
+        <service id="dao.ip" class="\Fossology\Lib\Dao\IPDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
 
         <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
             <argument type="service" id="dao.license"/>

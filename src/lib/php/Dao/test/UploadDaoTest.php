@@ -217,10 +217,16 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
    */
   protected function getSubentriesForFileAfterEmptyDirectory()
   {
+    /**
+     * docs      <-dir
+     * docs/txt  <-dir
+     * README    <-file
+     */
+
     return array(
-        array(6, 5, 1, 0, 536888320, 7, 9, 'docs'),
+        array(6, 5, 1, 0, 536888320, 7, 10, 'docs'),
         array(7, 6, 1, 0, 536888320, 8, 9, 'txt'),
-        array(8, 5, 1, 3, 33188, 9, 10, 'README')
+        array(8, 5, 1, 3, 33188, 11, 12, 'README')
     );
   }
 
