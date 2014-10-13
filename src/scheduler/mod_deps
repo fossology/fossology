@@ -37,15 +37,15 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
-      -y) 
-         YesOpt=" -y "; shift;;    
+      -y)
+         YesOpt=" -y "; shift;;
       -h|--help)
          echo "Usage: mod_deps [options]";
-     echo "  -r or --runtime    : install runtime dependencies"
-     echo "  -b or --buildtime  : install buildtime dependencies"
-     echo "  -e or --everything : install all dependencies (default)"
-     echo "  -h or --help       : this help text"
-     exit;;
+	 echo "  -r or --runtime    : install runtime dependencies"
+	 echo "  -b or --buildtime  : install buildtime dependencies"
+	 echo "  -e or --everything : install all dependencies (default)"
+	 echo "  -h or --help       : this help text"
+	 exit;;
       --) shift; break;;
       *) echo "ERROR: option $1 not recognised"; exit 1;;
    esac
@@ -62,6 +62,12 @@ if [ $EVERYTHING ]; then
    echo "*** Installing both runtime and buildtime dependencies ***"
    RUNTIME=1
    BUILDTIME=1
+fi
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+  echo "ERROR: fo-installdeps must run as root."
+  echo "Aborting."
+  exit 1
 fi
 
 # figure out what distro we're on
@@ -87,7 +93,7 @@ if [ $BUILDTIME ]; then
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi        
+      fi
       yum $YesOpt install \
         glib2-devel
       ;;
@@ -98,7 +104,7 @@ if [ $BUILDTIME ]; then
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi        
+      fi
       yum $YesOpt install \
         glib2-devel
       ;;
@@ -116,7 +122,7 @@ if [ $RUNTIME ]; then
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
         glib2
       ;;
@@ -127,7 +133,7 @@ if [ $RUNTIME ]; then
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
         glib2
       ;;
@@ -135,4 +141,3 @@ if [ $RUNTIME ]; then
 fi
 
 #######################################################################
-

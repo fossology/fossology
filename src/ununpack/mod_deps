@@ -37,8 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
-      -y) 
-         YesOpt=" -y "; shift;;          
+      -y)
+         YesOpt=" -y "; shift;;
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -92,27 +92,32 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
-        bzip2 cabextract cpio genisoimage p7zip \
-        poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full
+        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full
       case "$CODENAME" in
         jessie)
-          apt-get $YesOpt install unrar;;
+          apt-get $YesOpt install \
+            unrar
+          ;;
         *)
-          apt-get $YesOpt install unrar-free;;
-      esac;;
+          apt-get $YesOpt install \
+            unrar-free
+          ;;
+      esac
+      ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
-         bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins sleuthkit unrar;;
+        bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins sleuthkit unrar
+      ;;
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
-        bzip2 cabextract cpio genisoimage p7zip p7zip-plugins\
-        poppler-utils rpm tar upx unzip gzip sleuthkit unrar
+        bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm tar upx unzip gzip sleuthkit unrar
+      ;;
   esac
 fi
 

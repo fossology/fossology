@@ -37,8 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
-      -y) 
-         YesOpt=" -y "; shift;;      
+      -y)
+         YesOpt=" -y "; shift;;
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -88,7 +88,8 @@ if [ $BUILDTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
-      libmagic-dev;;
+        libmagic-dev
+      ;;
   esac
 fi
 
@@ -97,19 +98,22 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
-      libmagic1;;
+        libmagic1
+      ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi        
+      fi
       yum $YesOpt install \
-        file-libs;;
+        file-libs
+      ;;
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi        
+      fi
       yum $YesOpt install \
-        file-libs;;
+        file-libs
+      ;;
   esac
 fi
 

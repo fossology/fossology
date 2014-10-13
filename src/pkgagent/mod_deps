@@ -37,8 +37,8 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
-      -y) 
-         YesOpt=" -y "; shift;;      
+      -y)
+         YesOpt=" -y "; shift;;
       -h|--help)
          echo "Usage: mod_deps [options]";
 	 echo "  -r or --runtime    : install runtime dependencies"
@@ -88,19 +88,22 @@ if [ $BUILDTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
-      librpm-dev;;
+        librpm-dev
+      ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi
       yum $YesOpt install \
-        rpm-devel;;
+        rpm-devel
+      ;;
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
-        rpm-devel;;
+        rpm-devel
+      ;;
   esac
 fi
 
@@ -109,19 +112,22 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
       apt-get $YesOpt install \
-        rpm;;
+        rpm
+      ;;
     RedHatEnterprise*|CentOS)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi    
+      fi
       yum $YesOpt install \
-        rpm;;
+        rpm
+      ;;
     Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
-      fi        
+      fi
       yum $YesOpt install \
-        rpm;;
+        rpm
+      ;;
   esac
 fi
 
