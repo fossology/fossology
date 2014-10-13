@@ -38,12 +38,26 @@ class NewestEditedLicenseSelector extends Object
     foreach ($editedLicensesArray as $editedLicense)
     {
       $pfileId = $editedLicense->getPfileId();
-      if (!array_key_exists($pfileId, $editedLicensesArrayGrouped)) {
-        $editedLicensesArrayGrouped[$pfileId] = $editedLicense;
+      if (!array_key_exists($pfileId, $editedLicensesArrayGrouped))
+      {
+        $editedLicensesArrayGrouped[$pfileId] = array($editedLicense);
+      } else
+      {
+        $editedLicensesArrayGrouped[$pfileId][] = $editedLicense;
+      }
+    }
+    
+    $goodLicenseDecisions = array();
+    foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
+    {
+      $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
+      if ($cd != null)
+      {
+        $goodLicenseDecisions[$fileId] = $cd;
       }
     }
 
-    return $editedLicensesArrayGrouped;
+    return $goodLicenseDecisions;
   }
 
   /**
