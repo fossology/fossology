@@ -33,15 +33,12 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
-	@echo "make wget_agent"
 	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
-	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make wget_agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
@@ -57,15 +54,12 @@ libwget_agent_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
 test: libwget_agent.a
-	@echo "make test wget_agent"
 	$(MAKE) -C $(TESTDIR) test
 
 coverage: libwget_agent_cov.a
-	@echo "make coverage wget_agent"
 	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
-	@echo "make wget_agent clean"
 	rm -f $(EXE) *.o core *.a *.gc*
 
 include $(DEPS)

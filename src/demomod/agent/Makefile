@@ -27,7 +27,6 @@ OBJS = usage.o utils.o process.o
 HDRS = demomod.h
 
 all: $(EXE)
-	@echo "make demomod agent"
 
 $(EXE): demomod.c $(FOLIB) $(OBJS) $(HDRS)
 	$(CC) demomod.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
@@ -45,11 +44,9 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make demomod agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make demomod agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

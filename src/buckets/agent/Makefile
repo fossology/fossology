@@ -27,7 +27,6 @@ OBJS = validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o w
 HDRS = buckets.h
 
 all: $(EXE)
-	@echo "make bucket agent"
 
 $(EXE): buckets.c $(FOLIB) $(OBJS) $(HDRS)
 	$(CC) buckets.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
@@ -63,11 +62,9 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make buckets agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make buckets agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

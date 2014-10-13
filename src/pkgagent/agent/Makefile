@@ -30,10 +30,8 @@ CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
-	@echo "make pkgagent agent and test"
 
 $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
-	@echo "make pkgagent agent"
 	$(CC) main.c pkgagent.o $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
@@ -48,11 +46,9 @@ pkgagent.o: pkgagent.c pkgagent.h
 	fi
 
 install: all
-	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make pkgagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 test: all
@@ -69,7 +65,6 @@ pkgagent_cov.o: pkgagent.c pkgagent.h
 	fi
 
 clean:
-	@echo "make pkgagent agent clean"
 	rm -f $(EXE) *.o core *.gc*
 	$(MAKE) -C $(TESTDIRS) clean
 

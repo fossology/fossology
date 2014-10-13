@@ -29,21 +29,17 @@ EXE = delagent
 HDRS = delagent.h
 
 all: $(EXE)
-	@echo "make delagent agent and test"
 
 $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
-	@echo "make delagent agent"
 	$(CC) $< delagent.o $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 delagent.o: util.c $(HDRS)
 	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	@echo "make delagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make delagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 test: all
@@ -56,7 +52,6 @@ delagent_cov.o: util.c $(HDRS)
 	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 clean:
-	@echo "make delagent agent clean"
 	rm -f $(EXE) *.o core *.gc*
 	$(MAKE) -C $(TESTDIRS) clean
 

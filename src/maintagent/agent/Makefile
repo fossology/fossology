@@ -27,7 +27,6 @@ OBJS = usage.o utils.o process.o
 HDRS = maintagent.h
 
 all: $(EXE)
-	@echo "make maintagent agent"
 
 $(EXE): maintagent.c $(FOLIB) $(OBJS) $(HDRS)
 	$(CC) maintagent.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
@@ -45,11 +44,9 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make maintagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make maintagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:

@@ -17,23 +17,18 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 all: $(EXE)
 
 $(EXE): mimetype.c $(FOLIB) libmimetype.a $(DB) $(REPO) $(VARS)
-	@echo "make $(EXE)"
 	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
-	@echo "make $(EXE) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make $(EXE) uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 test: all
-	@echo "make test $(EXE)"
 	$(MAKE) -C $(TESTDIR) test
 
 coverage:
-	@echo "make coverage $(EXE)"
 	$(MAKE) -C $(TESTDIR) coverage
 
 $(OBJECTS): %.o: %.c

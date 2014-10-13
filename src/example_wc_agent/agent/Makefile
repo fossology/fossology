@@ -12,10 +12,8 @@ MOD_NAME = example_wc_agent
 MOD_SUBDIR = agent
 
 all: $(EXE)
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR)"
 
 $(EXE): %: %.c $(FOLIB) $(DB) $(REPO) $(VARS)
-	@echo "make $(EXE)"
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 #######################
@@ -25,11 +23,9 @@ $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$(EXE)
 
 uninstall:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 test: all
@@ -39,7 +35,6 @@ coverage: test
 	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
 
 clean:
-	@echo "make $(MOD_NAME)/$(MOD_SUBDIR) clean"
 	rm -f $(EXE) *.o core
 
 include $(DEPS)
