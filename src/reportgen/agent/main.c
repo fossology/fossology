@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include<sys/types.h>
 #include<sys/wait.h>
 #include "utils.h"
+#include "table.h"
+#include "jsonDataRetriever.h"
+
 #include <time.h>
 /* std library includes */
 #include <unistd.h>
@@ -39,7 +42,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libpq-fe.h>
 
 
-#include "sql_statements.h"
 #ifdef SVN_REV_S
 char BuildVersion[]="reportgen build version: " VERSION_S " r(" SVN_REV_S ").\n";
 #else
@@ -102,7 +104,7 @@ int zipdir(char* name)
 {
         pid_t child_pid;
         int status;
-        char* cmd[5];
+        char* cmd[5] = {NULL, NULL, NULL, NULL, NULL};
         char* targetdir = NULL;
         char* path = NULL;
         char* zipcmd="/usr/bin/zip";
@@ -132,42 +134,58 @@ int zipdir(char* name)
         memset(cmd[3], 0, strlen(targetdir)+strlen(name)+1);
         strcpy(cmd[3], dirname);
         strcat(cmd[3], name);
-        cmd[4] = (char*)malloc(sizeof(char)*(strlen("(char*) 0")+1));
-        strcpy(cmd[4], "(char*) 0");
         if((child_pid = fork()) < 0)
         {
-                perror("fork failure");
-                exit(1);
+          perror("fork failure");
+          exit(1);
         }
         if(child_pid == 0)
         {
-                char* chdir_cmd=(char*)malloc(sizeof(char)*strlen(dirname)+strlen(name)+1);
-                strcpy(chdir_cmd,dirname);
-                strcat(chdir_cmd,name);
-                if(chdir(chdir_cmd) == -1)	
-				{
-					exit(1);
-				}
-                execl(zipcmd, cmd[0], cmd[1], cmd[2], ".", (char*) 0); 
-                if (chdir_cmd)
-                {
-                	free(chdir_cmd);
-                }
+          char* chdir_cmd=(char*)malloc(sizeof(char)*strlen(dirname)+strlen(name)+1);
+          if (chdir_cmd)
+          {
+            strcpy(chdir_cmd,dirname);
+            strcat(chdir_cmd,name);
+            if(chdir(chdir_cmd) == -1)
+            {
+              exit(1);
+            }
+            free(chdir_cmd);
+          }
+          else
+          {
+            exit(1);
+          }
+
+          if (execl(zipcmd, cmd[0], cmd[1], cmd[2], ".", (char*) NULL))
+          {
+            perror("zip failed");
+            int ip;
+            printf("cmd = %s", zipcmd);
+            for (ip=0;ip<5;ip++)
+            {
+              if(cmd[ip])
+                printf("%s ", cmd[ip]);
+            }
+            printf("\n");
+            exit(5);
+          }
         }
         else
         {
-                wait(&status);
-                rename(cmd[2],docxfullpath);
+          wait(&status);
+          rename(cmd[2],docxfullpath);
+          printf("rename done\n");
         }
         if (dirname)
         {
-        	free(dirname);
+          free(dirname);
         }
         int ip;
         for (ip=0;ip<5;ip++)
         {
-        		if(cmd[ip])
-        		free(cmd[ip]);
+          if(cmd[ip])
+            free(cmd[ip]);
         }
 		if (path)
 		{
@@ -498,6 +516,23 @@ void json_parse(json_object * jobj) {
 }
 #endif
 
+char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
+  GString* fileNamesAppender = g_string_new("");
+  int lenght = json_object_array_length(jsonArray);
+  for (int jf = 0; jf < lenght; jf++)
+  {
+    json_object* value = json_object_array_get_idx(jsonArray, jf);
+    if (json_object_is_type(value, json_type_string))
+    {
+      const char* file = json_object_get_string(value);
+      if (jf>0)
+        g_string_append(fileNamesAppender, delimiter);
+      g_string_append(fileNamesAppender, file);
+    }
+  }
+  return g_string_free(fileNamesAppender, FALSE);
+}
+
 int main(int argc, char** argv)
 {  
 FILE *fp1;
@@ -563,6 +598,7 @@ int uploadId;
 int ars_pk = 0;               // the args primary key
 char UploadIdStr[DECLEN];
 /* connect to the scheduler */
+
 fo_scheduler_connect(&argc, argv, &pgConn);
 dbManager = fo_dbManager_new(pgConn);
 
@@ -574,7 +610,7 @@ cerr = stdout;
 cin = stdin;
 
 agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
-user_pk = fo_scheduler_userID(); 
+user_pk = fo_scheduler_userID();
 while(fo_scheduler_next()!=NULL)
 {
 uploadPk=atoi(fo_scheduler_current());
@@ -791,6 +827,8 @@ createrowdata(tr_nomos, tbcol3[0], "Number of Occurences");
 createrowdata(tr_nomos, tbcol3[1], "License Short Name");
 createrowdata(tr_nomos, tbcol3[2], "License Name");
 
+//TODO
+#if 0
 {
    int count=0;
    for(i=0;i<sql_lic_result_count;i++){
@@ -857,7 +895,6 @@ if(newCount > 0)
 
 
 
-
 mxml_node_t* p6 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p6,NULL, "Global Licenses","0","2");
 
@@ -903,7 +940,8 @@ if(pgres_gl)
 }
 PQclear(pgres_gl);
 PQclear(ResQ1);
-//end of global licenses 
+#endif
+//end of global licenses
 
 
 mxml_node_t* p7 = (mxml_node_t*)createnumsection(body,"0","2");
@@ -911,153 +949,58 @@ addparaheading(p7,NULL, "Other Licenses - DO NOT USE","0","2");
 mxml_node_t* p8 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p8,NULL, "Other Licenses","0","2");
 //table 3 for other license data
-mxml_node_t* tbl3 = (mxml_node_t*)createtable(body, "9638");
-createtablegrid(tbl3,tbcolSkewed,3);
 
-  /*
-   * find all files decided (status=3) by this user
-   */
-  PGresult* decidedUploadTreeIdsResult = fo_dbManager_Exec_printf(
-    dbManager,
-    "SELECT uploadtree_pk FROM license_ref_status WHERE status=3 AND upload_pk=%d AND user_id=%d",
-    uploadId,
-    user_pk
-  );
+rg_table* tableOthers = table_new(body, 3, "2000", "6000", "2000");
 
-  if (decidedUploadTreeIdsResult) {
-    int i=0;
-    for (i=0; i<PQntuples(decidedUploadTreeIdsResult); i++)
-    {
-      long uploadTreeId = atol(PQgetvalue(decidedUploadTreeIdsResult,i,0));
-      addLicensesForAll(uploadTreeId, user_pk, &custom_text_count);
+//TODO call php and collect json
+
+char* jsonLicenses = getClearedLicenses();
+
+json_object * jobj = json_tokener_parse(jsonLicenses);
+if ((jobj==NULL) || ((int)jobj < 0)) { // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
+  printf("json cannot be parsed\n");
+  exit(1);
+}
+
+json_object_object_foreach(jobj, key, val) {
+  if ((strcmp("licenses", key)==0) && json_object_is_type(val, json_type_object)) {
+    char* licenseName = NULL;
+    char* licenseText = NULL;
+    char* fileNames = NULL;
+    json_object_object_foreach(val, key1, val1) {
+      if (((strcmp(key1, "shortName"))==0) && json_object_is_type(val1, json_type_string))
+      {
+        licenseName = json_object_get_string(val1);
+      }
+      else
+      if (((strcmp(key1, "text"))==0) && json_object_is_type(val1, json_type_string))
+      {
+        licenseText = json_object_get_string(val1);
+      }
+      else
+      if (((strcmp(key1, "files"))==0) && json_object_is_type(val1, json_type_array))
+      {
+        fileNames = implodeJsonArray(val1, ",\n");
+      }
+      else
+      {
+        exit(9);
+      }
     }
-    PQclear(decidedUploadTreeIdsResult);
+    
+    if (licenseName && licenseText && fileNames)
+      table_addRow(tableOthers, licenseName, licenseText, fileNames);
+
+    if (fileNames) g_free(fileNames);
+  } else {
+    exit(10);
   }
+}
+json_object_put(jobj);
+g_free(jsonLicenses);
 
-#ifdef DEBUG
-  int idebug;
-  for(idebug=0;idebug<all_unique_lics_index;idebug++) {
-    printf("license '%s'\nfor: '%s'\n", all_unique_lics_arr[idebug][0], all_unique_lics_arr[idebug][1]);
-    char* replText = getReportText(all_unique_lics_arr[idebug][0]);
-    if (replText != NULL)
-      printf("report text: '%.10s'\n", replText);
-    printf("\n");
-  }
-#endif
 
-  mxml_node_t** tr31=NULL;
-  K=0;
-	//int i;
-	for(i=0;i<all_unique_lics_index;i++)
-  {
-    PGresult* pgres2 = fo_dbManager_ExecPrepared(
-      fo_dbManager_PrepareStamement(
-        dbManager,
-        "selectFullNameAndText",
-        "select rf_fullname,rf_text from license_ref where rf_shortname=$1",
-        char*
-      ),
-      all_unique_lics_arr[i][0]
-    );
-    if (!pgres2)
-      continue;
-    char* printableName = removeSuffix(all_unique_lics_arr[i][0]);
-			
-			   tr31=(mxml_node_t**)realloc(tr31,sizeof(mxml_node_t*)*(K+1));
-			   tr31[K] = (mxml_node_t*)createrowproperty(tbl3);
-
-			   if (PQntuples(pgres2)==0 || strlen(PQgetvalue(pgres2,0,0))==0)
-			   {				
-				   createrowdata(tr31[K], "2000", printableName);
-			   }	
-			   else 
-			   {				
-				   createrowdata(tr31[K], "2000", PQgetvalue(pgres2,0,0));
-			   }
-			   char* rfText;
-			   char* customText = getReportText(all_unique_lics_arr[i][0]);
-			   if (customText!=NULL)
-			   {
-					rfText=(char*)malloc(sizeof(char)*(strlen(customText)+1));
-					strcpy(rfText,customText);
-			   }
-			   else if (PQntuples(pgres2)>0 && PQgetvalue(pgres2,0,1)!=NULL)
-			   {
-				   rfText=(char*)malloc(sizeof(char)*(strlen(PQgetvalue(pgres2,0,1))+1));
-				   strcpy(rfText,PQgetvalue(pgres2,0,1));
-				   rfText[strlen(PQgetvalue(pgres2,0,1))]='\0';
-			   }
-			   else
-			   {
-				   rfText=(char*)malloc(sizeof(char)*(strlen("License by Nomos.")+1));
-				   strcpy(rfText,"License by Nomos.");
-			   }
-			   int indx;
-			   for (indx=0;rfText[indx]!='\0';indx++) //Now removing non ascii characters (if any)
-			   {
-				   if (!(isalpha(rfText[indx]) || isdigit(rfText[indx]) || rfText[indx]==' ' || rfText[indx]=='\n' || rfText[indx]=='\r'
-					  || ispunct(rfText[indx])))
-				   {
-					   rfText[indx]=' ';
-				   }
-			   }
-
-			   createrowdata(tr31[K], "6000",rfText);
-			   free(rfText);
-			   createrowdata(tr31[K], "2000",all_unique_lics_arr[i][1]);    
-			   K++;
-			   PQclear(pgres2);
-         free(printableName);
-	   }    
-	int t1;
-	for(t1=0;t1<all_unique_lics_index;t1++)
-	{
-		if (all_unique_lics_arr[t1][0])
-		{
-			free(all_unique_lics_arr[t1][0]);
-			all_unique_lics_arr[t1][0]=NULL;
-		}
-		if (all_unique_lics_arr[t1][1])
-		{
-			free(all_unique_lics_arr[t1][1]);
-			all_unique_lics_arr[t1][1]=NULL;
-		}
-		if (all_unique_lics_arr[t1])
-		{
-			free(all_unique_lics_arr[t1]);
-			all_unique_lics_arr[t1]=NULL;
-		}
-	}
-	if (all_unique_lics_arr)
-	{
-		free(all_unique_lics_arr);
-		all_unique_lics_arr=NULL;
-	}
-
-	for(t1=0;t1<custom_lic_index;t1++)
-	{
-		if (mapping_custom_lic_to_report_text[t1][0])
-		{
-			free(mapping_custom_lic_to_report_text[t1][0]);
-			mapping_custom_lic_to_report_text[t1][0]=NULL;
-		}
-		if (mapping_custom_lic_to_report_text[t1][1])
-		{
-			free(mapping_custom_lic_to_report_text[t1][1]);
-			mapping_custom_lic_to_report_text[t1][1]=NULL;
-		}
-		if (mapping_custom_lic_to_report_text[t1])
-		{
-			free(mapping_custom_lic_to_report_text[t1]);
-			mapping_custom_lic_to_report_text[t1]=NULL;
-		}
-	}
-
-	if (mapping_custom_lic_to_report_text)
-	{
-		free(mapping_custom_lic_to_report_text);
-		mapping_custom_lic_to_report_text=NULL;
-	}
+// endrow
 
 mxml_node_t* p9 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p9,NULL, "Copyrights","0","2");
@@ -1079,7 +1022,6 @@ if (copyright_content)
 int copyresultcount = PQntuples(copyright_results);
 
 mxml_node_t** tr33=(mxml_node_t**) malloc(sizeof(mxml_node_t*)*(copyresultcount+3));
-int tr31_size=K;
 K=0;
 int cnt=0;
 mxml_node_t* tbl_ = NULL;
@@ -1247,6 +1189,7 @@ if (sql_patentIssue)
 
 mxml_node_t** tr_patentIssueTable=NULL;
 int k_patentIssue=0;
+int i;
 if(sql_patentIssueCount)
 {
 	for(i=0; i<sql_patentIssueCount; i++){
@@ -1619,26 +1562,6 @@ if (tr33)
  free(tr33);
 }
 
-for (ki=0;ki<tr31_size;ki++)
-{
-	if (tr31[ki]) free(tr31[ki]);
-}
-if (tr31)
-{
- free(tr31);
-}
-
-
-if (tr_nomos_table)
-{  int ki =0;
-   for (ki=0;ki<k_nomos;ki++)
-   {
-	    if (tr_nomos_table[ki]) 
-		  free(tr_nomos_table[ki]);
-   }
-      free(tr_nomos_table);
-}
-
 int uloop2;
 for (uloop2=0;uloop2<3;uloop2++)
 {
@@ -1748,14 +1671,14 @@ free(tr2);
 if(p5)
 free(p5);
 
-if(p6)
-free(p6);
+//if(p6)
+//free(p6);
 
-if(tbl2)
-free(tbl2);
+//if(tbl2)
+//free(tbl2);
 
-if(tr22)
-free(tr22);
+//if(tr22)
+//free(tr22);
 
 
 if(tbl_nomos)
@@ -1767,8 +1690,8 @@ free(tr_nomos);
 //if(tr_nomos1)
 //free(tr_nomos1);
 
-if(tr_gl)
-free(tr_gl);
+//if(tr_gl)
+//free(tr_gl);
 
 
 if(p7)
@@ -1777,8 +1700,7 @@ free(p7);
 if(p8)
 free(p8);
 
-if(tbl3)
-free(tbl3);
+table_free(tableOthers);
 
 if(p9)
 free(p9);

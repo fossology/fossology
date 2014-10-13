@@ -9,14 +9,15 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. `pkg-config json --cflags`
+EXE = reportgen
+EXE_COPY = getCleared
+
+CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp -lmxml -L ./libmxml.a `pkg-config json --cflags --libs`
+CFLAGS_LINK  = $(ALL_CFLAGS) -lmxml -L ./libmxml.a `pkg-config json --cflags --libs`
 
-EXE = reportgen
-
-OBJECTS  = utils.o main.o
+OBJECTS  = utils.o main.o table.o jsonDataRetriever.o
 COVERAGE = 
 
 TESTDIR = ../agent_tests
@@ -39,6 +40,8 @@ $(OBJECTS): %.o: %.c %.h
 install: all
 	@echo "make reportgen agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE_COPY) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE_COPY)
+	# TODO use php fo_wrapper
 
 
 uninstall:

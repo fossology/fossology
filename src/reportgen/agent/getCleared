@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "{ \"licenses\" : { \"shortName\": \"Apache-2.0\", \"text\" : \"licText\", \"files\" : [ \"/a.txt\", \"/b.txt\"]} }"
