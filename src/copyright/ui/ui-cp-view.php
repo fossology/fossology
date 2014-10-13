@@ -30,15 +30,15 @@ define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
 class copyright_view extends FO_Plugin
 {
   /** @var UploadDao */
-  private $uploadDao;
+  protected $uploadDao;
   /** @var CopyrightDao */
   private $copyrightDao;
   /** @var HighlightRenderer */
-  private $highlightRenderer;
+  protected $highlightRenderer;
   /** bool */
-  private $invalidParm = false;
+  protected $invalidParm = false;
   /** array */
-  private $uploadEntry;
+  protected $uploadEntry;
 
   function __construct()
   {
@@ -51,6 +51,7 @@ class copyright_view extends FO_Plugin
 
     parent::__construct();
 
+    $this->vars['xptext'] = 'copyright/e-mail/URL';
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->copyrightDao = $container->get('dao.copyright');
@@ -80,8 +81,6 @@ class copyright_view extends FO_Plugin
     menu_insert("ViewCopyright::Audit", 5, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
     menu_insert("ViewCopyright::[BREAK]", 6);
 
-
-
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $Item = GetParm("item", PARM_INTEGER);
@@ -95,8 +94,8 @@ class copyright_view extends FO_Plugin
       } else
       {
         $text = _("View Copyright/Email/Url info");
-        menu_insert("View::View Copyright/Email/Url", 1, $URI, $text);
-        menu_insert("View-Meta::View Copyright/Email/Url", 1, $URI, $text);
+        menu_insert("View::Copyright/Email/Url", 1, $URI, $text);
+        menu_insert("View-Meta::Copyright/Email/Url", 1, $URI, $text);
       }
     }
     $Lic = GetParm("lic", PARM_INTEGER);
@@ -200,7 +199,6 @@ class copyright_view extends FO_Plugin
     $this->vars['legendBox'] = $this->legendBox();
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
     $this->vars['optionName'] = "skipFileCopyRight";
-    $this->vars['formName'] = "CopyRightForm";
     $this->vars['ajaxAction'] = "setNextPrevCopyRight";
   }
 
