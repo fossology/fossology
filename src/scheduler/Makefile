@@ -40,9 +40,11 @@ VERSIONFILE:
 
 install: all
 	$(call DIR_LOOP,install)
+	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
 
 uninstall:
 	$(call DIR_LOOP,uninstall)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 
 clean:
 	$(call DIR_LOOP,clean)
