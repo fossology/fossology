@@ -44,7 +44,7 @@ class TestPgDb
   {
     date_default_timezone_set("UTC");
     if (!is_callable('pg_connect')) {
-   throw new \Exception("php-psql not found");
+      throw new \Exception("php-psql not found");
     }
     if (!isset($dbName))
     {
@@ -52,30 +52,10 @@ class TestPgDb
       $dbName = "fosstest".time().$sub;
     }
     $this->dbName = $dbName;
-    $this->sys_conf = "/srv/fossology/$dbName";
-    // if (!$this->isInFossyGroup) die('cannot access origin db');
-
-    $userHome = getenv('HOME');
-    $ipv4 = gethostbyname(gethostname());
-    $fullHostName = gethostbyaddr(gethostbyname($ipv4));
-    $contents = "$fullHostName:*:*:fossy:fossy\n";
-    $pgpass = "$userHome/.pgpass";
-    $pg_pass_contents = file_exists($pgpass) ? file_get_contents($pgpass) : '';
-    if (!preg_match('/\:fossy\:fossy/', $pg_pass_contents)) {
-      $pgpassHandle = fopen($pgpass,'w');
-      $howmany = fwrite($pgpassHandle, $contents);
-      if($howmany === FALSE)
-      {
-        throw new \Exception("FATAL! Could not write .pgpass file to $pgpassHandle" );
-      }
-      fclose($pgpassHandle);
-    }
-    if(!chmod($pgpass, 0600))
-    {
-      echo "Warning! could not set $pgpass to 0600\n";
-    }
+    $this->ensurePgPassFileEntry();
     
-    if(!mkdir($this->sys_conf,0755,TRUE))
+    $this->sys_conf = sys_get_temp_dir()."/$dbName";
+    if(!mkdir($this->sys_conf,$mode=0755))
     {
       throw new \Exception("FATAL! Cannot create test repository at ".$this->sys_conf);
     }
@@ -88,21 +68,33 @@ class TestPgDb
     {
       throw new \Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
     }
-    
-    
-    $TESTROOT = dirname(dirname(dirname(dirname(__FILE__))))."/testing";
-    $_ENV['TESTROOT'] = $TESTROOT;
-    putenv("TESTROOT=$TESTROOT");
 
-    if(!chdir($TESTROOT . '/db'))
+    exec($cmd="psql -Ufossy -h localhost -l | grep -q $dbName", $cmdOut, $cmdRtn);
+    if($cmdRtn == 0)
     {
-      throw new \Exception("FATAL! could no cd to $TESTROOT/db\n");
-    }
-    $cmd = "sudo ./ftdbcreate.sh $dbName 2>&1";
-    exec($cmd, $cmdOut, $cmdRtn);
-    if($cmdRtn != 0)
+      echo "NOTE: $dbName database already exists, not creating";
+      exec($cmd="createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
+      if($cmdRtn == 0)
+        echo "NOTE: plpgsql already exists in $dbName database\n";
+      else
+      {
+        exec($cmd="createlang -Ufossy -h localhost plpgsql $dbName", $cmdOut, $cmdRtn);
+        if($cmdRtn != 0)
+          throw new \Exception("ERROR: failed to add plpgsql to $dbName database");
+      }
+    }    
+    else
     {
-      throw new \Exception("Error could not create Data Base $dbName in $TESTROOT ($cmdRtn)\n");
+      $fosstestSql = file_get_contents( dirname(__FILE__).'/fosstestinit.sql');
+      $fossSql = str_replace('fosstest',$dbName,$fosstestSql);
+      $pathSql = $this->sys_conf.'/dbinit.sql';
+      file_put_contents($pathSql,$fossSql);
+      exec($cmd="psql -Ufossy -h localhost fossology < $pathSql", $cmdOut, $cmdRtn); //  2>&1
+      if ($cmdRtn != 0)
+      {
+        throw new \Exception("ERROR: Database failed during configuration.");
+      }
+      unlink($pathSql);
     }
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
@@ -119,39 +111,60 @@ class TestPgDb
     $this->dbManager = $container->get('db.manager');
   }
   
+  public function ensurePgPassFileEntry()
+  {
+    $userHome = getenv('HOME');
+    $ipv4 = gethostbyname(gethostname());
+    $fullHostName = gethostbyaddr(gethostbyname($ipv4));
+    $contents = "$fullHostName:*:*:fossy:fossy\n";
+    $pgpass = "$userHome/.pgpass";
+    putenv("PGPASSFILE=$pgpass");
+    $pg_pass_contents = file_exists($pgpass) ? file_get_contents($pgpass) : '';
+    if (!preg_match('/\:fossy\:fossy/', $pg_pass_contents)) {
+      $pgpassHandle = fopen($pgpass,'w');
+      $howmany = fwrite($pgpassHandle, $contents);
+      if($howmany === FALSE)
+      {
+        throw new \Exception("FATAL! Could not write .pgpass file to $pgpassHandle" );
+      }
+      fclose($pgpassHandle);
+    }
+    if(!chmod($pgpass, 0600))
+    {
+      echo "Warning! could not set $pgpass to 0600\n";
+    }
+  }
+  
   function __destruct()
   {
-    pg_close($this->connection);
+    $this->dbManager = null;
+    if(!pg_close($this->connection))
+      throw new \Exception('Could not close connection');
     $this->connection = null;
-    /*
-    $ckCmd = "psql -c '\q' fossology -U fossy";
-    exec($ckCmd, $ckOut, $ckRtn);
-    if($ckRtn != 0)
-    {
-      throw new Exception("ERROR: postgresql isn't running, not deleting database ".$this->dbName."\n");
-    }
-    */
-/*    $existCmd = "psql -l  fossology -U fossy|grep -q ".$this->dbName;
+    
+    $existCmd = "psql -Ufossy -h localhost -l | grep -q ".$this->dbName;
     exec($existCmd, $existkOut, $existRtn);
     if($existRtn == 0)
     {
- */
-      $pkillCmd = "sudo pkill -f -u postgres fossy || true";
-      exec($pkillCmd, $killOut, $killRtn);
-      $dropCmd = "sudo su postgres -c 'echo \"drop database ".$this->dbName.";\"|psql'";
+      $dropCmd = "dropdb -Ufossy -h localhost ".$this->dbName;
       exec($dropCmd, $dropOut, $dropRtn);
       if($dropRtn != 0 )
       {
-        throw new Exception("ERROR: failed to delete database ".$this->dbName."\n");
+        echo("ERROR: failed to delete database ".$this->dbName);
       }
-  /*
-      }
+    }
     else
     {
       echo "NOTE: database ".$this->dbName." does not exist, nothing to delete\n";
     }
- */
-    $this->dbManager = null;    
+
+    /* 
+     */
+    foreach (glob($this->sys_conf."/*.*") as $filename) {
+      unlink($filename);
+    rmdir($this->sys_conf);
+}
+    
   }
 
   private function dirnameRec($path, $depth = 1)

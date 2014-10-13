@@ -331,7 +331,8 @@ class AjaxClearingView extends FO_Plugin
 
     foreach ($removedLicenses as $licenseShortName => $licenseDecisionResult)
     {
-      if ($licenseDecisionResult->getAgentDecisionEvents()) {
+      if ($licenseDecisionResult->getAgentDecisionEvents())
+      {
         $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
         $licenseId = $licenseDecisionResult->getLicenseId();
@@ -340,10 +341,11 @@ class AjaxClearingView extends FO_Plugin
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);
         $table[$licenseShortName] = array('DT_RowId' => $id,
+            'DT_RowClass' => 'removed',
             '0' => $licenseShortNameWithLink,
             '1' => implode("<br/>", $agents),
-            '2' => "n/a",
-            '3' => "n/a",
+            '2' => "-",
+            '3' => "-",
             '4' => $actionLink);
       }
     }

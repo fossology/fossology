@@ -22,10 +22,14 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Mockery as M;
+use Mockery\MockInterface;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
-  /** @var TestLiteDb */
+  /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */
   private $dbManager;
@@ -151,7 +155,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetNextItemWithMultipleFiles()
   {
-    $this->markTestSkipped("not possible with sqlite");
+//    $this->markTestSkipped("not possible with sqlite");
     $subentries = $this->getSubentriesForMultipleFiles();
     $this->prepareUploadTree($subentries);
 
@@ -161,7 +165,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetPreviousItemWithMultipleFiles()
   {
-    $this->markTestSkipped("not possible with sqlite");
+//    $this->markTestSkipped("not possible with sqlite");
     $subentries = $this->getSubentriesForMultipleFiles();
     $this->prepareUploadTree($subentries);
 

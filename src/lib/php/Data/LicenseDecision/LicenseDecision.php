@@ -17,27 +17,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 namespace Fossology\Lib\Data\LicenseDecision;
 
+use DateTime;
+use Fossology\Lib\Data\LicenseRef;
+
 interface LicenseDecision
 {
-  /**
-   * @return string
-   */
-  public function getComment();
+  const USER_DECISION = "User decision";
+  const BULK_RECOGNITION = "bulk";
+  const SCOPE_GLOBAL = "global";
+  const SCOPE_UPLOAD = "upload";
 
   /**
-   * @return float
+   * @return DateTime
    */
-  public function getEpoch();
-
-  /**
-   * @return int
-   */
-  public function getEventId();
+  public function getDateTime();
 
   /**
    * @return string
    */
   public function getEventType();
+
+  /**
+   * @return boolean
+   */
+  public function isGlobal();
+
+  /**
+   * @return boolean
+   */
+  public function isRemoved();
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef();
 
   /**
    * @return int
@@ -57,15 +70,15 @@ interface LicenseDecision
   /**
    * @return string
    */
+  public function getComment();
+
+  /**
+   * @return string
+   */
   public function getReportinfo();
 
-  /**
-   * @return boolean
+   /**
+   * @return int
    */
-  public function isGlobal();
-
-  /**
-   * @return boolean
-   */
-  public function isRemoved();
+  public function getEventId();
 }

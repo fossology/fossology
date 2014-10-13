@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use DateTime;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 
@@ -57,6 +58,22 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   /**
    * @return int
    */
+  public function getEventId()
+  {//TODO?
+    return $this->matchId;
+  }
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef()
+  {
+    return $this->licenseRef;
+  }
+
+  /**
+   * @return int
+   */
   public function getLicenseId()
   {
     return $this->licenseRef->getId();
@@ -78,31 +95,6 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
     return $this->licenseRef->getFullName();
   }
 
-  /**
-   * @return string
-   */
-  public function getComment()
-  {
-    return "";
-  }
-
-  /**
-   * @return float
-   */
-  public function getEpoch()
-  {
-    // TODO
-    return 0.0;
-  }
-
-  /**
-   * @return int
-   */
-  public function getEventId()
-  {
-    // TODO
-    return 0;
-  }
 
   /**
    * @return string
@@ -115,9 +107,24 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   /**
    * @return string
    */
+  public function getComment()
+  {
+    return "";
+  }
+
+  /**
+   * @return string
+   */
   public function getReportinfo()
   {
     return "";
+  }
+
+  /**
+   * @return DateTime
+   */
+  public function getDateTime(){
+    return new DateTime();
   }
 
   /**
@@ -134,6 +141,14 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   public function isRemoved()
   {
     return false;
+  }
+
+  /**
+   * @return AgentRef
+   */
+  public function getAgentRef()
+  {
+    return $this->agentRef;
   }
 
   /**

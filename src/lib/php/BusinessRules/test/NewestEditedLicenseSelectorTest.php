@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 
 class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
@@ -35,7 +36,6 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
    * @param $scope
    * @param $name
    * @param $ud
-   * @param null $list
    * @return ClearingDecision
    */
   public function clearingDec($id, $isLocal, $scope, $name, $ud)
@@ -49,7 +49,8 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setScope($scope);
 
     $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
-    $clearingDecision->setLicenses(array($licref));
+    $clearLic = new ClearingLicense($licref, false);
+    $clearingDecision->setLicenses(array($clearLic));
 
     return $clearingDecision->build();
   }
@@ -74,7 +75,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function testNotFoundIsEmpty()
   {
-    $editedLicensesArray = array($this->clearingDec(0, false, 'upload', "Test", ClearingDecision::IDENTIFIED));
+    $editedLicensesArray = array(134 => $this->clearingDec(0, false, 'upload', "Test", ClearingDecision::IDENTIFIED));
     assertThat($this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($editedLicensesArray), is(array()));
   }
 
