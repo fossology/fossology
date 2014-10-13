@@ -45,7 +45,7 @@ install: all
 
 uninstall:
 	$(call DIR_LOOP,uninstall)
-	for MOD_NAME in $(MON_NAMES); do \
+	for MOD_NAME in $(MOD_NAMES); do \
 		@echo "make $$MOD_NAME uninstall"; \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME; \
 		rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD_NAME; \
