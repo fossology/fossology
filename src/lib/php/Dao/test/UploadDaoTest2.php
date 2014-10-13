@@ -19,13 +19,9 @@
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
-use Mockery\MockInterface;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Logger;
 
 class UploadDaoTest2 extends \PHPUnit_Framework_TestCase
 {
@@ -39,7 +35,7 @@ class UploadDaoTest2 extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->testDb = new TestPgDb();
-    $this->dbManager = $this->testDb->getDbManager();
+    $this->dbManager = &$this->testDb->getDbManager();
 
     $this->testDb->createPlainTables(
         array(

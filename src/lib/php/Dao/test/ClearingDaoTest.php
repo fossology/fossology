@@ -57,7 +57,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $logger->pushHandler(new ErrorLogHandler());
 
     $this->testDb = new TestPgDb(); // TestLiteDb("/tmp/fossology.sqlite");
-    $this->dbManager = $this->testDb->getDbManager();
+    $this->dbManager = &$this->testDb->getDbManager();
 
     $this->clearingDao = new ClearingDao($this->dbManager, $this->licenseSelector, $this->uploadDao);
 

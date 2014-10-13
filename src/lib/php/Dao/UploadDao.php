@@ -257,21 +257,15 @@ class UploadDao extends Object
     $isFile = $item->isFile();
     $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
 
-    if ($isFile)
-    {
-      $parent = $item->getParentId();
-      $parentSize = $this->getParentSize($parent, $uploadTreeView);
-      $targetIndex = $this->getItemIndex($parent, $item, $uploadTreeView) + $indexIncrement;
-    } else
-    {
-      $parent = $item->getId();
-      $parentSize = $this->getParentSize($parent, $uploadTreeView);
-      $targetIndex = $direction == self::DIR_FWD ? 0 : $parentSize - 1;
+    $parent = $isFile ? $item->getParentId() : $item->getId();
+    $parentSize = $this->getParentSize($parent, $uploadTreeView);
+    $targetIndex = $isFile ?
+        $this->getItemIndex($parent, $item, $uploadTreeView) + $indexIncrement :
+        ($direction == self::DIR_FWD ? 0 : $parentSize - 1);
 
-      if ($item->getParentId() === null && $direction !== self::DIR_FWD)
-      {
-        return self::NOT_FOUND;
-      }
+    if ($parent === null && $direction !== self::DIR_FWD)
+    {
+      return self::NOT_FOUND;
     }
 
     $nextItem = null;
