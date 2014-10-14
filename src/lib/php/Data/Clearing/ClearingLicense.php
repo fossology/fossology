@@ -71,4 +71,10 @@ class ClearingLicense implements LicenseAlike {
   {
     return $this->removed;
   }
+  
+  /** @return string */
+  public function __toString()
+  {
+    return $this->getShortName();
+  }
 }

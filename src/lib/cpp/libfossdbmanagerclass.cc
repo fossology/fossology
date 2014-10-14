@@ -15,7 +15,7 @@ extern "C" {
 #include "libfossscheduler.h"
 }
 
-DbManager::DbManager(int* argc, char** argv){
+DbManager::DbManager(int* argc, char** argv) {
   fo_scheduler_connect_dbMan(argc,argv,&_dbManager);
 };
 
