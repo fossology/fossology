@@ -91,7 +91,7 @@ int zipdir(char* name)
 {
         pid_t child_pid;
         int status;
-        char* cmd[5] = {NULL, NULL, NULL, NULL, NULL};
+        char* cmd[6];
         char* targetdir = NULL;
         char* zipcmd="/usr/bin/zip";
         char* docxfilename=NULL;
@@ -102,7 +102,11 @@ int zipdir(char* name)
         docxfullpath = g_strdup_printf("%s/%s", targetdir, docxfilename);
         cmd[0] = g_strdup("/usr/bin/zip");
         cmd[1] = g_strdup("-r");
-        cmd[2] = g_strdup_printf("%s/%s", targetdir, zipname);
+        cmd[2] = g_strdup("-q");
+        cmd[3] = g_strdup_printf("%s/%s", targetdir, zipname);
+        char* fullzipname = cmd[3];
+        cmd[4] = g_strdup(".");
+        cmd[5] = NULL;
         if((child_pid = fork()) < 0)
         {
           perror("fork failure");
@@ -124,31 +128,31 @@ int zipdir(char* name)
             exit(1);
           }
 
-          if (execl(zipcmd, cmd[0], cmd[1], cmd[2], ".", (char*) NULL))
+          if (execv(zipcmd, cmd))
           {
-            perror("zip failed");
-            int ip;
-            printf("cmd = %s", zipcmd);
-            for (ip=0;ip<5;ip++)
+            perror("calling zip failed");
+            printf("cmd='%s'\n", zipcmd);
+            int ip=0;
+            char** cmdI = cmd;
+            while (*cmdI)
             {
-              if(cmd[ip])
-                printf("%s ", cmd[ip]);
+              printf("argv[%d]='%s'\n", ip, *cmdI);
+              ip++;
+              cmdI++;
             }
-            printf("\n");
             exit(5);
           }
         }
         else
         {
           wait(&status);
-          rename(cmd[2],docxfullpath);
+          if (rename(fullzipname,docxfullpath)<0)
+            printf("failed to rename %s to %s\n", fullzipname, docxfullpath);
         }
-        int ip;
-        for (ip=0;ip<5;ip++)
-        {
-          if(cmd[ip])
-            g_free(cmd[ip]);
-        }
+        char** cmdI = cmd;
+        while (*(cmdI++))
+          g_free(*cmdI);
+
         if(docxfullpath)
         {
           g_free(docxfullpath);
@@ -1113,34 +1117,21 @@ free(resxmlpath);
 free(docpropspath);
 free(hiddenrelspath);
 zipdir(outputPkgName);
-char* updatereporttable=(char*)malloc(sizeof(char)*(44+DECLEN+1));
-sprintf(updatereporttable,"select job_pk from job where job_upload_fk=%d",uploadId);
-PGresult* resrep=PQexec(pgConn,updatereporttable);
-if(PQntuples(resrep)>0)
-{
-    int jobpk=0,i=0;
-    while (i<PQntuples(resrep))
-    {
-   	if (atoi(PQgetvalue(resrep,i,0))>jobpk)
-	{	
-		jobpk=atoi(PQgetvalue(resrep,i,0));
-	}
-	i++;
-    }
-    char* updatereptable=(char*)malloc(sizeof(char)*(53+DECLEN+strlen(finaldocxpath)+1));
-    sprintf(updatereptable,"insert into report_table(jobid,filepath) values(%d,'%s')",jobpk,finaldocxpath);
-    PGresult* reporttableres=PQexec(pgConn,updatereptable);
-    PQclear(reporttableres);
-    if (updatereptable)
-    {
-	free(updatereptable);	 
-    }	
-} 		
-if (updatereporttable)
-{
-	free(updatereporttable);
-}
-PQclear(resrep);	 
+
+PQclear(
+  fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "updatereporttable",
+      "INSERT INTO report_table(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
+      int, int, char*
+    ),
+    uploadId,
+    fo_scheduler_jobId(),
+    finaldocxpath
+  )
+);
+
 if (outputPkgName)
 {
  free(outputPkgName);
