@@ -261,7 +261,7 @@ class UploadDao extends Object
       return self::NOT_FOUND;
     }
 
-    $enterItem = !$item->isFile() && $enterFolders;
+    $enterItem = $item->isContainer() && $enterFolders;
 
     $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
 
@@ -278,19 +278,14 @@ class UploadDao extends Object
         $firstIteration = false;
         if ($enterItem)
         {
-          $itemId = $item->getId();
-          $itemParentSize = $this->getParentSize($itemId, $uploadTreeView);
-          if ($itemParentSize > 0)
-          {
-            $nextItem = $this->getNewItemByIndex($itemId, $direction == self::DIR_FWD ? 0 : $itemParentSize - 1, $uploadTreeView);
-          }
+            $nextItem = $this->getNewItemByIndex($item->getId(), max(0, $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1), $uploadTreeView);
         }
       } else
       {
         $nextItem = $this->getNewItemByIndex($parent, $targetIndex, $uploadTreeView);
       }
 
-      if ($nextItem !== null && !$nextItem->isFile())
+      if ($nextItem !== null && $nextItem->isContainer())
       {
         $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
       }
@@ -302,6 +297,7 @@ class UploadDao extends Object
 
       $targetIndex += $indexIncrement;
     }
+    return null;
   }
 
   /**
@@ -375,7 +371,7 @@ class UploadDao extends Object
     $newItemResult = $this->dbManager->getSingleRow($theQuery
         , array($parent, $targetOffset), $statementName);
 
-    return $this->createItem($newItemResult, $uploadTreeView->getUploadTreeTableName());
+    return $newItemResult ? $this->createItem($newItemResult, $uploadTreeView->getUploadTreeTableName()) : null;
   }
 
 
