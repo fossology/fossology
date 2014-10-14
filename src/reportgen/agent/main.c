@@ -1123,7 +1123,7 @@ PQclear(
     fo_dbManager_PrepareStamement(
       dbManager,
       "updatereporttable",
-      "INSERT INTO report_table(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
+      "INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
       int, int, char*
     ),
     uploadId,

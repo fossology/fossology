@@ -1663,6 +1663,22 @@
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["UPDATE"] = "UPDATE report_cache_user SET cache_on='Y'::character(1)";
 
 
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["reportgen"]["job_fk"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"job_fk\" int4;";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"job_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["reportgen"]["filepath"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["filepath"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"filepath\" text;";
+  $Schema["TABLE"]["reportgen"]["filepath"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"filepath\" DROP NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["filepath"]["UPDATE"] = "";
+
+
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"sysconfig_pk\" int4;";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"sysconfig_pk\" SET NOT NULL, ALTER COLUMN \"sysconfig_pk\" SET DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass);";
