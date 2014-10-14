@@ -40,9 +40,6 @@ ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all $(VARS)
-	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ]; then \
-		rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
-	fi
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 
