@@ -154,7 +154,7 @@ class UploadTreeView
                                     OR ( cd.pfile_fk = ut.pfile_fk AND cd.is_global = TRUE  ) ) )";
         return $conditionQuery;
       case "noCopyright":
-        $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk)";
+        $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
         return $conditionQuery;
     }
 
