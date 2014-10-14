@@ -24,10 +24,12 @@
             <legend>
                 {{ 'Issue Type'| trans }}
             </legend>
-            <input type="radio" name="iType" value="0"/> {{ 'Not decided'| trans }} <br/>
-            <input type="radio" name="iType" value="1"/> {{ 'Not relevant'| trans }} <br/>
-            <input type="radio" name="iType" value="2"/> {{ 'To be decided'| trans }} <br/>
-            <input type="radio" name="iType" value="3"/> {{ 'Identified issue'| trans }} <br/>
+            {% for clearingType in clearingTypes %}
+            <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
+                   value="{{ loop.index }}">
+            {{ clearingType }}
+            </input><br/>
+            {% endfor %}
         </fieldset>
         <br/>
         {{ 'Description'| trans }}: <br/>

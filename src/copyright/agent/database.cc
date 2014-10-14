@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini
+ * Author: Daniele Fognini, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
  *
@@ -10,20 +10,12 @@
  */
 
 #include "database.hpp"
-
-const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
-{
-// keep only one sequence
-#define SEQUENCE_NAME "copyright_ct_pk_seq"
-    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
-    {"agent_fk", "bigint", "NOT NULL"},
-    {"pfile_fk", "bigint", "NOT NULL"},
-    {"content", "text", ""},
-    {"hash", "text", ""},
-    {"type", "text", ""}, //TODO removed constrain: "CHECK (type in ('statement', 'email', 'url'))"},
-    {"copy_startbyte", "integer", ""},
-    {"copy_endbyte", "integer", ""},
-  };
+#define RETURN_IF_FALSE(query) \
+  do {\
+    if (!(query)) {\
+      return false;\
+    }\
+  } while(0)
 
 CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname)
 {
@@ -48,38 +40,52 @@ CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
 }
 
 
-std::string CopyrightDatabaseHandler::getColumnListString() {
+std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) {
   std::string result;
-  for (size_t i=0; i<(sizeof(columns)/sizeof(ColumnDef)); ++i) {
+  for (size_t i=0; i<size; ++i) {
     if (i!=0)
       result += ", ";
-    result += columns[i].name;
+    result += in[i].name;
   }
   return result;
 }
 
-std::string CopyrightDatabaseHandler::getColumnCreationString() {
+std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size)  {
   std::string result;
-  for (size_t i=0; i< (sizeof(columns)/sizeof(ColumnDef)); ++i) {
+  for (size_t i=0; i< size; ++i) {
     if (i!=0)
       result += ", ";
-    result += columns[i].name;
+    result += in[i].name;
     result += " ";
-    result += columns[i].type;
+    result += in[i].type;
     result += " ";
-    result += columns[i].creationFlags;
+    result += in[i].creationFlags;
   }
   return result;
 }
 
 bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
+  RETURN_IF_FALSE(createTableAgentFindings(dbManager)) ;
+  RETURN_IF_FALSE(createCopyrightDecisionType(dbManager)) ;
+  RETURN_IF_FALSE(createTableClearing(dbManager)) ;
+  return true;
+}
 
-#define RETURN_IF_FALSE(query) \
-  do {\
-    if (!(query)) {\
-      return false;\
-    }\
-  } while(0)
+const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
+{
+// keep only one sequence
+#define SEQUENCE_NAME "copyright_ct_pk_seq"
+    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
+    {"agent_fk", "bigint", "NOT NULL"},
+    {"pfile_fk", "bigint", "NOT NULL"},
+    {"content", "text", ""},
+    {"hash", "text", ""},
+    {"type", "text", ""}, //TODO removed constrain: "CHECK (type in ('statement', 'email', 'url'))"},
+    {"copy_startbyte", "integer", ""},
+    {"copy_endbyte", "integer", ""},
+};
+
+bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
   if (!dbManager->sequenceExists(SEQUENCE_NAME)) {
     RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAME
                                           " START WITH 1"
@@ -89,8 +95,12 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
                                           " CACHE 1"));
   }
 
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name, getColumnCreationString().c_str()));
+  size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
 
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name,
+                                          getColumnCreationString( CopyrightDatabaseHandler::columns, ncolumns ).c_str()
+                                        )
+                  );
   RETURN_IF_FALSE(dbManager->queryPrintf(
    "CREATE INDEX %s_agent_fk_index"
    " ON %s"
@@ -131,9 +141,142 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
   return true;
 }
 
+
+//copyright_decision_type
+const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsCopyrightDecisionType[] = {
+    // keep only one sequence for clearing
+    #define SEQUENCE_NAMECopyrightDecisionType "copyright_decision_type_pk_seq"
+  {"copyright_decision_type_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMECopyrightDecisionType "'::regclass)"},
+  {"meaning", "varchar(30)", "NOT NULL"}
+};
+bool CopyrightDatabaseHandler::createCopyrightDecisionType(DbManager* dbManager){
+  if (!dbManager->sequenceExists(SEQUENCE_NAMECopyrightDecisionType)) {
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMECopyrightDecisionType
+                                        " START WITH 1"
+                                        " INCREMENT BY 1"
+                                        " NO MAXVALUE"
+                                        " NO MINVALUE"
+                                        " CACHE 1"));
+  }
+  if (!dbManager->tableExists("copyright_decision_type")) {
+    RETURN_IF_FALSE(createCopyrightDecisionTypeTable (dbManager) );
+  }
+  return true;
+}
+
+bool CopyrightDatabaseHandler::createCopyrightDecisionTypeTable(DbManager* dbManager){
+  size_t ntypes =  (sizeof(CopyrightDatabaseHandler::columnsCopyrightDecisionType)/sizeof(CopyrightDatabaseHandler::ColumnDef));
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table copyright_decision_type(%s)",
+              getColumnCreationString(CopyrightDatabaseHandler::columnsCopyrightDecisionType, ntypes).c_str()));
+
+  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Not decided')"));
+  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Not relevant')"));
+  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('To be decided')"));
+  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Identified issue')"));
+  return true;
+}
+
+
+const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
+    // keep only one sequence for clearing
+    #define SEQUENCE_NAMEClearing "copyright_decision_pk_seq"
+            {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
+            {"user_fk", "bigint", "NOT NULL"},
+            {"pfile_fk", "bigint", "NOT NULL"},
+            {"uploadtree_fk", "bigint", "NOT NULL"},
+            {"copyright_decision_type_fk", "bigint", "NOT NULL"},
+            {"description", "text", ""},
+            {"textFinding", "text", ""},
+            {"comment", "text", ""}
+};
+
+bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
+  char* tableName = g_strdup_printf("%s_decision", name);
+  if (!dbManager->sequenceExists(SEQUENCE_NAMECopyrightDecisionType)) {
+  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMEClearing
+                                        " START WITH 1"
+                                        " INCREMENT BY 1"
+                                        " NO MAXVALUE"
+                                        " NO MINVALUE"
+                                        " CACHE 1"));
+  }
+
+  if (!dbManager->tableExists(tableName)) {
+    size_t nDec =  (sizeof(CopyrightDatabaseHandler::columnsDecision)/sizeof(CopyrightDatabaseHandler::ColumnDef));
+    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)",tableName,
+                  getColumnCreationString(CopyrightDatabaseHandler::columnsDecision, nDec).c_str()));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_pfile_fk_index"
+     " ON %s"
+     " USING BTREE (pfile_fk)",
+     tableName, tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_user_fk_index"
+     " ON %s"
+     " USING BTREE (user_fk)",
+     tableName, tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_uploadtree_fk_index"
+     " ON %s"
+     " USING BTREE (uploadtree_fk)",
+     tableName, tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_copyright_decision_type_fk_index"
+     " ON %s"
+     " USING BTREE (copyright_decision_type_fk)",
+     tableName, tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT user_fk"
+      " FOREIGN KEY (user_fk)"
+      " REFERENCES  user(user_pk) ON DELETE CASCADE",
+      tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT uploadtree_fk"
+      " FOREIGN KEY (uploadtree_fk)"
+      " REFERENCES  uploadtree(uploadtree_pk) ON DELETE CASCADE",
+      tableName
+    ));
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT pfile_fk"
+      " FOREIGN KEY (pfile_fk)"
+      " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
+      tableName
+    ));
+
+
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT copyright_decision_type_fk"
+      " FOREIGN KEY (copyright_decision_type_fk)"
+      " REFERENCES copyright_decision_type(copyright_decision_type_pk) ON DELETE CASCADE",
+      tableName
+    ));
+  }
+
+
+  g_free(tableName);
+  return true;
+}
+
 bool CopyrightDatabaseHandler::checkTables(DbManager* dbManager) {
+  size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
   if (dbManager->tableExists(name)) {
-    RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s", getColumnListString().c_str(), name));
+    RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s limit 1", getColumnListString(CopyrightDatabaseHandler::columns,ncolumns ).c_str(), name));
   } else {
     return false;
   }

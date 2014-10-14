@@ -121,6 +121,14 @@ class copyright_view extends FO_Plugin
       return;
     }
 
+    $permission = GetUploadPerm($uploadId);
+    if($permission < PERM_READ ) {
+      $text = _("Permission Denied");
+      $this->vars['message']= "<h2>$text<h2>";
+      $this->invalidParm =true;
+      return;
+    }
+
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
     $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
@@ -170,7 +178,7 @@ class copyright_view extends FO_Plugin
 
     $uploadId = $this->uploadEntry['upload_fk'];
     $uploadTreeTableName = $this->uploadEntry['tablename'];
-    $permission = GetUploadPerm($uploadId);
+
     $this->vars['micromenu'] = Dir2Browse('copyright-hist', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
 
     $ModBack = GetParm("modback", PARM_STRING);
@@ -201,6 +209,7 @@ class copyright_view extends FO_Plugin
     $this->vars['optionName'] = "skipFileCopyRight";
     $this->vars['formName'] = "CopyRightForm";
     $this->vars['ajaxAction'] = "setNextPrevCopyRight";
+    $this->vars['clearingTypes'] = $this->copyrightDao->getCopyrightDecisionTypeMap();
   }
 
   /**

@@ -96,6 +96,17 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
-
+  /**
+   * @return array
+   */
+  public function getCopyrightDecisionTypeMap($selectableOnly = false)
+  {
+    $map = $this->dbManager->createMap('copyright_decision_type', 'copyright_decision_type_pk', 'meaning');
+    if ($selectableOnly)
+    {
+      $map = array(1 => $map[1], 2 => $map[2]);
+    }
+    return $map;
+  }
 
 }
