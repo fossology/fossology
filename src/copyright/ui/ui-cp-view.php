@@ -199,6 +199,7 @@ class copyright_view extends FO_Plugin
     $this->vars['legendBox'] = $this->legendBox();
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
     $this->vars['optionName'] = "skipFileCopyRight";
+    $this->vars['formName'] = "CopyRightForm";
     $this->vars['ajaxAction'] = "setNextPrevCopyRight";
   }
 

@@ -258,8 +258,22 @@ class AjaxClearingView extends FO_Plugin
           }
 
           $options = array('skipThese' => GetParm($opt, PARM_STRING));
-          $prev = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
-          $next = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+          $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+          $nextItem = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+
+          if($prevItem === null) {
+            $prev =null;
+          }
+          else {
+           $prev = $prevItem->getId();
+          }
+
+        if($nextItem === null) {
+          $next =null;
+        }
+        else {
+          $next = $nextItem->getId();
+        }
 
 
           return json_encode(array('prev' => $prev, 'next' => $next, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
