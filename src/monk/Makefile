@@ -11,7 +11,7 @@ include $(VARS)
 
 MOD_NAME = monk
 
-DIRS = agent ui agent_tests
+DIRS = agent ui
 TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
