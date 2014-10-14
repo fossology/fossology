@@ -17,12 +17,13 @@ use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 
 define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
-include_once(__DIR__."/version.php");
+include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
@@ -32,7 +33,7 @@ class DeciderAgent extends Agent
   private $uploadDao;
   /** @var ClearingDecisionEventProcessor */
   private $clearingDecisionEventProcessor;
-   /** @var ClearingDao */
+  /** @var ClearingDao */
   private $clearingDao;
 
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
@@ -42,7 +43,7 @@ class DeciderAgent extends Agent
   {
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
-    $args = getopt("k:",array(""));
+    $args = getopt("k:", array(""));
     $this->conflictStrategyId = @$args['k'];
 
     global $container;
@@ -54,22 +55,22 @@ class DeciderAgent extends Agent
     $this->initializeDecisionType();
   }
 
-  private function initializeDecisionType() {
+  private function initializeDecisionType()
+  {
     $row = $this->dbManager->getSingleRow("SELECT type_pk FROM clearing_decision_type WHERE meaning = $1", array(CLEARING_DECISION_TYPE));
     if ($row === false)
     {
-      print "ERROR: could not initialize clearing type for ". CLEARING_DECISION_TYPE;
+      print "ERROR: could not initialize clearing type for " . CLEARING_DECISION_TYPE;
       $this->bail(6);
-    }
-    else
+    } else
     {
       $this->decisionType = $row['type_pk'];
     }
   }
 
-  static protected function hasOnlyNewerUserEvents($events, $date)
+  static protected function hasNewerUserEvents($events, $date)
   {
-    foreach($events as $licenseShortName => $licenseDecisionResult)
+    foreach ($events as $licenseShortName => $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       $eventDate = $licenseDecisionResult->getDateTime();
@@ -81,7 +82,8 @@ class DeciderAgent extends Agent
     return true;
   }
 
-  protected function getDateOfLastRelevantClearing($userId, $uploadTreeId){
+  protected function getDateOfLastRelevantClearing($userId, $uploadTreeId)
+  {
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
     if (array_key_exists('date_added', $lastDecision))
       $lastDecisionDate = $lastDecision['date_added'];
@@ -94,7 +96,7 @@ class DeciderAgent extends Agent
   /* true if small is a subset of big */
   static protected function array_contains($big, $small)
   {
-    return count(array_diff($small,$big)) == 0;
+    return count(array_diff($small, $big)) == 0;
   }
 
   function processLicenseDecisionEventOfCurrentJob()
@@ -111,18 +113,32 @@ class DeciderAgent extends Agent
 
       $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
-      $canAutoDecide = true;
       list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
 
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerUserEvents($added, $lastDecisionDate);
-      $canAutoDecide &= DeciderAgent::hasOnlyNewerUserEvents($removed, $lastDecisionDate);
+      if ($lastDecisionDate !== null)
+      {
+        $filter_since_event = function ($event) use ($lastDecisionDate)
+        {
+          return $event->getDateTime() >= $lastDecisionDate;
+        };
+        $added = array_filter($added, $filter_since_event);
+        $added = array_filter($added, $filter_since_event);
+      }
+
+      $canAutoDecide = true;
+      foreach ($added as $event) {
+        /** @var LicenseDecision $event */
+        if ($event->getEventType() === LicenseDecisionResult::AGENT_DECISION_TYPE) {
+          $canAutoDecide = false;
+          break;
+        }
+      }
 
       if ($canAutoDecide)
       {
         $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $this->decisionType, $this->decisionIsGlobal);
         $this->heartbeat(1);
-      }
-      else
+      } else
       {
         //TODO implement conflict resolving strategies
         $this->heartbeat(0);
