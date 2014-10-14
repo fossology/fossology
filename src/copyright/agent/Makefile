@@ -10,7 +10,7 @@ VARS=$(TOP)/Makefile.conf
 
 include $(VARS)
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall  -fopenmp
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -Wextra -Weffc++ -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp

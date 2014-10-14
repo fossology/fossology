@@ -46,15 +46,15 @@ class TestPgDb
     if (!is_callable('pg_connect')) {
       throw new \Exception("php-psql not found");
     }
+    $sub = chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122));
     if (!isset($dbName))
     {
-      $sub = chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122));
-      $dbName = "fosstest".time().$sub;
+      $dbName = "fosstestone";
     }
     $this->dbName = $dbName;
     $this->ensurePgPassFileEntry();
     
-    $this->sys_conf = sys_get_temp_dir()."/$dbName";
+    $this->sys_conf = sys_get_temp_dir()."/$dbName".time().$sub;
     if(!mkdir($this->sys_conf,$mode=0755))
     {
       throw new \Exception("FATAL! Cannot create test repository at ".$this->sys_conf);
@@ -72,11 +72,8 @@ class TestPgDb
     exec($cmd="psql -Ufossy -h localhost -l | grep -q $dbName", $cmdOut, $cmdRtn);
     if($cmdRtn == 0)
     {
-      echo "NOTE: $dbName database already exists, not creating";
       exec($cmd="createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
-      if($cmdRtn == 0)
-        echo "NOTE: plpgsql already exists in $dbName database\n";
-      else
+      if($cmdRtn != 0)
       {
         exec($cmd="createlang -Ufossy -h localhost plpgsql $dbName", $cmdOut, $cmdRtn);
         if($cmdRtn != 0)
@@ -102,13 +99,25 @@ class TestPgDb
     
     require (dirname(dirname(__FILE__)).'/common-container.php');
     global $container;
-    // $logger = $container->get('logger');
-    $logger = new Logger('default');
+    $logger = new Logger('default'); // $container->get('logger');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.pg.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
+    $this->dropAllTables();
+  }
+  
+  private function dropAllTables()
+  {
+    $this->dbManager->prepare(__METHOD__.'.get',"SELECT table_name FROM information_schema.tables WHERE table_schema=$1");
+    $res = $this->dbManager->execute(__METHOD__.'.get',array('public'));
+    $tableNames = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    foreach($tableNames as $row){
+      $name = $row['table_name'];
+      $this->dbManager->queryOnce("DROP TABLE $name",$sqlLog=__METHOD__.".$name");
+    }
   }
   
   public function ensurePgPassFileEntry()
@@ -138,13 +147,19 @@ class TestPgDb
   function __destruct()
   {
     $this->dbManager = null;
-    if(!pg_close($this->connection))
+    if (!pg_close($this->connection))
+    {
       throw new \Exception('Could not close connection');
+    }
     $this->connection = null;
     
     $existCmd = "psql -Ufossy -h localhost -l | grep -q ".$this->dbName;
     exec($existCmd, $existkOut, $existRtn);
-    if($existRtn == 0)
+    if($existRtn != 0)
+    {
+      echo "NOTE: database ".$this->dbName." does not exist, nothing to delete\n";
+    }
+/*    else    
     {
       $dropCmd = "dropdb -Ufossy -h localhost ".$this->dbName;
       exec($dropCmd, $dropOut, $dropRtn);
@@ -153,18 +168,12 @@ class TestPgDb
         echo("ERROR: failed to delete database ".$this->dbName);
       }
     }
-    else
-    {
-      echo "NOTE: database ".$this->dbName." does not exist, nothing to delete\n";
-    }
-
-    /* 
-     */
+ * 
+ */
     foreach (glob($this->sys_conf."/*.*") as $filename) {
       unlink($filename);
-    rmdir($this->sys_conf);
-}
-    
+    }
+    rmdir($this->sys_conf);   
   }
 
   private function dirnameRec($path, $depth = 1)
@@ -192,8 +201,6 @@ class TestPgDb
     return ($uid_info['name'] !== 'root');
   }
   
-
-
   
   /**
    * @param array $tableList
@@ -212,7 +219,6 @@ class TestPgDb
       foreach ($tableCols as $attributes)
       {
         $this->dbManager->queryOnce($attributes["ADD"]);
-//        $this->dbManager->queryOnce($attributes["ALTER"]);
       }
     }
   }

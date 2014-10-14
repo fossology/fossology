@@ -35,6 +35,8 @@ class Highlight extends Object
   const COPYRIGHT = "C";
   const URL = "U";
   const EMAIL = "E";
+  const IP = "I";
+  const ECC = "X";
   const UNDEFINED = "any";
 
   /**

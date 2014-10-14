@@ -1,20 +1,20 @@
 
-<form method="post" id="CopyRightForm">
+<form method="post" id= {{ formName }}>
     <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
     <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
     <table>
         <tr>
             <td>
                 <div class="groupBox">
-                    <button type="submit" name="update"  id="prev" hidden >&lt;</button>
-                    <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
-                    <button type="submit" name="update" id="next" hidden  >&gt;</button>
+                  <button type="submit" name="update"  id="prev" disabled >&lt;</button>
+                  <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+                  <button type="submit" name="update" id="next" disabled  >&gt;</button>
                 </div>
             </td>
             <td>
                 <p>
-                    <input type="radio" name="FileSelection" id="FileSelection" value="none"> {% trans "Go through all files" %}<br>
-                    <input type="radio" name="FileSelection" id="FileSelection" value="noCopyright"> {% trans "Go through all files with COPYRIGHT/EMAIL/URL" %}<br>
+                  <input type="radio" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
+                  <input type="radio" name="FileSelection" id="FileSelection" value="noCopyright"> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
                 </p>
             </td>
         </tr>
