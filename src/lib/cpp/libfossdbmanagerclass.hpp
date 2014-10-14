@@ -29,6 +29,7 @@ public :
   DbManager(int* argc, char** argv);
   DbManager(fo_dbManager* dbManager);
   DbManager(DbManager& dbManager) = delete;
+  DbManager operator=(const DbManager&) = delete;
   ~DbManager();
 
   PGconn* getConnection() const;
