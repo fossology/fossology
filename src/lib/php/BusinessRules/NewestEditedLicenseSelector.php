@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 namespace Fossology\Lib\BusinessRules;
-
+use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Util\Object;
 
@@ -100,13 +100,20 @@ class NewestEditedLicenseSelector extends Object
 // $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
     //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
     //! misleading folder content overviews in the license browser and in the count of license findings
+    $out =array ();
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
       if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
       {
-        return $clearingDecWithLicenses;
+        $utid = $clearingDecWithLicenses->getUploadTreeId();
+        $out[$utid] = $clearingDecWithLicenses;
       }
     }
+    
+    if(count($out) > 0) {
+      return $this->flatten($out);
+    }
+    
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
       if ($clearingDecWithLicenses->getType() == ClearingDecision::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
@@ -116,4 +123,27 @@ class NewestEditedLicenseSelector extends Object
     }
     return null;
   }
+
+
+  /**
+   * @param ClearingDecision[] $in
+   * @return ClearingDecision
+   */
+  private function flatten($in)
+  {
+    $licenses = array();
+    foreach ($in as $clearingD) {
+     $licenses = array_merge($licenses, $clearingD->getLicenses());
+     $pfileId = $clearingD->getPfileId();
+    }
+    $out = ClearingDecisionBuilder::create()
+            ->setLicenses(array_unique($licenses) )
+            ->setSameUpload(true)
+            ->setPfileId($pfileId)
+            ->setScope('upload')
+            ->setType(ClearingDecision::IDENTIFIED)
+            ->build();
+    return $out;
+  }
+        
 }

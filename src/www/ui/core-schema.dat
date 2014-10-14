@@ -545,7 +545,7 @@
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" boolean;";
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" bool;";
   $Schema["TABLE"]["clearing_decision"]["is_global"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"is_global\" SET NOT NULL, ALTER COLUMN \"is_global\" SET DEFAULT false;";
   $Schema["TABLE"]["clearing_decision"]["is_global"]["UPDATE"] = "";
 
@@ -576,8 +576,8 @@
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_licenses"]["removed"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" boolean;";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT FALSE;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" bool;";
+  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT false;";
   $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
 
 
@@ -1148,7 +1148,7 @@
   $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"removing\" IS 'true if removing, false if adding';";
-  $Schema["TABLE"]["license_ref_bulk"]["removing"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"removing\" boolean;";
+  $Schema["TABLE"]["license_ref_bulk"]["removing"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"removing\" bool;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"removing\" SET NOT NULL, ALTER COLUMN \"removing\" SET DEFAULT false;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["UPDATE"] = "";
 
@@ -2291,13 +2291,13 @@
   $Schema["TABLE"]["upload"]["priority"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["assignee"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["assignee"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"assignee\" int4 default 1;";
-  $Schema["TABLE"]["upload"]["assignee"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"assignee\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["assignee"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"assignee\" int4;";
+  $Schema["TABLE"]["upload"]["assignee"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"assignee\" DROP NOT NULL, ALTER COLUMN \"assignee\" SET DEFAULT 1;";
   $Schema["TABLE"]["upload"]["assignee"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["status_fk"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_fk\" int4 default 1;";
-  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_fk\" int4;";
+  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_fk\" DROP NOT NULL, ALTER COLUMN \"status_fk\" SET DEFAULT 1;";
   $Schema["TABLE"]["upload"]["status_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["status_comment"]["DESC"] = "";
@@ -2327,7 +2327,7 @@
   $Schema["TABLE"]["license_decision_event"]["rf_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["is_removed"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"is_removed\" IS 'true: add license, false: remove license, null: only change comment';";
-  $Schema["TABLE"]["license_decision_event"]["is_removed"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_removed\" boolean;";
+  $Schema["TABLE"]["license_decision_event"]["is_removed"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_removed\" bool;";
   $Schema["TABLE"]["license_decision_event"]["is_removed"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["user_fk"]["DESC"] = "";
@@ -2345,7 +2345,7 @@
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_global\" boolean;";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_global\" bool;";
   $Schema["TABLE"]["license_decision_event"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"is_global\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["is_global"]["UPDATE"] = "";
 
