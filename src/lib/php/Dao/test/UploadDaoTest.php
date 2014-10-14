@@ -189,7 +189,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
    * @param $subentries
    * @return array
    */
-  protected function prepareModularTable($subentries=array())
+  protected function prepareModularTable($subentries = array())
   {
     $right_base = 5 + count($subentries) * 2;
 
@@ -295,6 +295,11 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
    * R                                                  14               3686
 
    */
+
+  private $entries = array(
+      3653, 3668, 3683, 3685, 3671, 3665, 3676, 3675, 3681, 3677, 3673, 3658, 3660, 3686,
+  );
+
   protected function getTestFileStructure()
   {
     return array(
@@ -331,7 +336,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     );
   }
 
-  public function testGetNextItemUsesRecursiveAndRegularSearchAsFallback() {
+  public function testGetNextItemUsesRecursiveAndRegularSearchAsFallback()
+  {
     $this->prepareUploadTree($this->getTestFileStructure());
 
     // L1 -> N1
@@ -339,73 +345,59 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($nextItem->getId(), is(3665));
   }
 
-  public function testGetPrevItemUsesRecursiveAndRegularSearchAsFallback() {
+  public function testGetPrevItemUsesRecursiveAndRegularSearchAsFallback()
+  {
     $this->prepareUploadTree($this->getTestFileStructure());
 
     $nextItem = $this->uploadDao->getPreviousItem(32, 3666);
     assertThat($nextItem->getId(), is(3671));
   }
 
-  public function testGetNextItemUsesRecursiveOnly() {
+  public function testGetNextItemUsesRecursiveOnly()
+  {
     $this->prepareUploadTree($this->getTestFileStructure());
 
     $nextItem = $this->uploadDao->getNextItem(32, 3674);
     assertThat($nextItem->getId(), is(3676));
   }
 
-  public function testGetPrevItemUsesRecursiveOnly() {
+  public function testGetPrevItemUsesRecursiveOnly()
+  {
     $this->prepareUploadTree($this->getTestFileStructure());
 
     $nextItem = $this->uploadDao->getPreviousItem(32, 3674);
     assertThat($nextItem->getId(), is(3665));
   }
 
-  public function testGetNextFull() {
+  public function testGetNextFull()
+  {
     $this->prepareUploadTree($this->getTestFileStructure());
 
-    $nextItem = $this->uploadDao->getNextItem(32, 3652);
-    assertThat($nextItem->getId(), is(3653));
+    $previousId = 3650;
+    foreach ($this->entries as $entry) {
+      $nextItem = $this->uploadDao->getNextItem(32, $previousId);
+      assertThat($nextItem->getId(), is($entry));
+      $previousId = $entry;
+    }
 
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3668));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3683));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3685));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3671));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3665));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3676));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3675));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3681));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3677));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3673));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3658));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3660));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
-    assertThat($nextItem->getId(), is(3686));
-
-    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    $nextItem = $this->uploadDao->getNextItem(32, $previousId);
     assertThat($nextItem, is(nullValue()));
+  }
+
+  public function testGetPreviousFull()
+  {
+    $this->prepareUploadTree($this->getTestFileStructure());
+
+    $entries = array_reverse($this->entries);
+
+    $previousId = $entries[0];
+    foreach (array_slice($entries, 1) as $entry) {
+      $previousItem = $this->uploadDao->getPreviousItem(32, $previousId);
+      assertThat($previousItem->getId(), is($entry));
+      $previousId = $entry;
+    }
+
+    $previousItem = $this->uploadDao->getPreviousItem(32, $previousId);
+    assertThat($previousItem, is(nullValue()));
   }
 }

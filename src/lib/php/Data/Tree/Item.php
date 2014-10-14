@@ -116,4 +116,12 @@ class Item {
     return $this->itemTreeBounds->containsFiles();
   }
 
+  /**
+   * @return bool
+   */
+  public function hasParent()
+  {
+    return $this->parentId !== null;
+  }
+
 }

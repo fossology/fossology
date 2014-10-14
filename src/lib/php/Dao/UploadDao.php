@@ -234,11 +234,9 @@ class UploadDao extends Object
         return $nextItem;
       }
 
-      $parent = $item->getParentId();
-
-      if (isset($parent))
+      if ($item->hasParent())
       {
-        $item = $this->getUploadEntryFromView($parent, $uploadTreeView);
+        $item = $this->getUploadEntryFromView($item->getParentId(), $uploadTreeView);
         $enterFolders = false;
       } else
       {
