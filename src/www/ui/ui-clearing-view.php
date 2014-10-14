@@ -134,13 +134,13 @@ class ClearingView extends FO_Plugin
         return;
       }
 
-      $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+      $item = $this->uploadDao->getNextItem($uploadId, $parent);
       if ($uploadTreeId === UploadDao::NOT_FOUND)
       {
         $this->invalidParm = true;
         return;
       }
-
+      $uploadTreeId=$item->getId();
       header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
@@ -155,13 +155,13 @@ class ClearingView extends FO_Plugin
         return;
       }
 
-      $uploadTreeId = $this->uploadDao->getNextItem($uploadId, $parent);
+      $item = $this->uploadDao->getNextItem($uploadId, $parent);
       if ($uploadTreeId === UploadDao::NOT_FOUND)
       {
         $this->invalidParm = true;
         return;
       }
-
+      $uploadTreeId=$item->getId();
       header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
