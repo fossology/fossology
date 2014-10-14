@@ -54,7 +54,6 @@ class agent_reportgen extends FO_Plugin
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
     $Dependencies[] = "agent_nomos";
-    // var_dump($this);
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 }

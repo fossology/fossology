@@ -22,3 +22,7 @@
 #define APPXML "app.xml"
 #define COREXML "core.xml"
 #define HIDDENRELSXML ".rels"
+
+#ifndef FOSSREPO_CONF
+#define FOSSREPO_CONF "/srv/fossology/repository"
+#endif

@@ -50,12 +50,9 @@ char BuildVersion[]="reportgen build version: NULL.\n";
 
 #include "main.h"
 
-FILE* cout;                           ///< the file to print information to
-FILE* cerr;                           ///< the file to print errors to
-FILE* cin;                            ///< the file to read from
-char* test_dir = "testdata/testdata"; ///< the location of the labeled and raw testing data
-const char* Destfldr = "/srv/fossology/repository/localhost/files/report/";
 const char* dirs[] = { "docProps/","_rels/", "word/", "word/_rels/"};
+#define DESTFLDR FOSSREPO_CONF "/localhost/files/report/"
+
 PGconn* pgConn;        // the connection to Database
 fo_dbManager* dbManager;        // the Database Manager
 
@@ -86,18 +83,7 @@ char* createdocxname(char* pckgname)
 
 char* gettargetdir(char* pckgname)
 {
-	char* targetpath = NULL;
-	
-	if(targetpath == NULL)
-	{
-		targetpath = (char*)malloc(sizeof(char)*(strlen(Destfldr)+strlen(pckgname)+1));
-		if(targetpath)
-		{
-			strcpy(targetpath,Destfldr);
-			strcat(targetpath,pckgname);
-		}
-	}
-	return targetpath;
+    return g_strdup_printf(DESTFLDR "%s", pckgname);
 }
 
 int zipdir(char* name)
@@ -106,34 +92,16 @@ int zipdir(char* name)
         int status;
         char* cmd[5] = {NULL, NULL, NULL, NULL, NULL};
         char* targetdir = NULL;
-        char* path = NULL;
         char* zipcmd="/usr/bin/zip";
         char* docxfilename=NULL;
         char* zipname = createzipname(name);
         char* docxfullpath=NULL;
         targetdir = gettargetdir(name);
-        char* dirname = (char*)malloc(sizeof(char)*(strlen(targetdir)+2));
-        strcpy(dirname, targetdir);
-        strcat(dirname,"/");
-        cmd[0] = (char*)malloc(sizeof(char)*(strlen("/usr/bin/zip")+1));
-        strcpy(cmd[0], "/usr/bin/zip");
-        cmd[1] = (char*)malloc(sizeof(char)*(3));
-        strcpy(cmd[1],"-r");
-        cmd[2] = (char*)malloc(sizeof(char)*(strlen(dirname)+strlen(zipname)+1));
-        memset(cmd[2], 0, strlen(dirname) + strlen(zipname)+1);
-        path=(char*)malloc(sizeof(char)*(strlen(dirname) + strlen(zipname)+1));
-        strcpy(path,dirname);
-        strcat(path,zipname); 
-        strcpy(cmd[2], path);//target path for zip file creation
-        docxfilename=createdocxname(name); 
-        docxfullpath=(char*)malloc(sizeof(char)*(strlen(dirname)+strlen(docxfilename)+1));
-        strcpy(docxfullpath,dirname);
-        strcat(docxfullpath,docxfilename);
-        //source pat
-        cmd[3] = (char*)malloc(sizeof(char*)*(strlen(targetdir)+1));
-        memset(cmd[3], 0, strlen(targetdir)+strlen(name)+1);
-        strcpy(cmd[3], dirname);
-        strcat(cmd[3], name);
+        docxfilename = createdocxname(name);
+        docxfullpath = g_strdup_printf("%s/%s", targetdir, docxfilename);
+        cmd[0] = g_strdup("/usr/bin/zip");
+        cmd[1] = g_strdup("-r");
+        cmd[2] = g_strdup_printf("%s/%s", targetdir, zipname);
         if((child_pid = fork()) < 0)
         {
           perror("fork failure");
@@ -141,16 +109,14 @@ int zipdir(char* name)
         }
         if(child_pid == 0)
         {
-          char* chdir_cmd=(char*)malloc(sizeof(char)*strlen(dirname)+strlen(name)+1);
+          char* chdir_cmd = g_strdup_printf("%s/%s", targetdir, name);
           if (chdir_cmd)
           {
-            strcpy(chdir_cmd,dirname);
-            strcat(chdir_cmd,name);
             if(chdir(chdir_cmd) == -1)
             {
               exit(1);
             }
-            free(chdir_cmd);
+            g_free(chdir_cmd);
           }
           else
           {
@@ -175,36 +141,26 @@ int zipdir(char* name)
         {
           wait(&status);
           rename(cmd[2],docxfullpath);
-          printf("rename done\n");
-        }
-        if (dirname)
-        {
-          free(dirname);
         }
         int ip;
         for (ip=0;ip<5;ip++)
         {
           if(cmd[ip])
-            free(cmd[ip]);
+            g_free(cmd[ip]);
         }
-		if (path)
-		{
-			free(path);
-		}
-		if(docxfullpath)
-		{
-			free(docxfullpath);
-		}
-		if(docxfilename)
-		{
-			free(docxfilename);
-		}
-		if(targetdir)
-		{
-		   free(targetdir);
-		   targetdir = NULL;
-		}
-		return 0;
+        if(docxfullpath)
+        {
+          g_free(docxfullpath);
+        }
+        if(docxfilename)
+        {
+          g_free(docxfilename);
+        }
+        if(targetdir)
+        {
+          g_free(targetdir);
+        }
+        return 0;
 }
 
 int createdir(char* path)
@@ -236,41 +192,43 @@ int createdir(char* path)
 
 int createdirinner(char* path)
 {
-	int i=0;
-	char* innerdir = NULL;
-	createdir(path);
-	for(i=0;i<4;i++)
-	{
-		innerdir = (char*)malloc(sizeof(char)*(strlen(path)+strlen(dirs[i])+1));
-		strcpy(innerdir, path);
-		strcat(innerdir, dirs[i]);
-		createdir(innerdir);
-		if(innerdir)
-		{
-		   free(innerdir);
-		   innerdir = NULL;
-		}
-	}
-    return 0;
+  int i=0;
+  char* innerdir = NULL;
+  createdir(path);
+  for(i=0;i<4;i++)
+  {
+    innerdir = g_strdup_printf("%s/%s", path, dirs[i]);
+    if(innerdir)
+    {
+      createdir(innerdir);
+      g_free(innerdir);
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  return 1;
 }
+
+
 int checkdest()
 {
-	char CMD[500];
+	char* CMD = "mkdir -p '" DESTFLDR "' >/dev/null 2>&1";
 	DIR* dir = NULL;	
-	snprintf(CMD,499, "mkdir -p '%s' >/dev/null 2>&1", Destfldr);
-	dir = opendir(Destfldr);
+	dir = opendir(DESTFLDR);
 	if(dir)
 	{
 		closedir(dir);
 		return 1;
-	}	
+	}
 	else
 	{
 		if(system(CMD) == -1)	
 		{
 			return 0;
 		}
-		else 
+		else
 		{
 			return 1;
 		}
@@ -281,33 +239,16 @@ int checkdest()
 
 int createdocxstructure(char* pckgname)
 {
-	//create a folderwith the name pckgname under dest folder
-	char* destlevel = NULL;
-	char* destlevel2 = NULL;
-	destlevel = (char*)malloc(sizeof(char)*(strlen(Destfldr)+strlen(pckgname)+1));
-	if(destlevel)
-	{
-		strcpy(destlevel,Destfldr);
-		strcat(destlevel,pckgname);
-	}
-	
-	destlevel2 = (char*)malloc(sizeof(char*)*(strlen(destlevel)+strlen(pckgname)+2+1));
-	strcpy(destlevel2, destlevel);
-	strcat(destlevel2, "/");
-	strcat(destlevel2, pckgname);
-	strcat(destlevel2, "/");
-	createdirinner(destlevel2);
-	if(destlevel2)
-        {
-           free(destlevel2);
-           destlevel2 = NULL;
-        }
-        if(destlevel)
-        {
-	   free(destlevel);
-	   destlevel = NULL;   	
-	}
-    return 0;
+  gchar* dest = g_strdup_printf(DESTFLDR "%s/%s/", pckgname, pckgname);
+
+  int result = 0;
+  if (dest)
+  {
+    result = createdirinner(dest);
+    g_free(dest);
+  }
+
+  return result;
 }
 
 char* replaceunderscore(char* systime)
@@ -579,9 +520,6 @@ dbManager = fo_dbManager_new(pgConn);
 SVN_REV = fo_sysconfig("reportgen", "SVN_REV");
 VERSION = fo_sysconfig("reportgen", "VERSION");
 sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
-cout = stdout;
-cerr = stdout;
-cin = stdin;
 
 agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
 user_pk = fo_scheduler_userID();
