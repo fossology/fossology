@@ -10,7 +10,8 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = reportgen
-EXE_COPY = getCleared getClearedCopy
+EXE_COPY = getCleared.php getClearedCopy.php
+WRAP = getCleared getClearedCopy
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
 DEF          = -DDATADIR='"$(MODDIR)"'
@@ -40,10 +41,14 @@ $(OBJECTS): %.o: %.c %.h
 install: all
 	@echo "make reportgen agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	for file in $(EXE_COPY); do\
+	@for file in $(EXE_COPY); do\
+		echo "installing $$file"; \
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file; \
 	done
-	# TODO use php fo_wrapper
+	@for file in $(WRAP); do \
+		echo "Making wrapper for $$file"; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file; \
+	done
 
 
 uninstall:
