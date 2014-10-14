@@ -835,6 +835,11 @@
   $Schema["TABLE"]["job"]["job_user_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_user_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["job"]["job_user_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["job"]["job_group_fk"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_group_fk\" IS 'Job submitted by this group';";
+  $Schema["TABLE"]["job"]["job_group_fk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_group_fk\" int4;";
+  $Schema["TABLE"]["job"]["job_group_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["job"]["job_group_fk"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["DESC"] = "COMMENT ON COLUMN \"jobdepends\".\"jdep_jq_fk\" IS 'jdep_jq_fk depends on jdep_jq_depends_fk';";
   $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ADD"] = "ALTER TABLE \"jobdepends\" ADD COLUMN \"jdep_jq_fk\" int4;";

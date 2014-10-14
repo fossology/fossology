@@ -49,7 +49,8 @@ class admin_upload_delete extends FO_Plugin {
 
     /* Prepare the job: job "Delete" */
     $user_pk = $SysConf['auth']['UserId'];
-    $jobpk = JobAddJob($user_pk, "Delete", $uploadpk);
+    $group_pk = $SysConf['auth']['GroupId'];
+    $jobpk = JobAddJob($user_pk, $group_pk, "Delete", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);

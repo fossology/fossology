@@ -272,6 +272,7 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEmail'] = $UserRow['user_email'];
     $_SESSION['UserEnote'] = $UserRow['email_notify'];
     $_SESSION['GroupId'] = $UserRow['group_fk'];
+    $SysConf['auth']['GroupId'] = $UserRow['group_fk'];
     $_SESSION['GroupName'] = $UserRow['group_name'];
   }
 

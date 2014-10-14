@@ -82,7 +82,7 @@ const char* basic_checkout =
     "   LIMIT 10;";
 
 const char* jobsql_information =
-    " SELECT user_pk, job_priority FROM users "
+    " SELECT user_pk, job_priority, job_group_fk as group_pk FROM users "
     "   LEFT JOIN job ON job_user_fk = user_pk "
     "   WHERE job_pk = '%s';";
 

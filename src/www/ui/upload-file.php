@@ -85,6 +85,7 @@ class upload_file extends FO_Plugin {
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
     $user_pk = $SysConf['auth']['UserId'];
+    $group_pk = $SysConf['auth']['GroupId'];
     $uploadpk = JobAddUpload($user_pk, $ShortName, $originName, $Desc, $Mode, $folder_pk, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -108,7 +109,7 @@ class upload_file extends FO_Plugin {
     unlink($UploadedFile);
 
     /* Create Job */
-    $job_pk = JobAddJob($user_pk, $ShortName, $uploadpk);
+    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadpk);
     global $Plugins;
     $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
 

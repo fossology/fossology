@@ -240,6 +240,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $user_pk = $SysConf['auth']['UserId'];
+  $group_pk = $SysConf['auth']['GroupId'];
   /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
   $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
   if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
@@ -284,10 +285,10 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Prepare the job: job "wget" */
   if ($Verbose) {
-    print "JobAddJob($user_pk, wget, $UploadPk);\n";
+    print "JobAddJob($user_pk, $group_pk, wget, $UploadPk);\n";
   }
   if (!$Test) {
-    $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
+    $jobpk = JobAddJob($user_pk, $group_pk, "wget", $UploadPk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       echo $text;
