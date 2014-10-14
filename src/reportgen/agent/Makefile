@@ -41,9 +41,11 @@ $(OBJECTS): %.o: %.c %.h
 install: all
 	@echo "make reportgen agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
+	@echo "TODO: do not install in the wrong location"
+	#$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file;
 	@for file in $(EXE_COPY); do\
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
 	@for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \

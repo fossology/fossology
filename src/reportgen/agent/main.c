@@ -52,6 +52,7 @@ char BuildVersion[]="reportgen build version: NULL.\n";
 
 const char* dirs[] = { "docProps/","_rels/", "word/", "word/_rels/"};
 #define DESTFLDR FOSSREPO_CONF "/localhost/files/report/"
+#define CLEARINGREPMID "_clearing_report_"
 
 PGconn* pgConn;        // the connection to Database
 fo_dbManager* dbManager;        // the Database Manager
@@ -497,10 +498,9 @@ char* tbcolSkewed[3];
 char* section1=NULL;
 char* finaldocxpath = NULL;
 
-char* finalpckgname = NULL;
+char* outputPkgName = NULL;
 
-char* packagename = "librex";
-char* clearingrepmid = "_clearing_report_";
+char* packagename = NULL;
 
 char agent_rev[myBUFSIZ];
 char *agent_desc = "reportgen agent";
@@ -526,7 +526,8 @@ user_pk = fo_scheduler_userID();
 while(fo_scheduler_next()!=NULL)
 {
 uploadPk=atoi(fo_scheduler_current());
-ars_pk = fo_WriteARS(pgConn, 0, uploadPk, agent_pk, AGENT_ARS, NULL, 0); 
+ars_pk = fo_WriteARS(pgConn, 0, uploadPk, agent_pk, AGENT_ARS, NULL, 0);
+
 uploadId = uploadPk;
 sprintf(UploadIdStr,"%d",uploadId);
 /*Check Permissions */
@@ -537,37 +538,31 @@ if (GetUploadPerm(pgConn, uploadPk, user_pk) < PERM_WRITE)
 checkdest();
 char* localtime1 = gettime();
 char* formattedtime = replaceunderscore(localtime1);
-char* Sql_UploadName=(char*)malloc(sizeof(char)*(69+1+strlen(UploadIdStr)));
-sprintf(Sql_UploadName,"select ufile_name from uploadtree where upload_fk=%d and parent is null",uploadId);
-PGresult* ResQ=PQexec(pgConn,Sql_UploadName);
-if (Sql_UploadName)
-{
-	free(Sql_UploadName);
-        Sql_UploadName = NULL;
+
+
+PGresult* uploadNameRes = fo_dbManager_Exec_printf(dbManager, "select ufile_name from uploadtree where upload_fk=%d and parent is null", uploadId);
+if (uploadNameRes) {
+  if (PQntuples(uploadNameRes)>0)
+  {
+    outputPkgName = g_strdup_printf("%s%s%s", PQgetvalue(uploadNameRes,0,0), CLEARINGREPMID, formattedtime);
+  }
+  PQclear(uploadNameRes);
 }
 
-if (PQntuples(ResQ)>0)
+if (!outputPkgName)
 {
-	packagename=(char*)malloc(sizeof(char)*(strlen(PQgetvalue(ResQ,0,0))+1));
-	sprintf(packagename,"%s",PQgetvalue(ResQ,0,0));	
+  printf("FATAL: cannot determine a name for upload=%d\n", uploadId);
+  fo_scheduler_disconnect(1);
+  exit(1);
 }
 
-finalpckgname = (char*)malloc(sizeof(char)*(strlen(packagename)+ strlen(clearingrepmid)+ strlen(formattedtime) +1));
-strcpy(finalpckgname, packagename);
-if (packagename)
-{
-	free(packagename);
-    packagename = NULL;
-}
-strcat(finalpckgname, clearingrepmid);
-strcat(finalpckgname, formattedtime);
-createdocxstructure(finalpckgname);
+createdocxstructure(outputPkgName);
 //------------Below: Code to create XML files---------//
-char* fullpathWithoutSlash = gettargetdir(finalpckgname);
-char* fullpath=(char*)malloc(sizeof(char)*(strlen(fullpathWithoutSlash)+2+strlen(finalpckgname)+1));
-sprintf(fullpath,"%s/%s/",fullpathWithoutSlash,finalpckgname);
-finaldocxpath=(char*)malloc(sizeof(char)*(strlen(fullpath)+strlen(finalpckgname)+strlen(".docx")+1));
-sprintf(finaldocxpath,"%s/%s.docx",fullpathWithoutSlash,finalpckgname);
+char* fullpathWithoutSlash = gettargetdir(outputPkgName);
+char* fullpath=(char*)malloc(sizeof(char)*(strlen(fullpathWithoutSlash)+2+strlen(outputPkgName)+1));
+sprintf(fullpath,"%s/%s/",fullpathWithoutSlash,outputPkgName);
+finaldocxpath=(char*)malloc(sizeof(char)*(strlen(fullpath)+strlen(outputPkgName)+strlen(".docx")+1));
+sprintf(finaldocxpath,"%s/%s.docx",fullpathWithoutSlash,outputPkgName);
 char* filexmlpath = (char*)malloc(sizeof(char)*(strlen(fullpath)+strlen("word/")+1));
 strcpy(filexmlpath,fullpath);
 strcat(filexmlpath, "word/");
@@ -1105,8 +1100,7 @@ free(filexmlpath);
 free(resxmlpath);
 free(docpropspath);
 free(hiddenrelspath);
-zipdir(finalpckgname);
-PQclear(ResQ);
+zipdir(outputPkgName);
 char* updatereporttable=(char*)malloc(sizeof(char)*(44+DECLEN+1));
 sprintf(updatereporttable,"select job_pk from job where job_upload_fk=%d",uploadId);
 PGresult* resrep=PQexec(pgConn,updatereporttable);
@@ -1135,10 +1129,10 @@ if (updatereporttable)
 	free(updatereporttable);
 }
 PQclear(resrep);	 
-if (finalpckgname)
+if (outputPkgName)
 {
- free(finalpckgname);	
- finalpckgname = NULL;
+ free(outputPkgName);
+ outputPkgName = NULL;
 } 
 if (finaldocxpath)
 {
