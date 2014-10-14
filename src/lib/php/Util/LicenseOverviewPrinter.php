@@ -460,24 +460,6 @@ class LicenseOverviewPrinter extends Object
    ' . $typeRadio . '</fieldset>';
   }
 
-  /**
-   * @param $clearingDecWithLicenses
-   * @return string
-   */
-  public function createWrappedRecentLicenseClearing($clearingDecWithLicenses)
-  {
-    $output = "<div id=\"recentLicenseClearing\" name=\"recentLicenseClearing\">";
-    if (!empty($clearingDecWithLicenses))
-    {
-      $output_TMP = $this->createRecentLicenseClearing($clearingDecWithLicenses);
-      if(!empty($output_TMP)) {
-        $output .= $output_TMP;
-      }
-    }
-    $output .= "</div>";
-    return $output;
-  }
-
 
   public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
                                    $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){

@@ -38,7 +38,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
    * @param $ud
    * @return ClearingDecision
    */
-  public function clearingDec($id, $isLocal, $scope, $name, $ud)
+  public function clearingDec($id, $isLocal, $scope, $name, $ud, $pfileId=1,$uploadTreeId=1)
   {
     $clearingDecision = ClearingDecisionBuilder::create()
         ->setClearingId($id)
@@ -46,7 +46,9 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setSameFolder($isLocal)
         ->setSameUpload($isLocal)
         ->setType($ud)
-        ->setScope($scope);
+        ->setScope($scope)
+        ->setPfileId($pfileId)
+        ->setUploadTreeId($uploadTreeId);
 
     $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
     $clearLic = new ClearingLicense($licref, false);
@@ -157,7 +159,6 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->clearingDec(0, true, 'upload', "B", ClearingDecision::IDENTIFIED)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
-
     assertThat(implode(", ", $licenses), is("BshortName"));
   }
 
@@ -169,7 +170,6 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->clearingDec(0, false, 'global', "B", ClearingDecision::IDENTIFIED)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
-
     assertThat(implode(", ", $licenses), is("BshortName"));
   }
 
@@ -184,4 +184,14 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", ClearingDecision::IDENTIFIED)), is(false));
   }
 
+  public function testSelectNewestEditedLicensePerFileID()
+  {
+    $editedLicensesArray = array(
+        $this->clearingDec(2, true, 'upload', "Test", ClearingDecision::IDENTIFIED,1,1),
+        $this->clearingDec(1, true, 'upload', "Aesa", ClearingDecision::IDENTIFIED,1,2),
+    );
+    $decision = $this->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($editedLicensesArray);
+    $licenses = $decision->getLicenses();
+    assertThat(implode(", ", $licenses), is("TestshortName, AesashortName"));
+  }
 }
