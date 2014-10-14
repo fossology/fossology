@@ -359,4 +359,9 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $nextItem = $this->uploadDao->getPreviousItem(32, 3674);
     assertThat($nextItem->getId(), is(3665));
   }
+
+  public function testGetNextFull() {
+    $nextItem = $this->uploadDao->getNextItem(32, 3652);
+    assertThat($nextItem->getId(), is(3653));
+  }
 }

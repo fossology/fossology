@@ -100,6 +100,17 @@ class Item {
     return !Isartifact($this->fileMode) && !Isdir($this->fileMode) && !Iscontainer($this->fileMode);
   }
 
+  /**
+   * @return bool
+   */
+  public function isContainer()
+  {
+    return Iscontainer($this->fileMode);
+  }
+
+  /**
+   * @return bool
+   */
   public function containsFileTreeItems()
   {
     return $this->itemTreeBounds->containsFiles();
