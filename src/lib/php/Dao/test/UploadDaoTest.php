@@ -361,7 +361,51 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   }
 
   public function testGetNextFull() {
+    $this->prepareUploadTree($this->getTestFileStructure());
+
     $nextItem = $this->uploadDao->getNextItem(32, 3652);
     assertThat($nextItem->getId(), is(3653));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3668));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3683));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3685));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3671));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3665));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3676));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3675));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3681));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3677));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3673));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3658));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3660));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem->getId(), is(3686));
+
+    $nextItem = $this->uploadDao->getNextItem(32, $nextItem->getId());
+    assertThat($nextItem, is(nullValue()));
   }
 }

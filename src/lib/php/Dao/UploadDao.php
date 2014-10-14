@@ -60,8 +60,7 @@ class UploadDao extends Object
     $uploadEntry = $this->dbManager->getSingleRow("$uploadTreeViewQuery SELECT * FROM UploadTreeView WHERE uploadtree_pk = $1",
         array($itemId), $stmt);
 
-    $item = $this->createItem($uploadEntry, $uploadTreeView->getUploadTreeTableName());
-    return $item;
+    return $uploadEntry ? $this->createItem($uploadEntry, $uploadTreeView->getUploadTreeTableName()) : null;
   }
 
   /**
@@ -278,7 +277,11 @@ class UploadDao extends Object
         $firstIteration = false;
         if ($enterItem)
         {
-            $nextItem = $this->getNewItemByIndex($item->getId(), max(0, $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1), $uploadTreeView);
+            $nextItem = $this->getNewItemByIndex(
+                $item->getId(),
+                $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1,
+                $uploadTreeView
+            );
         }
       } else
       {
@@ -359,6 +362,9 @@ class UploadDao extends Object
    */
   protected function getNewItemByIndex($parent, $targetOffset, UploadTreeView $uploadTreeView)
   {
+    if ($targetOffset < 0) {
+      return null;
+    }
     $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
 
     $statementName = __METHOD__;
