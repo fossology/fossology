@@ -302,6 +302,31 @@ char* gettime()
 	return asctime(timeinfo);
 }
 
+
+gchar* getUsrGrpName(fo_dbManager* dbManager)
+{
+  gchar* usrGrpName = NULL;
+  PGresult* usrGrpNameRes = fo_dbManager_Exec_printf(
+    dbManager,
+    "SELECT user_name, group_name FROM users,groups WHERE user_pk = %d AND group_pk = %d",
+    fo_scheduler_userID(), fo_scheduler_groupID()
+  );
+
+  if (usrGrpNameRes)
+  {
+    if (PQntuples(usrGrpNameRes)>0)
+    {
+      usrGrpName = g_strdup_printf("%s (%s)", PQgetvalue(usrGrpNameRes, 0, 0), PQgetvalue(usrGrpNameRes, 0, 1));
+    }
+    PQclear(usrGrpNameRes);
+  }
+
+  if (!usrGrpName)
+    usrGrpName = g_strdup("[unknown]");
+
+  return usrGrpName;
+}
+
 char* getParentFromUploadtreePk(long uploadtree_pk)
 {
   char* parent = NULL;
@@ -640,44 +665,30 @@ addheading(body, "Component Clearing Report for 3rd Party SW - V1");
 
 mxml_node_t* p1 = (mxml_node_t*)createnumsection(body,"0","2");
 
-section1=(char*)malloc(sizeof(char)*(strlen(formattedtime)+4+1+1));
-char* day1=(char*)malloc(sizeof(char)*(4));
-strncpy(day1,formattedtime,3);
-day1[3]='\0';
-sprintf(section1,"%s %s by ",day1,formattedtime+3);
-if (day1)
-{
-	free(day1);
-}
+char* formattedDate = malloc(strlen(formattedtime)+4+1+1);
 
 // TODO set correct user and group name
-char* usergroupid_name=(char*)malloc(sizeof(char)*(285+DECLEN+1));
-sprintf(usergroupid_name,"select username,group_user_member,groups.group_name from user_login,groups where groups.group_pk=group_user_member and logintime = (select max(logintime) from user_login where user_pk in (select job_user_fk from job where job_pk=(select max(job_pk) from job where job_upload_fk=%d)))",uploadId);
-PGresult* username_gid_query=PQexec(pgConn,usergroupid_name);
-if (usergroupid_name)
+char* day1 = malloc(4);
+if (day1)
 {
-	free(usergroupid_name);
+  strncpy(day1,formattedtime,3);
+  day1[3]='\0';
+  sprintf(formattedDate,"%s %s",day1,formattedtime+3);
+  free(day1);
 }
-if (PQntuples(username_gid_query)>0)
-{
-	section1=(char*)realloc(section1,strlen(section1)+strlen(PQgetvalue(username_gid_query,0,0))+strlen(" (")+strlen(PQgetvalue(username_gid_query,0,2))+strlen(")")+1);
-	strcat(section1,PQgetvalue(username_gid_query,0,0));
-	strcat(section1," (");
-	strcat(section1,PQgetvalue(username_gid_query,0,2));
-	strcat(section1,")");			
-	addparaheading(p1,NULL, section1,"0","2");
-}
-else
-{
-	section1=(char*)realloc(section1,strlen(section1)+strlen("[unknown]")+1);
-        strcat(section1,"[unknown]");
-	addparaheading(p1,NULL, section1,"0","2");
-}
+
+char* usrGrpName = getUsrGrpName(dbManager);
+
+section1 = g_strdup_printf("%s by %s", formattedDate, usrGrpName);
+
+addparaheading(p1, NULL, section1, "0","2");
 
 if (section1)
-free(section1);
-
-PQclear(username_gid_query);
+  free(section1);
+if (usrGrpName)
+  free(usrGrpName);
+if (formattedDate)
+  free(formattedDate);
 
 mxml_node_t* p2 = (mxml_node_t*)createnumsection(body,"0","2");
 
@@ -767,6 +778,7 @@ else
   fo_scheduler_disconnect(5);
   exit(5);
 }
+table_free(tableHistog);
 
 //TODO Global licenses
 #if 0
@@ -824,7 +836,7 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses - DO NOT USE
 addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 //table 3 for other license data
 
-rg_table* tableOthers = table_new(body, 3, "2000", "6000", "2000");
+rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
   char* jsonLicenses = getClearedLicenses();
@@ -846,7 +858,7 @@ table_addRow(tableOthers, "license", "text", "files");
 addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
 //table 4 for other license data
 
-rg_table* tableCopyright = table_new(body, 3, "2000", "6000", "2000");
+rg_table* tableCopyright = table_new(body, 3, "2638", "5000", "2000");
 table_addRow(tableCopyright, "copyright", "text", "files");
 {
   char* jsonCopyright = getClearedCopyright();
@@ -1152,7 +1164,6 @@ for (uloop2=0;uloop2<3;uloop2++)
 }
 
 table_free(tableOthers);
-table_free(tableHistog);
 table_free(tableCopyright);
 table_free(tableSecurity);
 
