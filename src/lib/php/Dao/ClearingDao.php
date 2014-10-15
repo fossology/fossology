@@ -454,9 +454,9 @@ insert into clearing_decision (
     return $events;
   }
 
-  public function getCurrentSelectedLicenses($userId, $itemId)
+  public function getCurrentLicenseDecisions($userId, $itemId)
   {
-    return $this->getCurrentSelectedLicensesFor(
+    return $this->getCurrentLicenseDecisionsFor(
         $this->getRelevantLicenseDecisionEvents($userId, $itemId)
     );
   }
@@ -465,7 +465,7 @@ insert into clearing_decision (
    * @param LicenseDecisionEvent[] $events
    * @return LicenseDecisionEvent[][]
    */
-  public function getCurrentSelectedLicensesFor($events)
+  public function getCurrentLicenseDecisionsFor($events)
   {
     $addedLicenses = array();
     $removedLicenses = array();

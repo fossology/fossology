@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
@@ -113,7 +114,7 @@ class ClearingDecisionEventProcessor
    * @param int $userId
    * @return array
    */
-  public function getCurrentSelectedLicenses(ItemTreeBounds $itemTreeBounds, $userId)
+  public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
@@ -122,7 +123,7 @@ class ClearingDecisionEventProcessor
 
     $agentLatestMap = $this->getLatestAgents($agentDetectedLicenses, $uploadId);
 
-    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentSelectedLicenses($userId, $uploadTreeId);
+    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
 
     $currentLicenses = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
 
@@ -191,7 +192,7 @@ class ClearingDecisionEventProcessor
     $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
     $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
-    list($added, $removed) = $this->getCurrentSelectedLicenses($itemBounds, $userId);
+    list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
 
     $lastDecision = null;
     if ($clearingDecision)
@@ -233,8 +234,21 @@ class ClearingDecisionEventProcessor
     {
       // handle "No license known"
       $insertDecision = true;
-      $added = array();
       $removedSinceLastDecision = array();
+      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
+      foreach($added as $licenseShortName => $licenseDecisionResult) {
+        /** @var LicenseDecisionResult $licenseDecisionResult */
+        $isglobal =$licenseDecisionResult->hasLicenseDecisionEvent()? $licenseDecisionResult->getLicenseDecisionEvent()->isGlobal():true;
+        $this->clearingDao->removeLicenseDecision($itemBounds->getUploadTreeId(), $userId,
+            $licenseDecisionResult->getLicenseId(), $type, $isglobal);
+        $licenseDecisionEventBuilder
+            ->setLicenseRef($licenseDecisionResult->getLicenseRef());
+        //we only need the license ID so the builder defaults should suffice for the rest
+        $removedSinceLastDecision[$licenseShortName] = $licenseDecisionEventBuilder->build();
+      }
+
+      $added = array();
+
     }
 
     if ($insertDecision)

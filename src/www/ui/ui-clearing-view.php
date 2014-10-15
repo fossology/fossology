@@ -22,6 +22,8 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\ChangeLicenseUtility;
@@ -327,7 +329,7 @@ class ClearingView extends FO_Plugin
 
     $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem);
 
-    if($type == ClearingDecisionTypes::NO_LICENSE_KNOWN) {
+    if($type == ClearingDecision::NO_LICENSE_KNOWN) {
      //TODO
     }
 
