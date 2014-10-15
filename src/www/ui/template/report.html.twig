@@ -16,7 +16,8 @@
           resultEntity.html("<a href='{{ downloadLink }}'>Download Report</a>");
         }
         function genereationFailed(jqPk) {
-          resultEntity.html("report generation failed: " + linkToJob(jqPk));
+          var text = (jqPk>0) ? linkToJob(jqPk) : "no job scheduled";
+          resultEntity.html("report generation failed: " + text);
         }
 
         function addLinkAndQueueAjaxPolling() {
