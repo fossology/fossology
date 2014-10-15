@@ -35,11 +35,9 @@
                 {{ 'Clearing decision type'| trans }}
             </legend>
             <input type="radio" name="clearingTypes" value="2" /> {{ 'No license known'| trans }}
-           {% for typeKey,typeText in clearingTypes %}
+            {% for typeKey,typeText in clearingTypes %}
             <br/>
-            <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
-            value="{{ typeKey }}" />
-            {{ typeText }}
+            <input type="radio" name="clearingTypes" value="{{ typeKey }}" {% if typeKey==selectedClearingType %}checked="checked"{% endif %}/> {{ typeText }}
             {% endfor %}
         </fieldset>
     </div>

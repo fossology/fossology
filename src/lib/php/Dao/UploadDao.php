@@ -31,15 +31,9 @@ require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
 class UploadDao extends Object
 {
-
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   public function __construct(DbManager $dbManager)
@@ -396,8 +390,7 @@ class UploadDao extends Object
   }
 
 
-  public
-  function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
+  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
     $statementName = __METHOD__ . $uploadTreeTableName;
     $leftRight = $this->dbManager->getSingleRow(
@@ -413,8 +406,7 @@ class UploadDao extends Object
    * @param $uploadTreeView
    * @return mixed
    */
-  protected
-  function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
+  protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
   {
     $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
     $sql = "$uploadTreeViewQuery
@@ -428,10 +420,8 @@ class UploadDao extends Object
     return $output;
   }
 
-  public
-  function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
+  public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
   {
-
     $alreadyClearedUploadTreeView = $this->getFileOnlyUploadTreeView($itemTreeBounds->getUploadId(),
         array('skipThese' => "alreadyCleared"),
         $itemTreeBounds->getUploadTreeTableName());
@@ -455,8 +445,7 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected
-  function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
+  protected function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
   {
     return new UploadTreeView($uploadId, $options, $uploadTreeTableName);
   }
@@ -468,13 +457,10 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected
-  function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
+  protected function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
   {
-    return new UploadTreeView($uploadId, $options, $uploadTreeTableName, "           OR
-                                    ut.ufile_mode & (1<<29) <> 0
-                                        OR
-                                    ut.uploadtree_pk = $itemId");
+    return new UploadTreeView($uploadId, $options, $uploadTreeTableName, " OR ut.ufile_mode & (1<<29) <> 0
+                                        OR ut.uploadtree_pk = $itemId");
   }
 
 
@@ -483,8 +469,7 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return Item
    */
-  protected
-  function createItem($uploadEntry, $uploadTreeTableName)
+  protected function createItem($uploadEntry, $uploadTreeTableName)
   {
     $itemTreeBounds = new ItemTreeBounds(
         intval($uploadEntry['uploadtree_pk']),

@@ -56,7 +56,7 @@ class DecisionTypes extends Object
     {
       return $this->map[$type];
     }
-    throw new Exception("unknown clearing type id" . $type);
+    throw new Exception("unknown clearing type id " . $type);
   }
 
   /**
@@ -65,5 +65,13 @@ class DecisionTypes extends Object
   public function getMap()
   {
     return $this->map;
+  }
+  
+  /**
+   * @return int
+   */
+  public function getTypeByName($name)
+  {
+    return array_search($name, $this->map);
   }
 }
