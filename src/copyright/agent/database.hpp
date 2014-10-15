@@ -23,6 +23,8 @@
 class CopyrightDatabaseHandler {
 public:
   CopyrightDatabaseHandler(const char* name);
+  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
+  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
 
   bool checkTables(DbManager* dbManager);

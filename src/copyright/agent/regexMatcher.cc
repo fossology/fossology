@@ -11,10 +11,9 @@
 
 #include "regexMatcher.hpp"
 
-RegexMatcher::RegexMatcher(const std::string type, const std::string  pattern, int regexIndex) : Matcher(type), regexIndex(regexIndex)
-{
-  matchingRegex = rx::regex(pattern, rx::regex_constants::icase);
-}
+RegexMatcher::RegexMatcher(const std::string type, const std::string  pattern, int regexIndex) :
+  Matcher(type), regexIndex(regexIndex), matchingRegex(rx::regex(pattern, rx::regex_constants::icase))
+{}
 
 std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) const {
 

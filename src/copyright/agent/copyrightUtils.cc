@@ -124,14 +124,21 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
     bail(state, 8);
   }
 
-  fo::File* file = new fo::File(pFileId, fo_RepMkPath("files", pFile));
+  char* fileName = fo_RepMkPath("files", pFile);
+  if (fileName)
+  {
+    fo::File* file = new fo::File(pFileId, fileName);
 
-  if (file->fileName != NULL) {
     matchFileWithLicenses(pFileId, file, state);
-  }
 
-  free(pFile);
-  delete(file);
+    free(pFile);
+    delete(file);
+  }
+  else
+  {
+    cout << "PFile not found in repo " << pFileId << endl;
+    bail(state, 7);
+  }
 }
 
 
