@@ -1176,7 +1176,7 @@ mxmlDelete(contentxml);
 mxmlDelete(appxml);
 mxmlDelete(corexml);
 mxmlDelete(hiddenrelsxml);
-fo_WriteARS(pgConn, ars_pk, uploadId, agent_pk, AGENT_ARS, NULL, 0);
+fo_WriteARS(pgConn, ars_pk, uploadId, agent_pk, AGENT_ARS, NULL, 1);
 }
 
 fo_scheduler_disconnect(0);
