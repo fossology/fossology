@@ -52,9 +52,16 @@ class CopyrightDao extends Object
 
   /**
    * @param int $uploadTreeId
+   * @param string $tableName
+   * @param array $typeToHighlightTypeMap
+   * @throws \Exception
    * @return Highlight[]
    */
-  public function getCopyrightHighlights($uploadTreeId)
+  public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
+                                                                        'statement' => Highlight::COPYRIGHT,
+                                                                        'email' => Highlight::EMAIL,
+                                                                        'url' => Highlight::URL)
+   )
   {
 
     $pFileId = 0;
@@ -69,16 +76,13 @@ class CopyrightDao extends Object
       print $text;
     }
 
-    $statementName = __METHOD__;
+    $statementName = __METHOD__.$tableName;
 
     $this->dbManager->prepare($statementName,
-        "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
+        "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
     $result = $this->dbManager->execute($statementName, array($pFileId));
 
-    $typeToHighlightTypeMap = array(
-        'statement' => Highlight::COPYRIGHT,
-        'email' => Highlight::EMAIL,
-        'url' => Highlight::URL);
+
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -87,9 +91,11 @@ class CopyrightDao extends Object
       {
         $type = $row['type'];
         $content = $row['content'];
-        $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
+        // $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
+        // $htmlElement = new LinkElement($linkUrl);
+        $htmlElement =null;
         $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
-        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, new LinkElement($linkUrl));
+        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
       }
     }
     $this->dbManager->freeResult($result);
@@ -97,36 +103,20 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
-  /**
-   * @return array
-   */
-  public function getCopyrightDecisionTypeMap($selectableOnly = false)
-  {
-    $map = $this->dbManager->createMap('copyright_decision_type', 'copyright_decision_type_pk', 'meaning');
-    if ($selectableOnly)
-    {
-      $map = array(1 => $map[1], 2 => $map[2]);
-    }
-    return $map;
-  }
-
-  public function saveCopyrightDecision($pfileId, $userId , $clearingType,
+  public function saveDecision($tableName,$pfileId, $userId , $clearingType,
                                          $description, $textFinding, $comment){
-//    list($descriptionOld,$textFindingOld,$commentOld, $decisionTypeOld)=$this->getCopyrightDecision($pfileId);
-
-
-    $statementName = __METHOD__;
-    $sql = "INSERT INTO copyright_decision (user_fk, pfile_fk,
+    $statementName = __METHOD__.$tableName;
+    $sql = "INSERT INTO $tableName (user_fk, pfile_fk,
            clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
 
     $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
         $clearingType, $description, $textFinding, $comment ),$statementName);
   }
 
-  public function getCopyrightDecision($pfileId){
+  public function getDecision($tableName,$pfileId){
 
-    $statementName = __METHOD__;
-    $sql = "SELECT * from copyright_decision where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+    $statementName = __METHOD__.$tableName;
+    $sql = "SELECT * from $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
 
     $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
 
