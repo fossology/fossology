@@ -112,10 +112,12 @@ class CopyrightDao extends Object
 
   public function saveCopyrightDecision($pfileId, $userId , $clearingType,
                                          $description, $textFinding, $comment){
-    $statementName = __METHOD__;
+//    list($descriptionOld,$textFindingOld,$commentOld, $decisionTypeOld)=$this->getCopyrightDecision($pfileId);
 
+
+    $statementName = __METHOD__;
     $sql = "INSERT INTO copyright_decision (user_fk, pfile_fk,
-           copyright_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
+           clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
 
     $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
         $clearingType, $description, $textFinding, $comment ),$statementName);
@@ -131,7 +133,7 @@ class CopyrightDao extends Object
     $description = $res['description'];
     $textFinding = $res['textfinding'];
     $comment = $res['comment'];
-    $decisionType = $res['copyright_decision_type_fk'];
+    $decisionType = $res['clearing_decision_type_fk'];
     return array($description,$textFinding,$comment, $decisionType);
   }
 }

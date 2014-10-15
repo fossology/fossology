@@ -212,7 +212,7 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT clearing_decision_type_fk"
       " FOREIGN KEY (clearing_decision_type_fk)"
-      " REFERENCES clearing_decision_type(clearing_decision_type_pk) ON DELETE CASCADE",
+      " REFERENCES clearing_decision_type(type_pk) ON DELETE CASCADE",
       tableName
     ));
   }
