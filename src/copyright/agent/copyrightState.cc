@@ -15,7 +15,8 @@ CopyrightState::CopyrightState(DbManager* _dbManager, int _agentId, int _verbosi
                               copyrightDatabaseHandler(name),
                               dbManager(_dbManager),
                               agentId(_agentId),
-                              verbosity(_verbosity)
+                              verbosity(_verbosity),
+                              regexMatchers()
 {
 
 }

@@ -2,6 +2,7 @@
 <form method="post" id= {{ formName }}>
     <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
     <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
+    <input name="changedSomething" id="changedSomething" type="hidden" value="false"/>
     <table>
         <tr>
             <td>
@@ -25,19 +26,19 @@
                 {{ 'Issue Type'| trans }}
             </legend>
             {% for clearingTypeVal, clearingType in clearingTypes %}
-            <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
-                   value="{{ clearingTypeVal }}">
+            <input type="radio" {% if clearingTypeVal == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
+                   value="{{ clearingTypeVal }}" class="supervised">
             {{ clearingType }}
             </input><br/>
             {% endfor %}
         </fieldset>
         <br/>
         {{ 'Description'| trans }}: <br/>
-        <textarea rows="2" name="description" style="width:90%" >{{ description }}</textarea><br/>
+        <textarea rows="2" name="description" style="width:90%" class="supervised">{{ description }}</textarea><br/>
         {{ 'Text finding'| trans }}: <br/>
-        <textarea rows="2" name="textFinding" style="width:90%" >{{ textFinding }}</textarea><br/>
+        <textarea rows="2" name="textFinding" style="width:90%" class="supervised">{{ textFinding }}</textarea><br/>
         {{ 'Comment'| trans }}: <br/>
-        <textarea rows="2" name="comment" style="width:90%" >{{ comment }}</textarea><br/>
+        <textarea rows="2" name="comment" style="width:90%" class="supervised">{{ comment }}</textarea><br/>
 
     </div>
 </form>

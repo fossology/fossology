@@ -194,9 +194,10 @@ class copyright_view extends FO_Plugin
     }
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
+    $changed= GetParm("changedSomething", PARM_STRING);
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
-    if (!empty($lastItem))
+    if (!empty($lastItem) && $changed =="true"  )
     {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
       $clearingType = $_POST['clearingTypes'];
