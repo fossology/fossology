@@ -16,7 +16,7 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;

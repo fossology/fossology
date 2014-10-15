@@ -134,7 +134,7 @@ if ($FailMsg)
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
-dataProperties($dbManager);
+// writeDataProperties($dbManager);
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
@@ -197,51 +197,98 @@ if (array_key_exists('r', $Options))
 }
 
 /* migration */
+$sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
-require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
-Migrate_20_21($Verbose);
-require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
-print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
-Migrate_21_22($Verbose);
-require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
-migrate_25_26($Verbose);
+if(!array_key_exists('Release', $sysconfig)){
+  require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
+  Migrate_20_21($Verbose);
+  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+  print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
+  Migrate_21_22($Verbose);
+  require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
+  migrate_25_26($Verbose);
+  $dbManager->insertTableRow('sysconfig',
+          array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
+  $sysconfig['Release'] = '2.6';
+}
+if($sysconfig['Release'] == '2.6')
+{
+  $writer = new dataPropertiesWriter($dbManager);
+  $writer->writeDataProperties();
+  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
+}
 
 exit(0);
 
 
-/**
- * \brief Adding the predefined constants for clearingDecisions and upload statuses to the database.
- * deletes the old ones
- */
-function dataProperties(DbManager &$dbManager)
-{
-  global $LIBEXECDIR;
-  $filename = "$LIBEXECDIR/dataProperties.dat";
-  if (!file_exists($filename))
+
+
+
+
+
+
+class dataPropertiesWriter{
+  var $dbManager;
+  var $dataProperties;
+
+  function __construct(DbManager &$dbManager)
   {
-    print "FAILED: Schema data file ($filename) not found.\n";
-    return;
+    $this->dbManager = &$dbManager;
+    global $LIBEXECDIR;
+    $this->dataProperties = $this->readDataPropertiesFromFile("$LIBEXECDIR/dataProperties.dat");
   }
-  $dbManager->queryOnce("COMMIT");
-  $dataPropertiesStorage = array(); // filled in next line
-  eval( file_get_contents($filename) );
-  foreach($dataPropertiesStorage as $tableColumn=>$columnContent)
-  {
-    list($table,$column) = explode('.', $tableColumn);
-    $stmt = __METHOD__.".$table.$column";
-    $dbManager->prepare($stmt,"SELECT $column FROM $table");
-    $result = $dbManager->execute($stmt);
+  
+  private function readDataPropertiesFromFile($filename){
+    if (!file_exists($filename))
+    {
+      throw new \Exception("FAILED: Schema data file ($filename) not found.");
+    }
+    $dataPropertiesStorage = array(); // filled in next line
+    eval( file_get_contents($filename) );
+    return $dataPropertiesStorage;
+  }
+  
+  function writeDataProperties(){
+    foreach($this->dataProperties as $tableColumn=>$columnContent)
+    {
+      $tableColumnList =  explode('.', $tableColumn);
+      if(count($tableColumnList)==2)
+      {
+        list($table,$column) = $tableColumnList;
+        $this->writeListedDataProperties($table,$column,$columnContent);
+      }
+      else if (count($tableColumnList) == 3)
+      {
+        list($table, $keyColumn, $valColumn) = $tableColumnList;
+        $this->writeMappedDataProperties($table, $keyColumn, $valColumn, $columnContent);
+      }
+    }
+  }
+
+  function writeMappedDataProperties($table, $keyColumn, $valColumn, $columnContent){
+    $this->dbManager->begin();
+    $this->dbManager->queryOnce($sqlStatement="TRUNCATE $table CASCADE");
+    foreach($columnContent as $key=>$val)
+    {
+      $this->dbManager->insertInto($table,"$keyColumn,$valColumn",array($key,$val));
+    }
+    $this->dbManager->commit();
+  }
+
+  function writeListedDataProperties($table,$column,$columnContent){
+    $stmt=__METHOD__.".$table.$column";
+    $this->dbManager->prepare($stmt,"SELECT $column FROM $table");
+    $result = $this->dbManager->execute($stmt);
     $oldColumnContent = array();
-    while ($row = pg_fetch_assoc($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
       $oldColumnContent[] = $row[$column];
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     $diffColumnContent = array_diff($columnContent,$oldColumnContent);
-    if(!empty($diffColumnContent)){
-      $sql = "INSERT INTO $table ($column) values ('".implode("'),('",$diffColumnContent)."')";
-      echo "$sql\n";
-      $dbManager->getSingleRow($sql,array(),$stmt.".insert");
+    foreach($diffColumnContent as $val)
+    {
+      $this->dbManager->insertInto($table,$column,array($val));
     }
   }
 }

@@ -16,14 +16,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data;
 
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 
-class ClearingDecisionTypes extends Object
+class DecisionTypes extends Object
 {
   const TO_BE_DISCUSSED = 3;
   const IRRELEVANT = 4;
@@ -42,7 +42,7 @@ class ClearingDecisionTypes extends Object
     assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
     assert($this->map[self::IRRELEVANT] == "Irrelevant");
     assert($this->map[self::IDENTIFIED] == "Identified");
-    assert(count($this->map) == count($this->values));
+//    assert(count($this->map) == count($this->values));
   }
 
   /**

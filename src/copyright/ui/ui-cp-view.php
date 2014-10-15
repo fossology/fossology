@@ -17,6 +17,7 @@
  ***********************************************************/
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\View\HighlightRenderer;
 
@@ -39,6 +40,9 @@ class copyright_view extends FO_Plugin
   protected $invalidParm = false;
   /** array */
   protected $uploadEntry;
+  /** @var DecisionTypes */
+  private $decisionTypes;
+
 
   function __construct()
   {
@@ -56,6 +60,7 @@ class copyright_view extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->copyrightDao = $container->get('dao.copyright');
     $this->highlightRenderer = $container->get('view.highlight_renderer');
+    $this->decisionTypes = $container->get('decision.types');
   }
 
   /**
@@ -121,6 +126,14 @@ class copyright_view extends FO_Plugin
       return;
     }
 
+    $permission = GetUploadPerm($uploadId);
+    if($permission < PERM_READ ) {
+      $text = _("Permission Denied");
+      $this->vars['message']= "<h2>$text<h2>";
+      $this->invalidParm =true;
+      return;
+    }
+
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
     $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
@@ -170,13 +183,29 @@ class copyright_view extends FO_Plugin
 
     $uploadId = $this->uploadEntry['upload_fk'];
     $uploadTreeTableName = $this->uploadEntry['tablename'];
-    $permission = GetUploadPerm($uploadId);
+
+    $copyrightDecisionMap = $this->decisionTypes->getMap();
     $this->vars['micromenu'] = Dir2Browse('copyright-hist', $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
 
     $ModBack = GetParm("modback", PARM_STRING);
     if (empty($ModBack))
     {
       $ModBack = 'copyright-hist';
+    }
+
+    $lastItem = GetParm("lastItem", PARM_INTEGER);
+    $changed= GetParm("changedSomething", PARM_STRING);
+    global $SysConf;
+    $userId = $SysConf['auth']['UserId'];
+    if (!empty($lastItem) && $changed =="true"  )
+    {
+      $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
+      $clearingType = $_POST['clearingTypes'];
+      $description = $_POST['description'];
+      $textFinding = $_POST['textFinding'];
+      $comment = $_POST['comment'];
+      $this->copyrightDao->saveCopyrightDecision( $lastUploadEntry['pfile_fk'], $userId , $clearingType,
+          $description, $textFinding, $comment);
     }
 
     $highlights = $this->copyrightDao->getCopyrightHighlights($uploadTreeId);
@@ -192,6 +221,11 @@ class copyright_view extends FO_Plugin
     $theView = $view->getView(NULL, $ModBack, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
 
+    list($description,$textFinding,$comment, $decisionType)=$this->copyrightDao->getCopyrightDecision($this->uploadEntry['pfile_fk']);
+    $this->vars['description'] =$description;
+    $this->vars['textFinding'] =$textFinding;
+    $this->vars['comment'] =$comment;
+
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['uploadId'] = $uploadId;
     $this->vars['pageMenu'] = $pageMenu;
@@ -201,6 +235,9 @@ class copyright_view extends FO_Plugin
     $this->vars['optionName'] = "skipFileCopyRight";
     $this->vars['formName'] = "CopyRightForm";
     $this->vars['ajaxAction'] = "setNextPrevCopyRight";
+
+    $this->vars['selectedClearingType'] = $decisionType;
+    $this->vars['clearingTypes'] =$copyrightDecisionMap ;
   }
 
   /**
@@ -224,7 +261,7 @@ class copyright_view extends FO_Plugin
   {
     return 'ui-cp-view.html.twig';
   }
-  
+
 }
 
 $NewPlugin = new copyright_view;

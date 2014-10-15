@@ -18,15 +18,20 @@
 #include "libfossdbmanagerclass.hpp"
 #include "cleanEntries.hpp"
 
+
+
 class CopyrightDatabaseHandler {
 public:
   CopyrightDatabaseHandler(const char* name);
+  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
+  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
 
   bool checkTables(DbManager* dbManager);
   bool createTables(DbManager* dbManager);
   bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
   bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId);
+
   std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId);
 private:
   typedef struct {
@@ -34,14 +39,19 @@ private:
     const char* type;
     const char* creationFlags;
   } ColumnDef;
-  static const ColumnDef columns[];
 
+  static const ColumnDef columns[];
+  static const ColumnDef columnsDecision[];
+
+
+  bool createTableAgentFindings(DbManager* dbManager);
+  bool createTableClearing(DbManager* dbManager);
   char* name;
   char* insertInDatabaseQuery;
   char* insertNoResultInDatabaseQuery;
 
-  std::string getColumnListString();
-  std::string getColumnCreationString();
+  std::string getColumnListString(const ColumnDef in[], size_t size) ;
+  std::string getColumnCreationString( const ColumnDef in[], size_t size) ;
 };
 
 #endif // DATABASE_HPP

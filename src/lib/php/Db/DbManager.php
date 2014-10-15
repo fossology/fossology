@@ -293,4 +293,20 @@ class DbManager extends Object
     $this->freeResult($res);
   }
 
+  /**
+   * @param string
+   * @param array with keys as column names
+   * @param string
+   */
+  public function insertTableRow($tableName,$assocParams,$sqlLog='')
+  {
+    $params = array_values($assocParams);
+    $keys = implode(',',array_keys($assocParams));
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $this->insertInto($tableName, $keys, $params, $sqlLog);
+  }
+  
 }

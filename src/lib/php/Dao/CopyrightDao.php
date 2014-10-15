@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
@@ -96,6 +97,43 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
+  /**
+   * @return array
+   */
+  public function getCopyrightDecisionTypeMap($selectableOnly = false)
+  {
+    $map = $this->dbManager->createMap('copyright_decision_type', 'copyright_decision_type_pk', 'meaning');
+    if ($selectableOnly)
+    {
+      $map = array(1 => $map[1], 2 => $map[2]);
+    }
+    return $map;
+  }
+
+  public function saveCopyrightDecision($pfileId, $userId , $clearingType,
+                                         $description, $textFinding, $comment){
+//    list($descriptionOld,$textFindingOld,$commentOld, $decisionTypeOld)=$this->getCopyrightDecision($pfileId);
 
 
+    $statementName = __METHOD__;
+    $sql = "INSERT INTO copyright_decision (user_fk, pfile_fk,
+           clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
+
+    $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
+        $clearingType, $description, $textFinding, $comment ),$statementName);
+  }
+
+  public function getCopyrightDecision($pfileId){
+
+    $statementName = __METHOD__;
+    $sql = "SELECT * from copyright_decision where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+
+    $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
+
+    $description = $res['description'];
+    $textFinding = $res['textfinding'];
+    $comment = $res['comment'];
+    $decisionType = $res['clearing_decision_type_fk'];
+    return array($description,$textFinding,$comment, $decisionType);
+  }
 }

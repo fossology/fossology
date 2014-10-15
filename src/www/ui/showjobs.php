@@ -671,6 +671,13 @@ if (!empty($Row["job_upload_fk"]))
         }
         else
          $OutBuf .= "<th>";
+
+        if (($jobqueueRec['jq_end_bits'] == 1) && $jobqueueRec['jq_type'] === 'reportgen'
+             && (($_SESSION["UserLevel"] > PLUGIN_DB_ADMIN)
+                 || ($_SESSION["UserId"] == $Job['job']['job_user_fk'])))
+        {
+          $OutBuf .= "<a href='" . Traceback_uri() . "?mod=download&report=$jobqueueRec[jq_job_fk]'>" ._("Download Report")."</a>";
+        }
         $OutBuf .= "</th></tr>";
       }
     }

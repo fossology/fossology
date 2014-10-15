@@ -54,13 +54,14 @@ class scheduleAgentAjax extends FO_Plugin
     $jq_pk = -1;
 
     $userId = $_SESSION['UserId'];
+    $groupId = $_SESSION['GroupId'];
     $uploadId = intval($_POST['uploadId']);
     $agentName = $_POST['agentName'];
 
     if ($uploadId > 0) {
       $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
       $uploadName = $uploadInfo['upload_filename'];
-      $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+      $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
       $ourPlugin = plugin_find($agentName);
       $jq_pk = $ourPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array());
