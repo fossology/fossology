@@ -19,15 +19,13 @@ namespace fo {
 class File {
 public:
   unsigned long id;
-  char* fileName;
+  std::string fileName;
 
   File();
   File(unsigned long _id, const char* _fileName);
 
   std::string getContent(const unsigned long int maximumBytes = 1<<20);
 
-
-  ~File();
 };
 
 std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1<<20 );

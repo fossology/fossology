@@ -20,6 +20,8 @@
 class CopyrightState {
 public:
   CopyrightState(DbManager* _dbManager,  int _agentId, int _verbosity, const char* name);
+  CopyrightState(const CopyrightState&) = delete;
+  CopyrightState operator=(const CopyrightState&) = delete;
   ~CopyrightState();
 
   int getAgentId();
