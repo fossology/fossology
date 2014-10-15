@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
@@ -234,8 +235,21 @@ class ClearingDecisionEventProcessor
     {
       // handle "No license known"
       $insertDecision = true;
-      $added = array();
       $removedSinceLastDecision = array();
+      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
+      foreach($added as $licenseShortName => $licenseDecisionResult) {
+        /** @var LicenseDecisionResult $licenseDecisionResult */
+        $isglobal =$licenseDecisionResult->hasLicenseDecisionEvent()? $licenseDecisionResult->getLicenseDecisionEvent()->isGlobal():true;
+        $this->clearingDao->removeLicenseDecision($itemBounds->getUploadTreeId(), $userId,
+            $licenseDecisionResult->getLicenseId(), $type, $isglobal);
+        $licenseDecisionEventBuilder
+            ->setLicenseRef($licenseDecisionResult->getLicenseRef());
+        //we only need the license ID so the builder defaults should suffice for the rest
+        $removedSinceLastDecision[$licenseShortName] = $licenseDecisionEventBuilder->build();
+      }
+
+      $added = array();
+
     }
 
     if ($insertDecision)
