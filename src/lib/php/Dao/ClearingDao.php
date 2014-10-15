@@ -23,8 +23,8 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\DatabaseEnum;
 use Fossology\Lib\Data\LicenseDecision;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
@@ -97,17 +97,16 @@ class ClearingDao extends Object
            CD.pfile_fk AS pfile_id,
            users.user_name AS user_name,
            CD.user_fk AS user_id,
-           CD_type.meaning AS type_meaning,
+           CD.type_fk AS type_id,
            CD.is_global AS is_global,
            EXTRACT(EPOCH FROM CD.date_added) AS date_added,
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
          FROM clearing_decision CD
-         LEFT JOIN clearing_decision_type CD_type ON CD.type_fk=CD_type.type_pk
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
          $secondJoin
-         GROUP BY id,uploadtree_id,pfile_id,user_name,user_id,type_meaning,is_global,date_added,same_upload,is_local
+         GROUP BY id,uploadtree_id,pfile_id,user_name,user_id,type_id,is_global,date_added,same_upload,is_local
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
     $this->dbManager->prepare($statementName,
@@ -128,7 +127,7 @@ class ClearingDao extends Object
           ->setPfileId($row['pfile_id'])
           ->setUserName($row['user_name'])
           ->setUserId($row['user_id'])
-          ->setType($row['type_meaning'])
+          ->setType($row['type_id'])
           ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
           ->setDateAdded($row['date_added'])
           ->build();
@@ -166,38 +165,6 @@ class ClearingDao extends Object
     }
     $this->dbManager->freeResult($res);
     return $clearingLicenses;
-  }
-
-  /**
-   * @return DatabaseEnum[]
-   */
-  public function getClearingTypes()
-  {
-    $clearingTypes = array();
-    $statementN = __METHOD__;
-
-    $this->dbManager->prepare($statementN, "select * from clearing_decision_type");
-    $res = $this->dbManager->execute($statementN);
-    while ($rw = pg_fetch_assoc($res))
-    {
-      $clearingTypes[] = new DatabaseEnum($rw['type_pk'], $rw['meaning']);
-    }
-    pg_free_result($res);
-    return $clearingTypes;
-  }
-
-
-  /**
-   * @return array
-   */
-  public function getClearingDecisionTypeMap($selectableOnly = false)
-  {
-    $map = $this->dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
-    if ($selectableOnly)
-    {
-      $map = array(1 => $map[1], 2 => $map[2]);
-    }
-    return $map;
   }
 
   /**
@@ -505,7 +472,7 @@ insert into clearing_decision (
 
     foreach ($events as $event)
     {
-      if ($event->getEventType() == ClearingDecision::TO_BE_DISCUSSED)
+      if ($event->getEventType() == ClearingDecisionTypes::TO_BE_DISCUSSED)
       {
         continue;
       }

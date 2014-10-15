@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
@@ -62,6 +63,8 @@ class ClearingView extends FO_Plugin
   private $clearingDecisionEventProcessor;
   /** @var bool */
   private $invalidParm = false;
+  /** @var ClearingDecisionTypes */
+  private $clearingDecisionTypes;
 
   function __construct()
   {
@@ -87,6 +90,7 @@ class ClearingView extends FO_Plugin
 
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
+    $this->clearingDecisionTypes = $container->get('clearing.decision.types');
 
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
   }
@@ -274,8 +278,8 @@ class ClearingView extends FO_Plugin
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
-    $this->vars['clearingTypes'] = $this->clearingDao->getClearingDecisionTypeMap();
-    $this->vars['selectedClearingType'] = ClearingDecision::NOT_DECIDED;
+    $this->vars['clearingTypes'] = $this->clearingDecisionTypes->getMap();
+    $this->vars['selectedClearingType'] = "Not decided";
 
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
@@ -324,6 +328,11 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
     $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+
+    if($type == ClearingDecision::NO_LICENSE_KNOWN) {
+     //TODO
+    }
+
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }
 }

@@ -22,6 +22,7 @@ namespace Fossology\Lib\Data;
 
 use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
+use Fossology\Lib\Exception;
 
 class ClearingDecisionBuilder extends  ClearingDecisionData
 {
@@ -35,7 +36,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     $this->pfileId = -1;
     $this->userName = "fossy";
     $this->userId = -1;
-    $this->type = "User decision";
+    $this->type = null;
     $this->scope = "upload";
     $this->date_added = new DateTime();
   }
@@ -46,7 +47,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setClearingId($clearingId)
   {
-    $this->clearingId = $clearingId;
+    $this->clearingId = intval($clearingId);
     return $this;
   }
 
@@ -76,7 +77,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setPfileId($pfileId)
   {
-    $this->pfileId = $pfileId;
+    $this->pfileId = intval($pfileId);
     return $this;
   }
 
@@ -102,7 +103,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
-   * @param string $type
+   * @param int $type
    * @return ClearingDecisionBuilder
    */
   public function setType($type)
@@ -161,10 +162,16 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
 
 
   /**
+   * @throws Exception
    * @return ClearingDecision
    */
   public function build()
   {
+    if ($this->type === null)
+    {
+      throw new Exception("decision type should be set");
+    }
+
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
         $this->date_added, $this->licenses);

@@ -62,6 +62,7 @@ class DbManager extends Object
   /**
    * @param $statementName
    * @param $sqlStatement
+   * @throws \Exception
    */
   public function prepare($statementName, $sqlStatement)
   {
@@ -85,6 +86,7 @@ class DbManager extends Object
   /**
    * @param string $statementName statement name
    * @param array $params parameters
+   * @throws \Exception
    * @return resource
    */
   public function execute($statementName, $params = array())

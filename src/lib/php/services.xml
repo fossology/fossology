@@ -67,6 +67,9 @@ without any warranty.
             <argument type="service" id="dao.upload"/>
         </service>
 
+        <service id="clearing.decision.types" class="\Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes">
+            <argument type="service" id="db.manager"/>
+        </service>
         <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
             <argument type="service" id="dao.license"/>
         </service>
@@ -92,6 +95,7 @@ without any warranty.
             <argument type="service" id="dao.upload"/>
             <argument type="service" id="dao.license"/>
             <argument type="service" id="dao.clearing"/>
+            <argument type="service" id="clearing.decision.types"/>
         </service>
 
         <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">
