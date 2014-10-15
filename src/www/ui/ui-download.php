@@ -98,6 +98,10 @@ class ui_download extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $Plugins;
     global $PG_CONN;
+    global $container;
+
+    /** @var DbManager $dbManager */
+    $dbManager = $container->get('db.manager');
 
     if (!$PG_CONN)
     {
@@ -110,38 +114,60 @@ class ui_download extends FO_Plugin
       }
     }
 
-    $Item = GetParm("item",PARM_INTEGER);
-
-    $text = _("Invalid item parameter");
-    if (empty($Item))
+    $reportId = GetParm("report",PARM_INTEGER);
+    if (!empty($reportId))
     {
-      echo "<h2>$text</h2>";
-      return;
+      $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");
+      if ($row === false)
+      {
+        $text = _("Missing report");
+        echo "<h2>$text: $Item</h2>";
+        return;
+      }
+
+      $Filename = $row['filepath'];
+      $Name = basename($Filename);
+      $Upload = $row['upload_fk'];
     }
-
-    $Filename = RepPathItem($Item);
-    if (empty($Filename))
+    else
     {
-      echo "<h2>$text: $Filename</h2>";
-      return;
-    }
+      $Item = GetParm("item",PARM_INTEGER);
 
-    $Fin = @fopen( RepPathItem($Item) ,"rb");
-    /* note that CheckRestore() does not return. */
-    if (empty($Fin)) $this->CheckRestore($Item, $Filename);
+      $text = _("Invalid item parameter");
+      if (empty($Item))
+      {
+        echo "<h2>$text</h2>";
+        return;
+      }
 
-    $sql = "SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if (pg_num_rows($result) != 1)
-    {
-      $text = _("Missing item");
-      echo "<h2>$text: $Item</h2>";
+      $Filename = RepPathItem($Item);
+      if (empty($Filename))
+      {
+        echo "<h2>$text: $Filename</h2>";
+        return;
+      }
+
+      $Fin = @fopen( RepPathItem($Item) ,"rb");
+      /* note that CheckRestore() does not return. */
+      if (empty($Fin)) $this->CheckRestore($Item, $Filename);
+
+      $sql = "SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $row = pg_fetch_assoc($result);
+      if (pg_num_rows($result) != 1)
+      {
+        $text = _("Missing item");
+        echo "<h2>$text: $Item</h2>";
+        pg_free_result($result);
+        return;
+      }
+
+      $Name = $row['ufile_name'];
+      $Upload = $row['upload_fk'];
       pg_free_result($result);
-      return;
     }
-    $Upload = $row['upload_fk'];
+
     $UploadPerm = GetUploadPerm($Upload);
     if ($UploadPerm < PERM_WRITE)
     {
@@ -149,9 +175,6 @@ class ui_download extends FO_Plugin
       echo "<h2>$text: $Item</h2>";
       return;
     }
-
-    $Name = $row['ufile_name'];
-    pg_free_result($result);
 
     if (($rv = DownloadFile($Filename, $Name)) !== True)
     {

@@ -85,7 +85,8 @@ class agent_add extends FO_Plugin
 
     /* Create Job */
     $user_pk = $SysConf['auth']['UserId'];
-    $job_pk = JobAddJob($user_pk, $ShortName, $uploadpk);
+    $group_pk = $SysConf['auth']['GroupId'];
+    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadpk);
 
     /* Validate the agent list and add agents as needed. */
     /** Don't worry about order or duplicates -- it will do the right thing. **/

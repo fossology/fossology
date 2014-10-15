@@ -62,7 +62,7 @@ class LicenseListFiles extends FO_Plugin
   /**
    * \brief Display the loaded menu and plugins.
    */
-  function Output()
+  function htmlContent()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

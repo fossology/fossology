@@ -88,6 +88,7 @@ function account_check(&$user, &$passwd)
       exit(1);
     }
     $SysConf['auth']['UserId'] = $row['user_pk'];
+    $SysConf['auth']['GroupId'] = $row['group_fk'];
     pg_free_result($result);
     if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
       $passwd_hash = sha1($row['user_seed'] . $passwd);

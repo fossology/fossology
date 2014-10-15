@@ -111,31 +111,48 @@ return ($upload_pk);
  * @brief Insert a new job record.
  *
  * @param $user_pk
+ * @param $group_pk
  * @param $job_name
  * @param $upload_pk (optional)
  * @param $priority  (optional default 0)
  *
  * @return int $job_pk the job primary key
  */
-function JobAddJob($user_pk, $job_name, $upload_pk=0, $priority=0)
+function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
 {
-  global $PG_CONN;
+  global $container;
+  global $SysConf;
 
-  $job_name = pg_escape_string($job_name);
+  /** @var DbManager $dbManager */
+  $dbManager = $container->get('db.manager');
+
   if (empty($upload_pk))
     $upload_pk_val = "null";
   else
     $upload_pk_val = $upload_pk;
 
-  $sql = "INSERT INTO job
-    	(job_user_fk,job_queued,job_priority,job_name,job_upload_fk) VALUES
-     	('$user_pk',now(),'$priority','$job_name',$upload_pk_val)";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $params = array($user_pk, $priority, $job_name, $upload_pk_val);
+  $stmtName = __METHOD__;
+  if (empty($group_pk))
+  {
+    $stmtName .= "noGrp";
+    $groupPkVal = "(SELECT group_fk FROM users WHERE user_pk = $1)";
+  }
+  else
+  {
+    $params[] = $group_pk;
+    $groupPkVal = "$". count($params);
+  }
 
-  $job_pk = GetLastSeq("job_job_pk_seq", "job");
-  return ($job_pk);
+  $row = $dbManager->getSingleRow(
+    "INSERT INTO job
+    (job_user_fk,job_group_fk,job_queued,job_priority,job_name,job_upload_fk) VALUES
+    ($1,$groupPkVal,now(),$2,$3,$4) RETURNING job_pk",
+    $params,
+    $stmtName
+  );
+
+  return ($row['job_pk']);
 } // JobAddJob()
 
 
@@ -282,6 +299,7 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 
   /* Get the users.default_bucketpool_fk */
   $user_pk = $SysConf['auth']['UserId'];
+  $group_pk = $SysConf['auth']['GroupId'];
 
   if (!empty($upload_pk_list)) 
   {
@@ -305,7 +323,7 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
       $ShortName = $UploadRec['upload_filename'];
 
       /* Create Job */
-      $job_pk = JobAddJob($user_pk, $ShortName, $upload_pk);
+      $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $upload_pk);
 
       // don't exit on AgentAdd failure, or all the agents requested will
       // not get scheduled.
@@ -352,6 +370,7 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
 
   /* Get the users.default_bucketpool_fk */
   $user_pk = $SysConf['auth']['UserId'];
+  $group_pk = $SysConf['auth']['GroupId'];
 
   if (!empty($upload_pk_list))
   {
@@ -361,7 +380,7 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
       if (empty($upload_pk))  continue;
 
       // Create a job for the upload
-      $jobpk = JobAddJob($user_pk, "Delete", $upload_pk); 
+      $jobpk = JobAddJob($user_pk, $group_pk, "Delete", $upload_pk);
       if (empty($jobpk) || ($jobpk < 0)) {
         echo "WARNING: Failed to schedule Delagent for Upload $upload_pk";
       }

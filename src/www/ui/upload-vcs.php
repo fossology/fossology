@@ -79,6 +79,7 @@ class upload_vcs extends FO_Plugin {
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
     $user_pk = $SysConf['auth']['UserId'];
+    $group_pk = $SysConf['auth']['GroupId'];
     $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -86,7 +87,7 @@ class upload_vcs extends FO_Plugin {
     }
 
     /* Create the job: job "wget" */
-    $jobpk = JobAddJob($user_pk, "wget", $uploadpk);
+    $jobpk = JobAddJob($user_pk, $group_pk, "wget", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       return ($text);
