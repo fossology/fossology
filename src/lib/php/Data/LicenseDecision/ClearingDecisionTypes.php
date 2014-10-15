@@ -21,8 +21,10 @@ namespace Fossology\Lib\Data\LicenseDecision;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecisionTypes {
+class ClearingDecisionTypes extends Object
+{
   const TO_BE_DISCUSSED = 3;
   const IRRELEVANT = 4;
   const IDENTIFIED = 5;
@@ -33,7 +35,8 @@ class ClearingDecisionTypes {
   /** @var array */
   private $map;
 
-  public function __construct(DbManager $dbManager) {
+  public function __construct(DbManager $dbManager)
+  {
     $this->map = $dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
 
     assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
@@ -47,8 +50,10 @@ class ClearingDecisionTypes {
    * @throws Exception
    * @return string
    */
-  function getTypeName($type) {
-    if (array_key_exists($type, $this->map)) {
+  function getTypeName($type)
+  {
+    if (array_key_exists($type, $this->map))
+    {
       return $this->map[$type];
     }
     throw new Exception("unknown clearing type id" . $type);

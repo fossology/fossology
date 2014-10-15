@@ -22,13 +22,21 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\View\Renderer;
+use Mockery as M;
 use Monolog\Logger;
 
 
 class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
+
+  /** @var ClearingDecisionTypes|M\MockInterface */
+  private $clearingDecisionTypes;
+
+  public function setUp() {
+    $this->clearingDecisionTypes = M::mock(ClearingDecisionTypes::className());
+  }
 
   function testFilterLists()
   {
@@ -50,7 +58,7 @@ class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
     $dbManager = new DbManager( new Logger(__FILE__));
     $newEditedLicenseSelector = new NewestEditedLicenseSelector();
     $uploadDao =  new UploadDao($dbManager);
-    $clu = new ChangeLicenseUtility($newEditedLicenseSelector, $uploadDao, new LicenseDao($dbManager), new ClearingDao($dbManager,$newEditedLicenseSelector, $uploadDao), new Renderer() );
+    $clu = new ChangeLicenseUtility($newEditedLicenseSelector, $uploadDao, new LicenseDao($dbManager), new ClearingDao($dbManager,$newEditedLicenseSelector, $uploadDao), $this->clearingDecisionTypes );
     $clu->filterLists($bigList, $smallList);
     
     $cloneBigListArray = $bigListArray;
