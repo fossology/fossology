@@ -164,7 +164,7 @@ if [ $RUNTIME ]; then
         echo "doing runtime"
          apt-get $YesOpt install apache2 libapache2-mod-php5
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
-            libxml3 libmxml1 libjson0 zip \
+            libxml2 libmxml1 libjson0 zip \
             binutils php-gettext
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
