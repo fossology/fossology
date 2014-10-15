@@ -24,7 +24,7 @@ use Mockery as M;
 class ClearingLicenseTest extends \PHPUnit_Framework_TestCase {
 
   /**
-   * @var M\MockInterface|LicenseRef
+   * @var LicenseRef|M\MockInterface
    */
   private $licenseRef;
 
@@ -52,6 +52,7 @@ class ClearingLicenseTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetShortName() {
     $value = "<shortName>";
+    $this->licenseRef->
     $this->licenseRef->shouldReceive("getShortName")->once()->withNoArgs()->andReturn($value);
 
     assertThat($this->clearingLicense->getShortName(), is($value));
