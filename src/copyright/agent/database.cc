@@ -66,7 +66,6 @@ std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDat
 
 bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
   RETURN_IF_FALSE(createTableAgentFindings(dbManager)) ;
-  RETURN_IF_FALSE(createCopyrightDecisionType(dbManager)) ;
   RETURN_IF_FALSE(createTableClearing(dbManager)) ;
   return true;
 }
@@ -142,40 +141,6 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
 }
 
 
-//copyright_decision_type
-const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsCopyrightDecisionType[] = {
-    // keep only one sequence for clearing
-    #define SEQUENCE_NAMECopyrightDecisionType "copyright_decision_type_pk_seq"
-  {"copyright_decision_type_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMECopyrightDecisionType "'::regclass)"},
-  {"meaning", "varchar(30)", "NOT NULL"}
-};
-bool CopyrightDatabaseHandler::createCopyrightDecisionType(DbManager* dbManager){
-  if (!dbManager->sequenceExists(SEQUENCE_NAMECopyrightDecisionType)) {
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMECopyrightDecisionType
-                                        " START WITH 1"
-                                        " INCREMENT BY 1"
-                                        " NO MAXVALUE"
-                                        " NO MINVALUE"
-                                        " CACHE 1"));
-  }
-  if (!dbManager->tableExists("copyright_decision_type")) {
-    RETURN_IF_FALSE(createCopyrightDecisionTypeTable (dbManager) );
-  }
-  return true;
-}
-
-bool CopyrightDatabaseHandler::createCopyrightDecisionTypeTable(DbManager* dbManager){
-  size_t ntypes =  (sizeof(CopyrightDatabaseHandler::columnsCopyrightDecisionType)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table copyright_decision_type(%s)",
-              getColumnCreationString(CopyrightDatabaseHandler::columnsCopyrightDecisionType, ntypes).c_str()));
-
-  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Not decided')"));
-  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Not relevant')"));
-  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('To be decided')"));
-  RETURN_IF_FALSE(dbManager->queryPrintf("INSERT INTO copyright_decision_type (meaning) values ('Identified issue')"));
-  return true;
-}
-
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
     // keep only one sequence for clearing
@@ -183,7 +148,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
             {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
             {"user_fk", "bigint", "NOT NULL"},
             {"pfile_fk", "bigint", "NOT NULL"},
-            {"copyright_decision_type_fk", "bigint", "NOT NULL"},
+            {"clearing_decision_type_fk", "bigint", "NOT NULL"},
             {"description", "text", ""},
             {"textFinding", "text", ""},
             {"comment", "text", ""}
@@ -220,9 +185,9 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
-     "CREATE INDEX %s_copyright_decision_type_fk_index"
+     "CREATE INDEX %s_clearing_decision_type_fk_index"
      " ON %s"
-     " USING BTREE (copyright_decision_type_fk)",
+     " USING BTREE (clearing_decision_type_fk)",
      tableName, tableName
     ));
 
@@ -245,9 +210,9 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
       "ALTER TABLE ONLY %s"
-      " ADD CONSTRAINT copyright_decision_type_fk"
-      " FOREIGN KEY (copyright_decision_type_fk)"
-      " REFERENCES copyright_decision_type(copyright_decision_type_pk) ON DELETE CASCADE",
+      " ADD CONSTRAINT clearing_decision_type_fk"
+      " FOREIGN KEY (clearing_decision_type_fk)"
+      " REFERENCES clearing_decision_type(clearing_decision_type_pk) ON DELETE CASCADE",
       tableName
     ));
   }

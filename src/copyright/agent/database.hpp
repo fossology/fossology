@@ -39,12 +39,10 @@ private:
   } ColumnDef;
 
   static const ColumnDef columns[];
-  static const ColumnDef columnsCopyrightDecisionType[];
   static const ColumnDef columnsDecision[];
 
-  bool createCopyrightDecisionType(DbManager* dbManager);
+
   bool createTableAgentFindings(DbManager* dbManager);
-  bool createCopyrightDecisionTypeTable(DbManager* dbManager);
   bool createTableClearing(DbManager* dbManager);
   char* name;
   char* insertInDatabaseQuery;
