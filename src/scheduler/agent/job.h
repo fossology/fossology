@@ -82,6 +82,7 @@ typedef struct
     int32_t  parent_id; ///< the identifier for the parent of this job (its queue id)
     int32_t  id;        ///< the identifier for this job
     int32_t  user_id;   ///< the id of the user that created the job
+    int32_t  group_id;  ///< the id of the group that created the job
 } job_t;
 
 /* ************************************************************************** */
@@ -89,7 +90,7 @@ typedef struct
 /* ************************************************************************** */
 
 job_t* job_init(GTree* job_list, GSequence* job_queue, char* type, char* host,
-    int id, int parent_id, int user_id, int priority, char *jq_cmd_args);
+    int id, int parent_id, int user_id, int group_id, int priority, char *jq_cmd_args);
 void   job_destroy(job_t* job);
 
 /* ************************************************************************** */

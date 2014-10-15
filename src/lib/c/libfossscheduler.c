@@ -41,6 +41,7 @@ int   alive;           ///< if the agent has updated with a hearbeat
 int   valid;           ///< if the information stored in buffer is valid
 int   sscheduler;      ///< whether the agent was started by the scheduler
 int   userID;          ///< the id of the user that created the job
+int   groupID;         ///< the id of the group of the user that created the job
 int   jobId;           ///< the id of the job
 char* module_name;     ///< the name of the agent
 
@@ -177,6 +178,7 @@ void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** 
   {
       {"config",          'c', 0, G_OPTION_ARG_STRING, &sysconfigdir, ""},
       {"userID",            0, 0, G_OPTION_ARG_INT,    &userID,       ""},
+      {"groupID",            0, 0, G_OPTION_ARG_INT,    &groupID,       ""},
       {"scheduler_start",   0, 0, G_OPTION_ARG_NONE,   &sscheduler,   ""},
       {"jobId",             0, 0, G_OPTION_ARG_INT,    &jobId,        ""},
       {NULL}
@@ -189,6 +191,7 @@ void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** 
   valid           = 0;
   sscheduler      = 0;
   userID          = -1;
+  groupID         = -1;
   agent_verbose   = 0;
   memset(buffer, 0, sizeof(buffer));
 
@@ -499,6 +502,16 @@ int fo_scheduler_jobId()
 int fo_scheduler_userID()
 {
   return userID;
+}
+
+/**
+ * @brief Gets the id of the group that created the job that the agent is running
+ *
+ * @return the group id
+ */
+int fo_scheduler_groupID()
+{
+  return groupID;
 }
 
 /**

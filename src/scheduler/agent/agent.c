@@ -238,7 +238,7 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
   {
     host = (host_t*) iter->data;
     V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
-    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, jq_cmd_args);
+    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, 0, jq_cmd_args);
     agent_init(scheduler, host, job);
   }
 
@@ -533,14 +533,14 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
  * @param argc     return: returns the number of arguments parsed
  * @param argv     return: the parsed arguments
  */
-static void shell_parse(char* confdir, int32_t userid, char* input, char *jq_cmd_args, int jobId, int* argc, char*** argv)
+static void shell_parse(char* confdir, int user_id, int group_id, char* input, char *jq_cmd_args, int jobId, int* argc, char*** argv)
 {
   char* begin;
   char* curr;
   int idx = 0;
 #define MAX_CMD_ARGS 30
 
-  *argv = g_new0(char*, MAX_ARGS);
+  *argv = g_new0(char*, MAX_CMD_ARGS);
   begin = NULL;
 
   for (curr = input; *curr; curr++)
@@ -569,13 +569,14 @@ static void shell_parse(char* confdir, int32_t userid, char* input, char *jq_cmd
       (*argv)[idx++] = g_strdup(begin + 1);
       begin = NULL;
     }
-    if (idx > MAX_CMD_ARGS - 6)
+    if (idx > MAX_CMD_ARGS - 7)
       break;
   }
 
   (*argv)[idx++] = g_strdup_printf("--jobId=%d", jobId);
   (*argv)[idx++] = g_strdup_printf("--config=%s", confdir);
-  (*argv)[idx++] = g_strdup_printf("--userID=%d", userid);
+  (*argv)[idx++] = g_strdup_printf("--userID=%d", user_id);
+  (*argv)[idx++] = g_strdup_printf("--groupID=%d", group_id);
   (*argv)[idx++] = "--scheduler_start";
   if (jq_cmd_args)
     (*argv)[idx++] = jq_cmd_args;
@@ -646,7 +647,7 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* were parsed when the meta_agent was created    */
     if (strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
-      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->type->raw_cmd, agent->owner->jq_cmd_args,
+      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->owner->group_id, agent->type->raw_cmd, agent->owner->jq_cmd_args,
                   agent->owner->parent_id, &argc, &args);
 
       tmp = args[0];
@@ -669,8 +670,8 @@ static void* agent_spawn(agent_spawn_args* pass)
     else
     {
       args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --scheduler_start --jobId=%d", agent->host->agent_dir,
-      AGENT_CONF, agent->type->name, agent->type->raw_cmd, agent->owner->user_id, agent->owner->parent_id);
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d", agent->host->agent_dir,
+      AGENT_CONF, agent->type->name, agent->type->raw_cmd, agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
 
       if (len>=sizeof(buffer)) {
         *(buffer + sizeof(buffer) - 1) = '\0';

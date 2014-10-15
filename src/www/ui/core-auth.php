@@ -187,6 +187,7 @@ class core_auth extends FO_Plugin
       $dbManager->prepare("selectMemberGroup", "UPDATE users SET group_fk=$1 WHERE user_pk=$2");
       $dbManager->execute("selectMemberGroup", array($_POST['selectMemberGroup'], $_SESSION['UserId']));
       $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
+      $SysConf['auth']['GroupId'] = $_SESSION['GroupId'];
     }
 
     if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
@@ -272,6 +273,7 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEmail'] = $UserRow['user_email'];
     $_SESSION['UserEnote'] = $UserRow['email_notify'];
     $_SESSION['GroupId'] = $UserRow['group_fk'];
+    $SysConf['auth']['GroupId'] = $UserRow['group_fk'];
     $_SESSION['GroupName'] = $UserRow['group_name'];
   }
 
