@@ -151,8 +151,6 @@ class LicenseDecisionResult implements LicenseDecision {
     foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
       return $agentDecisionEvent;
     }
-    print "licenseDecisionEvent: $this->licenseDecisionEvent\n";
-    throw new Exception("could not determine license");
   }
 
   /**

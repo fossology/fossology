@@ -22,8 +22,9 @@ namespace Fossology\Lib\Data\LicenseDecision;
 use DateTime;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Util\Object;
 
-class AgentLicenseDecisionEvent implements LicenseDecision {
+class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
   /**
    * @var LicenseRef
    */
