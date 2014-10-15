@@ -113,7 +113,8 @@ class DeciderAgent extends Agent
 
       $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
-      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+    
+      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentSelectedLicenses($itemTreeBounds, $userId);
 
       if ($lastDecisionDate !== null)
       {
