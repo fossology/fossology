@@ -154,7 +154,7 @@ class Xpview extends FO_Plugin
     $uploadTreeTableName = $this->uploadEntry['tablename'];
 
     $copyrightDecisionMap = $this->decisionTypes->getMap();
-    $this->vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "ViewCopyright", -1, '', '', $uploadTreeTableName);
+    $this->vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
@@ -233,27 +233,29 @@ class Xpview extends FO_Plugin
   {
 
     // For this menu, I prefer having this in one place
+    $text = _("Set the concluded licenses for this upload");
+    menu_insert("Clearing::Licenses", 36, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
+
     $text = _("View Copyright/Email/Url info");
-    menu_insert("ViewCopyright::Copyright", 35, "copyright-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+    menu_insert("Clearing::Copyright", 35, "copyright-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 
     $text = _("View Patent info");
-    menu_insert("ViewCopyright::IP", 34, "ip-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+    menu_insert("Clearing::IP", 34, "ip-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 
     $text = _("View Export Control and Customs info");
-    menu_insert("ViewCopyright::ECC", 34, "ecc-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+    menu_insert("Clearing::ECC", 33, "ecc-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 
     $text = _("View file information");
-    menu_insert("ViewCopyright::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
+    menu_insert("Clearing::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
 
     $text = _("Browse by buckets");
-    menu_insert("ViewCopyright::Bucket Browser", 4, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
+    menu_insert("Clearing::Bucket Browser", 4, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
     $text = _("Copyright/Email/URL One-shot, real-time analysis");
-    menu_insert("ViewCopyright::One-Shot Copyright/Email/URL",2, "agent_copyright_once", $text);
+    menu_insert("Clearing::One-Shot Copyright/Email/URL",2, "agent_copyright_once", $text);
     $text = _("Nomos One-shot, real-time license analysis");
-    menu_insert("ViewCopyright::One-Shot License", 2, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
-    $text = _("Set the concluded licenses for this upload");
-    menu_insert("ViewCopyright::Audit", 5, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
-    menu_insert("ViewCopyright::[BREAK]", 6);
+    menu_insert("Clearing::One-Shot License", 2, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
+
+    menu_insert("Clearing::[BREAK]", 6);
 
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
