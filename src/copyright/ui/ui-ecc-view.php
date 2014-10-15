@@ -18,38 +18,23 @@
  */
 use Fossology\Lib\Data\Highlight;
 
+define("TITLE_ecc_view", _("View Export Control and Customs Analysis"));
 
-/**
- * \file ui-cp-view.php
- * \brief View Copyright/Email/Url Analysis on an Analyzed file
- */
-
-define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
-
-class copyright_view extends Xpview
+class ecc_view extends Xpview
 {
-
   function __construct()
   {
-    $this->Name = "copyright-view";
-    $this->Title = TITLE_copyright_view;
-    $this->decisionTableName = "copyright_decision";
-    $this->tableName = "copyright";
-    $this->modBack = 'copyright-hist';
-    $this->hightlightTypeToStringMap= array(Highlight::COPYRIGHT => 'copyright remark',
-        Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address');
-    $this->typeToHighlightTypeMap = array(
-        'statement' => Highlight::COPYRIGHT,
-        'email' => Highlight::EMAIL,
-        'url' => Highlight::URL);
+    $this->Name = "ecc-view";
+    $this->Title = TITLE_ecc_view;
+    $this->decisionTableName = "ecc_decision";
+    $this->tableName = "ecc";
+    $this->modBack = 'copyright-hist'; //TODO
+    $this->hightlightTypeToStringMap= array(Highlight::ECC => 'Export Restriction');
+    $this->typeToHighlightTypeMap =  array('ecc' => Highlight::ECC);
     parent::__construct();
 
-    $this->vars['xptext'] = 'copyright/e-mail/URL';
+    $this->vars['xptext'] = 'export restriction';
   }
-
-
-
 }
-
-$NewPlugin = new copyright_view;
+$NewPlugin = new ecc_view;
 $NewPlugin->Initialize();
