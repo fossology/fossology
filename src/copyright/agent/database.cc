@@ -192,7 +192,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
 
 bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
   char* tableName = g_strdup_printf("%s_decision", name);
-  if (!dbManager->sequenceExists(SEQUENCE_NAMECopyrightDecisionType)) {
+  if (!dbManager->sequenceExists(SEQUENCE_NAMEClearing)) {
   RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMEClearing
                                         " START WITH 1"
                                         " INCREMENT BY 1"
@@ -238,7 +238,7 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT user_fk"
       " FOREIGN KEY (user_fk)"
-      " REFERENCES  user(user_pk) ON DELETE CASCADE",
+      " REFERENCES  users(user_pk) ON DELETE CASCADE",
       tableName
     ));
 
@@ -275,7 +275,7 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
 
 bool CopyrightDatabaseHandler::checkTables(DbManager* dbManager) {
   size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-  if (dbManager->tableExists(name)) {
+  if (dbManager->tableExists(name) && dbManager->tableExists((std::string(name)+"_decision").c_str())) {
     RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s limit 1", getColumnListString(CopyrightDatabaseHandler::columns,ncolumns ).c_str(), name));
   } else {
     return false;
