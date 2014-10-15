@@ -16,11 +16,11 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 
-define("CLEARING_DECISION_TYPE", ClearingDecision::IDENTIFIED);
+define("CLEARING_DECISION_TYPE", ClearingDecisionTypes::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");

@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 
 class ChangeLicenseUtility extends Object
@@ -49,18 +50,24 @@ class ChangeLicenseUtility extends Object
   private $clearingDao;
 
   /**
+   * @var ClearingDecisionTypes
+   */
+  private $clearingDecisionTypes;
+
+  /**
    * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
    * @param $uploadDao
    * @param $licenseDao
    * @param $clearingDao
    */
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao)
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao, ClearingDecisionTypes $clearingDecisionTypes)
   {
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
+    $this->clearingDecisionTypes = $clearingDecisionTypes;
   }
 
   /**
@@ -139,7 +146,7 @@ class ChangeLicenseUtility extends Object
           $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
           $clearingDecWithLic->getUserName(),
           $clearingDecWithLic->getScope(),
-          $clearingDecWithLic->getType(),
+          $this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
           implode(", ", $licenseNames));
       //$table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
       $table[] = array("content"=>$row);

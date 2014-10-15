@@ -21,167 +21,150 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
+use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 
-class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
+class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
+{
 
-  /**
-   * @var bool
-   */
-  private $sameUpload=true;
+  /** @var bool */
+  private $sameUpload = true;
 
-  /**
-   * @var bool
-   */
-  private $sameFolder=true;
+  /** @var bool */
+  private $sameFolder = true;
 
-  /**
-   * @var LicenseRef[]
-   */
-  private $licenses ;
+  /** @var LicenseRef[] */
+  private $licenses;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $clearingId;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $uploadTreeId;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $pfileId;
-  /**
-   * @var string
-   */
+  
+  /** @var string */
   private $userName;
-  /**
-   * @var int
-   */
+  
+  /** @var int */
   private $userId;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $type;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $comment;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $reportinfo;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $scope;
 
-  /**
-   * @var DateTime
-   */
+  /** @var DateTime */
   private $date_added;
+
+  /** @var ClearingDecisionBuilder */
+  private $clearingDecisionBuilder;
 
   public function setUp()
   {
-    $this->sameUpload=true;
-    $this->sameFolder=true;
-    $this->licenses = array (new LicenseRef(8, "testSN", "testFN") ,new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN")  );
-    $this->clearingId=8;
-    $this->uploadTreeId=9;
-    $this->pfileId=10;
-    $this->userName="tester";
-    $this->userId=11;
-    $this->type = ClearingDecision::TO_BE_DISCUSSED;
-    $this->comment="Test comment";
-    $this->reportinfo ="Test reportinfo";
+    $this->sameUpload = true;
+    $this->sameFolder = true;
+    $this->licenses = array(new LicenseRef(8, "testSN", "testFN"), new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN"));
+    $this->clearingId = 8;
+    $this->uploadTreeId = 9;
+    $this->pfileId = 10;
+    $this->userName = "tester";
+    $this->userId = 11;
+    $this->type = ClearingDecisionTypes::TO_BE_DISCUSSED;
+    $this->comment = "Test comment";
+    $this->reportinfo = "Test reportinfo";
     $this->scope = LicenseDecision::SCOPE_UPLOAD;
-    $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s',"2012-07-08 11:14:15");
+    $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
+    
+    $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(ClearingDecisionTypes::IDENTIFIED);
   }
 
   public function testSameUpload()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setSameUpload ($this->sameUpload)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setSameUpload($this->sameUpload)
+        ->build();
     assertThat($clearingDec->getSameUpload(), is($this->sameUpload));
   }
 
   public function testSameFolder()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setSameFolder ($this->sameFolder)
-      -> build();
+    $clearingDec =$this->clearingDecisionBuilder 
+        ->setSameFolder($this->sameFolder)
+        ->build();
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
   }
 
   public function testLicenses()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setLicenses ($this->licenses)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setLicenses($this->licenses)
+        ->build();
     assertThat($clearingDec->getLicenses(), is($this->licenses));
   }
 
   public function testClearingId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setClearingId ($this->clearingId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setClearingId($this->clearingId)
+        ->build();
     assertThat($clearingDec->getClearingId(), is($this->clearingId));
   }
 
   public function testUploadTreeId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUploadTreeId ($this->uploadTreeId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUploadTreeId($this->uploadTreeId)
+        ->build();
     assertThat($clearingDec->getUploadTreeId(), is($this->uploadTreeId));
   }
 
   public function testPfileId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setPfileId ($this->pfileId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setPfileId($this->pfileId)
+        ->build();
     assertThat($clearingDec->getPfileId(), is($this->pfileId));
   }
 
   public function testUserName()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUserName ($this->userName)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUserName($this->userName)
+        ->build();
     assertThat($clearingDec->getUserName(), is($this->userName));
   }
 
   public function testUserId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUserId ($this->userId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUserId($this->userId)
+        ->build();
     assertThat($clearingDec->getUserId(), is($this->userId));
   }
 
   public function testType()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setType ($this->type)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setType($this->type)
+        ->build();
     assertThat($clearingDec->getType(), is($this->type));
   }
 
   public function testDateAdded()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setDateAdded ($this->date_added->getTimestamp())
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setDateAdded($this->date_added->getTimestamp())
+        ->build();
     assertThat($clearingDec->getDateAdded(), is($this->date_added));
   }
 
