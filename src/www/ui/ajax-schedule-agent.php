@@ -102,11 +102,6 @@ class ajax_schedule_agent extends FO_Plugin
 
     return $V;
   }
-  
-  function getTemplateName()
-  {
-    return "plain.html";
-  }
 
 }
 $NewPlugin = new ajax_schedule_agent;

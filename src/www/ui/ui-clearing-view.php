@@ -323,6 +323,11 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
     $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+
+    if($type == ClearingDecision::NO_LICENSE_KNOWN) {
+     //TODO
+    }
+
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }
 }
