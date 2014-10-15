@@ -264,9 +264,14 @@ class ClearingView extends FO_Plugin
     $licenseInformation .= $output;
 
     $clearingHistory = array();
+    $selectedClearingType = false;
     if ($hasWritePermission)
     {
       $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $userId);
+    }
+    if(count($clearingHistory)>0)
+    {
+      $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['content'][3]);
     }
 
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
@@ -279,8 +284,7 @@ class ClearingView extends FO_Plugin
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
-    $this->vars['selectedClearingType'] = "Not decided";
-
+    $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }

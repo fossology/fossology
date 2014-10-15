@@ -144,10 +144,6 @@ class UploadTreeView
       case "noLicense":
         return $conditionQueryHasLicense;
       case "alreadyCleared":
-//        $conditionQuery = "( $conditionQueryHasLicense
-//              AND  NOT EXISTS  (SELECT license_decision_event_pk
-//                                    FROM license_decision_event lde where ut.uploadtree_pk = lde.uploadtree_fk
-//                                    OR ( lde.pfile_fk = ut.pfile_fk AND lde.is_global = TRUE  ) ) )";
         $conditionQuery = "( $conditionQueryHasLicense
               AND  NOT EXISTS  (SELECT clearing_decision_pk
                                     FROM clearing_decision cd where ut.uploadtree_pk = cd.uploadtree_fk
@@ -157,8 +153,5 @@ class UploadTreeView
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
         return $conditionQuery;
     }
-
-
   }
-
 } 

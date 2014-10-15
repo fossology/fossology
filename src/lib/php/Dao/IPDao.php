@@ -83,6 +83,4 @@ class IPDao extends Object
     return $highlights;
   }
 
-
-
 }

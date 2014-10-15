@@ -196,7 +196,7 @@ class ui_browse_license extends FO_Plugin
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $licenseCandidates = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $licenseCandidates);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -342,7 +342,7 @@ class ui_browse_license extends FO_Plugin
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
+  private function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
@@ -542,8 +542,7 @@ class ui_browse_license extends FO_Plugin
 
       $tableLanguage = array(
           "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-          "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
-              // in results.
+          "sSearch" => "Search _INPUT_ in all columns"
               . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
           "sInfoPostFix" => $AddInfoText,
           "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
@@ -562,9 +561,9 @@ class ui_browse_license extends FO_Plugin
         dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) . ");
     }
 </script>";
-      return array($ChildCount, $VF, $AddInfoText);
+      return array($ChildCount, $VF);
     }
-    return array($ChildCount, $VF, $AddInfoText);
+    return array($ChildCount, $VF);
   }
 
   /**
