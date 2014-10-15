@@ -32,6 +32,10 @@ class ClearingDecision extends ClearingDecisionData
   const IDENTIFIED = "Identified";
 
 
+  public function numFromClearingType() {
+    
+  }
+
   public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type, $scope, $date_added, $licenses, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;

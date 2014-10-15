@@ -113,7 +113,7 @@ class ClearingDecisionEventProcessor
    * @param int $userId
    * @return array
    */
-  public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
+  public function getCurrentSelectedLicenses(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
@@ -122,7 +122,7 @@ class ClearingDecisionEventProcessor
 
     $agentLatestMap = $this->getLatestAgents($agentDetectedLicenses, $uploadId);
 
-    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
+    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentSelectedLicenses($userId, $uploadTreeId);
 
     $currentLicenses = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
 
@@ -146,7 +146,6 @@ class ClearingDecisionEventProcessor
         {
           foreach ($agentResultMap as $agentId => $licenseProperties)
           {
-            $licenseId = $licenseProperties[0]['id'];
             if (!array_key_exists($agentName, $agentLatestMap) || $agentLatestMap[$agentName] != $agentId)
             {
               continue;
@@ -192,7 +191,7 @@ class ClearingDecisionEventProcessor
     $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
     $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
-    list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
+    list($added, $removed) = $this->getCurrentSelectedLicenses($itemBounds, $userId);
 
     $lastDecision = null;
     if ($clearingDecision)

@@ -405,52 +405,6 @@ class LicenseOverviewPrinter extends Object
     return $output;
   }
 
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @return string
-   */
-  public function createRecentLicenseClearing($clearingDecWithLicenses)
-  {
-    $output = "<h3>" . _("Concluded license") . "</h3>\n";
-
-    $output .= $this->createScopeTypeSelect();
-
-
-     $cd= $this->clearingDao->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($clearingDecWithLicenses);
-
-    /**
-     *@var  ClearingDecision $cd
-     */
-    if($cd != null  )
-    {
-      /**
-       * @var ClearingDecision $theLicense
-       */
-      $auditedLicenses = $cd->getLicenses();
-      /**
-       * @var LicenseRef[] $auditedLicenses
-       */
-      $output .= '<table border="1"><tr>';
-      $innerglue = '';
-      foreach ($auditedLicenses as $license)
-      {
-        $refId = $license->getId();
-        $output .= $innerglue;
-        $innerglue = '</tr><tr>';
-        $output .= '<td>'.$this->printLicenseNameAsLink($license->getShortName(), $license->getFullName()).'</td>';
-        $output .= '<td><textarea id="tedit'.$refId.'" cols="15" rows="2" onclick="activateLic('.$refId.')">TBD '.$refId.'</textarea></td>';
-        $output .= '<td><button hidden id="bedit'.$refId.'" onclick="performLicCommentRequest('.$refId.')">'._('Submit').'</button>';
-        $output .=    '<img onclick="performLicDelRequest('.$refId.')" id="aedit'.$refId.'" src="images/icons/close_32.png" alt="rm" title="'._('remove this license').'"/></td>';
-      }
-      $output .= "</tr></table>";
-      return $output;
-    }
-    else
-    {
-      return "";
-    }
-  }
-
   public function createScopeTypeSelect()
   {
     $clearingDecisionTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
