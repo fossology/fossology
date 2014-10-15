@@ -51,6 +51,8 @@ char BuildVersion[]="reportgen build version: NULL.\n";
 #include "main.h"
 
 const char* dirs[] = { "docProps/","_rels/", "word/", "word/_rels/"};
+
+//TODO do not hardcode use localhost: we could be running on a cluster, what is the correct way?
 #define DESTFLDR FOSSREPO_CONF "/localhost/files/report/"
 #define CLEARINGREPMID "_clearing_report_"
 
@@ -147,11 +149,15 @@ int zipdir(char* name)
         {
           wait(&status);
           if (rename(fullzipname,docxfullpath)<0)
+          {
             printf("failed to rename %s to %s\n", fullzipname, docxfullpath);
+            fo_scheduler_disconnect(6);
+            exit(6);
+          }
         }
         char** cmdI = cmd;
-        while (*(cmdI++))
-          g_free(*cmdI);
+        while (*cmdI)
+          g_free(*(cmdI++));
 
         if(docxfullpath)
         {
