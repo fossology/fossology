@@ -52,7 +52,6 @@ class ClearingLicenseTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetShortName() {
     $value = "<shortName>";
-    $this->licenseRef->
     $this->licenseRef->shouldReceive("getShortName")->once()->withNoArgs()->andReturn($value);
 
     assertThat($this->clearingLicense->getShortName(), is($value));
