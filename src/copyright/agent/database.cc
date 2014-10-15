@@ -94,49 +94,49 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
                                           " CACHE 1"));
   }
 
-  size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
+  if (!dbManager->tableExists(name)) {
+    size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
+    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name,
+                                            getColumnCreationString( CopyrightDatabaseHandler::columns, ncolumns).c_str()
+                                          )
+                    );
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_agent_fk_index"
+     " ON %s"
+     " USING BTREE (agent_fk)",
+     name, name
+    ));
 
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name,
-                                          getColumnCreationString( CopyrightDatabaseHandler::columns, ncolumns ).c_str()
-                                        )
-                  );
-  RETURN_IF_FALSE(dbManager->queryPrintf(
-   "CREATE INDEX %s_agent_fk_index"
-   " ON %s"
-   " USING BTREE (agent_fk)",
-   name, name
-  ));
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_hash_index"
+     " ON %s"
+     " USING BTREE (hash)",
+     name, name
+    ));
 
-  RETURN_IF_FALSE(dbManager->queryPrintf(
-   "CREATE INDEX %s_hash_index"
-   " ON %s"
-   " USING BTREE (hash)",
-   name, name
-  ));
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+     "CREATE INDEX %s_pfile_fk_index"
+     " ON %s"
+     " USING BTREE (pfile_fk)",
+     name, name
+    ));
 
-  RETURN_IF_FALSE(dbManager->queryPrintf(
-   "CREATE INDEX %s_pfile_fk_index"
-   " ON %s"
-   " USING BTREE (pfile_fk)",
-   name, name
-  ));
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT agent_fk"
+      " FOREIGN KEY (agent_fk)"
+      " REFERENCES agent(agent_pk) ON DELETE CASCADE",
+      name
+    ));
 
-  RETURN_IF_FALSE(dbManager->queryPrintf(
-    "ALTER TABLE ONLY %s"
-    " ADD CONSTRAINT agent_fk"
-    " FOREIGN KEY (agent_fk)"
-    " REFERENCES agent(agent_pk) ON DELETE CASCADE",
-    name
-  ));
-
-  RETURN_IF_FALSE(dbManager->queryPrintf(
-    "ALTER TABLE ONLY %s"
-    " ADD CONSTRAINT pfile_fk"
-    " FOREIGN KEY (pfile_fk)"
-    " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
-    name
-  ));
-
+    RETURN_IF_FALSE(dbManager->queryPrintf(
+      "ALTER TABLE ONLY %s"
+      " ADD CONSTRAINT pfile_fk"
+      " FOREIGN KEY (pfile_fk)"
+      " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
+      name
+    ));
+  }
   return true;
 }
 
