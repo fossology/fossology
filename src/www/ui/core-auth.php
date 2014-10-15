@@ -137,26 +137,6 @@ class core_auth extends FO_Plugin
   } // Install()
 
   /**
-   * \brief Retrieve the user's IP address.
-   * Some proxy systems pass forwarded IP address info.
-   * This ensures that someone who steals the cookie won't
-   * gain access unless they come from the same IP.
-   */
-  function GetIP()
-  {
-    /* NOTE: This can be easily defeated wtih fake HTTP headers. */
-    $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
-    foreach ($Vars as $V)
-    {
-      if (!empty($_SERVER[$V]))
-      {
-        return ($_SERVER[$V]);
-      }
-    }
-    return (@$_SERVER['REMOTE_ADDR']);
-  } // GetIP()
-
-  /**
    * \brief This is where the magic for
    * Authentication happens.
    */
@@ -191,6 +171,7 @@ class core_auth extends FO_Plugin
     }
 
     if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
+    if (array_key_exists('GroupId', $_SESSION)) $SysConf['auth']['GroupId'] = $_SESSION['GroupId'];
     $Now = time();
     if (!empty($_SESSION['time']))
     {
@@ -246,9 +227,9 @@ class core_auth extends FO_Plugin
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION['UserLevel']);
     $this->State = PLUGIN_STATE_READY;
-  } // PostInitialize()
+  } // GetIP()
 
-  /**
+    /**
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
@@ -275,88 +256,29 @@ class core_auth extends FO_Plugin
     $_SESSION['GroupId'] = $UserRow['group_fk'];
     $SysConf['auth']['GroupId'] = $UserRow['group_fk'];
     $_SESSION['GroupName'] = $UserRow['group_name'];
-  }
+  } // PostInitialize()
 
-
-  /**
-   * \brief See if a username/password is valid.
-   *
-   * \return string on match, or null on no-match.
+/**
+   * \brief Retrieve the user's IP address.
+   * Some proxy systems pass forwarded IP address info.
+   * This ensures that someone who steals the cookie won't
+   * gain access unless they come from the same IP.
    */
-  function CheckUser($User, $Pass, $Referer)
+  function GetIP()
   {
-    global $container;
-
-    if (empty($User) || $User == 'Default User')
+    /* NOTE: This can be easily defeated wtih fake HTTP headers. */
+    $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
+    foreach ($Vars as $V)
     {
-      return;
-    }
-    $dbManager = $container->get('db.manager');
-
-    $R = $dbManager->getSingleRow("SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
-                                array($User),$logNote=__METHOD__ . 'select.user');
-    if (empty($R['user_name']))
-    {
-      return;
-    }
-    /* Check the password -- only if a password exists */
-    if (!empty($R['user_seed']) && !empty($R['user_pass']))
-    {
-      $Hash = sha1($R['user_seed'] . $Pass);
-      if (strcmp($Hash, $R['user_pass']) != 0)
+      if (!empty($_SERVER[$V]))
       {
-        return;
+        return ($_SERVER[$V]);
       }
-    } else if (!empty($R['user_seed']))
-    {
-      /* Seed with no password hash = no login */
-      return;
-    } else if (!empty($Pass))
-    {
-      /* empty password required */
-      return;
     }
-    /* If you make it here, then username and password were good! */
-    $this->UpdateSess($R);
-    $_SESSION['time_check'] = time() + (480 * 60);
-    /* No specified permission means ALL permission */
-    if ("X" . $R['user_perm'] == "X")
-    {
-      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
-    } else
-    {
-      $_SESSION['UserLevel'] = $R['user_perm'];
-    }
-    $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
-    /* Check for the no-popup flag */
-    if (GetParm("nopopup", PARM_INTEGER) == 1)
-    {
-      $_SESSION['NoPopup'] = 1;
-    } else
-    {
-      $_SESSION['NoPopup'] = 0;
-    }
-
-    /* Use the previous redirect, but only use it if it comes from this
-      server's Traceback_uri().  (Ignore hostname.) */
-    $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
-    $Uri = Traceback_uri();
-    if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect))
-    {
-      $Redirect = ""; /* don't reference myself! */
-    }
-    if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri)))
-    {
-      $Uri = Traceback_uri();
-    } else
-    {
-      $Uri = $Redirect;
-    }
-    /* Redirect window */
-    header("Location: $Referer");
+    return (@$_SERVER['REMOTE_ADDR']);
   }
 
-  /**
+/**
    * \brief This is only called when the user logs out.
    */
   function Output()
@@ -447,6 +369,84 @@ class core_auth extends FO_Plugin
     }
 
     $this->vars['content'] = $V;
+  }
+
+    /**
+   * \brief See if a username/password is valid.
+   *
+   * \return string on match, or null on no-match.
+   */
+  function CheckUser($User, $Pass, $Referer)
+  {
+    global $container;
+
+    if (empty($User) || $User == 'Default User')
+    {
+      return;
+    }
+    $dbManager = $container->get('db.manager');
+
+    $R = $dbManager->getSingleRow("SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
+                                array($User),$logNote=__METHOD__ . 'select.user');
+    if (empty($R['user_name']))
+    {
+      return;
+    }
+    /* Check the password -- only if a password exists */
+    if (!empty($R['user_seed']) && !empty($R['user_pass']))
+    {
+      $Hash = sha1($R['user_seed'] . $Pass);
+      if (strcmp($Hash, $R['user_pass']) != 0)
+      {
+        return;
+      }
+    } else if (!empty($R['user_seed']))
+    {
+      /* Seed with no password hash = no login */
+      return;
+    } else if (!empty($Pass))
+    {
+      /* empty password required */
+      return;
+    }
+    /* If you make it here, then username and password were good! */
+    $this->UpdateSess($R);
+    $_SESSION['time_check'] = time() + (480 * 60);
+    /* No specified permission means ALL permission */
+    if ("X" . $R['user_perm'] == "X")
+    {
+      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
+    } else
+    {
+      $_SESSION['UserLevel'] = $R['user_perm'];
+    }
+    $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
+    /* Check for the no-popup flag */
+    if (GetParm("nopopup", PARM_INTEGER) == 1)
+    {
+      $_SESSION['NoPopup'] = 1;
+    } else
+    {
+      $_SESSION['NoPopup'] = 0;
+    }
+
+    /* Use the previous redirect, but only use it if it comes from this
+      server's Traceback_uri().  (Ignore hostname.) */
+    $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
+    $Uri = Traceback_uri();
+    if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect))
+    {
+      $Redirect = ""; /* don't reference myself! */
+    }
+    if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri)))
+    {
+      $Uri = Traceback_uri();
+    } else
+    {
+      $Uri = $Redirect;
+    }
+    /* Redirect window */
+    header("Location: $Referer");
   } // Output()
 
 }
