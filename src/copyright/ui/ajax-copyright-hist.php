@@ -217,7 +217,14 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $link .= $URLargs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
 
-    $output ['1'] = $row['content'];
+
+    if($type == 'url') {
+      $output ['1'] = htmlentities($row['content']);
+    }else {
+      $output ['1'] = $row['content'];
+    }
+
+   // does not work: $output ['1'] = iconv(mb_detect_encoding($row['content'], mb_detect_order(), true), "UTF-8", $row['content']);
 
     $output ['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$Uploadtree_pk,\"$hash\");' href='javascript:;'><img src=\"images/icons/close_16.png\">delete</a><span hidden='true' id='update$type$hash'></span>";
     return $output;

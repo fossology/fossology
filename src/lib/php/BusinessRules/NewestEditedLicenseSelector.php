@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Util\Object;
 
 /**
@@ -87,7 +87,7 @@ class NewestEditedLicenseSelector extends Object
    */
   public function isInactive($clearingDecWithLicAndContext)
   {
-    return $clearingDecWithLicAndContext->getType() !== ClearingDecisionTypes::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
+    return $clearingDecWithLicAndContext->getType() !== DecisionTypes::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
   }
 
   // these two functions have to be kept consistent to each other
@@ -104,7 +104,7 @@ class NewestEditedLicenseSelector extends Object
     $out =array ();
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == ClearingDecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
+      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
       {
         $utid = $clearingDecWithLicenses->getUploadTreeId();
         $out[$utid] = $clearingDecWithLicenses;
@@ -117,7 +117,7 @@ class NewestEditedLicenseSelector extends Object
     
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
     {
-      if ($clearingDecWithLicenses->getType() == ClearingDecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
+      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
       {
         return $clearingDecWithLicenses;
       }
@@ -142,7 +142,7 @@ class NewestEditedLicenseSelector extends Object
             ->setSameUpload(true)
             ->setPfileId($pfileId)
             ->setScope('upload')
-            ->setType(ClearingDecisionTypes::IDENTIFIED)
+            ->setType(DecisionTypes::IDENTIFIED)
             ->build();
     return $out;
   }

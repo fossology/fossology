@@ -21,7 +21,7 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
@@ -79,13 +79,13 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->pfileId = 10;
     $this->userName = "tester";
     $this->userId = 11;
-    $this->type = ClearingDecisionTypes::TO_BE_DISCUSSED;
+    $this->type = DecisionTypes::TO_BE_DISCUSSED;
     $this->comment = "Test comment";
     $this->reportinfo = "Test reportinfo";
     $this->scope = LicenseDecision::SCOPE_UPLOAD;
     $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
     
-    $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(ClearingDecisionTypes::IDENTIFIED);
+    $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);
   }
 
   public function testSameUpload()

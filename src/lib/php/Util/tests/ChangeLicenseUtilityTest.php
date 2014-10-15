@@ -22,7 +22,7 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -31,11 +31,11 @@ use Monolog\Logger;
 
 class ChangeLicenseUtilityTest extends \PHPUnit_Framework_TestCase {
 
-  /** @var ClearingDecisionTypes|M\MockInterface */
+  /** @var DecisionTypes|M\MockInterface */
   private $clearingDecisionTypes;
 
   public function setUp() {
-    $this->clearingDecisionTypes = M::mock(ClearingDecisionTypes::className());
+    $this->clearingDecisionTypes = M::mock(DecisionTypes::className());
   }
 
   function testFilterLists()
