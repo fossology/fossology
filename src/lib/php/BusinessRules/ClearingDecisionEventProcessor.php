@@ -27,6 +27,7 @@ use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\DecisionTypes;
 
 class ClearingDecisionEventProcessor
 {
@@ -230,9 +231,9 @@ class ClearingDecisionEventProcessor
       }
     }
 
+    // handle "No license known"
     if ($type === 2)
     {
-      // handle "No license known"
       $insertDecision = true;
       $removedSinceLastDecision = array();
       $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
@@ -248,7 +249,7 @@ class ClearingDecisionEventProcessor
       }
 
       $added = array();
-
+      $type = DecisionTypes::IDENTIFIED;
     }
 
     if ($insertDecision)

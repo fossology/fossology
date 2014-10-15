@@ -42,7 +42,7 @@ class DecisionTypes extends Object
     assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
     assert($this->map[self::IRRELEVANT] == "Irrelevant");
     assert($this->map[self::IDENTIFIED] == "Identified");
-//    assert(count($this->map) == count($this->values));
+    assert(count($this->map) == count($this->values));
   }
 
   /**
