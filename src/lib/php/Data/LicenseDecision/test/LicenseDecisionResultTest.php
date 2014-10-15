@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\LicenseDecision;
 
+use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 use Mockery as M;
@@ -133,6 +134,30 @@ class LicenseDecisionResultTest extends \PHPUnit_Framework_TestCase
     $this->licenseDecisionEvent->shouldReceive("isRemoved")->once()->andReturn(true);
 
     assertThat($this->licenseDecisionResult->isRemoved(), is(true));
+  }
+
+  public function testGetDateTime()
+  {
+    $dateTime = new DateTime();
+    $this->licenseDecisionEvent->shouldReceive("getDateTime")->once()->andReturn($dateTime);
+
+    assertThat($this->licenseDecisionResult->getDateTime(), is($dateTime));
+  }
+
+  public function testEventId()
+  {
+    $eventId = 123423;
+    $this->licenseDecisionEvent->shouldReceive("getEventId")->once()->andReturn($eventId);
+
+    assertThat($this->licenseDecisionResult->getEventId(), is($eventId));
+  }
+
+  public function testEventType()
+  {
+    $eventType = "<eventType>";
+    $this->licenseDecisionEvent->shouldReceive("getEventType")->once()->andReturn($eventType);
+
+    assertThat($this->licenseDecisionResult->getEventType(), is($eventType));
   }
 
   public function testGetLicenseIdFromAgentLicenseDecisionEvent()
