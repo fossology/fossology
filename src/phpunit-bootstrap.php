@@ -17,5 +17,6 @@ namespace TestSupport;
 $classLoader = require __DIR__ . '/vendor/autoload.php';
 
 $hamcrestUtilPath = $classLoader->findFile('\Hamcrest\Util');
+
 require dirname($hamcrestUtilPath) . '/../Hamcrest.php';
 

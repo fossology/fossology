@@ -19,7 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class AgentRef
+use Fossology\Lib\Util\Object;
+
+class AgentRef extends Object
 {
   /**
    * @var int

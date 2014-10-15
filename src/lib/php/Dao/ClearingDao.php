@@ -201,14 +201,13 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param $licenses
-   * @param $removed
-   * @param $uploadTreeId
-   * @param $userid
-   * @param $type
-   * @param $comment
-   * @param $remark
-   * @internal param array $licenses
+   * @param array $licenses
+   * @param bool $removed
+   * @param int $uploadTreeId
+   * @param int $userid
+   * @param string $comment
+   * @param string $remark
+   * @throws \Exception
    */
   public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid, $comment="", $remark="")
   {
@@ -490,7 +489,7 @@ insert into clearing_decision (
 
   public function getCurrentLicenseDecisions($userId, $itemId)
   {
-    return $this->getCurrentLicenseDecisionFor(
+    return $this->getCurrentLicenseDecisionsFor(
         $this->getRelevantLicenseDecisionEvents($userId, $itemId)
     );
   }
@@ -499,7 +498,7 @@ insert into clearing_decision (
    * @param LicenseDecisionEvent[] $events
    * @return LicenseDecisionEvent[][]
    */
-  public function getCurrentLicenseDecisionFor($events)
+  public function getCurrentLicenseDecisionsFor($events)
   {
     $addedLicenses = array();
     $removedLicenses = array();

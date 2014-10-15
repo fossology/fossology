@@ -2210,7 +2210,7 @@
 #
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF
 %KEY%	"(condit|vers)ion"
-%STR%	"version of autoconf"
+%STR%	"version of (the )?autoconf"
 #
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF_2
 %KEY%	"configur"
@@ -2295,6 +2295,10 @@
 %ENTRY%	_LT_GPL_NAMED_COMPATIBLE_1
 %KEY%	 =NULL=
 %STR%	"(\<gpl\>|gnu general public license) compatib(le|ility)"
+#
+%ENTRY%	_LT_AGPL_NAMED
+%KEY%	"agpl"
+%STR%	"agpl"
 #
 %ENTRY%	_LT_RPSL_COMPATIBLE
 %KEY%	"licen[cs]"
@@ -6538,6 +6542,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"affero (general p|p)ublic licen[cs]e =FEW= (v|version )3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
+%ENTRY%	_TITLE_AFFERO_V3_OR_LATER_ref1
+%KEY%	"agpl"
+%STR%	"AGPL (version |v)3 or later"
+#
 %ENTRY%	_TITLE_AFL30
 %KEY%	"licen[cs]"
 %STR%	"academic free licen[cs]e =FEW= (3\.?0|(v|version )3\.?0)"
@@ -7235,6 +7243,10 @@ k
 %ENTRY%	_TITLE_LGPLV21
 %KEY%	"(condit|vers)ion"
 %STR%	"version 2\.?1 February 1999"
+#
+%ENTRY%	_TITLE_LGPLV21_2
+%KEY%	"licen[cs]"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (version |v)2\.?1"
 #
 %ENTRY%	_TITLE_LGPL3
 %KEY%	"(condit|vers)ion"

@@ -63,11 +63,13 @@ ConfigInit($SYSCONFDIR, $SysConf);
 require_once("$MODDIR/lib/php/libschema.php");
 
 /* Locations where the target .php file might exist */
-$FO_phpLocations = "$BINDIR" 
-                    . PATH_SEPARATOR . "$SBINDIR" 
-                    . PATH_SEPARATOR . "$LIBEXECDIR" ;
-$IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLocations);
 $basename = basename($argv[0]);
+$dirname = dirname($argv[0]);
+$FO_phpLocations = "$BINDIR"
+                    . PATH_SEPARATOR . "$dirname"
+                    . PATH_SEPARATOR . "$SBINDIR"
+                    . PATH_SEPARATOR . "$LIBEXECDIR";
+$IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLocations);
 require("$basename" . ".php");
 exit(0);
 

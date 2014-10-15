@@ -21,8 +21,9 @@ namespace Fossology\Lib\Data;
 
 
 use Fossology\Lib\Data\License\LicenseAlike;
+use Fossology\Lib\Util\Object;
 
-class LicenseRef implements LicenseAlike
+class LicenseRef extends Object implements LicenseAlike
 {
   /** @var int */
   private $id;

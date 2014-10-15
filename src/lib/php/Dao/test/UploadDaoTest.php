@@ -54,7 +54,6 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
-    echo "P";
     $this->uploadDao = new UploadDao($this->dbManager);
   }
 
