@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
@@ -109,4 +110,28 @@ class CopyrightDao extends Object
     return $map;
   }
 
+  public function saveCopyrightDecision($pfileId, $userId , $clearingType,
+                                         $description, $textFinding, $comment){
+    $statementName = __METHOD__;
+
+    $sql = "INSERT INTO copyright_decision (user_fk, pfile_fk,
+           copyright_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
+
+    $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
+        $clearingType, $description, $textFinding, $comment ),$statementName);
+  }
+
+  public function getCopyrightDecision($pfileId){
+
+    $statementName = __METHOD__;
+    $sql = "SELECT * from copyright_decision where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+
+    $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
+
+    $description = $res['description'];
+    $textFinding = $res['textfinding'];
+    $comment = $res['comment'];
+    $decisionType = $res['copyright_decision_type_fk'];
+    return array($description,$textFinding,$comment, $decisionType);
+  }
 }

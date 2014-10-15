@@ -22,7 +22,7 @@ namespace Fossology\Lib\Dao;
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -287,9 +287,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $clearingDec = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     $result = $this->fixClearingDecArray($clearingDec);
     assertThat($result, contains(
-        array(3, 1000, 9, 3, 'upload', ClearingDecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
-        array(2, 1000, 7, 1, 'upload', ClearingDecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
-        array(1, 1000, 5, 1, 'upload', ClearingDecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
+        array(3, 1000, 9, 3, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
+        array(2, 1000, 7, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
+        array(1, 1000, 5, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
     ));
   }
 

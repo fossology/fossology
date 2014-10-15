@@ -23,7 +23,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Highlight;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\Renderer;
 
@@ -55,18 +55,18 @@ class LicenseOverviewPrinter extends Object
    */
   private $renderer;
   /**
-   * @var ClearingDecisionTypes
+   * @var \Fossology\Lib\Data\DecisionTypes
    */
-  private $clearingDecisionTypes;
+  private $decisionTypes;
 
-  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer, ClearingDecisionTypes $clearingDecisionTypes)
+  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer, DecisionTypes $decisionTypes)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
     $this->highlightRenderer = $highlightRenderer;
     $this->renderer = $renderer;
-    $this->clearingDecisionTypes = $clearingDecisionTypes;
+    $this->decisionTypes = $decisionTypes;
   }
 
   /**
@@ -128,23 +128,6 @@ class LicenseOverviewPrinter extends Object
     return $agentLatestMap;    
   }
 
-  function buildLicenseDecisions($licenseMatches, $uploadId, $uploadTreeId,
-                                 $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
-  {
-    $licenseDecisions = array();
-    foreach ($licenseMatches as $fileId => $agents)
-    {
-      ksort($agents);
-      $breakCounter = 0;
-      foreach ($agents as $agentName => $foundLicenses)
-      {
-        if ($breakCounter++ > 0) $output .= "<br/>";
-        $latestAgentId = $agentLatestMap[$agentName]['latest'];
-        $output .= $this->renderMatches($foundLicenses, $agentName, $latestAgentId, $agentLatestMap[$agentName]['ars'],
-            $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
-      }
-    }
-  }
   /**
    * @param $licenseMatches
    * @param $uploadId

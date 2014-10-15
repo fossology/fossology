@@ -24,7 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 
 class ChangeLicenseUtility extends Object
@@ -50,18 +50,19 @@ class ChangeLicenseUtility extends Object
   private $clearingDao;
 
   /**
-   * @var ClearingDecisionTypes
+   * @var DecisionTypes
    */
   private $clearingDecisionTypes;
 
   /**
    * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
-   * @param $uploadDao
-   * @param $licenseDao
-   * @param $clearingDao
+   * @param UploadDao $uploadDao
+   * @param LicenseDao $licenseDao
+   * @param ClearingDao $clearingDao
+   * @param DecisionTypes $clearingDecisionTypes
    */
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao, ClearingDecisionTypes $clearingDecisionTypes)
+  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao, DecisionTypes $clearingDecisionTypes)
   {
     $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;

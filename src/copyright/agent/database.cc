@@ -183,7 +183,6 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
             {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
             {"user_fk", "bigint", "NOT NULL"},
             {"pfile_fk", "bigint", "NOT NULL"},
-            {"uploadtree_fk", "bigint", "NOT NULL"},
             {"copyright_decision_type_fk", "bigint", "NOT NULL"},
             {"description", "text", ""},
             {"textFinding", "text", ""},
@@ -221,13 +220,6 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
-     "CREATE INDEX %s_uploadtree_fk_index"
-     " ON %s"
-     " USING BTREE (uploadtree_fk)",
-     tableName, tableName
-    ));
-
-    RETURN_IF_FALSE(dbManager->queryPrintf(
      "CREATE INDEX %s_copyright_decision_type_fk_index"
      " ON %s"
      " USING BTREE (copyright_decision_type_fk)",
@@ -239,14 +231,6 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
       " ADD CONSTRAINT user_fk"
       " FOREIGN KEY (user_fk)"
       " REFERENCES  users(user_pk) ON DELETE CASCADE",
-      tableName
-    ));
-
-    RETURN_IF_FALSE(dbManager->queryPrintf(
-      "ALTER TABLE ONLY %s"
-      " ADD CONSTRAINT uploadtree_fk"
-      " FOREIGN KEY (uploadtree_fk)"
-      " REFERENCES  uploadtree(uploadtree_pk) ON DELETE CASCADE",
       tableName
     ));
 

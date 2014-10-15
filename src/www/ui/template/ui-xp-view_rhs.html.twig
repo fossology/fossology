@@ -24,20 +24,20 @@
             <legend>
                 {{ 'Issue Type'| trans }}
             </legend>
-            {% for clearingType in clearingTypes %}
+            {% for clearingTypeVal, clearingType in clearingTypes %}
             <input type="radio" {% if clearingType == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
-                   value="{{ loop.index }}">
+                   value="{{ clearingTypeVal }}">
             {{ clearingType }}
             </input><br/>
             {% endfor %}
         </fieldset>
         <br/>
         {{ 'Description'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'what')">what</textarea><br/>
+        <textarea rows="2" name="description" style="width:90%" >{{ description }}</textarea><br/>
         {{ 'Text finding'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'in text')">in text</textarea><br/>
+        <textarea rows="2" name="textFinding" style="width:90%" >{{ textFinding }}</textarea><br/>
         {{ 'Comment'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'comment')">comment</textarea><br/>
+        <textarea rows="2" name="comment" style="width:90%" >{{ comment }}</textarea><br/>
 
     </div>
 </form>

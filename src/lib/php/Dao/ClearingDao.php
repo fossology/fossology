@@ -24,7 +24,7 @@ use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
@@ -472,7 +472,7 @@ insert into clearing_decision (
 
     foreach ($events as $event)
     {
-      if ($event->getEventType() == ClearingDecisionTypes::TO_BE_DISCUSSED)
+      if ($event->getEventType() == DecisionTypes::TO_BE_DISCUSSED)
       {
         continue;
       }
