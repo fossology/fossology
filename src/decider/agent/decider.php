@@ -38,8 +38,8 @@ class DeciderAgent extends Agent
 
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
 
-  /** @var ClearingDecisionTypes */
-  private $clearingDecisionTypes;
+  /** @var DecisionTypes */
+  private $decisionTypes;
 
   function __construct()
   {
@@ -52,7 +52,7 @@ class DeciderAgent extends Agent
     $this->uploadDao = $container->get('dao.upload');
 
     $this->clearingDao = $container->get('dao.clearing');
-    $this->clearingDecisionTypes = $container->get('clearing.decision.types');
+    $this->decisionTypes = $container->get('decision.types');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
 
   }
@@ -125,7 +125,7 @@ class DeciderAgent extends Agent
 
       if ($canAutoDecide)
       {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, ClearingDecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
+        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
         $this->heartbeat(1);
       } else
       {
