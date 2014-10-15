@@ -382,7 +382,7 @@ class AjaxClearingView extends FO_Plugin
     {
       $licenseId = $agentDecisionEvent->getLicenseId();
       $agentId = $agentDecisionEvent->getAgentId();
-      $matchId = $agentDecisionEvent->getMatchId();
+      $matchId = $agentDecisionEvent->getEventId();
       $percentage = $agentDecisionEvent->getPercentage();
       $agentResults[$agentDecisionEvent->getAgentName()][] = array(
           "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",

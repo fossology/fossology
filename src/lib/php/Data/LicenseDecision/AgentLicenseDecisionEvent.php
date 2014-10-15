@@ -48,7 +48,6 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
    * @param null|int $percentage
    */
   public function __construct(LicenseRef $licenseRef, AgentRef $agentRef, $matchId, $percentage) {
-
     $this->licenseRef = $licenseRef;
     $this->agentRef = $agentRef;
     $this->matchId = $matchId;
@@ -59,7 +58,7 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
    * @return int
    */
   public function getEventId()
-  {//TODO?
+  {
     return $this->matchId;
   }
 
@@ -165,11 +164,6 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   public function getAgentId()
   {
     return $this->agentRef->getAgentId();
-  }
-
-  public function getMatchId()
-  {
-    return $this->matchId;
   }
 
   public function getPercentage()
