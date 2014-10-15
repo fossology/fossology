@@ -451,8 +451,8 @@ int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char
           printf("wrong type for index %d in '%s'\n", j,  key);
           return 0;
         }
-        char* licenseName = NULL;
-        char* licenseText = NULL;
+        const char* licenseName = NULL;
+        const char* licenseText = NULL;
         char* fileNames = NULL;
         json_object_object_foreach(val1, key2, val2) {
           if (((strcmp(key2, "name"))==0) && json_object_is_type(val2, json_type_string))
@@ -523,9 +523,6 @@ mxml_node_t *body;
 mxml_node_t *fontxml;
 mxml_node_t *stylexml;
 mxml_node_t *numberingxml;
-mxml_node_t *p = NULL;
-mxml_node_t *r = NULL;
-mxml_node_t *t = NULL;
 char* tbcol4[4];
 char* tbcol3[3];
 char* tbcolSkewed[3];
@@ -535,18 +532,14 @@ char* finaldocxpath = NULL;
 
 char* outputPkgName = NULL;
 
-char* packagename = NULL;
-
 char agent_rev[myBUFSIZ];
 char *agent_desc = "reportgen agent";
 char *SVN_REV = NULL;
 char *VERSION = NULL;
 long agent_pk = 0; 
 int user_pk = 0;
-int uploadPk;
 int uploadId;
-int ars_pk = 0;               // the args primary key
-char UploadIdStr[DECLEN];
+int ars_pk = 0;
 /* connect to the scheduler */
 
 fo_scheduler_connect(&argc, argv, &pgConn);
@@ -560,20 +553,17 @@ agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
 user_pk = fo_scheduler_userID();
 while(fo_scheduler_next()!=NULL)
 {
-uploadPk=atoi(fo_scheduler_current());
-ars_pk = fo_WriteARS(pgConn, 0, uploadPk, agent_pk, AGENT_ARS, NULL, 0);
+uploadId=atoi(fo_scheduler_current());
+ars_pk = fo_WriteARS(pgConn, 0, uploadId, agent_pk, AGENT_ARS, NULL, 0);
 
-uploadId = uploadPk;
-sprintf(UploadIdStr,"%d",uploadId);
 /*Check Permissions */
-if (GetUploadPerm(pgConn, uploadPk, user_pk) < PERM_WRITE)
+if (GetUploadPerm(pgConn, uploadId, user_pk) < PERM_WRITE)
 {	
 	continue;
 }
 checkdest();
 char* localtime1 = gettime();
 char* formattedtime = replaceunderscore(localtime1);
-
 
 PGresult* uploadNameRes = fo_dbManager_Exec_printf(dbManager, "select ufile_name from uploadtree where upload_fk=%d and parent is null", uploadId);
 if (uploadNameRes) {
@@ -677,7 +667,6 @@ mxml_node_t* p1 = (mxml_node_t*)createnumsection(body,"0","2");
 
 char* formattedDate = malloc(strlen(formattedtime)+4+1+1);
 
-// TODO set correct user and group name
 char* day1 = malloc(4);
 if (day1)
 {
@@ -691,29 +680,28 @@ char* usrGrpName = getUsrGrpName(dbManager);
 
 section1 = g_strdup_printf("%s by %s", formattedDate, usrGrpName);
 
-addparaheading(p1, NULL, section1, "0","2");
-
 if (section1)
+{
+  addparaheading(p1, NULL, section1, "0","2");
   free(section1);
+}
 if (usrGrpName)
   free(usrGrpName);
 if (formattedDate)
   free(formattedDate);
 
-mxml_node_t* p2 = (mxml_node_t*)createnumsection(body,"0","2");
-
-
-char* Sql_UploadName1=(char*)malloc(sizeof(char)*(69+1+strlen(UploadIdStr)));
-sprintf(Sql_UploadName1,"select ufile_name from uploadtree where upload_fk=%d and parent is null",uploadId);
-PGresult* ResQ1=PQexec(pgConn,Sql_UploadName1);
-if (Sql_UploadName1)
 {
-	free(Sql_UploadName1);
-}
-if (PQntuples(ResQ1)>0)
-{
+  char* uploadName = "[upload name not found]";
 
-	addparaheading(p2, NULL,PQgetvalue(ResQ1,0,0),"0","2");  
+  PGresult* uploadNameRes = fo_dbManager_Exec_printf(dbManager, "select ufile_name from uploadtree where upload_fk=%d and parent is null", uploadId);
+  if (uploadNameRes && (PQntuples(uploadNameRes)>0))
+    uploadName = PQgetvalue(uploadNameRes,0,0);
+
+  mxml_node_t* p2 = (mxml_node_t*)createnumsection(body,"0","2");
+  addparaheading(p2, NULL, uploadName,"0","2");
+
+  if (uploadNameRes)
+    PQclear(uploadNameRes);
 }
 
 mxml_node_t* p3 = (mxml_node_t*)createnumsection(body,"0","2");
@@ -1188,7 +1176,7 @@ mxmlDelete(contentxml);
 mxmlDelete(appxml);
 mxmlDelete(corexml);
 mxmlDelete(hiddenrelsxml);
-fo_WriteARS(pgConn, ars_pk, uploadPk, agent_pk, AGENT_ARS, NULL, 0);
+fo_WriteARS(pgConn, ars_pk, uploadId, agent_pk, AGENT_ARS, NULL, 0);
 }
 
 fo_scheduler_disconnect(0);

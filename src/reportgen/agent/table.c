@@ -53,8 +53,6 @@ rg_table* table_new(mxml_node_t* parent, int width, ...)
 
 void table_addRow(rg_table* table, ...)
 {
-  gchar** row = malloc(sizeof(gchar*) * table->width);
-
   mxml_node_t* rowNode = createrowproperty(table->node);
 
   va_list args;
@@ -62,8 +60,7 @@ void table_addRow(rg_table* table, ...)
 
   for (int i=0; i<table->width; i++) {
     char* arg = va_arg(args, char*);
-    row[i] = g_strdup(arg);
-    createrowdata(rowNode, table->widths[i], row[i]);
+    createrowdata(rowNode, table->widths[i], arg);
   }
   va_end(args);
 }
