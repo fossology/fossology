@@ -18,9 +18,9 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseDecision\ClearingDecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 
-define("CLEARING_DECISION_TYPE", ClearingDecisionTypes::IDENTIFIED);
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");
@@ -37,7 +37,9 @@ class DeciderAgent extends Agent
   private $clearingDao;
 
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
-  private $decisionType;
+
+  /** @var ClearingDecisionTypes */
+  private $clearingDecisionTypes;
 
   function __construct()
   {
@@ -50,22 +52,9 @@ class DeciderAgent extends Agent
     $this->uploadDao = $container->get('dao.upload');
 
     $this->clearingDao = $container->get('dao.clearing');
+    $this->clearingDecisionTypes = $container->get('clearing.decision.types');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
 
-    $this->initializeDecisionType();
-  }
-
-  private function initializeDecisionType()
-  {
-    $row = $this->dbManager->getSingleRow("SELECT type_pk FROM clearing_decision_type WHERE meaning = $1", array(CLEARING_DECISION_TYPE));
-    if ($row === false)
-    {
-      print "ERROR: could not initialize clearing type for " . CLEARING_DECISION_TYPE;
-      $this->bail(6);
-    } else
-    {
-      $this->decisionType = $row['type_pk'];
-    }
   }
 
   static protected function hasNewerUserEvents($events, $date)
@@ -118,11 +107,10 @@ class DeciderAgent extends Agent
 
       if ($lastDecisionDate !== null)
       {
-        $filter_since_event = function ($event) use ($lastDecisionDate)
+        $filter_since_event = function (LicenseDecisionEvent $event) use ($lastDecisionDate)
         {
           return $event->getDateTime() >= $lastDecisionDate;
         };
-        $added = array_filter($added, $filter_since_event);
         $added = array_filter($added, $filter_since_event);
       }
 
@@ -137,7 +125,7 @@ class DeciderAgent extends Agent
 
       if ($canAutoDecide)
       {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $this->decisionType, $this->decisionIsGlobal);
+        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, ClearingDecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
         $this->heartbeat(1);
       } else
       {
