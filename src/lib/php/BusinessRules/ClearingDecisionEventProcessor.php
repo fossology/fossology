@@ -146,7 +146,6 @@ class ClearingDecisionEventProcessor
         {
           foreach ($agentResultMap as $agentId => $licenseProperties)
           {
-            $licenseId = $licenseProperties[0]['id'];
             if (!array_key_exists($agentName, $agentLatestMap) || $agentLatestMap[$agentName] != $agentId)
             {
               continue;
