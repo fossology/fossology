@@ -193,7 +193,13 @@ class LicenseRenderer
     $tableLanguage = array(
         "sInfo" => "Showing _START_ to _END_ of _TOTAL_ licenses",
         "sSearch" => "Search _INPUT_ <button onclick='resetLicenseField()' >" . _("Clear") . "</button>",
-        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> licenses"
+        "sLengthMenu" => "Display <select>
+                            <option value=\"10\">10</option>
+                            <option value=\"25\">25</option>
+                            <option value=\"50\">50</option>
+                            <option value=\"100\">100</option>
+                            <option value=\"999999\">All</option>
+                          </select> licenses"
     );
 
     $dataTableConfig = array(

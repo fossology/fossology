@@ -539,7 +539,13 @@ class ui_browse_license extends FO_Plugin
               // in results.
               . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
           "sInfoPostFix" => $AddInfoText,
-          "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
+          "sLengthMenu" => "Display <select>
+                              <option value=\"10\">10</option>
+                              <option value=\"25\">25</option>
+                              <option value=\"50\">50</option>
+                              <option value=\"100\">100</option>
+                              <option value=\"999999\">All</option>
+                            </select> files"
       );
 
       $dataTableConfig = array(
