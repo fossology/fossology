@@ -244,7 +244,7 @@ class ClearingView extends FO_Plugin
     $clearingDecWithLicenses = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     }
 
     if ($isSingleFile)
@@ -347,7 +347,9 @@ class ClearingView extends FO_Plugin
     $type = GetParm("clearingTypes", PARM_INTEGER);
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
-    $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
+    $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem,$uploadTreeTableName);
+
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }
 }

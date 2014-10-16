@@ -22,13 +22,13 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\DecisionTypes;
 
 class ClearingDecisionEventProcessor
 {
@@ -70,6 +70,7 @@ class ClearingDecisionEventProcessor
       $agentRef = $licenseMatch->getAgentRef();
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
+
       $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
           'id' => $licenseRef->getId(),
           'licenseRef' => $licenseRef,
@@ -121,6 +122,7 @@ class ClearingDecisionEventProcessor
   public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
+    $uploadId = $itemTreeBounds->getUploadId();
 
     $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds);
 
@@ -183,15 +185,18 @@ class ClearingDecisionEventProcessor
     }
     $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
     $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
-    $lastDecision = null;
-    if ($clearingDecision)
-    {
-      $lastDecision = $clearingDecision->getDateAdded();
-    }
 
     list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
 
-    $insertDecision = false;
+    $lastDecision = null;
+    $clearingDecType=null;
+    if ($clearingDecision)
+    {
+      $lastDecision = $clearingDecision->getDateAdded();
+      $clearingDecType = $clearingDecision->getType();
+    }
+
+    $insertDecision = ($type!=$clearingDecType);
     foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
