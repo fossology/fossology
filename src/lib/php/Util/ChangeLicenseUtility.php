@@ -19,8 +19,6 @@
 
 namespace Fossology\Lib\Util;
 
-use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
@@ -29,45 +27,23 @@ use Fossology\Lib\Data\LicenseRef;
 
 class ChangeLicenseUtility extends Object
 {
-
-  /**
-   * @var NewestEditedLicenseSelector $newestEditedLicenseSelector
-   */
-  private $newestEditedLicenseSelector;
-  /**
-   * @var UploadDao $uploadDao
-   */
+  /** @var UploadDao $uploadDao */
   private $uploadDao;
-
-  /**
-   * @var LicenseDao $licenseDao
-   */
+  /** @var LicenseDao $licenseDao */
   private $licenseDao;
-
-  /**
-   * @var ClearingDao $clearingDao
-   */
-  private $clearingDao;
-
-  /**
-   * @var DecisionTypes
-   */
+  /** @var DecisionTypes */
   private $clearingDecisionTypes;
 
   /**
-   * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
    * @param UploadDao $uploadDao
    * @param LicenseDao $licenseDao
-   * @param ClearingDao $clearingDao
    * @param DecisionTypes $clearingDecisionTypes
    */
 
-  function __construct(NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao, LicenseDao $licenseDao, ClearingDao $clearingDao, DecisionTypes $clearingDecisionTypes)
+  function __construct(UploadDao $uploadDao, LicenseDao $licenseDao, DecisionTypes $clearingDecisionTypes)
   {
-    $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
-    $this->clearingDao = $clearingDao;
     $this->clearingDecisionTypes = $clearingDecisionTypes;
   }
 
@@ -92,30 +68,25 @@ class ChangeLicenseUtility extends Object
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
-          'date'=>$clearingDecWithLic->getDateAdded(), //->format('Y-m-d'),
+          'date'=>$clearingDecWithLic->getDateAdded(),
           'username'=>$clearingDecWithLic->getUserName(),
           'scope'=>$clearingDecWithLic->getScope(),
           'type'=>$this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
           'licenses'=>implode(", ", $licenseNames));
       $table[] = $row;
-
     }
     return $table;
   }
   
 
   /**
-   * @param string $listElementName
-   * @param LicenseRef[] $licenseRefArray
-   * @return string
+   * @param $uploadTreeId
+   * @return array
    */
-  function createListSelect($listElementName, $licenseRefArray, $multiple=true, $size=20)
-  {
-    $output = "<select name=\"$listElementName\" id=\"$listElementName\" size=\"$size\" ";
-    if ($multiple) {
-      $output .= "multiple=\"multiple\" ";
-    }
-    $output .= "style=\"min-width:200px\" >\n"; //style=\"min-width:200px;max-width:400px;\"
+  public function createChangeLicenseForm() {
+    $licenseRefArray = $this->licenseDao->getLicenseRefs();
+    $listElementName = "licenseLeft";
+    $output = "<select name=\"$listElementName\" id=\"$listElementName\" style=\"min-width:200px\" >\n";
     foreach ($licenseRefArray as $licenseRef)
     {
       $uri = Traceback_uri() . "?mod=popup-license" . "&lic=" . urlencode($licenseRef->getShortName());
@@ -126,49 +97,16 @@ class ChangeLicenseUtility extends Object
                    . $licenseRef->getShortName() 
                   . "</option>\n";
     }
-    $output .= "</select>";
-    return $output;
-  }
-
-
-  /**
-   * @param $uploadTreeId
-   * @return LicenseRef[]
-   */
-  private function getAgentSuggestedLicenses($uploadTreeId)
-  {
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, "uploadtree");
-    $licenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
-    $licenseList = array();
-
-    foreach ($licenses as $licenseMatch)
-    {
-      $licenseList[] = $licenseMatch->getLicenseRef();
-
-    }
-    return $licenseList;
-  }
-
-
-
-  /**
-   * @param $uploadTreeId
-   * @return array
-   */
-  public function createChangeLicenseForm($uploadTreeId=-1) {
-    $licenseRefs = $this->licenseDao->getLicenseRefs();
-
-    $rendererVars = array();
-    $rendererVars['licenseLeftSelect'] = $this->createListSelect("licenseLeft", $licenseRefs);
+    $output .= "</select>";    
+    $rendererVars = array('licenseLeftSelect'=>$output);
     return $rendererVars;
   }
 
 
-  public function createBulkForm($uploadTreeId=-1) {
+  public function createBulkForm() {
     $rendererVars = array();
     $rendererVars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
     $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();
-    // print_r($rendererVars['licenseArray']);
     return $rendererVars;
   }
 }

@@ -49,12 +49,13 @@ class ClearingDecisionEventProcessor
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int
    * @return array
    */
-  public function getAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds)
+  protected function getLatestAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds,$uploadId)
   {
     $agentDetectedLicenses = array();
-
+    $agentsWithResults = array();
     $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
     foreach ($licenseFileMatches as $licenseMatch)
     {
@@ -67,8 +68,9 @@ class ClearingDecisionEventProcessor
       $agentRef = $licenseMatch->getAgentRef();
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
-
-      $agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = array(
+      $agentsWithResults[$agentName] = $agentName;
+      //$agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = array(
+      $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
           'id' => $licenseRef->getId(),
           'licenseRef' => $licenseRef,
           'agentRef' => $agentRef,
@@ -76,39 +78,38 @@ class ClearingDecisionEventProcessor
           'percentage' => $licenseMatch->getPercentage()
       );
     }
-
-    return $agentDetectedLicenses;
+    $agentLatestMap = $this->agentsDao->getLatestAgentResultForUpload($uploadId, $agentsWithResults);
+    $latestAgentDetectedLicenses = $this->functionWithNoName($agentDetectedLicenses,$agentLatestMap);
+    return $latestAgentDetectedLicenses;
   }
-
+  
   /**
-   * @param $agentDetectedLicenses
-   * @return array
+   * (A->B->C->X, A->B) => C->A->X
+   * @param array[][][]
+   * @param array $agentLatestMap
+   * @return array[][]
    */
-  protected function getAgentsWithResults($agentDetectedLicenses)
-  {
-    $agentsWithResults = array();
-    foreach ($agentDetectedLicenses as $agentMap)
+  protected function filterDetectedLicenses($agentDetectedLicenses,$agentLatestMap){
+    $latestAgentDetectedLicenses = array();
+    foreach($agentDetectedLicenses as $agentName=>$namedAgentDetectedLicenses)
     {
-      foreach ($agentMap as $agentName => $agentResultMap)
+      if (!array_key_exists($agentName, $agentLatestMap))
       {
-        $agentsWithResults[$agentName] = $agentName;
+        continue;
+      }
+      $latestAgentId = $agentLatestMap[$agentName];
+      if (!array_key_exists($latestAgentId,$namedAgentDetectedLicenses))
+      {
+        continue;
+      }
+      foreach($namedAgentDetectedLicenses[$latestAgentId] as $licenseShortName=>$properties)
+      {
+        $latestAgentDetectedLicenses[$licenseShortName][$agentName] = $properties;
       }
     }
-    return $agentsWithResults;
+    return $latestAgentDetectedLicenses;
   }
 
-  /**
-   * @param $agentDetectedLicenses
-   * @param $uploadId
-   * @return array
-   */
-  public function getLatestAgents($agentDetectedLicenses, $uploadId)
-  {
-    $agentsWithResults = $this->getAgentsWithResults($agentDetectedLicenses);
-
-    $agentLatestMap = $this->agentsDao->getLatestAgentResultForUpload($uploadId, $agentsWithResults);
-    return $agentLatestMap;
-  }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
@@ -120,9 +121,7 @@ class ClearingDecisionEventProcessor
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
 
-    $agentDetectedLicenses = $this->getAgentDetectedLicenses($itemTreeBounds);
-
-    $agentLatestMap = $this->getLatestAgents($agentDetectedLicenses, $uploadId);
+    $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds, $uploadId);
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
 
@@ -144,24 +143,16 @@ class ClearingDecisionEventProcessor
 
       if (array_key_exists($licenseShortName, $agentDetectedLicenses))
       {
-        foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $agentResultMap)
+        foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperty)
         {
-          foreach ($agentResultMap as $agentId => $licenseProperties)
+          foreach ($licenseProperties as $licenseProperty)
           {
-            if (!array_key_exists($agentName, $agentLatestMap) || $agentLatestMap[$agentName] != $agentId)
-            {
-              continue;
-            }
-
-            foreach ($licenseProperties as $licenseProperty)
-            {
-              $agentLicenseDecisionEvents[] = new AgentLicenseDecisionEvent(
-                  $licenseProperty['licenseRef'],
-                  $licenseProperty['agentRef'],
-                  $licenseProperty['matchId'],
-                  array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
-              );
-            }
+            $agentLicenseDecisionEvents[] = new AgentLicenseDecisionEvent(
+                $licenseProperty['licenseRef'],
+                $licenseProperty['agentRef'],
+                $licenseProperty['matchId'],
+                array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
+            );
           }
         }
       }
