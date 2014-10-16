@@ -21,9 +21,22 @@ require_once("$MODDIR/lib/php/common-cli.php");
 
 cli_Init();
 
-print '
-{ "licenses" : [
-                 { "content": "Apache-2.0", "text" : "licText", "files" : [ "/a.txt", "/b.txt" ]},
-                 { "content": "Apache-1.0", "text" : "lic3Text", "files" : [ "/c.txt" ]},
-               ]
-}';
+function getUploadIdArg()
+{
+  $args = getopt("u:", array());
+
+  if (!array_key_exists('u',$args))
+  {
+    print "missing required parameter -u {uploadId}";
+    exit(2);
+  }
+
+  $uploadId = intval($args['u']);
+
+  if ($uploadId<=0)
+  {
+    print "invalid uploadId ".$uploadId;
+    exit(2);
+  }
+  return $uploadId;
+}

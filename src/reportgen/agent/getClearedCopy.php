@@ -17,9 +17,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-require_once("$MODDIR/lib/php/common-cli.php");
+include_once("getReportDataCommon.php");
 
-cli_Init();
+use Fossology\Lib\Data\DecisionTypes;
 
 global $container;
 
@@ -29,21 +29,39 @@ $copyrightDao = $container->get('dao.copyright');
 /** @var UploadDao $uploadDao */
 $uploadDao = $container->get('dao.upload');
 
-//$copyrightDao->getDecision();
+/** @var TreeDao $treeDao */
+$treeDao = $container->get('dao.tree');
 
-$args = getopt("u:", array());
+/** @var DbManager $dbManager */
+$dbManger = $container->get('db.manager');
 
-if (!array_key_exists('u',$args))
-{
-  print "";
-  exit(2);
+$uploadId = getUploadIdArg();
+$uploadTreeTableName = $uploadDao->getUploadTreeTableName($uploadId);
+
+$ungrupedStatements = $copyrightDao->getAllDecisions("copyright", $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED,  "statement");
+
+$fileNames = array();
+foreach($ungrupedStatements as $key => $statement) {
+  $id = $statement['id'];
+  $content = $statement['content'];
+  $uploadTreeId = $statement['uploadtree_pk'];
+  $filePathRow = $treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);
+  $fileNames[$id.$content][] = $filePathRow['file_path'];
 }
 
-$uploadId = $args['u'];
-
 $statements = array();
-$statements[] = array("name" => "content", "text" => "comment $uploadId", "files" => array("a", "b"));
+foreach($ungrupedStatements as $key => $statement) {
+  $id = $statement['id'];
+  $description = $statement['description'];
+  //$textfinding = $statement['textfinding'];
+  $content = $statement['content'];
 
-$result = array("statements" => $statements);
+  $statements[$id.$content] =
+    array("content" => $content, //$textfinding,
+          "text" => $description,
+          "files" => array_values($fileNames[$id.$content]));
+}
+
+$result = array("statements" => array_values($statements));
 
 print json_encode($result);
