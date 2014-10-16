@@ -186,12 +186,14 @@ class ClearingDecisionEventProcessor
     list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
 
     $lastDecision = null;
+    $clearingDecType=null;
     if ($clearingDecision)
     {
       $lastDecision = $clearingDecision['date_added'];
+      $clearingDecType= $clearingDecision['type_fk'];
     }
 
-    $insertDecision = false;
+    $insertDecision = ($type!=$clearingDecType);
     foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
@@ -201,7 +203,7 @@ class ClearingDecisionEventProcessor
         break;
       }
 
-      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
+      $entryTimestamp = $licenseDecisionResult->getTimestamp();
       if ($lastDecision === null || $lastDecision < $entryTimestamp)
       {
         $insertDecision = true;

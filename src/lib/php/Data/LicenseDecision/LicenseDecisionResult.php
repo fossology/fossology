@@ -187,4 +187,13 @@ class LicenseDecisionResult implements LicenseDecision {
     return $this->licenseDecisionEvent;
   }
 
+  /*
+   * @return int EXTRACT(EPOCH FROM getLicenseDecisionEvent()->getDateTime())
+   */
+  public function getTimestamp()
+  {
+    $dateTime = $this->getDateTime();
+    return $dateTime->getTimestamp();
+  }
+  
 }
