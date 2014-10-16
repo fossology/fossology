@@ -56,18 +56,7 @@ class ClearingDao extends Object
     $this->uploadDao = $uploadDao;
   }
 
-  /**
-   * \brief get all the licenses for a single file or uploadtree
-   *
-   * @param $uploadTreeId
-   * @return ClearingDecision[]
-   */
-  function getFileClearings($uploadTreeId)
-  {
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-    return $this->getFileClearingsFolder($itemTreeBounds);
-  }
-  
+ 
   /**
    * \brief get all the licenses for a single file or uploadtree
    *
@@ -76,7 +65,6 @@ class ClearingDao extends Object
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds)
   {
-
     //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $uploadTreeTable=$itemTreeBounds->getUploadTreeTableName();

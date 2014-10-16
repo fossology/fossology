@@ -244,7 +244,7 @@ class ClearingView extends FO_Plugin
     $clearingDecWithLicenses = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
+      $clearingDecWithLicenses = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     }
 
     if ($isSingleFile)
