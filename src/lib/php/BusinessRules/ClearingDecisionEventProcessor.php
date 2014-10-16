@@ -69,7 +69,6 @@ class ClearingDecisionEventProcessor
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
       $agentsWithResults[$agentName] = $agentName;
-      //$agentDetectedLicenses[$licenseShortName][$agentName][$agentId][] = array(
       $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
           'id' => $licenseRef->getId(),
           'licenseRef' => $licenseRef,
@@ -79,7 +78,7 @@ class ClearingDecisionEventProcessor
       );
     }
     $agentLatestMap = $this->agentsDao->getLatestAgentResultForUpload($uploadId, $agentsWithResults);
-    $latestAgentDetectedLicenses = $this->functionWithNoName($agentDetectedLicenses,$agentLatestMap);
+    $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses,$agentLatestMap);
     return $latestAgentDetectedLicenses;
   }
   
@@ -143,7 +142,7 @@ class ClearingDecisionEventProcessor
 
       if (array_key_exists($licenseShortName, $agentDetectedLicenses))
       {
-        foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperty)
+        foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperties)
         {
           foreach ($licenseProperties as $licenseProperty)
           {

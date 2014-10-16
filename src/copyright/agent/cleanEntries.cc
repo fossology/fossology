@@ -11,6 +11,17 @@
 
 #include "cleanEntries.hpp"
 
+ DatabaseEntry::DatabaseEntry():
+  agent_fk(0),
+  pfile_fk(0),
+  content(""),
+  hash(""),
+  type(""),
+  copy_startbyte(0),
+  copy_endbyte(0)
+ {};
+
+
 /* Trims a string of any characters provided in the char list */
 std::string trim(std::string str, std::string charlist = " \t\f\v\n\r")
 {

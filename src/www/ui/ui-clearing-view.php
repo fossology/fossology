@@ -267,7 +267,7 @@ class ClearingView extends FO_Plugin
     $selectedClearingType = false;
     if ($hasWritePermission)
     {
-      $clearingHistory = $this->changeLicenseUtility->getClearingHistory($clearingDecWithLicenses, $userId);
+      $clearingHistory = $this->getClearingHistory($clearingDecWithLicenses);
     }
     if(count($clearingHistory)>0)
     {
@@ -289,6 +289,38 @@ class ClearingView extends FO_Plugin
     $this->vars['clearingHistory'] = $clearingHistory;
   }
 
+  
+  /**
+   * @param ClearingDecision[] $clearingDecWithLicenses
+   * @return array
+   */
+  private function getClearingHistory($clearingDecWithLicenses)
+  {
+    $table = array();
+    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
+    {
+      $licenseNames = array();
+      foreach ($clearingDecWithLic->getLicenses() as $lic)
+      {
+        $licenseShortName = $lic->getShortName();
+        if ($lic->isRemoved()) {
+          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
+        }
+        $licenseNames[$lic->getShortName()] = $licenseShortName;
+      }
+      ksort($licenseNames, SORT_STRING);
+      $row = array(
+          'date'=>$clearingDecWithLic->getDateAdded(),
+          'username'=>$clearingDecWithLic->getUserName(),
+          'scope'=>$clearingDecWithLic->getScope(),
+          'type'=>$this->decisionTypes->getTypeName($clearingDecWithLic->getType()),
+          'licenses'=>implode(", ", $licenseNames));
+      $table[] = $row;
+    }
+    return $table;
+  }
+  
+  
   public function getTemplateName()
   {
     return "ui-clearing-view.html.twig";

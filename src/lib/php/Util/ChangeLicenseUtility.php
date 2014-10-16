@@ -21,7 +21,6 @@ namespace Fossology\Lib\Util;
 
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 
@@ -31,53 +30,17 @@ class ChangeLicenseUtility extends Object
   private $uploadDao;
   /** @var LicenseDao $licenseDao */
   private $licenseDao;
-  /** @var DecisionTypes */
-  private $clearingDecisionTypes;
 
   /**
    * @param UploadDao $uploadDao
    * @param LicenseDao $licenseDao
-   * @param DecisionTypes $clearingDecisionTypes
    */
 
-  function __construct(UploadDao $uploadDao, LicenseDao $licenseDao, DecisionTypes $clearingDecisionTypes)
+  function __construct(UploadDao $uploadDao, LicenseDao $licenseDao)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
-    $this->clearingDecisionTypes = $clearingDecisionTypes;
   }
-
-
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @return array
-   */
-  function getClearingHistory($clearingDecWithLicenses)
-  {
-    $table = array();
-    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
-    {
-      $licenseNames = array();
-      foreach ($clearingDecWithLic->getLicenses() as $lic)
-      {
-        $licenseShortName = $lic->getShortName();
-        if ($lic->isRemoved()) {
-          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
-        }
-        $licenseNames[$lic->getShortName()] = $licenseShortName;
-      }
-      ksort($licenseNames, SORT_STRING);
-      $row = array(
-          'date'=>$clearingDecWithLic->getDateAdded(),
-          'username'=>$clearingDecWithLic->getUserName(),
-          'scope'=>$clearingDecWithLic->getScope(),
-          'type'=>$this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
-          'licenses'=>implode(", ", $licenseNames));
-      $table[] = $row;
-    }
-    return $table;
-  }
-  
 
   /**
    * @param $uploadTreeId
