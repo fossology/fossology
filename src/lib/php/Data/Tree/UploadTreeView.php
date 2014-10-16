@@ -105,6 +105,8 @@ class UploadTreeView
           case "noLicense":
           case "alreadyCleared":
           case "noCopyright":
+          case "noIp":
+          case "noEcc":
 
             $queryCondition = self::getQueryCondition($skipThese);
             $sql_upload = "";
@@ -151,6 +153,12 @@ class UploadTreeView
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
+        return $conditionQuery;
+      case "noIp":
+        $conditionQuery = "EXISTS (SELECT ct_pk FROM ip cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
+        return $conditionQuery;
+      case "noEcc":
+        $conditionQuery = "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
         return $conditionQuery;
     }
   }

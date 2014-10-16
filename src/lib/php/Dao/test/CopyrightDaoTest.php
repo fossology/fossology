@@ -57,7 +57,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $uploadDao->shouldReceive('getUploadEntry')->andReturn(array('pfile_fk'=>8));
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
-    $highlights = $copyrightDao->getCopyrightHighlights($uploadTreeId=1);
+    $highlights = $copyrightDao->getHighlights($uploadTreeId=1);
     $this->assertSame(array(), $highlights);
     
     $this->testDb->insertData(array('copyright'));
@@ -66,7 +66,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 698, 899)
 ",
             __METHOD__.'.insert.data');*/
-    $highlights = $copyrightDao->getCopyrightHighlights($uploadTreeId = 1);
+    $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     $highlight0 = reset($highlights);
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     $this->assertEquals($expected=899, $highlight0->getEnd());    

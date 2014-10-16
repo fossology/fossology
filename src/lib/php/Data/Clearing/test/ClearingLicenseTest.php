@@ -24,7 +24,7 @@ use Mockery as M;
 class ClearingLicenseTest extends \PHPUnit_Framework_TestCase {
 
   /**
-   * @var M\MockInterface|LicenseRef
+   * @var LicenseRef|M\MockInterface
    */
   private $licenseRef;
 

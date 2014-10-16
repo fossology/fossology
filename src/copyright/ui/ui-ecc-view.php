@@ -18,25 +18,26 @@
  */
 use Fossology\Lib\Data\Highlight;
 
-define("TITLE_ip_view", _("View patent Analysis"));
+define("TITLE_ecc_view", _("View Export Control and Customs Analysis"));
 
-class ip_view extends Xpview
+class ecc_view extends Xpview
 {
   function __construct()
   {
-    $this->Name = "ip-view";
-    $this->Title = TITLE_ip_view;
-    $this->decisionTableName = "ip_decision";
-    $this->tableName = "ip";
-    $this->modBack = 'copyright-hist';//TODO
-    $this->optionName = "skipFileIp";
-    $this->ajaxAction = "setNextPrevIp";
-    $this->skipOption = "noIp";
-    $this->hightlightTypeToStringMap= array(Highlight::IP => 'Patent');
-    $this->typeToHighlightTypeMap =  array('ip' => Highlight::IP);
+    $this->Name = "ecc-view";
+    $this->Title = TITLE_ecc_view;
+    $this->decisionTableName = "ecc_decision";
+    $this->tableName = "ecc";
+    $this->modBack = 'copyright-hist'; //TODO
+    $this->optionName = "skipFileEcc";
+    $this->ajaxAction = "setNextPrevEcc";
+    $this->skipOption = "noEcc";
+    $this->hightlightTypeToStringMap= array(Highlight::ECC => 'Export Restriction');
+    $this->typeToHighlightTypeMap =  array('ecc' => Highlight::ECC);
     parent::__construct();
-    $this->vars['xptext'] = 'patent';
+
+    $this->vars['xptext'] = 'export restriction';
   }
 }
-$NewPlugin = new ip_view;
+$NewPlugin = new ecc_view;
 $NewPlugin->Initialize();
