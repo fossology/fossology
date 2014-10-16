@@ -430,7 +430,7 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
   return g_string_free(fileNamesAppender, FALSE);
 }
 
-int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char* keyName)
+int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const char* keyName)
 {
   // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
   if ((jobj==NULL) || ((int)jobj < 0))
@@ -438,6 +438,10 @@ int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char
 
   int result = 0;
 
+  if (!json_object_is_type(jobj, json_type_object)) {
+    printf("expected object but type is %d\n", json_object_get_type(jobj));
+    return 0;
+  }
   json_object_object_foreach(jobj, key, val) {
     if ((strcmp(keyName, key)==0) && json_object_is_type(val, json_type_array)) {
       int length = json_object_array_length(val);
@@ -449,17 +453,17 @@ int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char
           printf("wrong type for index %d in '%s'\n", j,  key);
           return 0;
         }
-        const char* licenseName = NULL;
-        const char* licenseText = NULL;
+        const char* content = NULL;
+        const char* text = NULL;
         char* fileNames = NULL;
         json_object_object_foreach(val1, key2, val2) {
-          if (((strcmp(key2, "name"))==0) && json_object_is_type(val2, json_type_string))
+          if (((strcmp(key2, "content"))==0) && json_object_is_type(val2, json_type_string))
           {
-            licenseName = json_object_get_string(val2);
+            content = json_object_get_string(val2);
           }
           else if (((strcmp(key2, "text"))==0) && json_object_is_type(val2, json_type_string))
           {
-            licenseText = json_object_get_string(val2);
+            text = json_object_get_string(val2);
           }
           else if (((strcmp(key2, "files"))==0) && json_object_is_type(val2, json_type_array))
           {
@@ -472,8 +476,11 @@ int addRowsFromJson_NameTextFiles(rg_table* table, json_object* jobj, const char
           }
         }
 
-        if (licenseName && licenseText && fileNames)
-          table_addRow(table, licenseName, licenseText, fileNames);
+        if (content && text && fileNames) {
+          table_addRow(table, content, text, fileNames);
+        } else if (content && fileNames) { // TODO use a count argument in addRowsFromJson_ContentTextFiles
+          table_addRow(table, content, fileNames);
+        }
 
         if (fileNames) g_free(fileNames);
       }
@@ -835,10 +842,10 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
-  char* jsonLicenses = getClearedLicenses();
+  char* jsonLicenses = getClearedLicenses(uploadId);
   json_object * jobj = json_tokener_parse(jsonLicenses);
 
-  if (!addRowsFromJson_NameTextFiles(tableOthers, jobj, "licenses"))
+  if (!addRowsFromJson_ContentTextFiles(tableOthers, jobj, "licenses"))
   {
     printf("cannot parse json string: %s\n", jsonLicenses);
     fo_scheduler_disconnect(1);
@@ -857,10 +864,10 @@ addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
 rg_table* tableCopyright = table_new(body, 3, "2638", "5000", "2000");
 table_addRow(tableCopyright, "copyright", "text", "files");
 {
-  char* jsonCopyright = getClearedCopyright();
+  char* jsonCopyright = getClearedCopyright(uploadId);
   json_object * jobj = json_tokener_parse(jsonCopyright);
 
-  if (!addRowsFromJson_NameTextFiles(tableCopyright, jobj, "statements"))
+  if (!addRowsFromJson_ContentTextFiles(tableCopyright, jobj, "statements"))
   {
     printf("cannot parse json string: %s\n", jsonCopyright);
     fo_scheduler_disconnect(1);
@@ -1079,7 +1086,6 @@ strcpy(xmlfilename, hiddenrelspath);
 strcat(xmlfilename,HIDDENRELSXML);
 fhiddenrels = fopen(xmlfilename, "w");
 free(xmlfilename);
-
 
 mxmlSaveFile(header, hdrf, MXML_NO_CALLBACK);
 mxmlSaveFile(footer, fdrf, MXML_NO_CALLBACK);

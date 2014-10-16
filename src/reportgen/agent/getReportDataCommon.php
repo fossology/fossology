@@ -1,3 +1,4 @@
+<?php
 /*
  Copyright (C) 2014, Siemens AG
  Author: Daniele Fognini
@@ -15,19 +16,27 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef JSON_DATA_RETRIVER_H
-#define JSON_DATA_RETRIVER_H
 
-/*
- *
- * should return a json in this format:
- *
- * { "licenses" : [
- *                  { "name": "Apache-2.0", "text" : "licText", "files" : [ "/a.txt", "/b.txt" ]},
- *                  { "name": "Apache-1.0", "text" : "lic3Text", "files" : [ "/c.txt" ]},
- *                ]
- * }
- */
-char* getClearedLicenses(int uploadId);
-char* getClearedCopyright(int uploadId);
-#endif
+require_once("$MODDIR/lib/php/common-cli.php");
+
+cli_Init();
+
+function getUploadIdArg()
+{
+  $args = getopt("u:", array());
+
+  if (!array_key_exists('u',$args))
+  {
+    print "missing required parameter -u {uploadId}";
+    exit(2);
+  }
+
+  $uploadId = intval($args['u']);
+
+  if ($uploadId<=0)
+  {
+    print "invalid uploadId ".$uploadId;
+    exit(2);
+  }
+  return $uploadId;
+}

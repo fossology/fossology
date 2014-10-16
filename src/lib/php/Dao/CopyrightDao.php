@@ -113,6 +113,55 @@ class CopyrightDao extends Object
         $clearingType, $description, $textFinding, $comment ),$statementName);
   }
 
+  public function getAllDecisions($tableName, $uploadId, $uploadTreeTableName, $decisionType=null, $type=null)
+  {
+    $statementName = __METHOD__.$tableName.$uploadTreeTableName;
+
+    $params = array();
+    $whereClause = "";
+    $tableNameDecision = $tableName."_decision";
+
+    if ($uploadTreeTableName === "uploadtree_a")
+    {
+      $params []= $uploadId;
+      $whereClause .= "AND UT.upload_fk = $".count($params);
+      $statementName .= ".withUI";
+    }
+    if ($type !== null)
+    {
+      $params []= $type;
+      $whereClause .= "AND C.type = $".count($params);
+      $statementName .= ".withType";
+    }
+    if ($decisionType !== null)
+    {
+      $params []= $decisionType;
+      $whereClause .= "AND CD.clearing_decision_type_fk = $".count($params);
+      $statementName .= ".withDecisionType";
+    }
+
+    $sql = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
+             CD.description, CD.textfinding, UT.uploadtree_pk,
+             CD.copyright_decision_pk AS id, C.content
+            from $tableNameDecision CD
+            INNER JOIN $uploadTreeTableName UT
+            ON CD.pfile_fk = UT.pfile_fk
+            INNER JOIN $tableName C
+            ON C.pfile_fk = CD.pfile_fk
+            WHERE C.content IS NOT NULL $whereClause
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, id DESC";
+
+
+    $this->dbManager->prepare($statementName, $sql);
+
+    $sqlResult = $this->dbManager->execute($statementName, $params);
+
+    $result = $this->dbManager->fetchAll($sqlResult);
+    $this->dbManager->freeResult($sqlResult);
+
+    return $result;
+  }
+
   public function getDecision($tableName,$pfileId){
 
     $statementName = __METHOD__.$tableName;
