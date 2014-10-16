@@ -222,14 +222,6 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
   return true;
 }
 
-bool CopyrightDatabaseHandler::checkTables(DbManager* dbManager) {
-  size_t ncolumns = (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-  RETURN_IF_FALSE(dbManager->tableExists(name));
-  RETURN_IF_FALSE(dbManager->tableExists((std::string(name)+"_decision").c_str()));
-  RETURN_IF_FALSE(dbManager->queryPrintf("SELECT %s FROM %s limit 1", getColumnListString(CopyrightDatabaseHandler::columns,ncolumns ).c_str(), name));
-
-  return true;
-}
 
 std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId) {
   QueryResult queryResult = dbManager->queryPrintf(
