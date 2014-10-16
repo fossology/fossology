@@ -19,91 +19,27 @@
 
 namespace Fossology\Reportgen;
 
-require_once("$MODDIR/lib/php/common-cli.php");
-cli_Init();
-
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\CopyrightDao;
 
-class XpClearedGetter
+require_once ("getClearedCommon.php");
+
+class XpClearedGetter extends ClearedGetterCommon
 {
   /** @var CopyrightDao */
   private $copyrightDao;
-
-  /** @var UploadDao */
-  private $uploadDao;
-
-  /** @var TreeDao */
-  private $treeDao;
-
- // private $tableName = "copyright";
-  //private $type = null;
 
   public function __construct() {
     global $container;
 
     $this->copyrightDao = $container->get('dao.copyright');
-    $this->uploadDao = $container->get('dao.upload');
-    $this->treeDao = $container->get('dao.tree');
+
+    parent::__construct();
   }
 
-  public function getUploadIdArg()
+  protected function getDecisions($uploadId, $uploadTreeTableName)
   {
-    $args = getopt("u:", array());
-
-    if (!array_key_exists('u',$args))
-    {
-      print "missing required parameter -u {uploadId}";
-      exit(2);
-    }
-
-    $uploadId = intval($args['u']);
-
-    if ($uploadId<=0)
-    {
-      print "invalid uploadId ".$uploadId;
-      exit(2);
-    }
-    return $uploadId;
-  }
-
-  protected function groupStatements($ungrupedStatements, $uploadTreeTableName)
-  {
-    $fileNames = array();
-    foreach($ungrupedStatements as $key => $statement) {
-      $id = $statement['id'];
-      $content = $statement['content'];
-      $uploadTreeId = $statement['uploadtree_pk'];
-      $filePathRow = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);
-      $fileNames[$id.$content][] = $filePathRow['file_path'];
-    }
-
-    $statements = array();
-    foreach($ungrupedStatements as $key => $statement) {
-      $id = $statement['id'];
-      $description = $statement['description'];
-      //$textfinding = $statement['textfinding'];
-      $content = $statement['content'];
-
-      $statements[$id.$content] =
-      array("content" => $content, //$textfinding,
-      "text" => $description,
-      "files" => array_values($fileNames[$id.$content]));
-    }
-
-    return $statements;
-  }
-
-  public function getCleared($uploadId)
-  {
-    $uploadTreeTableName = $this->uploadDao->getUploadTreeTableName($uploadId);
-
-    $ungrupedStatements = $this->copyrightDao->getAllDecisions($this->tableName, $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED, $this->type);
-
-    $statements = $this->groupStatements($ungrupedStatements,$uploadTreeTableName);
-    return array("statements" => array_values($statements));
+    return $this->copyrightDao->getAllDecisions($this->tableName, $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED, $this->type);
   }
 }
 
