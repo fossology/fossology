@@ -36,6 +36,9 @@ class copyright_view extends Xpview
     $this->decisionTableName = "copyright_decision";
     $this->tableName = "copyright";
     $this->modBack = 'copyright-hist';
+    $this->optionName = "skipFileCopyRight";
+    $this->ajaxAction = "setNextPrevCopyRight";
+    $this->skipOption = "noCopyright";
     $this->hightlightTypeToStringMap= array(Highlight::COPYRIGHT => 'copyright remark',
         Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address');
     $this->typeToHighlightTypeMap = array(

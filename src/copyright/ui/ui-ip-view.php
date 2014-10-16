@@ -29,6 +29,9 @@ class ip_view extends Xpview
     $this->decisionTableName = "ip_decision";
     $this->tableName = "ip";
     $this->modBack = 'copyright-hist';//TODO
+    $this->optionName = "skipFileIp";
+    $this->ajaxAction = "setNextPrevIp";
+    $this->skipOption = "noIp";
     $this->hightlightTypeToStringMap= array(Highlight::IP => 'Patent');
     $this->typeToHighlightTypeMap =  array('patent' => Highlight::IP);
     parent::__construct();

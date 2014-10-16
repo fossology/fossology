@@ -43,6 +43,10 @@ use Fossology\Lib\View\HighlightRenderer;
 class Xpview extends FO_Plugin
 {
   /** @var  string */
+  protected $optionName;
+  /** @var  string */
+  protected $ajaxAction;
+  /** @var  string */
   protected $modBack;
   /** @var UploadDao */
   protected $uploadDao;
@@ -64,6 +68,8 @@ class Xpview extends FO_Plugin
   protected $hightlightTypeToStringMap;
   /** @var  array */
   protected $typeToHighlightTypeMap;
+  /**  @var string */
+  protected $skipOption;
 
   function __construct()
   {
@@ -195,10 +201,10 @@ class Xpview extends FO_Plugin
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->legendBox();
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
-    $this->vars['optionName'] = "skipFileCopyRight";
+    $this->vars['optionName'] = $this->optionName;
     $this->vars['formName'] = "CopyRightForm";
-    $this->vars['ajaxAction'] = "setNextPrevCopyRight";
-
+    $this->vars['ajaxAction'] = $this->ajaxAction;
+    $this->vars['skipOption'] =$this->skipOption;
     $this->vars['selectedClearingType'] = $decisionType;
     $this->vars['clearingTypes'] =$copyrightDecisionMap ;
   }

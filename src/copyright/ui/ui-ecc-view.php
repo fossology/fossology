@@ -29,6 +29,9 @@ class ecc_view extends Xpview
     $this->decisionTableName = "ecc_decision";
     $this->tableName = "ecc";
     $this->modBack = 'copyright-hist'; //TODO
+    $this->optionName = "skipFileEcc";
+    $this->ajaxAction = "setNextPrevEcc";
+    $this->skipOption = "noEcc";
     $this->hightlightTypeToStringMap= array(Highlight::ECC => 'Export Restriction');
     $this->typeToHighlightTypeMap =  array('ecc' => Highlight::ECC);
     parent::__construct();
