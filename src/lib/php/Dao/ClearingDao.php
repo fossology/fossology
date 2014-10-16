@@ -23,8 +23,8 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\LicenseDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
@@ -67,7 +67,7 @@ class ClearingDao extends Object
   {
     //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
-    $uploadTreeTable=$itemTreeBounds->getUploadTreeTableName();
+    $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
     $sql_upload="";
     if ('uploadtree_a' == $uploadTreeTable) {
@@ -276,18 +276,25 @@ class ClearingDao extends Object
     return $licensesWithCount;
   }
 
+  /**
+   * @param int $userId
+   * @param int $uploadTreeId
+   * @return ClearingDecision|null
+   * @throws \Fossology\Lib\Exception
+   */
   public function getRelevantClearingDecision($userId, $uploadTreeId)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
 SELECT
-  CD.pfile_fk,
-  CD.uploadtree_fk,
+  CD.clearing_decision_pk AS id,
+  CD.pfile_fk AS file_id,
+  CD.uploadtree_fk AS uploadtree_id,
   EXTRACT(EPOCH FROM CD.date_added) AS date_added,
-  CD.user_fk,
+  CD.user_fk AS user_id,
   GU.group_fk,
-  CD.type_fk,
+  CD.type_fk AS type_id,
   CD.is_global
 FROM clearing_decision CD
 INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
@@ -304,9 +311,22 @@ ORDER BY CD.date_added DESC LIMIT 1
         $statementName,
         array($uploadTreeId, $userId)
     );
-    $result = $this->dbManager->fetchAll($res);
+
+    $row = $this->dbManager->fetchAll($res);
+    $result = count($row) > 0 ?
+        ClearingDecisionBuilder::create()
+        ->setLicenses($this->getFileClearingLicenses($row['id']))
+        ->setClearingId($row['id'])
+        ->setUploadTreeId($row['uploadtree_id'])
+        ->setPfileId($row['file_id'])
+        ->setUserId($row['user_id'])
+        ->setType($row['type_id'])
+        ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
+        ->setDateAdded($row['date_added'])
+        ->build() :
+        null;
     $this->dbManager->freeResult($res);
-    return count($result) > 0 ? $result[0] : array();
+    return $result;
   }
 
   /**

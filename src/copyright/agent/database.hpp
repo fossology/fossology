@@ -22,7 +22,7 @@
 
 class CopyrightDatabaseHandler {
 public:
-  CopyrightDatabaseHandler(const char* name);
+  CopyrightDatabaseHandler();
   CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
   CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
@@ -45,9 +45,6 @@ private:
 
   bool createTableAgentFindings(DbManager* dbManager);
   bool createTableClearing(DbManager* dbManager);
-  char* name;
-  char* insertInDatabaseQuery;
-  char* insertNoResultInDatabaseQuery;
 
   std::string getColumnListString(const ColumnDef in[], size_t size) ;
   std::string getColumnCreationString( const ColumnDef in[], size_t size) ;

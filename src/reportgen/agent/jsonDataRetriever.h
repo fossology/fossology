@@ -30,4 +30,6 @@
  */
 char* getClearedLicenses(int uploadId);
 char* getClearedCopyright(int uploadId);
+char* getClearedIp(int uploadId);
+char* getClearedEcc(int uploadId);
 #endif

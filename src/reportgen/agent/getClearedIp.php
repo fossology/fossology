@@ -17,26 +17,23 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-require_once("$MODDIR/lib/php/common-cli.php");
+namespace Fossology\Reportgen;
 
-cli_Init();
+use Fossology\Reportgen\XpClearedGetter;
+require_once ("getClearedXp.php");
 
-function getUploadIdArg()
+
+class IpClearedGetter extends XpClearedGetter
 {
-  $args = getopt("u:", array());
 
-  if (!array_key_exists('u',$args))
+  public function __construct()
   {
-    print "missing required parameter -u {uploadId}";
-    exit(2);
+    parent::__construct();
+    $this->tableName = "ip";
+    $this->type = null;
   }
-
-  $uploadId = intval($args['u']);
-
-  if ($uploadId<=0)
-  {
-    print "invalid uploadId ".$uploadId;
-    exit(2);
-  }
-  return $uploadId;
 }
+
+$clearedGetter = new IpClearedGetter();
+$uploadId = $clearedGetter->getUploadIdArg();
+print json_encode($clearedGetter->getCleared($uploadId));

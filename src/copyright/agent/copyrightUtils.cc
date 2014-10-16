@@ -45,7 +45,7 @@ void bail(CopyrightState* state, int exitval) {
 CopyrightState* getState(DbManager* dbManager, int verbosity){
   int agentID;
   queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity, IDENTITY);
+  return new CopyrightState(dbManager, agentID, verbosity);
 }
 
 void fillMatchers(CopyrightState* state) {
@@ -110,8 +110,8 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   return state->getDbManager()->commit();
 };
 
-void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state){
-  string fileContent = file->getContent(0);
+void matchFileWithLicenses(long pFileId, const fo::File& file, CopyrightState* state){
+  string fileContent = file.getContent(0);
   vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
   saveToDatabase(matches, state, pFileId);
 }
@@ -124,15 +124,18 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
     bail(state, 8);
   }
 
-  char* fileName = fo_RepMkPath("files", pFile);
+  char * fil = g_strdup("files");
+  char* fileName = fo_RepMkPath(fil, pFile);
+  free(fil);
   if (fileName)
   {
-    fo::File* file = new fo::File(pFileId, fileName);
+    fo::File file(pFileId, fileName);
 
     matchFileWithLicenses(pFileId, file, state);
 
+
+    free(fileName);
     free(pFile);
-    delete(file);
   }
   else
   {

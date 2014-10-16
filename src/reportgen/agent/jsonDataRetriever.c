@@ -26,6 +26,8 @@
 
 #define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d"
 #define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
+#define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
+#define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
 
 static char* pipeRun(const char* cmdLineFmt, int uploadId)
 {
@@ -57,4 +59,14 @@ char* getClearedLicenses(int uploadId)
 char* getClearedCopyright(int uploadId)
 {
   return pipeRun(GETCLEAREDCOPY, uploadId);
+}
+
+char* getClearedIp(int uploadId)
+{
+  return pipeRun(GETCLEAREDIP, uploadId);
+}
+
+char* getClearedEcc(int uploadId)
+{
+  return pipeRun(GETCLEAREDECC, uploadId);
 }

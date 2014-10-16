@@ -19,21 +19,27 @@
 
 namespace Fossology\Reportgen;
 
-use Fossology\Reportgen\XpClearedGetter;
-require_once ("getClearedXp.php");
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Dao\CopyrightDao;
 
+require_once ("getClearedCommon.php");
 
-class CopyClearedGetter extends XpClearedGetter
+class XpClearedGetter extends ClearedGetterCommon
 {
+  /** @var CopyrightDao */
+  private $copyrightDao;
 
-  public function __construct()
-  {
+  public function __construct() {
+    global $container;
+
+    $this->copyrightDao = $container->get('dao.copyright');
+
     parent::__construct();
-    $this->tableName = "copyright";
-    $this->type = "statement";
+  }
+
+  protected function getDecisions($uploadId, $uploadTreeTableName)
+  {
+    return $this->copyrightDao->getAllDecisions($this->tableName, $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED, $this->type);
   }
 }
 
-$clearedGetter = new CopyClearedGetter();
-$uploadId = $clearedGetter->getUploadIdArg();
-print json_encode($clearedGetter->getCleared($uploadId));

@@ -17,8 +17,6 @@ use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
@@ -74,11 +72,7 @@ class DeciderAgent extends Agent
   protected function getDateOfLastRelevantClearing($userId, $uploadTreeId)
   {
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
-    if (array_key_exists('date_added', $lastDecision))
-      $lastDecisionDate = $lastDecision['date_added'];
-    else
-      $lastDecisionDate = null;
-    return $lastDecisionDate;
+    return $lastDecision !== null ? $lastDecision->getDateAdded() : null;
   }
 
 
@@ -96,44 +90,7 @@ class DeciderAgent extends Agent
     $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
     foreach ($changedItems as $uploadTreeId)
     {
-      $this->dbManager->begin();  /* start transaction */
-
-      $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
-
-      $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
-
-    
-      list($added, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
-      if ($lastDecisionDate !== null)
-      {
-        $filter_since_event = function (LicenseDecisionEvent $event) use ($lastDecisionDate)
-        {
-          return $event->getDateTime() >= $lastDecisionDate;
-        };
-        $added = array_filter($added, $filter_since_event);
-      }
-
-      $canAutoDecide = true;
-      foreach ($added as $event) {
-        /** @var LicenseDecision $event */
-        if ($event->getEventType() === LicenseDecisionResult::AGENT_DECISION_TYPE) {
-          $canAutoDecide = false;
-          break;
-        }
-      }
-
-      if ($canAutoDecide)
-      {
-        $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
-        $this->heartbeat(1);
-      } else
-      {
-        //TODO implement conflict resolving strategies
-        $this->heartbeat(0);
-      }
-
-      $this->dbManager->commit();  /* end transaction */
+      $this->processLicenseDecisionEventsForItem($uploadTreeId, $userId);
     }
   }
 
@@ -143,6 +100,34 @@ class DeciderAgent extends Agent
     $this->processLicenseDecisionEventOfCurrentJob();
 
     return true;
+  }
+
+  /**
+   * @param $uploadTreeId
+   * @param $userId
+   */
+  protected function processLicenseDecisionEventsForItem($uploadTreeId, $userId)
+  {
+    $this->dbManager->begin();  /* start transaction */
+
+    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+
+    $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
+
+    list($added, $removed) = $this->clearingDecisionEventProcessor->filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate);
+
+    $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
+
+    if ($canAutoDecide)
+    {
+      $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
+      $this->heartbeat(1);
+    } else
+    {
+      $this->heartbeat(0);
+    }
+
+    $this->dbManager->commit();  /* end transaction */
   }
 }
 

@@ -23,6 +23,7 @@ use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
+use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
@@ -52,11 +53,12 @@ class ClearingDecisionEventProcessor
    * @param int
    * @return array
    */
-  protected function getLatestAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds,$uploadId)
+  public function getLatestAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
-    $agentsWithResults = array();
+
     $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+
     foreach ($licenseFileMatches as $licenseMatch)
     {
       $licenseRef = $licenseMatch->getLicenseRef();
@@ -68,7 +70,7 @@ class ClearingDecisionEventProcessor
       $agentRef = $licenseMatch->getAgentRef();
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
-      $agentsWithResults[$agentName] = $agentName;
+
       $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
           'id' => $licenseRef->getId(),
           'licenseRef' => $licenseRef,
@@ -77,31 +79,33 @@ class ClearingDecisionEventProcessor
           'percentage' => $licenseMatch->getPercentage()
       );
     }
-    $agentLatestMap = $this->agentsDao->getLatestAgentResultForUpload($uploadId, $agentsWithResults);
-    $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses,$agentLatestMap);
+
+    $latestAgentIdPerAgent = $this->agentsDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }
-  
+
   /**
    * (A->B->C->X, A->B) => C->A->X
    * @param array[][][]
    * @param array $agentLatestMap
    * @return array[][]
    */
-  protected function filterDetectedLicenses($agentDetectedLicenses,$agentLatestMap){
+  protected function filterDetectedLicenses($agentDetectedLicenses, $agentLatestMap)
+  {
     $latestAgentDetectedLicenses = array();
-    foreach($agentDetectedLicenses as $agentName=>$namedAgentDetectedLicenses)
+    foreach ($agentDetectedLicenses as $agentName => $licensesFoundPerAgentId)
     {
       if (!array_key_exists($agentName, $agentLatestMap))
       {
         continue;
       }
       $latestAgentId = $agentLatestMap[$agentName];
-      if (!array_key_exists($latestAgentId,$namedAgentDetectedLicenses))
+      if (!array_key_exists($latestAgentId, $licensesFoundPerAgentId))
       {
         continue;
       }
-      foreach($namedAgentDetectedLicenses[$latestAgentId] as $licenseShortName=>$properties)
+      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseShortName => $properties)
       {
         $latestAgentDetectedLicenses[$licenseShortName][$agentName] = $properties;
       }
@@ -120,24 +124,23 @@ class ClearingDecisionEventProcessor
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
 
-    $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds, $uploadId);
+    $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds);
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
 
-    $currentLicenses = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
-
     $licenseDecisions = array();
-    $removed = array();
-    foreach ($currentLicenses as $licenseShortName)
+    $removedLicenseDecisions = array();
+
+    $allLicenseShortNames = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
+
+    foreach ($allLicenseShortNames as $licenseShortName)
     {
       $licenseDecisionEvent = null;
       $agentLicenseDecisionEvents = array();
 
       if (array_key_exists($licenseShortName, $addedLicenses))
       {
-        /** @var LicenseDecisionEvent $addedLicense */
-        $addedLicense = $addedLicenses[$licenseShortName];
-        $licenseDecisionEvent = $addedLicense;
+        $licenseDecisionEvent = $addedLicenses[$licenseShortName];
       }
 
       if (array_key_exists($licenseShortName, $agentDetectedLicenses))
@@ -162,7 +165,7 @@ class ClearingDecisionEventProcessor
 
         if (array_key_exists($licenseShortName, $removedLicenses))
         {
-          $removed[$licenseShortName] = $licenseDecisionResult;
+          $removedLicenseDecisions[$licenseShortName] = $licenseDecisionResult;
         } else
         {
           $licenseDecisions[$licenseShortName] = $licenseDecisionResult;
@@ -170,7 +173,7 @@ class ClearingDecisionEventProcessor
       }
     }
 
-    return array($licenseDecisions, $removed);
+    return array($licenseDecisions, $removedLicenseDecisions);
   }
 
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $isGlobal)
@@ -189,8 +192,8 @@ class ClearingDecisionEventProcessor
     $clearingDecType=null;
     if ($clearingDecision)
     {
-      $lastDecision = $clearingDecision['date_added'];
-      $clearingDecType= $clearingDecision['type_fk'];
+      $lastDecision = $clearingDecision->getDateAdded();
+      $clearingDecType = $clearingDecision->getType();
     }
 
     $insertDecision = ($type!=$clearingDecType);
@@ -203,7 +206,7 @@ class ClearingDecisionEventProcessor
         break;
       }
 
-      $entryTimestamp = $licenseDecisionResult->getTimestamp();
+      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
       if ($lastDecision === null || $lastDecision < $entryTimestamp)
       {
         $insertDecision = true;
@@ -248,6 +251,48 @@ class ClearingDecisionEventProcessor
     {
       $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
     }
+  }
+
+  /**
+   * @param $userId
+   * @param $itemTreeBounds
+   * @param $lastDecisionDate
+   * @return array
+   */
+  public function filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate)
+  {
+    list($added, $removed) = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+
+    if ($lastDecisionDate !== null)
+    {
+      $filter_since_event = function (LicenseDecisionEvent $event) use ($lastDecisionDate)
+      {
+        return $event->getDateTime() >= $lastDecisionDate;
+      };
+      $added = array_filter($added, $filter_since_event);
+      $removed = array_filter($removed, $filter_since_event);
+      return array($added, $removed);
+    }
+    return array($added, $removed);
+  }
+
+  /**
+   * @param LicenseDecision[] $added
+   * @param LicenseDecision[] $removed
+   * @return bool
+   */
+  public function checkIfAutomaticDecisionCanBeMade($added, $removed)
+  {
+    $canAutoDecide = true;
+    foreach ($added as $event)
+    {
+      if ($event->getEventType() === LicenseDecisionResult::AGENT_DECISION_TYPE)
+      {
+        $canAutoDecide = false;
+        break;
+      }
+    }
+    return $canAutoDecide;
   }
 
 }
