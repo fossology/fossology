@@ -71,57 +71,6 @@ class ChangeLicenseUtility extends Object
     $this->clearingDecisionTypes = $clearingDecisionTypes;
   }
 
-  /**
-   * @param $tableName
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @param $user_pk
-   * @return string
-   */
-  function printClearingTable($tableName, $clearingDecWithLicenses, $user_pk)
-  {
-    $output = "<div class='scrollable2'>";
-    $output .= "<table border=\"1\" id=\"$tableName\" name=\"$tableName\">\n";
-    $output .= $this->printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk);
-    $output .= "\n</table>";
-    $output .= "<table><tr class='inactiveClearing'><td>Inactive concluded licenses decisions</td></tr></table>";
-    $output .= "</div>";
-    return $output;
-  }
-
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @param $user_pk
-   * @return string
-   */
-  function printClearingTableInnerHtml($clearingDecWithLicenses, $user_pk)
-  {
-    $output = "<tr><th>" . _("Date") . "</th><th>" . _("Username") . "</th><th>" . _("Scope") . "</th><th>" . _("Type") . "</th><th>" . _("Licenses") . "</th><th>" . _("Comment") . "</th><th>" . _("Remark") . "</th></tr>";
-    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
-    {
-
-      if ($this->newestEditedLicenseSelector->isInactive($clearingDecWithLic))
-      {
-        $output .= "<tr class='inactiveClearing'>";
-      } else
-      {
-        $output .= "<tr>";
-      }
-      $output .= "<td>" . $clearingDecWithLic->getDateAdded()->format('Y-m-d') . "</td>";
-      $output .= "<td>" . $clearingDecWithLic->getUserName() . "</td>";
-      $output .= "<td>" . $clearingDecWithLic->getScope() . "</td>";
-      $output .= "<td>" . $clearingDecWithLic->getType() . "</td>";
-      $licenseNames = array();
-      foreach ($clearingDecWithLic->getLicenses() as $lic)
-      {
-        $licenseNames[] = $lic->getShortName();
-      }
-      $output .= "<td>" . implode(", ", $licenseNames) . "</td>";
-
-      $output .= "</tr>";
-    }
-    return $output;
-  }
-
 
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
@@ -154,36 +103,6 @@ class ChangeLicenseUtility extends Object
     return $table;
   }
   
-  
-  /**
-   * @param LicenseRef[] $bigList
-   * @param LicenseRef[] $smallList
-   */
-  function filterLists(&$bigList, &$smallList)
-  {
-    $bigListcopy = $bigList;
-    $smallListcopy = $smallList;
-
-    $bigList = array();
-    $smallList = array();
-
-    foreach ($bigListcopy as $license)
-    {
-      $flag = false;
-      foreach ($smallListcopy as $suggestedLic)
-      {
-        if ($license->getShortName() == $suggestedLic->getShortName()) $flag = true;
-      }
-      if ($flag)
-      {
-        $smallList[] = $license;
-      } else
-      {
-        $bigList[] = $license;
-      }
-    }
-  }
-
 
   /**
    * @param string $listElementName
