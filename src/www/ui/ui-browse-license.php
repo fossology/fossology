@@ -710,7 +710,7 @@ class ui_browse_license extends FO_Plugin
       if (false === $latestRun)
       {
 
-        $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
+        $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
 
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
@@ -732,12 +732,12 @@ class ui_browse_license extends FO_Plugin
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (in_array($newestAgent['agent_pk'], $runningJobs))
         {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
+          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
           $V .= $this->getViewJobsLink($uploadId);
           $V .= " " . _("or") . " ";
         } else
         {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
+          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" has not been run on this upload.");
 
         }
         $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
