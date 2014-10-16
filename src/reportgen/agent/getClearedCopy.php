@@ -21,9 +21,29 @@ require_once("$MODDIR/lib/php/common-cli.php");
 
 cli_Init();
 
-print '
-{ "statements" : [
-                 { "name": "Copyright Siemens", "text" : "we wrote this stuff", "files" : [ "/a.txt", "/b.txt" ]},
-                 { "name": "Copyright 2001-2014", "text" : "they wrote this other", "files" : [ "/c.txt", "d/file.c" ]},
-               ]
-}';
+global $container;
+
+/** @var CopyrightDao $copyrightDao */
+$copyrightDao = $container->get('dao.copyright');
+
+/** @var UploadDao $uploadDao */
+$uploadDao = $container->get('dao.upload');
+
+//$copyrightDao->getDecision();
+
+$args = getopt("u:", array());
+
+if (!array_key_exists('u',$args))
+{
+  print "";
+  exit(2);
+}
+
+$uploadId = $args['u'];
+
+$statements = array();
+$statements[] = array("name" => "content", "text" => "comment $uploadId", "files" => array("a", "b"));
+
+$result = array("statements" => $statements);
+
+print json_encode($result);

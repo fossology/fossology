@@ -835,7 +835,7 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
-  char* jsonLicenses = getClearedLicenses();
+  char* jsonLicenses = getClearedLicenses(uploadId);
   json_object * jobj = json_tokener_parse(jsonLicenses);
 
   if (!addRowsFromJson_NameTextFiles(tableOthers, jobj, "licenses"))
@@ -857,7 +857,7 @@ addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
 rg_table* tableCopyright = table_new(body, 3, "2638", "5000", "2000");
 table_addRow(tableCopyright, "copyright", "text", "files");
 {
-  char* jsonCopyright = getClearedCopyright();
+  char* jsonCopyright = getClearedCopyright(uploadId);
   json_object * jobj = json_tokener_parse(jsonCopyright);
 
   if (!addRowsFromJson_NameTextFiles(tableCopyright, jobj, "statements"))

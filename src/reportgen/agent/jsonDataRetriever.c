@@ -24,12 +24,14 @@
 #error
 #endif
 
-#define GETCLEAREDCMD   INSTALLDIR "/getCleared"
-#define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy"
+#define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d"
+#define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
 
-static char* pipeRun(const char* cmdLine)
+static char* pipeRun(const char* cmdLineFmt, int uploadId)
 {
-  FILE* pipe = popen(cmdLine, "r");
+  gchar* cmd = g_strdup_printf(cmdLineFmt, uploadId);
+  FILE* pipe = popen(cmd, "r");
+  g_free(cmd);
 
   //TODO replace _POSIX_C_SOURCE and popen with more secure dup2+fork
 
@@ -47,12 +49,12 @@ static char* pipeRun(const char* cmdLine)
   return g_string_free(stringBuffer, FALSE);
 }
 
-char* getClearedLicenses()
+char* getClearedLicenses(int uploadId)
 {
-  return pipeRun(GETCLEAREDCMD);
+  return pipeRun(GETCLEAREDCMD, uploadId);
 }
 
-char* getClearedCopyright()
+char* getClearedCopyright(int uploadId)
 {
-  return pipeRun(GETCLEAREDCOPY);
+  return pipeRun(GETCLEAREDCOPY, uploadId);
 }

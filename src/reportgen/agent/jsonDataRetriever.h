@@ -28,6 +28,6 @@
  *                ]
  * }
  */
-char* getClearedLicenses();
-char* getClearedCopyright();
+char* getClearedLicenses(int uploadId);
+char* getClearedCopyright(int uploadId);
 #endif
