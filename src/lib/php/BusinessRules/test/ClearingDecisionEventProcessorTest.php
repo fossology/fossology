@@ -86,6 +86,27 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   }
 
+  public function testGetLatestAgentDetectedWithOutdatedMatches()
+  {
+    $uploadId = 2;
+    list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 17, "nomos", 453, null);
+    list($licenseMatch2, $licenseRef2, $agentRef2) = $this->createLicenseMatch(5, "licA", 18, "monk", 665, 95);
+    $licenseMatches = array($licenseMatch1, $licenseMatch2);
+
+    $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'monk')))->andReturn(
+        array(
+            'nomos' => 23,
+            'monk' => 22
+        )
+    );
+
+    $latestAgentDetectedLicenses = $this->clearingDecisionEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+
+    assertThat($latestAgentDetectedLicenses, is(array()));
+  }
+
   /**
    * @return M\MockInterface
    */
@@ -106,6 +127,26 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatch->shouldReceive("getLicenseFileId")->withNoArgs()->andReturn($matchId);
     $licenseMatch->shouldReceive("getPercentage")->withNoArgs()->andReturn($percentage);
     return array($licenseMatch, $licenseRef, $agentRef);
+  }
+
+  public function testGetLatestAgentDetectedNoLicenseFoundShouldBeSkipped()
+  {
+    $uploadId = 2;
+    list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "No_license_found", 23, "nomos", 453, null);
+    $licenseMatches = array($licenseMatch1);
+
+    $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array()))->andReturn(
+        array(
+            'nomos' => 23,
+            'monk' => 22
+        )
+    );
+
+    $latestAgentDetectedLicenses = $this->clearingDecisionEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+
+    assertThat($latestAgentDetectedLicenses, is(array()));
   }
 
 }
