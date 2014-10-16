@@ -125,10 +125,9 @@ class ChangeLicenseUtility extends Object
 
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
-   * @param $user_pk
    * @return array
    */
-  function getClearingHistory($clearingDecWithLicenses, $user_pk)
+  function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
     foreach ($clearingDecWithLicenses as $clearingDecWithLic)
@@ -144,13 +143,12 @@ class ChangeLicenseUtility extends Object
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
-          $clearingDecWithLic->getDateAdded()->format('Y-m-d'),
-          $clearingDecWithLic->getUserName(),
-          $clearingDecWithLic->getScope(),
-          $this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
-          implode(", ", $licenseNames));
-      //$table[] = array("isInactive"=>$this->newestEditedLicenseSelector->isInactive($clearingDecWithLic),"content"=>$row);
-      $table[] = array("content"=>$row);
+          'date'=>$clearingDecWithLic->getDateAdded(), //->format('Y-m-d'),
+          'username'=>$clearingDecWithLic->getUserName(),
+          'scope'=>$clearingDecWithLic->getScope(),
+          'type'=>$this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
+          'licenses'=>implode(", ", $licenseNames));
+      $table[] = $row;
 
     }
     return $table;
