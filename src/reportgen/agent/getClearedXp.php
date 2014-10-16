@@ -37,7 +37,7 @@ class XpClearedGetter extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getDecisions($uploadId, $uploadTreeTableName)
+  protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
   {
     return $this->copyrightDao->getAllDecisions($this->tableName, $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED, $this->type);
   }

@@ -35,5 +35,6 @@ class IpClearedGetter extends XpClearedGetter
 }
 
 $clearedGetter = new IpClearedGetter();
-$uploadId = $clearedGetter->getUploadIdArg();
+$clearedGetter->getCliArgs();
+$uploadId = $clearedGetter->getUploadId();
 print json_encode($clearedGetter->getCleared($uploadId));

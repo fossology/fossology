@@ -17,13 +17,37 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-require_once("$MODDIR/lib/php/common-cli.php");
+namespace Fossology\Reportgen;
 
-cli_Init();
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Dao\ClearingDao;
 
-print '
-{ "licenses" : [
-                 { "content": "Apache-2.0", "text" : "licText", "files" : [ "/a.txt", "/b.txt" ]},
-                 { "content": "Apache-1.0", "text" : "lic3Text", "files" : [ "/c.txt" ]},
-               ]
-}';
+require_once ("getClearedCommon.php");
+
+class LicenseClearedGetter extends ClearedGetterCommon
+{
+  /** @var ClearingDao */
+  private $clearingDao;
+
+  public function __construct() {
+    global $container;
+
+    $this->clearingDao = $container->get('dao.clearing');
+
+    parent::__construct();
+  }
+
+  protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
+  {
+    $decidedLicenses = array();
+    // $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
+
+    return $decidedLicenses;
+  }
+}
+
+$clearedGetter = new LicenseClearedGetter();
+$clearedGetter->getCliArgs();
+$uploadId = $clearedGetter->getUploadId();
+$userId = $clearedGetter->getUserId();
+print json_encode($clearedGetter->getCleared($uploadId, $userId));
