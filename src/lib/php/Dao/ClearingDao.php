@@ -299,18 +299,17 @@ SELECT
   EXTRACT(EPOCH FROM CD.date_added) AS date_added,
   CD.user_fk,
   GU.group_fk,
-  CDT.meaning AS type,
+  CD.type_fk,
   CD.is_global
 FROM clearing_decision CD
 INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
-INNER JOIN clearing_decision_type CDT ON CD.type_fk = CDT.type_pk
 INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   CD2.uploadtree_fk=$1 AND
   (CD.is_global OR CD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, type, CD.is_global
+GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, CD.type_fk, CD.is_global
 ORDER BY CD.date_added DESC LIMIT 1
         ");
     $res = $this->dbManager->execute(
