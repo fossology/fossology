@@ -95,38 +95,35 @@ class UploadTreeView
    */
   private static function getUploadTreeView($uploadId, $options, $uploadTreeTableName, $additionalCondition)
   {
-      $skipThese = $options['skipThese'];
-      if (isset($skipThese))
+      $skipThese = $options['skipThese']?:'none';
+      switch ($skipThese)
       {
-        switch ($skipThese)
-        {
-          case "none":
-            break;
-          case "noLicense":
-          case "alreadyCleared":
-          case "noCopyright":
-          case "noIp":
-          case "noEcc":
+        case "none":
+          break;
+        case "noLicense":
+        case "alreadyCleared":
+        case "noCopyright":
+        case "noIp":
+        case "noEcc":
 
-            $queryCondition = self::getQueryCondition($skipThese);
-            $sql_upload = "";
-            if ('uploadtree_a' == $uploadTreeTableName)
-            {
-              $sql_upload = " AND ut.upload_fk=$uploadId ";
-            }
-            $uploadTreeView = " WITH UploadTreeView AS (
-                                select
-                                  *
-                                from $uploadTreeTableName ut
-                                where
-                                  (
-                                   $queryCondition
-                                   $additionalCondition
-                                  )
-                                  $sql_upload
-                                )";
-            return $uploadTreeView;
-        }
+          $queryCondition = self::getQueryCondition($skipThese);
+          $sql_upload = "";
+          if ('uploadtree_a' == $uploadTreeTableName)
+          {
+            $sql_upload = " AND ut.upload_fk=$uploadId ";
+          }
+          $uploadTreeView = " WITH UploadTreeView AS (
+                              select
+                                *
+                              from $uploadTreeTableName ut
+                              where
+                                (
+                                 $queryCondition
+                                 $additionalCondition
+                                )
+                                $sql_upload
+                              )";
+          return $uploadTreeView;
       }
       //default case, if cookie is not set or set to none
       $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
@@ -146,10 +143,12 @@ class UploadTreeView
       case "noLicense":
         return $conditionQueryHasLicense;
       case "alreadyCleared":
-        $conditionQuery = "( $conditionQueryHasLicense
-              AND  NOT EXISTS  (SELECT clearing_decision_pk
-                                    FROM clearing_decision cd where ut.uploadtree_pk = cd.uploadtree_fk
-                                    OR ( cd.pfile_fk = ut.pfile_fk AND cd.is_global = TRUE  ) ) )";
+        $decionQuery = "SELECT MAX(clearing_decision_pk) cdk, cd.type_fk type_id FROM clearing_decision cd
+                        WHERE (ut.uploadtree_pk = cd.uploadtree_fk
+                               OR cd.pfile_fk = ut.pfile_fk AND cd.is_global = TRUE )
+                        GROUP BY type_id ORDER BY cdk DESC LIMIT 1";
+        $conditionQuery = " $conditionQueryHasLicense
+              AND NOT EXISTS (SELECT * FROM ($decionQuery) as latest_decision WHERE latest_decision.type_id IN (4,5) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
