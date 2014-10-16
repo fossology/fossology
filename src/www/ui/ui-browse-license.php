@@ -535,9 +535,8 @@ class ui_browse_license extends FO_Plugin
 
       $tableLanguage = array(
           "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-          "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
+          "sSearch" => "Search _INPUT_ in all columns", // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
               // in results.
-              . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
           "sInfoPostFix" => $AddInfoText,
           "sLengthMenu" => "Display <select>
                               <option value=\"10\">10</option>
