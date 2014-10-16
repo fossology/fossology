@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Db\DbManager;
 
 /**
  * \file list.php
@@ -37,7 +38,7 @@ class copyright_list extends FO_Plugin
     $this->Name = "copyright-list";
     $this->Title = TITLE_copyright_list;
     $this->Version = "1.0";
-    $this->Dependency = array("copyright-hist");
+    $this->Dependency = array("copyright-hist", "ip-hist");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -75,8 +76,16 @@ class copyright_list extends FO_Plugin
 
   /**
    * \return return rows to process, and $upload_pk
+   * @param $Uploadtree_pk
+   * @param $Agent_pk
+   * @param $upload_pk
+   * @param $hash
+   * @param $type
+   * @param $tableName
+   * @throws Exception
+   * @return array
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type)
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName)
   {
     global $PG_CONN;
 
@@ -94,12 +103,12 @@ class copyright_list extends FO_Plugin
 
     /* get all the copyright records for this uploadtree.  */
     $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
-              from copyright,
+              from $tableName,
               (SELECT uploadtree_pk, pfile_fk as PF, ufile_name from uploadtree 
                  where upload_fk=$1
                    and uploadtree.lft BETWEEN $2 and $3) as SS
               where PF=pfile_fk and agent_fk=$4 and hash=$5 and type=$6 order by uploadtree_pk";
-    $statement = __METHOD__;
+    $statement = __METHOD__.$tableName;
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement,array($upload_pk, $lft, $rgt, $Agent_pk, $hash, $type));
 
@@ -266,9 +275,11 @@ class copyright_list extends FO_Plugin
       $Page=0;
     }
 
+    list($tableName,$modBack,$viewName) = $this->getTableName($type);
+
     /* get all rows */
     $upload_pk = -1;
-    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type);
+    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName);
 
     /* Get uploadtree_tablename */
     $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
@@ -304,6 +315,12 @@ class copyright_list extends FO_Plugin
         case "url":
           $TypeStr = "$text5";
           break;
+        case "ip":
+          $TypeStr = _("international patent");
+          break;
+        case "ecc":
+          $TypeStr = _("export restriction");
+          break;
       }
       $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
@@ -324,7 +341,8 @@ class copyright_list extends FO_Plugin
       }
 
       /* Offset is +1 to start numbering from 1 instead of zero */
-      $LinkLast = "copyright-view&agent=$agent_pk";
+
+      $LinkLast = "$viewName&agent=$agent_pk";
       $ShowBox = 1;
       $ShowMicro=NULL;
 
@@ -357,7 +375,11 @@ class copyright_list extends FO_Plugin
           if (in_array($FileExt, $ExclArray)) $ok = false;
         }
 
-        if ($ok) $OutBuf .= Dir2Browse("copyright-hist", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
+        if ($ok)
+        {
+
+          $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
+        }
       }
 
     }
@@ -383,6 +405,28 @@ class copyright_list extends FO_Plugin
     function getTemplateName()
   {
     return 'copyrightlist.html.twig';
+  }
+
+  private function getTableName($type)
+  {
+
+    switch ($type) {
+      case "ip" :
+        $tableName = "ip";
+        $modBack = "ip-hist";
+        $viewName = "ip-view";
+        break;
+      case "ecc" :
+        $tableName = "ecc";
+        $modBack = "ecc-hist";
+        $viewName = "ecc-view";
+        break;
+      default:
+        $tableName = "copyright";
+        $modBack = "copyright-hist";
+        $viewName = "copyright-view";
+    }
+    return array($tableName, $modBack,$viewName);
   }
 
 };
