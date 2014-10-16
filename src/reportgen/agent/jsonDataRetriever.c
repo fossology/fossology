@@ -19,19 +19,25 @@
 #include <stdio.h>
 #include <glib.h>
 
+#include <stdarg.h>
+
 #ifndef INSTALLDIR
 #define INSTALLDIR "."
 #error
 #endif
 
-#define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d"
+#define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d --uId=%d"
 #define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
 #define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
 #define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
 
-static char* pipeRun(const char* cmdLineFmt, int uploadId)
+static char* pipeRun(const char* cmdLineFmt, ...)
 {
-  gchar* cmd = g_strdup_printf(cmdLineFmt, uploadId);
+  va_list args;
+  va_start(args, cmdLineFmt);
+  gchar* cmd = g_strdup_vprintf(cmdLineFmt, args);
+  va_end(args);
+
   FILE* pipe = popen(cmd, "r");
   g_free(cmd);
 
@@ -51,9 +57,9 @@ static char* pipeRun(const char* cmdLineFmt, int uploadId)
   return g_string_free(stringBuffer, FALSE);
 }
 
-char* getClearedLicenses(int uploadId)
+char* getClearedLicenses(int uploadId,int userId)
 {
-  return pipeRun(GETCLEAREDCMD, uploadId);
+  return pipeRun(GETCLEAREDCMD, uploadId, userId);
 }
 
 char* getClearedCopyright(int uploadId)

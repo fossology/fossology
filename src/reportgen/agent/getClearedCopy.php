@@ -35,5 +35,6 @@ class CopyClearedGetter extends XpClearedGetter
 }
 
 $clearedGetter = new CopyClearedGetter();
-$uploadId = $clearedGetter->getUploadIdArg();
+$clearedGetter->getCliArgs();
+$uploadId = $clearedGetter->getUploadId();
 print json_encode($clearedGetter->getCleared($uploadId));

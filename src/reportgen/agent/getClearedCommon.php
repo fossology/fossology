@@ -33,6 +33,9 @@ abstract class ClearedGetterCommon
   /** @var TreeDao */
   private $treeDao;
 
+  private $userId;
+  private $uploadId;
+
  // private $tableName = "copyright";
   //private $type = null;
 
@@ -43,9 +46,9 @@ abstract class ClearedGetterCommon
     $this->treeDao = $container->get('dao.tree');
   }
 
-  public function getUploadIdArg()
+  public function getCliArgs()
   {
-    $args = getopt("u:", array());
+    $args = getopt("u:", array("uId:"));
 
     if (!array_key_exists('u',$args))
     {
@@ -53,7 +56,13 @@ abstract class ClearedGetterCommon
       exit(2);
     }
 
-    $uploadId = intval($args['u']);
+    $this->uploadId = intval($args['u']);
+    $this->userId = intval(@$args['uId']);
+  }
+
+  public function getUploadId()
+  {
+    $uploadId = $this->uploadId;
 
     if ($uploadId<=0)
     {
@@ -61,6 +70,18 @@ abstract class ClearedGetterCommon
       exit(2);
     }
     return $uploadId;
+  }
+
+  public function getUserId()
+  {
+    $userId = $this->userId;
+
+    if ($userId<=0)
+    {
+      print "invalid user ".$userId;
+      exit(2);
+    }
+    return $userId;
   }
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName)
@@ -102,19 +123,19 @@ abstract class ClearedGetterCommon
     return $statements;
   }
 
-  abstract protected function getDecisions($uploadId, $uploadTreeTableName);
+  abstract protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null);
 
-  public function getCleared($uploadId)
+  public function getCleared($uploadId, $userId=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadTreeTableName($uploadId);
 
-    $ungrupedStatements = $this->getDecisions($uploadId, $uploadTreeTableName);
+    $ungrupedStatements = $this->getDecisions($uploadId, $uploadTreeTableName, $userId);
 
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName);
 
     $statements = $this->groupStatements($ungrupedStatements);
 
-    return array_values($statements);
+    return array("statements" => array_values($statements));
   }
 }
 

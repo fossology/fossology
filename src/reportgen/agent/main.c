@@ -845,7 +845,7 @@ table_addRow(tableOthers, "license", "text", "files");
   char* jsonLicenses = getClearedLicenses(uploadId);
   json_object * jobj = json_tokener_parse(jsonLicenses);
 
-  if (!addRowsFromJson_ContentTextFiles(tableOthers, jobj, "licenses"))
+  if (!addRowsFromJson_ContentTextFiles(tableOthers, jobj, "statements")) // TODO change
   {
     printf("cannot parse json string: %s\n", jsonLicenses);
     fo_scheduler_disconnect(1);
