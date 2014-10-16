@@ -18,9 +18,11 @@
  */
 use Fossology\Lib\Data\Highlight;
 
+require_once('Xpview.php');
+
 define("TITLE_ecc_view", _("View Export Control and Customs Analysis"));
 
-class ecc_view extends Xpview
+class Ecc_view extends Xpview
 {
   function __construct()
   {
@@ -39,5 +41,5 @@ class ecc_view extends Xpview
     $this->vars['xptext'] = 'export restriction';
   }
 }
-$NewPlugin = new ecc_view;
+$NewPlugin = new Ecc_view;
 $NewPlugin->Initialize();

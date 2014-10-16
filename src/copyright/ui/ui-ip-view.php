@@ -18,9 +18,11 @@
  */
 use Fossology\Lib\Data\Highlight;
 
+require_once('Xpview.php');
+
 define("TITLE_ip_view", _("View patent Analysis"));
 
-class ip_view extends Xpview
+class Ip_view extends Xpview
 {
   function __construct()
   {
@@ -38,5 +40,5 @@ class ip_view extends Xpview
     $this->vars['xptext'] = 'patent';
   }
 }
-$NewPlugin = new ip_view;
+$NewPlugin = new Ip_view;
 $NewPlugin->Initialize();

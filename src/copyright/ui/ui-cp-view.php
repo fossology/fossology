@@ -18,6 +18,7 @@
  */
 use Fossology\Lib\Data\Highlight;
 
+require_once('Xpview.php');
 
 /**
  * \file ui-cp-view.php
@@ -26,7 +27,7 @@ use Fossology\Lib\Data\Highlight;
 
 define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
 
-class copyright_view extends Xpview
+class Copyright_view extends Xpview
 {
 
   function __construct()
@@ -54,5 +55,5 @@ class copyright_view extends Xpview
 
 }
 
-$NewPlugin = new copyright_view;
+$NewPlugin = new Copyright_view;
 $NewPlugin->Initialize();
