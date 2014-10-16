@@ -271,7 +271,7 @@ class ClearingView extends FO_Plugin
     }
     if(count($clearingHistory)>0)
     {
-      $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['content'][3]);
+      $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
 
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";

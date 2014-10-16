@@ -1,82 +1,82 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-    {{ parent() }}
+  {{ parent() }}
 {% endblock %}
 
 {% block foot %}
-    {{ parent() }}
-    <script src="scripts/jquery.dataTables.js" type="text/javascript"></script>
-    <script src="scripts/browse.js" type="text/javascript"></script>
-    <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
-    <script src="scripts/tools.js" type="text/javascript"></script>
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.js" type="text/javascript"></script>
+  <script src="scripts/browse.js" type="text/javascript"></script>
+  <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+  <script src="scripts/tools.js" type="text/javascript"></script>
 
-    <script type="text/javascript">
+  <script type="text/javascript">
 
-        tableColumns = [
-            {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
-            {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
+    tableColumns = [
+      {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
+      {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
+      {
+        "sTitle": "{{ "Comment" }}", "sClass": "center", "bSortable": false, "bSearchable": false,
+        "mRender": function (source, type, val) {
+          return commentColumn(source, type, val);
+        }
+      },
+      {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
+      {
+        "sTitle": "{{ "Priority" }}", "sClass": "center priobucket", "bSearchable": false,
+        "mRender": function (source, type, val) {
+          return prioColumn(source, type, val);
+        }
+      }
+    ];
+
+    tableSorting = [
+      [5, "desc"],
+      [0, "asc"],
+      [3, "desc"],
+      [1, "desc"],
+      [4, "desc"]
+    ];
+
+    /*
+     tableLanguage = [
+     {"sInfo": "Showing _START_ to _END_ of _TOTAL_ files"},
+     {"sSearch": "Search _INPUT_ in filenames"},
+     { "sLengthMenu": 'Display <select>
+     < option value = \ "10\">10</option> < option value = \ "25\">25</option> < option value = \ "50\">50</option> < option value = \ "100\">100</option> < / select > files " } ] ;
+     */
+
+
+    dataTableConfig =
             {
-                "sTitle": "{{ "Comment" }}", "sClass": "center", "bSortable": false, "bSearchable": false,
-                "mRender": function (source, type, val) {
-                    return commentColumn(source, type, val);
-                }
-            },
-            {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
-            {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
-            {
-                "sTitle": "{{ "Priority" }}", "sClass": "center priobucket", "bSearchable": false,
-                "mRender": function (source, type, val) {
-                    return prioColumn(source, type, val);
-                }
-            }
-        ];
-
-        tableSorting = [
-            [5, "desc"],
-            [0, "asc"],
-            [3, "desc"],
-            [1, "desc"],
-            [4, "desc"]
-        ];
-
-        /*
-         tableLanguage = [
-         {"sInfo": "Showing _START_ to _END_ of _TOTAL_ files"},
-         {"sSearch": "Search _INPUT_ in filenames"},
-         { "sLengthMenu": 'Display <select>
-         < option value = \ "10\">10</option> < option value = \ "25\">25</option> < option value = \ "50\">50</option> < option value = \ "100\">100</option> < / select > files " } ] ;
-         */
-
-
-        dataTableConfig =
-        {
-            "bServerSide": true,
-            "sAjaxSource": "?mod=browse-processPost",
-            "fnServerData": function (sSource, aoData, fnCallback) {
-                aoData.push({"name": "folder", "value": "{{ folder }}"});
-                aoData.push({"name": "show", "value": "{{ show }}"});
+              "bServerSide": true,
+              "sAjaxSource": "?mod=browse-processPost",
+              "fnServerData": function (sSource, aoData, fnCallback) {
+                  aoData.push({"name": "folder", "value": "{{ folder }}"});
+                  aoData.push({"name": "show", "value": "{{ show }}"});
                 aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
                 aoData.push({"name": "statusSelected", "value": statusSelected});
                 $.getJSON(sSource, aoData, fnCallback).fail(failed);
-            },
-            "aoColumns": tableColumns,
-            "aaSorting": tableSorting,
-            "iDisplayLength": 50,
-            "bProcessing": true,
-            "bStateSave": true,
-            "sCookiePrefix" : "fossology_",
-            "bRetrieve": true
-        };
+              },
+              "aoColumns": tableColumns,
+              "aaSorting": tableSorting,
+              "iDisplayLength": 50,
+              "bProcessing": true,
+              "bStateSave": true,
+              "sCookiePrefix": "fossology_",
+              "bRetrieve": true
+            };
 
-        function createBrowseTable() {
-            var otable = $('#browsetbl').dataTable(dataTableConfig);
-            return otable;
-        }
+    function createBrowseTable() {
+      var otable = $('#browsetbl').dataTable(dataTableConfig);
+      return otable;
+    }
 
-        $(document).ready(function () {
-            createBrowseTable();
-        })
+    $(document).ready(function () {
+      createBrowseTable();
+    })
 
-    </script>
+  </script>
 {% endblock %}
