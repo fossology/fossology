@@ -207,6 +207,8 @@ class AjaxClearingView extends FO_Plugin
         case "removeLicense":
         case "setNextPrev":
         case "setNextPrevCopyRight":
+        case "setNextPrevIp":
+        case "setNextPrevEcc":
           $uploadId = GetParm("upload", PARM_INTEGER);
           if (empty($uploadId))
           {
