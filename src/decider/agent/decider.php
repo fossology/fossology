@@ -72,11 +72,7 @@ class DeciderAgent extends Agent
   protected function getDateOfLastRelevantClearing($userId, $uploadTreeId)
   {
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
-    if (array_key_exists('date_added', $lastDecision))
-      $lastDecisionDate = $lastDecision['date_added'];
-    else
-      $lastDecisionDate = null;
-    return $lastDecisionDate;
+    return $lastDecision !== null ? $lastDecision->getDateAdded() : null;
   }
 
 
