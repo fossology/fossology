@@ -109,8 +109,7 @@ class ClearingDao extends Object
          GROUP BY id,uploadtree_id,pfile_id,user_name,user_id,type_id,is_global,date_added,same_upload,is_local
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
-    $this->dbManager->prepare($statementName,
-        $sql);
+    $this->dbManager->prepare($statementName, $sql);
 
     // the array needs to be sorted with the newest clearingDecision first.
     $result = $this->dbManager->execute($statementName, array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
@@ -183,25 +182,20 @@ class ClearingDao extends Object
     $statementName = __METHOD__ . ".s";
     $this->dbManager->prepare($statementName,
         "with thisItem AS (select * from uploadtree where uploadtree_pk = $1)
-         select uploadtree.* from uploadtree, thisItem where uploadtree.lft BETWEEN thisItem.lft AND thisItem.rgt AND ((uploadtree.ufile_mode & (3<<28))=0) AND uploadtree.pfile_fk != 0",
+         SELECT uploadtree.* from uploadtree, thisItem
+         WHERE uploadtree.lft BETWEEN thisItem.lft AND thisItem.rgt AND ((uploadtree.ufile_mode & (3<<28))=0) AND uploadtree.pfile_fk != 0",
         array($uploadTreeId),
         $statementName);
     $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
     $tbdColumnStatementName = __METHOD__ . "_TBD_column";
-    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from license_decision_type where meaning = $1", array(LicenseDecision::USER_DECISION), $tbdColumnStatementName);
+    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from license_decision_type where meaning = $1",
+            array(LicenseDecision::USER_DECISION), $tbdColumnStatementName);
     $type = $tbdDecisionTypeValue['type_pk'];
 
     $tbdColumnStatementName = __METHOD__ . ".d";
     $this->dbManager->prepare($tbdColumnStatementName,
         "delete from license_decision_event where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
-
-
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName,
-        "insert into license_decision_event
-                      (uploadtree_fk,pfile_fk,user_fk, rf_fk, is_removed, is_global, type_fk, comment,reportinfo)
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9)");
 
     while ($item = $this->dbManager->fetchArray($items))
     {
@@ -212,17 +206,15 @@ class ClearingDao extends Object
       {
         $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $license, $type));
         $this->dbManager->freeResult($res);
-
-
-        $res = $this->dbManager->execute($statementName, array($currentUploadTreeId, $pfileId, $userid, $license, $this->dbManager->booleanToDb($removed),$this->dbManager->booleanToDb(false), $type, $comment, $remark));
-        $this->dbManager->freeResult($res);
-
+        $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId,'pfile_fk'=>$pfileId, 'user_fk'=>$userid,
+            'rf_fk'=>$license, 'is_removed'=>$removed,'is_global'=>false,
+            'type_fk'=>$type, 'comment'=>$comment, 'reportinfo'=>$remark);
+        $this->dbManager->insertTableRow('license_decision_event', $aDecEvent, $sqlLog=__METHOD__);
       }
     }
     $this->dbManager->freeResult($items);
 
     $this->dbManager->commit();
-
   }
 
   /**
@@ -276,7 +268,7 @@ class ClearingDao extends Object
   public function getEditedLicenseShortnamesContainedWithCount(ItemTreeBounds $itemTreeBounds, $licenses=null)
   {
     if(empty($licenses))
-    $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
+      $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
     $uniqueLicenses = array_unique($licenses);
     $licensesWithCount = array();
 
@@ -377,7 +369,6 @@ insert into clearing_decision (
     }
 
     $this->dbManager->commit();
-
   }
 
   /**
@@ -387,8 +378,6 @@ insert into clearing_decision (
    */
   public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
   {
-    // TODO move type.meaning from DB to data
-    // No!   We are using type meaning in agents as well and should have a single relation name <-> ordinal
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         $sql = "
@@ -454,38 +443,35 @@ insert into clearing_decision (
     return $events;
   }
 
-  public function getCurrentLicenseDecisions($userId, $itemId)
-  {
-    return $this->getCurrentLicenseDecisionsFor(
-        $this->getRelevantLicenseDecisionEvents($userId, $itemId)
-    );
-  }
-
+  
   /**
-   * @param LicenseDecisionEvent[] $events
    * @return LicenseDecisionEvent[][]
    */
-  public function getCurrentLicenseDecisionsFor($events)
+  public function getCurrentLicenseDecisions($userId, $itemId)
   {
-    $addedLicenses = array();
-    $removedLicenses = array();
-
+    /** @var LicenseDecisionEvent[] $events */
+    $events = $this->getRelevantLicenseDecisionEvents($userId, $itemId);
+    $latestLicDec = array();
     foreach ($events as $event)
     {
       if ($event->getEventType() == DecisionTypes::TO_BE_DISCUSSED)
       {
         continue;
       }
-
       $licenseShortName = $event->getLicenseShortName();
+      $latestLicDec[$licenseShortName] = $event;
+    }
 
+    $addedLicenses = array();
+    $removedLicenses = array();
+    foreach ($latestLicDec as $licenseShortName=>$event)
+    {
       if ($event->isRemoved())
       {
-        unset($addedLicenses[$licenseShortName]);
         $removedLicenses[$licenseShortName] = $event;
-      } else
+      }
+      else
       {
-        unset($removedLicenses[$licenseShortName]);
         $addedLicenses[$licenseShortName] = $event;
       }
     }
@@ -517,40 +503,39 @@ insert into clearing_decision (
     $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, true);
   }
 
-public function updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo) {
+  public function updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo)
+  {
+    $this->dbManager->begin();
 
-  $this->dbManager->begin();
+    $statementGetOldata = "SELECT * from license_decision_event where uploadtree_fk=$1 and rf_fk=$2  order by license_decision_event_pk desc limit 1 ";
+    $statementName = __METHOD__.'getOld';
+    $params = array($uploadTreeId, $licenseId); //, $this->dbManager->booleanToDb(true)
+    $row = $this->dbManager->getSingleRow($statementGetOldata,$params,$statementName);
 
-  $statementGetOldata = "Select * from license_decision_event where uploadtree_fk=$1 and rf_fk=$2  order by license_decision_event_pk desc limit 1 ";
-//  and is_removed<>$3
-  $statementName = __METHOD__.'getOld';
-  $params = array($uploadTreeId, $licenseId); //, $this->dbManager->booleanToDb(true)
-  $row = $this->dbManager->getSingleRow($statementGetOldata,$params,$statementName);
+    if(!$row) {  //The license was not added as user decision yet -> we promote it here
+      $type=1;
+      $isGlobal = false;
+      $this->addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal);
+      $row['type_fk']=$type;
+      $row['is_global']=$isGlobal;
+      $row['comment']="";
+      $row['reportinfo']="";
+    }
 
-  if(!$row) {  //The license was not added as user decision yet -> we promote it here
-    $type=1;
-    $isGlobal = false;
-    $this->addLicenseDecision($uploadTreeId, $userId, $licenseId, $type, $isGlobal);
-    $row['type_fk']=$type;
-    $row['is_global']=$isGlobal;
-    $row['comment']="";
-    $row['reportinfo']="";
+    if($what=='Text') {
+        $reportInfo=$changeTo;
+        $comment =$row['comment'];
+    }
+    else {
+      $reportInfo =$row['reportinfo'];
+      $comment=$changeTo;
+
+    }
+    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], $row['is_global'], null, $reportInfo , $comment);
+
+    $this->dbManager->commit();
+
   }
-
-  if($what=='Text') {
-      $reportInfo=$changeTo;
-      $comment =$row['comment'];
-  }
-  else {
-    $reportInfo =$row['reportinfo'];
-    $comment=$changeTo;
-
-  }
-  $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], $row['is_global'], null, $reportInfo , $comment);
-
-  $this->dbManager->commit();
-
-}
 
   public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
