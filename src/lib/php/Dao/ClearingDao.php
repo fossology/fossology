@@ -313,7 +313,7 @@ ORDER BY CD.date_added DESC LIMIT 1
     );
 
     $row = $this->dbManager->fetchArray($res);
-    $result = count($row) > 0 ?
+    $result = $row ?
         ClearingDecisionBuilder::create()
         ->setLicenses($this->getFileClearingLicenses($row['id']))
         ->setClearingId($row['id'])
