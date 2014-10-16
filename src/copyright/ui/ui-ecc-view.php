@@ -30,7 +30,7 @@ class Ecc_view extends Xpview
     $this->Title = TITLE_ecc_view;
     $this->decisionTableName = "ecc_decision";
     $this->tableName = "ecc";
-    $this->modBack = 'copyright-hist'; //TODO
+    $this->modBack = 'ecc-hist';
     $this->optionName = "skipFileEcc";
     $this->ajaxAction = "setNextPrevEcc";
     $this->skipOption = "noEcc";

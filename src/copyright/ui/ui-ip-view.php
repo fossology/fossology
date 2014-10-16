@@ -30,7 +30,7 @@ class Ip_view extends Xpview
     $this->Title = TITLE_ip_view;
     $this->decisionTableName = "ip_decision";
     $this->tableName = "ip";
-    $this->modBack = 'copyright-hist';//TODO
+    $this->modBack = 'ip-hist';
     $this->optionName = "skipFileIp";
     $this->ajaxAction = "setNextPrevIp";
     $this->skipOption = "noIp";
