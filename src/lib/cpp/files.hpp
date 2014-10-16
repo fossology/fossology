@@ -24,7 +24,7 @@ public:
   File();
   File(unsigned long _id, const char* _fileName);
 
-  std::string getContent(const unsigned long int maximumBytes = 1<<20);
+  std::string getContent(const unsigned long int maximumBytes = 1<<20) const;
 
 };
 

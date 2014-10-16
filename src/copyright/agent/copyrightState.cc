@@ -11,8 +11,8 @@
 
 #include "copyrightState.hpp"
 
-CopyrightState::CopyrightState(DbManager* _dbManager, int _agentId, int _verbosity, const char* name):
-                              copyrightDatabaseHandler(name),
+CopyrightState::CopyrightState(DbManager* _dbManager, int _agentId, int _verbosity):
+                              copyrightDatabaseHandler(),
                               dbManager(_dbManager),
                               agentId(_agentId),
                               verbosity(_verbosity),

@@ -10,6 +10,7 @@
  */
 
 #include "database.hpp"
+#include "identity.hpp"
 #define RETURN_IF_FALSE(query) \
   do {\
     if (!(query)) {\
@@ -17,26 +18,11 @@
     }\
   } while(0)
 
-CopyrightDatabaseHandler::CopyrightDatabaseHandler(const char* aname)
-{
-  name = g_strdup(aname);
 
-  insertInDatabaseQuery = g_strdup_printf(
-    "INSERT INTO %s(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
-    " VALUES($1,$2,$3,md5($3),$4,$5,$6)",
-    name
-  );
-
-  insertNoResultInDatabaseQuery = g_strdup_printf(
-    "INSERT INTO %s(agent_fk, pfile_fk) VALUES($1,$2)",
-    name
-  );
+CopyrightDatabaseHandler::CopyrightDatabaseHandler() {
 }
 
 CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
-  g_free(name);
-  g_free(insertInDatabaseQuery);
-  g_free(insertNoResultInDatabaseQuery);
 }
 
 
@@ -73,7 +59,7 @@ bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
 {
 // keep only one sequence
-#define SEQUENCE_NAME "copyright_ct_pk_seq"
+#define SEQUENCE_NAME IDENTITY"_ct_pk_seq"
     {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
     {"agent_fk", "bigint", "NOT NULL"},
     {"pfile_fk", "bigint", "NOT NULL"},
@@ -94,9 +80,9 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
                                           " CACHE 1"));
   }
 
-  if (!dbManager->tableExists(name)) {
+  if (!dbManager->tableExists(IDENTITY)) {
     size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", name,
+    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", IDENTITY,
                                             getColumnCreationString( CopyrightDatabaseHandler::columns, ncolumns).c_str()
                                           )
                     );
@@ -104,21 +90,21 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
      "CREATE INDEX %s_agent_fk_index"
      " ON %s"
      " USING BTREE (agent_fk)",
-     name, name
+     IDENTITY, IDENTITY
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
      "CREATE INDEX %s_hash_index"
      " ON %s"
      " USING BTREE (hash)",
-     name, name
+     IDENTITY, IDENTITY
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
      "CREATE INDEX %s_pfile_fk_index"
      " ON %s"
      " USING BTREE (pfile_fk)",
-     name, name
+     IDENTITY, IDENTITY
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
@@ -126,7 +112,7 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
       " ADD CONSTRAINT agent_fk"
       " FOREIGN KEY (agent_fk)"
       " REFERENCES agent(agent_pk) ON DELETE CASCADE",
-      name
+      IDENTITY
     ));
 
     RETURN_IF_FALSE(dbManager->queryPrintf(
@@ -134,7 +120,7 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
       " ADD CONSTRAINT pfile_fk"
       " FOREIGN KEY (pfile_fk)"
       " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
-      name
+      IDENTITY
     ));
   }
   return true;
@@ -144,7 +130,7 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
     // keep only one sequence for clearing
-    #define SEQUENCE_NAMEClearing "copyright_decision_pk_seq"
+    #define SEQUENCE_NAMEClearing IDENTITY"_decision_pk_seq"
             {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
             {"user_fk", "bigint", "NOT NULL"},
             {"pfile_fk", "bigint", "NOT NULL"},
@@ -155,7 +141,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
 };
 
 bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
-  char* tableName = g_strdup_printf("%s_decision", name);
+  char* tableName = g_strdup_printf("%s_decision", IDENTITY);
   if (!dbManager->sequenceExists(SEQUENCE_NAMEClearing)) {
   RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMEClearing
                                         " START WITH 1"
@@ -235,7 +221,7 @@ std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(DbManager* dbM
     "inner join pfile on (PF = pfile_pk) "
     "WHERE ct_pk IS null or agent_fk <> %d",
     uploadId,
-    name,
+    IDENTITY,
     agentId,
     agentId
   );
@@ -248,7 +234,7 @@ bool CopyrightDatabaseHandler::insertNoResultInDatabase(DbManager* dbManager, lo
     fo_dbManager_PrepareStamement(
       dbManager->getStruct_dbManager(),
       "insertNoResultInDatabase",
-      insertNoResultInDatabaseQuery,
+      "INSERT INTO " IDENTITY "(agent_fk, pfile_fk) VALUES($1,$2)",
       long, long
     ),
     agentId, pFileId
@@ -260,7 +246,8 @@ bool CopyrightDatabaseHandler::insertInDatabase(DbManager* dbManager, DatabaseEn
     fo_dbManager_PrepareStamement(
       dbManager->getStruct_dbManager(),
       "insertInDatabase",
-      insertInDatabaseQuery,
+      "INSERT INTO " IDENTITY "(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
+                  " VALUES($1,$2,$3,md5($3),$4,$5,$6)",
       long, long, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,
