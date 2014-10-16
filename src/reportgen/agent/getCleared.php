@@ -22,6 +22,7 @@ namespace Fossology\Reportgen;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\License;
 
 require_once ("getClearedCommon.php");
 
@@ -66,7 +67,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicenseText($clearingLicense->getId())
+          'description' => $this->getCachedLicense($clearingLicense->getId())->getText()
         );
       }
     }
@@ -76,9 +77,9 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   /**
    * @param int $licenseId
-   * @return string
+   * @return License
    */
-  protected function getCachedLicenseText($licenseId)
+  protected function getCachedLicense($licenseId)
   {
     if (!array_key_exists($licenseId, $this->licenseCache)) {
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
