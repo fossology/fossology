@@ -312,7 +312,7 @@ ORDER BY CD.date_added DESC LIMIT 1
         array($uploadTreeId, $userId)
     );
 
-    $row = $this->dbManager->fetchAll($res);
+    $row = $this->dbManager->fetchArray($res);
     $result = count($row) > 0 ?
         ClearingDecisionBuilder::create()
         ->setLicenses($this->getFileClearingLicenses($row['id']))
