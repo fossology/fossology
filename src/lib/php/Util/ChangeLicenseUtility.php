@@ -48,36 +48,7 @@ class ChangeLicenseUtility extends Object
   }
 
 
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @return array
-   */
-  function getClearingHistory($clearingDecWithLicenses)
-  {
-    $table = array();
-    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
-    {
-      $licenseNames = array();
-      foreach ($clearingDecWithLic->getLicenses() as $lic)
-      {
-        $licenseShortName = $lic->getShortName();
-        if ($lic->isRemoved()) {
-          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
-        }
-        $licenseNames[$lic->getShortName()] = $licenseShortName;
-      }
-      ksort($licenseNames, SORT_STRING);
-      $row = array(
-          'date'=>$clearingDecWithLic->getDateAdded(),
-          'username'=>$clearingDecWithLic->getUserName(),
-          'scope'=>$clearingDecWithLic->getScope(),
-          'type'=>$this->clearingDecisionTypes->getTypeName($clearingDecWithLic->getType()),
-          'licenses'=>implode(", ", $licenseNames));
-      $table[] = $row;
-    }
-    return $table;
-  }
-  
+
 
   /**
    * @param $uploadTreeId
