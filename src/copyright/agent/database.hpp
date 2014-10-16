@@ -27,7 +27,6 @@ public:
   CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
 
-  bool checkTables(DbManager* dbManager);
   bool createTables(DbManager* dbManager);
   bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
   bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId);

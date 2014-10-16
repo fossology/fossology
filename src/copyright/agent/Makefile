@@ -64,14 +64,14 @@ libcopyright_cov.a: $(COVERAGE)
 $(OBJECTS): %.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
-$(OBJECTS_COP): %.o: $(OBJECTS_COP:_cop.o=.cc) $(OBJECTS_COP:_cop.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $(OBJECTS_COP) $<
+$(OBJECTS_COP): %_cop.o: %.cc %.hpp 
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $@ $<
 	
-$(OBJECTS_IP): %.o: $(OBJECTS_IP:_ip.o=.cc) $(OBJECTS_IP:_ip.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF) -o $(OBJECTS_IP) $<
+$(OBJECTS_IP): %_ip.o: %.cc %.hpp
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF)  -o $@ $<
 	
-$(OBJECTS_ECC): %.o: $(OBJECTS_ECC:_ecc.o=.cc) $(OBJECTS_ECC:_ecc.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $(OBJECTS_ECC) $<
+$(OBJECTS_ECC): %_ecc.o: %.cc %.hpp
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
 	
 $(COVERAGE): %_cov.o: %.cc %.hpp
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
