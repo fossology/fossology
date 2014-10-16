@@ -22,16 +22,16 @@ namespace Fossology\Reportgen;
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\TreeDao;
+use Fossology\Lib\Dao\UploadDao;
 
 abstract class ClearedGetterCommon
 {
   /** @var UploadDao */
-  private $uploadDao;
+  protected $uploadDao;
 
   /** @var TreeDao */
-  private $treeDao;
+  protected $treeDao;
 
   private $userId;
   private $uploadId;
@@ -100,8 +100,7 @@ abstract class ClearedGetterCommon
   protected function groupStatements($ungrupedStatements)
   {
     $statements = array();
-    foreach($ungrupedStatements as $key => $statement) {
-      $id = $statement['id'];
+    foreach($ungrupedStatements as $statement) {
       $description = $statement['description'];
       $content = $statement['content'];
       $fileName = $statement['fileName'];
@@ -123,6 +122,12 @@ abstract class ClearedGetterCommon
     return $statements;
   }
 
+  /**
+   * @param int $uploadId
+   * @param string $uploadTreeTableName
+   * @param null|int $userId
+   * @return array
+   */
   abstract protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null);
 
   public function getCleared($uploadId, $userId=null)

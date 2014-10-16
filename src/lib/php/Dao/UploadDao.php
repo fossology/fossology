@@ -24,6 +24,7 @@ use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Tree\UploadTreeView;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -90,13 +91,8 @@ class UploadDao extends Object
    */
   public function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
-    $uploadEntry = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if ($uploadEntry === FALSE)
-    {
-      $this->logger->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
-      return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
-    }
-    return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
+    $uploadEntryData = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
+    return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
 
   /**
@@ -108,6 +104,26 @@ class UploadDao extends Object
   {
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     return $this->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
+  }
+
+  /**
+   * @param int $uploadId
+   * @throws Exception
+   * @return ItemTreeBounds
+   */
+  public function getParentItemBounds($uploadId)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntryData = $this->dbManager->getSingleRow("
+SELECT * FROM $uploadTreeTableName
+        WHERE upload_fk = $1
+          AND parent IS NULL
+          ",
+        array($uploadId), $stmt);
+
+    return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
 
   /**
@@ -482,5 +498,20 @@ class UploadDao extends Object
         $itemTreeBounds, $parent !== null ? intval($parent) : null, intval($uploadEntry['pfile_fk']), intval($uploadEntry['ufile_mode']), $uploadEntry['ufile_name']
     );
     return $item;
+  }
+
+  /**
+   * @param array $uploadEntryData
+   * @param string $uploadTreeTableName
+   * @throws Exception
+   * @return ItemTreeBounds
+   */
+  protected function createItemTreeBounds($uploadEntryData, $uploadTreeTableName)
+  {
+    if ($uploadEntryData === FALSE)
+    {
+      throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
+    }
+    return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
   }
 }

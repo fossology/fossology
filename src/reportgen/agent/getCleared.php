@@ -19,8 +19,9 @@
 
 namespace Fossology\Reportgen;
 
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\ClearingDecision;
 
 require_once ("getClearedCommon.php");
 
@@ -29,20 +30,60 @@ class LicenseClearedGetter extends ClearedGetterCommon
   /** @var ClearingDao */
   private $clearingDao;
 
+  /** @var LicenseDao */
+  private $licenseDao;
+
+  private $licenseCache = array();
+
   public function __construct() {
     global $container;
 
     $this->clearingDao = $container->get('dao.clearing');
+    $this->licenseDao = $container->get('dao.license');
 
     parent::__construct();
   }
 
   protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
   {
-    $decidedLicenses = array();
-    // $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
 
-    return $decidedLicenses;
+    $latestClearingDecisions = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $itemId = $clearingDecision->getUploadTreeId();
+
+      if (!array_key_exists($itemId, $latestClearingDecisions)) {
+        $latestClearingDecisions[$itemId] = $clearingDecision;
+      }
+    }
+
+    $ungroupedStatements = array();
+    foreach ($latestClearingDecisions as $clearingDecision) {
+      /** @var ClearingDecision $clearingDecision */
+      foreach ($clearingDecision->getLicenses() as $clearingLicense) {
+        $ungroupedStatements[] = array(
+          'content' => $clearingLicense->getShortName(),
+          'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
+          'description' => $this->getCachedLicenseText($clearingLicense->getId())
+        );
+      }
+    }
+
+    return $ungroupedStatements;
+  }
+
+  /**
+   * @param int $licenseId
+   * @return string
+   */
+  protected function getCachedLicenseText($licenseId)
+  {
+    if (!array_key_exists($licenseId, $this->licenseCache)) {
+      $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
+    }
+    return $this->licenseCache[$licenseId];
   }
 }
 
