@@ -859,7 +859,6 @@ table_addRow(tableOthers, "license", "text", "files");
 // endrow
 
 addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
-//table 4 for other license data
 
 rg_table* tableCopyright = table_new(body, 3, "2638", "5000", "2000");
 table_addRow(tableCopyright, "copyright", "text", "files");
@@ -884,34 +883,44 @@ addparaheading(createnumsection(body,"1","2"), NULL, "Known Security Vulnerabili
 rg_table* tableSecurity = table_new(body, 3, "3000", "3000", "3000");
 table_addRow(tableSecurity, "", "", ""); //TODO why?
 
-//table 6 for known patent issues
-//TODO ip
-#if 0
-mxml_node_t* p102 = (mxml_node_t*)createnumsection(body,"1","2");
-addparaheading(p102, NULL, "Known Patent Issues","1","2");
-mxml_node_t* tbl_patentIssue = (mxml_node_t*)createtable(body, "9638");
-createtablegrid(tbl_patentIssue,tbcol3,3);
-mxml_node_t* tr_patentIssue = (mxml_node_t*)createrowproperty(tbl_patentIssue);
-createrowdata(tr_patentIssue, "4819", "Identified Patent");
-createrowdata(tr_patentIssue, "4819", "Comments");
-createrowdata(tr_patentIssue, "4819", "FilePath");
-#endif
 
-//end of known Patent Issue
+addparaheading(createnumsection(body,"1","2"), NULL, "Known Patent Issues","1","2");
 
-//TODO ecc Issue
-#if 0
-mxml_node_t* p103 = (mxml_node_t*)createnumsection(body,"1","2");
-addparaheading(p103, NULL, "Known ECC Issues","1","2");
-mxml_node_t* tbl_ecc = (mxml_node_t*)createtable(body, "9638");
-createtablegrid(tbl_ecc,tbcol3,3);
-mxml_node_t* tr_ecc = (mxml_node_t*)createrowproperty(tbl_ecc);
-createrowdata(tr_ecc, "4189", "Identified ECC Issue");
-createrowdata(tr_ecc, "4189", "Comments");
-createrowdata(tr_ecc, "4189", "FilePath");
-#endif
+rg_table* tableIP = table_new(body, 3, "3000", "3000", "3000");
+table_addRow(tableIP, "Identified Patent", "comments", "files");
+{
+  char* jsonIp = getClearedIp(uploadId);
+  json_object * jobj = json_tokener_parse(jsonIp);
 
-//end of known ECC Issue
+  if (!addRowsFromJson_ContentTextFiles(tableIP, jobj, "statements"))
+  {
+    printf("cannot parse json string: %s\n", jsonIp);
+    fo_scheduler_disconnect(1);
+    exit(1);
+  }
+
+  json_object_put(jobj);
+  g_free(jsonIp);
+}
+
+addparaheading(createnumsection(body,"1","2"), NULL, "Known ECC Issues","1","2");
+
+rg_table* tableEcc = table_new(body, 3, "3000", "3000", "3000");
+table_addRow(tableEcc, "Identified Ecc Issue", "comments", "files");
+{
+  char* jsonEcc = getClearedEcc(uploadId);
+  json_object * jobj = json_tokener_parse(jsonEcc);
+
+  if (!addRowsFromJson_ContentTextFiles(tableEcc, jobj, "statements"))
+  {
+    printf("cannot parse json string: %s\n", jsonEcc);
+    fo_scheduler_disconnect(1);
+    exit(1);
+  }
+
+  json_object_put(jobj);
+  g_free(jsonEcc);
+}
 
 mxml_node_t* p11 = (mxml_node_t*)createnumsection(body,"0","2");
 addparaheading(p11,NULL, "ToDos","0","2");
