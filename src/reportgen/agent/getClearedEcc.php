@@ -23,17 +23,17 @@ use Fossology\Reportgen\XpClearedGetter;
 require_once ("getClearedXp.php");
 
 
-class CopyClearedGetter extends XpClearedGetter
+class EccClearedGetter extends XpClearedGetter
 {
 
   public function __construct()
   {
     parent::__construct();
-    $this->tableName = "copyright";
-    $this->type = "statement";
+    $this->tableName = "ecc";
+    $this->type = null;
   }
 }
 
-$clearedGetter = new CopyClearedGetter();
+$clearedGetter = new EccClearedGetter();
 $uploadId = $clearedGetter->getUploadIdArg();
 print json_encode($clearedGetter->getCleared($uploadId));
