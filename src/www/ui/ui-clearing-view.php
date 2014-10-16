@@ -294,7 +294,7 @@ class ClearingView extends FO_Plugin
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @return array
    */
-  function getClearingHistory($clearingDecWithLicenses)
+  private function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
     foreach ($clearingDecWithLicenses as $clearingDecWithLic)

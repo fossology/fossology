@@ -13,124 +13,123 @@ without any warranty.
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <parameters>
-        <parameter key="twig.environment.config" type="collection">
-            <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
-            <parameter key="cache" type="constant">false</parameter>
-            <parameter key="autoescape" type="constant">false</parameter>
-        </parameter>
-        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
-    </parameters>
+  <parameters>
+    <parameter key="twig.environment.config" type="collection">
+      <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
+      <parameter key="cache" type="constant">false</parameter>
+      <parameter key="autoescape" type="constant">false</parameter>
+    </parameter>
+    <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
+  </parameters>
 
-    <services>
-        <service id="logger" class="\Monolog\Logger">
-            <argument type="string">default</argument>
-        </service>
-        <service id="db.manager" class="\Fossology\Lib\Db\DbManager">
-            <argument type="service" id="logger"/>
-            <tag name="monolog.processor" method="processRecord" handler="main"/>
-        </service>
+  <services>
+    <service id="logger" class="\Monolog\Logger">
+      <argument type="string">default</argument>
+    </service>
+    <service id="db.manager" class="\Fossology\Lib\Db\DbManager">
+      <argument type="service" id="logger"/>
+      <tag name="monolog.processor" method="processRecord" handler="main"/>
+    </service>
 
-        <service id="dao.upload" class="\Fossology\Lib\Dao\UploadDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.folder" class="\Fossology\Lib\Dao\FolderDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.tree" class="\Fossology\Lib\Dao\TreeDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.license" class="\Fossology\Lib\Dao\LicenseDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.clearing" class="\Fossology\Lib\Dao\ClearingDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="businessrules.newest_license_selector"/>
-            <argument type="service" id="dao.upload"/>
-        </service>
-        <service id="dao.highlight" class="\Fossology\Lib\Dao\HighlightDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.agents" class="\Fossology\Lib\Dao\AgentsDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.user" class="\Fossology\Lib\Dao\UserDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="renderer"/>
-        </service>
-        <service id="dao.copyright" class="\Fossology\Lib\Dao\CopyrightDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="dao.upload"/>
-        </service>
-        <service id="dao.ip" class="\Fossology\Lib\Dao\IPDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="dao.upload"/>
-        </service>
+    <service id="dao.upload" class="\Fossology\Lib\Dao\UploadDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.folder" class="\Fossology\Lib\Dao\FolderDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.tree" class="\Fossology\Lib\Dao\TreeDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.license" class="\Fossology\Lib\Dao\LicenseDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.clearing" class="\Fossology\Lib\Dao\ClearingDao">
+      <argument type="service" id="db.manager"/>
+      <argument type="service" id="businessrules.newest_license_selector"/>
+      <argument type="service" id="dao.upload"/>
+    </service>
+    <service id="dao.highlight" class="\Fossology\Lib\Dao\HighlightDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.agents" class="\Fossology\Lib\Dao\AgentsDao">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="dao.user" class="\Fossology\Lib\Dao\UserDao">
+      <argument type="service" id="db.manager"/>
+      <argument type="service" id="renderer"/>
+    </service>
+    <service id="dao.copyright" class="\Fossology\Lib\Dao\CopyrightDao">
+      <argument type="service" id="db.manager"/>
+      <argument type="service" id="dao.upload"/>
+    </service>
+    <service id="dao.ip" class="\Fossology\Lib\Dao\IPDao">
+      <argument type="service" id="db.manager"/>
+      <argument type="service" id="dao.upload"/>
+    </service>
 
-        <service id="decision.types" class="\Fossology\Lib\Data\DecisionTypes">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
-            <argument type="service" id="dao.license"/>
-        </service>
-        <service id="view.highlight_renderer" class="\Fossology\Lib\View\HighlightRenderer">
-        </service>
-        <service id="view.license_processor" class="\Fossology\Lib\View\LicenseProcessor">
-        </service>
-        <service id="view.license_renderer" class="\Fossology\Lib\View\LicenseRenderer">
-        </service>
-        <service id="view.text_renderer" class="\Fossology\Lib\View\TextRenderer">
-            <argument type="service" id="view.highlight_renderer"/>
-        </service>
+    <service id="decision.types" class="\Fossology\Lib\Data\DecisionTypes">
+      <argument type="service" id="db.manager"/>
+    </service>
+    <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
+      <argument type="service" id="dao.license"/>
+    </service>
+    <service id="view.highlight_renderer" class="\Fossology\Lib\View\HighlightRenderer">
+    </service>
+    <service id="view.license_processor" class="\Fossology\Lib\View\LicenseProcessor">
+    </service>
+    <service id="view.license_renderer" class="\Fossology\Lib\View\LicenseRenderer">
+    </service>
+    <service id="view.text_renderer" class="\Fossology\Lib\View\TextRenderer">
+      <argument type="service" id="view.highlight_renderer"/>
+    </service>
 
-        <service id="renderer" class="\Fossology\Lib\View\Renderer">
-            <argument type="string"></argument>
-        </service>
+    <service id="renderer" class="\Fossology\Lib\View\Renderer">
+      <argument type="string"></argument>
+    </service>
 
-        <service id="utils.data_tables_utility" class="\Fossology\Lib\Util\DataTablesUtility">
-        </service>
+    <service id="utils.data_tables_utility" class="\Fossology\Lib\Util\DataTablesUtility">
+    </service>
 
-        <service id="utils.change_license_utility" class="Fossology\Lib\Util\ChangeLicenseUtility">
-            <argument type="service" id="dao.upload"/>
-            <argument type="service" id="dao.license"/>
-            <argument type="service" id="decision.types"/>
-        </service>
+    <service id="utils.change_license_utility" class="Fossology\Lib\Util\ChangeLicenseUtility">
+      <argument type="service" id="dao.upload"/>
+      <argument type="service" id="dao.license"/>
+    </service>
 
-        <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">
-            <argument type="service" id="dao.license"/>
-            <argument type="service" id="dao.upload"/>
-            <argument type="service" id="dao.clearing"/>
-            <argument type="service" id="view.highlight_renderer"/>
-            <argument type="service" id="renderer"/>
-            <argument type="service" id="decision.types"/>
-        </service>
+    <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">
+      <argument type="service" id="dao.license"/>
+      <argument type="service" id="dao.upload"/>
+      <argument type="service" id="dao.clearing"/>
+      <argument type="service" id="view.highlight_renderer"/>
+      <argument type="service" id="renderer"/>
+      <argument type="service" id="decision.types"/>
+    </service>
 
-        <service id="businessrules.newest_license_selector"
+    <service id="businessrules.newest_license_selector"
                  class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
-        </service>
+    </service>
 
-        <service id="businessrules.clearing_decision_event_processor"
+    <service id="businessrules.clearing_decision_event_processor"
                  class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
-            <argument type="service" id="dao.license"/>
-            <argument type="service" id="dao.agents"/>
-            <argument type="service" id="dao.clearing"/>
-        </service>
+      <argument type="service" id="dao.license"/>
+      <argument type="service" id="dao.agents"/>
+      <argument type="service" id="dao.clearing"/>
+    </service>
 
-        <service id="twig.loader" class="Twig_Loader_Filesystem">
-            <argument id="option">%twig.loader.source_path%</argument>
-        </service>
+    <service id="twig.loader" class="Twig_Loader_Filesystem">
+      <argument id="option">%twig.loader.source_path%</argument>
+    </service>
 
-        <service id="twig.environment" class="\Twig_Environment">
-            <argument type="service" id="twig.loader"/>
-            <argument id="option">%twig.environment.config%</argument>
-            <call method="addExtension">
-                <argument type="service" id="twig.extension.i18n"/>
-            </call>
-        </service>
+    <service id="twig.environment" class="\Twig_Environment">
+      <argument type="service" id="twig.loader"/>
+      <argument id="option">%twig.environment.config%</argument>
+      <call method="addExtension">
+        <argument type="service" id="twig.extension.i18n"/>
+      </call>
+    </service>
 
-        <service id="twig.extension.i18n" class="\Twig_Extensions_Extension_I18n">
-            <tag name="twig.extension" />
-        </service>
+    <service id="twig.extension.i18n" class="\Twig_Extensions_Extension_I18n">
+      <tag name="twig.extension" />
+    </service>
 
-    </services>
+  </services>
 </container>

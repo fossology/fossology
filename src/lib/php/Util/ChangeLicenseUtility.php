@@ -21,7 +21,6 @@ namespace Fossology\Lib\Util;
 
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 
@@ -31,24 +30,17 @@ class ChangeLicenseUtility extends Object
   private $uploadDao;
   /** @var LicenseDao $licenseDao */
   private $licenseDao;
-  /** @var DecisionTypes */
-  private $clearingDecisionTypes;
 
   /**
    * @param UploadDao $uploadDao
    * @param LicenseDao $licenseDao
-   * @param DecisionTypes $clearingDecisionTypes
    */
 
-  function __construct(UploadDao $uploadDao, LicenseDao $licenseDao, DecisionTypes $clearingDecisionTypes)
+  function __construct(UploadDao $uploadDao, LicenseDao $licenseDao)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
-    $this->clearingDecisionTypes = $clearingDecisionTypes;
   }
-
-
-
 
   /**
    * @param $uploadTreeId
