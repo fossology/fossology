@@ -24,7 +24,8 @@ use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision;
+
+use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
@@ -161,7 +162,7 @@ class ClearingDao extends Object
    * @param string $remark
    * @throws \Exception
    */
-  public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid, $comment="", $remark="")
+  public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment="", $remark="")
   {
     $this->dbManager->begin();
 
@@ -194,6 +195,7 @@ class ClearingDao extends Object
         $this->dbManager->freeResult($res);
         $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId,'pfile_fk'=>$pfileId, 'user_fk'=>$userid,
             'rf_fk'=>$license, 'is_removed'=>$removed,'is_global'=>false,
+            'job_fk' =>$jobfk,
             'type_fk'=>$type, 'comment'=>$comment, 'reportinfo'=>$remark);
         $this->dbManager->insertTableRow('license_decision_event', $aDecEvent, $sqlLog=__METHOD__);
       }

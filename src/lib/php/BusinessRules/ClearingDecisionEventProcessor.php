@@ -265,7 +265,11 @@ class ClearingDecisionEventProcessor
 
     if ($lastDecisionDate !== null)
     {
-      $filter_since_event = function (LicenseDecisionEvent $event) use ($lastDecisionDate)
+      /**
+       * @param LicenseDecisionResult $event
+       * @return bool
+       */
+      $filter_since_event = function (LicenseDecisionResult $event) use ($lastDecisionDate)
       {
         return $event->getDateTime() >= $lastDecisionDate;
       };

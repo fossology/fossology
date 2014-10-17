@@ -50,3 +50,10 @@ function scheduleBulkScan() {
     location.reload();
   });
 }
+
+
+function performPostRequest() {
+    performPostRequestCommon($('#bulkIdResult'), function () {
+        location.reload();
+    });
+}

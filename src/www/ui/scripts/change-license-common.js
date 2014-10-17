@@ -85,6 +85,31 @@ function selectNoLicenseFound(left, right) {
   sortList(left);
 }
 
+
+function scheduledDeciderSuccess (data, resultEntity, callbackSuccess, callbackCloseModal) {
+    var jqPk = data.jqid;
+    if (jqPk) {
+        resultEntity.html("scan scheduled as " + linkToJob(jqPk));
+        if (callbackSuccess) {
+            queueUpdateCheck(jqPk, callbackSuccess);
+        }
+        callbackCloseModal();
+    } else {
+        resultEntity.html("bad response from server");
+    }
+    resultEntity.show();
+}
+
+function scheduledDeciderError (responseobject, resultEntity) {
+    var error = responseobject.responseJSON.error;
+    if (error) {
+        resultEntity.text("error: " + error);
+    } else {
+        resultEntity.text("error");
+    }
+    resultEntity.show();
+}
+
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   var post_data = {
     "removing": $('#bulkRemoving').val(),
@@ -100,33 +125,13 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-bulk",
     data: post_data,
-    success: function (data) {
-      var jqPk = data.jqid;
-      if (jqPk) {
-        resultEntity.html("scan scheduled as " + linkToJob(jqPk));
-        if (callbackSuccess) {
-          queueUpdateCheck(jqPk, callbackSuccess);
-        }
-        closeBulkModal();
-      } else {
-        resultEntity.html("bad response from server");
-      }
-      resultEntity.show();
-    },
-    error: function (responseobject) {
-      var error = responseobject.responseJSON.error;
-      if (error) {
-        resultEntity.text("error: " + error);
-      } else {
-        resultEntity.text("error");
-      }
-      resultEntity.show();
-    }
+    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal) },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity) }
   });
 
 }
 
-function performPostRequest() {
+function performPostRequestCommon(resultEntity, callbackSuccess) {
   var txt = [];
   $('#licenseRight option').each(function () {
     txt.push(this.value);
@@ -145,10 +150,10 @@ function performPostRequest() {
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
-    success: clearingSuccess
+    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeUserModal) },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity) }
   });
 
-  closeUserModal();
 }
 
 
