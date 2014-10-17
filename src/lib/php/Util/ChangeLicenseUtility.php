@@ -45,7 +45,7 @@ class ChangeLicenseUtility extends Object
   /**
    * @return array
    */
-  public function createChangeLicenseForm() {
+  public function createChangeLicenseFormContent() {
 
     $out = array();
 

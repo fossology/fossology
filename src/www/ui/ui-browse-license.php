@@ -220,7 +220,7 @@ class ui_browse_license extends FO_Plugin
     $V .= "<table border=0 cellpadding=2 width='100%'>\n";
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm());
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseFormContent());
     $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm());
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
