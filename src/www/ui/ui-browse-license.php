@@ -220,7 +220,6 @@ class ui_browse_license extends FO_Plugin
     $V .= "<table border=0 cellpadding=2 width='100%'>\n";
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
-    $V .= "<hr />\n";
     $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm());
     $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm());
     $V .= $jsBlockDirlist;
@@ -265,20 +264,18 @@ class ui_browse_license extends FO_Plugin
     }
 
     $this->vars['content'] = $V;
-
-    $Time = microtime(true) - $uTime; // convert usecs to secs
-    $text = _("Elapsed time: %.3f seconds");
-    $this->vars['content'] .= sprintf("<br/><small>$text</small>", $Time);
+    $Time = microtime(true) - $uTime;
 
     if ($Cached)
     {
-      $text = _("cached");
-      $text1 = _("Update");
-      $this->vars['content'] .= " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $text = _("This is cached view.");
+      $text1 = _("Update now.");
+      $this->vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     } else
     {
-      /*  Cache Report if this took longer than 1/2 second */
-      if ($Time > 0.5)
+      $text = _("Elapsed time: %.3f seconds");
+      $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
+      if ($Time > 3)
         ReportCachePut($CacheKey, $V);
     }
     return;
