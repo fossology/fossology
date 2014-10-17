@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -31,7 +30,9 @@ use Monolog\Logger;
  */
 class AgentsDao extends Object
 {
-
+  /** @var DbManager */
+  private $dbManager;
+  
   /**
    * @param DbManager $dbManager
    */
@@ -55,84 +56,54 @@ class AgentsDao extends Object
    * @param int $upload_pk
    * @param int $limit - limit number of rows returned.  0=No limit, default=1
    * @param int $agent_fk - ARS table agent_fk, optional
-   * @param string $extraWhere - Optional, added to where clause.
-   *                   eg: "and bucketpool_fk=2"
    *
    * @return mixed
    * assoc array of _ars records.
    *         or FALSE on error, or no rows
    */
-  public function AgentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $extraWhere = "", $agentSuccess = 1)
+  private function agentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $agentSuccess = TRUE)
   {
     //based on common-agents.php AgentARSList
     if (!DB_TableExists($tableName)) return false;
 
-    $arguments = array();
-    $arguments[] = $upload_pk;
-
-
-    $counter = 2;
-
-
-    $agentStmt = "";
+    $arguments = array($upload_pk);
+    $statementName = __METHOD__ . $tableName;
+    
     $agentCond = "";
     if ($agent_fk)
     {
-      $agentCond = " and agent_fk=\$$counter";
-      $counter = $counter + 1;
       $arguments[] = $agent_fk;
-      $agentStmt = "agent";
+      $counter = count($arguments);
+      $agentCond = " and agent_fk=\$$counter";
+      $statementName .= ".agent";
     }
 
     $limitClause = "";
-    $limitStmt = "";
     if ($limit > 0)
     {
-      $limitClause = " limit \$$counter";
-      $counter = $counter + 1;
       $arguments[] = $limit;
-      $limitStmt = "lim";
+      $counter = count($arguments);
+      $limitClause = " limit \$$counter";
+      $statementName .= ".lim";
     }
 
-    $sucStmt = "";
     $successClause = "";
-    if ($agentSuccess === 1)
+    if ($agentSuccess)
     {
-      $successClause = " and ars_success=true ";
-      $sucStmt = "suc";
+      $successClause = " and ars_success ";
+      $statementName .= ".suc";
     }
-
-    $statementName = __METHOD__ . $tableName . hash('adler32', $extraWhere) . $limitStmt . $agentStmt . $sucStmt;
 
     $this->dbManager->prepare($statementName,
         "SELECT * FROM $tableName, agent
            WHERE agent_pk=agent_fk and upload_fk=$1 and agent_enabled=true
-           $successClause $agentCond $extraWhere
+           $successClause $agentCond
            order by agent_ts desc $limitClause");
 
     $result = $this->dbManager->execute($statementName, $arguments);
-    $resultArray = pg_fetch_all($result);
-    pg_free_result($result);
+    $resultArray = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
     return $resultArray;
-  }
-
-  /**
-   * \brief Given an upload_pk, find the latest enabled agent_pk with results.
-   *
-   * \param $upload_pk - upload id
-   * \param $arsTableName - name of ars table to check for the requested agent
-   *
-   * \returns nomos agent_pk or 0 if none
-   */
-  public function LatestAgentpk($upload_pk, $arsTableName)
-  {
-    //based on common-agents.php  LatestAgentpk
-    $AgentRec = $this->AgentARSList($arsTableName, $upload_pk, 1);
-    if ($AgentRec === false)
-      $Agent_pk = 0;
-    else
-      $Agent_pk = $AgentRec[0]['agent_fk'];
-    return $Agent_pk;
   }
 
 
@@ -144,7 +115,7 @@ class AgentsDao extends Object
    */
   public function RunningAgentpks($upload_pk, $arsTableName)
   {
-    $listOfAllJobs = $this->AgentARSList($arsTableName, $upload_pk, 0, 0, "", 0);
+    $listOfAllJobs = $this->agentARSList($arsTableName, $upload_pk, 0, 0, FALSE);
 
     $listOfRunningAgents = array();
 
@@ -152,13 +123,11 @@ class AgentsDao extends Object
     {
       foreach ($listOfAllJobs as $job)
       {
-        if ($job ['ars_success'] === 't')
+        if ($job ['ars_success'] === $this->dbManager->booleanToDb(true) )
         {
           break;
-        } else
-        {
-          $listOfRunningAgents[] = $job['agent_fk'];
         }
+        $listOfRunningAgents[] = $job['agent_fk'];
       }
     }
     return $listOfRunningAgents;
