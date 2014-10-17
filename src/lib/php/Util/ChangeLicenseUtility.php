@@ -43,25 +43,26 @@ class ChangeLicenseUtility extends Object
   }
 
   /**
-   * @param $uploadTreeId
    * @return array
    */
   public function createChangeLicenseForm() {
+
+    $out = array();
+
+    $title = _("License Text");
+    $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
+    $uri = Traceback_uri() . "?mod=popup-license" . "&lic=";
+    $out['properties'] = array('listElementName' =>"licenseLeft", 'uri' =>$uri , 'title' => $title, 'sizeInfo' => $sizeInfo);
+    $out['values'] = array();
+
     $licenseRefArray = $this->licenseDao->getLicenseRefs();
-    $listElementName = "licenseLeft";
-    $output = "<select name=\"$listElementName\" id=\"$listElementName\" style=\"min-width:200px\" >\n";
+
     foreach ($licenseRefArray as $licenseRef)
     {
-      $uri = Traceback_uri() . "?mod=popup-license" . "&lic=" . urlencode($licenseRef->getShortName());
-      $title = _("License Text");
-      $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
-      $output .= '<option value="' . $licenseRef->getId() . '" title="'.$licenseRef->getFullName().'" '
-                      ."ondblclick=\"javascript:window.open('$uri','$title','$sizeInfo');\" >"
-                   . $licenseRef->getShortName() 
-                  . "</option>\n";
+      $out['values'][] = array( 'urlShortname' =>  urlencode($licenseRef->getShortName()), 'id' => $licenseRef->getId(), 'fullName' => $licenseRef->getFullName(), 'shortName' => $licenseRef->getShortName() );
     }
-    $output .= "</select>";    
-    $rendererVars = array('licenseLeftSelect'=>$output);
+
+    $rendererVars = array('licenseLeftSelect'=>$out);
     return $rendererVars;
   }
 

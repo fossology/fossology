@@ -52,6 +52,21 @@ function compareText(opt1, opt2) {
   return opt1.text < opt2.text ? -1 : opt1.text > opt2.text ? 1 : 0;
 }
 
+function moveLicense(theSelFrom, theSelTo) {
+    var selLength = theSelFrom.length;
+    var i;
+    for (i = selLength - 1; i >= 0; i--) {
+        if (theSelFrom.options[i].selected) {
+            theSelTo.options[theSelTo.options.length] = theSelFrom.options[i];
+            //(new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
+            theSelFrom[i] = null;
+        }
+    }
+    sortList(theSelFrom);
+    sortList(theSelTo);
+}
+
+
 
 function selectNoLicenseFound(left, right) {
   var selLength = right.length;
@@ -113,7 +128,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
 
 function performPostRequest() {
   var txt = [];
-  $('#licenseLeft option:selected').each(function () {
+  $('#licenseRight option').each(function () {
     txt.push(this.value);
   });
 

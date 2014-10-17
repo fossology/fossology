@@ -5,7 +5,26 @@
         <td>{{ 'Available licenses'| trans }}:</td>
       </tr>
       <tr>
-        <td>{{ licenseLeftSelect }}</td>
+        <td><p>Available licenses:<br>
+                <select name={{ licenseLeftSelect.properties.listElementName }}  id= {{ licenseLeftSelect.properties.listElementName }} style="min-width:200px"  size="20" multiple="multiple" >
+                    {%  for opt in licenseLeftSelect.values  %}
+                    <option value= {{ opt.id }} title='{{ opt.fullName | e }}'
+                            ondblclick="javascript:window.open('{{ licenseLeftSelect.properties.uri }}{{ opt.urlShortname }}','{{ licenseLeftSelect.properties.title}}','{{ licenseLeftSelect.properties.sizeInfo}}');" > {{ opt.shortName }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </p>
+        </td>
+        <td align="center" valign="middle">
+            <input type="button" value="&gt;" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" /><br />
+            <input type="button" value="&lt;" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+        </td>
+        <td>
+          <p>Selected licenses:<br>
+              <select name="licenseRight" id="licenseRight" style="min-width:200px"  size="20" multiple="multiple" >
+              </select>
+          </p>
+        </td>
       </tr>
     </table>
 
@@ -16,4 +35,7 @@
     <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
   </form>
+
+
+
 </div>
