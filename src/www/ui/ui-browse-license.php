@@ -38,46 +38,25 @@ class ui_browse_license extends FO_Plugin
 {
 
   private $uploadtree_tablename = "";
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-
-  /**
-   * @var ClearingDao
-   */
+  /** @var ClearingDao */
   private $clearingDao;
-  /**
-   * @var LicenseProcessor
-   */
+  /** @var LicenseProcessor */
   private $licenseProcessor;
-
-  /**
-   * @var ChangeLicenseUtility
-   */
+  /** @var ChangeLicenseUtility */
   private $changeLicenseUtility;
-  /**
-   * @var AgentsDao
-   */
+  /** @var AgentsDao */
   private $agentsDao;
-  /**
-   * @var LicenseRenderer
-   */
-  private $licenseRenderer;
-
-  /** @var DbManager  */
+  /** @var DbManager */
   private $dbManager;
 
   function __construct()
   {
     $this->Name = "license";
     $this->Title = TITLE_ui_license;
-    $this->Version = "1.0";
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
@@ -88,7 +67,6 @@ class ui_browse_license extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
-    $this->licenseRenderer = $container->get('view.license_renderer');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
@@ -161,7 +139,7 @@ class ui_browse_license extends FO_Plugin
    *   - The histogram for the directory BY LICENSE.
    *   - The file listing for the directory.
    */
-  function ShowUploadHist($Uploadtree_pk, $Uri, $tag_pk)
+  private function showUploadHist($Uploadtree_pk, $Uri, $tag_pk)
   {
     $UniqueTagArray = array();
     global $Plugins;
@@ -182,7 +160,6 @@ class ui_browse_license extends FO_Plugin
     $scannerAgents = array('nomos', 'monk');
 
 
-
     list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
 
     if (empty($allScans))
@@ -194,9 +171,9 @@ class ui_browse_license extends FO_Plugin
     $V .= $this->buildAgentSelector($allScans);
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $licenseCandidates = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $licenseCandidates);
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $allDecisions);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -284,7 +261,7 @@ class ui_browse_license extends FO_Plugin
     {
       $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
       $V .= js_url();
-      $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
+      $V .= $this->showUploadHist($Item, $Uri, $tag_pk);
     }
 
     $this->vars['content'] = $V;
@@ -571,16 +548,24 @@ class ui_browse_license extends FO_Plugin
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $agentId
+   * @param ClearingLicense[]
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $licenseCandidates)
+  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($itemTreeBounds, $this->clearingDao
-                          ->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates));
-
-    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
+    $goodLicenses = $this->clearingDao
+                          ->newestEditedLicenseSelector->extractGoodLicenses($allDecisions);
+    
+    $licenses = $goodLicenses?:$this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
+    
+    
+    $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
+    global $container;
+    /** @var LicenseRenderer */
+    $licenseRenderer = $container->get('view.license_renderer');
+    return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
 
   private function buildAgentSelector($allScans)

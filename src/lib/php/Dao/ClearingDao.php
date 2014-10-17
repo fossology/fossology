@@ -58,10 +58,8 @@ class ClearingDao extends Object
 
  
   /**
-   * \brief get all the licenses for a single file or uploadtree
-   *
    * @param ItemTreeBounds $itemTreeBounds
-   * @return ClearingDecision[]
+   * @return ClearingDecision[] 
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds)
   {
@@ -250,30 +248,28 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param ItemTreeBounds $itemTreeBounds
+   * @param array
    * @return array
    */
-  public function getEditedLicenseShortnamesContainedWithCount(ItemTreeBounds $itemTreeBounds, $licenses=null)
+  public function getMultiplicityOfValues($licenses=null)
   {
-    if(empty($licenses))
-      $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
-    $uniqueLicenses = array_unique($licenses);
-    $licensesWithCount = array();
+    $uniqueValues = array_unique($licenses);
+    $valueMultiplicityMap = array();
 
-    foreach ($uniqueLicenses as $licN)
+    foreach ($uniqueValues as $value)
     {
       $count = 0;
       foreach ($licenses as $candidate)
       {
-        if ($licN == $candidate)
+        if ($value == $candidate)
         {
           $count++;
         }
       }
-      $licensesWithCount[$licN] = $count;
+      $valueMultiplicityMap[$value] = $count;
     }
 
-    return $licensesWithCount;
+    return $valueMultiplicityMap;
   }
 
   /**
