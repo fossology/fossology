@@ -83,7 +83,7 @@ class DbManagerTest extends \PHPUnit_Framework_TestCase
     $valueColumn = 'lav';
     $tableName = 'foo';
     $sqlLog = 'bar';
-    $preSql = "select $keyColumn,$valueColumn from $tableName";
+    $preSql = "/ $keyColumn, *$valueColumn /";
     $this->driver->shouldReceive('prepare')->with($sqlLog,$preSql)->once();
     $this->driver->shouldReceive('execute')->andReturn('fakeRes');
     $this->driver->shouldReceive('fetchArray')->andReturn(
