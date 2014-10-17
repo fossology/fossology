@@ -18,7 +18,7 @@
 #include "libfossdbmanagerclass.hpp"
 #include "cleanEntries.hpp"
 
-
+#define MAX_TABLE_CREATION_RETRIES 5
 
 class CopyrightDatabaseHandler {
 public:
