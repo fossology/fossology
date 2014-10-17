@@ -6209,6 +6209,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Unidex");
   } 
   cleanLicenceBuffer();
+  /**  TCL License */
+  if (INFILE(_PHR_TCL)) {
+    INTERESTING("TCL");
+  }
+  cleanLicenceBuffer();
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
