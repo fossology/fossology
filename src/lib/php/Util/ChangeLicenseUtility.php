@@ -67,7 +67,7 @@ class ChangeLicenseUtility extends Object
   }
 
 
-  public function createBulkForm() {
+  public function createBulkFormContent() {
     $rendererVars = array();
     $rendererVars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
     $rendererVars['licenseArray'] = $this->licenseDao->getLicenseArray();

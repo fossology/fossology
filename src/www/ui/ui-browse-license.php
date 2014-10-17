@@ -187,15 +187,7 @@ class ui_browse_license extends FO_Plugin
      * **************************************/
     if ($ChildCount == 0)
     {
-      $uploadEntry = $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
-
-      if (IsDir($uploadEntry['ufile_mode']))
-      {
-        return "";
-      }
-
-      $ModLicView = & $Plugins[plugin_find_id("view-license")];
-      return ($ModLicView->Output());
+      header("Location: ?mod=view-license". Traceback_parm_keep(array("upload", "item")));
     }
 
     /******  Filters  *******/
@@ -221,7 +213,7 @@ class ui_browse_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
     $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseFormContent());
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm());
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkFormContent());
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);
