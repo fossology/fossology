@@ -11,6 +11,9 @@
 
 #include "database.hpp"
 #include "identity.hpp"
+
+#include <iostream>
+
 #define RETURN_IF_FALSE(query) \
   do {\
     if (!(query)) {\
@@ -51,9 +54,30 @@ std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDat
 }
 
 bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
-  RETURN_IF_FALSE(createTableAgentFindings(dbManager)) ;
-  RETURN_IF_FALSE(createTableClearing(dbManager)) ;
-  return true;
+  int failedCounter = 0;
+  bool tablesChecked = false;
+
+  while (!tablesChecked && failedCounter<MAX_TABLE_CREATION_RETRIES) {
+    dbManager->begin();
+
+    tablesChecked = createTableAgentFindings(dbManager) && createTableClearing(dbManager);
+
+    if (tablesChecked)
+      dbManager->commit();
+    else {
+      dbManager->rollback();
+      ++failedCounter;
+      std::cout << "WARNING: table creation failed: trying again"
+                   " (" << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES << ")"
+                << std::endl;
+    }
+  }
+  if (failedCounter>0)
+    std::cout << "NOTICE: table creation succeded on try "
+                 << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES
+              << std::endl;
+
+  return tablesChecked;
 }
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
