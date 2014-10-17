@@ -18,17 +18,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Test;
 
-class TestLiteDbTest extends \PHPUnit_Framework_TestCase
+class TestPgDbTest extends \PHPUnit_Framework_TestCase
 {
+  
+  public function testIfTestDbIsCreated()
+  {
+    $dbName = 'fosstestone';
+    exec($cmd="dropdb -Ufossy -hlocalhost $dbName", $cmdOut, $cmdRtn);
+    if($cmdRtn != 0)
+    {
+      echo $cmdOut;
+    }    
+    $testDb = new TestPgDb();
+    exec($cmd="psql -Ufossy -hlocalhost -l | grep -q $dbName", $cmdOut, $cmdRtn);
+    assertThat($cmdRtn,is(0));
+  }
 
-  public function testGetDbManager(){
-    $testDb = new TestLiteDb();
+  public function testGetDbManager()
+  {
+    $testDb = new TestPgDb();
     $this->assertInstanceOf('Fossology\Lib\Db\DbManager', $testDb->getDbManager());
   }
-  
+    
   public function testCreatePlainTables()
   {
-    $testDb = new TestLiteDb();
+    $testDb = new TestPgDb();
     $testDb->createPlainTables(array('tag'));
     $dbManager = $testDb->getDbManager();
     
@@ -47,6 +61,5 @@ class TestLiteDbTest extends \PHPUnit_Framework_TestCase
     assertThat($tag1,hasKey('perm'));
     assertThat($tag1['perm'],is(10));
   }
-  
   
 }
