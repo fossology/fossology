@@ -83,18 +83,11 @@ if [ $BUILDTIME ]; then
       apt-get $YesOpt install \
         libglib2.0-dev
       ;;
-    Fedora)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
-      yum $YesOpt install \
-        glib2-devel
-      ;;
     Mandriva)
       #urpmi
       # not supported
       ;;
-    RedHatEnterprise*|CentOS)
+    RedHatEnterprise*|CentOS|Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi
@@ -112,18 +105,11 @@ if [ $RUNTIME ]; then
       apt-get $YesOpt install \
         libglib2.0-0
       ;;
-    Fedora)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
-      yum $YesOpt install \
-        glib2
-      ;;
     Mandriva)
       #urpmi
       # not supported
       ;;
-    RedHatEnterprise*|CentOS)
+    RedHatEnterprise*|CentOS|Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi

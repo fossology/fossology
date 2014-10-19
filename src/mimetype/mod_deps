@@ -93,14 +93,7 @@ if [ $RUNTIME ]; then
       apt-get $YesOpt install \
         libmagic1
       ;;
-    RedHatEnterprise*|CentOS)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
-      yum $YesOpt install \
-        file-libs
-      ;;
-    Fedora)
+    RedHatEnterprise*|CentOS|Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi

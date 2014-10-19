@@ -87,14 +87,7 @@ if [ $RUNTIME ]; then
       apt-get $YesOpt install \
         subversion git wget
       ;;
-    RedHatEnterprise*|CentOS)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
-      yum $YesOpt install \
-        subversion git wget
-      ;;
-    Fedora)
+    RedHatEnterprise*|CentOS|Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi

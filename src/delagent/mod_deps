@@ -83,14 +83,7 @@ if [ $BUILDTIME ]; then
       apt-get $YesOpt install \
         libssl-dev
       ;;
-    RedHatEnterprise*|CentOS)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
-      yum $YesOpt install \
-        openssl-devel
-      ;;
-    Fedora)
+    RedHatEnterprise*|CentOS|Fedora)
       if [ $YesOpt ]; then
         YesOpt='-y'
       fi
