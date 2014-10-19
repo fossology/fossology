@@ -83,6 +83,13 @@ if [ $BUILDTIME ]; then
       apt-get $YesOpt install \
         libmagic-dev
       ;;
+    RedHatEnterprise*|CentOS|Fedora)
+      if [ $YesOpt ]; then
+        YesOpt='-y'
+      fi
+      yum $YesOpt install \
+        file-devel
+      ;;
   esac
 fi
 
