@@ -622,9 +622,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_CR_SLEEPYCAT)) {
       INTERESTING(lDebug ? "Sleepycat(1)" : "Sleepycat");
     }
-    else if (mCR_CMU()) {
-      INTERESTING(lDebug ? "CMU(BSD-ish)" : "CMU");
-    }
     else if (INFILE(_TITLE_PHP202)) {
       INTERESTING(lDebug ? "PHP(v2.0.2#2)" : "PHP-2.0.2");
       lmem[_mPHP] = 1;
@@ -676,6 +673,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("Cryptogams");
       } else if (INFILE(_CR_BSDCAL)) {
         INTERESTING(lDebug ? "BSD(1)" : "BSD");
+      }
+      else if (mCR_CMU()) {
+        INTERESTING(lDebug ? "CMU(BSD-ish)" : "CMU");
       }
       else if (!lmem[_fZPL]) {
         INTERESTING(lDebug ? "BSD-style(1)" : "BSD-style");
