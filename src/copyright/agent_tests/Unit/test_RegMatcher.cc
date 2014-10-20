@@ -60,10 +60,16 @@ protected:
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-
+    CPPUNIT_ASSERT_EQUAL((size_t) 3, (size_t) matches.size());
     CopyrightMatch match = matches[0];
 
     CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my company"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 21, match.getStart());
+    CPPUNIT_ASSERT_EQUAL((unsigned int) 25, match.getLength());
+    CPPUNIT_ASSERT_EQUAL(regCopyright::getType(), match.getType());
+
+    CPPUNIT_ASSERT_EQUAL(string("Copyrights by any strange people"), matches[1].getContent());
+    CPPUNIT_ASSERT_EQUAL(string("(C) copyright 2007-2011, 2013 my favourite company Google"), matches[2].getContent());
   };
 
 
