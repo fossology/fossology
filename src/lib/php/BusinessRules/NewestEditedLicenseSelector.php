@@ -70,12 +70,11 @@ class NewestEditedLicenseSelector extends Object
     $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray);
 
     $licenses = array();
-    foreach ($licensesPerId as $fileID => $licInfo)
+    foreach ($licensesPerId as $licInfo)
     {
-      foreach ($licInfo->getLicenses() as $licRef)
+      foreach ($licInfo->getPositiveLicenses() as $licRef)
       {
-        if (!($licRef->isRemoved()))
-          $licenses[] = $licRef->getShortName();
+        $licenses[] = $licRef->getShortName();
       }
     }
     return $licenses;
@@ -102,12 +101,12 @@ class NewestEditedLicenseSelector extends Object
     //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
     //! misleading folder content overviews in the license browser and in the count of license findings
     $out =array ();
-    foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
+    foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
+      if ($clearingDecision->getType() == DecisionTypes::IDENTIFIED and $clearingDecision->getSameFolder() and $clearingDecision->getScope() == 'upload')
       {
-        $utid = $clearingDecWithLicenses->getUploadTreeId();
-        $out[$utid] = $clearingDecWithLicenses;
+        $utid = $clearingDecision->getUploadTreeId();
+        $out[$utid] = $clearingDecision->getPositiveLicenses();
       }
     }
     
@@ -115,11 +114,11 @@ class NewestEditedLicenseSelector extends Object
       return $this->flatten($out);
     }
     
-    foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
+    foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
+      if ($clearingDecision->getType() == DecisionTypes::IDENTIFIED and $clearingDecision->getScope() == 'global')
       {
-        return $clearingDecWithLicenses;
+        return $clearingDecision;
       }
     }
     return null;
@@ -127,20 +126,18 @@ class NewestEditedLicenseSelector extends Object
 
 
   /**
-   * @param ClearingDecision[] $in
+   * @param LicenseRef[][] $in
    * @return ClearingDecision
    */
   private function flatten($in)
   {
     $licenses = array();
     foreach ($in as $clearingD) {
-     $licenses = array_merge($licenses, $clearingD->getLicenses());
-     $pfileId = $clearingD->getPfileId();
+     $licenses = array_merge($licenses, $clearingD);
     }
     $out = ClearingDecisionBuilder::create()
-            ->setLicenses(array_unique($licenses) )
+            ->setPositiveLicenses(array_unique($licenses) )
             ->setSameUpload(true)
-            ->setPfileId($pfileId)
             ->setScope('upload')
             ->setType(DecisionTypes::IDENTIFIED)
             ->build();

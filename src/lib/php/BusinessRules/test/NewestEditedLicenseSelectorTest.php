@@ -53,7 +53,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
     $licref = new LicenseRef(5, $name . "shortName", $name . "fullName");
     $clearLic = new ClearingLicense($licref, false);
-    $clearingDecision->setLicenses(array($clearLic));
+    $clearingDecision->setPositiveLicenses(array($clearLic));
 
     return $clearingDecision->build();
   }

@@ -452,7 +452,8 @@ class ui_browse_license extends FO_Plugin
       $licenseList = implode(', ', $licenses);
       $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
       $editedLicenseList .= implode(', ', $editedLicenses);
-    } else
+    }
+    else
     {
       if (array_key_exists($fileId, $pfileLicenses))
       {
@@ -494,13 +495,7 @@ class ui_browse_license extends FO_Plugin
       }
       if (array_key_exists($fileId, $editedPfileLicenses))
       {
-        $addedLicenses = array_filter(
-          $editedPfileLicenses[$fileId]->getLicenses(),
-          function ($licenseRef) {
-            /** @var ClearingLicense $licenseRef */
-            return !($licenseRef->isRemoved());
-          });
-
+        $addedLicenses = $editedPfileLicenses[$fileId]->getPositiveLicenses();
         $editedLicenseList .= implode(", ",
           array_map(
             function ($licenseRef) use ($uploadId,$childUploadTreeId)
@@ -544,7 +539,7 @@ class ui_browse_license extends FO_Plugin
    * @param ClearingLicense[]
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
+  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
@@ -727,7 +722,6 @@ class ui_browse_license extends FO_Plugin
   {
     return "browse_license.html.twig";
   }
-
 
 }
 

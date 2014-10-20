@@ -104,10 +104,12 @@ class ClearingDao extends Object
 
     while ($row = $this->dbManager->fetchArray($result))
     {
+      list($added,$removed) = $this->getFileClearingLicenses($row['id']);
       $clearingDec = ClearingDecisionBuilder::create()
           ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
           ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
-          ->setLicenses($this->getFileClearingLicenses($row['id']))
+          ->setPositiveLicenses($added)
+          ->setNegativeLicenses($removed)
           ->setClearingId($row['id'])
           ->setUploadTreeId($row['uploadtree_id'])
           ->setPfileId($row['pfile_id'])
@@ -125,12 +127,11 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param $clearingId
-   * @return ClearingLicense[]
+   * @param int $clearingId
+   * @return array pair of ClearingLicense[]
    */
-  public function getFileClearingLicenses($clearingId)
+  private function getFileClearingLicenses($clearingId)
   {
-    $clearingLicenses = array();
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
         "select
@@ -143,14 +144,22 @@ class ClearingDao extends Object
                where clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($clearingId));
-
+    $added = array();
+    $removed = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
       $licenseRef = new LicenseRef($row['id'], $row['shortname'], $row['fullname']);
-      $clearingLicenses[] = new ClearingLicense($licenseRef, $this->dbManager->booleanFromDb($row['removed']));
+      if ($this->dbManager->booleanFromDb($row['removed']))
+      {
+        $removed[] = $licenseRef;
+      }
+      else
+      {
+        $added[] = $licenseRef;
+      }
     }
     $this->dbManager->freeResult($res);
-    return $clearingLicenses;
+    return array($added,$removed);
   }
 
   /**
@@ -277,8 +286,7 @@ class ClearingDao extends Object
   /**
    * @param int $userId
    * @param int $uploadTreeId
-   * @return ClearingDecision|null
-   * @throws \Fossology\Lib\Exception
+   * @return ClearingDecision
    */
   public function getRelevantClearingDecision($userId, $uploadTreeId)
   {
@@ -311,9 +319,13 @@ ORDER BY CD.date_added DESC LIMIT 1
     );
 
     $row = $this->dbManager->fetchArray($res);
-    $result = $row ?
-        ClearingDecisionBuilder::create()
-        ->setLicenses($this->getFileClearingLicenses($row['id']))
+    $result = array();
+    if($row!==false && count($row)!=0)
+    {
+      list($added,$removed) = $this->getFileClearingLicenses($row['id']);
+      $result = ClearingDecisionBuilder::create()
+        ->setPositiveLicenses($added)
+        ->setNegativeLicenses($removed)
         ->setClearingId($row['id'])
         ->setUploadTreeId($row['uploadtree_id'])
         ->setPfileId($row['file_id'])
@@ -321,8 +333,8 @@ ORDER BY CD.date_added DESC LIMIT 1
         ->setType($row['type_id'])
         ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
         ->setDateAdded($row['date_added'])
-        ->build() :
-        null;
+        ->build();
+    }
     $this->dbManager->freeResult($res);
     return $result;
   }

@@ -34,7 +34,9 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   private $sameFolder = true;
 
   /** @var LicenseRef[] */
-  private $licenses;
+  private $positiveLicenses;
+  /** @var LicenseRef[] */
+  private $negativeLicenses;
 
   /** @var int */
   private $clearingId;
@@ -73,7 +75,8 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
-    $this->licenses = array(new LicenseRef(8, "testSN", "testFN"), new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN"));
+    $this->positiveLicenses = array(new LicenseRef(8, "testSN", "testFN"), new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN"));
+    $this->negativeLicenses = array();
     $this->clearingId = 8;
     $this->uploadTreeId = 9;
     $this->pfileId = 10;
@@ -104,12 +107,12 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
   }
 
-  public function testLicenses()
+  public function testPositiveLicenses()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setLicenses($this->licenses)
+        ->setPostiveLicenses($this->postiveLicenses)
         ->build();
-    assertThat($clearingDec->getLicenses(), is($this->licenses));
+    assertThat($clearingDec->getPositiveLicenses(), is($this->postiveLicenses));
   }
 
   public function testClearingId()

@@ -300,13 +300,15 @@ class ClearingView extends FO_Plugin
     foreach ($clearingDecWithLicenses as $clearingDecWithLic)
     {
       $licenseNames = array();
-      foreach ($clearingDecWithLic->getLicenses() as $lic)
+      foreach ($clearingDecWithLic->getPositiveLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        if ($lic->isRemoved()) {
-          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
-        }
         $licenseNames[$lic->getShortName()] = $licenseShortName;
+      }
+      foreach ($clearingDecWithLic->getNegativeLicenses() as $lic)
+      {
+        $licenseShortName = $lic->getShortName();
+        $licenseNames[$lic->getShortName()] = "<span style=\"color:red\">" . $licenseShortName . "</span>";
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
