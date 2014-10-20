@@ -152,15 +152,26 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
 bool processUploadId (CopyrightState* state, int uploadId) {
   vector<long> fileIds = state->queryFileIdsForUpload(uploadId);
 
-  for (vector<long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
-    long pFileId = *it;
+#pragma omp parallel
+  {
+    CopyrightState threadLocalState(state->getDbManager()->spawn(),
+                                    state->getAgentId(),
+                                    state->getVerbosity());
 
-    if (pFileId <= 0)
-      continue;
+    size_t pFileCount = fileIds.size();
+    #pragma omp for
+    for (size_t it = 0; it < pFileCount; ++it) {
+      long pFileId = fileIds[it];
 
-    matchPFileWithLicenses(state, pFileId);
+      if (pFileId <= 0)
+        continue;
 
-    fo_scheduler_heart(1);
+      matchPFileWithLicenses(&threadLocalState, pFileId);
+
+      fo_scheduler_heart(1);
+    }
+
+    delete(threadLocalState.getDbManager());
   }
 
   return true;

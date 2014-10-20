@@ -13,10 +13,10 @@ TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 include $(VARS)
 # -Werror -Wextra
 CPPUNIT_PATH=/opt/cppunit
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR) 
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I.  -Wall -I${CPPUNIT_PATH}/include   -I$(LOCALAGENTDIR) -fopenmp
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
+CXXFLAGS_LINK  = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE=test_copyright
 
