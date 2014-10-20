@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace std;
 
+
 class regexRegMatcher : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (regexRegMatcher);
   CPPUNIT_TEST (regMatcherTest);
@@ -62,7 +63,7 @@ protected:
 
     CopyrightMatch match = matches[0];
 
-    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my compan"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my company"), match.getContent());
   };
 
 
@@ -71,3 +72,4 @@ protected:
 
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION( regexRegMatcher );

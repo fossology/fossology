@@ -53,7 +53,7 @@ libcopyright_cov.a: $(COVERAGE)
 # object build rules #
 ######################
 
-%.o: %.cc
+$(OBJECTS): %.o : %.cc
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
 	
 $(COVERAGE): %_cov.o: %.c 
