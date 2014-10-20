@@ -14,11 +14,13 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 class CopyrightMatch
 {
 public:
     CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
+    CopyrightMatch(std::string content, std::string type, unsigned start);
     ~CopyrightMatch();
     const std::string getType() const;
     const std::string getContent() const;
@@ -32,5 +34,9 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const CopyrightMatch& match);
+bool operator==(const CopyrightMatch& first, const CopyrightMatch& other);
+
+std::ostream& operator<<(std::ostream& os, const std::vector<CopyrightMatch>& matches);
+
 
 #endif // COPYRIGHTMATCH_H

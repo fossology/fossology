@@ -41,10 +41,7 @@ int main(int argc, char** argv) {
       fo::File file(argn, fileName);
       vector<CopyrightMatch> matches = findAllMatches(file, state);
 
-      typedef vector<CopyrightMatch>::const_iterator cpm;
-      cout << fileName << " ::" << endl;
-      for (cpm it = matches.begin(); it != matches.end(); ++it)
-        cout << "\t" << *it << endl;
+      cout << fileName << " ::" << endl << matches << endl;
     }
   }
   else

@@ -17,40 +17,50 @@ const  std::string regCopyright::getType(){
 };
 
 
+#define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
+
 const std::string regCopyright::getRegex() {
-#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,}))"
+#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,})|(" EMAILRGX "))"
+#define SPACECLS  "[\\t ]"
+#define SPACES    SPACECLS "+"
+#define SPACESALL "[[:space:]]+"
+#define APUNCT    "[[:punct:]]?"
 #define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
 #define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
 #define COPYR_SYM_ALONE "©"
 #define COPYR_SYM "(\\(C\\)|" COPYR_SYM_ALONE ")"
 #define COPYR_TXT "copyright(s)?"
-#define SPACES    "[[:space:]]+"
 
  return std::string(
   "("
+  "("
     "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
     "("
-      "[[:space:][:punct:]]+"
+      SPACES
       "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
     ")?"
     "("
-      "[[:space:][:punct:]]+"
+      APUNCT
+      SPACESALL
       DATESLIST
     ")?"
     "("
-      "[[:space:][:punct:]]+"
+      APUNCT
+      SPACESALL
       NAMESLIST
     ")"
-  ")|("
-    "(all" SPACES "rights" SPACES "reserved)"
+    "(all" SPACES "rights" SPACES "reserved)?"
   ")|("
     "("
-      "((author|contributor)s?)"
-      "|((written|contributed)" SPACES "by)"
+      "((author|contributor|maintainer)s?)"
+      "|((written|contributed|maintained)" SPACES "by)"
     ")"
-    "[[:space:][:punct:]]+"
+    APUNCT
+    SPACESALL
     NAMESLIST
   ")"
+  ")"
+  "[.]?"
  );
 };
 
@@ -71,9 +81,7 @@ const  std::string regEmail::getType(){
 };
 
 const std::string regEmail::getRegex() {
- return std::string(
-             "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
- );
+ return std::string(EMAILRGX);
 };
 
 

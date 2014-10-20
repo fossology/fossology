@@ -40,98 +40,96 @@ private:
   std::string content;
 
 public:
-  void setUp (void)  {cout << "Setup" <<endl;
+  void setUp (void)  {
     content = string(
-                "© 2007 Hugh Jackman\n\
-Copyright 2004 my company\n\
-Copyrights by any strange people\n\
-(C) copyright 2007-2011, 2013 my favourite company Google\n\
-(C) 2007-2011, 2013 my favourite company Google\n\
-if (c) return -1 \n\
-Written by: me, myself and Irene \n\
-Authors all the people at ABC\n\
-GPL v2\n\
-This file is protected unter US patents 1 , 2 ,3\n\
-Do not modify this document\n\
-the shuttle is a space vehicle designed by NASA\n\
-visit http://mysite.org/FAQ or write to info@mysite.org"
+                "© 2007 Hugh Jackman\n"
+                "Copyright 2004 my company\n"
+                "Copyrights by any strange people\n"
+                "(C) copyright 2007-2011, 2013 my favourite company Google\n"
+                "(C) 2007-2011, 2013 my favourite company Google\n"
+                "if (c) return -1 \n"
+                "Written by: me, myself and Irene.\n"
+                "Authors all the people at ABC\n"
+                "Apache\n"
+                "This file is protected unter US patents 1 , 2 ,3\n"
+                "Do not modify this document\n"
+                "the shuttle is a space vehicle designed by NASA\n"
+                "visit http://mysite.org/FAQ or write to info@mysite.org\n"
+                "maintained by benjamin drieu <benj@debian.org>"
             );
   };
-  void tearDown (void) { cout << "Tear down" << endl;};
-
-private:
-
 
 protected:
   void regMatcherTest (void) {
     vector<RegexMatcher> copyrights;
-    copyrights.push_back(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+    auto type = regCopyright::getType();
+    copyrights.push_back(RegexMatcher(type, regCopyright::getRegex()));
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-    CopyrightMatch match = matches[1];
+    vector<CopyrightMatch> expected;
+    expected.push_back(CopyrightMatch("© 2007 Hugh Jackman", type, 0));
+    expected.push_back(CopyrightMatch("Copyright 2004 my company", type, 21));
+    expected.push_back(CopyrightMatch("Copyrights by any strange people", type, 47));
+    expected.push_back(CopyrightMatch("(C) copyright 2007-2011, 2013 my favourite company Google", type, 80));
+    expected.push_back(CopyrightMatch("Written by: me, myself and Irene.", type, 204));
+    expected.push_back(CopyrightMatch("Authors all the people at ABC", type, 238));
+    expected.push_back(CopyrightMatch("maintained by benjamin drieu <benj@debian.org>", type, 456));
 
-    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my company"), match.getContent());
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 21, match.getStart());
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 25, match.getLength());
-    CPPUNIT_ASSERT_EQUAL(regCopyright::getType(), match.getType());
-
-    CPPUNIT_ASSERT_EQUAL((size_t) 6, (size_t) matches.size());
-
-    CPPUNIT_ASSERT_EQUAL(string("© 2007 Hugh Jackman"), matches[0].getContent());
-    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my company"), matches[1].getContent());
-    CPPUNIT_ASSERT_EQUAL(string("Copyrights by any strange people"), matches[2].getContent());
-    CPPUNIT_ASSERT_EQUAL(string("(C) copyright 2007-2011, 2013 my favourite company Google"), matches[3].getContent());
-    CPPUNIT_ASSERT_EQUAL(string("Written by: me, myself and Irene"), matches[4].getContent());
-    CPPUNIT_ASSERT_EQUAL(string("Authors all the people at ABC"), matches[5].getContent());
+    CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 
   void regMatcherIpTest (void) {
     vector<RegexMatcher> copyrights;
-    copyrights.push_back(RegexMatcher(regIp::getType(), regIp::getRegex()));
+    auto type = regIp::getType();
+    copyrights.push_back(RegexMatcher(type, regIp::getRegex()));
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-    CPPUNIT_ASSERT_EQUAL((size_t) 1, (size_t) matches.size());
-    CopyrightMatch match = matches[0];
+    vector<CopyrightMatch> expected;
+    expected.push_back(CopyrightMatch("US patents 1 , 2 ,3", type, 304));
 
-    CPPUNIT_ASSERT_EQUAL(string("US patents 1 , 2 ,3"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 
   void regMatcherEccTest (void) {
     vector<RegexMatcher> copyrights;
-    copyrights.push_back(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
+    auto type = regEcc::getType();
+    copyrights.push_back(RegexMatcher(type, regEcc::getRegex()));
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-    CPPUNIT_ASSERT_EQUAL((size_t) 1, (size_t) matches.size());
-    CopyrightMatch match = matches[0];
+    vector<CopyrightMatch> expected;
+    expected.push_back(CopyrightMatch("space vehicle designed by NASA", type, 369));
 
-    CPPUNIT_ASSERT_EQUAL(string("space vehicle designed by NASA"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 
   void regMatcherUrlTest (void) {
     vector<RegexMatcher> copyrights;
-    copyrights.push_back(RegexMatcher(regURL::getType(), regURL::getRegex()));
+    auto type = regURL::getType();
+    copyrights.push_back(RegexMatcher(type, regURL::getRegex()));
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-    CPPUNIT_ASSERT_EQUAL((size_t) 1, (size_t) matches.size());
-    CopyrightMatch match = matches[0];
+    vector<CopyrightMatch> expected;
+    expected.push_back(CopyrightMatch("http://mysite.org/FAQ", type, 406));
 
-    CPPUNIT_ASSERT_EQUAL(string("http://mysite.org/FAQ"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 
   void regMatcherEmailTest (void) {
     vector<RegexMatcher> copyrights;
-    copyrights.push_back(RegexMatcher(regEmail::getType(), regEmail::getRegex()));
+    auto type = regEmail::getType();
+    copyrights.push_back(RegexMatcher(type, regEmail::getRegex(), 1)); //TODO get 1 from regex definition
 
     vector<CopyrightMatch> matches = matchStringToRegexes(content,copyrights);
 
-    CPPUNIT_ASSERT_EQUAL((size_t) 1, (size_t) matches.size());
-    CopyrightMatch match = matches[0];
+    vector<CopyrightMatch> expected;
+    expected.push_back(CopyrightMatch("info@mysite.org", type, 440));
+    expected.push_back(CopyrightMatch("benj@debian.org", type, 486));
 
-    CPPUNIT_ASSERT_EQUAL(string("info@mysite.org"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 };
 

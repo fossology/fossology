@@ -15,6 +15,10 @@ CopyrightMatch::CopyrightMatch(std::string content, std::string type, unsigned i
  content(content), start(start), length(length), type(type)
 {}
 
+CopyrightMatch::CopyrightMatch(std::string content, std::string type, unsigned int start):
+ content(content), start(start), length(content.length()), type(type)
+{}
+
 CopyrightMatch::~CopyrightMatch(){};
 
 unsigned CopyrightMatch::getStart() const
@@ -39,6 +43,14 @@ const std::string CopyrightMatch::getType() const
   return type;
 }
 
+bool operator==(const CopyrightMatch& first, const CopyrightMatch& other)
+{
+  return (first.getContent() == other.getContent()) &&
+         (first.getType() == other.getType()) &&
+         (first.getStart() == other.getStart()) &&
+         (first.getLength() == other.getLength());
+}
+
 std::ostream& operator<<(std::ostream& os, const CopyrightMatch& match)
 {
   unsigned start = match.getStart();
@@ -52,4 +64,13 @@ std::ostream& operator<<(std::ostream& os, const CopyrightMatch& match)
 
   return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const std::vector< CopyrightMatch >& matches)
+{
+  typedef std::vector<CopyrightMatch>::const_iterator cpm;
+  for (cpm it = matches.begin(); it != matches.end(); ++it)
+    os << "\t" << *it << std::endl;
+  return os;
+}
+
 
