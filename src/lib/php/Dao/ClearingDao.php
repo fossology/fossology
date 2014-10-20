@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
@@ -42,7 +41,7 @@ class ClearingDao extends Object
   /** @var Logger */
   private $logger;
   /** @var NewestEditedLicenseSelector */
-  public $newestEditedLicenseSelector;
+  protected $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
 
@@ -128,7 +127,7 @@ class ClearingDao extends Object
 
   /**
    * @param int $clearingId
-   * @return array pair of ClearingLicense[]
+   * @return array pair of LicenseRef[]
    */
   private function getFileClearingLicenses($clearingId)
   {
@@ -224,16 +223,6 @@ class ClearingDao extends Object
     // TODO comment license item pair
   }
 
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return ClearingDecision[]
-   */
-  public function getGoodClearingDecPerFileId(ItemTreeBounds $itemTreeBounds)
-  {
-    $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
-    $filteredLicenses = $this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
-    return $filteredLicenses;
-  }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
@@ -612,6 +601,22 @@ insert into license_decision_event (
     $this->dbManager->freeResult($res);
 
     return $items;
+  }
+  
+  /**
+   * @param ClearingDecision[] $decisions
+   * @return LicenseRef[][]
+   */
+  public function extractGoodLicensesPerFileID($decisions){
+    return $this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($decisions);
+  }
+  
+  /**
+   * @param LicenseRef[][] $editedLicensesArray
+   * @return string[]
+   */
+  public function extractGoodLicenses($editedLicensesArray){
+    return $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
   }
 
 }

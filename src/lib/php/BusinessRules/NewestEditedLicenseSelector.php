@@ -31,12 +31,12 @@ class NewestEditedLicenseSelector extends Object
 {
   /**
    * @param ClearingDecision[] $editedLicensesArray
-   * @return ClearingDecision[]
+   * @return LicenseRef[][]
    */
-  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray)
+  public function extractGoodLicensesPerFileID($editedDecArray)
   {
     $editedLicensesArrayGrouped = array();
-    foreach ($editedLicensesArray as $editedLicense)
+    foreach ($editedDecArray as $editedLicense)
     {
       $pfileId = $editedLicense->getPfileId();
       if (!array_key_exists($pfileId, $editedLicensesArrayGrouped))
@@ -48,31 +48,31 @@ class NewestEditedLicenseSelector extends Object
       }
     }
     
-    $goodLicenseDecisions = array();
+    $goodLicenses = array();
     foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
-      $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
-      if ($cd != null)
+      $licArr = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
+      if ($licArr !== null)
       {
-        $goodLicenseDecisions[$fileId] = $cd;
+        $goodLicenses[$fileId] = $licArr;
       }
     }
 
-    return $goodLicenseDecisions;
+    return $goodLicenses;
   }
 
   /**
-   * @param ClearingDecision[] $editedLicensesArray
+   * @param LicenseRef[][] $editedLicensesArray
    * @return string[]
    */
   public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray);
+    $licensesPerId = $this->extractGoodLicensesPerFileID($editedLicensesArray);
 
     $licenses = array();
     foreach ($licensesPerId as $licInfo)
     {
-      foreach ($licInfo->getPositiveLicenses() as $licRef)
+      foreach ($licInfo as $licRef)
       {
         $licenses[] = $licRef->getShortName();
       }
@@ -93,41 +93,44 @@ class NewestEditedLicenseSelector extends Object
 
   /**
    * @param ClearingDecision[] $sortedClearingDecArray
-   * @return ClearingDecision
+   * @return LicenseRef[]|null
    */
-  public function selectNewestEditedLicensePerFileID($sortedClearingDecArray)
+  private function selectNewestEditedLicensePerFileID($sortedClearingDecArray)
   {
 // $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
     //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
     //! misleading folder content overviews in the license browser and in the count of license findings
-    $out =array ();
+    $upload = array();
+    $global = array();
     foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecision->getType() == DecisionTypes::IDENTIFIED and $clearingDecision->getSameFolder() and $clearingDecision->getScope() == 'upload')
+      if ($clearingDecision->getType() != DecisionTypes::IDENTIFIED)
       {
-        $utid = $clearingDecision->getUploadTreeId();
-        $out[$utid] = $clearingDecision->getPositiveLicenses();
+        continue;
+      }
+      $utid = $clearingDecision->getUploadTreeId();
+      if ($clearingDecision->getSameFolder() && $clearingDecision->getScope() == 'upload' && !array_key_exists($utid, $upload))
+      {
+        unset($global[$utid]);
+        $upload[$utid] = $clearingDecision->getPositiveLicenses();
+      }
+      if ($clearingDecision->getScope() == 'global' && !array_key_exists($utid, $upload) && !array_key_exists($utid, $global))
+      {
+        $global[$utid] = $clearingDecision->getPositiveLicenses();
       }
     }
-    
-    if(count($out) > 0) {
-      return $this->flatten($out);
+    $licenses = array_merge($global,$upload); // not ($upload,$global)
+    if(count($licenses) > 0) {
+      return $this->flatten($licenses);
     }
-    
-    foreach ($sortedClearingDecArray as $clearingDecision)
-    {
-      if ($clearingDecision->getType() == DecisionTypes::IDENTIFIED and $clearingDecision->getScope() == 'global')
-      {
-        return $clearingDecision;
-      }
-    }
+   
     return null;
   }
 
 
   /**
    * @param LicenseRef[][] $in
-   * @return ClearingDecision
+   * @return LicenseRef[]
    */
   private function flatten($in)
   {
@@ -135,12 +138,7 @@ class NewestEditedLicenseSelector extends Object
     foreach ($in as $clearingD) {
      $licenses = array_merge($licenses, $clearingD);
     }
-    $out = ClearingDecisionBuilder::create()
-            ->setPositiveLicenses(array_unique($licenses) )
-            ->setSameUpload(true)
-            ->setScope('upload')
-            ->setType(DecisionTypes::IDENTIFIED)
-            ->build();
+    $out = array_unique($licenses);
     return $out;
   }
         

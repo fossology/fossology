@@ -73,13 +73,13 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testEmptyIsEmpty()
   {
     $editedLicensesArray = array();
-    assertThat($this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($editedLicensesArray), is(array()));
+    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
   }
 
   public function testNotFoundIsEmpty()
   {
     $editedLicensesArray = array(134 => $this->clearingDec(0, false, 'upload', "Test", DecisionTypes::IDENTIFIED));
-    assertThat($this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($editedLicensesArray), is(array()));
+    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
   }
 
   public function testFoundIsNotEmpty()
@@ -127,7 +127,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testToBeDeterminedIsIgnored()
   {
     $editedLicensesArray = array($this->clearingDec(0, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED));
-    assertThat($this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($editedLicensesArray), is(array()));
+    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
   }
 
   public function testOlderGlobalWinsAgainstTBD()

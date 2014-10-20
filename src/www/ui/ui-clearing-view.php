@@ -297,25 +297,25 @@ class ClearingView extends FO_Plugin
   private function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
-    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
+    foreach ($clearingDecWithLicenses as $clearingDecision)
     {
       $licenseNames = array();
-      foreach ($clearingDecWithLic->getPositiveLicenses() as $lic)
+      foreach ($clearingDecision->getPositiveLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        $licenseNames[$lic->getShortName()] = $licenseShortName;
+        $licenseNames[$lic->getShortName()] = "<span style=\"color:green\">" . $licenseShortName . "</span>";;
       }
-      foreach ($clearingDecWithLic->getNegativeLicenses() as $lic)
+      foreach ($clearingDecision->getNegativeLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
         $licenseNames[$lic->getShortName()] = "<span style=\"color:red\">" . $licenseShortName . "</span>";
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
-          'date'=>$clearingDecWithLic->getDateAdded(),
-          'username'=>$clearingDecWithLic->getUserName(),
-          'scope'=>$clearingDecWithLic->getScope(),
-          'type'=>$this->decisionTypes->getTypeName($clearingDecWithLic->getType()),
+          'date'=>$clearingDecision->getDateAdded(),
+          'username'=>$clearingDecision->getUserName(),
+          'scope'=>$clearingDecision->getScope(),
+          'type'=>$this->decisionTypes->getTypeName($clearingDecision->getType()),
           'licenses'=>implode(", ", $licenseNames));
       $table[] = $row;
     }
