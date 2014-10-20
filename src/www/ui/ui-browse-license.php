@@ -354,7 +354,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
     $tableColumns = array(
@@ -469,7 +469,7 @@ class ui_browse_license extends FO_Plugin
               if ($lic['agent_id'] != $agentInfo['latest'])
               {
                 $agentEntry .= "&dagger;";
-                $this->vars['haveOldVersionResult'] = true;
+                $this->vars['haveOldVersionResult'] = "&dagger;";
               }
             }
             else {
