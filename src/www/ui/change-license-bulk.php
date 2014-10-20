@@ -104,11 +104,13 @@ class changeLicenseBulk extends FO_Plugin
 
       if ($licenseRefBulkIdResult !== false) {
         $bulkId = $licenseRefBulkIdResult['lrb_pk'];
-        $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+        $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
+        /** @var agent_fodecider $deciderPlugin */
         $deciderPlugin = plugin_find("agent_decider");
         $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
-        $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $uploadTreeId);
+        $conflictStrategyId = null; // TODO add option in GUI
+        $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $conflictStrategyId);
       } else {
         $ErrorMsg = "can not insert bulk reference";
       }

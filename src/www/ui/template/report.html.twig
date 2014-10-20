@@ -1,0 +1,41 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  {{ parent() }}
+  <h3 id="jobResult"></h3>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+
+  <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+  <script>
+    var resultEntity = $("#jobResult");
+
+    function linkDownloadReport() {
+      resultEntity.html("<a href='{{ downloadLink }}'>Download Report</a>");
+    }
+    function genereationFailed(jqPk) {
+      var text = (jqPk > 0) ? linkToJob(jqPk) : "no job scheduled";
+      resultEntity.html("report generation failed: " + text);
+    }
+
+    function addLinkAndQueueAjaxPolling() {
+      var jqPk
+      = {{ jqPk }};
+              if (jqPk > 0)
+      {
+        resultEntity.html("report generation scheduled as " + linkToJob(jqPk));
+        queueUpdateCheck(jqPk, linkDownloadReport, genereationFailed);
+      }
+      else
+      {
+        genereationFailed();
+      }
+    }
+
+    $(document).ready(function () {
+      addLinkAndQueueAjaxPolling();
+    });
+  </script>
+{% endblock %}

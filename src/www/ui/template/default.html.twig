@@ -1,17 +1,17 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-<b>
+  <b>
     {{ 'FOSSology'| trans }}
-</b>
-{{ 'is a framework for software analysis tools.'| trans }}
-{{ 'With it, you can:'| trans }}
-<ul>
+  </b>
+  {{ 'is a framework for software analysis tools.'| trans }}
+  {{ 'With it, you can:'| trans }}
+  <ul>
     <li>
-        {{ 'Upload files into the fossology repository.'| trans }}
+      {{ 'Upload files into the fossology repository.'| trans }}
     </li>
     <li>
-        {{ 'Unpack files (zip, tar, bz2, iso\'s, and many others) into its component files.'| trans }}
+      {{ 'Unpack files (zip, tar, bz2, iso\'s, and many others) into its component files.'| trans }}
     </li>
     <li>
         {{ 'Browse upload file trees.'| trans }}
@@ -49,14 +49,14 @@
             even add new users.
         '| trans }}
     </li>
-</ul>
+  </ul>
 {% endblock %}
 
 {% block footer %}
-{ parent() }
-<script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
-<script src="scripts/job-queue-poll.js" type="text/javascript"></script>
-<script src="scripts/change-license-common.js" type="text/javascript"></script>
-<script src="scripts/change-license-view.js" type="text/javascript"></script>
-<script src="scripts/tools.js" type="text/javascript"></script>
+  { parent() }
+  <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+  <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+  <script src="scripts/change-license-common.js" type="text/javascript"></script>
+  <script src="scripts/change-license-view.js" type="text/javascript"></script>
+  <script src="scripts/tools.js" type="text/javascript"></script>
 {% endblock %}

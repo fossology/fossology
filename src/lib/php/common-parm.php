@@ -109,13 +109,16 @@ function Traceback_uri()
  */
 function Traceback_parm($ShowMod=1)
 {
-  $V = array();
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   /* need to check the size to avoid accessing past the array, there are
    * request URI's that only have a single entry after the explode.
    */
   if(count($V) >= 2) {
     $V = preg_replace("/^mod=/","",$V[1]);
+  }
+  else if (count($V) == 1)
+  {
+    $V = 'Default';
   }
 
   if (!$ShowMod)

@@ -1,49 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
+  <head lang="en">
     {% block head %}
-    {% include "include/head.html.twig" %}
-    <title>{% block title %}{{ title|e }}{% endblock %}</title>
-    {{ metadata }}
-    {{ styles }}
+      {% include "include/head.html.twig" %}
+      <title>{% block title %}{{ title|e }}{% endblock %}</title>
+      {{ metadata }}
+      {{ styles }}
     {% endblock %}
-</head>
-<body>
-{% block menu %}
-{{ menu }}
-{% endblock %}
+  </head>
+  <body>
+    {% block menu %}
+      {{ menu }}
+    {% endblock %}
 
-{% block micromenu %}
-{% if micromenu %}
-<div style='border: thin dotted gray; background-color:lightyellow;'>
-  {{ micromenu }}
-</div>
-{% endif %}
-{% endblock %}
+    {% block micromenu %}
+      {% if micromenu %}
+        <div style='border: thin dotted gray; background-color:lightyellow;'>
+          {{ micromenu }}
+        </div>
+      {% endif %}
+    {% endblock %}
 
-{% block message %}
-{% if message %}
- <div id="dmessage" style="border-bottom: 1px dashed gray;">
-  <button name='eraseme' value='close' onclick='rmMsg()'>{{ 'Close'| trans }}</button>
-  {{ message }}
- </div>
- <script type='text/javascript'>
-  function rmMsg(){
-   var div = document.getElementById("dmessage");
-   var parent = div.parentNode;
-   parent.removeChild(div);
-  }
- </script>
-{% endif %}
-{% endblock %}
+    {% block message %}
+      <div id="dmessage" style="border-bottom: 1px dashed gray;">
+        <button name='eraseme' value='close' onclick='rmMsg()'>{{ 'Close'| trans }}</button>
+        {% if message %}  {{ message }} {% endif %}
+      </div>
+      <script type='text/javascript'>
+        function rmMsg() {
+          var div = document.getElementById("dmessage");
+          div.style.display = 'none';
+        }
+        {% if message %}{% else %} rmMsg();{% endif %}
+    </script>
+  {% endblock %}
 
 
-{% block content %}
-{{ content }}
-{% endblock %}
+  {% block content %}
+    {{ content }}
+  {% endblock %}
 
-{% block foot %}
-{% include "include/foot.html.twig" %}
-{% endblock %}
+  {% block foot %}
+    {% include "include/foot.html.twig" %}
+  {% endblock %}
 </body>
 </html>

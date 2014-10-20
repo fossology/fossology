@@ -112,7 +112,7 @@ class Postgres implements Driver
    */
   public function fetchArray($res)
   {
-    return pg_fetch_array($res);
+    return pg_fetch_array($res, null, PGSQL_ASSOC);
   }
 
   /**

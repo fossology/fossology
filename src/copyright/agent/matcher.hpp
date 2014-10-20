@@ -21,7 +21,6 @@ public:
   Matcher(const std::string  _type);
   virtual ~Matcher();
 
-  virtual bool matches(const std::string content){return true;};
   virtual std::vector <CopyrightMatch> match(const std::string content) const =0;
 
   const std::string getType() const;

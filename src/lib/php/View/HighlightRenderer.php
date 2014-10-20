@@ -47,6 +47,8 @@ class HighlightRenderer extends Object
       Highlight::EMAIL => 'yellow',
       Highlight::URL => 'orange',
       Highlight::BULK => 'brown',
+      Highlight::IP => '#FF7F50', // Coral
+      Highlight::ECC => '#BA55D3', // MediumOrchid 
 
       Highlight::UNDEFINED => self::DEFAULT_COLOR
   );

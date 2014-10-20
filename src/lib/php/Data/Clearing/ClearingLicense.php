@@ -35,7 +35,6 @@ class ClearingLicense implements LicenseAlike {
    * @param boolean $removed
    */
   public function __construct(LicenseRef $licenseRef, $removed) {
-
     $this->licenseRef = $licenseRef;
     $this->removed = $removed;
   }
@@ -70,5 +69,11 @@ class ClearingLicense implements LicenseAlike {
   public function isRemoved()
   {
     return $this->removed;
+  }
+  
+  /** @return string */
+  public function __toString()
+  {
+    return $this->getShortName();
   }
 }

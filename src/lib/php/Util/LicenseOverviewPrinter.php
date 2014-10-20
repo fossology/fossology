@@ -22,9 +22,8 @@ namespace Fossology\Lib\Util;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Highlight;
-use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\Renderer;
 
@@ -55,14 +54,19 @@ class LicenseOverviewPrinter extends Object
    * @var Renderer
    */
   private $renderer;
+  /**
+   * @var \Fossology\Lib\Data\DecisionTypes
+   */
+  private $decisionTypes;
 
-  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer)
+  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer, DecisionTypes $decisionTypes)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
     $this->highlightRenderer = $highlightRenderer;
     $this->renderer = $renderer;
+    $this->decisionTypes = $decisionTypes;
   }
 
   /**
@@ -124,23 +128,6 @@ class LicenseOverviewPrinter extends Object
     return $agentLatestMap;    
   }
 
-  function buildLicenseDecisions($licenseMatches, $uploadId, $uploadTreeId,
-                                 $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
-  {
-    $licenseDecisions = array();
-    foreach ($licenseMatches as $fileId => $agents)
-    {
-      ksort($agents);
-      $breakCounter = 0;
-      foreach ($agents as $agentName => $foundLicenses)
-      {
-        if ($breakCounter++ > 0) $output .= "<br/>";
-        $latestAgentId = $agentLatestMap[$agentName]['latest'];
-        $output .= $this->renderMatches($foundLicenses, $agentName, $latestAgentId, $agentLatestMap[$agentName]['ars'],
-            $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
-      }
-    }
-  }
   /**
    * @param $licenseMatches
    * @param $uploadId
@@ -404,80 +391,6 @@ class LicenseOverviewPrinter extends Object
     $output .= "</a> ";
     return $output;
   }
-
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @return string
-   */
-  public function createRecentLicenseClearing($clearingDecWithLicenses)
-  {
-    $output = "<h3>" . _("Concluded license") . "</h3>\n";
-
-    $output .= $this->createScopeTypeSelect();
-
-
-     $cd= $this->clearingDao->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($clearingDecWithLicenses);
-
-    /**
-     *@var  ClearingDecision $cd
-     */
-    if($cd != null  )
-    {
-      /**
-       * @var ClearingDecision $theLicense
-       */
-      $auditedLicenses = $cd->getLicenses();
-      /**
-       * @var LicenseRef[] $auditedLicenses
-       */
-      $output .= '<table border="1"><tr>';
-      $innerglue = '';
-      foreach ($auditedLicenses as $license)
-      {
-        $refId = $license->getId();
-        $output .= $innerglue;
-        $innerglue = '</tr><tr>';
-        $output .= '<td>'.$this->printLicenseNameAsLink($license->getShortName(), $license->getFullName()).'</td>';
-        $output .= '<td><textarea id="tedit'.$refId.'" cols="15" rows="2" onclick="activateLic('.$refId.')">TBD '.$refId.'</textarea></td>';
-        $output .= '<td><button hidden id="bedit'.$refId.'" onclick="performLicCommentRequest('.$refId.')">'._('Submit').'</button>';
-        $output .=    '<img onclick="performLicDelRequest('.$refId.')" id="aedit'.$refId.'" src="images/icons/close_32.png" alt="rm" title="'._('remove this license').'"/></td>';
-      }
-      $output .= "</tr></table>";
-      return $output;
-    }
-    else
-    {
-      return "";
-    }
-  }
-
-  public function createScopeTypeSelect()
-  {
-    $clearingDecisionTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
-    $typeRadio = $this->renderer->createRadioGroup('type', $clearingDecisionTypes, $defaultType = 2, '', $separator = ' &nbsp; ');
-    return '  <fieldset style="display:inline">
-   <legend>' . _('Clearing decision type') . '</legend>
-   ' . $typeRadio . '</fieldset>';
-  }
-
-  /**
-   * @param $clearingDecWithLicenses
-   * @return string
-   */
-  public function createWrappedRecentLicenseClearing($clearingDecWithLicenses)
-  {
-    $output = "<div id=\"recentLicenseClearing\" name=\"recentLicenseClearing\">";
-    if (!empty($clearingDecWithLicenses))
-    {
-      $output_TMP = $this->createRecentLicenseClearing($clearingDecWithLicenses);
-      if(!empty($output_TMP)) {
-        $output .= $output_TMP;
-      }
-    }
-    $output .= "</div>";
-    return $output;
-  }
-
 
   public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
                                    $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){

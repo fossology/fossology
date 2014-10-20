@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
+  <head lang="en">
     {% block head %}
-    {% include "include/head.html.twig" %}
-    <title>{% block title %}License Info{% endblock %}</title>
-    {{ metadata }}
-    {{ styles }}
+      {% include "include/head.html.twig" %}
+      <title>{% block title %}License Info{% endblock %}</title>
+      {{ metadata }}
+      {{ styles }}
     {% endblock %}
-</head>
-<body>
+  </head>
+  <body>
 
-{% block content %}
-<div class="text">
-  <h1>{{ shortName|e }}</h1>
-  {% if fullName %}
-   <h2>License Fullname</h2>
-   {{ fullName }}
-  {% endif %}
-  {% if url %}
-   <h2>Reference UR:</h2>
-   <a href="{{ url }}" target="_blank">{{ url|e }}</a>
-  {% endif %}
-  {% if text %}
-  <h2>License Text</h2>
-  {{ text|e }}
-  {% else %}
-  {{ 'Original license text is not in the FOSSology database.'| trans }}
-  {% endif %}
-</div>
-{% endblock %}
+    {% block content %}
+      <div class="text">
+        <h1>{{ shortName|e }}</h1>
+        {% if fullName %}
+          <h2>License Fullname</h2>
+          {{ fullName }}
+        {% endif %}
+        {% if url %}
+          <h2>Reference UR:</h2>
+          <a href="{{ url }}" target="_blank">{{ url|e }}</a>
+        {% endif %}
+        {% if text %}
+          <h2>License Text</h2>
+          {{ text|e }}
+        {% else %}
+          {{ 'Original license text is not in the FOSSology database.'| trans }}
+        {% endif %}
+      </div>
+    {% endblock %}
 
-{% block foot %}
-{% include "include/foot.html.twig" %}
-{% endblock %}
-</body>
+    {% block foot %}
+      {% include "include/foot.html.twig" %}
+    {% endblock %}
+  </body>
 </html>

@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use DateTime;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 
 class LicenseDecisionResult implements LicenseDecision {
@@ -40,12 +42,20 @@ class LicenseDecisionResult implements LicenseDecision {
    * @throws Exception
    */
   public function __construct($licenseDecisionEvent, $agentDecisionEvents=array()) {
-    if (!isset($licenseDecisionEvent) && count($agentDecisionEvents == 0)) {
+    if (($licenseDecisionEvent === null) && (count($agentDecisionEvents) == 0)) {
       throw new Exception("cannot create LicenseDecisionEvent without any event contained");
     }
 
     $this->licenseDecisionEvent = $licenseDecisionEvent;
     $this->agentDecisionEvents = $agentDecisionEvents;
+  }
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef()
+  {
+    return $this->getLicenseDecision()->getLicenseRef();
   }
 
   /**
@@ -82,11 +92,11 @@ class LicenseDecisionResult implements LicenseDecision {
   }
 
   /**
-   * @return float
+   * @return DateTime
    */
-  public function getEpoch()
+  public function getDateTime()
   {
-    return $this->getLicenseDecision()->getEpoch();
+    return $this->getLicenseDecision()->getDateTime();
   }
 
   /**
@@ -138,11 +148,19 @@ class LicenseDecisionResult implements LicenseDecision {
     if (isset($this->licenseDecisionEvent)) {
       return $this->licenseDecisionEvent;
     }
+    $agentEvent = null;
     foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
-      return $agentDecisionEvent;
+      $agentEvent = $agentDecisionEvent;
     }
-    print "licenseDecisionEvent: $this->licenseDecisionEvent\n";
-    throw new Exception("could not determine license");
+    return $agentEvent;
+  }
+
+  /**
+   * @return bool
+   */
+  public function hasAgentDecisionEvent()
+  {
+    return !empty($this->agentDecisionEvents);
   }
 
   /**
@@ -169,4 +187,13 @@ class LicenseDecisionResult implements LicenseDecision {
     return $this->licenseDecisionEvent;
   }
 
+  /*
+   * @return int EXTRACT(EPOCH FROM getLicenseDecisionEvent()->getDateTime())
+   */
+  public function getTimestamp()
+  {
+    $dateTime = $this->getDateTime();
+    return $dateTime->getTimestamp();
+  }
+  
 }

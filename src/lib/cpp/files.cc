@@ -38,16 +38,12 @@ std::string getStringFromFile(std::string filename, const unsigned long int maxi
   return getStringFromFile(filename.c_str(), maximumBytes);
 };
 
-std::string File::getContent( const unsigned long int maximumBytes) {
+std::string File::getContent( const unsigned long int maximumBytes) const  {
   return getStringFromFile(fileName, maximumBytes);
 }
 
-File:: File(unsigned long _id, const char* _fileName):id(_id){  fileName= g_strdup(_fileName);};
+File:: File(unsigned long _id, const char* _fileName):id(_id), fileName(_fileName) {};
 
 File:: File() :id(0), fileName(NULL) {};
 
-File::~File(){
-  if(fileName!=NULL)
-    g_free(fileName);
-};
 }

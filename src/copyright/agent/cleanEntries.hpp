@@ -17,7 +17,7 @@
 
 class DatabaseEntry {
 public:
-
+  DatabaseEntry();
   long agent_fk;
   long pfile_fk;
   std::string content;

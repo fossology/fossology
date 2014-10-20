@@ -38,46 +38,25 @@ class ui_browse_license extends FO_Plugin
 {
 
   private $uploadtree_tablename = "";
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-
-  /**
-   * @var ClearingDao
-   */
+  /** @var ClearingDao */
   private $clearingDao;
-  /**
-   * @var LicenseProcessor
-   */
+  /** @var LicenseProcessor */
   private $licenseProcessor;
-
-  /**
-   * @var ChangeLicenseUtility
-   */
+  /** @var ChangeLicenseUtility */
   private $changeLicenseUtility;
-  /**
-   * @var AgentsDao
-   */
+  /** @var AgentsDao */
   private $agentsDao;
-  /**
-   * @var LicenseRenderer
-   */
-  private $licenseRenderer;
-
-  /** @var DbManager  */
+  /** @var DbManager */
   private $dbManager;
-
+  
   function __construct()
   {
     $this->Name = "license";
     $this->Title = TITLE_ui_license;
-    $this->Version = "1.0";
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
@@ -88,7 +67,6 @@ class ui_browse_license extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
-    $this->licenseRenderer = $container->get('view.license_renderer');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
@@ -161,12 +139,9 @@ class ui_browse_license extends FO_Plugin
    *   - The histogram for the directory BY LICENSE.
    *   - The file listing for the directory.
    */
-  function ShowUploadHist($Uploadtree_pk, $Uri, $tag_pk)
+  private function showUploadHist($Uploadtree_pk, $tag_pk)
   {
     $UniqueTagArray = array();
-    global $Plugins;
-
-    $ModLicView = & $Plugins[plugin_find_id("view-license")];
 
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
 
@@ -182,7 +157,6 @@ class ui_browse_license extends FO_Plugin
     $scannerAgents = array('nomos', 'monk');
 
 
-
     list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
 
     if (empty($allScans))
@@ -194,9 +168,9 @@ class ui_browse_license extends FO_Plugin
     $V .= $this->buildAgentSelector($allScans);
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $licenseCandidates = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $licenseCandidates);
-    list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $itemTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -210,15 +184,7 @@ class ui_browse_license extends FO_Plugin
      * **************************************/
     if ($ChildCount == 0)
     {
-      $uploadEntry = $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
-
-      if (IsDir($uploadEntry['ufile_mode']))
-      {
-        return "";
-      }
-
-      $ModLicView = & $Plugins[plugin_find_id("view-license")];
-      return ($ModLicView->Output());
+      header("Location: ?mod=view-license". Traceback_parm_keep(array("upload", "item")));
     }
 
     /******  Filters  *******/
@@ -243,9 +209,8 @@ class ui_browse_license extends FO_Plugin
     $V .= "<table border=0 cellpadding=2 width='100%'>\n";
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
-    $V .= "<hr />\n";
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseForm());
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkForm());
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseFormContent());
+    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkFormContent());
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);
@@ -282,26 +247,34 @@ class ui_browse_license extends FO_Plugin
     $Cached = !empty($V);
     if (!$Cached && !empty($Upload))
     {
-      $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
       $V .= js_url();
-      $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
+      $V .= $this->showUploadHist($Item, $tag_pk);
+      $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
+      /** @todo move text to template */
+      if ($this->vars['haveOldVersionResult'])
+      {
+        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . $this->vars['haveOldVersionResult'] . _(" are from an older version, or were not confirmed in latest successful scan or were found during incomplete scan.");
+      }
+      if($this->vars['haveRunningResult'])
+      {
+        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . $this->vars['haveRunningResult'] . _(" are from the newest version and come from a currently running or incomplete scan.");
+      }
+      $V .= $AddInfoText;
     }
 
     $this->vars['content'] = $V;
-
-    $Time = microtime(true) - $uTime; // convert usecs to secs
-    $text = _("Elapsed time: %.3f seconds");
-    $this->vars['content'] .= sprintf("<br/><small>$text</small>", $Time);
+    $Time = microtime(true) - $uTime;
 
     if ($Cached)
     {
-      $text = _("cached");
-      $text1 = _("Update");
-      $this->vars['content'] .= " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $text = _("This is cached view.");
+      $text1 = _("Update now.");
+      $this->vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     } else
     {
-      /*  Cache Report if this took longer than 1/2 second */
-      if ($Time > 0.5)
+      $text = _("Elapsed time: %.3f seconds");
+      $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
+      if ($Time > 3)
         ReportCachePut($CacheKey, $V);
     }
     return;
@@ -332,17 +305,15 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * @param $Uri
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $ModLicView
    * @param $UniqueTagArray
    * @param $selectedAgentId
    * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  public function createFileListing($Uri, $tagId, ItemTreeBounds $itemTreeBounds, $ModLicView, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
@@ -357,7 +328,6 @@ class ui_browse_license extends FO_Plugin
 
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
-    $AddInfoText = "";
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
     $editedPfileLicenses = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
     /* Get ALL the items under this Uploadtree_pk */
@@ -367,221 +337,228 @@ class ui_browse_license extends FO_Plugin
     if (!empty($tagId))
       TagFilter($Children, $tagId, $this->uploadtree_tablename);
 
-    $ChildCount = 0;
+    if (empty($Children)){
+      return array($ChildCount=0, $VF);
+    }
 
-    if (!empty($Children))
+    $this->vars['haveOldVersionResult'] = false;
+    $this->vars['haveRunningResult'] = false;
+    $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+    global $Plugins;
+    $ModLicView = & $Plugins[plugin_find_id("view-license")];
+    
+    $tableData = array();
+    foreach ($Children as $child)
     {
-      $haveOldVersionResult = false;
-      $haveRunningResult = false;
-      $tableData = array();
-
-      foreach ($Children as $child)
+      if (empty($child))
       {
-        if (empty($child))
-        {
-          continue;
-        }
-
-        /* Determine the hyperlink for non-containers to view-license  */
-        $fileId = $child['pfile_fk'];
-        $childUploadTreeId = $child['uploadtree_pk'];
-
-        if (!empty($fileId) && !empty($ModLicView))
-        {
-          $LinkUri = Traceback_uri();
-          $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
-          if ($selectedAgentId)
-          {
-            $LinkUri .= "&agentId=$selectedAgentId";
-          }
-        } else
-        {
-          $LinkUri = NULL;
-        }
-
-        /* Determine link for containers */
-        $isContainer = Iscontainer($child['ufile_mode']);
-        if ($isContainer)
-        {
-          $uploadtree_pk = DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename);
-          $LicUri = "$Uri&item=" . $uploadtree_pk;
-          if ($selectedAgentId)
-          {
-            $LicUri .= "&agentId=$selectedAgentId";
-          }
-        } else
-        {
-          $LicUri = NULL;
-        }
-
-        /* Populate the output ($VF) - file list */
-        /* id of each element is its uploadtree_pk */
-        $fileName = $child['ufile_name'];
-        if ($isContainer)
-          $fileName = "<a href='$LicUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
-        else if (!empty($LinkUri))
-          $fileName = "<a href='$LinkUri'>$fileName</a>";
-        $ChildCount++;
-
-
-        /* show licenses under file name */
-        $licenseList = "";
-        $editedLicenseList = "";
-        $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
-        if ($isContainer)
-        {
-          $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds , array());
-          $licenseList = implode(', ', $licenses);
-          $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
-          $editedLicenseList .= implode(', ', $editedLicenses);
-        } else
-        {
-          if (array_key_exists($fileId, $pfileLicenses))
-          {
-            $licenseEntries = array();
-            foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
-            {
-              $agentEntries = array();
-              foreach ($rfInfo as $agent => $lic)
-              {
-                $agentInfo = $goodAgents[$agent];
-                $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$agentInfo[name]</a>";
-
-                if($agentInfo['latestIsNewest']) {
-                  if ($lic['agent_id'] != $agentInfo['latest'])
-                  {
-                    $agentEntry .= "&dagger;";
-                    $haveOldVersionResult = true;
-                  }
-                }
-                else {
-                  if($lic['agent_id'] == $agentInfo['newest']['agent_pk']) {
-                    $agentEntry .= "&sect;";
-                    $haveRunningResult = true;
-                  }
-                  else {
-                    $agentEntry .= "&dagger;";
-                    $haveOldVersionResult = true;
-                  }
-                }
-                if ($lic['match_percentage'] > 0)
-                {
-                  $agentEntry .= ": $lic[match_percentage]%";
-                }
-                $agentEntries[] = $agentEntry;
-              }
-              $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
-            }
-            $licenseList = implode(", ", $licenseEntries);
-          }
-          if (array_key_exists($fileId, $editedPfileLicenses))
-          {
-            $addedLicenses = array_filter(
-              $editedPfileLicenses[$fileId]->getLicenses(),
-              function ($licenseRef) {
-                /** @var ClearingLicense $licenseRef */
-                return !($licenseRef->isRemoved());
-              });
-
-            $editedLicenseList .= implode(", ",
-              array_map(
-                function ($licenseRef) use ($uploadId,$childUploadTreeId)
-                {
-                  /** @var LicenseRef $licenseRef */
-                  return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-                },
-                $addedLicenses
-              )
-            );
-          }
-        }
-        $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
-
-        $getTextEditUser = _("Edit");
-        $getTextEditBulk = _("Bulk");
-        $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
-        $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
-
-        list($filesCleared,$filesToBeCleared )= $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
-
-        if($filesCleared == $filesToBeCleared) {
-          $img ="<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
-        }
-        else
-          $img ="<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
-
-        $tableData[] = array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);
+        continue;
       }
-
-      $AddInfoText .= "<br/><span id='bulkIdResult' hidden></span>";
-
-      if ($haveOldVersionResult)
-      {
-        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . "&dagger;" . _(" are from an older version, or were not confirmed in latest successful scan or were found during incomplete scan.");
-      }
-      if($haveRunningResult)
-      {
-        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . "&sect;" . _(" are from the newest version and come from a currently running or incomplete scan.");
-      }
-
-
-      $tableColumns = array(
-          array("sTitle" => _("Files"), "sClass" => "left"),
-          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
-          array("sTitle" => _("Edited Results"), "sClass" => "left"),
-          array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%"),
-          array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
-          array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
-      );
-
-      $tableSorting = array(
-          array(0, "asc"),
-          array(2, "desc"),
-          array(1, "desc")
-      );
-
-      $tableLanguage = array(
-          "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-          "sSearch" => "Search _INPUT_ in all columns" // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
-              // in results.
-              . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
-          "sInfoPostFix" => $AddInfoText,
-          "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
-      );
-
-      $dataTableConfig = array(
-          "aaData" => $tableData,
-          "aoColumns" => $tableColumns,
-          "aaSorting" => $tableSorting,
-          "iDisplayLength" => 50,
-          "oLanguage" => $tableLanguage
-      );
-
-      $VF .= "<script>
-    function createDirlistTable() {
-        dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) . ");
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
+
+    $tableColumns = array(
+        array("sTitle" => _("Files"), "sClass" => "left"),
+        array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
+        array("sTitle" => _("Edited Results"), "sClass" => "left"),
+        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%"),
+        array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
+        array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
+    );
+
+    $tableSorting = array(
+        array(0, "asc"),
+        array(2, "desc"),
+        array(1, "desc")
+    );
+
+    $tableLanguage = array(
+        "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
+        "sSearch" => "Search _INPUT_ in all columns"
+            . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
+        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
+    );
+
+    $dataTableConfig = array(
+        "aaData" => $tableData,
+        "aoColumns" => $tableColumns,
+        "aaSorting" => $tableSorting,
+        "iDisplayLength" => 50,
+        "oLanguage" => $tableLanguage
+    );
+
+    $VF .= "<script>
+  function createDirlistTable() {
+      dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) . ");
+  }
 </script>";
-      return array($ChildCount, $VF, $AddInfoText);
-    }
-    return array($ChildCount, $VF, $AddInfoText);
+
+    $ChildCount = count($tableData);
+    return array($ChildCount, $VF);
   }
 
+  
+  private function createFileDataRow($child,$uploadId,$selectedAgentId,$goodAgents,$pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  {
+    $fileId = $child['pfile_fk'];
+    $childUploadTreeId = $child['uploadtree_pk'];
+
+    if (!empty($fileId) && !empty($ModLicView))
+    {
+      $LinkUri = Traceback_uri();
+      $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
+      if ($selectedAgentId)
+      {
+        $LinkUri .= "&agentId=$selectedAgentId";
+      }
+    }
+    else
+    {
+      $LinkUri = NULL;
+    }
+
+    /* Determine link for containers */
+    $isContainer = Iscontainer($child['ufile_mode']);
+    if ($isContainer)
+    {
+      $uploadtree_pk = DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename);
+      $LicUri = "$Uri&item=" . $uploadtree_pk;
+      if ($selectedAgentId)
+      {
+        $LicUri .= "&agentId=$selectedAgentId";
+      }
+    } else
+    {
+      $LicUri = NULL;
+    }
+
+    /* Populate the output ($VF) - file list */
+    /* id of each element is its uploadtree_pk */
+    $fileName = $child['ufile_name'];
+    if ($isContainer)
+    {
+      $fileName = "<a href='$LicUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
+    } else if (!empty($LinkUri))
+    {
+      $fileName = "<a href='$LinkUri'>$fileName</a>";
+    }
+    /* show licenses under file name */
+    $licenseList = "";
+    $editedLicenseList = "";
+    $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+    if ($isContainer)
+    {
+      $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds , array());
+      $licenseList = implode(', ', $licenses);
+      $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
+      $editedLicenseList .= implode(', ', $editedLicenses);
+    } else
+    {
+      if (array_key_exists($fileId, $pfileLicenses))
+      {
+        $licenseEntries = array();
+        foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
+        {
+          $agentEntries = array();
+          foreach ($rfInfo as $agent => $lic)
+          {
+            $agentInfo = $goodAgents[$agent];
+            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$agentInfo[name]</a>";
+
+            if($agentInfo['latestIsNewest']) {
+              if ($lic['agent_id'] != $agentInfo['latest'])
+              {
+                $agentEntry .= "&dagger;";
+                $this->vars['haveOldVersionResult'] = "&dagger;";
+              }
+            }
+            else {
+              if($lic['agent_id'] == $agentInfo['newest']['agent_pk']) {
+                $agentEntry .= "&sect;";
+                $this->vars['haveRunningResult'] = "&sect;";
+              }
+              else {
+                $agentEntry .= "&dagger;";
+                $this->vars['haveOldVersionResult'] = "&dagger;";
+              }
+            }
+            if ($lic['match_percentage'] > 0)
+            {
+              $agentEntry .= ": $lic[match_percentage]%";
+            }
+            $agentEntries[] = $agentEntry;
+          }
+          $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+        }
+        $licenseList = implode(", ", $licenseEntries);
+      }
+      if (array_key_exists($fileId, $editedPfileLicenses))
+      {
+        $addedLicenses = array_filter(
+          $editedPfileLicenses[$fileId]->getLicenses(),
+          function ($licenseRef) {
+            /** @var ClearingLicense $licenseRef */
+            return !($licenseRef->isRemoved());
+          });
+
+        $editedLicenseList .= implode(", ",
+          array_map(
+            function ($licenseRef) use ($uploadId,$childUploadTreeId)
+            {
+              /** @var LicenseRef $licenseRef */
+              return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
+            },
+            $addedLicenses
+          )
+        );
+      }
+    }
+    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
+
+    $getTextEditUser = _("Edit");
+    $getTextEditBulk = _("Bulk");
+    $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
+    $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+
+    list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+
+    if ($filesCleared == $filesToBeCleared)
+    {
+      $img = "<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
+    }
+    else
+    {
+      $img = "<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
+    }
+
+    return array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);  
+  }
+  
+  
+  
   /**
    * @param $uploadTreeId
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $agentId
+   * @param ClearingLicense[]
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $licenseCandidates)
+  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $editedLicensesHist = $this->clearingDao->getEditedLicenseShortnamesContainedWithCount($itemTreeBounds, $this->clearingDao
-                          ->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates));
-
-    return $this->licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
+    $goodLicenses = $this->clearingDao
+                          ->newestEditedLicenseSelector->extractGoodLicenses($allDecisions);
+    
+    $licenses = $goodLicenses?:$this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
+    
+    
+    $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
+    global $container;
+    /** @var LicenseRenderer */
+    $licenseRenderer = $container->get('view.license_renderer');
+    return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
 
   private function buildAgentSelector($allScans)

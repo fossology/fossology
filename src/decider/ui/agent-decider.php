@@ -28,7 +28,7 @@ class agent_fodecider extends FO_Plugin
 {
   public $AgentName;
 
-  const UPLOADTREEIDFLAG = "-U";
+  const CONFLICT_STRATEGY_FLAG = "-k";
 
   function __construct() {
     $this->Name = "agent_decider";
@@ -81,12 +81,12 @@ class agent_fodecider extends FO_Plugin
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $uploadTreeId=null)
+  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
   {
     $Dependencies[] = "agent_adj2nest";
-    if ($uploadTreeId !== null)
+    if ($conflictStrategyId !== null)
     {
-      $args = $this::UPLOADTREEIDFLAG . $uploadTreeId;
+      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
     } else
     {
       $args = "";

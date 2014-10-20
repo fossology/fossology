@@ -181,9 +181,9 @@ function GetRunnableJobList()
   /* get the raw job list from scheduler 
      send command 'status' to the scheduler, get the all status of runnable jobs and scheduler 
      like:
-      scheduler:[#] daemon:[#] jobs:[#] log:[str] port:[#] verbose:[#]
-      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
-      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
+      scheduler:[#] daemon:[#] jobs:[#] log:[agentName] port:[#] verbose:[#]
+      job:[#] status:[agentName] type:[agentName] priority:[#] running:[#] finished[#] failed:[#]
+      job:[#] status:[agentName] type:[agentName] priority:[#] running:[#] finished[#] failed:[#]
    */
   $command = "status";
   $command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);

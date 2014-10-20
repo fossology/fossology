@@ -62,6 +62,7 @@ class DbManager extends Object
   /**
    * @param $statementName
    * @param $sqlStatement
+   * @throws \Exception
    */
   public function prepare($statementName, $sqlStatement)
   {
@@ -69,7 +70,7 @@ class DbManager extends Object
     {
       if ($this->preparedStatements[$statementName] !== $sqlStatement)
       {
-        Fatal("Existing Statement mismatch: $statementName", __FILE__, __LINE__);
+        throw new \Exception("Existing Statement mismatch: $statementName");
       }
       return;
     }
@@ -85,13 +86,14 @@ class DbManager extends Object
   /**
    * @param string $statementName statement name
    * @param array $params parameters
+   * @throws \Exception
    * @return resource
    */
   public function execute($statementName, $params = array())
   {
     if (!array_key_exists($statementName, $this->preparedStatements))
     {
-      Fatal("Unknown Statement", __FILE__, __LINE__);
+      throw new \Exception("Unknown Statement");
     }
     $startTime = microtime($get_as_float = true);
     $res = $this->dbDriver->execute($statementName, $params);
@@ -291,4 +293,20 @@ class DbManager extends Object
     $this->freeResult($res);
   }
 
+  /**
+   * @param string
+   * @param array with keys as column names
+   * @param string
+   */
+  public function insertTableRow($tableName,$assocParams,$sqlLog='')
+  {
+    $params = array_values($assocParams);
+    $keys = implode(',',array_keys($assocParams));
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $this->insertInto($tableName, $keys, $params, $sqlLog);
+  }
+  
 }

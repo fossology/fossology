@@ -19,10 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use DateTime;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Util\Object;
 
-class AgentLicenseDecisionEvent implements LicenseDecision {
+class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
   /**
    * @var LicenseRef
    */
@@ -47,11 +49,26 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
    * @param null|int $percentage
    */
   public function __construct(LicenseRef $licenseRef, AgentRef $agentRef, $matchId, $percentage) {
-
     $this->licenseRef = $licenseRef;
     $this->agentRef = $agentRef;
     $this->matchId = $matchId;
     $this->percentage = $percentage;
+  }
+
+  /**
+   * @return int
+   */
+  public function getEventId()
+  {
+    return $this->matchId;
+  }
+
+  /**
+   * @return LicenseRef
+   */
+  public function getLicenseRef()
+  {
+    return $this->licenseRef;
   }
 
   /**
@@ -78,31 +95,6 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
     return $this->licenseRef->getFullName();
   }
 
-  /**
-   * @return string
-   */
-  public function getComment()
-  {
-    return "";
-  }
-
-  /**
-   * @return float
-   */
-  public function getEpoch()
-  {
-    // TODO
-    return 0.0;
-  }
-
-  /**
-   * @return int
-   */
-  public function getEventId()
-  {
-    // TODO
-    return 0;
-  }
 
   /**
    * @return string
@@ -115,9 +107,24 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   /**
    * @return string
    */
+  public function getComment()
+  {
+    return "";
+  }
+
+  /**
+   * @return string
+   */
   public function getReportinfo()
   {
     return "";
+  }
+
+  /**
+   * @return DateTime
+   */
+  public function getDateTime(){
+    return new DateTime();
   }
 
   /**
@@ -137,6 +144,14 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   }
 
   /**
+   * @return AgentRef
+   */
+  public function getAgentRef()
+  {
+    return $this->agentRef;
+  }
+
+  /**
    * @return string
    */
   public function getAgentName()
@@ -150,11 +165,6 @@ class AgentLicenseDecisionEvent implements LicenseDecision {
   public function getAgentId()
   {
     return $this->agentRef->getAgentId();
-  }
-
-  public function getMatchId()
-  {
-    return $this->matchId;
   }
 
   public function getPercentage()

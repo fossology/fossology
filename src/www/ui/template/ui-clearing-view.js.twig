@@ -1,0 +1,81 @@
+selectedLicensesTableColumns = [
+  {"sTitle": "{{ 'License'| trans }}", "sClass": "left read_only"},
+  {"sTitle": "{{ 'Source'| trans }}", "sClass": "left read_only", "bSortable": false},
+  {"sTitle": "{{ 'Text'| trans }}", "sClass": "center", "bSortable": false},
+  {"sTitle": "{{ 'Comment'| trans }}", "sClass": "center", "bSortable": false},
+  {"sTitle": "{{ 'Action'| trans }}", "sClass": "center read_only", "bSortable": false}
+];
+
+uploadId = {{ uploadId }};
+itemId = {{ itemId }};
+
+selectedLicensesTableConfig = {
+  "bServerSide": true,
+  "sAjaxSource": "?mod=conclude-license&do=licenseDecisions",
+  "fnServerData": function (sSource, aoData, fnCallback) {
+    aoData.push({"name": "upload", "value": uploadId});
+    aoData.push({"name": "item", "value": itemId});
+    $.getJSON(sSource, aoData, fnCallback)
+      .fail(failed)
+  },
+  "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+    if (nRow.classList.contains('removed')) {
+      $('td', nRow).addClass('read_only');
+    }
+  },
+  "aoColumns": selectedLicensesTableColumns,
+  "iDisplayLength": 25,
+  "bProcessing": true,
+  "bStateSave": true,
+  "sCookiePrefix" : "fossology_",
+  "bRetrieve": true,
+  "bPaginate": false,
+  "bFilter": false
+};
+
+$editableConfiguration  = {
+  "sReadOnlyCellClass": "read_only",
+  "sUpdateURL": "?mod=conclude-license&do=updateLicenseDecisions" ,
+  "fnPnEditing": function(input) {return input[0].value;},
+  "fnOnEdited": function (){} ,
+  "fnOnDeleted": function(result) { createTable().fnDraw(false);},
+  "sSuccessResponse": "success"
+};
+
+function createLicenseDecisionTable() {
+  otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable($editableConfiguration);
+  return otable;
+}
+
+addLicenseTableColumns = [
+  {"sTitle": "{{ 'License'| trans }}", "sClass": "left"},
+  {"sTitle": "{{ 'Action'| trans }}", "sClass": "center", "bSortable": false}
+];
+
+addLicenseTableConfig = {
+  "bServerSide": true,
+  "sAjaxSource": "?mod=conclude-license&do=licenses",
+  "fnServerData": function (sSource, aoData, fnCallback) {
+    aoData.push({"name": "upload", "value": uploadId});
+    aoData.push({"name": "item", "value": itemId});
+    $.getJSON(sSource, aoData, fnCallback).fail(failed);
+  },
+  "aoColumns": addLicenseTableColumns,
+  "iDisplayLength": 25,
+  "bProcessing": true,
+  "bStateSave": true,
+  "sCookiePrefix" : "fossology_",
+  "bRetrieve": true,
+  "bPaginate": false,
+  "bFilter": true
+};
+
+function createLicenseSelectionTable() {
+  otable = $('#licenseSelectionTable').dataTable(addLicenseTableConfig);
+  return otable;
+}
+
+$(document).ready(function () {
+  createLicenseDecisionTable();
+  createLicenseSelectionTable();
+});
