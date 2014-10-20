@@ -32,20 +32,38 @@ int main(int argc, char** argv) {
 
   fillMatchers(state);
 
-  while (fo_scheduler_next() != NULL) {
-    int uploadId = atoi(fo_scheduler_current());
+  if (argc>1)
+  {
+    for (int argn=1; argn<argc; ++argn)
+    {
+      const char* fileName = argv[argn];
 
-    if (uploadId == 0) continue;
+      fo::File file(argn, fileName);
+      vector<CopyrightMatch> matches = findAllMatches(file, state);
 
-    int arsId = writeARS(state, 0, uploadId, 0);
-
-    if (!processUploadId(state, uploadId))
-      bail(state, 2);
-
-    fo_scheduler_heart(1);
-    writeARS(state, arsId, uploadId, 1);
+      typedef vector<CopyrightMatch>::const_iterator cpm;
+      cout << fileName << " ::" << endl;
+      for (cpm it = matches.begin(); it != matches.end(); ++it)
+        cout << "\t" << *it << endl;
+    }
   }
-  fo_scheduler_heart(0);
+  else
+  {
+    while (fo_scheduler_next() != NULL) {
+      int uploadId = atoi(fo_scheduler_current());
+
+      if (uploadId == 0) continue;
+
+      int arsId = writeARS(state, 0, uploadId, 0);
+
+      if (!processUploadId(state, uploadId))
+        bail(state, 2);
+
+      fo_scheduler_heart(1);
+      writeARS(state, arsId, uploadId, 1);
+    }
+    fo_scheduler_heart(0);
+  }
 
   /* after cleaning up agent, disconnect from */
   /* the scheduler, this doesn't return */

@@ -110,9 +110,13 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
   return state->getDbManager()->commit();
 };
 
-void matchFileWithLicenses(long pFileId, const fo::File& file, CopyrightState* state){
+vector<CopyrightMatch> findAllMatches(const fo::File& file, CopyrightState* state) {
   string fileContent = file.getContent(0);
-  vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
+  return matchStringToRegexes(fileContent, state->getRegexMatchers());
+}
+
+void matchFileWithLicenses(long pFileId, const fo::File& file, CopyrightState* state){
+  vector<CopyrightMatch> matches = findAllMatches(file, state);
   saveToDatabase(matches, state, pFileId);
 }
 

@@ -80,12 +80,12 @@ test: all
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
-	./$(EXE); \
+	$(CXX) run_tests.cc -o $(EXE)_cov $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CXXFLAGS_LINK) $(FLAG_COV) ; \
+	./$(EXE)_cov; \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 clean:
-	rm -f $(EXE) *.o *.a *.gcno *.gcda core
+	rm -rf $(EXE) $(EXE)_cov *.o *.a *.gcno *.gcda core results
 
 .PHONY: all install uninstall clean test

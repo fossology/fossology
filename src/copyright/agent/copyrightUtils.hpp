@@ -47,6 +47,7 @@ std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std
 
 bool saveToDatabase(const std::vector< CopyrightMatch >& matches, CopyrightState* state, long pFileId) ;
 
+std::vector<CopyrightMatch> findAllMatches(const fo::File& file, CopyrightState* state);
 void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state);
 void matchPFileWithLicenses(CopyrightState* state, long pFileId) ;
 

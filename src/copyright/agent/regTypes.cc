@@ -21,13 +21,14 @@ const std::string regCopyright::getRegex() {
 #define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,}))"
 #define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
 #define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
-#define COPYR_SYM "(\\(C\\)|©)"
+#define COPYR_SYM_ALONE "©"
+#define COPYR_SYM "(\\(C\\)|" COPYR_SYM_ALONE ")"
 #define COPYR_TXT "copyright(s)?"
 #define SPACES    "[[:space:]]+"
 
  return std::string(
   "("
-    "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT ")"
+    "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
     "("
       "[[:space:][:punct:]]+"
       "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
@@ -124,7 +125,7 @@ const std::string regEcc::getRegex() {
     "|(encryption)"
     "|(nuclear|surveillance|military|defense|marine|avionics|laser)"
     "|(propulsion" SPACES "systems)"
-    "|(space" SPACES "vehicles)"
+    "|(space" SPACES "vehicle(s)?)"
     "|(dual" SPACES "use)"
    ")"
    "[[:space:][:punct:]]+" // TODO what's the purpose of this???

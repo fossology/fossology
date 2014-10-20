@@ -13,6 +13,7 @@
 #define COPYRIGHTMATCH_H
 
 #include <string>
+#include <iostream>
 
 class CopyrightMatch
 {
@@ -29,5 +30,7 @@ private:
     unsigned length;
     std::string type;
 };
+
+std::ostream& operator<<(std::ostream& os, const CopyrightMatch& match);
 
 #endif // COPYRIGHTMATCH_H

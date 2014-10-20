@@ -38,3 +38,18 @@ const std::string CopyrightMatch::getType() const
 {
   return type;
 }
+
+std::ostream& operator<<(std::ostream& os, const CopyrightMatch& match)
+{
+  unsigned start = match.getStart();
+  unsigned end = start + match.getLength();
+
+  os << "["
+          << start << ":" << end << ":" << match.getType()
+     << "] '" <<
+              match.getContent()
+       << "'";
+
+  return os;
+}
+
