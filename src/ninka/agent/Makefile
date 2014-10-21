@@ -16,6 +16,7 @@ CXXFLAGS_LINK = $(ALL_CXXFLAGS)
 EXE = ninka
 
 OBJECTS = databasehandler.o licensematch.o ninka.o ninkawrapper.o state.o utils.o
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(CXXFOLIB) $(EXE)
 
@@ -32,12 +33,18 @@ $(CXXFOLIB):
 libninka.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
 
+libninka_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+
 ######################
 # object build rules #
 ######################
 
 $(OBJECTS): %.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
+
+$(COVERAGE): %_cov.o: %.cc %.hpp
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #
