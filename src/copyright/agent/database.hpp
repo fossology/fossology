@@ -23,15 +23,16 @@
 class CopyrightDatabaseHandler {
 public:
   CopyrightDatabaseHandler();
-  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
-  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
+  //CopyrightDatabaseHandler(CopyrightDatabaseHandler&&);
+  /*CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
+  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;*/
   ~CopyrightDatabaseHandler();
 
-  bool createTables(DbManager* dbManager);
-  bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
-  bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId);
+  bool createTables(const DbManager& dbManager);
+  bool insertInDatabase(const DbManager& dbManager, DatabaseEntry& entry) const;
+  bool insertNoResultInDatabase(const DbManager& dbManager, long agentId, long pFileId) const;
 
-  std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId);
+  std::vector<long> queryFileIdsForUpload(const DbManager& dbManager, int agentId, int uploadId) const;
 private:
   typedef struct {
     const char* name;
@@ -43,8 +44,8 @@ private:
   static const ColumnDef columnsDecision[];
 
 
-  bool createTableAgentFindings(DbManager* dbManager);
-  bool createTableClearing(DbManager* dbManager);
+  bool createTableAgentFindings(const DbManager& dbManager);
+  bool createTableClearing(const DbManager& dbManager);
 
   std::string getColumnListString(const ColumnDef in[], size_t size) ;
   std::string getColumnCreationString( const ColumnDef in[], size_t size) ;

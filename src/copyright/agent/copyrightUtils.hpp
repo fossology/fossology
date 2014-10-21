@@ -34,25 +34,25 @@ extern "C"{
 
 void queryAgentId(int& agent, PGconn* dbConn) ;
 
-void bail(CopyrightState* state, int exitval) ;
+void bail(int exitval);
 
-int writeARS(CopyrightState* state, int arsId, long uploadId, int success);
+int writeARS(CopyrightState& state, int arsId, long int uploadId, int success);
 
-CopyrightState* getState(DbManager* dbManager, int verbosity);
+CopyrightState getState(DbManager& dbManager, int verbosity);
 
-void fillMatchers(CopyrightState* state);
+void fillMatchers(CopyrightState& state);
 
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector< RegexMatcher > matchers ) ;
 
 
-bool saveToDatabase(const std::vector< CopyrightMatch >& matches, CopyrightState* state, long pFileId) ;
+bool saveToDatabase(const std::vector< CopyrightMatch >& matches, const CopyrightState& state, long pFileId) ;
 
-std::vector<CopyrightMatch> findAllMatches(const fo::File& file, CopyrightState* state);
-void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state);
-void matchPFileWithLicenses(CopyrightState* state, long pFileId) ;
+std::vector<CopyrightMatch> findAllMatches(const fo::File& file, const CopyrightState& state);
+void matchFileWithLicenses(long pFileId, fo::File* file, const CopyrightState& state);
+void matchPFileWithLicenses(const CopyrightState& state, long pFileId) ;
 
 
-bool processUploadId (CopyrightState* state, int uploadId) ;
+bool processUploadId (const CopyrightState& state, int uploadId) ;
 
 
 

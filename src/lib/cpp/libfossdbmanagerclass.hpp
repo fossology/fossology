@@ -24,16 +24,23 @@ extern "C" {
 
 class QueryResult;
 
+class DbManagerStructDeleter {
+public:
+  void operator()(fo_dbManager* d) {
+    fo_dbManager_finish(d);
+  }
+};
+
 class DbManager {
 public :
   DbManager(int* argc, char** argv);
   DbManager(fo_dbManager* dbManager);
-  DbManager(DbManager& dbManager) = delete;
-  DbManager operator=(const DbManager&) = delete;
+  DbManager(DbManager&&);
+  DbManager(const DbManager&);
   ~DbManager();
 
   PGconn* getConnection() const;
-  DbManager* spawn() const;
+  DbManager spawn() const;
 
   fo_dbManager* getStruct_dbManager() const;
   bool tableExists(const char* tableName) const;
@@ -46,7 +53,7 @@ public :
   QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
 private:
-  fo_dbManager* _dbManager;
+  unptr::shared_ptr<fo_dbManager> dbManager;
 };
 
 class PGresultDeleter {

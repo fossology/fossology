@@ -16,36 +16,42 @@ extern "C" {
 }
 
 DbManager::DbManager(int* argc, char** argv) {
+  fo_dbManager* _dbManager;
   fo_scheduler_connect_dbMan(argc,argv,&_dbManager);
-};
 
-DbManager::DbManager(fo_dbManager* __dbManager): _dbManager(__dbManager){
-
-};
-
-DbManager::~DbManager(){
-  fo_dbManager_finish(_dbManager);
-};
-
-PGconn* DbManager::getConnection() const {
-  return fo_dbManager_getWrappedConnection(_dbManager);
+  dbManager = unptr::shared_ptr<fo_dbManager>(_dbManager, DbManagerStructDeleter());
 }
 
+DbManager::DbManager(fo_dbManager* dbManager): dbManager(unptr::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter())) {
+}
 
-DbManager* DbManager::spawn() const {
-  return new DbManager(fo_dbManager_fork(_dbManager));
+DbManager::DbManager(DbManager&& other): dbManager(std::move(other.dbManager)){
+}
+
+DbManager::DbManager(const DbManager& other): dbManager(other.dbManager) {
+}
+
+DbManager::~DbManager() {
+}
+
+PGconn* DbManager::getConnection() const {
+  return fo_dbManager_getWrappedConnection(getStruct_dbManager());
+}
+
+DbManager DbManager::spawn() const {
+  return DbManager(fo_dbManager_fork(getStruct_dbManager()));
 }
 
 fo_dbManager* DbManager::getStruct_dbManager() const {
-  return _dbManager;
+  return dbManager.get();
 }
 
 bool DbManager::tableExists(const char* tableName) const {
-  return fo_dbManager_tableExists(_dbManager, tableName);
+  return fo_dbManager_tableExists(getStruct_dbManager(), tableName);
 }
 
 bool DbManager::sequenceExists(const char* name) const {
-  return fo_dbManager_exists(_dbManager, "sequence", name);
+  return fo_dbManager_exists(getStruct_dbManager(), "sequence", name);
 }
 
 bool DbManager::begin() const {
@@ -66,7 +72,7 @@ QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const {
   char* queryString = g_strdup_vprintf(queryFormat, args);
   va_end(args);
 
-  QueryResult result(fo_dbManager_Exec_printf(_dbManager, queryString));
+  QueryResult result(fo_dbManager_Exec_printf(getStruct_dbManager(), queryString));
 
   g_free(queryString);
   return result;

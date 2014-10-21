@@ -31,36 +31,34 @@ void queryAgentId(int& agent, PGconn* dbConn) {
     exit(1);
 }
 
-int writeARS(CopyrightState* state, int arsId, long uploadId, int success) {
-  return fo_WriteARS(state->getConnection(), arsId, uploadId, state->getAgentId(), AGENT_ARS, NULL, success);
+int writeARS(CopyrightState& state, int arsId, long uploadId, int success) {
+  return fo_WriteARS(state.getConnection(), arsId, uploadId, state.getAgentId(), AGENT_ARS, NULL, success);
 }
 
-void bail(CopyrightState* state, int exitval) {
-  delete(state->getDbManager());
-  delete(state);
+void bail(int exitval) {
   fo_scheduler_disconnect(exitval);
   exit(exitval);
 }
 
-CopyrightState* getState(DbManager* dbManager, int verbosity){
+CopyrightState getState(DbManager& dbManager, int verbosity){
   int agentID;
-  queryAgentId(agentID, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentID, verbosity);
+  queryAgentId(agentID, dbManager.getConnection());
+  return CopyrightState(dbManager, agentID, verbosity);
 }
 
-void fillMatchers(CopyrightState* state) {
+void fillMatchers(CopyrightState& state) {
 #ifdef IDENTITY_COPYRIGHT
-  state->addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
-  state->addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
-  state->addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
+  state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+  state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+  state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
 #endif
 
 #ifdef IDENTITY_IP
-  state->addMatcher(RegexMatcher(regIp::getType(), regIp::getRegex()));
+  state.addMatcher(RegexMatcher(regIp::getType(), regIp::getRegex()));
 #endif
 
 #ifdef IDENTITY_ECC
-  state->addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
+  state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
 #endif
 }
 
@@ -77,8 +75,8 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, std::vector< 
 }
 
 
-bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* state, long pFileId) {
-  if (!state->getDbManager()->begin())
+bool saveToDatabase(const vector<CopyrightMatch> & matches, const CopyrightState& state, long pFileId) {
+  if (!state.getDbManager().begin())
     return false;
 
   size_t count = 0;
@@ -87,7 +85,7 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
     const CopyrightMatch& match = *it;
 
     DatabaseEntry entry;
-    entry.agent_fk=state->getAgentId();
+    entry.agent_fk=state.getAgentId();
     entry.content=match.getContent();
     entry.copy_endbyte=match.getStart() + match.getLength();
     entry.copy_startbyte = match.getStart();
@@ -96,36 +94,36 @@ bool saveToDatabase(const vector<CopyrightMatch> & matches, CopyrightState* stat
 
     if(CleanDatabaseEntry(entry)) {
       ++count;
-      if (!state->copyrightDatabaseHandler.insertInDatabase(state->getDbManager(), entry)) {
-        state->getDbManager()->rollback();
+      if (!state.copyrightDatabaseHandler.insertInDatabase(state.getDbManager(), entry)) {
+        state.getDbManager().rollback();
         return false;
       };
     }
   }
 
   if (count==0) {
-    state->copyrightDatabaseHandler.insertNoResultInDatabase(state->getDbManager(), state->getAgentId(), pFileId);
+    state.copyrightDatabaseHandler.insertNoResultInDatabase(state.getDbManager(), state.getAgentId(), pFileId);
   }
 
-  return state->getDbManager()->commit();
+  return state.getDbManager().commit();
 };
 
-vector<CopyrightMatch> findAllMatches(const fo::File& file, CopyrightState* state) {
+vector<CopyrightMatch> findAllMatches(const fo::File& file, const CopyrightState& state) {
   string fileContent = file.getContent(0);
-  return matchStringToRegexes(fileContent, state->getRegexMatchers());
+  return matchStringToRegexes(fileContent, state.getRegexMatchers());
 }
 
-void matchFileWithLicenses(long pFileId, const fo::File& file, CopyrightState* state){
+void matchFileWithLicenses(long pFileId, const fo::File& file, const CopyrightState& state){
   vector<CopyrightMatch> matches = findAllMatches(file, state);
   saveToDatabase(matches, state, pFileId);
 }
 
-void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
-  char* pFile = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
+void matchPFileWithLicenses(const CopyrightState& state, long pFileId) {
+  char* pFile = queryPFileForFileId(state.getDbManager().getStruct_dbManager(), pFileId);
 
   if(!pFile) {
     cout << "File not found " << pFileId << endl;
-    bail(state, 8);
+    bail(8);
   }
 
   char * fil = g_strdup("files");
@@ -144,19 +142,17 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
   else
   {
     cout << "PFile not found in repo " << pFileId << endl;
-    bail(state, 7);
+    bail(7);
   }
 }
 
 
-bool processUploadId (CopyrightState* state, int uploadId) {
-  vector<long> fileIds = state->queryFileIdsForUpload(uploadId);
+bool processUploadId (const CopyrightState& state, int uploadId) {
+  vector<long> fileIds = state.queryFileIdsForUpload(uploadId);
 
 #pragma omp parallel
   {
-    CopyrightState threadLocalState(state->getDbManager()->spawn(),
-                                    state->getAgentId(),
-                                    state->getVerbosity());
+    CopyrightState threadLocalState = state.spawn();
 
     size_t pFileCount = fileIds.size();
     #pragma omp for
@@ -166,12 +162,10 @@ bool processUploadId (CopyrightState* state, int uploadId) {
       if (pFileId <= 0)
         continue;
 
-      matchPFileWithLicenses(&threadLocalState, pFileId);
+      matchPFileWithLicenses(threadLocalState, pFileId);
 
       fo_scheduler_heart(1);
     }
-
-    delete(threadLocalState.getDbManager());
   }
 
   return true;

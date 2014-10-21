@@ -19,21 +19,25 @@
 
 class CopyrightState {
 public:
-  CopyrightState(DbManager* _dbManager,  int _agentId, int _verbosity);
-  CopyrightState(const CopyrightState&) = delete;
-  CopyrightState operator=(const CopyrightState&) = delete;
+  CopyrightState(DbManager dbManager, int _agentId, int _verbosity);
+//  CopyrightState(const CopyrightState&) = delete;
+//  CopyrightState(CopyrightState&&);
+
+//  CopyrightState operator=(const CopyrightState&) = delete;
   ~CopyrightState();
 
-  int getAgentId();
-  int getVerbosity();
-  DbManager* getDbManager();
-  PGconn * getConnection();
+  CopyrightState spawn() const;
+
+  int getAgentId() const;
+  int getVerbosity() const;
+  PGconn * getConnection() const;
   void addMatcher(RegexMatcher regexMatcher);
-  std::vector<RegexMatcher> getRegexMatchers();
+  std::vector<RegexMatcher> getRegexMatchers() const;
   CopyrightDatabaseHandler copyrightDatabaseHandler;
-  std::vector<long> queryFileIdsForUpload(long uploadId);
+  std::vector<long> queryFileIdsForUpload(long uploadId) const;
+  DbManager getDbManager() const;
 private:
-  DbManager* dbManager;
+  DbManager dbManager;
   int agentId;
   int verbosity;
   std::vector<RegexMatcher> regexMatchers;

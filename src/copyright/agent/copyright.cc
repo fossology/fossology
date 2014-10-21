@@ -18,30 +18,34 @@ using namespace std;
 int main(int argc, char** argv) {
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
-
-  DbManager* dbManager = new DbManager(&argc, argv);
+  DbManager dbManager(&argc, argv);
 
   int verbosity=8;
-  CopyrightState* state;
-  state = getState(dbManager, verbosity);
+  CopyrightState state = getState(dbManager, verbosity);
 
-  if (!state->copyrightDatabaseHandler.createTables(dbManager)) {
+  if (!state.copyrightDatabaseHandler.createTables(dbManager)) {
     std::cout << "FATAL: initialization failed" << std::endl;
-    bail(state, 9);
+    bail(9);
   }
 
   fillMatchers(state);
 
   if (argc>1)
   {
-    for (int argn=1; argn<argc; ++argn)
+    #pragma omp parallel
     {
-      const char* fileName = argv[argn];
+      CopyrightState threadLocalState(state.spawn());
 
-      fo::File file(argn, fileName);
-      vector<CopyrightMatch> matches = findAllMatches(file, state);
+      #pragma omp for
+      for (int argn=1; argn<argc; ++argn)
+      {
+        const char* fileName = argv[argn];
 
-      cout << fileName << " ::" << endl << matches << endl;
+        fo::File file(argn, fileName);
+        vector<CopyrightMatch> matches = findAllMatches(file, state);
+
+        cout << fileName << " ::" << endl << matches << endl;
+      }
     }
   }
   else
@@ -54,7 +58,7 @@ int main(int argc, char** argv) {
       int arsId = writeARS(state, 0, uploadId, 0);
 
       if (!processUploadId(state, uploadId))
-        bail(state, 2);
+        bail(2);
 
       fo_scheduler_heart(1);
       writeARS(state, arsId, uploadId, 1);
@@ -62,7 +66,7 @@ int main(int argc, char** argv) {
     fo_scheduler_heart(0);
   }
 
-  /* after cleaning up agent, disconnect from */
-  /* the scheduler, this doesn't return */
-  bail(state, 0);
+  /* do not use bail, as it would prevent the destructors from running */
+  fo_scheduler_disconnect(0);
+  return 0;
 }

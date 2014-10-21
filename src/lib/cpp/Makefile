@@ -22,7 +22,6 @@ OBJS=files.o libfossdbmanagerclass.o
 COVERAGE=$(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)

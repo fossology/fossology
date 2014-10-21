@@ -25,6 +25,8 @@
 CopyrightDatabaseHandler::CopyrightDatabaseHandler() {
 }
 
+//CopyrightDatabaseHandler::CopyrightDatabaseHandler(CopyrightDatabaseHandler&&) {}
+
 CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
 }
 
@@ -53,19 +55,19 @@ std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDat
   return result;
 }
 
-bool CopyrightDatabaseHandler::createTables(DbManager* dbManager) {
+bool CopyrightDatabaseHandler::createTables(const DbManager& dbManager) {
   int failedCounter = 0;
   bool tablesChecked = false;
 
   while (!tablesChecked && failedCounter<MAX_TABLE_CREATION_RETRIES) {
-    dbManager->begin();
+    dbManager.begin();
 
     tablesChecked = createTableAgentFindings(dbManager) && createTableClearing(dbManager);
 
     if (tablesChecked)
-      dbManager->commit();
+      dbManager.commit();
     else {
-      dbManager->rollback();
+      dbManager.rollback();
       ++failedCounter;
       std::cout << "WARNING: table creation failed: trying again"
                    " (" << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES << ")"
@@ -94,9 +96,9 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
     {"copy_endbyte", "integer", ""},
 };
 
-bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
-  if (!dbManager->sequenceExists(SEQUENCE_NAME)) {
-    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAME
+bool CopyrightDatabaseHandler::createTableAgentFindings(const DbManager& dbManager) {
+  if (!dbManager.sequenceExists(SEQUENCE_NAME)) {
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE " SEQUENCE_NAME
                                           " START WITH 1"
                                           " INCREMENT BY 1"
                                           " NO MAXVALUE"
@@ -104,34 +106,34 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
                                           " CACHE 1"));
   }
 
-  if (!dbManager->tableExists(IDENTITY)) {
+  if (!dbManager.tableExists(IDENTITY)) {
     size_t ncolumns =  (sizeof(CopyrightDatabaseHandler::columns)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)", IDENTITY,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", IDENTITY,
                                             getColumnCreationString( CopyrightDatabaseHandler::columns, ncolumns).c_str()
                                           )
                     );
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_agent_fk_index"
      " ON %s"
      " USING BTREE (agent_fk)",
      IDENTITY, IDENTITY
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_hash_index"
      " ON %s"
      " USING BTREE (hash)",
      IDENTITY, IDENTITY
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_pfile_fk_index"
      " ON %s"
      " USING BTREE (pfile_fk)",
      IDENTITY, IDENTITY
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT agent_fk"
       " FOREIGN KEY (agent_fk)"
@@ -139,7 +141,7 @@ bool CopyrightDatabaseHandler::createTableAgentFindings(DbManager* dbManager) {
       IDENTITY
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT pfile_fk"
       " FOREIGN KEY (pfile_fk)"
@@ -164,10 +166,10 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
             {"comment", "text", ""}
 };
 
-bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
+bool CopyrightDatabaseHandler::createTableClearing(const DbManager& dbManager) {
   char* tableName = g_strdup_printf("%s_decision", IDENTITY);
-  if (!dbManager->sequenceExists(SEQUENCE_NAMEClearing)) {
-  RETURN_IF_FALSE(dbManager->queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMEClearing
+  if (!dbManager.sequenceExists(SEQUENCE_NAMEClearing)) {
+  RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE " SEQUENCE_NAMEClearing
                                         " START WITH 1"
                                         " INCREMENT BY 1"
                                         " NO MAXVALUE"
@@ -175,33 +177,33 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
                                         " CACHE 1"));
   }
 
-  if (!dbManager->tableExists(tableName)) {
+  if (!dbManager.tableExists(tableName)) {
     size_t nDec =  (sizeof(CopyrightDatabaseHandler::columnsDecision)/sizeof(CopyrightDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager->queryPrintf("CREATE table %s(%s)",tableName,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)",tableName,
                   getColumnCreationString(CopyrightDatabaseHandler::columnsDecision, nDec).c_str()));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_pfile_fk_index"
      " ON %s"
      " USING BTREE (pfile_fk)",
      tableName, tableName
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_user_fk_index"
      " ON %s"
      " USING BTREE (user_fk)",
      tableName, tableName
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
      "CREATE INDEX %s_clearing_decision_type_fk_index"
      " ON %s"
      " USING BTREE (clearing_decision_type_fk)",
      tableName, tableName
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT user_fk"
       " FOREIGN KEY (user_fk)"
@@ -209,7 +211,7 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
       tableName
     ));
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT pfile_fk"
       " FOREIGN KEY (pfile_fk)"
@@ -218,7 +220,7 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
     ));
 
 
-    RETURN_IF_FALSE(dbManager->queryPrintf(
+    RETURN_IF_FALSE(dbManager.queryPrintf(
       "ALTER TABLE ONLY %s"
       " ADD CONSTRAINT clearing_decision_type_fk"
       " FOREIGN KEY (clearing_decision_type_fk)"
@@ -233,8 +235,8 @@ bool CopyrightDatabaseHandler::createTableClearing(DbManager* dbManager) {
 }
 
 
-std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId) {
-  QueryResult queryResult = dbManager->queryPrintf(
+std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(const DbManager& dbManager, int agentId, int uploadId) const {
+  QueryResult queryResult = dbManager.queryPrintf(
     "SELECT pfile_pk"
     " FROM ("
     "  SELECT distinct(pfile_fk) AS PF"
@@ -253,10 +255,10 @@ std::vector<long> CopyrightDatabaseHandler::queryFileIdsForUpload(DbManager* dbM
   return queryResult.getSimpleResults<long>(0, atol);
 }
 
-bool CopyrightDatabaseHandler::insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId) {
-  return dbManager->execPrepared(
+bool CopyrightDatabaseHandler::insertNoResultInDatabase(const DbManager& dbManager, long int agentId, long int pFileId) const {
+  return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "insertNoResultInDatabase",
       "INSERT INTO " IDENTITY "(agent_fk, pfile_fk) VALUES($1,$2)",
       long, long
@@ -265,10 +267,10 @@ bool CopyrightDatabaseHandler::insertNoResultInDatabase(DbManager* dbManager, lo
   );
 }
 
-bool CopyrightDatabaseHandler::insertInDatabase(DbManager* dbManager, DatabaseEntry& entry) {
-  return dbManager->execPrepared(
+bool CopyrightDatabaseHandler::insertInDatabase(const DbManager& dbManager, DatabaseEntry& entry) const {
+  return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "insertInDatabase",
       "INSERT INTO " IDENTITY "(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
                   " VALUES($1,$2,$3,md5($3),$4,$5,$6)",
