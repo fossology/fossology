@@ -383,8 +383,7 @@ foreach ($src_dirs as $src_dir) {
     if ( preg_match("/^\./", $src_dir) 
          || $src_dir == 'lib' 
          || $src_dir == 'cli' 
-         || $src_dir == 'bsam' 
-         || $src_dir == 'example_wc_agent' 
+         || $src_dir == 'example_wc_agent'
          || $src_dir == 'tutorials' 
          || $src_dir == 'srcdocs' 
          || $src_dir == 'testing' 
