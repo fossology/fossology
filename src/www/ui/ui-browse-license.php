@@ -20,7 +20,6 @@ use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -550,7 +549,7 @@ class ui_browse_license extends FO_Plugin
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $agentId
-   * @param ClearingLicense[]
+   * @param ClearingDecision[]
    * @return string
    */
   private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
