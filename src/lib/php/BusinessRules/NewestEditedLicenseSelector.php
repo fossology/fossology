@@ -18,12 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 namespace Fossology\Lib\BusinessRules;
+
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Util\Object;
 
 /**
- * Class NewestEditedLicenseSelector
+ * @brief filter newest license from array of [ClearingDecisions or LicenceRef array]
  * @package Fossology\Lib\BusinessRules
  */
 class NewestEditedLicenseSelector extends Object
@@ -78,17 +78,6 @@ class NewestEditedLicenseSelector extends Object
     }
     return $licenses;
   }
-
-  /**
-   * @param ClearingDecision $clearingDecWithLicAndContext
-   * @return bool
-   */
-  public function isInactive($clearingDecWithLicAndContext)
-  {
-    return $clearingDecWithLicAndContext->getType() !== DecisionTypes::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
-  }
-
-  // these two functions have to be kept consistent to each other
 
   /**
    * @brief $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.

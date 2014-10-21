@@ -197,16 +197,6 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat(implode(", ", $licenses), is("BshortName"));
   }
 
-  public function testClearingDecisionTBDIsInActive()
-  {
-    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED)), is(true));
-  }
-
-  public function testClearingDecisionUserDecisionIsNotInActive()
-  {
-    assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", DecisionTypes::IDENTIFIED)), is(false));
-  }
-
   public function testSelectNewestEditedLicensePerItem_multipleFiles()
   {
     $editedLicensesArray = array(

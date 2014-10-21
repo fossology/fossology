@@ -303,7 +303,7 @@ class ClearingView extends FO_Plugin
       foreach ($clearingDecision->getPositiveLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        $licenseNames[$lic->getShortName()] = "<span style=\"color:green\">" . $licenseShortName . "</span>";;
+        $licenseNames[$lic->getShortName()] = $licenseShortName;
       }
       foreach ($clearingDecision->getNegativeLicenses() as $lic)
       {
