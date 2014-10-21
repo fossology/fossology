@@ -95,13 +95,13 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   public function testEmptyIsEmpty()
   {
     $editedLicensesArray = array();
-    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
+    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerItem($editedLicensesArray), is(array()));
   }
 
   public function testNotFoundIsEmpty()
   {
     $editedLicensesArray = array(134 => $this->clearingDec(0, false, 'upload', "Test", DecisionTypes::IDENTIFIED));
-    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
+    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerItem($editedLicensesArray), is(array()));
   }
 
   public function testFoundIsNotEmpty()

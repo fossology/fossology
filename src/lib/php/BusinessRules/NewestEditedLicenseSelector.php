@@ -29,10 +29,10 @@ use Fossology\Lib\Util\Object;
 class NewestEditedLicenseSelector extends Object
 {
   /**
-   * @param ClearingDecision[] $editedLicensesArray
+   * @param ClearingDecision[] $editedDecArray
    * @return LicenseRef[][]
    */
-  public function extractGoodLicensesPerFileID($editedDecArray)
+  public function extractGoodLicensesPerItem($editedDecArray)
   {
     $editedLicensesArrayGrouped = array();
     foreach ($editedDecArray as $editedLicense)
@@ -66,7 +66,7 @@ class NewestEditedLicenseSelector extends Object
    */
   public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodLicensesPerFileID($editedLicensesArray);
+    $licensesPerId = $this->extractGoodLicensesPerItem($editedLicensesArray);
 
     $licenses = array();
     foreach ($licensesPerId as $licInfo)

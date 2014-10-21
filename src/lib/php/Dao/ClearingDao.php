@@ -608,7 +608,7 @@ insert into license_decision_event (
    * @return LicenseRef[][]
    */
   public function extractGoodLicensesPerFileID($decisions){
-    return $this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($decisions);
+    return $this->newestEditedLicenseSelector->extractGoodLicensesPerItem($decisions);
   }
   
   /**
