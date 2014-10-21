@@ -110,9 +110,9 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   public function testPositiveLicenses()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setPostiveLicenses($this->postiveLicenses)
+        ->setPositiveLicenses($this->positiveLicenses)
         ->build();
-    assertThat($clearingDec->getPositiveLicenses(), is($this->postiveLicenses));
+    assertThat($clearingDec->getPositiveLicenses(), is($this->positiveLicenses));
   }
 
   public function testClearingId()

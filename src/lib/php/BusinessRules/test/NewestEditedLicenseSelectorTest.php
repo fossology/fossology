@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\BusinessRules;
 
-use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\DecisionTypes;
 
@@ -65,7 +66,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function testCreateClearingDec()
   {
-    $licenses = $this->clearingDec(0, true, 'global', "Test", 'Identified')->getLicenses();
+    $licenses = $this->clearingDec(0, true, 'global', "Test", 'Identified')->getPositiveLicenses();
     $firstLicense = reset($licenses);
     assertThat($firstLicense->getShortName(), is("TestshortName"));
   }
@@ -191,8 +192,12 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::IDENTIFIED,1,1),
         $this->clearingDec(1, true, 'upload', "Aesa", DecisionTypes::IDENTIFIED,1,2),
     );
-    $decision = $this->newestEditedLicenseSelector->selectNewestEditedLicensePerFileID($editedLicensesArray);
-    $licenses = $decision->getLicenses();
+
+    $reflection = new \ReflectionClass($this->newestEditedLicenseSelector->classname() );
+    $method = $reflection->getMethod('selectNewestEditedLicensePerFileID');
+    $method->setAccessible(true);
+    
+    $licenses = $method->invoke($this->newestEditedLicenseSelector,$editedLicensesArray);
     assertThat(implode(", ", $licenses), is("TestshortName, AesashortName"));
   }
 }
