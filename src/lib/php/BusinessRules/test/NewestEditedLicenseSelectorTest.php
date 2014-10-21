@@ -112,7 +112,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat(implode(", ", $licenses), is("TestshortName"));
   }
 
-  public function testNewerGlobalwinsAgainstGlobal()
+  public function testNewerGlobalWinsAgainstGlobal()
   {
     $editedLicensesArray = array(
         $this->clearingDec(1, false, 'global', "A", DecisionTypes::IDENTIFIED),
@@ -123,7 +123,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat(implode(", ", $licenses), is("AshortName"));
   }
 
-  public function testNewerLocalwinsAgainstGlobal()
+  public function testNewerLocalWinsAgainstGlobal()
   {
     $editedLicensesArray = array(
         $this->clearingDec(1, true, 'upload', "A", DecisionTypes::IDENTIFIED),
@@ -134,7 +134,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat(implode(", ", $licenses), is("AshortName"));
   }
 
-  public function testOlderLocalwinsAgainstGlobal()
+  public function testOlderLocalWinsAgainstGlobal()
   {
     $editedLicensesArray = array(
         $this->clearingDec(0, false, 'global', "B", DecisionTypes::IDENTIFIED),
@@ -146,13 +146,14 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat(implode(", ", $licenses), is("AshortName"));
   }
 
-  public function testToBeDeterminedIsIgnored()
+  public function testToBeDiscussedIsNotIgnored()
   {
     $editedLicensesArray = array($this->clearingDec(0, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED));
-    assertThat($this->newestEditedLicenseSelector->extractGoodLicensesPerFileID($editedLicensesArray), is(array()));
+    $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
+    assertThat($licenses, is(array('TestshortName')));
   }
 
-  public function testOlderGlobalWinsAgainstTBD()
+  public function testOlderGlobalLosesAgainstLocalTBD()
   {
     $editedLicensesArray = array(
         $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED),
@@ -160,10 +161,10 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
-    assertThat(implode(", ", $licenses), is("AshortName"));
+    assertThat(implode(", ", $licenses), is("TestshortName"));
   }
 
-  public function testOlderLocalWinsAgainstTBD()
+  public function testOlderLocalLosesAgainstNewerTBD()
   {
     $editedLicensesArray = array(
         $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED),
@@ -171,10 +172,10 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
 
-    assertThat(implode(", ", $licenses), is("AshortName"));
+    assertThat(implode(", ", $licenses), is("TestshortName"));
   }
 
-  public function testOlderLocalWinsAgainstNewerGlobalAndTBD()
+  public function testOlderLocalWinsAgainstNewerGlobal()
   {
     $editedLicensesArray = array(
         $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED),
@@ -182,20 +183,19 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->clearingDec(0, true, 'upload', "B", DecisionTypes::IDENTIFIED)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
-    assertThat(implode(", ", $licenses), is("BshortName"));
+    assertThat(implode(", ", $licenses), is("TestshortName"));
   }
 
-  public function testOlderGlobalWinsAgainstNewerLocalForDifferentFileAndTBD()
+  public function testOlderGlobalWinsAgainstNewerLocalForDifferentFileInOtherUpload()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED),
-        $this->clearingDec(1, false, 'upload', "A", DecisionTypes::IDENTIFIED),
-        $this->clearingDec(0, false, 'global', "B", DecisionTypes::IDENTIFIED)
+        $this->clearingDec(2, false, 'upload', "Test", DecisionTypes::TO_BE_DISCUSSED,1,1),
+        $this->clearingDec(1, false, 'upload', "A", DecisionTypes::IDENTIFIED,1,2),
+        $this->clearingDec(0, false, 'global', "B", DecisionTypes::IDENTIFIED,1,3)
     );
     $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
     assertThat(implode(", ", $licenses), is("BshortName"));
   }
-
 
   public function testClearingDecisionTBDIsInActive()
   {
@@ -207,17 +207,17 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     assertThat($this->newestEditedLicenseSelector->isInactive($this->clearingDec(2, true, 'upload', "Test", DecisionTypes::IDENTIFIED)), is(false));
   }
 
-  public function testSelectNewestEditedLicensePerFileID_multipleFiles()
+  public function testSelectNewestEditedLicensePerItem_multipleFiles()
   {
     $editedLicensesArray = array(
-        $this->clearingDec(4, true, 'upload', "Cesc", DecisionTypes::TO_BE_DISCUSSED,1,2),
-        $this->clearingDec(3, true, 'upload', "Aesa", DecisionTypes::IDENTIFIED,1,2),
-        $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::IDENTIFIED,1,1),
-        $this->clearingDec(1, true, 'upload', "Besb", DecisionTypes::IDENTIFIED,1,2),
+        $this->clearingDec(4, true, 'upload', "Cesc", DecisionTypes::TO_BE_DISCUSSED,1,1),
+        $this->clearingDec(3, true, 'upload', "Aesa", DecisionTypes::IDENTIFIED,3,3),
+        $this->clearingDec(2, true, 'upload', "Test", DecisionTypes::IDENTIFIED,1,2),
+        $this->clearingDec(1, true, 'upload', "Besb", DecisionTypes::IDENTIFIED,1,1),
     );
 
     $reflection = new \ReflectionClass($this->newestEditedLicenseSelector->classname() );
-    $method = $reflection->getMethod('selectNewestEditedLicensePerFileID');
+    $method = $reflection->getMethod('selectNewestEditedLicensePerItem');
     $method->setAccessible(true);
     
     $licenses = $method->invoke($this->newestEditedLicenseSelector,$editedLicensesArray);
@@ -226,7 +226,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     {
       $licenseNames[] = $lic->getShortName();
     }
-    assertThat(implode(", ", $licenseNames),  is("AesashortName, TestshortName"));
+    assertThat($licenseNames, is(arrayContainingInAnyOrder(array("AesashortName", "CescshortName", "TestshortName"))));
   }
   
   public function testSelectNewestEditedLicensePerFileID_complexeDecision()
@@ -241,11 +241,10 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
       );
     
     $reflection = new \ReflectionClass($this->newestEditedLicenseSelector->classname() );
-    $method = $reflection->getMethod('selectNewestEditedLicensePerFileID');
+    $method = $reflection->getMethod('selectNewestEditedLicensePerItem');
     $method->setAccessible(true);
     
     $licenses = $method->invoke($this->newestEditedLicenseSelector,$editedLicensesArray);
     assertThat($licenses, is($added2) );
   }
-  
 }

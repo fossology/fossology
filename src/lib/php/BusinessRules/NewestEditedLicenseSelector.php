@@ -50,7 +50,7 @@ class NewestEditedLicenseSelector extends Object
     $goodLicenses = array();
     foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
-      $licArr = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
+      $licArr = $this->selectNewestEditedLicensePerItem($editedLicensesArray);
       if ($licArr !== null)
       {
         $goodLicenses[$fileId] = $licArr;
@@ -91,22 +91,16 @@ class NewestEditedLicenseSelector extends Object
   // these two functions have to be kept consistent to each other
 
   /**
+   * @brief $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
    * @param ClearingDecision[] $sortedClearingDecArray
    * @return LicenseRef[]|null
    */
-  private function selectNewestEditedLicensePerFileID($sortedClearingDecArray)
+  private function selectNewestEditedLicensePerItem($sortedClearingDecArray)
   {
-// $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
-    //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
-    //! misleading folder content overviews in the license browser and in the count of license findings
     $upload = array();
     $global = array();
     foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecision->getType() != DecisionTypes::IDENTIFIED && $clearingDecision->getType() != DecisionTypes::IRRELEVANT)
-      {
-        continue;
-      }
       $utid = $clearingDecision->getUploadTreeId();
       if( array_key_exists($utid, $upload) )
       {
@@ -126,7 +120,6 @@ class NewestEditedLicenseSelector extends Object
     if(count($licenseArrays) > 0) {
       return $this->flatten($licenseArrays);
     }
-   
     return null;
   }
 
