@@ -170,5 +170,16 @@ class ClearingDecision extends ClearingDecisionData
     return $this->userName;
   }
 
-
+  /**
+   * @return bool
+   */
+  public function isInScope()
+  {
+    switch ($this->getScope())
+    {
+      case 'global': return true;
+      case 'upload': return $this->sameFolder;
+    }
+    return false;
+  }
 }

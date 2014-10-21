@@ -103,12 +103,16 @@ class NewestEditedLicenseSelector extends Object
     $global = array();
     foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecision->getType() != DecisionTypes::IDENTIFIED)
+      if ($clearingDecision->getType() != DecisionTypes::IDENTIFIED && $clearingDecision->getType() != DecisionTypes::IRRELEVANT)
       {
         continue;
       }
       $utid = $clearingDecision->getUploadTreeId();
-      if ($clearingDecision->getSameFolder() && $clearingDecision->getScope() == 'upload' && !array_key_exists($utid, $upload))
+      if( array_key_exists($utid, $upload) )
+      {
+        continue;
+      }
+      if ($clearingDecision->getSameFolder() && $clearingDecision->getScope() == 'upload')
       {
         unset($global[$utid]);
         $upload[$utid] = $clearingDecision->getPositiveLicenses();
@@ -118,9 +122,9 @@ class NewestEditedLicenseSelector extends Object
         $global[$utid] = $clearingDecision->getPositiveLicenses();
       }
     }
-    $licenses = array_merge($global,$upload); // not ($upload,$global)
-    if(count($licenses) > 0) {
-      return $this->flatten($licenses);
+    $licenseArrays = array_merge($global,$upload); // not ($upload,$global)
+    if(count($licenseArrays) > 0) {
+      return $this->flatten($licenseArrays);
     }
    
     return null;

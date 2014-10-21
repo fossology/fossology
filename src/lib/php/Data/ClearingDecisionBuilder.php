@@ -77,7 +77,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
    */
   public function setNegativeLicenses($licenses)
   {
-    $this->positiveLicenses = $licenses;
+    $this->negativeLicenses = $licenses;
     return $this;
   }
  
