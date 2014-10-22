@@ -143,7 +143,8 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
     "type": $('[name="type"]:checked').val(),
     "scope": $('[name="scope"]:checked').val(),
     "comment": $('#comment').val(),
-    "remark": $('#remark').val()
+    "remark": $('#remark').val(),
+    "removed": removed
   };
 
   $.ajax({
