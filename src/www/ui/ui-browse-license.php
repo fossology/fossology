@@ -360,7 +360,7 @@ class ui_browse_license extends FO_Plugin
         array("sTitle" => _("Files"), "sClass" => "left"),
         array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
         array("sTitle" => _("Edited Results"), "sClass" => "left"),
-        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'sType'=>'string'),
+        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'mRender'=>'##mRender##'),
         array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
         array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
     );
@@ -386,9 +386,18 @@ class ui_browse_license extends FO_Plugin
         "oLanguage" => $tableLanguage
     );
 
+    $fun = "function ( data, type, full ) {
+        if(type!='display') return data;
+        if (data==='green'){
+          return '<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>';
+        }
+        return '<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>';
+      }";
+    $dataTableJS = str_replace('"##mRender##"', $fun, json_encode($dataTableConfig));
+    
     $VF .= "<script>
   function createDirlistTable() {
-      dTable=$('#dirlist').dataTable(" . json_encode($dataTableConfig) . ");
+      $('#dirlist').dataTable(" . $dataTableJS . ");
   }
 </script>";
 
@@ -520,7 +529,7 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
     list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
-
+/*
     if ($filesCleared == $filesToBeCleared)
     {
       $img = "<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
@@ -529,6 +538,8 @@ class ui_browse_license extends FO_Plugin
     {
       $img = "<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
     }
+  */
+    $img = ($filesCleared==$filesToBeCleared) ? 'green' : 'red';
 
     return array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);  
   }
