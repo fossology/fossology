@@ -49,8 +49,8 @@ $(EXE_ECC): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_ECC)
 $(CXXFOLIB):
 	$(MAKE) -C $(CXXFOLIBDIR)
 
-libcopyright.a: $(OBJECTS) $(OBJECT_COP)
-	ar cvr $@ $(OBJECTS) $(OBJECT_COP)
+libcopyright.a: $(OBJECTS) $(OBJECTS_COP)
+	ar cvr $@ $(OBJECTS) $(OBJECTS_COP)
 
 libcopyright_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
