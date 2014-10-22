@@ -45,8 +45,6 @@ class ui_browse_license extends FO_Plugin
   private $clearingDao;
   /** @var LicenseProcessor */
   private $licenseProcessor;
-  /** @var ChangeLicenseUtility */
-  private $changeLicenseUtility;
   /** @var AgentsDao */
   private $agentsDao;
   /** @var DbManager */
@@ -66,7 +64,6 @@ class ui_browse_license extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
-    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }
@@ -208,8 +205,11 @@ class ui_browse_license extends FO_Plugin
     $V .= "<table border=0 cellpadding=2 width='100%'>\n";
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseFormContent());
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkFormContent());
+    
+    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&lic=";
+    $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);

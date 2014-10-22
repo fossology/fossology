@@ -275,7 +275,7 @@ class ClearingDao extends Object
   /**
    * @param int $userId
    * @param int $uploadTreeId
-   * @return ClearingDecision
+   * @return ClearingDecision|null
    */
   public function getRelevantClearingDecision($userId, $uploadTreeId)
   {
@@ -308,7 +308,7 @@ ORDER BY CD.date_added DESC LIMIT 1
     );
 
     $row = $this->dbManager->fetchArray($res);
-    $result = array();
+    $result = null;
     if($row!==false && count($row)!=0)
     {
       list($added,$removed) = $this->getFileClearingLicenses($row['id']);

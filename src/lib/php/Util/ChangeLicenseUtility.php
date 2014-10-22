@@ -21,7 +21,6 @@ namespace Fossology\Lib\Util;
 
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 
 class ChangeLicenseUtility extends Object
@@ -45,24 +44,11 @@ class ChangeLicenseUtility extends Object
   /**
    * @return array
    */
-  public function createChangeLicenseFormContent() {
-
-    $out = array();
-
-    $title = _("License Text");
-    $sizeInfo = 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes';
-    $uri = Traceback_uri() . "?mod=popup-license" . "&lic=";
-    $out['properties'] = array('listElementName' =>"licenseLeft", 'uri' =>$uri , 'title' => $title, 'sizeInfo' => $sizeInfo);
-    $out['values'] = array();
-
-    $licenseRefArray = $this->licenseDao->getLicenseRefs();
-
-    foreach ($licenseRefArray as $licenseRef)
-    {
-      $out['values'][] = array( 'urlShortname' =>  urlencode($licenseRef->getShortName()), 'id' => $licenseRef->getId(), 'fullName' => $licenseRef->getFullName(), 'shortName' => $licenseRef->getShortName() );
-    }
-
-    $rendererVars = array('licenseLeftSelect'=>$out);
+  public function createChangeLicenseFormContent()
+  {
+    $outValues = $this->licenseDao->getLicenseArray();
+    $uri = Traceback_uri() . "?mod=popup-license&lic=";
+    $rendererVars = array('licenseArray'=>$outValues,'licenseUri'=>$uri);
     return $rendererVars;
   }
 
