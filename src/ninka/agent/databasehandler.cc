@@ -72,7 +72,7 @@ long DatabaseHandler::saveLicense(string rfShortName) {
     ),
     rfShortName.c_str(),
     "License by Ninka.",
-    1
+    3
   );
 
   return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, atol)[0] : 0;

@@ -154,7 +154,7 @@ class ui_browse_license extends FO_Plugin
     }
 
     $uploadId = GetParm('upload', PARM_NUMBER);
-    $scannerAgents = array('nomos', 'monk');
+    $scannerAgents = array('nomos', 'monk', 'ninka');
 
 
     list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
@@ -323,8 +323,11 @@ class ui_browse_license extends FO_Plugin
     $newestNomos=$this->getNewestAgent("nomos");
     $latestMonk=LatestAgentpk($uploadId, "monk_ars");
     $newestMonk=$this->getNewestAgent("monk");
+    $latestNinka=LatestAgentpk($uploadId, "ninka_ars");
+    $newestNinka=$this->getNewestAgent("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
+        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ),
+        'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' =>$newestNinka, 'latestIsNewest' =>$latestNinka==$newestNinka['agent_pk']  ));
 
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
@@ -359,7 +362,7 @@ class ui_browse_license extends FO_Plugin
 
     $tableColumns = array(
         array("sTitle" => _("Files"), "sClass" => "left"),
-        array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
+        array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
         array("sTitle" => _("Edited Results"), "sClass" => "left"),
         array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%"),
         array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),

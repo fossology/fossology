@@ -33,7 +33,7 @@ PGresult* queryAllLicenses(fo_dbManager* dbManager) {
     fo_dbManager_PrepareStamement(
       dbManager,
       "queryAllLicenses",
-      "select rf_pk, rf_shortname from license_ref where rf_detector_type != 2"
+      "select rf_pk, rf_shortname from license_ref where rf_detector_type = 1"
     )
   );
 }
