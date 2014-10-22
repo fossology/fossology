@@ -28,11 +28,11 @@ install: all
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 		mkdir -p $(DESTDIR)/etc/cron.d/; \
-		@echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
+		echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
 		$(INSTALL_DATA) db.cron $(DESTDIR)/etc/cron.d/fossology; \
 	else \
-		@echo "WARNING: $(DESTDIR)/etc/cron.d/fossology already exists."; \
-		@echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+		echo "WARNING: $(DESTDIR)/etc/cron.d/fossology already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
 
 uninstall:
@@ -49,7 +49,7 @@ uninstall:
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
-			@echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing"; \
+			echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing"; \
 		else \
 			rmdir $(DESTDIR)$(LIBEXECDIR); \
 		fi \
