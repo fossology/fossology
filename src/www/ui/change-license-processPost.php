@@ -79,7 +79,7 @@ class changeLicenseProcessPost extends FO_Plugin
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
    */
   function Output()
   {
