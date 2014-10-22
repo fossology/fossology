@@ -134,7 +134,7 @@ class SqliteE implements Driver
    */
   public function fetchArray($res)
   {
-    return $res->fetchArray();
+    return $res->fetchArray(SQLITE3_ASSOC);
   }
 
   /**

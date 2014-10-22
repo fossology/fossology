@@ -314,6 +314,8 @@ class ui_browse_license extends FO_Plugin
    */
   private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $allDecisions)
   {
+    $this->vars['haveOldVersionResult'] = false;
+    $this->vars['haveRunningResult'] = false;
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
@@ -341,12 +343,9 @@ class ui_browse_license extends FO_Plugin
       return array($ChildCount=0, $VF);
     }
 
-    $this->vars['haveOldVersionResult'] = false;
-    $this->vars['haveRunningResult'] = false;
-    $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
     global $Plugins;
     $ModLicView = & $Plugins[plugin_find_id("view-license")];
-    
+    $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());    
     $tableData = array();
     foreach ($Children as $child)
     {
