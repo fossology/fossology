@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
@@ -38,6 +39,11 @@ class changeLicenseProcessPost extends FO_Plugin
   private $licenseOverviewPrinter;
 
 
+  /**
+   * @var UploadDao
+   */
+  private $uploadDao;
+
   function __construct()
   {
     $this->Name = "change-license-processPost";
@@ -54,6 +60,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter =  $container->get('utils.license_overview_printer');
+    $this->uploadDao = $container->get('dao.upload');
   }
 
   /**
@@ -82,15 +89,8 @@ class changeLicenseProcessPost extends FO_Plugin
     }
   }
 
-  function OutputOpen()
-  {
-    header('Content-type: text/json');
-    parent::OutputOpen();
-  }
-  
-  
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
    */
   function Output()
   {
@@ -98,13 +98,29 @@ class changeLicenseProcessPost extends FO_Plugin
       return;
     }
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
+    $userId = $_SESSION['UserId'];
+    $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
 
+    $uploadEntry = $this->uploadDao->getUploadEntry($itemId);
+    $uploadId = intval($uploadEntry['upload_fk']);
+    $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
+    $uploadName = $uploadInfo['upload_filename'];
+
+
+    $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+
     if(isset($licenses))
-    $this->clearingDao->insertClearingDecisionTest($licenses, false, $itemId, $userId); //,  $_POST['comment'], $_POST['remark']
+    $this->clearingDao->insertClearingDecisionTest($licenses, false, $itemId, $userId, $job_pk); //,  $_POST['comment'], $_POST['remark']
+
+
+    /** @var agent_fodecider $deciderPlugin */
+    $deciderPlugin = plugin_find("agent_decider");
+
+    $conflictStrategyId = null; // TODO add option in GUI
+    $ErrorMsg="";
+    $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
@@ -112,7 +128,14 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
 
-    print (json_encode("success"));
+
+    if (empty($ErrorMsg) && ($jq_pk>0)) {
+      header('Content-type: text/json');
+      return json_encode(array("jqid" => $jq_pk));
+    } else {
+      header('Content-type: text/json', true, 500);
+      return json_encode(array("error" => $ErrorMsg));
+    }
   }
 
 

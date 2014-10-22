@@ -104,7 +104,7 @@ class changeLicenseBulk extends FO_Plugin
 
       if ($licenseRefBulkIdResult !== false) {
         $bulkId = $licenseRefBulkIdResult['lrb_pk'];
-        $job_pk = JobAddJob($userId, $uploadName, $uploadId);
+        $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
         /** @var agent_fodecider $deciderPlugin */
         $deciderPlugin = plugin_find("agent_decider");

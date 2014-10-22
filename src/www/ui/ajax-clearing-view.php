@@ -145,7 +145,7 @@ class AjaxClearingView extends FO_Plugin
   protected function doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
     $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
-    $aaData = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId, $orderAscending);
+    $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds, $userId, $orderAscending);
 
     return json_encode(
         array(
@@ -207,6 +207,8 @@ class AjaxClearingView extends FO_Plugin
         case "removeLicense":
         case "setNextPrev":
         case "setNextPrevCopyRight":
+        case "setNextPrevIp":
+        case "setNextPrevEcc":
           $uploadId = GetParm("upload", PARM_INTEGER);
           if (empty($uploadId))
           {
@@ -247,36 +249,9 @@ class AjaxClearingView extends FO_Plugin
 
         case "setNextPrev":
         case "setNextPrevCopyRight":
-          if ($action == "setNextPrevCopyRight")
-          {
-            $modName = "copyright-view";
-            $opt = "option_skipFileCopyRight";
-          } else
-          {
-            $modName = "view-license";
-            $opt = "option_skipFile";
-          }
-
-          $options = array('skipThese' => GetParm($opt, PARM_STRING));
-          $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
-          $nextItem = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
-
-          if($prevItem === null) {
-            $prev =null;
-          }
-          else {
-           $prev = $prevItem->getId();
-          }
-
-        if($nextItem === null) {
-          $next =null;
-        }
-        else {
-          $next = $nextItem->getId();
-        }
-
-
-          return json_encode(array('prev' => $prev, 'next' => $next, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
+        case "setNextPrevIp":
+        case "setNextPrevEcc":
+          return $this->doNextPrev($action, $uploadId, $uploadTreeId);
 
         case "updateLicenseDecisions":
           $id = GetParm("id", PARM_STRING);
@@ -297,7 +272,7 @@ class AjaxClearingView extends FO_Plugin
    * @param $userId
    * @return array
    */
-  protected function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
+  protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
@@ -382,7 +357,7 @@ class AjaxClearingView extends FO_Plugin
     {
       $licenseId = $agentDecisionEvent->getLicenseId();
       $agentId = $agentDecisionEvent->getAgentId();
-      $matchId = $agentDecisionEvent->getMatchId();
+      $matchId = $agentDecisionEvent->getEventId();
       $percentage = $agentDecisionEvent->getPercentage();
       $agentResults[$agentDecisionEvent->getAgentName()][] = array(
           "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",
@@ -420,6 +395,61 @@ class AjaxClearingView extends FO_Plugin
       return $arrayToBeSortedByKeys;
     }
     return $arrayToBeSortedByKeys;
+  }
+
+  /**
+   * @param $action
+   * @param $uploadId
+   * @param $uploadTreeId
+   * @return string
+   */
+  protected function doNextPrev($action, $uploadId, $uploadTreeId)
+  {
+    switch($action)
+    {
+      case "setNextPrev":
+        $modName = "view-license";
+        $opt = "option_skipFile";
+        break;
+
+      case "setNextPrevCopyRight":
+        $modName = "copyright-view";
+        $opt = "option_skipFileCopyRight";
+        break;
+
+      case "setNextPrevIp":
+        $modName = "ip-view";
+        $opt = "option_skipFileIp";
+        break;
+
+      case "setNextPrevEcc":
+        $modName = "ecc-view";
+        $opt = "option_skipFileEcc";
+        break;
+    }
+
+    $options = array('skipThese' => GetParm($opt, PARM_STRING));
+    $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+    $nextItem = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+
+    if ($prevItem === null)
+    {
+      $prev = null;
+    } else
+    {
+      $prev = $prevItem->getId();
+    }
+
+    if ($nextItem === null)
+    {
+      $next = null;
+    } else
+    {
+      $next = $nextItem->getId();
+    }
+
+
+    return json_encode(array('prev' => $prev, 'next' => $next, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
   }
 }
 

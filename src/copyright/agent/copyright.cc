@@ -24,11 +24,10 @@ int main(int argc, char** argv) {
   int verbosity = 8;
   CopyrightState* state;
   state = getState(dbManager, verbosity);
-  if (!state->copyrightDatabaseHandler.checkTables(dbManager)) {
-    if (!state->copyrightDatabaseHandler.createTables(dbManager)) {
-      cout << "FATAL: initialization failed" << endl;
-      bail(state, 9);
-    }
+
+  if (!state->copyrightDatabaseHandler.createTables(dbManager)) {
+    std::cout << "FATAL: initialization failed" << std::endl;
+    bail(state, 9);
   }
 
   fillMatchers(state);

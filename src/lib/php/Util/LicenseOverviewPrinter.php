@@ -22,9 +22,8 @@ namespace Fossology\Lib\Util;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Highlight;
-use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\Renderer;
 
@@ -55,14 +54,19 @@ class LicenseOverviewPrinter extends Object
    * @var Renderer
    */
   private $renderer;
+  /**
+   * @var \Fossology\Lib\Data\DecisionTypes
+   */
+  private $decisionTypes;
 
-  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer)
+  function __construct(LicenseDao $licenseDao, UploadDao $uploadDao, ClearingDao $clearingDao, HighlightRenderer $highlightRenderer, Renderer $renderer, DecisionTypes $decisionTypes)
   {
     $this->uploadDao = $uploadDao;
     $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
     $this->highlightRenderer = $highlightRenderer;
     $this->renderer = $renderer;
+    $this->decisionTypes = $decisionTypes;
   }
 
   /**
@@ -124,23 +128,6 @@ class LicenseOverviewPrinter extends Object
     return $agentLatestMap;    
   }
 
-  function buildLicenseDecisions($licenseMatches, $uploadId, $uploadTreeId,
-                                 $selectedAgentId = 0, $selectedLicenseId = 0, $selectedLicenseFileId = 0, $hasHighlights = false, $showReadOnly = true)
-  {
-    $licenseDecisions = array();
-    foreach ($licenseMatches as $fileId => $agents)
-    {
-      ksort($agents);
-      $breakCounter = 0;
-      foreach ($agents as $agentName => $foundLicenses)
-      {
-        if ($breakCounter++ > 0) $output .= "<br/>";
-        $latestAgentId = $agentLatestMap[$agentName]['latest'];
-        $output .= $this->renderMatches($foundLicenses, $agentName, $latestAgentId, $agentLatestMap[$agentName]['ars'],
-            $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
-      }
-    }
-  }
   /**
    * @param $licenseMatches
    * @param $uploadId
@@ -404,16 +391,6 @@ class LicenseOverviewPrinter extends Object
     $output .= "</a> ";
     return $output;
   }
-
-  public function createScopeTypeSelect()
-  {
-    $clearingDecisionTypes = $this->clearingDao->getClearingDecisionTypeMap($selectableOnly = true);
-    $typeRadio = $this->renderer->createRadioGroup('type', $clearingDecisionTypes, $defaultType = 2, '', $separator = ' &nbsp; ');
-    return '  <fieldset style="display:inline">
-   <legend>' . _('Clearing decision type') . '</legend>
-   ' . $typeRadio . '</fieldset>';
-  }
-
 
   public function createBulkOverview($licenseMatches, $uploadId, $uploadTreeId,
                                    $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true){

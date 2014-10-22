@@ -24,10 +24,10 @@ EXE_IP = ip
 EXE_ECC = ecc
 EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
 
-OBJECTS = copyright.o copyrightState.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o database.o
-OBJECTS_COP = copyrightUtils_cop.o
-OBJECTS_IP = copyrightUtils_ip.o
-OBJECTS_ECC = copyrightUtils_ecc.o
+OBJECTS = copyright.o copyrightState.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o 
+OBJECTS_COP = copyrightUtils_cop.o database_cop.o
+OBJECTS_IP = copyrightUtils_ip.o database_ip.o
+OBJECTS_ECC = copyrightUtils_ecc.o database_ecc.o
 
 COVERAGE =
 
@@ -61,16 +61,16 @@ libcopyright_cov.a: $(COVERAGE)
 
 $(OBJECTS): %.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
-
-$(OBJECTS_COP): %.o: $(OBJECTS_COP:_cop.o=.cc) $(OBJECTS_COP:_cop.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $(OBJECTS_COP) $<
-
-$(OBJECTS_IP): %.o: $(OBJECTS_IP:_ip.o=.cc) $(OBJECTS_IP:_ip.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF) -o $(OBJECTS_IP) $<
-
-$(OBJECTS_ECC): %.o: $(OBJECTS_ECC:_ecc.o=.cc) $(OBJECTS_ECC:_ecc.o=.hpp)
-	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $(OBJECTS_ECC) $<
-
+	
+$(OBJECTS_COP): %_cop.o: %.cc %.hpp 
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $@ $<
+	
+$(OBJECTS_IP): %_ip.o: %.cc %.hpp
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF)  -o $@ $<
+	
+$(OBJECTS_ECC): %_ecc.o: %.cc %.hpp
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
+	
 $(COVERAGE): %_cov.o: %.cc %.hpp
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 

@@ -24,6 +24,7 @@ use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Tree\UploadTreeView;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -31,15 +32,9 @@ require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
 class UploadDao extends Object
 {
-
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   public function __construct(DbManager $dbManager)
@@ -73,7 +68,9 @@ class UploadDao extends Object
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
-    $uploadEntry['tablename'] = $uploadTreeTableName;
+    if ($uploadEntry) {
+      $uploadEntry['tablename'] = $uploadTreeTableName;
+    }
     return $uploadEntry;
   }
 
@@ -96,13 +93,8 @@ class UploadDao extends Object
    */
   public function getFileTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
   {
-    $uploadEntry = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if ($uploadEntry === FALSE)
-    {
-      $this->logger->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
-      return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
-    }
-    return new ItemTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
+    $uploadEntryData = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
+    return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
 
   /**
@@ -114,6 +106,26 @@ class UploadDao extends Object
   {
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     return $this->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
+  }
+
+  /**
+   * @param int $uploadId
+   * @throws Exception
+   * @return ItemTreeBounds
+   */
+  public function getParentItemBounds($uploadId)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntryData = $this->dbManager->getSingleRow("
+SELECT * FROM $uploadTreeTableName
+        WHERE upload_fk = $1
+          AND parent IS NULL
+          ",
+        array($uploadId), $stmt);
+
+    return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
 
   /**
@@ -396,8 +408,7 @@ class UploadDao extends Object
   }
 
 
-  public
-  function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
+  public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
     $statementName = __METHOD__ . $uploadTreeTableName;
     $leftRight = $this->dbManager->getSingleRow(
@@ -413,8 +424,7 @@ class UploadDao extends Object
    * @param $uploadTreeView
    * @return mixed
    */
-  protected
-  function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
+  protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
   {
     $uploadTreeViewQuery = $uploadTreeView->getUploadTreeViewQuery();
     $sql = "$uploadTreeViewQuery
@@ -428,10 +438,8 @@ class UploadDao extends Object
     return $output;
   }
 
-  public
-  function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
+  public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
   {
-
     $alreadyClearedUploadTreeView = $this->getFileOnlyUploadTreeView($itemTreeBounds->getUploadId(),
         array('skipThese' => "alreadyCleared"),
         $itemTreeBounds->getUploadTreeTableName());
@@ -455,8 +463,7 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected
-  function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
+  protected function getFileOnlyUploadTreeView($uploadId, $options, $uploadTreeTableName)
   {
     return new UploadTreeView($uploadId, $options, $uploadTreeTableName);
   }
@@ -468,13 +475,10 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return UploadTreeView
    */
-  protected
-  function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
+  protected function getNavigableUploadTreeView($uploadId, $itemId, $options, $uploadTreeTableName)
   {
-    return new UploadTreeView($uploadId, $options, $uploadTreeTableName, "           OR
-                                    ut.ufile_mode & (1<<29) <> 0
-                                        OR
-                                    ut.uploadtree_pk = $itemId");
+    return new UploadTreeView($uploadId, $options, $uploadTreeTableName, " OR ut.ufile_mode & (1<<29) <> 0
+                                        OR ut.uploadtree_pk = $itemId");
   }
 
 
@@ -483,8 +487,7 @@ class UploadDao extends Object
    * @param string $uploadTreeTableName
    * @return Item
    */
-  protected
-  function createItem($uploadEntry, $uploadTreeTableName)
+  protected function createItem($uploadEntry, $uploadTreeTableName)
   {
     $itemTreeBounds = new ItemTreeBounds(
         intval($uploadEntry['uploadtree_pk']),
@@ -497,5 +500,20 @@ class UploadDao extends Object
         $itemTreeBounds, $parent !== null ? intval($parent) : null, intval($uploadEntry['pfile_fk']), intval($uploadEntry['ufile_mode']), $uploadEntry['ufile_name']
     );
     return $item;
+  }
+
+  /**
+   * @param array $uploadEntryData
+   * @param string $uploadTreeTableName
+   * @throws Exception
+   * @return ItemTreeBounds
+   */
+  protected function createItemTreeBounds($uploadEntryData, $uploadTreeTableName)
+  {
+    if ($uploadEntryData === FALSE)
+    {
+      throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
+    }
+    return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
   }
 }

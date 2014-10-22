@@ -24,7 +24,7 @@ install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/decider/agent/
 	for file in $(EXE); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \

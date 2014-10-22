@@ -12,12 +12,10 @@ $dataPropertiesStorage['license_decision_type.meaning'] = array(
   'bulk'
 );
 
-$dataPropertiesStorage['clearing_decision_type.meaning'] = array(
-  'Not decided',
-  'No License known',
-  'To be discussed',
-  'Irrelevant',
-  'Identified'
+$dataPropertiesStorage['clearing_decision_type.type_pk.meaning'] = array(
+  3=>'To be discussed',
+  4=>'Irrelevant',
+  5=>'Identified'
 );
 
 $dataPropertiesStorage['upload_status.meaning'] = array(

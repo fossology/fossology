@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -101,7 +102,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     );
     foreach ($gumArray as $params)
     {
-      $this->dbManager->insertInto('group_user_member', $keys='group_fk, user_fk, group_perm', $params, $logStmt = 'insert.gum');
+      $this->dbManager->insertInto('group_user_member', $keys = 'group_fk, user_fk, group_perm', $params, $logStmt = 'insert.gum');
     }
 
     $refArray = array(
@@ -112,11 +113,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     );
     foreach ($refArray as $params)
     {
-      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_text',$params,$logStmt = 'insert.ref');
+      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
     $directory = 536888320;
-    $file= 33188;
+    $file = 33188;
 
     /*                                (pfile, uploadtreeID, left, right)
       upload1:     Afile              (1000,  5,  1,  2)
@@ -130,12 +131,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->prepare($stmt = 'insert.uploadtree',
         "INSERT INTO uploadtree (upload_fk, pfile_fk, uploadtree_pk, ufile_mode,lft,rgt,ufile_name) VALUES ($1, $2,$3,$4,$5,$6,$7)");
     $utArray = array(
-        array( 100, 1000, 5, $file,       1,2,"Afile"),
-        array( 100, 1200, 6, $file,       3,4,"Bfile"),
-        array( 2, 1000, 7, $file,       1,2,"Afile"),
-        array( 2,    0, 8, $directory,  3,6,"Adirectory"),
-        array( 2, 1000, 9, $file,       4,5,"Afile"),
-        array( 2, 1200,10, $file,       7,8,"Bfile"),
+        array(100, 1000, 5, $file, 1, 2, "Afile"),
+        array(100, 1200, 6, $file, 3, 4, "Bfile"),
+        array(2, 1000, 7, $file, 1, 2, "Afile"),
+        array(2, 0, 8, $directory, 3, 6, "Adirectory"),
+        array(2, 1000, 9, $file, 4, 5, "Afile"),
+        array(2, 1200, 10, $file, 7, 8, "Bfile"),
     );
     foreach ($utArray as $ur)
     {
@@ -144,27 +145,27 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->now = time();
     $ldArray = array(
-        array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now-888)),
-        array(2, 100, 1000, 1, 2, false, false, 1, $this->getMyDate($this->now-888)),
-        array(3, 100, 1000, 3, 4, false, false, 1, $this->getMyDate($this->now-1234)),
-        array(4, 100, 1000, 2, 3, false, true, 2, $this->getMyDate($this->now-900)),
-        array(5, 100, 1000, 2, 4, true, false, 1, $this->getMyDate($this->now-999)),
-        array(6, 100, 1200, 1, 3, true, true, 1, $this->getMyDate($this->now-654)),
-        array(7, 100, 1200, 1, 2, false, false, 1, $this->getMyDate($this->now-543))
+        array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now - 888)),
+        array(2, 100, 1000, 1, 2, false, false, 1, $this->getMyDate($this->now - 888)),
+        array(3, 100, 1000, 3, 4, false, false, 1, $this->getMyDate($this->now - 1234)),
+        array(4, 100, 1000, 2, 3, false, true, 2, $this->getMyDate($this->now - 900)),
+        array(5, 100, 1000, 2, 4, true, false, 1, $this->getMyDate($this->now - 999)),
+        array(6, 100, 1200, 1, 3, true, true, 1, $this->getMyDate($this->now - 654)),
+        array(7, 100, 1200, 1, 2, false, false, 1, $this->getMyDate($this->now - 543))
     );
     foreach ($ldArray as $params)
     {
       $this->dbManager->insertInto('license_decision_event',
-           'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, is_global, type_fk, date_added',
-           $params,  $logStmt = 'insert.lde');
+          'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, is_global, type_fk, date_added',
+          $params, $logStmt = 'insert.lde');
     }
 
     $this->dbManager->prepare($stmt = 'insert.cd',
         "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6)");
     $cdArray = array(
-        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now-888)),
-        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now-888)),
-        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now-1234))
+        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now - 888)),
+        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now - 888)),
+        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now - 1234))
     );
     foreach ($cdArray as $ur)
     {
@@ -172,7 +173,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
   }
-  
+
   function tearDown()
   {
     $this->testDb = null;
@@ -183,21 +184,23 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
    * @param LicenseDecisionEvent[] $input
    * @return array
    */
-  private function fixResult($input) {
+  private function fixResult($input)
+  {
     $output = array();
-    foreach($input as $row) {
+    foreach ($input as $row)
+    {
 
-      $tmp=array();
-      $tmp[]=$row->getEventId();
-      $tmp[]=$row->getPfileId();
-      $tmp[]=$row->getUploadTreeId();
-      $tmp[]=$row->getUserId();
-      $tmp[]=$row->getLicenseRef()->getId();
-      $tmp[]=$row->getLicenseRef()->getShortName();
-      $tmp[]=$row->isRemoved();
-      $tmp[]=$row->isGlobal();
-      $tmp[]=$row->getEventType();
-      $tmp[]=$row->getDateTime();
+      $tmp = array();
+      $tmp[] = $row->getEventId();
+      $tmp[] = $row->getPfileId();
+      $tmp[] = $row->getUploadTreeId();
+      $tmp[] = $row->getUserId();
+      $tmp[] = $row->getLicenseRef()->getId();
+      $tmp[] = $row->getLicenseRef()->getShortName();
+      $tmp[] = $row->isRemoved();
+      $tmp[] = $row->isGlobal();
+      $tmp[] = $row->getEventType();
+      $tmp[] = $row->getDateTime();
 
 
       $output[] = $tmp;
@@ -205,12 +208,14 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     return $output;
   }
 
-  private function getMyDate( $in ) {
+  private function getMyDate($in)
+  {
     $date = new DateTime();
     return $date->setTimestamp($in)->format('Y-m-d H:i:s T');
   }
 
-  private function getMyDate2( $in ) {
+  private function getMyDate2($in)
+  {
     $date = new DateTime();
     return $date->setTimestamp($in);
   }
@@ -220,11 +225,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1000));
 
     assertThat($result, contains(
-        array(5, 100, 1000, 2,4,  "QUX",true, false,LicenseDecision::USER_DECISION , $this->getMyDate2( $this->now-999)),
-        array(4, 100, 1000, 2,3, "BAZ", false, true,LicenseDecision::BULK_RECOGNITION, $this->getMyDate2( $this->now-900)),
-        array(1, 100, 1000, 1,1, "FOO", false, false,LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-888)),
-        array(2, 100, 1000,1,2,"BAR",false, false, LicenseDecision::USER_DECISION,$this->getMyDate2( $this->now-888)),
-        array(6, 100, 1200,1,3,"BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-654))
+        array(5, 100, 1000, 2, 4, "QUX", true, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 999)),
+        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
+        array(1, 100, 1000, 1, 1, "FOO", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
+        array(2, 100, 1000, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
+        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654))
     ));
   }
 
@@ -232,11 +237,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(2, 1000));
     assertThat($result, contains(
-        array(5, 100, 1000, 2,4,  "QUX",true, false,LicenseDecision::USER_DECISION , $this->getMyDate2( $this->now-999)),
-        array(4, 100, 1000, 2,3, "BAZ", false, true,LicenseDecision::BULK_RECOGNITION, $this->getMyDate2( $this->now-900)),
-        array(1, 100, 1000, 1,1, "FOO", false, false,LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-888)),
-        array(2, 100, 1000,1,2,"BAR",false, false, LicenseDecision::USER_DECISION,$this->getMyDate2( $this->now-888)),
-        array(6, 100, 1200,1,3,"BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-654))
+        array(5, 100, 1000, 2, 4, "QUX", true, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 999)),
+        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
+        array(1, 100, 1000, 1, 1, "FOO", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
+        array(2, 100, 1000, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
+        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654))
     ));
   }
 
@@ -244,9 +249,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1200));
     assertThat($result, contains(
-        array(4, 100, 1000, 2,3, "BAZ", false, true,LicenseDecision::BULK_RECOGNITION, $this->getMyDate2( $this->now-900)),
-        array(6, 100, 1200,1,3,"BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-654)),
-        array(7, 100, 1200,1,2,"BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now-543))
+        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
+        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654)),
+        array(7, 100, 1200, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 543))
     ));
   }
 
@@ -254,19 +259,21 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
    * @var ClearingDecision[] $input
    * @return array[]
    */
-  private function fixClearingDecArray($input) {
+  private function fixClearingDecArray($input)
+  {
     $output = array();
-    foreach($input as $row) {
-      $tmp=array();
-      $tmp[]=$row->getClearingId();
-      $tmp[]=$row->getPfileId();
-      $tmp[]=$row->getUploadTreeId();
-      $tmp[]=$row->getUserId();
-      $tmp[]=$row->getScope();
-      $tmp[]=$row->getType();
-      $tmp[]=$row->getDateAdded();
-      $tmp[]=$row->getSameFolder();
-      $tmp[]=$row->getSameUpload();
+    foreach ($input as $row)
+    {
+      $tmp = array();
+      $tmp[] = $row->getClearingId();
+      $tmp[] = $row->getPfileId();
+      $tmp[] = $row->getUploadTreeId();
+      $tmp[] = $row->getUserId();
+      $tmp[] = $row->getScope();
+      $tmp[] = $row->getType();
+      $tmp[] = $row->getDateAdded();
+      $tmp[] = $row->getSameFolder();
+      $tmp[] = $row->getSameUpload();
 
       $output[] = $tmp;
     }
@@ -275,15 +282,15 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetFileClearingsFolder()
   {
-    $itemTreeBounds =  new ItemTreeBounds(7, "uploadtree",2,1,2);
+    $itemTreeBounds = new ItemTreeBounds(7, "uploadtree", 2, 1, 2);
 
-    $clearingDec = $this->clearingDao->getFileClearingsFolder( $itemTreeBounds);
+    $clearingDec = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     $result = $this->fixClearingDecArray($clearingDec);
     assertThat($result, contains(
-        array(3, 1000, 9, 3, 'upload', 'Identified', $this->getMyDate2( $this->now-1234), false, true),
-        array(2, 1000, 7, 1, 'upload', 'Identified', $this->getMyDate2( $this->now-888), true,  true),
-        array(1, 1000, 5, 1, 'upload', 'Identified', $this->getMyDate2( $this->now-888), false, false)
-        ));
+        array(3, 1000, 9, 3, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
+        array(2, 1000, 7, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
+        array(1, 1000, 5, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
+    ));
   }
 
 
@@ -292,7 +299,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(3, 1000));
     assertThat(count($result), is(1));
     assertThat($result[0], is(
-        array(3, 100, 1000,3,4,"QUX",false, false, LicenseDecision::USER_DECISION,$this->getMyDate2( $this->now-1234))
+        array(3, 100, 1000, 3, 4, "QUX", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 1234))
     ));
   }
 

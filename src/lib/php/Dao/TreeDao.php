@@ -86,9 +86,9 @@ class TreeDao extends Object
     return $result;
   }
 
-  public function getFullPath($itemId)
+  public function getFullPath($itemId, $tableName)
   {
-    $statementName = __METHOD__;
+    $statementName = __METHOD__.$tableName;
 
     return $this->dbManager->getSingleRow(
         "
@@ -97,17 +97,17 @@ class TreeDao extends Object
             ARRAY[ut.uploadtree_pk],
             ut.ufile_name,
             false
-          FROM uploadtree ut
-          WHERE ut.uploadtree_pk = 1507
+          FROM $tableName ut
+          WHERE ut.uploadtree_pk = $1
         UNION ALL
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             path || ut.uploadtree_pk,
             CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN ut.ufile_name || '/' || file_path ELSE file_path END,
             ut.uploadtree_pk = ANY(path)
-          FROM uploadtree ut, file_tree ft
+          FROM $tableName ut, file_tree ft
           WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
         )
-        SELECT file_path from file_tree WHERE parent IS NULL
-}", array($itemId), $statementName);
+        SELECT file_path from file_tree WHERE parent IS NULL",
+        array($itemId), $statementName);
   }
 }

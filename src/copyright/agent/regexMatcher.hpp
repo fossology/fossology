@@ -23,8 +23,8 @@ public:
   virtual std::vector<CopyrightMatch> match(const std::string content) const;
   virtual ~RegexMatcher();
 private:
-  rx::regex matchingRegex;
   int regexIndex;
+  rx::regex matchingRegex;
 };
 
 #endif // REGEXMATCHER_HPP

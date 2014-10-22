@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
@@ -51,9 +52,16 @@ class CopyrightDao extends Object
 
   /**
    * @param int $uploadTreeId
+   * @param string $tableName
+   * @param array $typeToHighlightTypeMap
+   * @throws \Exception
    * @return Highlight[]
    */
-  public function getCopyrightHighlights($uploadTreeId)
+  public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
+                                                                        'statement' => Highlight::COPYRIGHT,
+                                                                        'email' => Highlight::EMAIL,
+                                                                        'url' => Highlight::URL)
+   )
   {
 
     $pFileId = 0;
@@ -68,16 +76,13 @@ class CopyrightDao extends Object
       print $text;
     }
 
-    $statementName = __METHOD__;
+    $statementName = __METHOD__.$tableName;
 
     $this->dbManager->prepare($statementName,
-        "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
+        "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
     $result = $this->dbManager->execute($statementName, array($pFileId));
 
-    $typeToHighlightTypeMap = array(
-        'statement' => Highlight::COPYRIGHT,
-        'email' => Highlight::EMAIL,
-        'url' => Highlight::URL);
+
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -86,9 +91,11 @@ class CopyrightDao extends Object
       {
         $type = $row['type'];
         $content = $row['content'];
-        $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
+        // $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
+        // $htmlElement = new LinkElement($linkUrl);
+        $htmlElement =null;
         $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
-        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, new LinkElement($linkUrl));
+        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
       }
     }
     $this->dbManager->freeResult($result);
@@ -96,6 +103,76 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
+  public function saveDecision($tableName,$pfileId, $userId , $clearingType,
+                                         $description, $textFinding, $comment){
+    $statementName = __METHOD__.$tableName;
+    $sql = "INSERT INTO $tableName (user_fk, pfile_fk,
+           clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
+
+    $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
+        $clearingType, $description, $textFinding, $comment ),$statementName);
+  }
+
+  public function getAllDecisions($tableName, $uploadId, $uploadTreeTableName, $decisionType=null, $type=null)
+  {
+    $statementName = __METHOD__.$tableName.$uploadTreeTableName;
+
+    $params = array();
+    $whereClause = "";
+    $tableNameDecision = $tableName."_decision";
+
+    if ($uploadTreeTableName === "uploadtree_a")
+    {
+      $params []= $uploadId;
+      $whereClause .= "AND UT.upload_fk = $".count($params);
+      $statementName .= ".withUI";
+    }
+    if ($type !== null)
+    {
+      $params []= $type;
+      $whereClause .= "AND C.type = $".count($params);
+      $statementName .= ".withType";
+    }
+    if ($decisionType !== null)
+    {
+      $params []= $decisionType;
+      $whereClause .= "AND CD.clearing_decision_type_fk = $".count($params);
+      $statementName .= ".withDecisionType";
+    }
+
+    $sql = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
+             CD.description, CD.textfinding, UT.uploadtree_pk,
+             CD.copyright_decision_pk AS id, C.content
+            from $tableNameDecision CD
+            INNER JOIN $uploadTreeTableName UT
+            ON CD.pfile_fk = UT.pfile_fk
+            INNER JOIN $tableName C
+            ON C.pfile_fk = CD.pfile_fk
+            WHERE C.content IS NOT NULL $whereClause
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, id DESC";
 
 
+    $this->dbManager->prepare($statementName, $sql);
+
+    $sqlResult = $this->dbManager->execute($statementName, $params);
+
+    $result = $this->dbManager->fetchAll($sqlResult);
+    $this->dbManager->freeResult($sqlResult);
+
+    return $result;
+  }
+
+  public function getDecision($tableName,$pfileId){
+
+    $statementName = __METHOD__.$tableName;
+    $sql = "SELECT * from $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+
+    $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
+
+    $description = $res['description'];
+    $textFinding = $res['textfinding'];
+    $comment = $res['comment'];
+    $decisionType = $res['clearing_decision_type_fk'];
+    return array($description,$textFinding,$comment, $decisionType);
+  }
 }

@@ -68,7 +68,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
     if(empty($uList))
     {
       $text = _("Fatal! Query Failed getting user_agent_list for user");
-      return("<h3 style='color:red'>$text $UserName</h3>");
+      return("<h3 style='color:red'>$text $userName</h3>");
     }
     $list = explode(',',$uList[0]['user_agent_list']);
     $default_bucketpool_fk = $uList[0]['default_bucketpool_fk'];
@@ -142,6 +142,7 @@ function AgentCheckBoxDo($job_pk, $upload_pk)
       $Name = htmlentities($Agent->Name);
       $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
       $Dependencies = array();
+      $ErrorMsg="Bad thing";
       if ($Parm == 1) $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
     }
   }
@@ -333,21 +334,19 @@ function LatestAgentpk($upload_pk, $arsTableName)
  *
  * \param string  $TableName - name of the ars table (e.g. nomos_ars)
  * \param int     $upload_pk
- * \param boolean $DataOnly  - If false, return the latest agent AND agent revs
- *                             that have data for this agent.  Note the latest agent may have
- *                             no entries in $TableName.
- *                             If true (default), return only the agent_revs with ars data.
- *                             Note: not used
  * \param string  $SLName    - select list element name
- * \param string  $SLID      - select list element id
  * \param string  &$Agent_pk  - return which agent is selected
  * \param string  $extra     - Extra info for the select element, e.g. "onclick=..."
  *
  * \return agent select list, when only one data, return null
- *      
+ * @param $TableName
+ * @param $upload_pk
+ * @param $SLName
+ * @param $agent_pk
+ * @param string $extra
+ * @return string
  */
-function AgentSelect($TableName, $upload_pk, $DataOnly=true,
-$SLName, $SLID, &$agent_pk, $extra = "")
+function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
 {
    global $PG_CONN;
    /* get the agent recs */

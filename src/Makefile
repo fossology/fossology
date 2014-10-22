@@ -9,22 +9,19 @@ include $(VARS)
 # the directories we do things in by default
 DIRS = \
 	adj2nest \
-	bsam \
 	buckets \
 	cli \
 	copyright \
 	debug \
 	decider \
 	delagent \
-	demomod \
-	example_wc_agent \
 	lib \
 	maintagent \
 	mimetype \
 	monk \
 	nomos \
 	pkgagent \
-	regexscan \
+	reportgen \
 	scheduler \
 	ununpack \
 	wget_agent \

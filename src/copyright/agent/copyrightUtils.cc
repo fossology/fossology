@@ -43,9 +43,9 @@ void bail(CopyrightState* state, int exitval) {
 }
 
 CopyrightState* getState(DbManager* dbManager, int verbosity) {
-  int agentId;
-  queryAgentId(agentId, dbManager->getConnection());
-  return new CopyrightState(dbManager, agentId, verbosity, IDENTITY);
+  int agentID;
+  queryAgentId(agentID, dbManager->getConnection());
+  return new CopyrightState(dbManager, agentID, verbosity);
 }
 
 void fillMatchers(CopyrightState* state) {
@@ -109,8 +109,8 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, CopyrightState* state
   return state->getDbManager()->commit();
 };
 
-void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state) {
-  string fileContent = file->getContent(0);
+void matchFileWithLicenses(long pFileId, const fo::File& file, CopyrightState* state){
+  string fileContent = file.getContent(0);
   vector<CopyrightMatch> matches = matchStringToRegexes(fileContent, state->getRegexMatchers());
   saveToDatabase(matches, state, pFileId);
 }
@@ -123,14 +123,24 @@ void matchPFileWithLicenses(CopyrightState* state, long pFileId) {
     bail(state, 8);
   }
 
-  fo::File* file = new fo::File(pFileId, fo_RepMkPath("files", pFile));
+  char * fil = g_strdup("files");
+  char* fileName = fo_RepMkPath(fil, pFile);
+  free(fil);
+  if (fileName)
+  {
+    fo::File file(pFileId, fileName);
 
-  if (file->fileName != NULL) {
     matchFileWithLicenses(pFileId, file, state);
-  }
 
-  free(pFile);
-  delete(file);
+
+    free(fileName);
+    free(pFile);
+  }
+  else
+  {
+    cout << "PFile not found in repo " << pFileId << endl;
+    bail(state, 7);
+  }
 }
 
 bool processUploadId (CopyrightState* state, int uploadId) {

@@ -835,6 +835,11 @@
   $Schema["TABLE"]["job"]["job_user_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_user_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["job"]["job_user_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["job"]["job_group_fk"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_group_fk\" IS 'Job submitted by this group';";
+  $Schema["TABLE"]["job"]["job_group_fk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_group_fk\" int4;";
+  $Schema["TABLE"]["job"]["job_group_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["job"]["job_group_fk"]["UPDATE"] = "";
+
 
   $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["DESC"] = "COMMENT ON COLUMN \"jobdepends\".\"jdep_jq_fk\" IS 'jdep_jq_fk depends on jdep_jq_depends_fk';";
   $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ADD"] = "ALTER TABLE \"jobdepends\" ADD COLUMN \"jdep_jq_fk\" int4;";
@@ -1656,6 +1661,22 @@
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char(1);";
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::character(1);";
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["UPDATE"] = "UPDATE report_cache_user SET cache_on='Y'::character(1)";
+
+
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["reportgen"]["job_fk"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"job_fk\" int4;";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"job_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["job_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["reportgen"]["filepath"]["DESC"] = "";
+  $Schema["TABLE"]["reportgen"]["filepath"]["ADD"] = "ALTER TABLE \"reportgen\" ADD COLUMN \"filepath\" text;";
+  $Schema["TABLE"]["reportgen"]["filepath"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"filepath\" DROP NOT NULL;";
+  $Schema["TABLE"]["reportgen"]["filepath"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";

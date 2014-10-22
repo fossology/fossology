@@ -62,6 +62,7 @@ class DbManager extends Object
   /**
    * @param $statementName
    * @param $sqlStatement
+   * @throws \Exception
    */
   public function prepare($statementName, $sqlStatement)
   {
@@ -85,6 +86,7 @@ class DbManager extends Object
   /**
    * @param string $statementName statement name
    * @param array $params parameters
+   * @throws \Exception
    * @return resource
    */
   public function execute($statementName, $params = array())
@@ -291,4 +293,20 @@ class DbManager extends Object
     $this->freeResult($res);
   }
 
+  /**
+   * @param string
+   * @param array with keys as column names
+   * @param string
+   */
+  public function insertTableRow($tableName,$assocParams,$sqlLog='')
+  {
+    $params = array_values($assocParams);
+    $keys = implode(',',array_keys($assocParams));
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $this->insertInto($tableName, $keys, $params, $sqlLog);
+  }
+  
 }

@@ -148,11 +148,11 @@ class LicenseDecisionResult implements LicenseDecision {
     if (isset($this->licenseDecisionEvent)) {
       return $this->licenseDecisionEvent;
     }
+    $agentEvent = null;
     foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
-      return $agentDecisionEvent;
+      $agentEvent = $agentDecisionEvent;
     }
-    print "licenseDecisionEvent: $this->licenseDecisionEvent\n";
-    throw new Exception("could not determine license");
+    return $agentEvent;
   }
 
   /**
@@ -187,4 +187,13 @@ class LicenseDecisionResult implements LicenseDecision {
     return $this->licenseDecisionEvent;
   }
 
+  /*
+   * @return int EXTRACT(EPOCH FROM getLicenseDecisionEvent()->getDateTime())
+   */
+  public function getTimestamp()
+  {
+    $dateTime = $this->getDateTime();
+    return $dateTime->getTimestamp();
+  }
+  
 }

@@ -1,41 +1,44 @@
 
 <form method="post" id= {{ formName }}>
-    <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
-    <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
-    <table>
-        <tr>
-            <td>
-                <div class="groupBox">
-                  <button type="submit" name="update"  id="prev" disabled >&lt;</button>
-                  <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
-                  <button type="submit" name="update" id="next" disabled  >&gt;</button>
-                </div>
-            </td>
-            <td>
-                <p>
-                  <input type="radio" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
-                  <input type="radio" name="FileSelection" id="FileSelection" value="noCopyright"> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
-                </p>
-            </td>
-        </tr>
-    </table>
-    <div class="groupBox">
-        <fieldset style="display:inline">
-            <legend>
-                {{ 'Issue Type'| trans }}
-            </legend>
-            <input type="radio" name="iType" value="0"/> {{ 'Not decided'| trans }} <br/>
-            <input type="radio" name="iType" value="1"/> {{ 'Not relevant'| trans }} <br/>
-            <input type="radio" name="iType" value="2"/> {{ 'To be decided'| trans }} <br/>
-            <input type="radio" name="iType" value="3"/> {{ 'Identified issue'| trans }} <br/>
-        </fieldset>
-        <br/>
-        {{ 'Description'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'what')">what</textarea><br/>
-        {{ 'Text finding'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'in text')">in text</textarea><br/>
-        {{ 'Comment'| trans }}: <br/>
-        <textarea rows="2" style="width:90%" onfocus="rmDefaultText(this,'comment')">comment</textarea><br/>
+  <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
+  <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
+  <input name="changedSomething" id="changedSomething" type="hidden" value="false"/>
+  <table>
+    <tr>
+      <td>
+        <div class="groupBox">
+          <button type="submit" name="update"  id="prev" disabled >&lt;</button>
+          <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+          <button type="submit" name="update" id="next" disabled  >&gt;</button>
+        </div>
+      </td>
+      <td>
+        <p>
+          <input type="radio" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
+          <input type="radio" name="FileSelection" id="FileSelection" value= {{ skipOption }}> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
+        </p>
+      </td>
+    </tr>
+  </table>
+  <div class="groupBox">
+    <fieldset style="display:inline">
+      <legend>
+        {{ 'Issue Type'| trans }}
+      </legend>
+      {% for clearingTypeVal, clearingType in clearingTypes %}
+        <input type="radio" {% if clearingTypeVal == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
+               value="{{ clearingTypeVal }}" class="supervised">
+        {{ clearingType }}
+        </input><br/>
+      {% endfor %}
+    </fieldset>
+    <br/>
+    {{ 'Description'| trans }}: <br/>
+    <textarea rows="2" name="description" style="width:90%" class="supervised">{{ description }}</textarea><br/>
+    {{ 'Text finding'| trans }}: <br/>
+    <textarea rows="2" name="textFinding" style="width:90%" class="supervised">{{ textFinding }}</textarea><br/>
+    {{ 'Comment'| trans }}: <br/>
+    <textarea rows="2" name="comment" style="width:90%" class="supervised">{{ comment }}</textarea><br/>
 
-    </div>
+  </div>
 </form>

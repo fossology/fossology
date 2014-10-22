@@ -70,7 +70,8 @@ class ajax_schedule_agent extends FO_Plugin
 
     /* Create Job */
     $user_pk = $SysConf['auth']['UserId'];
-    $job_pk = JobAddJob($user_pk, $ShortName, $UploadPk);
+    $group_pk = $SysConf['auth']['GroupId'];
+    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $UploadPk);
 
 
     $Dependencies = array();
@@ -100,11 +101,6 @@ class ajax_schedule_agent extends FO_Plugin
     }
 
     return $V;
-  }
-  
-  function getTemplateName()
-  {
-    return "plain.html";
   }
 
 }

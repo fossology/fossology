@@ -75,8 +75,6 @@ INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, us
 INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (11, 20, 6, 2, 1, 1, '', '', '2014-08-07 10:06:29.394152+00');
 INSERT INTO license_decision_type (type_pk, meaning) VALUES (1, 'User decision');
 INSERT INTO license_decision_type (type_pk, meaning) VALUES (2, 'bulk');
-INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (1, 'Not decided');
-INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (2, 'No License known');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (3, 'To be discussed');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (4, 'Irrelevant');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (5, 'Identified');
