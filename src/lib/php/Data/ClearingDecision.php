@@ -35,9 +35,11 @@ class ClearingDecision extends ClearingDecisionData
    * @param $type
    * @param $scope
    * @param $date_added
-   * @param $licenses
+   * @param $positiveLicenses
+   * @param $negativeLicenses
    * @param string $comment
    * @param string $reportinfo
+   * @internal param $licenses
    */
   public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
           $scope, $date_added, $positiveLicenses, $negativeLicenses, $comment = "", $reportinfo = "")
