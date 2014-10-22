@@ -37,7 +37,7 @@ install: all
 		echo "make $$MOD_NAME install"; \
 		$(INSTALL_DATA) VERSION-$$MOD_NAME $(DESTDIR)$(MODDIR)/$$MOD_NAME/VERSION; \
 		$(INSTALL_DATA) $$MOD_NAME.conf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$$MOD_NAME.conf; \
-		mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+		mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 		if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD_NAME; then \
 			ln -s $(MODDIR)/$$MOD_NAME $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 		fi; \
