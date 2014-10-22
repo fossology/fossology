@@ -113,7 +113,7 @@ class CopyrightDao extends Object
         $clearingType, $description, $textFinding, $comment ),$statementName);
   }
 
-  public function getAllDecisions($tableName, $uploadId, $uploadTreeTableName, $decisionType=null, $type=null)
+  public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
 
@@ -124,33 +124,55 @@ class CopyrightDao extends Object
     if ($uploadTreeTableName === "uploadtree_a")
     {
       $params []= $uploadId;
-      $whereClause .= "AND UT.upload_fk = $".count($params);
+      $whereClause .= " AND UT.upload_fk = $".count($params);
       $statementName .= ".withUI";
     }
     if ($type !== null)
     {
       $params []= $type;
-      $whereClause .= "AND C.type = $".count($params);
+      $whereClause .= " AND C.type = $".count($params);
       $statementName .= ".withType";
     }
-    if ($decisionType !== null)
+
+    if ($onlyCleared)
     {
-      $params []= $decisionType;
-      $whereClause .= "AND CD.clearing_decision_type_fk = $".count($params);
-      $statementName .= ".withDecisionType";
+      $joinType = "INNER";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $whereClause .= " AND CD.clearing_decision_type_fk = $".count($params);
+        $statementName .= ".withDecisionType";
+      }
+    }
+    else
+    {
+      $joinType = "LEFT";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $whereClause .= " AND (CD.clearing_decision_type_fk = $".count($params)." OR CD.clearing_decision_type_fk IS NULL)";
+        $statementName .= ".withDecisionType";
+      }
+    }
+    $statementName .= ".".$joinType."Join";
+
+    if ($extrawhere !== null)
+    {
+      $whereClause .= " AND ". $extrawhere;
+      $statementName .= "._".$extrawhere."_";
     }
 
     $sql = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
-             CD.description, CD.textfinding, UT.uploadtree_pk,
-             CD.copyright_decision_pk AS id, C.content
-            from $tableNameDecision CD
+             CD.description as description, CD.textfinding as textfinding,
+             UT.uploadtree_pk as uploadtree_pk,
+             CD.copyright_decision_pk AS id, C.content AS content
+            from $tableName C
             INNER JOIN $uploadTreeTableName UT
-            ON CD.pfile_fk = UT.pfile_fk
-            INNER JOIN $tableName C
+            ON C.pfile_fk = UT.pfile_fk
+            $joinType JOIN $tableNameDecision CD
             ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL $whereClause
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, id DESC";
-
 
     $this->dbManager->prepare($statementName, $sql);
 

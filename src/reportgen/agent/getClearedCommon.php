@@ -105,6 +105,9 @@ abstract class ClearedGetterCommon
       $content = $statement['content'];
       $fileName = $statement['fileName'];
 
+      if ($description === null)
+        $description = "";
+
       if (array_key_exists($content, $statements))
       {
         $statements[$content]['files'][] = $fileName;
