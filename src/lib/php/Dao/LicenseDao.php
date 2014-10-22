@@ -184,7 +184,7 @@ class LicenseDao extends Object
    * @param $selectedAgentId
    * @return array
    */
-  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
+  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
@@ -196,7 +196,6 @@ class LicenseDao extends Object
            rf_shortname as license_shortname,
            rf_pk as license_id,
            agent_name,
-           parent,
            max(agent_pk) as agent_id,
            rf_match_pct as match_percentage
          FROM license_file_ref
@@ -209,8 +208,9 @@ class LicenseDao extends Object
     if (!empty($selectedAgentId)){
       $param[] = $selectedAgentId;
       $sql .= " AND agent_pk=$".count($param);
+      $statementName .= '.agent';
     }
-    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
+    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, match_percentage
          ORDER BY match_percentage ASC, license_shortname ASC";
     
     $this->dbManager->prepare($statementName, $sql);

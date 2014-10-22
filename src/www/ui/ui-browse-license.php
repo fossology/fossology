@@ -402,7 +402,7 @@ class ui_browse_license extends FO_Plugin
    * @param int $uploadId
    * @param type $selectedAgentId
    * @param type $goodAgents
-   * @param LicenseRef[][] $pfileLicenses
+   * @param array[][][] $pfileLicenses
    * @param type $editedPfileLicenses
    * @param string $Uri
    * @param type $ModLicView
@@ -470,12 +470,12 @@ class ui_browse_license extends FO_Plugin
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
         {
           $agentEntries = array();
-          foreach ($rfInfo as $agent => $lic)
+          foreach ($rfInfo as $agent => $match)
           {
             $agentInfo = $goodAgents[$agent];
-            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$agentInfo[name]</a>";
+            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>$agentInfo[name]</a>";
 
-            if($lic['agent_id'] != $agentInfo['newest']['agent_pk'])
+            if($match['agent_id'] != $agentInfo['newest']['agent_pk'])
             {
               $agentEntry .= "&dagger;";
               $this->vars['haveOldVersionResult'] = "&dagger;";
@@ -485,9 +485,9 @@ class ui_browse_license extends FO_Plugin
               $this->vars['haveRunningResult'] = "&sect;";
             }
 
-            if ($lic['match_percentage'] > 0)
+            if ($match['match_percentage'] > 0)
             {
-              $agentEntry .= ": $lic[match_percentage]%";
+              $agentEntry .= ": $match[match_percentage]%";
             }
             $agentEntries[] = $agentEntry;
           }

@@ -205,12 +205,19 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     
     $licDao = new LicenseDao($this->dbManager);
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,$uploadtreetable_name,$uploadId,$left,$left+5);
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'));
+
     $row = array('file_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,
-               'agent_name'=>'monk','parent'=>$uploadtreeId+1, 'agent_id'=>$agentId, 'match_percentage'=>$matchPercent);
+               'agent_name'=>'monk', 'agent_id'=>$agentId, 'match_percentage'=>$matchPercent);
     $expected = array($pfileId=>array($licAll[$rf_pk]=>array('monk'=>$row)));
+
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'));
     assertThat($licenses, is(equalTo($expected)));
+    
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = $agentId, $filterLicenses = array('VOID'));
+    assertThat($licenses, is(equalTo($expected)));
+
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = 1+$agentId, $filterLicenses = array('VOID'));
+    assertThat($licenses, is(equalTo(array())));
   }
 
 }
- 
