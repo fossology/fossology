@@ -1,4 +1,3 @@
-Notes on the Debian packaging of FOSSology v2.0
 ==========================================
 1.) The debian/ directory is kept in upstream SVN, but it is excluded
 from upstream release tarballs in order to prevent the messy
