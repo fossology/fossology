@@ -360,7 +360,7 @@ class ui_browse_license extends FO_Plugin
         array("sTitle" => _("Files"), "sClass" => "left"),
         array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
         array("sTitle" => _("Edited Results"), "sClass" => "left"),
-        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%"),
+        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'sType'=>'string'),
         array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
         array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
     );
