@@ -47,8 +47,6 @@ class ClearingView extends FO_Plugin
   private $agentsDao;
   /** @var LicenseProcessor */
   private $licenseProcessor;
-  /** @var ChangeLicenseUtility */
-  private $changeLicenseUtility;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -88,7 +86,6 @@ class ClearingView extends FO_Plugin
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
 
-    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
     $this->decisionTypes = $container->get('decision.types');
 

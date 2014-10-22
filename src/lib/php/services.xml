@@ -90,11 +90,6 @@ without any warranty.
     <service id="utils.data_tables_utility" class="\Fossology\Lib\Util\DataTablesUtility">
     </service>
 
-    <service id="utils.change_license_utility" class="Fossology\Lib\Util\ChangeLicenseUtility">
-      <argument type="service" id="dao.upload"/>
-      <argument type="service" id="dao.license"/>
-    </service>
-
     <service id="utils.license_overview_printer" class="\Fossology\Lib\Util\LicenseOverviewPrinter">
       <argument type="service" id="dao.license"/>
       <argument type="service" id="dao.upload"/>
