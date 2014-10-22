@@ -63,7 +63,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $ungroupedStatements = array();
     foreach ($latestClearingDecisions as $clearingDecision) {
       /** @var ClearingDecision $clearingDecision */
-      foreach ($clearingDecision->getLicenses() as $clearingLicense) {
+      foreach ($clearingDecision->getPositiveLicenses() as $clearingLicense) {
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
