@@ -27,6 +27,7 @@ case "$1" in
     ln -s /etc/fossology/conf/fo-apache.conf /etc/apache2/sites-enabled/fossology.conf
     # need to run fo-postinstall web and agent stuff
     /usr/lib/fossology/fo-postinstall --web-only
+    invoke-rc.d apache2 restart
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
