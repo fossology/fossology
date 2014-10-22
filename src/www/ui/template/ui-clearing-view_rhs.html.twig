@@ -132,28 +132,19 @@
 {{ 'Text'| trans }}
 </th>
 </tr>
-{% set i = 0 %}
-{% for row in bulkHistory %}
-{% set i = i + 1 %}
-<tr
-class="
-{% if row.removing %}
-removed
-{% endif %}
-{% if row.success %}
-match
-{% endif %}
-{% if i % 2 %}
-odd
-{% else %}
-even
-{% endif %}
-"
->
-<td>{{ row.lic|e }}</td>
-<td>{{ row.text|e }}</td>
-</tr>
-{% endfor %}
+  {% set i = 0 %}
+  {% for row in bulkHistory %}
+  {% set i = i + 1 %}
+    <tr class="{% if i % 2 %}odd{% else %}even{% endif %} {% if row.success %}match{% endif %}">
+      <td>
+         <table>
+           <td><div class='{% if row.removing %}delete{% else %}add{% endif %}'></td>
+           <td>{{ row.lic|e }}</td>
+         </table>
+      </td>
+      <td>{{ row.text|e }}</td>
+    </tr>
+  {% endfor %}
 </table>
 </div>
 </div>
