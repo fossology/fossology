@@ -41,7 +41,9 @@ class TreeDao extends Object
     $this->logger = new Logger(self::className());
   }
 
-
+  /**
+   * @todo check if method is dead
+   */
   public function getNonArtifactChildren($itemId, $uploadId = null)
   {
     $statementName = __METHOD__ . ($itemId ? ".item" : ".noitem") . ($uploadId ? ".upload" : ".noupload");

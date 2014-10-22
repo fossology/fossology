@@ -1,7 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
+Author: Johannes Najjar, Steffen Weber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use DateTime;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 class ClearingDecision extends ClearingDecisionData
 {
@@ -40,7 +39,8 @@ class ClearingDecision extends ClearingDecisionData
    * @param string $comment
    * @param string $reportinfo
    */
-  public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type, $scope, $date_added, $licenses, $comment = "", $reportinfo = "")
+  public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
+          $scope, $date_added, $positiveLicenses, $negativeLicenses, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
     $this->sameUpload = $sameUpload;
@@ -54,7 +54,8 @@ class ClearingDecision extends ClearingDecisionData
     $this->date_added = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
-    $this->licenses = $licenses;
+    $this->positiveLicenses = $positiveLicenses;
+    $this->negativeLicenses = $negativeLicenses;
   }
 
   /**
@@ -82,11 +83,19 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return ClearingLicense[]
+   * @return LicenseRef[]
    */
-  public function getLicenses()
+  public function getPositiveLicenses()
   {
-    return $this->licenses;
+    return $this->positiveLicenses;
+  }
+
+  /**
+   * @return LicenseRef[]
+   */
+  public function getNegativeLicenses()
+  {
+    return $this->negativeLicenses;
   }
 
   /**
@@ -161,5 +170,16 @@ class ClearingDecision extends ClearingDecisionData
     return $this->userName;
   }
 
-
+  /**
+   * @return bool
+   */
+  public function isInScope()
+  {
+    switch ($this->getScope())
+    {
+      case 'global': return true;
+      case 'upload': return $this->sameFolder;
+    }
+    return false;
+  }
 }

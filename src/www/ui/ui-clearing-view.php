@@ -47,8 +47,6 @@ class ClearingView extends FO_Plugin
   private $agentsDao;
   /** @var LicenseProcessor */
   private $licenseProcessor;
-  /** @var ChangeLicenseUtility */
-  private $changeLicenseUtility;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -88,7 +86,6 @@ class ClearingView extends FO_Plugin
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
 
-    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
     $this->decisionTypes = $container->get('decision.types');
 
@@ -254,8 +251,10 @@ class ClearingView extends FO_Plugin
 
       if ($permission >= PERM_WRITE)
       {
-        $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkFormContent());
-      } else
+        $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+        $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+      }
+      else
       {
         $this->vars['auditDenied'] = true;
       }
@@ -297,23 +296,25 @@ class ClearingView extends FO_Plugin
   private function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
-    foreach ($clearingDecWithLicenses as $clearingDecWithLic)
+    foreach ($clearingDecWithLicenses as $clearingDecision)
     {
       $licenseNames = array();
-      foreach ($clearingDecWithLic->getLicenses() as $lic)
+      foreach ($clearingDecision->getPositiveLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        if ($lic->isRemoved()) {
-          $licenseShortName = "<span style=\"color:red\">" . $licenseShortName . "</span>";
-        }
         $licenseNames[$lic->getShortName()] = $licenseShortName;
+      }
+      foreach ($clearingDecision->getNegativeLicenses() as $lic)
+      {
+        $licenseShortName = $lic->getShortName();
+        $licenseNames[$lic->getShortName()] = "<span style=\"color:red\">" . $licenseShortName . "</span>";
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
-          'date'=>$clearingDecWithLic->getDateAdded(),
-          'username'=>$clearingDecWithLic->getUserName(),
-          'scope'=>$clearingDecWithLic->getScope(),
-          'type'=>$this->decisionTypes->getTypeName($clearingDecWithLic->getType()),
+          'date'=>$clearingDecision->getDateAdded(),
+          'username'=>$clearingDecision->getUserName(),
+          'scope'=>$clearingDecision->getScope(),
+          'type'=>$this->decisionTypes->getTypeName($clearingDecision->getType()),
           'licenses'=>implode(", ", $licenseNames));
       $table[] = $row;
     }

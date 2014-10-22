@@ -20,7 +20,6 @@ use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -46,8 +45,6 @@ class ui_browse_license extends FO_Plugin
   private $clearingDao;
   /** @var LicenseProcessor */
   private $licenseProcessor;
-  /** @var ChangeLicenseUtility */
-  private $changeLicenseUtility;
   /** @var AgentsDao */
   private $agentsDao;
   /** @var DbManager */
@@ -67,7 +64,6 @@ class ui_browse_license extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
     $this->licenseProcessor = $container->get('view.license_processor');
-    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }
@@ -209,8 +205,11 @@ class ui_browse_license extends FO_Plugin
     $V .= "<table border=0 cellpadding=2 width='100%'>\n";
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createChangeLicenseFormContent());
-    $this->vars = array_merge($this->vars, $this->changeLicenseUtility->createBulkFormContent());
+    
+    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&lic=";
+    $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
     return ($V);
@@ -309,11 +308,12 @@ class ui_browse_license extends FO_Plugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param $UniqueTagArray
    * @param $selectedAgentId
+   * @param ClearingDecision[]
    * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $licenseCandidates)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $allDecisions)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
@@ -329,7 +329,8 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    $editedPfileLicenses = $this->clearingDao->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
+    /** @var LicenseRef[][] */
+    $editedPfileLicenses = $this->clearingDao->extractGoodLicensesPerFileID($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -397,7 +398,19 @@ class ui_browse_license extends FO_Plugin
     return array($ChildCount, $VF);
   }
 
-  
+  /**
+   * 
+   * @param type $child
+   * @param int $uploadId
+   * @param type $selectedAgentId
+   * @param type $goodAgents
+   * @param LicenseRef[][] $pfileLicenses
+   * @param type $editedPfileLicenses
+   * @param string $Uri
+   * @param type $ModLicView
+   * @param type $UniqueTagArray
+   * @return type
+   */
   private function createFileDataRow($child,$uploadId,$selectedAgentId,$goodAgents,$pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
@@ -448,11 +461,12 @@ class ui_browse_license extends FO_Plugin
     $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
     if ($isContainer)
     {
-      $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds , array());
+      $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
       $licenseList = implode(', ', $licenses);
       $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
       $editedLicenseList .= implode(', ', $editedLicenses);
-    } else
+    }
+    else
     {
       if (array_key_exists($fileId, $pfileLicenses))
       {
@@ -494,13 +508,7 @@ class ui_browse_license extends FO_Plugin
       }
       if (array_key_exists($fileId, $editedPfileLicenses))
       {
-        $addedLicenses = array_filter(
-          $editedPfileLicenses[$fileId]->getLicenses(),
-          function ($licenseRef) {
-            /** @var ClearingLicense $licenseRef */
-            return !($licenseRef->isRemoved());
-          });
-
+        $addedLicenses = $editedPfileLicenses[$fileId];
         $editedLicenseList .= implode(", ",
           array_map(
             function ($licenseRef) use ($uploadId,$childUploadTreeId)
@@ -541,15 +549,14 @@ class ui_browse_license extends FO_Plugin
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|null $agentId
-   * @param ClearingLicense[]
+   * @param ClearingDecision[]
    * @return string
    */
-  public function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
+  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $goodLicenses = $this->clearingDao
-                          ->newestEditedLicenseSelector->extractGoodLicenses($allDecisions);
+    $goodLicenses = $this->clearingDao->extractGoodLicenses($allDecisions);
     
     $licenses = $goodLicenses?:$this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
     
@@ -727,7 +734,6 @@ class ui_browse_license extends FO_Plugin
   {
     return "browse_license.html.twig";
   }
-
 
 }
 

@@ -22,6 +22,8 @@ function clearingSuccess(data) {
 
 var bulkModal;
 var userModal;
+var removed = false;
+
 $(document).ready(function () {
   bulkModal = $('#bulkModal').plainModal();
   userModal = $('#userModal').plainModal();
@@ -51,9 +53,9 @@ function scheduleBulkScan() {
   });
 }
 
-
-function performPostRequest() {
-    performPostRequestCommon($('#bulkIdResult'), function () {
-        location.reload();
-    });
+function performPostRequest(doRemove) {
+  removed = doRemove;
+  performPostRequestCommon($('#bulkIdResult'), function () {
+      location.reload();
+  });
 }
