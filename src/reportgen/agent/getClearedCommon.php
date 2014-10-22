@@ -101,22 +101,29 @@ abstract class ClearedGetterCommon
   {
     $statements = array();
     foreach($ungrupedStatements as $statement) {
-      $description = $statement['description'];
       $content = $statement['content'];
+      $description = $statement['description'];
+      $textfinding = $statement['textfinding'];
       $fileName = $statement['fileName'];
 
-      if ($description === null)
-        $description = "";
+      if ($description === null) {
+        $text = "";
+      } else {
+        $content = $textfinding;
+        $text = $description;
+      }
 
       if (array_key_exists($content, $statements))
       {
-        $statements[$content]['files'][] = $fileName;
+        $currentFiles = &$statements[$content]['files'];
+        if (!in_array($fileName, $currentFiles))
+          $currentFiles[] = $fileName;
       }
       else
       {
         $statements[$content] = array(
-          "content" => $content, //$textfinding,
-          "text" => $description,
+          "content" => $content,
+          "text" => $text,
           "files" => array($fileName)
         );
       }
