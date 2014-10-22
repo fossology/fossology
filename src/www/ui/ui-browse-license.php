@@ -455,21 +455,19 @@ class ui_browse_license extends FO_Plugin
       $fileName = "<a href='$LinkUri'>$fileName</a>";
     }
     /* show licenses under file name */
-    $licenseList = "";
     $editedLicenseList = "";
     $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
     if ($isContainer)
     {
-      $licenses = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
-      $licenseList = implode(', ', $licenses);
+      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
       $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
       $editedLicenseList .= implode(', ', $editedLicenses);
     }
     else
     {
+      $licenseEntries = array();
       if (array_key_exists($fileId, $pfileLicenses))
       {
-        $licenseEntries = array();
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
         {
           $agentEntries = array();
@@ -478,23 +476,16 @@ class ui_browse_license extends FO_Plugin
             $agentInfo = $goodAgents[$agent];
             $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$lic[agent_id]&licenseId=$lic[license_id]#highlight'>$agentInfo[name]</a>";
 
-            if($agentInfo['latestIsNewest']) {
-              if ($lic['agent_id'] != $agentInfo['latest'])
-              {
-                $agentEntry .= "&dagger;";
-                $this->vars['haveOldVersionResult'] = "&dagger;";
-              }
+            if($lic['agent_id'] != $agentInfo['newest']['agent_pk'])
+            {
+              $agentEntry .= "&dagger;";
+              $this->vars['haveOldVersionResult'] = "&dagger;";
             }
-            else {
-              if($lic['agent_id'] == $agentInfo['newest']['agent_pk']) {
-                $agentEntry .= "&sect;";
-                $this->vars['haveRunningResult'] = "&sect;";
-              }
-              else {
-                $agentEntry .= "&dagger;";
-                $this->vars['haveOldVersionResult'] = "&dagger;";
-              }
+            else if(!$agentInfo['latestIsNewest']) {
+              $agentEntry .= "&sect;";
+              $this->vars['haveRunningResult'] = "&sect;";
             }
+
             if ($lic['match_percentage'] > 0)
             {
               $agentEntry .= ": $lic[match_percentage]%";
@@ -503,7 +494,6 @@ class ui_browse_license extends FO_Plugin
           }
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
-        $licenseList = implode(", ", $licenseEntries);
       }
       if (array_key_exists($fileId, $editedPfileLicenses))
       {
@@ -520,6 +510,9 @@ class ui_browse_license extends FO_Plugin
         );
       }
     }
+    
+    $licenseList = implode(', ', $licenseEntries);
+
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
 
     $getTextEditUser = _("Edit");
