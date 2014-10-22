@@ -17,7 +17,6 @@
  ***********************************************************/
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
