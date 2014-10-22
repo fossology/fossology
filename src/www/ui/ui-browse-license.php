@@ -241,6 +241,8 @@ class ui_browse_license extends FO_Plugin
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 
     $this->vars['micromenu'] = Dir2Browse($this->Name, $Item, NULL, $showBox=0, "Browse", -1, '', '', $this->uploadtree_tablename);
+    $this->vars['haveRunningResult'] = false;
+    $this->vars['haveOldVersionResult'] = false;
 
     $Cached = !empty($V);
     if (!$Cached && !empty($Upload))
