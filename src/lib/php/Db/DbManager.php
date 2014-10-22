@@ -22,22 +22,18 @@ namespace Fossology\Lib\Db;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class DbManager extends Object
+abstract class DbManager extends Object
 {
   /** @var Driver */
-  private $dbDriver;
-
+  protected $dbDriver;
   /** @var array */
-  private $preparedStatements;
-
+  protected $preparedStatements;
   /** @var Logger */
-  private $logger;
-
+  protected $logger;
   /** @var array */
-  private $cumulatedTime = array();
-
+  protected $cumulatedTime = array();
   /** @var array */
-  private $queryCount = array();
+  protected $queryCount = array();
 
   function __construct(Logger $logger)
   {
@@ -64,24 +60,7 @@ class DbManager extends Object
    * @param $sqlStatement
    * @throws \Exception
    */
-  public function prepare($statementName, $sqlStatement)
-  {
-    if (array_key_exists($statementName, $this->preparedStatements))
-    {
-      if ($this->preparedStatements[$statementName] !== $sqlStatement)
-      {
-        throw new \Exception("Existing Statement mismatch: $statementName");
-      }
-      return;
-    }
-    $startTime = microtime($get_as_float = true);
-    $res = $this->dbDriver->prepare($statementName, $sqlStatement);
-    $this->cumulatedTime[$statementName] = microtime($get_as_float = true) - $startTime;
-    $this->queryCount[$statementName] = 0;
-    $this->logger->addDebug("prepare '$statementName' took " . sprintf("%0.3fms", 1000 * $this->cumulatedTime[$statementName]));
-    $this->checkResult($res, "$sqlStatement -- $statementName");
-    $this->preparedStatements[$statementName] = $sqlStatement;
-  }
+  abstract public function prepare($statementName, $sqlStatement);
 
   /**
    * @param string $statementName statement name
@@ -89,20 +68,7 @@ class DbManager extends Object
    * @throws \Exception
    * @return resource
    */
-  public function execute($statementName, $params = array())
-  {
-    if (!array_key_exists($statementName, $this->preparedStatements))
-    {
-      throw new \Exception("Unknown Statement");
-    }
-    $startTime = microtime($get_as_float = true);
-    $res = $this->dbDriver->execute($statementName, $params);
-    $execTime = microtime($get_as_float = true) - $startTime;
-    $this->collectStatistics($statementName, $execTime);
-    // $this->logger->addDebug("execute '$statementName took " . sprintf("%0.3fms", 1000*$execTime));
-    $this->checkResult($res, "$statementName: " . $this->preparedStatements[$statementName] . ' -- -- ' . print_r($params, true));
-    return $res;
-  }
+  abstract public function execute($statementName, $params = array());
 
   /**
    * @brief Check the result for unexpected errors. If found, treat them as fatal.
