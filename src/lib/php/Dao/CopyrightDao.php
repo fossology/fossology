@@ -134,14 +134,19 @@ class CopyrightDao extends Object
       $statementName .= ".withType";
     }
 
+    $clearingTypeClause = null;
     if ($onlyCleared)
     {
       $joinType = "INNER";
       if ($decisionType !== null)
       {
         $params []= $decisionType;
-        $whereClause .= " AND CD.clearing_decision_type_fk = $".count($params);
+        $clearingTypeClause = "WHERE clearing_decision_type_fk = $".count($params);
         $statementName .= ".withDecisionType";
+      }
+      else
+      {
+        throw new Exception("requested only cleared but no type given");
       }
     }
     else
@@ -150,7 +155,7 @@ class CopyrightDao extends Object
       if ($decisionType !== null)
       {
         $params []= $decisionType;
-        $whereClause .= " AND (CD.clearing_decision_type_fk = $".count($params)." OR CD.clearing_decision_type_fk IS NULL)";
+        $clearingTypeClause = "WHERE clearing_decision_type_fk IS NULL OR clearing_decision_type_fk = $".count($params);
         $statementName .= ".withDecisionType";
       }
     }
@@ -162,17 +167,27 @@ class CopyrightDao extends Object
       $statementName .= "._".$extrawhere."_";
     }
 
-    $sql = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
+    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
              CD.description as description, CD.textfinding as textfinding,
              UT.uploadtree_pk as uploadtree_pk,
-             CD.copyright_decision_pk AS id, C.content AS content
+             CD.clearing_decision_type_fk AS clearing_decision_type_fk,
+             C.content AS content
             from $tableName C
             INNER JOIN $uploadTreeTableName UT
             ON C.pfile_fk = UT.pfile_fk
             $joinType JOIN $tableNameDecision CD
             ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL $whereClause
-            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, id DESC";
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
+
+    if ($clearingTypeClause !== null)
+    {
+      $sql = "SELECT * FROM ($latestInfo) AS latestInfo $clearingTypeClause";
+    }
+    else
+    {
+      $sql = $latestInfo;
+    }
 
     $this->dbManager->prepare($statementName, $sql);
 
