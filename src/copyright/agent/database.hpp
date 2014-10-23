@@ -23,7 +23,7 @@
 class CopyrightDatabaseHandler
 {
 public:
-  CopyrightDatabaseHandler(DbManager& _dbManager);
+  CopyrightDatabaseHandler(DbManager _dbManager);
   CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
   CopyrightDatabaseHandler spawn() const;
@@ -51,7 +51,7 @@ private:
   static const ColumnDef columns[];
   static const ColumnDef columnsDecision[];
 
-  DbManager& dbManager;
+  DbManager dbManager;
   bool createTableAgentFindings();
   bool createTableClearing();
   std::string getColumnListString(const ColumnDef in[], size_t size);

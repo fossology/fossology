@@ -105,7 +105,7 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, long pFileId, int age
     if (CleanDatabaseEntry(entry))
     {
       ++count;
-      if (!copyrightDatabaseHandler.insertInDatabase(<#initializer#>))
+      if (!copyrightDatabaseHandler.insertInDatabase(entry))
       {
         copyrightDatabaseHandler.rollback();
         return false;
@@ -143,8 +143,11 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
     bail(8);
   }
 
+  char* fileName = NULL;
+  {
 #pragma omp critical (repo_mk_path)
-  char* fileName = fo_RepMkPath("files", pFile);
+    fileName = fo_RepMkPath("files", pFile);
+  }
   if (fileName)
   {
     fo::File file(pFileId, fileName);

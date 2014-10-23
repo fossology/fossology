@@ -23,7 +23,7 @@
   } while(0)
 
 
-CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager& _dbManager) :
+CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager _dbManager) :
   dbManager(_dbManager)
 {
 }
