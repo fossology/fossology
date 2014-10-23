@@ -338,7 +338,7 @@ bool CopyrightDatabaseHandler::rollback() const
   return dbManager.rollback();
 }
 
-char* CopyrightDatabaseHandler::getPFileNameForFileId(long pfileId) const
+char* CopyrightDatabaseHandler::getPFileNameForFileId(unsigned long pfileId) const
 {
   return queryPFileForFileId(dbManager.getStruct_dbManager(), pfileId);
 }

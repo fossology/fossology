@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void queryAgentId(int& agent, PGconn& dbConn)
+void queryAgentId(int& agent, PGconn* dbConn)
 {
   char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
@@ -23,7 +23,7 @@ void queryAgentId(int& agent, PGconn& dbConn)
     exit(-1);
   };
 
-  int agentId = fo_GetAgentKey(&dbConn,
+  int agentId = fo_GetAgentKey(dbConn,
           AGENT_NAME, 0, agentRevision, AGENT_DESC);
   free(agentRevision);
 

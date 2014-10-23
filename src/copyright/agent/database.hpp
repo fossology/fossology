@@ -35,7 +35,7 @@ public:
   bool insertInDatabase(DatabaseEntry& entry) const;
   bool insertNoResultInDatabase(long agentId, long pFileId) const;
   std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
-  char* getPFileNameForFileId(long pfileId) const;
+  char* getPFileNameForFileId(unsigned long pfileId) const;
 
   bool begin() const;
   bool commit() const;
