@@ -137,7 +137,7 @@ class ClearingView extends FO_Plugin
       }
 
       $item = $this->uploadDao->getNextItem($uploadId, $parent);
-      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      if ($item === UploadDao::NOT_FOUND)
       {
         $this->invalidParm = true;
         return;
@@ -158,7 +158,7 @@ class ClearingView extends FO_Plugin
       }
 
       $item = $this->uploadDao->getNextItem($uploadId, $parent);
-      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      if ($item === UploadDao::NOT_FOUND)
       {
         $this->invalidParm = true;
         return;
