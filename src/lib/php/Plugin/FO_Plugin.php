@@ -228,7 +228,6 @@ class FO_Plugin
    */
   function PostInitialize()
   {
-    global $Plugins;
     if ($this->State != PLUGIN_STATE_VALID)
     {
       return (0);
@@ -330,7 +329,7 @@ class FO_Plugin
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
 
-    $vars['metadata'] = $metadata;
+    $this->vars['metadata'] = $metadata;
 
     if (!empty($this->Title))
     {

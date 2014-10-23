@@ -21,16 +21,16 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Exception;
 
-class ClearingDecisionBuilder extends  ClearingDecisionData
+class ClearingDecisionBuilder extends ClearingDecisionData
 {
   function __construct()
   {
     $this->sameUpload = false;
     $this->sameFolder = false;
-    $this->licenses = array();
+    $this->positiveLicenses = array();
+    $this->negativeLicenses = array();
     $this->clearingId = -1;
     $this->uploadTreeId = -1;
     $this->pfileId = -1;
@@ -62,15 +62,25 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
-   * @param ClearingLicense[] $licenses
+   * @param LicenseRef[] $licenses
    * @return ClearingDecisionBuilder
    */
-  public function setLicenses($licenses)
+  public function setPositiveLicenses($licenses)
   {
-    $this->licenses = $licenses;
+    $this->positiveLicenses = $licenses;
     return $this;
   }
 
+  /**
+   * @param LicenseRef[] $licenses
+   * @return ClearingDecisionBuilder
+   */
+  public function setNegativeLicenses($licenses)
+  {
+    $this->negativeLicenses = $licenses;
+    return $this;
+  }
+ 
   /**
    * @param int $pfileId
    * @return ClearingDecisionBuilder
@@ -174,7 +184,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
 
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->date_added, $this->licenses);
+        $this->date_added, $this->positiveLicenses, $this->negativeLicenses);
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
+Author: Johannes Najjar, Steffen Weber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,72 +19,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 use DateTime;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 
 class ClearingDecisionData {
-
-  /**
-   * @var bool
-   */
+  /** @var bool */
   protected $sameUpload;
-
-  /**
-   * @var bool
-   */
+  /** @var bool */
   protected $sameFolder;
-
-  /**
-   * @var ClearingLicense[]
-   */
-  protected $licenses;
-
-  /**
-   * @var int
-   */
+  /** @var LicenseRef[] */
+  protected $positiveLicenses;
+  /** @var LicenseRef[] */
+  protected $negativeLicenses;
+  /** @var int */
   protected $clearingId;
-
-  /**
-   * @var int
-   */
+  /** @var int */
   protected $uploadTreeId;
-
-  /**
-   * @var int
-   */
+  /** @var int */
   protected $pfileId;
-  /**
-   * @var string
-   */
+  /** @var string */
   protected $userName;
-  /**
-   * @var int
-   */
+  /** @var int */
   protected $userId;
-
-  /**
-   * @var string
-   */
+  /** @var string */
   protected $type;
-
-  /**
-   * @var string
-   */
+  /** @var string */
   protected $comment;
-
-  /**
-   * @var string
-   */
+  /** @var string */
   protected $reportinfo;
-
-  /**
-   * @var string
-   */
+  /** @var string */
   protected $scope;
-
-  /**
-   * @var DateTime
-   */
+  /** @var DateTime */
   protected $date_added;
 } 
