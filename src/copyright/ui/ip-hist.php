@@ -44,7 +44,7 @@ class IpHistogram  extends HistogramBase {
     $decription = _("Patent");
     $descriptionTotal = _("Total Patents");
 
-    $VPatent  =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $VPatent  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
     return  $VPatent;
   }
 

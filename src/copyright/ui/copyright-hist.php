@@ -41,26 +41,23 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
-
   $type = 'statement';
   $decription = _("Copyright");
-  $descriptionTotal = _("Total Copyrights");
 
-
-  $VCopyright  =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $this->vars['tables']['statement']=$varsCopyright;
 
   $type = 'email';
   $decription = _("Email");
-  $descriptionTotal = _("Total Emails");
 
-  $VEmail =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-
+  list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $this->vars['tables']['email']=$varsEmail;
 
   $type = 'url';
   $decription = _("URL");
-  $descriptionTotal = _("Total URLs");
 
-  $VUrl=  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $this->vars['tables']['url']=$varsURL;
 
   return array( $VCopyright, $VEmail, $VUrl);
   }

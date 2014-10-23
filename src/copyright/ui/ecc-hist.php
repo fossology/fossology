@@ -44,7 +44,7 @@ class EccHistogram  extends HistogramBase {
     $decription = _("Export restriction");
     $descriptionTotal = _("Total export restrictions");
 
-    $VEcc  =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $VEcc  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
     return  $VEcc;
   }
 
