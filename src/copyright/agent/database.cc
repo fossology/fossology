@@ -44,7 +44,7 @@ CopyrightDatabaseHandler CopyrightDatabaseHandler::spawn() const
 }
 
 
-std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size)
+std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) const
 {
   std::string result;
   for (size_t i = 0; i < size; ++i)
@@ -56,7 +56,7 @@ std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabas
   return result;
 }
 
-std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size)
+std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) const
 {
   std::string result;
   for (size_t i = 0; i < size; ++i)
@@ -116,7 +116,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
     {"copy_endbyte", "integer", ""},
   };
 
-bool CopyrightDatabaseHandler::createTableAgentFindings()
+bool CopyrightDatabaseHandler::createTableAgentFindings() const
 {
   if (!dbManager.sequenceExists(SEQUENCE_NAME))
   {
@@ -189,7 +189,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
   {"comment", "text", ""}
 };
 
-bool CopyrightDatabaseHandler::createTableClearing()
+bool CopyrightDatabaseHandler::createTableClearing() const
 {
   char* tableName = g_strdup_printf("%s_decision", IDENTITY);
   if (!dbManager.sequenceExists(SEQUENCE_NAMEClearing))

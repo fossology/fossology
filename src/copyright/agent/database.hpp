@@ -53,10 +53,10 @@ private:
   static const ColumnDef columnsDecision[];
 
   DbManager dbManager;
-  bool createTableAgentFindings();
-  bool createTableClearing();
-  std::string getColumnListString(const ColumnDef in[], size_t size);
-  std::string getColumnCreationString(const ColumnDef in[], size_t size);
+  bool createTableAgentFindings() const;
+  bool createTableClearing() const;
+  std::string getColumnListString(const ColumnDef in[], size_t size) const;
+  std::string getColumnCreationString(const ColumnDef in[], size_t size) const;
 };
 
 #endif // DATABASE_HPP
