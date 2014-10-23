@@ -11,6 +11,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
+
 #include "copyright.hpp"
 
 using namespace std;

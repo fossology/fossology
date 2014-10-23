@@ -17,6 +17,7 @@ extern "C"{
 }
 
 #include <iostream>
+#include <sstream>
 
 #define RETURN_IF_FALSE(query) \
   do {\
