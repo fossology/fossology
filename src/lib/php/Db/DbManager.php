@@ -133,8 +133,9 @@ abstract class DbManager extends Object
       $sqlLog = $sqlStatement;
     }
     $startTime = microtime($get_as_float = true);
+    $execTime = microtime($get_as_float = true) - $startTime;
     $res = $this->dbDriver->query($sqlStatement);
-    $this->logger->addDebug("Query '$sqlLog' took " . sprintf("%0.3fms", 1000 * (microtime($get_as_float = true) - $startTime)));
+    $this->logger->addDebug("Query '$sqlLog' took " . $this->formatMilliseconds($execTime));
     $this->checkResult($res, $sqlStatement);
     $this->freeResult($res);
   }
@@ -206,7 +207,7 @@ abstract class DbManager extends Object
    */
   protected function formatMilliseconds($seconds)
   {
-    return sprintf(" %0.3fms", 1000 * $seconds);
+    return sprintf("%0.3fms", 1000 * $seconds);
   }
 
   /**
