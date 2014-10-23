@@ -66,6 +66,9 @@ public:
 class QueryResult {
   friend class DbManager;
 
+private:
+    QueryResult(PGresult* ptr);
+
 public:
   bool isFailed() const;
   int getRowCount() const;
@@ -76,8 +79,7 @@ public:
   operator bool() const;
 
 private:
-  QueryResult(PGresult* ptr);
-  unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
+    unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
 };
 
 template<typename T> std::vector<T> QueryResult::getSimpleResults(int columnN, T (functionP)(const char*)) {

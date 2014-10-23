@@ -11,19 +11,22 @@
 
 #include "regexMatcher.hpp"
 
-RegexMatcher::RegexMatcher(const std::string type, const std::string  pattern, int regexIndex) :
+RegexMatcher::RegexMatcher(const std::string type, const std::string pattern, int regexIndex) :
   Matcher(type), regexIndex(regexIndex), matchingRegex(rx::regex(pattern, rx::regex_constants::icase))
-{}
+{
+}
 
-std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) const {
+std::vector<CopyrightMatch> RegexMatcher::match(const std::string content) const
+{
 
-  std::vector <CopyrightMatch> results;
+  std::vector<CopyrightMatch> results;
 
   std::string::const_iterator begin = content.begin();
   std::string::const_iterator end = content.end();
-  rx::match_results<std::string::const_iterator> what;
+  rx::match_results <std::string::const_iterator> what;
 
-  while (rx::regex_search(begin, end, what, matchingRegex)) {
+  while (rx::regex_search(begin, end, what, matchingRegex))
+  {
     results.push_back(
       CopyrightMatch(
         what.str(regexIndex),
@@ -38,4 +41,6 @@ std::vector <CopyrightMatch> RegexMatcher::match(const std::string content) cons
   return results;
 }
 
-RegexMatcher::~RegexMatcher(){};
+RegexMatcher::~RegexMatcher()
+{
+};

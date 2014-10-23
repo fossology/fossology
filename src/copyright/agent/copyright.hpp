@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "copyrightUtils.hpp"
 
-extern "C"  {
+extern "C" {
 #include "libfossagent.h"
 }
 

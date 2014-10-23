@@ -10,40 +10,40 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "files.hpp"
 #include <fstream>
-#include <cerrno>
 
 namespace fo {
 
-std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes )
-{
+    std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes) {
 
 
-  std::ifstream inStream(filename, std::ios::in | std::ios::binary);
-  if (inStream)
-  {
-    std::string contents;
-    inStream.seekg(0, std::ios::end);
-    const unsigned long int endPos =inStream.tellg();
-    contents.resize(( maximumBytes>0 && (endPos> maximumBytes) ) ? maximumBytes : endPos);
-    inStream.seekg(0, std::ios::beg);
-    inStream.read(&contents[0], contents.size());
-    inStream.close();
-    return(contents);
-  }
-  throw(errno);
-}
+        std::ifstream inStream(filename, std::ios::in | std::ios::binary);
+        if (inStream) {
+            std::string contents;
+            inStream.seekg(0, std::ios::end);
+            const unsigned long int endPos = inStream.tellg();
+            contents.resize((maximumBytes > 0 && (endPos > maximumBytes)) ? maximumBytes : endPos);
+            inStream.seekg(0, std::ios::beg);
+            inStream.read(&contents[0], contents.size());
+            inStream.close();
+            return (contents);
+        }
+        throw(errno);
+    }
 
 
-std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes) {
-  return getStringFromFile(filename.c_str(), maximumBytes);
-};
+    std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes) {
+        return getStringFromFile(filename.c_str(), maximumBytes);
+    };
 
-std::string File::getContent( const unsigned long int maximumBytes) const  {
-  return getStringFromFile(fileName, maximumBytes);
-}
+    std::string File::getContent(const unsigned long int maximumBytes) const {
+        return getStringFromFile(fileName, maximumBytes);
+    }
 
-File:: File(unsigned long _id, const char* _fileName):id(_id), fileName(_fileName) {};
+    File::File(unsigned long _id, const char *_fileName) : id(_id), fileName(_fileName) {
+    };
 
-File:: File() :id(0), fileName(NULL) {};
+    unsigned long File::getId() const {
+        return id;
+    }
 
 }

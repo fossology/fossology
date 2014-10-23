@@ -11,48 +11,34 @@
 
 #include "copyrightState.hpp"
 
-CopyrightState::CopyrightState(DbManager dbManager, int _agentId, int _verbosity):
-                              copyrightDatabaseHandler(),
-                              dbManager(dbManager),
-                              agentId(_agentId),
-                              verbosity(_verbosity),
-                              regexMatchers()
+CopyrightState::CopyrightState(int _agentId, int _verbosity) :
+        agentId(_agentId),
+        verbosity(_verbosity),
+        regexMatchers()
 {
 
 }
 
-CopyrightState::~CopyrightState(){
-}
-
-CopyrightState CopyrightState::spawn() const
+CopyrightState::~CopyrightState()
 {
-  DbManager spawnedDbMan(dbManager.spawn());
-  return CopyrightState(spawnedDbMan, agentId, verbosity);
 }
 
-
-int CopyrightState::getAgentId() const {return agentId;};
-int CopyrightState::getVerbosity() const {return verbosity;};
-
-DbManager CopyrightState::getDbManager() const
+int CopyrightState::getAgentId() const
 {
-  return dbManager;
+  return agentId;
+};
+
+int CopyrightState::getVerbosity() const
+{
+  return verbosity;
 }
-
-
-PGconn * CopyrightState::getConnection() const {return dbManager.getConnection();};
 
 void CopyrightState::addMatcher(RegexMatcher regexMatcher)
 {
   regexMatchers.push_back(regexMatcher);
 }
 
-std::vector< RegexMatcher > CopyrightState::getRegexMatchers() const
+const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
 {
   return regexMatchers;
 }
-
-std::vector< long > CopyrightState::queryFileIdsForUpload(long uploadId) const {
- return copyrightDatabaseHandler.queryFileIdsForUpload(dbManager, agentId, uploadId);
-}
-

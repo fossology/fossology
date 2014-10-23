@@ -15,53 +15,59 @@ You should have received a copy of the GNU General Public License along with thi
 
 using namespace std;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
+
   DbManager dbManager(&argc, argv);
 
-  int verbosity=8;
+  int verbosity = 8;
   CopyrightState state = getState(dbManager, verbosity);
+  CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
-  if (!state.copyrightDatabaseHandler.createTables(dbManager)) {
+  if (!copyrightDatabaseHandler.createTables())
+  {
     std::cout << "FATAL: initialization failed" << std::endl;
     bail(9);
   }
 
   fillMatchers(state);
 
-  if (argc>1)
+  if (argc > 1)
   {
-    #pragma omp parallel
+    const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+#pragma omp parallel
     {
-      CopyrightState threadLocalState(state.spawn());
-
-      #pragma omp for
-      for (int argn=1; argn<argc; ++argn)
+#pragma omp for
+      for (int argn = 1; argn < argc; ++argn)
       {
         const char* fileName = argv[argn];
 
-        fo::File file(argn, fileName);
-        vector<CopyrightMatch> matches = findAllMatches(file, state);
+        fo::File file((unsigned long) argn, fileName);
+        vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
 
-        cout << fileName << " ::" << endl << matches << endl;
+        stringstream ss;
+        ss << fileName << " ::" << endl << matches << endl;
+        cout << ss.str();
       }
     }
   }
   else
   {
-    while (fo_scheduler_next() != NULL) {
+    while (fo_scheduler_next() != NULL)
+    {
       int uploadId = atoi(fo_scheduler_current());
 
       if (uploadId == 0) continue;
 
-      int arsId = writeARS(state, 0, uploadId, 0);
+      int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
-      if (!processUploadId(state, uploadId))
+      if (!processUploadId(state, uploadId, copyrightDatabaseHandler))
         bail(2);
 
       fo_scheduler_heart(1);
-      writeARS(state, arsId, uploadId, 1);
+      writeARS(state, arsId, uploadId, 1, dbManager);
     }
     fo_scheduler_heart(0);
   }

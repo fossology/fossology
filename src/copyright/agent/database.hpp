@@ -20,21 +20,29 @@
 
 #define MAX_TABLE_CREATION_RETRIES 5
 
-class CopyrightDatabaseHandler {
+class CopyrightDatabaseHandler
+{
 public:
-  CopyrightDatabaseHandler();
-  //CopyrightDatabaseHandler(CopyrightDatabaseHandler&&);
-  /*CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
-  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;*/
+  CopyrightDatabaseHandler(DbManager& _dbManager);
+  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
+  CopyrightDatabaseHandler spawn() const;
 
-  bool createTables(const DbManager& dbManager);
-  bool insertInDatabase(const DbManager& dbManager, DatabaseEntry& entry) const;
-  bool insertNoResultInDatabase(const DbManager& dbManager, long agentId, long pFileId) const;
+  CopyrightDatabaseHandler operator =(const CopyrightDatabaseHandler&) = delete;
 
-  std::vector<long> queryFileIdsForUpload(const DbManager& dbManager, int agentId, int uploadId) const;
+  bool createTables() const;
+  bool insertInDatabase(DatabaseEntry& entry) const;
+  bool insertNoResultInDatabase(long agentId, long pFileId) const;
+  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
+  char* getPFileNameForFileId(long pfileId) const;
+
+  bool begin() const;
+  bool commit() const;
+  bool rollback() const;
+
 private:
-  typedef struct {
+  typedef struct
+  {
     const char* name;
     const char* type;
     const char* creationFlags;
@@ -43,12 +51,11 @@ private:
   static const ColumnDef columns[];
   static const ColumnDef columnsDecision[];
 
-
-  bool createTableAgentFindings(const DbManager& dbManager);
-  bool createTableClearing(const DbManager& dbManager);
-
-  std::string getColumnListString(const ColumnDef in[], size_t size) ;
-  std::string getColumnCreationString( const ColumnDef in[], size_t size) ;
+  DbManager& dbManager;
+  bool createTableAgentFindings();
+  bool createTableClearing();
+  std::string getColumnListString(const ColumnDef in[], size_t size);
+  std::string getColumnCreationString(const ColumnDef in[], size_t size);
 };
 
 #endif // DATABASE_HPP

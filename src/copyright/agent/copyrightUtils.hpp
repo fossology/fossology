@@ -28,32 +28,31 @@
 #include "database.hpp"
 #include "cleanEntries.hpp"
 
-extern "C"{
+extern "C" {
 #include "libfossology.h"
 }
 
-void queryAgentId(int& agent, PGconn* dbConn) ;
+void queryAgentId(int& agent, PGconn* dbConn);
 
 void bail(int exitval);
 
-int writeARS(CopyrightState& state, int arsId, long int uploadId, int success);
+int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager);
 
 CopyrightState getState(DbManager& dbManager, int verbosity);
 
 void fillMatchers(CopyrightState& state);
 
-std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector< RegexMatcher > matchers ) ;
+std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 
 
-bool saveToDatabase(const std::vector< CopyrightMatch >& matches, const CopyrightState& state, long pFileId) ;
+bool saveToDatabase(const std::vector<CopyrightMatch>& matches, long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
 
-std::vector<CopyrightMatch> findAllMatches(const fo::File& file, const CopyrightState& state);
-void matchFileWithLicenses(long pFileId, fo::File* file, const CopyrightState& state);
-void matchPFileWithLicenses(const CopyrightState& state, long pFileId) ;
+std::vector<CopyrightMatch> findAllMatches(const fo::File& file, std::vector<RegexMatcher> const regexMatchers);
+void matchFileWithLicenses(const fo::File& file, const CopyrightState& state);
+void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler);
 
 
-bool processUploadId (const CopyrightState& state, int uploadId) ;
-
+bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& handler);
 
 
 #endif /* COPYRIGHTUTILS_HPP_ */

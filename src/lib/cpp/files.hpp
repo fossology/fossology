@@ -16,23 +16,23 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace fo {
 
-class File {
-public:
-  unsigned long id;
-  std::string fileName;
+    class File {
+    public:
+        unsigned long id;
+        std::string fileName;
 
-  File();
-  File(unsigned long _id, const char* _fileName);
+        File(unsigned long _id, const char *_fileName);
 
-  std::string getContent(const unsigned long int maximumBytes = 1<<20) const;
+        unsigned long getId() const;
 
-};
+        std::string getContent(const unsigned long int maximumBytes = 1 << 20) const;
+    };
 
-std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1<<20 );
-std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1<<20 );
+    std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1 << 20);
+
+    std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1 << 20);
 
 }
-
 
 
 #endif /* FILES_HPP_ */
