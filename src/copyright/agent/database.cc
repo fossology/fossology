@@ -28,7 +28,10 @@ CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager _dbManager) :
 {
 }
 
-//CopyrightDatabaseHandler::CopyrightDatabaseHandler(CopyrightDatabaseHandler&&) {}
+CopyrightDatabaseHandler::CopyrightDatabaseHandler(CopyrightDatabaseHandler&& other) :
+  dbManager(std::move(other.dbManager))
+{
+}
 
 CopyrightDatabaseHandler::~CopyrightDatabaseHandler()
 {
@@ -339,3 +342,4 @@ char* CopyrightDatabaseHandler::getPFileNameForFileId(long pfileId) const
 {
   return queryPFileForFileId(dbManager.getStruct_dbManager(), pfileId);
 }
+

@@ -24,6 +24,7 @@ class CopyrightDatabaseHandler
 {
 public:
   CopyrightDatabaseHandler(DbManager _dbManager);
+  CopyrightDatabaseHandler(CopyrightDatabaseHandler&& other);
   CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
   ~CopyrightDatabaseHandler();
   CopyrightDatabaseHandler spawn() const;
