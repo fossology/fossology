@@ -17,5 +17,7 @@
 
   {% include "copyrighthist_scripts.html.twig" %}
 
-  {% foreach  %}
+  {% for type, table in tables  %}
+    {% include "histTable.js.twig" with table %}
+  {% endfor %}
 {% endblock %}

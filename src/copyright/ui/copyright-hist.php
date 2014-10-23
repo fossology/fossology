@@ -44,22 +44,24 @@ class CopyrightHistogram  extends HistogramBase {
   $type = 'statement';
   $decription = _("Copyright");
 
+  $tableVars=array();
+
   list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $this->vars['tables']['statement']=$varsCopyright;
+  $tableVars['statement']=$varsCopyright;
 
   $type = 'email';
   $decription = _("Email");
 
   list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $this->vars['tables']['email']=$varsEmail;
+  $tableVars['email']=$varsEmail;
 
   $type = 'url';
   $decription = _("URL");
 
   list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $this->vars['tables']['url']=$varsURL;
+  $tableVars['url']=$varsURL;
 
-  return array( $VCopyright, $VEmail, $VUrl);
+  return array( $VCopyright, $VEmail, $VUrl, $tableVars);
   }
 
 
@@ -73,7 +75,7 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
   {
-    list($VCopyright, $VEmail, $VUrl) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
 
     /* Combine VF and VLic */
     $text = _("Jump to");
@@ -89,7 +91,7 @@ class CopyrightHistogram  extends HistogramBase {
     $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    return $V;
+    return array($V, $tableVars);
   }
 
 

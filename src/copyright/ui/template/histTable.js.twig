@@ -1,20 +1,20 @@
 <script>
-    function createTable{{ type }}() {
-        var otable = $('#copyright{{ type }}').dataTable({  "bServerSide": true,
+    function createTable{{ table.type }}() {
+        var otable = $('#copyright{{ table.type }}').dataTable({  "bServerSide": true,
         "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
                 "fnServerData": function ( sSource, aoData, fnCallback ) {
-            aoData.push( { "name":"upload" , "value" : "{{ uploadId }}" } );
-            aoData.push( { "name":"item" , "value" : "{{ uploadTreeId }}" } );
-            aoData.push( { "name":"agent" , "value" : "{{ agentId }}" } );
-            aoData.push( { "name":"type" , "value" : "{{ type }}" } );
-            aoData.push( { "name":"filter" , "value" : "{{ filter }}" } );
+            aoData.push( { "name":"upload" , "value" : "{{ table.uploadId }}" } );
+            aoData.push( { "name":"item" , "value" : "{{ table.uploadTreeId }}" } );
+            aoData.push( { "name":"agent" , "value" : "{{ table.agentId }}" } );
+            aoData.push( { "name":"type" , "value" : "{{ table.type }}" } );
+            aoData.push( { "name":"filter" , "value" : "{{ table.filter }}" } );
             $.getJSON( sSource, aoData, fnCallback ).fail( function() {
                 if (confirm("You are not logged in. Go to login page?"))
                     window.location.href="'.  Traceback_uri(). '?mod=auth";
             });
         },
-        "aoColumns": {{ columns }},
-                "aaSorting": {{ sorting }},
+        "aoColumns": {{ table.columns }},
+                "aaSorting": {{ table.sorting }},
                 "iDisplayLength": 50,
                 "bProcessing": true,
                 "bStateSave": true,
@@ -23,15 +23,15 @@
     }).makeEditable({
         "sReadOnlyCellClass": "read_only",
                 "sSelectedRowClass" : "selectedRow",
-                "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ type }}" ,
+                "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ table.type }}" ,
                 "fnOnEditing" : function(input) {
             var value = input[0].value;
             var isValid = (value) && !(/^\s*$/.test(value));
             if (isValid) {
                 var id = input.parents("tr:first")[0].id;
                 var hash = id.split(",")[2];
-                $("#delete{{ type }}" + hash).hide();
-                var updateElement = $("#update{{ type }}" + hash);
+                $("#delete{{ table.type }}" + hash).hide();
+                var updateElement = $("#update{{ table.type }}" + hash);
                 updateElement.text("updating...");
                 updateElement.show();
             }
@@ -42,7 +42,7 @@
     return otable;
     };
 
-    function delete{{ type }}(upload,item,hash, kind) {
+    function delete{{ table.type }}(upload,item,hash, kind) {
         $.ajax({
             type: 'POST',
             dataType: 'text',

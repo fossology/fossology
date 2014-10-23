@@ -255,7 +255,9 @@ class HistogramBase extends FO_Plugin {
         $SelectFilter .= "</select>";
         $OutBuf .= $SelectFilter;
 
-        $OutBuf .= $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+        list($tables, $tableVars) = $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+        $this->vars['tables'] = $tableVars;
+        $OutBuf .= $tables;
       }
     }
     $OutBuf .= "</font>\n";

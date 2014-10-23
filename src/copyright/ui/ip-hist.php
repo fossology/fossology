@@ -42,10 +42,11 @@ class IpHistogram  extends HistogramBase {
   {
     $type = 'ip';
     $decription = _("Patent");
-    $descriptionTotal = _("Total Patents");
 
-    $VPatent  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-    return  $VPatent;
+    $tableVars=array();
+    list($VPatent,$ipVars)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars['ip']=$ipVars;
+    return  array($VPatent,$tableVars);
   }
 
   /**
@@ -58,14 +59,14 @@ class IpHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
   {
-    $VPatent = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VPatent, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
 
 
     $V = "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' width='50%'>$VPatent</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    return $V;
+    return array($V,$tableVars);
   }
 
   function RegisterMenus()
