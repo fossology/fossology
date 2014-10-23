@@ -12,8 +12,11 @@
 #include "database.hpp"
 #include "identity.hpp"
 
+extern "C"{
+#include "libfossology.h"
+}
+
 #include <iostream>
-#include <libfossagent.h>
 
 #define RETURN_IF_FALSE(query) \
   do {\
