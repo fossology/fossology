@@ -33,13 +33,13 @@ define("TITLE_ajax_upload_agents", _("List Agents for an Upload as Options"));
  */
 class ajax_upload_agents extends FO_Plugin
 {
-  var $Name       = "upload_agent_options";
-  var $Title      = TITLE_ajax_upload_agents;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $NoHTML     = 1; /* This plugin needs no HTML content help */
-
+  function __construct()
+  {
+    $this->Name       = "upload_agent_options";
+    $this->Title      = TITLE_ajax_upload_agents;
+    $this->DBaccess   = PLUGIN_DB_READ;
+    parent::__construct();
+  }
 
   /**
    * \brief This function checks if the current job was not already scheduled, or did already fail (You can reschedule failed jobs)
@@ -58,6 +58,7 @@ class ajax_upload_agents extends FO_Plugin
     pg_free_result($result);
     return $nrows<1;
   }
+  
   /**
    * \brief Display the loaded menu and plugins.
    */
@@ -66,43 +67,39 @@ class ajax_upload_agents extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
+    if($this->OutputType!='HTML')
+    {
+      return (!$this->OutputToStdout) ? "" : NULL;
+    }
+      
+    $UploadPk = GetParm("upload",PARM_INTEGER);
+    if (empty($UploadPk)) {
+      return;
+    }
+    $agent_list = menu_find("Agents", $depth=0);
+    $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
     $V="";
     global $Plugins;
-    switch($this->OutputType)
+    for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $UploadPk = GetParm("upload",PARM_INTEGER);
-        if (empty($UploadPk)) {
-          return;
-        }
-        $Depth=0;
-        $agent_list = menu_find("Agents", $depth);
-        $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-        for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
-        {
-          if (array_search($agent_list[$ac]->URI, $Skip) !== false) continue;
-          $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
-          if ( ($P->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($P->AgentName,$UploadPk )  )
-          {
-            $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
-            $V .= htmlentities($agent_list[$ac]->Name);
-            $V .= "</option>\n";
-          }
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      if (array_search($agent_list[$ac]->URI, $Skip) !== false)
+      {
+        continue;
+      }
+      $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
+      if ( ($P->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($P->AgentName, $UploadPk)  )
+      {
+        $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
+        $V .= htmlentities($agent_list[$ac]->Name);
+        $V .= "</option>\n";
+      }
     }
     if (!$this->OutputToStdout) {
       return($V);
     }
     print($V);
     return;
-  } // Output()
+  }
 
 }
 $NewPlugin = new ajax_upload_agents;
