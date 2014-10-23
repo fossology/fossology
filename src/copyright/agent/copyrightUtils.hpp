@@ -45,7 +45,7 @@ void fillMatchers(CopyrightState& state);
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 
 
-bool saveToDatabase(const std::vector<CopyrightMatch>& matches, long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
+bool saveToDatabase(const std::vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
 
 std::vector<CopyrightMatch> findAllMatches(const fo::File& file, std::vector<RegexMatcher> const regexMatchers);
 void matchFileWithLicenses(const fo::File& file, const CopyrightState& state);

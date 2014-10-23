@@ -83,7 +83,7 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexM
 }
 
 
-bool saveToDatabase(const vector<CopyrightMatch>& matches, long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
+bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
     return false;
@@ -115,7 +115,7 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, long pFileId, int age
 
   if (count == 0)
   {
-    copyrightDatabaseHandler.insertNoResultInDatabase(pFileId, 0);
+    copyrightDatabaseHandler.insertNoResultInDatabase(agentId, pFileId);
   }
 
   return copyrightDatabaseHandler.commit();

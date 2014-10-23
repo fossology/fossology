@@ -18,21 +18,17 @@ namespace fo {
 
     class File {
     public:
-        unsigned long id;
-        std::string fileName;
-
         File(unsigned long _id, const char *_fileName);
 
         unsigned long getId() const;
-
         std::string getContent(const unsigned long int maximumBytes = 1 << 20) const;
+    private:
+        unsigned long id;
+        std::string fileName;
     };
 
     std::string getStringFromFile(const char *filename, const unsigned long int maximumBytes = 1 << 20);
-
     std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1 << 20);
-
 }
-
 
 #endif /* FILES_HPP_ */
