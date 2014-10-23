@@ -185,5 +185,12 @@ class SqliteE implements Driver
     return $booleanValue ? 1 : 0;
   }
 
-
+  /**
+   * @param string
+   * @return string
+   */
+  public function escapeString($string)
+  {
+    return SQLite3::escapeString($string);
+  }
 }

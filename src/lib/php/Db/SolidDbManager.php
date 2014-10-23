@@ -93,7 +93,7 @@ class SolidDbManager extends DbManager
       }
       else
       {
-        $masked =  "'".  pg_escape_string($var)."'";
+        $masked =  "'". $this->dbDriver->escapeString($var)."'";
       }
       $sqlRep = preg_replace('/(\$'.$cnt.')([^\d]|$)/', "$masked$2", $sql);
       if ($sqlRep == $sql)

@@ -33,6 +33,9 @@ class SolidDbManagerTest extends \PHPUnit_Framework_TestCase
   function setUp()
   {
     $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
+    $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
+    $this->driver->shouldReceive('booleanToDb')->with(false)->andReturn('f');
+    $this->driver->shouldReceive('escapeString')->andReturnUsing(function($v){return pg_escape_string($v);});
     $this->logger = M::mock('Monolog\\Logger'); // new Logger(__FILE__);
     $this->logger->shouldReceive('addDebug');
     $this->dbManager = new SolidDbManager($this->logger);
@@ -96,8 +99,6 @@ class SolidDbManagerTest extends \PHPUnit_Framework_TestCase
   
   function testEvaluateStatement()
   {
-    $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
-    $this->driver->shouldReceive('booleanToDb')->with(false)->andReturn('f');
     $this->driver->shouldReceive('query');
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2 AND $3';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
