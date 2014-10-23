@@ -61,7 +61,6 @@ class SolidDbManager extends DbManager
       throw new \Exception("Unknown Statement");
     }
     $startTime = microtime($get_as_float = true);
-    // $res = $this->dbDriver->execute($statementName, $params);
     $statement = $this->evaluateStatement($statementName, $params);
     $res = $this->dbDriver->query($statement);
     $execTime = microtime($get_as_float = true) - $startTime;
@@ -70,10 +69,11 @@ class SolidDbManager extends DbManager
     $this->checkResult($res, "$statementName :: $statement");
     return $res;
   }
-  
+
   /**
    * @param string $statementName
    * @param array $params
+   * @throws \Exception
    * @return resource
    */
   private function evaluateStatement($statementName, $params)

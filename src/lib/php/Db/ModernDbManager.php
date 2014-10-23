@@ -68,7 +68,6 @@ class ModernDbManager extends DbManager
     $res = $this->dbDriver->execute($statementName, $params);
     $execTime = microtime($get_as_float = true) - $startTime;
     $this->collectStatistics($statementName, $execTime);
-    // $this->logger->addDebug("execute '$statementName took " . sprintf("%0.3fms", 1000*$execTime));
     $this->checkResult($res, "$statementName: " . $this->preparedStatements[$statementName] . ' -- -- ' . print_r($params, true));
     return $res;
   }
