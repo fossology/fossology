@@ -1,0 +1,18 @@
+{% if protocol != 'HTTPS' %}
+  <p>This login uses {{ protocol }}, so passwords are transmitted in plain text.  This is not a secure connection.</p>
+{% endif %}  
+<form method="post">
+  <input type="hidden" name="HTTP_REFERER" value="{{ referer }}"/>
+  <table border="0">
+    <tr>
+      <td>{{ 'Username'|trans }}:</td>
+      <td><input type="text" size=20 name="username" id="unamein"/></td>
+    </tr>
+    <tr>
+      <td>{{ 'Password'|trans }}:</td>
+      <td><input type="password" size="20" name="password"/></td>
+    </tr>
+  </table>
+  <script type="text/javascript">document.getElementById("unamein").focus();</script>
+  <input type="submit" value="{{ 'Login'|trans }}"/>
+</form>

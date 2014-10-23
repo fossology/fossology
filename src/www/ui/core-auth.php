@@ -303,24 +303,13 @@ class core_auth extends FO_Plugin
       global $Plugins;
       $V .= $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
-    $Protocol = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    if ($Protocol != 'HTTPS')
-    {
-      $V .= "This login uses $Protocol, so passwords are transmitted in plain text.  This is not a secure connection.<P />\n";
-    }
-    $V .= "<form method='post'>\n";
-    $V .= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
-    $V .= "<table border=0>";
-    $text = _("Username:");
-    $V .= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-    $text = _("Password:");
-    $V .= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
-    $V .= "</table>";
-    $V .= "<P/>";
-    $V .= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-    $text = _("Login");
-    $V .= "<input type='submit' value='$text'>\n";
-    $V .= "</form>\n";    
+    $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+    $this->vars['referer'] = $Referer;
+
+    global $container;
+    $renderer = $container->get('twig.environment');
+    $V .= $renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
+
     return $V;
   }
   
@@ -338,7 +327,7 @@ class core_auth extends FO_Plugin
     }
     parent::OutputOpen();
   }
-
+  
   
   /**
    * \brief See if a username/password is valid.
