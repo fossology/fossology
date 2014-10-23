@@ -67,7 +67,7 @@ class SolidDbManager extends DbManager
     $execTime = microtime($get_as_float = true) - $startTime;
     $this->collectStatistics($statementName, $execTime);
     $this->logger->addDebug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
-    $this->checkResult($res, "$statementName: " . $this->preparedStatements[$statementName] . ' -- -- ' . print_r($params, true));
+    $this->checkResult($res, "$statementName :: $statement");
     return $res;
   }
   
