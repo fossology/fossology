@@ -22,6 +22,8 @@ include $(VARS)
 MOD_NAMES = copyright ip ecc
 MOD_SUBDIR = ui
 
+TEMPL8FILES = `find template/ -type f`
+
 all:
 	@echo "nothing to do"
 
@@ -36,6 +38,9 @@ install:
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ecc.php
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ip.php
+	@for file in $(TEMPL8FILES); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/$$file ; \
+	done
 
 uninstall:
 	@for MOD_NAME in $(MOD_NAMES); do \

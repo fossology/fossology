@@ -17,27 +17,16 @@
  ***********************************************************/
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
 class changeLicenseProcessPost extends FO_Plugin
 {
-
   /** @var ClearingDao */
   private $clearingDao;
-
-  /**
-   * @var ChangeLicenseUtility
-   */
-  private $changeLicenseUtility;
-
-  /**
-   * @var LicenseOverviewPrinter
-   */
+  /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
-
 
   /**
    * @var UploadDao
@@ -58,7 +47,6 @@ class changeLicenseProcessPost extends FO_Plugin
 
     global $container;
     $this->clearingDao = $container->get('dao.clearing');
-    $this->changeLicenseUtility = $container->get('utils.change_license_utility');
     $this->licenseOverviewPrinter =  $container->get('utils.license_overview_printer');
     $this->uploadDao = $container->get('dao.upload');
   }
@@ -102,6 +90,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
+    $removed = $_POST['removed'];
 
     $uploadEntry = $this->uploadDao->getUploadEntry($itemId);
     $uploadId = intval($uploadEntry['upload_fk']);
@@ -112,7 +101,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
     if(isset($licenses))
-    $this->clearingDao->insertClearingDecisionTest($licenses, false, $itemId, $userId, $job_pk); //,  $_POST['comment'], $_POST['remark']
+    $this->clearingDao->insertClearingDecisionTest($licenses, $removed, $itemId, $userId, $job_pk); //,  $_POST['comment'], $_POST['remark']
 
 
     /** @var agent_fodecider $deciderPlugin */
