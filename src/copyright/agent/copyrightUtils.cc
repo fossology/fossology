@@ -167,7 +167,7 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
 
 bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& databaseHandler)
 {
-  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId, state.getAgentId());
+  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(state.getAgentId(), uploadId);
 
 #pragma omp parallel
   {
