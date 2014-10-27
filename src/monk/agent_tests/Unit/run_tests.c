@@ -38,8 +38,7 @@ extern CU_TestInfo database_testcases[];
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
 
-CU_SuiteInfo suites[] =
-{
+CU_SuiteInfo suites[] = {
     {"Testing process:", NULL, NULL, string_operations_testcases},
     {"Testing monk:", NULL, NULL, file_operations_testcases},
     {"Testing license:", NULL, NULL, license_testcases},
@@ -56,7 +55,6 @@ CU_SuiteInfo suites[] =
 /* **** main test functions ************************************************* */
 /* ************************************************************************** */
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   return focunit_main(argc, argv, "monk_agent_Tests", suites);
 }

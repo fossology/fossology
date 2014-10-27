@@ -12,29 +12,25 @@
 #include "copyrightMatch.hpp"
 
 CopyrightMatch::CopyrightMatch(std::string content, std::string type, unsigned int start, unsigned int length):
- content(content), start(start), length(length), type(type)
-{}
+    content(content),
+    start(start),
+    length(length),
+    type(type) {}
 
-CopyrightMatch::~CopyrightMatch(){};
+CopyrightMatch::~CopyrightMatch() {};
 
-unsigned CopyrightMatch::getStart() const
-{
+unsigned CopyrightMatch::getStart() const {
   return start;
 }
 
-unsigned CopyrightMatch::getLength() const
-{
+unsigned CopyrightMatch::getLength() const {
   return length;
 }
 
-
-const std::string CopyrightMatch::getContent() const
-{
+const std::string CopyrightMatch::getContent() const {
   return content;
 }
 
-
-const std::string CopyrightMatch::getType() const
-{
+const std::string CopyrightMatch::getType() const {
   return type;
 }

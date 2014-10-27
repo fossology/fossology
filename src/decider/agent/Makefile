@@ -33,18 +33,12 @@ install: all
 
 uninstall:
 	for file in $(WRAP); do \
-	  rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
 	done
-
-test: all
-	@echo "no tests"
-
-coverage:
-	@echo "NOTICE: no coverage available for decider"
 
 clean:
 	rm -f *.o core version.php $(WRAP)
 
-include $(DEPS)
+.PHONY: all install uninstall clean
 
-.PHONY: all install uninstall clean test
+include $(DEPS)

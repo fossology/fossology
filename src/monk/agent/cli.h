@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #ifndef MONK_AGENT_CLI_H
 #define MONK_AGENT_CLI_H
 
@@ -19,4 +20,4 @@ void onNoMatch_Cli(File* file);
 void onFullMatch_Cli(File* file, License* license, DiffMatchInfo* matchInfo);
 void onDiffMatch_Cli(File* file, License* license, DiffResult* diffResult, unsigned short rank);
 
-#endif
+#endif // MONK_AGENT_CLI_H

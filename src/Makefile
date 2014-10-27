@@ -7,11 +7,29 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent delagent wget_agent mimetype maintagent www debug decider reportgen
+DIRS = \
+	adj2nest \
+	buckets \
+	cli \
+	copyright \
+	debug \
+	decider \
+	delagent \
+	lib \
+	maintagent \
+	mimetype \
+	monk \
+	nomos \
+	pkgagent \
+	reportgen \
+	scheduler \
+	ununpack \
+	wget_agent \
+	www
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
-# run 'make $(operation)-$(subdir)'. Yet another convencience, a target of
+# run 'make $(operation)-$(subdir)'. Yet another convenience, a target of
 # '$(subdir)' is equivalent to 'build-$(subdir)'
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
@@ -19,6 +37,7 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
+
 all: $(BUILDDIRS)
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
@@ -46,11 +65,11 @@ clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
-phpvendors: 
+phpvendors:
 	composer install
 
 composer_install:
-	echo "current dir: '${PWD}'"
+	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
 	(cd $(DESTDIR)$(MODDIR); composer install --no-dev)
 

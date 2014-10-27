@@ -16,31 +16,34 @@ CopyrightState::CopyrightState(DbManager* _dbManager, int _agentId, int _verbosi
                               dbManager(_dbManager),
                               agentId(_agentId),
                               verbosity(_verbosity),
-                              regexMatchers()
-{
+                              regexMatchers() {}
 
-}
+CopyrightState::~CopyrightState() {}
 
-CopyrightState::~CopyrightState(){
-}
+int CopyrightState::getAgentId() {
+  return agentId;
+};
 
-int CopyrightState::getAgentId(){return agentId;};
-int CopyrightState::getVerbosity(){return verbosity;};
-DbManager* CopyrightState::getDbManager(){return dbManager;};
+int CopyrightState::getVerbosity() {
+  return verbosity;
+};
 
-PGconn * CopyrightState::getConnection(){return dbManager->getConnection();};
+DbManager* CopyrightState::getDbManager() {
+  return dbManager;
+};
 
-void CopyrightState::addMatcher(RegexMatcher regexMatcher)
-{
+PGconn* CopyrightState::getConnection() {
+  return dbManager->getConnection();
+};
+
+void CopyrightState::addMatcher(RegexMatcher regexMatcher) {
   regexMatchers.push_back(regexMatcher);
 }
 
-std::vector< RegexMatcher > CopyrightState::getRegexMatchers()
-{
+std::vector<RegexMatcher> CopyrightState::getRegexMatchers() {
   return regexMatchers;
 }
 
-std::vector< long > CopyrightState::queryFileIdsForUpload(long uploadId) {
- return copyrightDatabaseHandler.queryFileIdsForUpload(dbManager, agentId, uploadId);
+std::vector<long> CopyrightState::queryFileIdsForUpload(long uploadId) {
+  return copyrightDatabaseHandler.queryFileIdsForUpload(dbManager, agentId, uploadId);
 }
-

@@ -9,8 +9,8 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef REGEX_HPP_
-#define REGEX_HPP_
+#ifndef REGEX_HPP
+#define REGEX_HPP
 
 #define USEBOOST
 #ifdef USEBOOST
@@ -18,11 +18,7 @@
   namespace rx = boost;
 #else
   #include <regex>
-  namespace rx  = std;
+  namespace rx = std;
 #endif
 
-
-
-
-
-#endif /* REGEX_HPP_ */
+#endif // REGEX_HPP
