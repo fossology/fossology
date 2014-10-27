@@ -18,9 +18,9 @@
 
 using namespace std;
 
-class DatabaseHandler : public fo::AgentDatabaseHandler {
+class NinkaDatabaseHandler : public fo::AgentDatabaseHandler {
  public:
-  DatabaseHandler(DbManager dbManager);
+  NinkaDatabaseHandler(DbManager dbManager);
 
   vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);

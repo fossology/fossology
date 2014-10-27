@@ -31,6 +31,8 @@ namespace fo
     bool begin() const;
     bool commit() const;
     bool rollback() const;
+
+    char* getPFileNameForFileId(unsigned long pfileId) const;
   };
 }
 

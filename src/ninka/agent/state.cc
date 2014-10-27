@@ -10,24 +10,10 @@
 
 #include "state.hpp"
 
-State::State(int agentId, DbManager* dbManager):
-    agentId(agentId),
-    dbManager(dbManager),
-    databaseHandler(new DatabaseHandler(dbManager)) {}
+State::State(int agentId):
+    agentId(agentId) {}
 
-State::~State() {
-  delete(dbManager);
-  delete(databaseHandler);
-}
-
-int State::getAgentId() {
+int State::getAgentId() const {
   return agentId;
 };
 
-DbManager* State::getDbManager() {
-  return dbManager;
-};
-
-DatabaseHandler* State::getDatabaseHandler() {
-  return databaseHandler;
-};

@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
 
-  DbManager* dbManager = new DbManager(&argc, argv);
+  DbManager dbManager(&argc, argv);
 
   State* state = getState(dbManager);
 

@@ -31,7 +31,6 @@ public:
   bool insertInDatabase(DatabaseEntry& entry) const;
   bool insertNoResultInDatabase(long agentId, long pFileId) const;
   std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
-  char* getPFileNameForFileId(unsigned long pfileId) const;
 
 private:
   typedef struct

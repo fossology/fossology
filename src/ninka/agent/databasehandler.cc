@@ -11,11 +11,11 @@
 #include "databasehandler.hpp"
 #include "libfossUtils.hpp"
 
-DatabaseHandler::DatabaseHandler(DbManager dbManager):
+NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager):
     fo::AgentDatabaseHandler(dbManager) {}
 
 // TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
-vector<unsigned long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
+vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -30,7 +30,7 @@ vector<unsigned long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
-bool DatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch) {
+bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch) {
   return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -45,7 +45,7 @@ bool DatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId
   );
 }
 
-unsigned long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
+unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -59,7 +59,7 @@ unsigned long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
   return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
 }
 
-unsigned long DatabaseHandler::saveLicense(string rfShortName) {
+unsigned long NinkaDatabaseHandler::saveLicense(string rfShortName) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),

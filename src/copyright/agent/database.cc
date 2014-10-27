@@ -13,7 +13,6 @@
 #include "identity.hpp"
 
 extern "C" {
-#include "libfossology.h"
 }
 
 #include <iostream>
@@ -303,11 +302,6 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
     entry.type.c_str(),
     entry.copy_startbyte, entry.copy_endbyte
   );
-}
-
-char* CopyrightDatabaseHandler::getPFileNameForFileId(unsigned long pfileId) const
-{
-  return queryPFileForFileId(dbManager.getStruct_dbManager(), pfileId);
 }
 
 CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager manager) :

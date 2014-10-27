@@ -31,7 +31,7 @@ State* getState(DbManager* dbManager);
 int queryAgentId(DbManager* dbManager);
 int writeARS(State* state, int arsId, long uploadId, int success);
 void bail(State* state, int exitval);
-void bail(DbManager* dbManager, int exitval);
+void bail(int exitval);
 bool processUploadId(State* state, int uploadId);
 void matchPFileWithLicenses(State* state, long pFileId);
 void matchFileWithLicenses(State* state, fo::File* file);

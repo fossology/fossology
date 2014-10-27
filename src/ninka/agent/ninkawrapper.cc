@@ -13,15 +13,15 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
-string scanFileWithNinka(State* state, fo::File* file) {
+string scanFileWithNinka(State& state, const fo::File& file) {
   FILE *in;
   char buffer[512];
-  string command = "ninka " + file->getFileName();
+  string command = "ninka " + file.getFileName();
   string result;
 
   if (!(in = popen(command.c_str(), "r"))) {
     cout << "could not execute ninka command: " << command << endl;
-    bail(state, 1);
+    bail(1);
   }
 
   while (fgets(buffer, sizeof(buffer), in) != NULL) {
@@ -30,7 +30,7 @@ string scanFileWithNinka(State* state, fo::File* file) {
 
   if (pclose(in) != 0) {
     cout << "could not execute ninka command: " << command << endl;
-    bail(state, 1);
+    bail(1);
   }
 
   return result;
