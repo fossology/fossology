@@ -10,4 +10,4 @@ without any warranty.
 unsigned int squareVisitorX[SQUARE_VISITOR_LENGTH];
 unsigned int squareVisitorY[SQUARE_VISITOR_LENGTH];
 
-#endif	/* SQUAREVISITOR_H */
+#endif // SQUAREVISITOR_H

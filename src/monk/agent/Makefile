@@ -5,24 +5,22 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
-EXE=monk
-TESTDIR = ../agent_tests
-OBJECTS  = monk.o string_operations.o file_operations.o database.o\
-           license.o highlight.o match.o hash.o diff.o extended.o\
-           cli.o bulk.o \
-           _squareVisitor.o
-COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o\
-           database_cov.o license_cov.o highlight_cov.o match_cov.o\
+EXE = monk
+OBJECTS = monk.o string_operations.o file_operations.o database.o \
+          license.o highlight.o match.o hash.o diff.o extended.o \
+          cli.o bulk.o \
+          _squareVisitor.o
+COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o \
+           database_cov.o license_cov.o highlight_cov.o match_cov.o \
            cli_cov.o bulk_cov.o \
            hash_cov.o diff_cov.o extended_cov.o _squareVisitor_cov.o
 
@@ -40,7 +38,7 @@ $(FOLIB):
 
 libmonk.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
-	
+
 libmonk_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
@@ -93,7 +91,7 @@ _squareVisitor.c _squareVisitor.h: squareBuilder
 squareBuilder: buildSquareVisitor.c
 	$(CC) buildSquareVisitor.c $(DEF) $(CFLAGS_LOCAL) -lm -o $@
 
-$(COVERAGE): %_cov.o: %.c 
+$(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################
@@ -102,23 +100,12 @@ $(COVERAGE): %_cov.o: %.c
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(CONFDIR)/mods-enabled
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
-	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
-
-test: all
-	$(MAKE) -C $(TESTDIR) $@
-
-coverage: all
-	$(MAKE) -C $(TESTDIR) $@
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o *.a *.gcno *.gcda core _squareVisitor.h _squareVisitor.c \
 	squareBuilder _squareVisitor.h.gen
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

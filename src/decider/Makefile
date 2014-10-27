@@ -9,45 +9,41 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME=decider
+MOD_NAME = decider
 
 DIRS = agent ui
 TESTDIR =
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
-
-coverage: all
-	@echo "no coverage for $(MOD_NAME)"
+	$(call DIR_LOOP, )
 
 test: all
-	$(MAKE) -C $(TESTDIR) test
+	@echo "nothing to do"
 
-# generate the VERSION file
+coverage: all
+	@echo "nothing to do"
+
 VERSIONFILE:
-	$(call WriteVERSIONFile,"decider")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make $(MOD_NAME) install"
-	$(call dirloop,install)
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
 	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
-
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
-
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 	rm -f VERSION
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

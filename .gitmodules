@@ -1,0 +1,3 @@
+[submodule "src/ninka/ninka-tool"]
+	path = src/ninka/ninka-tool
+	url = git@bitbucket.org:tngfossy/ninka.git

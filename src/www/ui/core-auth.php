@@ -256,7 +256,7 @@ class core_auth extends FO_Plugin
     $_SESSION['GroupId'] = $UserRow['group_fk'];
     $SysConf['auth']['GroupId'] = $UserRow['group_fk'];
     $_SESSION['GroupName'] = $UserRow['group_name'];
-  } // PostInitialize()
+  }
 
 /**
    * \brief Retrieve the user's IP address.
@@ -278,100 +278,58 @@ class core_auth extends FO_Plugin
     return (@$_SERVER['REMOTE_ADDR']);
   }
 
-/**
+  /**
    * \brief This is only called when the user logs out.
    */
-  function Output()
+  protected function htmlContent()
   {
-    global $SysConf;
-
-    if ($this->State != PLUGIN_STATE_READY)
+    $User = GetParm("username", PARM_TEXT);
+    $Pass = GetParm("password", PARM_TEXT);
+    $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
+    if (empty($Referer))
     {
-      return;
+      $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
-    $V = "";
-    if (!array_key_exists('User',$_SESSION) || $_SESSION['User'] == "Default User")
+    $VP = !empty($User) ? $this->CheckUser($User, $Pass, $Referer) : '';
+    if (!empty($VP))
     {
-      $User = GetParm("username", PARM_TEXT);
-      $Pass = GetParm("password", PARM_TEXT);
-      $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
-      if (empty($Referer))
-      {
-        $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
-      }
-      $VP = !empty($User) ? $this->CheckUser($User, $Pass, $Referer) : '';
-      if (!empty($VP))
-      {
-        $V .= $VP;
-      } else
-      {
-        /* Check for init and first-time use */
-        if (plugin_find_id("init") >= 0)
-        {
-          $text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
-          $V .= "<b>$text</b>";
-          $V .= "<P />\n";
-          /* Check for a default user */
-          global $PG_CONN;
-          $Level = PLUGIN_DB_ADMIN;
-          $sql = "SELECT * FROM users WHERE user_perm = $Level LIMIT 1;";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $R = pg_fetch_assoc($result);
-          pg_free_result($result);
-          if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R))
-          {
-            $sql = "SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-          } else
-          {
-            $sql = "SELECT user_name FROM users;";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-          }
-          $R = pg_fetch_assoc($result);
-          pg_free_result($result);
-          if (!empty($R['user_name']))
-          {
-            $V .= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
-            $V .= "<P />\n";
-          }
-        }
-        /* Inform about the protocol. */
-        $Protocol = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-        if ($Protocol != 'HTTPS')
-        {
-          $V .= "This login uses $Protocol, so passwords are transmitted in plain text.  This is not a secure connection.<P />\n";
-        }
-        $V .= "<form method='post'>\n";
-        $V .= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
-        $V .= "<table border=0>";
-        $text = _("Username:");
-        $V .= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-        $text = _("Password:");
-        $V .= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
-        $V .= "</table>";
-        $V .= "<P/>";
-        $V .= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-        $text = _("Login");
-        $V .= "<input type='submit' value='$text'>\n";
-        $V .= "</form>\n";
-      }
-    } else
-      /* It's a logout */
+      return $VP;
+    }
+    
+    $V = "";    
+    $initPluginId = plugin_find_id("init");
+    if ( $initPluginId>= 0)
+    {
+      global $Plugins;
+      $V .= $Plugins[$initPluginId]->infoFirstTimeUsage();
+    }
+    $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+    $this->vars['referer'] = $Referer;
+
+    global $container;
+    $renderer = $container->get('twig.environment');
+    $V .= $renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
+
+    return $V;
+  }
+  
+  /**
+   * @brief perform logout
+   */
+  function OutputOpen()
+  {
+    if (array_key_exists('User',$_SESSION) && $_SESSION['User'] != "Default User")
     {
       $this->UpdateSess("");
       $Uri = Traceback_uri();
-      $V .= "<script language='javascript'>\n";
-      $V .= "window.open('$Uri','_top');\n";
-      $V .= "</script>\n";
+      header("Location: $Uri");
+      exit;
     }
-
-    $this->vars['content'] = $V;
+    parent::OutputOpen();
   }
-
-    /**
+  
+  
+  /**
    * \brief See if a username/password is valid.
    *
    * \return string on match, or null on no-match.
@@ -447,7 +405,7 @@ class core_auth extends FO_Plugin
     }
     /* Redirect window */
     header("Location: $Referer");
-  } // Output()
+  }
 
 }
 

@@ -18,10 +18,10 @@ You should have received a copy of the GNU General Public License along with thi
 #include "hash.h"
 
 void test_read_file() {
-  char * teststring = "vduinvdf\nfgbfg\n\t\rvfvfdß";
-  char * testfile = "/tmp/monkftest";
+  char* teststring = "vduinvdf\nfgbfg\n\t\rvfvfdß";
+  char* testfile = "/tmp/monkftest";
   
-  FILE * file = fopen(testfile, "w");
+  FILE* file = fopen(testfile, "w");
   fprintf(file, "%s", teststring);
   fclose(file);
 
@@ -30,9 +30,9 @@ void test_read_file() {
 
 void test_read_mangling_binaries() {
   char teststring[] = "\0afdß";
-  char * testfile = "/tmp/monkftest";
+  char* testfile = "/tmp/monkftest";
 
-  FILE * file = fopen(testfile, "w");
+  FILE* file = fopen(testfile, "w");
   fwrite(teststring, 1, sizeof (teststring), file);
   fclose(file);
 
@@ -40,14 +40,14 @@ void test_read_mangling_binaries() {
 }
 
 void test_read_file_tokens() {
-  char * teststring = "a\n^b\n c";
-  char * testfile = "/tmp/monkftest";
+  char* teststring = "a\n^b\n c";
+  char* testfile = "/tmp/monkftest";
   
-  FILE * file = fopen(testfile, "w");
+  FILE* file = fopen(testfile, "w");
   fprintf(file, "%s", teststring);
   fclose(file);
 
-  GArray * tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
   
   CU_ASSERT_EQUAL_FATAL(tokens->len, 3);
   Token token0 = g_array_index(tokens, Token, 0);
@@ -65,14 +65,14 @@ void test_read_file_tokens() {
 }
 
 void test_read_file_tokens2() {
-  char * teststring = " * a\n *\n * b";
-  char * testfile = "/tmp/monkftest";
+  char* teststring = " * a\n *\n * b";
+  char* testfile = "/tmp/monkftest";
   
-  FILE * file = fopen(testfile, "w");
+  FILE* file = fopen(testfile, "w");
   fprintf(file, "%s", teststring);
   fclose(file);
 
-  GArray * tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
   
   CU_ASSERT_EQUAL_FATAL(tokens->len, 5);
   Token token0 = g_array_index(tokens, Token, 0);
@@ -99,13 +99,13 @@ void test_read_file_tokens2() {
 
 void test_read_file_tokens_binaries() {
   char teststring[] = "a\n^b\0 c";
-  char * testfile = "/tmp/monkftest";
+  char* testfile = "/tmp/monkftest";
 
-  FILE * file = fopen(testfile, "w");
+  FILE* file = fopen(testfile, "w");
   fwrite(teststring, 1, sizeof (teststring), file);
   fclose(file);
 
-  GArray * tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
 
   CU_ASSERT_EQUAL_FATAL(tokens->len, 3);
   Token token0 = g_array_index(tokens, Token, 0);

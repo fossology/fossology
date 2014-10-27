@@ -10,8 +10,8 @@
  */
 
 
-#ifndef IDENTITY_H_INCLUDE
-#define IDENTITY_H_INCLUDE
+#ifndef IDENTITY_HPP
+#define IDENTITY_HPP
 
 #ifndef IDENTITY_ECC
 #ifndef IDENTITY_IP
@@ -47,4 +47,4 @@
  #endif
 #endif
 
-#endif /* IDENTITY_H_INCLUDE */
+#endif // IDENTITY_HPP

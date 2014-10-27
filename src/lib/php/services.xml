@@ -26,7 +26,7 @@ without any warranty.
     <service id="logger" class="\Monolog\Logger">
       <argument type="string">default</argument>
     </service>
-    <service id="db.manager" class="\Fossology\Lib\Db\DbManager">
+    <service id="db.manager" class="\Fossology\Lib\Db\ModernDbManager">
       <argument type="service" id="logger"/>
       <tag name="monolog.processor" method="processRecord" handler="main"/>
     </service>
