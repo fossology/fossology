@@ -9,17 +9,16 @@
  */
 
 #include "databasehandler.hpp"
+#include "libfossUtils.hpp"
 
-DatabaseHandler::DatabaseHandler(DbManager* dbManager):
-    dbManager(dbManager) {}
-
-DatabaseHandler::~DatabaseHandler() {}
+DatabaseHandler::DatabaseHandler(DbManager dbManager):
+    fo::AgentDatabaseHandler(dbManager) {}
 
 // TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
 vector<long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
-  QueryResult queryResult = dbManager->execPrepared(
+  QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "queryFileIdsForUpload",
       "SELECT DISTINCT(pfile_fk) FROM uploadtree WHERE upload_fk = $1 AND (ufile_mode&x'3C000000'::int) = 0",
       int
@@ -27,14 +26,14 @@ vector<long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
     uploadId
   );
 
-  return queryResult.getSimpleResults<long>(0, atol);
+  return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
 bool DatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch) {
-  return dbManager->execPrepared(
+  return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "saveLicenseMatch",
       "INSERT INTO license_file (agent_fk, pfile_fk, rf_fk, rf_match_pct) VALUES ($1, $2, $3, $4)",
       int, long, long, unsigned
@@ -47,9 +46,9 @@ bool DatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId
 }
 
 long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
-  QueryResult queryResult = dbManager->execPrepared(
+  QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "queryLicenseIdForLicense",
       "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1",
       char*
@@ -57,13 +56,13 @@ long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
     rfShortName.c_str()
   );
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, atol)[0] : 0;
+  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, fo::stringToUnsignedLong)[0] : 0;
 }
 
 long DatabaseHandler::saveLicense(string rfShortName) {
-  QueryResult queryResult = dbManager->execPrepared(
+  QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
-      dbManager->getStruct_dbManager(),
+      dbManager.getStruct_dbManager(),
       "saveLicense",
       "INSERT INTO license_ref(rf_shortname, rf_text, rf_detector_type) VALUES ($1, $2, $3) RETURNING rf_pk",
       char*,
@@ -75,5 +74,5 @@ long DatabaseHandler::saveLicense(string rfShortName) {
     3
   );
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, atol)[0] : 0;
+  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, fo::stringToUnsignedLong)[0] : 0;
 }

@@ -16,30 +16,22 @@
 #include <vector>
 
 #include "libfossdbmanagerclass.hpp"
+#include "libfossAgentDatabaseHandler.hpp"
 #include "cleanEntries.hpp"
 
 #define MAX_TABLE_CREATION_RETRIES 5
 
-class CopyrightDatabaseHandler
+class CopyrightDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
-  CopyrightDatabaseHandler(DbManager _dbManager);
-  CopyrightDatabaseHandler(CopyrightDatabaseHandler&& other);
-  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
-  ~CopyrightDatabaseHandler();
+  CopyrightDatabaseHandler(DbManager manager);
   CopyrightDatabaseHandler spawn() const;
-
-  CopyrightDatabaseHandler operator =(const CopyrightDatabaseHandler&) = delete;
 
   bool createTables() const;
   bool insertInDatabase(DatabaseEntry& entry) const;
   bool insertNoResultInDatabase(long agentId, long pFileId) const;
   std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
   char* getPFileNameForFileId(unsigned long pfileId) const;
-
-  bool begin() const;
-  bool commit() const;
-  bool rollback() const;
 
 private:
   typedef struct
@@ -52,7 +44,6 @@ private:
   static const ColumnDef columns[];
   static const ColumnDef columnsDecision[];
 
-  DbManager dbManager;
   bool createTableAgentFindings() const;
   bool createTableClearing() const;
   std::string getColumnListString(const ColumnDef in[], size_t size) const;

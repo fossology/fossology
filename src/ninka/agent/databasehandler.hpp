@@ -13,22 +13,19 @@
 
 #include <string>
 #include <vector>
+#include "libfossAgentDatabaseHandler.hpp"
 #include "libfossdbmanagerclass.hpp"
 
 using namespace std;
 
-class DatabaseHandler {
+class DatabaseHandler : public fo::AgentDatabaseHandler {
  public:
-  DatabaseHandler(DbManager* dbManager);
-  ~DatabaseHandler();
+  DatabaseHandler(DbManager dbManager);
 
   vector<long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
   long queryLicenseIdForLicense(string rfShortname);
   long saveLicense(string rfShortname);
-
- private:
-  DbManager* dbManager;
 };
 
 #endif // NINKA_AGENT_DATABASE_HANDLER_HPP

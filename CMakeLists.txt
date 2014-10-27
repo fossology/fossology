@@ -89,6 +89,10 @@ set(SOURCE_FILES
     src/lib/c/sqlCopy.c
     src/lib/c/sqlCopy.h
     src/lib/c/sqlCopyTest.c
+    src/lib/cpp/libfossAgentDatabaseHandler.cc
+    src/lib/cpp/libfossAgentDatabaseHandler.hpp
+    src/lib/cpp/libfossUtils.cc
+    src/lib/cpp/libfossUtils.hpp
     src/lib/cpp/files.cc
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc
@@ -146,6 +150,20 @@ set(SOURCE_FILES
     src/monk/agent_tests/Unit/test_string_operations.c
     src/monk/agent_tests/Unit/utils.c
     src/monk/agent_tests/Unit/utils.h
+    src/ninka/agent/databasehandler.cc
+    src/ninka/agent/databasehandler.hpp
+    src/ninka/agent/licensematch.cc
+    src/ninka/agent/licensematch.hpp
+    src/ninka/agent/ninka.cc
+    src/ninka/agent/ninka.hpp
+    src/ninka/agent/ninkawrapper.cc
+    src/ninka/agent/ninkawrapper.hpp
+    src/ninka/agent/state.cc
+    src/ninka/agent/state.hpp
+    src/ninka/agent/utils.cc
+    src/ninka/agent/utils.hpp
+    src/ninka/agent_tests/Unit/run_tests.cc
+    src/ninka/agent_tests/Unit/test_ninkawrapper.cc
     src/nomos/agent/_autodata.c
     src/nomos/agent/_autodefs.h
     src/nomos/agent/_precheck.c

@@ -12,12 +12,12 @@
 #include "database.hpp"
 #include "identity.hpp"
 
-extern "C"{
+extern "C" {
 #include "libfossology.h"
 }
 
 #include <iostream>
-#include <sstream>
+#include <libfossUtils.hpp>
 
 #define RETURN_IF_FALSE(query) \
   do {\
@@ -26,20 +26,6 @@ extern "C"{
     }\
   } while(0)
 
-
-CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager _dbManager) :
-  dbManager(_dbManager)
-{
-}
-
-CopyrightDatabaseHandler::CopyrightDatabaseHandler(CopyrightDatabaseHandler&& other) :
-  dbManager(std::move(other.dbManager))
-{
-}
-
-CopyrightDatabaseHandler::~CopyrightDatabaseHandler()
-{
-}
 
 CopyrightDatabaseHandler CopyrightDatabaseHandler::spawn() const
 {
@@ -264,14 +250,6 @@ bool CopyrightDatabaseHandler::createTableClearing() const
   return true;
 }
 
-
-unsigned long stringToUnsignedLong(const char* string)
-{
-  unsigned long uLongVariable;
-  std::stringstream(string) >> uLongVariable;
-  return uLongVariable;
-}
-
 std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId)
 {
   QueryResult queryResult = dbManager.queryPrintf(
@@ -290,7 +268,7 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
     agentId
   );
 
-  return queryResult.getSimpleResults<unsigned long>(0, stringToUnsignedLong);
+  return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
 }
 
 bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long int pFileId) const
@@ -327,23 +305,13 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
   );
 }
 
-bool CopyrightDatabaseHandler::begin() const
-{
-  return dbManager.begin();
-}
-
-bool CopyrightDatabaseHandler::commit() const
-{
-  return dbManager.commit();
-}
-
-bool CopyrightDatabaseHandler::rollback() const
-{
-  return dbManager.rollback();
-}
-
 char* CopyrightDatabaseHandler::getPFileNameForFileId(unsigned long pfileId) const
 {
   return queryPFileForFileId(dbManager.getStruct_dbManager(), pfileId);
 }
 
+CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager manager) :
+  AgentDatabaseHandler(manager)
+{
+
+}
