@@ -1,6 +1,6 @@
 <phpunit>
   <testsuites>
-    <testsuite name="lib/php Tests">
+    <testsuite name="nomos/agent_tests/Functional Tests">
       <file>cli1Test.php</file>
       <file>OneShot-lgpl2.1.php</file>
       <file>OneShot-gpl3.php</file>

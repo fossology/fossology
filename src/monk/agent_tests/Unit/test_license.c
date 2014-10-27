@@ -20,7 +20,7 @@ void test_ignoreLicense_withGoodLicense() {
   License notIgnored;
   notIgnored.refId = 0;
   notIgnored.shortname = "testLicense";
-  char * text_ptr = g_strdup("this is a real license.");
+  char* text_ptr = g_strdup("this is a real license.");
   notIgnored.tokens = tokenize(text_ptr, DELIMITERS);
 
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
@@ -33,7 +33,7 @@ void test_ignoreLicense_withGoodLicenseBranch2() {
   License notIgnored;
   notIgnored.refId = 0;
   notIgnored.shortname = "testLicense";
-  char * text_ptr = g_strdup("Licence by Me."); //same token length as an ignored
+  char* text_ptr = g_strdup("Licence by Me."); //same token length as an ignored
   notIgnored.tokens = tokenize(text_ptr, DELIMITERS);
 
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
@@ -46,7 +46,7 @@ void test_ignoreLicense_withNomosLicense() {
   License notIgnored;
   notIgnored.refId = 0;
   notIgnored.shortname = "testLicense";
-  char * text_ptr = g_strdup("License by Nomos.");
+  char* text_ptr = g_strdup("License by Nomos.");
   notIgnored.tokens = tokenize(text_ptr, DELIMITERS);
 
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
@@ -59,7 +59,7 @@ void test_ignoreLicense_withIgnoredName() {
   License notIgnored;
   notIgnored.refId = 0;
   notIgnored.shortname = "Void";
-  char * text_ptr = g_strdup("a good license text");
+  char* text_ptr = g_strdup("a good license text");
   notIgnored.tokens = tokenize(text_ptr, DELIMITERS);
 
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
@@ -72,11 +72,11 @@ void test_ignoreLicense_withIgnoredName() {
   free(text_ptr);
 }
 
-void assertTokens(GArray * tokens, ...) {
+void assertTokens(GArray* tokens, ...) {
   va_list expptr;
   va_start(expptr, tokens);
 
-  char * expected = va_arg(expptr, char *);
+  char* expected = va_arg(expptr, char*);
   size_t i = 0;
   while (expected != NULL) {
     if (i >= tokens->len) {
@@ -90,7 +90,7 @@ void assertTokens(GArray * tokens, ...) {
     if (token.hashedContent != hash(expected)) {
       printf("%u != hash(%s)\n", token.hashedContent, expected);
     }
-    expected = va_arg(expptr, char *);
+    expected = va_arg(expptr, char*);
     i++;
   }
 
@@ -98,22 +98,22 @@ void assertTokens(GArray * tokens, ...) {
 }
 
 void test_extractLicenses_Ignored() {
-  PGconn * dbConnection = dbRealConnect();
+  PGconn* dbConnection = dbRealConnect();
   if (!dbConnection) {
     CU_FAIL("no db connection");
     return;
   }
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
 
-  char * noLic = "No_license_found";
+  char* noLic = "No_license_found";
 
-  PGresult * licensesResult = fo_dbManager_Exec_printf(dbManager,
+  PGresult* licensesResult = fo_dbManager_Exec_printf(dbManager,
           "select rf_pk, rf_shortname from license_ref where rf_shortname = '%s'",
           noLic);
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray * licenses = extractLicenses(dbManager, licensesResult);
+  GArray* licenses = extractLicenses(dbManager, licensesResult);
   CU_ASSERT_EQUAL(licenses->len, 0);
 
   freeLicenseArray(licenses);
@@ -124,22 +124,22 @@ void test_extractLicenses_Ignored() {
 }
 
 void test_extractLicenses_One() {
-  PGconn * dbConnection = dbRealConnect();
+  PGconn* dbConnection = dbRealConnect();
   if (!dbConnection) {
     CU_FAIL("no db connection");
     return;
   }
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
 
-  char * gpl3 = "GPL-3.0";
+  char* gpl3 = "GPL-3.0";
 
-  PGresult * licensesResult = fo_dbManager_Exec_printf(dbManager,
+  PGresult* licensesResult = fo_dbManager_Exec_printf(dbManager,
           "select rf_pk, rf_shortname from license_ref where rf_shortname = '%s'",
           gpl3);
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray * licenses = extractLicenses(dbManager, licensesResult);
+  GArray* licenses = extractLicenses(dbManager, licensesResult);
   CU_ASSERT_EQUAL(licenses->len, 1);
 
   License license = g_array_index(licenses, License, 0);
@@ -156,24 +156,24 @@ void test_extractLicenses_One() {
 }
 
 void test_extractLicenses_Two() {
-  PGconn * dbConnection = dbRealConnect();
+  PGconn* dbConnection = dbRealConnect();
   if (!dbConnection) {
     CU_FAIL("no db connection");
     return;
   }
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
 
-  char * gpl3 = "GPL-3.0";
-  char * gpl2 = "GPL-2.0";
+  char* gpl3 = "GPL-3.0";
+  char* gpl2 = "GPL-2.0";
 
-  PGresult * licensesResult = fo_dbManager_Exec_printf(dbManager,
+  PGresult* licensesResult = fo_dbManager_Exec_printf(dbManager,
           "select rf_pk, rf_shortname from license_ref "
           "where rf_shortname = '%s' or rf_shortname = '%s'",
           gpl3, gpl2);
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray * licenses = extractLicenses(dbManager, licensesResult);
+  GArray* licenses = extractLicenses(dbManager, licensesResult);
   CU_ASSERT_EQUAL(licenses->len, 2);
 
   sortLicenses(licenses);

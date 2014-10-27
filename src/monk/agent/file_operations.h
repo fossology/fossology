@@ -10,12 +10,11 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 #ifndef MONK_AGENT_FILE_OPERATIONS_H
-#define	MONK_AGENT_FILE_OPERATIONS_H
+#define MONK_AGENT_FILE_OPERATIONS_H
 
 #include <glib.h>
 
-char * readFile(char * pFileName);
-GArray * readTokensFromFile(char * fileName, char * delimiters);
+char* readFile(char* pFileName);
+GArray* readTokensFromFile(char* fileName, char* delimiters);
 
-#endif	/* MONK_AGENT_FILE_OPERATIONS_H */
-
+#endif // MONK_AGENT_FILE_OPERATIONS_H

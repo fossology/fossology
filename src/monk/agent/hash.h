@@ -8,8 +8,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef HASH_H
-#define	HASH_H
+
+#ifndef MONK_AGENT_HASH_H
+#define MONK_AGENT_HASH_H
 
 #include <stdint.h>
 
@@ -19,5 +20,4 @@ uint32_t hash_init();
 
 void hash_add(const char* value, uint32_t* currentHash);
 
-#endif	/* HASH_H */
-
+#endif // MONK_AGENT_HASH_H

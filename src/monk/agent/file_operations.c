@@ -21,8 +21,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define BUFFSIZE 4096
 
-GArray * readTokensFromFile(char * fileName, char * delimiters) {
-  GArray * tokens = tokens_new();
+GArray* readTokensFromFile(char* fileName, char* delimiters) {
+  GArray* tokens = tokens_new();
 
   int fd = open(fileName, O_RDONLY);
   if (fd < 0) {
@@ -30,7 +30,7 @@ GArray * readTokensFromFile(char * fileName, char * delimiters) {
     return tokens;
   }
 
-  Token * remainder = NULL;
+  Token* remainder = NULL;
 
   char buffer[BUFFSIZE];
   int n;
@@ -51,8 +51,8 @@ GArray * readTokensFromFile(char * fileName, char * delimiters) {
   return tokens;
 }
 
-char * readFile(char * fileName) {
-  char * result;
+char* readFile(char* fileName) {
+  char* result;
   int fd = open(fileName, O_RDONLY);
   if (fd < 0) {
     printf("FATAL: can not open %s\n", fileName);
@@ -73,7 +73,7 @@ char * readFile(char * fileName) {
   }
 
   size_t fileSize = statBuf.st_size + 1;
-  char * buffer = malloc(fileSize);
+  char* buffer = malloc(fileSize);
   result = buffer;
   size_t n = 0;
   size_t rem = fileSize-1;

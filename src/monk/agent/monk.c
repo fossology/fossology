@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <libfossology.h>
@@ -43,7 +44,7 @@ void queryAgentId(MonkState* state) {
     bail(state, 1);
 }
 
-inline int processUploadId(MonkState* state, int uploadId, GArray* licenses){
+inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
 
   if (!fileIdResult)

@@ -28,7 +28,6 @@ CopyrightDatabaseHandler::CopyrightDatabaseHandler() {
 CopyrightDatabaseHandler::~CopyrightDatabaseHandler() {
 }
 
-
 std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) {
   std::string result;
   for (size_t i=0; i<size; ++i) {
