@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include "libfossAgentDatabaseHandler.hpp"
 #include "libfossdbmanagerclass.hpp"
 
@@ -26,8 +27,13 @@ public:
 
   vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
-  unsigned long queryLicenseIdForLicense(string rfShortname);
-  unsigned long saveLicense(string rfShortname);
+
+  unsigned long getLicenseIdForName(string const & rfShortName);
+
+private:
+  unsigned long selectOrInsertLicenseIdForName(string rfShortname);
+
+  std::unordered_map<string,long> licenseRefCache;
 };
 
 #endif // NINKA_AGENT_DATABASE_HANDLER_HPP
