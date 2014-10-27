@@ -94,14 +94,14 @@ void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHa
   }
 }
 
-void matchFileWithLicenses(fo::File& file, State& state, NinkaDatabaseHandler& databaseHandler) {
+void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler) {
   string ninkaResult = scanFileWithNinka(state, file);
   vector<string> ninkaLicenseNames = extractLicensesFromNinkaResult(ninkaResult);
   vector<LicenseMatch> matches = createMatches(ninkaLicenseNames);
   saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
 }
 
-bool saveLicenseMatchesToDatabase(State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
+bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
   if (!databaseHandler.begin())
     return false;
 
