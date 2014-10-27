@@ -15,25 +15,26 @@ int main(int argc, char** argv) {
   /* to initialize the scheduler connection */
 
   DbManager dbManager(&argc, argv);
+  NinkaDatabaseHandler databaseHandler(dbManager);
 
-  State* state = getState(dbManager);
+  State state = getState(dbManager);
 
   while (fo_scheduler_next() != NULL) {
     int uploadId = atoi(fo_scheduler_current());
 
     if (uploadId == 0) continue;
 
-    int arsId = writeARS(state, 0, uploadId, 0);
+    int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
     if (!processUploadId(state, uploadId))
-      bail(state, 2);
+      bail(2);
 
     fo_scheduler_heart(1);
     writeARS(state, arsId, uploadId, 1);
   }
   fo_scheduler_heart(0);
 
-  /* after cleaning up agent, disconnect from */
-  /* the scheduler, this doesn't return */
-  bail(state, 0);
+  /* do not use bail, as it would prevent the destructors from running */
+  fo_scheduler_disconnect(0);
+  return 0;
 }

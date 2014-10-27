@@ -1,6 +1,10 @@
 #include <iostream>
-#include <libfossagent.h>
 #include "libfossAgentDatabaseHandler.hpp"
+
+extern "C" {
+#include "libfossagent.h"
+#include "libfossdb.h"
+}
 
 fo::AgentDatabaseHandler::AgentDatabaseHandler(DbManager _dbManager) :
   dbManager(_dbManager)
