@@ -15,111 +15,135 @@ extern "C" {
 #include "libfossscheduler.h"
 }
 
-DbManager::DbManager(int *argc, char **argv) {
-    fo_dbManager *_dbManager;
-    fo_scheduler_connect_dbMan(argc, argv, &_dbManager);
+DbManager::DbManager(int* argc, char** argv)
+{
+  fo_dbManager* _dbManager;
+  fo_scheduler_connect_dbMan(argc, argv, &_dbManager);
 
-    dbManager = unptr::shared_ptr<fo_dbManager>(_dbManager, DbManagerStructDeleter());
+  dbManager = unptr::shared_ptr<fo_dbManager>(_dbManager, DbManagerStructDeleter());
 }
 
-DbManager::DbManager(fo_dbManager *dbManager)
-        : dbManager(unptr::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter())) {
+DbManager::DbManager(fo_dbManager* dbManager)
+  : dbManager(unptr::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter()))
+{
 }
 
-DbManager::DbManager(DbManager &&other) : dbManager(std::move(other.dbManager)) {
+DbManager::DbManager(DbManager&& other) : dbManager(std::move(other.dbManager))
+{
 }
 
-DbManager::DbManager(const DbManager &other) : dbManager(other.dbManager) {
+DbManager::DbManager(const DbManager& other) : dbManager(other.dbManager)
+{
 
 }
 
-PGconn* DbManager::getConnection() const {
-    return fo_dbManager_getWrappedConnection(getStruct_dbManager());
+PGconn* DbManager::getConnection() const
+{
+  return fo_dbManager_getWrappedConnection(getStruct_dbManager());
 }
 
-DbManager::~DbManager() {
+DbManager::~DbManager()
+{
 }
 
-DbManager DbManager::spawn() const {
-    return DbManager(fo_dbManager_fork(getStruct_dbManager()));
+DbManager DbManager::spawn() const
+{
+  return DbManager(fo_dbManager_fork(getStruct_dbManager()));
 }
 
-fo_dbManager *DbManager::getStruct_dbManager() const {
-    return dbManager.get();
+fo_dbManager* DbManager::getStruct_dbManager() const
+{
+  return dbManager.get();
 }
 
-bool DbManager::tableExists(const char *tableName) const {
-    return fo_dbManager_tableExists(getStruct_dbManager(), tableName);
+bool DbManager::tableExists(const char* tableName) const
+{
+  return fo_dbManager_tableExists(getStruct_dbManager(), tableName);
 }
 
-bool DbManager::sequenceExists(const char *name) const {
-    return fo_dbManager_exists(getStruct_dbManager(), "sequence", name);
+bool DbManager::sequenceExists(const char* name) const
+{
+  return fo_dbManager_exists(getStruct_dbManager(), "sequence", name);
 }
 
-bool DbManager::begin() const {
-    return fo_dbManager_begin(getStruct_dbManager());
+bool DbManager::begin() const
+{
+  return fo_dbManager_begin(getStruct_dbManager());
 }
 
-bool DbManager::commit() const {
-    return fo_dbManager_commit(getStruct_dbManager());
+bool DbManager::commit() const
+{
+  return fo_dbManager_commit(getStruct_dbManager());
 }
 
-bool DbManager::rollback() const {
-    return fo_dbManager_rollback(getStruct_dbManager());
+bool DbManager::rollback() const
+{
+  return fo_dbManager_rollback(getStruct_dbManager());
 }
 
-QueryResult DbManager::queryPrintf(const char *queryFormat, ...) const {
-    va_list args;
-    va_start(args, queryFormat);
-    char *queryString = g_strdup_vprintf(queryFormat, args);
-    va_end(args);
+QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const
+{
+  va_list args;
+  va_start(args, queryFormat);
+  char* queryString = g_strdup_vprintf(queryFormat, args);
+  va_end(args);
 
-    QueryResult result(fo_dbManager_Exec_printf(getStruct_dbManager(), queryString));
+  QueryResult result(fo_dbManager_Exec_printf(getStruct_dbManager(), queryString));
 
-    g_free(queryString);
-    return result;
+  g_free(queryString);
+  return result;
 }
 
-QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement *stmt, ...) const {
-    va_list args;
-    va_start(args, stmt);
-    PGresult *pgResult = fo_dbManager_ExecPreparedv(stmt, args);
-    va_end(args);
+QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const
+{
+  va_list args;
+  va_start(args, stmt);
+  PGresult* pgResult = fo_dbManager_ExecPreparedv(stmt, args);
+  va_end(args);
 
-    return QueryResult(pgResult);
+  return QueryResult(pgResult);
 }
 
-QueryResult::QueryResult(PGresult *pgResult) : ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult)) {
+QueryResult::QueryResult(PGresult* pgResult) : ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult))
+{
 };
 
-QueryResult::QueryResult(QueryResult &&other) : ptr(std::move(other.ptr)) {
+QueryResult::QueryResult(QueryResult&& other) : ptr(std::move(other.ptr))
+{
 };
 
-bool QueryResult::isFailed() const {
-    return ptr.get() == NULL;
+bool QueryResult::isFailed() const
+{
+  return ptr.get() == NULL;
 }
 
-QueryResult::operator bool() const {
-    return !isFailed();
+QueryResult::operator bool() const
+{
+  return !isFailed();
 }
 
-int QueryResult::getRowCount() const {
-    if (ptr) {
-        return PQntuples(ptr.get());
+int QueryResult::getRowCount() const
+{
+  if (ptr)
+  {
+    return PQntuples(ptr.get());
+  }
+
+  return -1;
+}
+
+std::vector<std::string> QueryResult::getRow(int i) const
+{
+  std::vector<std::string> result;
+  PGresult* r = ptr.get();
+
+  if (i >= 0 && i < getRowCount())
+  {
+    for (int j = 0; j < PQnfields(r); j++)
+    {
+      result.push_back(std::string(PQgetvalue(r, i, j)));
     }
+  }
 
-    return -1;
-}
-
-std::vector<std::string> QueryResult::getRow(int i) const {
-    std::vector<std::string> result;
-    PGresult *r = ptr.get();
-
-    if (i >= 0 && i < getRowCount()) {
-        for (int j = 0; j < PQnfields(r); j++) {
-            result.push_back(std::string(PQgetvalue(r, i, j)));
-        }
-    }
-
-    return result;
+  return result;
 }

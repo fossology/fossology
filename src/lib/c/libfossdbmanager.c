@@ -23,24 +23,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <ctype.h>
 #include <libfossdbmanager.h>
-#include <stdint.h>
-#include <stddef.h>
 #include <libfossdb.h>
 
-typedef struct {
+typedef struct
+{
   int type;
   char* name;
   char* fmt;
 } param;
 
-struct fo_dbmanager_preparedstatement {
+struct fo_dbmanager_preparedstatement
+{
   fo_dbManager* dbManager;
   param* params;
   char* name;
   int paramc;
 };
 
-struct fo_dbmanager {
+struct fo_dbmanager
+{
   PGconn* dbConnection;
   GHashTable* cachedPrepared;
   char* dbConf;
@@ -67,20 +68,23 @@ struct fo_dbmanager {
   } while(0)
 #endif
 
-static void cachedPrepared_free(gpointer ptr) {
+static void cachedPrepared_free(gpointer ptr)
+{
   fo_dbManager_PreparedStatement* stmt = ptr;
   free(stmt->name);
   free(stmt->params);
   free(stmt);
 }
 
-fo_dbManager* fo_dbManager_new_withConf(PGconn* dbConnection, const char* dbConf){
+fo_dbManager* fo_dbManager_new_withConf(PGconn* dbConnection, const char* dbConf)
+{
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
   dbManager->dbConf = g_strdup(dbConf);
   return dbManager;
 }
 
-fo_dbManager* fo_dbManager_new(PGconn* dbConnection){
+fo_dbManager* fo_dbManager_new(PGconn* dbConnection)
+{
   fo_dbManager* result = malloc(sizeof(fo_dbManager));
 
   result->cachedPrepared = g_hash_table_new_full(
@@ -96,38 +100,46 @@ fo_dbManager* fo_dbManager_new(PGconn* dbConnection){
   return result;
 }
 
-fo_dbManager* fo_dbManager_fork(fo_dbManager* dbManager) {
+fo_dbManager* fo_dbManager_fork(fo_dbManager* dbManager)
+{
   fo_dbManager* result = NULL;
   char* error = NULL;
   PGconn* newDbConnection = fo_dbconnect(dbManager->dbConf, &error);
-  if (newDbConnection) {
+  if (newDbConnection)
+  {
     result = fo_dbManager_new_withConf(newDbConnection, dbManager->dbConf);
-  } else {
+  } else
+  {
     LOG_FATAL("Can not open connection\n%s\nWhile forking dbManager using config: '%s'\n",
-              error, dbManager->dbConf);
+      error, dbManager->dbConf);
     free(error);
   }
   return result;
 }
 
-int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName) {
+int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName)
+{
   if (dbManager->logFile)
     fclose(dbManager->logFile);
 
-  if (logFileName) {
+  if (logFileName)
+  {
     dbManager->logFile = fopen(logFileName, "a");
     return dbManager->logFile != NULL;
-  } else {
+  } else
+  {
     dbManager->logFile = NULL;
     return 1;
   }
 }
 
-PGconn* fo_dbManager_getWrappedConnection(fo_dbManager* dbManager) {
+PGconn* fo_dbManager_getWrappedConnection(fo_dbManager* dbManager)
+{
   return dbManager->dbConnection;
 }
 
-void fo_dbManager_free(fo_dbManager* dbManager) {
+void fo_dbManager_free(fo_dbManager* dbManager)
+{
   g_hash_table_unref(dbManager->cachedPrepared);
   if (dbManager->dbConf)
     free(dbManager->dbConf);
@@ -136,16 +148,19 @@ void fo_dbManager_free(fo_dbManager* dbManager) {
   free(dbManager);
 }
 
-void fo_dbManager_finish(fo_dbManager* dbManager) {
+void fo_dbManager_finish(fo_dbManager* dbManager)
+{
   PQfinish(dbManager->dbConnection);
   fo_dbManager_free(dbManager);
 }
 
-static char* array_print(char** parameters, int count) {
+static char* array_print(char** parameters, int count)
+{
   GString* resultCreator = g_string_new("{");
   int i;
-  for (i=0; i<count; i++) {
-    if (i>0)
+  for (i = 0; i < count; i++)
+  {
+    if (i > 0)
       g_string_append(resultCreator, ", ");
     g_string_append_printf(resultCreator, "[%d]='%s'", i, parameters[i]);
   }
@@ -153,9 +168,10 @@ static char* array_print(char** parameters, int count) {
   return g_string_free(resultCreator, FALSE);
 }
 
-static void array_free(char** parameters, int count) {
- int i;
-  for (i=0; i<count; i++)
+static void array_free(char** parameters, int count)
+{
+  int i;
+  for (i = 0; i < count; i++)
     free(parameters[i]);
   free(parameters);
 }
@@ -163,44 +179,47 @@ static void array_free(char** parameters, int count) {
 param supported[] = {
 #define ADDSUPPORTED(n, type, fmt) \
   {n, #type, fmt},
-ADDSUPPORTED(0, long, "%ld")
-ADDSUPPORTED(1, int, "%d")
-ADDSUPPORTED(2, char*, "%s")
-ADDSUPPORTED(3, size_t, "%zu")
-ADDSUPPORTED(4, unsigned, "%u")
-ADDSUPPORTED(5, unsigned int, "%u")
-ADDSUPPORTED(6, unsigned long, "%lu")
+  ADDSUPPORTED(0, long, "%ld")
+  ADDSUPPORTED(1, int, "%d")
+  ADDSUPPORTED(2, char*, "%s")
+  ADDSUPPORTED(3, size_t, "%zu")
+  ADDSUPPORTED(4, unsigned, "%u")
+  ADDSUPPORTED(5, unsigned int, "%u")
+  ADDSUPPORTED(6, unsigned long, "%lu")
 /* remember to keep these synchronized in buildStringArray() */
 #undef ADDSUPPORTED
   {0, NULL, NULL},
 };
 
-static inline char** buildStringArray(int paramCount, param* params, va_list vars) {
-  char** result = malloc(sizeof(char*)*paramCount);
+static inline char** buildStringArray(int paramCount, param* params, va_list vars)
+{
+  char** result = malloc(sizeof(char*) * paramCount);
   int i;
-  for (i=0; i<paramCount; i++){
+  for (i = 0; i < paramCount; i++)
+  {
     param currentParamDesc = params[i];
     int type = currentParamDesc.type;
     char* format = currentParamDesc.fmt;
-    switch (type) {
-#define ADDCASE(n,type) \
+    switch (type)
+    {
+#define ADDCASE(n, type) \
       case n:\
         { \
           type t = va_arg(vars, type);\
           result[i] = g_strdup_printf(format, t);\
         }\
         break;
-      ADDCASE(0,long)
-      ADDCASE(1,int)
-      ADDCASE(2,char*)
-      ADDCASE(3,size_t)
-      ADDCASE(4,unsigned)
-      ADDCASE(5,unsigned int)
-      ADDCASE(6,unsigned long)
+      ADDCASE(0, long)
+      ADDCASE(1, int)
+      ADDCASE(2, char*)
+      ADDCASE(3, size_t)
+      ADDCASE(4, unsigned)
+      ADDCASE(5, unsigned int)
+      ADDCASE(6, unsigned long)
 #undef ADDCASE
       default:
         printf("internal error on typeid=%d\n", type);
-        array_free(result, i-1);
+        array_free(result, i - 1);
         return NULL;
     }
   }
@@ -208,63 +227,74 @@ static inline char** buildStringArray(int paramCount, param* params, va_list var
   return result;
 }
 
-char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatement) {
+char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatement)
+{
   GString* resultCreator = g_string_new("");
   g_string_append_printf(resultCreator,
-                         "{ name: '%s', parameterTypes: [",
-                         preparedStatement->name);
+    "{ name: '%s', parameterTypes: [",
+    preparedStatement->name);
   int i;
-  for (i=0; i<preparedStatement->paramc; i++) {
+  for (i = 0; i < preparedStatement->paramc; i++)
+  {
     param current = preparedStatement->params[i];
-    if (i>0) g_string_append(resultCreator, ", ");
+    if (i > 0) g_string_append(resultCreator, ", ");
     g_string_append_printf(resultCreator,
-                           "[%d]={%s, %s}",
-                           i, current.name, current.fmt);
+      "[%d]={%s, %s}",
+      i, current.name, current.fmt);
   }
   g_string_append_printf(resultCreator, "]}");
   return g_string_free(resultCreator, FALSE);
 }
 
-int fo_dbManager_begin(fo_dbManager* dbManager) {
+int fo_dbManager_begin(fo_dbManager* dbManager)
+{
   int result = 0;
   PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "BEGIN");
-  if (queryResult) {
+  if (queryResult)
+  {
     result = 1;
     PQclear(queryResult);
   }
   return result;
 }
 
-int fo_dbManager_commit(fo_dbManager* dbManager) {
+int fo_dbManager_commit(fo_dbManager* dbManager)
+{
   int result = 0;
   PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "COMMIT");
-  if (queryResult) {
+  if (queryResult)
+  {
     result = 1;
     PQclear(queryResult);
   }
   return result;
 }
 
-int fo_dbManager_rollback(fo_dbManager* dbManager) {
+int fo_dbManager_rollback(fo_dbManager* dbManager)
+{
   int result = 0;
   PGresult* queryResult = fo_dbManager_Exec_printf(dbManager, "ROLLBACK");
-  if (queryResult) {
+  if (queryResult)
+  {
     result = 1;
     PQclear(queryResult);
   }
   return result;
 }
 
-int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName) {
+int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName)
+{
   return fo_dbManager_exists(dbManager, "table", tableName);
 }
 
-int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name) {
+int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name)
+{
   int result = 0;
 
   char* escapedName = fo_dbManager_StringEscape(dbManager, name);
 
-  if (escapedName) {
+  if (escapedName)
+  {
     PGresult* queryResult = fo_dbManager_Exec_printf(
       dbManager,
       "select count(*) from information_schema.%ss where %s_catalog='%s' and %s_name='%s'",
@@ -274,9 +304,12 @@ int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* n
       escapedName
     );
 
-    if (queryResult) {
-      if (PQntuples(queryResult)==1) {
-        if (atol(PQgetvalue(queryResult, 0, 0)) == 1) {
+    if (queryResult)
+    {
+      if (PQntuples(queryResult) == 1)
+      {
+        if (atol(PQgetvalue(queryResult, 0, 0)) == 1)
+        {
           result = 1;
         }
       }
@@ -288,7 +321,8 @@ int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* n
   return result;
 }
 
-PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...) {
+PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...)
+{
   char* sqlQueryString;
   PGconn* dbConnection = dbManager->dbConnection;
 
@@ -296,7 +330,8 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
   va_start(argptr, sqlQueryStringFormat);
   sqlQueryString = g_strdup_vprintf(sqlQueryStringFormat, argptr);
   va_end(argptr);
-  if (sqlQueryString == NULL) {
+  if (sqlQueryString == NULL)
+  {
     return NULL;
   }
 
@@ -309,7 +344,8 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
     PQclear(result);
     return NULL;
   }
-  if (PQresultStatus(result) == PGRES_FATAL_ERROR) {
+  if (PQresultStatus(result) == PGRES_FATAL_ERROR)
+  {
     LOG_ERROR("%sOn: %s\n", PQresultErrorMessage(result), sqlQueryString);
     g_free(sqlQueryString);
     PQclear(result);
@@ -320,21 +356,27 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
   return result;
 }
 
-char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string) {
+char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string)
+{
   size_t length = strlen(string);
-  char* dest = malloc(2*length + 1);
+  char* dest = malloc(2 * length + 1);
 
   int err;
   PQescapeStringConn(dbManager->dbConnection, dest, string, length, &err);
-  if (err==0) {
+  if (err == 0)
+  {
     return dest;
-  } else {
+  } else
+  {
     free(dest);
     return NULL;
   }
 }
-PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...) {
-  if (!preparedStatement) {
+
+PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...)
+{
+  if (!preparedStatement)
+  {
     return NULL;
   }
   va_list vars;
@@ -344,8 +386,11 @@ PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStat
 
   return result;
 }
-PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args) {
-  if (!preparedStatement) {
+
+PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args)
+{
+  if (!preparedStatement)
+  {
     return NULL;
   }
 
@@ -362,26 +407,28 @@ PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedSta
   free(printedStatement);
 #endif
   PGresult* result = PQexecPrepared(dbConnection,
-                        preparedStatement->name,
-                        preparedStatement->paramc,
-                        (const char * const *) parameters,
-                        NULL,
-                        NULL,
-                        0);
+    preparedStatement->name,
+    preparedStatement->paramc,
+    (const char* const*) parameters,
+    NULL,
+    NULL,
+    0);
 
-  if (!result) {
+  if (!result)
+  {
     char* printedStatement = fo_dbManager_printStatement(preparedStatement);
     LOG_FATAL("%sExecuting prepared '%s' with params %s\n",
-              PQerrorMessage(dbConnection),
-              printedStatement,
-              array_print(parameters, preparedStatement->paramc));
+      PQerrorMessage(dbConnection),
+      printedStatement,
+      array_print(parameters, preparedStatement->paramc));
     free(printedStatement);
-  } else if (PQresultStatus(result) == PGRES_FATAL_ERROR) {
+  } else if (PQresultStatus(result) == PGRES_FATAL_ERROR)
+  {
     char* printedStatement = fo_dbManager_printStatement(preparedStatement);
     LOG_ERROR("%sExecuting prepared '%s' with params %s\n",
-              PQresultErrorMessage(result),
-              printedStatement,
-              array_print(parameters, preparedStatement->paramc));
+      PQresultErrorMessage(result),
+      printedStatement,
+      array_print(parameters, preparedStatement->paramc));
     free(printedStatement);
 
     PQclear(result);
@@ -393,16 +440,20 @@ PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedSta
   return result;
 }
 
-static inline int parseParamStr_equals(const char* a, const char* b, size_t bLength ){
+static inline int parseParamStr_equals(const char* a, const char* b, size_t bLength)
+{
   const char* ptrA = a;
   const char* ptrB = b;
   size_t lenB = 0;
 
-  while (*ptrA && lenB < bLength) {
-    if (isspace(*ptrA)) {
-      if(!isspace(*ptrB))
+  while (*ptrA && lenB < bLength)
+  {
+    if (isspace(*ptrA))
+    {
+      if (!isspace(*ptrB))
         return 0;
-      while (isspace(*ptrB) && lenB < bLength) {
+      while (isspace(*ptrB) && lenB < bLength)
+      {
         ++ptrB;
         ++lenB;
       }
@@ -418,10 +469,13 @@ static inline int parseParamStr_equals(const char* a, const char* b, size_t bLen
   return (!(*ptrA) && (lenB == bLength));
 }
 
-static inline int parseParamStr_set(const char* type, size_t length, param* dest) {
+static inline int parseParamStr_set(const char* type, size_t length, param* dest)
+{
   param* ptr = supported;
-  while (ptr->fmt) {
-    if (parseParamStr_equals(ptr->name, type, length)) {
+  while (ptr->fmt)
+  {
+    if (parseParamStr_equals(ptr->name, type, length))
+    {
       *dest = *ptr;
       return 1;
     }
@@ -430,7 +484,8 @@ static inline int parseParamStr_set(const char* type, size_t length, param* dest
   return 0;
 }
 
-int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params) {
+int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params)
+{
   *params = g_array_new(TRUE, FALSE, sizeof(param));
   GArray* paramsG = *params;
 
@@ -439,14 +494,16 @@ int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params) {
   const char* currentStart;
   const char* nextStart = ptr;
   int success = 1;
-  while (*ptr) {
+  while (*ptr)
+  {
     // eat all starting whitespace
     while (*ptr && (isspace(*ptr)))
       ++ptr;
     currentStart = ptr;
     currentLength = 0;
     // go till the next comma
-    while (*ptr && *ptr != ',') {
+    while (*ptr && *ptr != ',')
+    {
       ++currentLength;
       ++ptr;
     }
@@ -457,7 +514,8 @@ int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params) {
       break;
 
     --ptr;
-    while (ptr != currentStart && isspace(*ptr)) {
+    while (ptr != currentStart && isspace(*ptr))
+    {
       --currentLength;
       --ptr;
     }
@@ -465,9 +523,11 @@ int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params) {
     // we found a real token: add it
     {
       param next;
-      if (parseParamStr_set(currentStart, currentLength, &next)) {
+      if (parseParamStr_set(currentStart, currentLength, &next))
+      {
         g_array_append_val(paramsG, next);
-      } else {
+      } else
+      {
         success = 0;
         break;
       }
@@ -489,7 +549,8 @@ int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params) {
   return success;
 }
 
-static inline int parseParamStr(fo_dbManager_PreparedStatement* statement, const char* paramtypes) {
+static inline int parseParamStr(fo_dbManager_PreparedStatement* statement, const char* paramtypes)
+{
   GArray* paramsG;
   int success = fo_dbManager_parseParamStr(paramtypes, &paramsG);
 
@@ -500,11 +561,13 @@ static inline int parseParamStr(fo_dbManager_PreparedStatement* statement, const
 
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(
   fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes
-){
+)
+{
   GHashTable* cachedPrepared = dbManager->cachedPrepared;
   fo_dbManager_PreparedStatement* cached = g_hash_table_lookup(cachedPrepared, name);
 
-  if (cached) {
+  if (cached)
+  {
     LOG_DEBUG("returning cached statement '%s'\n", cached->name);
     return cached;
   }
@@ -517,39 +580,46 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(
   result->name = g_strdup(name);
 
   int failure = 0;
-  if (parseParamStr(result, paramtypes)) {
+  if (parseParamStr(result, paramtypes))
+  {
     PGresult* prepareResult = PQprepare(dbConnection, result->name, query, 0, NULL);
 
-    if (!prepareResult) {
+    if (!prepareResult)
+    {
       char* printedStatement = fo_dbManager_printStatement(result);
       LOG_FATAL("%sPreparing of '%s' AS '%s'\n",
-                PQerrorMessage(dbConnection),
-                printedStatement,
-                query);
+        PQerrorMessage(dbConnection),
+        printedStatement,
+        query);
       free(printedStatement);
       failure = 1;
-    } else {
-      if (PQresultStatus(prepareResult) != PGRES_COMMAND_OK) {
+    } else
+    {
+      if (PQresultStatus(prepareResult) != PGRES_COMMAND_OK)
+      {
         char* printedStatement = fo_dbManager_printStatement(result);
         LOG_ERROR("%sPreparing of '%s' AS '%s'\n",
-                  PQresultErrorMessage(prepareResult),
-                  printedStatement,
-                  query);
+          PQresultErrorMessage(prepareResult),
+          printedStatement,
+          query);
         free(printedStatement);
         failure = 1;
       }
       PQclear(prepareResult);
     }
-  } else {
+  } else
+  {
     LOG_FATAL("dbManager could not comprehend parameter types '%s'\n"
-              "Trying to prepare '%s' as '%s'\n", paramtypes, name, query);
+      "Trying to prepare '%s' as '%s'\n", paramtypes, name, query);
     failure = 1;
   }
 
-  if (failure) {
+  if (failure)
+  {
     cachedPrepared_free(result);
     result = NULL;
-  } else {
+  } else
+  {
     g_hash_table_insert(cachedPrepared, result->name, result);
   }
 

@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 namespace fo
 {
-  class AgentDatabaseHandler {
+  class AgentDatabaseHandler
+  {
 
   protected:
     DbManager dbManager;

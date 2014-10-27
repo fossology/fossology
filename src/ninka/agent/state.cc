@@ -10,10 +10,13 @@
 
 #include "state.hpp"
 
-State::State(int agentId):
-    agentId(agentId) {}
+State::State(int agentId) :
+  agentId(agentId)
+{
+}
 
-int State::getAgentId() const {
+int State::getAgentId() const
+{
   return agentId;
 };
 

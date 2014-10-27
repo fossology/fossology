@@ -16,13 +16,14 @@
 
 using namespace std;
 
-class State {
- public:
+class State
+{
+public:
   State(int agentId);
 
   int getAgentId() const;
 
- private:
+private:
   int agentId;
 };
 

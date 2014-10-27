@@ -12,12 +12,14 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
-State getState(DbManager& dbManager) {
+State getState(DbManager& dbManager)
+{
   int agentId = queryAgentId(dbManager);
   return State(agentId);
 }
 
-int queryAgentId(DbManager& dbManager) {
+int queryAgentId(DbManager& dbManager)
+{
   char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
   char* agentRevision;
@@ -34,7 +36,8 @@ int queryAgentId(DbManager& dbManager) {
   return agentId;
 }
 
-int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager) {
+int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager)
+{
   PGconn* connection = dbManager.getConnection();
   int agentId = state.getAgentId();
 
@@ -47,10 +50,12 @@ void bail(int exitval)
   exit(exitval);
 }
 
-bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseHandler) {
+bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseHandler)
+{
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
-  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
+  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it)
+  {
     unsigned long pFileId = *it;
 
     if (pFileId == 0)
@@ -64,7 +69,8 @@ bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseH
   return true;
 }
 
-void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
+void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+{
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
   if (!pFile)
@@ -94,25 +100,29 @@ void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHa
   }
 }
 
-void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler) {
+void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler)
+{
   string ninkaResult = scanFileWithNinka(state, file);
   vector<string> ninkaLicenseNames = extractLicensesFromNinkaResult(ninkaResult);
   vector<LicenseMatch> matches = createMatches(ninkaLicenseNames);
   saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
 }
 
-bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
+bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+{
   if (!databaseHandler.begin())
     return false;
 
-  for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+  for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it)
+  {
     const LicenseMatch& match = *it;
 
     int agentId = state.getAgentId();
     long refId = getLicenseId(match.getLicenseName(), databaseHandler);
     unsigned percent = match.getPercentage();
 
-    if (!databaseHandler.saveLicenseMatch(agentId, pFileId, refId, percent)) {
+    if (!databaseHandler.saveLicenseMatch(agentId, pFileId, refId, percent))
+    {
       databaseHandler.rollback();
       return false;
     };
@@ -126,7 +136,8 @@ long getLicenseId(string rfShortname, NinkaDatabaseHandler& databaseHandler)
 {
   long licenseId;
 
-  if (rfShortname.length() == 0) {
+  if (rfShortname.length() == 0)
+  {
     cout << "getLicenseId() passed empty license name" << endl;
     bail(1);
   }

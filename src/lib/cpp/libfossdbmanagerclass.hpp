@@ -24,14 +24,17 @@ extern "C" {
 
 class QueryResult;
 
-class DbManagerStructDeleter {
+class DbManagerStructDeleter
+{
 public:
-  void operator()(fo_dbManager* d) {
+  void operator ()(fo_dbManager* d)
+  {
     fo_dbManager_finish(d);
   }
 };
 
-class DbManager {
+class DbManager
+{
 public :
   DbManager(int* argc, char** argv);
   DbManager(fo_dbManager* dbManager);
@@ -53,41 +56,49 @@ public :
   QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
 private:
-  unptr::shared_ptr<fo_dbManager> dbManager;
+  unptr::shared_ptr <fo_dbManager> dbManager;
 };
 
-class PGresultDeleter {
+class PGresultDeleter
+{
 public:
-  void operator()(PGresult* p) {
+  void operator ()(PGresult* p)
+  {
     PQclear(p);
   }
 };
 
-class QueryResult {
+class QueryResult
+{
   friend class DbManager;
 
 private:
-    QueryResult(PGresult* ptr);
+  QueryResult(PGresult* ptr);
 
 public:
   bool isFailed() const;
   int getRowCount() const;
   std::vector<std::string> getRow(int i) const;
-  template<typename T> std::vector<T> getSimpleResults(int columnN, T (functionP)(const char*));
+  template <typename T>
+  std::vector<T> getSimpleResults(int columnN, T (functionP)(const char*));
 
-  QueryResult(QueryResult && queryResult);
+  QueryResult(QueryResult&& queryResult);
   operator bool() const;
 
 private:
-    unptr::unique_ptr<PGresult, PGresultDeleter> ptr;
+  unptr::unique_ptr <PGresult, PGresultDeleter> ptr;
 };
 
-template<typename T> std::vector<T> QueryResult::getSimpleResults(int columnN, T (functionP)(const char*)) {
+template <typename T>
+std::vector<T> QueryResult::getSimpleResults(int columnN, T (functionP)(const char*))
+{
   std::vector<T> result;
   PGresult* r = ptr.get();
 
-  if (columnN<PQnfields(r)) {
-    for (int i=0; i<getRowCount(); i++) {
+  if (columnN < PQnfields(r))
+  {
+    for (int i = 0; i < getRowCount(); i++)
+    {
       result.push_back(functionP(PQgetvalue(r, i, columnN)));
     }
   }

@@ -1,19 +1,19 @@
 /**************************************************************
- Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-  
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
+Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License version 2.1 as published by the Free Software Foundation.
 
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- **************************************************************/
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.0
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+**************************************************************/
 
 /*!
  * \file sqlCopy.c
@@ -59,19 +59,20 @@
  \return sqlCopy_struct.
          On failure, ERROR to stdout, return 0
 */
-psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int NumColumns, ...)
+psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int NumColumns, ...)
 {
   psqlCopy_t pCopy;
-  va_list    ColumnNameArg;
-  int        ColIdx;
-  int        ColStrLength;
-  char *     ColStr;
+  va_list ColumnNameArg;
+  int ColIdx;
+  int ColStrLength;
+  char* ColStr;
 
   va_start(ColumnNameArg, NumColumns);
 
   /* Allocate the structure */
   pCopy = malloc(sizeof(sqlCopy_t));
-  if (!pCopy) ERROR_RETURN("sqlCopy malloc")
+  if (!pCopy)
+  ERROR_RETURN("sqlCopy malloc")
 
   /* Allocate storage for the data buffer */
   if (BufSize < 1) BufSize = 1;
@@ -110,12 +111,12 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
     }
     else
     {
-       fo_sqlCopyDestroy(pCopy, 0);
-       ERROR_RETURN("pCopy->ColumnNames size too small")
+      fo_sqlCopyDestroy(pCopy, 0);
+      ERROR_RETURN("pCopy->ColumnNames size too small")
     }
   }
   va_end(ColumnNameArg);
-  return(pCopy);
+  return (pCopy);
 }  /* End fo_sqlCopyCreate()  */
 
 
@@ -147,20 +148,21 @@ int tmp_printhex(char * str)
  \return 0 if failure
 */
 #define growby  128  //Grow DataBuf by this number of bytes.
-int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
+
+int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow)
 {
   int NewRowLen;
   int rncount = 0;
-  char *dptr = DataRow;
-  char *NewRow=0, *nptr;
+  char* dptr = DataRow;
+  char* NewRow = 0, * nptr;
 
   /* As of Postgresql 8.4, COPY will not accept embedded literal carriage returns
    * or line feeds.  Use "\r" and "\n" instead.
    * Count how many we need to get rid of (and make space for).
    */
-  while(*dptr) 
+  while (*dptr)
   {
-    if (((*dptr == '\n') || (*dptr == '\r')) && (*(dptr+1))) rncount++;
+    if (((*dptr == '\n') || (*dptr == '\r')) && (*(dptr + 1))) rncount++;
     dptr++;
   }
 
@@ -169,20 +171,20 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
    */
   if (rncount)
   {
-    NewRowLen = strlen(DataRow) + rncount ;
+    NewRowLen = strlen(DataRow) + rncount;
     NewRow = malloc(NewRowLen + 1);  // plus 1 for potential required \n at end
-    if (!NewRow) ERROR_RETURN("fo_sqlCopyAdd: out of memory");
+    if (!NewRow)
+    ERROR_RETURN("fo_sqlCopyAdd: out of memory");
     nptr = NewRow;
     dptr = DataRow;
-    while (*dptr && *(dptr+1))
+    while (*dptr && *(dptr + 1))
     {
       if (*dptr == '\n')
       {
         *nptr++ = '\\';
         *nptr = 'n';
       }
-      else
-      if (*dptr == '\r')
+      else if (*dptr == '\r')
       {
         *nptr++ = '\\';
         *nptr = 'r';
@@ -198,16 +200,17 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 
   /* Does new record fit in DataBuf?  */
   NewRowLen = strlen(DataRow);
-  if ((pCopy->BufSize - pCopy->DataIdx) < (NewRowLen+1))
+  if ((pCopy->BufSize - pCopy->DataIdx) < (NewRowLen + 1))
   {
     /* if DataIdx is zero, then DataBuf isn't big enough to hold
      * this record.  In this case make DataBuf larger.
      */
     if (pCopy->DataIdx == 0)
     {
-      pCopy->DataBuf = realloc(pCopy->DataBuf, NewRowLen+growby);
-      if (!pCopy->DataBuf) ERROR_RETURN("fo_sqlCopyAdd: Realloc for DataBuf failed");
-      pCopy->BufSize = NewRowLen+growby;
+      pCopy->DataBuf = realloc(pCopy->DataBuf, NewRowLen + growby);
+      if (!pCopy->DataBuf)
+      ERROR_RETURN("fo_sqlCopyAdd: Realloc for DataBuf failed");
+      pCopy->BufSize = NewRowLen + growby;
     }
     else
     {
@@ -217,18 +220,18 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
   }
 
   /* copy in DataRow */
-  strcpy(pCopy->DataBuf+pCopy->DataIdx, DataRow);
+  strcpy(pCopy->DataBuf + pCopy->DataIdx, DataRow);
   pCopy->DataIdx += NewRowLen;
 
   /* If the DataRow was missing a terminating newline, add one */
-  if (DataRow[NewRowLen-1] != '\n') 
+  if (DataRow[NewRowLen - 1] != '\n')
   {
     pCopy->DataBuf[pCopy->DataIdx++] = '\n';
     pCopy->DataBuf[pCopy->DataIdx] = 0;  // new null terminator
   }
 
   if (NewRow) free(NewRow);
-  return(1);
+  return (1);
 }
 
 /*!
@@ -242,30 +245,30 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char *DataRow)
 */
 int fo_sqlCopyExecute(psqlCopy_t pCopy)
 {
-  char  copystmt[2048];
-  PGresult *result;
+  char copystmt[2048];
+  PGresult* result;
 
   /* check pCopy */
-  if (!pCopy) ERROR_RETURN("Null pCopy");
-  if (pCopy->DataIdx == 0) return(1);  /* nothing to copy */
+  if (!pCopy)
+  ERROR_RETURN("Null pCopy");
+  if (pCopy->DataIdx == 0) return (1);  /* nothing to copy */
 
   /* Start the Copy command */
-  sprintf(copystmt, "COPY %s(%s) from stdin", 
-          pCopy->TableName,
-          pCopy->ColumnNames);
+  sprintf(copystmt, "COPY %s(%s) from stdin",
+    pCopy->TableName,
+    pCopy->ColumnNames);
   result = PQexec(pCopy->PGconn, copystmt);
-  if (PGRES_COPY_IN == PQresultStatus(result)) 
+  if (PGRES_COPY_IN == PQresultStatus(result))
   {
     PQclear(result);
     if (PQputCopyData(pCopy->PGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
-      ERROR_RETURN(PQresultErrorMessage(result))
+    ERROR_RETURN(PQresultErrorMessage(result))
   }
-  else
-    if (fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
+  else if (fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
 
 
   /* End copy  */
-  if (PQputCopyEnd(pCopy->PGconn, NULL) == 1) 
+  if (PQputCopyEnd(pCopy->PGconn, NULL) == 1)
   {
     result = PQgetResult(pCopy->PGconn);
     if (fo_checkPQcommand(pCopy->PGconn, result, "copy end", __FILE__, __LINE__)) return 0;
@@ -275,7 +278,7 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
   /* reset DataBuf */
   pCopy->DataIdx = 0;
 
-  return(1);
+  return (1);
 }
 
 
@@ -314,12 +317,12 @@ void fo_sqlCopyPrint(psqlCopy_t pCopy, int PrintBytes)
   int idx;
 
   printf("========== fo_sqlCopyPrint  Start  ================\n");
-  printf("pCopy: %lx, TableName: %s, BufSize: %d, DataIdx: %d\n", 
-        (long)pCopy, pCopy->TableName, pCopy->BufSize, pCopy->DataIdx);
+  printf("pCopy: %lx, TableName: %s, BufSize: %d, DataIdx: %d\n",
+    (long) pCopy, pCopy->TableName, pCopy->BufSize, pCopy->DataIdx);
   printf("       ColumnNames: %s\n", pCopy->ColumnNames);
 
   if (PrintBytes == 0) PrintBytes = pCopy->DataIdx;
-  for(idx=0; idx < PrintBytes; idx++) putchar(pCopy->DataBuf[idx]);
+  for (idx = 0; idx < PrintBytes; idx++) putchar(pCopy->DataBuf[idx]);
 
   printf("========== fo_sqlCopyPrint  End  ================");
 }

@@ -18,8 +18,9 @@
 
 using namespace std;
 
-class NinkaDatabaseHandler : public fo::AgentDatabaseHandler {
- public:
+class NinkaDatabaseHandler : public fo::AgentDatabaseHandler
+{
+public:
   NinkaDatabaseHandler(DbManager dbManager);
 
   vector<unsigned long> queryFileIdsForUpload(int uploadId);

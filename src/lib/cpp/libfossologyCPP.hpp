@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License along with thi
 #define LIBFOSSOLOGYCPP_HPP_
 
 extern "C" {
-  #include "libfossology.h"
+#include "libfossology.h"
 }
 
 #include "files.hpp"

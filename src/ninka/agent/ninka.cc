@@ -10,7 +10,8 @@
 
 #include "ninka.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
 
@@ -19,7 +20,8 @@ int main(int argc, char** argv) {
 
   State state = getState(dbManager);
 
-  while (fo_scheduler_next() != NULL) {
+  while (fo_scheduler_next() != NULL)
+  {
     int uploadId = atoi(fo_scheduler_current());
 
     if (uploadId == 0) continue;

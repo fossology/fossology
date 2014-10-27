@@ -20,7 +20,8 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
   // Retrieve test path from command line first argument.
   // Default to "" which resolves to the top level suite.
   string testPath = (argc > 1) ? string(argv[1]) : string("");
@@ -40,7 +41,8 @@ int main(int argc, char* argv[]) {
   CPPUNIT_NS::TestRunner runner;
   runner.addTest(CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest());
 
-  try {
+  try
+  {
     CPPUNIT_NS::stdCOut() << "Running " << (testPath.empty() ? "all tests" : testPath) << endl;
     runner.run(controller, testPath);
     CPPUNIT_NS::stdCOut() << endl;
@@ -54,8 +56,9 @@ int main(int argc, char* argv[]) {
     CPPUNIT_NS::XmlOutputter xml(&result, file);
     xml.write();
     file.close();
-  } catch (invalid_argument &e) { // Test path not resolved.
-    CPPUNIT_NS::stdCOut() << endl << "ERROR: " <<  e.what() << endl;
+  } catch (invalid_argument& e)
+  { // Test path not resolved.
+    CPPUNIT_NS::stdCOut() << endl << "ERROR: " << e.what() << endl;
     return 1;
   }
 

@@ -11,11 +11,14 @@
 #include "databasehandler.hpp"
 #include "libfossUtils.hpp"
 
-NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager):
-    fo::AgentDatabaseHandler(dbManager) {}
+NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
+  fo::AgentDatabaseHandler(dbManager)
+{
+}
 
 // TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
-vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId) {
+vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId)
+{
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -30,7 +33,8 @@ vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId) 
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
-bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch) {
+bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch)
+{
   return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -45,13 +49,14 @@ bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long lice
   );
 }
 
-unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
+unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName)
+{
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
       "queryLicenseIdForLicense",
       "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1",
-      char*
+      char *
     ),
     rfShortName.c_str()
   );
@@ -59,7 +64,8 @@ unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName)
   return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
 }
 
-unsigned long NinkaDatabaseHandler::saveLicense(string rfShortName) {
+unsigned long NinkaDatabaseHandler::saveLicense(string rfShortName)
+{
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
