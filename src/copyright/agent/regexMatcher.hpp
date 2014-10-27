@@ -17,7 +17,8 @@
 #include "matcher.hpp"
 #include "regex.hpp"
 
-class RegexMatcher : public virtual Matcher {
+class RegexMatcher : public virtual Matcher
+{
 public:
   RegexMatcher(const std::string type, const std::string pattern, int regexIndex = 0);
   virtual std::vector<CopyrightMatch> match(const std::string content) const;

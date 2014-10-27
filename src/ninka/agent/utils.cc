@@ -12,57 +12,56 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
-State* getState(DbManager* dbManager) {
+State getState(DbManager& dbManager)
+{
   int agentId = queryAgentId(dbManager);
-  return new State(agentId, dbManager);
+  return State(agentId);
 }
 
-int queryAgentId(DbManager* dbManager) {
+int queryAgentId(DbManager& dbManager)
+{
   char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
   char* agentRevision;
 
   if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV))
-    bail(dbManager, -1);
+    bail(-1);
 
-  int agentId = fo_GetAgentKey(dbManager->getConnection(), AGENT_NAME, 0, agentRevision, AGENT_DESC);
+  int agentId = fo_GetAgentKey(dbManager.getConnection(), AGENT_NAME, 0, agentRevision, AGENT_DESC);
   free(agentRevision);
 
   if (agentId <= 0)
-    bail(dbManager, 1);
+    bail(1);
 
   return agentId;
 }
 
-int writeARS(State* state, int arsId, long uploadId, int success) {
-  PGconn* connection = state->getDbManager()->getConnection();
-  int agentId = state->getAgentId();
+int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager)
+{
+  PGconn* connection = dbManager.getConnection();
+  int agentId = state.getAgentId();
 
   return fo_WriteARS(connection, arsId, uploadId, agentId, AGENT_ARS, NULL, success);
 }
 
-void bail(State* state, int exitval) {
-  delete(state);
+void bail(int exitval)
+{
   fo_scheduler_disconnect(exitval);
   exit(exitval);
 }
 
-void bail(DbManager* dbManager, int exitval) {
-  delete(dbManager);
-  fo_scheduler_disconnect(exitval);
-  exit(exitval);
-}
+bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler)
+{
+  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
-bool processUploadId(State* state, int uploadId) {
-  vector<long> fileIds = state->getDatabaseHandler()->queryFileIdsForUpload(uploadId);
+  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it)
+  {
+    unsigned long pFileId = *it;
 
-  for (vector<long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
-    long pFileId = *it;
-
-    if (pFileId <= 0)
+    if (pFileId == 0)
       continue;
 
-    matchPFileWithLicenses(state, pFileId);
+    matchPFileWithLicenses(state, pFileId, databaseHandler);
 
     fo_scheduler_heart(1);
   }
@@ -70,68 +69,84 @@ bool processUploadId(State* state, int uploadId) {
   return true;
 }
 
-void matchPFileWithLicenses(State* state, long pFileId) {
-  char* pFile = queryPFileForFileId(state->getDbManager()->getStruct_dbManager(), pFileId);
-  if (!pFile) {
+void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+{
+  char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
+
+  if (!pFile)
+  {
     cout << "File not found " << pFileId << endl;
-    bail(state, 8);
+    bail(8);
   }
 
-  char* fileName = fo_RepMkPath("files", pFile);
-  if (fileName) {
-    fo::File* file = new fo::File(pFileId, fileName);
+  char* fileName = NULL;
+  {
+#pragma omp critical (repo_mk_path)
+    fileName = fo_RepMkPath("files", pFile);
+  }
+  if (fileName)
+  {
+    fo::File file(pFileId, fileName);
 
-    matchFileWithLicenses(state, file);
+    matchFileWithLicenses(state, file, databaseHandler);
 
+    free(fileName);
     free(pFile);
-    delete(file);
-  } else {
+  }
+  else
+  {
     cout << "PFile not found in repo " << pFileId << endl;
-    bail(state, 7);
+    bail(7);
   }
 }
 
-void matchFileWithLicenses(State* state, fo::File* file) {
+void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler)
+{
   string ninkaResult = scanFileWithNinka(state, file);
   vector<string> ninkaLicenseNames = extractLicensesFromNinkaResult(ninkaResult);
   vector<LicenseMatch> matches = createMatches(ninkaLicenseNames);
-  saveLicenseMatchesToDatabase(state, matches, file->id);
+  saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
 }
 
-bool saveLicenseMatchesToDatabase(State* state, const vector<LicenseMatch>& matches, long pFileId) {
-  if (!state->getDbManager()->begin())
+bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+{
+  if (!databaseHandler.begin())
     return false;
 
-  for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+  for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it)
+  {
     const LicenseMatch& match = *it;
 
-    int agentId = state->getAgentId();
-    long refId = getLicenseId(state, match.getLicenseName());
+    int agentId = state.getAgentId();
+    long refId = getLicenseId(match.getLicenseName(), databaseHandler);
     unsigned percent = match.getPercentage();
 
-    if (!state->getDatabaseHandler()->saveLicenseMatch(agentId, pFileId, refId, percent)) {
-      state->getDbManager()->rollback();
+    if (!databaseHandler.saveLicenseMatch(agentId, pFileId, refId, percent))
+    {
+      databaseHandler.rollback();
       return false;
     };
   }
 
-  return state->getDbManager()->commit();
+  return databaseHandler.commit();
 }
 
 // TODO: see function get_rfpk() from src/nomos/agent/nomos_utils.c
-long getLicenseId(State* state, string rfShortname) {
+long getLicenseId(string rfShortname, NinkaDatabaseHandler& databaseHandler)
+{
   long licenseId;
 
-  if (rfShortname.length() == 0) {
+  if (rfShortname.length() == 0)
+  {
     cout << "getLicenseId() passed empty license name" << endl;
-    bail(state, 1);
+    bail(1);
   }
 
-  licenseId = state->getDatabaseHandler()->queryLicenseIdForLicense(rfShortname);
+  licenseId = databaseHandler.queryLicenseIdForLicense(rfShortname);
   if (licenseId)
     return licenseId;
 
-  licenseId = state->getDatabaseHandler()->saveLicense(rfShortname);
+  licenseId = databaseHandler.saveLicense(rfShortname);
 
   return licenseId;
 }

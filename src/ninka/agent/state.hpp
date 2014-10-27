@@ -16,19 +16,15 @@
 
 using namespace std;
 
-class State {
- public:
-  State(int agentId, DbManager* dbManager);
-  ~State();
+class State
+{
+public:
+  State(int agentId);
 
-  int getAgentId();
-  DbManager* getDbManager();
-  DatabaseHandler* getDatabaseHandler();
+  int getAgentId() const;
 
- private:
+private:
   int agentId;
-  DbManager* dbManager;
-  DatabaseHandler* databaseHandler;
 };
 
 #endif // NINKA_AGENT_STATE_HPP

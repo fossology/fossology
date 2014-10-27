@@ -9,8 +9,8 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef COPYRIGHTUTILS_HPP
-#define COPYRIGHTUTILS_HPP
+#ifndef COPYRIGHTUTILS_HPP_
+#define COPYRIGHTUTILS_HPP_
 
 #include "identity.hpp"
 
@@ -34,22 +34,25 @@ extern "C" {
 
 void queryAgentId(int& agent, PGconn* dbConn);
 
-void bail(CopyrightState* state, int exitval);
+void bail(int exitval);
 
-int writeARS(CopyrightState* state, int arsId, long uploadId, int success);
+int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager);
 
-CopyrightState* getState(DbManager* dbManager, int verbosity);
+CopyrightState getState(DbManager& dbManager, int verbosity);
 
-void fillMatchers(CopyrightState* state);
+void fillMatchers(CopyrightState& state);
 
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 
-bool saveToDatabase(const std::vector<CopyrightMatch>& matches, CopyrightState* state, long pFileId);
 
-void matchFileWithLicenses(long pFileId, fo::File* file, CopyrightState* state);
+bool saveToDatabase(const std::vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
 
-void matchPFileWithLicenses(CopyrightState* state, long pFileId);
+std::vector<CopyrightMatch> findAllMatches(const fo::File& file, std::vector<RegexMatcher> const regexMatchers);
+void matchFileWithLicenses(const fo::File& file, const CopyrightState& state);
+void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler);
 
-bool processUploadId(CopyrightState* state, int uploadId);
 
-#endif // COPYRIGHTUTILS_HPP
+bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& handler);
+
+
+#endif /* COPYRIGHTUTILS_HPP_ */

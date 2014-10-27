@@ -13,36 +13,42 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
-string scanFileWithNinka(State* state, fo::File* file) {
-  FILE *in;
+string scanFileWithNinka(const State& state, const fo::File& file)
+{
+  FILE* in;
   char buffer[512];
-  string command = "ninka " + file->fileName;
+  string command = "ninka " + file.getFileName();
   string result;
 
-  if (!(in = popen(command.c_str(), "r"))) {
+  if (!(in = popen(command.c_str(), "r")))
+  {
     cout << "could not execute ninka command: " << command << endl;
-    bail(state, 1);
+    bail(1);
   }
 
-  while (fgets(buffer, sizeof(buffer), in) != NULL) {
-      result += buffer;
+  while (fgets(buffer, sizeof(buffer), in) != NULL)
+  {
+    result += buffer;
   }
 
-  if (pclose(in) != 0) {
+  if (pclose(in) != 0)
+  {
     cout << "could not execute ninka command: " << command << endl;
-    bail(state, 1);
+    bail(1);
   }
 
   return result;
 }
 
-vector<string> extractLicensesFromNinkaResult(string ninkaResult) {
+vector<string> extractLicensesFromNinkaResult(string ninkaResult)
+{
   string licensePart = extractLicensePartFromNinkaResult(ninkaResult);
   return splitLicensePart(licensePart);
 }
 
 // Ninka result format: filename;license1,license2,...,licenseN;details...
-string extractLicensePartFromNinkaResult(string ninkaResult) {
+string extractLicensePartFromNinkaResult(string ninkaResult)
+{
   string delimiters = ";\r\n";
 
   size_t first = ninkaResult.find_first_of(delimiters);
@@ -51,23 +57,27 @@ string extractLicensePartFromNinkaResult(string ninkaResult) {
   return ninkaResult.substr(first + 1, last - 1 - first);
 }
 
-vector<string> splitLicensePart(string licensePart) {
+vector<string> splitLicensePart(string licensePart)
+{
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
   boost::char_separator<char> separator(",");
   tokenizer tokens(licensePart, separator);
 
   vector<string> licenses;
 
-  for (tokenizer::iterator iter = tokens.begin(); iter != tokens.end(); ++iter) {
+  for (tokenizer::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+  {
     licenses.push_back(*iter);
   }
 
   return licenses;
 }
 
-vector<LicenseMatch> createMatches(vector<string> ninkaLicenseNames) {
+vector<LicenseMatch> createMatches(vector<string> ninkaLicenseNames)
+{
   vector<LicenseMatch> matches;
-  for (vector<string>::const_iterator it = ninkaLicenseNames.begin(); it != ninkaLicenseNames.end(); ++it) {
+  for (vector<string>::const_iterator it = ninkaLicenseNames.begin(); it != ninkaLicenseNames.end(); ++it)
+  {
     const string& ninkaLicenseName = *it;
     string fossologyLicenseName = mapLicenseFromNinkaToFossology(ninkaLicenseName);
     unsigned percentage = (ninkaLicenseName.compare("NONE") == 0 || ninkaLicenseName.compare("UNKNOWN") == 0) ? 0 : 100;
@@ -77,7 +87,8 @@ vector<LicenseMatch> createMatches(vector<string> ninkaLicenseNames) {
   return matches;
 }
 
-string mapLicenseFromNinkaToFossology(string name) {
+string mapLicenseFromNinkaToFossology(string name)
+{
   if (name.compare("NONE") == 0) return string("No_license_found");
   if (name.compare("UNKNOWN") == 0) return string("UnclassifiedLicense");
   return name;

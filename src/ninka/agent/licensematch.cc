@@ -10,16 +10,22 @@
 
 #include "licensematch.hpp"
 
-LicenseMatch::LicenseMatch(string licenseName, unsigned percentage):
+LicenseMatch::LicenseMatch(string licenseName, unsigned percentage) :
   licenseName(licenseName),
-  percentage(percentage) {}
+  percentage(percentage)
+{
+}
 
-LicenseMatch::~LicenseMatch() {}
+LicenseMatch::~LicenseMatch()
+{
+}
 
-const string LicenseMatch::getLicenseName() const {
+const string LicenseMatch::getLicenseName() const
+{
   return licenseName;
 }
 
-unsigned LicenseMatch::getPercentage() const {
+unsigned LicenseMatch::getPercentage() const
+{
   return percentage;
 }

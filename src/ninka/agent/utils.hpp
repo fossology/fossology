@@ -27,15 +27,14 @@ extern "C" {
 
 using namespace std;
 
-State* getState(DbManager* dbManager);
-int queryAgentId(DbManager* dbManager);
-int writeARS(State* state, int arsId, long uploadId, int success);
-void bail(State* state, int exitval);
-void bail(DbManager* dbManager, int exitval);
-bool processUploadId(State* state, int uploadId);
-void matchPFileWithLicenses(State* state, long pFileId);
-void matchFileWithLicenses(State* state, fo::File* file);
-bool saveLicenseMatchesToDatabase(State* state, const vector<LicenseMatch>& matches, long pFileId);
-long getLicenseId(State* state, string rfShortname);
+State getState(DbManager& dbManager);
+int queryAgentId(DbManager& dbManager);
+int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager);
+void bail(int exitval);
+bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler);
+void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
+void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler);
+bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
+long getLicenseId(string rfShortname, NinkaDatabaseHandler& databaseHandler);
 
 #endif // NINKA_AGENT_UTILS_HPP

@@ -14,10 +14,10 @@ TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 # -Werror -Wextra
 CPPUNIT_PATH = /opt/cppunit
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR)
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl
+CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE = test_copyright
 
@@ -59,6 +59,6 @@ coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	genhtml -o results cov.txt
 
 clean:
-	rm -f $(EXE) *.o *.a *.gcno *.gcda core
+	rm -rf $(EXE) $(EXE)_cov *.o *.a *.gcno *.gcda core results
 
 .PHONY: all test coverage clean

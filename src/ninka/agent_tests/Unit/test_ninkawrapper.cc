@@ -18,20 +18,26 @@ using namespace std;
 using namespace boost;
 using namespace boost::assign;
 
-namespace CPPUNIT_NS {
-  template<> struct assertion_traits<LicenseMatch> {
-    static bool equal(const LicenseMatch& m1, const LicenseMatch& m2) {
+namespace CPPUNIT_NS
+{
+  template <>
+  struct assertion_traits<LicenseMatch>
+  {
+    static bool equal(const LicenseMatch& m1, const LicenseMatch& m2)
+    {
       return m1.getLicenseName() == m2.getLicenseName() && m1.getPercentage() == m2.getPercentage();
     }
 
-    static string toString(const LicenseMatch& m) {
+    static string toString(const LicenseMatch& m)
+    {
       boost::format format("LicenseMatch(licenseName=\"%s\", percentage=\"%u\")");
       return str(format % m.getLicenseName() % m.getPercentage());
     }
   };
 };
 
-class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
+class NinkaWrapperTest : public CPPUNIT_NS::TestFixture
+{
   CPPUNIT_TEST_SUITE(NinkaWrapperTest);
   CPPUNIT_TEST(test_extractLicensesFromNinkaResult);
   CPPUNIT_TEST(test_extractLicensePartFromNinkaResult);
@@ -40,8 +46,9 @@ class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
   CPPUNIT_TEST(test_mapLicenseFromNinkaToFossology);
   CPPUNIT_TEST_SUITE_END();
 
- public:
-  void test_extractLicensesFromNinkaResult() {
+public:
+  void test_extractLicensesFromNinkaResult()
+  {
     string ninkaResult("filename;UNKNOWN,LGPLv3+;more;fields\n");
 
     vector<string> licenses = extractLicensesFromNinkaResult(ninkaResult);
@@ -51,7 +58,8 @@ class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_ASSERT_EQUAL(string("LGPLv3+"), licenses[1]);
   }
 
-  void test_extractLicensePartFromNinkaResult() {
+  void test_extractLicensePartFromNinkaResult()
+  {
     string licensePart;
 
     // valid output - single line w/ additional fields
@@ -79,7 +87,8 @@ class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_ASSERT_EQUAL(string("license"), licensePart);
   }
 
-  void test_splitLicensePart() {
+  void test_splitLicensePart()
+  {
     vector<string> licenses;
 
     // no license
@@ -98,7 +107,8 @@ class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_ASSERT_EQUAL(string("Apachev1.0"), licenses[1]);
   }
 
-  void test_createMatches() {
+  void test_createMatches()
+  {
     vector<LicenseMatch> matches;
 
     // special case: NONE should have a percentage of 0
@@ -118,13 +128,14 @@ class NinkaWrapperTest : public CPPUNIT_NS::TestFixture {
     CPPUNIT_ASSERT_EQUAL(LicenseMatch("Apachev1.0", 100), matches[1]);
   }
 
-  void test_mapLicenseFromNinkaToFossology() {
+  void test_mapLicenseFromNinkaToFossology()
+  {
     // mapping: special cases
-    CPPUNIT_ASSERT_EQUAL(string("No_license_found"),    mapLicenseFromNinkaToFossology(string("NONE")));
+    CPPUNIT_ASSERT_EQUAL(string("No_license_found"), mapLicenseFromNinkaToFossology(string("NONE")));
     CPPUNIT_ASSERT_EQUAL(string("UnclassifiedLicense"), mapLicenseFromNinkaToFossology(string("UNKNOWN")));
 
     // mapping: input = output
-    CPPUNIT_ASSERT_EQUAL(string(""),          mapLicenseFromNinkaToFossology(string("")));
+    CPPUNIT_ASSERT_EQUAL(string(""), mapLicenseFromNinkaToFossology(string("")));
     CPPUNIT_ASSERT_EQUAL(string("something"), mapLicenseFromNinkaToFossology(string("something")));
   };
 };

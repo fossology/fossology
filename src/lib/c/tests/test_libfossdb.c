@@ -16,9 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 /**
- * @file test_libfossagent.c
- * @brief unit tests for the libfossagent.
- */
+* @file test_libfossagent.c
+* @brief unit tests for the libfossagent.
+*/
 
 /* includes for files that will be tested */
 #include <libfossdb.h>
@@ -36,19 +36,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 /**
- * @brief fo_tableExists() tests:
- *   - Check for an existing table
- *   - Check for table that does not exist
- *   - Check for a non table entities (sequence, constraint, ...)
- * @return void
- */
+* @brief fo_tableExists() tests:
+*   - Check for an existing table
+*   - Check for table that does not exist
+*   - Check for a non table entities (sequence, constraint, ...)
+* @return void
+*/
 void test_fo_tableExists()
 {
-  PGconn *pgConn;
-  int     nonexistant_table;
-  int     existing_table;
-  char   *DBConfFile = NULL;  /* use default Db.conf */
-  char   *ErrorBuf;
+  PGconn* pgConn;
+  int nonexistant_table;
+  int existing_table;
+  char* DBConfFile = NULL;  /* use default Db.conf */
+  char* ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
@@ -68,7 +68,7 @@ void test_fo_tableExists()
 /* *** cunit test info ****************************************************** */
 /* ************************************************************************** */
 CU_TestInfo libfossdb_testcases[] =
-{
-    { "fo_tableExists()",   test_fo_tableExists   },
+  {
+    {"fo_tableExists()", test_fo_tableExists},
     CU_TEST_INFO_NULL
-};
+  };

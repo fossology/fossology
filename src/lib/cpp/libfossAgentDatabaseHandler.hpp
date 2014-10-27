@@ -8,16 +8,33 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef LIBFOSSOLOGYCPP_HPP_
-#define LIBFOSSOLOGYCPP_HPP_
+#ifndef LIBFOSS_AGENT_DATABASE_HANDLER_HPP_
+#define LIBFOSS_AGENT_DATABASE_HANDLER_HPP_
 
-extern "C" {
-#include "libfossology.h"
+#include <string>
+#include <vector>
+#include "libfossdbmanagerclass.hpp"
+
+namespace fo
+{
+  class AgentDatabaseHandler
+  {
+
+  protected:
+    DbManager dbManager;
+  public:
+    AgentDatabaseHandler(DbManager _dbManager);
+    AgentDatabaseHandler(AgentDatabaseHandler&& other);
+    AgentDatabaseHandler(const AgentDatabaseHandler&) = delete;
+    virtual ~AgentDatabaseHandler();
+    AgentDatabaseHandler operator =(const AgentDatabaseHandler&) = delete;
+
+    bool begin() const;
+    bool commit() const;
+    bool rollback() const;
+
+    char* getPFileNameForFileId(unsigned long pfileId) const;
+  };
 }
 
-#include "files.hpp"
-#include "libfossdbmanagerclass.hpp"
-#include "libfossAgentDatabaseHandler.hpp"
-#include "libfossUtils.hpp"
-
-#endif /* LIBFOSSOLOGYCPP_HPP_ */
+#endif

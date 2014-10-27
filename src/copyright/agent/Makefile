@@ -29,7 +29,8 @@ OBJECTS_COP = copyrightUtils_cop.o database_cop.o
 OBJECTS_IP = copyrightUtils_ip.o database_ip.o
 OBJECTS_ECC = copyrightUtils_ecc.o database_ecc.o
 
-COVERAGE =
+COVERAGE = $(OBJECTS:.o=_cov.o)
+COVERAGE_COP = $(OBJECTS_COP:.o=_cov.o)
 
 all: $(CXXFOLIB) $(EXE)
 
@@ -51,9 +52,9 @@ $(CXXFOLIB):
 
 libcopyright.a: $(OBJECTS) $(OBJECTS_COP)
 	ar cvr $@ $(OBJECTS) $(OBJECTS_COP)
-
-libcopyright_cov.a: $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
+	
+libcopyright_cov.a: $(COVERAGE) $(COVERAGE_COP)
+	ar cvr $@ $(COVERAGE) $(COVERAGE_COP)
 
 ######################
 # object build rules #
@@ -72,6 +73,9 @@ $(OBJECTS_ECC): %_ecc.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
 	
 $(COVERAGE): %_cov.o: %.cc %.hpp
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
+
+$(COVERAGE_COP): %_cop_cov.o: %.cc %.hpp
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
 #######################

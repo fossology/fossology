@@ -18,12 +18,12 @@ CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
 EXE =
 LIB = libfossologyCPP.a
 DEPENDENCY = $(CLIBDIR)/libfossology.a
-OBJS = files.o libfossdbmanagerclass.o
+OBJS = libfossAgentDatabaseHandler.o files.o libfossdbmanagerclass.o libfossUtils.o
 
 COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	@echo "make $(LIB)"
+	echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)
