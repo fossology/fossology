@@ -9,20 +9,20 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = monk
-MOD_SUBDIR = ui
+DIRS = Unit
+
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	@echo "nothing to do"
+	$(call DIR_LOOP, )
 
-install:
-	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+test:
+	$(call DIR_LOOP,test)
 
-uninstall:
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+coverage:
+	$(call DIR_LOOP,coverage)
 
 clean:
-	@echo "nothing to do"
+	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean
+.PHONY: all test coverage clean

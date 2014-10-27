@@ -43,7 +43,7 @@ At the end of processing B<get-projects> prints a summary of it's efforts on
 standard out.
 
 Getting the archives can take a lot of space.  B<get-projects> gets the path
-for the golden directories from an environment variable  in the makefile Makefile.utils.
+for the golden directories from an environment variable in the makefile Makefile.utils.
 The path is site specific and so the makefile B<must> be adjusted based on
 your site.
 

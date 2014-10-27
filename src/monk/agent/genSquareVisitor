@@ -11,6 +11,6 @@
 
 ./squareBuilder
 if [ ! -e _squareVisitor.h.gen ]; then
-	exit 1
+    exit 1
 fi
-cat _squareVisitor.h.pre  _squareVisitor.h.gen _squareVisitor.h.post > _squareVisitor.h
+cat _squareVisitor.h.pre _squareVisitor.h.gen _squareVisitor.h.post > _squareVisitor.h

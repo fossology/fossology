@@ -9,17 +9,17 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef copyrightState_h
-#define copyrightState_h
+#ifndef COPYRIGHTSTATE_HPP
+#define COPYRIGHTSTATE_HPP
 
+#include <vector>
 #include "libfossdbmanagerclass.hpp"
 #include "regexMatcher.hpp"
 #include "database.hpp"
-#include <vector>
 
 class CopyrightState {
 public:
-  CopyrightState(DbManager* _dbManager,  int _agentId, int _verbosity);
+  CopyrightState(DbManager* _dbManager, int _agentId, int _verbosity);
   CopyrightState(const CopyrightState&) = delete;
   CopyrightState operator=(const CopyrightState&) = delete;
   ~CopyrightState();
@@ -27,7 +27,7 @@ public:
   int getAgentId();
   int getVerbosity();
   DbManager* getDbManager();
-  PGconn * getConnection();
+  PGconn* getConnection();
   void addMatcher(RegexMatcher regexMatcher);
   std::vector<RegexMatcher> getRegexMatchers();
   CopyrightDatabaseHandler copyrightDatabaseHandler;
@@ -39,4 +39,4 @@ private:
   std::vector<RegexMatcher> regexMatchers;
 };
 
-#endif
+#endif // COPYRIGHTSTATE_HPP

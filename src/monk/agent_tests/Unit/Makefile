@@ -6,8 +6,11 @@
 # without any warranty.
 
 TOP = ../../../..
-include $(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+VARS = $(TOP)/Makefile.conf
+DEPS = ${TOP}/Makefile.deps
+include $(VARS)
+
+LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
@@ -26,19 +29,17 @@ OBJECTS = test_string_operations.o \
           test_database.o \
           utils.o
 
-all:
+all: $(EXE)
 
-test: $(EXE)
-	@echo "make monk Unit agent_tests"
+test: all
 	./$(EXE)
 
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
-	@echo "make monk agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	genhtml -o results cov.txt
 
 $(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
@@ -50,18 +51,12 @@ $(OBJECTS): %.o: %.c
 libmonk.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libmonk_cov.a: 
+libmonk_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	@echo "make monk agent_tests clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
-install:
-	@echo "make monk agent_tests nothing to install"
-uninstall:
-	@echo "make monk agent_tests nothing to uninstall"
+.PHONY: all test coverage clean
 
-.PHONY: all install uninstall clean test coverage
-include ${TOP}/Makefile.deps
-
+include ${DEPS}

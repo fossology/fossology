@@ -5,41 +5,41 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-
-CLIBDIR=../c/
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-CXXFLAGS_LOCAL=-fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
 
-CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
-        -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
-EXE=
-LIB=libfossologyCPP.a
+CLIBDIR = ../c/
+CXXFLAGS_LOCAL = -fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
+
+CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
+          -DFOSSGROUP='"$(PROJECTGROUP)"' \
+          -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
+EXE =
+LIB = libfossologyCPP.a
 DEPENDENCY = $(CLIBDIR)/libfossology.a
-OBJS=files.o libfossdbmanagerclass.o
+OBJS = files.o libfossdbmanagerclass.o
 
-COVERAGE=$(OBJS:%.o=%_cov.o)
+COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	echo "make $(LIB)"
+	@echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS) $(DEPENDENCY)
 	$(AR) -x $(DEPENDENCY)
 	$(AR) cr $@ $(OBJS) $$( $(AR) -t $(DEPENDENCY) )
-	
+
 $(DEPENDENCY):
 	$(MAKE) -C $(CLIBDIR)
 
 $(EXE): %: %.cc $(LIB) $(VARS)
 	$(CXX) $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(LIB) -o $@
 
-
 $(OBJS): %.o: %.cc %.hpp
-	$(CXX) -c $< $(CONFDEF)  $(CXXFLAGS_LOCAL)
+	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL)
 
 install: install-dev install-lib install-exe
-	echo "make $(LIB) install"
+	@echo "make $(LIB) install"
 
 install-dev: $(LIB)
 	$(INSTALL_DATA) libfossologyCPP.a $(DESTDIR)$(LIBEXECDIR)/libfossologyCPP.a
@@ -47,7 +47,7 @@ install-dev: $(LIB)
 
 install-exe: $(EXE)
 	for program in $(EXE); do \
-	  $(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		$(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 # If we ever do shared libs, they will go here
@@ -56,7 +56,7 @@ install-lib:
 # uninstall only cleans up the files, not the directories that might have
 # been created
 uninstall: uninstall-dev uninstall-lib uninstall-exe
-	echo "make $(LIB) uninstall"
+	@echo "make $(LIB) uninstall"
 
 uninstall-dev:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/libfossology.a
@@ -64,7 +64,7 @@ uninstall-dev:
 
 uninstall-exe:
 	for program in $(EXE); do \
-	  rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
+		rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
 	done
 
 uninstall-lib:
@@ -73,7 +73,7 @@ test: all
 	$(MAKE) -C tests
 
 clean:
-	echo "make $(LIB) clean "
+	@echo "make $(LIB) clean "
 	rm -f *.a $(EXE) *.o core *.gc*
 
 .PHONY: all clean test

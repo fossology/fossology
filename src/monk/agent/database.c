@@ -86,7 +86,7 @@ char* getFileNameForFileId(fo_dbManager* dbManager, long pFileId) {
 }
 
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
-  PGresult * insertResult = fo_dbManager_ExecPrepared(
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
       "hasAlreadyResultsFor",
@@ -99,7 +99,7 @@ int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
 
   int exists = 0;
   if (insertResult) {
-    exists = (PQntuples(insertResult)==1);
+    exists = (PQntuples(insertResult) == 1);
     PQclear(insertResult);
   }
 
@@ -107,7 +107,7 @@ int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
 }
 
 long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, unsigned percent) {
-  PGresult * insertResult = fo_dbManager_ExecPrepared(
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
       "saveToDb",
@@ -118,7 +118,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
 
   long licenseFilePk = -1;
   if (insertResult) {
-    if (PQntuples(insertResult)==1) {
+    if (PQntuples(insertResult) == 1) {
       licenseFilePk = atol(PQgetvalue(insertResult, 0, 0));
     }
     PQclear(insertResult);
@@ -168,7 +168,7 @@ inline int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInf
 
 int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId) {
   size_t matchedInfoLen = matchedInfo->len ;
-  for (size_t i = 0; i < matchedInfoLen; i++){
+  for (size_t i = 0; i < matchedInfoLen; i++) {
     DiffMatchInfo* diffMatchInfo = &g_array_index(matchedInfo, DiffMatchInfo, i);
     if (!saveDiffHighlightToDb(dbManager, diffMatchInfo, licenseFileId))
       return 0;

@@ -11,25 +11,18 @@ include $(VARS)
 
 DIRS = Unit Functional
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
-all: 
-	$(call dirloop, )
+all:
+	$(call DIR_LOOP, )
 
-test: 
-	$(call dirloop, test)
+test:
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(call dirloop, coverage)
+	$(call DIR_LOOP,coverage)
 
 clean:
-	$(call dirloop, clean)
+	$(call DIR_LOOP,clean)
 
-install:
-	echo "no make copyright ui install"
-
-uninstall:
-	echo "no make copyright ui uninstall"
-
-PHONY: all test coverage clean install uninstall
-
+.PHONY: all test coverage clean

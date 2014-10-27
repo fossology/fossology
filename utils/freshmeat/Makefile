@@ -1,18 +1,20 @@
 # FOSSology Makefile - utils/freshmeat
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
-include $(VARS)
 
-LIBFILES=lib_projxml.h.php
-BINFILES=GetFM diffm.php get-projects.php mktop1k.php wrapGFM
-fmPATHFILE=fm-paths.php
-FMDir=FMDir
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
+include ../Makefile.utils
+
+LIBFILES = lib_projxml.h.php
+BINFILES = GetFM diffm.php get-projects.php mktop1k.php wrapGFM
+fmPATHFILE = fm-paths.php
+FMDir = FMDir
 
 all: $(fmPATHFILE)
 
-$(fmPATHFILE): ../Makefile.utils
+$(fmPATHFILE):
 	@echo "Building $(fmPATHFILE)"
 	@echo "<?php" > $(fmPATHFILE)
 	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(fmPATHFILE)
@@ -27,7 +29,7 @@ $(fmPATHFILE): ../Makefile.utils
 
 install: all
 	for file in $(BINFILES); do \
-	   $(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	$(INSTALL_DATA) $(LIBFILES) $(DESTDIR)$(LIBDIR)/$(LIBFILES)
@@ -35,10 +37,9 @@ install: all
 	$(INSTALL_DATA) $(fmPATHFILE) $(DESTDIR)$(LIBDIR)/$(fmPATHFILE)
 	$(INSTALL_DATA) $(FMDir) $(DESTDIR)$(INCLUDEDIR)/$(FMDir)
 
-
 uninstall:
 	for file in $(BINFILES); do \
-	   rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
+		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	rm -f $(DESTDIR)$(LIBDIR)/$(LIBFILES)
@@ -52,6 +53,6 @@ test: all
 clean:
 	rm -f $(fmPATHFILE) $(FMDir) *.o core
 
-include $(DEPS)
-
 .PHONY: all install uninstall clean test
+
+include $(DEPS)
