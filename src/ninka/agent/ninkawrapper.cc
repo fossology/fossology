@@ -13,7 +13,7 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
-string scanFileWithNinka(State& state, const fo::File& file) {
+string scanFileWithNinka(const State& state, const fo::File& file) {
   FILE *in;
   char buffer[512];
   string command = "ninka " + file.getFileName();

@@ -26,11 +26,14 @@ int main(int argc, char** argv) {
 
     int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
-    if (!processUploadId(state, uploadId))
+    if (arsId == 0)
+      bail(5);
+
+    if (!processUploadId(state, uploadId, databaseHandler))
       bail(2);
 
     fo_scheduler_heart(1);
-    writeARS(state, arsId, uploadId, 1);
+    writeARS(state, arsId, uploadId, 1, dbManager);
   }
   fo_scheduler_heart(0);
 

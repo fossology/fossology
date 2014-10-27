@@ -48,15 +48,15 @@ void bail(int exitval)
 }
 
 bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseHandler) {
-  vector<long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
+  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
-  for (vector<long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
-    long pFileId = *it;
+  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it) {
+    unsigned long pFileId = *it;
 
-    if (pFileId <= 0)
+    if (pFileId == 0)
       continue;
 
-    matchPFileWithLicenses(state, pFileId);
+    matchPFileWithLicenses(state, pFileId, databaseHandler);
 
     fo_scheduler_heart(1);
   }

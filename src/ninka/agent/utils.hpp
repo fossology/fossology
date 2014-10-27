@@ -27,13 +27,12 @@ extern "C" {
 
 using namespace std;
 
-State* getState(DbManager* dbManager);
-int queryAgentId(DbManager* dbManager);
-int writeARS(State* state, int arsId, long uploadId, int success);
-void bail(State* state, int exitval);
+State getState(DbManager& dbManager);
+int queryAgentId(DbManager& dbManager);
+int writeARS(const State& state, int arsId, long uploadId, int success, DbManager& dbManager);
 void bail(int exitval);
-bool processUploadId(State* state, int uploadId);
-void matchPFileWithLicenses(State* state, long pFileId);
+bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler);
+void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
 void matchFileWithLicenses(State* state, fo::File* file);
 bool saveLicenseMatchesToDatabase(State* state, const vector<LicenseMatch>& matches, long pFileId);
 long getLicenseId(State* state, string rfShortname);
