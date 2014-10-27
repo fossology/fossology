@@ -64,7 +64,8 @@ class agent_copyright_once extends FO_Plugin {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
-    $Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    $Sys = "./copyright $tempFileName";
 
     $inputFile = popen($Sys, "r");
     $colors = array();
