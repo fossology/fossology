@@ -521,9 +521,9 @@ class ui_browse_license extends FO_Plugin
 
 
       $tableColumns = array(
-          array("sTitle" => _("Files"), "sClass" => "left"),
-          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
-          array("sTitle" => _("Edited Results"), "sClass" => "left"),
+          array("sTitle" => _("Files"), "sClass" => "left", "sType" => "html"),
+          array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left", "sType" => "html"),
+          array("sTitle" => _("Edited Results"), "sClass" => "left", "sType" => "html"),
           array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "14.6%")
       );
 
@@ -535,8 +535,8 @@ class ui_browse_license extends FO_Plugin
 
       $tableLanguage = array(
           "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-          "sSearch" => "Search _INPUT_ in all columns", // or <input type=\"text\" id=\"dirlist_filter_scanner\" name=\"dirlist_filter_license\" style=\"padding:0px;\"/>
-              // in results.
+          "sSearch" => "_INPUT_"
+         . "<button onclick='clearSearchFiles()' >" . _("Clear") . "</button>",
           "sInfoPostFix" => $AddInfoText,
           "sLengthMenu" => "Display <select>
                               <option value=\"10\">10</option>
