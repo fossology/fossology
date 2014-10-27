@@ -47,7 +47,7 @@ std::string trim(std::string str, std::string charlist = " \t\f\v\n\r")
 *
 * @return true if entry needs to be written to database
 */
-bool CleanDatabaseEntry(DatabaseEntry& input)
+bool normalizeDatabaseEntry(DatabaseEntry& input)
 {
 
   std::string newtext = " ";

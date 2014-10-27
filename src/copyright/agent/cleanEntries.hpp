@@ -30,7 +30,7 @@ public:
 };
 
 
-bool CleanDatabaseEntry(DatabaseEntry& input);
+bool normalizeDatabaseEntry(DatabaseEntry& input);
 
 
 #endif /* CLEANENTRIES_HPP_ */

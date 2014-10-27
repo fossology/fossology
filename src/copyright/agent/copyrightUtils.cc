@@ -102,7 +102,7 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId
     entry.pfile_fk = pFileId;
     entry.type = match.getType();
 
-    if (CleanDatabaseEntry(entry))
+    if (normalizeDatabaseEntry(entry))
     {
       ++count;
       if (!copyrightDatabaseHandler.insertInDatabase(entry))
