@@ -1,0 +1,59 @@
+<script>
+    function createTable{{ table.type }}() {
+        var otable = $('#copyright{{ table.type }}').dataTable({  "bServerSide": true,
+        "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
+                "fnServerData": function ( sSource, aoData, fnCallback ) {
+            aoData.push( { "name":"upload" , "value" : "{{ table.uploadId }}" } );
+            aoData.push( { "name":"item" , "value" : "{{ table.uploadTreeId }}" } );
+            aoData.push( { "name":"agent" , "value" : "{{ table.agentId }}" } );
+            aoData.push( { "name":"type" , "value" : "{{ table.type }}" } );
+            aoData.push( { "name":"filter" , "value" : "{{ table.filter }}" } );
+            $.getJSON( sSource, aoData, fnCallback ).fail( function() {
+                if (confirm("You are not logged in. Go to login page?"))
+                    window.location.href="'.  Traceback_uri(). '?mod=auth";
+            });
+        },
+        "aoColumns": [
+                            { "sTitle" : "{{ 'Count'| trans }}", "sClass": "right read_only" ,"sWidth" : "5%" },
+                            { "sTitle" : "{{ table.description }}", "sClass": "left"},
+                            { "sTitle" : "", "sClass" : "center read_only", "sWidth" : "10%", "bSortable" : false }
+                        ],
+                "aaSorting": {{ table.sorting }},
+                "iDisplayLength": 50,
+                "bProcessing": true,
+                "bStateSave": true,
+                "sCookiePrefix" : "fossology_",
+                "bRetrieve": true
+    }).makeEditable({
+        "sReadOnlyCellClass": "read_only",
+                "sSelectedRowClass" : "selectedRow",
+                "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ table.type }}" ,
+                "fnOnEditing" : function(input) {
+            var value = input[0].value;
+            var isValid = (value) && !(/^\s*$/.test(value));
+            if (isValid) {
+                var id = input.parents("tr:first")[0].id;
+                var hash = id.split(",")[2];
+                $("#delete{{ table.type }}" + hash).hide();
+                var updateElement = $("#update{{ table.type }}" + hash);
+                updateElement.text("updating...");
+                updateElement.show();
+            }
+            return isValid;
+        },
+        "sSuccessResponse" : "success"
+    });
+    return otable;
+    };
+
+    function delete{{ table.type }}(upload,item,hash, kind) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'text',
+            url: '?mod=ajax-copyright-hist&action=delete&type=$type',
+            data: { id : upload + ',' + item + ',' + hash + ',' + kind },
+            success: function(data) { $('#copyright$type').dataTable().fnDraw(false); },
+            error: function() { alert('error'); }
+        });
+    }
+</script>

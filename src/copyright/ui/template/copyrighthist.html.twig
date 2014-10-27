@@ -16,4 +16,8 @@
   <script src="scripts/jquery.validate.js" type="text/javascript"></script>
 
   {% include "copyrighthist_scripts.html.twig" %}
+
+  {% for type, table in tables  %}
+    {% include "histTable.js.twig" with table %}
+  {% endfor %}
 {% endblock %}

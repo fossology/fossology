@@ -41,28 +41,27 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
-
   $type = 'statement';
   $decription = _("Copyright");
-  $descriptionTotal = _("Total Copyrights");
 
+  $tableVars=array();
 
-  $VCopyright  =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $tableVars['statement']=$varsCopyright;
 
   $type = 'email';
   $decription = _("Email");
-  $descriptionTotal = _("Total Emails");
 
-  $VEmail =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-
+  list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $tableVars['email']=$varsEmail;
 
   $type = 'url';
   $decription = _("URL");
-  $descriptionTotal = _("Total URLs");
 
-  $VUrl=  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+  $tableVars['url']=$varsURL;
 
-  return array( $VCopyright, $VEmail, $VUrl);
+  return array( $VCopyright, $VEmail, $VUrl, $tableVars);
   }
 
 
@@ -76,7 +75,7 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
   {
-    list($VCopyright, $VEmail, $VUrl) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
 
     /* Combine VF and VLic */
     $text = _("Jump to");
@@ -92,7 +91,7 @@ class CopyrightHistogram  extends HistogramBase {
     $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    return $V;
+    return array($V, $tableVars);
   }
 
 

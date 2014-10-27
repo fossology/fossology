@@ -42,10 +42,11 @@ class EccHistogram  extends HistogramBase {
   {
     $type = 'ecc';
     $decription = _("Export restriction");
-    $descriptionTotal = _("Total export restrictions");
 
-    $VEcc  =  $this->getTableForSingleType($type, $decription, $descriptionTotal, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-    return  $VEcc;
+    $tableVars=array();
+    list($VEcc, $eccVars)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars['ecc']=$eccVars;
+    return  array($VEcc,$tableVars);
   }
 
   /**
@@ -58,14 +59,14 @@ class EccHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
   {
-    $VEcc = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VEcc, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
 
 
     $V = "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' width='50%'>$VEcc</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    return $V;
+    return array($V,$tableVars);
   }
 
   function RegisterMenus()

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@ class agent_copyright_once extends FO_Plugin {
     $this->Name = "agent_copyright_once";
     $this->Title = TITLE_agent_copyright_once;
     $this->Version = "1.0";
-    $this->Dependency = array("browse", "view");
+    //$this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_NONE;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
