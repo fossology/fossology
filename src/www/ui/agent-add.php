@@ -30,7 +30,6 @@ class agent_add extends FO_Plugin
     $this->Title      = TITLE_agent_add;
     $this->MenuList   = "Jobs::Schedule Agents";
     $this->Version    = "1.1";
-    $this->Dependency = array();
     $this->DBaccess   = PLUGIN_DB_WRITE;
     parent::__construct();
   }
@@ -60,18 +59,17 @@ class agent_add extends FO_Plugin
    * \param $agentlist - list of agents
    * \return NULL on success, error message string on failure
    */
-  function AgentsAdd($uploadpk, $agentlist)
+  private function AgentsAdd($uploadpk, $agentlist)
   {
     global $Plugins;
     global $PG_CONN;
     global $SysConf;
 
     $rc="";
-    $Alist = array();
 
     /* Make sure the uploadpk is valid */
     if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
-    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$uploadpk';";
+    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$uploadpk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -90,7 +88,7 @@ class agent_add extends FO_Plugin
 
     /* Validate the agent list and add agents as needed. */
     /** Don't worry about order or duplicates -- it will do the right thing. **/
-    $Depth=0;
+    $depth=0;
     $agent_list = menu_find("Agents", $depth);
     for($al=0; !empty($agentlist[$al]); $al++)
     {
@@ -174,11 +172,8 @@ class agent_add extends FO_Plugin
     $V .= "  {\n";
     $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
     $V .= "    {\n";
-    /* Remove all options */
     $V .= "    document.getElementById('uploaddiv').innerHTML = '<select size=\'10\' name=\'upload\' onChange=\'Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)\'>' + Uploads.responseText + '</select><P />';\n";
-    //$V .= "alert(document.getElementById('uploaddiv').innerHTML)\n";
     $V .= "    document.getElementById('agentsdiv').innerHTML = '';\n";
-    /* Add new options */
     $V .= "    }\n";
     $V .= "  }\n";
     $V .= "</script>\n";
@@ -189,9 +184,7 @@ class agent_add extends FO_Plugin
     $V .= "  {\n";
     $V .= "  if ((Agents.readyState==4) && (Agents.status==200))\n";
     $V .= "    {\n";
-    /* Remove all options */
     $V .= "    document.getElementById('agentsdiv').innerHTML = '<select multiple size=\'10\' id=\'agents\' name=\'agents[]\'>' + Agents.responseText + '</select>';\n";
-    /* Add new options */
     $V .= "    }\n";
     $V .= "  }\n";
     $V .= "</script>\n";

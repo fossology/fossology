@@ -142,9 +142,9 @@ class HighlightDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $licenseId
-   * @param $agentId
-   * @param $highlightId
+   * @param int|null $licenseId
+   * @param int|null $agentId
+   * @param int|null $highlightId
    * @return array
    */
   private function getHighlightBulk(ItemTreeBounds $itemTreeBounds, $licenseId, $agentId, $highlightId)
@@ -155,13 +155,18 @@ class HighlightDao extends Object
     $sql = "SELECT license_decision_event_fk,start,len, rf_fk
              FROM highlight_bulk INNER JOIN license_ref_bulk
              ON license_ref_bulk.lrb_pk = highlight_bulk.lrb_fk
-             WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)
-             AND rf_fk = $2";
-    $params = array($itemTreeBounds->getUploadTreeId(), $licenseId);
+             WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
+    $params = array($itemTreeBounds->getUploadTreeId());
+    if(!empty($licenseId))
+    {
+      $stmt .= '.License';
+      $params[] = $licenseId;
+      $sql .= ' AND rf_fk = $'.count($params);
+    }
     if (!empty($agentId))
     {
       $stmt .= ".Agent";
-      $params[] = $agentId == 2 ? "f" : "t";
+      $params[] = $this->dbManager->booleanToDb($agentId!=2);
       $sql .= " AND license_ref_bulk.removing = $" . count($params);
     }
     if (!empty($highlightId))
@@ -187,9 +192,9 @@ class HighlightDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int $licenseId
-   * @param int $agentId
-   * @param null $highlightId
+   * @param int|null $licenseId
+   * @param int|null $agentId
+   * @param int|null $highlightId
    * @return array
    */
   public function getHighlightEntries(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null){
