@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License along with thi
 int ignoredLicenseNamesCount = 2;
 char* ignoredLicenseNames[] = {"Void", "No_license_found"};
 
-int ignoredLicenseTextsCount = 1;
-char* ignoredLicenseTexts[] = {"License by Nomos."};
+int ignoredLicenseTextsCount = 2;
+char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
 
 int isIgnoredLicense(License* license) {
   int ignored = 0;
