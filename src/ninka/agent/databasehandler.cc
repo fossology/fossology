@@ -15,7 +15,7 @@ DatabaseHandler::DatabaseHandler(DbManager dbManager):
     fo::AgentDatabaseHandler(dbManager) {}
 
 // TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
-vector<long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
+vector<unsigned long> DatabaseHandler::queryFileIdsForUpload(int uploadId) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -45,7 +45,7 @@ bool DatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long licenseId
   );
 }
 
-long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
+unsigned long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -56,10 +56,10 @@ long DatabaseHandler::queryLicenseIdForLicense(string rfShortName) {
     rfShortName.c_str()
   );
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, fo::stringToUnsignedLong)[0] : 0;
+  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
 }
 
-long DatabaseHandler::saveLicense(string rfShortName) {
+unsigned long DatabaseHandler::saveLicense(string rfShortName) {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
@@ -74,5 +74,5 @@ long DatabaseHandler::saveLicense(string rfShortName) {
     3
   );
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<long>(0, fo::stringToUnsignedLong)[0] : 0;
+  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
 }

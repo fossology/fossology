@@ -16,7 +16,7 @@
 string scanFileWithNinka(State* state, fo::File* file) {
   FILE *in;
   char buffer[512];
-  string command = "ninka " + file->fileName;
+  string command = "ninka " + file->getFileName();
   string result;
 
   if (!(in = popen(command.c_str(), "r"))) {

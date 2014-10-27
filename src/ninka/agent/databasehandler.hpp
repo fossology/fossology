@@ -22,10 +22,10 @@ class DatabaseHandler : public fo::AgentDatabaseHandler {
  public:
   DatabaseHandler(DbManager dbManager);
 
-  vector<long> queryFileIdsForUpload(int uploadId);
+  vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
-  long queryLicenseIdForLicense(string rfShortname);
-  long saveLicense(string rfShortname);
+  unsigned long queryLicenseIdForLicense(string rfShortname);
+  unsigned long saveLicense(string rfShortname);
 };
 
 #endif // NINKA_AGENT_DATABASE_HANDLER_HPP

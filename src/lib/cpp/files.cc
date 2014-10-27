@@ -36,7 +36,11 @@ namespace fo {
     };
 
     std::string File::getContent(const unsigned long int maximumBytes) const {
-        return getStringFromFile(fileName, maximumBytes);
+      return getStringFromFile(fileName, maximumBytes);
+    }
+
+    const std::string& File::getFileName() const {
+        return fileName;
     }
 
     File::File(unsigned long _id, const char *_fileName) : id(_id), fileName(_fileName) {
