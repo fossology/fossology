@@ -22,6 +22,7 @@ class NinkaDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
   NinkaDatabaseHandler(DbManager dbManager);
+  NinkaDatabaseHandler spawn() const;
 
   vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);

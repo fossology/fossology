@@ -54,16 +54,23 @@ bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& dat
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
-  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it)
+#pragma omp parallel
   {
-    unsigned long pFileId = *it;
+    NinkaDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
 
-    if (pFileId == 0)
-      continue;
+    size_t pFileCount = fileIds.size();
+#pragma omp for
+    for (size_t it = 0; it < pFileCount; ++it)
+    {
+      unsigned long pFileId = fileIds[it];
 
-    matchPFileWithLicenses(state, pFileId, databaseHandler);
+      if (pFileId == 0)
+        continue;
 
-    fo_scheduler_heart(1);
+      matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler);
+
+      fo_scheduler_heart(1);
+    }
   }
 
   return true;

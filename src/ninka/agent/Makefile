@@ -10,8 +10,8 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DEF = -DDATADIR='"$(MODDIR)"'
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall
-CXXFLAGS_LINK = $(ALL_CXXFLAGS)
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -fopenmp
+CXXFLAGS_LINK = $(ALL_CXXFLAGS) -fopenmp
 
 EXE = ninka
 

@@ -82,3 +82,9 @@ unsigned long NinkaDatabaseHandler::saveLicense(string rfShortName)
 
   return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
 }
+
+NinkaDatabaseHandler NinkaDatabaseHandler::spawn() const
+{
+  DbManager spawnedDbMan(dbManager.spawn());
+  return NinkaDatabaseHandler(spawnedDbMan);
+}
