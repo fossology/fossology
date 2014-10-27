@@ -103,6 +103,15 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
     $this->testDb->insertData(array('mimetype','pfile','uploadtree_a','clearing_decision_type','bucketpool','users','copyright'), false);
   }
 
+  private function searchContent($array, $content)
+  {
+    foreach($array as $entry) {
+      if ($entry['content'] === $content)
+        return true;
+    }
+    return false;
+  }
+
   public function testGetAllEntries()
   {
     $this->setUpClearingTables();
@@ -112,20 +121,132 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
 
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $this->assertEquals(14, count($entries));
+    $this->assertTrue($this->searchContent($entries,"info@3dfx.com"));
+  }
+
+  public function testGetAllEntriesOnlyStatementsAndIndentifyedIfCleared()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED);
     $this->assertEquals(13, count($entries));
+    $this->assertFalse($this->searchContent($entries,"info@3dfx.com"));
+  }
+
+  public function testGetAllEntriesOnlyStatementsWithFilterAndIndentifyedIfCleared()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED, "content LIKE '%permission of 3dfx interactiv%'");
+    $this->assertEquals(1, count($entries));
+    $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
+  }
+
+  public function testGetAllEntriesOnlyStatementsAndOnlyClearedIndentifyed()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED);
     $this->assertEquals(0, count($entries));
+  }
 
-    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+  public function testGetAllEntriesOnlyStatementsAndOnlyClearedIndentifyed_afterADecision()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment"); // pfile_fk=4 => uploadtree_pk=7
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED);
     $this->assertEquals(3, count($entries));
+
+    $expected = array(
+      array(
+        "description"=> "desc",
+        "textfinding" => "text",
+        "uploadtree_pk" => "7",
+        "clearing_decision_type_fk" => "5",
+        "content" => "copyright 3dfx interactive, inc. 1999, all rights reserved this \n"),
+      array(
+        "description"=> "desc",
+        "textfinding" => "text",
+        "uploadtree_pk" => "7",
+        "clearing_decision_type_fk" => "5",
+        "content" => "copyright laws of \nthe united states. \n\ncopyright 3dfx interactive, inc. 1999, all rights reserved\" \n"),
+      array(
+        "description" => "desc",
+        "textfinding" => "text",
+        "uploadtree_pk" => "7",
+        "clearing_decision_type_fk"=> "5",
+        "content" => "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"
+      )
+    );
+    $this->assertEquals($expected, $entries);
+  }
+
+  public function testGetAllEntriesOnlyStatementsWithFilterAndOnlyClearedIndentifyed_afterIdentifiedDecision()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $this->assertEquals(1, count($entries));
+    $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
+  }
+
+  public function testGetAllEntriesOnlyStatementsOnlyClearedIndentifyed_irrelevantDecisionIsIrrelevant()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED);
     $this->assertEquals(0, count($entries));
-
   }
+
+  public function testGetAllEntriesOnlyStatementsWithFilterAndOnlyClearedIndentifyed_afterTwoDecisions()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $this->assertEquals(0, count($entries));
+  }
+
+  public function testGetAllEntriesOnlyStatementsWithFilterAndOnlyClearedIndentifyed_afterTwoDecisionsWinsSecond()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc2","text","comment");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $this->assertEquals(1, count($entries));
+    $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
+    $this->assertEquals("desc2", $entries[0]['description']);
+  }
+
+
 }
