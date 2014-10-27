@@ -23,7 +23,7 @@
 
 using namespace std;
 
-string scanFileWithNinka(State* state, fo::File* file);
+string scanFileWithNinka(const State& state, const fo::File& file);
 vector<string> extractLicensesFromNinkaResult(string ninkaResult);
 string extractLicensePartFromNinkaResult(string ninkaResult);
 vector<string> splitLicensePart(string licensePart);

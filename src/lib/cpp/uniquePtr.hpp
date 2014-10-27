@@ -17,8 +17,10 @@
   #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
   namespace unptr = boost::interprocess;
 #else
-  #include <memory>
-  namespace unptr = std;
+
+#include <memory>
+
+namespace unptr = std;
 #endif
 
 #endif /* UNIQUE_PTR_HPP_ */

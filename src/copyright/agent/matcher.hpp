@@ -16,7 +16,8 @@
 #include <vector>
 #include "copyrightMatch.hpp"
 
-class Matcher {
+class Matcher
+{
 public:
   Matcher(const std::string _type);
   virtual ~Matcher();

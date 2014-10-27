@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(fossology)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+include_directories(
+    ${fossology_SOURCE_DIR}/src/lib/c
+    ${fossology_SOURCE_DIR}/src/lib/cpp
+)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Weffc++")
 
 set(SOURCE_FILES
     src/adj2nest/agent/adj2nest.c
@@ -83,6 +88,10 @@ set(SOURCE_FILES
     src/lib/c/sqlCopy.c
     src/lib/c/sqlCopy.h
     src/lib/c/sqlCopyTest.c
+    src/lib/cpp/libfossAgentDatabaseHandler.cc
+    src/lib/cpp/libfossAgentDatabaseHandler.hpp
+    src/lib/cpp/libfossUtils.cc
+    src/lib/cpp/libfossUtils.hpp
     src/lib/cpp/files.cc
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc
@@ -103,6 +112,57 @@ set(SOURCE_FILES
     src/mimetype/agent_tests/Unit/finder/testOtheFunctions.c
     src/mimetype/agent_tests/Unit/testRun.c
     src/mimetype/agent_tests/Unit/testRun.h
+    src/monk/agent/buildSquareVisitor.c
+    src/monk/agent/bulk.c
+    src/monk/agent/bulk.h
+    src/monk/agent/cli.c
+    src/monk/agent/cli.h
+    src/monk/agent/database.c
+    src/monk/agent/database.h
+    src/monk/agent/diff.c
+    src/monk/agent/diff.h
+    src/monk/agent/extended.c
+    src/monk/agent/extended.h
+    src/monk/agent/file_operations.c
+    src/monk/agent/file_operations.h
+    src/monk/agent/hash.c
+    src/monk/agent/hash.h
+    src/monk/agent/highlight.c
+    src/monk/agent/highlight.h
+    src/monk/agent/license.c
+    src/monk/agent/license.h
+    src/monk/agent/match.c
+    src/monk/agent/match.h
+    src/monk/agent/monk.c
+    src/monk/agent/monk.h
+    src/monk/agent/string_operations.c
+    src/monk/agent/string_operations.h
+    src/monk/agent_tests/Unit/run_tests.c
+    src/monk/agent_tests/Unit/test_database.c
+    src/monk/agent_tests/Unit/test_diff.c
+    src/monk/agent_tests/Unit/test_extended.c
+    src/monk/agent_tests/Unit/test_file_operations.c
+    src/monk/agent_tests/Unit/test_hash.c
+    src/monk/agent_tests/Unit/test_highlight.c
+    src/monk/agent_tests/Unit/test_license.c
+    src/monk/agent_tests/Unit/test_match.c
+    src/monk/agent_tests/Unit/test_string_operations.c
+    src/monk/agent_tests/Unit/utils.c
+    src/monk/agent_tests/Unit/utils.h
+    src/ninka/agent/databasehandler.cc
+    src/ninka/agent/databasehandler.hpp
+    src/ninka/agent/licensematch.cc
+    src/ninka/agent/licensematch.hpp
+    src/ninka/agent/ninka.cc
+    src/ninka/agent/ninka.hpp
+    src/ninka/agent/ninkawrapper.cc
+    src/ninka/agent/ninkawrapper.hpp
+    src/ninka/agent/state.cc
+    src/ninka/agent/state.hpp
+    src/ninka/agent/utils.cc
+    src/ninka/agent/utils.hpp
+    src/ninka/agent_tests/Unit/run_tests.cc
+    src/ninka/agent_tests/Unit/test_ninkawrapper.cc
     src/nomos/agent/_autodata.c
     src/nomos/agent/_autodefs.h
     src/nomos/agent/_precheck.c
@@ -246,50 +306,6 @@ set(SOURCE_FILES
     src/wget_agent/agent_tests/Unit/utility.h
     src/dox.c)
 
-set(SOURCE_FILES_MONK
-    src/monk/agent/_squareVisitor.c
-    src/monk/agent/_squareVisitor.h
-    src/monk/agent/buildSquareVisitor.c
-    src/monk/agent/bulk.c
-    src/monk/agent/bulk.h
-    src/monk/agent/cli.c
-    src/monk/agent/cli.h
-    src/monk/agent/database.c
-    src/monk/agent/database.h
-    src/monk/agent/diff.c
-    src/monk/agent/diff.h
-    src/monk/agent/extended.c
-    src/monk/agent/extended.h
-    src/monk/agent/file_operations.c
-    src/monk/agent/file_operations.h
-    src/monk/agent/hash.c
-    src/monk/agent/hash.h
-    src/monk/agent/highlight.c
-    src/monk/agent/highlight.h
-    src/monk/agent/license.c
-    src/monk/agent/license.h
-    src/monk/agent/match.c
-    src/monk/agent/match.h
-    src/monk/agent/monk.c
-    src/monk/agent/monk.h
-    src/monk/agent/string_operations.c
-    src/monk/agent/string_operations.h
-    src/monk/agent_tests/Unit/run_tests.c
-    src/monk/agent_tests/Unit/test_database.c
-    src/monk/agent_tests/Unit/test_diff.c
-    src/monk/agent_tests/Unit/test_extended.c
-    src/monk/agent_tests/Unit/test_file_operations.c
-    src/monk/agent_tests/Unit/test_hash.c
-    src/monk/agent_tests/Unit/test_highlight.c
-    src/monk/agent_tests/Unit/test_license.c
-    src/monk/agent_tests/Unit/test_match.c
-    src/monk/agent_tests/Unit/test_string_operations.c
-    src/monk/agent_tests/Unit/utils.c
-    src/monk/agent_tests/Unit/utils.h)
-
-include_directories(src/lib/c)
-include_directories(src/lib/cpp)
 include_directories(/usr/include/glib-2.0)
 
-add_executable(monk ${SOURCE_FILES_MONK})
 add_executable(others ${SOURCE_FILES})

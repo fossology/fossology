@@ -15,15 +15,16 @@
 
 using namespace std;
 
-class LicenseMatch {
- public:
+class LicenseMatch
+{
+public:
   LicenseMatch(string licenseName, unsigned percentage);
   ~LicenseMatch();
 
   const string getLicenseName() const;
   unsigned getPercentage() const;
 
- private:
+private:
   string licenseName;
   unsigned percentage;
 };
