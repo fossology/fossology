@@ -18,25 +18,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 namespace Fossology\Lib\BusinessRules;
+
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Util\Object;
 
 /**
- * Class NewestEditedLicenseSelector
+ * @brief filter newest license from array of [ClearingDecisions or LicenceRef array]
  * @package Fossology\Lib\BusinessRules
  */
 class NewestEditedLicenseSelector extends Object
 {
   /**
-   * @param ClearingDecision[] $editedLicensesArray
-   * @return ClearingDecision[]
+   * @param ClearingDecision[] $editedDecArray
+   * @return LicenseRef[][]
    */
-  public function extractGoodClearingDecisionsPerFileID($editedLicensesArray)
+  public function extractGoodLicensesPerItem($editedDecArray)
   {
     $editedLicensesArrayGrouped = array();
-    foreach ($editedLicensesArray as $editedLicense)
+    foreach ($editedDecArray as $editedLicense)
     {
       $pfileId = $editedLicense->getPfileId();
       if (!array_key_exists($pfileId, $editedLicensesArrayGrouped))
@@ -48,102 +47,83 @@ class NewestEditedLicenseSelector extends Object
       }
     }
     
-    $goodLicenseDecisions = array();
+    $goodLicenses = array();
     foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
-      $cd = $this->selectNewestEditedLicensePerFileID($editedLicensesArray);
-      if ($cd != null)
+      $licArr = $this->selectNewestEditedLicensePerItem($editedLicensesArray);
+      if ($licArr !== null)
       {
-        $goodLicenseDecisions[$fileId] = $cd;
+        $goodLicenses[$fileId] = $licArr;
       }
     }
 
-    return $goodLicenseDecisions;
+    return $goodLicenses;
   }
 
   /**
-   * @param ClearingDecision[] $editedLicensesArray
+   * @param LicenseRef[][] $editedLicensesArray
    * @return string[]
    */
   public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodClearingDecisionsPerFileID($editedLicensesArray);
+    $licensesPerId = $this->extractGoodLicensesPerItem($editedLicensesArray);
 
     $licenses = array();
-    foreach ($licensesPerId as $fileID => $licInfo)
+    foreach ($licensesPerId as $licInfo)
     {
-      foreach ($licInfo->getLicenses() as $licRef)
+      foreach ($licInfo as $licRef)
       {
-        if (!($licRef->isRemoved()))
-          $licenses[] = $licRef->getShortName();
+        $licenses[] = $licRef->getShortName();
       }
     }
     return $licenses;
   }
 
   /**
-   * @param ClearingDecision $clearingDecWithLicAndContext
-   * @return bool
-   */
-  public function isInactive($clearingDecWithLicAndContext)
-  {
-    return $clearingDecWithLicAndContext->getType() !== DecisionTypes::IDENTIFIED or ($clearingDecWithLicAndContext->getScope() == 'upload' and $clearingDecWithLicAndContext->getSameFolder() === false);
-  }
-
-  // these two functions have to be kept consistent to each other
-
-  /**
+   * @brief $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
    * @param ClearingDecision[] $sortedClearingDecArray
-   * @return ClearingDecision
+   * @return LicenseRef[]|null
    */
-  public function selectNewestEditedLicensePerFileID($sortedClearingDecArray)
+  private function selectNewestEditedLicensePerItem($sortedClearingDecArray)
   {
-// $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
-    //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
-    //! misleading folder content overviews in the license browser and in the count of license findings
-    $out =array ();
-    foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
+    $upload = array();
+    $global = array();
+    foreach ($sortedClearingDecArray as $clearingDecision)
     {
-      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getSameFolder() and $clearingDecWithLicenses->getScope() == 'upload')
+      $utid = $clearingDecision->getUploadTreeId();
+      if( array_key_exists($utid, $upload) )
       {
-        $utid = $clearingDecWithLicenses->getUploadTreeId();
-        $out[$utid] = $clearingDecWithLicenses;
+        continue;
+      }
+      if ($clearingDecision->getSameFolder() && $clearingDecision->getScope() == 'upload')
+      {
+        unset($global[$utid]);
+        $upload[$utid] = $clearingDecision->getPositiveLicenses();
+      }
+      if ($clearingDecision->getScope() == 'global' && !array_key_exists($utid, $upload) && !array_key_exists($utid, $global))
+      {
+        $global[$utid] = $clearingDecision->getPositiveLicenses();
       }
     }
-    
-    if(count($out) > 0) {
-      return $this->flatten($out);
-    }
-    
-    foreach ($sortedClearingDecArray as $clearingDecWithLicenses)
-    {
-      if ($clearingDecWithLicenses->getType() == DecisionTypes::IDENTIFIED and $clearingDecWithLicenses->getScope() == 'global')
-      {
-        return $clearingDecWithLicenses;
-      }
+    $licenseArrays = array_merge($global,$upload); // not ($upload,$global)
+    if(count($licenseArrays) > 0) {
+      return $this->flatten($licenseArrays);
     }
     return null;
   }
 
 
   /**
-   * @param ClearingDecision[] $in
-   * @return ClearingDecision
+   * @param LicenseRef[][] $in
+   * @return LicenseRef[]
    */
   private function flatten($in)
   {
     $licenses = array();
     foreach ($in as $clearingD) {
-     $licenses = array_merge($licenses, $clearingD->getLicenses());
-     $pfileId = $clearingD->getPfileId();
+     $licenses = array_merge($licenses, $clearingD);
     }
-    $out = ClearingDecisionBuilder::create()
-            ->setLicenses(array_unique($licenses) )
-            ->setSameUpload(true)
-            ->setPfileId($pfileId)
-            ->setScope('upload')
-            ->setType(DecisionTypes::IDENTIFIED)
-            ->build();
+    $out = array_unique($licenses);
     return $out;
   }
         

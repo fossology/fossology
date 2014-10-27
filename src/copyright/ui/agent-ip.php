@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,21 +18,23 @@
 ***********************************************************/
 
 /**
- * \file agent.php
- * \brief Interface ip agent to job queue
+  * \brief Interface ip agent to job queue
  */
 
 define("TITLE_agent_ip", _("IP Analysis"));
 
-class agent_ip extends FO_Plugin
+class Agent_ip extends FO_Plugin
 {
-  public $Name = "agent_ip";
-  public $Title = TITLE_agent_ip;
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
   public $AgentName = "ip";   // agent.agent_name
-
+    
+  function __construct()
+  {
+    $this->Name = "agent_ip";
+    $this->Title = TITLE_agent_ip;
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
+  
   /**
    * \brief Register ip agent in "Agents" menu
    */
@@ -81,4 +84,4 @@ class agent_ip extends FO_Plugin
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 }
-$NewPlugin = new agent_ip;
+$NewPlugin = new Agent_ip;

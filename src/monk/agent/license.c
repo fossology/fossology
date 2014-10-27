@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #include <glib.h>
 
 #include "license.h"
@@ -15,8 +16,8 @@ You should have received a copy of the GNU General Public License along with thi
 int ignoredLicenseNamesCount = 2;
 char* ignoredLicenseNames[] = {"Void", "No_license_found"};
 
-int ignoredLicenseTextsCount = 1;
-char* ignoredLicenseTexts[] = {"License by Nomos."};
+int ignoredLicenseTextsCount = 2;
+char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
 
 int isIgnoredLicense(License* license) {
   int ignored = 0;

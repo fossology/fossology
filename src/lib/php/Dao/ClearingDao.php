@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
@@ -42,7 +41,7 @@ class ClearingDao extends Object
   /** @var Logger */
   private $logger;
   /** @var NewestEditedLicenseSelector */
-  public $newestEditedLicenseSelector;
+  protected $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
 
@@ -104,10 +103,12 @@ class ClearingDao extends Object
 
     while ($row = $this->dbManager->fetchArray($result))
     {
+      list($added,$removed) = $this->getFileClearingLicenses($row['id']);
       $clearingDec = ClearingDecisionBuilder::create()
           ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
           ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
-          ->setLicenses($this->getFileClearingLicenses($row['id']))
+          ->setPositiveLicenses($added)
+          ->setNegativeLicenses($removed)
           ->setClearingId($row['id'])
           ->setUploadTreeId($row['uploadtree_id'])
           ->setPfileId($row['pfile_id'])
@@ -125,12 +126,11 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param $clearingId
-   * @return ClearingLicense[]
+   * @param int $clearingId
+   * @return array pair of LicenseRef[]
    */
-  public function getFileClearingLicenses($clearingId)
+  private function getFileClearingLicenses($clearingId)
   {
-    $clearingLicenses = array();
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
         "select
@@ -143,14 +143,22 @@ class ClearingDao extends Object
                where clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($clearingId));
-
+    $added = array();
+    $removed = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
       $licenseRef = new LicenseRef($row['id'], $row['shortname'], $row['fullname']);
-      $clearingLicenses[] = new ClearingLicense($licenseRef, $this->dbManager->booleanFromDb($row['removed']));
+      if ($this->dbManager->booleanFromDb($row['removed']))
+      {
+        $removed[] = $licenseRef;
+      }
+      else
+      {
+        $added[] = $licenseRef;
+      }
     }
     $this->dbManager->freeResult($res);
-    return $clearingLicenses;
+    return array($added,$removed);
   }
 
   /**
@@ -215,16 +223,6 @@ class ClearingDao extends Object
     // TODO comment license item pair
   }
 
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return ClearingDecision[]
-   */
-  public function getGoodClearingDecPerFileId(ItemTreeBounds $itemTreeBounds)
-  {
-    $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
-    $filteredLicenses = $this->newestEditedLicenseSelector->extractGoodClearingDecisionsPerFileID($licenseCandidates);
-    return $filteredLicenses;
-  }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
@@ -278,7 +276,6 @@ class ClearingDao extends Object
    * @param int $userId
    * @param int $uploadTreeId
    * @return ClearingDecision|null
-   * @throws \Fossology\Lib\Exception
    */
   public function getRelevantClearingDecision($userId, $uploadTreeId)
   {
@@ -311,9 +308,13 @@ ORDER BY CD.date_added DESC LIMIT 1
     );
 
     $row = $this->dbManager->fetchArray($res);
-    $result = $row ?
-        ClearingDecisionBuilder::create()
-        ->setLicenses($this->getFileClearingLicenses($row['id']))
+    $result = null;
+    if($row!==false && count($row)!=0)
+    {
+      list($added,$removed) = $this->getFileClearingLicenses($row['id']);
+      $result = ClearingDecisionBuilder::create()
+        ->setPositiveLicenses($added)
+        ->setNegativeLicenses($removed)
         ->setClearingId($row['id'])
         ->setUploadTreeId($row['uploadtree_id'])
         ->setPfileId($row['file_id'])
@@ -321,8 +322,8 @@ ORDER BY CD.date_added DESC LIMIT 1
         ->setType($row['type_id'])
         ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
         ->setDateAdded($row['date_added'])
-        ->build() :
-        null;
+        ->build();
+    }
     $this->dbManager->freeResult($res);
     return $result;
   }
@@ -600,6 +601,22 @@ insert into license_decision_event (
     $this->dbManager->freeResult($res);
 
     return $items;
+  }
+  
+  /**
+   * @param ClearingDecision[] $decisions
+   * @return LicenseRef[][]
+   */
+  public function extractGoodLicensesPerFileID($decisions){
+    return $this->newestEditedLicenseSelector->extractGoodLicensesPerItem($decisions);
+  }
+  
+  /**
+   * @param LicenseRef[][] $editedLicensesArray
+   * @return string[]
+   */
+  public function extractGoodLicenses($editedLicensesArray){
+    return $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
   }
 
 }

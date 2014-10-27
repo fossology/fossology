@@ -17,20 +17,22 @@
 ***********************************************************/
 
 /**
- * \file agent.php
- * \brief Interface copyright agent to job queue
+  * \brief Interface copyright agent to job queue
  */
 
 define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
 
-class agent_copyright extends FO_Plugin
+class Agent_copyright extends FO_Plugin
 {
-  public $Name = "agent_copyright";
-  public $Title = TITLE_agent_copyright;
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
   public $AgentName = "copyright";   // agent.agent_name
+
+  function __construct()
+  {
+    $this->Name = "agent_copyright";
+    $this->Title = TITLE_agent_copyright;
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Register copyright agent in "Agents" menu
@@ -81,4 +83,4 @@ class agent_copyright extends FO_Plugin
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
   } // AgentAdd()
 }
-$NewPlugin = new agent_copyright;
+$NewPlugin = new Agent_copyright;

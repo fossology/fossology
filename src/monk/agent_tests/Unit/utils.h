@@ -11,8 +11,8 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef UTILS_H
 #define	UTILS_H
 
-PGconn * dbRealConnect();
-void dbRealDisconnect(PGconn * dbConn);
+PGconn* dbRealConnect();
+void dbRealDisconnect(PGconn* dbConn);
 
-#endif	/* UTILS_H */
+#endif // UTILS_H
 

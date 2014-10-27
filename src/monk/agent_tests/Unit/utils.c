@@ -10,9 +10,9 @@ You should have received a copy of the GNU General Public License along with thi
 */
 #include "libfossdb.h"
 
-PGconn * dbRealConnect() {
-  char * errorBuf = NULL;
-  PGconn * dbConn = fo_dbconnect(NULL, &errorBuf);
+PGconn* dbRealConnect() {
+  char* errorBuf = NULL;
+  PGconn* dbConn = fo_dbconnect(NULL, &errorBuf);
 
   if (errorBuf != NULL) {
     dbConn = NULL;
@@ -23,6 +23,6 @@ PGconn * dbRealConnect() {
   return dbConn;
 }
 
-void dbRealDisconnect(PGconn * dbConn) {
+void dbRealDisconnect(PGconn* dbConn) {
   PQfinish(dbConn);
 }

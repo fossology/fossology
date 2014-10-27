@@ -112,7 +112,7 @@ class Postgres implements Driver
    */
   public function fetchArray($res)
   {
-    return pg_fetch_array($res);
+    return pg_fetch_array($res, null, PGSQL_ASSOC);
   }
 
   /**
@@ -162,5 +162,12 @@ class Postgres implements Driver
     return $booleanValue ? 't' : 'f';
   }
 
-
+  /**
+   * @param string
+   * @return string
+   */
+  public function escapeString($string)
+  {
+    return pg_escape_string($string);
+  }
 }

@@ -65,40 +65,37 @@ class LicenseProcessor extends Object
 
     foreach ($matches as $match)
     {
+      $fileId = $match->getPfileId();
+      $highlightId = $match->getClearingId();
       $agentRef = "empty";
       if($match->getType()=="bulk") {
-        foreach($match->getLicenses() as $license) {
-
-          if($license->isRemoved()) {
-
-            $agentName = _("Bulk removal");
-            $agentId = 1;
-          }
-          else {
-            $agentName = _("Bulk addition");
-            $agentId = 2;
-          }
-
+        foreach($match->getNegativeLicenses() as $license)
+        {
+          $agentName = _("Bulk removal");
+          $agentId = 1;
           $content = array(
               'licenseId' => $license->getId(),
               'agentRev' => $agentRef,
               'percent' => null,
               'agentId' => $agentId);
-
-
-          $fileId = $match->getPfileId();
-
-
           $shortName = $license->getShortName();
-
-          $highlightId = $match->getClearingId();
+          $extractedMatches[$fileId][$agentName][$shortName][$agentId][$highlightId] = $content;
+        }
+        foreach($match->getPositiveLicenses() as $license)
+        {
+          $agentName = _("Bulk addition");
+          $agentId = 2;
+          $content = array(
+              'licenseId' => $license->getId(),
+              'agentRev' => $agentRef,
+              'percent' => null,
+              'agentId' => $agentId);
+          $shortName = $license->getShortName();
           $extractedMatches[$fileId][$agentName][$shortName][$agentId][$highlightId] = $content;
         }
       }
     }
-
     return $extractedMatches;
   }
-
 
 } 
