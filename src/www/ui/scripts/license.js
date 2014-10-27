@@ -69,17 +69,17 @@ function filterLicense(licenseShortName) {
   searchField.trigger('keyup');
 }
 
-function resetLicenseField() {
-  var searchField = $('#lichistogram_filter input');
+function clearSearchLicense() {
+  var searchField =  $('#lichistogram_filter input');
   searchField.val('');
   searchField.trigger('keyup.DT');
 }
 
-function resetFileFields() {
-  $('#dirlist_filter_license').val('');
-  var searchField = $('#dirlist_filter input');
-  searchField.val('');
-  searchField.trigger('keyup');
+function clearSearchFiles() {
+    $('#dirlist_filter_license').val('');
+    var searchField =  $('#dirlist_filter input');
+    searchField.val('');
+    searchField.trigger('keyup');
 }
 
 
@@ -125,3 +125,13 @@ function scheduleScan(upload, agentName, resultEntityKey) {
   });
 
 }
+function dressContents ( data, type, full ) {
+    if (type === 'display')
+        return '<a onclick=\'filterLicense(\"'+data +'\")\'>'+data+'</a>';
+
+    return data;
+
+
+}
+
+

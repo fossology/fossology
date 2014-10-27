@@ -62,7 +62,7 @@ protected:
 
     CopyrightMatch match = matches[0];
 
-    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my compan"), match.getContent());
+    CPPUNIT_ASSERT_EQUAL(string("Copyright 2004 my company"), match.getContent());
   };
 
 
@@ -71,3 +71,4 @@ protected:
 
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(regexRegMatcher);

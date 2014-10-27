@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #ifndef MONK_AGENT_MONK_H
 #define MONK_AGENT_MONK_H
 
@@ -54,24 +55,24 @@ typedef struct {
 } BulkArguments;
 
 typedef struct {
-    fo_dbManager* dbManager;
-    int agentId;
-    int scanMode;
-    int verbosity;
-    int jobId;
-    BulkArguments* bulkArguments;
+  fo_dbManager* dbManager;
+  int agentId;
+  int scanMode;
+  int verbosity;
+  int jobId;
+  BulkArguments* bulkArguments;
 } MonkState;
 
 typedef struct {
-    long refId;
-    char * shortname;
-    GArray * tokens;
+  long refId;
+  char* shortname;
+  GArray* tokens;
 } License;
 
 typedef struct {
-    long id;
-    char * fileName;
-    GArray * tokens;
+  long id;
+  char* fileName;
+  GArray* tokens;
 } File;
 
-#endif
+#endif // MONK_AGENT_MONK_H

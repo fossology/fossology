@@ -5,7 +5,7 @@
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=install src
+DIRS = install src
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -17,8 +17,7 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
-CONFPATH=$(SYSCONFDIR)
-
+CONFPATH = $(SYSCONFDIR)
 
 ## Targets
 # build
@@ -40,7 +39,7 @@ utils: build-utils
 
 # generate the VERSION file
 TOP = .
-VERSIONFILE: 
+VERSIONFILE:
 	$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
@@ -52,12 +51,11 @@ $(INSTALLDIRS):
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
-	
+
 # test depends on everything being built first
 test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
-
 
 coverage: $(COVDIRS)
 $(COVDIRS):
@@ -65,13 +63,12 @@ $(COVDIRS):
 
 clean: $(CLEANDIRS)
 	rm -f variable.list VERSION
-
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
-
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
+
 # release stuff
 tar: dist-testing
 dist-testing:
@@ -80,7 +77,6 @@ dist-testing:
 tar-release: dist
 dist:
 	utils/fo-mktar
-
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)

@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #ifndef MONK_AGENT_STRING_OPERATIONS_H
 #define MONK_AGENT_STRING_OPERATIONS_H
 
@@ -16,9 +17,9 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdint.h>
 
 typedef struct {
-    unsigned int length;
-    unsigned int removedBefore;
-    uint32_t hashedContent;
+  unsigned int length;
+  unsigned int removedBefore;
+  uint32_t hashedContent;
 } Token;
 
 #define token_length(token) ((Token) (token)).length
@@ -34,10 +35,10 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
 
 int tokensEquals(GArray* a, GArray* b);
 
-size_t token_position_of(size_t index, GArray * tokens);
+size_t token_position_of(size_t index, GArray* tokens);
 
 typedef struct {
-  GArray * contents;
+  GArray* contents;
   size_t length;
 } StringBuilder;
 
@@ -48,4 +49,5 @@ void stringBuilder_free(StringBuilder* stringBuilder);
 void stringBuilder_printf(StringBuilder* stringBuilder, const char* format, ...);
 
 char* stringBuilder_build(StringBuilder* stringBuilder);
-#endif
+
+#endif // MONK_AGENT_STRING_OPERATIONS_H

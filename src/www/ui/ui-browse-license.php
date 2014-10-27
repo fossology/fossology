@@ -149,7 +149,7 @@ class ui_browse_license extends FO_Plugin
     }
 
     $uploadId = GetParm('upload', PARM_NUMBER);
-    $scannerAgents = array('nomos', 'monk');
+    $scannerAgents = array('nomos', 'monk', 'ninka');
 
 
     list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
@@ -326,8 +326,11 @@ class ui_browse_license extends FO_Plugin
     $newestNomos=$this->getNewestAgent("nomos");
     $latestMonk=LatestAgentpk($uploadId, "monk_ars");
     $newestMonk=$this->getNewestAgent("monk");
+    $latestNinka=LatestAgentpk($uploadId, "ninka_ars");
+    $newestNinka=$this->getNewestAgent("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
+        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ),
+        'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' =>$newestNinka, 'latestIsNewest' =>$latestNinka==$newestNinka['agent_pk']  ));
 
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
@@ -360,7 +363,7 @@ class ui_browse_license extends FO_Plugin
 
     $tableColumns = array(
         array("sTitle" => _("Files"), "sClass" => "left"),
-        array("sTitle" => _("Scanner Results (N: nomos, M: monk)"), "sClass" => "left"),
+        array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
         array("sTitle" => _("Edited Results"), "sClass" => "left"),
         array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'mRender'=>'##mRender##'),
         array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
@@ -375,8 +378,8 @@ class ui_browse_license extends FO_Plugin
 
     $tableLanguage = array(
         "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-        "sSearch" => "Search _INPUT_ in all columns"
-            . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
+        "sSearch" => "_INPUT_"
+            . "<button onclick='clearSearchFiles()' >" . _("Clear") . "</button>",
         "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
     );
 
@@ -531,16 +534,7 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
     list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
-/*
-    if ($filesCleared == $filesToBeCleared)
-    {
-      $img = "<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
-    }
-    else
-    {
-      $img = "<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
-    }
-  */
+
     $img = ($filesCleared==$filesToBeCleared) ? 'green' : 'red';
 
     return array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);  
@@ -567,7 +561,7 @@ class ui_browse_license extends FO_Plugin
     
     $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
     global $container;
-    /** @var LicenseRenderer */
+    /** @var LicenseRenderer  $licenseRenderer*/
     $licenseRenderer = $container->get('view.license_renderer');
     return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
@@ -697,7 +691,7 @@ class ui_browse_license extends FO_Plugin
       if (false === $latestRun)
       {
 
-        $V .= _("The agent") . " <b>$agentName</b> " . _("did never run successfully on this upload.");
+        $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
 
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
@@ -719,12 +713,12 @@ class ui_browse_license extends FO_Plugin
         $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
         if (in_array($newestAgent['agent_pk'], $runningJobs))
         {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
+          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
           $V .= $this->getViewJobsLink($uploadId);
           $V .= " " . _("or") . " ";
         } else
         {
-          $V .= _(" The newer revision ") . $newestAgent['agent_rev'] . _(" did not run on this upload.");
+          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" has not been run on this upload.");
 
         }
         $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));

@@ -49,81 +49,26 @@ class HistogramBase extends FO_Plugin {
 
   }
 
-  protected function getTableForSingleType($type, $description, $descriptionTotal, $upload_pk, $uploadtreeId, $filter, $Agent_pk){
+  /**
+   * @param $type
+   * @param $description
+   * @param $uploadId
+   * @param $uploadTreeId
+   * @param $filter
+   * @param $agentId
+   * @return string
+   */
+  protected function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId){
 
-    $output = "<div><table border=1 width='100%' id='copyright".$type."'>\n";
-    $output .= "</table></div><br/>\n";
+    $sorting = json_encode($this->returnSortOrder());
 
-    $tableColumns = '[
-      { "sTitle" : "'._("Count").'", "sClass": "right read_only" ,"sWidth" : "5%" },
-      { "sTitle" : "'.$description.'", "sClass": "left"},
-      { "sTitle" : "", "sClass" : "center read_only", "sWidth" : "10%", "bSortable" : false }
-    ]';
-    $tableSorting = json_encode($this->returnSortOrder());
+    $out=array("type"=> $type,  "sorting" =>$sorting, "uploadId" => $uploadId,
+        "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" =>$filter, "description" => $description);
 
-    $dataTableConfig =
-        '{  "bServerSide": true,
-            "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
-            "fnServerData": function ( sSource, aoData, fnCallback ) {
-              aoData.push( { "name":"upload" , "value" : "'.$upload_pk.'" } );
-              aoData.push( { "name":"item" , "value" : "'.$uploadtreeId.'" } );
-              aoData.push( { "name":"agent" , "value" : "'.$Agent_pk.'" } );
-              aoData.push( { "name":"type" , "value" : "'.$type.'" } );
-              aoData.push( { "name":"filter" , "value" : "'.$filter.'" } );
-              $.getJSON( sSource, aoData, fnCallback ).fail( function() {
-              if (confirm("You are not logged in. Go to login page?"))
-                window.location.href="'.  Traceback_uri(). '?mod=auth";
-            });
-          },
-      "aoColumns": '.$tableColumns.',
-      "aaSorting": '.$tableSorting.',
-      "iDisplayLength": 50,
-      "bProcessing": true,
-      "bStateSave": true,
-      "sCookiePrefix" : "fossology_",
-      "bRetrieve": true
-    }';
+    //TODO template this! For now I just template the js
+    $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/>";
 
-    $editableConfiguration  = '{
-    "sReadOnlyCellClass": "read_only",
-    "sSelectedRowClass" : "selectedRow",
-    "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type='.$type.'" ,
-    "fnOnEditing" : function(input) {
-                      var value = input[0].value;
-                      var isValid = (value) && !(/^\s*$/.test(value));
-                      if (isValid) {
-                         var id = input.parents("tr:first")[0].id;
-                         var hash = id.split(",")[2];
-                         $("#delete'.$type.'" + hash).hide();
-                         var updateElement = $("#update'.$type.'" + hash);
-                         updateElement.text("updating...");
-                         updateElement.show();
-                      }
-                      return isValid;
-                    },
-    "sSuccessResponse" : "success",
-    }';
-
-    $output   .= "<script>
-              function createTable".$type."() {
-                    var otable = $('#copyright".$type."').dataTable(". $dataTableConfig . ").makeEditable($editableConfiguration);
-                    // var settings = otable.fnSettings(); // for debugging
-                    return otable;
-                };
-
-              function delete".$type."(upload,item,hash, kind) {
-                 $.ajax({
-                   type: 'POST',
-                   dataType: 'text',
-                   url: '?mod=ajax-copyright-hist&action=delete&type=$type',
-                   data: { id : upload + ',' + item + ',' + hash + ',' + kind },
-                   success: function(data) { $('#copyright$type').dataTable().fnDraw(false); },
-                   error: function() { alert('error'); }
-                 });
-              }
-            </script>";
-
-    return $output;
+    return array($output,$out );
   }
 
 
@@ -304,7 +249,9 @@ class HistogramBase extends FO_Plugin {
         $SelectFilter .= "</select>";
         $OutBuf .= $SelectFilter;
 
-        $OutBuf .= $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+        list($tables, $tableVars) = $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
+        $this->vars['tables'] = $tableVars;
+        $OutBuf .= $tables;
       }
     }
     $OutBuf .= "</font>\n";

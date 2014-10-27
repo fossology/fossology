@@ -160,7 +160,7 @@ class LicenseRenderer
         }
 
 
-        if ($editedCount > 0) //complicated but later I want to show real links
+        if ($editedCount > 0)
         {
           $editedLink = $editedCount;
         } else
@@ -168,20 +168,14 @@ class LicenseRenderer
           $editedLink = "0";
         }
 
-        /*  License name  */
-        $encodedLicenseShortName = urlencode($licenseShortName);
-        $shortN = "<a id='$encodedLicenseShortName' onclick='filterLicense(\"$licenseShortName\");'";
-        $shortN .= ">$licenseShortName</a>";
-
-
-        $tableData[] = array($scannerCountLink, $editedLink, $shortN);
+        $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
       }
     }
 
     $tableColumns = array(
         array("sTitle" => _("Scanner Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
         array("sTitle" => _("Concluded License Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
-        array("sTitle" => _("License Name"), "sClass" => "left"),
+        array("sTitle" => _("License Name"), "sClass" => "left", "mRender" => '###dressContents###'),
     );
 
     $tableSorting = array(
@@ -192,7 +186,7 @@ class LicenseRenderer
 
     $tableLanguage = array(
         "sInfo" => "Showing _START_ to _END_ of _TOTAL_ licenses",
-        "sSearch" => "Search _INPUT_ <button onclick='resetLicenseField()' >" . _("Clear") . "</button>",
+        "sSearch" => "Search _INPUT_ <button onclick='clearSearchLicense()' >" . _("Clear") . "</button>",
         "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> licenses"
     );
 
@@ -204,9 +198,11 @@ class LicenseRenderer
         "oLanguage" => $tableLanguage
     );
 
+    $dataTableJS = str_replace('"###dressContents###"', "dressContents", json_encode($dataTableConfig));
+
     $rendered = "<script>
       function createLicHistTable() {
-        dTable=$('#lichistogram').dataTable(" . json_encode($dataTableConfig) . ");
+        dTable=$('#lichistogram').dataTable(" . $dataTableJS . ");
     }
 </script>";
 

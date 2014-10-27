@@ -15,13 +15,13 @@ You should have received a copy of the GNU General Public License along with thi
 #include "hash.h"
 
 void test_hash1() {
-  CU_ASSERT_NOT_EQUAL(hash(""),hash("t"));
-  CU_ASSERT_NOT_EQUAL(hash("t"),hash("test"));
-  CU_ASSERT_NOT_EQUAL(hash("test"),hash("test1"));
+  CU_ASSERT_NOT_EQUAL(hash(""), hash("t"));
+  CU_ASSERT_NOT_EQUAL(hash("t"), hash("test"));
+  CU_ASSERT_NOT_EQUAL(hash("test"), hash("test1"));
 }
 
 void test_hash2() {
-  CU_ASSERT_EQUAL(hash("a\0b"),hash("a"));
+  CU_ASSERT_EQUAL(hash("a\0b"), hash("a"));
 }
 
 CU_TestInfo hash_testcases[] = {
