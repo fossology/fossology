@@ -50,7 +50,7 @@ void bail(int exitval)
   exit(exitval);
 }
 
-bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseHandler)
+bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
@@ -69,8 +69,7 @@ bool processUploadId(State& state, int uploadId, NinkaDatabaseHandler& databaseH
   return true;
 }
 
-void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
-{
+void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
   if (!pFile)
@@ -88,7 +87,7 @@ void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHa
   {
     fo::File file(pFileId, fileName);
 
-    matchFileWithLicenses(file, state, databaseHandler);
+    matchFileWithLicenses(state, file, databaseHandler);
 
     free(fileName);
     free(pFile);

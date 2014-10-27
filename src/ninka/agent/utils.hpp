@@ -29,10 +29,10 @@ using namespace std;
 
 State getState(DbManager& dbManager);
 int queryAgentId(DbManager& dbManager);
-int writeARS(const State& state, int arsId, long uploadId, int success, DbManager& dbManager);
+int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager);
 void bail(int exitval);
 bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler);
-void matchPFileWithLicenses(State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
+void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
 void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler);
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);
 long getLicenseId(string rfShortname, NinkaDatabaseHandler& databaseHandler);
