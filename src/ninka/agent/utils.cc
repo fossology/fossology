@@ -69,7 +69,8 @@ bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& dat
   return true;
 }
 
-void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler) {
+void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+{
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
   if (!pFile)
