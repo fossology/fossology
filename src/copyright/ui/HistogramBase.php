@@ -60,16 +60,10 @@ class HistogramBase extends FO_Plugin {
    */
   protected function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId){
 
-
-    $columns = '[
-      { "sTitle" : "'._("Count").'", "sClass": "right read_only" ,"sWidth" : "5%" },
-      { "sTitle" : "'.$description.'", "sClass": "left"},
-      { "sTitle" : "", "sClass" : "center read_only", "sWidth" : "10%", "bSortable" : false }
-    ]';
     $sorting = json_encode($this->returnSortOrder());
 
-    $out=array("type"=> $type, "columns" => $columns, "sorting" =>$sorting, "uploadId" => $uploadId,
-        "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" =>$filter);
+    $out=array("type"=> $type,  "sorting" =>$sorting, "uploadId" => $uploadId,
+        "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" =>$filter, "description" => $description);
 
     //TODO template this! For now I just template the js
     $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/>";

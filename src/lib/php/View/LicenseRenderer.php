@@ -172,11 +172,11 @@ class LicenseRenderer
       }
     }
 
-    $tableColumns = '[
-      {"sTitle" : "'._("Scanner Count").'", "sClass": "right", "sWidth": "5%", "bSearchable" : false, "sType" : "num-html"},
-      {"sTitle" : "'._("Concluded License Count").'", "sClass" : "right", "sWidth" : "5%", "bSearchable" : false, "sType" : "num-html"},
-      {"sTitle" : "'._("License Name").'", "sClass" : "left" , "sType" : "html", "mRender" : dressContents}
-    ]';
+    $tableColumns = array(
+        array("sTitle" => _("Scanner Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
+        array("sTitle" => _("Concluded License Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
+        array("sTitle" => _("License Name"), "sClass" => "left", "mRender" => '###dressContents###'),
+    );
 
     $tableSorting = array(
         array(0, "desc"),
@@ -187,26 +187,22 @@ class LicenseRenderer
     $tableLanguage = array(
         "sInfo" => "Showing _START_ to _END_ of _TOTAL_ licenses",
         "sSearch" => "Search _INPUT_ <button onclick='clearSearchLicense()' >" . _("Clear") . "</button>",
-        "sLengthMenu" => "Display <select>
-                            <option value=\"10\">10</option>
-                            <option value=\"25\">25</option>
-                            <option value=\"50\">50</option>
-                            <option value=\"100\">100</option>
-                            <option value=\"999999\">All</option>
-                          </select> licenses"
+        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> licenses"
     );
 
-    $dataTableConfig = '{
-        "aaData": '.json_encode($tableData).',
-        "aoColumns": '.$tableColumns.',
-        "aaSorting" : '.json_encode($tableSorting).',
-        "iDisplayLength" : 25,
-        "oLanguage": '.json_encode($tableLanguage).'
-        } ';
+    $dataTableConfig = array(
+        "aaData" => $tableData,
+        "aoColumns" => $tableColumns,
+        "aaSorting" => $tableSorting,
+        "iDisplayLength" => 25,
+        "oLanguage" => $tableLanguage
+    );
+
+    $dataTableJS = str_replace('"###dressContents###"', "dressContents", json_encode($dataTableConfig));
 
     $rendered = "<script>
       function createLicHistTable() {
-        dTable=$('#lichistogram').dataTable($dataTableConfig );
+        dTable=$('#lichistogram').dataTable(" . $dataTableJS . ");
     }
 </script>";
 

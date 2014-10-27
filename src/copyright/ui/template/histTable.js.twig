@@ -13,7 +13,11 @@
                     window.location.href="'.  Traceback_uri(). '?mod=auth";
             });
         },
-        "aoColumns": {{ table.columns }},
+        "aoColumns": [
+                            { "sTitle" : "{{ 'Count'| trans }}", "sClass": "right read_only" ,"sWidth" : "5%" },
+                            { "sTitle" : "{{ table.description }}", "sClass": "left"},
+                            { "sTitle" : "", "sClass" : "center read_only", "sWidth" : "10%", "bSortable" : false }
+                        ],
                 "aaSorting": {{ table.sorting }},
                 "iDisplayLength": 50,
                 "bProcessing": true,

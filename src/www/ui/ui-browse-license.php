@@ -378,8 +378,8 @@ class ui_browse_license extends FO_Plugin
 
     $tableLanguage = array(
         "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-        "sSearch" => "Search _INPUT_ in all columns"
-            . "<button onclick='resetFileFields()' >" . _("Show all files") . "</button>",
+        "sSearch" => "_INPUT_"
+            . "<button onclick='clearSearchFiles()' >" . _("Clear") . "</button>",
         "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
     );
 
@@ -534,16 +534,7 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
     list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
-/*
-    if ($filesCleared == $filesToBeCleared)
-    {
-      $img = "<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>";
-    }
-    else
-    {
-      $img = "<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>";
-    }
-  */
+
     $img = ($filesCleared==$filesToBeCleared) ? 'green' : 'red';
 
     return array($fileName, $licenseList, $editedLicenseList,$img,"$filesCleared/$filesToBeCleared", $fileListLinks);  
@@ -570,7 +561,7 @@ class ui_browse_license extends FO_Plugin
     
     $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
     global $container;
-    /** @var LicenseRenderer */
+    /** @var LicenseRenderer  $licenseRenderer*/
     $licenseRenderer = $container->get('view.license_renderer');
     return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
