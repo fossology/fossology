@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <libpq-fe.h>
 
+#include "libfossdbmanager.h"
+
 char* getUploadTreeTableName (fo_dbManager* dbManager, int uploadId);
 PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId);
 char* queryPFileForFileId(fo_dbManager* dbManager, long int fileId);

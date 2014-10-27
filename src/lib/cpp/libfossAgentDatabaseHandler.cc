@@ -1,4 +1,3 @@
-#include "database.hpp"
 #include <iostream>
 #include <libfossagent.h>
 #include "libfossAgentDatabaseHandler.hpp"

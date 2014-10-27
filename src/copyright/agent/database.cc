@@ -12,9 +12,6 @@
 #include "database.hpp"
 #include "identity.hpp"
 
-extern "C" {
-}
-
 #include <iostream>
 #include <libfossUtils.hpp>
 
