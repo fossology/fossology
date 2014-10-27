@@ -56,7 +56,7 @@ unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName)
       dbManager.getStruct_dbManager(),
       "queryLicenseIdForLicense",
       "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1",
-      char *
+      char*
     ),
     rfShortName.c_str()
   );
