@@ -65,7 +65,7 @@ class agent_copyright_once extends FO_Plugin {
       return $errmsg;
     }
     //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
-    $Sys = "./copyright $tempFileName";
+    $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
 
     $inputFile = popen($Sys, "r");
     $colors = array();
