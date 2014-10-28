@@ -29,17 +29,26 @@ class XpClearedGetter extends ClearedGetterCommon
   /** @var CopyrightDao */
   private $copyrightDao;
 
-  public function __construct() {
+  protected $tableName;
+  protected $type;
+  protected $getOnlyCleared;
+  protected $extrawhere;
+
+  public function __construct($tableName, $type=null, $getOnlyCleared=false, $extraWhere=null) {
     global $container;
 
     $this->copyrightDao = $container->get('dao.copyright');
 
+    $this->getOnlyCleared = $getOnlyCleared;
+    $this->type = $type;
+    $this->tableName = $tableName;
+    $this->extrawhere = $extraWhere;
     parent::__construct();
   }
 
   protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
   {
-    return $this->copyrightDao->getAllDecisions($this->tableName, $uploadId, $uploadTreeTableName, DecisionTypes::IDENTIFIED, $this->type);
+    return $this->copyrightDao->getAllEntries($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere);
   }
 }
 

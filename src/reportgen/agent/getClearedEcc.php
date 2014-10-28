@@ -28,9 +28,7 @@ class EccClearedGetter extends XpClearedGetter
 
   public function __construct()
   {
-    parent::__construct();
-    $this->tableName = "ecc";
-    $this->type = null;
+    parent::__construct("ecc", null, true);
   }
 }
 
