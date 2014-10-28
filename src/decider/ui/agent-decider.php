@@ -22,7 +22,7 @@
  * \brief run the decider license agent
  */
 
-define("TITLE_agent_fodecider", _("Automatic User License Decisor"));
+define("TITLE_agent_fodecider", _("Automatic User License Decider"));
 
 class agent_fodecider extends FO_Plugin
 {
