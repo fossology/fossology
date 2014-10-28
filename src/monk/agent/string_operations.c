@@ -36,8 +36,8 @@ inline int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
-int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
-        GArray** output, Token** remainder) {
+int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
+  GArray** output, Token** remainder) {
   GArray* tokens = *output;
   Token* stateToken;
 
@@ -68,7 +68,8 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
 
   const char* ptr = inputChunk;
 
-  while (ptr - inputChunk < inputSize) {
+  size_t readBytes = 0;
+  while (readBytes < inputSize) {
     if (isDelim(*ptr, delimiters)) {
       if (stateToken->length > 0) {
         g_array_append_val(tokens, *stateToken);
@@ -89,6 +90,7 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
       stateToken->length++;
     }
     ptr++;
+    readBytes++;
   }
 
   return tokens->len - initialTokenCount;

@@ -71,14 +71,20 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
       #pragma omp for schedule(dynamic)
 #endif
       for (int i = 0; i < count; i++) {
+        if (threadError)
+          continue;
+
         long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
 
         if (pFileId <= 0)
           continue;
 
-        matchPFileWithLicenses(threadLocalState, pFileId, licenses);
-
-        fo_scheduler_heart(1);
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses))
+          fo_scheduler_heart(1);
+        else {
+          fo_scheduler_heart(0);
+          threadError = 1;
+        }
       }
       fo_dbManager_finish(threadLocalState->dbManager);
     } else {

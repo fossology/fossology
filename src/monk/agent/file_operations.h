@@ -15,6 +15,6 @@ You should have received a copy of the GNU General Public License along with thi
 #include <glib.h>
 
 char* readFile(char* pFileName);
-GArray* readTokensFromFile(char* fileName, char* delimiters);
+int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimiters);
 
 #endif // MONK_AGENT_FILE_OPERATIONS_H

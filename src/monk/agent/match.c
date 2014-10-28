@@ -91,28 +91,38 @@ Match* match_array_get(GArray* matches, guint i) {
   return g_array_index(matches, Match*, i);
 }
 
-void matchFileWithLicenses(MonkState* state, File* file, GArray* licenses) {
+int matchFileWithLicenses(MonkState* state, File* file, GArray* licenses) {
   GArray* matches = findAllMatchesBetween(file, licenses,
                                           MAX_ALLOWED_DIFF_LENGTH, MIN_TRAILING_MATCHES, MAX_LEADING_DIFF);
-  processMatches(state, file, matches);
+  int result = processMatches(state, file, matches);
 
   // we are done: free memory
   match_array_free(matches);
+
+  return result;
 }
 
-void matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses) {
   File file;
   file.id = pFileId;
 
   file.fileName = getFileName(state, pFileId);
+
+  int result = 0;
   if (file.fileName != NULL) {
-    file.tokens = readTokensFromFile(file.fileName, DELIMITERS);
+    result = readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS);
 
-    matchFileWithLicenses(state, &file, licenses);
+    if (result)
+    {
+      result = matchFileWithLicenses(state, &file, licenses);
 
-    g_array_free(file.tokens, TRUE);
+      g_array_free(file.tokens, TRUE);
+    }
+
     free(file.fileName);
   }
+
+  return result;
 }
 
 char* formatMatchArray(GArray * matchInfo) {
@@ -201,7 +211,7 @@ inline size_t match_getEnd(const Match* match) {
   }
 }
 
-gint compareMatchIncuded (gconstpointer a, gconstpointer b) {
+gint compareMatchIncluded (gconstpointer a, gconstpointer b) {
   const Match* matchA = *(Match**)a;
   const Match* matchB = *(Match**)b;
 
@@ -251,13 +261,13 @@ gint compareMatchByRank (gconstpointer a, gconstpointer b) {
  * each first element of a group contains all the successive elements in the same group
  *
  * a match m1 is contained in another m2 if the set [m1.start, m1.end] is contained in [m2.start, m2.end]
- * in this case compareMatchIncuded(&m1, &m2) == 1
+ * in this case compareMatchIncluded(&m1, &m2) == 1
  *
  * input: [GArray of Match*]
  * output: [GArray of GArray of Match*]
  */
 inline GArray* groupOverlapping(GArray* matches) {
-  g_array_sort(matches, compareMatchIncuded);
+  g_array_sort(matches, compareMatchIncluded);
 
   GArray* result = g_array_new(TRUE, FALSE, sizeof(GArray*));
 
@@ -397,18 +407,18 @@ inline void processMatch(MonkState* state, File* file, Match* match) {
   }
 }
 
-inline void processMatches(MonkState* state, File* file, GArray* matches) {
+inline int processMatches(MonkState* state, File* file, GArray* matches) {
   /* check if we have other results for this file.
    * We do it now to minimize races with a concurrent scan of this file:
    * the same file could be inside more than upload
    */
   if ((state->scanMode == MODE_SCHEDULER) && (matches->len>0) &&
        hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
-    return;
+    return 1;
 
   if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0)) {
     onNoMatch(state, file);
-    return;
+    return 1;
   }
 
   if (state->scanMode == MODE_BULK) {
@@ -419,6 +429,8 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
       processMatch(state, file, match);
     }
   }
+
+  return 1; //TODO return errors
 }
 
 inline Match* diffResult2Match(DiffResult* diffResult, License* license){
