@@ -10,16 +10,22 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE_DIR = ../../agent/
+LOCALAGENTDIR = ../../agent
 
 all: $(FOLIB)
-	$(MAKE) -C $(EXE_DIR)
+	$(MAKE) -C $(LOCALAGENTDIR)
 
 test: all
+	ln -fs $(LOCALAGENTDIR)/monk ./monk
 	./shunit2 cli_test.sh
 
 coverage:
-	@echo "nothing to do"
+	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
+	ln -fs $(LOCALAGENTDIR)/monk_cov ./monk
+	./shunit2 cli_test.sh
+	@echo TODO call phpunit
+	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt
+	genhtml -o results cov.txt
 
 clean:
 	@echo "nothing to do"

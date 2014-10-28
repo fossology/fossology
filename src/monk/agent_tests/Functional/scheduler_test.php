@@ -34,55 +34,77 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var LicenseDao */
+  private $licenseDao;
+  /** @var UploadDao */
+  private $uploadDao;
 
   public function setUp()
   {
     $this->testDb = new TestPgDb("monkSched".time());
     $this->dbManager = $this->testDb->getDbManager();
+
+    $this->licenseDao = new LicenseDao($this->dbManager);
+    $this->uploadDao = new UploadDao($this->dbManager);
   }
   
   public function tearDown()
   {
     $this->testDb = null;
     $this->dbManager = null;
+    $this->licenseDao = null;
   }
 
   private function runMonk($uploadId)
   {
     $sysConf = $this->testDb->getFossSysConf();
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
-    file_put_contents($confFile, $config);
-    $agentDir = dirname(dirname(__DIR__));
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/monk/VERSION");
 
-    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
-    $pipeFd = popen("echo $uploadId | ".$agentDir."/agent/monk -c ".$sysConf." --scheduler_start", "r");
-    $this->assertTrue($pipeFd !== false, 'runnig monk failed');
+    $agentName = "monk_cov";
+
+    $agentDir = dirname(dirname(__DIR__));
+    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
+
+    $pipeFd = popen("echo $uploadId | ".$agentDir."/agent/$agentName -c ".$sysConf." --scheduler_start", "r");
+    $this->assertTrue($pipeFd !== false, 'running monk failed');
 
     $output = "";
     while (($buffer = fgets($pipeFd, 4096)) !== false) {
       $output .= $buffer;
     }
-    $this->assertTrue($output !== false, 'monk failed');
     $retCode = pclose($pipeFd);
 
-    $this->assertEquals($retCode, 0, 'running monk failed: '.$output);
-
-    unlink("$sysConf/mods-enabled/monk/VERSION");
-    rmdir("$sysConf/mods-enabled/monk");
+    unlink("$sysConf/mods-enabled/$agentName/VERSION");
+    rmdir("$sysConf/mods-enabled/$agentName");
     rmdir("$sysConf/mods-enabled");
     unlink($sysConf."/fossology.conf");
 
-    return $output;
+    return array($output,$retCode);
+  }
+
+  private function setUpRepo()
+  {
+    $sysConf = $this->testDb->getFossSysConf();
+
+    $confFile = $sysConf."/fossology.conf";
+    system("touch ".$confFile);
+    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
+    file_put_contents($confFile, $config);
+
+    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
+    system("cp -a $testRepoDir/repo $sysConf/");
+  }
+
+  private function rmRepo()
+  {
+    $sysConf = $this->testDb->getFossSysConf();
+    system("rm $sysConf/repo -rf");
   }
 
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq'),false);
+    $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight'),false);
 
@@ -90,14 +112,35 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData_license_ref();
   }
 
-
   public function testRun()
   {
     $this->setUpTables();
+    $this->setUpRepo();
 
-    echo $this->runMonk(1);
+    list($output,$retCode) = $this->runMonk($uploadId=1);
 
+    $this->rmRepo();
 
+    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+
+    $bounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
+
+    $this->assertEquals($expected=1, count($matches));
+
+    /** @var LicenseMatch */
+    $licenseMatch = $matches[0];
+
+    $this->assertEquals($expected=4, $licenseMatch->getFileId());
+
+    /** @var LicenseRef */
+    $matchedLicense = $licenseMatch->getLicenseRef();
+    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
+
+    /** @var AgentRef */
+    $agentRef = $licenseMatch->getAgentRef();
+
+    $this->assertEquals($agentRef->getAgentName(), "monk");
   }
 
 
