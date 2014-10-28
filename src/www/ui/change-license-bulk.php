@@ -69,12 +69,11 @@ class changeLicenseBulk extends FO_Plugin
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
     $uploadTreeId = intval($_POST['uploadTreeId']);
-    $refText = $_POST['refText'];
+    $refText = filter_input(INPUT_POST,'refText');
     $licenseId = intval($_POST['licenseId']);
-    $removing = $_POST['removing'];
-    $bulkScope = $_POST['bulkScope'];
+    $removing = filter_input(INPUT_POST,'removing');
+    $bulkScope = filter_input(INPUT_POST,'bulkScope');
 
-    $license = $this->licenseDao->getLicenseById($licenseId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
     $uploadId = intval($uploadEntry['upload_fk']);
 
