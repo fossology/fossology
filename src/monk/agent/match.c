@@ -402,7 +402,7 @@ inline void processMatches(MonkState* state, File* file, GArray* matches) {
    * We do it now to minimize races with a concurrent scan of this file:
    * the same file could be inside more than upload
    */
-  if ((state->scanMode == MODE_SCHEDULER) &&
+  if ((state->scanMode == MODE_SCHEDULER) && (matches->len>0) &&
        hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
     return;
 

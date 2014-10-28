@@ -122,6 +122,9 @@ int main(int argc, char** argv) {
       int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
                               0, uploadId, state->agentId, AGENT_ARS, NULL, 0);
 
+      if (arsId<=0)
+        bail(state, 1);
+
       if (!processUploadId(state, uploadId, licenses))
         bail(state, 2);
 
