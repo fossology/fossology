@@ -16,24 +16,25 @@
 #include <vector>
 
 #include "libfossdbmanagerclass.hpp"
+#include "libfossAgentDatabaseHandler.hpp"
 #include "cleanEntries.hpp"
 
 #define MAX_TABLE_CREATION_RETRIES 5
 
-class CopyrightDatabaseHandler {
+class CopyrightDatabaseHandler : public fo::AgentDatabaseHandler
+{
 public:
-  CopyrightDatabaseHandler();
-  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
-  CopyrightDatabaseHandler operator=(const CopyrightDatabaseHandler&) = delete;
-  ~CopyrightDatabaseHandler();
+  CopyrightDatabaseHandler(DbManager manager);
+  CopyrightDatabaseHandler spawn() const;
 
-  bool createTables(DbManager* dbManager);
-  bool insertInDatabase(DbManager* dbManager, DatabaseEntry& entry);
-  bool insertNoResultInDatabase(DbManager* dbManager, long agentId, long pFileId);
+  bool createTables() const;
+  bool insertInDatabase(DatabaseEntry& entry) const;
+  bool insertNoResultInDatabase(long agentId, long pFileId) const;
+  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
 
-  std::vector<long> queryFileIdsForUpload(DbManager* dbManager, int agentId, int uploadId);
 private:
-  typedef struct {
+  typedef struct
+  {
     const char* name;
     const char* type;
     const char* creationFlags;
@@ -42,12 +43,10 @@ private:
   static const ColumnDef columns[];
   static const ColumnDef columnsDecision[];
 
-
-  bool createTableAgentFindings(DbManager* dbManager);
-  bool createTableClearing(DbManager* dbManager);
-
-  std::string getColumnListString(const ColumnDef in[], size_t size) ;
-  std::string getColumnCreationString( const ColumnDef in[], size_t size) ;
+  bool createTableAgentFindings() const;
+  bool createTableClearing() const;
+  std::string getColumnListString(const ColumnDef in[], size_t size) const;
+  std::string getColumnCreationString(const ColumnDef in[], size_t size) const;
 };
 
 #endif // DATABASE_HPP

@@ -79,11 +79,6 @@ Requires:       fossology-web
 Summary:        Architecture for analyzing software, debug
 Group:          PBGRP
 
-%package bsam
-Requires:       fossology-web
-Summary:        Architecture for analyzing software, bsam
-Group:          PBGRP
-
 %package monk
 Requires:       fossology-common
 Summary:        Architecture for analyzing software, monk
@@ -137,9 +132,6 @@ This package contains the delagent agent programs and their resources.
 %description debug
 This package contains the debug UI.
 
-%description bsam
-This package contains the bsam UI.
-
 %description monk
 This package contains the monk agent programs and their resources.
 
@@ -150,13 +142,11 @@ This package contains the monk agent programs and their resources.
 %build
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
-make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} src/bsam/
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install
-make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/bsam install
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/nomos/agent/ -f Makefile.sa install
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
 #cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
@@ -292,13 +282,6 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/debug
 %{_datadir}/PBPROJ/debug/*
-
-%files bsam
-%defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
-%{_sysconfdir}/PBPROJ/mods-enabled/bsam
-%{_datadir}/PBPROJ/bsam/*
 
 %files monk
 %defattr(-,root,root)

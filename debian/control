@@ -37,7 +37,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, fossology-monk, apache2, libapache2-mod-php5, ${misc:Depends}
+Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5, ${misc:Depends}
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -62,7 +62,7 @@ Description: architecture for analyzing software, scheduler
 
 Package: fossology-db
 Architecture: any
-Depends: PBDEP, ${misc:Depends}
+Depends: postgresql, ${misc:Depends}
 Description: architecture for analyzing software, database
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -187,18 +187,6 @@ Description: architecture for analyzing software, debug UI
  .
  This package contains the debug UI.
 
-Package: fossology-bsam
-Architecture: any
-Depends: fossology-common, fossology-db, ${misc:Depends}
-Description: architecture for analyzing software, bsam UI
- The FOSSology project is a web based framework that allows you to
- upload software to be picked apart and then analyzed by software agents
- which produce results that are then browsable via the web interface.
- Existing agents include license analysis, metadata extraction, and MIME
- type identification.
- .
- This package contains the bsam UI.
-
 Package: fossology-monk
 Architecture: any
 Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
@@ -210,3 +198,27 @@ Description: architecture for analyzing software, monk
  type identification.
  .
  This package contains the monk agent programs and their resources.
+
+Package: fossology-decider
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, decider
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the decider agent programs and their resources.
+
+Package: fossology-reportgen
+Architecture: any
+Depends: fossology-common, libjson0, zip, libmxml1, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, decider
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the reportgen agent programs and their resources.

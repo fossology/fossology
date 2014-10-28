@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #include "diff.h"
 #include "monk.h"
 
@@ -17,7 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 inline int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                         GArray* searchTokens, size_t searchStart, size_t searchLength,
-                        unsigned int numberOfWantedMatches){
+                        unsigned int numberOfWantedMatches) {
 
   if (tokenEquals(
     &g_array_index(textTokens, Token, textStart),
@@ -75,7 +76,7 @@ inline int lookForDiff(GArray* textTokens, GArray* searchTokens,
 inline int applyDiff(const DiffMatchInfo* diff,
                      GArray* matchedInfo,
                      size_t* additionsCounter, size_t* removedCounter,
-                     size_t* iText, size_t* iSearch ){
+                     size_t* iText, size_t* iSearch) {
 
   DiffMatchInfo diffCopy = *diff;
   diffCopy.text.start = *iText;
@@ -120,7 +121,7 @@ inline void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSe
  ****************************************************/
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
                              size_t textStartPosition, size_t searchStartPosition,
-                             int maxAllowedDiff, int minTrailingMatches ){
+                             int maxAllowedDiff, int minTrailingMatches) {
   size_t textLength = textTokens->len;
   size_t searchLength = searchTokens->len;
 
@@ -232,7 +233,7 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
   }
 }
 
-void diffResult_free(DiffResult* diffResult){
+void diffResult_free(DiffResult* diffResult) {
   g_array_free(diffResult->matchedInfo, TRUE);
   free(diffResult);
 }

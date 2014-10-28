@@ -8,6 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
 #include <math.h>
 #include <stdio.h>
 #include <glib.h>
@@ -50,8 +51,8 @@ void circleVisit(unsigned int timeOfVisit[SIZE][SIZE]) {
     }
 }
 
-GArray * generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
-  GArray * visitor = g_array_new(TRUE, FALSE, sizeof (point));
+GArray* generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
+  GArray* visitor = g_array_new(TRUE, FALSE, sizeof(point));
   for (int i = 0; i < SIZE; i++)
     for (int j = 0; j < SIZE; j++) {
       point p;
@@ -66,8 +67,8 @@ GArray * generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
   return visitor;
 }
 
-int writeVisitorToSourceFiles(GArray * visitor) {
-  FILE * fc = fopen("_squareVisitor.c", "w");
+int writeVisitorToSourceFiles(GArray* visitor) {
+  FILE* fc = fopen("_squareVisitor.c", "w");
 
   if (!fc) {
     return 2;
@@ -92,7 +93,7 @@ int writeVisitorToSourceFiles(GArray * visitor) {
 
   fclose(fc);
 
-  FILE * fh = fopen("_squareVisitor.h.gen", "w");
+  FILE* fh = fopen("_squareVisitor.h.gen", "w");
 
   if (!fh) {
     return 2;
@@ -132,7 +133,7 @@ int main() {
   }
 #endif //SQUARE_BUILDER_DEBUG
 
-  GArray * visitor = generateTimeOrderedVisitor (timeOfVisit);
+  GArray* visitor = generateTimeOrderedVisitor(timeOfVisit);
 
   if (visitor->len == 0)
     return 1;

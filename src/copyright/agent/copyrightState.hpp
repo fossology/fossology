@@ -17,23 +17,21 @@
 #include "database.hpp"
 #include <vector>
 
-class CopyrightState {
+class CopyrightState
+{
 public:
-  CopyrightState(DbManager* _dbManager,  int _agentId, int _verbosity);
-  CopyrightState(const CopyrightState&) = delete;
-  CopyrightState operator=(const CopyrightState&) = delete;
+  CopyrightState(int _agentId, int _verbosity);
   ~CopyrightState();
 
-  int getAgentId();
-  int getVerbosity();
-  DbManager* getDbManager();
-  PGconn * getConnection();
+  int getAgentId() const;
+
+  int getVerbosity() const;
+
   void addMatcher(RegexMatcher regexMatcher);
-  std::vector<RegexMatcher> getRegexMatchers();
-  CopyrightDatabaseHandler copyrightDatabaseHandler;
-  std::vector<long> queryFileIdsForUpload(long uploadId);
+
+  const std::vector<RegexMatcher>& getRegexMatchers() const;
+
 private:
-  DbManager* dbManager;
   int agentId;
   int verbosity;
   std::vector<RegexMatcher> regexMatchers;

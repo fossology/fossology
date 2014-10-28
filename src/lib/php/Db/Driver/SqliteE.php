@@ -134,7 +134,7 @@ class SqliteE implements Driver
    */
   public function fetchArray($res)
   {
-    return $res->fetchArray();
+    return $res->fetchArray(SQLITE3_ASSOC);
   }
 
   /**
@@ -185,5 +185,12 @@ class SqliteE implements Driver
     return $booleanValue ? 1 : 0;
   }
 
-
+  /**
+   * @param string
+   * @return string
+   */
+  public function escapeString($string)
+  {
+    return SQLite3::escapeString($string);
+  }
 }

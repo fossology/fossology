@@ -32,12 +32,12 @@ int token_search_diff(char * text, char* search,
   GArray* tokenizedText = tokenize(textCopy, "^");
   GArray* tokenizedSearch = tokenize(searchCopy, "^");
 
-  GArray * matched = g_array_new(TRUE, FALSE, sizeof (size_t));
-  GArray * additions = g_array_new(TRUE, FALSE, sizeof (size_t));
-  GArray * removals = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* matched = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* additions = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* removals = g_array_new(TRUE, FALSE, sizeof (size_t));
 
   size_t textStartPosition = 0;
-  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 50, 1); //TODO test searchStartPosition
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 50, 1); //TODO test searchStartPosition
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
     return diffResult != NULL;
@@ -55,29 +55,31 @@ int token_search_diff(char * text, char* search,
   size_t additionCount = 0;
   size_t removalCount = 0;
 
-  for(size_t i=0; i<matchedInfo->len; i++){
+  for (size_t i=0; i<matchedInfo->len; i++) {
     DiffMatchInfo diffInfo = g_array_index(matchedInfo, DiffMatchInfo, i);
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_ADDITION)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_ADDITION) == 0) {
       additionCount += diffInfo.text.length;
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length;
-      j++)
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(additions, j);
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_MATCH)==0) {
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length; j++)
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_MATCH) == 0) {
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(matched, j);
        matchedCount += diffInfo.text.length;
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_REMOVAL)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_REMOVAL) == 0) {
       g_array_append_val(removals, diffInfo.text.start);
       removalCount ++;
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_REPLACE)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_REPLACE) == 0) {
       additionCount += diffInfo.text.length;
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length; j++)
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(additions, j);
       removalCount++;
       g_array_append_val(removals, diffInfo.text.start);
@@ -144,7 +146,7 @@ end:
 
   va_end(argptr);
 
-  if(diffResult)
+  if (diffResult)
     diffResult_free(diffResult);
   g_array_free(matched, TRUE);
   g_array_free(additions, TRUE);
@@ -257,7 +259,7 @@ void test_token_search_diffs() {
           ));
 }
 
-int token_search(char * text, char* search, size_t expectedStart) {
+int token_search(char* text, char* search, size_t expectedStart) {
   char* textCopy = g_strdup(text);
   char* searchCopy = g_strdup(search);
 
@@ -316,14 +318,14 @@ void test_matchNTokens(){
                               7));
 }
 
-int _test_lookForAdditions(char * text, char * search,
+int _test_lookForAdditions(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
         int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
   DiffMatchInfo result;
   int ret = lookForDiff(textTokens, searchTokens,
@@ -350,14 +352,14 @@ int _test_lookForAdditions(char * text, char * search,
   return ret;
 }
 
-int _test_lookForRemovals(char * text, char * search,
+int _test_lookForRemovals(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
         int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
   DiffMatchInfo result;
   int ret = lookForDiff(textTokens, searchTokens,
@@ -387,12 +389,12 @@ int _test_lookForRemovals(char * text, char * search,
 void test_lookForReplacesNotOverflowing() {
   int max = MAX_ALLOWED_DIFF_LENGTH+1;
   int length = max + 1;
-  char * testText = malloc((length)*2+1);
-  char * testSearch = malloc((length)*2+1);
+  char* testText = malloc((length)*2+1);
+  char* testSearch = malloc((length)*2+1);
 
-  char * ptr1 =testSearch;
-  char * ptr2 =testText;
-  for(int i = 0; i<length; i++) {
+  char* ptr1 =testSearch;
+  char* ptr2 =testText;
+  for (int i = 0; i<length; i++) {
     *ptr1='a';
     *ptr2='b';
     ptr1++;
@@ -408,8 +410,8 @@ void test_lookForReplacesNotOverflowing() {
   *ptr1 = '\0';
   *ptr2 = '\0';
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
   DiffMatchInfo result;
   CU_ASSERT_FALSE(lookForDiff(textTokens, searchTokens,
@@ -419,14 +421,14 @@ void test_lookForReplacesNotOverflowing() {
   free(testSearch);
 }
 
-int _test_lookForReplaces(char * text, char * search,
+int _test_lookForReplaces(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
         int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
   DiffMatchInfo result;
   int ret = lookForDiff(textTokens, searchTokens,

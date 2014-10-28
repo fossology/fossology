@@ -11,7 +11,7 @@
       {{ 'Upload files into the fossology repository.'| trans }}
     </li>
     <li>
-      {{ 'Unpack files (zip, tar, bz2, iso\'s, and many others) into its component files.'| trans }}
+      {{ "Unpack files (zip, tar, bz2, iso's, and many others) into its component files."| trans }}
     </li>
     <li>
         {{ 'Browse upload file trees.'| trans }}
@@ -39,17 +39,20 @@
 <b>
     {{ 'Where to Begin...'| trans }}
 </b><br/>
-{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}
+
 <ul>
+  <li>{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}</li>
+  <li>
+    <b>{% if authUrl %}<a href="{{ authUrl }}">{{ 'Login'| trans }}</a>{% else %}{{ 'Login'| trans }}{% endif %}</b>:
+    {{ "Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
+        even add new users."| trans }}
+  </li>
+  {% if authUrl %}
     <li>
-        <b>
-            {% if baseUrl %} <a href="{{ baseUrl }}?mod=auth">{{ 'Login'| trans }}</a>{% else %}
-            {{ 'Login'| trans }}{% endif %}</b>:
-        {{ 'Depending on your account\'s access rights, you may be able to upload files, schedule analysis tasks, or
-            even add new users.
-        '| trans }}
+      {% include 'login-form.html.twig' %}
     </li>
-  </ul>
+  {% endif %}
+</ul>
 {% endblock %}
 
 {% block footer %}

@@ -1,22 +1,22 @@
 /***************************************************************
- libfossagent: Set of generic functions handy for agent development.
+libfossagent: Set of generic functions handy for agent development.
 
- Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- ***************************************************************/
+***************************************************************/
 
 /*!
  * \file libfossagent.c
@@ -27,25 +27,28 @@
 
 #define FUNCTION
 
-char* getUploadTreeTableName (fo_dbManager* dbManager, int uploadId) {
-char* result;
-PGresult* resTableName= fo_dbManager_ExecPrepared(
-                            fo_dbManager_PrepareStamement(
-                              dbManager,
-                              "getUploadTreeTableName",
-                              "SELECT uploadtree_tablename from upload where upload_pk=$1 limit 1",
-                              int),
-                            uploadId
-                          );
-  if (!resTableName) {
+char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
+{
+  char* result;
+  PGresult* resTableName = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "getUploadTreeTableName",
+      "SELECT uploadtree_tablename from upload where upload_pk=$1 limit 1",
+      int),
+    uploadId
+  );
+  if (!resTableName)
+  {
     result = g_strdup("uploadtree");
     return result;
-    }
+  }
 
-  if (PQntuples(resTableName) == 0) {
+  if (PQntuples(resTableName) == 0)
+  {
     PQclear(resTableName);
-     result = g_strdup("uploadtree");
-     return result;
+    result = g_strdup("uploadtree");
+    return result;
   }
 
 
@@ -56,36 +59,39 @@ PGresult* resTableName= fo_dbManager_ExecPrepared(
 }
 
 
-PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
+PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId)
+{
 
   PGresult* result;
 
   char* uploadtreeTableName = getUploadTreeTableName(dbManager, uploadId);
 
-  if(strcmp (uploadtreeTableName, "uploadtree_a")==0){
-    char* queryName = g_strdup_printf ("queryFileIdsForUpload.%s",uploadtreeTableName);
-    char* sql ;
-    sql = g_strdup_printf ("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
-                uploadtreeTableName);
+  if (strcmp(uploadtreeTableName, "uploadtree_a") == 0)
+  {
+    char* queryName = g_strdup_printf("queryFileIdsForUpload.%s", uploadtreeTableName);
+    char* sql;
+    sql = g_strdup_printf("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
+      uploadtreeTableName);
 
     result = fo_dbManager_ExecPrepared(
-              fo_dbManager_PrepareStamement(
-                dbManager,
-                queryName,
-                sql,
-                int),
-              uploadId
-            );
+      fo_dbManager_PrepareStamement(
+        dbManager,
+        queryName,
+        sql,
+        int),
+      uploadId
+    );
 
     g_free(sql);
     g_free(queryName);
   }
-  else {
+  else
+  {
 
     result = fo_dbManager_Exec_printf(dbManager,
-                "select distinct(pfile_fk) from %s where (ufile_mode&x'3C000000'::int)=0",
-                              uploadtreeTableName
-                );
+      "select distinct(pfile_fk) from %s where (ufile_mode&x'3C000000'::int)=0",
+      uploadtreeTableName
+    );
   }
 
   g_free(uploadtreeTableName);
@@ -93,7 +99,8 @@ PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
   return result;
 }
 
-char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
+char* queryPFileForFileId(fo_dbManager* dbManager, long fileId)
+{
   PGresult* fileNameResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
@@ -103,7 +110,8 @@ char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
     fileId
   );
 
-  if (PQntuples(fileNameResult) == 0) {
+  if (PQntuples(fileNameResult) == 0)
+  {
     PQclear(fileNameResult);
     return NULL;
   }
@@ -127,16 +135,16 @@ char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
  \todo This function is not checking if the agent is enabled.  And it is not setting 
        agent version when an agent record is inserted.
  */
-FUNCTION int fo_GetAgentKey(PGconn *pgConn, const char * agent_name, long Upload_pk, const char *rev, const char *agent_desc)
+FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_pk, const char* rev, const char* agent_desc)
 {
-  int Agent_pk=-1;    /* agent identifier */
+  int Agent_pk = -1;    /* agent identifier */
   char sql[256];
   char sqlselect[256];
-  PGresult *result;
+  PGresult* result;
 
   /* get the exact agent rec requested */
   sprintf(sqlselect, "SELECT agent_pk FROM agent WHERE agent_name ='%s' order by agent_ts desc limit 1",
-		  agent_name );
+    agent_name);
   result = PQexec(pgConn, sqlselect);
   if (fo_checkPQresult(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
   if (PQntuples(result) == 0)
@@ -144,7 +152,7 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, const char * agent_name, long Upload
     PQclear(result);
     /* no match, so add an agent rec */
     sprintf(sql, "INSERT INTO agent (agent_name,agent_desc,agent_enabled,agent_rev) VALUES ('%s',E'%s','%d', '%s')",
-            agent_name, agent_desc, 1, rev);
+      agent_name, agent_desc, 1, rev);
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
 
@@ -159,30 +167,30 @@ FUNCTION int fo_GetAgentKey(PGconn *pgConn, const char * agent_name, long Upload
 
 
 /**
- \brief Write ars record
-  If the ars table does not exist, one is created by inheriting the ars_master table.
-  The new table is called {tableName}.  For example, "unpack_ars".
-  If ars_pk is zero a new ars record will be created. Otherwise, it is updated.
+\brief Write ars record
+If the ars table does not exist, one is created by inheriting the ars_master table.
+The new table is called {tableName}.  For example, "unpack_ars".
+If ars_pk is zero a new ars record will be created. Otherwise, it is updated.
 
- \param pgConn Database connection object pointer.
- \param ars_pk  If zero, a new record will be created.
- \param upload_pk
- \parm  agent_pk   Agents should get this from fo_GetAgentKey()
- \param tableName  ars table name
- \parm  ars_status   Status to update ars_status.  May be null.
- \parm  ars_success  Automatically set to false if ars_pk is zero.
+\param pgConn Database connection object pointer.
+\param ars_pk  If zero, a new record will be created.
+\param upload_pk
+\parm  agent_pk   Agents should get this from fo_GetAgentKey()
+\param tableName  ars table name
+\parm  ars_status   Status to update ars_status.  May be null.
+\parm  ars_success  Automatically set to false if ars_pk is zero.
 
- \return On success write the ars record and return the ars_pk.  
-         On sql failure, return 0, and the error will be written to stdout.
- */
-FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk,
-                         const char *tableName, const char *ars_status, int ars_success)
+\return On success write the ars record and return the ars_pk.
+On sql failure, return 0, and the error will be written to stdout.
+*/
+FUNCTION int fo_WriteARS(PGconn* pgConn, int ars_pk, int upload_pk, int agent_pk,
+  const char* tableName, const char* ars_status, int ars_success)
 {
   char sql[1024];
-  PGresult *result;
+  PGresult* result;
 
   /* does ars table exist?  If not, create it.  */
-    if (! fo_CreateARSTable(pgConn, tableName)) return(0);
+  if (!fo_CreateARSTable(pgConn, tableName)) return (0);
 
   /* If ars_pk is null, 
    * write the ars_status=false record 
@@ -191,17 +199,17 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
   if (!ars_pk)
   {
     snprintf(sql, sizeof(sql), "insert into %s (agent_fk, upload_fk) values(%d,%d)",
-             tableName, agent_pk, upload_pk);
+      tableName, agent_pk, upload_pk);
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
 
     /* get primary key */
     snprintf(sql, sizeof(sql), "SELECT currval('nomos_ars_ars_pk_seq')");
-    result =  PQexec(pgConn, sql);
+    result = PQexec(pgConn, sql);
     if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
     {
       PQclear(result);
-      return(0);
+      return (0);
     }
     ars_pk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
@@ -212,39 +220,39 @@ FUNCTION int fo_WriteARS(PGconn *pgConn, int ars_pk, int upload_pk, int agent_pk
     if (ars_status)
     {
       snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_status='%s',ars_endtime=now() where ars_pk = %d",
-             tableName, ars_success?"True":"False", ars_status, ars_pk);
+        tableName, ars_success ? "True" : "False", ars_status, ars_pk);
     }
     else
     {
       snprintf(sql, sizeof(sql), "update %s set ars_success=%s, ars_endtime=now() where ars_pk = %d",
-             tableName, ars_success?"True":"False", ars_pk);
+        tableName, ars_success ? "True" : "False", ars_pk);
     }
     result = PQexec(pgConn, sql);
     if (fo_checkPQcommand(pgConn, result, sql, __FILE__, __LINE__)) return 0;
   }
-  return(ars_pk);
+  return (ars_pk);
 }  /* fo_WriteARS() */
 
 
 /**
- \brief Create ars table if it doesn't already exist.
-  
- \param pgConn Database connection object pointer.
- \param tableName  ars table name
+\brief Create ars table if it doesn't already exist.
 
- \return 0 on failure
- */
-FUNCTION int fo_CreateARSTable(PGconn *pgConn, const char *tableName)
+\param pgConn Database connection object pointer.
+\param tableName  ars table name
+
+\return 0 on failure
+*/
+FUNCTION int fo_CreateARSTable(PGconn* pgConn, const char* tableName)
 {
   char sql[1024];
-  PGresult *result;
+  PGresult* result;
 
   if (fo_tableExists(pgConn, tableName)) return 1;  // table already exists
 
   snprintf(sql, sizeof(sql), "create table %s() inherits(ars_master);\
   ALTER TABLE ONLY %s ADD CONSTRAINT %s_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);\
-  ALTER TABLE ONLY %s ADD CONSTRAINT %s_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE;", 
-  tableName, tableName, tableName, tableName, tableName);
+  ALTER TABLE ONLY %s ADD CONSTRAINT %s_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE;",
+    tableName, tableName, tableName, tableName, tableName);
 /*  ALTER TABLE ONLY %s ADD CONSTRAINT %s_pkey1 PRIMARY KEY (ars_pk); \  */
 
 
@@ -255,24 +263,24 @@ FUNCTION int fo_CreateARSTable(PGconn *pgConn, const char *tableName)
 
 
 /**
- * \brief Get users permission to this upload
- *
- * \param pgConn Database connection object pointer.
- * \param long upload_pk
- * \param user_pk  
- *
- * \return permission (PERM_) this user has for UploadPk
- */
-FUNCTION int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
+* \brief Get users permission to this upload
+*
+* \param pgConn Database connection object pointer.
+* \param long upload_pk
+* \param user_pk
+*
+* \return permission (PERM_) this user has for UploadPk
+*/
+FUNCTION int GetUploadPerm(PGconn* pgConn, long UploadPk, int user_pk)
 {
-  PGresult *result;
+  PGresult* result;
   char SQL[1024];
   int perm;
 
   /* Check the users PLUGIN_DB level.  PLUGIN_DB_ADMIN are superusers. */
   snprintf(SQL, sizeof(SQL), "select user_perm from users where user_pk='%d'", user_pk);
-  result =  PQexec(pgConn, SQL);
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  result = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__);
   if (PQntuples(result) < 1)
   {
     LOG_ERROR("No records returned in %s", SQL);
@@ -280,37 +288,37 @@ FUNCTION int GetUploadPerm(PGconn *pgConn, long UploadPk, int user_pk)
   }
   perm = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
-  if (perm >= PLUGIN_DB_ADMIN) return(PERM_ADMIN);
+  if (perm >= PLUGIN_DB_ADMIN) return (PERM_ADMIN);
 
   /* Get the user permission level */
   snprintf(SQL, sizeof(SQL), "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=%ld and user_fk=%d and group_user_member.group_fk=perm_upload.group_fk", UploadPk, user_pk);
   result = PQexec(pgConn, SQL);
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__);
   perm = atoi(PQgetvalue(result, 0, 0));
   return (PERM_ADMIN);
 }
 
 
 /**
- * \brief Get the uploadtree table name for this upload_pk
- *        If upload_pk does not exist, return "uploadtree".
- *
- * \param pgConn Database connection object pointer.
- * \param upload_pk
- * 
- * \return uploadtree table name, or null if upload_pk does not exist.
- * Caller must free the (non-null) returned value.
- */
-FUNCTION char *GetUploadtreeTableName(PGconn *pgConn, int upload_pk)
+* \brief Get the uploadtree table name for this upload_pk
+*        If upload_pk does not exist, return "uploadtree".
+*
+* \param pgConn Database connection object pointer.
+* \param upload_pk
+*
+* \return uploadtree table name, or null if upload_pk does not exist.
+* Caller must free the (non-null) returned value.
+*/
+FUNCTION char* GetUploadtreeTableName(PGconn* pgConn, int upload_pk)
 {
-  PGresult *result;
-  char *uploadtree_tablename = 0;
+  PGresult* result;
+  char* uploadtree_tablename = 0;
   char SQL[1024];
 
   /* Get the uploadtree table name from the upload table */
   snprintf(SQL, sizeof(SQL), "select uploadtree_tablename from upload where upload_pk='%d'", upload_pk);
-  result =  PQexec(pgConn, SQL);
-  fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__);
+  result = PQexec(pgConn, SQL);
+  fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__);
   if (PQntuples(result) == 1) uploadtree_tablename = strdup(PQgetvalue(result, 0, 0));
   PQclear(result);
 

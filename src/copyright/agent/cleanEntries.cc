@@ -11,49 +11,51 @@
 
 #include "cleanEntries.hpp"
 
- DatabaseEntry::DatabaseEntry():
-  agent_fk(0),
-  pfile_fk(0),
-  content(""),
-  hash(""),
-  type(""),
-  copy_startbyte(0),
-  copy_endbyte(0)
- {};
+DatabaseEntry::DatabaseEntry() :
+        agent_fk(0),
+        pfile_fk(0),
+        content(""),
+        hash(""),
+        type(""),
+        copy_startbyte(0),
+        copy_endbyte(0)
+{
+};
 
 
 /* Trims a string of any characters provided in the char list */
 std::string trim(std::string str, std::string charlist = " \t\f\v\n\r")
 {
-size_t last;
-last = str.find_last_not_of(charlist);
+  size_t last;
+  last = str.find_last_not_of(charlist);
 // only contains chars that are being trimmed, return ""
-if (last == std::string::npos)
-{
-  return "";
-}
+  if (last == std::string::npos)
+  {
+    return "";
+  }
 
-size_t first = str.find_first_not_of(charlist);
-if (first == std::string::npos)
-{
-  first = 0;
-}
+  size_t first = str.find_first_not_of(charlist);
+  if (first == std::string::npos)
+  {
+    first = 0;
+  }
 
-return str.substr(first, (last-first)+1);
+  return str.substr(first, (last - first) + 1);
 }
 
 /**
- *
- * @return true if entry needs to be written to database
- */
-bool CleanDatabaseEntry(DatabaseEntry& input) {
+*
+* @return true if entry needs to be written to database
+*/
+bool normalizeDatabaseEntry(DatabaseEntry& input)
+{
 
   std::string newtext = " ";
 
   input.content = rx::regex_replace(input.content, rx::regex("[\\x0-\\x1f]"), newtext);
 
-    //This is ugly, we should not use strings, neither here nor in the database to distinguish types
-  if (input.type.compare("statement") == 0 )
+  //This is ugly, we should not use strings, neither here nor in the database to distinguish types
+  if (input.type.compare("statement") == 0)
   {
     /* !"#$%&' */
     input.content = rx::regex_replace(input.content, rx::regex("([\\x21-\\x27])|([*@])"), newtext);
@@ -62,8 +64,7 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
 //TODO    input.content = rx::regex_replace(input.content, rx::regex("(([0-9]+)-([0-9]+))|([0-9]{2,})|(,)"), newtext);
 //TODO    input.content = rx::regex_replace(input.content, rx::regex(" : "), newtext);// free :, probably followed a date
   }
-  else
-  if (input.type.compare("email") == 0 )
+  else if (input.type.compare("email") == 0)
   {
     //$content = str_replace(":;<=>()", " ", $content);
     // I do not understand the above, I would assume they want to replace any of the characters with space
@@ -82,11 +83,11 @@ bool CleanDatabaseEntry(DatabaseEntry& input) {
 
   /* remove leading "dnl " */
   if ((strlen(input.content.c_str()) > 4) &&
-  (input.content.compare(0, 4,"dnl ") == 0))
+          (input.content.compare(0, 4, "dnl ") == 0))
     input.content = input.content.substr(4);
 
   /* skip empty content */
-  if (input.content.size()==0) return false;
+  if (input.content.size() == 0) return false;
 
   /* Step 1B: rearrange copyright statments to try and put the holder first,
    * followed by the rest of the statement, less copyright years.

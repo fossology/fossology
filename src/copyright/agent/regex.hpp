@@ -14,15 +14,14 @@
 
 #define USEBOOST
 #ifdef USEBOOST
-  #include <boost/regex.hpp>
-  namespace rx = boost;
+
+#include <boost/regex.hpp>
+
+namespace rx = boost;
 #else
   #include <regex>
   namespace rx  = std;
 #endif
-
-
-
 
 
 #endif /* REGEX_HPP_ */

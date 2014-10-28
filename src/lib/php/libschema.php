@@ -25,6 +25,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php');
 
+use Fossology\Lib\Db\ModernDbManager;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
 use Monolog\Handler\ErrorLogHandler;
@@ -967,7 +968,7 @@ if (empty($dbManager) || !($dbManager instanceof DbManager))
   $logLevel = Logger::INFO;
   $logger = new Logger(__FILE__);
   $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
-  $dbManager = new DbManager($logger);
+  $dbManager = new ModernDbManager($logger);
   $dbManager->setDriver(new Postgres($PG_CONN));
 }
 /* simulate the old functions*/

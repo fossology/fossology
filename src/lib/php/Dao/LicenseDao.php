@@ -184,34 +184,33 @@ class LicenseDao extends Object
    * @param $selectedAgentId
    * @return array
    */
-  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
+  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
-    $param = array($itemTreeBounds->getUploadTreeId());
+    $param = array($itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
 
-    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
-        . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
+    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ('" . implode("', '", $filterLicenses) . "')";
 
     $sql = "SELECT license_file_ref.pfile_fk as file_id,
            rf_shortname as license_shortname,
            rf_pk as license_id,
            agent_name,
-           parent,
            max(agent_pk) as agent_id,
            rf_match_pct as match_percentage
          FROM license_file_ref
          INNER JOIN $uploadTreeTableName utree ON license_file_ref.pfile_fk = utree.pfile_fk
          INNER JOIN agent ON agent_fk = agent_pk
-         WHERE parent = $1
+         WHERE lft BETWEEN $1 AND $2
            AND license_file_ref.pfile_fk = utree.pfile_fk
            $noLicenseFoundStmt";
 
     if (!empty($selectedAgentId)){
-      $sql .= " AND agent_pk=$2";
       $param[] = $selectedAgentId;
+      $sql .= " AND agent_pk=$".count($param);
+      $statementName .= '.agent';
     }
-    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, parent, match_percentage
+    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, match_percentage
          ORDER BY match_percentage ASC, license_shortname ASC";
     
     $this->dbManager->prepare($statementName, $sql);

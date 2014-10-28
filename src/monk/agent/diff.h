@@ -8,15 +8,16 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef DIFF_H
-#define	DIFF_H
+
+#ifndef MONK_AGENT_DIFF_H
+#define MONK_AGENT_DIFF_H
 
 #include "string_operations.h"
 #include "monk.h"
 
 typedef struct {
-    size_t start;
-    size_t length;
+  size_t start;
+  size_t length;
 } DiffPoint;
 
 typedef struct {
@@ -48,4 +49,4 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
 
 void diffResult_free(DiffResult* diffResult);
 
-#endif	/* DIFF_H */
+#endif // MONK_AGENT_DIFF_H

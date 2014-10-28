@@ -174,5 +174,50 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     asort($licAll);    
     assertThat($licenses, is(array_values($licAll)));
   }
+  
+
+  public function testGetTopLevelLicensesPerFileId()
+  {
+    $this->testDb->createPlainTables(array('license_ref','license_file','uploadtree','agent'));
+    $this->testDb->insertData(array('agent'));
+    $this->testDb->createViews(array('license_file_ref'));
+    $this->testDb->insertData_license_ref($limit=3);
+    $licAll = $this->dbManager->createMap('license_ref', 'rf_pk','rf_shortname');
+    $rf_pk_all = array_keys($licAll);
+    $rf_pk =  $rf_pk_all[0];
+    $uploadtreetable_name = 'uploadtree';
+    $this->dbManager->insertInto('license_file', 
+            'fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk',
+            array(1, $rf_pk, $agentId = 5, $matchPercent = 50, $mydate = "'2014-06-04 14:01:30.551093+02'", $pfileId=42, 1) );
+    $uploadtreeId= 512;
+    $uploadId =123;
+    $left=2009;
+    $containerMode = 1<<29;
+    $this->dbManager->insertTableRow('uploadtree',
+            array('uploadtree_pk'=>$uploadtreeId, 'upload_fk'=>$uploadId, 'pfile_fk'=>0,
+                'lft'=>$left, 'rgt'=>$left+5, 'parent'=>NULL, 'ufile_mode'=>$containerMode));
+    $this->dbManager->insertTableRow('uploadtree',
+            array('uploadtree_pk'=>$uploadtreeId+1, 'upload_fk'=>$uploadId, 'pfile_fk'=>0,
+                'lft'=>$left+1, 'rgt'=>$left+4, 'parent'=>$uploadtreeId, 'ufile_mode'=>$containerMode));
+    $this->dbManager->insertTableRow('uploadtree',
+            array('uploadtree_pk'=>$uploadtreeId+2, 'upload_fk'=>$uploadId, 'pfile_fk'=>$pfileId,
+                'lft'=>$left+2, 'rgt'=>$left+3, 'parent'=>$uploadtreeId+1, 'ufile_mode'=>0));
+    
+    $licDao = new LicenseDao($this->dbManager);
+    $itemTreeBounds = new ItemTreeBounds($uploadtreeId,$uploadtreetable_name,$uploadId,$left,$left+5);
+
+    $row = array('file_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,
+               'agent_name'=>'monk', 'agent_id'=>$agentId, 'match_percentage'=>$matchPercent);
+    $expected = array($pfileId=>array($licAll[$rf_pk]=>array('monk'=>$row)));
+
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'));
+    assertThat($licenses, is(equalTo($expected)));
+    
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = $agentId, $filterLicenses = array('VOID'));
+    assertThat($licenses, is(equalTo($expected)));
+
+    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = 1+$agentId, $filterLicenses = array('VOID'));
+    assertThat($licenses, is(equalTo(array())));
+  }
+
 }
- 

@@ -1,41 +1,36 @@
 <div class="modal" id="userModal" hidden>
   <form name="licenseListSelect">
-    <table border="0">
+    <table>
       <tr>
-        <td>{{ 'Available licenses'| trans }}:</td>
-      </tr>
-      <tr>
-        <td><p>Available licenses:<br>
-                <select name={{ licenseLeftSelect.properties.listElementName }}  id= {{ licenseLeftSelect.properties.listElementName }} style="min-width:200px"  size="20" multiple="multiple" >
-                    {%  for opt in licenseLeftSelect.values  %}
-                    <option value= {{ opt.id }} title='{{ opt.fullName | e }}'
-                            ondblclick="javascript:window.open('{{ licenseLeftSelect.properties.uri }}{{ opt.urlShortname }}','{{ licenseLeftSelect.properties.title}}','{{ licenseLeftSelect.properties.sizeInfo}}');" > {{ opt.shortName }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </p>
+        <td>{{ 'Available licenses'| trans }}:<br/>
+          <select name="licenseLeft" id=licenseLeft" style="min-width:200px" size="20" multiple="multiple">
+            {%  for opt in licenseArray  %}
+            <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
+                    ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.shortname|url_encode }}',
+                              '{{ 'License Text'|trans}}','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');" >
+              {{ opt.shortname }}
+            </option>
+            {% endfor %}
+          </select>
         </td>
         <td align="center" valign="middle">
-            <input type="button" value="&gt;" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" /><br />
-            <input type="button" value="&lt;" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+          <input type="button" value="&gt;" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" /><br />
+          <input type="button" value="&lt;" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
         </td>
         <td>
-          <p>Selected licenses:<br>
-              <select name="licenseRight" id="licenseRight" style="min-width:200px"  size="20" multiple="multiple" >
-              </select>
-          </p>
+          {{ 'Selected licenses'|trans }}:<br/>
+          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple" >
+          </select>
         </td>
       </tr>
     </table>
 
     {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}<br/>
     &nbsp; &nbsp; &nbsp;
-    <button type="button" autofocus onclick="performPostRequest()">Add selected licenses</button>
+    <button type="button" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
     &nbsp;
+    <button type="button" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
     <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
   </form>
-
-
-
 </div>

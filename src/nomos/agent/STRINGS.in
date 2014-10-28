@@ -8575,6 +8575,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"license =FEW= creative commons =FEW= attribution\,? share-?alike"
 #
+%ENTRY%	_PHR_TCL
+%KEY%	"software"
+%STR%	"this software is copyrighted by the Regents of the University of California =SOME= ActiveState Corporation and other parties =SOME= apply to all files associated with the software unless explicitly disclaimed in individual files"
+#
 %ENTRY%	_TEXT_ADOBE_FRAME
 %KEY%	=NULL=
 #%STR%	"(adobe systems|frame technology)"

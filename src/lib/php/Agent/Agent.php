@@ -129,7 +129,7 @@ abstract class Agent extends Object
   {
     if (!DB_TableExists($this->agentArs)) {
       $this->createArsTable();
-    };
+    }
   }
 
   function writeArsRecord($uploadId,$arsId=0,$success=false,$status="")

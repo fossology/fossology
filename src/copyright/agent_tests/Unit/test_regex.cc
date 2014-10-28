@@ -29,10 +29,6 @@ class regexTest : public CPPUNIT_NS :: TestFixture {
 
   CPPUNIT_TEST_SUITE_END ();
 
-public:
-  void setUp (void)  {cout << "Setup" <<endl;};
-  void tearDown (void) { cout << "Tear down" << endl;};
-
 protected:
   void regTest (void) {
 
@@ -56,3 +52,4 @@ protected:
 
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION( regexTest );

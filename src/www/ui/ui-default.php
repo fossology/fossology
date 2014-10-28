@@ -20,12 +20,16 @@ define("TITLE_ui_default", _("Welcome to FOSSology"));
 
 class ui_default extends FO_Plugin
 {
-  var $Name = "Default";
-  var $Title = TITLE_ui_default;
-  var $Version = "2.0";
-  var $MenuList = "";
-  var $MenuOrder = 100;
-  var $LoginFlag = 0;
+  function __construct()
+  {
+    $this->Name = "Default";
+    $this->Title = TITLE_ui_default;
+    $this->Version = "2.0";
+    $this->MenuOrder = 100;
+    $this->LoginFlag = 0;
+
+    parent::__construct();
+  }
 
   function RegisterMenus()
   {
@@ -41,7 +45,9 @@ class ui_default extends FO_Plugin
 
     if ($_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
-      $this->vars['baseUrl'] = Traceback_uri();
+      $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+      $this->vars['referer'] = Traceback_uri();
+      $this->vars['authUrl'] = "?mod=auth";
     }
    
     return $this->renderTemplate("default.html.twig");

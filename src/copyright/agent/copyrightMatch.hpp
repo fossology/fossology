@@ -13,21 +13,30 @@
 #define COPYRIGHTMATCH_H
 
 #include <string>
+#include <iostream>
+#include <vector>
 
 class CopyrightMatch
 {
 public:
-    CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
-    ~CopyrightMatch();
-    const std::string getType() const;
-    const std::string getContent() const;
-    unsigned getStart() const;
-    unsigned getLength() const;
+  CopyrightMatch(std::string content, std::string type, unsigned start, unsigned length);
+  CopyrightMatch(std::string content, std::string type, unsigned start);
+  ~CopyrightMatch();
+  const std::string getType() const;
+  const std::string getContent() const;
+  size_t getStart() const;
+  size_t getLength() const;
 private:
-    std::string content;
-    unsigned start;
-    unsigned length;
-    std::string type;
+  std::string content;
+  unsigned start;
+  size_t length;
+  std::string type;
 };
+
+std::ostream& operator <<(std::ostream& os, const CopyrightMatch& match);
+bool operator ==(const CopyrightMatch& first, const CopyrightMatch& other);
+
+std::ostream& operator <<(std::ostream& os, const std::vector<CopyrightMatch>& matches);
+
 
 #endif // COPYRIGHTMATCH_H

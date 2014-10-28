@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "match.h"
 
-File* getFileWithText(const char* text){
+File* getFileWithText(const char* text) {
   char* fileText = g_strdup(text);
 
   File* result = malloc(sizeof(File));
@@ -50,7 +50,7 @@ void file_free(File* file) {
   free(file);
 }
 
-void licenses_free(GArray* licenses){
+void licenses_free(GArray* licenses) {
   for (guint i = 0; i < licenses->len; i++) {
     License license = g_array_index(licenses, License, i);
     g_array_free(license.tokens, TRUE);
@@ -60,14 +60,14 @@ void licenses_free(GArray* licenses){
 }
 
 void matchesArray_free(GArray* matches) {
-  for(guint i = 0; i < matches->len; i++) {
+  for (guint i = 0; i < matches->len; i++) {
     Match* match = g_array_index(matches, Match*, i);
     match_free(match);
   }
   g_array_free(matches, TRUE);
 }
 
-int _matchEquals(Match* match, long refId, size_t start, size_t end){
+int _matchEquals(Match* match, long refId, size_t start, size_t end) {
   CU_ASSERT_EQUAL(match_getStart(match), start);
   CU_ASSERT_EQUAL(match_getEnd(match), end);
   CU_ASSERT_EQUAL(match->license->refId, refId);
@@ -77,13 +77,13 @@ int _matchEquals(Match* match, long refId, size_t start, size_t end){
            (match->license->refId == refId) );
 }
 
-void test_findAllMatchesDisjoint(){
+void test_findAllMatchesDisjoint() {
   File* file = getFileWithText("^e^a^b^c^d^e");
   GArray* licenses = getNLicensesWithText(3, "a", "b^c", "d");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
-  if (matches->len == 3){
+  if (matches->len == 3) {
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 1, 2))
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 1, 2, 4))
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 2, 4, 5))
@@ -94,7 +94,7 @@ void test_findAllMatchesDisjoint(){
   licenses_free(licenses);
 }
 
-void test_findDiffsAtBeginning(){
+void test_findDiffsAtBeginning() {
   File* file = getFileWithText("^e^a^b^c^d^e");
   GArray* licenses = getNLicensesWithText(3, "a", "e^b^c^d^e");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
@@ -113,13 +113,13 @@ void test_findDiffsAtBeginning(){
   licenses_free(licenses);
 }
 
-void test_findAllMatchesWithDiff(){
+void test_findAllMatchesWithDiff() {
   File* file = getFileWithText("a^b^c^d^e^f");
   GArray* licenses = getNLicensesWithText(3, "a^c^d", "a^b^d^e", "d", "e^f");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
-  if (matches->len == 1){
+  if (matches->len == 1) {
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 2, 3, 4))
   }
 
@@ -128,13 +128,13 @@ void test_findAllMatchesWithDiff(){
   licenses_free(licenses);
 }
 
-void test_findAllMatchesTwoGroups(){
+void test_findAllMatchesTwoGroups() {
   File* file = getFileWithText("a^b^c^d^e^f^g");
   GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^d", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 2);
-  if (matches->len == 2){
+  if (matches->len == 2) {
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 1, 0, 4))
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 5, 4, 7))
   }
@@ -144,13 +144,13 @@ void test_findAllMatchesTwoGroups(){
   licenses_free(licenses);
 }
 
-void test_findAllMatchesTwoGroupsWithDiff(){
+void test_findAllMatchesTwoGroupsWithDiff() {
   File* file = getFileWithText("a^b^c^d^e^f^g");
   GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^e", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
-  if (matches->len == 3){
+  if (matches->len == 3) {
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 0, 2))
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 2, 3, 4))
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 5, 4, 7))
@@ -161,13 +161,13 @@ void test_findAllMatchesTwoGroupsWithDiff(){
   licenses_free(licenses);
 }
 
-void test_findAllMatchesAllIncluded(){
+void test_findAllMatchesAllIncluded() {
   File* file = getFileWithText("a^b^c^d");
   GArray* licenses = getNLicensesWithText(3, "a^b^c^d", "b^c", "d");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
-  if (matches->len == 1){
+  if (matches->len == 1) {
     CU_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 0, 4))
   }
 
@@ -222,7 +222,7 @@ void test_formatMatchArray() {
 
 // match initialized with just enough to run _getRank() and _free()
 // if type == MATCH_TYPE_FULL then _getRank() == 100 irrespective of the rank variable
-Match* _matchWithARank(int type, double rank){
+Match* _matchWithARank(int type, double rank) {
   Match* result = malloc(sizeof(Match));
 
   result->type = type;
@@ -238,7 +238,7 @@ Match* _matchWithARank(int type, double rank){
 
 // match initialized with just enough to have
 // _getRank() == rank, _getStart() == start, _getEnd() == end and working _free()
-Match* _matchWithARankStartAndEnd(int type, double rank, size_t start, size_t end){
+Match* _matchWithARankStartAndEnd(int type, double rank, size_t start, size_t end) {
   Match* result = _matchWithARank(type, rank);
   if (type == MATCH_TYPE_FULL) {
     result->ptr.full->start = start;
@@ -254,7 +254,7 @@ Match* _matchWithARankStartAndEnd(int type, double rank, size_t start, size_t en
   return result;
 }
 
-void test_greatestMatchInGroup(){
+void test_greatestMatchInGroup() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 80.0);
   Match* match2 = _matchWithARank(MATCH_TYPE_FULL, 0.0);
@@ -271,7 +271,7 @@ void test_greatestMatchInGroup(){
   matchesArray_free(matches);
 }
 
-void test_greatestMatchInGroup2(){
+void test_greatestMatchInGroup2() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 80.0);
   Match* match2 = _matchWithARank(MATCH_TYPE_DIFF, 60.0);
@@ -286,7 +286,7 @@ void test_greatestMatchInGroup2(){
   matchesArray_free(matches);
 }
 
-void test_greatestMatchInGroup3(){
+void test_greatestMatchInGroup3() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 50.0);
   Match* match2 = _matchWithARank(MATCH_TYPE_DIFF, 60.0);
@@ -301,7 +301,7 @@ void test_greatestMatchInGroup3(){
   matchesArray_free(matches);
 }
 
-void test_filterMatches(){
+void test_filterMatches() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 50.0, 0, 4);
   Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 60.0, 0, 6);
@@ -312,13 +312,13 @@ void test_filterMatches(){
   GArray* filteredMatches = filterNonOverlappingMatches(matches);
 
   CU_ASSERT_EQUAL(filteredMatches->len, 1);
-  if (filteredMatches->len == 1){
+  if (filteredMatches->len == 1) {
     CU_ASSERT_EQUAL(g_array_index(filteredMatches, Match*, 0), match2);
     matchesArray_free(filteredMatches);
   }
 }
 
-void test_filterMatchesEmpty(){
+void test_filterMatchesEmpty() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
   GArray* filteredMatches = filterNonOverlappingMatches(matches);
@@ -328,7 +328,7 @@ void test_filterMatchesEmpty(){
   matchesArray_free(filteredMatches);
 }
 
-void test_filterMatches2(){
+void test_filterMatches2() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 50.0, 0, 4);
   Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 0.0, 0, 6);
@@ -339,13 +339,13 @@ void test_filterMatches2(){
   GArray* filteredMatches = filterNonOverlappingMatches(matches);
 
   CU_ASSERT_EQUAL(filteredMatches->len, 1);
-  if (filteredMatches->len == 1){
+  if (filteredMatches->len == 1) {
     CU_ASSERT_EQUAL(g_array_index(filteredMatches, Match*, 0), match2);
     matchesArray_free(filteredMatches);
   }
 }
 
-void test_filterMatchesWithTwoGroups(){
+void test_filterMatchesWithTwoGroups() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
   Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 50.0, 0, 4);
   Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 60.0, 0, 6);
@@ -359,7 +359,7 @@ void test_filterMatchesWithTwoGroups(){
 
   // TODO we probably want to return all 3 in this case
   CU_ASSERT_EQUAL(filteredMatches->len, 2);
-  if (filteredMatches->len == 2){
+  if (filteredMatches->len == 2) {
     CU_ASSERT_EQUAL(g_array_index(filteredMatches, Match*, 0), match1);
     CU_ASSERT_EQUAL(g_array_index(filteredMatches, Match*, 1), match3);
     matchesArray_free(filteredMatches);

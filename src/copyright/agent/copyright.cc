@@ -11,43 +11,73 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
+
 #include "copyright.hpp"
 
 using namespace std;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   /* before parsing argv and argc make sure */
   /* to initialize the scheduler connection */
 
-  DbManager* dbManager = new DbManager(&argc, argv);
+  DbManager dbManager(&argc, argv);
 
-  int verbosity=8;
-  CopyrightState* state;
-  state = getState(dbManager, verbosity);
+  int verbosity = 8;
+  CopyrightState state = getState(dbManager, verbosity);
+  CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
-  if (!state->copyrightDatabaseHandler.createTables(dbManager)) {
+  if (!copyrightDatabaseHandler.createTables())
+  {
     std::cout << "FATAL: initialization failed" << std::endl;
-    bail(state, 9);
+    bail(9);
   }
 
   fillMatchers(state);
 
-  while (fo_scheduler_next() != NULL) {
-    int uploadId = atoi(fo_scheduler_current());
+  if (argc > 1)
+  {
+    const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int argn = 1; argn < argc; ++argn)
+      {
+        const char* fileName = argv[argn];
 
-    if (uploadId == 0) continue;
+        fo::File file((unsigned long) argn, fileName);
+        vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
 
-    int arsId = writeARS(state, 0, uploadId, 0);
-
-    if (!processUploadId(state, uploadId))
-      bail(state, 2);
-
-    fo_scheduler_heart(1);
-    writeARS(state, arsId, uploadId, 1);
+        stringstream ss;
+        ss << fileName << " ::" << endl << matches << endl;
+        cout << ss.str();
+      }
+    }
   }
-  fo_scheduler_heart(0);
+  else
+  {
+    while (fo_scheduler_next() != NULL)
+    {
+      int uploadId = atoi(fo_scheduler_current());
 
-  /* after cleaning up agent, disconnect from */
-  /* the scheduler, this doesn't return */
-  bail(state, 0);
+      if (uploadId == 0) continue;
+
+      int arsId = writeARS(state, 0, uploadId, 0, dbManager);
+
+      if (arsId <= 0)
+        bail(5);
+
+      if (!processUploadId(state, uploadId, copyrightDatabaseHandler))
+        bail(2);
+
+      fo_scheduler_heart(1);
+      writeARS(state, arsId, uploadId, 1, dbManager);
+    }
+    fo_scheduler_heart(0);
+  }
+
+  /* do not use bail, as it would prevent the destructors from running */
+  fo_scheduler_disconnect(0);
+  return 0;
 }

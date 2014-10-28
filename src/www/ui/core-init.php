@@ -144,8 +144,43 @@ class core_init extends FO_Plugin
     print($V);
     return;
   } // Output()
+  
+  /**
+   * @see http://www.fossology.org/projects/fossology/wiki/UI_Architecture_Overview
+   */
+  function infoFirstTimeUsage()
+  {
+    $text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
+    $V .= "<b>$text</b>";
+    $V .= "<P />\n";
+    /* Check for a default user */
+    global $PG_CONN;
+    $Level = PLUGIN_DB_ADMIN;
+    $sql = "SELECT * FROM users WHERE user_perm = $Level LIMIT 1;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R))
+    {
+      $sql = "SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL";
+    }
+    else
+    {
+      $sql = "SELECT user_name FROM users";
+    }
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $R = pg_fetch_assoc($result);
+    pg_free_result($result);
+    if (!empty($R['user_name']))
+    {
+      $V .= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
+      $V .= "<P />\n";
+    }
+    return $V;
+  }
 
-};
+}
 $NewPlugin = new core_init;
 $NewPlugin->Initialize();
-?>
