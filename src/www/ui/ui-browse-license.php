@@ -207,7 +207,7 @@ class ui_browse_license extends FO_Plugin
     
     $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&lic=";
     $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
-    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+
 
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
@@ -243,6 +243,7 @@ class ui_browse_license extends FO_Plugin
     $this->vars['micromenu'] = Dir2Browse($this->Name, $Item, NULL, $showBox=0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $this->vars['haveRunningResult'] = false;
     $this->vars['haveOldVersionResult'] = false;
+    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $Cached = !empty($V);
     if (!$Cached && !empty($Upload))
@@ -262,6 +263,7 @@ class ui_browse_license extends FO_Plugin
       $V .= $AddInfoText;
     }
 
+
     $this->vars['content'] = $V;
     $Time = microtime(true) - $uTime;
 
@@ -274,7 +276,7 @@ class ui_browse_license extends FO_Plugin
     {
       $text = _("Elapsed time: %.3f seconds");
       $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
-      if ($Time > 3)
+      if ($Time > 3.0)
         ReportCachePut($CacheKey, $V);
     }
     return;
