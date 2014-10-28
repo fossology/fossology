@@ -25,6 +25,7 @@ include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
+  const FORCE_DECISION = 1;
   /** @var int */
   private $conflictStrategyId;
   /** @var UploadDao */
@@ -33,9 +34,8 @@ class DeciderAgent extends Agent
   private $clearingDecisionEventProcessor;
   /** @var ClearingDao */
   private $clearingDao;
-
+  /** @var int */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
-
   /** @var DecisionTypes */
   private $decisionTypes;
 
@@ -116,7 +116,13 @@ class DeciderAgent extends Agent
 
     list($added, $removed) = $this->clearingDecisionEventProcessor->filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate);
 
-    $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
+    switch($this->conflictStrategyId){
+      case DeciderAgent::FORCE_DECISION:
+        $canAutoDecide = true;
+        break;
+      default:
+        $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
+    }
 
     if ($canAutoDecide)
     {
