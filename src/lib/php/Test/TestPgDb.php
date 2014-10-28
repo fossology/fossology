@@ -176,10 +176,10 @@ class TestPgDb
     }
  * 
  */
-    foreach (glob($this->sys_conf."/*.*") as $filename) {
+   /* foreach (glob($this->sys_conf."/*.*") as $filename) {
       unlink($filename);
     }
-    rmdir($this->sys_conf);   
+    rmdir($this->sys_conf);   */
   }
 
   private function dirnameRec($path, $depth = 1)
@@ -292,7 +292,7 @@ class TestPgDb
     for ($i = 1; $i < count($splitted); $i++)
     {
       $sql = $splitted[$i];
-      $this->dbManager->queryOnce($sql);
+      $this->dbManager->queryOnce($delimiter.$sql);
       if ($i > $limit)
       {
         break;
