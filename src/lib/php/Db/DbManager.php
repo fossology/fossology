@@ -22,22 +22,18 @@ namespace Fossology\Lib\Db;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class DbManager extends Object
+abstract class DbManager extends Object
 {
   /** @var Driver */
-  private $dbDriver;
-
+  protected $dbDriver;
   /** @var array */
-  private $preparedStatements;
-
+  protected $preparedStatements;
   /** @var Logger */
-  private $logger;
-
+  protected $logger;
   /** @var array */
-  private $cumulatedTime = array();
-
+  protected $cumulatedTime = array();
   /** @var array */
-  private $queryCount = array();
+  protected $queryCount = array();
 
   function __construct(Logger $logger)
   {
@@ -45,53 +41,34 @@ class DbManager extends Object
     $this->logger = $logger;
   }
 
+  /** param Driver */
   public function setDriver(&$dbDriver)
   {
     $this->dbDriver = $dbDriver;
   }
 
+  public function begin() {
+    $this->dbDriver->begin();
+  }
+
+  public function commit() {
+    $this->dbDriver->commit();
+  }
+
   /**
    * @param $statementName
    * @param $sqlStatement
+   * @throws \Exception
    */
-  public function prepare($statementName, $sqlStatement)
-  {
-    if (array_key_exists($statementName, $this->preparedStatements))
-    {
-      if ($this->preparedStatements[$statementName] !== $sqlStatement)
-      {
-        Fatal("Existing Statement mismatch: $statementName", __FILE__, __LINE__);
-      }
-      return;
-    }
-    $startTime = microtime($get_as_float = true);
-    $res = $this->dbDriver->prepare($statementName, $sqlStatement);
-    $this->cumulatedTime[$statementName] = microtime($get_as_float = true) - $startTime;
-    $this->queryCount[$statementName] = 0;
-    $this->logger->addDebug("prepare '$statementName' took " . sprintf("%0.3fms", 1000 * $this->cumulatedTime[$statementName]));
-    $this->checkResult($res, "$sqlStatement -- $statementName");
-    $this->preparedStatements[$statementName] = $sqlStatement;
-  }
+  abstract public function prepare($statementName, $sqlStatement);
 
   /**
    * @param string $statementName statement name
    * @param array $params parameters
+   * @throws \Exception
    * @return resource
    */
-  public function execute($statementName, $params = array())
-  {
-    if (!array_key_exists($statementName, $this->preparedStatements))
-    {
-      Fatal("Unknown Statement", __FILE__, __LINE__);
-    }
-    $startTime = microtime($get_as_float = true);
-    $res = $this->dbDriver->execute($statementName, $params);
-    $execTime = microtime($get_as_float = true) - $startTime;
-    $this->collectStatistics($statementName, $execTime);
-    // $this->logger->addDebug("execute '$statementName took " . sprintf("%0.3fms", 1000*$execTime));
-    $this->checkResult($res, "$statementName: " . $this->preparedStatements[$statementName] . ' -- -- ' . print_r($params, true));
-    return $res;
-  }
+  abstract public function execute($statementName, $params = array());
 
   /**
    * @brief Check the result for unexpected errors. If found, treat them as fatal.
@@ -104,15 +81,18 @@ class DbManager extends Object
     {
       return;
     }
+    $lastError = "";
     if ($this->dbDriver->isConnected())
     {
-      $this->logger->addCritical($this->dbDriver->getLastError());
+      $lastError = $this->dbDriver->getLastError();
+      $this->logger->addCritical($lastError);
     } else
     {
       $this->logger->addCritical("DB connection lost.");
     }
     echo "<br/><pre>$sqlStatement</pre><pre>";
     debug_print_backtrace();
+    print "\n" . $lastError;
     echo "</pre><hr>";
     exit(1);
   }
@@ -153,8 +133,9 @@ class DbManager extends Object
       $sqlLog = $sqlStatement;
     }
     $startTime = microtime($get_as_float = true);
+    $execTime = microtime($get_as_float = true) - $startTime;
     $res = $this->dbDriver->query($sqlStatement);
-    $this->logger->addDebug("Query '$sqlLog' took " . sprintf("%0.3fms", 1000 * (microtime($get_as_float = true) - $startTime)));
+    $this->logger->addDebug("Query '$sqlLog' took " . $this->formatMilliseconds($execTime));
     $this->checkResult($res, $sqlStatement);
     $this->freeResult($res);
   }
@@ -177,6 +158,38 @@ class DbManager extends Object
     return $this->dbDriver->fetchArray($res);
   }
 
+  /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res)
+  {
+    return $this->dbDriver->fetchAll($res);
+  }
+
+  /**
+   * @param string $tableName
+   * @param string $keyColumn
+   * @param string $valueColumn
+   * @param string $sqlLog
+   * @return array
+   */
+  public function createMap($tableName,$keyColumn,$valueColumn,$sqlLog=''){
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keyColumn,$valueColumn";
+    }
+    $this->prepare($sqlLog, "select $keyColumn,$valueColumn from $tableName");
+    $res = $this->execute($sqlLog);
+    $map = array();
+    while ($row = $this->fetchArray($res))
+    {
+      $map[$row[$keyColumn]] = $row[$valueColumn];
+    }
+    $this->freeResult($res);
+    return $map;
+  }
+
   public function flushStats()
   {
     foreach ($this->cumulatedTime as $statementName => $seconds)
@@ -194,7 +207,7 @@ class DbManager extends Object
    */
   protected function formatMilliseconds($seconds)
   {
-    return sprintf(" %0.3fms", 1000 * $seconds);
+    return sprintf("%0.3fms", 1000 * $seconds);
   }
 
   /**
@@ -216,4 +229,51 @@ class DbManager extends Object
   {
     return $this->dbDriver->booleanToDb($booleanValue);
   }
+
+  /**
+   * @param string
+   * @param string
+   * @param array
+   * @param string
+   */
+  public function insertInto($tableName,$keys,$params,$sqlLog='')
+  {
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $sql = "INSERT INTO $tableName ($keys) VALUES (";
+    $nKeys = substr_count($keys,',')+1;
+    for ($i = 1; $i < $nKeys; $i++)
+    {
+      $sql .= '$'.$i.',';
+    }
+    $sql .= '$'.$nKeys.')';
+    for($i=0;$i<$nKeys;$i++){
+      if(is_bool($params[$i]))
+      {
+        $params[$i] = $this->dbDriver->booleanToDb($params[$i]);
+      }
+    }
+    $this->prepare($sqlLog,$sql);
+    $res = $this->execute($sqlLog,$params);
+    $this->freeResult($res);
+  }
+
+  /**
+   * @param string
+   * @param array with keys as column names
+   * @param string
+   */
+  public function insertTableRow($tableName,$assocParams,$sqlLog='')
+  {
+    $params = array_values($assocParams);
+    $keys = implode(',',array_keys($assocParams));
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+    $this->insertInto($tableName, $keys, $params, $sqlLog);
+  }
+  
 }

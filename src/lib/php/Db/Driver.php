@@ -66,6 +66,22 @@ interface Driver
   public function fetchArray($res);
 
   /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res);
+
+  /**
+   * @return void
+   */
+  public function begin();
+
+  /**
+   * @return void
+   */
+  public function commit();
+
+  /**
    * @param $booleanValue
    * @return boolean
    */
@@ -76,4 +92,10 @@ interface Driver
    * @return mixed
    */
   public function booleanToDb($booleanValue);
+  
+  /**
+   * @param string
+   * @return string
+   */
+  public function escapeString($string);
 }

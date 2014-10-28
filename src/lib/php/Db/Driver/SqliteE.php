@@ -88,7 +88,8 @@ class SqliteE implements Driver
     $stmt = $this->preparedStmt[$statementName];
     for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
     {
-      $stmt->bindValue($this->varPrefix . chr(65 + $idx), $params[$idx]);
+      $variableName = $this->varPrefix . chr(65 + $idx);
+      $stmt->bindValue($variableName, $params[$idx]);
     }
     return $stmt->execute();
   }
@@ -133,7 +134,37 @@ class SqliteE implements Driver
    */
   public function fetchArray($res)
   {
-    return $res->fetchArray();
+    return $res->fetchArray(SQLITE3_ASSOC);
+  }
+
+  /**
+   * @param ressource
+   * @return array
+   */
+  public function fetchAll($res)
+  {
+    $result = array();
+    while ($row = $res->fetchArray(SQLITE3_ASSOC)) // do not SQLITE3_NUM !
+    {
+      $result[] = $row;
+    }
+    return $result;
+  }
+
+  /**
+   * @return void
+   */
+  public function begin(){
+    $this->dbConnection->query("BEGIN");
+    return;
+  }
+
+  /**
+   * @return void
+   */
+  public function commit(){
+    $this->dbConnection->query("COMMIT");
+    return;
   }
 
   /**
@@ -152,5 +183,14 @@ class SqliteE implements Driver
   public function booleanToDb($booleanValue)
   {
     return $booleanValue ? 1 : 0;
+  }
+
+  /**
+   * @param string
+   * @return string
+   */
+  public function escapeString($string)
+  {
+    return SQLite3::escapeString($string);
   }
 }
