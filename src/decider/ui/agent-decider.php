@@ -84,13 +84,7 @@ class agent_fodecider extends FO_Plugin
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
   {
     $Dependencies[] = "agent_adj2nest";
-    if ($conflictStrategyId !== null)
-    {
-      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
-    } else
-    {
-      $args = "";
-    }
+    $args = ($conflictStrategyId !== null) ? $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId : "";
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
   }
 }
