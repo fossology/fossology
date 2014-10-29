@@ -185,6 +185,12 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId
 
 vector<CopyrightMatch> findAllMatches(const fo::File& file, vector<RegexMatcher> const regexMatchers)
 {
+  if (!file.isReadable())
+  {
+    cout << "File not readable: " << file.getFileName() << endl;
+    bail(9);
+  }
+
   string fileContent = file.getContent(0);
   return matchStringToRegexes(fileContent, regexMatchers);
 }

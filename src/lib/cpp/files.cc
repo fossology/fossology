@@ -10,6 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "files.hpp"
 #include <fstream>
+#include <sys/stat.h>
 
 namespace fo
 {
@@ -58,4 +59,9 @@ namespace fo
     return id;
   }
 
+  bool File::isReadable() const
+  {
+    struct stat statStr;
+    return (stat(fileName.c_str(), &statStr) == 0);
+  }
 }

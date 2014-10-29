@@ -25,6 +25,7 @@ namespace fo
     unsigned long getId() const;
     std::string getContent(const unsigned long int maximumBytes = 1 << 20) const;
     const std::string& getFileName() const;
+    bool isReadable() const;
   private:
     unsigned long id;
     std::string fileName;
