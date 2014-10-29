@@ -412,18 +412,18 @@ class ui_browse_license extends FO_Plugin
     return array($ChildCount, $VF);
   }
 
+
   /**
-   * 
-   * @param type $child
+   * @param array $child
    * @param int $uploadId
-   * @param type $selectedAgentId
-   * @param type $goodAgents
-   * @param array[][][] $pfileLicenses
-   * @param type $editedPfileLicenses
+   * @param int $selectedAgentId
+   * @param array $goodAgents
+   * @param array $pfileLicenses
+   * @param array $editedPfileLicenses
    * @param string $Uri
-   * @param type $ModLicView
-   * @param type $UniqueTagArray
-   * @return type
+   * @param null|ClearingView $ModLicView
+   * @param array $UniqueTagArray
+   * @return array
    */
   private function createFileDataRow($child,$uploadId,$selectedAgentId,$goodAgents,$pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {

@@ -145,10 +145,10 @@ class UploadTreeView
       case "alreadyCleared":
         $decisionQuery = "SELECT type_fk AS type_id FROM clearing_decision AS cd
                         WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                               OR cd.pfile_fk = ut.pfile_fk AND cd.is_global
+                              OR ( cd.is_global AND ut.pfile_fk = cd.pfile_fk )
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
-              AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_id IN (4,5) )";
+              AND NOT EXISTS (SELECT type_id FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_id IN (4,5) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
