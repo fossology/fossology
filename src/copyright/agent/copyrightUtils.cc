@@ -24,13 +24,17 @@ void queryAgentId(int& agent, PGconn* dbConn)
   };
 
   int agentId = fo_GetAgentKey(dbConn,
-          AGENT_NAME, 0, agentRevision, AGENT_DESC);
+    AGENT_NAME, 0, agentRevision, AGENT_DESC);
   free(agentRevision);
 
   if (agentId > 0)
+  {
     agent = agentId;
+  }
   else
+  {
     exit(1);
+  }
 }
 
 int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager)
@@ -44,19 +48,76 @@ void bail(int exitval)
   exit(exitval);
 }
 
-CopyrightState getState(DbManager& dbManager, int verbosity)
+
+void showHelp()
+{
+  cout << "TODO: help" << endl;
+}
+
+bool parseCliOptions(int argc, char** argv, CliOptions& dest, int& argn)
+{
+  int c;
+  bool optShowHelp = false;
+  unsigned type = DEFAULT_TYPES;
+  int verbosity = 0;
+
+  while ((c = getopt(argc, argv, "hvT:")) != -1)
+  {
+    switch (c)
+    {
+      case '?':
+      case 'h':
+        optShowHelp = true;
+        break;
+      case 'v':
+        ++verbosity;
+        break;
+      case 'T':
+        {
+          int value = atoi(optarg);
+          if ((value > 0) && (value <= 1 << MAX_TYPES))
+          {
+            type = (unsigned int) value;
+          }
+          else
+          {
+            return false;
+          }
+        }
+        break;
+      default:
+        return false;
+    }
+  }
+
+  argn = optind;
+
+  dest = CliOptions(verbosity, optShowHelp, type);
+
+  return true;
+}
+
+CopyrightState getState(DbManager dbManager, const CliOptions& cliOptions)
 {
   int agentID;
   queryAgentId(agentID, dbManager.getConnection());
-  return CopyrightState(agentID, verbosity);
+
+  return CopyrightState(agentID, cliOptions);
 }
 
 void fillMatchers(CopyrightState& state)
 {
 #ifdef IDENTITY_COPYRIGHT
-  state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
-  state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
-  state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
+  unsigned types = state.getCliOptions().getOptType();
+
+  if (types & 1<<0)
+    state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+
+  if (types & 1<<1)
+    state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+
+  if (types & 1<<2)
+    state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
 #endif
 
 #ifdef IDENTITY_IP
@@ -82,11 +143,12 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexM
   return result;
 }
 
-
 bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
+  {
     return false;
+  }
 
   size_t count = 0;
   typedef vector<CopyrightMatch>::const_iterator cpm;
@@ -164,7 +226,6 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   }
 }
 
-
 bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& databaseHandler)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(state.getAgentId(), uploadId);
@@ -180,7 +241,9 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
       unsigned long pFileId = fileIds[it];
 
       if (pFileId <= 0)
+      {
         continue;
+      }
 
       matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler);
 

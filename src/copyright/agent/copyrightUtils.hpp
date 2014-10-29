@@ -38,7 +38,11 @@ void bail(int exitval);
 
 int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager);
 
-CopyrightState getState(DbManager& dbManager, int verbosity);
+void showHelp();
+
+bool parseCliOptions(int argc, char** argv, CliOptions& dest, int& argn);
+
+CopyrightState getState(DbManager dbManager, const CliOptions& cliOptions);
 
 void fillMatchers(CopyrightState& state);
 

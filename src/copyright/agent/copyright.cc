@@ -24,8 +24,15 @@ int main(int argc, char** argv)
 
   DbManager dbManager(&argc, argv);
 
-  int verbosity = 8;
-  CopyrightState state = getState(dbManager, verbosity);
+  CliOptions cliOptions;
+  int argInd = 1;
+  if (!parseCliOptions(argc, argv, cliOptions, argInd) || cliOptions.showHelp())
+  {
+    showHelp();
+    return 0;
+  }
+
+  CopyrightState state = getState(dbManager, cliOptions);
   CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
   if (!copyrightDatabaseHandler.createTables())
@@ -36,13 +43,13 @@ int main(int argc, char** argv)
 
   fillMatchers(state);
 
-  if (argc > 1)
+  if ((argc > 1) && (argInd < argc))
   {
     const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
 #pragma omp parallel
     {
 #pragma omp for
-      for (int argn = 1; argn < argc; ++argn)
+      for (int argn = argInd; argn < argc; ++argn)
       {
         const char* fileName = argv[argn];
 
@@ -81,3 +88,4 @@ int main(int argc, char** argv)
   fo_scheduler_disconnect(0);
   return 0;
 }
+
