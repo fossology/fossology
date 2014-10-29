@@ -22,21 +22,24 @@ namespace Fossology\Lib\Data\Tree;
 class UploadTreeView
 {
   /** @var string */
-  private $uploadTreeTableName;
-
+  private $uploadTreeViewName;
   /** @var string */
   public $uploadTreeViewQuery;
-
+  /** @var string */
+  private $uploadTreeTableName;
+  /** @var bool */
+  private $materialized = false;
+  
   /**
    * @param int $uploadId
-   * @param array $options
+   * @param array $options (keys skipThese, ut.filter supported)
    * @param string $uploadTreeTableName
-   * @param string $additionalCondition
    */
-  public function __construct($uploadId, $options, $uploadTreeTableName, $additionalCondition = "")
+  public function __construct($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName=null)
   {
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $this->uploadTreeViewQuery = self::createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName, $additionalCondition);
+    $this->uploadTreeViewName = $uploadTreeViewName ?: 'UploadTreeView';
+    $this->uploadTreeViewQuery = $this->createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName);
   }
 
   /**
@@ -46,28 +49,69 @@ class UploadTreeView
   {
     return $this->uploadTreeTableName;
   }
-
+  
   /**
    * @return string
    */
-  public function getUploadTreeViewQuery()
+  public function getUploadTreeViewName()
   {
-    return $this->uploadTreeViewQuery;
+    return $this->uploadTreeViewName;
   }
 
+  /**
+   * @brief create temp table
+   */
+  public function materialize()
+  {
+    if ($this->materialized)
+    {
+      return;
+    }
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $dbManager->queryOnce("CREATE TEMPORARY TABLE $this->uploadTreeViewName AS $this->uploadTreeViewQuery");
+    $this->materialized = true;
+  }
 
+  /**
+   * @brief drops temp table
+   */
+  public function unmaterialize()
+  {
+    if (!$this->materialized)
+    {
+      return;
+    }
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $dbManager->queryOnce("DROP TABLE $this->uploadTreeViewName");
+    $this->materialized = false;
+  }    
+    
   /**
    * @param int $uploadId
    * @param array $options
    * @param string $uploadTreeTableName
-   * @param string $additionalCondition
    * @return string
    */
-  private static function createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName, $additionalCondition = "")
+  private function createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName)
   {
-    return $options === null ?
-        self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName) :
-        self::getUploadTreeView($uploadId, $options, $uploadTreeTableName, $additionalCondition);
+    if ($options === null)
+    {
+      return self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+    }
+    else
+    {
+      return self::getUploadTreeView($uploadId, $options, $uploadTreeTableName);
+    }
+  }
+  
+  /**
+   * @brief Common Table Expressions
+   * @return string
+   */
+  public function asCTE(){
+    return "WITH $this->uploadTreeViewName AS (".$this->uploadTreeViewQuery.")";
   }
 
   /**
@@ -82,7 +126,7 @@ class UploadTreeView
     {
       $sql_upload = " WHERE ut.upload_fk=$uploadId ";
     }
-    $uploadTreeView = "WITH UploadTreeView  As ( SELECT * FROM $uploadTreeTableName UT $sql_upload)";
+    $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut $sql_upload";
     return $uploadTreeView;
   }
 
@@ -90,44 +134,31 @@ class UploadTreeView
    * @param $uploadId
    * @param $options
    * @param $uploadTreeTableName
-   * @param $additionalCondition
    * @return string
    */
-  private static function getUploadTreeView($uploadId, $options, $uploadTreeTableName, $additionalCondition)
+  private static function getUploadTreeView($uploadId, $options, $uploadTreeTableName)
   {
-      $skipThese = $options['skipThese']?:'none';
-      switch ($skipThese)
-      {
-        case "none":
-          break;
-        case "noLicense":
-        case "alreadyCleared":
-        case "noCopyright":
-        case "noIp":
-        case "noEcc":
+    $additionalCondition = array_key_exists('ut.filter', $options) ? $options['ut.filter'] : '';
+    $skipThese = array_key_exists('skipThese',$options) ? $options['skipThese'] : 'none';
+    switch ($skipThese)
+    {
+      case "none":
+        break;
+      case "noLicense":
+      case "alreadyCleared":
+      case "noCopyright":
+      case "noIp":
+      case "noEcc":
 
-          $queryCondition = self::getQueryCondition($skipThese);
-          $sql_upload = "";
-          if ('uploadtree_a' == $uploadTreeTableName)
-          {
-            $sql_upload = " AND ut.upload_fk=$uploadId ";
-          }
-          $uploadTreeView = " WITH UploadTreeView AS (
-                              select
-                                *
-                              from $uploadTreeTableName ut
-                              where
-                                (
-                                 $queryCondition
-                                 $additionalCondition
-                                )
-                                $sql_upload
-                              )";
-          return $uploadTreeView;
-      }
-      //default case, if cookie is not set or set to none
-      $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
-      return $uploadTreeView;
+        $queryCondition = self::getQueryCondition($skipThese);
+        $sql_upload = ('uploadtree_a' == $uploadTreeTableName) ? "ut.upload_fk=$uploadId AND " : '';
+        $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut
+                           WHERE $sql_upload $queryCondition $additionalCondition";
+        return $uploadTreeView;
+    }
+    //default case, if cookie is not set or set to none
+    $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+    return $uploadTreeView;
   }
 
   /**
@@ -143,12 +174,12 @@ class UploadTreeView
       case "noLicense":
         return $conditionQueryHasLicense;
       case "alreadyCleared":
-        $decisionQuery = "SELECT type_fk AS type_id FROM clearing_decision AS cd
+        $decisionQuery = "SELECT type_fk FROM clearing_decision AS cd
                         WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                              OR ( cd.is_global AND ut.pfile_fk = cd.pfile_fk )
+                              OR cd.pfile_fk = ut.pfile_fk AND cd.is_global
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
-              AND NOT EXISTS (SELECT type_id FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_id IN (4,5) )";
+              AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_fk IN (4,5) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";

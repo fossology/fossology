@@ -155,12 +155,13 @@ class ClearingDao extends Object
     }
 
     //! Add the last match
-    $clearingDec =$clearingDecisionBuilder->setPositiveLicenses($added)
-        ->setNegativeLicenses($removed)
-        ->build();
-    $clearingsWithLicensesArray[] = $clearingDec;
-
-
+    if(!$firstMatch)
+    {
+      $clearingDec = $clearingDecisionBuilder->setPositiveLicenses($added)
+          ->setNegativeLicenses($removed)
+          ->build();
+      $clearingsWithLicensesArray[] = $clearingDec;
+    }
 
     $this->dbManager->freeResult($result);
     return $clearingsWithLicensesArray;
