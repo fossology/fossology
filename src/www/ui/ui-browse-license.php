@@ -53,6 +53,10 @@ class ui_browse_license extends FO_Plugin
   private $alreadyClearedUploadTreeView;
   /** @var UploadTreeView */
   private $noLicenseUploadTreeView;  
+  /** @note please refactor this */
+  private $filesThatShouldStillBeCleared;
+  /** @note please refactor this */
+  private $filesToBeCleared;
   
   function __construct()
   {
@@ -372,6 +376,35 @@ class ui_browse_license extends FO_Plugin
     $this->alreadyClearedUploadTreeView->materialize();
     $this->noLicenseUploadTreeView->materialize();
     
+    
+    $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
+            . $this->alreadyClearedUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
+            . " AND v.lft BETWEEN u.lft and u.rgt GROUP BY u.uploadtree_pk";
+    $stmt = __METHOD__ . '.between.should';
+    $this->dbManager->prepare($stmt,$sql);
+    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
+    $this->filesThatShouldStillBeCleared = array();
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $this->filesThatShouldStillBeCleared[$row['uploadtree_pk']] = $row['cnt'];
+    }
+    $this->dbManager->freeResult($res);
+    
+    
+    $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
+            . $this->noLicenseUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
+            . " AND v.lft BETWEEN u.lft and u.rgt GROUP BY u.uploadtree_pk";
+    $stmt = __METHOD__ . '.between.scan';
+    $this->dbManager->prepare($stmt,$sql);
+    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
+    $this->filesToBeCleared = array();
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $this->filesToBeCleared[$row['uploadtree_pk']] = $row['cnt'];
+    }
+    $this->dbManager->freeResult($res);
+    
+    
     foreach ($Children as $child)
     {
       if (empty($child))
@@ -555,12 +588,14 @@ class ui_browse_license extends FO_Plugin
     $getTextEditBulk = _("Bulk");
     $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
-
-//    list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+   
+    // $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
+    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
+            ,$this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
     
-    $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
-    
-    $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
+    // $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
+    $filesToBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
+            ,$this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
 
     $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;   
 
