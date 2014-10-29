@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
+use Fossology\Lib\Data\Tree\UploadTreeView;
 
 /**
  * \file ui-browse-license.php
@@ -48,6 +49,10 @@ class ui_browse_license extends FO_Plugin
   private $agentsDao;
   /** @var DbManager */
   private $dbManager;
+  /** @var UploadTreeView */
+  private $alreadyClearedUploadTreeView;
+  /** @var UploadTreeView */
+  private $noLicenseUploadTreeView;  
   
   function __construct()
   {
@@ -354,6 +359,19 @@ class ui_browse_license extends FO_Plugin
     $ModLicView = & $Plugins[plugin_find_id("view-license")];
     $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());    
     $tableData = array();
+    
+    $this->alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+            $options=array('skipThese' => "alreadyCleared"),
+            $itemTreeBounds->getUploadTreeTableName(),
+            $viewName='already_cleared_uploadtree'.$itemTreeBounds->getUploadId());
+    $this->noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+            $options=array('skipThese' => "noLicense"),
+            $itemTreeBounds->getUploadTreeTableName(),
+            $viewName='no_license_uploadtree'.$itemTreeBounds->getUploadId());
+    
+    $this->alreadyClearedUploadTreeView->materialize();
+    $this->noLicenseUploadTreeView->materialize();
+    
     foreach ($Children as $child)
     {
       if (empty($child))
@@ -363,6 +381,9 @@ class ui_browse_license extends FO_Plugin
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
+    $this->alreadyClearedUploadTreeView->unmaterialize();
+    $this->noLicenseUploadTreeView->unmaterialize();
+    
     $tableColumns = array(
         array("sTitle" => _("Files"), "sClass" => "left"),
         array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
@@ -535,7 +556,13 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
 
-    list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+//    list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+    
+    $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
+    
+    $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
+
+    $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;   
 
     $img = ($filesCleared==$filesToBeCleared) ? 'green' : 'red';
 

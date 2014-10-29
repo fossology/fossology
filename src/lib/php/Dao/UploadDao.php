@@ -423,39 +423,15 @@ SELECT * FROM $uploadTreeTableName
    * @param $uploadTreeView
    * @return int
    */
-  protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
+  public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
   {
-    $uploadTreeViewQuery = $uploadTreeView->asCTE();
-    $sql = "$uploadTreeViewQuery
-            SELECT count(*) from uploadTreeView where lft BETWEEN $1 and $2
-            ";
-
+    $sql = "SELECT count(*) FROM ". $uploadTreeView->getUploadTreeViewName() ." where lft BETWEEN $1 and $2";
     $result = $this->dbManager->getSingleRow($sql
-        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeViewQuery);
-
+        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeView->asCTE() );
     $output = $result['count'];
     return $output;
   }
 
-  public function getFilesClearedAndFilesToClear(ItemTreeBounds $itemTreeBounds)
-  {
-    $alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
-            $options=array('skipThese' => "alreadyCleared"),
-            $itemTreeBounds->getUploadTreeTableName());
-    
-    
-    $filesThatShouldStillBeCleared = $this->getContainingFileCount($itemTreeBounds, $alreadyClearedUploadTreeView);
-
-    $noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
-            $options=array('skipThese' => "noLicense"),
-            $itemTreeBounds->getUploadTreeTableName());
-
-    $filesToBeCleared = $this->getContainingFileCount($itemTreeBounds, $noLicenseUploadTreeView);
-
-    $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;
-    return array($filesCleared, $filesToBeCleared);
-
-  }
 
   /**
    * @param array $uploadEntry

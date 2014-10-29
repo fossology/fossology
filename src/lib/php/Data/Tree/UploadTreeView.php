@@ -27,6 +27,8 @@ class UploadTreeView
   public $uploadTreeViewQuery;
   /** @var string */
   private $uploadTreeTableName;
+  /** @var bool */
+  private $materialized = false;
   
   /**
    * @param int $uploadId
@@ -47,16 +49,45 @@ class UploadTreeView
   {
     return $this->uploadTreeTableName;
   }
-
+  
   /**
    * @return string
    */
-  private function getUploadTreeViewQuery()
+  public function getUploadTreeViewName()
   {
-    return $this->uploadTreeViewQuery;
+    return $this->uploadTreeViewName;
   }
 
+  /**
+   * @brief create temp table
+   */
+  public function materialize()
+  {
+    if ($this->materialized)
+    {
+      return;
+    }
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $dbManager->queryOnce("CREATE TEMPORARY TABLE $this->uploadTreeViewName AS $this->uploadTreeViewQuery");
+    $this->materialized = true;
+  }
 
+  /**
+   * @brief drops temp table
+   */
+  public function unmaterialize()
+  {
+    if (!$this->materialized)
+    {
+      return;
+    }
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $dbManager->queryOnce("DROP TABLE $this->uploadTreeViewName");
+    $this->materialized = false;
+  }    
+    
   /**
    * @param int $uploadId
    * @param array $options
@@ -80,7 +111,7 @@ class UploadTreeView
    * @return string
    */
   public function asCTE(){
-    return "WITH $this->uploadTreeViewName AS (".$this->getUploadTreeViewQuery().")";
+    return "WITH $this->uploadTreeViewName AS (".$this->uploadTreeViewQuery.")";
   }
 
   /**
@@ -148,7 +179,7 @@ class UploadTreeView
                               OR cd.pfile_fk = ut.pfile_fk AND cd.is_global
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
-              AND EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_fk IN (4,5) )";
+              AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_fk IN (4,5) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
