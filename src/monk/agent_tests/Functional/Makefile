@@ -19,13 +19,11 @@ test: all
 	ln -fs $(LOCALAGENTDIR)/monk ./monk
 	./shunit2 cli_test.sh
 
-coverage:
+coverage: all
 	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
 	ln -fs $(LOCALAGENTDIR)/monk_cov ./monk
 	./shunit2 cli_test.sh
-	@echo TODO call phpunit
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt
-	genhtml -o results cov.txt
+	@echo TODO call phpunit scheduler_test.php
 
 clean:
 	@echo "nothing to do"
