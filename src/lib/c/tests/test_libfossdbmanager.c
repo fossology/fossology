@@ -74,7 +74,7 @@ int _assertFileLines(const char* fileName, const char* expectedContent, int id)
   {
     char buffer[2048];
     ssize_t n = read(fd, buffer, sizeof(buffer) - 1);
-    if (n > 0)
+    if (n >= 0)
     {
       buffer[n] = '\0';
       int patternMatch = g_pattern_match_simple(expectedContent, buffer);
@@ -791,13 +791,44 @@ char* _test_wrongQueries_unparsableTypes(fo_dbManager** dbManager, const char* t
     *dbManager,
     "name4",
     "irrelevant",
-    int, , long
+    int, ,long
   ));
 
   return g_strdup(
     "FATAL: dbManager could not comprehend parameter types 'int, ,long'\n"
       "Trying to prepare 'name4' as 'irrelevant'\n"
   );
+}
+
+char* _test_wrongQueries_transactions(fo_dbManager** dbManager, const char* testTableName)
+{
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+  CU_ASSERT_TRUE(fo_dbManager_commit(*dbManager));
+
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, c) VALUES (1,2)", testTableName));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+
+  CU_ASSERT_TRUE(fo_dbManager_rollback(*dbManager));
+
+  PGresult* res = fo_dbManager_Exec_printf(*dbManager, "SELECT * FROM %s", testTableName);
+
+  CU_ASSERT_TRUE(PQntuples(res)==1);
+  PQclear(res);
+
+ return g_strdup_printf(
+   "NOTICE: WARNING:  there is already a transaction in progress\n"
+   "ERROR: ERROR:  column \"c\" of relation \"%s\" does not exist\n"
+   "LINE 1: *\n"
+   "*^\n"
+   "On: INSERT INTO %s (a, c) VALUES (1,2)\n"
+   "ERROR: ERROR:  current transaction is aborted, commands ignored until end of transaction block\n"
+   "On: INSERT INTO %s (a, b) VALUES (1,2)\n", testTableName, testTableName, testTableName, testTableName, testTableName
+ );
 }
 
 void test_wrongQueries()
@@ -812,6 +843,7 @@ void test_wrongQueries()
   _test_wrongQueries_runner(_test_wrongQueries_noParametersFor1ParameterStmt, ++testNumber);
   _test_wrongQueries_runner(_test_wrongQueries_2ParametersForNoParametersQuery, ++testNumber);
   _test_wrongQueries_runner(_test_wrongQueries_unparsableTypes, ++testNumber);
+  _test_wrongQueries_runner(_test_wrongQueries_transactions, ++testNumber);
 }
 
 void test_executeNull()
