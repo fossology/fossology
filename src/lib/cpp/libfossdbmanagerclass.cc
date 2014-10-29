@@ -147,3 +147,8 @@ std::vector<std::string> QueryResult::getRow(int i) const
 
   return result;
 }
+
+void DbManager::ignoreWarnings(bool b) const
+{
+  fo_dbManager_ignoreWarnings(getStruct_dbManager(), b);
+}

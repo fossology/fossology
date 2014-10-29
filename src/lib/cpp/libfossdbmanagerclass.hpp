@@ -51,6 +51,7 @@ public :
   bool begin() const;
   bool commit() const;
   bool rollback() const;
+  void ignoreWarnings(bool) const;
 
   QueryResult queryPrintf(const char* queryFormat, ...) const;
   QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;

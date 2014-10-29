@@ -122,6 +122,7 @@ void fo_dbManager_finish(fo_dbManager* dbManager);
  *
  */
 int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName);
+void fo_dbManager_ignoreWarnings(fo_dbManager* dbManager, int ignoreWarns);
 
 /*!
  * fo_dbManager_StringEscape()

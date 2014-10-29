@@ -63,6 +63,7 @@ bool CopyrightDatabaseHandler::createTables() const
   int failedCounter = 0;
   bool tablesChecked = false;
 
+  dbManager.ignoreWarnings(true);
   while (!tablesChecked && failedCounter < MAX_TABLE_CREATION_RETRIES)
   {
     dbManager.begin();
@@ -85,6 +86,7 @@ bool CopyrightDatabaseHandler::createTables() const
       << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES
       << std::endl;
 
+  dbManager.ignoreWarnings(false);
   return tablesChecked;
 }
 
