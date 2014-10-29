@@ -1,3 +1,4 @@
+<script type="text/javascript">
 selectedLicensesTableColumns = [
   {"sTitle": "{{ 'License'| trans }}", "sClass": "left read_only"},
   {"sTitle": "{{ 'Source'| trans }}", "sClass": "left read_only", "bSortable": false},
@@ -19,9 +20,18 @@ selectedLicensesTableConfig = {
       .fail(failed)
   },
   "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-    if (nRow.classList.contains('removed')) {
-      $('td', nRow).addClass('read_only');
-    }
+//    if (nRow.classList.contains('removed')) {
+//      $('td', nRow).addClass('read_only');
+//    }
+
+//      if (nRow.className.split('/\\s+/').contains('removed')) {
+//          $('td', nRow).addClass('read_only');
+//      }
+
+
+      if (nRow.className.match(/(^| )removed($| )/g)  ) {
+          $('td', nRow).addClass('read_only');
+      }
   },
   "aoColumns": selectedLicensesTableColumns,
   "iDisplayLength": 25,
@@ -79,3 +89,4 @@ $(document).ready(function () {
   createLicenseDecisionTable();
   createLicenseSelectionTable();
 });
+</script>
