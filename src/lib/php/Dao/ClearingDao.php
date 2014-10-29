@@ -56,10 +56,9 @@ class ClearingDao extends Object
     $this->uploadDao = $uploadDao;
   }
 
- 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @return ClearingDecision[] 
+   * @return ClearingDecision[]
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds)
   {
@@ -71,9 +70,6 @@ class ClearingDao extends Object
     if ('uploadtree_a' == $uploadTreeTable) {
       $sql_upload = "ut.upload_fk=$1  and ";
     }
-
-    $secondJoin = " INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
-           WHERE $sql_upload ut.lft BETWEEN $2 and $3 ";
 
     $statementName = __METHOD__.$uploadTreeTable;
 
@@ -87,12 +83,20 @@ class ClearingDao extends Object
            CD.is_global AS is_global,
            EXTRACT(EPOCH FROM CD.date_added) AS date_added,
            ut2.upload_fk = $1 AS same_upload,
-           ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local
+           ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local,
+           LR.rf_pk as license_id,
+           LR.rf_shortname as shortname,
+           LR.rf_fullname  as fullname,
+           CL.removed  as removed
          FROM clearing_decision CD
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
-         $secondJoin
-         GROUP BY id,uploadtree_id,pfile_id,user_name,user_id,type_id,is_global,date_added,same_upload,is_local
+         INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
+         INNER JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
+         LEFT JOIN license_ref LR on CL.rf_fk=LR.rf_pk
+           WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
+         GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, is_global, date_added, same_upload, is_local,
+         license_id, shortname, fullname, removed
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -101,29 +105,58 @@ class ClearingDao extends Object
     $result = $this->dbManager->execute($statementName, array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
     $clearingsWithLicensesArray = array();
 
+    $previousClearingId  = -1;
+    $added=array();
+    $removed=array();
+    $clearingDecisionBuilder = ClearingDecisionBuilder::create();
+    $firstMatch = true;
     while ($row = $this->dbManager->fetchArray($result))
     {
-      list($added,$removed) = $this->getFileClearingLicenses($row['id']);
-      $clearingDec = ClearingDecisionBuilder::create()
-          ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
-          ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
-          ->setPositiveLicenses($added)
-          ->setNegativeLicenses($removed)
-          ->setClearingId($row['id'])
-          ->setUploadTreeId($row['uploadtree_id'])
-          ->setPfileId($row['pfile_id'])
-          ->setUserName($row['user_name'])
-          ->setUserId($row['user_id'])
-          ->setType($row['type_id'])
-          ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
-          ->setDateAdded($row['date_added'])
-          ->build();
+      $clearingId = $row['id'];
+      $licenseId = $row['license_id'];
+      $licenseShortName = $row['shortname'];
+      $licenseName = $row['fullname'];
+      $licenseIsRemoved = $row['removed'];
 
-      $clearingsWithLicensesArray[] = $clearingDec;
+
+      if($clearingId === $previousClearingId) {
+        //append To last finding
+        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
+      }
+      else {
+        //store the old one
+        if(!$firstMatch) {
+          $clearingDec =$clearingDecisionBuilder->setPositiveLicenses($added)
+                                                ->setNegativeLicenses($removed)
+                                                ->build();
+          $clearingsWithLicensesArray[] = $clearingDec;
+        }
+
+        $firstMatch = false;
+        //prepare the new one
+        $previousClearingId  = $clearingId;
+        $added=array();
+        $removed=array();
+        $clearingDecisionBuilder = ClearingDecisionBuilder::create()
+                                    ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
+                                    ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
+                                    ->setClearingId($row['id'])
+                                    ->setUploadTreeId($row['uploadtree_id'])
+                                    ->setPfileId($row['pfile_id'])
+                                    ->setUserName($row['user_name'])
+                                    ->setUserId($row['user_id'])
+                                    ->setType($row['type_id'])
+                                    ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
+                                    ->setDateAdded($row['date_added']);
+
+        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
+
+      }
     }
     $this->dbManager->freeResult($result);
     return $clearingsWithLicensesArray;
   }
+
 
   /**
    * @param int $clearingId
@@ -134,13 +167,13 @@ class ClearingDao extends Object
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
         "select
-               license_ref.rf_pk as id,
-               license_ref.rf_shortname as shortname,
-               license_ref.rf_fullname  as fullname,
-               clearing_licenses.removed  as removed
-           from clearing_licenses
-           left join license_ref on clearing_licenses.rf_fk=license_ref.rf_pk
-               where clearing_fk=$1");
+               LR.rf_pk as id,
+               LR.rf_shortname as shortname,
+               LR.rf_fullname  as fullname,
+               CL.removed  as removed
+           from clearing_licenses CL
+           left join license_ref LR on CL.rf_fk=LR.rf_pk
+               where CL.clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($clearingId));
     $added = array();
@@ -617,6 +650,26 @@ insert into license_decision_event (
    */
   public function extractGoodLicenses($editedLicensesArray){
     return $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
+  }
+
+  /**
+   * @param $licenseId
+   * @param $licenseShortName
+   * @param $licenseName
+   * @param $licenseIsRemoved
+   * @param $removed
+   * @param $added
+   */
+  protected function appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, &$removed, &$added)
+  {
+    $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseName);
+    if ($this->dbManager->booleanFromDb($licenseIsRemoved))
+    {
+      $removed[] = $licenseRef;
+    } else
+    {
+      $added[] = $licenseRef;
+    }
   }
 
 }
