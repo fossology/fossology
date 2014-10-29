@@ -379,7 +379,7 @@ class ui_browse_license extends FO_Plugin
     
     $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
             . $this->alreadyClearedUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt GROUP BY u.uploadtree_pk";
+            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = ".$itemTreeBounds->getUploadTreeId()." GROUP BY u.uploadtree_pk";
     $stmt = __METHOD__ . '.between.should';
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
@@ -393,7 +393,7 @@ class ui_browse_license extends FO_Plugin
     
     $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
             . $this->noLicenseUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt GROUP BY u.uploadtree_pk";
+            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = ".$itemTreeBounds->getUploadTreeId()." GROUP BY u.uploadtree_pk";
     $stmt = __METHOD__ . '.between.scan';
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
