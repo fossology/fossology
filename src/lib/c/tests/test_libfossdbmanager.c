@@ -34,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TESTABLE1(s, i) TESTABLE2(s,i)
 #define TESTTABLE TESTABLE1("test_db_manager_",__LINE__)
 
+extern char* dbConf;
+
 /* <0 unable to perform check
  * 0 does not exists
  * >0 exists
@@ -157,10 +159,9 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
 void test_prepare()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* testTableName = TESTTABLE;
@@ -339,10 +340,9 @@ PGresult* _insertWithFunction(
 void test_perf()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager1 = fo_dbManager_new(pgConn);
   fo_dbManager* dbManager2 = fo_dbManager_new(pgConn);
   fo_dbManager* dbManager3 = fo_dbManager_new(pgConn);
@@ -424,10 +424,9 @@ void test_perf()
 void test_simple_inject()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* testTableName = TESTTABLE;
@@ -524,11 +523,10 @@ void test_fork_error()
 void test_fork()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  fo_dbManager* dbManager0 = fo_dbManager_new(pgConn);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
+  fo_dbManager* dbManager0 = fo_dbManager_new_withConf(pgConn, dbConf);
 
   char* testTableName = TESTTABLE;
   if (_getTestTable(dbManager0, &testTableName, "a int, b bigint, c varchar"))
@@ -595,11 +593,10 @@ void test_fork()
 void _test_wrongQueries_runner(char* (* test)(fo_dbManager**, const char*), int testNumber)
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  fo_dbManager* dbManager = fo_dbManager_new_withConf(pgConn, DBConfFile);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
+  fo_dbManager* dbManager = fo_dbManager_new_withConf(pgConn, dbConf);
 
   char* testTable = g_strdup_printf(TESTTABLE "runner_%d", testNumber);
   int gotTable = _getTestTable(dbManager, &testTable, "a int, b bigint");
@@ -858,10 +855,9 @@ void test_executeNull()
 void test_stringEscape_corners()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* empty = fo_dbManager_StringEscape(dbManager, "");
