@@ -49,13 +49,9 @@ class ui_browse_license extends FO_Plugin
   private $agentsDao;
   /** @var DbManager */
   private $dbManager;
-  /** @var UploadTreeView */
-  private $alreadyClearedUploadTreeView;
-  /** @var UploadTreeView */
-  private $noLicenseUploadTreeView;  
-  /** @note please refactor this */
+  /** @var array [uploadtree_id]=>cnt */
   private $filesThatShouldStillBeCleared;
-  /** @note please refactor this */
+  /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
   
   function __construct()
@@ -364,46 +360,22 @@ class ui_browse_license extends FO_Plugin
     $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());    
     $tableData = array();
     
-    $this->alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+    $alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
             $options=array('skipThese' => "alreadyCleared"),
             $itemTreeBounds->getUploadTreeTableName(),
             $viewName='already_cleared_uploadtree'.$itemTreeBounds->getUploadId());
-    $this->noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+    
+    $alreadyClearedUploadTreeView->materialize();
+    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $alreadyClearedUploadTreeView->unmaterialize();
+    
+    $noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
             $options=array('skipThese' => "noLicense"),
             $itemTreeBounds->getUploadTreeTableName(),
             $viewName='no_license_uploadtree'.$itemTreeBounds->getUploadId());
-    
-    $this->alreadyClearedUploadTreeView->materialize();
-    $this->noLicenseUploadTreeView->materialize();
-    
-    
-    $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
-            . $this->alreadyClearedUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = ".$itemTreeBounds->getUploadTreeId()." GROUP BY u.uploadtree_pk";
-    $stmt = __METHOD__ . '.between.should';
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
-    $this->filesThatShouldStillBeCleared = array();
-    while($row=$this->dbManager->fetchArray($res))
-    {
-      $this->filesThatShouldStillBeCleared[$row['uploadtree_pk']] = $row['cnt'];
-    }
-    $this->dbManager->freeResult($res);
-    
-    
-    $sql = "SELECT count(*) cnt, u.uploadtree_pk FROM ".$itemTreeBounds->getUploadTreeTableName()." u, "
-            . $this->noLicenseUploadTreeView->getUploadTreeViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = ".$itemTreeBounds->getUploadTreeId()." GROUP BY u.uploadtree_pk";
-    $stmt = __METHOD__ . '.between.scan';
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId()));
-    $this->filesToBeCleared = array();
-    while($row=$this->dbManager->fetchArray($res))
-    {
-      $this->filesToBeCleared[$row['uploadtree_pk']] = $row['cnt'];
-    }
-    $this->dbManager->freeResult($res);
-    
+    $noLicenseUploadTreeView->materialize();
+    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $noLicenseUploadTreeView->unmaterialize();
     
     foreach ($Children as $child)
     {
@@ -413,9 +385,6 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
-
-    $this->alreadyClearedUploadTreeView->unmaterialize();
-    $this->noLicenseUploadTreeView->unmaterialize();
     
     $tableColumns = array(
         array("sTitle" => _("Files"), "sClass" => "left"),

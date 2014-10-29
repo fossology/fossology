@@ -24,9 +24,11 @@ class UploadTreeView
   /** @var string */
   private $uploadTreeViewName;
   /** @var string */
-  public $uploadTreeViewQuery;
+  private $uploadTreeViewQuery;
   /** @var string */
   private $uploadTreeTableName;
+  /** @var int */
+  private $uploadId;
   /** @var bool */
   private $materialized = false;
   
@@ -37,9 +39,10 @@ class UploadTreeView
    */
   public function __construct($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName=null)
   {
+    $this->uploadId = $uploadId;
     $this->uploadTreeTableName = $uploadTreeTableName;
     $this->uploadTreeViewName = $uploadTreeViewName ?: 'UploadTreeView';
-    $this->uploadTreeViewQuery = $this->createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName);
+    $this->uploadTreeViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
   }
 
   /**
@@ -89,20 +92,19 @@ class UploadTreeView
   }    
     
   /**
-   * @param int $uploadId
    * @param array $options
    * @param string $uploadTreeTableName
    * @return string
    */
-  private function createUploadTreeViewQuery($uploadId, $options, $uploadTreeTableName)
+  private function createUploadTreeViewQuery($options, $uploadTreeTableName)
   {
     if ($options === null)
     {
-      return self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+      return self::getDefaultUploadTreeView($this->uploadId, $uploadTreeTableName);
     }
     else
     {
-      return self::getUploadTreeView($uploadId, $options, $uploadTreeTableName);
+      return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
     }
   }
   
@@ -192,4 +194,36 @@ class UploadTreeView
         return $conditionQuery;
     }
   }
-} 
+  
+  /**
+   * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
+   * @param int $parent
+   */
+  public function countMaskedNonArtifactChildren($parent)
+  {
+    global $container;
+    $dbManager = $container->get('db.manager');
+        $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
+            . $this->uploadTreeViewName ." v where u.upload_fk=$1"
+            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
+    $dbManager->prepare($stmt=__METHOD__.$this->uploadTreeViewName,$sql);
+    $res = $dbManager->execute($stmt,array($this->uploadId,$parent));
+    $children = array();
+    $artifactContainers = array();
+    while($row=$dbManager->fetchArray($res))
+    {
+      $children[$row['uploadtree_pk']] = $row['cnt'];
+      if ( ($row['ufile_mode'] & (3<<28)) == (3<<28))
+      {
+        $artifactContainers[] = $row['uploadtree_pk'];
+      }
+    }
+    $dbManager->freeResult($res);
+    foreach ($artifactContainers as $ac)
+    {
+      foreach($this->countMaskedNonArtifactChildren($ac) as $utid=>$cnt)
+      $children[$utid] = $cnt;
+    }
+    return $children;
+  }
+}
