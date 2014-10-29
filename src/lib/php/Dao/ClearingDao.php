@@ -589,7 +589,7 @@ insert into license_decision_event (
     $statementName = __METHOD__;
     $this->dbManager->prepare(
       $statementName,
-      "SELECT uploadtree_fk FROM license_decision_event WHERE job_fk = $1"
+      "SELECT DISTINCT(uploadtree_fk) FROM license_decision_event WHERE job_fk = $1"
     );
 
     $res = $this->dbManager->execute($statementName, array($jobId));

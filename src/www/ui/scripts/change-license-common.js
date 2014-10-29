@@ -23,10 +23,9 @@ var noLicenseString = "No_license_found";
 
 
 function jsArrayFromHtmlOptions(pListBox) {
-  var i;
   var options = new Array(pListBox.options.length);
-  for (i = 0; i < options.length; i++) {
-    if (pListBox.options[i].value == magicNumberNoLicenseFound)
+  for (var i = 0; i < options.length; i++) {
+    if (pListBox.options[i].value === magicNumberNoLicenseFound)
       continue;
     options[i] = pListBox.options[i];
   }
@@ -35,8 +34,10 @@ function jsArrayFromHtmlOptions(pListBox) {
 
 function htmlOptionsFromJsArray(pListBox, options) {
   pListBox.options.length = 0;
+  if(options===undefined) return;
   for (var i = 0; i < options.length; i++) {
-    pListBox.options[i] = options[i];
+      if(options[i]===undefined) continue;
+      pListBox.options[i] = options[i];
   }
 }
 
@@ -57,7 +58,9 @@ function moveLicense(theSelFrom, theSelTo) {
     var i;
     for (i = selLength - 1; i >= 0; i--) {
         if (theSelFrom.options[i].selected) {
-            theSelTo.options[theSelTo.options.length] = theSelFrom.options[i];
+            //var selToLength = theSelTo.options.length;
+            //theSelTo.options[selToLength] = theSelFrom.options[i];
+            theSelTo.appendChild(theSelFrom.options[i].cloneNode(true));
             //(new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
             theSelFrom[i] = null;
         }

@@ -53,7 +53,6 @@ class agent_copyright_once extends FO_Plugin {
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
     $copyright_array = array();
-
     $V = "";
 
     /** @var ui_view $view */
@@ -65,16 +64,18 @@ class agent_copyright_once extends FO_Plugin {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
-    $Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
+
     $inputFile = popen($Sys, "r");
-    $colors = Array();
+    $colors = array();
     $colors['statement'] = 0;
     $colors['email'] = 1;
     $colors['url'] = 2;
-    $stuff = Array();
-    $stuff['statement'] = Array();
-    $stuff['email'] = Array();
-    $stuff['url'] = Array();
+    $stuff = array();
+    $stuff['statement'] = array();
+    $stuff['email'] = array();
+    $stuff['url'] = array();
     $realline = "";
 
     $highlights = array();
@@ -83,7 +84,6 @@ class agent_copyright_once extends FO_Plugin {
         'statement' => Highlight::COPYRIGHT,
         'email' => Highlight::EMAIL,
         'url' => Highlight::URL);
-
     while (!feof($inputFile)) {
       $Line = fgets($inputFile);
       if ($Line[0] == '/') continue;
@@ -120,7 +120,7 @@ class agent_copyright_once extends FO_Plugin {
 
     $inputFile = fopen($tempFileName, "r");
     if ($inputFile) {
-      $view->ShowView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
+      $V = $view->getView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
       fclose($inputFile);
     }
     if(!chdir($ui_dir)) {
@@ -217,12 +217,13 @@ class agent_copyright_once extends FO_Plugin {
     if ($this->OutputType!='HTML' && file_exists($tmp_name))
     {
       $copyright_res = $this->AnalyzeOne();
+      $cont = '';
       foreach ($copyright_res as $copyright)
       {
-        echo "$copyright\n";
+        $cont = "$copyright\n";
       }
       unlink($tmp_name);
-      return;
+      return $cont;
     }
 
     if ($this->OutputType=='HTML') {
@@ -230,7 +231,7 @@ class agent_copyright_once extends FO_Plugin {
       if ($tmp_name) {
         if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
           /* Size is not too big.  */
-          $this->vars['content'] = $this->AnalyzeOne() . "\n";
+          $this->vars['content'] = $this->AnalyzeOne();
         }
         return;
       }

@@ -49,36 +49,65 @@ bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long lice
   );
 }
 
-unsigned long NinkaDatabaseHandler::queryLicenseIdForLicense(string rfShortName)
+unsigned long NinkaDatabaseHandler::selectOrInsertLicenseIdForName(string rfShortName)
 {
   QueryResult queryResult = dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
-      "queryLicenseIdForLicense",
-      "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1",
-      char *
-    ),
-    rfShortName.c_str()
-  );
+      "selectOrInsertLicenseIdForName",
+      "WITH "
+      "selectExisting AS ("
+        "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1 LIMIT 1"
+      "),"
+      "insertNew AS ("
+        "INSERT INTO license_ref(rf_shortname, rf_text, rf_detector_type)"
+        " SELECT $1, $2, $3"
+        " WHERE NOT EXISTS(SELECT * FROM selectExisting)"
+        " RETURNING rf_pk"
+      ") "
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
-}
-
-unsigned long NinkaDatabaseHandler::saveLicense(string rfShortName)
-{
-  QueryResult queryResult = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "saveLicense",
-      "INSERT INTO license_ref(rf_shortname, rf_text, rf_detector_type) VALUES ($1, $2, $3) RETURNING rf_pk",
-      char*,
-      char*,
-      int
+      "SELECT rf_pk FROM insertNew "
+      "UNION "
+      "SELECT rf_pk FROM selectExisting",
+      char*, char*, int
     ),
     rfShortName.c_str(),
     "License by Ninka.",
     3
   );
 
-  return (queryResult.getRowCount() == 1) ? queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong)[0] : 0;
+  if(!queryResult)
+    return 0;
+
+  if (queryResult.getRowCount() > 0) {
+    return queryResult.getSimpleResults(0, fo::stringToUnsignedLong)[0];
+  }
+
+  return 0;
+}
+
+NinkaDatabaseHandler NinkaDatabaseHandler::spawn() const
+{
+  DbManager spawnedDbMan(dbManager.spawn());
+  return NinkaDatabaseHandler(spawnedDbMan);
+}
+
+unsigned long NinkaDatabaseHandler::getLicenseIdForName(string const & rfShortName)
+{
+  std::unordered_map<string,long>::const_iterator findIterator = licenseRefCache.find(rfShortName);
+  if (findIterator != licenseRefCache.end())
+  {
+    return findIterator->second;
+  }
+  else
+  {
+    unsigned long licenseId = selectOrInsertLicenseIdForName(rfShortName);
+    if (licenseId > 0)
+    {
+      licenseRefCache.insert(std::make_pair(rfShortName, licenseId));
+      return licenseId;
+    }
+  }
+
+  return 0;
 }

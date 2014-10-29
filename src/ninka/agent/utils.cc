@@ -54,22 +54,36 @@ bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& dat
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(uploadId);
 
-  for (vector<unsigned long>::const_iterator it = fileIds.begin(); it != fileIds.end(); ++it)
+  bool errors = false;
+#pragma omp parallel
   {
-    unsigned long pFileId = *it;
+    NinkaDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
 
-    if (pFileId == 0)
-      continue;
+    size_t pFileCount = fileIds.size();
+#pragma omp for
+    for (size_t it = 0; it < pFileCount; ++it)
+    {
+      if (errors)
+        continue;
 
-    matchPFileWithLicenses(state, pFileId, databaseHandler);
+      unsigned long pFileId = fileIds[it];
 
-    fo_scheduler_heart(1);
+      if (pFileId == 0)
+        continue;
+
+      if (!matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler))
+      {
+        errors = true;
+      }
+
+      fo_scheduler_heart(1);
+    }
   }
 
-  return true;
+  return !errors;
 }
 
-void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
+bool matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
 {
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
@@ -88,7 +102,8 @@ void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaData
   {
     fo::File file(pFileId, fileName);
 
-    matchFileWithLicenses(state, file, databaseHandler);
+    if (!matchFileWithLicenses(state, file, databaseHandler))
+      return false;
 
     free(fileName);
     free(pFile);
@@ -98,14 +113,16 @@ void matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaData
     cout << "PFile not found in repo " << pFileId << endl;
     bail(7);
   }
+
+  return true;
 }
 
-void matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler)
+bool matchFileWithLicenses(const State& state, const fo::File& file, NinkaDatabaseHandler& databaseHandler)
 {
   string ninkaResult = scanFileWithNinka(state, file);
   vector<string> ninkaLicenseNames = extractLicensesFromNinkaResult(ninkaResult);
   vector<LicenseMatch> matches = createMatches(ninkaLicenseNames);
-  saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
+  return saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
 }
 
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
@@ -118,35 +135,27 @@ bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>
     const LicenseMatch& match = *it;
 
     int agentId = state.getAgentId();
-    long refId = getLicenseId(match.getLicenseName(), databaseHandler);
+    string rfShortname = match.getLicenseName();
     unsigned percent = match.getPercentage();
 
-    if (!databaseHandler.saveLicenseMatch(agentId, pFileId, refId, percent))
+    unsigned long licenseId = databaseHandler.getLicenseIdForName(rfShortname);
+
+    if (licenseId == 0)
     {
       databaseHandler.rollback();
+      cout << "cannot get licenseId for shortname '" + rfShortname + "'" << endl;
+      return false;
+    }
+
+
+    if (!databaseHandler.saveLicenseMatch(agentId, pFileId, licenseId, percent))
+    {
+      databaseHandler.rollback();
+      cout << "failing save licenseMatch" << endl;
       return false;
     };
   }
 
   return databaseHandler.commit();
-}
-
-// TODO: see function get_rfpk() from src/nomos/agent/nomos_utils.c
-long getLicenseId(string rfShortname, NinkaDatabaseHandler& databaseHandler)
-{
-  long licenseId;
-
-  if (rfShortname.length() == 0)
-  {
-    cout << "getLicenseId() passed empty license name" << endl;
-    bail(1);
-  }
-
-  licenseId = databaseHandler.queryLicenseIdForLicense(rfShortname);
-  if (licenseId)
-    return licenseId;
-
-  licenseId = databaseHandler.saveLicense(rfShortname);
-
-  return licenseId;
+  return true;
 }

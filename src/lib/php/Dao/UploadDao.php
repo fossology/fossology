@@ -422,7 +422,7 @@ SELECT * FROM $uploadTreeTableName
   /**
    * @var ItemTreeBounds $itemTreeBounds
    * @param $uploadTreeView
-   * @return mixed
+   * @return int
    */
   protected function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
   {

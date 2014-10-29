@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
     int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
-    if (arsId == 0)
+    if (arsId <= 0)
       bail(5);
 
     if (!processUploadId(state, uploadId, databaseHandler))

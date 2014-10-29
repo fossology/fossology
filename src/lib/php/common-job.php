@@ -121,7 +121,6 @@ return ($upload_pk);
 function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
 {
   global $container;
-  global $SysConf;
 
   /** @var DbManager $dbManager */
   $dbManager = $container->get('db.manager');
@@ -186,35 +185,26 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
       $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$Dependency'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $MissingDep =  (pg_num_rows($result) == 0) ? true : false;
+      $MissingDep =  (pg_num_rows($result) == 0);
       pg_free_result($result);
 
       if ($MissingDep) return;
     }
   }
 
-  $sql = "BEGIN";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $sqlBegin = "BEGIN";
+  $result = pg_query($PG_CONN, $sqlBegin);
+  DBCheckResult($result, $sqlBegin, __FILE__, __LINE__);
   pg_free_result($result);
 
   /* Add the job */
   $sql = "INSERT INTO jobqueue ";
   $sql.= "(jq_job_fk,jq_type,jq_args,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits,jq_host,jq_cmd_args) VALUES ";
   $sql.= "('$job_pk','$jq_type','$jq_args',";
-  if (empty($jq_runonpfile))
-    $sql.= "NULL";
-  else 
-    $sql.= "'$jq_runonpfile'";
+  $sql .= (empty($jq_runonpfile)) ? "NULL" : "'$jq_runonpfile'";
   $sql.= ",NULL,NULL,0,";
-  if ($host)
-    $sql.="'$host',";
-  else
-    $sql.="NULL,";
-  if ($jq_cmd_args)
-    $sql.="'$jq_cmd_args');";
-  else
-    $sql.="NULL);";
+  $sql .= $host ? "'$host'," : "NULL,";
+  $sql .= $jq_cmd_args ? "'$jq_cmd_args')" : "NULL)";
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -236,11 +226,11 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   {
     foreach($Depends as $Dependency) 
     {
-      if (empty($Dependency)) continue;
-
-      $sql = "INSERT INTO jobdepends
-        		(jdep_jq_fk,jdep_jq_depends_fk) VALUES
-        		('$jq_pk','$Dependency')";
+      if (empty($Dependency))
+      {
+        continue;
+      }
+      $sql = "INSERT INTO jobdepends (jdep_jq_fk,jdep_jq_depends_fk) VALUES ('$jq_pk','$Dependency')";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -272,15 +262,16 @@ function GetJobList($status)
 {
   /* Gets the list of jobqueue records with the requested $status */
   global $PG_CONN;
-	if (empty($status)) return;
+  if (empty($status))
+  {
+    return;
+  }
   $sql = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '%$status%' order by jq_pk;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $job_array = array();
-  $job_array =	pg_fetch_all_columns($result, 0);
-
-	pg_free_result($result);
-	return $job_array;
+  $job_array = pg_fetch_all_columns($result, 0);
+  pg_free_result($result);
+  return $job_array;
 }
 
 /**
@@ -301,59 +292,58 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
   $user_pk = $SysConf['auth']['UserId'];
   $group_pk = $SysConf['auth']['GroupId'];
 
-  if (!empty($upload_pk_list)) 
+  if (empty($upload_pk_list)) 
   {
-    $reg_agents = array();
-    $results = array();
-    // Schedule them
-    $agent_count = count($agent_list);
-    foreach(explode(",", $upload_pk_list) as $upload_pk) 
+    return;
+  }
+  // Schedule them
+  $agent_count = count($agent_list);
+  foreach(explode(",", $upload_pk_list) as $upload_pk) 
+  {
+    if (empty($upload_pk))  continue;
+
+    // Create a job for the upload
+    $where = "where upload_pk ='$upload_pk'";
+    $UploadRec = GetSingleRec("upload", $where);
+    if (empty($UploadRec))
     {
-      if (empty($upload_pk))  continue;
+      echo "ERROR: unknown upload_pk: $upload_pk\n";
+      continue;
+    }
 
-      // Create a job for the upload
-      $where = "where upload_pk ='$upload_pk'";
-      $UploadRec = GetSingleRec("upload", $where);
-      if (empty($UploadRec))
+    $ShortName = $UploadRec['upload_filename'];
+
+    /* Create Job */
+    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $upload_pk);
+
+    // don't exit on AgentAdd failure, or all the agents requested will
+    // not get scheduled.
+    for ($ac = 0;$ac < $agent_count;$ac++) 
+    {
+      $agentname = $agent_list[$ac]->URI;
+      if (!empty($agentname)) 
       {
-        echo "ERROR: unknown upload_pk: $upload_pk\n";
-        continue;
-      }
-
-      $ShortName = $UploadRec['upload_filename'];
-
-      /* Create Job */
-      $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $upload_pk);
-
-      // don't exit on AgentAdd failure, or all the agents requested will
-      // not get scheduled.
-      for ($ac = 0;$ac < $agent_count;$ac++) 
-      {
-        $agentname = $agent_list[$ac]->URI;
-        if (!empty($agentname)) 
+        $Agent = & $Plugins[plugin_find_id($agentname) ];
+        $Dependencies = "";
+        $ErrorMsg = "already queued!";
+        $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+        if ($agent_jq_pk <= 0) 
         {
-          $Agent = & $Plugins[plugin_find_id($agentname) ];
-          $Dependencies = "";
-          $ErrorMsg = "already queued!";
-          $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-          if ($agent_jq_pk <= 0) 
-          {
-            echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
-            echo "WARNING message: $ErrorMsg\n";
-          } 
-          else if ($Verbose) 
-          {
-            $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk;";
-            $result = pg_query($PG_CONN, $SQL);
-            DBCheckResult($result, $SQL, __FILE__, __LINE__);
-            $row = pg_fetch_assoc($result);
-            pg_free_result($result);
-            print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
-          }
+          echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
+          echo "WARNING message: $ErrorMsg\n";
+        } 
+        else if ($Verbose) 
+        {
+          $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk";
+          $result = pg_query($PG_CONN, $SQL);
+          DBCheckResult($result, $SQL, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          pg_free_result($result);
+          print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
         }
-      } /* for $ac */
-    } /* for each $upload_pk */
-  } // if $upload_pk is defined
+      }
+    } /* for $ac */
+  } /* for each $upload_pk */
 } /* QueueUploadsOnAgents() */
 
 /**
@@ -456,55 +446,58 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
  * -   0   Not queued, latest version of agent has previously run successfully
  * -  -1   Not queued, error, error string in $ErrorMsg
  **/
-function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs="", $jq_cmd_args=NULL)
+function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs = "", $jq_cmd_args = NULL)
 {
-    global $PG_CONN;
-    global $Plugins;
-    $Deps = array();
-    $DependsEmpty = array();
+  global $Plugins;
+  $Deps = array();
+  $DependsEmpty = array();
 
-    /* check if the latest agent has already been run */
-    if ($plugin->AgentHasResults($upload_pk) == 1) return 0;
+  /* check if the latest agent has already been run */
+  if ($plugin->AgentHasResults($upload_pk) == 1)
+    return 0;
 
-    /* if it is already scheduled, then return success */
-    if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0 ) return $jq_pk;
+  /* if it is already scheduled, then return success */
+  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0)
+    return $jq_pk;
 
-    /* queue up dependencies */
-    foreach ($Dependencies as $Dependency)
+  /* queue up dependencies */
+  foreach ($Dependencies as $Dependency)
+  {
+    if (is_array($Dependency))
     {
-      if (is_array($Dependency)) {
-        $PluginName = $Dependency['name'];
-        $DepArgs = $Dependency['args'];
-      } else {
-        $PluginName = $Dependency;
-        $DepArgs = null;
-      }
-      $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
-      if (!$DepPlugin)
-      {
-        $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
-        return -1;
-      }
-      if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
-        return -1;
-    }
-
-    /* schedule AgentName */
-    if (empty($jqargs)) $jqargs = $upload_pk;
-    $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL, $jq_cmd_args);
-    if (empty($jq_pk)){
-      $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
-      return (-1);
-    }
-
-    /* Tell the scheduler to check the queue. */
-    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success)
+      $PluginName = $Dependency['name'];
+      $DepArgs = $Dependency['args'];
+    } else
     {
-      $ErrorMsg = $error_msg . "\n" . $output;
-      // return -1;
+      $PluginName = $Dependency;
+      $DepArgs = null;
     }
+    $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
+    if (!$DepPlugin)
+    {
+      $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
+      return -1;
+    }
+    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
+      return -1;
+  }
+  /* schedule AgentName */
+  if (empty($jqargs))
+  {
+    $jqargs = $upload_pk;
+  }
+  $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL, $jq_cmd_args);
+  if (empty($jq_pk))
+  {
+    $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
+    return (-1);
+  }
+  /* Tell the scheduler to check the queue. */
+  $success = fo_communicate_with_scheduler("database", $output, $error_msg);
+  if (!$success)
+  {
+    $ErrorMsg = $error_msg . "\n" . $output;
+  }
 
-    return ($jq_pk);
-} // CommonAgentAdd()
-?>
+  return ($jq_pk);
+}
