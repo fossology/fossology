@@ -22,7 +22,6 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 char* getFileNameForFileId(fo_dbManager* dbManager, long int pFileId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);
 long saveToDb(fo_dbManager* dbManager, int agentId, long int refId, long int pFileId, unsigned int percent);
-int saveHighlightToDb(fo_dbManager* dbManager, char* type, DiffPoint* highlight, long int licenseFileId);
 int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long int licenseFileId);
 int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId);
 

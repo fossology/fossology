@@ -147,39 +147,3 @@ size_t token_position_of(size_t index, GArray* tokens) {
 
   return result;
 }
-
-StringBuilder* stringBuilder_new(){
-  StringBuilder* result = malloc(sizeof(StringBuilder));
-  result->contents = g_array_new(TRUE, FALSE, sizeof(gchar*));
-  result->length = 0;
-  return result;
-}
-
-void stringBuilder_free(StringBuilder* stringBuilder) {
-  for (size_t i = 0; i < stringBuilder->contents->len; i++) {
-    g_free(g_array_index(stringBuilder->contents, gchar*, i));
-  }
-  g_array_free(stringBuilder->contents, TRUE);
-  free(stringBuilder);
-}
-
-void stringBuilder_printf(StringBuilder* stringBuilder, const gchar* format, ...){
-  va_list args;
-  va_start(args, format);
-  gchar* value = g_strdup_vprintf(format, args);
-  va_end(args);
-  g_array_append_val(stringBuilder->contents, value);
-  stringBuilder->length += strlen(value);
-}
-
-char* stringBuilder_build(StringBuilder* stringBuilder){
-  char* result = malloc(stringBuilder->length + 1);
-  char* temporaryBuffer = result;
-  guint pieceCount = stringBuilder->contents->len;
-  for (guint i = 0; i < pieceCount; i++) {
-    char* nextString = g_array_index(stringBuilder->contents, gchar*, i);
-    temporaryBuffer = g_stpcpy(temporaryBuffer, nextString);
-  }
-
-  return result;
-}

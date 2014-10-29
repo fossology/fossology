@@ -37,17 +37,4 @@ int tokensEquals(GArray* a, GArray* b);
 
 size_t token_position_of(size_t index, GArray* tokens);
 
-typedef struct {
-  GArray* contents;
-  size_t length;
-} StringBuilder;
-
-StringBuilder* stringBuilder_new();
-
-void stringBuilder_free(StringBuilder* stringBuilder);
-
-void stringBuilder_printf(StringBuilder* stringBuilder, const char* format, ...);
-
-char* stringBuilder_build(StringBuilder* stringBuilder);
-
 #endif // MONK_AGENT_STRING_OPERATIONS_H

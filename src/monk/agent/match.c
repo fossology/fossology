@@ -11,17 +11,11 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "match.h"
 
-#include "monk.h"
-#include "extended.h"
-#include "string_operations.h"
 #include "file_operations.h"
 #include "license.h"
-#include "database.h"
-#include "highlight.h"
-#include "diff.h"
 #include "math.h"
+#include "extended.h"
 #include "bulk.h"
-#include "_squareVisitor.h"
 
 inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
                                      unsigned maxAllowedDiff, unsigned minTrailingMatches, unsigned maxLeadingDiff) {
@@ -126,41 +120,36 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses) {
 }
 
 char* formatMatchArray(GArray * matchInfo) {
-  char* result;
-
-  StringBuilder* stringBuilder = stringBuilder_new();
+  GString* stringBuilder = g_string_new("");
 
   size_t len = matchInfo->len;
   for (size_t i = 0; i < len; i++) {
     DiffMatchInfo* current = &g_array_index(matchInfo, DiffMatchInfo, i);
 
     if (current->text.length > 0)
-      stringBuilder_printf(stringBuilder,
-                           "t[%zu+%zu] %s ",
-                           current->text.start, current->text.length, current->diffType);
+      g_string_append_printf(stringBuilder,
+                             "t[%zu+%zu] %s ",
+                             current->text.start, current->text.length, current->diffType);
     else
-      stringBuilder_printf(stringBuilder,
-                           "t[%zu] %s ",
-                           current->text.start, current->diffType);
+      g_string_append_printf(stringBuilder,
+                             "t[%zu] %s ",
+                             current->text.start, current->diffType);
 
     if (current->search.length > 0)
-      stringBuilder_printf(stringBuilder,
-                           "s[%zu+%zu]",
-                           current->search.start, current->search.length);
+      g_string_append_printf(stringBuilder,
+                             "s[%zu+%zu]",
+                             current->search.start, current->search.length);
     else
-      stringBuilder_printf(stringBuilder,
-                           "s[%zu]",
-                           current->search.start);
+      g_string_append_printf(stringBuilder,
+                             "s[%zu]",
+                             current->search.start);
 
     if (i < len-1) {
-      stringBuilder_printf(stringBuilder, ", ");
+      g_string_append_printf(stringBuilder, ", ");
     }
   }
 
-  result = stringBuilder_build(stringBuilder);
-  stringBuilder_free(stringBuilder);
-
-  return result;
+  return g_string_free(stringBuilder, FALSE);
 }
 
 inline unsigned short match_rank(Match* match) {
@@ -424,7 +413,7 @@ inline int processMatches(MonkState* state, File* file, GArray* matches) {
   if (state->scanMode == MODE_BULK) {
     processMatches_Bulk(state, file, matches);
   } else {
-    for (size_t matchIndex = 0; matchIndex < matches->len; matchIndex++) {
+    for (guint matchIndex = 0; matchIndex < matches->len; matchIndex++) {
       Match* match = match_array_get(matches, matchIndex);
       processMatch(state, file, match);
     }
