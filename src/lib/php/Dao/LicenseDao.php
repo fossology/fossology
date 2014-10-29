@@ -187,10 +187,16 @@ class LicenseDao extends Object
   public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . '.' . implode("",$filterLicenses);
     $param = array($itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ('" . implode("', '", $filterLicenses) . "')";
+
+    $sql_upload = "";
+    if ('uploadtree_a' == $uploadTreeTableName) {
+      $sql_upload = " AND utree.upload_fk=$3 ";
+      $param[] = $itemTreeBounds->getUploadId();
+    }
 
     $sql = "SELECT license_file_ref.pfile_fk as file_id,
            rf_shortname as license_shortname,
@@ -201,7 +207,7 @@ class LicenseDao extends Object
          FROM license_file_ref
          INNER JOIN $uploadTreeTableName utree ON license_file_ref.pfile_fk = utree.pfile_fk
          INNER JOIN agent ON agent_fk = agent_pk
-         WHERE lft BETWEEN $1 AND $2
+         WHERE (lft BETWEEN $1 AND $2) $sql_upload
            AND license_file_ref.pfile_fk = utree.pfile_fk
            $noLicenseFoundStmt";
 
