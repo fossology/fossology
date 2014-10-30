@@ -148,11 +148,8 @@ class LicenseDecisionResult implements LicenseDecision {
     if (isset($this->licenseDecisionEvent)) {
       return $this->licenseDecisionEvent;
     }
-    $agentEvent = null;
-    foreach ($this->agentDecisionEvents as $agentDecisionEvent) {
-      $agentEvent = $agentDecisionEvent;
-    }
-    return $agentEvent;
+
+    return $this->agentDecisionEvents[0];
   }
 
   /**
