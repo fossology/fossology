@@ -10,9 +10,11 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 #include "libfossdbmanagerclass.hpp"
+#include "libfossUtils.hpp"
 
 extern "C" {
 #include "libfossscheduler.h"
+#include "libfossagent.h"
 }
 
 DbManager::DbManager(int* argc, char** argv)
@@ -151,4 +153,10 @@ std::vector<std::string> QueryResult::getRow(int i) const
 void DbManager::ignoreWarnings(bool b) const
 {
   fo_dbManager_ignoreWarnings(getStruct_dbManager(), b);
+}
+
+std::vector<unsigned long> DbManager::queryFileIdsVectorForUpload(int uploadId) const
+{
+  QueryResult queryResult(queryFileIdsForUpload(getStruct_dbManager(), uploadId));
+  return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }

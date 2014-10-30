@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     if (!processUploadId(state, uploadId, databaseHandler))
       bail(2);
 
-    fo_scheduler_heart(1);
+    fo_scheduler_heart(0);
     writeARS(state, arsId, uploadId, 1, dbManager);
   }
   fo_scheduler_heart(0);

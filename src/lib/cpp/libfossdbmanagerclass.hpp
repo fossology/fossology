@@ -56,6 +56,8 @@ public :
   QueryResult queryPrintf(const char* queryFormat, ...) const;
   QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
+  std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId) const;
+
 private:
   unptr::shared_ptr <fo_dbManager> dbManager;
 };

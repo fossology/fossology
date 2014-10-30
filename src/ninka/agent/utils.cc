@@ -130,7 +130,7 @@ bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>
   for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it)
   {
     const LicenseMatch& match = *it;
-    databaseHandler.insertOrCacheLicenseIdForName(it->getLicenseName());
+    databaseHandler.insertOrCacheLicenseIdForName(match.getLicenseName());
   }
 
   if (!databaseHandler.begin())

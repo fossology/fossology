@@ -16,20 +16,9 @@ NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
 {
 }
 
-// TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
 vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId)
 {
-  QueryResult queryResult = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "queryFileIdsForUpload",
-      "SELECT DISTINCT(pfile_fk) FROM uploadtree WHERE upload_fk = $1 AND (ufile_mode&x'3C000000'::int) = 0",
-      int
-    ),
-    uploadId
-  );
-
-  return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
+  return dbManager.queryFileIdsVectorForUpload(uploadId);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
