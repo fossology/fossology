@@ -67,6 +67,9 @@ without any warranty.
       <argument type="service" id="dao.upload"/>
     </service>
 
+    <service id="event.types" class="\Fossology\Lib\Data\LicenseDecision\LicenseEventTypes">
+      <argument type="service" id="db.manager"/>
+    </service>
     <service id="decision.types" class="\Fossology\Lib\Data\DecisionTypes">
       <argument type="service" id="db.manager"/>
     </service>

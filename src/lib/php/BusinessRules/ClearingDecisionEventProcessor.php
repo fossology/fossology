@@ -27,11 +27,14 @@ use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
+use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
 
 class ClearingDecisionEventProcessor
 {
+  const NO_LICENSE_KNOWN_DECISION_TYPE = 2;
+
   /** @var LicenseDao */
   private $licenseDao;
 
@@ -51,7 +54,7 @@ class ClearingDecisionEventProcessor
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $isGlobal)
   {
     $item = $itemBounds->getUploadTreeId();
-    if ($type <= 1)
+    if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       return;
     }
@@ -75,7 +78,7 @@ class ClearingDecisionEventProcessor
       if (!$licenseDecisionResult->hasLicenseDecisionEvent())
       {
         $licenseId = $licenseDecisionResult->getLicenseId();
-        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, 1, $isGlobal);
+        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER, $isGlobal);
         $insertDecision = true;
         break;
       }
@@ -100,8 +103,7 @@ class ClearingDecisionEventProcessor
       }
     }
 
-    // handle "No license known"
-    if ($type === 2)
+    if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       $insertDecision = true;
       $removedSinceLastDecision = array();
