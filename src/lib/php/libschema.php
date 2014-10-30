@@ -215,7 +215,7 @@ class fo_libschema
           }
 
           $sql = $modification['ADD'];
-          if ($debug)
+          if ($this->debug)
           {
             print "$sql\n";
           } else
@@ -237,7 +237,7 @@ class fo_libschema
         if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'] && isset($modification['ALTER']))
         {
           $sql = $modification['ALTER'];
-          if ($debug)
+          if ($this->debug)
           {
             print "$sql\n";
           } else

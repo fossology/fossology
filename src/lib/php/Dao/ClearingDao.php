@@ -498,6 +498,7 @@ insert into clearing_decision (
   {
     /** @var LicenseDecisionEvent[] $events */
     $events = $this->getRelevantLicenseDecisionEvents($userId, $itemId);
+    /** @var LicenseDecisionEvent[] $latestLicDec */
     $latestLicDec = array();
     foreach ($events as $event)
     {
