@@ -295,34 +295,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $output['0'] = $link;
 
 
-    $content = $row['content'];
-    $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
-    if(!$in_charset) {
-      $output1 = false;
-      $charsets =  array('iso-8859-1', 'windows-1251', 'GB2312');
-      foreach ($charsets as $charset)
-      {
-        $output1 = @iconv($charset, "UTF-8", $content);
-        if($output1) break;
-      }
-    }
-    else if ($in_charset != "UTF-8") {
-      $output1 = @iconv($in_charset, "UTF-8", $content);
-    }
-    else  {
-      $output1 = $content;
-    }
-    if(!$output1) $output1 = $content;
-
-
-    $htmlentities = @htmlentities($output1);
-    if (!$htmlentities) {
-      $htmlentities = "<b>Unknown encoding</b>";
-    }
-    $output ['1'] = $htmlentities;
-
-
-   // does not work: $output ['1'] = iconv(mb_detect_encoding($row['content'], mb_detect_order(), true), "UTF-8", $row['content']);
+    $output ['1'] = convertToUTF8($row['content']);
 
     $output ['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><img src=\"images/icons/close_16.png\"></a><span hidden='true' id='update$type$hash'></span>";
     return $output;
@@ -427,6 +400,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       return;
     }
   }
+
 }
 
 $NewPlugin = new CopyrightHistogramProcessPost;

@@ -105,7 +105,7 @@ abstract class ClearedGetterCommon
   {
     $statements = array();
     foreach($ungrupedStatements as $statement) {
-      $content = $statement['content'];
+      $content = convertToUTF8($statement['content'], false);
       $description = $statement['description'];
       $textfinding = $statement['textfinding'];
       $fileName = $statement['fileName'];
