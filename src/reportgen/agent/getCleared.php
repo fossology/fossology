@@ -47,7 +47,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
   {
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
 
     $latestClearingDecisions = array();
@@ -67,7 +67,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicense($clearingLicense->getId())->getText()
+          'description' => $this->getCachedLicense($clearingLicense->getId())->getText(),
+          'textfinding' => $clearingLicense->getShortName()
         );
       }
     }

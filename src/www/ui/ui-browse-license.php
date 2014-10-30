@@ -494,7 +494,8 @@ class ui_browse_license extends FO_Plugin
     }
     /* show licenses under file name */
     $editedLicenseList = "";
-    $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+    $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+        new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
