@@ -110,12 +110,16 @@ class UploadDao extends Object
 
   /**
    * @param int $uploadId
+   * @param string|null
    * @throws Exception
    * @return ItemTreeBounds
    */
-  public function getParentItemBounds($uploadId)
+  public function getParentItemBounds($uploadId,$uploadTreeTableName=NULL)
   {
-    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    if ($uploadTreeTableName === null)
+    {
+      $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    }
 
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntryData = $this->dbManager->getSingleRow("

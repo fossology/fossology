@@ -90,7 +90,7 @@ abstract class ClearedGetterCommon
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName)
   {
-    foreach($ungrupedStatements as $key => &$statement) {
+    foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
       $filePathRow = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);

@@ -47,7 +47,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
   protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
   {
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
 
     $latestClearingDecisions = array();
