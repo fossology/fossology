@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
+use Fossology\Lib\Data\Tree\UploadTreeView;
 
 /**
  * \file ui-browse-license.php
@@ -48,6 +49,10 @@ class ui_browse_license extends FO_Plugin
   private $agentsDao;
   /** @var DbManager */
   private $dbManager;
+  /** @var array [uploadtree_id]=>cnt */
+  private $filesThatShouldStillBeCleared;
+  /** @var array [uploadtree_id]=>cnt */
+  private $filesToBeCleared;
   
   function __construct()
   {
@@ -207,7 +212,7 @@ class ui_browse_license extends FO_Plugin
     
     $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&lic=";
     $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
-    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+
 
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
@@ -243,6 +248,7 @@ class ui_browse_license extends FO_Plugin
     $this->vars['micromenu'] = Dir2Browse($this->Name, $Item, NULL, $showBox=0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $this->vars['haveRunningResult'] = false;
     $this->vars['haveOldVersionResult'] = false;
+    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $Cached = !empty($V);
     if (!$Cached && !empty($Upload))
@@ -262,6 +268,7 @@ class ui_browse_license extends FO_Plugin
       $V .= $AddInfoText;
     }
 
+
     $this->vars['content'] = $V;
     $Time = microtime(true) - $uTime;
 
@@ -274,7 +281,7 @@ class ui_browse_license extends FO_Plugin
     {
       $text = _("Elapsed time: %.3f seconds");
       $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
-      if ($Time > 3)
+      if ($Time > 3.0)
         ReportCachePut($CacheKey, $V);
     }
     return;
@@ -352,6 +359,24 @@ class ui_browse_license extends FO_Plugin
     $ModLicView = & $Plugins[plugin_find_id("view-license")];
     $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());    
     $tableData = array();
+    
+    $alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+            $options=array('skipThese' => "alreadyCleared"),
+            $itemTreeBounds->getUploadTreeTableName(),
+            $viewName='already_cleared_uploadtree'.$itemTreeBounds->getUploadId());
+    
+    $alreadyClearedUploadTreeView->materialize();
+    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $alreadyClearedUploadTreeView->unmaterialize();
+    
+    $noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+            $options=array('skipThese' => "noLicense"),
+            $itemTreeBounds->getUploadTreeTableName(),
+            $viewName='no_license_uploadtree'.$itemTreeBounds->getUploadId());
+    $noLicenseUploadTreeView->materialize();
+    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $noLicenseUploadTreeView->unmaterialize();
+    
     foreach ($Children as $child)
     {
       if (empty($child))
@@ -360,7 +385,7 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
-
+    
     $tableColumns = array(
         array("sTitle" => _("Files"), "sClass" => "left"),
         array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
@@ -410,18 +435,18 @@ class ui_browse_license extends FO_Plugin
     return array($ChildCount, $VF);
   }
 
+
   /**
-   * 
-   * @param type $child
+   * @param array $child
    * @param int $uploadId
-   * @param type $selectedAgentId
-   * @param type $goodAgents
-   * @param array[][][] $pfileLicenses
-   * @param type $editedPfileLicenses
+   * @param int $selectedAgentId
+   * @param array $goodAgents
+   * @param array $pfileLicenses
+   * @param array $editedPfileLicenses
    * @param string $Uri
-   * @param type $ModLicView
-   * @param type $UniqueTagArray
-   * @return type
+   * @param null|ClearingView $ModLicView
+   * @param array $UniqueTagArray
+   * @return array
    */
   private function createFileDataRow($child,$uploadId,$selectedAgentId,$goodAgents,$pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
@@ -469,7 +494,8 @@ class ui_browse_license extends FO_Plugin
     }
     /* show licenses under file name */
     $editedLicenseList = "";
-    $childItemTreeBounds = $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+    $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+        new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
@@ -532,8 +558,16 @@ class ui_browse_license extends FO_Plugin
     $getTextEditBulk = _("Bulk");
     $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+   
+    // $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
+    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
+            ,$this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
+    
+    // $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
+    $filesToBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
+            ,$this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
 
-    list($filesCleared,$filesToBeCleared) = $this->uploadDao->getFilesClearedAndFilesToClear($childItemTreeBounds);
+    $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;   
 
     $img = ($filesCleared==$filesToBeCleared) ? 'green' : 'red';
 

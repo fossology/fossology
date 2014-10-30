@@ -83,6 +83,10 @@ class SolidDbManager extends DbManager
     foreach($params as $var)
     {
       $cnt++;
+      if ($var === null)
+      {
+        throw new \Exception('given argument for $' . $cnt . ' is null');
+      }
       if(is_bool($var))
       {
         $masked = $this->dbDriver->booleanToDb($var);

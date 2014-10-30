@@ -21,6 +21,8 @@
  * \brief Common Direcotory Functions
  */
 
+use Fossology\Lib\Db\DbManager;
+
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
@@ -96,23 +98,23 @@ function DirMode2String($Mode)
 $DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
 {
-  global $PG_CONN;
-
   $Children = array();
 
   /* Get contents of this directory */
   global $DirGetNonArtifact_Prepared;
+  global $container;
+  $dbManager = $container->get('db.manager');
   if (!$DirGetNonArtifact_Prepared)
   {
     $DirGetNonArtifact_Prepared=1;
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $UploadtreePk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
+    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $1";
+    $dbManager->prepare($stmt=__METHOD__.".$uploadtree_tablename",$sql);
+    $result = $dbManager->execute($stmt,array($UploadtreePk));
+    while ($child=$dbManager->fetchArray($result) )
     {
-      $Children = pg_fetch_all($result);
+      $Children[] = $child;
     }
-    pg_free_result($result);
+    $dbManager->freeResult($result);
   }
   $Recurse=NULL;
   foreach($Children as $C)
@@ -538,27 +540,27 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  */
 function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
-  global $PG_CONN;
-
-  $foundChildren = array();
+  global $container;
+  /** @var DbManager */
+  $dbManager = $container->get('db.manager');
 
   /* Find all the children */
   $sql = "select {$uploadtree_tablename}.*, pfile_size, pfile_mimetypefk from $uploadtree_tablename
           left outer join pfile on (pfile_pk=pfile_fk)
-          where parent=$uploadtree_pk";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0)
+          where parent=$1";
+  $dbManager->prepare($stmt=__METHOD__."$uploadtree_tablename",$sql);
+  $result = $dbManager->execute($stmt,array($uploadtree_pk));
+  $children = $dbManager->fetchAll($result);
+  $dbManager->freeResult($result);
+  if (count($children) == 0)
   {
-    pg_free_result($result);
-    return $foundChildren;
+    return $children;
   }
-  $children = pg_fetch_all($result);
-  pg_free_result($result);
 
   /* Loop through each child and replace any artifacts with their
    non artifact child.  Or skip them if they are not containers.
    */
+  $foundChildren = array();
   foreach($children as $key => $child)
   {
     if (Isartifact($child['ufile_mode']))
@@ -568,7 +570,7 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
         unset($children[$key]);
         $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk'], $uploadtree_tablename);
         if ($NonAChildren)
-        $foundChildren = array_merge($foundChildren, $NonAChildren);
+          $foundChildren = array_merge($foundChildren, $NonAChildren);
       }
       else
         unset($children[$key]);
