@@ -134,6 +134,10 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/monk install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ninka \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/ninka install
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/decider install
