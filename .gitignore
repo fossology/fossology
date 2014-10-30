@@ -15,6 +15,7 @@ VERSION
 .*.sw?
 *~
 /src/vendor
+.vagrant/
 src/composer.lock
 testReport/*
 /nbproject/private/

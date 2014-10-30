@@ -46,7 +46,7 @@ class ui_default extends FO_Plugin
     if ($_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
       $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-      $this->vars['referer'] = Traceback_uri();
+      $this->vars['referer'] = "?mod=browse";
       $this->vars['authUrl'] = "?mod=auth";
     }
    

@@ -52,10 +52,14 @@ abstract class ClearedGetterCommon
 
     if (!array_key_exists('u',$args))
     {
-      print "missing required parameter -u {uploadId}";
+      print "missing required parameter -u {uploadId}\n";
       exit(2);
     }
-
+    if (false && !array_key_exists('uId',$args))
+    {
+      print "missing optional parameter --uId {userId}\n";
+    }
+    
     $this->uploadId = intval($args['u']);
     $this->userId = intval(@$args['uId']);
   }
