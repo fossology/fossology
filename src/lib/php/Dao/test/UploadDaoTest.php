@@ -61,6 +61,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = null;
     $this->dbManager = null;
+
+    M::close();
   }
 
   public function testGetFileTreeBounds()
