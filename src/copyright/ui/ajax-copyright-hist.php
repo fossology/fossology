@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2014 Siemens AG
- * Author: J.Najjar
+ * Author: Daniele Fognini, Steffen Weber, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -92,42 +92,38 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   }
 
   /**
-   * @param $row
-   * @param $uploadTreeId
-   * @param $upload
-   * @param $agentId
-   * @param $type
-   * @param string $filter
-   * @internal param bool $normalizeString
-   * @return array
+   * @return string
    */
-  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "")
+  protected function doGetData()
   {
-    $output = array();
-
-    $output['DT_RowId'] = $upload . "," . $uploadTreeId . "," . $row['hash']. "," . $type;
-
-    $hash = $row['hash'];
-
-    $link = "<a href='";
-    $link .= Traceback_uri();
-    $URLargs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
-    if (!empty($filter)) $URLargs .= "&filter=$filter";
-    $link .= $URLargs . "'>" . $row['copyright_count'] . "</a>";
-    $output['0'] = $link;
-
-    if($type == 'url') {
-      $output ['1'] = htmlentities($row['content']);
-    }else {
-      $output ['1'] = $row['content'];
+    $upload = GetParm("upload", PARM_INTEGER);
+    /* check upload permissions */
+    $UploadPerm = GetUploadPerm($upload);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
     }
+    $this->uploadtree_tablename = GetUploadtreeTableName($upload);
 
-   // does not work: $output ['1'] = iconv(mb_detect_encoding($row['content'], mb_detect_order(), true), "UTF-8", $row['content']);
+    $item = GetParm("item", PARM_INTEGER);
+    $agent_pk = GetParm("agent", PARM_STRING);
+    $type = GetParm("type", PARM_STRING);
+    $filter = GetParm("filter", PARM_STRING);
+    $listPage = "copyright-list";
 
-    $output ['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><img src=\"images/icons/close_16.png\"></a><span hidden='true' id='update$type$hash'></span>";
-    return $output;
+    header('Content-type: text/json');
+    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
+    return (json_encode(array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $aaData,
+            'iTotalRecords' => $iTotalRecords,
+            'iTotalDisplayRecords' => $iTotalDisplayRecords
+        )
+    )
+    );
   }
-
 
   private function GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter)
   {
@@ -144,31 +140,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return array($aaData, $iTotalRecords, $iTotalDisplayRecords);
 
   }
-
-
-  private function getOrderString()
-  {
-
-    $columnNamesInDatabase = array('copyright_count', 'content');
-
-    $defaultOrder = CopyrightHistogram::returnSortOrder();
-
-    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
-
-    return $orderString;
-  }
-
-  private function addSearchFilter(&$filterParams)
-  {
-    $searchPattern = GetParm('sSearch', PARM_STRING);
-    if (empty($searchPattern))
-    {
-      return '';
-    }
-    $filterParams[] = "%$searchPattern%";
-    return ' AND CP.content ilike $'.count($filterParams).' ';
-  }
-
 
   public function getCopyrights($upload_pk, $Uploadtree_pk, $uploadTreeTableName, $Agent_pk, $type, $filter)
   {
@@ -258,38 +229,103 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
   }
 
-  /**
-   * @return string
-   */
-  protected function doGetData()
+  private function getTableNameAndFilter($type, $filter)
   {
-    $upload = GetParm("upload", PARM_INTEGER);
-    /* check upload permissions */
-    $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < PERM_READ)
-    {
-      $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
-      return;
+    switch ($type) {
+      case "ip" :
+        $tableName = "ip";
+        $filter="none";
+        break;
+      case "ecc" :
+        $tableName = "ecc";
+        $filter="none";
+        break;
+      default:
+        $tableName = "copyright";
     }
-    $this->uploadtree_tablename = GetUploadtreeTableName($upload);
+    return array($tableName, $filter);
+  }
 
-    $item = GetParm("item", PARM_INTEGER);
-    $agent_pk = GetParm("agent", PARM_STRING);
-    $type = GetParm("type", PARM_STRING);
-    $filter = GetParm("filter", PARM_STRING);
-    $listPage = "copyright-list";
+  private function getOrderString()
+  {
 
-    header('Content-type: text/json');
-    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
-    return (json_encode(array(
-            'sEcho' => intval($_GET['sEcho']),
-            'aaData' => $aaData,
-            'iTotalRecords' => $iTotalRecords,
-            'iTotalDisplayRecords' => $iTotalDisplayRecords
-        )
-    )
-    );
+    $columnNamesInDatabase = array('copyright_count', 'content');
+
+    $defaultOrder = CopyrightHistogram::returnSortOrder();
+
+    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
+
+    return $orderString;
+  }
+
+  private function addSearchFilter(&$filterParams)
+  {
+    $searchPattern = GetParm('sSearch', PARM_STRING);
+    if (empty($searchPattern))
+    {
+      return '';
+    }
+    $filterParams[] = "%$searchPattern%";
+    return ' AND CP.content ilike $'.count($filterParams).' ';
+  }
+
+  /**
+   * @param $row
+   * @param $uploadTreeId
+   * @param $upload
+   * @param $agentId
+   * @param $type
+   * @param string $filter
+   * @internal param bool $normalizeString
+   * @return array
+   */
+  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "")
+  {
+    $output = array();
+
+    $output['DT_RowId'] = $upload . "," . $uploadTreeId . "," . $row['hash']. "," . $type;
+
+    $hash = $row['hash'];
+
+    $link = "<a href='";
+    $link .= Traceback_uri();
+    $URLargs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
+    if (!empty($filter)) $URLargs .= "&filter=$filter";
+    $link .= $URLargs . "'>" . $row['copyright_count'] . "</a>";
+    $output['0'] = $link;
+
+
+    $content = $row['content'];
+    $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
+    if(!$in_charset) {
+      $output1 = false;
+      $charsets =  array('iso-8859-1', 'windows-1251', 'GB2312');
+      foreach ($charsets as $charset)
+      {
+        $output1 = @iconv($charset, "UTF-8", $content);
+        if($output1) break;
+      }
+    }
+    else if ($in_charset != "UTF-8") {
+      $output1 = @iconv($in_charset, "UTF-8", $content);
+    }
+    else  {
+      $output1 = $content;
+    }
+    if(!$output1) $output1 = $content;
+
+
+    $htmlentities = @htmlentities($output1);
+    if (!$htmlentities) {
+      $htmlentities = "<b>Unknown encoding</b>";
+    }
+    $output ['1'] = $htmlentities;
+
+
+   // does not work: $output ['1'] = iconv(mb_detect_encoding($row['content'], mb_detect_order(), true), "UTF-8", $row['content']);
+
+    $output ['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><img src=\"images/icons/close_16.png\"></a><span hidden='true' id='update$type$hash'></span>";
+    return $output;
   }
 
   /**
@@ -391,28 +427,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       return;
     }
   }
-
-  private function getTableNameAndFilter($type, $filter)
-  {
-    switch ($type) {
-      case "ip" :
-        $tableName = "ip";
-        $filter="none";
-        break;
-      case "ecc" :
-        $tableName = "ecc";
-        $filter="none";
-        break;
-      default:
-        $tableName = "copyright";
-    }
-    return array($tableName, $filter);
-  }
-
-
 }
-
-;
 
 $NewPlugin = new CopyrightHistogramProcessPost;
 $NewPlugin->Initialize();
