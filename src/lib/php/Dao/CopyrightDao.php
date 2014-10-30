@@ -22,25 +22,16 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 class CopyrightDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
@@ -63,7 +54,6 @@ class CopyrightDao extends Object
                                                                         'url' => Highlight::URL)
    )
   {
-
     $pFileId = 0;
     $row = $this->uploadDao->getUploadEntry($uploadTreeId);
 
@@ -77,12 +67,9 @@ class CopyrightDao extends Object
     }
 
     $statementName = __METHOD__.$tableName;
-
     $this->dbManager->prepare($statementName,
         "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
     $result = $this->dbManager->execute($statementName, array($pFileId));
-
-
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -91,8 +78,6 @@ class CopyrightDao extends Object
       {
         $type = $row['type'];
         $content = $row['content'];
-        // $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
-        // $htmlElement = new LinkElement($linkUrl);
         $htmlElement =null;
         $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
         $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
@@ -105,12 +90,9 @@ class CopyrightDao extends Object
 
   public function saveDecision($tableName,$pfileId, $userId , $clearingType,
                                          $description, $textFinding, $comment){
-    $statementName = __METHOD__.$tableName;
-    $sql = "INSERT INTO $tableName (user_fk, pfile_fk,
-           clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
-
-    $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
-        $clearingType, $description, $textFinding, $comment ),$statementName);
+    $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
+        'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
+    $this->dbManager->insertTableRow($tableName, $assocParams, $sqlLog=__METHOD__);
   }
 
   public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
@@ -146,7 +128,7 @@ class CopyrightDao extends Object
       }
       else
       {
-        throw new Exception("requested only cleared but no type given");
+        throw new \Exception("requested only cleared but no type given");
       }
     }
     else
@@ -190,9 +172,7 @@ class CopyrightDao extends Object
     }
 
     $this->dbManager->prepare($statementName, $sql);
-
     $sqlResult = $this->dbManager->execute($statementName, $params);
-
     $result = $this->dbManager->fetchAll($sqlResult);
     $this->dbManager->freeResult($sqlResult);
 
