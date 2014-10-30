@@ -11,6 +11,8 @@
 #include "databasehandler.hpp"
 #include "libfossUtils.hpp"
 
+using namespace fo;
+
 NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
   fo::AgentDatabaseHandler(dbManager)
 {
@@ -18,7 +20,7 @@ NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
 
 vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId)
 {
-  return dbManager.queryFileIdsVectorForUpload(uploadId);
+  return queryFileIdsVectorForUpload(uploadId);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c

@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "copyright.hpp"
 
 using namespace std;
+using namespace fo;
 
 int main(int argc, char** argv)
 {

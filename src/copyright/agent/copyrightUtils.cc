@@ -12,6 +12,7 @@
 #include "copyrightUtils.hpp"
 
 using namespace std;
+using namespace fo;
 
 void queryAgentId(int& agent, PGconn* dbConn)
 {

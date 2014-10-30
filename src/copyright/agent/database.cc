@@ -15,6 +15,8 @@
 #include <iostream>
 #include <libfossUtils.hpp>
 
+using namespace fo;
+
 #define RETURN_IF_FALSE(query) \
   do {\
     if (!(query)) {\

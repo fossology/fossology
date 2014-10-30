@@ -12,6 +12,8 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
+using namespace fo;
+
 State getState(DbManager& dbManager)
 {
   int agentId = queryAgentId(dbManager);

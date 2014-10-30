@@ -10,12 +10,12 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 #include "libfossdbmanagerclass.hpp"
-#include "libfossUtils.hpp"
 
 extern "C" {
 #include "libfossscheduler.h"
-#include "libfossagent.h"
 }
+
+using namespace fo;
 
 DbManager::DbManager(int* argc, char** argv)
 {
@@ -30,13 +30,12 @@ DbManager::DbManager(fo_dbManager* dbManager)
 {
 }
 
-DbManager::DbManager(DbManager&& other) : dbManager(std::move(other.dbManager))
+DbManager::DbManager(DbManager&& other) : dbManager(other.dbManager)
 {
 }
 
 DbManager::DbManager(const DbManager& other) : dbManager(other.dbManager)
 {
-
 }
 
 PGconn* DbManager::getConnection() const
@@ -60,27 +59,27 @@ fo_dbManager* DbManager::getStruct_dbManager() const
 
 bool DbManager::tableExists(const char* tableName) const
 {
-  return fo_dbManager_tableExists(getStruct_dbManager(), tableName);
+  return fo_dbManager_tableExists(getStruct_dbManager(), tableName) != 0;
 }
 
 bool DbManager::sequenceExists(const char* name) const
 {
-  return fo_dbManager_exists(getStruct_dbManager(), "sequence", name);
+  return fo_dbManager_exists(getStruct_dbManager(), "sequence", name) != 0;
 }
 
 bool DbManager::begin() const
 {
-  return fo_dbManager_begin(getStruct_dbManager());
+  return fo_dbManager_begin(getStruct_dbManager()) != 0;
 }
 
 bool DbManager::commit() const
 {
-  return fo_dbManager_commit(getStruct_dbManager());
+  return fo_dbManager_commit(getStruct_dbManager()) != 0;
 }
 
 bool DbManager::rollback() const
 {
-  return fo_dbManager_rollback(getStruct_dbManager());
+  return fo_dbManager_rollback(getStruct_dbManager()) != 0;
 }
 
 QueryResult DbManager::queryPrintf(const char* queryFormat, ...) const
@@ -106,57 +105,8 @@ QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement* stmt, ...) c
   return QueryResult(pgResult);
 }
 
-QueryResult::QueryResult(PGresult* pgResult) : ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult))
-{
-};
-
-QueryResult::QueryResult(QueryResult&& other) : ptr(std::move(other.ptr))
-{
-};
-
-bool QueryResult::isFailed() const
-{
-  return ptr.get() == NULL;
-}
-
-QueryResult::operator bool() const
-{
-  return !isFailed();
-}
-
-int QueryResult::getRowCount() const
-{
-  if (ptr)
-  {
-    return PQntuples(ptr.get());
-  }
-
-  return -1;
-}
-
-std::vector<std::string> QueryResult::getRow(int i) const
-{
-  std::vector<std::string> result;
-  PGresult* r = ptr.get();
-
-  if (i >= 0 && i < getRowCount())
-  {
-    for (int j = 0; j < PQnfields(r); j++)
-    {
-      result.push_back(std::string(PQgetvalue(r, i, j)));
-    }
-  }
-
-  return result;
-}
-
 void DbManager::ignoreWarnings(bool b) const
 {
   fo_dbManager_ignoreWarnings(getStruct_dbManager(), b);
 }
 
-std::vector<unsigned long> DbManager::queryFileIdsVectorForUpload(int uploadId) const
-{
-  QueryResult queryResult(queryFileIdsForUpload(getStruct_dbManager(), uploadId));
-  return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
-}

@@ -10,6 +10,8 @@
 
 #include "ninka.hpp"
 
+using namespace fo;
+
 int main(int argc, char** argv)
 {
   /* before parsing argv and argc make sure */

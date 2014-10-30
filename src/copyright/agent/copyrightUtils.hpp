@@ -36,13 +36,13 @@ void queryAgentId(int& agent, PGconn* dbConn);
 
 void bail(int exitval);
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager);
+int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager);
 
 void showHelp();
 
 bool parseCliOptions(int argc, char** argv, CliOptions& dest, int& argn);
 
-CopyrightState getState(DbManager dbManager, const CliOptions& cliOptions);
+CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions);
 
 void fillMatchers(CopyrightState& state);
 

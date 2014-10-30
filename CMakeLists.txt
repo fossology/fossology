@@ -98,6 +98,8 @@ set(SOURCE_FILES
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc
     src/lib/cpp/libfossdbmanagerclass.hpp
+    src/lib/cpp/libfossdbQueryResult.cc
+    src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
     src/lib/cpp/uniquePtr.hpp
     src/maintagent/agent/maintagent.c
