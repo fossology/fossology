@@ -122,7 +122,7 @@ class TestPgDb
     $this->dbManager->freeResult($res);
     foreach($tableNames as $row){
       $name = $row['table_name'];
-      $this->dbManager->queryOnce("DROP TABLE $name",$sqlLog=__METHOD__.".$name");
+      $this->dbManager->queryOnce("DROP TABLE $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
   
