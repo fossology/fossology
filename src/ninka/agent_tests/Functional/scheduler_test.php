@@ -103,10 +103,10 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight'),false);
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','rf_pkpk'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight','license_ref'),false);
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a'), false);
     $this->testDb->insertData_license_ref();
@@ -123,28 +123,27 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($retCode, 0, 'ninka failed: '.$output);
 
-    print $output;
-
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
 
-    return; //TODO update testcases to have matches to test
-    $this->assertEquals($expected=1, count($matches));
+    $this->assertEquals($expected=6, count($matches));
 
-    /** @var LicenseMatch */
-    $licenseMatch = $matches[0];
+    foreach($matches as $licenseMatch) {
+      /** @var LicenseRef */
+      $matchedLicense = $licenseMatch->getLicenseRef();
+      if ($licenseMatch->getFileId() == 4)
+      {
+        $this->assertEquals($matchedLicense->getShortName(), "GPLv3+");
+      }
+      else
+      {
+        $this->assertEquals($matchedLicense->getShortName(), "No_license_found");
+      }
 
-    $this->assertEquals($expected=4, $licenseMatch->getFileId());
-
-    /** @var LicenseRef */
-    $matchedLicense = $licenseMatch->getLicenseRef();
-    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
-
-    /** @var AgentRef */
-    $agentRef = $licenseMatch->getAgentRef();
-
-    $this->assertEquals($agentRef->getAgentName(), "ninka");
+      /** @var AgentRef */
+      $agentRef = $licenseMatch->getAgentRef();
+      $this->assertEquals($agentRef->getAgentName(), "ninka");
+    }
   }
-
 
 }
