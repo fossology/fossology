@@ -1,7 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Steffen Weber
+Author: Daniele Fognini, Steffen Weber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("copyrightDao".time());
+    $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
   }
   
@@ -75,7 +75,9 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
 
   private function runCopyright()
   {
-    $sysConf = $this->testDb->getFossSysConf();
+    $sysConf = $this->testDb->getFossSysConf().time();
+    mkdir($sysConf);
+    copy($this->testDb->getFossSysConf()."/Db.conf","$sysConf/Db.conf");
     system("touch ".$sysConf."/fossology.conf");
     $copyDir = dirname(dirname(dirname(dirname(__DIR__))))."/copyright/";
     system("install -D $copyDir/VERSION-copyright $sysConf/mods-enabled/copyright/VERSION");
@@ -88,14 +90,16 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
     rmdir("$sysConf/mods-enabled/copyright");
     rmdir("$sysConf/mods-enabled");
     unlink($sysConf."/fossology.conf");
+    unlink($sysConf."/Db.conf");
+    rmdir($sysConf);
   }
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('uploadtree','uploadtree_a','agent','pfile','users','bucketpool','mimetype','clearing_decision_type'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq'),false);
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey','clearing_decision_type_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','users'),false);
+    $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype','clearing_decision_type'));
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq'));
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey','clearing_decision_type_pkey'));
+    $this->testDb->alterTables(array('agent','pfile','users'));
 
     $this->testDb->insertData(array('agent'), false);
     $this->runCopyright();
@@ -247,6 +251,5 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
     $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
     $this->assertEquals("desc2", $entries[0]['description']);
   }
-
 
 }

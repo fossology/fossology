@@ -20,10 +20,8 @@ namespace Fossology\Lib\Data;
 
 
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Exception;
-use Fossology\Lib\Util\Object;
 
-class DecisionTypes extends Object
+class DecisionTypes extends Types
 {
   const TO_BE_DISCUSSED = 3;
   const IRRELEVANT = 4;
@@ -32,11 +30,10 @@ class DecisionTypes extends Object
   /** @var array */
   private $values = array(self::TO_BE_DISCUSSED, self::IRRELEVANT, self::IDENTIFIED);
 
-  /** @var array */
-  private $map;
-
   public function __construct(DbManager $dbManager)
   {
+    parent::__construct("clearing decision type");
+
     $this->map = $dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
 
     assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
@@ -45,33 +42,4 @@ class DecisionTypes extends Object
     assert(count($this->map) == count($this->values));
   }
 
-  /**
-   * @param int $type
-   * @throws Exception
-   * @return string
-   */
-  function getTypeName($type)
-  {
-    if (array_key_exists($type, $this->map))
-    {
-      return $this->map[$type];
-    }
-    throw new Exception("unknown clearing type id " . $type);
-  }
-
-  /**
-   * @return array
-   */
-  public function getMap()
-  {
-    return $this->map;
-  }
-  
-  /**
-   * @return int
-   */
-  public function getTypeByName($name)
-  {
-    return array_search($name, $this->map);
-  }
 }

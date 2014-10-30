@@ -72,7 +72,7 @@ class ClearingDecisionEventProcessor
     }
 
     $insertDecision = ($type!=$clearingDecType);
-    foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
+    foreach ($added  as $licenseShortName => $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       if (!$licenseDecisionResult->hasLicenseDecisionEvent())
@@ -80,17 +80,24 @@ class ClearingDecisionEventProcessor
         $licenseId = $licenseDecisionResult->getLicenseId();
         $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER, $isGlobal);
         $insertDecision = true;
-        break;
-      }
-
-      $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
-      if ($lastDecision === null || $lastDecision < $entryTimestamp)
-      {
-        $insertDecision = true;
-        break;
       }
     }
 
+    if(!$insertDecision)
+    {
+      foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
+      {
+//       check for (!$licenseDecisionResult->hasLicenseDecisionEvent())  is unnecessary
+
+        $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
+
+        if ($lastDecision === null || $lastDecision < $entryTimestamp)
+        {
+          $insertDecision = true;
+          break;
+        }
+      }
+    }
     $removedSinceLastDecision = array();
     foreach ($events as $event)
     {
