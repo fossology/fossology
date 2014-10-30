@@ -147,15 +147,16 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
     "scope": $('[name="scope"]:checked').val(),
     "comment": $('#comment').val(),
     "remark": $('#remark').val(),
-    "removed": removed
+    "removed": removed,
+    "force": $('#forceDecision').val()
   };
 
   $.ajax({
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeUserModal) },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity) }
+    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess, closeUserModal); },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
   });
 
 }
