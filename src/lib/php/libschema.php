@@ -85,18 +85,20 @@ class fo_libschema
     $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
 
     $result = pg_query($PG_CONN, $sql_statement)
-      or die("Could not check the database for plpgsql language\n");
+    or die("Could not check the database for plpgsql language\n");
 
     $plpgsql_already_installed = FALSE;
-    if ( $row = pg_fetch_row($result) ) {
+    if ($row = pg_fetch_row($result))
+    {
       $plpgsql_already_installed = TRUE;
     }
 
     // then create language plpgsql if not already created
-    if ( $plpgsql_already_installed == FALSE ) {
+    if ($plpgsql_already_installed == FALSE)
+    {
       $sql_statement = "CREATE LANGUAGE plpgsql";
       $result = pg_query($PG_CONN, $sql_statement)
-        or die("Could not create plpgsql language in the database\n");
+      or die("Could not create plpgsql language in the database\n");
     }
 
 
@@ -259,246 +261,247 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Add views (dependent on columns) */
-  /************************************/
-  function applyViews()
-  {
-    if (empty($this->schema['VIEW']))
+    /************************************/
+    /* Add views (dependent on columns) */
+    /************************************/
+    function applyViews()
     {
-      return;
-    }
-    foreach ($this->schema['VIEW'] as $name => $sql)
-    {
-      if (empty($name) || $this->currSchema['VIEW'][$name] == $sql)
+      if (empty($this->schema['VIEW']))
       {
-        continue;
+        return;
       }
-      if (!empty($this->currSchema['VIEW'][$name]))
+      foreach ($this->schema['VIEW'] as $name => $sql)
       {
-        $sqlDropView = "DROP VIEW IF EXISTS $name";
-        $this->applyOrEchoOnce($sqlDropView);
-      }
-      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $name);
-    }
-  }
-
-  /************************************/
-  /* Delete constraints */
-  /* Delete now, so they won't interfere with migrations. */
-  /************************************/
-  function dropConstraints()
-  {
-    if (empty($this->currSchema['CONSTRAINT']))
-    {
-      return;
-    }
-    foreach ($this->currSchema['CONSTRAINT'] as $name => $sql)
-    {
-      // skip if constraint name is empty or does not exist
-      if (empty($name) || ($this->schema['CONSTRAINT'][$name] == $sql)
-          || (DB_ConstraintExists($name) == False))
-      {
-        continue;
-      }
-
-      /* Only process tables that I know about */
-      $table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $sql);
-      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $sql);
-      if ($TableFk == $sql)
-      {
-        $TableFk = $table;
-      }
-      /* If I don't know the primary or foreign table... */
-      if (empty($this->schema['TABLE'][$table]) && empty($this->schema['TABLE'][$TableFk]))
-      {
-        continue;
-      }
-      $sql = "ALTER TABLE \"$table\" DROP CONSTRAINT \"$name\" CASCADE";
-      $this->applyOrEchoOnce($sql);
-    }
-  }
-
-  /************************************/
-  /* Delete indexes */
-  /************************************/
-  function dropIndexes()
-  {
-    if (empty($this->currSchema['INDEX']))
-    {
-      return;
-    }
-    foreach ($this->currSchema['INDEX'] as $table => $IndexInfo)
-    {
-      if (empty($table) || empty($this->schema['TABLE'][$table]))
-      {
-        continue;
-      }
-      foreach ($IndexInfo as $name => $sql)
-      {
-        if (empty($name) || $this->schema['INDEX'][$table][$name] == $sql)
+        if (empty($name) || $this->currSchema['VIEW'][$name] == $sql)
         {
           continue;
         }
-        $sql = "DROP INDEX \"$name\"";
-        $this->applyOrEchoOnce($sql);
+        if (!empty($this->currSchema['VIEW'][$name]))
+        {
+          $sqlDropView = "DROP VIEW IF EXISTS $name";
+          $this->applyOrEchoOnce($sqlDropView);
+        }
+        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $name);
       }
     }
-  }
 
-  /************************************/
-  /* Add indexes (dependent on columns) */
-  /************************************/
-  function applyIndexes()
-  {
-    if (empty($this->schema['INDEX']))
+    /************************************/
+    /* Delete constraints */
+    /* Delete now, so they won't interfere with migrations. */
+    /************************************/
+    function dropConstraints()
     {
-      return;
-    }
-    foreach ($this->schema['INDEX'] as $table => $IndexInfo)
-    {
-      if (empty($table))
+      if (empty($this->currSchema['CONSTRAINT']))
       {
-        continue;
+        return;
       }
-      if (!array_key_exists($table, $this->schema["TABLE"]))
+      foreach ($this->currSchema['CONSTRAINT'] as $name => $sql)
       {
-        echo "skipping orphan table: $table\n";
-        continue;
-      }
-      foreach ($IndexInfo as $name => $sql)
-      {
-        if (empty($name) || $this->currSchema['INDEX'][$table][$name] == $sql)
+        // skip if constraint name is empty or does not exist
+        if (empty($name) || ($this->schema['CONSTRAINT'][$name] == $sql)
+            || (DB_ConstraintExists($name) == False)
+        )
         {
           continue;
         }
-        $this->applyOrEchoOnce($sql);
-        $sql = "REINDEX INDEX \"$name\"";
-        $this->applyOrEchoOnce($sql);
-      }
-    }
-  }
 
-  /************************************/
-  /* Add constraints (dependent on columns, views, and indexes) */
-  /************************************/
-  function applyConstraints()
-  {
-    $this->currSchema = $this->getCurrSchema(); /* constraints and indexes are linked, recheck */
-    if (empty($this->schema['CONSTRAINT']))
-    {
-      return;
-    }
-    /* Constraints must be added in the correct order! */
-    $orderedConstraints = array('primary' => array(), 'unique' => array(), 'foreign' => array(), 'other' => array());
-    foreach ($this->schema['CONSTRAINT'] as $Name => $sql)
-    {
-      if (empty($Name) || $this->currSchema['CONSTRAINT'][$Name] == $sql)
-      {
-        continue;
-      }
-      if (preg_match("/PRIMARY KEY/", $sql))
-      {
-        $orderedConstraints['primary'][] = $sql;
-      } elseif (preg_match("/UNIQUE/", $sql))
-      {
-        $orderedConstraints['unique'][] = $sql;
-      } elseif (preg_match("/FOREIGN KEY/", $sql))
-      {
-        $orderedConstraints['foreign'][] = $sql;
-      } else
-      {
-        $orderedConstraints['other'][] = $sql;
+        /* Only process tables that I know about */
+        $table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/", '${1}', $sql);
+        $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/", '${1}', $sql);
+        if ($TableFk == $sql)
+        {
+          $TableFk = $table;
+        }
+        /* If I don't know the primary or foreign table... */
+        if (empty($this->schema['TABLE'][$table]) && empty($this->schema['TABLE'][$TableFk]))
+        {
+          continue;
+        }
+        $sql = "ALTER TABLE \"$table\" DROP CONSTRAINT \"$name\" CASCADE";
+        $this->applyOrEchoOnce($sql);
       }
     }
-    foreach ($orderedConstraints as $type => $constraints)
-    {
-      foreach ($constraints as $sql)
-      {
-        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . ".constraint.$type");
-      }
-    }
-  }
 
-  /************************************/
-  /* Delete views */
-  /************************************/
-  /* Get current tables and columns used by all views */
-  /* Delete if: uses table I know and column I do not know. */
-  /* Without this delete, we won't be able to drop columns. */
-  function dropViews($catalog)
-  {
-    $sql = "SELECT view_name,table_name,column_name
+    /************************************/
+    /* Delete indexes */
+    /************************************/
+    function dropIndexes()
+    {
+      if (empty($this->currSchema['INDEX']))
+      {
+        return;
+      }
+      foreach ($this->currSchema['INDEX'] as $table => $IndexInfo)
+      {
+        if (empty($table) || empty($this->schema['TABLE'][$table]))
+        {
+          continue;
+        }
+        foreach ($IndexInfo as $name => $sql)
+        {
+          if (empty($name) || $this->schema['INDEX'][$table][$name] == $sql)
+          {
+            continue;
+          }
+          $sql = "DROP INDEX \"$name\"";
+          $this->applyOrEchoOnce($sql);
+        }
+      }
+    }
+
+    /************************************/
+    /* Add indexes (dependent on columns) */
+    /************************************/
+    function applyIndexes()
+    {
+      if (empty($this->schema['INDEX']))
+      {
+        return;
+      }
+      foreach ($this->schema['INDEX'] as $table => $IndexInfo)
+      {
+        if (empty($table))
+        {
+          continue;
+        }
+        if (!array_key_exists($table, $this->schema["TABLE"]))
+        {
+          echo "skipping orphan table: $table\n";
+          continue;
+        }
+        foreach ($IndexInfo as $name => $sql)
+        {
+          if (empty($name) || $this->currSchema['INDEX'][$table][$name] == $sql)
+          {
+            continue;
+          }
+          $this->applyOrEchoOnce($sql);
+          $sql = "REINDEX INDEX \"$name\"";
+          $this->applyOrEchoOnce($sql);
+        }
+      }
+    }
+
+    /************************************/
+    /* Add constraints (dependent on columns, views, and indexes) */
+    /************************************/
+    function applyConstraints()
+    {
+      $this->currSchema = $this->getCurrSchema(); /* constraints and indexes are linked, recheck */
+      if (empty($this->schema['CONSTRAINT']))
+      {
+        return;
+      }
+      /* Constraints must be added in the correct order! */
+      $orderedConstraints = array('primary' => array(), 'unique' => array(), 'foreign' => array(), 'other' => array());
+      foreach ($this->schema['CONSTRAINT'] as $Name => $sql)
+      {
+        if (empty($Name) || $this->currSchema['CONSTRAINT'][$Name] == $sql)
+        {
+          continue;
+        }
+        if (preg_match("/PRIMARY KEY/", $sql))
+        {
+          $orderedConstraints['primary'][] = $sql;
+        } elseif (preg_match("/UNIQUE/", $sql))
+        {
+          $orderedConstraints['unique'][] = $sql;
+        } elseif (preg_match("/FOREIGN KEY/", $sql))
+        {
+          $orderedConstraints['foreign'][] = $sql;
+        } else
+        {
+          $orderedConstraints['other'][] = $sql;
+        }
+      }
+      foreach ($orderedConstraints as $type => $constraints)
+      {
+        foreach ($constraints as $sql)
+        {
+          $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . ".constraint.$type");
+        }
+      }
+    }
+
+    /************************************/
+    /* Delete views */
+    /************************************/
+    /* Get current tables and columns used by all views */
+    /* Delete if: uses table I know and column I do not know. */
+    /* Without this delete, we won't be able to drop columns. */
+    function dropViews($catalog)
+    {
+      $sql = "SELECT view_name,table_name,column_name
         FROM information_schema.view_column_usage
         WHERE table_catalog='$catalog'
         ORDER BY view_name,table_name,column_name";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['view_name']); $i++)
-    {
-      $View = $Results[$i]['view_name'];
-      $table = $Results[$i]['table_name'];
-      if (empty($this->schema['TABLE'][$table]))
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['view_name']); $i++)
       {
-        continue;
-      }
-      $column = $Results[$i]['column_name'];
-      if (empty($this->schema['TABLE'][$table][$column]))
-      {
-        $sql = "DROP VIEW \"$View\";";
-        $this->applyOrEchoOnce($sql);
-      }
-    }
-  }
-
-  /************************************/
-  /* Delete columns/tables */
-  /************************************/
-  function dropColumnsFromTable($columns, $table)
-  {
-    if (empty($table) || empty($this->schema['TABLE'][$table]))
-    {
-      return;
-    }
-    foreach ($columns as $column => $modification)
-    {
-      if (empty($column))
-      {
-        continue;
-      }
-      if (empty($this->schema['TABLE'][$table][$column]))
-      {
-        $sql = "ALTER TABLE \"$table\" DROP COLUMN \"$column\";";
-        $this->applyOrEchoOnce($sql);
+        $View = $Results[$i]['view_name'];
+        $table = $Results[$i]['table_name'];
+        if (empty($this->schema['TABLE'][$table]))
+        {
+          continue;
+        }
+        $column = $Results[$i]['column_name'];
+        if (empty($this->schema['TABLE'][$table][$column]))
+        {
+          $sql = "DROP VIEW \"$View\";";
+          $this->applyOrEchoOnce($sql);
+        }
       }
     }
-  }
+
+    /************************************/
+    /* Delete columns/tables */
+    /************************************/
+    function dropColumnsFromTable($columns, $table)
+    {
+      if (empty($table) || empty($this->schema['TABLE'][$table]))
+      {
+        return;
+      }
+      foreach ($columns as $column => $modification)
+      {
+        if (empty($column))
+        {
+          continue;
+        }
+        if (empty($this->schema['TABLE'][$table][$column]))
+        {
+          $sql = "ALTER TABLE \"$table\" DROP COLUMN \"$column\";";
+          $this->applyOrEchoOnce($sql);
+        }
+      }
+    }
 
 
-  /**
-   * \brief Load the schema from the db into an array.
-   **/
-  function getCurrSchema()
-  {
-    global $SysConf;
-    $this->currSchema = array();
-    $this->addTables();
-    $this->addViews($viewowner = $SysConf['DBCONF']['user']);
-    $this->addSequences();
-    $this->addConstraints();
-    $this->addIndexes();
-    unset($this->currSchema['TABLEID']);
-    return $this->currSchema;
-  }
+    /**
+     * \brief Load the schema from the db into an array.
+     **/
+    function getCurrSchema()
+    {
+      global $SysConf;
+      $this->currSchema = array();
+      $this->addTables();
+      $this->addViews($viewowner = $SysConf['DBCONF']['user']);
+      $this->addSequences();
+      $this->addConstraints();
+      $this->addIndexes();
+      unset($this->currSchema['TABLEID']);
+      return $this->currSchema;
+    }
 
-  /***************************/
-  /* Get the tables */
-  /***************************/
-  function addTables()
-  {
-    $sql = "SELECT class.relname AS table,
+    /***************************/
+    /* Get the tables */
+    /***************************/
+    function addTables()
+    {
+      $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
         type.typname AS type,
@@ -514,100 +517,100 @@ class fo_libschema
         AND tab.table_schema = 'public'
       LEFT OUTER JOIN pg_attrdef AS attrdef ON adrelid = attrelid AND adnum = attnum
       ORDER BY class.relname,attr.attnum";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
-    {
-      $R = & $Results[$i];
-      $Table = $R['table'];
-      $Column = $R['column_name'];
-      $Type = $R['type'];
-      if ($Type == 'bpchar')
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['table']); $i++)
       {
-        $Type = "char";
+        $R = &$Results[$i];
+        $Table = $R['table'];
+        $Column = $R['column_name'];
+        $Type = $R['type'];
+        if ($Type == 'bpchar')
+        {
+          $Type = "char";
+        }
+        if ($R['modifier'] > 0)
+        {
+          $Type .= '(' . $R['modifier'] . ')';
+        }
+        $Desc = str_replace("'", "''", $R['description']);
+        $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
+        if (!empty($Desc))
+        {
+          $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
+        } else
+        {
+          $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "";
+        }
+        $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
+        $this->currSchema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
+        $Alter = "ALTER COLUMN \"$Column\"";
+        // create the index UPDATE to get rid of php notice
+        $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] = "";
+        if ($R['notnull'] == 't')
+        {
+          $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL";
+        } else
+        {
+          $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter DROP NOT NULL";
+        }
+        if ($R['default'] != '')
+        {
+          $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
+          $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
+          $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
+        }
+        $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ";";
       }
-      if ($R['modifier'] > 0)
-      {
-        $Type .= '(' . $R['modifier'] . ')';
-      }
-      $Desc = str_replace("'", "''", $R['description']);
-      $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
-      if (!empty($Desc))
-      {
-        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
-      } else
-      {
-        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "";
-      }
-      $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
-      $this->currSchema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
-      $Alter = "ALTER COLUMN \"$Column\"";
-      // create the index UPDATE to get rid of php notice
-      $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] = "";
-      if ($R['notnull'] == 't')
-      {
-        $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL";
-      } else
-      {
-        $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter DROP NOT NULL";
-      }
-      if ($R['default'] != '')
-      {
-        $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
-        $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
-        $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
-      }
-      $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ";";
     }
-  }
 
-  /***************************/
-  /* Get Views */
-  /***************************/
-  function addViews($viewowner)
-  {
-    $sql = "SELECT viewname,definition FROM pg_views WHERE viewowner = $1";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt, array($viewowner));
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['viewname']); $i++)
+    /***************************/
+    /* Get Views */
+    /***************************/
+    function addViews($viewowner)
     {
-      $sql = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
-      $this->currSchema['VIEW'][$Results[$i]['viewname']] = $sql;
+      $sql = "SELECT viewname,definition FROM pg_views WHERE viewowner = $1";
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt, array($viewowner));
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['viewname']); $i++)
+      {
+        $sql = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
+        $this->currSchema['VIEW'][$Results[$i]['viewname']] = $sql;
+      }
     }
-  }
 
-  /***************************/
-  /* Get Sequence */
-  /***************************/
-  function addSequences()
-  {
-    $sql = "SELECT relname
+    /***************************/
+    /* Get Sequence */
+    /***************************/
+    function addSequences()
+    {
+      $sql = "SELECT relname
       FROM pg_class
       WHERE relkind = 'S'
         AND relnamespace IN (
              SELECT oid FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname != 'information_schema'
             )";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['relname']); $i++)
-    {
-      $sql = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
-      $this->currSchema['SEQUENCE'][$Results[$i]['relname']] = $sql;
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['relname']); $i++)
+      {
+        $sql = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
+        $this->currSchema['SEQUENCE'][$Results[$i]['relname']] = $sql;
+      }
     }
-  }
 
-  /***************************/
-  /* Get Constraints */
-  /***************************/
-  function addConstraints()
-  {
-    $sql = "SELECT c.conname AS constraint_name,
+    /***************************/
+    /* Get Constraints */
+    /***************************/
+    function addConstraints()
+    {
+      $sql = "SELECT c.conname AS constraint_name,
         CASE c.contype
           WHEN 'c' THEN 'CHECK'
           WHEN 'f' THEN 'FOREIGN KEY'
@@ -643,140 +646,140 @@ class fo_libschema
       LEFT JOIN pg_class AS t2 ON c.confrelid = t2.oid
       ORDER BY constraint_name,table_name
     ";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    /* Constraints use indexes into columns.  Covert those to column names. */
-    for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
-    {
-      $Key = "";
-      $Keys = explode(" ", $Results[$i]['constraint_key']);
-      foreach ($Keys as $K)
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      /* Constraints use indexes into columns.  Covert those to column names. */
+      for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
       {
-        if (empty($K))
+        $Key = "";
+        $Keys = explode(" ", $Results[$i]['constraint_key']);
+        foreach ($Keys as $K)
+        {
+          if (empty($K))
+          {
+            continue;
+          }
+          if (!empty($Key))
+          {
+            $Key .= ",";
+          }
+          $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['table_name']][$K] . '"';
+        }
+        $Results[$i]['constraint_key'] = $Key;
+        $Key = "";
+        $Keys = explode(" ", $Results[$i]['fk_constraint_key']);
+        foreach ($Keys as $K)
+        {
+          if (empty($K))
+          {
+            continue;
+          }
+          if (!empty($Key))
+          {
+            $Key .= ",";
+          }
+          $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['references_table']][$K] . '"';
+        }
+        $Results[$i]['fk_constraint_key'] = $Key;
+      }
+      /* Save the constraint */
+      /** There are different types of constraints that must be stored in order **/
+      /** CONSTRAINT: PRIMARY KEY **/
+      for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+        if ($Results[$i]['type'] != 'PRIMARY KEY')
         {
           continue;
         }
-        if (!empty($Key))
+        $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+        $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+        $sql .= " " . $Results[$i]['type'];
+        $sql .= " (" . $Results[$i]['constraint_key'] . ")";
+        if (!empty($Results[$i]['references_table']))
         {
-          $Key .= ",";
+          $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+          $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
         }
-        $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['table_name']][$K] . '"';
+        $sql .= ";";
+        $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
+        $Results[$i]['processed'] = 1;
       }
-      $Results[$i]['constraint_key'] = $Key;
-      $Key = "";
-      $Keys = explode(" ", $Results[$i]['fk_constraint_key']);
-      foreach ($Keys as $K)
+      /** CONSTRAINT: UNIQUE **/
+      for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
       {
-        if (empty($K))
+        if ($Results[$i]['type'] != 'UNIQUE')
         {
           continue;
         }
-        if (!empty($Key))
+        $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+        $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+        $sql .= " " . $Results[$i]['type'];
+        $sql .= " (" . $Results[$i]['constraint_key'] . ")";
+        if (!empty($Results[$i]['references_table']))
         {
-          $Key .= ",";
+          $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+          $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
         }
-        $Key .= '"' . $this->currSchema['TABLEID'][$Results[$i]['references_table']][$K] . '"';
+        $sql .= ";";
+        $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
+        $Results[$i]['processed'] = 1;
       }
-      $Results[$i]['fk_constraint_key'] = $Key;
+
+      /** CONSTRAINT: FOREIGN KEY **/
+      for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+        if ($Results[$i]['type'] != 'FOREIGN KEY')
+        {
+          continue;
+        }
+        $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+        $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+        $sql .= " " . $Results[$i]['type'];
+        $sql .= " (" . $Results[$i]['constraint_key'] . ")";
+        if (!empty($Results[$i]['references_table']))
+        {
+          $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+          $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
+        }
+
+        if (!empty($Results[$i]['on_update']))
+          $sql .= " ON UPDATE " . $Results[$i]['on_update'];
+        if (!empty($Results[$i]['on_delete']))
+          $sql .= " ON DELETE " . $Results[$i]['on_delete'];
+
+        $sql .= ";";
+        $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
+        $Results[$i]['processed'] = 1;
+      }
+
+      /** CONSTRAINT: ALL OTHERS **/
+      for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+        if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) continue;
+
+        $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+        $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+        $sql .= " " . $Results[$i]['type'];
+        $sql .= " (" . $Results[$i]['constraint_key'] . ")";
+        if (!empty($Results[$i]['references_table']))
+        {
+          $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+          $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
+        }
+        $sql .= ";";
+        $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
+        $Results[$i]['processed'] = 1;
+      }
     }
-    /* Save the constraint */
-    /** There are different types of constraints that must be stored in order **/
-    /** CONSTRAINT: PRIMARY KEY **/
-    for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
+
+    /***************************/
+    /* Get Index */
+    /***************************/
+    function addIndexes()
     {
-      if ($Results[$i]['type'] != 'PRIMARY KEY')
-      {
-        continue;
-      }
-      $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
-      $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
-      $sql .= " " . $Results[$i]['type'];
-      $sql .= " (" . $Results[$i]['constraint_key'] . ")";
-      if (!empty($Results[$i]['references_table']))
-      {
-        $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
-        $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
-      }
-      $sql .= ";";
-      $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
-      $Results[$i]['processed'] = 1;
-    }
-    /** CONSTRAINT: UNIQUE **/
-    for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
-    {
-      if ($Results[$i]['type'] != 'UNIQUE')
-      {
-        continue;
-      }
-      $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
-      $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
-      $sql .= " " . $Results[$i]['type'];
-      $sql .= " (" . $Results[$i]['constraint_key'] . ")";
-      if (!empty($Results[$i]['references_table']))
-      {
-        $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
-        $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
-      }
-      $sql .= ";";
-      $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
-      $Results[$i]['processed'] = 1;
-    }
-
-    /** CONSTRAINT: FOREIGN KEY **/
-    for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
-    {
-      if ($Results[$i]['type'] != 'FOREIGN KEY')
-      {
-        continue;
-      }
-      $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
-      $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
-      $sql .= " " . $Results[$i]['type'];
-      $sql .= " (" . $Results[$i]['constraint_key'] . ")";
-      if (!empty($Results[$i]['references_table']))
-      {
-        $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
-        $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
-      }
-
-      if (!empty($Results[$i]['on_update']))
-        $sql .= " ON UPDATE " . $Results[$i]['on_update'];
-      if (!empty($Results[$i]['on_delete']))
-        $sql .= " ON DELETE " . $Results[$i]['on_delete'];
-
-      $sql .= ";";
-      $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
-      $Results[$i]['processed'] = 1;
-    }
-
-    /** CONSTRAINT: ALL OTHERS **/
-    for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
-    {
-      if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) continue;
-
-      $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
-      $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
-      $sql .= " " . $Results[$i]['type'];
-      $sql .= " (" . $Results[$i]['constraint_key'] . ")";
-      if (!empty($Results[$i]['references_table']))
-      {
-        $sql .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
-        $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
-      }
-      $sql .= ";";
-      $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
-      $Results[$i]['processed'] = 1;
-    }
-  }
-
-  /***************************/
-  /* Get Index */
-  /***************************/
-  function addIndexes()
-  {
-    $sql = "SELECT tablename AS table, indexname AS index, indexdef AS define
+      $sql = "SELECT tablename AS table, indexname AS index, indexdef AS define
       FROM pg_indexes
       INNER JOIN information_schema.tables ON table_name = tablename
         AND table_type = 'BASE TABLE'
@@ -784,26 +787,26 @@ class fo_libschema
         AND schemaname = 'public'
       ORDER BY tablename,indexname;
     ";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
-    {
-      /* UNIQUE constraints also include indexes. */
-      if (empty($this->currSchema['CONSTRAINT'][$Results[$i]['index']]))
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['table']); $i++)
       {
-        $this->currSchema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
+        /* UNIQUE constraints also include indexes. */
+        if (empty($this->currSchema['CONSTRAINT'][$Results[$i]['index']]))
+        {
+          $this->currSchema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
+        }
       }
     }
-  }
 
 
-  function addFunctions($schema)
-  {
-    // prosrc
-    // proretset == setof
-    $sql = "SELECT proname AS name,
+    function addFunctions($schema)
+    {
+      // prosrc
+      // proretset == setof
+      $sql = "SELECT proname AS name,
         pronargs AS input_num,
         proargnames AS input_names,
         proargtypes AS input_type,
@@ -814,84 +817,84 @@ class fo_libschema
       INNER JOIN pg_language AS lang ON proc.prolang = lang.oid
       WHERE lang.lanname = 'plpgsql'
       ORDER BY proname;";
-    $stmt = __METHOD__;
-    $this->dbman->prepare($stmt, $sql);
-    $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['proname']); $i++)
-    {
-      $sql = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
-      $sql .= ' RETURNS ' . "TBD" . ' AS $$';
-      $sql .= " " . $Results[$i]['prosrc'];
-      $schema['FUNCTION'][$Results[$i]['proname']] = $sql;
+      $stmt = __METHOD__;
+      $this->dbman->prepare($stmt, $sql);
+      $result = $this->dbman->execute($stmt);
+      $Results = pg_fetch_all($result);
+      for ($i = 0; !empty($Results[$i]['proname']); $i++)
+      {
+        $sql = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
+        $sql .= ' RETURNS ' . "TBD" . ' AS $$';
+        $sql .= " " . $Results[$i]['prosrc'];
+        $schema['FUNCTION'][$Results[$i]['proname']] = $sql;
+      }
+      return $schema;
     }
-    return $schema;
-  }
 
 
-  function writeArrayEntries($fout, $key, $value, $varname)
-  {
-    $varname .= '["' . str_replace('"', '\"', $key) . '"]';
-    if (!is_array($value))
+    function writeArrayEntries($fout, $key, $value, $varname)
     {
-      $value = str_replace('"', '\"', $value);
-      fwrite($fout, "$varname = \"$value\";\n");
-      return;
+      $varname .= '["' . str_replace('"', '\"', $key) . '"]';
+      if (!is_array($value))
+      {
+        $value = str_replace('"', '\"', $value);
+        fwrite($fout, "$varname = \"$value\";\n");
+        return;
+      }
+      foreach ($value as $k => $v)
+      {
+        $this->writeArrayEntries($fout, $k, $v, $varname);
+      }
+      fwrite($fout, "\n");
     }
-    foreach ($value as $k => $v)
-    {
-      $this->writeArrayEntries($fout, $k, $v, $varname);
-    }
-    fwrite($fout, "\n");
-  }
 
-  /**
-   * \brief Export the schema of the connected ($PG_CONN) database to a
-   *        file in the format readable by GetSchema().
-   *
-   * @param string $filename path to the file to store the schema in.
-   *
-   * @return false=success, on error return string with error message.
-   **/
-  function exportSchema($filename = NULL)
-  {
-    if (empty($filename))
+    /**
+     * \brief Export the schema of the connected ($PG_CONN) database to a
+     *        file in the format readable by GetSchema().
+     *
+     * @param string $filename path to the file to store the schema in.
+     *
+     * @return false=success, on error return string with error message.
+     **/
+    function exportSchema($filename = NULL)
     {
-      $filename = stdout;
+      if (empty($filename))
+      {
+        $filename = stdout;
+      }
+      $Schema = $this->getCurrSchema();
+      $fout = fopen($filename, "w");
+      if (!$fout)
+      {
+        return ("Failed to write to $filename\n");
+      }
+      global $Name;
+      fwrite($fout, "<?php\n");
+      fwrite($fout, "/* This file is generated by " . $Name . " */\n");
+      fwrite($fout, "/* Do not manually edit this file */\n\n");
+      fwrite($fout, '  $Schema=array();' . "\n\n");
+      foreach ($Schema as $K1 => $V1)
+      {
+        $this->writeArrayEntries($fout, $K1, $V1, '  $Schema');
+      }
+      fclose($fout);
+      return false;
     }
-    $Schema = $this->getCurrSchema();
-    $fout = fopen($filename, "w");
-    if (!$fout)
-    {
-      return ("Failed to write to $filename\n");
-    }
-    global $Name;
-    fwrite($fout, "<?php\n");
-    fwrite($fout, "/* This file is generated by " . $Name . " */\n");
-    fwrite($fout, "/* Do not manually edit this file */\n\n");
-    fwrite($fout, '  $Schema=array();' . "\n\n");
-    foreach ($Schema as $K1 => $V1)
-    {
-      $this->writeArrayEntries($fout, $K1, $V1, '  $Schema');
-    }
-    fclose($fout);
-    return false;
-  }
 
 
-  /**
-   * MakeFunctions
-   * \brief Create any required DB functions.
-   */
-  function makeFunctions()
-  {
-    print "  Applying database functions\n";
-    flush();
-    /********************************************
-     * GetRunnable() is a DB function for listing the runnable items
-     * in the jobqueue. This is used by the scheduler.
-     ********************************************/
-    $sql = '
+    /**
+     * MakeFunctions
+     * \brief Create any required DB functions.
+     */
+    function makeFunctions()
+    {
+      print "  Applying database functions\n";
+      flush();
+      /********************************************
+       * GetRunnable() is a DB function for listing the runnable items
+       * in the jobqueue. This is used by the scheduler.
+       ********************************************/
+      $sql = '
   CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
   DECLARE
     jqrec jobqueue;
@@ -931,15 +934,15 @@ class fo_libschema
   $$
   LANGUAGE plpgsql;
       ';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getrunnable');
-    /********************************************
-     * uploadtree2path is a DB function that returns the non-artifact parents of an uploadtree_pk.
-     * drop and recreate to change the return type.
-     */
-    $sql = 'drop function if exists uploadtree2path(integer);';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.drop');
+      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getrunnable');
+      /********************************************
+       * uploadtree2path is a DB function that returns the non-artifact parents of an uploadtree_pk.
+       * drop and recreate to change the return type.
+       */
+      $sql = 'drop function if exists uploadtree2path(integer);';
+      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.drop');
 
-    $sql = '
+      $sql = '
     CREATE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
     DECLARE
       UTrec   uploadtree;
@@ -958,9 +961,9 @@ class fo_libschema
     $$
     LANGUAGE plpgsql;
       ';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.create');
-    return;
-  } // MakeFunctions()
+      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.create');
+      return;
+    } // MakeFunctions()
 }
 
 if (empty($dbManager) || !($dbManager instanceof DbManager))
