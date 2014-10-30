@@ -11,6 +11,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "files.hpp"
 #include <fstream>
 #include <sys/stat.h>
+#include <sstream>
 
 namespace fo
 {
@@ -24,10 +25,23 @@ namespace fo
     {
       std::string contents;
       inStream.seekg(0, std::ios::end);
-      const unsigned long int endPos = inStream.tellg();
-      contents.resize((maximumBytes > 0 && (endPos > maximumBytes)) ? maximumBytes : endPos);
-      inStream.seekg(0, std::ios::beg);
-      inStream.read(&contents[0], contents.size());
+      if (!(inStream.rdstate() & std::ifstream::failbit))
+      {
+        const unsigned long int endPos = inStream.tellg();
+        contents.resize((maximumBytes > 0 && (endPos > maximumBytes)) ? maximumBytes : endPos);
+        inStream.seekg(0, std::ios::beg);
+        inStream.read(&contents[0], contents.size());
+      }
+      else
+      {
+        // TODO respect limit of maximumBytes
+        inStream.clear(std::ifstream::goodbit);
+
+        std::stringstream ss;
+        ss << inStream.rdbuf();
+
+        return ss.str();
+      }
       inStream.close();
       return (contents);
     }
