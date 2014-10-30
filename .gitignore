@@ -76,8 +76,10 @@ src/monk/agent_tests/Functional/monk
 src/monk/agent_tests/Unit/test_monk
 src/monk/agent_tests/results/
 src/ninka/agent/ninka
-src/ninka/agent_tests/Unit/results/
+src/ninka/agent/ninka_cov
+src/ninka/agent_tests/Functional/ninka
 src/ninka/agent_tests/Unit/test_ninka
+src/ninka/agent_tests/results/
 src/nomos/agent/_STRFILTER
 src/nomos/agent/_autodefs.h
 src/nomos/agent/_strings.data
