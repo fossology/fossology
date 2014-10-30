@@ -97,7 +97,7 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
   private function setUpClearingTables()
   {
     $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype','clearing_decision_type'));
-//    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey','clearing_decision_type_pkey'));
     $this->testDb->alterTables(array('agent','pfile','users'));
 

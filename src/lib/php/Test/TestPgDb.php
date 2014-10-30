@@ -106,7 +106,9 @@ class TestPgDb
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
+    $this->dbManager->queryOnce("DEALLOCATE ALL");
     $this->dropAllTables();
+    $this->dropAllSequences();
   }
   
   public function getFossSysConf()
@@ -122,11 +124,24 @@ class TestPgDb
     $this->dbManager->freeResult($res);
     foreach($tableNames as $row){
       $name = $row['table_name'];
-      $this->dbManager->queryOnce("DROP TABLE $name CASCADE",$sqlLog=__METHOD__.".$name");
+      $this->dbManager->queryOnce("DROP TABLE IF EXISTS $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
-  
-  public function ensurePgPassFileEntry()
+
+  private function dropAllSequences()
+  {
+    $this->dbManager->prepare($stmt=__METHOD__.'.get',
+            "SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema=$1");
+    $res = $this->dbManager->execute($stmt,array('public'));
+    $tableNames = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    foreach($tableNames as $row){
+      $name = $row['sequence_name'];
+      $this->dbManager->queryOnce("DROP SEQUENCE $name CASCADE",$sqlLog=__METHOD__.".$name");
+    }
+  }
+
+  private function ensurePgPassFileEntry()
   {
     $userHome = getenv('HOME');
     $ipv4 = gethostbyname(gethostname());
