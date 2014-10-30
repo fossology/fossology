@@ -67,7 +67,8 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicense($clearingLicense->getId())->getText()
+          'description' => $this->getCachedLicense($clearingLicense->getId())->getText(),
+          'textfinding' => $clearingLicense->getShortName()
         );
       }
     }
