@@ -71,9 +71,9 @@ class fo_libschema
 
   /**
    * @brief Make schema match $Filename.  This is a single transaction.
-   * @param $filename Schema file written by schema-export.php
-   * @param $debug Turn on debugging (echo sql as it is being executed)
-   * @param $catalog Optional database name
+   * @param string $filename Schema file written by schema-export.php
+   * @param bool $debug Turn on debugging (echo sql as it is being executed)
+   * @param string $catalog Optional database name
    * @return false=success, on error return string with error message.
    **/
   function applySchema($filename = NULL, $debug = false, $catalog = 'fossology')

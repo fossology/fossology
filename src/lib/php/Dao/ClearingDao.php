@@ -167,7 +167,6 @@ class ClearingDao extends Object
     return $clearingsWithLicensesArray;
   }
 
-
   /**
    * @param int $clearingId
    * @return array pair of LicenseRef[]
@@ -492,7 +491,6 @@ insert into clearing_decision (
     return $events;
   }
 
-  
   /**
    * @return LicenseDecisionEvent[][]
    */
@@ -527,6 +525,7 @@ insert into clearing_decision (
 
     return array($addedLicenses, $removedLicenses);
   }
+
 
   /**
    * @param $uploadTreeId
