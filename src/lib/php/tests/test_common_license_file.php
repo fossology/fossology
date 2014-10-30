@@ -21,7 +21,7 @@
  * \brief unit tests for common-license-file.php
  */
 
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Db\ModernDbManager;
 use Fossology\Lib\Test\TestLiteDb;
 
 require_once(dirname(__FILE__) . '/../common-license-file.php');
@@ -45,7 +45,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
  
   /** @var TestLiteDb */
   private $testDb;
-  /** @var DbManager */
+  /** @var ModernDbManager */
   private $dbManager;
 
   private $logFileName;
@@ -81,7 +81,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $logger = new Monolog\Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
     $logger->pushHandler(new Monolog\Handler\StreamHandler($this->logFileName, Monolog\Logger::ERROR));
-    $this->dbManager = new DbManager($logger);
+    $this->dbManager = new ModernDbManager($logger);
     $this->dbManager->setDriver(new Fossology\Lib\Db\Driver\Postgres($PG_CONN));
 
     /** preparation, add uploadtree, upload, pfile, license_file record */
