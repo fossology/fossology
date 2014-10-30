@@ -2,7 +2,7 @@ Source: fossology
 Section: utils
 Priority: extra
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all
+Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all
 Standards-Version: 3.9.1
 Homepage: http://fossology.org
 
@@ -198,6 +198,18 @@ Description: architecture for analyzing software, monk
  type identification.
  .
  This package contains the monk agent programs and their resources.
+
+Package: fossology-ninka
+Architecture: any
+Depends: fossology-common, ninka>=1.2, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, ninka
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the ninka wrapper agent programs and their resources.
 
 Package: fossology-decider
 Architecture: any
