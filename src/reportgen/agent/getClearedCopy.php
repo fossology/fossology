@@ -28,9 +28,7 @@ class CopyClearedGetter extends XpClearedGetter
 
   public function __construct()
   {
-    parent::__construct();
-    $this->tableName = "copyright";
-    $this->type = "statement";
+    parent::__construct("copyright", "statement", false, "content ilike 'Copyright%'");
   }
 }
 

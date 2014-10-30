@@ -49,7 +49,7 @@ require_once("common-db.php");
 require_once("common-auth.php");
 require_once("common-perms.php");
 require_once("common-users.php");
-
+require_once("common-string.php");
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
 if (!empty($UI_CLI) && ($UI_CLI == 1))

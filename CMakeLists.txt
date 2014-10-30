@@ -58,7 +58,6 @@ set(SOURCE_FILES
     src/demomod/agent/process.c
     src/demomod/agent/usage.c
     src/demomod/agent/utils.c
-    src/example_wc_agent/agent/wc_agent.c
     src/lib/c/tests/test_fossconfig.c
     src/lib/c/tests/test_fossscheduler.c
     src/lib/c/tests/test_libfossdb.c
@@ -188,193 +187,8 @@ set(SOURCE_FILES
     src/nomos/agent/parse.h
     src/nomos/agent/process.c
     src/nomos/agent/process.h
-    src/nomos/agent/standalone.c
-    src/nomos/agent/standalone.h
     src/nomos/agent/util.c
     src/nomos/agent/util.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Apache/condor_blkng_full_disk_io.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/APSL/DNSDigest.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Artistic/a2p.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Artistic/macos_main.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/app_exec.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/autoopts.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/basename.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/bug3537_DNSDigest.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/chpst.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/cidr.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/destest.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/dlfcn.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/drand48.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/Epl.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/fft4g.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/inetd.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/podd.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/s_erf.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/snprintf.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/sparse_crc32.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/tclLoadAix.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSD/win_ce_semaphore.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSL/graphviz_digraph_lex.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/BSL/intel.hpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/accessstate.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/bltsville.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/boot_config.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/config.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/configwords.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/DS_HuffmanEncodingTreeNode.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/GCOneShotEffectTimer.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/ifiction.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/license.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/malloc.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/memory_map.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/netbsd.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CC/setup.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CCLRC/cdunifpp_check.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/CDDL/doctext.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CDDL/vnode.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CECILL/CImg.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CECILL/dataset_io.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/CECILL/qapplication_proxy.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/ClArtistic/SaveAbleCollection.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/ClearSilver/csparse.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/CUA-OPL/cua_office_t1.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/DPTC/dpt_osdutil.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/aes.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/ashmem.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/asn1.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/fuse_kernel.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/Identity_daemon.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/lzf.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/plc.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/qhttp.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/smb.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Dual-license/xpmr.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/ECL/bufftest.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/ECL/qt_sbtl_embedder.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EFL/epanel.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EFL/wel_image_list.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EPL/egPrerequisites.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EPL/filterscallbacks.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/ErlPL/decode_skip.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EUDatagrid/scar_log.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/EUPL/simRender.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/FTL/freetype.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/FTL/gxvfgen.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GFDL/license2.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/argparse.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/bitfield.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/cfg.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/CFontz-charmap.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/clisp.cxx
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/cmdedit.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/ConfigEnv.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/curve.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/dialogboundvalues.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/evd-pki-pubkey-lic.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/ext4_jbd2.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/fnmatch.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/frogr-picture-loader.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/frogr-util.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/gids.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/gnu-md5.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/grecord.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/gtkmovelist.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/gwymath.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/m_knock.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/nf_conntrack_h323_asn1.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/parser.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/passdb.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/ps_inspect.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/radrealms.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/RelParser.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/save_particles_Point3D_format.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/stddef.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/stdvga.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/sys-ecos.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/taskset.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/test-file-4-GPL-2.0.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/Timestamp.cc
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/ttl.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/version.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/webserver.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/GPL/zconf.tab.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/gSOAP/wsdx.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/info-zip/unzip.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/IPL/license.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/JISP/Maze.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Leptonica/affine_reg.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/autoopts.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/Deflater.hxx
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/evd-pki-pubkey.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/fsp-parser.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/io-jpeg.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/main.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/tracker-class.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LGPL/valaprojectgenerator.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/LIBGCJ/natStringBuilder.cc
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/edit.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/ge_console.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/net.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/Netizen.cc
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/privates.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/MIT/watch.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/No_license_found/ipl.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Nvidia/atom.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/OpenSSL/gost89.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Postfix/master_spawn.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Public-domain/dirent.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Public-domain/fitblk.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Public-domain/LzmaDec.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Public-domain/nwlib.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Public-domain/zpipe.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/QT/printview.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/catalog.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/command.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/http.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/lualib.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/mic.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-doc/xmlsec.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/ad_testfs_close.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/bzip2.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/camd_dump.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/connection.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/dimoopx.cc
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/fetmainform.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/findme.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/FlGui.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/gdcmServiceClassUser.cxx
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/itkAffineTransform.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/jcparam.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/json.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/ldapmodule.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/main.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/mhstatus.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/mmu_context.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/MPIController.cxx
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/perf_event.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/play.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/pngget.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/popt_options.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/qla_version.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/qlcnic_ctx.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/qlge.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/revoco.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/rtctype.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/sel_util.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/See-file/util.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/SGI/gl2.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Trademark-ref/53c7xx.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/UnclassifiedLicense/IPA.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/UnclassifiedLicense/isc.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/UnclassifiedLicense/net_phy_def.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Vixie/user.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/WebM/alpha.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/WTFPL/random.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/WTFPL/wtfpl.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/WXwindows/setup.h
-    src/nomos/agent_tests/testdata/NomosTestfiles/Zlib/blast.c
-    src/nomos/agent_tests/testdata/NomosTestfiles/Zlib/util.cpp
-    src/nomos/agent_tests/testdata/NomosTestfiles/Zlib/zutil.h
     src/nomos/agent_tests/Unit/run_tests.c
     src/nomos/agent_tests/Unit/test_DoctoredBuffer.c
     src/nomos/agent_tests/Unit/test_nomos_gap.c
@@ -389,10 +203,6 @@ set(SOURCE_FILES
     src/pkgagent/agent_tests/Unit/testRecordMetadataRPM.c
     src/pkgagent/agent_tests/Unit/testRun.c
     src/pkgagent/agent_tests/Unit/testTrim.c
-    src/regexscan/agent/regexscan-Stage1.c
-    src/regexscan/agent/regexscan-Stage2.c
-    src/regexscan/agent/regexscan-Stage3.c
-    src/regexscan/agent/regexscan.c
     src/reportgen/agent/jsonDataRetriever.c
     src/reportgen/agent/jsonDataRetriever.h
     src/reportgen/agent/main.c
@@ -496,4 +306,6 @@ set(SOURCE_FILES
     src/wget_agent/agent_tests/Unit/utility.h
     src/dox.c)
 
-add_executable(fossology ${SOURCE_FILES})
+include_directories(/usr/include/glib-2.0)
+
+add_executable(others ${SOURCE_FILES})

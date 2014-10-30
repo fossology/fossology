@@ -50,9 +50,9 @@
         $.ajax({
             type: 'POST',
             dataType: 'text',
-            url: '?mod=ajax-copyright-hist&action=delete&type=$type',
+            url: '?mod=ajax-copyright-hist&action=delete&type={{ table.type }}',
             data: { id : upload + ',' + item + ',' + hash + ',' + kind },
-            success: function(data) { $('#copyright$type').dataTable().fnDraw(false); },
+            success: function(data) { $('#copyright{{ table.type }}').dataTable().fnDraw(false); },
             error: function() { alert('error'); }
         });
     }

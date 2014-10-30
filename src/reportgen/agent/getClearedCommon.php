@@ -52,10 +52,14 @@ abstract class ClearedGetterCommon
 
     if (!array_key_exists('u',$args))
     {
-      print "missing required parameter -u {uploadId}";
+      print "missing required parameter -u {uploadId}\n";
       exit(2);
     }
-
+    if (false && !array_key_exists('uId',$args))
+    {
+      print "missing optional parameter --uId {userId}\n";
+    }
+    
     $this->uploadId = intval($args['u']);
     $this->userId = intval(@$args['uId']);
   }
@@ -86,7 +90,7 @@ abstract class ClearedGetterCommon
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName)
   {
-    foreach($ungrupedStatements as $key => &$statement) {
+    foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
       $filePathRow = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);
@@ -101,19 +105,29 @@ abstract class ClearedGetterCommon
   {
     $statements = array();
     foreach($ungrupedStatements as $statement) {
+      $content = convertToUTF8($statement['content'], false);
       $description = $statement['description'];
-      $content = $statement['content'];
+      $textfinding = $statement['textfinding'];
       $fileName = $statement['fileName'];
+
+      if ($description === null) {
+        $text = "";
+      } else {
+        $content = $textfinding;
+        $text = $description;
+      }
 
       if (array_key_exists($content, $statements))
       {
-        $statements[$content]['files'][] = $fileName;
+        $currentFiles = &$statements[$content]['files'];
+        if (!in_array($fileName, $currentFiles))
+          $currentFiles[] = $fileName;
       }
       else
       {
         $statements[$content] = array(
-          "content" => $content, //$textfinding,
-          "text" => $description,
+          "content" => $content,
+          "text" => $text,
           "files" => array($fileName)
         );
       }
