@@ -824,7 +824,7 @@ char* _test_wrongQueries_transactions(fo_dbManager** dbManager, const char* test
    "*^\n"
    "On: INSERT INTO %s (a, c) VALUES (1,2)\n"
    "ERROR: ERROR:  current transaction is aborted, commands ignored until end of transaction block\n"
-   "On: INSERT INTO %s (a, b) VALUES (1,2)\n", testTableName, testTableName, testTableName, testTableName, testTableName
+   "On: INSERT INTO %s (a, b) VALUES (1,2)\n", testTableName, testTableName, testTableName
  );
 }
 

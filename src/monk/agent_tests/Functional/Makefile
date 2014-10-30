@@ -12,18 +12,31 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 
-all: $(FOLIB)
-	$(MAKE) -C $(LOCALAGENTDIR)
+all:
+	$(MAKE) -C $(LOCALAGENTDIR)/..
 
-test: all
+test: test-cli test-sched
+
+test-cli: all
+	@echo "make functional tests for cli mode"
 	ln -fs $(LOCALAGENTDIR)/monk ./monk
 	./shunit2 cli_test.sh
 
-coverage: all
+test-sched: all
+	@echo "make functional tests for scheduler mode"
+	$(PHPUNIT) -c $(PHPUNIT_CONF) scheduler_test.php
+
+coverage: coverage-cli coverage-sched
+
+coverage-cli: all
+	@echo "make functional tests for cli mode with coverage"
 	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
 	ln -fs $(LOCALAGENTDIR)/monk_cov ./monk
 	./shunit2 cli_test.sh
-	@echo TODO call phpunit scheduler_test.php
+
+coverage-sched: all
+	@echo "make functional tests for scheduler mode with coverage"
+	$(PHPUNIT) -c $(PHPUNIT_CONF) scheduler_test.php
 
 clean:
 	@echo "nothing to do"
