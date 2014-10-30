@@ -19,21 +19,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use Fossology\Lib\Data\Types;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Exception;
 
-class LicenseEventTypes {
+class LicenseEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
 
   /** @var array */
   private $values = array(self::USER, self::BULK);
 
-  /** @var array */
-  private $map;
-
   public function __construct(DbManager $dbManager)
   {
+    parent::__construct("license decision type");
     $this->map = $dbManager->createMap('license_decision_type', 'type_pk', 'meaning');
 
     assert($this->map[self::USER] == "User decision");
@@ -41,33 +39,4 @@ class LicenseEventTypes {
     assert(count($this->map) == count($this->values));
   }
 
-  /**
-   * @param int $type
-   * @throws Exception
-   * @return string
-   */
-  function getTypeName($type)
-  {
-    if (array_key_exists($type, $this->map))
-    {
-      return $this->map[$type];
-    }
-    throw new Exception("unknown license decision type id " . $type);
-  }
-
-  /**
-   * @return array
-   */
-  public function getMap()
-  {
-    return $this->map;
-  }
-
-  /**
-   * @return int
-   */
-  public function getTypeByName($name)
-  {
-    return array_search($name, $this->map);
-  }
 } 
