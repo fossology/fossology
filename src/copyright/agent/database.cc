@@ -15,6 +15,8 @@
 #include <iostream>
 #include <libfossUtils.hpp>
 
+using namespace fo;
+
 #define RETURN_IF_FALSE(query) \
   do {\
     if (!(query)) {\
@@ -63,6 +65,7 @@ bool CopyrightDatabaseHandler::createTables() const
   int failedCounter = 0;
   bool tablesChecked = false;
 
+  dbManager.ignoreWarnings(true);
   while (!tablesChecked && failedCounter < MAX_TABLE_CREATION_RETRIES)
   {
     dbManager.begin();
@@ -85,6 +88,7 @@ bool CopyrightDatabaseHandler::createTables() const
       << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES
       << std::endl;
 
+  dbManager.ignoreWarnings(false);
   return tablesChecked;
 }
 

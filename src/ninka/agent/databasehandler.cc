@@ -11,25 +11,16 @@
 #include "databasehandler.hpp"
 #include "libfossUtils.hpp"
 
+using namespace fo;
+
 NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
   fo::AgentDatabaseHandler(dbManager)
 {
 }
 
-// TODO: see function queryFileIdsForUpload() from src/lib/c/libfossagent.c
 vector<unsigned long> NinkaDatabaseHandler::queryFileIdsForUpload(int uploadId)
 {
-  QueryResult queryResult = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "queryFileIdsForUpload",
-      "SELECT DISTINCT(pfile_fk) FROM uploadtree WHERE upload_fk = $1 AND (ufile_mode&x'3C000000'::int) = 0",
-      int
-    ),
-    uploadId
-  );
-
-  return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
+  return queryFileIdsVectorForUpload(uploadId);
 }
 
 // TODO: see function saveToDb() from src/monk/agent/database.c
@@ -51,36 +42,45 @@ bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long lice
 
 unsigned long NinkaDatabaseHandler::selectOrInsertLicenseIdForName(string rfShortName)
 {
-  QueryResult queryResult = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager.getStruct_dbManager(),
-      "selectOrInsertLicenseIdForName",
-      "WITH "
-      "selectExisting AS ("
-        "SELECT rf_pk FROM license_ref WHERE rf_shortname = $1 LIMIT 1"
-      "),"
-      "insertNew AS ("
-        "INSERT INTO license_ref(rf_shortname, rf_text, rf_detector_type)"
-        " SELECT $1, $2, $3"
-        " WHERE NOT EXISTS(SELECT * FROM selectExisting)"
-        " RETURNING rf_pk"
-      ") "
+  bool committed = false;
 
-      "SELECT rf_pk FROM insertNew "
-      "UNION "
-      "SELECT rf_pk FROM selectExisting",
-      char*, char*, int
-    ),
-    rfShortName.c_str(),
-    "License by Ninka.",
-    3
-  );
+  unsigned count = 0;
+  while ((!committed) && count++<3)
+  {
+    dbManager.begin();
+    dbManager.queryPrintf("LOCK TABLE license_ref");
 
-  if(!queryResult)
-    return 0;
+    QueryResult queryResult = dbManager.execPrepared(
+      fo_dbManager_PrepareStamement(
+        dbManager.getStruct_dbManager(),
+        "selectOrInsertLicenseIdForName",
+        "WITH "
+          "selectExisting AS ("
+            "SELECT rf_pk FROM license_ref"
+            " WHERE rf_shortname = $1"
+          "),"
+          "insertNew AS ("
+            "INSERT INTO license_ref(rf_shortname, rf_text, rf_detector_type)"
+            " SELECT $1, $2, $3"
+            " WHERE NOT EXISTS(SELECT * FROM selectExisting)"
+            " RETURNING rf_pk"
+          ") "
 
-  if (queryResult.getRowCount() > 0) {
-    return queryResult.getSimpleResults(0, fo::stringToUnsignedLong)[0];
+        "SELECT rf_pk FROM insertNew "
+        "UNION "
+        "SELECT rf_pk FROM selectExisting",
+        char*, char*, int
+      ),
+      rfShortName.c_str(),
+      "License by Ninka.",
+      3
+    );
+
+    committed = dbManager.commit();
+
+    if (committed && queryResult && queryResult.getRowCount() > 0) {
+      return queryResult.getSimpleResults(0, fo::stringToUnsignedLong)[0];
+    }
   }
 
   return 0;
@@ -92,7 +92,20 @@ NinkaDatabaseHandler NinkaDatabaseHandler::spawn() const
   return NinkaDatabaseHandler(spawnedDbMan);
 }
 
-unsigned long NinkaDatabaseHandler::getLicenseIdForName(string const & rfShortName)
+void NinkaDatabaseHandler::insertOrCacheLicenseIdForName(string const& rfShortName)
+{
+  if (getCachedLicenseIdForName(rfShortName)==0)
+  {
+    unsigned long licenseId = selectOrInsertLicenseIdForName(rfShortName);
+
+    if (licenseId > 0)
+    {
+      licenseRefCache.insert(std::make_pair(rfShortName, licenseId));
+    }
+  }
+}
+
+unsigned long NinkaDatabaseHandler::getCachedLicenseIdForName(string const& rfShortName) const
 {
   std::unordered_map<string,long>::const_iterator findIterator = licenseRefCache.find(rfShortName);
   if (findIterator != licenseRefCache.end())
@@ -101,13 +114,6 @@ unsigned long NinkaDatabaseHandler::getLicenseIdForName(string const & rfShortNa
   }
   else
   {
-    unsigned long licenseId = selectOrInsertLicenseIdForName(rfShortName);
-    if (licenseId > 0)
-    {
-      licenseRefCache.insert(std::make_pair(rfShortName, licenseId));
-      return licenseId;
-    }
+    return 0;
   }
-
-  return 0;
 }

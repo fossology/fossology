@@ -12,8 +12,8 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 DEF = -DDATADIR='"$(MODDIR)"'
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -Wall -I. -I$(LOCALAGENTDIR)
-CXXFLAGS_LINK  = $(ALL_CXXFLAGS) -lcppunit -lstdc++
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -Wall -I. -I$(LOCALAGENTDIR) -fopenmp
+CXXFLAGS_LINK  = $(ALL_CXXFLAGS) -lcppunit -lstdc++ -fopenmp
 
 EXE = test_ninka
 
@@ -46,8 +46,6 @@ test: all
 coverage: run_tests.cc $(OBJECTS) libninka_cov.a ${CXXFOLIB}
 	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libninka_cov.a $(CXXFLAGS_LINK) $(FLAG_COV)
 	./$(EXE)
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt
-	genhtml -o results cov.txt
 
 clean:
 	rm -rf $(EXE) *.o *.a *.gcno *.gcda *Tests-Results.xml cov.txt results

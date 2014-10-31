@@ -16,6 +16,13 @@ You should have received a copy of the GNU General Public License along with thi
 #include "copyright.hpp"
 
 using namespace std;
+using namespace fo;
+
+#define return_sched(retval) \
+  do {\
+    fo_scheduler_disconnect((retval));\
+    return (retval);\
+  } while(0)
 
 int main(int argc, char** argv)
 {
@@ -24,28 +31,35 @@ int main(int argc, char** argv)
 
   DbManager dbManager(&argc, argv);
 
-  int verbosity = 8;
-  CopyrightState state = getState(dbManager, verbosity);
+  CliOptions cliOptions;
+  vector<string> fileNames;
+  if (!parseCliOptions(argc, argv, cliOptions, fileNames))
+  {
+    return_sched(1);
+  }
+
+  CopyrightState state = getState(dbManager, cliOptions);
   CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
   if (!copyrightDatabaseHandler.createTables())
   {
     std::cout << "FATAL: initialization failed" << std::endl;
-    bail(9);
+    return_sched(9);
   }
 
   fillMatchers(state);
 
-  if (argc > 1)
+  if (!fileNames.empty())
   {
     const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+
+    const unsigned long fileNamesCount = fileNames.size();
 #pragma omp parallel
     {
 #pragma omp for
-      for (int argn = 1; argn < argc; ++argn)
+      for (int argn = 0; argn < fileNamesCount; ++argn)
       {
-        const char* fileName = argv[argn];
-
+        const string fileName = fileNames[argn];
         fo::File file((unsigned long) argn, fileName);
         vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
 
@@ -66,10 +80,10 @@ int main(int argc, char** argv)
       int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
       if (arsId <= 0)
-        bail(5);
+        return_sched(5);
 
       if (!processUploadId(state, uploadId, copyrightDatabaseHandler))
-        bail(2);
+        return_sched(2);
 
       fo_scheduler_heart(1);
       writeARS(state, arsId, uploadId, 1, dbManager);
@@ -78,6 +92,6 @@ int main(int argc, char** argv)
   }
 
   /* do not use bail, as it would prevent the destructors from running */
-  fo_scheduler_disconnect(0);
-  return 0;
+  return_sched(0);
 }
+

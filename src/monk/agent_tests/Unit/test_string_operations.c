@@ -177,26 +177,11 @@ void test_token_equal() {
   free(search);
 }
 
-void test_stringBuilder() {
-  StringBuilder* stringBuilder = stringBuilder_new();
-
-  stringBuilder_printf(stringBuilder, "test null, ");
-  stringBuilder_printf(stringBuilder, "test int '%d', ", 5);
-  stringBuilder_printf(stringBuilder, "test string '%s'", "a string");
-
-  char* result = stringBuilder_build(stringBuilder);
-  stringBuilder_free(stringBuilder);
-
-  CU_ASSERT_STRING_EQUAL(result, "test null, test int '5', test string 'a string'");
-  free(result);
-}
-
 CU_TestInfo string_operations_testcases[] = {
   {"Testing tokenize:", test_tokenize},
   {"Testing stream tokenize:", test_streamTokenize},
   {"Testing stream tokenize with too long stream:",test_streamTokenizeEventuallyGivesUp},
   {"Testing find token position in string:", test_tokenPosition},
   {"Testing token equals:", test_token_equal},
-  {"Testing string builder:", test_stringBuilder},
   CU_TEST_INFO_NULL
 };

@@ -27,6 +27,9 @@ COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o \
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
 
+$(EXE)_cov: $(FOLIB) $(VARS) $(COVERAGE)
+	$(CC) $(COVERAGE) $(FLAG_COV) $(DEF) $(CFLAGS_LINK) -o $@
+
 all: _squareVisitor.h $(FOLIB) $(EXE)
 
 #######################

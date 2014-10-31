@@ -22,13 +22,14 @@ using namespace std;
 class NinkaDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
-  NinkaDatabaseHandler(DbManager dbManager);
+  NinkaDatabaseHandler(fo::DbManager dbManager);
   NinkaDatabaseHandler spawn() const;
 
   vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
 
-  unsigned long getLicenseIdForName(string const & rfShortName);
+  void insertOrCacheLicenseIdForName(string const& rfShortName);
+  unsigned long getCachedLicenseIdForName(string const& rfShortName) const;
 
 private:
   unsigned long selectOrInsertLicenseIdForName(string rfShortname);

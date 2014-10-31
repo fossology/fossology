@@ -92,10 +92,14 @@ set(SOURCE_FILES
     src/lib/cpp/libfossAgentDatabaseHandler.hpp
     src/lib/cpp/libfossUtils.cc
     src/lib/cpp/libfossUtils.hpp
+    src/lib/cpp/libfossRepo.cc
+    src/lib/cpp/libfossRepo.hpp
     src/lib/cpp/files.cc
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc
     src/lib/cpp/libfossdbmanagerclass.hpp
+    src/lib/cpp/libfossdbQueryResult.cc
+    src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
     src/lib/cpp/uniquePtr.hpp
     src/maintagent/agent/maintagent.c

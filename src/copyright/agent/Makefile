@@ -13,7 +13,7 @@ include $(VARS)
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -Wextra -Weffc++ -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -fopenmp
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
@@ -24,10 +24,10 @@ EXE_IP = ip
 EXE_ECC = ecc
 EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
 
-OBJECTS = copyright.o copyrightState.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o 
-OBJECTS_COP = copyrightUtils_cop.o database_cop.o
-OBJECTS_IP = copyrightUtils_ip.o database_ip.o
-OBJECTS_ECC = copyrightUtils_ecc.o database_ecc.o
+OBJECTS = copyright.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o
+OBJECTS_COP = copyrightUtils_cop.o copyrightState_cop.o database_cop.o
+OBJECTS_IP = copyrightUtils_ip.o copyrightState_ip.o database_ip.o
+OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
 
 COVERAGE = $(OBJECTS:.o=_cov.o)
 COVERAGE_COP = $(OBJECTS_COP:.o=_cov.o)

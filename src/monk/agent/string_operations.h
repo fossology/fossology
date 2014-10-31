@@ -26,9 +26,9 @@ typedef struct {
 
 #define tokens_new() g_array_new(TRUE, FALSE, sizeof (Token))
 
-GArray* tokenize(char* inputString, const char* delimiters);
+GArray* tokenize(const char* inputString, const char* delimiters);
 
-int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
+int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
         GArray** output, Token** remainder);
 
 #define tokenEquals(a, b) (((Token*) a)->hashedContent == ((Token*) b)->hashedContent)
@@ -36,18 +36,5 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
 int tokensEquals(GArray* a, GArray* b);
 
 size_t token_position_of(size_t index, GArray* tokens);
-
-typedef struct {
-  GArray* contents;
-  size_t length;
-} StringBuilder;
-
-StringBuilder* stringBuilder_new();
-
-void stringBuilder_free(StringBuilder* stringBuilder);
-
-void stringBuilder_printf(StringBuilder* stringBuilder, const char* format, ...);
-
-char* stringBuilder_build(StringBuilder* stringBuilder);
 
 #endif // MONK_AGENT_STRING_OPERATIONS_H

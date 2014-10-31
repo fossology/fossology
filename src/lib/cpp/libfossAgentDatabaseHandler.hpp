@@ -11,8 +11,8 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef LIBFOSS_AGENT_DATABASE_HANDLER_HPP_
 #define LIBFOSS_AGENT_DATABASE_HANDLER_HPP_
 
-#include <string>
 #include <vector>
+
 #include "libfossdbmanagerclass.hpp"
 
 namespace fo
@@ -23,7 +23,7 @@ namespace fo
   protected:
     DbManager dbManager;
   public:
-    AgentDatabaseHandler(DbManager _dbManager);
+    AgentDatabaseHandler(DbManager dbManager);
     AgentDatabaseHandler(AgentDatabaseHandler&& other);
     AgentDatabaseHandler(const AgentDatabaseHandler&) = delete;
     virtual ~AgentDatabaseHandler();
@@ -34,6 +34,7 @@ namespace fo
     bool rollback() const;
 
     char* getPFileNameForFileId(unsigned long pfileId) const;
+    std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId) const;
   };
 }
 
