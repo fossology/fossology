@@ -17,7 +17,7 @@ CPPUNIT_PATH = /opt/cppunit
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl -fopenmp
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE = test_copyright
 
@@ -53,7 +53,7 @@ test: all
 
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
