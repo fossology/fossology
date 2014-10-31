@@ -20,6 +20,7 @@ namespace Fossology\Lib\Test;
 
 // setup autoloading
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/vendor/autoload.php");
+require_once(__DIR__ . "/../../../testing/db/TestDbFactory.php");
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
@@ -42,58 +43,10 @@ class TestPgDb
 
   function __construct($dbName = null)
   {
-    date_default_timezone_set("UTC");
-    if (!is_callable('pg_connect')) {
-      throw new \Exception("php-psql not found");
-    }
-    $sub = chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122)).chr(mt_rand(97,122));
-    if (!isset($dbName))
-    {
-      $dbName = "fosstestone";
-    }
-    $dbName = strtolower($dbName);
-    $this->dbName = $dbName;
-    $this->ensurePgPassFileEntry();
-    
-    $this->sys_conf = sys_get_temp_dir()."/$dbName".time().$sub;
-    if(!mkdir($this->sys_conf,$mode=0755))
-    {
-      throw new \Exception("FATAL! Cannot create test repository at ".$this->sys_conf);
-    }
-    if(chmod($this->sys_conf, 0755) === FALSE )
-    {
-      echo "ERROR: Cannot set mode to 755 on ".$this->sys_conf."\n" . __FILE__ . " at line " . __LINE__ . "\n";
-    }
-    $conf = "dbname=$dbName;\nhost=localhost;\nuser=fossy;\npassword=fossy;\n";
-    if(file_put_contents($this->sys_conf . "/Db.conf", $conf) === FALSE)
-    {
-      throw new \Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
-    }
+    $testDbFactory = new \TestDbFactory();
+    $sysConfDir = getenv('SYSCONFDIR');
 
-    exec($cmd="psql -Ufossy -h localhost -lqtA | cut -f 1 -d '|' | grep -q '^$dbName\$'", $cmdOut, $cmdRtn);
-    if($cmdRtn == 0)
-    {
-      exec($cmd="createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
-      if($cmdRtn != 0)
-      {
-        exec($cmd="createlang -Ufossy -h localhost plpgsql $dbName", $cmdOut, $cmdRtn);
-        if($cmdRtn != 0)
-          throw new \Exception("ERROR: failed to add plpgsql to $dbName database");
-      }
-    }    
-    else
-    {
-      $fosstestSql = file_get_contents( dirname(__FILE__).'/fosstestinit.sql');
-      $fossSql = str_replace('fosstest',$dbName,$fosstestSql);
-      $pathSql = $this->sys_conf.'/dbinit.sql';
-      file_put_contents($pathSql,$fossSql);
-      exec($cmd="psql -Ufossy -h localhost fossology < $pathSql", $cmdOut, $cmdRtn); //  2>&1
-      if ($cmdRtn != 0)
-      {
-        throw new \Exception("ERROR: Database failed during configuration.");
-      }
-      unlink($pathSql);
-    }
+    $this->sys_conf = $sysConfDir ?: $testDbFactory->setupTestDb($dbName);
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
     $this->connection = DBconnect($this->sys_conf);
@@ -141,29 +94,6 @@ class TestPgDb
     }
   }
 
-  private function ensurePgPassFileEntry()
-  {
-    $userHome = getenv('HOME');
-    $ipv4 = gethostbyname(gethostname());
-    $fullHostName = gethostbyaddr(gethostbyname($ipv4));
-    $contents = "$fullHostName:*:*:fossy:fossy\n";
-    $pgpass = "$userHome/.pgpass";
-    putenv("PGPASSFILE=$pgpass");
-    $pg_pass_contents = file_exists($pgpass) ? file_get_contents($pgpass) : '';
-    if (!preg_match('/\:fossy\:fossy/', $pg_pass_contents)) {
-      $pgpassHandle = fopen($pgpass,'w');
-      $howmany = fwrite($pgpassHandle, $contents);
-      if($howmany === FALSE)
-      {
-        throw new \Exception("FATAL! Could not write .pgpass file to $pgpassHandle" );
-      }
-      fclose($pgpassHandle);
-    }
-    if(!chmod($pgpass, 0600))
-    {
-      echo "Warning! could not set $pgpass to 0600\n";
-    }
-  }
   
   function __destruct()
   {
