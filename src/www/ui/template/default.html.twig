@@ -1,6 +1,13 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
+  
+    {% if authUrl %}
+    <div style="float: right; border: 1px black dashed; max-width: 360px; padding: 5px;">
+      {% include 'login-form.html.twig' %}
+    </div>
+  {% endif %}
+  
   <b>
     {{ 'FOSSology'| trans }}
   </b>
@@ -47,11 +54,6 @@
     {{ "Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
         even add new users."| trans }}
   </li>
-  {% if authUrl %}
-    <li>
-      {% include 'login-form.html.twig' %}
-    </li>
-  {% endif %}
 </ul>
 {% endblock %}
 
