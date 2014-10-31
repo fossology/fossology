@@ -146,7 +146,7 @@ class ClearingDecisionEventProcessor
   public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
-    $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds);
+    $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemTreeBounds);
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
 

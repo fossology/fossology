@@ -82,7 +82,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testGetCurrentLicenseDecisionsWithUserDecisionsOnly()
   {
-    $addedEvent = $this->createLicenseDecisionEvent(123, 12, 13, "licA", "License A");
+    $addedEvent = $this->createLicenseDecisionEvent(123, 13, "licA", "License A");
 
     $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
     $this->clearingDao->shouldReceive("getCurrentLicenseDecisions")
@@ -160,7 +160,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds)
         ->andReturn($addedEvents);
 
-    $addedEvent = $this->createLicenseDecisionEvent(123, 12, 13, "licA", "License A");
+    $addedEvent = $this->createLicenseDecisionEvent(123, 13, "licA", "License A");
     $this->clearingDao->shouldReceive("getCurrentLicenseDecisions")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($this->createResults($addedEvent), array()));
@@ -179,7 +179,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testGetCurrentLicenseDecisionsWithUserRemovedDecisionsOnly()
   {
-    $removedEvent = $this->createLicenseDecisionEvent(123, 12, 13, "licA", "License A");
+    $removedEvent = $this->createLicenseDecisionEvent(123, 13, "licA", "License A");
 
     $agentRef = new AgentRef(143, "agent", "1.1");
     $licenseRef = new LicenseRef(13, "licA", "License A");
@@ -225,21 +225,19 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   /**
    * @param $eventId
-   * @param $fileId
    * @param $licenseId
    * @param $licenseShortName
    * @param $licenseFullName
    * @param string $eventType
-   * @param bool $isGlobal
    * @param bool $isRemoved
    * @param string $reportInfo
    * @param string $comment
    * @return LicenseDecisionEvent
    */
-  private function createLicenseDecisionEvent($eventId, $fileId, $licenseId, $licenseShortName, $licenseFullName, $eventType = LicenseDecisionEvent::USER_DECISION, $isGlobal = false, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
+  private function createLicenseDecisionEvent($eventId, $licenseId, $licenseShortName, $licenseFullName, $eventType = LicenseDecisionEvent::USER_DECISION, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseFullName);
-    return new LicenseDecisionEvent($eventId, $fileId, $this->uploadTreeId, new DateTime(), $this->userId, $this->groupId, $eventType, $licenseRef, $isGlobal, $isRemoved, $reportInfo, $comment);
+    return new LicenseDecisionEvent($eventId, $this->uploadTreeId, new DateTime(), $this->userId, $this->groupId, $eventType, $licenseRef, $isRemoved, $reportInfo, $comment);
   }
 
   private function createResults()
