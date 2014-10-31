@@ -18,7 +18,8 @@
       <option value="f">{{ 'scan only current Folder'| trans }}</option>
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
     </select>
-    <br><button type="button" onclick='scheduleBulkScan()'>Schedule Bulk scan</button>
+    <input type="checkbox" id="forceDecision"/>{{ 'ignoreConflicts'|trans }}
+    <br><button type="button" onclick='scheduleBulkScan();'>Schedule Bulk scan</button>
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
   </form>
 </div>

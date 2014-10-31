@@ -44,7 +44,7 @@ class DeciderAgent extends Agent
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
-    $this->conflictStrategyId = @$args['k'];
+    $this->conflictStrategyId = array_key_exists('k',$args) ? $args['k'] : NULL;
 
     global $container;
     $this->uploadDao = $container->get('dao.upload');
@@ -57,13 +57,14 @@ class DeciderAgent extends Agent
 
   static protected function hasNewerUserEvents($events, $date)
   {
-    foreach ($events as $licenseShortName => $licenseDecisionResult)
+    foreach ($events as $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)))
-        if (($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
-          return false;
+      if ((($date === null) || ($eventDate > $date)) && ($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
+      {
+        return false;
+      }
     }
 
     return true;

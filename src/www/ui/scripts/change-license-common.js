@@ -119,7 +119,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "refText": $('#bulkRefText').val(),
     "licenseId": $('#bulkLicense').val(),
     "bulkScope": $('#bulkScope').val(),
-    "uploadTreeId": $('#uploadTreeId').val()
+    "uploadTreeId": $('#uploadTreeId').val(),
+    "forceDecision": $('#forceDecision').is(':checked')?1:0
   };
 
   resultEntity.hide();
@@ -128,8 +129,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-bulk",
     data: post_data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal) },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity) }
+    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal); },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
   });
 
 }
