@@ -133,6 +133,7 @@ class ClearingDecisionEventProcessor
     if ($insertDecision)
     {
       $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
+      ReportCachePurgeAll();
     }
   }
 
