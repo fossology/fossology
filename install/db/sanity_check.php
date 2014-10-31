@@ -18,6 +18,8 @@
 
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Db\DbManager;
 
 class SanityChecker
 {
@@ -33,8 +35,15 @@ class SanityChecker
     $this->dbManager = $dbManager;
     $this->verbose = $verbose;
   }
-  
-  public function checkDecisionScopes()
+
+  public function check()
+  {
+    $this->checkDecisionScopes();
+    $this->checkUploadStatus();
+    return $this->errors;
+  }
+
+  private function checkDecisionScopes()
   {
     $decScopes = new DecisionScopes();
     $scopeMap = $decScopes->getMap();
@@ -42,7 +51,13 @@ class SanityChecker
     $decTypes = new DecisionTypes();
     $typeMap = $decTypes->getExtendedMap();
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'decision_type', $typeMap);
-    return $this->errors;
+  }
+
+  public function checkUploadStatus()
+  {
+    $uploadStatus = new UploadStatus();
+    $statusMap = $uploadStatus->getMap();
+    $this->errors += $this->checkDatabaseEnum($tablename = 'upload_status', 'status_pk', $statusMap);
   }
 
   /**

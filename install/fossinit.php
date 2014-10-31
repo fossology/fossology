@@ -221,7 +221,8 @@ if($sysconfig['Release'] == '2.6')
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
-$errors = $checker->checkDecisionScopes();
+$errors = $checker->check();
+
 if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";

@@ -18,30 +18,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-use Fossology\Lib\Db\DbManager;
-
 class UploadStatus extends Types
 {
   const OPEN = 1;
   const IN_PROGRESS = 2;
   const CLOSED = 3;
   const REJECTED = 4;
-  
-  /** @var array */
-  private $values = array(self::OPEN, self::IN_PROGRESS, self::CLOSED, self::REJECTED);
 
-  public function __construct(DbManager $dbManager)
+  public function __construct()
   {
     parent::__construct("upload status type");
 
-    $this->map = $dbManager->createMap('upload_status', 'status_pk', 'meaning');
-
-    assert($this->map[self::OPEN] == "open");
-    assert($this->map[self::IN_PROGRESS] == "in progress");
-    assert($this->map[self::CLOSED] == "closed");
-    assert($this->map[self::REJECTED] == "rejected");
-    assert(count($this->map) == count($this->values));
+    $this->map = array(
+        self::OPEN => "open",
+        self::IN_PROGRESS => "in progress",
+        self::CLOSED => "closed",
+        self::REJECTED => "recected"
+    );
   }
-
 }

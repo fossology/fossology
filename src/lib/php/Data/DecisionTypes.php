@@ -29,11 +29,13 @@ class DecisionTypes extends Types
   {
     parent::__construct("decision type");
 
-    $this->map = array(self::TO_BE_DISCUSSED=>"To be discussed",
-            self::IRRELEVANT=>"Irrelevant",
-            self::IDENTIFIED=>"Identified");
+    $this->map = array(
+        self::TO_BE_DISCUSSED => "To be discussed",
+        self::IRRELEVANT => "Irrelevant",
+        self::IDENTIFIED => "Identified"
+    );
   }
-  
+
   public function getExtendedMap()
   {
     $map = $this->map;
