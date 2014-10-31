@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\DatabaseEnum;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\Tree\UploadTreeView;
@@ -150,31 +150,15 @@ SELECT * FROM $uploadTreeTableName
     return $fileCount;
   }
 
-
-  /**
-   * @return DatabaseEnum[]
-   */
-  public function getStatusTypes()
-  {
-    $clearingTypes = array();
-    $statementN = __METHOD__;
-
-    $this->dbManager->prepare($statementN, "select * from upload_status");
-    $res = $this->dbManager->execute($statementN);
-    while ($rw = pg_fetch_assoc($res))
-    {
-      $clearingTypes[] = new DatabaseEnum($rw['status_pk'], $rw['meaning']);
-    }
-    pg_free_result($res);
-    return $clearingTypes;
-  }
-
   /**
    * @return array
    */
   public function getStatusTypeMap()
   {
-    return $this->dbManager->createMap('upload_status', 'status_pk', 'meaning');
+    global $container;
+    /** UploadStatus */
+    $uploadStatus = $container->get('upload_status.types');
+    return $uploadStatus->getMap();
   }
 
   /**
