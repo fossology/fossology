@@ -21,15 +21,13 @@ class CliOptions
 {
 private:
   int verbosity;
-  bool optShowHelp;
   unsigned int optType;
 
 public:
   int getVerbosity() const;
   unsigned int getOptType() const;
-  bool showHelp();
 
-  CliOptions(int verbosity, bool showHelp, unsigned int type);
+  CliOptions(int verbosity, unsigned int type);
   CliOptions();
 };
 

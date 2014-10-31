@@ -66,7 +66,11 @@ namespace fo
 
   File::File(unsigned long _id, const char* _fileName) : id(_id), fileName(_fileName)
   {
-  };
+  }
+
+  File::File(unsigned long id, const std::string fileName) : id(id), fileName(fileName)
+  {
+  }
 
   unsigned long File::getId() const
   {

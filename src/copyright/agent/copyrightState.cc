@@ -43,14 +43,8 @@ int CliOptions::getVerbosity() const
   return verbosity;
 }
 
-bool CliOptions::showHelp()
-{
-  return optShowHelp;
-}
-
-CliOptions::CliOptions(int verbosity, bool showHelp, unsigned int type) :
+CliOptions::CliOptions(int verbosity, unsigned int type) :
   verbosity(verbosity),
-  optShowHelp(showHelp),
   optType(type)
 {
 
@@ -63,8 +57,7 @@ unsigned int CliOptions::getOptType() const
 
 CliOptions::CliOptions():
   verbosity(0),
-  optShowHelp(false),
-  optType(DEFAULT_TYPES)
+  optType(ALL_TYPES)
 {
 }
 

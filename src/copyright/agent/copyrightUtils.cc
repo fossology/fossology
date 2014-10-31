@@ -10,9 +10,11 @@
  */
 
 #include "copyrightUtils.hpp"
+#include <boost/program_options.hpp>
+
+#include <iostream>
 
 using namespace std;
-using namespace fo;
 
 void queryAgentId(int& agent, PGconn* dbConn)
 {
@@ -38,7 +40,7 @@ void queryAgentId(int& agent, PGconn* dbConn)
   }
 }
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager)
+int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
 {
   return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, state.getAgentId(), AGENT_ARS, NULL, success);
 }
@@ -49,56 +51,60 @@ void bail(int exitval)
   exit(exitval);
 }
 
-
-void showHelp()
+bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
-  cout << "TODO: help" << endl;
-}
-
-bool parseCliOptions(int argc, char** argv, CliOptions& dest, int& argn)
-{
-  int c;
-  bool optShowHelp = false;
-  unsigned type = DEFAULT_TYPES;
+  unsigned type;
   int verbosity = 0;
 
-  while ((c = getopt(argc, argv, "hvT:")) != -1)
+  boost::program_options::options_description desc(IDENTITY ": recognized options");
+  desc.add_options()
+        ("help,h", "shows help")
+        (
+          "type,T",
+          boost::program_options::value<unsigned>(&type)
+            ->default_value(ALL_TYPES),
+          "type of regex to try"
+        ) // TODO change and add help based on IDENTITY
+        (
+          "files",
+          boost::program_options::value< vector<string> >(),
+          "files to scan"
+        );
+
+  boost::program_options::positional_options_description p;
+  p.add("files", -1);
+
+  boost::program_options::variables_map vm;
+
+  try
   {
-    switch (c)
+    boost::program_options::store(
+      boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+
+    type = vm["type"].as<unsigned>();
+
+    if ((vm.count("help") > 0) || (type > ALL_TYPES))
     {
-      case '?':
-      case 'h':
-        optShowHelp = true;
-        break;
-      case 'v':
-        ++verbosity;
-        break;
-      case 'T':
-        {
-          int value = atoi(optarg);
-          if ((value > 0) && (value <= 1 << MAX_TYPES))
-          {
-            type = (unsigned int) value;
-          }
-          else
-          {
-            return false;
-          }
-        }
-        break;
-      default:
-        return false;
+      cout << desc << endl;
+      return false;
     }
+
+    if (vm.count("files"))
+    {
+      fileNames = vm["files"].as<std::vector<string> >();
+    }
+
+    dest = CliOptions(verbosity, type);
+    return true;
   }
-
-  argn = optind;
-
-  dest = CliOptions(verbosity, optShowHelp, type);
-
-  return true;
+  catch (boost::program_options::error&)
+  {
+    cout << desc << endl;
+    return false;
+  }
 }
 
-CopyrightState getState(DbManager dbManager, const CliOptions& cliOptions)
+CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
 {
   int agentID;
   queryAgentId(agentID, dbManager.getConnection());

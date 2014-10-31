@@ -50,6 +50,6 @@
  #endif
 #endif
 
-#define DEFAULT_TYPES ((1<<MAX_TYPES) -1)
+#define ALL_TYPES ((1<<MAX_TYPES) -1)
 
 #endif // IDENTITY_HPP
