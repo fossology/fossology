@@ -21,7 +21,6 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\View\Renderer;
 
 define("TITLE_ui_browse", _("Browse"));
 
@@ -29,12 +28,8 @@ class ui_browse extends FO_Plugin
 {
   /** @var UploadDao */
   private $uploadDao;
-
   /** @var FolderDao */
   private $folderDao;
-
-  /** @var TreeDao */
-  private $treeDao;
 
   function __construct()
   {
@@ -49,7 +44,6 @@ class ui_browse extends FO_Plugin
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->folderDao = $container->get('dao.folder');
-    $this->treeDao = $container->get('dao.tree');
 
     parent::__construct();
   }
@@ -121,7 +115,7 @@ class ui_browse extends FO_Plugin
     $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
     /* menu with only Tag and Compare */
     $MenuTag = array();
-    foreach ($MenuPfile as $key => $value)
+    foreach ($MenuPfile as $value)
     {
       if (($value->Name == 'Tag') or ($value->Name == 'Compare'))
       {
@@ -221,13 +215,13 @@ class ui_browse extends FO_Plugin
       }
     }
     return ($V);
-  } // ShowItem()
+  }
   
   /**
-   * \brief Given a upload_pk, list every item in it.
+   * @brief Given a upload_pk, list every item in it.
    * If it is an individual file, then list the file contents.
    */
-  function ShowFolder($Folder, $Show)
+  private function ShowFolder($Folder, $Show)
   {
     $V = "<div align='center'><small>";
     if ($Folder != GetUserRootFolder())
@@ -248,18 +242,11 @@ class ui_browse extends FO_Plugin
     $V .= "</form>\n";
     $this->vars['folderNav'] = $V;
     
-    global $container;
-    /** @var Renderer */
-    $renderer = $container->get('renderer');
     $assigneeArray = $this->getAssigneeArray();
-
-    $assigneeFilter = $renderer->createSelect('assigneeSelector', $assigneeArray, 0, ' onchange="filterAssignee()"');
-    $this->vars['assigneeFilter'] = $assigneeFilter;
+    $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
-    
     $this->vars['folder'] = $Folder;
     $this->vars['show'] = $Show;
-
     return '';
   }
 
@@ -268,14 +255,11 @@ class ui_browse extends FO_Plugin
    */
   function Output()
   {
-    global $PG_CONN;
-
     if ($this->State != PLUGIN_STATE_READY)
     {
       return 0;
     }
 
-    $V = "";
     $folder_pk = GetParm("folder", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
@@ -286,48 +270,57 @@ class ui_browse extends FO_Plugin
       $UploadPerm = GetUploadPerm($Upload);
       if ($UploadPerm < PERM_READ)
       {
-        $text = _("Permission Denied");
-        echo "<h2>$text</h2>";
-        return "";
+        $this->vars['message'] = _("Permission Denied");
+        return $this->renderTemplate('include/base.html.twig');
       }
     }
 
-    /* kludge for plugins not supplying a folder parameter.
-     * Find what folder this upload is in.  Error if in multiple folders.
-     */
     if (empty($folder_pk))
     {
-      if (empty($Upload))
-        $folder_pk = GetUserRootFolder();
-      else
-      {
-        /* Make sure the upload record exists */
-        $sql = "select upload_pk from upload where upload_pk=$Upload";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        if (pg_num_rows($result) < 1)
-        {
-          echo "This upload no longer exists on this system.";
-          return "";
-        }
-
-        $sql = "select parent_fk from foldercontents where child_id=$Upload and foldercontents_mode=2";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        if (pg_num_rows($result) > 1)
-          Fatal("Upload $Upload found in multiple folders.", __FILE__, __LINE__);
-        if (pg_num_rows($result) < 1)
-          Fatal("Upload $Upload missing from foldercontents.", __FILE__, __LINE__);
-
-        $row = pg_fetch_assoc($result);
-        $folder_pk = $row['parent_fk'];
-        pg_free_result($result);
+      try {
+        $folder_pk = $this->getFolderId($Upload);
+      }
+      catch (Exception $exc) {
+        return $exc->getMessage();
       }
     }
 
-    $V .= $this->outputItemHtml($Item, $folder_pk, $Upload);
-    $this->vars['content'] = $V;
+    $this->vars['content'] = $this->outputItemHtml($Item, $folder_pk, $Upload);
     return $this->renderTemplate('ui-browse.html.twig');
+  }
+  
+  /**
+   * @brief kludge for plugins not supplying a folder parameter.
+   * Find what folder this upload is in.  Error if in multiple folders.
+   */
+  private function getFolderId($uploadId)
+  {
+    if (empty($uploadId))
+    {
+      return GetUserRootFolder();
+    }
+    global $container;
+    /** @var Fossology\Lib\Db\DbManager */
+    $dbManager = $container->get('db.manager');
+    $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
+    if ($uploadExists['cnt']< 1)
+    {
+      throw new \Exception("This upload no longer exists on this system.");
+    }
+    $dbManager->prepare($stmt=__METHOD__.'.parent',
+           $sql = "select parent_fk from foldercontents where child_id=$1 and foldercontents_mode=$2");
+    $result = $dbManager->execute($stmt,array($uploadId,2));
+    $allParents = $dbManager->fetchAll($result);
+    $dbManager->freeResult($result);
+    if (count($allParents) > 1)
+    {
+      Fatal("Upload $uploadId found in multiple folders.", __FILE__, __LINE__);
+    }
+    if (count($allParents) < 1)
+    {
+      Fatal("Upload $uploadId missing from foldercontents.", __FILE__, __LINE__);
+    }
+    return $allParents[0]['parent_fk'];
   }
 
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
@@ -345,9 +338,9 @@ class ui_browse extends FO_Plugin
       $UploadPerm = GetUploadPerm($Upload);
       if ($UploadPerm < PERM_READ)
       {
-        $text = _("Permission Denied");
-        echo "<h2>$text</h2>";
-        return "";
+        $this->vars['message'] = _("Permission Denied");
+        echo $this->renderTemplate('include/base.html.twig');
+        exit;
       }
 
       if (!Iscontainer($row['ufile_mode']))
@@ -356,72 +349,52 @@ class ui_browse extends FO_Plugin
         $View = &$Plugins[plugin_find_id("view")];
         if (!empty($View))
         {
-          /** @var ui_view $View */
-          return ($View->ShowView(NULL, "browse"));
+          $this->vars['content'] = $View->ShowView(NULL, "browse");
+          echo $this->renderTemplate('include/base.html.twig');
+          exit;
         }
       }
       $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
       $html .= Dir2Browse($this->Name, $uploadTreeId, NULL, 1, "Browse", -1, '', '', $uploadtree_tablename) . "\n";
-    } else if (!empty($Upload))
+    }
+    else if (!empty($Upload))
     {
       $uploadtree_tablename = GetUploadtreeTableName($Upload);
       $html .= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
     }
 
-    if (!empty($Upload))
-    {
-      if (empty($uploadTreeId))
-      {
-        $dbManager->prepare($stmt = __METHOD__ . ".getTreeRoot",
-            $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1");
-        $result = $dbManager->execute($stmt, array($Upload));
-        if (pg_num_rows($result))
-        {
-          $row = $dbManager->fetchArray($result);
-          $uploadTreeId = $row['uploadtree_pk'];
-        } else
-        {
-          $text = _("Missing upload tree parent for upload");
-          $html .= "<hr><h2>$text $Upload</h2><hr>";
-          $dbManager->freeResult($result);
-          return $html;
-        }
-        $dbManager->freeResult($result);
-      }
-      $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
-    } else
+    if (empty($Upload))
     {
       $html .= $this->ShowFolder($Folder, $show);
     }
-    return $html . $this->rejectModal();
-  }
-
-
-  private function rejectModal()
-  {
-    $output2 = "<div>" . _('Please enter a reason for status change') . ":</div>
-              <textarea id='commentText' style='overflow:auto;resize:none;width:100%;height:80px;' name='commentText'></textarea></br>
-              [<a class='button' onclick='submitComment()'>OK</a>]   &nbsp;&nbsp;&nbsp;
-              [<a class='button' onclick='closeCommentModal()'>Cancel</a>] ";
-
-    $output1 = "<form name=\"rejector\">$output2</form>\n";
-    return "<div class=\"modal\" id=\"commentModal\" hidden>$output1</div>";
+    else {
+      if (empty($uploadTreeId))
+      {
+        $row = $dbManager->getSingleRow(
+            $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
+            $sqlLog=__METHOD__.".getTreeRoot");
+        if ($row)
+        {
+          $uploadTreeId = $row['uploadtree_pk'];
+        } else
+        {
+          $this->vars['message'] = _("Missing upload tree parent for upload");
+          echo $this->renderTemplate('include/base.html.twig');
+          exit;
+        }
+      }
+      $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
+      $this->vars['content'] = $html;
+      echo $this->renderTemplate('include/base.html.twig');
+      exit;
+    }
+    return $html;
   }
 
   /**
    * @return array
    */
-  protected function getStatusArray()
-  {
-    $statusArray = $this->uploadDao->getStatusTypeMap();
-    $statusArray[0] = '';
-    return $statusArray;
-  }
-
-  /**
-   * @return array
-   */
-  protected function getAssigneeArray()
+  private function getAssigneeArray()
   {
     global $container;
     /** @var UserDao $userDao */
