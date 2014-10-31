@@ -129,7 +129,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-bulk",
     data: post_data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal); },
+    success: function(data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal); },
     error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
   });
 

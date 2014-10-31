@@ -44,7 +44,7 @@ class DeciderAgent extends Agent
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
-    $this->conflictStrategyId = array_key_exists('k',$args) ? $args['k'] : NULL;
+    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
 
     $this->uploadDao = $this->container->get('dao.upload');
 
@@ -115,10 +115,12 @@ class DeciderAgent extends Agent
 
     list($added, $removed) = $this->clearingDecisionEventProcessor->filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate);
 
-    switch($this->conflictStrategyId){
+    switch ($this->conflictStrategyId)
+    {
       case DeciderAgent::FORCE_DECISION:
         $canAutoDecide = true;
         break;
+
       default:
         $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
     }
