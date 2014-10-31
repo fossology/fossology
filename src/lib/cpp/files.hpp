@@ -20,11 +20,13 @@ namespace fo
   class File
   {
   public:
-    File(unsigned long _id, const char* _fileName);
+    File(unsigned long id, const char* fileName);
+    File(unsigned long id, const std::string fileName);
 
     unsigned long getId() const;
     std::string getContent(const unsigned long int maximumBytes = 1 << 20) const;
     const std::string& getFileName() const;
+    bool isReadable() const;
   private:
     unsigned long id;
     std::string fileName;

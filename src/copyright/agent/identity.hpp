@@ -25,12 +25,14 @@
  #ifndef IDENTITY_IP
   #ifdef IDENTITY_COPYRIGHT
    #define IDENTITY "copyright"
+   #define MAX_TYPES 3
   #else
    #error
   #endif
  #else
   #ifndef IDENTITY_COPYRIGHT
    #define IDENTITY "ip"
+   #define MAX_TYPES 1
   #else
    #error
   #endif
@@ -39,6 +41,7 @@
  #ifndef IDENTITY_IP
   #ifndef IDENTITY_COPYRIGHT
    #define IDENTITY "ecc"
+   #define MAX_TYPES 1
   #else
    #error
   #endif
@@ -46,5 +49,7 @@
   #error
  #endif
 #endif
+
+#define ALL_TYPES ((1<<MAX_TYPES) -1)
 
 #endif // IDENTITY_HPP

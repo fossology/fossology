@@ -34,8 +34,8 @@ OBJS = test_fossconfig.o \
 
 all: test
 test: $(EXE)
-	@echo "make library tests"
-	./$(EXE)
+	@echo "running library tests"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"

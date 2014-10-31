@@ -10,13 +10,13 @@
  */
 
 #include "copyrightState.hpp"
+#include "identity.hpp"
 
-CopyrightState::CopyrightState(int _agentId, int _verbosity) :
-        agentId(_agentId),
-        verbosity(_verbosity),
-        regexMatchers()
+CopyrightState::CopyrightState(int _agentId, const CliOptions& cliOptions) :
+  agentId(_agentId),
+  cliOptions(cliOptions),
+  regexMatchers()
 {
-
 }
 
 CopyrightState::~CopyrightState()
@@ -28,11 +28,6 @@ int CopyrightState::getAgentId() const
   return agentId;
 };
 
-int CopyrightState::getVerbosity() const
-{
-  return verbosity;
-}
-
 void CopyrightState::addMatcher(RegexMatcher regexMatcher)
 {
   regexMatchers.push_back(regexMatcher);
@@ -41,4 +36,32 @@ void CopyrightState::addMatcher(RegexMatcher regexMatcher)
 const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
 {
   return regexMatchers;
+}
+
+int CliOptions::getVerbosity() const
+{
+  return verbosity;
+}
+
+CliOptions::CliOptions(int verbosity, unsigned int type) :
+  verbosity(verbosity),
+  optType(type)
+{
+
+}
+
+unsigned int CliOptions::getOptType() const
+{
+  return optType;
+}
+
+CliOptions::CliOptions():
+  verbosity(0),
+  optType(ALL_TYPES)
+{
+}
+
+const CliOptions& CopyrightState::getCliOptions() const
+{
+  return cliOptions;
 }

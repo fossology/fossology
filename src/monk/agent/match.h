@@ -43,20 +43,21 @@ size_t match_getStart(const Match* match);
 size_t match_getEnd(const Match* match);
 
 gint compareMatchByRank(gconstpointer a, gconstpointer b);
-gint compareMatchIncuded(gconstpointer a, gconstpointer b);
+gint compareMatchIncluded(gconstpointer a, gconstpointer b);
 Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare);
 
-GArray* findAllMatchesBetween(File* file, GArray* licenses,
-                              int maxAllowedDiff, int minTrailingMatches);
+GArray* findAllMatchesBetween(File* file, GArray* licenses, unsigned maxAllowedDiff, unsigned minTrailingMatches, unsigned maxLeadingDiff);
 
-void matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses);
-void matchFileWithLicenses(MonkState* state, File* file, GArray* licenses);
+int matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses);
+int matchFileWithLicenses(MonkState* state, File* file, GArray* licenses);
 
-void findDiffMatches(File* file, License* license, GArray* matches,
+void findDiffMatches(File* file, License* license,
+                     size_t textStartPosition, size_t searchStartPosition,
+                     GArray* matches,
                      int maxAllowedDiff, int minTrailingMatches);
 
 GArray* filterNonOverlappingMatches(GArray* matches);
-void processMatches(MonkState* state, File* file, GArray* matches);
+int processMatches(MonkState* state, File* file, GArray* matches);
 
 char* formatMatchArray(GArray* matchInfo);
 

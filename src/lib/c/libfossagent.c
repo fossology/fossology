@@ -207,10 +207,7 @@ FUNCTION int fo_WriteARS(PGconn* pgConn, int ars_pk, int upload_pk, int agent_pk
     snprintf(sql, sizeof(sql), "SELECT currval('nomos_ars_ars_pk_seq')");
     result = PQexec(pgConn, sql);
     if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
-    {
-      PQclear(result);
       return (0);
-    }
     ars_pk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
   }

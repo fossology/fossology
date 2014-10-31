@@ -12,6 +12,8 @@
 #include "ninkawrapper.hpp"
 #include "utils.hpp"
 
+using namespace fo;
+
 State getState(DbManager& dbManager)
 {
   int agentId = queryAgentId(dbManager);
@@ -127,6 +129,12 @@ bool matchFileWithLicenses(const State& state, const fo::File& file, NinkaDataba
 
 bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>& matches, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler)
 {
+  for (vector<LicenseMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it)
+  {
+    const LicenseMatch& match = *it;
+    databaseHandler.insertOrCacheLicenseIdForName(match.getLicenseName());
+  }
+
   if (!databaseHandler.begin())
     return false;
 
@@ -138,7 +146,7 @@ bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>
     string rfShortname = match.getLicenseName();
     unsigned percent = match.getPercentage();
 
-    unsigned long licenseId = databaseHandler.getLicenseIdForName(rfShortname);
+    unsigned long licenseId = databaseHandler.getCachedLicenseIdForName(rfShortname);
 
     if (licenseId == 0)
     {
@@ -157,5 +165,4 @@ bool saveLicenseMatchesToDatabase(const State& state, const vector<LicenseMatch>
   }
 
   return databaseHandler.commit();
-  return true;
 }

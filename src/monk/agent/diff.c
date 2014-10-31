@@ -120,13 +120,12 @@ inline void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSe
  @return pointer to the result, or NULL on negative match. To be freed with diffResult_free
  ****************************************************/
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
-                             size_t* textStartPosition,
+                             size_t textStartPosition, size_t searchStartPosition,
                              int maxAllowedDiff, int minTrailingMatches) {
   size_t textLength = textTokens->len;
   size_t searchLength = searchTokens->len;
 
-  if (!searchLength || !textLength) {
-    *textStartPosition = textLength;
+  if ((searchLength<=searchStartPosition ) || (textLength<=textStartPosition)) {
     return NULL;
   }
 
@@ -134,8 +133,28 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
   result->matchedInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
   GArray* matchedInfo = result->matchedInfo;
 
-  size_t iText = *textStartPosition;
+  size_t iText = textStartPosition;
   size_t iSearch = 0;
+
+  size_t removedCounter = 0;
+  size_t matchedCounter = 0;
+  size_t additionsCounter = 0;
+
+  if (searchStartPosition > 0) {
+    DiffMatchInfo licenseHeadDiff = (DiffMatchInfo) {
+      .search = (DiffPoint) {
+        .start = 0,
+        .length = searchStartPosition
+      },
+      .text = (DiffPoint) {
+        .start = iText,
+        .length = 0
+      },
+      .diffType = NULL
+    };
+    applyDiff(&licenseHeadDiff, matchedInfo, &additionsCounter, &removedCounter, &iText, &iSearch);
+    iSearch = searchStartPosition;
+  }
 
   // match first token
   while (iText < textLength) {
@@ -145,11 +164,6 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
         break;
     iText++;
   }
-  *textStartPosition = iText + 1;
-
-  size_t removedCounter = 0;
-  size_t matchedCounter = 0;
-  size_t additionsCounter = 0;
 
   if (iText < textLength) {
     DiffMatchInfo simpleMatch;
@@ -212,9 +226,6 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
       );
     }
 #endif
-    DiffPoint firstMatch = g_array_index(result->matchedInfo, DiffMatchInfo, 0).text;
-    *textStartPosition = firstMatch.start + firstMatch.length;
-
     result->removed = removedCounter;
     result->added = additionsCounter;
     result->matched = matchedCounter;

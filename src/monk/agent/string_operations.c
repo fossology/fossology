@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "string_operations.h"
 #include "hash.h"
+#include "monk.h"
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
 
@@ -35,8 +36,8 @@ inline int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
-int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters,
-        GArray** output, Token** remainder) {
+int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
+  GArray** output, Token** remainder) {
   GArray* tokens = *output;
   Token* stateToken;
 
@@ -67,7 +68,8 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
 
   const char* ptr = inputChunk;
 
-  while (ptr - inputChunk < inputSize) {
+  size_t readBytes = 0;
+  while (readBytes < inputSize) {
     if (isDelim(*ptr, delimiters)) {
       if (stateToken->length > 0) {
         g_array_append_val(tokens, *stateToken);
@@ -78,17 +80,23 @@ int streamTokenize(const char* inputChunk, int inputSize, const char* delimiters
         stateToken->removedBefore++;
       }
     } else {
-      char lowerChar = g_ascii_tolower(*ptr);
-      hash_add(&lowerChar, &(stateToken->hashedContent));
+#ifndef MONK_CASE_INSENSITIVE
+      const char* newCharPtr = ptr;
+#else
+      char newChar = g_ascii_tolower(*ptr);
+      const char* newCharPtr = &newChar;
+#endif
+      hash_add(newCharPtr, &(stateToken->hashedContent));
       stateToken->length++;
     }
     ptr++;
+    readBytes++;
   }
 
   return tokens->len - initialTokenCount;
 }
 
-GArray* tokenize(char* inputString, const char* delimiters) {
+GArray* tokenize(const char* inputString, const char* delimiters) {
   GArray* tokenArray = tokens_new();
 
   Token* remainder = NULL;
@@ -135,42 +143,6 @@ size_t token_position_of(size_t index, GArray* tokens) {
     Token* token = &g_array_index(tokens, Token, i);
     result += token->removedBefore + previousLength;
     previousLength = token_length(*token);
-  }
-
-  return result;
-}
-
-StringBuilder* stringBuilder_new(){
-  StringBuilder* result = malloc(sizeof(StringBuilder));
-  result->contents = g_array_new(TRUE, FALSE, sizeof(gchar*));
-  result->length = 0;
-  return result;
-}
-
-void stringBuilder_free(StringBuilder* stringBuilder) {
-  for (size_t i = 0; i < stringBuilder->contents->len; i++) {
-    g_free(g_array_index(stringBuilder->contents, gchar*, i));
-  }
-  g_array_free(stringBuilder->contents, TRUE);
-  free(stringBuilder);
-}
-
-void stringBuilder_printf(StringBuilder* stringBuilder, const gchar* format, ...){
-  va_list args;
-  va_start(args, format);
-  gchar* value = g_strdup_vprintf(format, args);
-  va_end(args);
-  g_array_append_val(stringBuilder->contents, value);
-  stringBuilder->length += strlen(value);
-}
-
-char* stringBuilder_build(StringBuilder* stringBuilder){
-  char* result = malloc(stringBuilder->length + 1);
-  char* temporaryBuffer = result;
-  guint pieceCount = stringBuilder->contents->len;
-  for (guint i = 0; i < pieceCount; i++) {
-    char* nextString = g_array_index(stringBuilder->contents, gchar*, i);
-    temporaryBuffer = g_stpcpy(temporaryBuffer, nextString);
   }
 
   return result;
