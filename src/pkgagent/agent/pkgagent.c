@@ -187,7 +187,8 @@ int ProcessUpload (long upload_pk)
   int debsrcmimetypepk = 0; 
   int numrows;
   int i;
-
+  char *uploadtree_tablename;
+  
   struct rpmpkginfo *pi;
   struct debpkginfo *dpi;
 
@@ -263,10 +264,10 @@ int ProcessUpload (long upload_pk)
     }
   }
 
+  uploadtree_tablename = GetUploadtreeTableName(db_conn, upload_pk);
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
-      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from uploadtree where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb)", 
-      upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
+      "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from %s where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and (not exists (SELECT 1 from pkg_rpm where pkg_rpm.pfile_fk = pfile_pk)) and (not exists (SELECT 1 from pkg_deb where pkg_deb.pfile_fk = pfile_pk))", uploadtree_tablename, upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
   result = PQexec(db_conn, sqlbuf);
   if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
 
@@ -666,11 +667,13 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
   char line[MAXCMD];
   char *s = NULL;
   char temp[MAXCMD];
+  char *uploadtree_tablename;
 
+  uploadtree_tablename = GetUploadtreeTableName(db_conn, upload_pk);
   /* Get the debian control file's repository path */
   /* First get the uploadtree bounds (lft,rgt) for the package */
-  snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM uploadtree WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",
-      upload_pk, pi->pFileFk);
+  snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM %s WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",
+      uploadtree_tablename, upload_pk, pi->pFileFk);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   if (PQntuples(result) == 0)
