@@ -83,11 +83,11 @@ class ClearingDecisionEventProcessor
       }
     }
 
-    if(!$insertDecision)
+    if (!$insertDecision)
     {
       foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
       {
-//       check for (!$licenseDecisionResult->hasLicenseDecisionEvent())  is unnecessary
+        if (!$licenseDecisionResult->hasLicenseDecisionEvent()) continue;
 
         $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
 
