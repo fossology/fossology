@@ -28,7 +28,7 @@ class TestDbFactory
       throw new \Exception("php-psql not found");
     }
     $sub = chr(mt_rand(97, 122)) . chr(mt_rand(97, 122)) . chr(mt_rand(97, 122)) . chr(mt_rand(97, 122));
-    if ($dbName == NULL)
+    if ($dbName === NULL)
     {
       $dbName = "fosstestone";
     }
