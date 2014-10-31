@@ -102,7 +102,7 @@ class SolidDbManager extends DbManager
       }
       $sql = $sqlRep;
     }
-    if(preg_match('/(\$[\d]+)([^\d]|$)/',$sql, $match=array())){
+    if(preg_match('/(\$[\d]+)([^\d]|$)/',$sql, $match)){
       $this->logger->addDebug($match[1]." in '$statementName not resolved");  
     }
     return $sql;
