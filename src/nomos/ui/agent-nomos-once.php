@@ -35,7 +35,7 @@ class agent_nomos_once extends FO_Plugin {
     $this->Dependency = array();
     $this->NoHTML = 0;  // always print text output for now
     /** For anyone to access, without login, use: **/
-    $this->DBaccess   = PLUGIN_DB_NONE;
+    $this->DBaccess   = PLUGIN_DB_READ;
     /** To require login access, use: **/
     //  public $DBaccess = PLUGIN_DB_WRITE;
     //  public $LoginFlag = 1;
@@ -63,6 +63,14 @@ class agent_nomos_once extends FO_Plugin {
    
     return ($licenses[0]);
   } // AnalyzeFile()
+
+   function Install() {
+      global $PG_CONN;
+    if (empty($PG_CONN)) {
+          return(1);
+    }
+    else return(0);
+   }
 
   /**
    * \brief Change the type of output
@@ -244,3 +252,4 @@ class agent_nomos_once extends FO_Plugin {
 }
 
 $NewPlugin = new agent_nomos_once;
+$NewPlugin->Install();
