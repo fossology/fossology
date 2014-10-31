@@ -22,25 +22,16 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 class CopyrightDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
@@ -63,7 +54,6 @@ class CopyrightDao extends Object
                                                                         'url' => Highlight::URL)
    )
   {
-
     $pFileId = 0;
     $row = $this->uploadDao->getUploadEntry($uploadTreeId);
 
@@ -77,12 +67,9 @@ class CopyrightDao extends Object
     }
 
     $statementName = __METHOD__.$tableName;
-
     $this->dbManager->prepare($statementName,
         "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
     $result = $this->dbManager->execute($statementName, array($pFileId));
-
-
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -91,8 +78,6 @@ class CopyrightDao extends Object
       {
         $type = $row['type'];
         $content = $row['content'];
-        // $linkUrl = Traceback_uri() . "?mod=copyright-list&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
-        // $htmlElement = new LinkElement($linkUrl);
         $htmlElement =null;
         $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
         $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
@@ -105,15 +90,12 @@ class CopyrightDao extends Object
 
   public function saveDecision($tableName,$pfileId, $userId , $clearingType,
                                          $description, $textFinding, $comment){
-    $statementName = __METHOD__.$tableName;
-    $sql = "INSERT INTO $tableName (user_fk, pfile_fk,
-           clearing_decision_type_fk, description, textfinding, comment) values ($1,$2,$3,$4,$5,$6)";
-
-    $this->dbManager->getSingleRow($sql,array($userId,$pfileId,
-        $clearingType, $description, $textFinding, $comment ),$statementName);
+    $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
+        'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
+    $this->dbManager->insertTableRow($tableName, $assocParams, $sqlLog=__METHOD__);
   }
 
-  public function getAllDecisions($tableName, $uploadId, $uploadTreeTableName, $decisionType=null, $type=null)
+  public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
 
@@ -124,38 +106,73 @@ class CopyrightDao extends Object
     if ($uploadTreeTableName === "uploadtree_a")
     {
       $params []= $uploadId;
-      $whereClause .= "AND UT.upload_fk = $".count($params);
+      $whereClause .= " AND UT.upload_fk = $".count($params);
       $statementName .= ".withUI";
     }
     if ($type !== null)
     {
       $params []= $type;
-      $whereClause .= "AND C.type = $".count($params);
+      $whereClause .= " AND C.type = $".count($params);
       $statementName .= ".withType";
     }
-    if ($decisionType !== null)
+
+    $clearingTypeClause = null;
+    if ($onlyCleared)
     {
-      $params []= $decisionType;
-      $whereClause .= "AND CD.clearing_decision_type_fk = $".count($params);
-      $statementName .= ".withDecisionType";
+      $joinType = "INNER";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $clearingTypeClause = "WHERE clearing_decision_type_fk = $".count($params);
+        $statementName .= ".withDecisionType";
+      }
+      else
+      {
+        throw new \Exception("requested only cleared but no type given");
+      }
+    }
+    else
+    {
+      $joinType = "LEFT";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $clearingTypeClause = "WHERE clearing_decision_type_fk IS NULL OR clearing_decision_type_fk = $".count($params);
+        $statementName .= ".withDecisionType";
+      }
+    }
+    $statementName .= ".".$joinType."Join";
+
+    if ($extrawhere !== null)
+    {
+      $whereClause .= " AND ". $extrawhere;
+      $statementName .= "._".$extrawhere."_";
     }
 
-    $sql = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
-             CD.description, CD.textfinding, UT.uploadtree_pk,
-             CD.copyright_decision_pk AS id, C.content
-            from $tableNameDecision CD
+    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
+             CD.description as description, CD.textfinding as textfinding,
+             UT.uploadtree_pk as uploadtree_pk,
+             CD.clearing_decision_type_fk AS clearing_decision_type_fk,
+             C.content AS content
+            from $tableName C
             INNER JOIN $uploadTreeTableName UT
-            ON CD.pfile_fk = UT.pfile_fk
-            INNER JOIN $tableName C
+            ON C.pfile_fk = UT.pfile_fk
+            $joinType JOIN $tableNameDecision CD
             ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL $whereClause
-            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, id DESC";
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
 
+    if ($clearingTypeClause !== null)
+    {
+      $sql = "SELECT * FROM ($latestInfo) AS latestInfo $clearingTypeClause";
+    }
+    else
+    {
+      $sql = $latestInfo;
+    }
 
     $this->dbManager->prepare($statementName, $sql);
-
     $sqlResult = $this->dbManager->execute($statementName, $params);
-
     $result = $this->dbManager->fetchAll($sqlResult);
     $this->dbManager->freeResult($sqlResult);
 

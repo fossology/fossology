@@ -51,6 +51,7 @@ class TestPgDb
     {
       $dbName = "fosstestone";
     }
+    $dbName = strtolower($dbName);
     $this->dbName = $dbName;
     $this->ensurePgPassFileEntry();
     
@@ -69,7 +70,7 @@ class TestPgDb
       throw new \Exception("FATAL! Could not create Db.conf file at ".$this->sys_conf);
     }
 
-    exec($cmd="psql -Ufossy -h localhost -l | grep -q $dbName", $cmdOut, $cmdRtn);
+    exec($cmd="psql -Ufossy -h localhost -lqtA | cut -f 1 -d '|' | grep -q '^$dbName\$'", $cmdOut, $cmdRtn);
     if($cmdRtn == 0)
     {
       exec($cmd="createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
@@ -105,9 +106,16 @@ class TestPgDb
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
+    $this->dbManager->queryOnce("DEALLOCATE ALL");
     $this->dropAllTables();
+    $this->dropAllSequences();
   }
   
+  public function getFossSysConf()
+  {
+    return $this->sys_conf;
+  }
+
   private function dropAllTables()
   {
     $this->dbManager->prepare(__METHOD__.'.get',"SELECT table_name FROM information_schema.tables WHERE table_schema=$1");
@@ -116,11 +124,24 @@ class TestPgDb
     $this->dbManager->freeResult($res);
     foreach($tableNames as $row){
       $name = $row['table_name'];
-      $this->dbManager->queryOnce("DROP TABLE $name",$sqlLog=__METHOD__.".$name");
+      $this->dbManager->queryOnce("DROP TABLE IF EXISTS $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
-  
-  public function ensurePgPassFileEntry()
+
+  private function dropAllSequences()
+  {
+    $this->dbManager->prepare($stmt=__METHOD__.'.get',
+            "SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema=$1");
+    $res = $this->dbManager->execute($stmt,array('public'));
+    $tableNames = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    foreach($tableNames as $row){
+      $name = $row['sequence_name'];
+      $this->dbManager->queryOnce("DROP SEQUENCE $name CASCADE",$sqlLog=__METHOD__.".$name");
+    }
+  }
+
+  private function ensurePgPassFileEntry()
   {
     $userHome = getenv('HOME');
     $ipv4 = gethostbyname(gethostname());
@@ -204,6 +225,28 @@ class TestPgDb
   
   /**
    * @param array $tableList
+   * @param bool $invert
+   */
+  public function alterTables($tableList, $invert=FALSE)
+  {
+    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
+    $Schema = array();
+    require($coreSchemaFile);
+    foreach($Schema['TABLE'] as $tableName=>$tableCols){
+      if( $invert^!in_array($tableName, $tableList) ){
+        continue;
+      }
+      foreach ($tableCols as $attributes)
+      {
+        $attributeKey = "ALTER";
+        if (array_key_exists($attributeKey, $attributes))
+          $this->dbManager->queryOnce($attributes[$attributeKey]);
+      }
+    }
+  }
+
+  /**
+   * @param array $tableList
    * @param bool $invert 
    */
   public function createPlainTables($tableList, $invert=FALSE)
@@ -273,22 +316,50 @@ class TestPgDb
   }
 
   /**
+   * @param string $type
    * @param array $viewList
-   * @param bool $invert 
+   * @param bool $invert
    */
-  public function createViews($viewList, $invert=FALSE)
+  private function applySchema($type, $elementList, $invert=FALSE)
   {
     $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
     $Schema = array();
     require($coreSchemaFile);
-    foreach($Schema['VIEW'] as $viewName=>$sql){
-      if( $invert^!in_array($viewName, $viewList) ){
+    foreach($Schema[$type] as $viewName=>$sql){
+      if( $invert^!in_array($viewName, $elementList) ){
         continue;
       }
       $this->dbManager->queryOnce($sql);
     }
   }
-  
+
+  /**
+   * @param array $viewList
+   * @param bool $invert 
+   */
+  public function createViews($viewList, $invert=FALSE)
+  {
+    $this->applySchema('VIEW', $viewList, $invert);
+  }
+
+  /**
+   * @param array $seqList
+   * @param bool $invert
+   */
+  public function createSequences($seqList, $invert=FALSE)
+  {
+    $this->applySchema('SEQUENCE', $seqList, $invert);
+  }
+
+  /**
+   * @param array $cList
+   * @param bool $invert
+   */
+  public function createConstraints($cList, $invert=FALSE)
+  {
+    $this->applySchema('CONSTRAINT', $cList, $invert);
+  }
+
   public function &getDbManager()
   {
     return $this->dbManager;

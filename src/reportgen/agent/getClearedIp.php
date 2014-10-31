@@ -28,9 +28,7 @@ class IpClearedGetter extends XpClearedGetter
 
   public function __construct()
   {
-    parent::__construct();
-    $this->tableName = "ip";
-    $this->type = null;
+    parent::__construct("ip", null, true);
   }
 }
 

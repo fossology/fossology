@@ -16,30 +16,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Data\LicenseDecision;
 
 
+use Fossology\Lib\Data\Types;
 use Fossology\Lib\Db\DbManager;
 
-class DecisionTypes extends Types
-{
-  const TO_BE_DISCUSSED = 3;
-  const IRRELEVANT = 4;
-  const IDENTIFIED = 5;
+class LicenseEventTypes extends Types {
+  const USER = 1;
+  const BULK = 2;
 
   /** @var array */
-  private $values = array(self::TO_BE_DISCUSSED, self::IRRELEVANT, self::IDENTIFIED);
+  private $values = array(self::USER, self::BULK);
 
   public function __construct(DbManager $dbManager)
   {
-    parent::__construct("clearing decision type");
+    parent::__construct("license decision type");
+    $this->map = $dbManager->createMap('license_decision_type', 'type_pk', 'meaning');
 
-    $this->map = $dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
-
-    assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
-    assert($this->map[self::IRRELEVANT] == "Irrelevant");
-    assert($this->map[self::IDENTIFIED] == "Identified");
+    assert($this->map[self::USER] == "User decision");
+    assert($this->map[self::BULK] == "Bulk");
     assert(count($this->map) == count($this->values));
   }
 
-}
+} 
