@@ -44,9 +44,14 @@ class TestPgDb
   function __construct($dbName = null)
   {
     $testDbFactory = new \TestDbFactory();
-    $sysConfDir = getenv('SYSCONFDIR');
-
-    $this->sys_conf = $sysConfDir ?: $testDbFactory->setupTestDb($dbName);
+    $this->sys_conf = getenv('TSYSCONFDIR');
+    if(empty($this->sys_conf))
+    {
+      $this->sys_conf = $testDbFactory->setupTestDb($dbName);
+      putenv("TSYSCONFDIR=".$this->sys_conf);
+      $dbName = $testDbFactory->getDbName($this->sys_conf);
+    }
+    $this->dbName = $dbName;
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
     $this->connection = DBconnect($this->sys_conf);
@@ -93,7 +98,6 @@ class TestPgDb
       $this->dbManager->queryOnce("DROP SEQUENCE $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
-
   
   function __destruct()
   {
@@ -103,28 +107,12 @@ class TestPgDb
       throw new \Exception('Could not close connection');
     }
     $this->connection = null;
-    
-    $existCmd = "psql -Ufossy -h localhost -l | grep -q ".$this->dbName;
-    exec($existCmd, $existkOut, $existRtn);
-    if($existRtn != 0)
-    {
-      echo "NOTE: database ".$this->dbName." does not exist, nothing to delete\n";
-    }
-/*    else    
-    {
-      $dropCmd = "dropdb -Ufossy -h localhost ".$this->dbName;
-      exec($dropCmd, $dropOut, $dropRtn);
-      if($dropRtn != 0 )
-      {
-        echo("ERROR: failed to delete database ".$this->dbName);
-      }
-    }
- * 
- */
-    foreach (glob($this->sys_conf."/*.*") as $filename) {
-      unlink($filename);
-    }
-    rmdir($this->sys_conf);
+  }
+  
+  function fullDestruct()
+  {
+    $testDbFactory = new \TestDbFactory();
+    $testDbFactory->purgeTestDb();
   }
 
   private function dirnameRec($path, $depth = 1)

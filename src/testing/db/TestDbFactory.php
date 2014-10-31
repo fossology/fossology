@@ -102,16 +102,21 @@ class TestDbFactory
     }
   }
 
-  public function purgeTestDb()
+  public function getDbName($sys_conf)
   {
-    $sys_conf = getenv('SYSCONFDIR');
     $dbConfig = file_get_contents("$sys_conf/Db.conf");
     if (!preg_match("/dbname=([[:alnum:]]+);.*/", $dbConfig, $matches))
     {
       print "could not parse db name";
       exit(5);
     }
-    $dbName = $matches[1];
+    return $matches[1];    
+  }
+  
+  public function purgeTestDb()
+  {
+    $sys_conf = getenv('SYSCONFDIR');
+    $dbName = $this->getDbName($sys_conf);
 
     $existCmd = "psql -Ufossy -h localhost -l | grep -q " . $dbName;
     exec($existCmd, $existkOut, $existRtn);
