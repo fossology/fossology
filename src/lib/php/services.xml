@@ -73,6 +73,9 @@ without any warranty.
     <service id="decision.types" class="\Fossology\Lib\Data\DecisionTypes">
       <argument type="service" id="db.manager"/>
     </service>
+    <service id="upload_status.types" class="\Fossology\Lib\Data\UploadStatus">
+      <argument type="service" id="db.manager"/>
+    </service>
     <service id="view.highlight_processor" class="\Fossology\Lib\View\HighlightProcessor">
       <argument type="service" id="dao.license"/>
     </service>

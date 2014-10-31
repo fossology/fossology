@@ -57,10 +57,10 @@ int main(int argc, char** argv)
 #pragma omp parallel
     {
 #pragma omp for
-      for (int argn = 0; argn < fileNamesCount; ++argn)
+      for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
       {
         const string fileName = fileNames[argn];
-        fo::File file((unsigned long) argn, fileName);
+        fo::File file(argn, fileName);
         vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
 
         stringstream ss;

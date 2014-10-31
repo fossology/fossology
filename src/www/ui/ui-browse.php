@@ -229,12 +229,7 @@ class ui_browse extends FO_Plugin
    */
   function ShowFolder($Folder, $Show)
   {
-    $V="YESSS";
-    $V = "<table border=1 width='100%'>";
-    $V .= "<tr><td valign='top' width='20%'>\n";
-    $text = _("Folder Navigation");
-    $V .= "<div align='center'><H3>$text</H3></div>\n";
-    $V .= "<div align='center'><small>";
+    $V = "<div align='center'><small>";
     if ($Folder != GetUserRootFolder())
     {
       $text = _("Top");
@@ -251,32 +246,21 @@ class ui_browse extends FO_Plugin
     $V .= "<form>\n";
     $V .= FolderListDiv($Folder, 0, $Folder, 1);
     $V .= "</form>\n";
-    $V .= "</td><td valign='top'>\n";
-    $text = _("Uploads");
-    $V .= "<div align='center'><H3>$text</H3></div>\n";
-
+    $this->vars['folderNav'] = $V;
+    
     global $container;
-    /**
-     * @var Renderer
-     */
+    /** @var Renderer */
     $renderer = $container->get('renderer');
     $assigneeArray = $this->getAssigneeArray();
 
     $assigneeFilter = $renderer->createSelect('assigneeSelector', $assigneeArray, 0, ' onchange="filterAssignee()"');
-    $statusArray = $this->getStatusArray();
-    $statusFilter = $renderer->createSelect('statusSelector', $statusArray, 0, ' onchange="filterStatus()"');
-
-    $V .= "<table class='semibordered' id='browsetbl' width='100%' cellpadding=0>"
-        . "<thead><tr><th id='insert_browsetbl_filter'></th> <th>$statusFilter</th> <th></th> <th>$assigneeFilter</th> <th></th> <th></th> </tr>"
-        . "<tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> </tr></thead>"
-        . "<tbody></tbody>" . "<tfoot></tfoot>"
-        . "</table>";
-    $V .= "</table>";
-
+    $this->vars['assigneeFilter'] = $assigneeFilter;
+    $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
+    
     $this->vars['folder'] = $Folder;
     $this->vars['show'] = $Show;
 
-    return $V;
+    return '';
   }
 
   /**
@@ -409,13 +393,13 @@ class ui_browse extends FO_Plugin
     {
       $html .= $this->ShowFolder($Folder, $show);
     }
-    return "<font class='text'>\n$html</font>\n" . $this->rejectModal();
+    return $html . $this->rejectModal();
   }
 
 
   private function rejectModal()
   {
-    $output2 = "<div>" . _('Please enter a reason for status change.') . ":</div>
+    $output2 = "<div>" . _('Please enter a reason for status change') . ":</div>
               <textarea id='commentText' style='overflow:auto;resize:none;width:100%;height:80px;' name='commentText'></textarea></br>
               [<a class='button' onclick='submitComment()'>OK</a>]   &nbsp;&nbsp;&nbsp;
               [<a class='button' onclick='closeCommentModal()'>Cancel</a>] ";
@@ -429,16 +413,8 @@ class ui_browse extends FO_Plugin
    */
   protected function getStatusArray()
   {
-    global $container;
-    $statusArray = array(0 => '');
-    $dbManager = $container->get('db.manager');
-    $dbManager->prepare($stmt = __METHOD__ . ".status", 'SELECT status_pk,meaning FROM upload_status ORDER BY status_pk');
-    $res = $dbManager->execute($stmt);
-    while ($row = $dbManager->fetchArray($res))
-    {
-      $statusArray[$row['status_pk']] = $row['meaning'];
-    }
-    $dbManager->freeResult($res);
+    $statusArray = $this->uploadDao->getStatusTypeMap();
+    $statusArray[0] = '';
     return $statusArray;
   }
 

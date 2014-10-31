@@ -2,6 +2,41 @@
 
 {% block content %}
   {{ parent() }}
+  
+  <table border="1" width="100%">
+    <tr>
+      <td valign='top' width='20%'>
+        <div style="text-align:center;font-size: large;">{{ 'Folder Navigation'|trans }}</div>
+        {{ folderNav }}
+      </td>
+      <td valign="top">
+        <div style="text-align:center;font-size: large;">{{ 'Uploads'|trans }}</div>
+
+      <table class="semibordered" id="browsetbl" width="100%" cellpadding="0">
+      <thead>
+       <tr>
+         <th id="insert_browsetbl_filter"></th>
+         <th> 
+           <select id="statusSelector" onchange="filterStatus();">
+             <option value="0" selected> </option>
+          {% for key,disp in statusOptions %}
+            <option value="{{ key }}" {%if key == select %} selected{% endif %}>{{ disp }}</option>
+          {% endfor %}
+           </select>
+         </th>
+         <th></th>
+         <th>{{ assigneeFilter }}</th>
+         <th></th>
+         <th></th>
+       </tr>
+       <tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot></tfoot>
+      </table>
+
+    </td></tr>
+  </table>
 {% endblock %}
 
 {% block foot %}
@@ -40,33 +75,24 @@
       [4, "desc"]
     ];
 
-    /*
-     tableLanguage = [
-     {"sInfo": "Showing _START_ to _END_ of _TOTAL_ files"},
-     {"sSearch": "Search _INPUT_ in filenames"},
-     { "sLengthMenu": 'Display <select>
-     < option value = \ "10\">10</option> < option value = \ "25\">25</option> < option value = \ "50\">50</option> < option value = \ "100\">100</option> < / select > files " } ] ;
-     */
-
-
     dataTableConfig =
-            {
-              "bServerSide": true,
-              "sAjaxSource": "?mod=browse-processPost",
-              "fnServerData": function (sSource, aoData, fnCallback) {
-                  aoData.push({"name": "folder", "value": "{{ folder }}"});
-                  aoData.push({"name": "show", "value": "{{ show }}"});
-                aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
-                aoData.push({"name": "statusSelected", "value": statusSelected});
-                $.getJSON(sSource, aoData, fnCallback).fail(failed);
-              },
-              "aoColumns": tableColumns,
-              "aaSorting": tableSorting,
-              "iDisplayLength": 50,
-              "bProcessing": true,
-              "bStateSave": true,
-              "sCookiePrefix": "fossology_",
-              "bRetrieve": true
+        {
+          "bServerSide": true,
+          "sAjaxSource": "?mod=browse-processPost",
+          "fnServerData": function (sSource, aoData, fnCallback) {
+              aoData.push({"name": "folder", "value": "{{ folder }}"});
+              aoData.push({"name": "show", "value": "{{ show }}"});
+            aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
+            aoData.push({"name": "statusSelected", "value": statusSelected});
+            $.getJSON(sSource, aoData, fnCallback).fail(failed);
+          },
+          "aoColumns": tableColumns,
+          "aaSorting": tableSorting,
+          "iDisplayLength": 50,
+          "bProcessing": true,
+          "bStateSave": true,
+          "sCookiePrefix": "fossology_",
+          "bRetrieve": true
             };
 
     function createBrowseTable() {
@@ -76,7 +102,7 @@
 
     $(document).ready(function () {
       createBrowseTable();
-    })
+    });
 
   </script>
 {% endblock %}
