@@ -25,7 +25,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
-use Fossology\Lib\Data\Tree\UploadTreeView;
+use Fossology\Lib\Dao\UploadTreeDao;
 
 /**
  * \file ui-browse-license.php
@@ -360,7 +360,7 @@ class ui_browse_license extends FO_Plugin
     $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());    
     $tableData = array();
     
-    $alreadyClearedUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+    $alreadyClearedUploadTreeView = new UploadTreeDao($itemTreeBounds->getUploadId(),
             $options=array('skipThese' => "alreadyCleared"),
             $itemTreeBounds->getUploadTreeTableName(),
             $viewName='already_cleared_uploadtree'.$itemTreeBounds->getUploadId());
@@ -369,7 +369,7 @@ class ui_browse_license extends FO_Plugin
     $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
     $alreadyClearedUploadTreeView->unmaterialize();
     
-    $noLicenseUploadTreeView = new UploadTreeView($itemTreeBounds->getUploadId(),
+    $noLicenseUploadTreeView = new UploadTreeDao($itemTreeBounds->getUploadId(),
             $options=array('skipThese' => "noLicense"),
             $itemTreeBounds->getUploadTreeTableName(),
             $viewName='no_license_uploadtree'.$itemTreeBounds->getUploadId());
