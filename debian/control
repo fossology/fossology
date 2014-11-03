@@ -213,7 +213,7 @@ Description: architecture for analyzing software, ninka
 
 Package: fossology-decider
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, ${misc:Depends}
 Description: architecture for analyzing software, decider
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
