@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Tree;
 
+use Fossology\Lib\Data\DecisionScopes;
 
 class UploadTreeView
 {
@@ -178,7 +179,7 @@ class UploadTreeView
       case "alreadyCleared":
         $decisionQuery = "SELECT type_fk FROM clearing_decision AS cd
                         WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                              OR cd.pfile_fk = ut.pfile_fk AND cd.is_global
+                              OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_fk IN (4,5) )";
