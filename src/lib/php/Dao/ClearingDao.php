@@ -23,6 +23,7 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\DecisionScopes;
 
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
@@ -80,14 +81,14 @@ class ClearingDao extends Object
            users.user_name AS user_name,
            CD.user_fk AS user_id,
            CD.type_fk AS type_id,
-           CD.is_global AS is_global,
+           CD.scope as scope,
            EXTRACT(EPOCH FROM CD.date_added) AS date_added,
            ut2.upload_fk = $1 AS same_upload,
            ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local,
            LR.rf_pk as license_id,
            LR.rf_shortname as shortname,
-           LR.rf_fullname  as fullname,
-           CL.removed  as removed
+           LR.rf_fullname as fullname,
+           CL.removed as removed
          FROM clearing_decision CD
          LEFT JOIN users ON CD.user_fk=users.user_pk
          INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
@@ -95,7 +96,7 @@ class ClearingDao extends Object
          LEFT JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
          LEFT JOIN license_ref LR on CL.rf_fk=LR.rf_pk
            WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
-         GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, is_global, date_added, same_upload, is_local,
+         GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
          license_id, shortname, fullname, removed
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
@@ -146,7 +147,7 @@ class ClearingDao extends Object
                                     ->setUserName($row['user_name'])
                                     ->setUserId($row['user_id'])
                                     ->setType($row['type_id'])
-                                    ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
+                                    ->setScope($row['scope'])
                                     ->setDateAdded($row['date_added']);
 
         $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
@@ -243,8 +244,8 @@ class ClearingDao extends Object
       {
         $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $license, $type));
         $this->dbManager->freeResult($res);
-        $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId,'pfile_fk'=>$pfileId, 'user_fk'=>$userid,
-            'rf_fk'=>$license, 'is_removed'=>$removed,'is_global'=>false,
+        $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId, 'pfile_fk'=>$pfileId, 'user_fk'=>$userid,
+            'rf_fk'=>$license, 'is_removed'=>$removed, 'scope'=>DecisionScopes::ITEM,
             'job_fk' =>$jobfk,
             'type_fk'=>$type, 'comment'=>$comment, 'reportinfo'=>$remark);
         $this->dbManager->insertTableRow('license_decision_event', $aDecEvent, $sqlLog=__METHOD__);
@@ -254,17 +255,6 @@ class ClearingDao extends Object
 
     $this->dbManager->commit();
   }
-
-  /**
-   * @param int $licenseId
-   * @param $uploadTreeId
-   * @param $userid
-   */
-  public function commentClearingDecision($licenseId, $uploadTreeId, $userid)
-  {
-    // TODO comment license item pair
-  }
-
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
@@ -332,16 +322,16 @@ SELECT
   CD.user_fk AS user_id,
   GU.group_fk,
   CD.type_fk AS type_id,
-  CD.is_global
+  CD.scope
 FROM clearing_decision CD
 INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
 INNER JOIN group_user_member GU ON CD.user_fk = GU.user_fk
 INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
 WHERE
   CD2.uploadtree_fk=$1 AND
-  (CD.is_global OR CD.uploadtree_fk = $1) AND
+  (CD.scope=".DecisionScopes::REPO. " OR CD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, CD.type_fk, CD.is_global
+GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, CD.type_fk, CD.scope
 ORDER BY CD.date_added DESC LIMIT 1
         ");
     $res = $this->dbManager->execute(
@@ -362,7 +352,7 @@ ORDER BY CD.date_added DESC LIMIT 1
         ->setPfileId($row['file_id'])
         ->setUserId($row['user_id'])
         ->setType($row['type_id'])
-        ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
+        ->setScope($row['scope'])
         ->setDateAdded($row['date_added'])
         ->build();
     }
@@ -390,7 +380,7 @@ insert into clearing_decision (
   pfile_fk,
   user_fk,
   type_fk,
-  is_global
+  scope
 ) VALUES (
   $1,
   (select pfile_fk from uploadtree where uploadtree_pk=$1),
@@ -398,9 +388,8 @@ insert into clearing_decision (
   $3,
   $4) RETURNING clearing_decision_pk
   ");
-    $res = $this->dbManager->execute($statementName, array(
-        $uploadTreeId, $userId, $type,
-        $this->dbManager->booleanToDb($isGlobal)));
+    $res = $this->dbManager->execute($statementName,
+            array($uploadTreeId, $userId, $type, $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
@@ -440,7 +429,7 @@ insert into clearing_decision (
     LD.rf_fk,
     LR.rf_shortname,
     LR.rf_fullname,
-    LD.is_global,
+    LD.scope,
     LD.is_removed,
     LD.reportinfo,
     LD.comment
@@ -452,10 +441,10 @@ insert into clearing_decision (
   INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
   WHERE
     LD2.uploadtree_fk=$1 AND
-    (LD.is_global OR LD.uploadtree_fk = $1) AND
+    (LD.scope=".DecisionScopes::REPO." OR LD.uploadtree_fk = $1) AND
     GU2.user_fk=$2
   GROUP BY LD.license_decision_event_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
-      GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.is_removed, LD.is_global, LD.reportinfo, LD.comment
+      GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.is_removed, LD.scope, LD.reportinfo, LD.comment
   ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(
@@ -466,9 +455,7 @@ insert into clearing_decision (
     $events = array();
 
     while ($row = $this->dbManager->fetchArray($res)) {
-      foreach (array('is_global', 'is_removed') as $columnName) {
-        $row[$columnName] = $this->dbManager->booleanFromDb($row[$columnName]);
-      }
+      $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
       $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
       $licenseDecisionEventBuilder->setEventId($row['license_decision_event_pk'])
@@ -479,7 +466,7 @@ insert into clearing_decision (
                                   ->setGroupId($row['group_fk'])
                                   ->setEventType($row['event_type'])
                                   ->setLicenseRef($licenseRef)
-                                  ->setGlobal($row['is_global'])
+                                  ->setGlobal($row['scope']==DecisionScopes::REPO)
                                   ->setRemoved($row['is_removed'])
                                   ->setReportinfo($row['reportinfo'])
                                   ->setComment($row['comment']);
@@ -588,7 +575,7 @@ insert into clearing_decision (
 
   public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
-    $insertisGlobal =$this->dbManager->booleanToDb($isGlobal);
+    $insertScope = $isGlobal ? DecisionScopes::REPO : Decision::ITEM ;
     if($isRemoved!=null)
     {
       $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
@@ -606,7 +593,7 @@ insert into license_decision_event (
   user_fk,
   rf_fk,
   type_fk,
-  is_global,
+  scope,
   is_removed,
   reportinfo,
   comment
@@ -622,7 +609,7 @@ insert into license_decision_event (
   $8)");
     $res = $this->dbManager->execute($statementName, array(
         $uploadTreeId, $userId, $licenseId, $type,
-        $insertisGlobal,
+        $insertScope,
         $insertIsRemoved, $reportInfo, $comment));
     $this->dbManager->freeResult($res);
   }

@@ -23,6 +23,7 @@ use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -145,18 +146,18 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->now = time();
     $ldArray = array(
-        array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now - 888)),
-        array(2, 100, 1000, 1, 2, false, false, 1, $this->getMyDate($this->now - 888)),
-        array(3, 100, 1000, 3, 4, false, false, 1, $this->getMyDate($this->now - 1234)),
-        array(4, 100, 1000, 2, 3, false, true, 2, $this->getMyDate($this->now - 900)),
-        array(5, 100, 1000, 2, 4, true, false, 1, $this->getMyDate($this->now - 999)),
-        array(6, 100, 1200, 1, 3, true, true, 1, $this->getMyDate($this->now - 654)),
-        array(7, 100, 1200, 1, 2, false, false, 1, $this->getMyDate($this->now - 543))
+        array(1, 100, 1000, 1, 1, false, DecisionScopes::ITEM, 1, $this->getMyDate($this->now - 888)),
+        array(2, 100, 1000, 1, 2, false, DecisionScopes::ITEM, 1, $this->getMyDate($this->now - 888)),
+        array(3, 100, 1000, 3, 4, false, DecisionScopes::ITEM, 1, $this->getMyDate($this->now - 1234)),
+        array(4, 100, 1000, 2, 3, false, DecisionScopes::REPO, 2, $this->getMyDate($this->now - 900)),
+        array(5, 100, 1000, 2, 4, true, DecisionScopes::ITEM, 1, $this->getMyDate($this->now - 999)),
+        array(6, 100, 1200, 1, 3, true, DecisionScopes::REPO, 1, $this->getMyDate($this->now - 654)),
+        array(7, 100, 1200, 1, 2, false, DecisionScopes::ITEM, 1, $this->getMyDate($this->now - 543))
     );
-    foreach ($ldArray as $params)
+    foreach ($ldArray as $params)  
     {
       $this->dbManager->insertInto('license_decision_event',
-          'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, is_global, type_fk, date_added',
+          'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, scope, type_fk, date_added',
           $params, $logStmt = 'insert.lde');
     }
 
@@ -187,9 +188,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private function fixResult($input)
   {
     $output = array();
+    /** @var LicenseDecisionEvent $row */
     foreach ($input as $row)
     {
-
       $tmp = array();
       $tmp[] = $row->getEventId();
       $tmp[] = $row->getPfileId();
@@ -201,7 +202,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $tmp[] = $row->isGlobal();
       $tmp[] = $row->getEventType();
       $tmp[] = $row->getDateTime();
-
 
       $output[] = $tmp;
     }
@@ -262,6 +262,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private function fixClearingDecArray($input)
   {
     $output = array();
+    /** @var ClearingDecision $row */
     foreach ($input as $row)
     {
       $tmp = array();
@@ -287,9 +288,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $clearingDec = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     $result = $this->fixClearingDecArray($clearingDec);
     assertThat($result, contains(
-        array(3, 1000, 9, 3, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
-        array(2, 1000, 7, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
-        array(1, 1000, 5, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
+        array(3, 1000, 9, 3, DecisionScopes::ITEM, DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
+        array(2, 1000, 7, 1, DecisionScopes::ITEM, DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
+        array(1, 1000, 5, 1, DecisionScopes::ITEM, DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
     ));
   }
 

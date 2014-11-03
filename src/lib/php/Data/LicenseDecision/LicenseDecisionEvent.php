@@ -21,43 +21,32 @@ namespace Fossology\Lib\Data\LicenseDecision;
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
+use Fossology\Lib\Data\DecisionScopes;
 
 class LicenseDecisionEvent extends Object implements LicenseDecision
 {
-
   /** @var int */
   private $eventId;
-
   /** @var int */
   private $pfileId;
-
   /** @var int */
   private $uploadTreeId;
-
   /** @var DateTime */
   private $dateTime;
-
   /** @var int */
   private $userId;
-
   /** @var int */
   private $groupId;
-
   /** @var string */
   private $eventType;
-
   /** @var LicenseRef */
   private $licenseRef;
-
-  /** @var boolean */
-  private $global;
-
+  /** @var DecisionScope */
+  private $scope;
   /** @var boolean */
   private $removed;
-
   /** @var string */
   private $reportinfo;
-
   /** @var string */
   private $comment;
 
@@ -71,12 +60,12 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
    * @param int $groupId
    * @param string $eventType
    * @param LicenseRef $licenseRef
-   * @param boolean $global
+   * @param int $scope
    * @param boolean $removed
    * @param string $reportinfo
    * @param string $comment
    */
-  public function __construct($eventId, $pfileId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $global, $removed, $reportinfo, $comment)
+  public function __construct($eventId, $pfileId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $scope, $removed, $reportinfo, $comment)
   {
     $this->eventId = $eventId;
     $this->pfileId = $pfileId;
@@ -86,7 +75,7 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
     $this->groupId = $groupId;
     $this->eventType = $eventType;
     $this->licenseRef = $licenseRef;
-    $this->global = $global;
+    $this->scope = $scope;
     $this->removed = $removed;
     $this->reportinfo = $reportinfo;
     $this->comment = $comment;
@@ -129,7 +118,15 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
    */
   public function isGlobal()
   {
-    return $this->global;
+    return $this->scope == DecisionScopes::REPO;
+  }
+  
+  /**
+   * @return int
+   */
+  public function getScope()
+  {
+    return $this->scope;
   }
 
   /**

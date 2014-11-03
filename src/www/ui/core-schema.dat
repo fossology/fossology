@@ -544,10 +544,10 @@
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" bool;";
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"is_global\" SET NOT NULL, ALTER COLUMN \"is_global\" SET DEFAULT false;";
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\";";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["date_added"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"date_added\" timestamptz;";
@@ -2365,10 +2365,10 @@
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_global\" bool;";
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"is_global\" SET NOT NULL;";
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["UPDATE"] = "";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["DESC"] = "";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"scope\" int4;";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"scope\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"comment\" IS 'User comment';";
   $Schema["TABLE"]["license_decision_event"]["comment"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"comment\" text;";
