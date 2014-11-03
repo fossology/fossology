@@ -218,7 +218,15 @@ if($sysconfig['Release'] == '2.6')
   $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
 }
 
-exit(0);
+/* sanity check */
+require_once ("$LIBEXECDIR/sanity_check.php");
+$checker = new SanityChecker($dbManager,$Verbose);
+$errors = $checker->checkDecisionScopes();
+if($errors>0)
+{
+  echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
+}
+exit($errors);
 
 
 
