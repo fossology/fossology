@@ -379,7 +379,7 @@ class core_auth extends FO_Plugin {
 						}
 						/* Inform about the protocol. */
 						$Protocol = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-						if ($Protocol != 'HTTPS') {
+						if (!ISSET($_SERVER['HTTPS'])) {
 							$V.= "This login uses $Protocol, so passwords are transmitted in plain text.  This is not a secure connection.<P />\n";
 						}
 						$V.= "<form method='post'>\n";
