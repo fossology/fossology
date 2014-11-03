@@ -70,7 +70,7 @@ test: all
 	$(MAKE) -C tests
 
 coverage: all
-	$(MAKE) -C tests test
+	$(MAKE) -C tests coverage
 
 clean:
 	@echo "make $(LIB) clean "
