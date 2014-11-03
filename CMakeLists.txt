@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/copyright/agent_tests/Unit/run_tests.cc
     src/copyright/agent_tests/Unit/test_regex.cc
     src/copyright/agent_tests/Unit/test_RegMatcher.cc
+    src/copyright/agent_tests/Unit/test_testdataCheckFound.cc
     src/delagent/agent/delagent.c
     src/delagent/agent/delagent.h
     src/delagent/agent/util.c

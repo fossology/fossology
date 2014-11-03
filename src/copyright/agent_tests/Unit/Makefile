@@ -21,7 +21,7 @@ CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -L${CP
 
 EXE = test_copyright
 
-OBJECTS = test_regex.o test_RegMatcher.o
+OBJECTS = test_regex.o test_RegMatcher.o test_testdataCheckFound.o
 COVERAGE =
 
 $(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
