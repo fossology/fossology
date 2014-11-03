@@ -352,6 +352,10 @@ class FO_Plugin
     {
       $this->vars['menu'] = $Menu->Output($this->Title);
     }
+
+    global $SysConf;
+    $this->vars['VERSION'] = $SysConf['BUILD'];
+
     return;
   } // OutputOpen()
 
