@@ -43,11 +43,33 @@ int CliOptions::getVerbosity() const
   return verbosity;
 }
 
+
+
 CliOptions::CliOptions(int verbosity, unsigned int type) :
   verbosity(verbosity),
-  optType(type)
+  optType(type),
+  extraRegex(false),
+  extraRegexId(0),
+  extraRegexStr("")
 {
+}
 
+CliOptions::CliOptions(int verbosity, unsigned int optType, std::string& extraRegexStr, unsigned extraRegexId) :
+  verbosity(verbosity),
+  optType(optType),
+  extraRegex(true),
+  extraRegexId(extraRegexId),
+  extraRegexStr(extraRegexStr)
+{
+}
+
+CliOptions::CliOptions():
+  verbosity(0),
+  optType(ALL_TYPES),
+  extraRegex(false),
+  extraRegexId(0),
+  extraRegexStr("")
+{
 }
 
 unsigned int CliOptions::getOptType() const
@@ -55,13 +77,22 @@ unsigned int CliOptions::getOptType() const
   return optType;
 }
 
-CliOptions::CliOptions():
-  verbosity(0),
-  optType(ALL_TYPES)
-{
-}
-
 const CliOptions& CopyrightState::getCliOptions() const
 {
   return cliOptions;
+}
+
+const std::string& CliOptions::getExtraRegex() const
+{
+  return extraRegexStr;
+}
+
+bool CliOptions::hasExtraRegex() const
+{
+  return extraRegex;
+}
+
+unsigned int CliOptions::getExtraRegexId() const
+{
+  return extraRegexId;
 }

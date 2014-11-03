@@ -66,6 +66,17 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
           "type of regex to try"
         ) // TODO change and add help based on IDENTITY
         (
+          "regex",
+          boost::program_options::value<string>(),
+          "user defined Regex to search"
+        )
+        (
+          "regexId",
+          boost::program_options::value<unsigned>()
+            ->default_value(0),
+          "subexpression Id for user defined Regex"
+        )
+        (
           "files",
           boost::program_options::value< vector<string> >(),
           "files to scan"
@@ -94,11 +105,28 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
       fileNames = vm["files"].as<std::vector<string> >();
     }
 
-    dest = CliOptions(verbosity, type);
+    if (vm.count("regex"))
+    {
+      std::string regex = vm["regex"].as<std::string>();
+
+      unsigned regexId = vm["regexId"].as<unsigned>();
+
+      dest = CliOptions(verbosity, type, regex, regexId);
+    }
+    else
+    {
+      dest = CliOptions(verbosity, type);
+    }
     return true;
+  }
+  catch (boost::bad_any_cast&) {
+    cout << "wrong parameter type" << endl;
+    cout << desc << endl;
+    return false;
   }
   catch (boost::program_options::error&)
   {
+    cout << "wrong command line arguments" << endl;
     cout << desc << endl;
     return false;
   }
@@ -114,8 +142,14 @@ CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
 
 void fillMatchers(CopyrightState& state)
 {
+  const CliOptions& cliOptions = state.getCliOptions();
+
+  if (cliOptions.hasExtraRegex()) {
+    state.addMatcher(RegexMatcher("cli", cliOptions.getExtraRegex(), cliOptions.getExtraRegexId()));
+  }
+
 #ifdef IDENTITY_COPYRIGHT
-  unsigned types = state.getCliOptions().getOptType();
+  unsigned types = cliOptions.getOptType();
 
   if (types & 1<<0)
     state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));

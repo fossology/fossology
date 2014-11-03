@@ -22,12 +22,19 @@ class CliOptions
 private:
   int verbosity;
   unsigned int optType;
+  bool extraRegex;
+  unsigned extraRegexId;
+  std::string extraRegexStr;
 
 public:
+  bool hasExtraRegex() const;
+  unsigned int getExtraRegexId() const;
+  const std::string& getExtraRegex() const;
   int getVerbosity() const;
   unsigned int getOptType() const;
 
   CliOptions(int verbosity, unsigned int type);
+  CliOptions(int verbosity, unsigned int optType, std::string& extraRegexStr, unsigned extraRegexId);
   CliOptions();
 };
 
