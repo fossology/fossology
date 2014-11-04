@@ -80,7 +80,7 @@ class ClearingDao extends Object
            CD.pfile_fk AS pfile_id,
            users.user_name AS user_name,
            CD.user_fk AS user_id,
-           CD.type_fk AS type_id,
+           CD.decision_type AS type_id,
            CD.scope as scope,
            EXTRACT(EPOCH FROM CD.date_added) AS date_added,
            ut2.upload_fk = $1 AS same_upload,
@@ -321,7 +321,7 @@ SELECT
   EXTRACT(EPOCH FROM CD.date_added) AS date_added,
   CD.user_fk AS user_id,
   GU.group_fk,
-  CD.type_fk AS type_id,
+  CD.decision_type AS type_id,
   CD.scope
 FROM clearing_decision CD
 INNER JOIN clearing_decision CD2 ON CD.pfile_fk = CD2.pfile_fk
@@ -331,7 +331,7 @@ WHERE
   CD2.uploadtree_fk=$1 AND
   (CD.scope=".DecisionScopes::REPO. " OR CD.uploadtree_fk = $1) AND
   GU2.user_fk=$2
-GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, CD.type_fk, CD.scope
+GROUP BY CD.clearing_decision_pk, CD.pfile_fk, CD.uploadtree_fk, CD.user_fk, GU.group_fk, CD.decision_type, CD.scope
 ORDER BY CD.date_added DESC LIMIT 1
         ");
     $res = $this->dbManager->execute(
@@ -363,12 +363,12 @@ ORDER BY CD.date_added DESC LIMIT 1
   /**
    * @param $uploadTreeId
    * @param $userId
-   * @param $type
+   * @param $decType
    * @param $isGlobal
    * @param LicenseDecisionResult[] $licenses
    * @param LicenseDecisionResult[] $removedLicenses
    */
-  public function insertClearingDecision($uploadTreeId, $userId, $type, $isGlobal, $licenses, $removedLicenses)
+  public function insertClearingDecision($uploadTreeId, $userId, $decType, $isGlobal, $licenses, $removedLicenses)
   {
     $this->dbManager->begin();
 
@@ -379,7 +379,7 @@ insert into clearing_decision (
   uploadtree_fk,
   pfile_fk,
   user_fk,
-  type_fk,
+  decision_type,
   scope
 ) VALUES (
   $1,
@@ -389,7 +389,7 @@ insert into clearing_decision (
   $4) RETURNING clearing_decision_pk
   ");
     $res = $this->dbManager->execute($statementName,
-            array($uploadTreeId, $userId, $type, $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ));
+            array($uploadTreeId, $userId, $decType, $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
@@ -575,7 +575,7 @@ insert into clearing_decision (
 
   public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
-    $insertScope = $isGlobal ? DecisionScopes::REPO : Decision::ITEM ;
+    $insertScope = $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ;
     if($isRemoved!=null)
     {
       $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);

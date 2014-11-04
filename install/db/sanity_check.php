@@ -17,6 +17,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 
 class SanityChecker
 {
@@ -39,6 +40,9 @@ class SanityChecker
     $scopeMap = $decScopes->getMap();
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'scope', $scopeMap);
     $this->errors += $this->checkDatabaseEnum($tablename = 'license_decision_event', 'scope', $scopeMap);
+    $decTypes = new DecisionTypes();
+    $typeMap = $decTypes->getExtendedMap();
+    $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'decision_type', $typeMap);
     return $this->errors;
   }
 
@@ -58,14 +62,14 @@ class SanityChecker
     $res = $this->dbManager->execute($stmt);
     while($row = $this->dbManager->fetchArray($res))
     {
-      if(!array_key_exists($row['scope'], $map))
+      if(!array_key_exists($row[$columnname], $map))
       {
-        echo "(-) found invalid scope '$row[scope]' in table '$tablename'\n";
+        echo "(-) found invalid $columnname '".$row[$columnname]."' in table '$tablename'\n";
         $errors++;
       }
       else if($this->verbose)
       {
-        echo "(+) found valid scope '$row[scope]' in table '$tablename'\n";
+        echo "(+) found valid $columnname '".$row[$columnname]."' in table '$tablename'\n";
       }
     }
     $this->dbManager->freeResult($res);

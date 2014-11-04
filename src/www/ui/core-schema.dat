@@ -539,14 +539,14 @@
   $Schema["TABLE"]["clearing_decision"]["user_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["user_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"type_fk\" IS 'Identifier for clearing_decision_type';";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type_fk\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"decision_type\" IS 'see Fossology/Lib/Data/DecisionTypes';";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"decision_type\" int4 NOT NULL DEFAULT 0;";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"decision_type\" SET NOT NULL, ALTER COLUMN \"decision_type\" SET DEFAULT 0;";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["scope"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"scope\" IS 'see Fossology/Lib/Data/DecisonScopes'";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4 DEFAULT 1;";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4 NOT NULL DEFAULT 1;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1;";
   $Schema["TABLE"]["clearing_decision"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["date_added"]["DESC"] = "";
@@ -2199,7 +2199,6 @@
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_decision_type_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_type_fk_fkey\" FOREIGN KEY (\"type_fk\") REFERENCES \"clearing_decision_type\" (\"type_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_licenses_rf_fk_fkey"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_licenses_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2366,8 +2365,8 @@
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["scope"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_event"]["scope"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"scope\" int4, ALTER COLUMN \"scope\" SET DEFAULT 1;";
-  $Schema["TABLE"]["license_decision_event"]["scope"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"scope\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"scope\" int4 NOT NULL DEFAULT 1;";
+  $Schema["TABLE"]["license_decision_event"]["scope"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1;";
   $Schema["TABLE"]["license_decision_event"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"comment\" IS 'User comment';";

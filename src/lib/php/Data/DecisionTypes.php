@@ -18,28 +18,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-use Fossology\Lib\Db\DbManager;
-
 class DecisionTypes extends Types
 {
   const TO_BE_DISCUSSED = 3;
   const IRRELEVANT = 4;
   const IDENTIFIED = 5;
+  const WIP = 0;
 
-  /** @var array */
-  private $values = array(self::TO_BE_DISCUSSED, self::IRRELEVANT, self::IDENTIFIED);
-
-  public function __construct(DbManager $dbManager)
+  public function __construct()
   {
-    parent::__construct("clearing decision type");
+    parent::__construct("decision type");
 
-    $this->map = $dbManager->createMap('clearing_decision_type', 'type_pk', 'meaning');
-
-    assert($this->map[self::TO_BE_DISCUSSED] == "To be discussed");
-    assert($this->map[self::IRRELEVANT] == "Irrelevant");
-    assert($this->map[self::IDENTIFIED] == "Identified");
-    assert(count($this->map) == count($this->values));
+    $this->map = array(self::TO_BE_DISCUSSED=>"To be discussed",
+            self::IRRELEVANT=>"Irrelevant",
+            self::IDENTIFIED=>"Identified");
   }
-
+  
+  public function getExtendedMap()
+  {
+    $map = $this->map;
+    $map[self::WIP] = 'Temporary';
+    return $map;
+  }
 }
