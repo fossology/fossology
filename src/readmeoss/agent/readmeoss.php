@@ -59,12 +59,18 @@ class ReadmeOssAgent extends Agent
     $ecc  = $this->eccClearedGetter ->getCleared($uploadId,$userId);
     $ip  = $this->ipClearedGetter->getCleared($uploadId,$userId);
 
-    $this->writeReport($licenses, $copyrights, $ecc, $ip, $uploadId);
+    $contents = array('licenses' => $licenses,
+                      'copyrights' => $copyrights,
+                      'ecc' => $ecc,
+                      'ip' => $ip
+    );
+
+    $this->writeReport($contents, $uploadId);
 
     return true;
   }
 
-  private function writeReport($licenses, $copyrights, $ecc, $ip, $uploadId)
+  private function writeReport($contents, $uploadId)
   {
     global $SysConf;
 
@@ -75,17 +81,9 @@ class ReadmeOssAgent extends Agent
       mkdir($fileBase, 0777, true);
     }
 
-    ob_start();
-    var_dump($licenses);
-    var_dump($copyrights);
-    file_put_contents($filename,  ob_get_clean());
+    $message = $this->generateReport($contents);
 
-//
-//    $handle = fopen($filename, "a");
-//    fwrite($handle, $message);
-//    fclose($handle);
-
-
+    file_put_contents($filename, $message );
 
     $this->updateReportTable($uploadId, $this->jobId, $filename );
 
@@ -95,6 +93,14 @@ class ReadmeOssAgent extends Agent
   private function updateReportTable($uploadId, $jobId, $filename){
    $result=$this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",array($uploadId, $jobId, $filename),__METHOD__);
    $this->dbManager->freeResult($result);
+  }
+
+  private function generateReport($contents)
+  {
+    //TODO fill output with the correct ReadMeOss format
+    $output = print_r($contents, true);
+
+    return $output;
   }
 
 

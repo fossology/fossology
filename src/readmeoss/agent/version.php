@@ -1,3 +1,3 @@
 <?php
 define("AGENT_VERSION", "trunk");
-define("AGENT_REV", "18ecd8");
+define("AGENT_REV", "6ee49b");
