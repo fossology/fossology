@@ -18,11 +18,9 @@
  */
 
 namespace Fossology\Reportgen;
-
-use Fossology\Reportgen\XpClearedGetter;
-require_once ("getClearedXp.php");
-
-
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
+require_once("$MODDIR/lib/php/Report/getClearedXp.php");
 class EccClearedGetter extends XpClearedGetter
 {
 
