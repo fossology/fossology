@@ -41,8 +41,6 @@ class ReadmeOssAgent extends Agent
   /** @var EccClearedGetter */
   private $eccClearedGetter;
 
-  /** @var DecisionTypes */
-  private $decisionTypes;
 
   function __construct()
   {
@@ -55,8 +53,6 @@ class ReadmeOssAgent extends Agent
 
 
   }
-
-
 
   function processUploadId($uploadId)
   {
