@@ -1,6 +1,6 @@
 .\" $OpenBSD: ssh-agent.1,v 1.37 2003/03/28 10:11:43 jmc Exp $
 .\"
-.\" Author: Tatu Ylonen <ylo@cs.hut.fi>
+.\" <s>Author: Tatu Ylonen <ylo@cs.hut.fi></s>
 .\" <s>Copyright (c) 1995 Tatu Ylonen <ylo@cs.hut.fi>, Espoo, Finland</s>
 .\"                    All rights reserved
 .\"

@@ -8,7 +8,7 @@ from sources obtained from:
 
 ftp://ftp.gnu.org/pub/gnu/gawk/gawk-3.1.5.tar.gz
 
-It is currently being maintained by James Troup <james@nocrew.org>.
+It is currently being <s>maintained by James Troup <james@nocrew.org>.</s>
 
 Gawk is <s>Copyright (C) 1989-2006 Free Software Foundation</s>.
 Modifications for Debian GNU <s>Copyright (C) 1995-1997 Chris Fearnley.</s>

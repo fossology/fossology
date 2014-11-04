@@ -27,9 +27,44 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace std;
 
+class StatsAccumulator
+{
+
+public:
+  StatsAccumulator() : matched(0), falsePositives(0), falseNegatives(0) {}
+
+  unsigned int getMatched() const { return matched; }
+  unsigned int getFalsePositives() const { return falsePositives; }
+  unsigned int getFalseNegatives() const { return falseNegatives; }
+
+  void incrementMatched(unsigned int matched = 1) { StatsAccumulator::matched += matched; }
+  void incrementFalsePositives(unsigned int falsePositives = 1) { StatsAccumulator::falsePositives += falsePositives; }
+  void incrementFalseNegatives(unsigned int falseNegatives = 1) { StatsAccumulator::falseNegatives += falseNegatives; }
+
+private:
+  unsigned matched;
+  unsigned falsePositives;
+  unsigned falseNegatives;
+};
+
+ostream& operator<<(ostream& os, const StatsAccumulator& accumulator) {
+  os << "Total:   " << accumulator.getMatched() + accumulator.getFalsePositives() << endl;
+  os << "Matches: " << accumulator.getMatched() << endl;
+  os << "False +: " << accumulator.getFalsePositives() << endl;
+  os << "False -: " << accumulator.getFalseNegatives() << endl;
+  return os;
+}
+
+bool operator<=(const CopyrightMatch& a, const CopyrightMatch& b)
+{
+  size_t aEnd = a.getStart() + a.getLength();
+  size_t bEnd = b.getStart() + b.getLength();
+  return ((a.getStart() >= b.getStart()) && (aEnd <= bEnd));
+}
+
 class TestDataCheck : public CPPUNIT_NS :: TestFixture
 {
-CPPUNIT_TEST_SUITE (TestDataCheck);
+  CPPUNIT_TEST_SUITE (TestDataCheck);
     CPPUNIT_TEST (testDataCheck);
 
   CPPUNIT_TEST_SUITE_END ();
@@ -54,6 +89,67 @@ private:
     return output;
   }
 
+  void checkMatches(const vector<CopyrightMatch>& matches, const vector<CopyrightMatch>& expected, StatsAccumulator& accumulator, const string& logText, ostream& log)
+  {
+    const unsigned long legalMatchesSize = matches.size();
+    const unsigned long expectedMatchesSize = expected.size();
+
+    if (legalMatchesSize == 0)
+    {
+      log << logText << ": not found: " << expected << endl;
+      accumulator.incrementFalseNegatives(expectedMatchesSize);
+      return;
+    }
+
+    if (expectedMatchesSize == 0) {
+      log << logText << ": bad found: " << matches << endl;
+      accumulator.incrementFalsePositives(legalMatchesSize);
+      return;
+    }
+
+    size_t iMatches = 0;
+    size_t iExpected = 0;
+
+    while(iMatches < legalMatchesSize && iExpected < expectedMatchesSize)
+    {
+      const CopyrightMatch& currentExpected = expected[iExpected];
+      const CopyrightMatch& currentMatched = matches[iMatches];
+
+      if ((currentMatched <= currentExpected) || (currentExpected <= currentMatched)) {
+        accumulator.incrementMatched();
+        ++iMatches;
+        ++iExpected;
+      }
+      else if (currentExpected.getStart() > currentMatched.getStart())
+      {
+        log << logText << ": bad found: " << currentMatched << endl;
+        accumulator.incrementFalsePositives();
+        ++iMatches;
+      }
+      else //if (currentExpected.getStart() < currentMatched.getStart())
+      {
+        log << logText << ": not found: " << currentExpected << endl;
+        accumulator.incrementFalseNegatives();
+        ++iExpected;
+      }
+    }
+
+    while (iMatches < legalMatchesSize)
+    {
+      log << logText << ": bad found: " << matches[iMatches]<< endl;
+      accumulator.incrementFalsePositives();
+      ++iMatches;
+    }
+
+    while (iExpected < expectedMatchesSize)
+    {
+      log << logText << ": not found: " << expected[iExpected]<< endl;
+      accumulator.incrementFalseNegatives();
+      ++iExpected;
+    }
+
+  }
+
 protected:
   void testDataCheck (void) {
     string baseFileName("../testdata/testdata");
@@ -62,6 +158,8 @@ protected:
     vector<RegexMatcher> copyrights = { RegexMatcher(type, regCopyright::getRegex()) };
 
     vector<RegexMatcher> expectedMatcher = { RegexMatcher(type, "<s>(.*?)<\\/s>", 1) };
+
+    StatsAccumulator accumulator;
 
     for (unsigned int i = 0; i<139; ++i)
     {
@@ -76,8 +174,17 @@ protected:
       vector<CopyrightMatch> matches = matchStringToRegexes(currentFile.getContent(), copyrights);
       vector<CopyrightMatch> expected = correctPositions(matchStringToRegexes(expectedMatchesFile.getContent(), expectedMatcher));
 
-      CPPUNIT_ASSERT_EQUAL(expected, matches);
+//#define DEBUG
+#ifdef DEBUG
+      std::ostream& os = cout;
+#else
+      std::ostream os(0);
+#endif
+      checkMatches(matches, expected, accumulator, currentFileName, os);
     }
+
+    cout << endl;
+    cout << accumulator << endl;
   };
 
 };

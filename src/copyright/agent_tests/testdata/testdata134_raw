@@ -1,8 +1,8 @@
 This is the Debian package of Texinfo, the GNU documentation system.
 
-This package was previously maintained by Ian Jackson, Erick
-Branderhorst, Galen Hazelwood, and Josip Rodin. Today, it is 
-maintained by the Debian TeX Task Force <debian-tex-maint@lists.debian.org>.
+This package was previously <s>maintained by Ian Jackson, Erick
+Branderhorst, Galen Hazelwood, and Josip Rodin</s>. Today, it is 
+<s>maintained by the Debian TeX Task Force <debian-tex-maint@lists.debian.org>.</s>
 
 The original source can be found at: http://ftp.gnu.org/gnu/texinfo/
 
