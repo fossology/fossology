@@ -81,6 +81,32 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   }
 
+  public function testGetLatestAgentDetectedLicensesWithUnknownAgent()
+  {
+    $uploadId = 2;
+    list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
+    list($licenseMatch2, $licenseRef2, $agentRef2) = $this->createLicenseMatch(5, "licA", 22, "unknown", 665, 95);
+    $licenseMatches = array($licenseMatch1, $licenseMatch2);
+
+    $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'unknown')))->andReturn(
+        array(
+            'nomos' => 23
+        )
+    );
+
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+
+    assertThat($latestAgentDetectedLicenses, is(array(
+        'licA' => array(
+            'nomos' => array(
+                array('id' => 5, 'licenseRef' => $licenseRef1, 'agentRef' => $agentRef1, 'matchId' => 453, 'percentage' => null)
+            )
+        )
+    )));
+  }
+
   public function testGetLatestAgentDetectedWithOutdatedMatches()
   {
     $uploadId = 2;
