@@ -451,9 +451,7 @@ insert into clearing_decision (
         $statementName,
         array($uploadTreeId, $userId)
     );
-
     $events = array();
-
     while ($row = $this->dbManager->fetchArray($res)) {
       $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
@@ -556,6 +554,10 @@ insert into clearing_decision (
       $row['is_global']=$isGlobal;
       $row['comment']="";
       $row['reportinfo']="";
+    }
+    else
+    {
+      $row['is_global'] = ($row['scope']==DecisionScopes::REPO);
     }
 
     if($what=='Text') {

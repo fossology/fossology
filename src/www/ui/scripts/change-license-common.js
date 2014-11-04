@@ -70,7 +70,6 @@ function moveLicense(theSelFrom, theSelTo) {
 }
 
 
-
 function selectNoLicenseFound(left, right) {
   var selLength = right.length;
   var i;
@@ -128,8 +127,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-bulk",
     data: post_data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal) },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity) }
+    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess,  closeBulkModal); },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
   });
 
 }
@@ -169,21 +168,25 @@ function popUpLicenseText(popUpUri, title) {
 
 function addLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
-          .done(function (data) {
-            var table = createLicenseDecisionTable();
-            table.fnDraw(false);
-          })
-          .fail(failed);
-
+      .done(function (data) {
+      if(data){
+        $('#decTypeSet').css('border-color','red');
+      }
+      var table = createLicenseDecisionTable();
+      table.fnDraw(false);
+    })
+    .fail(failed);
 }
 
 
 function removeLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
-          .done(function (data) {
-            var table = createLicenseDecisionTable();
-            table.fnDraw(false);
-          })
-          .fail(failed);
-
+    .done(function (data) {
+      if(data){
+        $('#decTypeSet').css('border-color','red');
+      }
+      var table = createLicenseDecisionTable();
+      table.fnDraw(false);
+    })
+    .fail(failed);
 }

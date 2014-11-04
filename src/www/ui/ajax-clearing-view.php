@@ -272,12 +272,9 @@ class AjaxClearingView extends FO_Plugin
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
-
-
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
     list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
 
     $table = array();
     foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
