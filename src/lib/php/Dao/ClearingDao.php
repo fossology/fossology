@@ -683,7 +683,12 @@ insert into license_decision_event (
     }
   }
 
-  private function markDecisionAsWip($uploadTreeId, $userId, $isGlobal)
+  /**
+   * @param int $uploadTreeId
+   * @param int $userId
+   * @param bool $isGlobal
+   */
+  public function markDecisionAsWip($uploadTreeId, $userId, $isGlobal)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -692,7 +697,6 @@ insert into license_decision_event (
     $res = $this->dbManager->execute($statementName,
             array($uploadTreeId, $userId, DecisionTypes::WIP, $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ));
     $result = $this->dbManager->fetchArray($res);
-    $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
   }
   

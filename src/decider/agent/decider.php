@@ -57,15 +57,15 @@ class DeciderAgent extends Agent
 
   static protected function hasNewerUserEvents($events, $date)
   {
-    foreach ($events as $licenseShortName => $licenseDecisionResult)
+    foreach ($events as $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)))
-        if (($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
-          return false;
+      if ((($date === null) || ($eventDate > $date)) && $licenseDecisionResult->hasAgentDecisionEvent() && !$licenseDecisionResult->hasLicenseDecisionEvent())
+      {
+        return false;
+      }
     }
-
     return true;
   }
 
@@ -121,12 +121,13 @@ class DeciderAgent extends Agent
     if ($canAutoDecide)
     {
       $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
-      $this->heartbeat(1);
-    } else
-    {
-      $this->heartbeat(0);
     }
-
+    else
+    {
+      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId, $this->decisionIsGlobal);
+    }
+    $this->heartbeat(1);
+    
     $this->dbManager->commit();  /* end transaction */
   }
 }
