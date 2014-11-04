@@ -37,7 +37,7 @@ editableConfiguration  = {
   "sReadOnlyCellClass": "read_only",
   "sUpdateURL": "?mod=conclude-license&do=updateLicenseDecisions" ,
   "fnOnEditing": function(input) {return input[0].value;},
-  "fnOnEdited": function (status){ if(status==="failure") {;} } ,
+  "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').css('border-color','red');} } ,
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
   "sSuccessResponse": "success"
 };
