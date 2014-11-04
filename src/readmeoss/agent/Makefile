@@ -10,8 +10,8 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=readmeOssAgent.php version.php
-WRAP=readmeOssAgent
+EXE=readmeoss.php version.php
+WRAP=readmeoss
 
 all: version.php
 
@@ -21,19 +21,19 @@ version.php: version-process_php
 include $(TOP)/Makefile.process
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/decider/agent/
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/readmeoss/agent/
 	for file in $(EXE); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/readmeoss/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/readmeoss/agent/$$file; \
 	done
 
 uninstall:
 	for file in $(WRAP); do \
-		rm -rf $(DESTDIR)$(MODDIR)/decider/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/readmeoss/agent/$$file; \
 	done
 
 clean:

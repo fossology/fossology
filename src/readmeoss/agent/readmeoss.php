@@ -10,44 +10,39 @@
  You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-define("AGENT_NAME", "decider");
+define("AGENT_NAME", "readmeoss");
 
 use Fossology\Lib\Agent\Agent;
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
-use Fossology\Reportgen\CopyClearedGetter;
-use Fossology\Reportgen\EccClearedGetter;
-use Fossology\Reportgen\IpClearedGetter;
-use Fossology\Reportgen\LicenseClearedGetter;
+use Fossology\Reportgen\LicenseClearedGetterProto;
 use Fossology\Reportgen\XpClearedGetter;
+
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");
 
+require_once("$MODDIR/lib/php/Report/getClearedXp.php");
+require_once("$MODDIR/lib/php/Report/getClearedProto.php");
 class ReadmeOssAgent extends Agent
 {
 
-  /** @var  LicenseClearedGetter  */
+  /** @var  LicenseClearedGetterProto  */
   private $licenseClearedGetter;
 
-  /** @var CopyClearedGetter */
+  /** @var XpClearedGetter */
   private $cpClearedGetter;
-  /** @var IpClearedGetter */
+  /** @var XpClearedGetter */
   private $ipClearedGetter;
-  /** @var EccClearedGetter */
+  /** @var XpClearedGetter */
   private $eccClearedGetter;
 
 
   function __construct()
   {
-    $this->cpClearedGetter = new CopyClearedGetter();
-    $this->ipClearedGetter = new IpClearedGetter();
-    $this->eccClearedGetter = new EccClearedGetter();
-    $this->licenseClearedGetter = new LicenseClearedGetter();
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
+    $this->ipClearedGetter = new XpClearedGetter("ip", null, true);
+    $this->eccClearedGetter = new XpClearedGetter("ecc", null, true);
+    $this->licenseClearedGetter = new LicenseClearedGetterProto();
 
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -64,15 +59,42 @@ class ReadmeOssAgent extends Agent
     $ecc  = $this->eccClearedGetter ->getCleared($uploadId,$userId);
     $ip  = $this->ipClearedGetter->getCleared($uploadId,$userId);
 
-    $this->generateReport($licenses,$copyrights,$ecc,$ip);
+    $this->writeReport($licenses, $copyrights, $ecc, $ip, $uploadId);
 
     return true;
   }
 
-  private function generateReport($licenses, $copyrights, $ecc, $ip)
+  private function writeReport($licenses, $copyrights, $ecc, $ip, $uploadId)
   {
+    global $SysConf;
+
+    $fileBase=$SysConf['FOSSOLOGY']['path']."/report/";
+    $filename =$fileBase. "ReadMeOss_".$this->jobId.".txt" ;
+
+    if(!is_dir($fileBase)) {
+      mkdir($fileBase, 0777, true);
+    }
+
+    ob_start();
     var_dump($licenses);
     var_dump($copyrights);
+    file_put_contents($filename,  ob_get_clean());
+
+//
+//    $handle = fopen($filename, "a");
+//    fwrite($handle, $message);
+//    fclose($handle);
+
+
+
+    $this->updateReportTable($uploadId, $this->jobId, $filename );
+
+  }
+
+
+  private function updateReportTable($uploadId, $jobId, $filename){
+   $result=$this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",array($uploadId, $jobId, $filename),__METHOD__);
+   $this->dbManager->freeResult($result);
   }
 
 
