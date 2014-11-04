@@ -90,14 +90,14 @@ class ClearingDao extends Object
            LR.rf_fullname as fullname,
            CL.removed as removed
          FROM clearing_decision CD
-         LEFT JOIN users ON CD.user_fk=users.user_pk
-         INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
-         INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
-         LEFT JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
-         LEFT JOIN license_ref LR on CL.rf_fk=LR.rf_pk
-           WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
+           LEFT JOIN users ON CD.user_fk=users.user_pk
+           INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
+           INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
+           LEFT JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
+           LEFT JOIN license_ref LR on CL.rf_fk=LR.rf_pk
+         WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
          GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
-         license_id, shortname, fullname, removed
+           license_id, shortname, fullname, removed
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -573,7 +573,7 @@ insert into clearing_decision (
 
   }
 
-  public function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
+  private function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isGlobal, $isRemoved, $reportInfo = '', $comment = '')
   {
     $insertScope = $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM ;
     if($isRemoved!=null)

@@ -162,11 +162,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6)");
+        "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, decision_type, date_added, scope)"
+            . " VALUES ($1, $2, $3, $4, $5, $6, $7)");
     $cdArray = array(
-        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now - 888)),
-        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now - 888)),
-        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now - 1234))
+        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now - 888), DecisionScopes::ITEM),
+        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now - 888), DecisionScopes::ITEM),
+        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now - 1234), DecisionScopes::ITEM)
     );
     foreach ($cdArray as $ur)
     {
