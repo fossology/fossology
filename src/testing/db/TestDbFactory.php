@@ -31,6 +31,10 @@ class TestDbFactory
     if ($dbName === NULL)
     {
       $dbName = "fosstestone";
+    } else {
+      if ($dbName === "fossology") {
+        throw new Exception("cannot use production database for tests");
+      }
     }
     $dbName = strtolower($dbName);
     $this->ensurePgPassFileEntry();

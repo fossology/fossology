@@ -138,6 +138,45 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     assertThat($removedLicenseDecisions, is(emptyArray()));
   }
 
+  public function testGetCurrentLicenseDecisionsWithUserAndAgentDecision()
+  {
+    $agentRef = new AgentRef(143, "agent", "1.1");
+    $licenseRef = new LicenseRef(13, "licA", "License A");
+    $addedEvents = array(
+        "licA" => array(
+            $agentRef->getAgentName() => array(
+                array(
+                    "id" => $licenseRef->getId(),
+                    "licenseRef" => $licenseRef,
+                    "agentRef" => $agentRef,
+                    "matchId" => 143,
+                    "percentage" => 98
+                )
+            )
+        )
+    );
+
+    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")
+        ->with($this->itemTreeBounds)
+        ->andReturn($addedEvents);
+
+    $addedEvent = $this->createLicenseDecisionEvent(123, 12, 13, "licA", "License A");
+    $this->clearingDao->shouldReceive("getCurrentLicenseDecisions")
+        ->with($this->userId, $this->uploadTreeId)
+        ->andReturn(array($this->createResults($addedEvent), array()));
+
+    list($licenseDecisions, $removedLicenseDecisions) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($this->itemTreeBounds, $this->userId);
+
+    assertThat($licenseDecisions, is(arrayWithSize(1)));
+
+    /** @var LicenseDecisionResult $result */
+    $result = $licenseDecisions[$licenseRef->getShortName()];
+    assertThat($result->getLicenseRef(), is($licenseRef));
+    assertThat($result->getLicenseDecisionEvent(), is($addedEvent));
+    assertThat($result->getAgentDecisionEvents(), is(arrayWithSize(1)));
+    assertThat($removedLicenseDecisions, is(emptyArray()));
+  }
+
   /**
    * @param $eventId
    * @param $fileId
