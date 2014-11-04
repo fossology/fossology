@@ -31,6 +31,7 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp  
 
 	# Add here commands to compile the arch part of the package.
+	@dpkg-parsechangelog | sed -n -e 's/^Version: //p' > VERSIONSTRING
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var -C src/nomos/agent/ -f Makefile.sa
 	touch $@

@@ -87,7 +87,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
 
     $expected = "";
  
-    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
+    exec("pg_restore -Ufossy -d $DB_NAME ../testdata/testdb_all.tar");
 
     $sql = "SELECT upload_pk, upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $sql);
@@ -113,7 +113,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     global $DB_NAME;
     $expected = "";
 
-    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
+    exec("pg_restore -Ufossy -d $DB_NAME ../testdata/testdb_all.tar");
 
     $sql = "SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;";
     $result = pg_query($PG_CONN, $sql);
@@ -138,7 +138,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     global $DB_NAME;
     $expected = "The upload '85' is deleted by the user 'fossy'.";
 
-    exec("sudo su postgres -c 'pg_restore -d $DB_NAME ../testdata/testdb_all.tar'");
+    exec("pg_restore -Ufossy -d $DB_NAME ../testdata/testdb_all.tar");
     $sql = "UPDATE upload SET user_fk = 2;";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);

@@ -59,6 +59,7 @@ src/lib/c/reppath
 src/lib/c/sqlCopyTest
 src/lib/c/tests/lib-c-Listing.xml
 src/lib/c/tests/lib-c-Results.xml
+src/lib/c/tests/results/
 src/lib/c/tests/testlibs
 src/lib/php/bootstrap.php
 src/lib/php/id.patch

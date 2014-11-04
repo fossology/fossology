@@ -69,6 +69,9 @@ uninstall-lib:
 test: all
 	$(MAKE) -C tests
 
+coverage: all
+	$(MAKE) -C tests coverage
+
 clean:
 	@echo "make $(LIB) clean "
 	rm -f *.a $(EXE) *.o core *.gc*
