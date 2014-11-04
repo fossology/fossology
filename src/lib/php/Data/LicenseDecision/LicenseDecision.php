@@ -24,8 +24,6 @@ interface LicenseDecision
 {
   const USER_DECISION = "User decision";
   const BULK_RECOGNITION = "bulk";
-  const SCOPE_GLOBAL = "global";
-  const SCOPE_UPLOAD = "upload";
 
   /**
    * @return DateTime

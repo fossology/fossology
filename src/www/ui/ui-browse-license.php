@@ -171,7 +171,7 @@ class ui_browse_license extends FO_Plugin
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
-
+    
     /***************************************
      * Problem: $ChildCount can be zero!
      * This happens if you have a container that does not
