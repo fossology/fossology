@@ -363,6 +363,16 @@ ORDER BY CD.date_added DESC LIMIT 1
   }
 
   /**
+   * @param int $uploadTreeId
+   * @param int $userId
+   */
+  public function removeWipClearingDecision($uploadTreeId, $userId){
+    $sql = "DELETE FROM clearing_decision WHERE uploadtree_fk=$1 AND user_fk=$2 AND decision_type=$3";
+    $this->dbManager->prepare($stmt=__METHOD__,$sql);
+    $this->dbManager->freeResult($this->dbManager->execute($stmt,array($uploadTreeId, $userId, DecisionTypes::WIP)));
+  }
+  
+  /**
    * @param $uploadTreeId
    * @param $userId
    * @param $decType
@@ -441,10 +451,9 @@ insert into clearing_decision (
   INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
   INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
   INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
-  WHERE
-    LD2.uploadtree_fk=$1 AND
-    (LD.scope=".DecisionScopes::REPO." OR LD.uploadtree_fk = $1) AND
-    GU2.user_fk=$2
+  WHERE LD2.uploadtree_fk=$1
+    AND (LD.scope=".DecisionScopes::REPO." OR LD.uploadtree_fk = $1)
+    AND GU2.user_fk=$2
   GROUP BY LD.license_decision_event_pk, LD.pfile_fk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
       GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.is_removed, LD.scope, LD.reportinfo, LD.comment
   ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
@@ -689,7 +698,7 @@ insert into license_decision_event (
   
   public function isDecisionWip($uploadTreeId, $userId)
   {
-    $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND user_fk=$2";
+    $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND user_fk=$2 ORDER BY date_added DESC LIMIT 1";
     $latestDec = $this->dbManager->getSingleRow($sql, array($uploadTreeId, $userId), $sqlLog=__METHOD__);
     if($latestDec===false)
     {
