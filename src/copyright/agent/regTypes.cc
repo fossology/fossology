@@ -20,13 +20,14 @@ const  std::string regCopyright::getType(){
 #define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
 
 const std::string regCopyright::getRegex() {
-#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,})|(" EMAILRGX "))"
+#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
 #define SPACECLS  "[\\t ]"
 #define SPACES    SPACECLS "+"
-#define SPACESALL "[[:space:]]+"
+#define SPACESALL "[[:space:]]*"
 #define APUNCT    "[[:punct:]]?"
-#define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
-#define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
+#define NAMESLIST NAME "(([-, ]+)" NAME ")*"
+#define DATE      "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
+#define DATESLIST DATE "(([[:punct:][:space:]-]+)" DATE ")*"
 #define COPYR_SYM_ALONE "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
 #define COPYR_SYM "(\\(C\\)|" COPYR_SYM_ALONE ")"
 #define COPYR_TXT "copyright(s)?"
@@ -53,7 +54,7 @@ const std::string regCopyright::getRegex() {
   ")|("
     "("
       "((author|contributor|maintainer)s?)"
-      "|((written|contributed|maintained)" SPACES "by)"
+      "|((written|contribut(ed|ions?)|maintained|put"SPACES"together)" SPACES "by)"
     ")"
     APUNCT
     SPACESALL
