@@ -40,7 +40,7 @@ utils: build-utils
 
 # generate the VERSION file
 TOP = .
-VERSIONFILE: 
+VERSIONFILE:
 	$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
@@ -52,7 +52,7 @@ $(INSTALLDIRS):
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
-	
+
 # test depends on everything being built first
 test: all $(TESTDIRS)
 $(TESTDIRS):

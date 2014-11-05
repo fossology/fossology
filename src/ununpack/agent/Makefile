@@ -18,7 +18,7 @@ TESTDIR=tests
 OBJECTS= checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
 COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
-all: $(FOLIB) $(EXE) 
+all: $(FOLIB) $(EXE)
 
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
@@ -32,11 +32,11 @@ install: all $(VARS)
 	fi
 	@mkdir -p $(CONFDIR)/mods-enabled
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
-	
+
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
 	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
 	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
-	  
+
 # create wrapper for departition in BINDIR
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/departition
@@ -49,10 +49,10 @@ uninstall: $(VARS)
 	rm -rf $(DESTDIR)$(MODDIR)/ununpack
 
 $(OBJECTS): %.o: %.c  $(UUHDR)
-	$(CC) -c $< $(CFLAGS_LOCAL) 
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 
-$(COVERAGE): %_cov.o: %.c 
+$(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libununpack.a: $(OBJECTS)

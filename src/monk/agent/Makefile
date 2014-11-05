@@ -38,7 +38,7 @@ $(FOLIB):
 
 libmonk.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
-	
+
 libmonk_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
@@ -85,7 +85,7 @@ _squareVisitor.c _squareVisitor.h: squareBuilder
 squareBuilder: buildSquareVisitor.c
 	$(CC) buildSquareVisitor.c $(DEF) $(CFLAGS_LOCAL) -lm -o $@
 
-$(COVERAGE): %_cov.o: %.c 
+$(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################

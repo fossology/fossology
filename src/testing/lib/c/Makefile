@@ -15,10 +15,10 @@ $(LIB): $(OBJS) $(VARS)
 
 
 $(OBJS): %.o: %.c %.h
-	$(CC) -c $< 
+	$(CC) -c $<
 
 clean:
 	echo "make $(LIB) clean "
-	rm -f $(LIB) *.o 
+	rm -f $(LIB) *.o
 
 .PHONY: all clean

@@ -18,7 +18,7 @@ EXE = test_nomos
 
 OBJECTS = test_nomos_gap.o  test_DoctoredBuffer.o \
           $(NULL)
-# test_nomos_gap.o 
+# test_nomos_gap.o
 all: $(EXE)
 	@echo "make nomos Unit agent_tests"
 
@@ -47,7 +47,7 @@ agent:
 libnomos.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libnomos_cov.a: 
+libnomos_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
@@ -59,6 +59,6 @@ install:
 uninstall:
 	@echo "make nomos agent_tests nothing to uninstall"
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test
 include ${TOP}/Makefile.deps
 

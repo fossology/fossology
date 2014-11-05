@@ -1,15 +1,15 @@
 #####################################################################
 # Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -40,7 +40,7 @@ $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 all: $(EXE) test
 	@echo "make copyright agent and test"
 
-test: 
+test:
 	$(MAKE) -C $(TESTDIR) test
 	$(MAKE) -C $(TESTDIR) coverage
 
@@ -50,10 +50,10 @@ test:
 
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
-	
+
 libcopyright_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
-	
+
 ######################
 # object build rules #
 ######################
@@ -73,7 +73,7 @@ pair.o: %.o: %.c %.h cvector.h
 main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
 	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
-$(COVERAGE): %_cov.o: %.c 
+$(COVERAGE): %_cov.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################

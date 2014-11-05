@@ -1,15 +1,15 @@
 ######################################################################
 # Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -62,12 +62,12 @@ $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLI
 	@echo "make delagent agent unit test"
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) -o $@
 
-$(TEST_OBJ_RUN): %.o: %.c 
+$(TEST_OBJ_RUN): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-$(TEST_OBJ): %.o: %.c 
+$(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
-	
+
 test: all $(EXE) testdata
 	@echo "execute delagent test"
 	./$(EXE)
@@ -78,7 +78,7 @@ cunit_lib:
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
-coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) 
+coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	@echo "execute delagent test and code coverage"
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
@@ -92,6 +92,6 @@ delagent.o:
 	$(MAKE) -C $(LOCALAGENTDIR)/ $@
 
 clean:
-	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result 
+	rm -fr $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt  *.gc* results test_result
 
 include $(DEPS)

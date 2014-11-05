@@ -35,7 +35,7 @@ coverage:
 	@echo "make coverage $(EXE)"
 	$(MAKE) -C $(TESTDIR) coverage
 
-$(OBJECTS): %.o: %.c 
+$(OBJECTS): %.o: %.c
 	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
