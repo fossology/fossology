@@ -22,11 +22,19 @@ _runcopyrightPositives()
 
 _checkFound()
 {
+  while IFS="[:]'" read initial start length type unused content unused; do
+    found=""
+    while IFS="[:]'" read initial2 start2 length2 type2 unused2 content2 unused2; do
+      if [ "x$content2" = "x$content1" ]; then
+        found="yes"
+        break
+      fi
+    done <<EO2
+$2
+EO2
 
-echo "$1"
-   while IFS="[:]'" read initial start length type unused content unused; do
-      echo "i=$initial s=$start l=$length t=$type c='$content' u=$unused"
-   done <<EO1
+    assertEquals "$found" "yes"
+  done <<EO1
 $1
 EO1
 
@@ -34,7 +42,7 @@ EO1
 
 testAll()
 {
-  for file_raw in ../testdata/*02_raw; do
+  for file_raw in ../testdata/testdata0_raw; do
     file=${file_raw%_raw}
     expectedPositives="$( _runcopyrightPositives "$file_raw" )"
     found="$( _runcopyright "$file" )"
