@@ -108,11 +108,16 @@ without any warranty.
     <service id="businessrules.newest_license_selector" class="\Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
     </service>
 
-    <service id="businessrules.clearing_decision_event_processor"
-                 class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
+    <service id="businessrules.agent_license_event_processor"
+                class="\Fossology\Lib\BusinessRules\AgentLicenseEventProcessor">
       <argument type="service" id="dao.license"/>
       <argument type="service" id="dao.agents"/>
+    </service>
+
+    <service id="businessrules.clearing_decision_event_processor"
+                 class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
       <argument type="service" id="dao.clearing"/>
+      <argument type="service" id="businessrules.agent_license_event_processor"/>
     </service>
 
     <service id="twig.loader" class="Twig_Loader_Filesystem">

@@ -167,7 +167,7 @@ class UploadTreeView
    * @param $skipThese
    * @return string
    */
-  private function getQueryCondition($skipThese)
+  private static function getQueryCondition($skipThese)
   {
     $conditionQueryHasLicense = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
 
@@ -194,10 +194,11 @@ class UploadTreeView
         return $conditionQuery;
     }
   }
-  
+
   /**
    * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
    * @param int $parent
+   * @return array
    */
   public function countMaskedNonArtifactChildren($parent)
   {
