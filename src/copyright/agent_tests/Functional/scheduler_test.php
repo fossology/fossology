@@ -38,6 +38,8 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
   private $licenseDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var CopyrightDao */
+  private $copyrightDao;
 
   public function setUp()
   {
@@ -46,8 +48,9 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $this->uploadDao = new UploadDao($this->dbManager);
+    $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
   }
-  
+
   public function tearDown()
   {
     $this->testDb = null;
@@ -62,7 +65,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $agentName = "copyright";
 
     $agentDir = dirname(dirname(__DIR__));
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
+    system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
 
     $pipeFd = popen("echo $uploadId | ./$agentName -c $sysConf --scheduler_start", "r");
     $this->assertTrue($pipeFd !== false, 'running copyright failed');
@@ -102,14 +105,12 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq'),false);
-    $this->testDb->createViews(array('license_file_ref'),false);
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight'),false);
+    $this->testDb->createPlainTables(array('agent','uploadtree','upload','uploadtree_a','pfile','users','bucketpool','mimetype','clearing_decision_type','ars_master'));
+    $this->testDb->createSequences(array('agent_agent_pk_seq','upload_upload_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq','nomos_ars_ars_pk_seq'));
+    $this->testDb->createConstraints(array('agent_pkey','upload_pkey_idx','pfile_pkey','user_pkey','clearing_decision_type_pkey'));
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','users'));
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData(array('upload','pfile','uploadtree_a','bucketpool','mimetype','users'), false);
   }
 
   public function testRun()
@@ -124,24 +125,10 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($retCode, 0, 'copyright failed: '.$output);
 
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
-    $this->assertEquals($expected=1, count($matches));
-
-    /** @var LicenseMatch */
-    $licenseMatch = $matches[0];
-
-    $this->assertEquals($expected=4, $licenseMatch->getFileId());
-
-    /** @var LicenseRef */
-    $matchedLicense = $licenseMatch->getLicenseRef();
-    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
-
-    /** @var AgentRef */
-    $agentRef = $licenseMatch->getAgentRef();
-
-    $this->assertEquals($agentRef->getAgentName(), "copyright");
+    $matches = $this->copyrightDao->getAllEntries("copyright", $uploadId, $uploadTreeTableName);
+    $this->assertGreaterThan($expected=5, count($matches), $output);
   }
-
 
 }
