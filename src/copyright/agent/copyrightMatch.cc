@@ -56,6 +56,13 @@ bool operator ==(const CopyrightMatch& first, const CopyrightMatch& other)
           (first.getLength() == other.getLength());
 }
 
+bool operator<=(const CopyrightMatch& a, const CopyrightMatch& b)
+{
+  size_t aEnd = a.getStart() + a.getLength();
+  size_t bEnd = b.getStart() + b.getLength();
+  return ((a.getStart() >= b.getStart()) && (aEnd <= bEnd));
+}
+
 std::ostream& operator <<(std::ostream& os, const CopyrightMatch& match)
 {
   size_t start = match.getStart();

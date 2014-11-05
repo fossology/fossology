@@ -54,7 +54,6 @@ void bail(int exitval)
 bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
   unsigned type;
-  int verbosity = 0;
 
   boost::program_options::options_description desc(IDENTITY ": recognized options");
   desc.add_options()
@@ -65,6 +64,9 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
             ->default_value(ALL_TYPES),
           "type of regex to try"
         ) // TODO change and add help based on IDENTITY
+        (
+          "verbose,v", "increase verbosity"
+        )
         (
           "regex",
           boost::program_options::value<string>(),
@@ -104,6 +106,8 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
     {
       fileNames = vm["files"].as<std::vector<string> >();
     }
+
+    int verbosity = vm.count("verbosity");
 
     if (vm.count("regex"))
     {
@@ -168,6 +172,15 @@ void fillMatchers(CopyrightState& state)
 #ifdef IDENTITY_ECC
   state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
 #endif
+
+  if (cliOptions.getVerbosity() >= CliOptions::DEBUG)
+  {
+    const vector<RegexMatcher>& matchers = state.getRegexMatchers();
+
+    for (auto it = matchers.begin(); it != matchers.end(); ++it) {
+      std::cout << *it << std::endl;
+    }
+  }
 }
 
 vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexMatcher> matchers)

@@ -31,6 +31,8 @@ public:
   unsigned int getExtraRegexId() const;
   const std::string& getExtraRegex() const;
   int getVerbosity() const;
+  enum {DEBUG} verbosityLevels;
+
   unsigned int getOptType() const;
 
   CliOptions(int verbosity, unsigned int type);

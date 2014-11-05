@@ -55,13 +55,6 @@ ostream& operator<<(ostream& os, const StatsAccumulator& accumulator) {
   return os;
 }
 
-bool operator<=(const CopyrightMatch& a, const CopyrightMatch& b)
-{
-  size_t aEnd = a.getStart() + a.getLength();
-  size_t bEnd = b.getStart() + b.getLength();
-  return ((a.getStart() >= b.getStart()) && (aEnd <= bEnd));
-}
-
 class TestDataCheck : public CPPUNIT_NS :: TestFixture
 {
   CPPUNIT_TEST_SUITE (TestDataCheck);
@@ -181,7 +174,7 @@ protected:
       vector<CopyrightMatch> cheatMatches = matchStringToRegexes(currentFile.getContent(), cheat);
       accumulator.incrementMatched(cheat.size());
 
-#if 0
+#if 1
       std::ostream& os = cout;
 #else
       std::ostream os(0);

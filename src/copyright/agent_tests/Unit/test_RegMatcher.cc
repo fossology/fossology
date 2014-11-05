@@ -55,7 +55,9 @@ public:
                 "Do not modify this document\n"
                 "the shuttle is a space vehicle designed by NASA\n"
                 "visit http://mysite.org/FAQ or write to info@mysite.org\n"
-                "maintained by benjamin drieu <benj@debian.org>"
+                "maintained by benjamin drieu <benj@debian.org>\n"
+                "* Copyright (c) 1989, 1993\n"
+                "* The Regents of the University of California. All rights reserved."
             );
   };
 
@@ -75,6 +77,7 @@ protected:
     expected.push_back(CopyrightMatch("Written by: me, myself and Irene.", type, 204));
     expected.push_back(CopyrightMatch("Authors all the people at ABC", type, 238));
     expected.push_back(CopyrightMatch("maintained by benjamin drieu <benj@debian.org>", type, 456));
+    expected.push_back(CopyrightMatch("Copyright (c) 1989, 1993\n* The Regents of the University of California. All rights reserved.", type, 505));
 
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
