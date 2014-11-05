@@ -156,12 +156,16 @@ protected:
 
     auto type = regCopyright::getType();
     vector<RegexMatcher> copyrights = { RegexMatcher(type, regCopyright::getRegex()) };
+    vector<RegexMatcher> cheat = {
+      RegexMatcher(type, regEmail::getRegex()),
+      RegexMatcher(type, regURL::getRegex())
+    };
 
     vector<RegexMatcher> expectedMatcher = { RegexMatcher(type, "<s>(.*?)<\\/s>", 1) };
 
     StatsAccumulator accumulator;
 
-    for (unsigned int i = 0; i<139; ++i)
+    for (unsigned int i = 0; i<140; ++i)
     {
       const string currentFileName = baseFileName + std::to_string(i);
 
@@ -174,8 +178,10 @@ protected:
       vector<CopyrightMatch> matches = matchStringToRegexes(currentFile.getContent(), copyrights);
       vector<CopyrightMatch> expected = correctPositions(matchStringToRegexes(expectedMatchesFile.getContent(), expectedMatcher));
 
-//#define DEBUG
-#ifdef DEBUG
+      vector<CopyrightMatch> cheatMatches = matchStringToRegexes(currentFile.getContent(), cheat);
+      accumulator.incrementMatched(cheat.size());
+
+#if 0
       std::ostream& os = cout;
 #else
       std::ostream os(0);
