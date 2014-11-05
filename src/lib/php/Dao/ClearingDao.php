@@ -281,30 +281,6 @@ class ClearingDao extends Object
     return array_unique($licenses);
   }
 
-  /**
-   * @param array
-   * @return array
-   */
-  public function getMultiplicityOfValues($licenses=null)
-  {
-    $uniqueValues = array_unique($licenses);
-    $valueMultiplicityMap = array();
-
-    foreach ($uniqueValues as $value)
-    {
-      $count = 0;
-      foreach ($licenses as $candidate)
-      {
-        if ($value == $candidate)
-        {
-          $count++;
-        }
-      }
-      $valueMultiplicityMap[$value] = $count;
-    }
-
-    return $valueMultiplicityMap;
-  }
 
   /**
    * @param int $userId

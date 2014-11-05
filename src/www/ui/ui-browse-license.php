@@ -26,6 +26,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Dao\UploadTreeDao;
+use Fossology\Lib\Util\ArrayOperation;
 
 /**
  * \file ui-browse-license.php
@@ -593,7 +594,7 @@ class ui_browse_license extends FO_Plugin
     $licenses = $goodLicenses?:$this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
     
     
-    $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
+    $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;
     /** @var LicenseRenderer  $licenseRenderer*/
     $licenseRenderer = $container->get('view.license_renderer');
