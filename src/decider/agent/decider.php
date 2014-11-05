@@ -124,7 +124,7 @@ class DeciderAgent extends Agent
     }
     else
     {
-      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId, $this->decisionIsGlobal);
+      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId);
     }
     $this->heartbeat(1);
     

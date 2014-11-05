@@ -39,7 +39,6 @@ class SanityChecker
     $decScopes = new DecisionScopes();
     $scopeMap = $decScopes->getMap();
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'scope', $scopeMap);
-    $this->errors += $this->checkDatabaseEnum($tablename = 'license_decision_event', 'scope', $scopeMap);
     $decTypes = new DecisionTypes();
     $typeMap = $decTypes->getExtendedMap();
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'decision_type', $typeMap);

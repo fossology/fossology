@@ -62,7 +62,7 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
     $this->dateTime = new DateTime();
     $this->licenseRef = M::mock(LicenseRef::classname());
 
-    $this->licenseDecisionEvent = new LicenseDecisionEvent($this->eventId, $this->pfileId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->licenseRef, true, false, $this->reportinfo, $this->comment);
+    $this->licenseDecisionEvent = new LicenseDecisionEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->licenseRef, false, $this->reportinfo, $this->comment);
   }
 
   public function testGetEventId() {
@@ -79,10 +79,6 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
 
   public function testGetLicenseRef() {
     assertThat($this->licenseDecisionEvent->getLicenseRef(), is($this->licenseRef));
-  }
-
-  public function testGetPfileId() {
-    assertThat($this->licenseDecisionEvent->getPfileId(), is($this->pfileId));
   }
 
   public function testGetUploadTreeId() {
@@ -108,10 +104,6 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
     $this->licenseRef->shouldReceive('getFullName')->once()->withNoArgs()->andReturn($licenseFullName);
 
     assertThat($this->licenseDecisionEvent->getLicenseFullName(), is($licenseFullName));
-  }
-
-  public function testIsGlobal() {
-    assertThat($this->licenseDecisionEvent->isGlobal(), is(true));
   }
 
   public function testIsRemoved() {

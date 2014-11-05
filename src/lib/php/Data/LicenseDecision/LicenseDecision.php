@@ -38,11 +38,6 @@ interface LicenseDecision
   /**
    * @return boolean
    */
-  public function isGlobal();
-
-  /**
-   * @return boolean
-   */
   public function isRemoved();
 
   /**
