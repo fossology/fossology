@@ -82,9 +82,7 @@ class SqliteE implements Driver
       return false;
     }
     $params = array_values($parameters);
-    /**
-     * @var SQLite3Stmt
-     */
+    /** @var SQLite3Stmt */
     $stmt = $this->preparedStmt[$statementName];
     for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
     {
@@ -192,5 +190,24 @@ class SqliteE implements Driver
   public function escapeString($string)
   {
     return SQLite3::escapeString($string);
+  }
+  
+  /**
+   * @param string $tableName
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    $sql = "SELECT count(*) cnt FROM sqlite_master WHERE type='table' AND name='$tableName'";
+    $row = SQLite3::querySingle($sql);
+    if (!$row && $this->isConnected())
+    {
+      throw new \Exception($this->getLastError());
+    }
+    else if(!$res)
+    {
+      throw new \Exception('DB connection lost');
+    }
+    return($row['cnt']>0);
   }
 }

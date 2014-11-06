@@ -170,4 +170,26 @@ class Postgres implements Driver
   {
     return pg_escape_string($string);
   }
+  
+  /**
+   * @param string $tableName
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    $dbName = pg_dbname($this->connection);
+    $sql = "SELECT count(*) cnt FROM information_schema.tables WHERE table_catalog='$dbName' AND table_name='$tableName'";
+    $res = pg_query($this->connection, $sql);
+    if (!$res && pg_connection_status($this->connection)===PGSQL_CONNECTION_OK)
+    {
+      throw new \Exception(pg_last_error($this->connection));
+    }
+    else if(!$res)
+    {
+      throw new \Exception('DB connection lost');
+    }
+    $row = pg_fetch_assoc($res);
+    pg_free_result($res);
+    return($row['cnt']>0);
+  }
 }
