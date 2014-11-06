@@ -14,6 +14,7 @@ define("AGENT_NAME", "decider");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
@@ -30,6 +31,8 @@ class DeciderAgent extends Agent
   private $conflictStrategyId;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var ClearingEventProcessor */
+  private $clearingEventProcessor;
   /** @var ClearingDecisionEventProcessor */
   private $clearingDecisionEventProcessor;
   /** @var ClearingDao */
@@ -50,6 +53,7 @@ class DeciderAgent extends Agent
 
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
+    $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_event_processor');
   }
 
@@ -110,9 +114,11 @@ class DeciderAgent extends Agent
 
     $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
 
-    $lastDecisionDate = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
+    $lastDecision = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
-    list($added, $removed) = $this->clearingDecisionEventProcessor->filterRelevantClearingEvents($userId, $itemTreeBounds, $lastDecisionDate);
+    $allEvents = $this->clearingDao->getRelevantClearingEvents($userId, $uploadTreeId);
+    $currentEvents = $this->clearingEventProcessor->filterEventsByTime($allEvents, $lastDecision);
+    list($added, $removed) = $this->clearingEventProcessor->getFilteredState($currentEvents);
 
     switch ($this->conflictStrategyId)
     {

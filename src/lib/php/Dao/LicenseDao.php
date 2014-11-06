@@ -82,9 +82,9 @@ class LicenseDao extends Object
 
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
-      $agentRef = new AgentRef($row['agent_id'], $row['agent_name'], $row['agent_revision']);
-      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, $row['license_file_id'], $row['percent_match']);
+      $licenseRef = new LicenseRef(intval($row['license_id']), $row['license_shortname'], $row['license_fullname']);
+      $agentRef = new AgentRef(intval($row['agent_id']), $row['agent_name'], $row['agent_revision']);
+      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']), intval($row['percent_match']));
     }
 
     $this->dbManager->freeResult($result);

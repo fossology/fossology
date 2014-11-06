@@ -24,32 +24,6 @@ use Fossology\Lib\Util\Object;
 
 class ClearingEventProcessor extends Object
 {
-
-  /**
-   *
-   * @param ClearingEvent[] $events
-   * @return ClearingEvent[][]
-   */
-  public function getCurrentClearings($events)
-  {
-    $addedLicenses = array();
-    $removedLicenses = array();
-    foreach ($events as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-
-      if ($event->isRemoved())
-      {
-        $removedLicenses[$licenseShortName] = $event;
-      } else
-      {
-        $addedLicenses[$licenseShortName] = $event;
-      }
-    }
-
-    return array($addedLicenses, $removedLicenses);
-  }
-
   /**
    * @param ClearingEvent[] $events
    * @param DateTime|null $lastDecisionDate
@@ -70,6 +44,16 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
+   * @return ClearingEvent[][]
+   */
+  public function getFilteredState($events)
+  {
+    $filteredEvents = $this->filterEffectiveEvents($events);
+    return $this->getCurrentClearingState($filteredEvents);
+  }
+
+  /**
+   * @param ClearingEvent[] $events
    * @return ClearingEvent[]
    */
   public function filterEffectiveEvents($events)
@@ -84,16 +68,20 @@ class ClearingEventProcessor extends Object
         $licenseShortName = $event->getLicenseShortName();
         if ($event->isRemoved())
         {
-          if (array_key_exists($licenseShortName, $addingEvents)) {
+          if (array_key_exists($licenseShortName, $addingEvents))
+          {
             unset($addingEvents[$licenseShortName]);
-          } else {
+          }
+          {
             $removingEvents[$licenseShortName] = $event;
           }
         } else
         {
-          if (array_key_exists($licenseShortName, $removingEvents)) {
+          if (array_key_exists($licenseShortName, $removingEvents))
+          {
             unset($removingEvents[$licenseShortName]);
-          } else {
+          }
+          {
             $addingEvents[$licenseShortName] = $event;
           }
         }
@@ -104,8 +92,55 @@ class ClearingEventProcessor extends Object
   }
 
   /**
+   * @param ClearingEvent[] $events
+   * @param string[] $base
+   * @return string[]
+   */
+  public function getUnhandledLicenses($events, $base) {
+    $values = array();
+    foreach ($base as $value) {
+      $values[$value] = $value;
+    }
+
+    foreach ($events as $event) {
+      $licenseShortName = $event->getLicenseShortName();
+      if (array_key_exists($licenseShortName, $values)) {
+        unset($values[$licenseShortName]);
+      }
+    }
+
+    return array_keys($values);
+  }
+
+  /**
    *
-   * @param ClearingEvent[]
+   * @param ClearingEvent[] $events
+   * @return ClearingEvent[][]
+   */
+  public function getCurrentClearingState($events)
+  {
+    $addedLicenses = array();
+    $removedLicenses = array();
+    foreach ($events as $event)
+    {
+      $licenseShortName = $event->getLicenseShortName();
+
+      if ($event->isRemoved())
+      {
+        $removedLicenses[$licenseShortName] = $event;
+      } else
+      {
+        $addedLicenses[$licenseShortName] = $event;
+      }
+    }
+
+    return array($addedLicenses, $removedLicenses);
+  }
+
+
+  /**
+   *
+   * @param ClearingEvent []
    * @return ClearingEvent[]
    */
   protected function sortEventsInTime($events)

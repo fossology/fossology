@@ -96,6 +96,9 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn($clearingDecision);
 
+    $this->clearingDao->shouldReceive("insertClearingDecision");
+    $this->clearingDao->shouldReceive("removeWipClearingDecision");
+
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, DecisionTypes::IDENTIFIED, false);
   }
 
