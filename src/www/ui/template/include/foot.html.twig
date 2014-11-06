@@ -1,8 +1,9 @@
-<div id="footer" style="right:17px; bottom:17px">
 {%if VERSION %}
-{# VERSION contains all the variables defined at build time in the [BUILD] section of /VERSION #}
-<span>{{ VERSION.VERSION }}, commit: [#{{ VERSION.COMMIT_HASH }}] {{ VERSION.COMMIT_DATE }}</span>
+  {# VERSION contains all the variables defined at build time in the [BUILD] section of /VERSION #}
+  <script>(function (c) {if (c && c.groupCollapsed) {
+    c.log("{{ VERSION.VERSION }}, commit: [#{{ VERSION.COMMIT_HASH }}] {{ VERSION.COMMIT_DATE }}");
+  }})(console);
+  </script>
 {% endif %}
-</div>
 <script src="scripts/jquery-1.11.1.min.js" type="text/javascript"></script>
 {{ scripts }}
