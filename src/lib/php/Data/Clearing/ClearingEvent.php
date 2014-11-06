@@ -34,7 +34,7 @@ class ClearingEvent extends Object implements LicenseClearing
   private $userId;
   /** @var int */
   private $groupId;
-  /** @var string */
+  /** @var int */
   private $eventType;
   /** @var LicenseRef */
   private $licenseRef;
@@ -52,7 +52,7 @@ class ClearingEvent extends Object implements LicenseClearing
    * @param DateTime $dateTime
    * @param int $userId
    * @param int $groupId
-   * @param string $eventType
+   * @param int $eventType
    * @param LicenseRef $licenseRef
    * @param boolean $removed
    * @param string $reportinfo
@@ -97,7 +97,7 @@ class ClearingEvent extends Object implements LicenseClearing
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getEventType()
   {

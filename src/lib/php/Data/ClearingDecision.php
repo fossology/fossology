@@ -42,7 +42,7 @@ class ClearingDecision extends Object
   private $userName;
   /** @var int */
   private $userId;
-  /** @var string */
+  /** @var int */
   private $type;
   /** @var string */
   private $comment;
@@ -170,7 +170,7 @@ class ClearingDecision extends Object
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getType()
   {

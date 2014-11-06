@@ -173,7 +173,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     return $date->setTimestamp($in);
   }
 
-  public function testCurrentClearingViaGroupMembershipShouldBeSymmetric()
+  public function testRelevantClearingEventsViaGroupMembershipShouldBeSymmetric()
   {
     $this->buildProposals(array(
         array(301,1,401,false,-99),
@@ -182,10 +182,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->buildDecisions(array(
         array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
     ));
-    list($added1, $removed1) = $this->clearingDao->getCurrentClearings(1, 301);
-    list($added2, $removed2) = $this->clearingDao->getCurrentClearings(2, 301);
-    assertThat($added1, is(equalTo($added2)));
-    assertThat($removed1, is(equalTo($removed2)));
+    $events1 = $this->clearingDao->getRelevantClearingEvents(1, 301);
+    $events2 = $this->clearingDao->getRelevantClearingEvents(2, 301);
+    assertThat($events1, is($events2));
   }
 
   function testWip()

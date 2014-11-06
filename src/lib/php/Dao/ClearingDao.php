@@ -454,40 +454,6 @@ insert into clearing_decision (
   }
 
   /**
-   * @return ClearingEvent[][]
-   */
-  public function getCurrentClearings($userId, $itemId)
-  {
-    /** @var ClearingEvent[] $events */
-    $events = $this->getRelevantClearingEvents($userId, $itemId);
-
-    /** @var ClearingEvent[] $latestLicDec */
-    $latestLicDec = array();
-    foreach ($events as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-      $latestLicDec[$licenseShortName] = $event;
-    }
-
-    $addedLicenses = array();
-    $removedLicenses = array();
-    foreach ($latestLicDec as $licenseShortName=>$event)
-    {
-      if ($event->isRemoved())
-      {
-        $removedLicenses[$licenseShortName] = $event;
-      }
-      else
-      {
-        $addedLicenses[$licenseShortName] = $event;
-      }
-    }
-
-    return array($addedLicenses, $removedLicenses);
-  }
-
-
-  /**
    * @param $uploadTreeId
    * @param $userId
    * @param int $licenseId

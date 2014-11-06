@@ -69,7 +69,7 @@ class LicenseDao extends Object
                   AG.agent_rev AS agent_revision,
                   LFR.rf_match_pct AS percent_match
           FROM license_file_ref as LFR
-          INNER JOIN $uploadTreeTableName as UT  ON UT.pfile_fk = LFR.pfile_fk
+          INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
            UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3

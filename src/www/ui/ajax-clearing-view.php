@@ -100,10 +100,10 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param $orderAscending
-   * @param $itemTreeBounds
    * @param $userId
    * @param $uploadId
    * @param $uploadTreeId
+   * @internal param $itemTreeBounds
    * @return string
    */
   protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
