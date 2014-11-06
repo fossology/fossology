@@ -46,6 +46,7 @@ void fillMatchers(CopyrightState& state);
 
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 
+void normalizeContent(std::string& content);
 
 bool saveToDatabase(const std::vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
 

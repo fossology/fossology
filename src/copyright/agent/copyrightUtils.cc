@@ -246,7 +246,22 @@ vector<CopyrightMatch> findAllMatches(const fo::File& file, vector<RegexMatcher>
   }
 
   string fileContent = file.getContent(0);
+
+  normalizeContent(fileContent);
+
   return matchStringToRegexes(fileContent, regexMatchers);
+}
+
+//TODO normalize the content
+void normalizeContent(string& content)
+{
+  for (std::string::iterator it = content.begin(); it != content.end(); ++it)
+  {
+    char& charachter = *it;
+
+    if (charachter == '*')
+      charachter = ' ';
+  }
 }
 
 void matchFileWithLicenses(const fo::File& file, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
