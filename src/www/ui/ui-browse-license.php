@@ -331,11 +331,11 @@ class ui_browse_license extends FO_Plugin
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos=$this->getNewestAgent("nomos");
+    $newestNomos=$this->agentsDao->getNewestAgent("nomos");
     $latestMonk=LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk=$this->getNewestAgent("monk");
+    $newestMonk=$this->agentsDao->getNewestAgent("monk");
     $latestNinka=LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka=$this->getNewestAgent("ninka");
+    $newestNinka=$this->agentsDao->getNewestAgent("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
         'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ),
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' =>$newestNinka, 'latestIsNewest' =>$latestNinka==$newestNinka['agent_pk']  ));
@@ -386,51 +386,8 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
-    
-    $tableColumns = array(
-        array("sTitle" => _("Files"), "sClass" => "left"),
-        array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
-        array("sTitle" => _("Edited Results"), "sClass" => "left"),
-        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'mRender'=>'##mRender##'),
-        array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
-        array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
-    );
-
-    $tableSorting = array(
-        array(0, "asc"),
-        array(2, "desc"),
-        array(1, "desc")
-    );
-
-    $tableLanguage = array(
-        "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-        "sSearch" => "_INPUT_"
-            . "<button onclick='clearSearchFiles()' >" . _("Clear") . "</button>",
-        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
-    );
-
-    $dataTableConfig = array(
-        "aaData" => $tableData,
-        "aoColumns" => $tableColumns,
-        "aaSorting" => $tableSorting,
-        "iDisplayLength" => 50,
-        "oLanguage" => $tableLanguage
-    );
-
-    $fun = "function ( data, type, full ) {
-        if(type!='display') return data;
-        if (data==='green'){
-          return '<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>';
-        }
-        return '<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>';
-      }";
-    $dataTableJS = str_replace('"##mRender##"', $fun, json_encode($dataTableConfig));
-    
-    $VF .= "<script>
-  function createDirlistTable() {
-      $('#dirlist').dataTable(" . $dataTableJS . ");
-  }
-</script>";
+       
+    $VF .= '<script>'.$this->renderTemplate('ui-browse-license_file-list.js.twig',array('aaData'=>json_encode($tableData))).'</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
