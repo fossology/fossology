@@ -21,12 +21,9 @@ namespace Fossology\Lib\Dao;
 
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -48,6 +45,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $clearingDao;
   /** @var int */
   private $now;
+  /** @var array */
+  private $items;
 
 
   public function setUp()
@@ -83,16 +82,13 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'license_decision_type'
         ));
 
-    $this->dbManager->prepare($stmt = 'insert.users',
-        "INSERT INTO users (user_name, root_folder_fk) VALUES ($1,$2)");
     $userArray = array(
         array('myself', 1),
         array('in_same_group', 2),
-        array('in_trusted_group', 3),
-        array('not_in_trusted_group', 4));
+        array('in_trusted_group', 3));
     foreach ($userArray as $ur)
     {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+      $this->dbManager->insertInto('users', 'user_name, root_folder_fk', $ur);
     }
 
     $gumArray = array(
@@ -107,75 +103,64 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $refArray = array(
-        array(1, 'FOO', 'foo text'),
-        array(2, 'BAR', 'bar text'),
-        array(3, 'BAZ', 'baz text'),
-        array(4, 'QUX', 'qux text')
+        array(401, 'FOO', 'foo text'),
+        array(402, 'BAR', 'bar text'),
+        array(403, 'BAZ', 'baz text'),
+        array(404, 'QUX', 'qux text')
     );
     foreach ($refArray as $params)
     {
       $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
-    $directory = 536888320;
-    $file = 33188;
+    $modd = 536888320;
+    $modf = 33188;
 
-    /*                                (pfile, uploadtreeID, left, right)
-      upload1:     Afile              (1000,  5,  1,  2)
-                   Bfile              (1200,  6,  3,  4)
-
-      upload2:     Afile              (1000,  7,  1,  2)
-                   Adirectory/        (   0,  8,  3,  6)
-                   Adirectory/Afile   (1000,  9,  4,  5)
-                   Bfile              (1200, 10,  7,  8)
+    /*                          (pfile,item,lft,rgt)
+      upload101:   Afile         (201, 301,  1,  2)
+                   Bfile         (202, 302,  3,  4)
+      upload102:   Afile         (201, 303,  1,  2)
+                   A-dir/        (  0, 304,  3,  6)
+                   A-dir/Afile   (201, 305,  4,  5)
+                   Bfile         (202, 306,  7,  8)
     */
-    $this->dbManager->prepare($stmt = 'insert.uploadtree',
-        "INSERT INTO uploadtree (upload_fk, pfile_fk, uploadtree_pk, ufile_mode,lft,rgt,ufile_name) VALUES ($1, $2,$3,$4,$5,$6,$7)");
-    $utArray = array(
-        array(100, 1000, 5, $file, 1, 2, "Afile"),
-        array(100, 1200, 6, $file, 3, 4, "Bfile"),
-        array(2, 1000, 7, $file, 1, 2, "Afile"),
-        array(2, 0, 8, $directory, 3, 6, "Adirectory"),
-        array(2, 1000, 9, $file, 4, 5, "Afile"),
-        array(2, 1200, 10, $file, 7, 8, "Bfile"),
+    $this->items = array(
+        301=>array(101, 301, 201, $modf, 1, 2, "Afile"),
+        302=>array(101, 302, 202, $modf, 3, 4, "Bfile"),
+        303=>array(102, 303, 201, $modf, 1, 2, "Afile"),
+        304=>array(102, 304,   0, $modd, 3, 6, "A-dir"),
+        305=>array(102, 305, 201, $modf, 4, 5, "Afile"),
+        306=>array(102, 306, 202, $modf, 7, 8, "Bfile"),
     );
-    foreach ($utArray as $ur)
+    foreach ($this->items as $ur)
     {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+      $this->dbManager->insertInto('uploadtree', 'upload_fk,uploadtree_pk,pfile_fk,ufile_mode,lft,rgt,ufile_name', $ur);
     }
-
     $this->now = time();
-    $ldArray = array(
-        array(1, 100, 1, 1, false, 1, $this->getMyDate($this->now - 888)),
-        array(2, 100, 1, 2, false, 1, $this->getMyDate($this->now - 888)),
-        array(3, 100, 3, 4, false, 1, $this->getMyDate($this->now - 1234)),
-        array(4, 100, 2, 3, false, 2, $this->getMyDate($this->now - 900)),
-        array(5, 100, 2, 4, true, 1, $this->getMyDate($this->now - 999)),
-        array(6, 100, 1, 3, true, 1, $this->getMyDate($this->now - 654)),
-        array(7, 100, 1, 2, false, 1, $this->getMyDate($this->now - 543))
-    );
-    foreach ($ldArray as $params)  
-    {
-      $this->dbManager->insertInto('license_decision_event',
-          'license_decision_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
-          $params, $logStmt = 'insert.lde');
-    }
-
-    $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, decision_type, date_added, scope)"
-            . " VALUES ($1, $2, $3, $4, $5, $6, $7)");
-    $cdArray = array(
-        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now - 888), DecisionScopes::ITEM),
-        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now - 888), DecisionScopes::ITEM),
-        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now - 1234), DecisionScopes::ITEM)
-    );
-    foreach ($cdArray as $ur)
-    {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
-    }
-
   }
 
+  private function buildProposals($licProp,$i=0)
+  {
+    foreach($licProp as $lp){
+      $i++;
+      list($item,$user,$rf,$isRm,$t) = $lp;
+      $this->dbManager->insertInto('license_decision_event',
+          'license_decision_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
+          array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
+    }
+  }  
+
+  private function buildDecisions($cDec,$j=0)
+  {
+    foreach($cDec as $cd){
+      $j++;
+      list($item,$user,$type,$t,$scope) = $cd;
+      $this->dbManager->insertInto('clearing_decision',
+          'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, decision_type, date_added, scope',
+          array($j,$item,$this->items[$item][2],$user,$type, $this->getMyDate($this->now+$t),$scope));
+    }
+  }
+    
   function tearDown()
   {
     $this->testDb = null;
@@ -196,10 +181,42 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testCurrentLicenseDecisionViaGroupMembershipShouldBeSymmetric()
   {
-    list($added1, $removed1) = $this->clearingDao->getCurrentLicenseDecisions(1, 7);
-    list($added2, $removed2) = $this->clearingDao->getCurrentLicenseDecisions(2, 7);
-    assertThat(array_keys($added1), is($added2));
-    assertThat(array_keys($removed1), is($removed2));
+    $this->buildProposals(array(
+        array(301,1,401,false,-99),
+        array(301,1,402,true,-98)
+    ));
+    $this->buildDecisions(array(
+        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+    ));
+    list($added1, $removed1) = $this->clearingDao->getCurrentLicenseDecisions(1, 301);
+    list($added2, $removed2) = $this->clearingDao->getCurrentLicenseDecisions(2, 301);
+    assertThat($added1, is(equalTo($added2)));
+    assertThat($removed1, is(equalTo($removed2)));
   }
+
+  function testWip()
+  {
+    $this->buildProposals(array(
+        array(301,1,401,false,-99),
+        array(301,1,402,false,-98),
+        array(301,1,401,true,-97),
+    ));
+    $this->buildDecisions(array(
+        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+    ));
+    $watchThis = $this->clearingDao->isDecisionWip(301, 1);
+    assertThat($watchThis,is(FALSE));
+    $watchOther = $this->clearingDao->isDecisionWip(303, 1);
+    assertThat($watchOther,is(FALSE));
+    $this->buildProposals(array(
+        array(301,1,403,false,-89),
+    ),3);
+    $this->clearingDao->markDecisionAsWip(301, 1);
+    $watchThisNow = $this->clearingDao->isDecisionWip(301, 1);
+    assertThat($watchThisNow,is(TRUE));
+    $watchOtherNow = $this->clearingDao->isDecisionWip(303, 1);
+    assertThat($watchOtherNow,is(FALSE));
+  }
+  
   
 }

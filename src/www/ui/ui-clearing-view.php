@@ -284,7 +284,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $userId);
+    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }

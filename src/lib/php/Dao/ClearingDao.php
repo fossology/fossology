@@ -636,7 +636,7 @@ insert into clearing_decision (
     $latestDec = $this->dbManager->getSingleRow($sql, array($uploadTreeId, $userId), $sqlLog=__METHOD__);
     if($latestDec===false)
     {
-      return true;
+      return false;
     }
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
