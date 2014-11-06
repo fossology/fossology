@@ -23,7 +23,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgthread-2.0 -lgio-2.0
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
+LOCAL_CFLAGS= $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
 DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
         -DCLI_DIR='"$(DESTDIR)$(BINDIR)"' \
@@ -50,11 +50,11 @@ test: fossology_testconfig $(EXE)
 	./$(EXE)
 
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
-	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
+	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(LOCAL_CFLAGS)
 
 coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
 	@echo "make scheduler test coverage"
-	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
+	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(LOCAL_CFLAGS) $(COV_CFLAGS); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
@@ -74,7 +74,7 @@ $(FOCUNIT):
 ######################
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 clean:
 	@echo "make copyright agent_tests clean"

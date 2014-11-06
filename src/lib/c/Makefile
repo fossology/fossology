@@ -3,7 +3,7 @@
 TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
-CFLAGS_LOCAL=-fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
+LOCAL_CFLAGS=-fPIC $(ALL_CFLAGS) $(FO_CFLAGS)
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
@@ -23,14 +23,13 @@ libfossology_cov.a: $(COVERAGE)
 	$(AR) cr $@ $(COVERAGE)
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
+	$(CC) $< $(CONFDEF) $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(LIB) -o $@
 
 %.o: %.c %.h
-	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL)
-#	$(CC) -c $< $(CONFDEF)  -I`pg_config --includedir` -fPIC
+	$(CC) -c $< $(CONFDEF)  $(LOCAL_CFLAGS)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CONFDEF)  $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CONFDEF)  $(LOCAL_CFLAGS) $(COV_CFLAGS) -o $@
 
 install: install-dev install-lib install-exe
 	echo "make $(LIB) install"

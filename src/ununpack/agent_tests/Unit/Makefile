@@ -11,7 +11,7 @@ TEST_LIB_DIR=$(TOP)/src/testing/db/c
 TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 DATA=../unpack-test-data.tar.bz2
 
-CFLAGS_LOCAL=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+LOCAL_CFLAGS=-lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE=run_tests
 
 OBJS=	run_tests.o \
@@ -42,10 +42,10 @@ TEST_FILES = unpack-test-data.tar.bz2
 all: $(EXE)
 
 $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
-	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(LOCAL_CFLAGS) -o $@
 
 $(OBJS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 # target to retrieve remote test data if it doesn't already exist
 # make sure your /etc/wgetrc file is configured correctly!
@@ -78,7 +78,7 @@ test: all testdata $(EXE)
 	./$(EXE)
 
 coverage: $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
-	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(COV_CFLAGS) $(LOCAL_CFLAGS); \
 	./$(EXE); \
 	lcov --directory $(AGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o results cov.txt

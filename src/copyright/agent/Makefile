@@ -19,10 +19,9 @@ VARS = $(TOP)/Makefile.conf
 
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -Werror
+LOCAL_CFLAGS = $(ALL_CFLAGS) -I. -Werror
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -35,7 +34,7 @@ COVERAGE=$(OBJECTS:%.o=%_cov.o)
 ##########################
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(FO_LDFLAGS) -o $@
 
 all: $(EXE) test
 	@echo "make copyright agent and test"
@@ -59,22 +58,22 @@ libcopyright_cov.a: $(COVERAGE)
 ######################
 
 copyright.o: %.o: %.c %.h cvector.h radixtree.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 cvector.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 radixtree.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 pair.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEFS) $<
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #

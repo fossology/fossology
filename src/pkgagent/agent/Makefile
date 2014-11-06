@@ -20,28 +20,28 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=../agent_tests
-CFLAGS_LOCAL=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
+LOCAL_CFLAGS=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
 
 EXE=pkgagent
 HDRS=pkgagent.h
-CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
-CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
+LOCAL_RPM_4_4_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4
+LOCAL_RPM_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
 	@echo "make pkgagent agent and test"
 
 $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
 	@echo "make pkgagent agent"
-	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) main.c pkgagent.o  $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
+		$(CC) -c $< $(LOCAL_RPM_CFLAGS); \
 	else \
 		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null ; then \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
+			$(CC) -c $< $(LOCAL_RPM_CFLAGS); \
 		else \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+			$(CC) -c $< $(LOCAL_RPM_4_4_CFLAGS); \
 		fi \
 	fi
 
@@ -61,9 +61,9 @@ coverage: pkgagent_cov.o
 
 pkgagent_cov.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
+		$(CC) -c $< $(COV_CFLAGS) $(LOCAL_RPM_CFLAGS) -o $@; \
 	else \
-		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+		$(CC) -c $< $(COV_CFLAGS) $(LOCAL_RPM_4_4_CFLAGS) -o $@; \
 	fi
 
 clean:

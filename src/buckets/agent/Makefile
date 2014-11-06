@@ -19,7 +19,7 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS)
+LOCAL_CFLAGS= $(DEF) $(ALL_CFLAGS) $(DEFS)
 
 EXE=buckets
 OBJS=validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
@@ -29,34 +29,34 @@ all: $(EXE)
 	@echo "make bucket agent"
 
 $(EXE): buckets.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) buckets.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+	$(CC) buckets.c $(OBJS) -lpq $(LOCAL_CFLAGS) $(FO_LDFLAGS) -o $@
 
 write.o: $(HDRS) write.c
-	$(CC) -c $(CFLAGS_LOCAL) write.c
+	$(CC) -c $(LOCAL_CFLAGS) write.c
 
 child.o: $(HDRS) child.c
-	$(CC) -c $(CFLAGS_LOCAL) child.c
+	$(CC) -c $(LOCAL_CFLAGS) child.c
 
 container.o: $(HDRS) container.c
-	$(CC) -c $(CFLAGS_LOCAL) container.c
+	$(CC) -c $(LOCAL_CFLAGS) container.c
 
 match.o: $(HDRS) match.c
-	$(CC) -c $(CFLAGS_LOCAL) match.c
+	$(CC) -c $(LOCAL_CFLAGS) match.c
 
 walk.o: $(HDRS) walk.c
-	$(CC) -c $(CFLAGS_LOCAL) walk.c
+	$(CC) -c $(LOCAL_CFLAGS) walk.c
 
 leaf.o: $(HDRS) leaf.c
-	$(CC) -c $(CFLAGS_LOCAL) leaf.c
+	$(CC) -c $(LOCAL_CFLAGS) leaf.c
 
 validate.o: $(HDRS) validate.c
-	$(CC) -c $(CFLAGS_LOCAL) validate.c
+	$(CC) -c $(LOCAL_CFLAGS) validate.c
 
 inits.o: $(HDRS) inits.c
-	$(CC) -c $(CFLAGS_LOCAL) inits.c
+	$(CC) -c $(LOCAL_CFLAGS) inits.c
 
 liccache.o: $(HDRS) inits.c
-	$(CC) -c $(CFLAGS_LOCAL) liccache.c
+	$(CC) -c $(LOCAL_CFLAGS) liccache.c
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)

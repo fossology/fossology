@@ -19,7 +19,7 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS)
+LOCAL_CFLAGS= $(DEF) $(ALL_CFLAGS) $(DEFS)
 
 EXE=maintagent
 OBJS=usage.o utils.o process.o
@@ -29,16 +29,16 @@ all: $(EXE)
 	@echo "make maintagent agent"
 
 $(EXE): maintagent.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) maintagent.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+	$(CC) maintagent.c $(OBJS) -lpq $(LOCAL_CFLAGS) $(FO_LDFLAGS) -o $@
 
 usage.o: $(HDRS) usage.c
-	$(CC) -c $(CFLAGS_LOCAL) usage.c
+	$(CC) -c $(LOCAL_CFLAGS) usage.c
 
 utils.o: $(HDRS) utils.c
-	$(CC) -c $(CFLAGS_LOCAL) utils.c
+	$(CC) -c $(LOCAL_CFLAGS) utils.c
 
 process.o: $(HDRS) process.c
-	$(CC) -c $(CFLAGS_LOCAL) process.c
+	$(CC) -c $(LOCAL_CFLAGS) process.c
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)

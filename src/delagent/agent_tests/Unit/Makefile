@@ -25,7 +25,7 @@ CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR=$(TOP)/src/testing/db/c
 TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
-CFLAGS_LOCAL=-lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
+LOCAL_CFLAGS=-lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
 EXE=test_delagent
 TEST_OBJ_RUN=testRun.o
 TEST_OBJ=testListFolders.o testDeleteFolders.o testReadParameter.o
@@ -60,13 +60,13 @@ testdata:
 
 $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLIB)
 	@echo "make delagent agent unit test"
-	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) -o $@
+	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(LOCAL_CFLAGS) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 $(TEST_OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
+	$(CC) -c $(LOCAL_CFLAGS) $< -o $@
 
 test: all $(EXE) testdata
 	@echo "execute delagent test"
@@ -80,7 +80,7 @@ test_lib:
 
 coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	@echo "execute delagent test and code coverage"
-	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(COV_CFLAGS) $(LOCAL_CFLAGS); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml  -o results cov.txt

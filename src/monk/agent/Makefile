@@ -10,10 +10,10 @@ VARS=$(TOP)/Makefile.conf
 
 include $(VARS)
 
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lm -fopenmp
+LOCAL_CFLAGS  = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
+DEF           = -DDATADIR='"$(MODDIR)"'
+CONFDIR       = $(DESTDIR)$(SYSCONFDIR)
+LOCAL_LDFLAGS = $(FO_LDFLAGS) -lm -fopenmp -lfossology
 
 EXE=monk
 TESTDIR = ../agent_tests
@@ -25,7 +25,7 @@ COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o\
            hash_cov.o diff_cov.o extended_cov.o _squareVisitor_cov.o
 
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
-	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(LOCAL_LDFLAGS) -o $@
 
 all: _squareVisitor.h $(FOLIB) $(EXE)
 
@@ -47,46 +47,46 @@ libmonk_cov.a: $(COVERAGE)
 ######################
 
 monk.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 string_operations.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 file_operations.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 license.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 database.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 highlight.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 hash.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 diff.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 match.o: %.o: %.c %.h _squareVisitor.o
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 extended.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEFS) $<
 
 _squareVisitor.o: _squareVisitor.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 _squareVisitor.c _squareVisitor.h: squareBuilder
 	sh genSquareVisitor
 
 squareBuilder: buildSquareVisitor.c
-	$(CC) buildSquareVisitor.c $(DEF) $(CFLAGS_LOCAL) -lm -o $@
+	$(CC) buildSquareVisitor.c $(DEF) $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) -lm -o $@
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FLAG_COV) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #

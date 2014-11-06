@@ -19,11 +19,11 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS)
+LOCAL_CFLAGS= $(ALL_CFLAGS)
 EXE=adj2nest
 
 $(EXE): adj2nest.c $(FOLIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) $< $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
 
 all: $(EXE)
 

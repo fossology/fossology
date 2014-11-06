@@ -20,7 +20,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB)
+LOCAL_CFLAGS= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB)
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_copyright
 
@@ -38,17 +38,17 @@ test: $(EXE)
 coverage: run_tests.c $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	@echo "make copyright agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(LOCAL_CFLAGS) $(COV_CFLAGS) ; \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libcopyright.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(LOCAL_CFLAGS)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 libcopyright.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@

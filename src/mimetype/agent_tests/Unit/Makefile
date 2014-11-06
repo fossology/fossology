@@ -11,7 +11,7 @@ TEST_LIB_DIR=$(TOP)/src/testing/db/c
 TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+LOCAL_CFLAGS=$(DB_CFLAGS) $(REPO_CFLAGS) $(AGENT_CFLAGS) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE=test_mimetype
 TEST_OBJ_RUN=testRun.o
 TEST_OBJ= ./finder/testDBCheckMime.o \
@@ -23,13 +23,13 @@ all: $(EXE)
 
 $(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
 	@echo "make mimetype agent unit test"
-	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) -o $@
+	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(LOCAL_CFLAGS) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
+	$(CC) -c $(LOCAL_CFLAGS) $< -o $@
 
 $(TEST_OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $< -o $@ -g
+	$(CC) -c $(LOCAL_CFLAGS) $< -o $@ -g
 
 cunit_lib:
 	$(MAKE) -C $(CUNIT_LIB_DIR)
@@ -43,7 +43,7 @@ test: all $(EXE)
 
 coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
 	@echo "execute mimetype test and code coverage"
-	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(COV_CFLAGS) $(LOCAL_CFLAGS); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml  -o results cov.txt

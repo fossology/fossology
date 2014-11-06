@@ -11,7 +11,7 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -lm $(TESTLIB) -Werror -fopenmp
+LOCAL_CFLAGS = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -lm $(TESTLIB) -Werror -fopenmp
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
 
@@ -35,17 +35,17 @@ test: $(EXE)
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
 	@echo "make monk agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(LOCAL_CFLAGS) $(FLAG_COV) ; \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(LOCAL_CFLAGS)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 libmonk.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@

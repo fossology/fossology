@@ -20,7 +20,7 @@ SRCDIR = ..
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
+LOCAL_CFLAGS = $(DB_CFLAGS) $(REPO_CFLAGS) $(ALL_CFLAGS) \
                $(TESTLIB) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
@@ -36,16 +36,16 @@ test: $(EXE)
 
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
-	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(LOCAL_CFLAGS) $(COV_CFLAGS)
 	./$(EXE)
 	lcov --directory $(SRCDIR) --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 $(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
-	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)
+	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(LOCAL_CFLAGS)
 
 $(OBJS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 libfossology.a:
 	$(MAKE) -C $(SRCDIR) $@
