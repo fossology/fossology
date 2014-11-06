@@ -177,6 +177,52 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     assertThat($removedLicenseDecisions, is(emptyArray()));
   }
 
+  public function testGetCurrentLicenseDecisionsWithUserRemovedDecisionsOnly()
+  {
+    $removedEvent = $this->createLicenseDecisionEvent(123, 12, 13, "licA", "License A");
+
+    $agentRef = new AgentRef(143, "agent", "1.1");
+    $licenseRef = new LicenseRef(13, "licA", "License A");
+    $addedAgentEvents = array(
+        "licA" => array(
+            $agentRef->getAgentName() => array(
+                array(
+                    "id" => $licenseRef->getId(),
+                    "licenseRef" => $licenseRef,
+                    "agentRef" => $agentRef,
+                    "matchId" => 143,
+                    "percentage" => 98
+                )
+            )
+        )
+    );
+    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")
+        ->with($this->itemTreeBounds)->andReturn($addedAgentEvents);
+    $this->clearingDao->shouldReceive("getCurrentLicenseDecisions")
+        ->with($this->userId, $this->uploadTreeId)
+        ->andReturn(array(array(), $this->createResults($removedEvent)));
+
+    list($licenseDecisions, $removedLicenseDecisions) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($this->itemTreeBounds, $this->userId);
+
+    assertThat($licenseDecisions, is(emptyArray()));
+
+    assertThat($removedLicenseDecisions, is(arrayWithSize(1)));
+
+    /** @var LicenseDecisionResult $result */
+    $result = $removedLicenseDecisions[$removedEvent->getLicenseShortName()];
+    assertThat($result->getLicenseRef(), is($removedEvent->getLicenseRef()));
+    assertThat($result->getLicenseDecisionEvent(), is(nullValue()));
+    $agentLicenseDecisionEvents = $result->getAgentDecisionEvents();
+    assertThat($agentLicenseDecisionEvents, is(arrayWithSize(1)));
+
+    $agentEvent = $agentLicenseDecisionEvents[0];
+
+    assertThat($agentEvent->getAgentRef(), is($agentRef));
+    assertThat($agentEvent->getLicenseRef(), is($licenseRef));
+    assertThat($agentEvent->getEventId(), is(143));
+    assertThat($agentEvent->getPercentage(), is(98));
+  }
+
   /**
    * @param $eventId
    * @param $fileId
