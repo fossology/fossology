@@ -64,42 +64,33 @@ class AgentsDao extends Object
   private function agentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $agentSuccess = TRUE)
   {
     //based on common-agents.php AgentARSList
-    if (!DB_TableExists($tableName)) return false;
+    if (!$this->dbManager->existsTable($tableName))
+    {
+      return false;
+    }
 
     $arguments = array($upload_pk);
     $statementName = __METHOD__ . $tableName;
-    
-    $agentCond = "";
+    $sql = "SELECT * FROM $tableName, agent WHERE agent_pk=agent_fk AND upload_fk=$1 AND agent_enabled";
     if ($agent_fk)
     {
       $arguments[] = $agent_fk;
-      $counter = count($arguments);
-      $agentCond = " and agent_fk=\$$counter";
+      $sql .= ' AND agent_fk=$'.count($arguments);
       $statementName .= ".agent";
     }
-
-    $limitClause = "";
+    if ($agentSuccess)
+    {
+      $sql .= " AND ars_success";
+      $statementName .= ".suc";
+    }
+    $sql .= " ORDER BY agent_ts DESC";
     if ($limit > 0)
     {
       $arguments[] = $limit;
-      $counter = count($arguments);
-      $limitClause = " limit \$$counter";
+      $sql .= ' limit $'.count($arguments);
       $statementName .= ".lim";
     }
-
-    $successClause = "";
-    if ($agentSuccess)
-    {
-      $successClause = " and ars_success ";
-      $statementName .= ".suc";
-    }
-
-    $this->dbManager->prepare($statementName,
-        "SELECT * FROM $tableName, agent
-           WHERE agent_pk=agent_fk and upload_fk=$1 and agent_enabled=true
-           $successClause $agentCond
-           order by agent_ts desc $limitClause");
-
+    $this->dbManager->prepare($statementName,$sql);
     $result = $this->dbManager->execute($statementName, $arguments);
     $resultArray = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
@@ -113,7 +104,7 @@ class AgentsDao extends Object
    * @param $arsTableName
    * @return array  - list of running agent pks
    */
-  public function RunningAgentpks($upload_pk, $arsTableName)
+  public function runningAgentIds($upload_pk, $arsTableName)
   {
     $listOfAllJobs = $this->agentARSList($arsTableName, $upload_pk, 0, 0, FALSE);
 
@@ -166,5 +157,14 @@ ORDER BY agent_fk DESC";
     }
     return $agentLatestMap;
   }
-
+    
+  /**
+   * @param string $agentName
+   * @return array
+   */
+  public function getNewestAgent($agentName)
+  {
+    return $this->dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
+        . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
+  }
 } 

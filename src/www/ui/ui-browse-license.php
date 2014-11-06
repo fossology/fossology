@@ -648,18 +648,6 @@ class ui_browse_license extends FO_Plugin
     return $out;
   }
 
-  /**
-   * @param string $agentName
-   * @return array
-   */
-  public function getNewestAgent($agentName)
-  {
-    global $container;
-    $dbManager = $container->get('db.manager');
-    /** @var DbManager $dbManager */
-    return $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
-        . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
-  }
 
   /**
    * @param $scannerAgents
@@ -673,7 +661,7 @@ class ui_browse_license extends FO_Plugin
 
     foreach ($scannerAgents as $agentName)
     {
-      $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+      $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
       if (count($runningJobs) > 0)
       {
         $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
@@ -698,18 +686,17 @@ class ui_browse_license extends FO_Plugin
     $V = ""; // total return value
     foreach ($scannerAgents as $agentName)
     {
-      $agentHasArsTable = DB_TableExists($agentName . "_ars");
+      $agentHasArsTable = $this->dbManager->existsTable($agentName . "_ars");
       if (empty($agentHasArsTable))
       {
         continue;
       }
 
-      $newestAgent = $this->getNewestAgent($agentName);
+      $newestAgent = $this->agentsDao->getNewestAgent($agentName);
       $stmt = __METHOD__ . ".getAgent.$agentName";
       $this->dbManager->prepare($stmt,
           $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
-              . "WHERE agent_name=$2 AND agent_enabled "
-              . "  AND upload_fk=$1 AND ars_success "
+              . "WHERE agent_name=$2 AND agent_enabled AND upload_fk=$1 AND ars_success "
               . "ORDER BY agent_pk DESC");
       $res = $this->dbManager->execute($stmt, array($uploadId, $agentName));
       $latestRun = $this->dbManager->fetchArray($res);
@@ -728,7 +715,7 @@ class ui_browse_license extends FO_Plugin
 
         $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
 
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
         {
           $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
@@ -745,7 +732,7 @@ class ui_browse_license extends FO_Plugin
       if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
       {
 
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
         if (in_array($newestAgent['agent_pk'], $runningJobs))
         {
           $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
