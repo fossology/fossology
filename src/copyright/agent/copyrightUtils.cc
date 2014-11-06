@@ -69,14 +69,8 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
         )
         (
           "regex",
-          boost::program_options::value<string>(),
+          boost::program_options::value<vector<string> >(),
           "user defined Regex to search"
-        )
-        (
-          "regexId",
-          boost::program_options::value<unsigned>()
-            ->default_value(0),
-          "subexpression Id for user defined Regex"
         )
         (
           "files",
@@ -109,18 +103,20 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
 
     unsigned long verbosity = vm.count("verbose");
 
+    dest = CliOptions(verbosity, type);
+
     if (vm.count("regex"))
     {
-      std::string regex = vm["regex"].as<std::string>();
-
-      unsigned regexId = vm["regexId"].as<unsigned>();
-
-      dest = CliOptions(verbosity, type, regex, regexId);
+      const std::vector<std::string>& userRegexesFmts = vm["regex"].as<vector<std::string> >();
+      for (auto it = userRegexesFmts.begin(); it != userRegexesFmts.end(); ++it) {
+        if (!(dest.addExtraRegex(*it)))
+        {
+          cout << "cannot parse regex format : " << *it << endl;
+          return false;
+        }
+      }
     }
-    else
-    {
-      dest = CliOptions(verbosity, type);
-    }
+
     return true;
   }
   catch (boost::bad_any_cast&) {
@@ -148,9 +144,7 @@ void fillMatchers(CopyrightState& state)
 {
   const CliOptions& cliOptions = state.getCliOptions();
 
-  if (cliOptions.hasExtraRegex()) {
-    state.addMatcher(RegexMatcher("cli", cliOptions.getExtraRegex(), cliOptions.getExtraRegexId()));
-  }
+  state.addMatcher(cliOptions.getExtraRegexes());
 
 #ifdef IDENTITY_COPYRIGHT
   unsigned types = cliOptions.getOptType();

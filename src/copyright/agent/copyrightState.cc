@@ -28,9 +28,16 @@ int CopyrightState::getAgentId() const
   return agentId;
 };
 
-void CopyrightState::addMatcher(RegexMatcher regexMatcher)
+void CopyrightState::addMatcher(const RegexMatcher& regexMatcher)
 {
   regexMatchers.push_back(regexMatcher);
+}
+
+void CopyrightState::addMatcher(const std::vector<RegexMatcher>& regexMatchers)
+{
+  for (auto it = regexMatchers.begin(); it != regexMatchers.end(); ++it) {
+    addMatcher(*it);
+  }
 }
 
 const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
@@ -42,27 +49,14 @@ const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
 CliOptions::CliOptions(int verbosity, unsigned int type) :
   verbosity(verbosity),
   optType(type),
-  extraRegex(false),
-  extraRegexId(0),
-  extraRegexStr("")
+  extraRegex()
 {
 }
 
-CliOptions::CliOptions(int verbosity, unsigned int optType, std::string& extraRegexStr, unsigned extraRegexId) :
-  verbosity(verbosity),
-  optType(optType),
-  extraRegex(true),
-  extraRegexId(extraRegexId),
-  extraRegexStr(extraRegexStr)
-{
-}
-
-CliOptions::CliOptions():
+CliOptions::CliOptions() :
   verbosity(0),
   optType(ALL_TYPES),
-  extraRegex(false),
-  extraRegexId(0),
-  extraRegexStr("")
+  extraRegex()
 {
 }
 
@@ -76,22 +70,37 @@ const CliOptions& CopyrightState::getCliOptions() const
   return cliOptions;
 }
 
-const std::string& CliOptions::getExtraRegex() const
-{
-  return extraRegexStr;
-}
-
-bool CliOptions::hasExtraRegex() const
+const std::vector<RegexMatcher>& CliOptions::getExtraRegexes() const
 {
   return extraRegex;
-}
-
-unsigned int CliOptions::getExtraRegexId() const
-{
-  return extraRegexId;
 }
 
 bool CliOptions::isVerbosityDebug() const
 {
   return verbosity >= 1;
+}
+
+bool CliOptions::addExtraRegex(const std::string& regexDesc)
+{
+  #define RGX_FMT_SEPARATOR "@@"
+  auto fmtRegex = rx::regex(
+    "(?:([[:alpha:]]+)" RGX_FMT_SEPARATOR ")?(?:([[:digit:]]+)" RGX_FMT_SEPARATOR ")?(.*)",
+    rx::regex_constants::icase
+  );
+
+  rx::match_results<std::string::const_iterator> match;
+  if (rx::regex_match(regexDesc.begin(), regexDesc.end(), match, fmtRegex))
+  {
+    std::string type(match.length(1) > 0 ? match.str(1) : "cli");
+    int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
+
+    if (match.length(3) == 0)
+      return false;
+
+    std::string regexPattern(match.str(3));
+
+    extraRegex.push_back(RegexMatcher(type, regexPattern, regId));
+    return true;
+  }
+  return false;
 }

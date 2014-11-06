@@ -22,20 +22,17 @@ class CliOptions
 private:
   int verbosity;
   unsigned int optType;
-  bool extraRegex;
-  unsigned extraRegexId;
-  std::string extraRegexStr;
+  std::vector<RegexMatcher> extraRegex;
 
 public:
-  bool hasExtraRegex() const;
-  unsigned int getExtraRegexId() const;
-  const std::string& getExtraRegex() const;
+  const std::vector<RegexMatcher>& getExtraRegexes() const;
   bool isVerbosityDebug() const;
 
   unsigned int getOptType() const;
 
+  bool addExtraRegex(const std::string& regexDesc);
+
   CliOptions(int verbosity, unsigned int type);
-  CliOptions(int verbosity, unsigned int optType, std::string& extraRegexStr, unsigned extraRegexId);
   CliOptions();
 };
 
@@ -47,7 +44,8 @@ public:
 
   int getAgentId() const;
 
-  void addMatcher(RegexMatcher regexMatcher);
+  void addMatcher(const RegexMatcher& regexMatcher);
+  void addMatcher(const std::vector<RegexMatcher>& regexMatchers);
 
   const std::vector<RegexMatcher>& getRegexMatchers() const;
 
