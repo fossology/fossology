@@ -539,14 +539,14 @@
   $Schema["TABLE"]["clearing_decision"]["user_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["user_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"type_fk\" IS 'Identifier for clearing_decision_type';";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type_fk\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"decision_type\" IS 'see Fossology/Lib/Data/DecisionTypes';";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"decision_type\" int4 NOT NULL DEFAULT 0;";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"decision_type\" SET NOT NULL, ALTER COLUMN \"decision_type\" SET DEFAULT 0;";
+  $Schema["TABLE"]["clearing_decision"]["decision_type"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["scope"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"scope\" IS 'see Fossology/Lib/Data/DecisonScopes'";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4 DEFAULT 1;";
-  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"scope\" int4 NOT NULL DEFAULT 1;";
+  $Schema["TABLE"]["clearing_decision"]["scope"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1;";
   $Schema["TABLE"]["clearing_decision"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["date_added"]["DESC"] = "";
@@ -565,6 +565,7 @@
   $Schema["TABLE"]["clearing_decision_type"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_type\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
   $Schema["TABLE"]["clearing_decision_type"]["meaning"]["UPDATE"] = "";
 
+  
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["DESC"] = "";
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"clearing_fk\" int4;";
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_fk\" SET NOT NULL;";
@@ -2033,9 +2034,8 @@
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::unknown AS ts, NULL::unknown AS upload_pk, NULL::unknown AS pfile_fk, NULL::unknown AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::unknown AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
-  $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT key.key_pk, key.key_name, key.key_desc, key.key_parent_fk, key.key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM key, agent WHERE (agent.agent_pk = key.key_agent_fk);";
-  $Schema["VIEW"]["runstat_up_agent"] = "CREATE VIEW \"runstat_up_agent\" AS SELECT agent_runstatus.ars_status, agent_runstatus.ars_complete, agent_runstatus.ars_pk, agent_runstatus.ars_starttime AS ars_ts, agent_runstatus.agent_fk, agent.agent_desc, agent.agent_name, agent.agent_parms, agent.agent_enabled AS agent_enable, agent.agent_pk, agent.agent_ts, agent.agent_rev, upload.upload_desc, upload.upload_filename, upload.pfile_fk, upload.upload_pk FROM ((agent_runstatus JOIN agent ON ((agent_runstatus.agent_fk = agent.agent_pk))) JOIN upload ON ((agent_runstatus.upload_fk = upload.upload_pk)));";
 
+  
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["uploadtree_uploadtree_pk_seq"] = "CREATE SEQUENCE \"uploadtree_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["agent_agent_pk_seq"] = "CREATE SEQUENCE \"agent_agent_pk_seq\" START 1;";
@@ -2199,7 +2199,6 @@
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_decision_type_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_type_fk_fkey\" FOREIGN KEY (\"type_fk\") REFERENCES \"clearing_decision_type\" (\"type_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_licenses_rf_fk_fkey"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_licenses_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2337,11 +2336,6 @@
   $Schema["TABLE"]["license_decision_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["uploadtree_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_decision_event"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_event"]["pfile_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["license_decision_event"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["license_decision_event"]["pfile_fk"]["UPDATE"] = "";
-
   $Schema["TABLE"]["license_decision_event"]["rf_fk"]["DESC"] = "";
   $Schema["TABLE"]["license_decision_event"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"rf_fk\" int4;";
   $Schema["TABLE"]["license_decision_event"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
@@ -2364,11 +2358,6 @@
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"type_fk\" int4;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_decision_event"]["scope"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_event"]["scope"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"scope\" int4, ALTER COLUMN \"scope\" SET DEFAULT 1;";
-  $Schema["TABLE"]["license_decision_event"]["scope"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"scope\" SET NOT NULL;";
-  $Schema["TABLE"]["license_decision_event"]["scope"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"comment\" IS 'User comment';";
   $Schema["TABLE"]["license_decision_event"]["comment"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"comment\" text;";

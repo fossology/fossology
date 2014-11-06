@@ -236,11 +236,11 @@ class AjaxClearingView extends FO_Plugin
           return $this->doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "addLicense":
-          $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global); //$global was always false, why?
+          $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, LicenseEventTypes::USER);
           return json_encode(array());
 
         case "removeLicense":
-          $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global);
+          $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, LicenseEventTypes::USER);
           return json_encode(array());
 
         case "setNextPrev":
@@ -272,12 +272,9 @@ class AjaxClearingView extends FO_Plugin
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $uploadId = $itemTreeBounds->getUploadId();
-
-
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
     list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
 
     $table = array();
     foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)

@@ -23,6 +23,7 @@ namespace Fossology\Lib\Data;
 use DateTime;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
+use Fossology\Lib\Data\DecisionScopes;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -85,7 +86,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->type = DecisionTypes::TO_BE_DISCUSSED;
     $this->comment = "Test comment";
     $this->reportinfo = "Test reportinfo";
-    $this->scope = LicenseDecision::SCOPE_UPLOAD;
+    $this->scope = DecisionScopes::ITEM;
     $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
     
     $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);

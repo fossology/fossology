@@ -26,6 +26,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Dao\UploadTreeDao;
+use Fossology\Lib\Util\ArrayOperation;
 
 /**
  * \file ui-browse-license.php
@@ -171,7 +172,7 @@ class ui_browse_license extends FO_Plugin
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
-
+    
     /***************************************
      * Problem: $ChildCount can be zero!
      * This happens if you have a container that does not
@@ -330,11 +331,11 @@ class ui_browse_license extends FO_Plugin
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos=$this->getNewestAgent("nomos");
+    $newestNomos=$this->agentsDao->getNewestAgent("nomos");
     $latestMonk=LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk=$this->getNewestAgent("monk");
+    $newestMonk=$this->agentsDao->getNewestAgent("monk");
     $latestNinka=LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka=$this->getNewestAgent("ninka");
+    $newestNinka=$this->agentsDao->getNewestAgent("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
         'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ),
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' =>$newestNinka, 'latestIsNewest' =>$latestNinka==$newestNinka['agent_pk']  ));
@@ -385,51 +386,8 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
-    
-    $tableColumns = array(
-        array("sTitle" => _("Files"), "sClass" => "left"),
-        array("sTitle" => _("Scanner Results (N: nomos, M: monk, Nk: ninka)"), "sClass" => "left"),
-        array("sTitle" => _("Edited Results"), "sClass" => "left"),
-        array("sTitle" => _("Clearing Status"), "sClass" => "clearingStatus center", "bSearchable" => false, "sWidth" => "5%", 'mRender'=>'##mRender##'),
-        array("sTitle" => _("Files Cleared"), "sClass" => "center", "bSearchable" => false),
-        array("sTitle" => _("Actions"), "sClass" => "left", "bSortable" => false, "bSearchable" => false, "sWidth" => "13.6%")
-    );
-
-    $tableSorting = array(
-        array(0, "asc"),
-        array(2, "desc"),
-        array(1, "desc")
-    );
-
-    $tableLanguage = array(
-        "sInfo" => "Showing _START_ to _END_ of _TOTAL_ files",
-        "sSearch" => "_INPUT_"
-            . "<button onclick='clearSearchFiles()' >" . _("Clear") . "</button>",
-        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> files"
-    );
-
-    $dataTableConfig = array(
-        "aaData" => $tableData,
-        "aoColumns" => $tableColumns,
-        "aaSorting" => $tableSorting,
-        "iDisplayLength" => 50,
-        "oLanguage" => $tableLanguage
-    );
-
-    $fun = "function ( data, type, full ) {
-        if(type!='display') return data;
-        if (data==='green'){
-          return '<img alt=\"done\" src=\"images/green.png\" class=\"icon-small\"/>';
-        }
-        return '<img alt=\"not done\" src=\"images/red.png\" class=\"icon-small\"/>';
-      }";
-    $dataTableJS = str_replace('"##mRender##"', $fun, json_encode($dataTableConfig));
-    
-    $VF .= "<script>
-  function createDirlistTable() {
-      $('#dirlist').dataTable(" . $dataTableJS . ");
-  }
-</script>";
+       
+    $VF .= '<script>'.$this->renderTemplate('ui-browse-license_file-list.js.twig',array('aaData'=>json_encode($tableData))).'</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
@@ -593,7 +551,7 @@ class ui_browse_license extends FO_Plugin
     $licenses = $goodLicenses?:$this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
     
     
-    $editedLicensesHist = $this->clearingDao->getMultiplicityOfValues($licenses);
+    $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;
     /** @var LicenseRenderer  $licenseRenderer*/
     $licenseRenderer = $container->get('view.license_renderer');
@@ -647,18 +605,6 @@ class ui_browse_license extends FO_Plugin
     return $out;
   }
 
-  /**
-   * @param string $agentName
-   * @return array
-   */
-  public function getNewestAgent($agentName)
-  {
-    global $container;
-    $dbManager = $container->get('db.manager');
-    /** @var DbManager $dbManager */
-    return $dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
-        . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
-  }
 
   /**
    * @param $scannerAgents
@@ -672,7 +618,7 @@ class ui_browse_license extends FO_Plugin
 
     foreach ($scannerAgents as $agentName)
     {
-      $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+      $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
       if (count($runningJobs) > 0)
       {
         $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
@@ -697,18 +643,17 @@ class ui_browse_license extends FO_Plugin
     $V = ""; // total return value
     foreach ($scannerAgents as $agentName)
     {
-      $agentHasArsTable = DB_TableExists($agentName . "_ars");
+      $agentHasArsTable = $this->dbManager->existsTable($agentName . "_ars");
       if (empty($agentHasArsTable))
       {
         continue;
       }
 
-      $newestAgent = $this->getNewestAgent($agentName);
+      $newestAgent = $this->agentsDao->getNewestAgent($agentName);
       $stmt = __METHOD__ . ".getAgent.$agentName";
       $this->dbManager->prepare($stmt,
           $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
-              . "WHERE agent_name=$2 AND agent_enabled "
-              . "  AND upload_fk=$1 AND ars_success "
+              . "WHERE agent_name=$2 AND agent_enabled AND upload_fk=$1 AND ars_success "
               . "ORDER BY agent_pk DESC");
       $res = $this->dbManager->execute($stmt, array($uploadId, $agentName));
       $latestRun = $this->dbManager->fetchArray($res);
@@ -727,7 +672,7 @@ class ui_browse_license extends FO_Plugin
 
         $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
 
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
         if (count($runningJobs) > 0)
         {
           $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
@@ -744,7 +689,7 @@ class ui_browse_license extends FO_Plugin
       if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
       {
 
-        $runningJobs = $this->agentsDao->RunningAgentpks($uploadId, $agentName . "_ars");
+        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
         if (in_array($newestAgent['agent_pk'], $runningJobs))
         {
           $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");

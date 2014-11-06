@@ -26,11 +26,11 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
+use Fossology\Lib\Data\DecisionScopes;
 use Monolog\Logger;
 
 define("TITLE_clearingView", _("Change concluded License "));
@@ -284,6 +284,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
+    $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $userId);
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
   }
@@ -296,6 +297,7 @@ class ClearingView extends FO_Plugin
   private function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
+    $scope = new DecisionScopes();
     foreach ($clearingDecWithLicenses as $clearingDecision)
     {
       $licenseNames = array();
@@ -313,7 +315,7 @@ class ClearingView extends FO_Plugin
       $row = array(
           'date'=>$clearingDecision->getDateAdded(),
           'username'=>$clearingDecision->getUserName(),
-          'scope'=>$clearingDecision->getScope(),
+          'scope'=> $scope->getTypeName( $clearingDecision->getScope() ),
           'type'=>$this->decisionTypes->getTypeName($clearingDecision->getType()),
           'licenses'=>implode(", ", $licenseNames));
       $table[] = $row;
