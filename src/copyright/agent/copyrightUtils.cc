@@ -173,7 +173,7 @@ void fillMatchers(CopyrightState& state)
   state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
 #endif
 
-  if (cliOptions.getVerbosity() >= CliOptions::DEBUG)
+  if (cliOptions.getVerbosity() >= CliOptions::verbosityLevels::DEBUG)
   {
     const vector<RegexMatcher>& matchers = state.getRegexMatchers();
 
