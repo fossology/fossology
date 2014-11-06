@@ -177,12 +177,12 @@ class Postgres implements Driver
    */
   public function existsTable($tableName)
   {
-    $dbName = pg_dbname($this->connection);
+    $dbName = pg_dbname($this->dbConnection);
     $sql = "SELECT count(*) cnt FROM information_schema.tables WHERE table_catalog='$dbName' AND table_name='$tableName'";
-    $res = pg_query($this->connection, $sql);
-    if (!$res && pg_connection_status($this->connection)===PGSQL_CONNECTION_OK)
+    $res = pg_query($this->dbConnection, $sql);
+    if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
     {
-      throw new \Exception(pg_last_error($this->connection));
+      throw new \Exception(pg_last_error($this->dbConnection));
     }
     else if(!$res)
     {
