@@ -107,7 +107,7 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
       fileNames = vm["files"].as<std::vector<string> >();
     }
 
-    int verbosity = vm.count("verbosity");
+    unsigned long verbosity = vm.count("verbose");
 
     if (vm.count("regex"))
     {
@@ -173,7 +173,7 @@ void fillMatchers(CopyrightState& state)
   state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
 #endif
 
-  if (cliOptions.getVerbosity() >= CliOptions::verbosityLevels::DEBUG)
+  if (cliOptions.isVerbosityDebug())
   {
     const vector<RegexMatcher>& matchers = state.getRegexMatchers();
 

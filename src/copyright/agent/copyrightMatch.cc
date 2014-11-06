@@ -56,6 +56,11 @@ bool operator ==(const CopyrightMatch& first, const CopyrightMatch& other)
           (first.getLength() == other.getLength());
 }
 
+bool operator>=(const CopyrightMatch& a, const CopyrightMatch& b)
+{
+  return b <= a;
+}
+
 bool operator<=(const CopyrightMatch& a, const CopyrightMatch& b)
 {
   size_t aEnd = a.getStart() + a.getLength();

@@ -38,12 +38,6 @@ const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
   return regexMatchers;
 }
 
-int CliOptions::getVerbosity() const
-{
-  return verbosity;
-}
-
-
 
 CliOptions::CliOptions(int verbosity, unsigned int type) :
   verbosity(verbosity),
@@ -95,4 +89,9 @@ bool CliOptions::hasExtraRegex() const
 unsigned int CliOptions::getExtraRegexId() const
 {
   return extraRegexId;
+}
+
+bool CliOptions::isVerbosityDebug() const
+{
+  return verbosity >= 1;
 }

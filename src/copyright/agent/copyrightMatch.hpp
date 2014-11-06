@@ -37,6 +37,7 @@ private:
 std::ostream& operator <<(std::ostream& os, const CopyrightMatch& match);
 bool operator ==(const CopyrightMatch& first, const CopyrightMatch& other);
 bool operator <=(const CopyrightMatch& first, const CopyrightMatch& other);
+bool operator >=(const CopyrightMatch& first, const CopyrightMatch& other);
 
 std::ostream& operator <<(std::ostream& os, const std::vector<CopyrightMatch>& matches);
 

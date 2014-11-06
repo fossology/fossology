@@ -26,6 +26,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <files.hpp>
 
+#define TESTFILES_BEGIN 0
+#define TESTFILES_END 140
+
+//#define SHOWALLDIFFS
+
 using namespace std;
 
 bool compMatchByStart(const CopyrightMatch& a, const CopyrightMatch& b)
@@ -53,7 +58,16 @@ public:
 
   void incrementFalseNegatives(const vector<CopyrightMatch>& matches)
   {
-    for (auto it = matches.begin(); it != matches.end(); ++it) incrementFalsePositives(*it);
+    for (auto it = matches.begin(); it != matches.end(); ++it) incrementFalseNegatives(*it);
+  }
+
+  StatsAccumulator& operator+=(const StatsAccumulator& rhs) {
+    if (this != &rhs) {
+      this->incrementFalsePositives(rhs.getFalsePositives());
+      this->incrementFalseNegatives(rhs.getFalseNegatives());
+      this->incrementMatched(rhs.getMatched());
+    }
+    return *this;
   }
 
 private:
@@ -82,11 +96,61 @@ class TestDataCheck : public CPPUNIT_NS :: TestFixture
 {
   CPPUNIT_TEST_SUITE (TestDataCheck);
     CPPUNIT_TEST (testDataCheck);
-//    CPPUNIT_TEST (testChanges);
+    //CPPUNIT_TEST (testChanges);
 
   CPPUNIT_TEST_SUITE_END ();
 
 private:
+
+
+  std::string getNewRegex()
+  {
+#define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
+#define NAME              "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
+#define SPACECLS          "[\\t ]"
+#define SPACES            SPACECLS "+"
+#define SPACESALL         "[[:space:]]*"
+#define PUNCTORSPACE      "[[:punct:][:space:]]"
+#define NAMESLIST         NAME "(([-, &]+)" NAME ")*"
+#define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
+#define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
+#define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
+#define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
+#define COPYR_TXT         "copyright(s)?"
+
+    return std::string(
+      "("
+      "("
+        "(" COPYR_SYM SPACESALL COPYR_TXT "|" COPYR_TXT ":?" SPACESALL COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
+        "("
+          SPACES
+          "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
+        ")?"
+        "("
+          PUNCTORSPACE "?"
+          SPACESALL
+          DATESLIST
+        ")?"
+        "("
+          PUNCTORSPACE "?"
+          SPACESALL
+          NAMESLIST
+        ")"
+        "(" PUNCTORSPACE"*" "all" SPACES "rights" SPACES "reserved)?"
+      ")|("
+        "("
+          "((author|contributor|maintainer)s?)"
+          "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put"SPACES"together)" SPACES "by)"
+        ")"
+        "[:]?"
+        SPACESALL
+        NAMESLIST
+      ")"
+      ")"
+      "[.]?"
+    );
+  }
+
   vector<CopyrightMatch> correctPositions(const vector<CopyrightMatch>& input)
   {
     vector<CopyrightMatch> output;
@@ -106,31 +170,42 @@ private:
     return output;
   }
 
-  void checkMatches(const vector<CopyrightMatch>& matches, const vector<CopyrightMatch>& expected, StatsAccumulator& accumulator)
+  StatsAccumulator checkMatches(const vector<CopyrightMatch>& matches, const vector<CopyrightMatch>& expected)
   {
-    const unsigned long legalMatchesSize = matches.size();
-    const unsigned long expectedMatchesSize = expected.size();
+    StatsAccumulator accumulator;
 
-    if (legalMatchesSize == 0)
-    {
-      accumulator.incrementFalseNegatives(expected);
-      return;
-    }
-
-    if (expectedMatchesSize == 0) {
-      accumulator.incrementFalsePositives(matches);
-      return;
-    }
+    const unsigned long matchesSize = matches.size();
+    const unsigned long expectedSize = expected.size();
 
     size_t iMatches = 0;
     size_t iExpected = 0;
 
-    while(iMatches < legalMatchesSize && iExpected < expectedMatchesSize)
+    while(iMatches < matchesSize || iExpected < expectedSize)
     {
+      if (iMatches == matchesSize)
+      {
+        while (iExpected < expectedSize)
+        {
+          accumulator.incrementFalseNegatives(expected[iExpected]);
+          ++iExpected;
+        }
+        continue;
+      }
+
+      if (iExpected == expectedSize)
+      {
+        while (iMatches < matchesSize)
+        {
+          accumulator.incrementFalsePositives(matches[iMatches]);
+          ++iMatches;
+        }
+        continue;
+      }
+
       const CopyrightMatch& currentExpected = expected[iExpected];
       const CopyrightMatch& currentMatched = matches[iMatches];
 
-      if ((currentMatched <= currentExpected) || (currentExpected <= currentMatched)) {
+      if ((currentMatched <= currentExpected) || (currentMatched >= currentExpected)) {
         accumulator.incrementMatched();
         ++iMatches;
         ++iExpected;
@@ -147,24 +222,6 @@ private:
       }
     }
 
-    while (iMatches < legalMatchesSize)
-    {
-      accumulator.incrementFalsePositives(matches[iMatches]);
-      ++iMatches;
-    }
-
-    while (iExpected < expectedMatchesSize)
-    {
-      accumulator.incrementFalseNegatives(expected[iExpected]);
-      ++iExpected;
-    }
-
-  }
-
-  StatsAccumulator checkMatches(const vector<CopyrightMatch>& matches, const vector<CopyrightMatch>& expected)
-  {
-    StatsAccumulator accumulator;
-    checkMatches(matches, expected, accumulator);
     return accumulator;
   }
 
@@ -172,7 +229,7 @@ private:
   {
     StatsAccumulator accumulator;
 
-    for (unsigned int i = 0; i<140; ++i)
+    for (unsigned int i = TESTFILES_BEGIN; i < TESTFILES_END; ++i)
     {
       const string currentFileName = baseFileName + to_string(i);
 
@@ -188,59 +245,28 @@ private:
       vector<CopyrightMatch> cheatMatches = matchStringToRegexes(currentFile.getContent(), untested);
       accumulator.incrementMatched(untested.size());
 
-      checkMatches(matches, expected, accumulator);
+      const StatsAccumulator fileStats = checkMatches(matches, expected);
+
+      const vector<CopyrightMatch> falseNegatives = fileStats.getFalseNegatives();
+      const vector<CopyrightMatch> falsePositives = fileStats.getFalsePositives();
+
+#ifdef SHOWALLDIFFS
+      cout << currentFileName << ": " << fileStats << endl;
+      if (!falseNegatives.empty())
+      {
+        cout << "negatives: " << falseNegatives << endl;
+      }
+      if (!falsePositives.empty())
+      {
+        cout << "positives: " << falsePositives << endl;
+      }
+#endif
+
+      accumulator += fileStats;
     }
 
     return accumulator;
   }
-
-  std::string getNewRegex()
-  {
-#define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
-#define NAME              "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
-#define SPACECLS          "[\\t ]"
-#define SPACES            SPACECLS "+"
-#define SPACESALL         "[[:space:]]*"
-#define PUNCTORSPACE      "[[:punct:][:space:]]"
-#define NAMESLIST         NAME "(([-, &]+)" NAME ")*"
-#define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
-#define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
-#define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
-#define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
-#define COPYR_TXT         "copyright(s)?"
-
- return std::string(
-  "("
-  "("
-    "(" COPYR_SYM SPACESALL COPYR_TXT "|" COPYR_TXT SPACESALL COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
-    "("
-      SPACES
-      "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
-    ")?"
-    "("
-      PUNCTORSPACE "?"
-      SPACESALL
-      DATESLIST
-    ")?"
-    "("
-      PUNCTORSPACE "?"
-      SPACESALL
-      NAMESLIST
-    ")"
-    "(" PUNCTORSPACE"*" "all" SPACES "rights" SPACES "reserved)?"
-  ")|("
-    "("
-      "((author|contributor|maintainer)s?)"
-      "|((written|contribut(ed|ions?)|maintained|put"SPACES"together)" SPACES "by)"
-    ")"
-    "[:]?"
-    SPACESALL
-    NAMESLIST
-  ")"
-  ")"
-  "[.]?"
-);
- }
 
 protected:
   void testChanges (void) {
@@ -260,8 +286,6 @@ protected:
     const vector<RegexMatcher> changing = { RegexMatcher(type, getNewRegex()) };
     const StatsAccumulator accumulator2 = runtestWith(baseFileName, changing, cheat, expectedMatcher);
 
-    cout << accumulator2.getFalseNegatives() << endl;
-
     cout << endl
      << "Current Regex:" << endl
      << accumulator << endl
@@ -274,9 +298,9 @@ protected:
 
     cout << endl
     << "removed    False Positives: " << diffPositives.getFalseNegatives() << endl
-    << "removed    False Negatives: " << diffNegatives.getFalsePositives() << endl
+    << "removed    False Negatives: " << diffNegatives.getFalseNegatives() << endl
     << "introduced False Positives: " << diffPositives.getFalsePositives() << endl
-    << "introduced False Negatives: " << diffNegatives.getFalseNegatives() << endl
+    << "introduced False Negatives: " << diffNegatives.getFalsePositives() << endl
     << endl;
 
   };
@@ -293,9 +317,9 @@ protected:
 
     vector<RegexMatcher> expectedMatcher = { RegexMatcher(type, "<s>(.*?)<\\/s>", 1) };
 
-    const StatsAccumulator accumulator  = runtestWith(baseFileName, copyrights, cheat, expectedMatcher);
+    const StatsAccumulator accumulator = runtestWith(baseFileName, copyrights, cheat, expectedMatcher);
 
-    cout << accumulator << endl;
+    cout << endl << accumulator << endl;
   }
 
 };

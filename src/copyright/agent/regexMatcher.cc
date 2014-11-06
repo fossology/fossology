@@ -51,5 +51,5 @@ RegexMatcher::~RegexMatcher()
 
 std::ostream& operator<<(std::ostream& os, const RegexMatcher& matcher)
 {
-  return (os << matcher.matchingRegex);
+  return (os << "type: " << matcher.getType() << " regex: " << matcher.matchingRegex);
 }

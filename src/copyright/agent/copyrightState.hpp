@@ -30,8 +30,7 @@ public:
   bool hasExtraRegex() const;
   unsigned int getExtraRegexId() const;
   const std::string& getExtraRegex() const;
-  int getVerbosity() const;
-  typedef enum {DEBUG} verbosityLevels;
+  bool isVerbosityDebug() const;
 
   unsigned int getOptType() const;
 
