@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/copyright/agent_tests/Unit/run_tests.cc
     src/copyright/agent_tests/Unit/test_regex.cc
     src/copyright/agent_tests/Unit/test_RegMatcher.cc
+    src/copyright/agent_tests/Unit/test_testdataCheckFound.cc
     src/delagent/agent/delagent.c
     src/delagent/agent/delagent.h
     src/delagent/agent/util.c
@@ -92,8 +93,6 @@ set(SOURCE_FILES
     src/lib/cpp/libfossAgentDatabaseHandler.hpp
     src/lib/cpp/libfossUtils.cc
     src/lib/cpp/libfossUtils.hpp
-    src/lib/cpp/libfossRepo.cc
-    src/lib/cpp/libfossRepo.hpp
     src/lib/cpp/files.cc
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc

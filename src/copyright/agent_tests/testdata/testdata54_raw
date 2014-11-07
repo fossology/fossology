@@ -1,19 +1,19 @@
 This is the Debian GNU/Linux prepackaged version of util-linux.
 
-This package was put together by Guy Maor <maor@debian.org> and later
-maintained by Sean 'Shaleh' Perry <shaleh@debian.org>, and Adrian Bunk
-<bunk@stusta.de>.
+This package was <s>put together by Guy Maor <maor@debian.org></s> and later
+<s>maintained by Sean 'Shaleh' Perry <shaleh@debian.org>, and Adrian Bunk
+<bunk@stusta.de></s>.
 
-The current maintainer is LaMont Jones <lamont@debian.org>.
+The current <s>maintainer is LaMont Jones <lamont@debian.org>.</s>
 See also: git://git.debian.org/~lamont/util-linux.git
 
 It was downloaded from:
     ftp://ftp.us.kernel.org/pub/linux/utils/util-linux-ng/
 
 Upstream maintainers include:
-  Maintainer: Karel Zak <kzak@redhat.com>
-  Past Maintainer: Adrian Bunk <bunk@fs.tum.de>
-  Past Maintainer: Andries Brouwer <aeb@cwi.nl>
+  <s>Maintainer: Karel Zak <kzak@redhat.com></s>
+  Past <s>Maintainer: Adrian Bunk <bunk@fs.tum.de></s>
+  Past <s>Maintainer: Andries Brouwer <aeb@cwi.nl></s>
   See also /usr/share/doc/util-linux/AUTHORS
 
 Copyright:

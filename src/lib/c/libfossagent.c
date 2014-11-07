@@ -51,11 +51,9 @@ char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
     return result;
   }
 
-
-  result = strdup(PQgetvalue(resTableName, 0, 0));
+  result = g_strdup(PQgetvalue(resTableName, 0, 0));
   PQclear(resTableName);
   return result;
-
 }
 
 

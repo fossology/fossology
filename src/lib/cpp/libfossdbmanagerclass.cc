@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 extern "C" {
 #include "libfossscheduler.h"
+#include "libfossagent.h"
 }
 
 using namespace fo;
@@ -109,4 +110,10 @@ void DbManager::ignoreWarnings(bool b) const
 {
   fo_dbManager_ignoreWarnings(getStruct_dbManager(), b);
 }
+
+std::string DbManager::queryUploadTreeTableName(int uploadId)
+{
+  return std::string(getUploadTreeTableName(getStruct_dbManager(), uploadId));
+}
+
 

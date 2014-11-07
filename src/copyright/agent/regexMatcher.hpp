@@ -17,15 +17,20 @@
 #include "matcher.hpp"
 #include "regex.hpp"
 
+
 class RegexMatcher : public virtual Matcher
 {
+  friend std::ostream& operator<<(std::ostream&, const RegexMatcher&);
 public:
   RegexMatcher(const std::string type, const std::string pattern, int regexIndex = 0);
   virtual std::vector<CopyrightMatch> match(const std::string content) const;
   virtual ~RegexMatcher();
+
 private:
   int regexIndex;
   rx::regex matchingRegex;
 };
+
+std::ostream& operator<<(std::ostream&, const RegexMatcher&);
 
 #endif // REGEXMATCHER_HPP

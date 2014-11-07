@@ -57,6 +57,8 @@ namespace fo
     QueryResult queryPrintf(const char* queryFormat, ...) const;
     QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
+    std::string queryUploadTreeTableName(int uploadId);
+
   private:
     unptr::shared_ptr <fo_dbManager> dbManager;
   };

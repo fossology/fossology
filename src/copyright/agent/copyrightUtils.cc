@@ -54,7 +54,6 @@ void bail(int exitval)
 bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
   unsigned type;
-  int verbosity = 0;
 
   boost::program_options::options_description desc(IDENTITY ": recognized options");
   desc.add_options()
@@ -65,6 +64,14 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
             ->default_value(ALL_TYPES),
           "type of regex to try"
         ) // TODO change and add help based on IDENTITY
+        (
+          "verbose,v", "increase verbosity"
+        )
+        (
+          "regex",
+          boost::program_options::value<vector<string> >(),
+          "user defined Regex to search: [{name=cli}@@][{matchingGroup=0}@@]{regex} e.g. 'linux@@1@@(linus) torvalds'"
+        )
         (
           "files",
           boost::program_options::value< vector<string> >(),
@@ -94,11 +101,32 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
       fileNames = vm["files"].as<std::vector<string> >();
     }
 
+    unsigned long verbosity = vm.count("verbose");
+
     dest = CliOptions(verbosity, type);
+
+    if (vm.count("regex"))
+    {
+      const std::vector<std::string>& userRegexesFmts = vm["regex"].as<vector<std::string> >();
+      for (auto it = userRegexesFmts.begin(); it != userRegexesFmts.end(); ++it) {
+        if (!(dest.addExtraRegex(*it)))
+        {
+          cout << "cannot parse regex format : " << *it << endl;
+          return false;
+        }
+      }
+    }
+
     return true;
+  }
+  catch (boost::bad_any_cast&) {
+    cout << "wrong parameter type" << endl;
+    cout << desc << endl;
+    return false;
   }
   catch (boost::program_options::error&)
   {
+    cout << "wrong command line arguments" << endl;
     cout << desc << endl;
     return false;
   }
@@ -114,8 +142,12 @@ CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
 
 void fillMatchers(CopyrightState& state)
 {
+  const CliOptions& cliOptions = state.getCliOptions();
+
+  state.addMatcher(cliOptions.getExtraRegexes());
+
 #ifdef IDENTITY_COPYRIGHT
-  unsigned types = state.getCliOptions().getOptType();
+  unsigned types = cliOptions.getOptType();
 
   if (types & 1<<0)
     state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
@@ -134,6 +166,15 @@ void fillMatchers(CopyrightState& state)
 #ifdef IDENTITY_ECC
   state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
 #endif
+
+  if (cliOptions.isVerbosityDebug())
+  {
+    const vector<RegexMatcher>& matchers = state.getRegexMatchers();
+
+    for (auto it = matchers.begin(); it != matchers.end(); ++it) {
+      std::cout << *it << std::endl;
+    }
+  }
 }
 
 vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexMatcher> matchers)
@@ -199,7 +240,22 @@ vector<CopyrightMatch> findAllMatches(const fo::File& file, vector<RegexMatcher>
   }
 
   string fileContent = file.getContent(0);
+
+  normalizeContent(fileContent);
+
   return matchStringToRegexes(fileContent, regexMatchers);
+}
+
+//TODO normalize the content
+void normalizeContent(string& content)
+{
+  for (std::string::iterator it = content.begin(); it != content.end(); ++it)
+  {
+    char& charachter = *it;
+
+    if (charachter == '*')
+      charachter = ' ';
+  }
 }
 
 void matchFileWithLicenses(const fo::File& file, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)

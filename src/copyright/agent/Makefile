@@ -23,6 +23,7 @@ EXE_COP = copyright
 EXE_IP = ip
 EXE_ECC = ecc
 EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
+EXE_COV = $(EXE_COP)_cov
 
 OBJECTS = copyright.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o
 OBJECTS_COP = copyrightUtils_cop.o copyrightState_cop.o database_cop.o
@@ -42,6 +43,9 @@ $(EXE_IP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_IP)
 
 $(EXE_ECC): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_ECC)
 	$(CXX) $(OBJECTS) $(OBJECTS_ECC) $(DEF_ID_ECC) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_COV): $(CXXFOLIB) $(VARS) $(COVERAGE) $(COVERAGE_COP)
+	$(CXX) $(COVERAGE) $(COVERAGE_COP) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 #######################
 # library build rules #
@@ -72,10 +76,10 @@ $(OBJECTS_IP): %_ip.o: %.cc %.hpp
 $(OBJECTS_ECC): %_ecc.o: %.cc %.hpp
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
 	
-$(COVERAGE): %_cov.o: %.cc %.hpp
+$(COVERAGE_COP): %_cop_cov.o: %.cc %.hpp
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
-$(COVERAGE_COP): %_cop_cov.o: %.cc %.hpp
+$(COVERAGE): %_cov.o: %.cc %.hpp
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
 #######################
