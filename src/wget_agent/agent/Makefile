@@ -20,7 +20,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIR=../agent_tests
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
+LOCAL_CFLAGS=$(DB_CFLAGS) $(REPO_CFLAGS) $(AGENT_CFLAGS) -lpq $(ALL_CFLAGS)
 EXE=wget_agent
 CHKHDR=../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
@@ -32,7 +32,7 @@ all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
 	@echo "make wget_agent"
-	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) main.c libwget_agent.a $(CHKSRC) $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
 
 install: all
 	@echo "make wget_agent install"
@@ -43,10 +43,10 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL)
+	$(CC) -c $< $(LOCAL_CFLAGS)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) -o $@
 
 libwget_agent.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)

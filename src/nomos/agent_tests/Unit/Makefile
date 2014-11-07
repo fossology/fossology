@@ -12,13 +12,13 @@ LOCALAGENTDIR=../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lfocunit -lcunit -I$(TESTDIR)
-CFLAGS_LOCAL= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB) -std=c99
+LOCAL_CFLAGS = $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB) -std=c99
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_nomos
 
 OBJECTS = test_nomos_gap.o  test_DoctoredBuffer.o \
           $(NULL)
-# test_nomos_gap.o 
+# test_nomos_gap.o
 all: $(EXE)
 	@echo "make nomos Unit agent_tests"
 
@@ -29,17 +29,17 @@ test: $(EXE)
 coverage: agent run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
 	@echo "make nomos agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV) ; \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(LOCAL_CFLAGS) $(FLAG_COV) ; \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
 $(EXE): agent $(OBJECTS) libnomos.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libnomos.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libnomos.a $(LOCAL_CFLAGS)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 agent:
 	$(MAKE) -C $(LOCALAGENTDIR)
@@ -47,7 +47,7 @@ agent:
 libnomos.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
-libnomos_cov.a: 
+libnomos_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
@@ -59,6 +59,6 @@ install:
 uninstall:
 	@echo "make nomos agent_tests nothing to uninstall"
 
-.PHONY: all install uninstall clean test 
+.PHONY: all install uninstall clean test
 include ${TOP}/Makefile.deps
 

@@ -1,15 +1,15 @@
 #####################################################################
 # Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -19,10 +19,9 @@ VARS = $(TOP)/Makefile.conf
 
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -Werror
+LOCAL_CFLAGS = $(ALL_CFLAGS) -I. -Werror
 DEF          = -DDATADIR='"$(MODDIR)"'
 CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS)
 
 EXE = copyright
 TESTDIR = ../agent_tests
@@ -35,12 +34,12 @@ COVERAGE=$(OBJECTS:%.o=%_cov.o)
 ##########################
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	@echo "make copyright agent"
-	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(FO_LDFLAGS) -o $@
 
 all: $(EXE) test
 	@echo "make copyright agent and test"
 
-test: 
+test:
 	$(MAKE) -C $(TESTDIR) test
 	$(MAKE) -C $(TESTDIR) coverage
 
@@ -50,31 +49,31 @@ test:
 
 libcopyright.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
-	
+
 libcopyright_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
-	
+
 ######################
 # object build rules #
 ######################
 
 copyright.o: %.o: %.c %.h cvector.h radixtree.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 cvector.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 radixtree.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 pair.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEFS) $<
 
-$(COVERAGE): %_cov.o: %.c 
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+$(COVERAGE): %_cov.o: %.c
+	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #

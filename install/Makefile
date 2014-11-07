@@ -55,7 +55,7 @@ install: all
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
-	
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/fossology.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossology.conf"; \
 	 	$(INSTALL) -m 666 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
@@ -63,7 +63,7 @@ install: all
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
-	
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/sampleheader.txt"; \
 	 	$(INSTALL) -m 666 defconf/sampleheader.txt $(DESTDIR)$(CONFPATH)/sampleheader.txt; \
@@ -71,7 +71,7 @@ install: all
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/sampleheader.txt already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
-	
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/samplefooter.txt -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/samplefooter.txt"; \
 	 	$(INSTALL) -m 666 defconf/samplefooter.txt $(DESTDIR)$(CONFPATH)/samplefooter.txt; \
@@ -79,7 +79,7 @@ install: all
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/samplefooter.txt already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
-	
+
 	if [ ! -f $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf -o "$(OVERWRITE)" ] ; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf"; \
 	 	$(INSTALL) -m 666 fo-apache.conf $(DESTDIR)$(CONFPATH)/conf/fo-apache.conf; \

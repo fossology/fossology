@@ -22,7 +22,7 @@ install: all
 	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
-	
+
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \

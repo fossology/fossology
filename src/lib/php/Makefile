@@ -1,6 +1,6 @@
 ######################################################################
 # Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License version 2.1 as published by the Free Software Foundation.
@@ -34,7 +34,7 @@ include $(TOP)/Makefile.process
 install: all
 
 	mkdir -p $(DESTDIR)$(MODDIR)/lib/php; \
-	
+
 	for file in $(FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/lib/php/$$file; \
 	done
@@ -46,11 +46,11 @@ uninstall:
 
 clean:
 	rm -f *.o core bootstrap.php
-	
+
 test:
 	make -C tests test
-	
+
 coverage:
 	make -C tests coverage
-	
+
 .PHONY: all install uninstall clean test

@@ -1,15 +1,15 @@
 ######################################################################
 # Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -20,10 +20,9 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-#GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
 AR = ar
 GLIB_FLAGS =  -lgthread-2.0 -lgio-2.0 -lgobject-2.0
-CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
+LOCAL_CFLAGS = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEPEN = Makefile logging.h
 DEF   = -DLOG_DIR='"$(LOGDIR)"' \
         -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
@@ -62,16 +61,16 @@ HEAD = agent.h \
        job.h \
        logging.h \
        interface.h \
-       sqlstatements.h 
-       
+       sqlstatements.h
+
 ##########################
 # executable build rules #
 ##########################
 
-all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology 
+all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology
 
 $(EXE): %: %.c $(LIB) $(VARS) $(HEAD) $(DEPEN) $(FOLIB)
-	$(CC) $< $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(LIB) $(DEF) $(LOCAL_CFLAGS) $(FO_LDFLAGS) -o $@
 
 $(LIB): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(AR) cr $@ $(OBJS)
@@ -91,35 +90,35 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 ######################
 
 main.o: %.o: %.c $(HEAD)
-	$(CC) -c $(CFLAGS_LOCAL) $(FODEF) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(FODEF) $(DEF) $<
 
 scheduler.o: %.o: %.c %.h $(HEAD)  $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(FODEF) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(FODEF) $(DEF) $<
 
 agent.o: %.o: %.c %.h job.h database.h scheduler.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 database.o: %.o: %.c %.h agent.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 event.o: %.o: %.c %.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 host.o: %.o: %.c %.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 interface.o: %.o: %.c %.h database.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 job.o: %.o: %.c %.h agent.h database.h $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 logging.o: %.o: %.c $(DEPEN)
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
 
 
 $(COVERAGE): %_cov.o: %.c $(HEAD)  $(DEPEN)
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(FODEF) $(DEF) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(COV_CFLAGS) $(FODEF) $(DEF) -o $@
 
 #######################
 # install build rules #
@@ -167,4 +166,4 @@ coverage:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test coverage 
+.PHONY: all install uninstall clean test coverage

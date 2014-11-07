@@ -9,24 +9,24 @@ CUNIT_LIB_DIR=$(TOP)/src/testing/lib/c
 CUNIT_LIB= -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR=$(TOP)/src/testing/db/c
 TEST_LIB= -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
-  
-CFLAGS_LOCAL=-I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
+
+LOCAL_CFLAGS=-I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
 EXE=test_pkgagent
-CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
-CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
-TEST_OBJ=testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o 
+LOCAL_RPM_4_4_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4
+LOCAL_RPM_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4_COMPAT
+TEST_OBJ=testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o
 all: $(EXE)
 $(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
-	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
+	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(LOCAL_CFLAGS)
 
 $(TEST_OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(LOCAL_CFLAGS) $<
 
 testGetMetadata.o:testGetMetadata.c
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-		$(CC) -c $(CFLAGS_LOCAL_RPM) $<; \
+		$(CC) -c $(LOCAL_RPM_CFLAGS) $<; \
 	else \
-		$(CC) -c $(CFLAGS_LOCAL_RPM_4_4) $<; \
+		$(CC) -c $(LOCAL_RPM_4_4_CFLAGS) $<; \
 	fi
 
 test: all $(EXE)
@@ -39,7 +39,7 @@ test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
 coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
-	$(CC) -o $(EXE) $(LOCALAGENTDIR)/pkgagent_cov.o $(TEST_OBJ) testGetMetadata.o $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(LOCALAGENTDIR)/pkgagent_cov.o $(TEST_OBJ) testGetMetadata.o $(COV_CFLAGS) $(LOCAL_CFLAGS); \
 	./$(EXE); \
 	lcov --directory  $(LOCALAGENTDIR)/   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt

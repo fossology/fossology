@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS)
+LOCAL_CFLAGS=$(DB_CFLAGS) $(REPO_CFLAGS) $(AGENT_CFLAGS) $(ALL_CFLAGS)
 EXE=wc_agent
 MOD_NAME=example_wc_agent
 MOD_SUBDIR=agent
@@ -15,7 +15,7 @@ all: $(EXE)
 
 $(EXE): %: %.c $(FOLIB) $(DB) $(REPO) $(VARS)
 	@echo "make $(EXE)"
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(LOCAL_CFLAGS) -o $@
 
 #######################
 # library build rules #

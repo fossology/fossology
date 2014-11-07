@@ -1,15 +1,15 @@
 #####################################################################
 # Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -19,7 +19,7 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL= $(DEF) $(ALL_CFLAGS) $(DEFS) 
+LOCAL_CFLAGS= $(DEF) $(ALL_CFLAGS) $(DEFS)
 
 EXE=demomod
 OBJS=usage.o utils.o process.o
@@ -29,16 +29,16 @@ all: $(EXE)
 	@echo "make demomod agent"
 
 $(EXE): demomod.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) demomod.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+	$(CC) demomod.c $(OBJS) -lpq $(LOCAL_CFLAGS) -o $@
 
 usage.o: $(HDRS) usage.c
-	$(CC) -c $(CFLAGS_LOCAL) usage.c
+	$(CC) -c $(LOCAL_CFLAGS) usage.c
 
 utils.o: $(HDRS) utils.c
-	$(CC) -c $(CFLAGS_LOCAL) utils.c
+	$(CC) -c $(LOCAL_CFLAGS) utils.c
 
 process.o: $(HDRS) process.c
-	$(CC) -c $(CFLAGS_LOCAL) process.c
+	$(CC) -c $(LOCAL_CFLAGS) process.c
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)

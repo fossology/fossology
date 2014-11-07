@@ -15,7 +15,7 @@ DIRS = agent ui agent_tests
 TESTDIR = agent_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-		 
+
 all: VERSIONFILE
 	$(call dirloop, )
 
