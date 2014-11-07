@@ -29,51 +29,34 @@ class LicenseDecisionEventBuilder extends Object
 {
   /** @var int */
   private $eventId;
-
-  /** @var int */
-  private $pfileId;
-
   /** @var int */
   private $uploadTreeId;
-
   /** @var DateTime */
   private $dateTime;
-
   /** @var int */
   private $userId;
-
   /** @var int */
   private $groupId;
-
   /** @var string */
   private $eventType;
-
   /** @var LicenseRef */
   private $licenseRef;
-
-  /** @var boolean */
-  private $global;
-
   /** @var boolean */
   private $removed;
-
   /** @var string */
   private $reportinfo;
-
   /** @var string */
   private $comment;
 
   public function __construct()
   {
     $this->eventId = 0;
-    $this->pfileId = 0;
     $this->uploadTreeId = 0;
     $this->dateTime = null;
     $this->userId = 1;
     $this->groupId = 1;
     $this->eventType = LicenseDecision::USER_DECISION;
     $this->licenseRef = null;
-    $this->global = null;
     $this->removed = false;
     $this->reportinfo = "";
     $this->comment = "";
@@ -84,8 +67,8 @@ class LicenseDecisionEventBuilder extends Object
    */
   public function build()
   {
-    return new LicenseDecisionEvent($this->eventId, $this->pfileId, $this->uploadTreeId, $this->dateTime, $this->userId,
-        $this->groupId, $this->eventType, $this->licenseRef, $this->global, $this->removed, $this->reportinfo, $this->comment);
+    return new LicenseDecisionEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
+        $this->groupId, $this->eventType, $this->licenseRef, $this->removed, $this->reportinfo, $this->comment);
   }
 
   /**
@@ -132,16 +115,6 @@ class LicenseDecisionEventBuilder extends Object
   }
 
   /**
-   * @param boolean $global
-   * @return $this
-   */
-  public function setGlobal($global)
-  {
-    $this->global = $global;
-    return $this;
-  }
-
-  /**
    * @param int $groupId
    * @return $this
    */
@@ -158,16 +131,6 @@ class LicenseDecisionEventBuilder extends Object
   public function setLicenseRef(LicenseRef $licenseRef)
   {
     $this->licenseRef = $licenseRef;
-    return $this;
-  }
-
-  /**
-   * @param int $pfileId
-   * @return $this
-   */
-  public function setPfileId($pfileId)
-  {
-    $this->pfileId = intval($pfileId);
     return $this;
   }
 

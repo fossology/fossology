@@ -25,6 +25,7 @@ include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
+  const FORCE_DECISION = 1;
   /** @var int */
   private $conflictStrategyId;
   /** @var UploadDao */
@@ -33,9 +34,8 @@ class DeciderAgent extends Agent
   private $clearingDecisionEventProcessor;
   /** @var ClearingDao */
   private $clearingDao;
-
+  /** @var int */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
-
   /** @var DecisionTypes */
   private $decisionTypes;
 
@@ -44,28 +44,26 @@ class DeciderAgent extends Agent
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
-    $this->conflictStrategyId = @$args['k'];
+    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
 
-    global $container;
-    $this->uploadDao = $container->get('dao.upload');
+    $this->uploadDao = $this->container->get('dao.upload');
 
-    $this->clearingDao = $container->get('dao.clearing');
-    $this->decisionTypes = $container->get('decision.types');
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
-
+    $this->clearingDao = $this->container->get('dao.clearing');
+    $this->decisionTypes = $this->container->get('decision.types');
+    $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_event_processor');
   }
 
   static protected function hasNewerUserEvents($events, $date)
   {
-    foreach ($events as $licenseShortName => $licenseDecisionResult)
+    foreach ($events as $licenseDecisionResult)
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)))
-        if (($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
-          return false;
+      if ((($date === null) || ($eventDate > $date)) && $licenseDecisionResult->hasAgentDecisionEvent() && !$licenseDecisionResult->hasLicenseDecisionEvent())
+      {
+        return false;
+      }
     }
-
     return true;
   }
 
@@ -116,17 +114,26 @@ class DeciderAgent extends Agent
 
     list($added, $removed) = $this->clearingDecisionEventProcessor->filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate);
 
-    $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
+    switch ($this->conflictStrategyId)
+    {
+      case DeciderAgent::FORCE_DECISION:
+        $canAutoDecide = true;
+        break;
+
+      default:
+        $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($added, $removed);
+    }
 
     if ($canAutoDecide)
     {
       $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
-      $this->heartbeat(1);
-    } else
-    {
-      $this->heartbeat(0);
     }
-
+    else
+    {
+      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId);
+    }
+    $this->heartbeat(1);
+    
     $this->dbManager->commit();  /* end transaction */
   }
 }

@@ -46,12 +46,8 @@ class FolderDao extends Object
    */
   public function hasTopLevelFolder()
   {
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName, "SELECT * FROM folder WHERE folder_pk=1" );
-    $res = $this->dbManager->execute($statementName);
-    $hasFolder = count($this->dbManager->fetchAll($res)) > 0;
-    $this->dbManager->freeResult($res);
-
+    $folderInfo = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM folder WHERE folder_pk=$1",array(1),__METHOD__);
+    $hasFolder = $folderInfo['cnt']>0;
     return $hasFolder;
   }
 

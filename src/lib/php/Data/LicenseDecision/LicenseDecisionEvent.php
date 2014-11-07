@@ -24,69 +24,49 @@ use Fossology\Lib\Util\Object;
 
 class LicenseDecisionEvent extends Object implements LicenseDecision
 {
-
   /** @var int */
   private $eventId;
-
-  /** @var int */
-  private $pfileId;
-
   /** @var int */
   private $uploadTreeId;
-
   /** @var DateTime */
   private $dateTime;
-
   /** @var int */
   private $userId;
-
   /** @var int */
   private $groupId;
-
   /** @var string */
   private $eventType;
-
   /** @var LicenseRef */
   private $licenseRef;
-
-  /** @var boolean */
-  private $global;
-
   /** @var boolean */
   private $removed;
-
   /** @var string */
   private $reportinfo;
-
   /** @var string */
   private $comment;
 
 
   /**
    * @param int $eventId
-   * @param int $pfileId
    * @param int $uploadTreeId
    * @param DateTime $dateTime
    * @param int $userId
    * @param int $groupId
    * @param string $eventType
    * @param LicenseRef $licenseRef
-   * @param boolean $global
    * @param boolean $removed
    * @param string $reportinfo
    * @param string $comment
    */
-  public function __construct($eventId, $pfileId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $global, $removed, $reportinfo, $comment)
+  public function __construct($eventId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $removed, $reportinfo, $comment)
   {
     $this->eventId = $eventId;
-    $this->pfileId = $pfileId;
     $this->uploadTreeId = $uploadTreeId;
     $this->dateTime = $dateTime;
     $this->userId = $userId;
     $this->groupId = $groupId;
     $this->eventType = $eventType;
     $this->licenseRef = $licenseRef;
-    $this->global = $global;
     $this->removed = $removed;
     $this->reportinfo = $reportinfo;
     $this->comment = $comment;
@@ -125,14 +105,6 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
   }
 
   /**
-   * @return boolean
-   */
-  public function isGlobal()
-  {
-    return $this->global;
-  }
-
-  /**
    * @return int
    */
   public function getGroupId()
@@ -146,14 +118,6 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
   public function getLicenseRef()
   {
     return $this->licenseRef;
-  }
-
-  /**
-   * @return int
-   */
-  public function getPfileId()
-  {
-    return $this->pfileId;
   }
 
   /**

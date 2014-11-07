@@ -16,10 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\Tree;
+namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\DecisionScopes;
 
-class UploadTreeView
+class UploadTreeDao
 {
   /** @var string */
   private $uploadTreeViewName;
@@ -167,21 +168,22 @@ class UploadTreeView
    * @param $skipThese
    * @return string
    */
-  private function getQueryCondition($skipThese)
+  private static function getQueryCondition($skipThese)
   {
-    $conditionQueryHasLicense = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
+        OR EXISTS (SELECT 1 FROM license_decision_event AS lde WHERE ut.uploadtree_pk = lde.uploadtree_fk))";
 
     switch ($skipThese)
     {
       case "noLicense":
         return $conditionQueryHasLicense;
       case "alreadyCleared":
-        $decisionQuery = "SELECT type_fk FROM clearing_decision AS cd
+        $decisionQuery = "SELECT decision_type FROM clearing_decision AS cd
                         WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                              OR cd.pfile_fk = ut.pfile_fk AND cd.is_global
+                              OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
-              AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.type_fk IN (4,5) )";
+              AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (4,5) )";
         return $conditionQuery;
       case "noCopyright":
         $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
@@ -194,10 +196,11 @@ class UploadTreeView
         return $conditionQuery;
     }
   }
-  
+
   /**
    * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
    * @param int $parent
+   * @return array
    */
   public function countMaskedNonArtifactChildren($parent)
   {

@@ -18,45 +18,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
-use Mockery as M;
-use Mockery\MockInterface;
-
-class SolidDbManagerTest extends \PHPUnit_Framework_TestCase
+class SolidDbManagerTest extends DbManagerTest
 {
-  /** @var Driver|MockInterface */
-  private $driver;
-  /** @var Logger|MockInterface */
-  private $logger;
-  /** @var DbManager */
-  private $dbManager;
-
   function setUp()
   {
-    $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
-    $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
-    $this->driver->shouldReceive('booleanToDb')->with(false)->andReturn('f');
-    $this->driver->shouldReceive('escapeString')->andReturnUsing(function($v){return pg_escape_string($v);});
-    $this->logger = M::mock('Monolog\\Logger'); // new Logger(__FILE__);
-    $this->logger->shouldReceive('addDebug');
+    parent::setUp();
     $this->dbManager = new SolidDbManager($this->logger);
     $this->dbManager->setDriver($this->driver);
   }
 
   function tearDown()
   {
-    M::close();
-  }
-
-  function testBeginTransaction()
-  {
-    $this->driver->shouldReceive("begin")->withNoArgs()->once();
-    $this->dbManager->begin();
-  }
-
-  function testCommitTransaction()
-  {
-    $this->driver->shouldReceive("commit")->withNoArgs()->once();
-    $this->dbManager->commit();
+    parent::tearDown();
   }
 
   function testInsertTableRow()
@@ -69,15 +42,6 @@ class SolidDbManagerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->insertTableRow($tableName,$assocParams,$sqlLog);
   }
 
-  function testFlushStats()
-  {
-    $this->driver->shouldReceive('prepare');
-    $sqlStmt = 'foo';
-    $this->dbManager->prepare($sqlStmt,'SELECT elephant FROM africa');
-    $this->logger->shouldReceive('addDebug')->with("/executing '$sqlStmt' took /");
-    $this->dbManager->flushStats();
-  }
-  
   function testCreateMap()
   {
     $keyColumn = 'yek';

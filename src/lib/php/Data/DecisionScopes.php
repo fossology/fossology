@@ -18,22 +18,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class UploadStatus extends Types
+class DecisionScopes extends Types
 {
-  const OPEN = 1;
-  const IN_PROGRESS = 2;
-  const CLOSED = 3;
-  const REJECTED = 4;
+  const ITEM = 0;
+  const REPO = 1;
+  const UPLOAD = 2;
+  const PACKAGE = 3;
 
   public function __construct()
   {
-    parent::__construct("upload status type");
+    parent::__construct("decision scope");
 
-    $this->map = array(
-        self::OPEN => "open",
-        self::IN_PROGRESS => "in progress",
-        self::CLOSED => "closed",
-        self::REJECTED => "recected"
-    );
+    $this->map = array(self::ITEM => "local", self::REPO => "global");
   }
+
 }

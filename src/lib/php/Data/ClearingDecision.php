@@ -23,7 +23,6 @@ use DateTime;
 
 class ClearingDecision extends ClearingDecisionData
 {
-
   /**
    * @param $sameFolder
    * @param $sameUpload
@@ -32,8 +31,8 @@ class ClearingDecision extends ClearingDecisionData
    * @param $pfileId
    * @param $userName
    * @param $userId
-   * @param $type
-   * @param $scope
+   * @param int $type
+   * @param int $scope
    * @param $date_added
    * @param $positiveLicenses
    * @param $negativeLicenses
@@ -133,7 +132,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getScope()
   {

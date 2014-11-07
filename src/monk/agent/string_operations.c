@@ -36,6 +36,22 @@ inline int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
+inline int specialDelim(const char* z){
+  char a, b;
+  a = *z;
+  b = *(z+1);
+  if( a=='/') {
+    if (b=='/' || b=='*')
+      return 2;
+  }
+  else if( a=='*') {
+    if (b=='/')
+      return 2;
+    return 1;
+  }
+  return 0;
+}
+
 int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
   GArray** output, Token** remainder) {
   GArray* tokens = *output;
@@ -70,15 +86,24 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
 
   size_t readBytes = 0;
   while (readBytes < inputSize) {
-    if (isDelim(*ptr, delimiters)) {
+    int delimLen = 0;
+    if(inputSize-readBytes>=2) {
+      delimLen = specialDelim(ptr);
+    }
+    if(!delimLen) {
+      delimLen = isDelim(*ptr, delimiters);
+    }
+    if (delimLen>0) {
       if (stateToken->length > 0) {
         g_array_append_val(tokens, *stateToken);
         stateToken->hashedContent = hash_init();
         stateToken->length = 0;
-        stateToken->removedBefore = 1;
+        stateToken->removedBefore = delimLen;
       } else {
-        stateToken->removedBefore++;
+        stateToken->removedBefore += delimLen;
       }
+      ptr += delimLen;
+      readBytes += delimLen;
     } else {
 #ifndef MONK_CASE_INSENSITIVE
       const char* newCharPtr = ptr;
@@ -88,9 +113,9 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
 #endif
       hash_add(newCharPtr, &(stateToken->hashedContent));
       stateToken->length++;
+      ptr += 1;
+      readBytes += 1;
     }
-    ptr++;
-    readBytes++;
   }
 
   return tokens->len - initialTokenCount;

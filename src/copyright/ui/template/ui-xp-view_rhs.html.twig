@@ -27,9 +27,9 @@
       </legend>
       {% for clearingTypeVal, clearingType in clearingTypes %}
         <input type="radio" {% if clearingTypeVal == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
-               value="{{ clearingTypeVal }}" class="supervised">
+               value="{{ clearingTypeVal }}" class="supervised"/>
         {{ clearingType }}
-        </input><br/>
+        <br/>
       {% endfor %}
     </fieldset>
     <br/>

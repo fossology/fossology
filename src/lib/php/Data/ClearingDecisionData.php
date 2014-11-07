@@ -46,7 +46,7 @@ class ClearingDecisionData {
   protected $comment;
   /** @var string */
   protected $reportinfo;
-  /** @var string */
+  /** @var int */
   protected $scope;
   /** @var DateTime */
   protected $date_added;

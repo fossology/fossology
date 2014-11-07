@@ -16,24 +16,33 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Util;
 
-class UploadStatus extends Types
+
+class ArrayOperation extends Object
 {
-  const OPEN = 1;
-  const IN_PROGRESS = 2;
-  const CLOSED = 3;
-  const REJECTED = 4;
-
-  public function __construct()
+  /**
+   * @param array
+   * @return array
+   */
+  public static function getMultiplicityOfValues($allValues)
   {
-    parent::__construct("upload status type");
+    $uniqueValues = array_unique($allValues);
+    $valueMultiplicityMap = array();
 
-    $this->map = array(
-        self::OPEN => "open",
-        self::IN_PROGRESS => "in progress",
-        self::CLOSED => "closed",
-        self::REJECTED => "recected"
-    );
+    foreach ($uniqueValues as $value)
+    {
+      $count = 0;
+      foreach ($allValues as $candidate)
+      {
+        if ($value == $candidate)
+        {
+          $count++;
+        }
+      }
+      $valueMultiplicityMap[$value] = $count;
+    }
+
+    return $valueMultiplicityMap;
   }
 }

@@ -1,0 +1,24 @@
+function createDirlistTable() {
+  $('#dirlist').dataTable( {
+    "aaData": {{ aaData }},
+    "aoColumns":[{"sTitle":"Files","sClass":"left"},
+      {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka)","sClass":"left"},
+      {"sTitle":"Edited Results","sClass":"left"},
+      {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
+          if(type!='display') return data;
+          if (data==='green'){
+            return '<img alt="done" src="images/green.png" class="icon-small"/>';
+          }
+          return '<img alt="not done" src="images/red.png" class="icon-small"/>';
+        }
+      },
+      {"sTitle":"Files Cleared","sClass":"center","bSearchable":false},
+      {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
+    "aaSorting":[[0,"asc"],[2,"desc"],[1,"desc"]],
+    "iDisplayLength":50,
+    "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files",
+      "sSearch":"_INPUT_<button onclick='clearSearchFiles()' >Clear<\/button>",
+      "sLengthMenu":"Display <select><option value=\"10\">10<\/option><option value=\"25\">25<\/option><option value=\"50\">50<\/option><option value=\"100\">100<\/option><\/select> files"
+    }
+ } );
+}
