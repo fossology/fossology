@@ -26,7 +26,7 @@ You should have received a copy of the GNU General Public License along with thi
 #define DIFF_TYPE_REMOVAL "M-"
 #define DIFF_TYPE_REPLACE "MR"
 
-#define DELIMITERS " \t\n\r\f"
+#define DELIMITERS " \t\n\r\f#"
 
 #define MONK_CASE_INSENSITIVE
 #define MAX_ALLOWED_DIFF_LENGTH 100

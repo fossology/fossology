@@ -42,7 +42,7 @@ void test_read_mangling_binaries() {
 void test_read_file_tokens() {
   char* teststring = "a\n^b\n c";
   char* testfile = "/tmp/monkftest";
-  
+
   FILE* file = fopen(testfile, "w");
   fprintf(file, "%s", teststring);
   fclose(file);
@@ -68,7 +68,7 @@ void test_read_file_tokens() {
 void test_read_file_tokens2() {
   char* teststring = " * a\n *\n * b";
   char* testfile = "/tmp/monkftest";
-  
+
   FILE* file = fopen(testfile, "w");
   fprintf(file, "%s", teststring);
   fclose(file);
@@ -76,27 +76,15 @@ void test_read_file_tokens2() {
   GArray* tokens;
   CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens, "\n\t\r^ "));
   
-  CU_ASSERT_EQUAL_FATAL(tokens->len, 5);
+  CU_ASSERT_EQUAL_FATAL(tokens->len, 2);
   Token token0 = g_array_index(tokens, Token, 0);
   Token token1 = g_array_index(tokens, Token, 1);
-  Token token2 = g_array_index(tokens, Token, 2);
-  Token token3 = g_array_index(tokens, Token, 3);
-  Token token4 = g_array_index(tokens, Token, 4);
-  CU_ASSERT_EQUAL(token0.hashedContent, hash("*"));
-  CU_ASSERT_EQUAL(token1.hashedContent, hash("a"));
-  CU_ASSERT_EQUAL(token2.hashedContent, hash("*"));
-  CU_ASSERT_EQUAL(token3.hashedContent, hash("*"));
-  CU_ASSERT_EQUAL(token4.hashedContent, hash("b"));
+  CU_ASSERT_EQUAL(token0.hashedContent, hash("a"));
+  CU_ASSERT_EQUAL(token1.hashedContent, hash("b"));
   CU_ASSERT_EQUAL(token0.length, 1);
   CU_ASSERT_EQUAL(token1.length, 1);
-  CU_ASSERT_EQUAL(token2.length, 1);
-  CU_ASSERT_EQUAL(token3.length, 1);
-  CU_ASSERT_EQUAL(token4.length, 1);
-  CU_ASSERT_EQUAL(token0.removedBefore, 1);
-  CU_ASSERT_EQUAL(token1.removedBefore, 1);
-  CU_ASSERT_EQUAL(token2.removedBefore, 2);
-  CU_ASSERT_EQUAL(token3.removedBefore, 2);
-  CU_ASSERT_EQUAL(token4.removedBefore, 1);
+  CU_ASSERT_EQUAL(token0.removedBefore, 3);
+  CU_ASSERT_EQUAL(token1.removedBefore, 7);
 }
 
 void test_read_file_tokens_error() {
