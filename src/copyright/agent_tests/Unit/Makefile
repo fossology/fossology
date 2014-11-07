@@ -10,22 +10,19 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 LOCALAGENTDIR = ../../agent
-TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -lstdc++ -lcppunit -ldl -I$(TESTDIR)
 # -Werror -Wextra
-CPPUNIT_PATH = /opt/cppunit
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I${CPPUNIT_PATH}/include -I$(LOCALAGENTDIR) -fopenmp
+CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -L${CPPUNIT_PATH}/lib -lstdc++ -lcppunit -ldl -fopenmp
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE = test_copyright
 
-OBJECTS = test_regex.o test_RegMatcher.o test_testdataCheckFound.o
+OBJECTS = test_regex.o test_RegMatcher.o
+OBJECTS_ACC = test_accuracy.o
 COVERAGE =
 
-$(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc ${FOLIB}
-	${MAKE} -C ${TESTDIR}
+$(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc
 	$(CXX) run_tests.cc -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK)
 
 all: $(CXXFOLIB) $(EXE)
@@ -51,9 +48,12 @@ $(COVERAGE): %_cov.o: %.c
 test: all
 	./$(EXE)
 
-coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
-	${MAKE} -C ${TESTDIR}
+coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a
 	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK) $(FLAG_COV); \
+	./$(EXE)
+
+accuracy: agent run_tests.cc $(OBJECTS_ACC) libcopyright.a
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK); \
 	./$(EXE)
 
 clean:

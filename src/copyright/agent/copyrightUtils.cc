@@ -70,7 +70,7 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
         (
           "regex",
           boost::program_options::value<vector<string> >(),
-          "user defined Regex to search"
+          "user defined Regex to search: [{name=cli}@@][{matchingGroup=0}@@]{regex} e.g. 'linux@@1@@(linus) torvalds'"
         )
         (
           "files",
