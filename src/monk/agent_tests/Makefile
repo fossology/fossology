@@ -10,6 +10,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = Unit Functional
+LOCALAGENTDIR = ../agent/
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
@@ -21,6 +22,8 @@ test:
 
 coverage:
 	$(call DIR_LOOP,coverage)
+	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
+	genhtml -o results cov.txt
 
 clean:
 	$(call DIR_LOOP,clean)

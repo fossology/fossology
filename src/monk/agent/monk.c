@@ -71,14 +71,20 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
       #pragma omp for schedule(dynamic)
 #endif
       for (int i = 0; i < count; i++) {
+        if (threadError)
+          continue;
+
         long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
 
         if (pFileId <= 0)
           continue;
 
-        matchPFileWithLicenses(threadLocalState, pFileId, licenses);
-
-        fo_scheduler_heart(1);
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses))
+          fo_scheduler_heart(1);
+        else {
+          fo_scheduler_heart(0);
+          threadError = 1;
+        }
       }
       fo_dbManager_finish(threadLocalState->dbManager);
     } else {
@@ -121,6 +127,9 @@ int main(int argc, char** argv) {
 
       int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
                               0, uploadId, state->agentId, AGENT_ARS, NULL, 0);
+
+      if (arsId<=0)
+        bail(state, 1);
 
       if (!processUploadId(state, uploadId, licenses))
         bail(state, 2);

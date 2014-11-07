@@ -17,23 +17,37 @@
 #include "database.hpp"
 #include <vector>
 
+class CliOptions
+{
+private:
+  int verbosity;
+  unsigned int optType;
+
+public:
+  int getVerbosity() const;
+  unsigned int getOptType() const;
+
+  CliOptions(int verbosity, unsigned int type);
+  CliOptions();
+};
+
 class CopyrightState
 {
 public:
-  CopyrightState(int _agentId, int _verbosity);
+  CopyrightState(int agentId, const CliOptions& cliOptions);
   ~CopyrightState();
 
   int getAgentId() const;
-
-  int getVerbosity() const;
 
   void addMatcher(RegexMatcher regexMatcher);
 
   const std::vector<RegexMatcher>& getRegexMatchers() const;
 
+  const CliOptions& getCliOptions() const;
+
 private:
   int agentId;
-  int verbosity;
+  const CliOptions& cliOptions;
   std::vector<RegexMatcher> regexMatchers;
 };
 

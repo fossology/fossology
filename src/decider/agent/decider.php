@@ -46,13 +46,11 @@ class DeciderAgent extends Agent
     $args = getopt("k:", array(""));
     $this->conflictStrategyId = array_key_exists('k',$args) ? $args['k'] : NULL;
 
-    global $container;
-    $this->uploadDao = $container->get('dao.upload');
+    $this->uploadDao = $this->container->get('dao.upload');
 
-    $this->clearingDao = $container->get('dao.clearing');
-    $this->decisionTypes = $container->get('decision.types');
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
-
+    $this->clearingDao = $this->container->get('dao.clearing');
+    $this->decisionTypes = $this->container->get('decision.types');
+    $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_event_processor');
   }
 
   static protected function hasNewerUserEvents($events, $date)

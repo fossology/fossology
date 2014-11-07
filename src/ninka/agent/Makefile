@@ -23,6 +23,9 @@ all: $(CXXFOLIB) $(EXE)
 $(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
 
+$(EXE)_cov: $(CXXFOLIB) $(VARS) $(COVERAGE)
+	$(CXX) $(COVERAGE) $(FLAG_COV) $(DEF) $(CXXFLAGS_LINK) -o $@
+
 #######################
 # library build rules #
 #######################

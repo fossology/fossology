@@ -10,16 +10,39 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE_DIR = ../../agent/
+LOCALAGENTDIR = ../../agent
 
-all: $(FOLIB)
-	$(MAKE) -C $(EXE_DIR)
+test: test-cli test-sched
 
-test: all
+all: version
+	$(MAKE) -C $(LOCALAGENTDIR) monk
+	ln -fs $(LOCALAGENTDIR)/monk ./monk
+
+all-cov: version
+	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
+	ln -fs $(LOCALAGENTDIR)/monk_cov ./monk
+
+version:
+	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
+
+test-cli: all
+	@echo "make functional tests for cli mode"
 	./shunit2 cli_test.sh
 
-coverage:
-	@echo "nothing to do"
+test-sched: all
+	@echo "make functional tests for scheduler mode"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+
+coverage: coverage-cli coverage-sched
+
+coverage-cli: all-cov
+	@echo "make functional tests for cli mode with coverage"
+	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
+	./shunit2 cli_test.sh
+
+coverage-sched: all-cov
+	@echo "make functional tests for scheduler mode with coverage"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
 
 clean:
 	@echo "nothing to do"

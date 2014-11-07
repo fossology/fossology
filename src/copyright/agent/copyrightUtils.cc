@@ -10,6 +10,9 @@
  */
 
 #include "copyrightUtils.hpp"
+#include <boost/program_options.hpp>
+
+#include <iostream>
 
 using namespace std;
 
@@ -24,16 +27,20 @@ void queryAgentId(int& agent, PGconn* dbConn)
   };
 
   int agentId = fo_GetAgentKey(dbConn,
-          AGENT_NAME, 0, agentRevision, AGENT_DESC);
+    AGENT_NAME, 0, agentRevision, AGENT_DESC);
   free(agentRevision);
 
   if (agentId > 0)
+  {
     agent = agentId;
+  }
   else
+  {
     exit(1);
+  }
 }
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const DbManager& dbManager)
+int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
 {
   return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, state.getAgentId(), AGENT_ARS, NULL, success);
 }
@@ -44,19 +51,80 @@ void bail(int exitval)
   exit(exitval);
 }
 
-CopyrightState getState(DbManager& dbManager, int verbosity)
+bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames)
+{
+  unsigned type;
+  int verbosity = 0;
+
+  boost::program_options::options_description desc(IDENTITY ": recognized options");
+  desc.add_options()
+        ("help,h", "shows help")
+        (
+          "type,T",
+          boost::program_options::value<unsigned>(&type)
+            ->default_value(ALL_TYPES),
+          "type of regex to try"
+        ) // TODO change and add help based on IDENTITY
+        (
+          "files",
+          boost::program_options::value< vector<string> >(),
+          "files to scan"
+        );
+
+  boost::program_options::positional_options_description p;
+  p.add("files", -1);
+
+  boost::program_options::variables_map vm;
+
+  try
+  {
+    boost::program_options::store(
+      boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+
+    type = vm["type"].as<unsigned>();
+
+    if ((vm.count("help") > 0) || (type > ALL_TYPES))
+    {
+      cout << desc << endl;
+      return false;
+    }
+
+    if (vm.count("files"))
+    {
+      fileNames = vm["files"].as<std::vector<string> >();
+    }
+
+    dest = CliOptions(verbosity, type);
+    return true;
+  }
+  catch (boost::program_options::error&)
+  {
+    cout << desc << endl;
+    return false;
+  }
+}
+
+CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
 {
   int agentID;
   queryAgentId(agentID, dbManager.getConnection());
-  return CopyrightState(agentID, verbosity);
+
+  return CopyrightState(agentID, cliOptions);
 }
 
 void fillMatchers(CopyrightState& state)
 {
 #ifdef IDENTITY_COPYRIGHT
-  state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
-  state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
-  state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
+  unsigned types = state.getCliOptions().getOptType();
+
+  if (types & 1<<0)
+    state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+
+  if (types & 1<<1)
+    state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+
+  if (types & 1<<2)
+    state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
 #endif
 
 #ifdef IDENTITY_IP
@@ -82,11 +150,12 @@ vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexM
   return result;
 }
 
-
 bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
+  {
     return false;
+  }
 
   size_t count = 0;
   typedef vector<CopyrightMatch>::const_iterator cpm;
@@ -123,6 +192,12 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId
 
 vector<CopyrightMatch> findAllMatches(const fo::File& file, vector<RegexMatcher> const regexMatchers)
 {
+  if (!file.isReadable())
+  {
+    cout << "File not readable: " << file.getFileName() << endl;
+    bail(9);
+  }
+
   string fileContent = file.getContent(0);
   return matchStringToRegexes(fileContent, regexMatchers);
 }
@@ -164,7 +239,6 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   }
 }
 
-
 bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& databaseHandler)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(state.getAgentId(), uploadId);
@@ -180,7 +254,9 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
       unsigned long pFileId = fileIds[it];
 
       if (pFileId <= 0)
+      {
         continue;
+      }
 
       matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler);
 

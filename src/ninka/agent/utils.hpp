@@ -27,9 +27,9 @@ extern "C" {
 
 using namespace std;
 
-State getState(DbManager& dbManager);
-int queryAgentId(DbManager& dbManager);
-int writeARS(const State& state, int arsId, int uploadId, int success, DbManager& dbManager);
+State getState(fo::DbManager& dbManager);
+int queryAgentId(fo::DbManager& dbManager);
+int writeARS(const State& state, int arsId, int uploadId, int success, fo::DbManager& dbManager);
 void bail(int exitval);
 bool processUploadId(const State& state, int uploadId, NinkaDatabaseHandler& databaseHandler);
 bool matchPFileWithLicenses(const State& state, unsigned long pFileId, NinkaDatabaseHandler& databaseHandler);

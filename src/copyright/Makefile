@@ -26,7 +26,7 @@ coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 VERSIONFILE:
-	for MOD_NAME in $(MOD_NAMES); do \
+	@for MOD_NAME in $(MOD_NAMES); do \
 		$(call WriteVERSIONFile,$$MOD_NAME); \
 		mv -f VERSION VERSION-$$MOD_NAME; \
 	done

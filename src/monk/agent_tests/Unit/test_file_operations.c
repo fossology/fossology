@@ -47,7 +47,8 @@ void test_read_file_tokens() {
   fprintf(file, "%s", teststring);
   fclose(file);
 
-  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens;
+  CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens, "\n\t\r^ "));
   
   CU_ASSERT_EQUAL_FATAL(tokens->len, 3);
   Token token0 = g_array_index(tokens, Token, 0);
@@ -72,7 +73,8 @@ void test_read_file_tokens2() {
   fprintf(file, "%s", teststring);
   fclose(file);
 
-  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens;
+  CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens, "\n\t\r^ "));
   
   CU_ASSERT_EQUAL_FATAL(tokens->len, 5);
   Token token0 = g_array_index(tokens, Token, 0);
@@ -97,6 +99,12 @@ void test_read_file_tokens2() {
   CU_ASSERT_EQUAL(token4.removedBefore, 1);
 }
 
+void test_read_file_tokens_error() {
+  GArray* tokens;
+  CU_ASSERT_FALSE(readTokensFromFile("not a file", &tokens, "\n\t\r^ "));
+  CU_ASSERT_EQUAL(tokens->len, 0);
+}
+
 void test_read_file_tokens_binaries() {
   char teststring[] = "a\n^b\0 c";
   char* testfile = "/tmp/monkftest";
@@ -105,7 +113,8 @@ void test_read_file_tokens_binaries() {
   fwrite(teststring, 1, sizeof (teststring), file);
   fclose(file);
 
-  GArray* tokens = readTokensFromFile(testfile, "\n\t\r^ ");
+  GArray* tokens;
+  CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens, "\n\t\r^ "));
 
   CU_ASSERT_EQUAL_FATAL(tokens->len, 3);
   Token token0 = g_array_index(tokens, Token, 0);
@@ -127,6 +136,7 @@ CU_TestInfo file_operations_testcases[] = {
   {"Testing reading file tokens:", test_read_file_tokens},
   {"Testing reading file tokens2:", test_read_file_tokens2},
   {"Testing reading file tokens with a binary file:", test_read_file_tokens_binaries},
+  {"Testing reading file tokens from wrong file:", test_read_file_tokens_error},
   {"Testing reading binary file and mangle it:", test_read_mangling_binaries},
   CU_TEST_INFO_NULL
 };

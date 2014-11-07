@@ -46,6 +46,7 @@ struct fo_dbmanager
   GHashTable* cachedPrepared;
   char* dbConf;
   FILE* logFile;
+  int ignoreWarns;
 };
 
 #define LOG(level, str, ...) \
@@ -76,6 +77,14 @@ static void cachedPrepared_free(gpointer ptr)
   free(stmt);
 }
 
+static void noticeReceiver(void* arg, const PGresult* res) {
+  fo_dbManager* dbManager = arg;
+  char* message = PQresultErrorMessage(res);
+
+  if (!dbManager->ignoreWarns)
+    LOG("NOTICE", "%s", message);
+};
+
 fo_dbManager* fo_dbManager_new_withConf(PGconn* dbConnection, const char* dbConf)
 {
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
@@ -97,6 +106,10 @@ fo_dbManager* fo_dbManager_new(PGconn* dbConnection)
   result->dbConnection = dbConnection;
   result->logFile = NULL;
   result->dbConf = NULL;
+  result->ignoreWarns = 0;
+
+  PQsetNoticeReceiver(dbConnection, noticeReceiver, result);
+
   return result;
 }
 
@@ -131,6 +144,11 @@ int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName)
     dbManager->logFile = NULL;
     return 1;
   }
+}
+
+void fo_dbManager_ignoreWarnings(fo_dbManager* dbManager, int ignoreWarns)
+{
+  dbManager->ignoreWarns = ignoreWarns;
 }
 
 PGconn* fo_dbManager_getWrappedConnection(fo_dbManager* dbManager)

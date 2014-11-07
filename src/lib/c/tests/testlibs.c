@@ -30,6 +30,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* *    declaration and add it to the suites array                          * */
 /* ************************************************************************** */
 
+char* dbConf;
+
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
 extern CU_TestInfo libfossdb_testcases[];
@@ -54,6 +56,11 @@ CU_SuiteInfo suites[] =
 
 int main(int argc, char** argv)
 {
+  if (argc>1)
+    dbConf = argv[1];
+  else
+    dbConf = NULL;
+
   CU_pFailureRecord FailureList;
   CU_RunSummary* pRunSummary;
   int FailRec;

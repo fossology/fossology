@@ -15,13 +15,9 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stddef.h>
 
 #include "bulk.h"
-#include "file_operations.h"
 #include "database.h"
 #include "license.h"
 #include "match.h"
-#include "monk.h"
-
-#include "libfossagent.h"
 
 int setLeftAndRight(MonkState* state) {
   PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(

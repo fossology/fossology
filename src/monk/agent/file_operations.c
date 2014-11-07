@@ -21,34 +21,34 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define BUFFSIZE 4096
 
-GArray* readTokensFromFile(char* fileName, char* delimiters) {
-  GArray* tokens = tokens_new();
+int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimiters) {
+  *tokens = tokens_new();
 
   int fd = open(fileName, O_RDONLY);
   if (fd < 0) {
     printf("FATAL: can not open %s\n", fileName);
-    return tokens;
+    return 0;
   }
 
   Token* remainder = NULL;
 
   char buffer[BUFFSIZE];
-  int n;
+  ssize_t n;
   while ((n = read(fd, buffer, BUFFSIZE)) > 0) {
-    int addedTokens = streamTokenize(buffer, n, delimiters, &tokens, &remainder);
+    int addedTokens = streamTokenize(buffer, (size_t) n, delimiters, tokens, &remainder);
     if (addedTokens < 0) {
       printf("WARNING: can not complete tokenizing of '%s'\n", fileName);
       break;
     }
   }
-  streamTokenize(NULL, 0, NULL, &tokens, &remainder);
+  streamTokenize(NULL, 0, NULL, tokens, &remainder);
 
   if (remainder)
     free(remainder);
 
   close(fd);
 
-  return tokens;
+  return 1;
 }
 
 char* readFile(char* fileName) {

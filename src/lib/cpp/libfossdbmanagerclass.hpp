@@ -20,90 +20,46 @@ extern "C" {
 #include <vector>
 #include <string>
 
-#include "uniquePtr.hpp"
 
-class QueryResult;
+#include "libfossdbQueryResult.hpp"
 
-class DbManagerStructDeleter
+namespace fo
 {
-public:
-  void operator ()(fo_dbManager* d)
+  class DbManagerStructDeleter
   {
-    fo_dbManager_finish(d);
-  }
-};
-
-class DbManager
-{
-public :
-  DbManager(int* argc, char** argv);
-  DbManager(fo_dbManager* dbManager);
-  DbManager(DbManager&&);
-  DbManager(const DbManager&);
-  ~DbManager();
-
-  PGconn* getConnection() const;
-  DbManager spawn() const;
-
-  fo_dbManager* getStruct_dbManager() const;
-  bool tableExists(const char* tableName) const;
-  bool sequenceExists(const char* name) const;
-  bool begin() const;
-  bool commit() const;
-  bool rollback() const;
-
-  QueryResult queryPrintf(const char* queryFormat, ...) const;
-  QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
-
-private:
-  unptr::shared_ptr <fo_dbManager> dbManager;
-};
-
-class PGresultDeleter
-{
-public:
-  void operator ()(PGresult* p)
-  {
-    PQclear(p);
-  }
-};
-
-class QueryResult
-{
-  friend class DbManager;
-
-private:
-  QueryResult(PGresult* ptr);
-
-public:
-  bool isFailed() const;
-  int getRowCount() const;
-  std::vector<std::string> getRow(int i) const;
-  template <typename T>
-  std::vector<T> getSimpleResults(int columnN, T (functionP)(const char*));
-
-  QueryResult(QueryResult&& queryResult);
-  operator bool() const;
-
-private:
-  unptr::unique_ptr <PGresult, PGresultDeleter> ptr;
-};
-
-template <typename T>
-std::vector<T> QueryResult::getSimpleResults(int columnN, T (functionP)(const char*))
-{
-  std::vector<T> result;
-  PGresult* r = ptr.get();
-
-  if (columnN < PQnfields(r))
-  {
-    for (int i = 0; i < getRowCount(); i++)
+  public:
+    void operator ()(fo_dbManager* d)
     {
-      result.push_back(functionP(PQgetvalue(r, i, columnN)));
+      fo_dbManager_finish(d);
     }
-  }
+  };
 
-  return result;
+  class DbManager
+  {
+  public :
+    DbManager(int* argc, char** argv);
+    DbManager(fo_dbManager* dbManager);
+    DbManager(DbManager&&);
+    DbManager(const DbManager&);
+    ~DbManager();
+
+    PGconn* getConnection() const;
+    DbManager spawn() const;
+
+    fo_dbManager* getStruct_dbManager() const;
+    bool tableExists(const char* tableName) const;
+    bool sequenceExists(const char* name) const;
+    bool begin() const;
+    bool commit() const;
+    bool rollback() const;
+    void ignoreWarnings(bool) const;
+
+    QueryResult queryPrintf(const char* queryFormat, ...) const;
+    QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
+
+  private:
+    unptr::shared_ptr <fo_dbManager> dbManager;
+  };
 }
 
 #endif /* LIBFOSSDBMANAGERCLASS_HPP_ */

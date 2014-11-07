@@ -44,7 +44,7 @@ int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                  unsigned int numberOfWantedMatches);
 
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
-                             size_t* textStartPosition,
+                             size_t textStartPosition, size_t searchStartPosition,
                              int maxAllowedDiff, int minTrailingMatches);
 
 void diffResult_free(DiffResult* diffResult);

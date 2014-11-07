@@ -540,12 +540,12 @@
   $Schema["TABLE"]["clearing_decision"]["user_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"type_fk\" IS 'Identifier for clearing_decision_type';";
-  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type_fk\" int4;";
+  $Schema["TABLE"]["clearing_decision"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"type_fk\" int4 DEFAULT 5;";
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["type_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["is_global"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" bool;";
+  $Schema["TABLE"]["clearing_decision"]["is_global"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"is_global\" bool DEFAULT false;";
   $Schema["TABLE"]["clearing_decision"]["is_global"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"is_global\" SET NOT NULL, ALTER COLUMN \"is_global\" SET DEFAULT false;";
   $Schema["TABLE"]["clearing_decision"]["is_global"]["UPDATE"] = "";
 
@@ -2367,7 +2367,7 @@
 
   $Schema["TABLE"]["license_decision_event"]["is_global"]["DESC"] = "";
   $Schema["TABLE"]["license_decision_event"]["is_global"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"is_global\" bool;";
-  $Schema["TABLE"]["license_decision_event"]["is_global"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"is_global\" SET NOT NULL;";
+  $Schema["TABLE"]["license_decision_event"]["is_global"]["ALTER"] = "";
   $Schema["TABLE"]["license_decision_event"]["is_global"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_decision_event"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"comment\" IS 'User comment';";
