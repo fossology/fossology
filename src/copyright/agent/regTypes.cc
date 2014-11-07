@@ -20,42 +20,43 @@ const  std::string regCopyright::getType(){
 #define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
 
 const std::string regCopyright::getRegex() {
-#define NAME      "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]{2,})|(" EMAILRGX "))"
-#define SPACECLS  "[\\t ]"
-#define SPACES    SPACECLS "+"
-#define SPACESALL "[[:space:]]+"
-#define APUNCT    "[[:punct:]]?"
-#define NAMESLIST NAME "(([-, ]{1,3})" NAME ")*"
-#define DATESLIST "[[:digit:]]{4,4}(([[:punct:][:space:]]+)[[:digit:]]{4,4})*"
-#define COPYR_SYM_ALONE "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
-#define COPYR_SYM "(\\(C\\)|" COPYR_SYM_ALONE ")"
-#define COPYR_TXT "copyright(s)?"
+#define NAME              "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
+#define SPACECLS          "[\\t ]"
+#define SPACES            SPACECLS "+"
+#define SPACESALL         "[[:space:]]*"
+#define PUNCTORSPACE      "[[:punct:][:space:]]"
+#define NAMESLIST         NAME "(([-, &]+)" NAME ")*"
+#define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
+#define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
+#define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
+#define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
+#define COPYR_TXT         "copyright(s)?"
 
  return std::string(
   "("
   "("
-    "(" COPYR_SYM SPACES COPYR_TXT "|" COPYR_TXT SPACES COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
+    "(" COPYR_SYM SPACESALL COPYR_TXT "|" COPYR_TXT ":?" SPACESALL COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
     "("
       SPACES
       "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
     ")?"
     "("
-      APUNCT
+      PUNCTORSPACE "?"
       SPACESALL
       DATESLIST
     ")?"
     "("
-      APUNCT
+      PUNCTORSPACE "?"
       SPACESALL
       NAMESLIST
     ")"
-    "(all" SPACES "rights" SPACES "reserved)?"
+    "(" PUNCTORSPACE"*" "all" SPACES "rights" SPACES "reserved)?"
   ")|("
     "("
       "((author|contributor|maintainer)s?)"
-      "|((written|contributed|maintained)" SPACES "by)"
+      "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put"SPACES"together)" SPACES "by)"
     ")"
-    APUNCT
+    "[:]?"
     SPACESALL
     NAMESLIST
   ")"
@@ -63,7 +64,6 @@ const std::string regCopyright::getRegex() {
   "[.]?"
  );
 };
-
 
 const  std::string regURL::getType(){
   return std::string("url");

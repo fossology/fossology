@@ -18,7 +18,6 @@ RegexMatcher::RegexMatcher(const std::string type, const std::string pattern, in
 
 std::vector<CopyrightMatch> RegexMatcher::match(const std::string content) const
 {
-
   std::vector<CopyrightMatch> results;
 
   std::string::const_iterator begin = content.begin();
@@ -27,15 +26,20 @@ std::vector<CopyrightMatch> RegexMatcher::match(const std::string content) const
 
   while (rx::regex_search(begin, end, what, matchingRegex))
   {
-    results.push_back(
-      CopyrightMatch(
-        what.str(regexIndex),
-        getType(),
-        what.position(regexIndex) + (begin - content.begin()),
-        what.length(regexIndex)
-      )
+    CopyrightMatch newMatch(
+      what.str(regexIndex),
+      getType(),
+      what.position(regexIndex) + (begin - content.begin()),
+      what.length(regexIndex)
     );
-    begin = what[0].second;
+
+    if ((results.size()==0) || !(newMatch <= (results[results.size()-1])))
+    {
+      results.push_back(newMatch);
+    }
+
+    begin = what[0].first;
+    ++begin;
   }
 
   return results;
@@ -44,3 +48,8 @@ std::vector<CopyrightMatch> RegexMatcher::match(const std::string content) const
 RegexMatcher::~RegexMatcher()
 {
 };
+
+std::ostream& operator<<(std::ostream& os, const RegexMatcher& matcher)
+{
+  return (os << "type: " << matcher.getType() << " regex: " << matcher.matchingRegex << " capturingGroup: " << matcher.regexIndex);
+}

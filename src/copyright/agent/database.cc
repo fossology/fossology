@@ -78,12 +78,13 @@ bool CopyrightDatabaseHandler::createTables() const
     {
       dbManager.rollback();
       ++failedCounter;
-      std::cout << "WARNING: table creation failed: trying again"
-        " (" << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES << ")"
-        << std::endl;
+      if (failedCounter < MAX_TABLE_CREATION_RETRIES)
+        std::cout << "WARNING: table creation failed: trying again"
+          " (" << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES << ")"
+          << std::endl;
     }
   }
-  if (failedCounter > 0)
+  if (tablesChecked && (failedCounter > 0))
     std::cout << "NOTICE: table creation succeded on try "
       << failedCounter << "/" << MAX_TABLE_CREATION_RETRIES
       << std::endl;
@@ -252,16 +253,19 @@ bool CopyrightDatabaseHandler::createTableClearing() const
 
 std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId)
 {
+  std::string uploadTreeTableName = dbManager.queryUploadTreeTableName(uploadId);
+
   QueryResult queryResult = dbManager.queryPrintf(
     "SELECT pfile_pk"
       " FROM ("
       "  SELECT distinct(pfile_fk) AS PF"
-      "  FROM uploadtree"
+      "  FROM %s"
       "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
       " ) AS SS "
       "left outer join %s on (PF = pfile_fk and agent_fk = %d) "
       "inner join pfile on (PF = pfile_pk) "
       "WHERE ct_pk IS null or agent_fk <> %d",
+    uploadTreeTableName.c_str(),
     uploadId,
     IDENTITY,
     agentId,

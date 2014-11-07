@@ -373,8 +373,8 @@ msgid "Learn calculating with fractions"
 msgstr "Вчіться рахувати з дробами"
 
 #: kbruch.cpp:47
-msgid "(c) 2002-2004, Sebastian Stein"
-msgstr "©2002-2004, Sebastian Stein"
+msgid "<s>(c) 2002-2004, Sebastian Stein</s>"
+msgstr "<s>©2002-2004, Sebastian Stein</s>"
 
 #: kbruch.cpp:48
 msgid "Sebastian Stein"

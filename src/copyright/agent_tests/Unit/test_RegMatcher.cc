@@ -37,11 +37,12 @@ class regexRegMatcher : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE_END ();
 
 private:
+  std::string raw_content;
   std::string content;
 
 public:
   void setUp (void)  {
-    content = string(
+    raw_content = string(
                 "© 2007 Hugh Jackman\n"
                 "Copyright 2004 my company\n"
                 "Copyrights by any strange people\n"
@@ -55,8 +56,13 @@ public:
                 "Do not modify this document\n"
                 "the shuttle is a space vehicle designed by NASA\n"
                 "visit http://mysite.org/FAQ or write to info@mysite.org\n"
-                "maintained by benjamin drieu <benj@debian.org>"
+                "maintained by benjamin drieu <benj@debian.org>\n"
+                "* Copyright (c) 1989, 1993\n"
+                "* The Regents of the University of California. All rights reserved."
             );
+
+    content = raw_content;
+    normalizeContent(content);
   };
 
 protected:
@@ -75,6 +81,7 @@ protected:
     expected.push_back(CopyrightMatch("Written by: me, myself and Irene.", type, 204));
     expected.push_back(CopyrightMatch("Authors all the people at ABC", type, 238));
     expected.push_back(CopyrightMatch("maintained by benjamin drieu <benj@debian.org>", type, 456));
+    expected.push_back(CopyrightMatch("Copyright (c) 1989, 1993\n  The Regents of the University of California. All rights reserved.", type, 505));
 
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   };

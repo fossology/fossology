@@ -1,12 +1,12 @@
 This is the Debian GNU/Linux prepackaged version of the GNU groff
 document formatting system. 
 GNU groff was <s>written by James Clark <jjc@jclark.com>.</s>  
-It is now maintained by Ted Harding <ted.harding@nessie.mcc.ac.uk> and
-Werner Lemberg <wl@gnu.org>.
+It is now <s>maintained by Ted Harding <ted.harding@nessie.mcc.ac.uk> and
+Werner Lemberg <wl@gnu.org>.</s>
 
-This Debian package was previously maintained by Fabrizio Polacco
-<fpolacco@debian.org>.
-It is now maintained by Colin Watson <cjwatson@debian.org>.
+This Debian package was previously <s>maintained by Fabrizio Polacco
+<fpolacco@debian.org>.</s>
+It is now <s>maintained by Colin Watson <cjwatson@debian.org>.</s>
 
 The original tarball came from <URL:ftp://groff.ffii.org/pub/groff/>:
   4c7a1b478d230696f14743772f31639f  groff-1.18.1.tar.gz
@@ -28,8 +28,8 @@ Watson).
 
 =========================================================================
 
-<s>Copyright (C) 1989-2000 Free Software Foundation, Inc.
-     Written by James Clark (jjc@jclark.com)</s>
+<s>Copyright (C) 1989-2000 Free Software Foundation, Inc.</s>
+     <s>Written by James Clark (jjc@jclark.com)</s>
 
 This file is part of groff.
 
