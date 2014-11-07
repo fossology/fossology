@@ -45,9 +45,12 @@ src/cli/tests/cli-Xunit.xml
 src/cli/testupdate2.php
 src/copyright/VERSION-*
 src/copyright/agent/copyright
+src/copyright/agent/copyright_cov
 src/copyright/agent/ecc
 src/copyright/agent/ip
+src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
+src/copyright/agent_tests/results
 src/decider/agent/version.php
 src/delagent/agent/delagent
 src/delagent/agent_tests/Functional/delagent-Xunit.xml

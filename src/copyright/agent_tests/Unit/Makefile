@@ -54,9 +54,7 @@ test: all
 coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a ${FOLIB}
 	${MAKE} -C ${TESTDIR}
 	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK) $(FLAG_COV); \
-	./$(EXE); \
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	./$(EXE)
 
 clean:
 	rm -rf $(EXE) $(EXE)_cov *.o *.a *.gcno *.gcda core results
