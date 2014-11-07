@@ -98,4 +98,10 @@ interface Driver
    * @return string
    */
   public function escapeString($string);
+  
+  /**
+   * @param string $tableName
+   * @return bool
+   */
+  public function existsTable($tableName);
 }

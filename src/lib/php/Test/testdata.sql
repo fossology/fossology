@@ -62,17 +62,6 @@ INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mod
 INSERT INTO bucketpool (bucketpool_pk, bucketpool_name, version, active, description) VALUES (1, 'GPL Demo bucket pool', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (1, 'GPL Licenses (Demo)', 'orange', 50, 50, 1, 3, '(affero|gpl)', NULL, 'N', 'f');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (2, 'non-gpl (Demo)', 'yellow', 50, 1000, 1, 99, NULL, NULL, 'N', 'f');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (1, 7, 4, 2, 1, 1, '', '', '2014-08-07 09:59:27.17262+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (2, 8, 5, 2, 1, 1, '', '', '2014-08-07 09:59:39.796902+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (3, 6, 3, 2, 1, 1, '', '', '2014-08-07 09:59:48.999742+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (4, 11, 7, 2, 1, 1, '', '', '2014-08-07 10:00:05.541258+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (5, 12, 8, 2, 1, 2, '', '', '2014-08-07 10:00:33.505955+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (6, 10, 6, 2, 1, 2, '', '', '2014-08-07 10:00:48.535576+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (7, 23, 4, 2, 1, 2, '', '', '2014-08-07 10:02:35.374565+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (8, 24, 5, 2, 1, 1, '', '', '2014-08-07 10:03:43.235674+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (9, 22, 3, 2, 2, 1, '', '', '2014-08-07 10:04:19.403175+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (10, 19, 8, 2, 1, 2, '', '', '2014-08-07 10:05:34.48741+00');
-INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, type_fk, scope_fk, comment, reportinfo, date_added) VALUES (11, 20, 6, 2, 1, 1, '', '', '2014-08-07 10:06:29.394152+00');
 INSERT INTO license_decision_type (type_pk, meaning) VALUES (1, 'User decision');
 INSERT INTO license_decision_type (type_pk, meaning) VALUES (2, 'bulk');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (3, 'To be discussed');

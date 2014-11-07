@@ -22,7 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Data\Tree\UploadTreeView;
+use Fossology\Lib\Dao\UploadTreeDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
@@ -45,10 +45,10 @@ class UploadDao extends Object
 
   /**
    * @param int $itemId
-   * @param UploadTreeView $uploadTreeView
+   * @param UploadTreeDao $uploadTreeView
    * @return Item
    */
-  public function getUploadEntryFromView($itemId, UploadTreeView $uploadTreeView)
+  public function getUploadEntryFromView($itemId, UploadTreeDao $uploadTreeView)
   {
     $uploadTreeViewQuery = $uploadTreeView->asCTE();
     $stmt = __METHOD__ . ".$uploadTreeViewQuery";
@@ -156,7 +156,7 @@ SELECT * FROM $uploadTreeTableName
   public function getStatusTypeMap()
   {
     global $container;
-    /** UploadStatus */
+    /** @var UploadStatus */
     $uploadStatus = $container->get('upload_status.types');
     return $uploadStatus->getMap();
   }
@@ -221,7 +221,7 @@ SELECT * FROM $uploadTreeTableName
   {
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
-    $uploadTreeView = new UploadTreeView($uploadId, $options, $uploadTreeTableName);
+    $uploadTreeView = new UploadTreeDao($uploadId, $options, $uploadTreeTableName);
 
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
@@ -252,7 +252,7 @@ SELECT * FROM $uploadTreeTableName
    * @param $uploadTreeView
    * @return mixed
    */
-  protected function findNextItem(Item $item, $direction, UploadTreeView $uploadTreeView, $enterFolders = true)
+  protected function findNextItem(Item $item, $direction, UploadTreeDao $uploadTreeView, $enterFolders = true)
   {
     if ($item->getParentId() === null && $direction !== self::DIR_FWD)
     {
@@ -304,10 +304,10 @@ SELECT * FROM $uploadTreeTableName
 
   /**
    * @param Item $item
-   * @param UploadTreeView $uploadTreeView
+   * @param UploadTreeDao $uploadTreeView
    * @return int
    */
-  protected function getItemIndex(Item $item, UploadTreeView $uploadTreeView)
+  protected function getItemIndex(Item $item, UploadTreeDao $uploadTreeView)
   {
     if ($item->getParentId() === null)
     {
@@ -332,10 +332,10 @@ SELECT * FROM $uploadTreeTableName
 
   /**
    * @param int $parent
-   * @param UploadTreeView $uploadTreeView
+   * @param UploadTreeDao $uploadTreeView
    * @return int
    */
-  protected function getParentSize($parent, UploadTreeView $uploadTreeView)
+  protected function getParentSize($parent, UploadTreeDao $uploadTreeView)
   {
     if ($parent === null)
     {
@@ -354,10 +354,10 @@ SELECT * FROM $uploadTreeTableName
   /**
    * @param int $parent
    * @param int $targetOffset
-   * @param UploadTreeView $uploadTreeView
+   * @param UploadTreeDao $uploadTreeView
    * @return Item
    */
-  protected function getNewItemByIndex($parent, $targetOffset, UploadTreeView $uploadTreeView)
+  protected function getNewItemByIndex($parent, $targetOffset, UploadTreeDao $uploadTreeView)
   {
     if ($targetOffset < 0) {
       return null;
@@ -411,7 +411,7 @@ SELECT * FROM $uploadTreeTableName
    * @param $uploadTreeView
    * @return int
    */
-  public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeView $uploadTreeView)
+  public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeDao $uploadTreeView)
   {
     $sql = "SELECT count(*) FROM ". $uploadTreeView->getUploadTreeViewName() ." where lft BETWEEN $1 and $2";
     $result = $this->dbManager->getSingleRow($sql

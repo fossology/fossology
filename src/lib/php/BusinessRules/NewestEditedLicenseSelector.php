@@ -21,6 +21,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Util\Object;
+use Fossology\Lib\Data\DecisionScopes;
 
 /**
  * @brief filter newest license from array of [ClearingDecisions or LicenceRef array]
@@ -95,12 +96,12 @@ class NewestEditedLicenseSelector extends Object
       {
         continue;
       }
-      if ($clearingDecision->getSameFolder() && $clearingDecision->getScope() == 'upload')
+      if ($clearingDecision->getScope() == DecisionScopes::ITEM && $clearingDecision->getSameFolder() )
       {
         unset($global[$utid]);
         $upload[$utid] = $clearingDecision->getPositiveLicenses();
       }
-      if ($clearingDecision->getScope() == 'global' && !array_key_exists($utid, $upload) && !array_key_exists($utid, $global))
+      if ($clearingDecision->getScope() == DecisionScopes::REPO && !array_key_exists($utid, $upload) && !array_key_exists($utid, $global))
       {
         $global[$utid] = $clearingDecision->getPositiveLicenses();
       }

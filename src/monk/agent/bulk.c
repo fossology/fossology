@@ -206,8 +206,8 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, job_fk, type_fk, rf_fk, is_removed, is_global)"
-      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, $6, 'f'"
+      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, job_fk, type_fk, rf_fk, is_removed, scope)"
+      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, $6, '0'"
       " FROM uploadtree"
       " WHERE upload_fk = $7 AND pfile_fk = $1 AND lft BETWEEN $8 AND $9"
       "RETURNING license_decision_event_pk",

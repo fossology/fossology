@@ -80,7 +80,7 @@ class ClearingDecisionEventProcessor
       if (!$licenseDecisionResult->hasLicenseDecisionEvent())
       {
         $licenseId = $licenseDecisionResult->getLicenseId();
-        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER, $isGlobal);
+        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER);
         $insertDecision = true;
       }
     }
@@ -118,10 +118,8 @@ class ClearingDecisionEventProcessor
       $removedSinceLastDecision = array();
       $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
       foreach($added as $licenseShortName => $licenseDecisionResult) {
-        /** @var LicenseDecisionResult $licenseDecisionResult */
-        $isglobal =$licenseDecisionResult->hasLicenseDecisionEvent()? $licenseDecisionResult->getLicenseDecisionEvent()->isGlobal():true;
         $this->clearingDao->removeLicenseDecision($itemBounds->getUploadTreeId(), $userId,
-            $licenseDecisionResult->getLicenseId(), $type, $isglobal);
+            $licenseDecisionResult->getLicenseId(), $type);
         $licenseDecisionEventBuilder
             ->setLicenseRef($licenseDecisionResult->getLicenseRef());
         //we only need the license ID so the builder defaults should suffice for the rest
@@ -135,6 +133,7 @@ class ClearingDecisionEventProcessor
     if ($insertDecision)
     {
       $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
+      $this->clearingDao->removeWipClearingDecision($item, $userId);
       ReportCachePurgeAll();
     }
   }
@@ -147,8 +146,7 @@ class ClearingDecisionEventProcessor
   public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
-
-    $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemTreeBounds);
+    $agentDetectedLicenses = $this->getLatestAgentDetectedLicenses($itemTreeBounds);
 
     list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
 

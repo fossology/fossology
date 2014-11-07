@@ -49,14 +49,10 @@ class ui_browse extends FO_Plugin
   }
 
   /**
-   * \brief Create and configure database tables
+   * @brief Create top-level folder if not exists
    */
   function Install()
   {
-    /****************
-     * The top-level folder must exist.
-     ****************/
-    /* check if the table needs population */
     if (!$this->folderDao->hasTopLevelFolder())
     {
       $this->folderDao->insertFolder(1, 'Software Repository', 'Top Folder');
@@ -64,7 +60,7 @@ class ui_browse extends FO_Plugin
       $this->folderDao->fixFolderSequence();
     }
     return (0);
-  } // Install()
+  }
 
 
   /**
@@ -80,17 +76,17 @@ class ui_browse extends FO_Plugin
       return;
     }
     // For the Browse menu, permit switching between detail and simple.
-    $URI = $this->Name . Traceback_parm_keep(array(
-            "upload",
-            "item"
-        ));
+    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
     if (GetParm("mod", PARM_STRING) == $this->Name)
+    {
       menu_insert("Browse::Browse", 1);
+    }
     else
+    {
       menu_insert("Browse::Browse", 1, $URI);
-
+    }
     return ($this->State == PLUGIN_STATE_READY);
-  } // RegisterMenus()
+  }
 
   /**
    * \brief Given a upload_pk, list every item in it.
@@ -98,7 +94,9 @@ class ui_browse extends FO_Plugin
    */
   function ShowItem($Upload, $Item, $Show, $Folder, $uploadtree_tablename)
   {
-    global $PG_CONN;
+    global $container;
+    /** @var DbManager */
+    $dbManager = $container->get('db.manager');
     $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
     $RowStyle2 = "style='background-color:#ffffe3'";  // pale yellow
     $ColorSpanRows = 3;  // Alternate background color every $ColorSpanRows
@@ -123,15 +121,15 @@ class ui_browse extends FO_Plugin
       }
     }
 
-    /* Get the (non artifact) children  */
     $Results = GetNonArtifactChildren($Item, $uploadtree_tablename);
     $ShowSomething = 0;
     $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
+    $stmtGetFirstChild = __METHOD__.'.getFirstChild';
+    $dbManager->prepare($stmtGetFirstChild,'SELECT uploadtree_pk FROM uploadtree WHERE parent=$1 limit 1');
     foreach ($Results as $Row)
     {
       if (empty($Row['uploadtree_pk'])) continue;
       $ShowSomething = 1;
-      $Link = NULL;
       $Name = $Row['ufile_name'];
 
       /* Set alternating row background color - repeats every $ColorSpanRows rows */
@@ -139,18 +137,13 @@ class ui_browse extends FO_Plugin
       $V .= "<tr $RowStyle>";
 
       /* Check for children so we know if the file should by hyperlinked */
-      $sql = "select uploadtree_pk from uploadtree
-                where parent=$Row[uploadtree_pk] limit 1";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $HasChildren = pg_num_rows($result);
-      pg_free_result($result);
+      $result = $dbManager->execute($stmtGetFirstChild,array($Row['uploadtree_pk']));
+      $HasChildren = $dbManager->fetchArray($result);
+      $dbManager->freeResult($result);
 
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
-      if ($HasChildren)
-        $Link = $Uri . "&show=$Show&upload=$Upload&item=" . $Row['uploadtree_pk'];
+      $Link = $HasChildren ? "$Uri&show=$Show&upload=$Upload&item=$Row[uploadtree_pk]" : NULL;
 
-      /* Show details children */
       if ($Show == 'detail')
       {
         $V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";

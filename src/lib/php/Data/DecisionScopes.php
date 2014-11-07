@@ -18,26 +18,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class DecisionTypes extends Types
+class DecisionScopes extends Types
 {
-  const TO_BE_DISCUSSED = 3;
-  const IRRELEVANT = 4;
-  const IDENTIFIED = 5;
-  const WIP = 0;
+  const ITEM = 0;
+  const REPO = 1;
+  const UPLOAD = 2;
+  const PACKAGE = 3;
 
   public function __construct()
   {
-    parent::__construct("decision type");
+    parent::__construct("decision scope");
 
-    $this->map = array(self::TO_BE_DISCUSSED=>"To be discussed",
-            self::IRRELEVANT=>"Irrelevant",
-            self::IDENTIFIED=>"Identified");
+    $this->map = array(self::ITEM => "local", self::REPO => "global");
   }
-  
-  public function getExtendedMap()
-  {
-    $map = $this->map;
-    $map[self::WIP] = 'Temporary';
-    return $map;
-  }
+
 }

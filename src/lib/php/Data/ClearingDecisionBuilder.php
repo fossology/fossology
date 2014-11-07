@@ -37,7 +37,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
     $this->userName = "fossy";
     $this->userId = -1;
     $this->type = null;
-    $this->scope = "upload";
+    $this->scope = DecisionScopes::ITEM;
     $this->date_added = new DateTime();
   }
 
@@ -123,7 +123,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
   }
 
   /**
-   * @param $scope
+   * @param int $scope
    * @return $this
    */
   public function setScope($scope)

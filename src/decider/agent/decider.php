@@ -59,12 +59,11 @@ class DeciderAgent extends Agent
     {
       /** @var LicenseDecisionResult $licenseDecisionResult */
       $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)) && ($licenseDecisionResult->hasAgentDecisionEvent()) && !($licenseDecisionResult->hasLicenseDecisionEvent()))
+      if ((($date === null) || ($eventDate > $date)) && $licenseDecisionResult->hasAgentDecisionEvent() && !$licenseDecisionResult->hasLicenseDecisionEvent())
       {
         return false;
       }
     }
-
     return true;
   }
 
@@ -128,12 +127,13 @@ class DeciderAgent extends Agent
     if ($canAutoDecide)
     {
       $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
-      $this->heartbeat(1);
-    } else
-    {
-      $this->heartbeat(0);
     }
-
+    else
+    {
+      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId);
+    }
+    $this->heartbeat(1);
+    
     $this->dbManager->commit();  /* end transaction */
   }
 }

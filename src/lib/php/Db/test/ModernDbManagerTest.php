@@ -18,42 +18,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
-use Mockery as M;
-use Mockery\MockInterface;
 
-class ModernDbManagerTest extends \PHPUnit_Framework_TestCase
+class ModernDbManagerTest extends DbManagerTest
 {
-  /** @var Driver|MockInterface */
-  private $driver;
-  /** @var Logger|MockInterface */
-  private $logger;
-  /** @var DbManager */
-  private $dbManager;
 
   function setUp()
   {
-    $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
-    $this->logger = M::mock('Monolog\\Logger'); // new Logger(__FILE__);
-    $this->logger->shouldReceive('addDebug');
+    parent::setUp();
     $this->dbManager = new ModernDbManager($this->logger);
     $this->dbManager->setDriver($this->driver);
   }
 
   function tearDown()
   {
-    M::close();
-  }
-
-  function testBeginTransaction()
-  {
-    $this->driver->shouldReceive("begin")->withNoArgs()->once();
-    $this->dbManager->begin();
-  }
-
-  function testCommitTransaction()
-  {
-    $this->driver->shouldReceive("commit")->withNoArgs()->once();
-    $this->dbManager->commit();
+    parent::tearDown();
   }
   
   function testInsertTableRow()
@@ -66,15 +44,6 @@ class ModernDbManagerTest extends \PHPUnit_Framework_TestCase
     $this->driver->shouldReceive('execute')->with($sqlLog,array_values($assocParams))->once();
     $this->driver->shouldReceive('freeResult');
     $this->dbManager->insertTableRow($tableName,$assocParams,$sqlLog);
-  }
-  
-  function testFlushStats()
-  {
-    $this->driver->shouldReceive('prepare');
-    $sqlStmt = 'foo';
-    $this->dbManager->prepare($sqlStmt,'SELECT elephant FROM africa');
-    $this->logger->shouldReceive('addDebug')->with("/executing '$sqlStmt' took /");
-    $this->dbManager->flushStats();
   }
   
   function testCreateMap()

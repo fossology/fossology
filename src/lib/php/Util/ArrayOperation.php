@@ -16,28 +16,33 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Util;
 
-class DecisionTypes extends Types
+
+class ArrayOperation extends Object
 {
-  const TO_BE_DISCUSSED = 3;
-  const IRRELEVANT = 4;
-  const IDENTIFIED = 5;
-  const WIP = 0;
-
-  public function __construct()
+  /**
+   * @param array
+   * @return array
+   */
+  public static function getMultiplicityOfValues($allValues)
   {
-    parent::__construct("decision type");
+    $uniqueValues = array_unique($allValues);
+    $valueMultiplicityMap = array();
 
-    $this->map = array(self::TO_BE_DISCUSSED=>"To be discussed",
-            self::IRRELEVANT=>"Irrelevant",
-            self::IDENTIFIED=>"Identified");
-  }
-  
-  public function getExtendedMap()
-  {
-    $map = $this->map;
-    $map[self::WIP] = 'Temporary';
-    return $map;
+    foreach ($uniqueValues as $value)
+    {
+      $count = 0;
+      foreach ($allValues as $candidate)
+      {
+        if ($value == $candidate)
+        {
+          $count++;
+        }
+      }
+      $valueMultiplicityMap[$value] = $count;
+    }
+
+    return $valueMultiplicityMap;
   }
 }
