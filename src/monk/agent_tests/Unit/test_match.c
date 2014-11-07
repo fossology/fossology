@@ -115,7 +115,7 @@ void test_findDiffsAtBeginning() {
 
 void test_findAllMatchesWithDiff() {
   File* file = getFileWithText("a^b^c^d^e^f");
-  GArray* licenses = getNLicensesWithText(3, "a^c^d", "a^b^d^e", "d", "e^f");
+  GArray* licenses = getNLicensesWithText(4, "a^c^d", "a^b^d^e", "d", "e^f");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
