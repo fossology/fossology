@@ -96,7 +96,7 @@ void test_findAllMatchesDisjoint() {
 
 void test_findDiffsAtBeginning() {
   File* file = getFileWithText("^e^a^b^c^d^e");
-  GArray* licenses = getNLicensesWithText(3, "a", "e^b^c^d^e");
+  GArray* licenses = getNLicensesWithText(2, "a", "e^b^c^d^e");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
 
   CU_ASSERT_EQUAL(matches->len, 2);
