@@ -12,7 +12,7 @@
 
 _runcopyright()
 {
-  ./copyright -T 1 "$1" | sed -e '1d'
+  ./copyright "$@" | sed -e '1d'
 }
 
 _runcopyrightPositives()
@@ -45,8 +45,67 @@ testAll()
   for file_raw in ../testdata/testdata0_raw; do
     file=${file_raw%_raw}
     expectedPositives="$( _runcopyrightPositives "$file_raw" )"
-    found="$( _runcopyright "$file" )"
+    found="$( _runcopyright -T 1 "$file" )"
     _checkFound "$expectedPositives" "$found"
   done
 }
 
+testUserRegexesDefault()
+{
+  tmpfile=$(mktemp)
+  assertTrue $?
+  echo "test one" > "$tmpfile"
+
+  out=$( _runcopyright -T 0 --regex 'test[[:space:]]*' "$tmpfile" )
+
+  expected=$(printf "\t[0:5:cli] 'test '")
+
+  assertEquals "$expected" "$out"
+
+  rm "$tmpfile"
+}
+
+testUserRegexesName()
+{
+  tmpfile=$(mktemp)
+  assertTrue $?
+  echo "test one" > "$tmpfile"
+
+  out=$( _runcopyright -T 0 --regex 'test@@test[[:space:]]*' "$tmpfile" )
+
+  expected=$(printf "\t[0:5:test] 'test '")
+
+  assertEquals "$expected" "$out"
+
+  rm "$tmpfile"
+}
+
+testUserRegexesNameAndGroup()
+{
+  tmpfile=$(mktemp)
+  assertTrue $?
+  echo "test one" > "$tmpfile"
+
+  out=$( _runcopyright -T 0 --regex 'test@@1@@t(es)t[[:space:]]*' "$tmpfile" )
+
+  expected=$(printf "\t[1:3:test] 'es'")
+
+  assertEquals "$expected" "$out"
+
+  rm "$tmpfile"
+}
+
+testUserRegexesNameAndGroup2()
+{
+  tmpfile=$(mktemp)
+  assertTrue $?
+  echo "test one" > "$tmpfile"
+
+  out=$( _runcopyright -T 0 --regex 'test@@0@@t(es)t[[:space:]]*' "$tmpfile" )
+
+  expected=$(printf "\t[0:5:test] 'test '")
+
+  assertEquals "$expected" "$out"
+
+  rm "$tmpfile"
+}
