@@ -41,12 +41,6 @@ int main(int argc, char** argv)
   CopyrightState state = getState(dbManager, cliOptions);
   CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
-  if (!copyrightDatabaseHandler.createTables())
-  {
-    std::cout << "FATAL: initialization failed" << std::endl;
-    return_sched(9);
-  }
-
   fillMatchers(state);
 
   if (!fileNames.empty())
@@ -71,6 +65,12 @@ int main(int argc, char** argv)
   }
   else
   {
+    if (!copyrightDatabaseHandler.createTables())
+    {
+      std::cout << "FATAL: initialization failed" << std::endl;
+      return_sched(9);
+    }
+
     while (fo_scheduler_next() != NULL)
     {
       int uploadId = atoi(fo_scheduler_current());
