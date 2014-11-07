@@ -54,7 +54,7 @@ const std::string regCopyright::getRegex() {
   ")|("
     "("
       "((author|contributor|maintainer)s?)"
-      "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put"SPACES"together)" SPACES "by)"
+      "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put" SPACES "together)" SPACES "by)"
     ")"
     "[:]?"
     SPACESALL
