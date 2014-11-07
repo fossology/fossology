@@ -22,6 +22,7 @@ void test_read_file() {
   char* testfile = "/tmp/monkftest";
   
   FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
   fprintf(file, "%s", teststring);
   fclose(file);
 
@@ -33,6 +34,7 @@ void test_read_mangling_binaries() {
   char* testfile = "/tmp/monkftest";
 
   FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
   fwrite(teststring, 1, sizeof (teststring), file);
   fclose(file);
 
@@ -44,6 +46,7 @@ void test_read_file_tokens() {
   char* testfile = "/tmp/monkftest";
 
   FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
   fprintf(file, "%s", teststring);
   fclose(file);
 
@@ -70,6 +73,7 @@ void test_read_file_tokens2() {
   char* testfile = "/tmp/monkftest";
 
   FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
   fprintf(file, "%s", teststring);
   fclose(file);
 
@@ -98,6 +102,7 @@ void test_read_file_tokens_binaries() {
   char* testfile = "/tmp/monkftest";
 
   FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
   fwrite(teststring, 1, sizeof (teststring), file);
   fclose(file);
 
