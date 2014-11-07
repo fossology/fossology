@@ -23,19 +23,11 @@ define("TITLE_changeLicenseBulk", _("Private: schedule a bulk scan from post"));
 
 class changeLicenseBulk extends FO_Plugin
 {
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
 
   function __construct()
@@ -108,7 +100,7 @@ class changeLicenseBulk extends FO_Plugin
         /** @var agent_fodecider $deciderPlugin */
         $deciderPlugin = plugin_find("agent_decider");
         $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
-        $conflictStrategyId = null; // TODO add option in GUI
+        $conflictStrategyId = intval(filter_input(INPUT_POST,'forceDecision'));
         $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $conflictStrategyId);
       } else {
         $ErrorMsg = "can not insert bulk reference";
