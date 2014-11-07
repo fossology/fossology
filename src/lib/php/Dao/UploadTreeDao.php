@@ -168,9 +168,10 @@ class UploadTreeDao
    * @param $skipThese
    * @return string
    */
-  private function getQueryCondition($skipThese)
+  private static function getQueryCondition($skipThese)
   {
-    $conditionQueryHasLicense = "EXISTS (SELECT rf_pk FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)";
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
+        OR EXISTS (SELECT 1 FROM license_decision_event AS lde WHERE ut.uploadtree_pk = lde.uploadtree_fk))";
 
     switch ($skipThese)
     {
@@ -195,10 +196,11 @@ class UploadTreeDao
         return $conditionQuery;
     }
   }
-  
+
   /**
    * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
    * @param int $parent
+   * @return array
    */
   public function countMaskedNonArtifactChildren($parent)
   {
