@@ -128,11 +128,11 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
     int tableExists = _tableExists(dbManager, result);
     if (tableExists < 0)
     {
-      free(result);
+      g_free(result);
       return 0;
     } else if (tableExists > 0)
     {
-      free(result);
+      g_free(result);
       result = NULL;
     }
   }
@@ -147,7 +147,7 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
       return 1;
     } else
     {
-      free(result);
+      g_free(result);
       return 0;
     }
   } else
@@ -233,8 +233,8 @@ void test_prepare()
       }
       free(c);
     }
-    free(querySelect);
-    free(queryInsert);
+    g_free(querySelect);
+    g_free(queryInsert);
 
     fo_dbManager_Exec_printf(dbManager,
       "DROP TABLE %s",
@@ -332,7 +332,7 @@ PGresult* _insertWithFunction(
     CU_FAIL("could not get test table");
   }
 
-  free(testTableNameVar);
+  g_free(testTableNameVar);
 
   return result;
 }
@@ -620,9 +620,9 @@ void _test_wrongQueries_runner(char* (* test)(fo_dbManager**, const char*), int 
 
     fo_dbManager_finish(dbManager);
 
-    free(logFile);
-    free(expectedLog);
-    free(testTable);
+    g_free(logFile);
+    g_free(expectedLog);
+    g_free(testTable);
 
   } else
   {
@@ -686,7 +686,7 @@ char* _test_wrongQueries_noConnectionToServerOnPrepare(fo_dbManager** dbManager,
     "noConnPrepare",
     query
   );
-  free(query);
+  g_free(query);
 
   CU_ASSERT_PTR_NULL(statement);
 
@@ -708,7 +708,7 @@ char* _test_wrongQueries_noConnectionToServerOnExecute(fo_dbManager** dbManager,
     "noConn",
     query
   );
-  free(query);
+  g_free(query);
 
   CU_ASSERT_PTR_NOT_NULL_FATAL(statement);
 
@@ -735,7 +735,7 @@ char* _test_wrongQueries_noParametersFor1ParameterStmt(fo_dbManager** dbManager,
       query
     )
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup(
     "ERROR: ERROR:  bind message supplies 0 parameters, but prepared statement \"name2\" requires 1\n"
@@ -751,7 +751,7 @@ char* _test_wrongQueries_prepareWithNotExistingColumn(fo_dbManager** dbManager, 
     "name",
     query
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup_printf(
     "ERROR: * column \"c\" does not exist\n"
@@ -774,7 +774,7 @@ char* _test_wrongQueries_2ParametersForNoParametersQuery(fo_dbManager** dbManage
   ),
   (int) 5, (size_t) 6
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup(
     "ERROR: ERROR:  bind message supplies 2 parameters, but prepared statement \"name3\" requires 0\n"
