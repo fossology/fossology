@@ -18,7 +18,6 @@
  ***********************************************************/
 
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 

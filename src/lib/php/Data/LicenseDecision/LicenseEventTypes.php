@@ -18,25 +18,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\LicenseDecision;
 
-
 use Fossology\Lib\Data\Types;
-use Fossology\Lib\Db\DbManager;
 
 class LicenseEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
 
-  /** @var array */
-  private $values = array(self::USER, self::BULK);
-
-  public function __construct(DbManager $dbManager)
+  public function __construct()
   {
     parent::__construct("license decision type");
-    $this->map = $dbManager->createMap('license_decision_type', 'type_pk', 'meaning');
 
-    assert($this->map[self::USER] == "User decision");
-    assert($this->map[self::BULK] == "Bulk");
-    assert(count($this->map) == count($this->values));
+    $this->map = array(
+        self::USER => "User decision",
+        self::BULK => "Bulk"
+    );
   }
 
 } 
