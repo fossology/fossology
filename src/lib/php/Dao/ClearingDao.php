@@ -25,7 +25,7 @@ use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\Clearing\Clearing;
+use Fossology\Lib\Data\Clearing\LicenseClearing;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
 use Fossology\Lib\Data\Clearing\ClearingResult;

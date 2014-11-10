@@ -23,18 +23,18 @@ use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 
-class ClearingResult implements Clearing {
+class ClearingResult implements LicenseClearing {
   const AGENT_DECISION_TYPE = 'agent';
 
   /**
    * @var ClearingEvent
    */
-  private $licenseDecisionEvent;
+  private $clearingEvent;
 
   /**
    * @var array|AgentClearingEvent[]
    */
-  private $agentDecisionEvents;
+  private $agentClearingEvents;
 
   /**
    * @param null|ClearingEvent $licenseDecisionEvent
@@ -46,8 +46,8 @@ class ClearingResult implements Clearing {
       throw new Exception("cannot create ClearingEvent without any event contained");
     }
 
-    $this->licenseDecisionEvent = $licenseDecisionEvent;
-    $this->agentDecisionEvents = $agentDecisionEvents;
+    $this->clearingEvent = $licenseDecisionEvent;
+    $this->agentClearingEvents = $agentDecisionEvents;
   }
 
   /**
@@ -88,7 +88,7 @@ class ClearingResult implements Clearing {
    */
   public function getComment()
   {
-    return $this->getClearing()->getComment();
+    return isset($this->clearingEvent) ? $this->getClearing()->getComment() : '';
   }
 
   /**
@@ -97,14 +97,6 @@ class ClearingResult implements Clearing {
   public function getDateTime()
   {
     return $this->getClearing()->getDateTime();
-  }
-
-  /**
-   * @return int
-   */
-  public function getEventId()
-  {
-    return $this->getClearing()->getEventId();
   }
 
   /**
@@ -120,15 +112,7 @@ class ClearingResult implements Clearing {
    */
   public function getReportinfo()
   {
-    return $this->getClearing()->getReportinfo();
-  }
-
-  /**
-   * @return boolean
-   */
-  public function isGlobal()
-  {
-    return $this->getClearing()->isGlobal();
+    return isset($this->clearingEvent) ? $this->clearingEvent->getReportinfo() : '';
   }
 
   /**
@@ -141,15 +125,15 @@ class ClearingResult implements Clearing {
 
   /**
    * @throws Exception
-   * @return Clearing
+   * @return LicenseClearing
    */
   private function getClearing()
   {
-    if (isset($this->licenseDecisionEvent)) {
-      return $this->licenseDecisionEvent;
+    if (isset($this->clearingEvent)) {
+      return $this->clearingEvent;
     }
 
-    return $this->agentDecisionEvents[0];
+    return $this->agentClearingEvents[0];
   }
 
   /**
@@ -157,7 +141,7 @@ class ClearingResult implements Clearing {
    */
   public function hasAgentDecisionEvent()
   {
-    return !empty($this->agentDecisionEvents);
+    return !empty($this->agentClearingEvents);
   }
 
   /**
@@ -165,7 +149,7 @@ class ClearingResult implements Clearing {
    */
   public function hasClearingEvent()
   {
-    return isset($this->licenseDecisionEvent);
+    return isset($this->clearingEvent);
   }
 
   /**
@@ -173,7 +157,7 @@ class ClearingResult implements Clearing {
    */
   public function getAgentDecisionEvents()
   {
-    return $this->agentDecisionEvents;
+    return $this->agentClearingEvents;
   }
 
   /**
@@ -181,7 +165,7 @@ class ClearingResult implements Clearing {
    */
   public function getClearingEvent()
   {
-    return $this->licenseDecisionEvent;
+    return $this->clearingEvent;
   }
 
   /*

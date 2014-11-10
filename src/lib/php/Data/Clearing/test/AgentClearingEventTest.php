@@ -49,8 +49,8 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
     M::close();
   }
 
-  public function testGetEventId() {
-    assertThat($this->agentClearingEvent->getEventId(), is($this->matchId));
+  public function testGetMatchId() {
+    assertThat($this->agentClearingEvent->getMatchId(), is($this->matchId));
   }
 
   public function testGetLicenseRef() {
@@ -88,10 +88,6 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetReportinfo() {
     assertThat($this->agentClearingEvent->getReportinfo(), is(""));
-  }
-
-  public function testIsGlobal() {
-    assertThat($this->agentClearingEvent->isGlobal(), is(true));
   }
 
   public function testIsRemoved() {

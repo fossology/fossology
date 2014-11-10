@@ -17,16 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 namespace Fossology\Lib\Data\Clearing;
 
-use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 
-interface Clearing
+interface LicenseClearing
 {
-  /**
-   * @return DateTime
-   */
-  public function getDateTime();
-
   /**
    * @return string
    */
@@ -56,19 +50,9 @@ interface Clearing
    * @return string
    */
   public function getLicenseFullName();
-
+  
   /**
-   * @return string
+   * @return DateTime
    */
-  public function getComment();
-
-  /**
-   * @return string
-   */
-  public function getReportinfo();
-
-   /**
-   * @return int
-   */
-  public function getEventId();
+  public function getDateTime();
 }

@@ -20,7 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
-use Fossology\Lib\Data\Clearing\Clearing;
+use Fossology\Lib\Data\Clearing\LicenseClearing;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
@@ -226,8 +226,8 @@ class ClearingDecisionEventProcessor
   }
 
   /**
-   * @param Clearing[] $added
-   * @param Clearing[] $removed
+   * @param LicenseClearing[] $added
+   * @param LicenseClearing[] $removed
    * @return bool
    */
   public function checkIfAutomaticDecisionCanBeMade($added, $removed)

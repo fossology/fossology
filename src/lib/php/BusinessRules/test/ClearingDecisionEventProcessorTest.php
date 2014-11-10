@@ -221,7 +221,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
     assertThat($agentEvent->getAgentRef(), is($agentRef));
     assertThat($agentEvent->getLicenseRef(), is($licenseRef));
-    assertThat($agentEvent->getEventId(), is(143));
+    assertThat($agentEvent->getMatchId(), is(143));
     assertThat($agentEvent->getPercentage(), is(98));
   }
 

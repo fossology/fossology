@@ -24,7 +24,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
-class AgentClearingEvent extends Object implements Clearing {
+class AgentClearingEvent extends Object implements LicenseClearing {
   /**
    * @var LicenseRef
    */
@@ -58,7 +58,7 @@ class AgentClearingEvent extends Object implements Clearing {
   /**
    * @return int
    */
-  public function getEventId()
+  public function getMatchId()
   {
     return $this->matchId;
   }
@@ -125,14 +125,6 @@ class AgentClearingEvent extends Object implements Clearing {
    */
   public function getDateTime(){
     return new DateTime();
-  }
-
-  /**
-   * @return boolean
-   */
-  public function isGlobal()
-  {
-    return true;
   }
 
   /**

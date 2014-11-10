@@ -30,7 +30,7 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
   private $licenseRef;
 
   /** @var ClearingEvent|M\MockInterface */
-  private $licenseDecisionEvent;
+  private $clearingEvent;
 
   /** @var AgentClearingEvent|M\MockInterface */
   private $agentClearingEvent1;
@@ -40,32 +40,33 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
 
   /** @var ClearingResult */
   private $licenseDecisionResult;
+  
+
 
   public function setUp()
   {
     $this->licenseRef = M::mock(LicenseRef::classname());
-    $this->licenseDecisionEvent = M::mock(ClearingEvent::classname());
+    $this->clearingEvent = M::mock(ClearingEvent::classname());
 
     $this->agentClearingEvent1 = M::mock(AgentClearingEvent::classname());
     $this->agentClearingEvent2 = M::mock(AgentClearingEvent::classname());
-
-    $this->licenseDecisionResult = new ClearingResult($this->licenseDecisionEvent, array($this->agentClearingEvent1, $this->agentClearingEvent2));
   }
 
   public function testHasAgentDecisionEventIsTrue()
   {
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1, $this->agentClearingEvent2));
     assertThat($this->licenseDecisionResult->hasAgentDecisionEvent(), is(true));
   }
 
   public function testHasAgentDecisionEventIsFalse()
   {
-    $this->licenseDecisionResult = new ClearingResult($this->licenseDecisionEvent);
-
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent);
     assertThat($this->licenseDecisionResult->hasAgentDecisionEvent(), is(false));
   }
 
   public function testHasDecisionEventIsTrue()
   {
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1, $this->agentClearingEvent2));
     assertThat($this->licenseDecisionResult->hasClearingEvent(), is(true));
   }
 
@@ -75,107 +76,139 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionResult->hasClearingEvent(), is(false));
   }
 
-  public function testGetLicenseRef()
+  public function testGetLicenseRefFromClearingEvent()
   {
-    $this->licenseDecisionEvent->shouldReceive("getLicenseRef")->once()->andReturn($this->licenseRef);
-
+    $this->clearingEvent->shouldReceive("getLicenseRef")->once()->andReturn($this->licenseRef);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getLicenseRef(), is($this->licenseRef));
+  }
+  
+  public function testGetLicenseRefFromAgentEvents()
+  {
+    $this->agentClearingEvent1->shouldReceive("getLicenseRef")->once()->andReturn($this->licenseRef);
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1, $this->agentClearingEvent2));
     assertThat($this->licenseDecisionResult->getLicenseRef(), is($this->licenseRef));
   }
 
-  public function testGetLicenseId()
+  public function testGetLicenseIdFromClearingEvent()
   {
     $licenseId = 123;
-    $this->licenseDecisionEvent->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
-
+    $this->clearingEvent->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
 
+  
+  public function testGetLicenseIdFromAgentEvent()
+  {
+    $licenseId = 123;
+    $this->agentClearingEvent1->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
+  }
+  
   public function testGetLicenseShortName()
   {
     $licenseShortName = "<shortName>";
-    $this->licenseDecisionEvent->shouldReceive("getLicenseShortName")->once()->andReturn($licenseShortName);
-
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    $this->clearingEvent->shouldReceive("getLicenseShortName")->once()->andReturn($licenseShortName);
     assertThat($this->licenseDecisionResult->getLicenseShortName(), is($licenseShortName));
   }
 
   public function testGetLicenseFullName()
   {
     $licenseFullName = "<fullName>";
-    $this->licenseDecisionEvent->shouldReceive("getLicenseFullName")->once()->andReturn($licenseFullName);
-
+    $this->clearingEvent->shouldReceive("getLicenseFullName")->once()->andReturn($licenseFullName);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseFullName(), is($licenseFullName));
   }
 
-  public function testGetComment()
+  public function testGetCommentWithClearingEvent()
   {
     $comment = "<comment>";
-    $this->licenseDecisionEvent->shouldReceive("getComment")->once()->andReturn($comment);
-
+    $this->clearingEvent->shouldReceive("getComment")->once()->andReturn($comment);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getComment(), is($comment));
+  }
+  
+  public function testGetCommentWithoutClearingEvent()
+  {
+    $comment = "";
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getComment(), is($comment));
   }
 
-  public function testGetReportInfo()
+  public function testGetReportInfoWithClearingEvent()
   {
     $reportInfo = "<reportInfo>";
-    $this->licenseDecisionEvent->shouldReceive("getReportinfo")->once()->andReturn($reportInfo);
-
+    $this->clearingEvent->shouldReceive("getReportinfo")->once()->andReturn($reportInfo);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getReportinfo(), is($reportInfo));
   }
-
-  public function testIsGlobal()
+  
+  public function testGetReportInfoWithoutClearingEvent()
   {
-    $this->licenseDecisionEvent->shouldReceive("isGlobal")->once()->andReturn(true);
-
-    assertThat($this->licenseDecisionResult->isGlobal(), is(true));
+    $reportInfo = "";
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getReportinfo(), is($reportInfo));
   }
 
   public function testIsRemoved()
   {
-    $this->licenseDecisionEvent->shouldReceive("isRemoved")->once()->andReturn(true);
-
+    $this->clearingEvent->shouldReceive("isRemoved")->once()->andReturn(true);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->isRemoved(), is(true));
   }
 
   public function testGetDateTime()
   {
     $dateTime = new DateTime();
-    $this->licenseDecisionEvent->shouldReceive("getDateTime")->once()->andReturn($dateTime);
-
+    $this->clearingEvent->shouldReceive("getDateTime")->once()->andReturn($dateTime);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getDateTime(), is($dateTime));
   }
 
-  public function testEventId()
-  {
-    $eventId = 123423;
-    $this->licenseDecisionEvent->shouldReceive("getEventId")->once()->andReturn($eventId);
-
-    assertThat($this->licenseDecisionResult->getEventId(), is($eventId));
-  }
-
-  public function testEventType()
+  public function testEventTypeWithClearingEvent()
   {
     $eventType = "<eventType>";
-    $this->licenseDecisionEvent->shouldReceive("getEventType")->once()->andReturn($eventType);
-
+    $this->clearingEvent->shouldReceive("getEventType")->once()->andReturn($eventType);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getEventType(), is($eventType));
   }
 
-  public function testGetLicenseIdFromAgentClearingEvent()
+  public function testEventTypeWithoutClearingEvent()
   {
+    $eventType = "<eventType>";
+    $this->agentClearingEvent1->shouldReceive("getEventType")->once()->andReturn($eventType);
     $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getEventType(), is($eventType));
+  }
+
+  public function testGetLicenseIdWithClearingEvent()
+  {
+    $licenseId = 123;
+    $this->clearingEvent->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
+  }
+  
+  public function testGetLicenseIdWithoutClearingEvent()
+  {
     $licenseId = 123;
     $this->agentClearingEvent1->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
-
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
 
   public function testGetClearingEvent()
   {
-    assertThat($this->licenseDecisionResult->getClearingEvent(), is($this->licenseDecisionEvent));
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getClearingEvent(), is($this->clearingEvent));
   }
 
   public function testGetAgentClearingEvents()
   {
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1, $this->agentClearingEvent2));
     assertThat($this->licenseDecisionResult->getAgentDecisionEvents(), is(array(
         $this->agentClearingEvent1, $this->agentClearingEvent2)));
   }

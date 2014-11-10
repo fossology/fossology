@@ -22,7 +22,7 @@ use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
-class ClearingEvent extends Object implements Clearing
+class ClearingEvent extends Object implements LicenseClearing
 {
   /** @var int */
   private $eventId;
