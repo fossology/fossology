@@ -188,11 +188,11 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO license_decision_event(uploadtree_fk, user_fk, job_fk, type_fk, rf_fk, is_removed)"
-      " SELECT uploadtree_pk, $2, $3, $4, $5, $6, '0'"
+      "INSERT INTO clearing_event(uploadtree_fk, user_fk, job_fk, type_fk, rf_fk, is_removed)"
+      " SELECT uploadtree_pk, $2, $3, $4, $5, $6"
       " FROM uploadtree"
       " WHERE upload_fk = $7 AND pfile_fk = $1 AND lft BETWEEN $8 AND $9"
-      "RETURNING license_decision_event_pk",
+      "RETURNING clearing_event_pk",
       long, int, int, int, long, int,
       int, long, long
     ),
@@ -226,7 +226,7 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
           fo_dbManager_PrepareStamement(
             state->dbManager,
             "saveBulkResult:highlight",
-            "INSERT INTO highlight_bulk(license_decision_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
+            "INSERT INTO highlight_bulk(clearing_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
             long, long, size_t, size_t
           ),
           licenseDecisionEventId,
