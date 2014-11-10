@@ -48,27 +48,9 @@ int setLeftAndRight(MonkState* state) {
 }
 
 int queryDecisionType(MonkState* state) {
-  PGresult* bulkDecisionType = fo_dbManager_Exec_printf(
-    state->dbManager,
-    "SELECT type_pk FROM license_decision_type WHERE meaning = '" BULK_DECISION_TYPE "'"
-  );
-
-  int result = 0;
-
-  if (bulkDecisionType) {
-    if (PQntuples(bulkDecisionType)==1) {
-       int decisionType = atoi(PQgetvalue(bulkDecisionType,0,0));
-       state->bulkArguments->decisionType = decisionType;
-       result = 1;
-    }
-    PQclear(bulkDecisionType);
-  }
-
-  if (!result) {
-    printf("FATAL: could not read decision type for '" BULK_DECISION_TYPE "'\n");
-  }
-
-  return result;
+  int decisionType = BULK_DECISION_TYPE;
+  state->bulkArguments->decisionType = decisionType;
+  return 1;
 }
 
 int queryBulkArguments(long bulkId, MonkState* state) {
@@ -206,13 +188,12 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO license_decision_event(uploadtree_fk, pfile_fk, user_fk, job_fk, type_fk, rf_fk, is_removed, scope)"
-      " SELECT uploadtree_pk, $1, $2, $3, $4, $5, $6, '0'"
+      "INSERT INTO license_decision_event(uploadtree_fk, user_fk, job_fk, type_fk, rf_fk, is_removed)"
+      " SELECT uploadtree_pk, $2, $3, $4, $5, $6, '0'"
       " FROM uploadtree"
       " WHERE upload_fk = $7 AND pfile_fk = $1 AND lft BETWEEN $8 AND $9"
       "RETURNING license_decision_event_pk",
-      long,
-      int, int, int, long, int,
+      long, int, int, int, long, int,
       int, long, long
     ),
     file->id,
