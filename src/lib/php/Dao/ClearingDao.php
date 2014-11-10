@@ -232,7 +232,7 @@ class ClearingDao extends Object
 
     $tbdColumnStatementName = __METHOD__ . ".d";
     $this->dbManager->prepare($tbdColumnStatementName,
-        "delete from license_decision_event where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
+        "delete from clearing_event where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
 
     while ($item = $this->dbManager->fetchArray($items))
     {
@@ -247,7 +247,7 @@ class ClearingDao extends Object
             'rf_fk'=>$license, 'is_removed'=>$removed, 'scope'=>DecisionScopes::ITEM,
             'job_fk' =>$jobfk,
             'type_fk'=>$type, 'comment'=>$comment, 'reportinfo'=>$remark);
-        $this->dbManager->insertTableRow('license_decision_event', $aDecEvent, $sqlLog=__METHOD__);
+        $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__);
       }
     }
     $this->dbManager->freeResult($items);
@@ -404,7 +404,7 @@ insert into clearing_decision (
     $this->dbManager->prepare($statementName,
         $sql = "
   SELECT
-    LD.license_decision_event_pk,
+    LD.clearing_event_pk,
     LD.uploadtree_fk,
     EXTRACT(EPOCH FROM LD.date_added) as date_added,
     LD.user_fk,
@@ -416,13 +416,13 @@ insert into clearing_decision (
     LD.is_removed,
     LD.reportinfo,
     LD.comment
-  FROM license_decision_event LD
+  FROM clearing_event LD
   INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
   INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
   INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
   WHERE LD.uploadtree_fk = $1
     AND GU2.user_fk=$2
-  GROUP BY LD.license_decision_event_pk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
+  GROUP BY LD.clearing_event_pk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
       GU.group_fk,LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.type_fk, LD.is_removed, LD.reportinfo, LD.comment
   ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
@@ -435,7 +435,7 @@ insert into clearing_decision (
       $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
       $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
-      $licenseDecisionEventBuilder->setEventId($row['license_decision_event_pk'])
+      $licenseDecisionEventBuilder->setEventId($row['clearing_event_pk'])
                                   ->setUploadTreeId($row['uploadtree_fk'])
                                   ->setDateFromTimeStamp($row['date_added'])
                                   ->setUserId($row['user_fk'])
@@ -513,7 +513,7 @@ insert into clearing_decision (
   {
     $this->dbManager->begin();
 
-    $statementGetOldata = "SELECT * from license_decision_event where uploadtree_fk=$1 and rf_fk=$2  order by license_decision_event_pk desc limit 1";
+    $statementGetOldata = "SELECT * from clearing_event where uploadtree_fk=$1 and rf_fk=$2  order by clearing_event_pk desc limit 1";
     $statementName = __METHOD__.'getOld';
     $params = array($uploadTreeId, $licenseId); //, $this->dbManager->booleanToDb(true)
     $row = $this->dbManager->getSingleRow($statementGetOldata,$params,$statementName);
@@ -552,7 +552,7 @@ insert into clearing_decision (
     {
       $insertIsRemoved = null;
     }
-    $this->dbManager->insertTableRow('license_decision_event', array(
+    $this->dbManager->insertTableRow('clearing_event', array(
         'uploadtree_fk'=>$uploadTreeId, 'user_fk'=>$userId, 'rf_fk'=>$licenseId, 'type_fk'=>$type,
         'is_removed'=>$insertIsRemoved, 'reportinfo'=>$reportInfo, 'comment'=>$comment));
   }
@@ -562,7 +562,7 @@ insert into clearing_decision (
     $statementName = __METHOD__;
     $this->dbManager->prepare(
       $statementName,
-      "SELECT DISTINCT(uploadtree_fk) FROM license_decision_event WHERE job_fk = $1"
+      "SELECT DISTINCT(uploadtree_fk) FROM clearing_event WHERE job_fk = $1"
     );
 
     $res = $this->dbManager->execute($statementName, array($jobId));

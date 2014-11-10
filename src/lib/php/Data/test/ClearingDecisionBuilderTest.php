@@ -22,7 +22,6 @@ namespace Fossology\Lib\Data;
 
 use DateTime;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Data\DecisionScopes;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase

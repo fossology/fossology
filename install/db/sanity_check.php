@@ -66,7 +66,7 @@ class SanityChecker
   {
     $licenseEventTypes = new LicenseEventTypes();
     $map = $licenseEventTypes->getMap();
-    $this->errors += $this->checkDatabaseEnum($tablename='license_decision_event', 'type_fk', $map);
+    $this->errors += $this->checkDatabaseEnum($tablename='clearing_event', 'type_fk', $map);
   }
   
   /**
