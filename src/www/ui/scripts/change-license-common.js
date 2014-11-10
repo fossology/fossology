@@ -169,7 +169,7 @@ function popUpLicenseText(popUpUri, title) {
 }
 
 function addLicense(uploadId, uploadTreeId, licenseId) {
-  $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
+  $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
       .done(function (data) {
       if(data){
         $('#decTypeSet').css('border-color','red');
@@ -182,7 +182,7 @@ function addLicense(uploadId, uploadTreeId, licenseId) {
 
 
 function removeLicense(uploadId, uploadTreeId, licenseId) {
-  $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId + "&global=" + $('[name="global_license_decision"]:checked').val())
+  $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
       if(data){
         $('#decTypeSet').css('border-color','red');

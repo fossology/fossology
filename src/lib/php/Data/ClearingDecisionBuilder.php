@@ -22,9 +22,39 @@ namespace Fossology\Lib\Data;
 
 use DateTime;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecisionBuilder extends ClearingDecisionData
+class ClearingDecisionBuilder extends Object
 {
+  /** @var bool */
+  private $sameUpload;
+  /** @var bool */
+  private $sameFolder;
+  /** @var LicenseRef[] */
+  private $positiveLicenses;
+  /** @var LicenseRef[] */
+  private $negativeLicenses;
+  /** @var int */
+  private $clearingId;
+  /** @var int */
+  private $uploadTreeId;
+  /** @var int */
+  private $pfileId;
+  /** @var string */
+  private $userName;
+  /** @var int */
+  private $userId;
+  /** @var string */
+  private $type;
+  /** @var string */
+  private $comment;
+  /** @var string */
+  private $reportinfo;
+  /** @var int */
+  private $scope;
+  /** @var DateTime */
+  private $dateAdded;
+
   function __construct()
   {
     $this->sameUpload = false;
@@ -38,7 +68,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
     $this->userId = -1;
     $this->type = null;
     $this->scope = DecisionScopes::ITEM;
-    $this->date_added = new DateTime();
+    $this->dateAdded = new DateTime();
   }
 
   /**
@@ -57,7 +87,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
    */
   public function setDateAdded($date_added)
   {
-    $this->date_added->setTimestamp($date_added);
+    $this->dateAdded->setTimestamp($date_added);
     return $this;
   }
 
@@ -184,7 +214,7 @@ class ClearingDecisionBuilder extends ClearingDecisionData
 
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->date_added, $this->positiveLicenses, $this->negativeLicenses);
+        $this->dateAdded, $this->positiveLicenses, $this->negativeLicenses);
   }
 
 }

@@ -62,8 +62,6 @@ INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mod
 INSERT INTO bucketpool (bucketpool_pk, bucketpool_name, version, active, description) VALUES (1, 'GPL Demo bucket pool', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (1, 'GPL Licenses (Demo)', 'orange', 50, 50, 1, 3, '(affero|gpl)', NULL, 'N', 'f');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (2, 'non-gpl (Demo)', 'yellow', 50, 1000, 1, 99, NULL, NULL, 'N', 'f');
-INSERT INTO license_decision_type (type_pk, meaning) VALUES (1, 'User decision');
-INSERT INTO license_decision_type (type_pk, meaning) VALUES (2, 'bulk');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (3, 'To be discussed');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (4, 'Irrelevant');
 INSERT INTO clearing_decision_type (type_pk, meaning) VALUES (5, 'Identified');

@@ -224,9 +224,6 @@ class AjaxClearingView extends FO_Plugin
           {
             $orderAscending = $sort0 === "asc";
           }
-
-          $global = GetParm("global", PARM_STRING) === "true";
-
       }
       switch ($action)
       {
@@ -276,7 +273,9 @@ class AjaxClearingView extends FO_Plugin
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
     list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
+    $licenseEventTypes = new LicenseEventTypes();
+    $licenseEventTypeMap = $licenseEventTypes->getMap();
+    
     $table = array();
     foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
     {
@@ -290,7 +289,7 @@ class AjaxClearingView extends FO_Plugin
       if ($licenseDecisionResult->hasLicenseDecisionEvent())
       {
         $licenseDecisionEvent = $licenseDecisionResult->getLicenseDecisionEvent();
-        $types[] = $licenseDecisionEvent->getEventType();
+        $types[] = $licenseEventTypeMap[$licenseDecisionEvent->getEventType()];
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }
