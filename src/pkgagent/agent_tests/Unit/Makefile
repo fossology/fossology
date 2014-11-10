@@ -29,7 +29,7 @@ coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
 	genhtml -o results cov.txt
 
 $(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
-	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
+	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL) 
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<

@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -152,9 +152,9 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   upload_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /* insert uploadtree: fossology-web_1.4.1_all.deb */
+  /* insert uploadtree_a: fossology-web_1.4.1_all.deb */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,1,48,'fossology-web_1.4.1_all.deb');",
+  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree_a (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,1,48,'fossology-web_1.4.1_all.deb');",
           upload_pk, pi->pFileFk);
   result =  PQexec(db_conn, SQL);
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
@@ -163,9 +163,9 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
     return (-1);
   }
   PQclear(result);
-  /* insert uploadtree: control */
+  /* insert uploadtree_a: control */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,9,10,'control');",
+  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree_a (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,9,10,'control');",
           upload_pk, control_pfilepk);
   result =  PQexec(db_conn, SQL);
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
@@ -243,7 +243,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   PQclear(result);
 
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"DELETE FROM uploadtree WHERE upload_fk = %ld;", upload_pk);
+  snprintf(SQL,MAXSQL,"DELETE FROM uploadtree_a WHERE upload_fk = %ld;", upload_pk);
   result =  PQexec(db_conn, SQL);
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
