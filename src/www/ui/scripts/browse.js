@@ -26,6 +26,8 @@ var statusId = 0;
 var assigneeSelected = 0;
 var statusSelected = 0;
 
+var staSel = null;
+
 $(document).ready(function () {
   table = createBrowseTable();
   $('#insert_browsetbl_filter').append($('#browsetbl_filter'));
@@ -123,6 +125,7 @@ function openCommentModal(upload, status, comment) {
 }
 
 function closeCommentModal() {
+  $(staSel).val( $(staSel).find('option[selected]').val() );
   commentModal.plainModal('close');
 }
 
@@ -147,6 +150,7 @@ function mysuccess4() {
 
 function changeTableEntry(sel, uploadId, columnName) {
   if (columnName == 'status_fk' && (sel.value == 3 || sel.value == 4)) {
+    staSel = sel;
     openCommentModal(uploadId, sel.value, '');
   }
   else {
