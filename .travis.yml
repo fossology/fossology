@@ -20,5 +20,5 @@ install:
 
 script:
  - make
- - cppcheck -q src/
+ - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
 
