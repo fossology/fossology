@@ -22,9 +22,6 @@ use Fossology\Lib\Data\LicenseRef;
 
 interface LicenseDecision
 {
-  const USER_DECISION = "User decision";
-  const BULK_RECOGNITION = "bulk";
-
   /**
    * @return DateTime
    */
