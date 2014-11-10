@@ -168,11 +168,16 @@ function popUpLicenseText(popUpUri, title) {
   window.open(popUpUri + sel, title, 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
 }
 
+function markAsModified() {
+    // TODO: use class to set border styling
+    $('#decTypeSet').css('border-color', 'red').css('border-width', '5px');
+}
+
 function addLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
       .done(function (data) {
       if(data){
-        $('#decTypeSet').css('border-color','red');
+          markAsModified();
       }
       var table = createClearingTable();
       table.fnDraw(false);
@@ -184,8 +189,8 @@ function addLicense(uploadId, uploadTreeId, licenseId) {
 function removeLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
-      if(data){
-        $('#decTypeSet').css('border-color','red');
+      if(data) {
+          markAsModified();
       }
       var table = createClearingTable();
       table.fnDraw(false);
