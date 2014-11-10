@@ -224,9 +224,6 @@ class AjaxClearingView extends FO_Plugin
           {
             $orderAscending = $sort0 === "asc";
           }
-
-          $global = GetParm("global", PARM_STRING) === "true";
-
       }
       switch ($action)
       {
