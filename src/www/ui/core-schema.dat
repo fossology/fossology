@@ -2092,14 +2092,12 @@
   $Schema["SEQUENCE"]["tag_ns_group_tag_ns_group_pk_seq"] = "CREATE SEQUENCE \"tag_ns_group_tag_ns_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_decision_type_type_seq"] = "CREATE SEQUENCE \"license_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_type_type_seq"] = "CREATE SEQUENCE \"clearing_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["upload_status_type_seq"] = "CREATE SEQUENCE \"upload_status_type_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_license_events_clearing_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_license_events_clearing_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_decision_event_license_decision_event_pk_seq"] = "CREATE SEQUENCE \"license_decision_event_license_decision_event_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_decision_type_type_seq"] = "CREATE SEQUENCE \"license_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_decision_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["copyright_audit_ca_pk_seq"] = "CREATE SEQUENCE \"copyright_audit_ca_pk_seq\" START 1;";
 
@@ -2116,7 +2114,6 @@
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
   $Schema["CONSTRAINT"]["license_decision_event_pkey"] = "ALTER TABLE \"license_decision_event\" ADD CONSTRAINT \"license_decision_event_pkey\" PRIMARY KEY (\"license_decision_event_pk\");";
-  $Schema["CONSTRAINT"]["license_decision_type_pkey"] = "ALTER TABLE \"license_decision_type\" ADD CONSTRAINT \"license_decision_type_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_type_pkey"] = "ALTER TABLE \"clearing_decision_type\" ADD CONSTRAINT \"clearing_decision_type_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
@@ -2354,7 +2351,7 @@
   $Schema["TABLE"]["license_decision_event"]["job_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"job_fk\" int4;";
   $Schema["TABLE"]["license_decision_event"]["job_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_decision_event"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"type_fk\" IS 'Identifier for license_decision_type';";
+  $Schema["TABLE"]["license_decision_event"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"license_decision_event\".\"type_fk\" IS 'see Fossology/Lib/Data/LicenseEvent/LicenseEventTypes';";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ADD"] = "ALTER TABLE \"license_decision_event\" ADD COLUMN \"type_fk\" int4;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_decision_event"]["type_fk"]["UPDATE"] = "";
@@ -2374,16 +2371,6 @@
   $Schema["TABLE"]["license_decision_event"]["date_added"]["ALTER"] = "ALTER TABLE \"license_decision_event\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
   $Schema["TABLE"]["license_decision_event"]["date_added"]["UPDATE"] = "UPDATE license_decision_event SET date_added=now()";
 
-
-  $Schema["TABLE"]["license_decision_type"]["type_pk"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_type"]["type_pk"]["ADD"] = "ALTER TABLE \"license_decision_type\" ADD COLUMN \"type_pk\" int4;";
-  $Schema["TABLE"]["license_decision_type"]["type_pk"]["ALTER"] = "ALTER TABLE \"license_decision_type\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('license_decision_type_type_seq'::regclass);";
-  $Schema["TABLE"]["license_decision_type"]["type_pk"]["UPDATE"] = "UPDATE license_decision_type SET type_pk=nextval('license_decision_type_type_seq'::regclass)";
-
-  $Schema["TABLE"]["license_decision_type"]["meaning"]["DESC"] = "";
-  $Schema["TABLE"]["license_decision_type"]["meaning"]["ADD"] = "ALTER TABLE \"license_decision_type\" ADD COLUMN \"meaning\" varchar(30);";
-  $Schema["TABLE"]["license_decision_type"]["meaning"]["ALTER"] = "ALTER TABLE \"license_decision_type\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_decision_type"]["meaning"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["copyright_audit"]["ct_fk"]["DESC"] = "";

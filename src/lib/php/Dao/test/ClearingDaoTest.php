@@ -23,7 +23,6 @@ use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -68,7 +67,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'clearing_decision_events',
             'clearing_decision_type',
             'license_decision_event',
-            'license_decision_type',
             'clearing_licenses',
             'license_ref',
             'users',
@@ -76,11 +74,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'uploadtree'
         ));
 
-    $this->testDb->insertData(
-        array(
-            'clearing_decision_type',
-            'license_decision_type'
-        ));
+    $this->testDb->insertData(array('clearing_decision_type'));
 
     $userArray = array(
         array('myself', 1),

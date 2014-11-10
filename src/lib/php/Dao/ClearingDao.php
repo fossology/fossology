@@ -228,10 +228,7 @@ class ClearingDao extends Object
         $statementName);
     $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
-    $tbdColumnStatementName = __METHOD__ . "_TBD_column";
-    $tbdDecisionTypeValue = $this->dbManager->getSingleRow("select type_pk from license_decision_type where meaning = $1",
-            array(LicenseDecision::USER_DECISION), $tbdColumnStatementName);
-    $type = $tbdDecisionTypeValue['type_pk'];
+    $type = LicenseEventTypes::USER;
 
     $tbdColumnStatementName = __METHOD__ . ".d";
     $this->dbManager->prepare($tbdColumnStatementName,
@@ -412,22 +409,21 @@ insert into clearing_decision (
     EXTRACT(EPOCH FROM LD.date_added) as date_added,
     LD.user_fk,
     GU.group_fk,
-    LDT.meaning AS event_type,
     LD.rf_fk,
     LR.rf_shortname,
     LR.rf_fullname,
+    LD.type_fk event_type,
     LD.is_removed,
     LD.reportinfo,
     LD.comment
   FROM license_decision_event LD
-  INNER JOIN license_decision_type LDT ON LD.type_fk = LDT.type_pk
   INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
   INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
   INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
   WHERE LD.uploadtree_fk = $1
     AND GU2.user_fk=$2
   GROUP BY LD.license_decision_event_pk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
-      GU.group_fk, LDT.meaning, LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.is_removed, LD.reportinfo, LD.comment
+      GU.group_fk,LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.type_fk, LD.is_removed, LD.reportinfo, LD.comment
   ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
         ");
     $res = $this->dbManager->execute(

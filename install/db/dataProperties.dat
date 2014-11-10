@@ -7,11 +7,6 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-$dataPropertiesStorage['license_decision_type.type_pk.meaning'] = array(
-  1=>'User decision',
-  2=>'bulk'
-);
-
 $dataPropertiesStorage['clearing_decision_type.type_pk.meaning'] = array(
   3=>'To be discussed',
   4=>'Irrelevant',
