@@ -26,5 +26,6 @@ coverage:
 
 clean:
 	$(call DIR_LOOP,clean)
+	rm -rf results/ cov.txt
 
 .PHONY: all test coverage clean
