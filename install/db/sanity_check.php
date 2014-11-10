@@ -19,6 +19,7 @@
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
 use Fossology\Lib\Db\DbManager;
 
 class SanityChecker
@@ -40,6 +41,7 @@ class SanityChecker
   {
     $this->checkDecisionScopes();
     $this->checkUploadStatus();
+    $this->checkLicenseEventTypes();
     return $this->errors;
   }
 
@@ -53,13 +55,20 @@ class SanityChecker
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'decision_type', $typeMap);
   }
 
-  public function checkUploadStatus()
+  private function checkUploadStatus()
   {
     $uploadStatus = new UploadStatus();
     $statusMap = $uploadStatus->getMap();
     $this->errors += $this->checkDatabaseEnum($tablename = 'upload_status', 'status_pk', $statusMap);
   }
 
+  private function checkLicenseEventTypes()
+  {
+    $licenseEventTypes = new LicenseEventTypes();
+    $map = $licenseEventTypes->getMap();
+    $this->errors += $this->checkDatabaseEnum($tablename='clearing_event', 'type_fk', $map);
+  }
+  
   /**
    * 
    * @param string $tablename

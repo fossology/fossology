@@ -22,6 +22,7 @@ namespace Fossology\Lib\Data\LicenseDecision;
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
 use Fossology\Lib\Util\Object;
 
 
@@ -55,7 +56,7 @@ class LicenseDecisionEventBuilder extends Object
     $this->dateTime = null;
     $this->userId = 1;
     $this->groupId = 1;
-    $this->eventType = LicenseDecision::USER_DECISION;
+    $this->eventType = LicenseEventTypes::USER;
     $this->licenseRef = null;
     $this->removed = false;
     $this->reportinfo = "";
@@ -173,6 +174,5 @@ class LicenseDecisionEventBuilder extends Object
     $this->userId = intval($userId);
     return $this;
   }
-
 
 }

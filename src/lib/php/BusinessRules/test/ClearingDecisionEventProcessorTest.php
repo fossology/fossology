@@ -24,9 +24,11 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
+use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Mockery as M;
+
 
 class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 {
@@ -234,7 +236,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
    * @param string $comment
    * @return LicenseDecisionEvent
    */
-  private function createLicenseDecisionEvent($eventId, $licenseId, $licenseShortName, $licenseFullName, $eventType = LicenseDecisionEvent::USER_DECISION, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
+  private function createLicenseDecisionEvent($eventId, $licenseId, $licenseShortName, $licenseFullName, $eventType = LicenseEventTypes::USER, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseFullName);
     return new LicenseDecisionEvent($eventId, $this->uploadTreeId, new DateTime(), $this->userId, $this->groupId, $eventType, $licenseRef, $isRemoved, $reportInfo, $comment);

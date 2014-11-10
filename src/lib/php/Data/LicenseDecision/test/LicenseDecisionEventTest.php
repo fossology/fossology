@@ -43,7 +43,7 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
   private $groupId = 123;
 
   /** @var string */
-  private $eventType = LicenseDecision::USER_DECISION;
+  private $eventType = LicenseEventTypes::USER;
 
   /** @var string */
   private $reportinfo = "<reportinfo>";
