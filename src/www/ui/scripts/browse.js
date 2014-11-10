@@ -33,6 +33,10 @@ $(document).ready(function () {
   table.on('draw', function () {
     initPrioClick();
     initPrioDraw();
+    $('.cc').dblclick( function (){
+        var source=table.fnGetData(this);
+        openCommentModal(source[0],source[1],source[2]); 
+      } );
   });
   commentModal = $('#commentModal').plainModal();
 });
@@ -122,20 +126,6 @@ function closeCommentModal() {
   commentModal.plainModal('close');
 }
 
-
-function commentColumn(source, type, val) {
-  if (type === 'set') {
-    source[2] = val;
-    return;
-  }
-  if (type === 'display') {
-    if (source[0]) {
-      return '<span ondblclick="openCommentModal(' + source[0] + ',' + source[1] + ',this.value)">' + source[2] + '</span>';
-    }
-    return source[2];
-  }
-  return source[2];
-}
 
 function mysuccess() {
   var oTable = createBrowseTable();

@@ -2,10 +2,8 @@ tableColumns = [
   {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
   {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
   {
-    "sTitle": "{{ "Comment" }}", "sClass": "center", "bSortable": false, "bSearchable": false,
-    "mRender": function (source, type, val) {
-      return commentColumn(source, type, val);
-    }
+    "sTitle": "{{ "Comment" }}", "sClass": "center cc", "bSortable": false, "bSearchable": false,
+    "mRender": 2
   },
   {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
   {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
