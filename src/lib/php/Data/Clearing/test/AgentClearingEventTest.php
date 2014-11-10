@@ -16,13 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
 
-class AgentLicenseDecisionEventTest extends \PHPUnit_Framework_TestCase {
+class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
   /** @var LicenseRef|M\MockInterface */
   private $licenseRef;
 
@@ -35,14 +35,14 @@ class AgentLicenseDecisionEventTest extends \PHPUnit_Framework_TestCase {
   /** @var int */
   private $percentage = 95;
 
-  /** @var AgentLicenseDecisionEvent */
-  private $agentLicenseDecisionEvent;
+  /** @var AgentClearingEvent */
+  private $agentClearingEvent;
 
   public function setUp() {
     $this->licenseRef = M::mock(LicenseRef::classname());
     $this->agentRef = M::mock(AgentRef::classname());
 
-    $this->agentLicenseDecisionEvent = new AgentLicenseDecisionEvent($this->licenseRef, $this->agentRef, $this->matchId, $this->percentage);
+    $this->agentClearingEvent = new AgentClearingEvent($this->licenseRef, $this->agentRef, $this->matchId, $this->percentage);
   }
 
   public function tearDown() {
@@ -50,74 +50,74 @@ class AgentLicenseDecisionEventTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function testGetEventId() {
-    assertThat($this->agentLicenseDecisionEvent->getEventId(), is($this->matchId));
+    assertThat($this->agentClearingEvent->getEventId(), is($this->matchId));
   }
 
   public function testGetLicenseRef() {
-    assertThat($this->agentLicenseDecisionEvent->getLicenseRef(), is($this->licenseRef));
+    assertThat($this->agentClearingEvent->getLicenseRef(), is($this->licenseRef));
   }
 
   public function testGetLicenseId() {
     $licenseId = 1234;
     $this->licenseRef->shouldReceive('getId')->once()->withNoArgs()->andReturn($licenseId);
 
-    assertThat($this->agentLicenseDecisionEvent->getLicenseId(), is($licenseId));
+    assertThat($this->agentClearingEvent->getLicenseId(), is($licenseId));
   }
 
   public function testGetLicenseShortName() {
     $licenseShortname = "<licenseShortname>";
     $this->licenseRef->shouldReceive('getShortName')->once()->withNoArgs()->andReturn($licenseShortname);
 
-    assertThat($this->agentLicenseDecisionEvent->getLicenseShortName(), is($licenseShortname));
+    assertThat($this->agentClearingEvent->getLicenseShortName(), is($licenseShortname));
   }
 
   public function testGetLicenseFullName() {
     $licenseFullName = "<licenseFullName>";
     $this->licenseRef->shouldReceive('getFullName')->once()->withNoArgs()->andReturn($licenseFullName);
 
-    assertThat($this->agentLicenseDecisionEvent->getLicenseFullName(), is($licenseFullName));
+    assertThat($this->agentClearingEvent->getLicenseFullName(), is($licenseFullName));
   }
 
   public function testGetEventType() {
-    assertThat($this->agentLicenseDecisionEvent->getEventType(), is(LicenseDecisionResult::AGENT_DECISION_TYPE));
+    assertThat($this->agentClearingEvent->getEventType(), is(ClearingResult::AGENT_DECISION_TYPE));
   }
 
   public function testGetComment() {
-    assertThat($this->agentLicenseDecisionEvent->getComment(), is(""));
+    assertThat($this->agentClearingEvent->getComment(), is(""));
   }
 
   public function testGetReportinfo() {
-    assertThat($this->agentLicenseDecisionEvent->getReportinfo(), is(""));
+    assertThat($this->agentClearingEvent->getReportinfo(), is(""));
   }
 
   public function testIsGlobal() {
-    assertThat($this->agentLicenseDecisionEvent->isGlobal(), is(true));
+    assertThat($this->agentClearingEvent->isGlobal(), is(true));
   }
 
   public function testIsRemoved() {
-    assertThat($this->agentLicenseDecisionEvent->isRemoved(), is(false));
+    assertThat($this->agentClearingEvent->isRemoved(), is(false));
   }
 
   public function testGetAgentRef() {
-    assertThat($this->agentLicenseDecisionEvent->getAgentRef(), is($this->agentRef));
+    assertThat($this->agentClearingEvent->getAgentRef(), is($this->agentRef));
   }
 
   public function testGetAgentId() {
     $agentId = 1234;
     $this->agentRef->shouldReceive('getAgentId')->once()->withNoArgs()->andReturn($agentId);
 
-    assertThat($this->agentLicenseDecisionEvent->getAgentId(), is($agentId));
+    assertThat($this->agentClearingEvent->getAgentId(), is($agentId));
   }
 
   public function testGetAgentName() {
     $agentName = "<agentName>";
     $this->agentRef->shouldReceive('getAgentName')->once()->withNoArgs()->andReturn($agentName);
 
-    assertThat($this->agentLicenseDecisionEvent->getAgentName(), is($agentName));
+    assertThat($this->agentClearingEvent->getAgentName(), is($agentName));
   }
 
   public function testGetPercentage() {
-    assertThat($this->agentLicenseDecisionEvent->getPercentage(), is($this->percentage));
+    assertThat($this->agentClearingEvent->getPercentage(), is($this->percentage));
   }
 }
  

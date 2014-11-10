@@ -24,11 +24,11 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
-use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\Clearing;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
+use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -228,7 +228,7 @@ class ClearingDao extends Object
         $statementName);
     $items = $this->dbManager->execute($statementName, array($uploadTreeId));
 
-    $type = LicenseEventTypes::USER;
+    $type = ClearingEventTypes::USER;
 
     $tbdColumnStatementName = __METHOD__ . ".d";
     $this->dbManager->prepare($tbdColumnStatementName,
@@ -350,8 +350,8 @@ ORDER BY CD.date_added DESC LIMIT 1
    * @param $userId
    * @param $decType
    * @param $isGlobal
-   * @param LicenseDecisionResult[] $licenses
-   * @param LicenseDecisionResult[] $removedLicenses
+   * @param ClearingResult[] $licenses
+   * @param ClearingResult[] $removedLicenses
    */
   public function insertClearingDecision($uploadTreeId, $userId, $decType, $isGlobal, $licenses, $removedLicenses)
   {
@@ -396,9 +396,9 @@ insert into clearing_decision (
   /**
    * @param int $userId
    * @param int $uploadTreeId
-   * @return LicenseDecisionEvent[]
+   * @return ClearingEvent[]
    */
-  public function getRelevantLicenseDecisionEvents($userId, $uploadTreeId)
+  public function getRelevantClearingEvents($userId, $uploadTreeId)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -434,7 +434,7 @@ insert into clearing_decision (
     while ($row = $this->dbManager->fetchArray($res)) {
       $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
-      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
+      $licenseDecisionEventBuilder = new ClearingEventBuilder();
       $licenseDecisionEventBuilder->setEventId($row['clearing_event_pk'])
                                   ->setUploadTreeId($row['uploadtree_fk'])
                                   ->setDateFromTimeStamp($row['date_added'])
@@ -454,14 +454,14 @@ insert into clearing_decision (
   }
 
   /**
-   * @return LicenseDecisionEvent[][]
+   * @return ClearingEvent[][]
    */
-  public function getCurrentLicenseDecisions($userId, $itemId)
+  public function getCurrentClearings($userId, $itemId)
   {
-    /** @var LicenseDecisionEvent[] $events */
-    $events = $this->getRelevantLicenseDecisionEvents($userId, $itemId);
+    /** @var ClearingEvent[] $events */
+    $events = $this->getRelevantClearingEvents($userId, $itemId);
 
-    /** @var LicenseDecisionEvent[] $latestLicDec */
+    /** @var ClearingEvent[] $latestLicDec */
     $latestLicDec = array();
     foreach ($events as $event)
     {
@@ -493,9 +493,9 @@ insert into clearing_decision (
    * @param int $licenseId
    * @param $type
    */
-  public function addLicenseDecision($uploadTreeId, $userId, $licenseId, $type)
+  public function addClearing($uploadTreeId, $userId, $licenseId, $type)
   {
-    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, false);
+    $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, $type, false);
   }
 
   /**
@@ -504,12 +504,12 @@ insert into clearing_decision (
    * @param int $licenseId
    * @param int $type
    */
-  public function removeLicenseDecision($uploadTreeId, $userId, $licenseId, $type)
+  public function removeClearing($uploadTreeId, $userId, $licenseId, $type)
   {
-    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, true);
+    $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, $type, true);
   }
 
-  public function updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo)
+  public function updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo)
   {
     $this->dbManager->begin();
 
@@ -519,8 +519,8 @@ insert into clearing_decision (
     $row = $this->dbManager->getSingleRow($statementGetOldata,$params,$statementName);
 
     if(!$row) {  //The license was not added as user decision yet -> we promote it here
-      $type = LicenseEventTypes::USER;
-      $this->addLicenseDecision($uploadTreeId, $userId, $licenseId, $type);
+      $type = ClearingEventTypes::USER;
+      $this->addClearing($uploadTreeId, $userId, $licenseId, $type);
       $row['type_fk'] = $type;
       $row['comment'] = "";
       $row['reportinfo'] = "";
@@ -535,13 +535,13 @@ insert into clearing_decision (
       $comment=$changeTo;
 
     }
-    $this->insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], null, $reportInfo, $comment);
+    $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], null, $reportInfo, $comment);
 
     $this->dbManager->commit();
 
   }
 
-  private function insertLicenseDecisionEvent($uploadTreeId, $userId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
+  private function insertClearingEvent($uploadTreeId, $userId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
   {
     $this->markDecisionAsWip($uploadTreeId, $userId);
     if($isRemoved!=null)

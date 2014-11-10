@@ -35,14 +35,14 @@ selectedLicensesTableConfig = {
 
 editableConfiguration  = {
   "sReadOnlyCellClass": "read_only",
-  "sUpdateURL": "?mod=conclude-license&do=updateLicenseDecisions" ,
+  "sUpdateURL": "?mod=conclude-license&do=updateClearings" ,
   "fnOnEditing": function(input) {return input[0].value;},
   "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').css('border-color','red');} } ,
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
   "sSuccessResponse": "success"
 };
 
-function createLicenseDecisionTable() {
+function createClearingTable() {
   otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   return otable;
 }
@@ -76,6 +76,6 @@ function createLicenseSelectionTable() {
 }
 
 $(document).ready(function () {
-  createLicenseDecisionTable();
+  createClearingTable();
   createLicenseSelectionTable();
 });

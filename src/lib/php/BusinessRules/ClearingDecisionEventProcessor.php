@@ -19,11 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
-use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
+use Fossology\Lib\Data\Clearing\AgentClearingEvent;
+use Fossology\Lib\Data\Clearing\Clearing;
+use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
+use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
 
@@ -60,10 +60,10 @@ class ClearingDecisionEventProcessor
     {
       return;
     }
-    $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
+    $events = $this->clearingDao->getRelevantClearingEvents($userId, $item);
     $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
-    list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
+    list($added, $removed) = $this->getCurrentClearings($itemBounds, $userId);
 
     $lastDecision = null;
     $clearingDecType=null;
@@ -76,11 +76,11 @@ class ClearingDecisionEventProcessor
     $insertDecision = ($type!=$clearingDecType);
     foreach ($added  as $licenseShortName => $licenseDecisionResult)
     {
-      /** @var LicenseDecisionResult $licenseDecisionResult */
-      if (!$licenseDecisionResult->hasLicenseDecisionEvent())
+      /** @var ClearingResult $licenseDecisionResult */
+      if (!$licenseDecisionResult->hasClearingEvent())
       {
         $licenseId = $licenseDecisionResult->getLicenseId();
-        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER);
+        $this->clearingDao->addClearing($itemBounds->getUploadTreeId(), $userId, $licenseId, ClearingEventTypes::USER);
         $insertDecision = true;
       }
     }
@@ -89,9 +89,9 @@ class ClearingDecisionEventProcessor
     {
       foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
       {
-        if (!$licenseDecisionResult->hasLicenseDecisionEvent()) continue;
+        if (!$licenseDecisionResult->hasClearingEvent()) continue;
 
-        $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
+        $entryTimestamp = $licenseDecisionResult->getClearingEvent()->getDateTime();
 
         if ($lastDecision === null || $lastDecision < $entryTimestamp)
         {
@@ -116,9 +116,9 @@ class ClearingDecisionEventProcessor
     {
       $insertDecision = true;
       $removedSinceLastDecision = array();
-      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
+      $licenseDecisionEventBuilder = new ClearingEventBuilder();
       foreach($added as $licenseShortName => $licenseDecisionResult) {
-        $this->clearingDao->removeLicenseDecision($itemBounds->getUploadTreeId(), $userId,
+        $this->clearingDao->removeClearing($itemBounds->getUploadTreeId(), $userId,
             $licenseDecisionResult->getLicenseId(), $type);
         $licenseDecisionEventBuilder
             ->setLicenseRef($licenseDecisionResult->getLicenseRef());
@@ -143,22 +143,22 @@ class ClearingDecisionEventProcessor
    * @param int $userId
    * @return array
    */
-  public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
+  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $uploadTreeId = $itemTreeBounds->getUploadTreeId();
     $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemTreeBounds);
 
-    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
+    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentClearings($userId, $uploadTreeId);
 
     $licenseDecisions = array();
-    $removedLicenseDecisions = array();
+    $removedClearings = array();
 
     $allLicenseShortNames = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
 
     foreach ($allLicenseShortNames as $licenseShortName)
     {
       $licenseDecisionEvent = null;
-      $agentLicenseDecisionEvents = array();
+      $agentClearingEvents = array();
 
       if (array_key_exists($licenseShortName, $addedLicenses))
       {
@@ -171,7 +171,7 @@ class ClearingDecisionEventProcessor
         {
           foreach ($licenseProperties as $licenseProperty)
           {
-            $agentLicenseDecisionEvents[] = new AgentLicenseDecisionEvent(
+            $agentClearingEvents[] = new AgentClearingEvent(
                 $licenseProperty['licenseRef'],
                 $licenseProperty['agentRef'],
                 $licenseProperty['matchId'],
@@ -181,13 +181,13 @@ class ClearingDecisionEventProcessor
         }
       }
 
-      if (($licenseDecisionEvent !== null) || (count($agentLicenseDecisionEvents) > 0))
+      if (($licenseDecisionEvent !== null) || (count($agentClearingEvents) > 0))
       {
-        $licenseDecisionResult = new LicenseDecisionResult($licenseDecisionEvent, $agentLicenseDecisionEvents);
+        $licenseDecisionResult = new ClearingResult($licenseDecisionEvent, $agentClearingEvents);
 
         if (array_key_exists($licenseShortName, $removedLicenses))
         {
-          $removedLicenseDecisions[$licenseShortName] = $licenseDecisionResult;
+          $removedClearings[$licenseShortName] = $licenseDecisionResult;
         } else
         {
           $licenseDecisions[$licenseShortName] = $licenseDecisionResult;
@@ -195,7 +195,7 @@ class ClearingDecisionEventProcessor
       }
     }
 
-    return array($licenseDecisions, $removedLicenseDecisions);
+    return array($licenseDecisions, $removedClearings);
   }
 
   /**
@@ -204,17 +204,17 @@ class ClearingDecisionEventProcessor
    * @param $lastDecisionDate
    * @return array
    */
-  public function filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate)
+  public function filterRelevantClearingEvents($userId, $itemTreeBounds, $lastDecisionDate)
   {
-    list($added, $removed) = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+    list($added, $removed) = $this->getCurrentClearings($itemTreeBounds, $userId);
 
     if ($lastDecisionDate !== null)
     {
       /**
-       * @param LicenseDecisionResult $event
+       * @param ClearingResult $event
        * @return bool
        */
-      $filter_since_event = function (LicenseDecisionResult $event) use ($lastDecisionDate)
+      $filter_since_event = function (ClearingResult $event) use ($lastDecisionDate)
       {
         return $event->getDateTime() >= $lastDecisionDate;
       };
@@ -226,8 +226,8 @@ class ClearingDecisionEventProcessor
   }
 
   /**
-   * @param LicenseDecision[] $added
-   * @param LicenseDecision[] $removed
+   * @param Clearing[] $added
+   * @param Clearing[] $removed
    * @return bool
    */
   public function checkIfAutomaticDecisionCanBeMade($added, $removed)
@@ -235,7 +235,7 @@ class ClearingDecisionEventProcessor
     $canAutoDecide = true;
     foreach ($added as $event)
     {
-      if ($event->getEventType() === LicenseDecisionResult::AGENT_DECISION_TYPE)
+      if ($event->getEventType() === ClearingResult::AGENT_DECISION_TYPE)
       {
         $canAutoDecide = false;
         break;

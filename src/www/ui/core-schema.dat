@@ -2351,7 +2351,7 @@
   $Schema["TABLE"]["clearing_event"]["job_fk"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"job_fk\" int4;";
   $Schema["TABLE"]["clearing_event"]["job_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_event"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"type_fk\" IS 'see Fossology/Lib/Data/LicenseEvent/LicenseEventTypes';";
+  $Schema["TABLE"]["clearing_event"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"type_fk\" IS 'see Fossology/Lib/Data/LicenseEvent/ClearingEventTypes';";
   $Schema["TABLE"]["clearing_event"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"type_fk\" int4;";
   $Schema["TABLE"]["clearing_event"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_event"]["type_fk"]["UPDATE"] = "";

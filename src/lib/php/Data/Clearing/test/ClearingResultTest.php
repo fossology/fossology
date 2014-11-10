@@ -16,40 +16,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 use Mockery as M;
 
-class LicenseDecisionResultTest extends \PHPUnit_Framework_TestCase
+class ClearingResultTest extends \PHPUnit_Framework_TestCase
 {
 
   /** @var LicenseRef|M\MockInterface */
   private $licenseRef;
 
-  /** @var LicenseDecisionEvent|M\MockInterface */
+  /** @var ClearingEvent|M\MockInterface */
   private $licenseDecisionEvent;
 
-  /** @var AgentLicenseDecisionEvent|M\MockInterface */
-  private $agentLicenseDecisionEvent1;
+  /** @var AgentClearingEvent|M\MockInterface */
+  private $agentClearingEvent1;
 
-  /** @var AgentLicenseDecisionEvent|M\MockInterface */
-  private $agentLicenseDecisionEvent2;
+  /** @var AgentClearingEvent|M\MockInterface */
+  private $agentClearingEvent2;
 
-  /** @var LicenseDecisionResult */
+  /** @var ClearingResult */
   private $licenseDecisionResult;
 
   public function setUp()
   {
     $this->licenseRef = M::mock(LicenseRef::classname());
-    $this->licenseDecisionEvent = M::mock(LicenseDecisionEvent::classname());
+    $this->licenseDecisionEvent = M::mock(ClearingEvent::classname());
 
-    $this->agentLicenseDecisionEvent1 = M::mock(AgentLicenseDecisionEvent::classname());
-    $this->agentLicenseDecisionEvent2 = M::mock(AgentLicenseDecisionEvent::classname());
+    $this->agentClearingEvent1 = M::mock(AgentClearingEvent::classname());
+    $this->agentClearingEvent2 = M::mock(AgentClearingEvent::classname());
 
-    $this->licenseDecisionResult = new LicenseDecisionResult($this->licenseDecisionEvent, array($this->agentLicenseDecisionEvent1, $this->agentLicenseDecisionEvent2));
+    $this->licenseDecisionResult = new ClearingResult($this->licenseDecisionEvent, array($this->agentClearingEvent1, $this->agentClearingEvent2));
   }
 
   public function testHasAgentDecisionEventIsTrue()
@@ -59,20 +59,20 @@ class LicenseDecisionResultTest extends \PHPUnit_Framework_TestCase
 
   public function testHasAgentDecisionEventIsFalse()
   {
-    $this->licenseDecisionResult = new LicenseDecisionResult($this->licenseDecisionEvent);
+    $this->licenseDecisionResult = new ClearingResult($this->licenseDecisionEvent);
 
     assertThat($this->licenseDecisionResult->hasAgentDecisionEvent(), is(false));
   }
 
   public function testHasDecisionEventIsTrue()
   {
-    assertThat($this->licenseDecisionResult->hasLicenseDecisionEvent(), is(true));
+    assertThat($this->licenseDecisionResult->hasClearingEvent(), is(true));
   }
 
   public function testHasDecisionEventIsFalse()
   {
-    $this->licenseDecisionResult = new LicenseDecisionResult(null, array($this->agentLicenseDecisionEvent1));
-    assertThat($this->licenseDecisionResult->hasLicenseDecisionEvent(), is(false));
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->hasClearingEvent(), is(false));
   }
 
   public function testGetLicenseRef()
@@ -160,33 +160,33 @@ class LicenseDecisionResultTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionResult->getEventType(), is($eventType));
   }
 
-  public function testGetLicenseIdFromAgentLicenseDecisionEvent()
+  public function testGetLicenseIdFromAgentClearingEvent()
   {
-    $this->licenseDecisionResult = new LicenseDecisionResult(null, array($this->agentLicenseDecisionEvent1));
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
     $licenseId = 123;
-    $this->agentLicenseDecisionEvent1->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
+    $this->agentClearingEvent1->shouldReceive("getLicenseId")->once()->andReturn($licenseId);
 
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
 
-  public function testGetLicenseDecisionEvent()
+  public function testGetClearingEvent()
   {
-    assertThat($this->licenseDecisionResult->getLicenseDecisionEvent(), is($this->licenseDecisionEvent));
+    assertThat($this->licenseDecisionResult->getClearingEvent(), is($this->licenseDecisionEvent));
   }
 
-  public function testGetAgentLicenseDecisionEvents()
+  public function testGetAgentClearingEvents()
   {
     assertThat($this->licenseDecisionResult->getAgentDecisionEvents(), is(array(
-        $this->agentLicenseDecisionEvent1, $this->agentLicenseDecisionEvent2)));
+        $this->agentClearingEvent1, $this->agentClearingEvent2)));
   }
 
   /**
    * @expectedException Exception
-   * @expectedExceptionMessage cannot create LicenseDecisionEvent without any event contained
+   * @expectedExceptionMessage cannot create ClearingEvent without any event contained
    */
-  public function testCreateLicenseDecisionResultCreationFailsOfNoEventsWereFound()
+  public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
-    new LicenseDecisionResult(null);
+    new ClearingResult(null);
   }
 }
  

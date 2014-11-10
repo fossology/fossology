@@ -16,13 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
-class LicenseDecisionEvent extends Object implements LicenseDecision
+class ClearingEvent extends Object implements Clearing
 {
   /** @var int */
   private $eventId;

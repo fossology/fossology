@@ -173,7 +173,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     return $date->setTimestamp($in);
   }
 
-  public function testCurrentLicenseDecisionViaGroupMembershipShouldBeSymmetric()
+  public function testCurrentClearingViaGroupMembershipShouldBeSymmetric()
   {
     $this->buildProposals(array(
         array(301,1,401,false,-99),
@@ -182,8 +182,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->buildDecisions(array(
         array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
     ));
-    list($added1, $removed1) = $this->clearingDao->getCurrentLicenseDecisions(1, 301);
-    list($added2, $removed2) = $this->clearingDao->getCurrentLicenseDecisions(2, 301);
+    list($added1, $removed1) = $this->clearingDao->getCurrentClearings(1, 301);
+    list($added2, $removed2) = $this->clearingDao->getCurrentClearings(2, 301);
     assertThat($added1, is(equalTo($added2)));
     assertThat($removed1, is(equalTo($removed2)));
   }

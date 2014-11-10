@@ -16,13 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
 
-class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
+class ClearingEventTest extends \PHPUnit_Framework_TestCase
 {
   /** @var int */
   private $eventId = 12;
@@ -43,7 +43,7 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
   private $groupId = 123;
 
   /** @var string */
-  private $eventType = LicenseEventTypes::USER;
+  private $eventType = ClearingEventTypes::USER;
 
   /** @var string */
   private $reportinfo = "<reportinfo>";
@@ -54,7 +54,7 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
   /** @var LicenseRef|M/MockInterface */
   private $licenseRef;
 
-  /** @var LicenseDecisionEvent */
+  /** @var ClearingEvent */
   private $licenseDecisionEvent;
 
   public function setUp()
@@ -62,7 +62,7 @@ class LicenseDecisionEventTest extends \PHPUnit_Framework_TestCase
     $this->dateTime = new DateTime();
     $this->licenseRef = M::mock(LicenseRef::classname());
 
-    $this->licenseDecisionEvent = new LicenseDecisionEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->licenseRef, false, $this->reportinfo, $this->comment);
+    $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->licenseRef, false, $this->reportinfo, $this->comment);
   }
 
   public function testGetEventId() {

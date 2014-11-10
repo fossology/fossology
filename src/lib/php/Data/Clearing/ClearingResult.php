@@ -16,34 +16,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 
-class LicenseDecisionResult implements LicenseDecision {
+class ClearingResult implements Clearing {
   const AGENT_DECISION_TYPE = 'agent';
 
   /**
-   * @var LicenseDecisionEvent
+   * @var ClearingEvent
    */
   private $licenseDecisionEvent;
 
   /**
-   * @var array|AgentLicenseDecisionEvent[]
+   * @var array|AgentClearingEvent[]
    */
   private $agentDecisionEvents;
 
   /**
-   * @param null|LicenseDecisionEvent $licenseDecisionEvent
-   * @param AgentLicenseDecisionEvent[] $agentDecisionEvents
+   * @param null|ClearingEvent $licenseDecisionEvent
+   * @param AgentClearingEvent[] $agentDecisionEvents
    * @throws Exception
    */
   public function __construct($licenseDecisionEvent, $agentDecisionEvents=array()) {
     if (($licenseDecisionEvent === null) && (count($agentDecisionEvents) == 0)) {
-      throw new Exception("cannot create LicenseDecisionEvent without any event contained");
+      throw new Exception("cannot create ClearingEvent without any event contained");
     }
 
     $this->licenseDecisionEvent = $licenseDecisionEvent;
@@ -55,7 +55,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getLicenseRef()
   {
-    return $this->getLicenseDecision()->getLicenseRef();
+    return $this->getClearing()->getLicenseRef();
   }
 
   /**
@@ -64,7 +64,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   function getLicenseId()
   {
-    return $this->getLicenseDecision()->getLicenseId();
+    return $this->getClearing()->getLicenseId();
   }
 
   /**
@@ -72,7 +72,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   function getLicenseFullName()
   {
-    return $this->getLicenseDecision()->getLicenseFullName();
+    return $this->getClearing()->getLicenseFullName();
   }
 
   /**
@@ -80,7 +80,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   function getLicenseShortName()
   {
-    return $this->getLicenseDecision()->getLicenseShortName();
+    return $this->getClearing()->getLicenseShortName();
   }
 
   /**
@@ -88,7 +88,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getComment()
   {
-    return $this->getLicenseDecision()->getComment();
+    return $this->getClearing()->getComment();
   }
 
   /**
@@ -96,7 +96,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getDateTime()
   {
-    return $this->getLicenseDecision()->getDateTime();
+    return $this->getClearing()->getDateTime();
   }
 
   /**
@@ -104,7 +104,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getEventId()
   {
-    return $this->getLicenseDecision()->getEventId();
+    return $this->getClearing()->getEventId();
   }
 
   /**
@@ -112,7 +112,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getEventType()
   {
-    return $this->getLicenseDecision()->getEventType();
+    return $this->getClearing()->getEventType();
   }
 
   /**
@@ -120,7 +120,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function getReportinfo()
   {
-    return $this->getLicenseDecision()->getReportinfo();
+    return $this->getClearing()->getReportinfo();
   }
 
   /**
@@ -128,7 +128,7 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function isGlobal()
   {
-    return $this->getLicenseDecision()->isGlobal();
+    return $this->getClearing()->isGlobal();
   }
 
   /**
@@ -136,14 +136,14 @@ class LicenseDecisionResult implements LicenseDecision {
    */
   public function isRemoved()
   {
-    return $this->getLicenseDecision()->isRemoved();
+    return $this->getClearing()->isRemoved();
   }
 
   /**
    * @throws Exception
-   * @return LicenseDecision
+   * @return Clearing
    */
-  private function getLicenseDecision()
+  private function getClearing()
   {
     if (isset($this->licenseDecisionEvent)) {
       return $this->licenseDecisionEvent;
@@ -163,13 +163,13 @@ class LicenseDecisionResult implements LicenseDecision {
   /**
    * @return bool
    */
-  public function hasLicenseDecisionEvent()
+  public function hasClearingEvent()
   {
     return isset($this->licenseDecisionEvent);
   }
 
   /**
-   * @return array|AgentLicenseDecisionEvent[]
+   * @return array|AgentClearingEvent[]
    */
   public function getAgentDecisionEvents()
   {
@@ -177,15 +177,15 @@ class LicenseDecisionResult implements LicenseDecision {
   }
 
   /**
-   * @return LicenseDecisionEvent
+   * @return ClearingEvent
    */
-  public function getLicenseDecisionEvent()
+  public function getClearingEvent()
   {
     return $this->licenseDecisionEvent;
   }
 
   /*
-   * @return int EXTRACT(EPOCH FROM getLicenseDecisionEvent()->getDateTime())
+   * @return int EXTRACT(EPOCH FROM getClearingEvent()->getDateTime())
    */
   public function getTimestamp()
   {

@@ -174,7 +174,7 @@ function addLicense(uploadId, uploadTreeId, licenseId) {
       if(data){
         $('#decTypeSet').css('border-color','red');
       }
-      var table = createLicenseDecisionTable();
+      var table = createClearingTable();
       table.fnDraw(false);
     })
     .fail(failed);
@@ -187,7 +187,7 @@ function removeLicense(uploadId, uploadTreeId, licenseId) {
       if(data){
         $('#decTypeSet').css('border-color','red');
       }
-      var table = createLicenseDecisionTable();
+      var table = createClearingTable();
       table.fnDraw(false);
     })
     .fail(failed);
