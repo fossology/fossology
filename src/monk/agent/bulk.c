@@ -199,7 +199,17 @@ int handleBulkMode(MonkState* state, long bulkId) {
 }
 
 int processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
-  if (matches->len == 0)
+  int haveAFullMatch = 0;
+  for (guint j=0; j<matches->len; j++) {
+    Match* match = match_array_get(matches, j);
+
+    if (match->type == MATCH_TYPE_FULL) {
+      haveAFullMatch = 1;
+      break;
+    }
+  }
+
+  if (!haveAFullMatch)
     return 1;
 
   long licenseId = state->bulkArguments->licenseId;

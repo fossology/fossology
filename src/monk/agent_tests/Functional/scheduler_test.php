@@ -186,4 +186,39 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($expected=1, count($relevantDecisionsItem6));
     $this->assertEquals($expected=1, count($relevantDecisionsItem7));
   }
+
+  public function testRunMonkBulkScanWithBadSearchForDiff()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+
+    $licenseId = 225;
+    $removing = "f";
+    $refText = "The GNU General Public License is copyleft license for software and other kinds of works.";
+
+    $jobId = 64;
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
+    $args = $bulkFlag.$bulkId;
+
+    list($output,$retCode) = $this->runMonk($uploadId=1, $userId, $groupId, $jobId, $args);
+
+    $this->rmRepo();
+
+    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 6);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 7);
+
+    $this->assertEquals($expected=0, count($relevantDecisionsItem6));
+    $this->assertEquals($expected=0, count($relevantDecisionsItem7));
+  }
 }
