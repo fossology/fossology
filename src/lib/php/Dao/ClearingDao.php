@@ -213,9 +213,8 @@ class ClearingDao extends Object
    * @param int $userid
    * @param string $comment
    * @param string $remark
-   * @throws \Exception
    */
-  public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment="", $remark="")
+  public function insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment="", $remark="")
   {
     $this->dbManager->begin();
 

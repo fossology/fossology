@@ -212,21 +212,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($watchOtherNow,is(FALSE));
   }
   
- 
-  
-  
-  public function testInsertClearingDecisionTest()
+
+  public function testInsertMultipleClearingEvents()
   {
-/*
-   * @param array $licenses
-   * @param bool $removed
-   * @param int $uploadTreeId
-   * @param int $userid
-   * @param string $comment
-   * @param string $remark
-   * @throws \Exception
-  */  
-     
     $licenses = array(401,402);
     $oldlicenses = array(401,403);
     $removed = false;
@@ -245,7 +233,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
     }
     
-    $this->clearingDao->insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
+    $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
 
     $refs = $this->dbManager->createMap('clearing_event', 'rf_fk', 'rf_fk');
     $expected = array_unique(array_merge($licenses, $oldlicenses));
