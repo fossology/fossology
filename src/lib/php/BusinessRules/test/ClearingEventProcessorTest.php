@@ -268,13 +268,5 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
 
     assertThat($result, is(emptyArray()));
   }
-
-
-  public function testCheckIfAutomaticDecisionCanBeMade()
-  {
-    $events = array($this->addedEvent, $this->removedEvent);
-
-    $this->assertTrue($this->clearingEventProcessor->checkIfAutomaticDecisionCanBeMade($events));
-  }
 }
  
