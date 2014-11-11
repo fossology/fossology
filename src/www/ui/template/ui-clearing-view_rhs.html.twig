@@ -114,3 +114,47 @@
     </div>
   </div>
 {% endif %}
+
+{% if bulkHistory %}
+<div class="groupBox">
+
+<h3>
+{{ 'Bulk History'| trans }}
+</h3>
+
+<div class="scrollable2">
+<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable">
+<tr>
+<th>
+{{ 'License'| trans }}
+</th>
+<th>
+{{ 'Text'| trans }}
+</th>
+</tr>
+{% set i = 0 %}
+{% for row in bulkHistory %}
+{% set i = i + 1 %}
+<tr
+class="
+{% if row.removing %}
+removed
+{% endif %}
+{% if row.success %}
+match
+{% endif %}
+{% if i % 2 %}
+odd
+{% else %}
+even
+{% endif %}
+"
+>
+<td>{{ row.lic }}</td>
+<td>{{ row.text }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+</div>
+{% endif %}

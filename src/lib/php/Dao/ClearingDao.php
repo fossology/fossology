@@ -626,7 +626,7 @@ insert into clearing_decision (
             array($uploadTreeId, $userId, DecisionTypes::WIP, DecisionScopes::ITEM ));
     $this->dbManager->freeResult($res);
   }
-  
+
   public function isDecisionWip($uploadTreeId, $userId)
   {
     $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND user_fk=$2 ORDER BY date_added DESC LIMIT 1";
@@ -638,4 +638,42 @@ insert into clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
+  public function getTriedBulks($uploadTreeId, $uploadId)
+  {
+    $sql = "with alltried as (
+            select lr.lrb_pk,
+              lr.rf_text, lr.rf_fk, removing, ce.uploadtree_fk, lr.uploadtree_fk as lritem
+              from license_ref_bulk lr
+              left join highlight_bulk h on lrb_fk = lrb_pk
+              left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
+              left join uploadtree ut on ut.uploadtree_pk = ce.uploadtree_fk
+              where lr.upload_fk = $2
+            )
+            SELECT distinct on (lrb_pk) rf_text as text, rf_fk as lic, removing, success
+            FROM (
+              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, true as success FROM alltryied WHERE uploadtree_fk = $1
+              UNION ALL
+              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, false as success FROM alltryied WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
+            ) AS result";
+
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $sql);
+
+    $res = $this->dbManager->execute($stmt, array($uploadTreeId, $uploadId));
+
+    $bulks = array();
+
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $bulks[] = array(
+        "text" => $row['text'],
+        "lic" => $row['lic'],
+        "removing" => $this->dbManager->booleanFromDb($row['removing']),
+        "success" => $this->dbManager->booleanFromDb($row['success'])
+      );
+    }
+
+    $this->dbManager->freeResult($res);
+    return $bulks;
+  }
 }

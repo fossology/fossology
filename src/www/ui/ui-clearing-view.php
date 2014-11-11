@@ -272,6 +272,8 @@ class ClearingView extends FO_Plugin
       $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
 
+    $bulkHistory = $this->clearingDao->getTriedBulks($uploadTreeId, $uploadId);
+
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
     list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
@@ -286,6 +288,7 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
     $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
+    $this->vars['bulkHistory'] = $bulkHistory;
   }
 
   
