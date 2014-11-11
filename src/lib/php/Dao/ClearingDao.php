@@ -350,8 +350,8 @@ ORDER BY CD.date_added DESC LIMIT 1
    * @param $userId
    * @param $decType
    * @param $isGlobal
-   * @param ClearingResult[] $licenses
-   * @param ClearingResult[] $removedLicenses
+   * @param LicenseRef[] $licenses
+   * @param LicenseRef[] $removedLicenses
    */
   public function insertClearingDecision($uploadTreeId, $userId, $decType, $isGlobal, $licenses, $removedLicenses)
   {
@@ -382,11 +382,11 @@ insert into clearing_decision (
     $statementNameLicenseInsert = __METHOD__ . ".insertLicense";
     $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO  clearing_licenses (clearing_fk, rf_fk, removed) VALUES($1, $2, $3)");
     foreach ($licenses as $license) {
-      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getLicenseId(), $this->dbManager->booleanToDb(false)));
+      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getId(), $this->dbManager->booleanToDb(false)));
       $this->dbManager->freeResult($res);
     }
     foreach ($removedLicenses as $license) {
-      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getLicenseId(), $this->dbManager->booleanToDb(true)));
+      $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getId(), $this->dbManager->booleanToDb(true)));
       $this->dbManager->freeResult($res);
     }
 

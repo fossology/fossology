@@ -20,6 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
 class ClearingEventProcessor extends Object
@@ -44,7 +45,7 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
-   * @return ClearingEvent[][]
+   * @return LicenseRef[][]
    */
   public function getFilteredState($events)
   {
@@ -56,35 +57,47 @@ class ClearingEventProcessor extends Object
    * @param ClearingEvent[] $events
    * @return ClearingEvent[]
    */
+  public function indexByLicenseShortName($events)
+  {
+    $values = array();
+    foreach ($events as $license)
+    {
+      $values[$license->getLicenseShortName()] = $license;
+    }
+    return $values;
+  }
+
+  /**
+   * @param ClearingEvent[] $events
+   * @return ClearingEvent[]
+   */
   public function filterEffectiveEvents($events)
   {
+    if ($events === null)
+    {
+      return array();
+    }
+
     $addingEvents = array();
     $removingEvents = array();
 
-    if ($events !== null)
+    foreach ($events as $event)
     {
-      foreach ($events as $event)
+      $licenseShortName = $event->getLicenseShortName();
+      if ($event->isRemoved())
       {
-        $licenseShortName = $event->getLicenseShortName();
-        if ($event->isRemoved())
+        if (array_key_exists($licenseShortName, $addingEvents))
         {
-          if (array_key_exists($licenseShortName, $addingEvents))
-          {
-            unset($addingEvents[$licenseShortName]);
-          }
-          {
-            $removingEvents[$licenseShortName] = $event;
-          }
-        } else
-        {
-          if (array_key_exists($licenseShortName, $removingEvents))
-          {
-            unset($removingEvents[$licenseShortName]);
-          }
-          {
-            $addingEvents[$licenseShortName] = $event;
-          }
+          unset($addingEvents[$licenseShortName]);
         }
+        $removingEvents[$licenseShortName] = $event;
+      } else
+      {
+        if (array_key_exists($licenseShortName, $removingEvents))
+        {
+          unset($removingEvents[$licenseShortName]);
+        }
+        $addingEvents[$licenseShortName] = $event;
       }
     }
 
@@ -93,29 +106,29 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
-   * @param string[] $base
+   * @param LicenseRef[] $licenses
    * @return string[]
    */
-  public function getUnhandledLicenses($events, $base) {
-    $values = array();
-    foreach ($base as $value) {
-      $values[$value] = $value;
-    }
+  public function getUnhandledLicenses($events, $licenses)
+  {
+    $values = $this->indexByShortName($licenses);
 
-    foreach ($events as $event) {
+    foreach ($events as $event)
+    {
       $licenseShortName = $event->getLicenseShortName();
-      if (array_key_exists($licenseShortName, $values)) {
+      if (array_key_exists($licenseShortName, $values))
+      {
         unset($values[$licenseShortName]);
       }
     }
 
-    return array_keys($values);
+    return $values;
   }
 
   /**
    *
    * @param ClearingEvent[] $events
-   * @return ClearingEvent[][]
+   * @return LicenseRef[][]
    */
   public function getCurrentClearingState($events)
   {
@@ -127,10 +140,10 @@ class ClearingEventProcessor extends Object
 
       if ($event->isRemoved())
       {
-        $removedLicenses[$licenseShortName] = $event;
+        $removedLicenses[$licenseShortName] = $event->getLicenseRef();
       } else
       {
-        $addedLicenses[$licenseShortName] = $event;
+        $addedLicenses[$licenseShortName] = $event->getLicenseRef();
       }
     }
 
@@ -151,4 +164,20 @@ class ClearingEventProcessor extends Object
     });
     return $events;
   }
+
+  /**
+   * @param LicenseRef[] $licenses
+   * @return LicenseRef[]
+   */
+  protected function indexByShortName($licenses)
+  {
+    $values = array();
+    foreach ($licenses as $license)
+    {
+      $values[$license->getShortName()] = $license;
+    }
+    return $values;
+  }
+
+
 }

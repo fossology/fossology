@@ -112,14 +112,18 @@ class AjaxClearingView extends FO_Plugin
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
-      $currentShortName = $licenseRef->getShortName();
-      if (array_key_exists($currentShortName, $licenseDecisions)) continue;
-      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($currentShortName);
-      $theLicenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $theLicenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+      $licenseShortName = $licenseRef->getShortName();
+
+      if (array_key_exists($licenseShortName, $licenseDecisions))
+        continue;
+
+      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseShortName);
+      $licenseId = $licenseRef->getId();
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -272,29 +276,29 @@ class AjaxClearingView extends FO_Plugin
     $uploadId = $itemTreeBounds->getUploadId();
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
     $licenseEventTypes = new ClearingEventTypes();
     $licenseEventTypeMap = $licenseEventTypes->getMap();
     
     $table = array();
-    foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
+    foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
-      /** @var ClearingResult $licenseDecisionResult */
-      $licenseId = $licenseDecisionResult->getLicenseId();
+      /** @var ClearingResult $clearingResult */
+      $licenseId = $clearingResult->getLicenseId();
 
       $types = array();
       $reportInfo = "";
       $comment = "";
 
-      if ($licenseDecisionResult->hasClearingEvent())
+      if ($clearingResult->hasClearingEvent())
       {
-        $licenseDecisionEvent = $licenseDecisionResult->getClearingEvent();
+        $licenseDecisionEvent = $clearingResult->getClearingEvent();
         $types[] = $licenseEventTypeMap[$licenseDecisionEvent->getEventType()];
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }
 
-      $types = array_merge($types, $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId));
+      $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
 
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
@@ -311,13 +315,13 @@ class AjaxClearingView extends FO_Plugin
           '4' => $actionLink);
     }
 
-    foreach ($removedLicenses as $licenseShortName => $licenseDecisionResult)
+    foreach ($removedLicenses as $licenseShortName => $clearingResult)
     {
-      if ($licenseDecisionResult->getAgentDecisionEvents())
+      if ($clearingResult->getAgentDecisionEvents())
       {
-        $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
+        $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
-        $licenseId = $licenseDecisionResult->getLicenseId();
+        $licenseId = $clearingResult->getLicenseId();
         $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
