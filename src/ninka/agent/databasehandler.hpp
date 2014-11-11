@@ -17,24 +17,22 @@
 #include "libfossAgentDatabaseHandler.hpp"
 #include "libfossdbmanagerclass.hpp"
 
-using namespace std;
-
 class NinkaDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
   NinkaDatabaseHandler(fo::DbManager dbManager);
   NinkaDatabaseHandler spawn() const;
 
-  vector<unsigned long> queryFileIdsForUpload(int uploadId);
+  std::vector<unsigned long> queryFileIdsForUpload(int uploadId);
   bool saveLicenseMatch(int agentId, long pFileId, long licenseId, unsigned percentMatch);
 
-  void insertOrCacheLicenseIdForName(string const& rfShortName);
-  unsigned long getCachedLicenseIdForName(string const& rfShortName) const;
+  void insertOrCacheLicenseIdForName(std::string const& rfShortName);
+  unsigned long getCachedLicenseIdForName(std::string const& rfShortName) const;
 
 private:
-  unsigned long selectOrInsertLicenseIdForName(string rfShortname);
+  unsigned long selectOrInsertLicenseIdForName(std::string rfShortname);
 
-  std::unordered_map<string,long> licenseRefCache;
+  std::unordered_map<std::string,long> licenseRefCache;
 };
 
 #endif // NINKA_AGENT_DATABASE_HANDLER_HPP

@@ -135,6 +135,10 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
       {
         $this->assertEquals($matchedLicense->getShortName(), "GPLv3+");
       }
+      else if ($licenseMatch->getFileId() == 3)
+      {
+        $this->assertEquals($matchedLicense->getShortName(), "UnclassifiedLicense");
+      }
       else
       {
         $this->assertEquals($matchedLicense->getShortName(), "No_license_found");

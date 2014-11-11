@@ -297,7 +297,7 @@ $test_pg_conn = @pg_connect($initial_postgres_params)
 // unless the LC_CTYPE environment variable is set correctly
 //$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 // In the long run, FOSSology should be using a UTF8 encoding for text
-$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
+$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8' TEMPLATE template0";
 $result = pg_query($test_pg_conn, $sql_statement) 
     or die("FAIL: Could not create test database!\n");
 

@@ -411,7 +411,7 @@ inline int processMatches(MonkState* state, File* file, GArray* matches) {
   }
 
   if (state->scanMode == MODE_BULK) {
-    processMatches_Bulk(state, file, matches);
+    return processMatches_Bulk(state, file, matches);
   } else {
     for (guint matchIndex = 0; matchIndex < matches->len; matchIndex++) {
       Match* match = match_array_get(matches, matchIndex);
