@@ -50,6 +50,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $this->agentsDao);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   public function testGetLatestAgentDetectedLicenses()
   {
     $uploadId = 2;
