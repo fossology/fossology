@@ -150,8 +150,8 @@ even
 {% endif %}
 "
 >
-<td>{{ row.lic }}</td>
-<td>{{ row.text }}</td>
+<td>{{ row.lic|e }}</td>
+<td>{{ row.text|e }}</td>
 </tr>
 {% endfor %}
 </table>
