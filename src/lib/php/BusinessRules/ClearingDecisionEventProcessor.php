@@ -87,9 +87,16 @@ class ClearingDecisionEventProcessor
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
-      $insertDecision = true;
       $type = DecisionTypes::IDENTIFIED;
-      list($addedLicenses, $currentRemovedLicenses) = $this->createAllRemoveClearingEvents($addedLicenses, $userId, $item);
+      $removedAddedLicenses = $this->createAllRemoveClearingEvents($userId, $item, $addedLicenses);
+      $currentRemovedLicenses = array_merge($currentRemovedLicenses, $removedAddedLicenses);
+
+      foreach ($currentAddedLicenses as $licenseShortName => $currentAddedLicense)
+      {
+        unset($currentRemovedLicenses[$licenseShortName]);
+      }
+
+      $insertDecision = count($currentRemovedLicenses) > 0;
     }
 
     if ($insertDecision)
@@ -191,11 +198,11 @@ class ClearingDecisionEventProcessor
    * @param LicenseRef[] $licenseRefs
    * @param int $eventType
    */
-  protected function addClearingEventsForLicenses($userId, $itemId, $licenseRefs, $eventType=ClearingEventTypes::USER)
+  protected function addClearingEventsForLicenses($userId, $itemId, $licenseRefs, $eventType = ClearingEventTypes::USER)
   {
     foreach ($licenseRefs as $licenseRef)
     {
-        $this->clearingDao->addClearing($itemId, $userId, $licenseRef->getId(), $eventType);
+      $this->clearingDao->addClearing($itemId, $userId, $licenseRef->getId(), $eventType);
     }
   }
 
@@ -212,37 +219,20 @@ class ClearingDecisionEventProcessor
   }
 
   /**
-   * @param LicenseRef $licenseRef
-   * @param bool|false $isRemoved
-   * @return ClearingEvent
+   * @param int $userId
+   * @param int $itemId
+   * @param LicenseRef[] $licenses
+   * @return LicenseRef[]
    */
-  private function createTempClearingEvent(LicenseRef $licenseRef, $isRemoved = false)
+  protected function createAllRemoveClearingEvents($userId, $itemId, $licenses)
   {
-    $licenseDecisionEventBuilder = new ClearingEventBuilder();
-    $licenseDecisionEventBuilder->setRemoved($isRemoved);
-
-    $licenseDecisionEventBuilder->setLicenseRef($licenseRef);
-    //we only need the license ID so the builder defaults should suffice for the rest
-    return $licenseDecisionEventBuilder->build();
-  }
-
-  /**
-   * @param LicenseRef[] $licensesToAdd
-   * @param $userId
-   * @param $item
-   * @internal param $type
-   * @return array
-   */
-  protected function createAllRemoveClearingEvents($licensesToAdd, $userId, $item)
-  {
-    $removedSinceLastDecision = array();
-    foreach ($licensesToAdd as $licenseToAdd)
+    $removedLicenses = array();
+    foreach ($licenses as $license)
     {
-      $this->clearingDao->removeClearing($item, $userId, $licenseToAdd->getId(), ClearingEventTypes::USER);
-      $removedSinceLastDecision[$licenseToAdd->getShortName()]
-          = $this->createTempClearingEvent($licenseToAdd, true);
+      $this->clearingDao->removeClearing($itemId, $userId, $license->getId(), ClearingEventTypes::USER);
+      $removedLicenses[$license->getShortName()] = $license;
     }
-    return array(array(), $removedSinceLastDecision);
+    return $removedLicenses;
   }
 
   /**

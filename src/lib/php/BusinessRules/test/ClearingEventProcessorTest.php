@@ -73,6 +73,11 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->removedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(true);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   public function testGetCurrentClearingsShouldReturnNothingForEmptyArrays()
   {
     assertThat($this->clearingEventProcessor->getCurrentClearingState(array()), is(array(array(), array())));
