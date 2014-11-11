@@ -21,6 +21,7 @@ namespace Fossology\Lib\Dao;
 
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
@@ -211,5 +212,33 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($watchOtherNow,is(FALSE));
   }
   
-  
+
+  public function testInsertMultipleClearingEvents()
+  {
+    $licenses = array(401,402);
+    $oldlicenses = array(401,403);
+    $removed = false;
+    $uploadTreeId = 304;
+    $uploadTreeIdPp = 305;
+    $userid = 1;
+    $jobfk = 501;
+    $comment="<commit>";
+    $remark="<remark>";
+    
+    foreach($oldlicenses as $lic)
+    {
+      $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid,
+          'rf_fk'=>$lic, 'is_removed'=>$removed, 'job_fk' =>$jobfk,
+          'type_fk'=>ClearingEventTypes::USER, 'comment'=>$comment, 'reportinfo'=>$remark);
+      $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
+    }
+    
+    $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
+
+    $refs = $this->dbManager->createMap('clearing_event', 'rf_fk', 'rf_fk');
+    $expected = array_unique(array_merge($licenses, $oldlicenses));
+    sort($refs);
+    sort($expected);
+    assertThat(array_values($refs),equalTo($expected));
+  } 
 }

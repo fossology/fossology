@@ -213,9 +213,8 @@ class ClearingDao extends Object
    * @param int $userid
    * @param string $comment
    * @param string $remark
-   * @throws \Exception
    */
-  public function insertClearingDecisionTest($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment="", $remark="")
+  public function insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment="", $remark="")
   {
     $this->dbManager->begin();
 
@@ -237,15 +236,12 @@ class ClearingDao extends Object
     while ($item = $this->dbManager->fetchArray($items))
     {
       $currentUploadTreeId = $item['uploadtree_pk'];
-      $pfileId = $item['pfile_fk'];
-
       foreach ($licenses as $license)
       {
         $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $license, $type));
         $this->dbManager->freeResult($res);
-        $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId, 'pfile_fk'=>$pfileId, 'user_fk'=>$userid,
-            'rf_fk'=>$license, 'is_removed'=>$removed, 'scope'=>DecisionScopes::ITEM,
-            'job_fk' =>$jobfk,
+        $aDecEvent =  array('uploadtree_fk'=>$currentUploadTreeId, 'user_fk'=>$userid,
+            'rf_fk'=>$license, 'is_removed'=>$removed, 'job_fk' =>$jobfk,
             'type_fk'=>$type, 'comment'=>$comment, 'reportinfo'=>$remark);
         $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__);
       }
