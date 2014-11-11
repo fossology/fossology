@@ -117,7 +117,7 @@ class DeciderAgent extends Agent
     $lastDecision = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
 
     $orderedEvents = $this->clearingDao->getRelevantClearingEvents($userId, $uploadTreeId);
-    $currentEvents = $this->clearingEventProcessor->filterEventsByTime($orderedEvents, $lastDecision);
+    $currentEvents = $this->clearingEventProcessor->filterEventsAfterTime($orderedEvents, $lastDecision);
     $unionedEvents = $this->clearingEventProcessor->filterEffectiveEvents($currentEvents);
 
     switch ($this->conflictStrategyId)

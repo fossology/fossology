@@ -30,13 +30,13 @@ class ClearingEventProcessor extends Object
    * @param DateTime|null $lastDecisionDate
    * @return array
    */
-  public function filterEventsByTime($events, $lastDecisionDate)
+  public function filterEventsAfterTime($events, $lastDecisionDate)
   {
     if ($lastDecisionDate !== null)
     {
       $filterEventsBefore = function (ClearingEvent $event) use ($lastDecisionDate)
       {
-        return $event->getDateTime() > $lastDecisionDate;
+        return $event->getDateTime() < $lastDecisionDate;
       };
       return array_filter($events, $filterEventsBefore);
     }
@@ -84,23 +84,21 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
-   * @param LicenseRef[] $licenses
+   * @param LicenseRef[] $detectedLicenses
    * @return string[]
    */
-  public function getUnhandledLicenses($events, $licenses)
+  public function getUnhandledLicenses($events, $detectedLicenses)
   {
-    $values = $this->indexByShortName($licenses);
-
     foreach ($events as $event)
     {
       $licenseShortName = $event->getLicenseShortName();
-      if (array_key_exists($licenseShortName, $values))
+      if (array_key_exists($licenseShortName, $detectedLicenses))
       {
-        unset($values[$licenseShortName]);
+        unset($detectedLicenses[$licenseShortName]);
       }
     }
 
-    return $values;
+    return $detectedLicenses;
   }
 
   /**
@@ -127,6 +125,31 @@ class ClearingEventProcessor extends Object
 
     return array($addedLicenses, $removedLicenses);
   }
+  
+  /**
+   * 
+   * @param ClearingEvent[] $events
+   * @param DateTime|null $untilTime
+   */
+  public function getState($events, $untilTime=null) {
+    $selection = array();
+    
+    foreach ($events as $event) {
+   if($untilTime !== null && $event->getDateTime() > $untilTime)
+      {
+        break;
+      }
+      $shortName = $event->getLicenseShortName();
+      
+      if ($event->isRemoved()) {
+        unset($selection[$shortName]);
+      } else {
+        $selection[$shortName] = $event->getLicenseRef();
+      }
+    }
+    
+    return $selection;
+  }
 
 
   /**
@@ -141,20 +164,6 @@ class ClearingEventProcessor extends Object
       return $event1->getDateTime() > $event2->getDateTime();
     });
     return $events;
-  }
-
-  /**
-   * @param LicenseRef[] $licenses
-   * @return LicenseRef[]
-   */
-  protected function indexByShortName($licenses)
-  {
-    $values = array();
-    foreach ($licenses as $license)
-    {
-      $values[$license->getShortName()] = $license;
-    }
-    return $values;
   }
 
 
