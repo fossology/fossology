@@ -16,10 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\UploadStatus;
-use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
 use Fossology\Lib\Db\DbManager;
 
 class SanityChecker
@@ -64,7 +64,7 @@ class SanityChecker
 
   private function checkLicenseEventTypes()
   {
-    $licenseEventTypes = new LicenseEventTypes();
+    $licenseEventTypes = new ClearingEventTypes();
     $map = $licenseEventTypes->getMap();
     $this->errors += $this->checkDatabaseEnum($tablename='clearing_event', 'type_fk', $map);
   }
