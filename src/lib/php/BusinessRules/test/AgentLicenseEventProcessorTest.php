@@ -175,5 +175,28 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     return array($licenseMatch, $licenseRef, $agentRef);
   }
 
+  public function testGetScannedLicenses()
+  {
+    /** @var LicenseRef $licenseRef1 */
+    list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
+
+    $details = array(
+        'licA' => array(
+            'nomos' => array(
+                array('id' => 5, 'licenseRef' => $licenseRef1, 'agentRef' => $agentRef1, 'matchId' => 453, 'percentage' => null)
+            )
+        )
+    );
+
+    $result = $this->agentLicenseEventProcessor->getScannedLicenses($details);
+
+    assertThat($result, is(array($licenseRef1->getShortName() => $licenseRef1)));
+  }
+
+  public function testGetScannedLicensesWithEmptyDetails()
+  {
+    assertThat($this->agentLicenseEventProcessor->getScannedLicenses(array()), is(emptyArray()));
+  }
+
 }
  
