@@ -211,6 +211,10 @@ table.dataTable tr.even.removed {
     background-color: #ffc9c9;
 }
 
+.match {
+    font-weight: bold;
+}
+
 .inactiveClearing
     {
       background-color: #bebebe;
