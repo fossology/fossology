@@ -120,10 +120,11 @@
 
 <h3>
 {{ 'Bulk History'| trans }}
+<button onclick='$("#bulkHistoryTable").toggle();'>Show/Hide</button>
 </h3>
 
 <div class="scrollable2">
-<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable">
+<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable" hidden>
 <tr>
 <th>
 {{ 'License'| trans }}
