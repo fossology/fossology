@@ -105,8 +105,8 @@ psqlCopy_t fo_sqlCopyCreate(PGconn *PGconn, char *TableName, int BufSize, int Nu
     ColStrLength += strlen(ColStr) + 1;  /* extra 1 for the comma */
     if (ColStrLength < sizeof(pCopy->ColumnNames))
     {
-      if (ColIdx != 0) strncat(pCopy->ColumnNames, ",", sizeof(pCopy->ColumnNames));
-      strncat(pCopy->ColumnNames, ColStr, sizeof(pCopy->ColumnNames));
+      if (ColIdx != 0) strncat(pCopy->ColumnNames, ",", 1);
+      strncat(pCopy->ColumnNames, ColStr, ColStrLength);
     }
     else
     {
