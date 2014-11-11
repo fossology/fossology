@@ -36,7 +36,7 @@ class ClearingEventProcessor extends Object
     {
       $filterEventsBefore = function (ClearingEvent $event) use ($lastDecisionDate)
       {
-        return $event->getDateTime() < $lastDecisionDate;
+        return $event->getDateTime() <= $lastDecisionDate;
       };
       return array_filter($events, $filterEventsBefore);
     }
@@ -125,29 +125,28 @@ class ClearingEventProcessor extends Object
 
     return array($addedLicenses, $removedLicenses);
   }
-  
+
   /**
-   * 
    * @param ClearingEvent[] $events
-   * @param DateTime|null $untilTime
+   * @return LicenseRef[]
    */
-  public function getState($events, $untilTime=null) {
+  public function getState($events)
+  {
     $selection = array();
-    
-    foreach ($events as $event) {
-   if($untilTime !== null && $event->getDateTime() > $untilTime)
-      {
-        break;
-      }
+
+    foreach ($events as $event)
+    {
       $shortName = $event->getLicenseShortName();
-      
-      if ($event->isRemoved()) {
+
+      if ($event->isRemoved())
+      {
         unset($selection[$shortName]);
-      } else {
+      } else
+      {
         $selection[$shortName] = $event->getLicenseRef();
       }
     }
-    
+
     return $selection;
   }
 

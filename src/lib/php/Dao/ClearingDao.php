@@ -322,8 +322,8 @@ ORDER BY CD.date_added DESC LIMIT 1
         ->setUploadTreeId($row['uploadtree_id'])
         ->setPfileId($row['file_id'])
         ->setUserId($row['user_id'])
-        ->setType($row['type_id'])
-        ->setScope($row['scope'])
+        ->setType(intval($row['type_id']))
+        ->setScope(intval($row['scope']))
         ->setDateAdded($row['date_added'])
         ->build();
     }

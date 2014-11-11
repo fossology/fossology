@@ -68,39 +68,35 @@ class ClearingDecisionEventProcessor
     }
 
     $item = $itemBounds->getUploadTreeId();
-
     list($lastDecision, $lastType) = $this->getRelevantClearingDecisionParameters($userId, $item);
-
     $allEvents = $this->clearingDao->getRelevantClearingEvents($userId, $item);
 
     $eventsUntilLastDecision = $this->clearingEventProcessor->filterEventsAfterTime($allEvents, $lastDecision);
-    $nowAddedLicenses = $this->clearingEventProcessor->getState($allEvents);
-    $lastAddedLicenses = $addedLicenses = $this->clearingEventProcessor->getState($eventsUntilLastDecision);
-    
-    $addedLicenses = array_diff($nowAddedLicenses,$lastAddedLicenses);
-    $removedLicenses = array_diff($lastAddedLicenses,$nowAddedLicenses);
-    
-    
+    $lastSelectedLicenses = $this->clearingEventProcessor->getState($eventsUntilLastDecision);
+    $currentSelectedLicenses = $this->clearingEventProcessor->getState($allEvents);
+
+    $addedLicenses = array_diff($currentSelectedLicenses, $lastSelectedLicenses);
+    $removedLicenses = array_diff($lastSelectedLicenses, $currentSelectedLicenses);
 
     $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemBounds);
-    $unhandledAgentDetectedLicenses = $this->clearingEventProcessor->getUnhandledLicenses($eventsUntilLastDecision, $agentDetectedLicenses);
+    $unhandledAgentDetectedLicenses = $this->clearingEventProcessor->getUnhandledLicenses($allEvents, $agentDetectedLicenses);
     $this->addClearingEventsForLicenses($userId, $item, $unhandledAgentDetectedLicenses);
     $addedLicenses = array_merge($addedLicenses, $unhandledAgentDetectedLicenses);
-    $nowAddedLicenses = array_merge($nowAddedLicenses, $unhandledAgentDetectedLicenses);
+    $currentSelectedLicenses = array_merge($currentSelectedLicenses, $unhandledAgentDetectedLicenses);
 
     $insertDecision = $type !== $lastType || count($addedLicenses) > 0 || count($removedLicenses) > 0 || count($unhandledAgentDetectedLicenses) > 0;
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       $type = DecisionTypes::IDENTIFIED;
-      $this->removeClearingEvents($userId, $item, $nowAddedLicenses);
-      $removedLicenses = $lastAddedLicenses;
-      $insertDecision = count($lastAddedLicenses) > 0;
+      $this->removeClearingEvents($userId, $item, $currentSelectedLicenses);
+      $removedLicenses = $lastSelectedLicenses;
+      $insertDecision = count($lastSelectedLicenses) > 0;
     }
 
     if ($insertDecision)
     {
-      $this->insertClearingDecision($userId, $item, $type, $isGlobal, $nowAddedLicenses, $removedLicenses);
+      $this->insertClearingDecision($userId, $item, $type, $isGlobal, $currentSelectedLicenses, $removedLicenses);
     }
   }
 
