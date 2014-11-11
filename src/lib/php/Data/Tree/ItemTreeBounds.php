@@ -43,22 +43,22 @@ class ItemTreeBounds extends Object
   /**
    * @var int
    */
-  private $uploadTreeId;
+  private $itemId;
 
   /**
-   * @param int $uploadTreeId
+   * @param int $itemId
    * @param string $uploadTreeTableName
    * @param int $uploadId
    * @param int $left
    * @param int $right
    */
-  public function __construct($uploadTreeId, $uploadTreeTableName, $uploadId, $left, $right)
+  public function __construct($itemId, $uploadTreeTableName, $uploadId, $left, $right)
   {
     $this->uploadTreeTableName = $uploadTreeTableName;
     $this->uploadId = $uploadId;
     $this->left = $left;
     $this->right = $right;
-    $this->uploadTreeId = $uploadTreeId;
+    $this->itemId = $itemId;
   }
 
   /**
@@ -66,7 +66,7 @@ class ItemTreeBounds extends Object
    */
   public function getItemId()
   {
-    return $this->uploadTreeId;
+    return $this->itemId;
   }
 
   /**

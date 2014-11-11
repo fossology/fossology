@@ -76,7 +76,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingEventProcessor;
 
     $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
-    $this->itemTreeBounds->shouldReceive("getUploadTreeId")->withNoArgs()->andReturn($this->uploadTreeId);
+    $this->itemTreeBounds->shouldReceive("getItemId")->withNoArgs()->andReturn($this->uploadTreeId);
 
     $this->clearingDecisionEventProcessor = new ClearingDecisionEventProcessor(
         $this->clearingDao, $this->agentLicenseEventProcessor, $this->clearingEventProcessor);
