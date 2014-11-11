@@ -67,7 +67,7 @@ class HighlightDao extends Object
    */
   private function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
-    $params =array($itemTreeBounds->getUploadTreeId());
+    $params =array($itemTreeBounds->getItemId());
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
     $sql = "SELECT start,len,type,rf_fk,rf_start,rf_len
@@ -128,7 +128,7 @@ class HighlightDao extends Object
              FROM highlight_keyword
              WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
     $this->dbManager->prepare($stmt, $sql);
-    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getUploadTreeId()));
+    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getItemId()));
     $highlightEntries = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
@@ -156,7 +156,7 @@ class HighlightDao extends Object
              FROM highlight_bulk INNER JOIN license_ref_bulk
              ON license_ref_bulk.lrb_pk = highlight_bulk.lrb_fk
              WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
-    $params = array($itemTreeBounds->getUploadTreeId());
+    $params = array($itemTreeBounds->getItemId());
     if(!empty($licenseId))
     {
       $stmt .= '.License';

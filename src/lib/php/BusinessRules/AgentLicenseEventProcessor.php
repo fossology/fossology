@@ -44,27 +44,18 @@ class AgentLicenseEventProcessor extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return LicenseRef[]
    */
-  public function getLatestAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds)
+  public function getScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds)
   {
-    $licenses = array();
+    $details = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
 
-    $details = $this->getLatestAgentDetectedLicenseDetails($itemTreeBounds);
-
-    foreach ($details as $licenseShortName => $agentEntries) {
-      foreach ($agentEntries as $agentName => $matchProperties) {
-        $licenses[$licenseShortName] = $matchProperties[0]['licenseRef'];
-        break;
-      }
-    }
-
-    return $licenses;
+    return $this->getScannedLicenses($details);
   }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getLatestAgentDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
+  public function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
 
@@ -122,5 +113,25 @@ class AgentLicenseEventProcessor extends Object
       }
     }
     return $latestAgentDetectedLicenses;
+  }
+
+  /**
+   * @param array $details
+   * @return LicenseRef[]
+   */
+  public function getScannedLicenses($details)
+  {
+    $licenses = array();
+
+    foreach ($details as $licenseShortName => $agentEntries)
+    {
+      foreach ($agentEntries as $agentName => $matchProperties)
+      {
+        $licenses[$licenseShortName] = $matchProperties[0]['licenseRef'];
+        break;
+      }
+    }
+
+    return $licenses;
   }
 }

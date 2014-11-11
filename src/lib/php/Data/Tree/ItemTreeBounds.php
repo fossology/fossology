@@ -64,7 +64,7 @@ class ItemTreeBounds extends Object
   /**
    * @return int
    */
-  public function getUploadTreeId()
+  public function getItemId()
   {
     return $this->uploadTreeId;
   }

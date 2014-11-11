@@ -71,7 +71,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         'licA' => array(
@@ -101,7 +101,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         'licA' => array(
@@ -128,7 +128,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }
@@ -148,7 +148,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }

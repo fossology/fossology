@@ -13,12 +13,14 @@
 define("AGENT_NAME", "decider");
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
@@ -27,18 +29,28 @@ include_once(__DIR__ . "/version.php");
 class DeciderAgent extends Agent
 {
   const FORCE_DECISION = 1;
+
   /** @var int */
   private $conflictStrategyId;
+
   /** @var UploadDao */
   private $uploadDao;
+
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
+
   /** @var ClearingDecisionEventProcessor */
   private $clearingDecisionEventProcessor;
+
+  /** @var AgentLicenseEventProcessor */
+  private $agentLicenseEventProcessor;
+
   /** @var ClearingDao */
   private $clearingDao;
+
   /** @var int */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
+
   /** @var DecisionTypes */
   private $decisionTypes;
 
@@ -55,6 +67,7 @@ class DeciderAgent extends Agent
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_event_processor');
+    $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
   static protected function hasNewerUserEvents($events, $date)
@@ -92,7 +105,8 @@ class DeciderAgent extends Agent
     $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
     foreach ($changedItems as $uploadTreeId)
     {
-      $this->processClearingEventsForItem($uploadTreeId, $userId);
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
+      $this->processClearingEventsForItem($itemTreeBounds, $userId);
     }
   }
 
@@ -105,20 +119,21 @@ class DeciderAgent extends Agent
   }
 
   /**
-   * @param $uploadTreeId
-   * @param $userId
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $userId
    */
-  protected function processClearingEventsForItem($uploadTreeId, $userId)
+  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId)
   {
     $this->dbManager->begin();  /* start transaction */
 
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    $itemId = $itemTreeBounds->getItemId();
 
-    $lastDecision = $this->getDateOfLastRelevantClearing($userId, $uploadTreeId);
+    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+    $scanerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemTreeBounds);
 
-    $orderedEvents = $this->clearingDao->getRelevantClearingEvents($userId, $uploadTreeId);
-    $currentEvents = $this->clearingEventProcessor->filterEventsAfterTime($orderedEvents, $lastDecision);
-    $unionedEvents = $this->clearingEventProcessor->filterEffectiveEvents($currentEvents);
+    list($selection, $total) = $this->clearingEventProcessor->getState($events);
+
+    $unhandledScannerDetectedLicenses = array_diff_key($scanerDetectedLicenses, $total);
 
     switch ($this->conflictStrategyId)
     {
@@ -127,7 +142,7 @@ class DeciderAgent extends Agent
         break;
 
       default:
-        $canAutoDecide = $this->clearingDecisionEventProcessor->checkIfAutomaticDecisionCanBeMade($unionedEvents);
+        $canAutoDecide = count($unhandledScannerDetectedLicenses) == 0;
     }
 
     if ($canAutoDecide)
@@ -136,7 +151,7 @@ class DeciderAgent extends Agent
     }
     else
     {
-      $this->clearingDao->markDecisionAsWip($uploadTreeId, $userId);
+      $this->clearingDao->markDecisionAsWip($itemId, $userId);
     }
     $this->heartbeat(1);
     

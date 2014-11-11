@@ -144,7 +144,7 @@ class ui_browse_license extends FO_Plugin
   {
     $UniqueTagArray = array();
 
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
 
     $left = $itemTreeBounds->getLeft();
     if (empty($left))
@@ -328,7 +328,7 @@ class ui_browse_license extends FO_Plugin
     $this->vars['haveRunningResult'] = false;
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
-    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
+    $uploadTreeId = $itemTreeBounds->getItemId();
 
     $latestNomos=LatestAgentpk($uploadId, "nomos_ars");
     $newestNomos=$this->agentsDao->getNewestAgent("nomos");
@@ -367,7 +367,7 @@ class ui_browse_license extends FO_Plugin
             $viewName='already_cleared_uploadtree'.$itemTreeBounds->getUploadId());
     
     $alreadyClearedUploadTreeView->materialize();
-    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $alreadyClearedUploadTreeView->unmaterialize();
     
     $noLicenseUploadTreeView = new UploadTreeDao($itemTreeBounds->getUploadId(),
@@ -375,7 +375,7 @@ class ui_browse_license extends FO_Plugin
             $itemTreeBounds->getUploadTreeTableName(),
             $viewName='no_license_uploadtree'.$itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getUploadTreeId());
+    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $noLicenseUploadTreeView->unmaterialize();
     
     foreach ($Children as $child)
@@ -518,12 +518,12 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
    
     // $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
-    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
-            ,$this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
+    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
+            ,$this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
     
     // $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
-    $filesToBeCleared = array_key_exists($childItemTreeBounds->getUploadTreeId()
-            ,$this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getUploadTreeId()] : 0;
+    $filesToBeCleared = array_key_exists($childItemTreeBounds->getItemId()
+            ,$this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getItemId()] : 0;
 
     $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;   
 

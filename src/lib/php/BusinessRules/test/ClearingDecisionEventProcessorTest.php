@@ -96,7 +96,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($addedEvent));
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
 
     $clearingDecision = M::mock(ClearingDecision::classname());
     $dateTime = new DateTime();
@@ -124,7 +124,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($addedEvent));
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
 
     $clearingDecision = M::mock(ClearingDecision::classname());
     $dateTime = new DateTime();
@@ -155,7 +155,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($addedEvent));
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenses")->with($this->itemTreeBounds)->andReturn(array());
 
     $clearingDecision = M::mock(ClearingDecision::classname());
     $dateTime = new DateTime();
@@ -178,7 +178,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
   public function testMakeDecisionFromLastEventsWithInvalidType()
   {
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")->never();
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenses")->never();
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenses")->never();
     $this->clearingDao->shouldReceive("getRelevantClearingDecision")->never();
 
     $this->clearingDao->shouldReceive("insertClearingDecision")->never();
@@ -189,7 +189,8 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testGetCurrentClearingsWithoutDecisions()
   {
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenseDetails")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenseDetails")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannedLicenses")->with(array())->andReturn(array());
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")->with($this->userId, $this->uploadTreeId)->andReturn(array());
 
     list($licenseDecisions, $removedClearings) = $this->clearingDecisionEventProcessor->getCurrentClearings($this->itemTreeBounds, $this->userId);
@@ -202,7 +203,8 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
 
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenseDetails")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenseDetails")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannedLicenses")->with(array())->andReturn(array());
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($addedEvent));
@@ -237,9 +239,12 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenseDetails")
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenseDetails")
         ->with($this->itemTreeBounds)
         ->andReturn($addedEvents);
+    $this->agentLicenseEventProcessor->shouldReceive("getScannedLicenses")
+        ->with($addedEvents)
+        ->andReturn(array("licA" => $licenseRef));
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array());
@@ -274,9 +279,12 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenseDetails")
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenseDetails")
         ->with($this->itemTreeBounds)
         ->andReturn($addedEvents);
+    $this->agentLicenseEventProcessor->shouldReceive("getScannedLicenses")
+        ->with($addedEvents)
+        ->andReturn(array("licA" => $licenseRef));
 
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
@@ -314,8 +322,10 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
             )
         )
     );
-    $this->agentLicenseEventProcessor->shouldReceive("getLatestAgentDetectedLicenseDetails")
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerDetectedLicenseDetails")
         ->with($this->itemTreeBounds)->andReturn($addedAgentEvents);
+    $this->agentLicenseEventProcessor->shouldReceive("getScannedLicenses")
+        ->with($addedAgentEvents)->andReturn(array("licA" => $licenseRef));
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn(array($removedEvent));
@@ -323,13 +333,12 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     list($licenseDecisions, $removedClearings) = $this->clearingDecisionEventProcessor->getCurrentClearings($this->itemTreeBounds, $this->userId);
 
     assertThat($licenseDecisions, is(emptyArray()));
-
     assertThat($removedClearings, is(arrayWithSize(1)));
 
     /** @var ClearingResult $result */
     $result = $removedClearings[$removedEvent->getLicenseShortName()];
     assertThat($result->getLicenseRef(), is($removedEvent->getLicenseRef()));
-    assertThat($result->getClearingEvent(), is(nullValue()));
+    assertThat($result->getClearingEvent(), is($removedEvent));
     $agentClearingEvents = $result->getAgentDecisionEvents();
     assertThat($agentClearingEvents, is(arrayWithSize(1)));
 
@@ -369,6 +378,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     }
     return $result;
   }
+
 
 }
 

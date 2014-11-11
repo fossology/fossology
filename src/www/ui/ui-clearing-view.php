@@ -210,7 +210,7 @@ class ClearingView extends FO_Plugin
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
 
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
 
@@ -350,7 +350,7 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
-    $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem,$uploadTreeTableName);
+    $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem,$uploadTreeTableName);
 
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }
