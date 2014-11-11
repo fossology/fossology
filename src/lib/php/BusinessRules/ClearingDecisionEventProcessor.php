@@ -19,11 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseDecision\AgentLicenseDecisionEvent;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEventBuilder;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
-use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
+use Fossology\Lib\Data\Clearing\AgentClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\LicenseClearing;
+use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
+use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
 
@@ -37,14 +39,19 @@ class ClearingDecisionEventProcessor
   /** @var AgentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
 
+  /** @var ClearingEventProcessor */
+  private $clearingEventProcessor;
+
   /**
    * @param ClearingDao $clearingDao
    * @param AgentLicenseEventProcessor $agentLicenseEventProcessor
+   * @param ClearingEventProcessor $clearingEventProcessor
    */
-  public function __construct(ClearingDao $clearingDao, AgentLicenseEventProcessor $agentLicenseEventProcessor)
+  public function __construct(ClearingDao $clearingDao, AgentLicenseEventProcessor $agentLicenseEventProcessor, ClearingEventProcessor $clearingEventProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
+    $this->clearingEventProcessor = $clearingEventProcessor;
   }
 
   /**
@@ -55,86 +62,46 @@ class ClearingDecisionEventProcessor
    */
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $isGlobal)
   {
-    $item = $itemBounds->getUploadTreeId();
     if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       return;
     }
-    $events = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, $item);
-    $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
-    list($added, $removed) = $this->getCurrentLicenseDecisions($itemBounds, $userId);
+    $item = $itemBounds->getUploadTreeId();
 
-    $lastDecision = null;
-    $clearingDecType=null;
-    if ($clearingDecision)
-    {
-      $lastDecision = $clearingDecision->getDateAdded();
-      $clearingDecType = $clearingDecision->getType();
-    }
+    list($lastDecision, $lastType) = $this->getRelevantClearingDecisionParameters($userId, $item);
 
-    $insertDecision = ($type!=$clearingDecType);
-    foreach ($added  as $licenseShortName => $licenseDecisionResult)
-    {
-      /** @var LicenseDecisionResult $licenseDecisionResult */
-      if (!$licenseDecisionResult->hasLicenseDecisionEvent())
-      {
-        $licenseId = $licenseDecisionResult->getLicenseId();
-        $this->clearingDao->addLicenseDecision($itemBounds->getUploadTreeId(), $userId, $licenseId, LicenseEventTypes::USER);
-        $insertDecision = true;
-      }
-    }
+    $allEvents = $this->clearingDao->getRelevantClearingEvents($userId, $item);
 
-    if (!$insertDecision)
-    {
-      foreach (array_merge($added, $removed) as $licenseShortName => $licenseDecisionResult)
-      {
-        if (!$licenseDecisionResult->hasLicenseDecisionEvent()) continue;
+    list($addedLicenses, $removedLicenses) = $this->clearingEventProcessor->getFilteredState($allEvents);
 
-        $entryTimestamp = $licenseDecisionResult->getLicenseDecisionEvent()->getDateTime();
+    $currentEvents = $this->clearingEventProcessor->filterEventsByTime($allEvents, $lastDecision);
+    list($currentAddedLicenses, $currentRemovedLicenses) = $this->clearingEventProcessor->getFilteredState($currentEvents);
 
-        if ($lastDecision === null || $lastDecision < $entryTimestamp)
-        {
-          $insertDecision = true;
-          break;
-        }
-      }
-    }
-    $removedSinceLastDecision = array();
-    foreach ($events as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-      $entryTimestamp = $event->getDateTime();
-      if ($event->isRemoved() && !array_key_exists($licenseShortName, $added) && $lastDecision < $entryTimestamp)
-      {
-        $removedSinceLastDecision[$licenseShortName] = $event;
-        $insertDecision = true;
-      }
-    }
+    $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemBounds);
+    $unhandledAgentDetectedLicenses = $this->clearingEventProcessor->getUnhandledLicenses($allEvents, $agentDetectedLicenses);
+    $this->addClearingEventsForLicenses($userId, $item, $unhandledAgentDetectedLicenses);
+    $addedLicenses = array_merge($addedLicenses, $unhandledAgentDetectedLicenses);
+
+    $insertDecision = $type !== $lastType || count($currentEvents) > 0 || count($unhandledAgentDetectedLicenses) > 0;
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
-      $insertDecision = true;
-      $removedSinceLastDecision = array();
-      $licenseDecisionEventBuilder = new LicenseDecisionEventBuilder();
-      foreach($added as $licenseShortName => $licenseDecisionResult) {
-        $this->clearingDao->removeLicenseDecision($itemBounds->getUploadTreeId(), $userId,
-            $licenseDecisionResult->getLicenseId(), $type);
-        $licenseDecisionEventBuilder
-            ->setLicenseRef($licenseDecisionResult->getLicenseRef());
-        //we only need the license ID so the builder defaults should suffice for the rest
-        $removedSinceLastDecision[$licenseShortName] = $licenseDecisionEventBuilder->build();
+      $type = DecisionTypes::IDENTIFIED;
+      $removedAddedLicenses = $this->createAllRemoveClearingEvents($userId, $item, $addedLicenses);
+      $currentRemovedLicenses = array_merge($currentRemovedLicenses, $removedAddedLicenses);
+
+      foreach ($currentAddedLicenses as $licenseShortName => $currentAddedLicense)
+      {
+        unset($currentRemovedLicenses[$licenseShortName]);
       }
 
-      $added = array();
-      $type = DecisionTypes::IDENTIFIED;
+      $insertDecision = count($currentRemovedLicenses) > 0;
     }
 
     if ($insertDecision)
     {
-      $this->clearingDao->insertClearingDecision($item, $userId, $type, $isGlobal, $added, $removedSinceLastDecision);
-      $this->clearingDao->removeWipClearingDecision($item, $userId);
-      ReportCachePurgeAll();
+      $this->insertClearingDecision($userId, $item, $type, $isGlobal, $addedLicenses, $currentRemovedLicenses);
     }
   }
 
@@ -143,59 +110,41 @@ class ClearingDecisionEventProcessor
    * @param int $userId
    * @return array
    */
-  public function getCurrentLicenseDecisions(ItemTreeBounds $itemTreeBounds, $userId)
+  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $userId)
   {
-    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
-    $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($itemTreeBounds);
+    $itemId = $itemTreeBounds->getUploadTreeId();
+    $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($itemTreeBounds);
 
-    list($addedLicenses, $removedLicenses) = $this->clearingDao->getCurrentLicenseDecisions($userId, $uploadTreeId);
+    $orderedEvents = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+    $sortedFilteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($orderedEvents);
 
-    $licenseDecisions = array();
-    $removedLicenseDecisions = array();
+    list($addedLicenses, $removedLicenses) = $this->clearingEventProcessor->getCurrentClearingState($sortedFilteredEvents);
+    $events = $this->clearingEventProcessor->indexByLicenseShortName($sortedFilteredEvents);
+
+    $addedResults = array();
+    $removedResults = array();
 
     $allLicenseShortNames = array_unique(array_merge(array_keys($addedLicenses), array_keys($agentDetectedLicenses)));
-
     foreach ($allLicenseShortNames as $licenseShortName)
     {
-      $licenseDecisionEvent = null;
-      $agentLicenseDecisionEvents = array();
+      $licenseDecisionEvent = array_key_exists($licenseShortName, $addedLicenses) ? $events[$licenseShortName] : null;
+      $agentClearingEvents = $this->collectAgentDetectedLicenses($licenseShortName, $agentDetectedLicenses);
 
-      if (array_key_exists($licenseShortName, $addedLicenses))
+      if (($licenseDecisionEvent !== null) || (count($agentClearingEvents) > 0))
       {
-        $licenseDecisionEvent = $addedLicenses[$licenseShortName];
-      }
-
-      if (array_key_exists($licenseShortName, $agentDetectedLicenses))
-      {
-        foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperties)
-        {
-          foreach ($licenseProperties as $licenseProperty)
-          {
-            $agentLicenseDecisionEvents[] = new AgentLicenseDecisionEvent(
-                $licenseProperty['licenseRef'],
-                $licenseProperty['agentRef'],
-                $licenseProperty['matchId'],
-                array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
-            );
-          }
-        }
-      }
-
-      if (($licenseDecisionEvent !== null) || (count($agentLicenseDecisionEvents) > 0))
-      {
-        $licenseDecisionResult = new LicenseDecisionResult($licenseDecisionEvent, $agentLicenseDecisionEvents);
+        $licenseDecisionResult = new ClearingResult($licenseDecisionEvent, $agentClearingEvents);
 
         if (array_key_exists($licenseShortName, $removedLicenses))
         {
-          $removedLicenseDecisions[$licenseShortName] = $licenseDecisionResult;
+          $removedResults[$licenseShortName] = $licenseDecisionResult;
         } else
         {
-          $licenseDecisions[$licenseShortName] = $licenseDecisionResult;
+          $addedResults[$licenseShortName] = $licenseDecisionResult;
         }
       }
     }
 
-    return array($licenseDecisions, $removedLicenseDecisions);
+    return array($addedResults, $removedResults);
   }
 
   /**
@@ -204,17 +153,17 @@ class ClearingDecisionEventProcessor
    * @param $lastDecisionDate
    * @return array
    */
-  public function filterRelevantLicenseDecisionEvents($userId, $itemTreeBounds, $lastDecisionDate)
+  public function filterRelevantClearingEvents($userId, $itemTreeBounds, $lastDecisionDate)
   {
-    list($added, $removed) = $this->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+    list($added, $removed) = $this->getCurrentClearings($itemTreeBounds, $userId);
 
     if ($lastDecisionDate !== null)
     {
       /**
-       * @param LicenseDecisionResult $event
+       * @param ClearingResult $event
        * @return bool
        */
-      $filter_since_event = function (LicenseDecisionResult $event) use ($lastDecisionDate)
+      $filter_since_event = function (ClearingResult $event) use ($lastDecisionDate)
       {
         return $event->getDateTime() >= $lastDecisionDate;
       };
@@ -226,16 +175,15 @@ class ClearingDecisionEventProcessor
   }
 
   /**
-   * @param LicenseDecision[] $added
-   * @param LicenseDecision[] $removed
+   * @param LicenseClearing[] $unionedEvents
    * @return bool
    */
-  public function checkIfAutomaticDecisionCanBeMade($added, $removed)
+  public function checkIfAutomaticDecisionCanBeMade($unionedEvents)
   {
     $canAutoDecide = true;
-    foreach ($added as $event)
+    foreach ($unionedEvents as $event)
     {
-      if ($event->getEventType() === LicenseDecisionResult::AGENT_DECISION_TYPE)
+      if ($event->getEventType() === ClearingResult::AGENT_DECISION_TYPE && !$event->isRemoved())
       {
         $canAutoDecide = false;
         break;
@@ -243,5 +191,118 @@ class ClearingDecisionEventProcessor
     }
     return $canAutoDecide;
   }
+
+  /**
+   * @param int $userId
+   * @param int $itemId
+   * @param LicenseRef[] $licenseRefs
+   * @param int $eventType
+   */
+  protected function addClearingEventsForLicenses($userId, $itemId, $licenseRefs, $eventType = ClearingEventTypes::USER)
+  {
+    foreach ($licenseRefs as $licenseRef)
+    {
+      $this->clearingDao->addClearing($itemId, $userId, $licenseRef->getId(), $eventType);
+    }
+  }
+
+  /**
+   * @param ClearingEvent[] $currentEvents
+   * @return ClearingEvent[]
+   */
+  protected function getCurrentRemovedEvents($currentEvents)
+  {
+    return array_filter($currentEvents, function (ClearingEvent $event)
+    {
+      return $event->isRemoved();
+    });
+  }
+
+  /**
+   * @param int $userId
+   * @param int $itemId
+   * @param LicenseRef[] $licenses
+   * @return LicenseRef[]
+   */
+  protected function createAllRemoveClearingEvents($userId, $itemId, $licenses)
+  {
+    $removedLicenses = array();
+    foreach ($licenses as $license)
+    {
+      $this->clearingDao->removeClearing($itemId, $userId, $license->getId(), ClearingEventTypes::USER);
+      $removedLicenses[$license->getShortName()] = $license;
+    }
+    return $removedLicenses;
+  }
+
+  /**
+   * @param $userId
+   * @param $item
+   * @return array
+   */
+  protected function getRelevantClearingDecisionParameters($userId, $item)
+  {
+    $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
+
+    if ($clearingDecision)
+    {
+      return array(
+          $clearingDecision->getDateAdded(),
+          $clearingDecision->getType()
+      );
+    }
+    return array(null, null);
+  }
+
+  /**
+   * @param $userId
+   * @param $itemId
+   * @param $type
+   * @param $isGlobal
+   * @param $addedLicenses
+   * @param $removedLicenses
+   */
+  protected function insertClearingDecision($userId, $itemId, $type, $isGlobal, $addedLicenses, $removedLicenses)
+  {
+    $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $isGlobal, $addedLicenses, $removedLicenses);
+    $this->clearingDao->removeWipClearingDecision($itemId, $userId);
+    ReportCachePurgeAll();
+  }
+
+  /**
+   * @param $licenseProperty
+   * @return AgentClearingEvent
+   */
+  private function createAgentClearingEvent($licenseProperty)
+  {
+    return new AgentClearingEvent(
+        $licenseProperty['licenseRef'],
+        $licenseProperty['agentRef'],
+        $licenseProperty['matchId'],
+        array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
+    );
+  }
+
+  /**
+   * @param $licenseShortName
+   * @param $agentDetectedLicenses
+   * @return array
+   */
+  protected function collectAgentDetectedLicenses($licenseShortName, $agentDetectedLicenses)
+  {
+    $agentClearingEvents = array();
+    if (array_key_exists($licenseShortName, $agentDetectedLicenses))
+    {
+      foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperties)
+      {
+        foreach ($licenseProperties as $licenseProperty)
+        {
+          $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
+        }
+      }
+    }
+    return $agentClearingEvents;
+  }
+
 
 }

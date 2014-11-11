@@ -21,6 +21,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\Object;
 
@@ -41,10 +42,29 @@ class AgentLicenseEventProcessor extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int
-   * @return array
+   * @return LicenseRef[]
    */
   public function getLatestAgentDetectedLicenses(ItemTreeBounds $itemTreeBounds)
+  {
+    $licenses = array();
+
+    $details = $this->getLatestAgentDetectedLicenseDetails($itemTreeBounds);
+
+    foreach ($details as $licenseShortName => $agentEntries) {
+      foreach ($agentEntries as $agentName => $matchProperties) {
+        $licenses[$licenseShortName] = $matchProperties[0]['licenseRef'];
+        break;
+      }
+    }
+
+    return $licenses;
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
+   */
+  public function getLatestAgentDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
 

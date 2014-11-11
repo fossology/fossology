@@ -48,7 +48,7 @@ function closeUserModal() {
 
 function reloadClearingTable() {
   // TODO reload also highlights
-  var table = createLicenseDecisionTable();
+  var table = createClearingTable();
   table.fnDraw(false);
   $('#bulkIdResult').hide();
 }

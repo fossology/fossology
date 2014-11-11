@@ -16,13 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
-class LicenseDecisionEvent extends Object implements LicenseDecision
+class ClearingEvent extends Object implements LicenseClearing
 {
   /** @var int */
   private $eventId;
@@ -34,7 +34,7 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
   private $userId;
   /** @var int */
   private $groupId;
-  /** @var string */
+  /** @var int */
   private $eventType;
   /** @var LicenseRef */
   private $licenseRef;
@@ -52,7 +52,7 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
    * @param DateTime $dateTime
    * @param int $userId
    * @param int $groupId
-   * @param string $eventType
+   * @param int $eventType
    * @param LicenseRef $licenseRef
    * @param boolean $removed
    * @param string $reportinfo
@@ -97,7 +97,7 @@ class LicenseDecisionEvent extends Object implements LicenseDecision
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getEventType()
   {

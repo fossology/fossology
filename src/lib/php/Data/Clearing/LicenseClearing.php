@@ -15,18 +15,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
-use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 
-interface LicenseDecision
+interface LicenseClearing
 {
-  /**
-   * @return DateTime
-   */
-  public function getDateTime();
-
   /**
    * @return string
    */
@@ -56,19 +50,9 @@ interface LicenseDecision
    * @return string
    */
   public function getLicenseFullName();
-
+  
   /**
-   * @return string
+   * @return DateTime
    */
-  public function getComment();
-
-  /**
-   * @return string
-   */
-  public function getReportinfo();
-
-   /**
-   * @return int
-   */
-  public function getEventId();
+  public function getDateTime();
 }

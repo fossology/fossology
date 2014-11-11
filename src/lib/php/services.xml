@@ -67,7 +67,7 @@ without any warranty.
       <argument type="service" id="dao.upload"/>
     </service>
 
-    <service id="event.types" class="\Fossology\Lib\Data\LicenseDecision\LicenseEventTypes">
+    <service id="event.types" class="\Fossology\Lib\Data\Clearing\ClearingEventTypes">
       <argument type="service" id="db.manager"/>
     </service>
     <service id="decision.types" class="\Fossology\Lib\Data\DecisionTypes">
@@ -113,10 +113,14 @@ without any warranty.
       <argument type="service" id="dao.agents"/>
     </service>
 
+    <service id="businessrules.clearing_event_processor"
+               class="\Fossology\Lib\BusinessRules\ClearingEventProcessor">
+    </service>
     <service id="businessrules.clearing_decision_event_processor"
                  class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
       <argument type="service" id="dao.clearing"/>
       <argument type="service" id="businessrules.agent_license_event_processor"/>
+        <argument type="service" id="businessrules.clearing_event_processor"/>
     </service>
 
     <service id="twig.loader" class="Twig_Loader_Filesystem">

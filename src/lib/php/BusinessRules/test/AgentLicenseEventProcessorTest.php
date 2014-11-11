@@ -50,6 +50,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $this->agentsDao);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   public function testGetLatestAgentDetectedLicenses()
   {
     $uploadId = 2;
@@ -66,7 +71,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         'licA' => array(
@@ -96,7 +101,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         'licA' => array(
@@ -123,7 +128,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }
@@ -143,7 +148,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenses($this->itemTreeBounds);
+    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }

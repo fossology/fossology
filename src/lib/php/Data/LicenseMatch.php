@@ -44,6 +44,13 @@ class LicenseMatch extends Object
    */
   private $licenseFileId;
 
+  /**
+   * @param int $fileId
+   * @param LicenseRef $licenseRef
+   * @param AgentRef $agentRef
+   * @param int$licenseFileId
+   * @param null|int $percent
+   */
   public function __construct($fileId, LicenseRef $licenseRef, AgentRef $agentRef, $licenseFileId, $percent = null)
   {
     $this->fileId = $fileId;
