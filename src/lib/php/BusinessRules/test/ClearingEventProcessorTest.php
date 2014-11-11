@@ -253,12 +253,7 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testFilterEffectiveEventsWithEmptyArray()
   {
-    assertThat($this->clearingEventProcessor->filterEffectiveEvents(null), is(emptyArray()));
-  }
-
-  public function testFilterEffectiveEventsWithNullValue()
-  {
-    assertThat($this->clearingEventProcessor->filterEffectiveEvents(null), is(emptyArray()));
+    assertThat($this->clearingEventProcessor->filterEffectiveEvents(array()), is(emptyArray()));
   }
 
   public function testGetUnhandledLicenseWithUnhandledLicenses() {

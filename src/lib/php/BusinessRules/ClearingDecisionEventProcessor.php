@@ -108,10 +108,11 @@ class ClearingDecisionEventProcessor
     $itemId = $itemTreeBounds->getUploadTreeId();
     $agentDetectedLicenses = $this->agentLicenseEventProcessor->getLatestAgentDetectedLicenseDetails($itemTreeBounds);
 
-    $allEvents = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
-    $filteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($allEvents);
-    list($addedLicenses, $removedLicenses) = $this->clearingEventProcessor->getCurrentClearingState($filteredEvents);
-    $events = $this->clearingEventProcessor->indexByLicenseShortName($filteredEvents);
+    $orderedEvents = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+    $sortedFilteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($orderedEvents);
+
+    list($addedLicenses, $removedLicenses) = $this->clearingEventProcessor->getCurrentClearingState($sortedFilteredEvents);
+    $events = $this->clearingEventProcessor->indexByLicenseShortName($sortedFilteredEvents);
 
     $addedResults = array();
     $removedResults = array();
@@ -167,16 +168,15 @@ class ClearingDecisionEventProcessor
   }
 
   /**
-   * @param LicenseClearing[] $added
-   * @param LicenseClearing[] $removed
+   * @param LicenseClearing[] $unionedEvents
    * @return bool
    */
-  public function checkIfAutomaticDecisionCanBeMade($added, $removed)
+  public function checkIfAutomaticDecisionCanBeMade($unionedEvents)
   {
     $canAutoDecide = true;
-    foreach ($added as $event)
+    foreach ($unionedEvents as $event)
     {
-      if ($event->getEventType() === ClearingResult::AGENT_DECISION_TYPE)
+      if ($event->getEventType() === ClearingResult::AGENT_DECISION_TYPE && !$event->isRemoved())
       {
         $canAutoDecide = false;
         break;

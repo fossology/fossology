@@ -392,7 +392,7 @@ insert into clearing_decision (
   /**
    * @param int $userId
    * @param int $uploadTreeId
-   * @return ClearingEvent[]
+   * @return ClearingEvent[] sorted by date_added
    */
   public function getRelevantClearingEvents($userId, $uploadTreeId)
   {
@@ -426,7 +426,7 @@ insert into clearing_decision (
         $statementName,
         array($uploadTreeId, $userId)
     );
-    $events = array();
+    $orderedEvents = array();
     while ($row = $this->dbManager->fetchArray($res)) {
       $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
@@ -442,11 +442,11 @@ insert into clearing_decision (
                                   ->setReportinfo($row['reportinfo'])
                                   ->setComment($row['comment']);
 
-      $events[] =$licenseDecisionEventBuilder->build();
+      $orderedEvents[] =$licenseDecisionEventBuilder->build();
     }
 
     $this->dbManager->freeResult($res);
-    return $events;
+    return $orderedEvents;
   }
 
   /**

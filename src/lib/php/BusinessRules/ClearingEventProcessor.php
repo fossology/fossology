@@ -44,12 +44,12 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param ClearingEvent[] $events
+   * @param ClearingEvent[] $orderedEvents ordered by data_added
    * @return LicenseRef[][]
    */
-  public function getFilteredState($events)
+  public function getFilteredState($orderedEvents)
   {
-    $filteredEvents = $this->filterEffectiveEvents($events);
+    $filteredEvents = $this->filterEffectiveEvents($orderedEvents);
     return $this->getCurrentClearingState($filteredEvents);
   }
 
@@ -68,40 +68,18 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param ClearingEvent[] $events
+   * @param ClearingEvent[] $orderedEvents
    * @return ClearingEvent[]
    */
-  public function filterEffectiveEvents($events)
+  public function filterEffectiveEvents($orderedEvents)
   {
-    if ($events === null)
-    {
-      return array();
-    }
-
-    $addingEvents = array();
-    $removingEvents = array();
-
-    foreach ($events as $event)
+    $unorderedEvents = array();
+    foreach ($orderedEvents as $event)
     {
       $licenseShortName = $event->getLicenseShortName();
-      if ($event->isRemoved())
-      {
-        if (array_key_exists($licenseShortName, $addingEvents))
-        {
-          unset($addingEvents[$licenseShortName]);
-        }
-        $removingEvents[$licenseShortName] = $event;
-      } else
-      {
-        if (array_key_exists($licenseShortName, $removingEvents))
-        {
-          unset($removingEvents[$licenseShortName]);
-        }
-        $addingEvents[$licenseShortName] = $event;
-      }
+      $unorderedEvents[$licenseShortName] = $event;
     }
-
-    return $this->sortEventsInTime(array_merge(array_values($addingEvents), array_values($removingEvents)));
+    return $this->sortEventsInTime($unorderedEvents);
   }
 
   /**
