@@ -17,16 +17,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 
 use DateTime;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\LicenseDecision\LicenseEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Util\Object;
 
 
-class LicenseDecisionEventBuilder extends Object
+class ClearingEventBuilder extends Object
 {
   /** @var int */
   private $eventId;
@@ -56,7 +56,7 @@ class LicenseDecisionEventBuilder extends Object
     $this->dateTime = null;
     $this->userId = 1;
     $this->groupId = 1;
-    $this->eventType = LicenseEventTypes::USER;
+    $this->eventType = ClearingEventTypes::USER;
     $this->licenseRef = null;
     $this->removed = false;
     $this->reportinfo = "";
@@ -64,11 +64,11 @@ class LicenseDecisionEventBuilder extends Object
   }
 
   /**
-   * @return LicenseDecisionEvent
+   * @return ClearingEvent
    */
   public function build()
   {
-    return new LicenseDecisionEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
+    return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
         $this->groupId, $this->eventType, $this->licenseRef, $this->removed, $this->reportinfo, $this->comment);
   }
 

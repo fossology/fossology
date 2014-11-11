@@ -16,11 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\Types;
 
-class LicenseEventTypes extends Types {
+class ClearingEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
 

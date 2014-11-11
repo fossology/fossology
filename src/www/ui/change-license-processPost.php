@@ -101,7 +101,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
     if (isset($licenses))
     {
-      $this->clearingDao->insertClearingDecisionTest($licenses, $removed, $itemId, $userId, $job_pk);
+      $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $itemId, $userId, $job_pk);
     } //,  $_POST['comment'], $_POST['remark']
 
     /** @var agent_fodecider $deciderPlugin */

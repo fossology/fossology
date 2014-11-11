@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\LicenseDecision;
+namespace Fossology\Lib\Data\Clearing;
 
 
 use DateTime;
@@ -24,7 +24,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
-class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
+class AgentClearingEvent extends Object implements LicenseClearing {
   /**
    * @var LicenseRef
    */
@@ -58,7 +58,7 @@ class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
   /**
    * @return int
    */
-  public function getEventId()
+  public function getMatchId()
   {
     return $this->matchId;
   }
@@ -101,7 +101,7 @@ class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
    */
   public function getEventType()
   {
-    return LicenseDecisionResult::AGENT_DECISION_TYPE;
+    return ClearingResult::AGENT_DECISION_TYPE;
   }
 
   /**
@@ -125,14 +125,6 @@ class AgentLicenseDecisionEvent extends Object implements LicenseDecision {
    */
   public function getDateTime(){
     return new DateTime();
-  }
-
-  /**
-   * @return boolean
-   */
-  public function isGlobal()
-  {
-    return true;
   }
 
   /**
