@@ -87,7 +87,7 @@ class changeLicenseBulk extends FO_Plugin
         }
       }
 
-      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
 
       if ($bulkId > 0) {
         $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);

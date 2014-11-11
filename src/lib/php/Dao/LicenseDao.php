@@ -326,12 +326,12 @@ class LicenseDao extends Object
     return $license;
   }
 
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+  public function insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-      VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-      array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+      "INSERT INTO license_ref_bulk (user_fk, group_fk, upload_fk, uploadtree_fk, rf_fk, removing, rf_text)
+      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING lrb_pk",
+      array($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText)
     );
 
     if ($licenseRefBulkIdResult !== false) {

@@ -651,9 +651,9 @@ insert into clearing_decision (
             )
             SELECT distinct on (lrb_pk) rf_text as text, rf_fk as lic, removing, success
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, true as success FROM alltryied WHERE uploadtree_fk = $1
+              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, true as success FROM alltried WHERE uploadtree_fk = $1
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, false as success FROM alltryied WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
+              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_fk, removing, false as success FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
             ) AS result";
 
     $stmt = __METHOD__;
