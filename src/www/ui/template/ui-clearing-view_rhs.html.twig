@@ -124,7 +124,7 @@
 </h3>
 
 <div class="scrollable2">
-<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable" hidden>
+<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable">
 <tr>
 <th>
 {{ 'License'| trans }}
@@ -143,7 +143,13 @@
            <td>{{ row.lic|e }}</td>
          </table>
       </td>
-      <td>{{ row.text|e }}</td>
+      <td>
+      {% if row.id > 0 and row.success %}
+      <a href="{{ uri }}&item={{ itemId }}&clearingId={{ row.id }}">{{ row.text|e }}<a>
+      {% else %}
+      {{ row.text|e }}
+      {% endif %}
+      </td>
     </tr>
   {% endfor %}
 </table>

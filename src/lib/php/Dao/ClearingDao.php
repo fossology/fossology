@@ -604,7 +604,8 @@ insert into clearing_decision (
   {
     $sql = "with alltried as (
             select lr.lrb_pk,
-              lr.rf_text, lrf.rf_shortname, removing, ce.uploadtree_fk, lr.uploadtree_fk as lritem
+              ce.clearing_event_pk ce_pk, lr.rf_text, lrf.rf_shortname, removing,
+              ce.uploadtree_fk
               from license_ref_bulk lr
               left join highlight_bulk h on lrb_fk = lrb_pk
               left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
@@ -612,11 +613,11 @@ insert into clearing_decision (
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
               where lr.upload_fk = $2
             )
-            SELECT distinct on (lrb_pk) rf_text as text, rf_shortname as lic, removing, success
+            SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, success
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_shortname, removing, true as success FROM alltried WHERE uploadtree_fk = $1
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as success FROM alltried WHERE uploadtree_fk = $1
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, rf_text, rf_shortname, removing, false as success FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as success FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
             ) AS result";
 
     $stmt = __METHOD__;
@@ -629,6 +630,7 @@ insert into clearing_decision (
     while ($row = $this->dbManager->fetchArray($res))
     {
       $bulks[] = array(
+        "id" => $row['ce_pk'],
         "text" => $row['text'],
         "lic" => $row['lic'],
         "removing" => $this->dbManager->booleanFromDb($row['removing']),

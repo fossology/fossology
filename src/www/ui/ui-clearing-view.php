@@ -99,10 +99,10 @@ class ClearingView extends FO_Plugin
    * @param $highlightId
    * @return array
    */
-  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId)
+  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
-    if ($selectedAgentId > 0)
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    if (($selectedAgentId > 0) || ($clearingId > 0))
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
     } else
@@ -215,18 +215,28 @@ class ClearingView extends FO_Plugin
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;
-    /** @var $view ui_view */
+    /** @var ui_view $view */
     $view = &$Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $selectedAgentId = GetParm("agentId", PARM_INTEGER);
     $highlightId = GetParm("highlightId", PARM_INTEGER);
+    $clearingId = GetParm("clearingId", PARM_INTEGER);
+
+    if ($clearingId !== null)
+    {
+      $highlightId = -1;
+    }
+    else if ($highlightId !== null)
+    {
+      $clearingId = -1;
+    }
 
     $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
     $hasHighlights = count($highlights) > 0;
 
     $permission = GetUploadPerm($uploadId);
@@ -245,8 +255,9 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile)
     {
-      $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
-      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+      // TODO these methods should probably be removed: no idea what they do
+      //$extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
+      //$output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
 
       if ($permission >= PERM_WRITE)
       {
@@ -282,7 +293,7 @@ class ClearingView extends FO_Plugin
     $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
-    $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
+    $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
