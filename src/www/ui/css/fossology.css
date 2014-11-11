@@ -212,11 +212,11 @@ table.dataTable tr.even.removed {
 }
 
 table.dataTable tr.odd.match {
-    background-color: #7ecf7e;
+    background-color: #cea15f;
 }
 
 table.dataTable tr.even.match {
-    background-color: #86da84;
+    background-color: #efbe76;
 }
 
 .inactiveClearing
