@@ -296,7 +296,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds = M::mock(ItemTreeBounds::classname());
     $treeBounds->shouldReceive('getItemId')->andReturn(301);
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 101);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
@@ -307,7 +309,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds = M::mock(ItemTreeBounds::classname());
     $treeBounds->shouldReceive('getItemId')->andReturn(305);
     $treeBounds->shouldReceive('getLeft')->andReturn(4);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 102);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(102);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false));
@@ -320,7 +324,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds = M::mock(ItemTreeBounds::classname());
     $treeBounds->shouldReceive('getItemId')->andReturn(301);
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 101);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);

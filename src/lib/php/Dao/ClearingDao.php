@@ -600,8 +600,16 @@ insert into clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
-  public function getTriedBulks(ItemTreeBounds $itemTreeBound, $uploadId)
+  public function getTriedBulks(ItemTreeBounds $itemTreeBound)
   {
+    $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
+    $itemId = $itemTreeBound->getItemId();
+    $uploadId = $itemTreeBound->getUploadId();
+    $left = $itemTreeBound->getLeft();
+
+    $params = array($uploadId, $itemId, $left);
+    $stmt = __METHOD__.".".$uploadTreeTableName;
+
     $sql = "with alltried as (
             select lr.lrb_pk,
               ce.clearing_event_pk ce_pk, lr.rf_text, lrf.rf_shortname, removing,
@@ -609,23 +617,21 @@ insert into clearing_decision (
               from license_ref_bulk lr
               left join highlight_bulk h on lrb_fk = lrb_pk
               left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
-              left join uploadtree ut on ut.uploadtree_pk = ce.uploadtree_fk
-              inner join uploadtree ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
+              left join $uploadTreeTableName ut on ut.uploadtree_pk = ce.uploadtree_fk
+              inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
-              where lr.upload_fk = $2
+              where lr.upload_fk = $1
               and $3 between ut2.lft and ut2.rgt
             )
             SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as matched FROM alltried WHERE uploadtree_fk = $1
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as matched FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
             ) AS result";
 
-    $stmt = __METHOD__;
     $this->dbManager->prepare($stmt, $sql);
 
-    $params = array($itemTreeBound->getItemId(), $uploadId, $itemTreeBound->getLeft());
     $res = $this->dbManager->execute($stmt, $params);
 
     $bulks = array();
