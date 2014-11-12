@@ -600,15 +600,23 @@ insert into clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
-  public function getTriedBulks(ItemTreeBounds $itemTreeBound)
+  public function getBulkHistory(ItemTreeBounds $itemTreeBound, $onlyTried = true)
   {
     $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
     $itemId = $itemTreeBound->getItemId();
     $uploadId = $itemTreeBound->getUploadId();
-    $left = $itemTreeBound->getLeft();
 
-    $params = array($uploadId, $itemId, $left);
+    $params = array($uploadId, $itemId);
     $stmt = __METHOD__.".".$uploadTreeTableName;
+
+    $triedFilter = "";
+    if ($onlyTried)
+    {
+      $left = $itemTreeBound->getLeft();
+      $params[] = $left;
+      $triedFilter = "and $".count($params)." between ut2.lft and ut2.rgt";
+      $stmt .= ".tried";
+    }
 
     $sql = "with alltried as (
             select lr.lrb_pk,
@@ -621,7 +629,7 @@ insert into clearing_decision (
               inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
               where lr.upload_fk = $1
-              and $3 between ut2.lft and ut2.rgt
+              $triedFilter
               order by lr.lrb_pk
             )
             SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched

@@ -1,0 +1,35 @@
+<table class="dataTable" border="1" cellpadding="5px" id="bulkHistoryTable" name="bulkHistoryTable">
+  <tr>
+    <th>{{ 'License'| trans }}</th>
+    <th>{{ 'Text'| trans }}</th>
+  </tr>
+  {% for row in bulkHistory %}
+    <tr class="{{ cycle(['odd','even'], loop.index0) }} {% if row.matched %}match{% endif %}">
+      <td>
+          <table>
+            <td><div class='{% if row.removing %}delete{% else %}add{% endif %} inactive'></td>
+            <td>{{ row.lic|e }}</td>
+          </table>
+      </td>
+      <td>
+      {% if uri and row.id > 0 and row.matched %}
+      <a href="{{ uri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
+      {% else %}
+      {{ row.text|e }}
+      {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<script type='text/javascript'>
+function refreshBulkHistoryModal(callbacksuccess) {
+  $.ajax({
+    url: "{{ baseuri }}?mod=bulk-history&upload={{ upload }}&item={{ item }}",
+    success: function(data) {
+      $('#bulkHistoryTable').html(data);
+      $('#bulkHistoryModal').plainModal('open');
+    }
+  });
+}
+</script>

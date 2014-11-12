@@ -298,7 +298,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
@@ -311,7 +311,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(4);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false));
@@ -326,7 +326,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
-    $bulks = $this->clearingDao->getTriedBulks($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);

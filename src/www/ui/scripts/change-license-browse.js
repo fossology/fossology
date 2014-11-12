@@ -38,6 +38,16 @@ function closeBulkModal() {
   bulkModal.plainModal('close');
 }
 
+function loadBulkHistoryModal() {
+  $.ajax({
+    url: "?mod=bulk-history&upload=1&item=3",
+    success: function(data) {
+      $('#bulkHistoryTable').html(data);
+      $('#bulkHistoryModal').plainModal('open');
+    }
+  });
+}
+
 function openUserModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
   userModal.plainModal('open');

@@ -3,6 +3,10 @@
 {% block content %}
   {% include 'change_license_modal.html.twig' %}
   {% include 'ui-clearing-view_bulk.html.twig' %}
+  <div class="modal" id="bulkHistoryModal" hidden>
+  {% include 'bulk-history.html.twig' %}
+  </div>
+  <button onclick='loadBulkHistoryModal();'>bulk history</button>
   {{ parent() }}
 {% endblock %}
 
