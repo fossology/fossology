@@ -16,23 +16,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Data\Clearing;
 
-class DecisionScopes extends Types
-{
-  const ITEM = 0;
-  const REPO = 1;
-  const UPLOAD = 2;
-  const PACKAGE = 3;
 
-  public function __construct()
-  {
-    parent::__construct("decision scope");
+use Fossology\Lib\Test\EnumMapTestBase;
 
-    $this->map = array(
-        self::ITEM => "local",
-        self::PACKAGE => "package",
-        self::REPO => "global");
+class ClearingEventTypesTest extends EnumMapTestBase {
+
+  public function setUp() {
+    $this->setTypes(new ClearingEventTypes());
   }
 
+  public function testTypeUser()
+  {
+    $this->checkMapping(ClearingEventTypes::USER, "User decision");
+  }
+
+  public function testTypeBulk()
+  {
+    $this->checkMapping(ClearingEventTypes::BULK, "Bulk");
+  }
 }
+ 

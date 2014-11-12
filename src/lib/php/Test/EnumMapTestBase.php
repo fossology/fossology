@@ -16,23 +16,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Test;
 
-class DecisionScopes extends Types
-{
-  const ITEM = 0;
-  const REPO = 1;
-  const UPLOAD = 2;
-  const PACKAGE = 3;
+use Fossology\Lib\Data\Types;
 
-  public function __construct()
-  {
-    parent::__construct("decision scope");
+class EnumMapTestBase extends \PHPUnit_Framework_TestCase {
 
-    $this->map = array(
-        self::ITEM => "local",
-        self::PACKAGE => "package",
-        self::REPO => "global");
+  /** @var Types */
+  private $types;
+
+  /**
+   * @param Types $types
+   */
+  protected function setTypes($types) {
+    $this->types = $types;
   }
 
+  /**
+   * @param int $type
+   * @param string $expectedTypeName
+   * @throws \Exception
+   */
+  protected function checkMapping($type, $expectedTypeName) {
+    $typeName = $this->types->getTypeName($type);
+
+    assertThat($typeName, is($expectedTypeName));
+    assertThat($this->types->getTypeByName($typeName), is($type));
+  }
 }

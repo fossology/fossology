@@ -20,10 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-use Fossology\Lib\Data\License\LicenseAlike;
 use Fossology\Lib\Util\Object;
 
-class LicenseRef extends Object implements LicenseAlike
+class LicenseRef extends Object
 {
   /** @var int */
   private $id;
