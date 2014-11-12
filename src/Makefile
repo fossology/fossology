@@ -58,7 +58,11 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -s -C $(@:test-%=%) test
 
+coverage-report-html:
+	$(call coverage-report-html,.)
+
 coverage: $(COVDIRS)
+	$(MAKE) coverage-report-html
 $(COVDIRS):
 	$(MAKE) -s -C $(@:cov-%=%) coverage
 

@@ -20,6 +20,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 
 if (!function_exists('Traceback_uri'))
 {
@@ -36,6 +37,10 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
   private $dbManager;
   /** @var LicenseDao */
   private $licenseDao;
+  /** @var ClearingDao */
+  private $clearingDao;
+  /** @var NewestEditedLicenseSelector */
+  private $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
 
@@ -46,16 +51,19 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $this->uploadDao = new UploadDao($this->dbManager);
+    $this->newestEditedLicenseSelector = new NewestEditedLicenseSelector();
+    $this->clearingDao = new ClearingDao($this->dbManager, $this->newestEditedLicenseSelector, $this->uploadDao);
   }
-  
+
   public function tearDown()
   {
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
+    $this->clearingDao = null;
   }
 
-  private function runMonk($uploadId)
+  private function runMonk($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $sysConf = $this->testDb->getFossSysConf();
 
@@ -64,7 +72,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $agentDir = dirname(dirname(__DIR__));
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
-    $pipeFd = popen("echo $uploadId | ./$agentName -c $sysConf --scheduler_start", "r");
+    $pipeFd = popen("echo $uploadId | ./$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
     $output = "";
@@ -102,17 +110,18 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq'),false);
+    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','group_user_member'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight'),false);
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','license_file','highlight'),false);
+    $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a'), false);
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','group_user_member'), false);
     $this->testDb->insertData_license_ref();
   }
 
-  public function testRun()
+  public function testRunMonkScan()
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -143,5 +152,73 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($agentRef->getAgentName(), "monk");
   }
 
+  public function testRunMonkBulkScan()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
 
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+
+    $licenseId = 225;
+    $removing = "f";
+    $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
+
+    $jobId = 64;
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
+    $args = $bulkFlag.$bulkId;
+
+    list($output,$retCode) = $this->runMonk($uploadId=1, $userId, $groupId, $jobId, $args);
+
+    $this->rmRepo();
+
+    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
+
+    $this->assertEquals($expected=1, count($relevantDecisionsItem6));
+    $this->assertEquals($expected=1, count($relevantDecisionsItem7));
+  }
+
+  public function testRunMonkBulkScanWithBadSearchForDiff()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+
+    $licenseId = 225;
+    $removing = "f";
+    $refText = "The GNU General Public License is copyleft license for software and other kinds of works.";
+
+    $jobId = 64;
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
+    $args = $bulkFlag.$bulkId;
+
+    list($output,$retCode) = $this->runMonk($uploadId=1, $userId, $groupId, $jobId, $args);
+
+    $this->rmRepo();
+
+    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
+
+    $this->assertEquals($expected=0, count($relevantDecisionsItem6));
+    $this->assertEquals($expected=0, count($relevantDecisionsItem7));
+  }
 }

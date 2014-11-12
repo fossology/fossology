@@ -23,8 +23,7 @@ test:
 
 coverage:
 	$(call DIR_LOOP,coverage)
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 clean:
 	$(call DIR_LOOP,clean)
