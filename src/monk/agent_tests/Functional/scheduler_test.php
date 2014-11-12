@@ -180,8 +180,8 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($retCode, 0, 'monk failed: '.$output);
 
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 6);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 7);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
 
     $this->assertEquals($expected=1, count($relevantDecisionsItem6));
     $this->assertEquals($expected=1, count($relevantDecisionsItem7));
@@ -215,8 +215,8 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($retCode, 0, 'monk failed: '.$output);
 
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 6);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantLicenseDecisionEvents($userId, 7);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
 
     $this->assertEquals($expected=0, count($relevantDecisionsItem6));
     $this->assertEquals($expected=0, count($relevantDecisionsItem7));
