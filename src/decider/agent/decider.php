@@ -40,7 +40,7 @@ class DeciderAgent extends Agent
   private $clearingEventProcessor;
 
   /** @var ClearingDecisionProcessor */
-  private $clearingDecisionEventProcessor;
+  private $clearingDecisionProcessor;
 
   /** @var AgentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
@@ -66,7 +66,7 @@ class DeciderAgent extends Agent
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
-    $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_processor');
+    $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
@@ -128,26 +128,21 @@ class DeciderAgent extends Agent
 
     $itemId = $itemTreeBounds->getItemId();
 
-    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
-    $scanerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemTreeBounds);
-
-    list($selection, $total) = $this->clearingEventProcessor->getState($events);
-
-    $unhandledScannerDetectedLicenses = array_diff_key($scanerDetectedLicenses, $total);
+    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $userId);
 
     switch ($this->conflictStrategyId)
     {
       case DeciderAgent::FORCE_DECISION:
-        $canAutoDecide = true;
+        $createDecision = true;
         break;
 
       default:
-        $canAutoDecide = count($unhandledScannerDetectedLicenses) == 0;
+        $createDecision = count($unhandledScannerDetectedLicenses) == 0;
     }
 
-    if ($canAutoDecide)
+    if ($createDecision)
     {
-      $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
     }
     else
     {

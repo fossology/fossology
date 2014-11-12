@@ -51,6 +51,16 @@ class ClearingDecisionProcessor
     $this->clearingEventProcessor = $clearingEventProcessor;
   }
 
+  public function getUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $userId) {
+    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemTreeBounds->getItemId());
+
+    $scannerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemTreeBounds);
+
+    list($selection, $total) = $this->clearingEventProcessor->getState($events);
+
+    return array_diff_key($scannerDetectedLicenses, $total);
+  }
+
   /**
    * @param ItemTreeBounds $itemBounds
    * @param int $userId
@@ -156,7 +166,7 @@ class ClearingDecisionProcessor
    * @param LicenseRef[] $licenses
    * @return LicenseRef[]
    */
-  protected function removeClearingEvents($userId, $itemId, $licenses)
+  private function removeClearingEvents($userId, $itemId, $licenses)
   {
     foreach ($licenses as $license)
     {
@@ -169,7 +179,7 @@ class ClearingDecisionProcessor
    * @param $item
    * @return array
    */
-  protected function getRelevantClearingDecisionParameters($userId, $item)
+  private function getRelevantClearingDecisionParameters($userId, $item)
   {
     $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
 
@@ -191,7 +201,7 @@ class ClearingDecisionProcessor
    * @param $addedLicenses
    * @param $removedLicenses
    */
-  protected function insertClearingDecision($userId, $itemId, $type, $isGlobal, $addedLicenses, $removedLicenses)
+  private function insertClearingDecision($userId, $itemId, $type, $isGlobal, $addedLicenses, $removedLicenses)
   {
     $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $isGlobal, $addedLicenses, $removedLicenses);
     $this->clearingDao->removeWipClearingDecision($itemId, $userId);
@@ -217,7 +227,7 @@ class ClearingDecisionProcessor
    * @param $agentDetectedLicenses
    * @return array
    */
-  protected function collectAgentDetectedLicenses($licenseShortName, $agentDetectedLicenses)
+  private function collectAgentDetectedLicenses($licenseShortName, $agentDetectedLicenses)
   {
     $agentClearingEvents = array();
     if (array_key_exists($licenseShortName, $agentDetectedLicenses))
