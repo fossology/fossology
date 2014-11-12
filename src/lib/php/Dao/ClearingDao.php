@@ -600,7 +600,7 @@ insert into clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
-  public function getTriedBulks($uploadTreeId, $uploadId)
+  public function getTriedBulks(ItemTreeBounds $itemTreeBound, $uploadId)
   {
     $sql = "with alltried as (
             select lr.lrb_pk,
@@ -610,8 +610,10 @@ insert into clearing_decision (
               left join highlight_bulk h on lrb_fk = lrb_pk
               left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
               left join uploadtree ut on ut.uploadtree_pk = ce.uploadtree_fk
+              inner join uploadtree ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
               where lr.upload_fk = $2
+              and $3 between ut2.lft and ut2.rgt
             )
             SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
             FROM (
@@ -623,7 +625,8 @@ insert into clearing_decision (
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt, $sql);
 
-    $res = $this->dbManager->execute($stmt, array($uploadTreeId, $uploadId));
+    $params = array($itemTreeBound->getItemId(), $uploadId, $itemTreeBound->getLeft());
+    $res = $this->dbManager->execute($stmt, $params);
 
     $bulks = array();
 

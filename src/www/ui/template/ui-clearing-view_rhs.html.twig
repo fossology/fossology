@@ -132,10 +132,8 @@
 {{ 'Text'| trans }}
 </th>
 </tr>
-  {% set i = 0 %}
   {% for row in bulkHistory %}
-  {% set i = i + 1 %}
-    <tr class="{% if i % 2 %}odd{% else %}even{% endif %} {% if row.matched %}match{% endif %}">
+    <tr class="{{ cycle(['odd','even'], loop.index0) }} {% if row.matched %}match{% endif %}">
       <td>
          <table>
            <td><div class='{% if row.removing %}delete{% else %}add{% endif %}'></td>

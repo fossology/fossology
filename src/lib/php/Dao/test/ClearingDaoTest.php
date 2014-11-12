@@ -24,6 +24,7 @@ use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -69,7 +70,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'clearing_decision_type',
             'clearing_event',
             'clearing_licenses',
+            'highlight_bulk',
             'license_ref',
+            'license_ref_bulk',
             'users',
             'group_user_member',
             'uploadtree'
@@ -112,14 +115,18 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $modf = 33188;
 
     /*                          (pfile,item,lft,rgt)
-      upload101:   Afile         (201, 301,  1,  2)
+      upload101:   upload101/    (  0, 299,  1,  4)
+                   Afile         (201, 301,  1,  2)
                    Bfile         (202, 302,  3,  4)
-      upload102:   Afile         (201, 303,  1,  2)
+      upload102:   upload102/    (  0, 300,  1,  8)
+                   Afile         (201, 303,  1,  2)
                    A-dir/        (  0, 304,  3,  6)
                    A-dir/Afile   (201, 305,  4,  5)
                    Bfile         (202, 306,  7,  8)
     */
     $this->items = array(
+        299=>array(101, 299,   0, $modd, 1, 4, "upload101"),
+        300=>array(102, 300,   0, $modd, 1, 8, "upload102"),
         301=>array(101, 301, 201, $modf, 1, 2, "Afile"),
         302=>array(101, 302, 202, $modf, 3, 4, "Bfile"),
         303=>array(102, 303, 201, $modf, 1, 2, "Afile"),
@@ -132,6 +139,49 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->insertInto('uploadtree', 'upload_fk,uploadtree_pk,pfile_fk,ufile_mode,lft,rgt,ufile_name', $ur);
     }
     $this->now = time();
+
+    $bulkLicArray = array(
+        array(1, 401, 'TextFOO', false, 101, 299),
+        array(2, 402, 'TextBAR', false, 101, 299),
+        array(3, 403, 'TextBAZ', true,  101, 301),
+        array(4, 403, 'TextBAZ', false, 101, 299),
+        array(5, 404, 'TextQUX', true,  101, 299),
+        array(6, 404, 'TextQUX', true,  101, 302),
+        array(7, 403, 'TextBAZ', false, 102, 300),
+        array(8, 403, 'TextBAZ', true,  102, 306)
+    );
+    foreach ($bulkLicArray as $params)
+    {
+      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk', $params, $logStmt = 'insert.bulkref');
+    }
+  }
+
+  private function insertBulkEvents()
+  {
+    $bulkFindingsArray = array(
+        array(1, 5001),
+        array(1, 5001),// a second bulk match in the same file in a different place
+        array(1, 5002),
+        array(1, 5003),
+        array(4, 5004),
+        array(7, 5005)
+    );
+    foreach ($bulkFindingsArray as $params)
+    {
+      $this->dbManager->insertInto('highlight_bulk', 'lrb_fk, clearing_event_fk', $params, $logStmt = 'insert.bulkfinds');
+    }
+
+    $bulkClearingEvents = array(
+        array(5001, 301),
+        array(5002, 302),
+        array(5003, 303),
+        array(5004, 301),
+        array(5005, 305)
+    );
+    foreach ($bulkClearingEvents as $params)
+    {
+      $this->dbManager->insertInto('clearing_event', 'clearing_event_pk, uploadtree_fk', $params, $logStmt = 'insert.bulkevents');
+    }
   }
 
   private function buildProposals($licProp,$i=0)
@@ -241,8 +291,46 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat(array_values($refs),equalTo($expected));
   }
 
-  public function testBulkHistory()
+  public function testBulkHistoryWithoutMatches()
   {
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 101);
+
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
   }
 
+ public function testBulkHistoryWithoutMatchesFromDifferentFolder()
+  {
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(305);
+    $treeBounds->shouldReceive('getLeft')->andReturn(4);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 102);
+
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    assertThat($bulkMatched, arrayContaining(false));
+  }
+
+  public function testBulkHistoryWithAMatch()
+  {
+    $this->insertBulkEvents();
+
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $bulks = $this->clearingDao->getTriedBulks($treeBounds, 101);
+
+    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+
+    assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null));
+    assertThat($bulkMatched, arrayContaining(true, false, false, true, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true));
+  }
 }
