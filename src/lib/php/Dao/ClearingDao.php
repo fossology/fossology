@@ -613,11 +613,11 @@ insert into clearing_decision (
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
               where lr.upload_fk = $2
             )
-            SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, success
+            SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as success FROM alltried WHERE uploadtree_fk = $1
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as matched FROM alltried WHERE uploadtree_fk = $1
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as success FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as matched FROM alltried WHERE uploadtree_fk != $1 or uploadtree_fk is NULL
             ) AS result";
 
     $stmt = __METHOD__;
@@ -634,7 +634,7 @@ insert into clearing_decision (
         "text" => $row['text'],
         "lic" => $row['lic'],
         "removing" => $this->dbManager->booleanFromDb($row['removing']),
-        "success" => $this->dbManager->booleanFromDb($row['success'])
+        "matched" => $this->dbManager->booleanFromDb($row['matched'])
       );
     }
 

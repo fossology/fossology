@@ -143,7 +143,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
           'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
           array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
     }
-  }  
+  }
 
   private function buildDecisions($cDec,$j=0)
   {
@@ -155,7 +155,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
           array($j,$item,$this->items[$item][2],$user,$type, $this->getMyDate($this->now+$t),$scope));
     }
   }
-    
+
   function tearDown()
   {
     $this->testDb = null;
@@ -211,7 +211,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $watchOtherNow = $this->clearingDao->isDecisionWip(303, 1);
     assertThat($watchOtherNow,is(FALSE));
   }
-  
 
   public function testInsertMultipleClearingEvents()
   {
@@ -224,7 +223,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $jobfk = 501;
     $comment="<commit>";
     $remark="<remark>";
-    
+
     foreach($oldlicenses as $lic)
     {
       $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid,
@@ -232,7 +231,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
           'type_fk'=>ClearingEventTypes::USER, 'comment'=>$comment, 'reportinfo'=>$remark);
       $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
     }
-    
+
     $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
 
     $refs = $this->dbManager->createMap('clearing_event', 'rf_fk', 'rf_fk');
@@ -240,5 +239,10 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     sort($refs);
     sort($expected);
     assertThat(array_values($refs),equalTo($expected));
-  } 
+  }
+
+  public function testBulkHistory()
+  {
+  }
+
 }

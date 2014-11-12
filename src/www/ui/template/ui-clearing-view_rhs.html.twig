@@ -135,7 +135,7 @@
   {% set i = 0 %}
   {% for row in bulkHistory %}
   {% set i = i + 1 %}
-    <tr class="{% if i % 2 %}odd{% else %}even{% endif %} {% if row.success %}match{% endif %}">
+    <tr class="{% if i % 2 %}odd{% else %}even{% endif %} {% if row.matched %}match{% endif %}">
       <td>
          <table>
            <td><div class='{% if row.removing %}delete{% else %}add{% endif %}'></td>
@@ -143,7 +143,7 @@
          </table>
       </td>
       <td>
-      {% if row.id > 0 and row.success %}
+      {% if row.id > 0 and row.matched %}
       <a href="{{ uri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
       {% else %}
       {{ row.text|e }}
