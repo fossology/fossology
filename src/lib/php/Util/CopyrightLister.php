@@ -66,6 +66,44 @@ class CopyrightLister extends Object
   }
 
   /**
+   * @param $uploadtree_pk - uploadtree id
+   * @param $upload_pk - upload id
+   */
+  public function getCopyrightList($uploadtree_pk, $upload_pk)
+  {
+    if (empty($uploadtree_pk)) {
+      $uploadtree_pk = $this->getUploadtreeIdFromUploadId($upload_pk);
+    }    
+    if ($this->selectAgentId($upload_pk) === FALSE)
+    {
+      return;
+    }
+    $sqlBounds = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk=$1";
+    $toprow = $this->dbManager->getSingleRow($sqlBounds, array($uploadtree_pk), __METHOD__.'.getBounds');
+    $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
+    $modeMask = empty($this->includeContainer) ? (3<<28) : (1<<28);
+    $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
+              where upload_fk=$1 and lft>$2 and rgt<$3 and (ufile_mode & $4) = 0
+              order by uploadtree_pk";
+    $this->dbManager->prepare($outerStmt=__METHOD__.'.loopThroughAllRecordsInTree',$sql);
+    $outerresult = $this->dbManager->execute($outerStmt,array($toprow['upload_fk'],$toprow['lft'],$toprow['rgt'],$modeMask));
+    while ($row = $this->dbManager->fetchArray($outerresult))
+    { 
+      $this->printRow($row,$uploadtree_tablename);
+    } 
+    $this->dbManager->freeResult($outerresult);
+  }
+  
+    
+  private function getUploadtreeIdFromUploadId($upload_pk){
+    $uploadtreeRec = $this->dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$1',
+            array($upload_pk),
+            $sqlLog=__METHOD__);
+    $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
+    return $uploadtree_pk;
+  }
+  
+  /**
    * @param int $uploadId
    * @return bool success
    */
@@ -83,53 +121,6 @@ class CopyrightLister extends Object
     }
     $this->agentId = $agentRec[0]["agent_fk"];
     return TRUE;
-  }
-  
-  private function getUploadtreeIdFromUploadId($upload_pk){
-    $uploadtreeRec = $this->dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$1',
-            array($upload_pk),
-            $sqlLog=__METHOD__);
-    $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
-    return $uploadtree_pk;
-  }
-
-  
-  /**
-   * @param $uploadtree_pk - uploadtree id
-   * @param $upload_pk - upload id
-   */
-  public function getCopyrightList($uploadtree_pk, $upload_pk)
-  {
-    if (empty($uploadtree_pk)) {
-      $uploadtree_pk = $this->getUploadtreeIdFromUploadId($upload_pk);
-    }    
-    if ($this->selectAgentId($upload_pk) === FALSE)
-    {
-      return;
-    }
-
-    /* get the top of tree */
-    $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk=$1";
-    $toprow = $this->dbManager->getSingleRow($sql, array($uploadtree_pk), __METHOD__.'.getBounds');
-
-    $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
-
-    /* loop through all the records in this tree */
-    global $PG_CONN;
-    $modeMask = empty($this->includeContainer) ? (3<<28) : (1<<28);
-    $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
-                where upload_fk='$toprow[upload_fk]' 
-                      and lft>'$toprow[lft]' and rgt<'$toprow[rgt]'
-                      and (ufile_mode & $modeMask) = 0";
-    $sql .= " order by uploadtree_pk";
-    $outerresult = pg_query($PG_CONN, $sql);
-    DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
-
-    while ($row = pg_fetch_assoc($outerresult))
-    { 
-      $this->printRow($row,$uploadtree_tablename);
-    } 
-    pg_free_result($outerresult);
   }
   
   /**
@@ -178,56 +169,55 @@ class CopyrightLister extends Object
   
 
   /**
-   * \brief get all the copyright for a single file or uploadtree
-   * 
-   * \param $agent_pk - agent id
-   * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
-   * \param $uploadtree_pk - (used only if $pfile_pk is empty)
-   * \return Array of file copyright CopyrightArray[ct_pk] = copyright.content
+   * @brief get all the copyright for a single file or uploadtree
+   * @param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
+   * @param $uploadtree_pk - (used only if $pfile_pk is empty)
+   * @return Array of file copyright CopyrightArray[ct_pk] = copyright.content
    */
-  private function getFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
+  private function getFileCopyrights($pfile_pk, $uploadtree_pk)
   {
-    $type = $this->type;
-    global $PG_CONN;
-
+    $agent_pk = $this->agentId;
     // if $pfile_pk, then return the copyright for that one file
     if ($pfile_pk)
     {
-      $sql = "SELECT ct_pk, content 
-                from copyright
-                where pfile_fk='$pfile_pk' and agent_fk=$agent_pk";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $sql = "SELECT ct_pk, content FROM copyright WHERE pfile_fk=$1 AND agent_fk=$2";
+      $this->dbManager->prepare($stmt=__METHOD__.'.pfileGiven',$sql);
+      $result = $this->dbManager->execute($stmt,array($pfile_pk,$agent_pk));
     }
     else if ($uploadtree_pk)
     {
-      $sql = "SELECT lft, rgt, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
-      $row = $this->dbManager->getSingleRow($sql, array($uploadtree_pk), __METHOD__.'.findLftAndRgtBounds');
+      $sqlUt = "SELECT lft, rgt, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
+      $row = $this->dbManager->getSingleRow($sqlUt, array($uploadtree_pk), __METHOD__.'.findLftAndRgtBounds');
       $lft = $row["lft"];
       $rgt = $row["rgt"];
       $upload_pk = $row["upload_fk"];
 
-      $typesql = ($type && "all" != $type) ? "and type = '$type'" : '';
-      //  Get the copyright under this $uploadtree_pk
       $sql = "SELECT ct_pk, content from copyright,
                   (SELECT distinct(pfile_fk) as PF from uploadtree
-                     where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$agent_pk $typesql";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+                     where upload_fk=$1 and uploadtree.lft BETWEEN $2 and $3) as SS
+              where PF=pfile_fk and agent_fk=$4";
+      $param = array($upload_pk,$lft,$rgt,$agent_pk);
+      $type = $this->type;
+      if($type && "all" != $type)
+      {
+        $param[] = $type;
+        $sql .= " AND type=$".count($param);
+      }
+      $this->dbManager->prepare($stmt=__METHOD__.'.uploadtreeGiven',$sql);
+      $result = $this->dbManager->execute($stmt,$param);
     }
     else
     {
       throw new Exception("Missing function inputs in " . __FILE__ . ':' . __LINE__);
     }
 
-    $CopyrightArray = array();
-    while ($row = pg_fetch_assoc($result))
+    $copyrightArray = array();
+    while ($row = $this->dbManager->fetchArray($result))
     {
-      $CopyrightArray[$row['ct_pk']] = $row["content"];
+      $copyrightArray[$row['ct_pk']] = $row["content"];
     }
-    pg_free_result($result);
-    return $CopyrightArray;
+    $this->dbManager->freeResult($result);
+    return $copyrightArray;
   }
 
   /**
@@ -238,7 +228,7 @@ class CopyrightLister extends Object
   private function getFileCopyright_string($uploadtree_pk, $pfile_pk=0)
   {
     $copyrightStr = '';
-    $copyrightArray = $this->getFileCopyrights($this->agentId, $pfile_pk, $uploadtree_pk);
+    $copyrightArray = $this->getFileCopyrights($pfile_pk, $uploadtree_pk);
     $glue = '';
     foreach($copyrightArray as $ct)
     {
