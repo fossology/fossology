@@ -37,7 +37,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
   -h  help, this message
   ";
 
-$upload = $item = $type = "";
+$upload = $item = "";
 
 $longopts = array("user:", "password:", "type:", "container:");
 $options = getopt("c:u:t:hx:X:", $longopts);
@@ -51,8 +51,8 @@ if (($options === false) || empty($options) || !is_array($options))
 
 $user = $passwd = "";
 
-
-require_once(dirname(__DIR__)."/lib/php/common-copyright-file.php");
+require_once dirname(__DIR__).'/lib/php/Util/CopyrightLister.php';
+use Fossology\Lib\Util\CopyrightLister;
 
 $cpLister = new CopyrightLister();
 
@@ -78,7 +78,7 @@ foreach($options as $option => $value)
       $passwd = $value;
       break;
     case 'type':
-      $type = $value;
+      $cpLister->setType($value);
       break;
     case 'container':
       $cpLister->setContainerInclusion($value);
@@ -117,9 +117,5 @@ if (empty($return_value))
 }
 
 /** get copyright information for this uploadtree */
-$cpLister->GetCopyrightList($item, $upload, $type);
+$cpLister->getCopyrightList($item, $upload);
 return 0;
-
-
-
-
