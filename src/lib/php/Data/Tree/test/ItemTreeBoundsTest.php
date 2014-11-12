@@ -50,7 +50,7 @@ class FileTreeBoundsTest extends \PHPUnit_Framework_TestCase
 
   public function testGetUploadTreeID()
   {
-    assertThat($this->itemTreeBounds->getUploadTreeId(), is($this->uploadTreeId));
+    assertThat($this->itemTreeBounds->getItemId(), is($this->uploadTreeId));
   }
 
   public function testGetUploadId()

@@ -116,8 +116,8 @@ without any warranty.
     <service id="businessrules.clearing_event_processor"
                class="\Fossology\Lib\BusinessRules\ClearingEventProcessor">
     </service>
-    <service id="businessrules.clearing_decision_event_processor"
-                 class="\Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor">
+    <service id="businessrules.clearing_decision_processor"
+                 class="\Fossology\Lib\BusinessRules\ClearingDecisionProcessor">
       <argument type="service" id="dao.clearing"/>
       <argument type="service" id="businessrules.agent_license_event_processor"/>
         <argument type="service" id="businessrules.clearing_event_processor"/>

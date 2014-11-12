@@ -59,6 +59,7 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingEventProcessor = new ClearingEventProcessor();
 
     $this->addedLicenseRef = M::mock(LicenseRef::classname());
+    $this->addedLicenseRef->shouldReceive("getShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedEvent = M::mock(ClearingEvent::classname());
     $this->addedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedEvent->shouldReceive("getLicenseRef")->withNoArgs()->andReturn($this->addedLicenseRef);
@@ -66,6 +67,7 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->addedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(false);
 
     $this->removedLicenseRef = M::mock(LicenseRef::classname());
+    $this->removedLicenseRef->shouldReceive("getShortName")->withNoArgs()->andReturn($this->removedName);
     $this->removedEvent = M::mock(ClearingEvent::classname());
     $this->removedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->removedName);
     $this->removedEvent->shouldReceive("getLicenseRef")->withNoArgs()->andReturn($this->removedLicenseRef);
@@ -78,47 +80,39 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     M::close();
   }
 
-  public function testGetCurrentClearingsShouldReturnNothingForEmptyArrays()
+  public function testGetStateShouldReturnNothingForEmptyArrays()
   {
-    assertThat($this->clearingEventProcessor->getCurrentClearingState(array()), is(array(array(), array())));
+    assertThat($this->clearingEventProcessor->getState(array()), is(array(array(), array())));
   }
 
-  public function testGetCurrentClearingsWithSingleAddedEvent()
+  public function testGetStateWithSingleAddedEvent()
   {
-    assertThat($this->clearingEventProcessor->getCurrentClearingState(array($this->addedEvent)),
-        is(array(array($this->addedName => $this->addedLicenseRef), array())));
+    $license = array($this->addedName => $this->addedLicenseRef);
+    assertThat($this->clearingEventProcessor->getState(array($this->addedEvent)),
+        is(array($license, $license)));
   }
 
-  public function testGetCurrentClearingsWithSingleRemovedEvent()
+  public function testGetStateWithSingleRemovedEvent()
   {
-    assertThat($this->clearingEventProcessor->getCurrentClearingState(array($this->removedEvent)),
+    assertThat($this->clearingEventProcessor->getState(array($this->removedEvent)),
         is(array(array(), array($this->removedName => $this->removedLicenseRef))));
   }
 
-  public function testGetCurrentClearingsWithAddedAndRemovedEvent()
+  public function testGetStateWithAddedAndRemovedEvent()
   {
-    assertThat($this->clearingEventProcessor->getCurrentClearingState(array($this->addedEvent, $this->removedEvent)),
-        is(array(array($this->addedName => $this->addedLicenseRef), array($this->removedName => $this->removedLicenseRef))));
-  }
-
-  public function testGetFilteredState() {
-    $filteredEvent = M::mock(ClearingEvent::classname());
-    $filteredEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->removedName);
-    $filteredEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(false);
-
-    $events = array($this->addedEvent, $filteredEvent, $this->removedEvent);
-    $licenseState = array(array($this->addedName => $this->addedLicenseRef), array($this->removedName => $this->removedLicenseRef));
-
-    $result = $this->clearingEventProcessor->getFilteredState($events);
-
-    assertThat($result, is($licenseState));
+    assertThat($this->clearingEventProcessor->getState(array($this->addedEvent, $this->removedEvent)),
+        is(array(
+            array($this->addedName => $this->addedLicenseRef),
+            array(
+                $this->addedName => $this->addedLicenseRef,
+                $this->removedName => $this->removedLicenseRef))));
   }
 
   public function testFilterEventsByTimeWhenNoTimeIsSet()
   {
     $events = $this->createEvents();
 
-    $filteredEvents = $this->clearingEventProcessor->filterEventsAfterTime($events, null);
+    $filteredEvents = $this->clearingEventProcessor->selectEventsUntilTime($events, null);
     assertThat($filteredEvents, is(arrayWithSize(2)));
     assertThat($filteredEvents, is($events));
   }
@@ -127,8 +121,8 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $events = $this->createEvents();
 
-    $this->timestamp->sub(new DateInterval("PT30M"));
-    $filteredEvents = $this->clearingEventProcessor->filterEventsAfterTime($events, $this->timestamp);
+    $this->timestamp->sub(new DateInterval("PT1S"));
+    $filteredEvents = $this->clearingEventProcessor->selectEventsUntilTime($events, $this->timestamp);
     assertThat($filteredEvents, is(arrayWithSize(1)));
     assertThat($filteredEvents, is(arrayContaining($events[1])));
   }
@@ -140,8 +134,9 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->timestamp->sub(new DateInterval("PT1H"));
     assertThat($events[1]->getDateTime(), is($this->timestamp));
 
-    $filteredEvents = $this->clearingEventProcessor->filterEventsAfterTime($events, $this->timestamp);
-    assertThat($filteredEvents, is(arrayWithSize(0)));
+    $filteredEvents = $this->clearingEventProcessor->selectEventsUntilTime($events, $this->timestamp);
+    assertThat($filteredEvents, is(arrayWithSize(1)));
+    assertThat($filteredEvents, is(arrayContaining($events[1])));
   }
 
   /**
@@ -191,8 +186,8 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $filteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($events);
 
     assertThat($filteredEvents, is(arrayWithSize(2)));
-    assertThat($events[0], is($filteredEvents[0]));
-    assertThat($events[1], is($filteredEvents[1]));
+    assertThat($events[0], is($filteredEvents['licA']));
+    assertThat($events[1], is($filteredEvents['licB']));
   }
 
   public function testFilterEffectiveEventsIdenticalEventsOverride()
@@ -212,7 +207,7 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $filteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($events);
 
     assertThat($filteredEvents, is(arrayWithSize(1)));
-    assertThat($events[1], is($filteredEvents[0]));
+    assertThat($events[1], is($filteredEvents['licA']));
   }
 
   public function testFilterEffectiveEventsOppositeIdenticalEventsOverwrite()
@@ -232,7 +227,7 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $filteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($events);
 
     assertThat($filteredEvents, is(arrayWithSize(1)));
-    assertThat($events[1], is($filteredEvents[0]));
+    assertThat($events[1], is($filteredEvents['licA']));
   }
 
   public function testFilterEffectiveEventsOppositeIdenticalEventsOverwriteInOtherOrder()
@@ -252,41 +247,12 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
     $filteredEvents = $this->clearingEventProcessor->filterEffectiveEvents($events);
 
     assertThat($filteredEvents, is(arrayWithSize(1)));
-    assertThat($events[1], is($filteredEvents[0]));
+    assertThat($events[1], is($filteredEvents['licA']));
   }
 
   public function testFilterEffectiveEventsWithEmptyArray()
   {
     assertThat($this->clearingEventProcessor->filterEffectiveEvents(array()), is(emptyArray()));
-  }
-
-  public function testGetUnhandledLicenseWithUnhandledLicenses() {
-    $timestamp = new DateTime();
-    $events = array();
-
-    $licenseRef1 = M::mock(LicenseRef::classname());
-    $licenseRef1->shouldReceive("getShortName")->withNoArgs()->andReturn("licA");
-    $events[] = $this->createEvent(clone $timestamp, $licenseRef1, true);
-
-    $licenseRef2 = M::mock(LicenseRef::classname());
-    $licenseRef2->shouldReceive("getShortName")->withNoArgs()->andReturn("licB");
-
-    $unhandledLicenses = $this->clearingEventProcessor->getUnhandledLicenses($events, array("licB" => $licenseRef2));
-
-    assertThat($unhandledLicenses, is(array("licB" => $licenseRef2)));
-  }
-
-  public function testGetUnhandledLicenseWithNoUnhandledLicenses() {
-    $timestamp = new DateTime();
-    $events = array();
-
-    $licenseRef1 = M::mock(LicenseRef::classname());
-    $licenseRef1->shouldReceive("getShortName")->withNoArgs()->andReturn("licA");
-    $events[] = $this->createEvent(clone $timestamp, $licenseRef1, true);
-
-    $unhandledLicenses = $this->clearingEventProcessor->getUnhandledLicenses($events, array("licA" => $licenseRef1));
-
-    assertThat($unhandledLicenses, is(emptyArray()));
   }
 
   public function testIndexByLicenseShortName() {

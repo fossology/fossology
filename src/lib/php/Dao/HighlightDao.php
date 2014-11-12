@@ -67,7 +67,7 @@ class HighlightDao extends Object
    */
   private function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
-    $params =array($itemTreeBounds->getUploadTreeId());
+    $params =array($itemTreeBounds->getItemId());
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
     $sql = "SELECT start,len,type,rf_fk,rf_start,rf_len
@@ -128,7 +128,7 @@ class HighlightDao extends Object
              FROM highlight_keyword
              WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
     $this->dbManager->prepare($stmt, $sql);
-    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getUploadTreeId()));
+    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getItemId()));
     $highlightEntries = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
@@ -186,7 +186,7 @@ class HighlightDao extends Object
   public function getHighlightEntries(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null, $clearingId = null){
     $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
     $highlightKeywords = $this->getHighlightKeywords($itemTreeBounds);
-    $highlightBulk = $this->getHighlightBulk($itemTreeBounds->getUploadTreeId(), $clearingId);
+    $highlightBulk = $this->getHighlightBulk($itemTreeBounds->getItemId(), $clearingId);
     $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
     return $highlightEntries;
   }

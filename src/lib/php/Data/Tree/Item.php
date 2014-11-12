@@ -49,7 +49,7 @@ class Item {
    */
   public function getId()
   {
-    return $this->itemTreeBounds->getUploadTreeId();
+    return $this->itemTreeBounds->getItemId();
   }
 
   /**
@@ -87,7 +87,7 @@ class Item {
   /**
    * @return ItemTreeBounds
    */
-  public function getFileTreeBounds()
+  public function getItemTreeBounds()
   {
     return $this->itemTreeBounds;
   }

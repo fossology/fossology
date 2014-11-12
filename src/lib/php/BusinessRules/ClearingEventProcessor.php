@@ -20,17 +20,71 @@ namespace Fossology\Lib\BusinessRules;
 
 use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
 class ClearingEventProcessor extends Object
 {
+
+  /**
+   * @param ClearingEvent[] $events
+   * @return LicenseRef[]
+   */
+  public function getState($events)
+  {
+    $selection = array();
+    $total = array();
+
+    foreach ($events as $event)
+    {
+      $licenseRef = $event->getLicenseRef();
+      $shortName = $licenseRef->getShortName();
+
+      if ($event->isRemoved())
+      {
+        unset($selection[$shortName]);
+      } else
+      {
+        $selection[$shortName] = $licenseRef;
+      }
+      $total[$shortName] = $licenseRef;
+    }
+
+    return array($selection, $total);
+  }
+
+  /**
+   * @param DateTime|null $lastDecision
+   * @param ClearingEvent[] $events
+   * @return LicenseRef[]
+   */
+  public function getStateAt($lastDecision, $events)
+  {
+    $filteredEvents = $this->selectEventsUntilTime($events, $lastDecision);
+    return $this->getState($filteredEvents);
+  }
+
+  /**
+   * @param LicenseRef[] $previousSelection
+   * @param LicenseRef[] $currentSelection
+   * @return LicenseRef[][]
+   */
+  public function getStateChanges($previousSelection, $currentSelection)
+  {
+    return array(
+        array_diff($currentSelection, $previousSelection),
+        array_diff($previousSelection, $currentSelection)
+    );
+  }
+
   /**
    * @param ClearingEvent[] $events
    * @param DateTime|null $lastDecisionDate
    * @return array
    */
-  public function filterEventsAfterTime($events, $lastDecisionDate)
+  public function selectEventsUntilTime($events, $lastDecisionDate)
   {
     if ($lastDecisionDate !== null)
     {
@@ -44,13 +98,18 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param ClearingEvent[] $orderedEvents ordered by data_added
-   * @return LicenseRef[][]
+   * @param ClearingEvent[] $events
+   * @return ClearingEvent[]
    */
-  public function getFilteredState($orderedEvents)
+  public function filterEffectiveEvents($events)
   {
-    $filteredEvents = $this->filterEffectiveEvents($orderedEvents);
-    return $this->getCurrentClearingState($filteredEvents);
+    $reducedEvents = array();
+    foreach ($events as $event)
+    {
+      $licenseShortName = $event->getLicenseShortName();
+      $reducedEvents[$licenseShortName] = $event;
+    }
+    return $reducedEvents;
   }
 
   /**
@@ -66,104 +125,4 @@ class ClearingEventProcessor extends Object
     }
     return $values;
   }
-
-  /**
-   * @param ClearingEvent[] $orderedEvents
-   * @return ClearingEvent[]
-   */
-  public function filterEffectiveEvents($orderedEvents)
-  {
-    $unorderedEvents = array();
-    foreach ($orderedEvents as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-      $unorderedEvents[$licenseShortName] = $event;
-    }
-    return $this->sortEventsInTime($unorderedEvents);
-  }
-
-  /**
-   * @param ClearingEvent[] $events
-   * @param LicenseRef[] $detectedLicenses
-   * @return string[]
-   */
-  public function getUnhandledLicenses($events, $detectedLicenses)
-  {
-    foreach ($events as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-      if (array_key_exists($licenseShortName, $detectedLicenses))
-      {
-        unset($detectedLicenses[$licenseShortName]);
-      }
-    }
-
-    return $detectedLicenses;
-  }
-
-  /**
-   *
-   * @param ClearingEvent[] $events
-   * @return LicenseRef[][]
-   */
-  public function getCurrentClearingState($events)
-  {
-    $addedLicenses = array();
-    $removedLicenses = array();
-    foreach ($events as $event)
-    {
-      $licenseShortName = $event->getLicenseShortName();
-
-      if ($event->isRemoved())
-      {
-        $removedLicenses[$licenseShortName] = $event->getLicenseRef();
-      } else
-      {
-        $addedLicenses[$licenseShortName] = $event->getLicenseRef();
-      }
-    }
-
-    return array($addedLicenses, $removedLicenses);
-  }
-
-  /**
-   * @param ClearingEvent[] $events
-   * @return LicenseRef[]
-   */
-  public function getState($events)
-  {
-    $selection = array();
-
-    foreach ($events as $event)
-    {
-      $shortName = $event->getLicenseShortName();
-
-      if ($event->isRemoved())
-      {
-        unset($selection[$shortName]);
-      } else
-      {
-        $selection[$shortName] = $event->getLicenseRef();
-      }
-    }
-
-    return $selection;
-  }
-
-
-  /**
-   *
-   * @param ClearingEvent []
-   * @return ClearingEvent[]
-   */
-  protected function sortEventsInTime($events)
-  {
-    usort($events, function (ClearingEvent $event1, ClearingEvent $event2)
-    {
-      return $event1->getDateTime() > $event2->getDateTime();
-    });
-    return $events;
-  }
-
-
 }
