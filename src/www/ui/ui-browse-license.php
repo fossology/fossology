@@ -23,7 +23,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Dao\UploadTreeDao;
 use Fossology\Lib\Util\ArrayOperation;
@@ -44,8 +43,6 @@ class ui_browse_license extends FO_Plugin
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var AgentsDao */
   private $agentsDao;
   /** @var DbManager */
@@ -68,7 +65,6 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }

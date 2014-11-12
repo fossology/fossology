@@ -27,7 +27,6 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Data\DecisionScopes;
 use Monolog\Logger;
@@ -44,8 +43,6 @@ class ClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -78,7 +75,6 @@ class ClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
@@ -240,9 +236,6 @@ class ClearingView extends FO_Plugin
     $hasHighlights = count($highlights) > 0;
 
     $permission = GetUploadPerm($uploadId);
-    $licenseInformation = "";
-
-    $output = '';
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
     $hasWritePermission = $permission >= PERM_WRITE;
@@ -255,10 +248,6 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile)
     {
-      // TODO these methods should probably be removed: no idea what they do
-      //$extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
-      //$output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-
       if ($permission >= PERM_WRITE)
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
@@ -268,9 +257,7 @@ class ClearingView extends FO_Plugin
       {
         $this->vars['auditDenied'] = true;
       }
-
     }
-    $licenseInformation .= $output;
 
     $clearingHistory = array();
     $selectedClearingType = false;
@@ -290,14 +277,12 @@ class ClearingView extends FO_Plugin
 
     $this->vars['uploadId'] = $uploadId;
     $this->vars['itemId'] = $uploadTreeId;
-    $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
     $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
-    $this->vars['licenseInformation'] = $licenseInformation;
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
   }
@@ -335,8 +320,7 @@ class ClearingView extends FO_Plugin
     }
     return $table;
   }
-  
-  
+
   public function getTemplateName()
   {
     return "ui-clearing-view.html.twig";

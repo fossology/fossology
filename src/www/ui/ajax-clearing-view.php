@@ -27,7 +27,6 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
 
@@ -43,8 +42,6 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -75,7 +72,6 @@ class AjaxClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
