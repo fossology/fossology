@@ -16,7 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
@@ -53,7 +53,7 @@ class AjaxClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
-  /** @var ClearingDecisionEventProcessor */
+  /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
 
   /** @var LicenseRenderer */
@@ -84,7 +84,7 @@ class AjaxClearingView extends FO_Plugin
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
 
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
   /**

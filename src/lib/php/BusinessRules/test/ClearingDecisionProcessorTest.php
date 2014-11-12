@@ -61,7 +61,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
   /** @var ItemTreeBounds|M\MockInterface */
   private $itemTreeBounds;
 
-  /** @var ClearingDecisionEventProcessor */
+  /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
 
   public function setUp()
@@ -78,7 +78,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
     $this->itemTreeBounds->shouldReceive("getItemId")->withNoArgs()->andReturn($this->uploadTreeId);
 
-    $this->clearingDecisionEventProcessor = new ClearingDecisionEventProcessor(
+    $this->clearingDecisionEventProcessor = new ClearingDecisionProcessor(
         $this->clearingDao, $this->agentLicenseEventProcessor, $this->clearingEventProcessor);
   }
 
@@ -141,7 +141,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("insertClearingDecision")->never();
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->never();
 
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionEventProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
+    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
   }
 
   public function testMakeDecisionFromLastEventsWithNoLicenseKnownType()
@@ -172,7 +172,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("insertClearingDecision")->once();
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->once();
 
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionEventProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
+    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
   }
 
   public function testMakeDecisionFromLastEventsWithInvalidType()
@@ -184,7 +184,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao->shouldReceive("insertClearingDecision")->never();
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->never();
 
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionEventProcessor::NO_LICENSE_KNOWN_DECISION_TYPE - 1, false);
+    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE - 1, false);
   }
 
   public function testGetCurrentClearingsWithoutDecisions()

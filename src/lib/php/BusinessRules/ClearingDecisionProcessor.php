@@ -20,15 +20,13 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\LicenseClearing;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
 
-class ClearingDecisionEventProcessor
+class ClearingDecisionProcessor
 {
   const NO_LICENSE_KNOWN_DECISION_TYPE = 2;
 

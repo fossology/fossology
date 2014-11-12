@@ -14,7 +14,7 @@ define("AGENT_NAME", "decider");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -39,7 +39,7 @@ class DeciderAgent extends Agent
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
 
-  /** @var ClearingDecisionEventProcessor */
+  /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
 
   /** @var AgentLicenseEventProcessor */
@@ -66,7 +66,7 @@ class DeciderAgent extends Agent
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
-    $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_event_processor');
+    $this->clearingDecisionEventProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
