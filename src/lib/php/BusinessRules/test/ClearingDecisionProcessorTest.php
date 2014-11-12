@@ -460,7 +460,7 @@ class ClearingDecisionEventProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->uploadTreeId, $this->userId, DecisionTypes::IDENTIFIED, $isGlobal, array($removedLicense->getShortName() => $removedLicense), array());
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->once();
 
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, DecisionTypes::IDENTIFIED, $isGlobal);
+    $this->clearingDecisionProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, DecisionTypes::IDENTIFIED, $isGlobal);
   }
   
 }
