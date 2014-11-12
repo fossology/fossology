@@ -15,13 +15,14 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Plugin\Plugin;
 
 /**
  * \file index.php
  * \ brief This is the main guts of the UI: Find the plugin and run it.
  */
 
-require_once("../../lib/php/bootstrap.php");
+require_once(__DIR__ . "/../../lib/php/bootstrap.php");
 
 $SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
@@ -42,6 +43,7 @@ if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
 {
+  /** @var Plugin[] $plugin */
   $plugin = $Plugins[$PluginId];
   $plugin->OutputOpen();
   $plugin->renderOutput();

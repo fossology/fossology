@@ -1,0 +1,11 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<b> {{ "FOSSology version" | l10n }} {{ VERSION }} ({{ 'code revision' | trans }} {{ SVN_REV }})</b>
+with {{ licenseCount }} known licenses in database
+<p/>
+{{ copyright }}<p>
+{{ text | nl2br }}
+{% endblock %}
+

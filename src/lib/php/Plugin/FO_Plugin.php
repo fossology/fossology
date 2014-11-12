@@ -1,5 +1,6 @@
 <?php
 /***********************************************************
+ *
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  *
  * This program is free software; you can redistribute it and/or
@@ -15,6 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+use Fossology\Lib\Plugin\Plugin;
 
 /**
  * Each plugin has a state to identify if it is invalid.
@@ -61,7 +64,7 @@ $GLOBALS['PERM_NAMES'] = array(PERM_NONE => $NoneText, PERM_READ => $ReadText, P
  * $NewPlugin->Name="Fred";
  * if ($NewPlugin->Initialize() != 0) { destroy $NewPlugin; }
  */
-class FO_Plugin
+class FO_Plugin implements Plugin
 {
   /**
    *  All public fields can be empty, indicating that it does not apply.
@@ -192,7 +195,6 @@ class FO_Plugin
    */
   public function __construct()
   {
-
     global $Plugins;
 
     if ($this->State != PLUGIN_STATE_INVALID)
@@ -452,6 +454,11 @@ class FO_Plugin
     $renderer = $container->get('twig.environment');
 
     return $renderer->loadTemplate($templateName)->render($vars);
+  }
+
+  public function execute() {
+    $this->OutputOpen();
+    $this->renderOutput();
   }
 
 }
