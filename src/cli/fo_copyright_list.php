@@ -50,9 +50,11 @@ if (($options === false) || empty($options) || !is_array($options))
 }
 
 $user = $passwd = "";
-$container = 0; // include container or not, 1: yes, 0: no (default)
-$including_copyright = -1; // to match mycopyright
-$excluding_copyright = -1; // match all that does not contain mycopyright
+
+
+require_once(dirname(__DIR__)."/lib/php/common-copyright-file.php");
+
+$cpLister = new CopyrightLister();
 
 foreach($options as $option => $value)
 {
@@ -79,13 +81,13 @@ foreach($options as $option => $value)
       $type = $value;
       break;
     case 'container':
-      $container = $value;
+      $cpLister->setContainerInclusion($value);
       break;
     case 'x': // exclude my copyright
-      $excluding_copyright = $value;
+      $cpLister->setExcludingCopyright($value);
       break;
     case 'X': // include my copyright
-      $including_copyright = $value;
+      $cpLister->setIncludingCopyright($value);
       break;
     default:
       print "unknown option $option\n";
@@ -114,112 +116,10 @@ if (empty($return_value))
   return 1;
 }
 
-require_once("$MODDIR/lib/php/common.php");
-
 /** get copyright information for this uploadtree */
-GetCopyrightList($item, $upload, $type, $container);
+$cpLister->GetCopyrightList($item, $upload, $type);
 return 0;
 
-/**
- * \brief get copyright list of one specified uploadtree_id
- *
- * \pamam $uploadtree_pk - uploadtree id
- * \pamam $upload_pk - upload id
- * \param $type copyright type(all/statement/url/email)
- * \param $container - include container or not, 1: yes, 0: no (default)
- */
-function GetCopyrightList($uploadtree_pk, $upload_pk, $type, $container = 0) 
-{
-  global $PG_CONN;
-  global $excluding_copyright;
-  global $including_copyright;
-  if (empty($uploadtree_pk)) {
-      /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-      $uploadtreeRec = GetSingleRec("uploadtree", "where parent is NULL and upload_fk='$upload_pk'");
-      $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
-  }
 
-//  print "Upload ID:$upload_pk; Uploadtree ID:$uploadtree_pk\n";
 
-  /* get last copyright agent_pk that has data for this upload */
-  $Agent_name = "copyright";
-  $AgentRec = AgentARSList("copyright_ars", $upload_pk, 1);
-  $agent_pk = $AgentRec[0]["agent_fk"];
-  if ($AgentRec === false)
-  {
-    echo _("No data available \n");
-    return;
-  }
 
-  /* get the top of tree */
-  $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk='$uploadtree_pk';";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $toprow = pg_fetch_assoc($result);
-  pg_free_result($result); 
-
-  $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
-  
-  /* loop through all the records in this tree */
-  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
-              where upload_fk='$toprow[upload_fk]' 
-                    and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0)";
-  $container_sql = " and ((ufile_mode & (1<<29)) = 0)";
-  /* include container or not */
-  if (empty($container)) {
-    $sql .= $container_sql; // do not include container
-  }
-  $sql .= " order by uploadtree_pk";
-  $outerresult = pg_query($PG_CONN, $sql);
-  DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
-
-  /* Select each uploadtree row in this tree, write out text:
-   * filepath : copyright list
-   * e.g. copyright (c) 2011 hewlett-packard development company, l.p.
-   */
-  while ($row = pg_fetch_assoc($outerresult))
-  { 
-    $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
-    $filepath = "";
-    foreach($filepatharray as $uploadtreeRow)
-    {
-      if (!empty($filepath)) $filepath .= "/";
-      $filepath .= $uploadtreeRow['ufile_name'];
-    }
-
-    $copyright = GetFileCopyright_string($agent_pk, 0, $row['uploadtree_pk'], $type) ;
-    /** include and exclude together */
-    if (-1 != $including_copyright && -1 != $excluding_copyright && !empty($including_copyright) && 
-        !empty($excluding_copyright))
-    {
-      if (!empty($copyright) && stristr($copyright, $including_copyright) && 
-          !stristr($copyright, $excluding_copyright)) ;
-      else {
-        continue;
-      }
-    }
-    else if (
-        /** no value set for -x and -X, show all files */ 
-        (-1 == $including_copyright && -1 == $excluding_copyright) ||
-        /** both value from -x and -X are empty, unmeaningful, show all files */
-        (empty($including_copyright) && empty($excluding_copyright)) ||
-        /** just show files without copyright no matter if excluding_copyright */
-        (empty($including_copyright) && empty($copyright)) ||
-        /** just show files with copyright */
-        (empty($excluding_copyright) && !empty($copyright)) ||
-        /** include  */
-        (-1 != $including_copyright && !empty($including_copyright) && !empty($copyright) && stristr($copyright, $including_copyright))  ||
-        /** exclude */
-        (-1 != $excluding_copyright && !empty($excluding_copyright) && !empty($copyright) && !stristr($copyright, $excluding_copyright))) ;
-    else continue;
-    {
-      $V = $filepath . ": ". $copyright;
-      print "$V";
-      print "\n";
-    }
-  } 
-    pg_free_result($outerresult);
-}
-
-?>
