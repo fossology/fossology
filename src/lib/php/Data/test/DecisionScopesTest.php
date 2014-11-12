@@ -18,21 +18,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class DecisionScopes extends Types
-{
-  const ITEM = 0;
-  const REPO = 1;
-  const UPLOAD = 2;
-  const PACKAGE = 3;
 
-  public function __construct()
-  {
-    parent::__construct("decision scope");
+use Fossology\Lib\Test\EnumMapTestBase;
 
-    $this->map = array(
-        self::ITEM => "local",
-        self::PACKAGE => "package",
-        self::REPO => "global");
+class DecisionScopesTest extends EnumMapTestBase {
+
+  public function setUp() {
+    $this->setTypes(new DecisionScopes());
   }
 
+  public function testTypeItem()
+  {
+    $this->checkMapping(DecisionScopes::ITEM, "local");
+  }
+
+  public function testTypePackage()
+  {
+    $this->checkMapping(DecisionScopes::PACKAGE, "package");
+  }
+
+  public function testTypeRepository()
+  {
+    $this->checkMapping(DecisionScopes::REPO, "global");
+  }
 }
+ 
