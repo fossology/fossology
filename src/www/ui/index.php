@@ -43,10 +43,9 @@ if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
 {
-  /** @var Plugin[] $plugin */
+  /** @var Plugin[] $Plugins */
   $plugin = $Plugins[$PluginId];
-  $plugin->OutputOpen();
-  $plugin->renderOutput();
+  $plugin->execute();
 }
 else
 {

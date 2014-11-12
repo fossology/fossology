@@ -26,6 +26,11 @@ use Twig_Environment;
 abstract class DefaultPlugin implements Plugin
 {
 
+  const PLUGIN_STATE_FAIL = -1; // mark it as a total failure
+  const PLUGIN_STATE_INVALID = 0;
+  const PLUGIN_STATE_VALID = 1; // used during install
+  const PLUGIN_STATE_READY = 2;
+
   /**
    * @var ContainerBuilder
    */
@@ -43,21 +48,71 @@ abstract class DefaultPlugin implements Plugin
       'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
       'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
 
+  /** @var  string */
+  private $title;
 
-  public function __construct($name, $version="1.0")
+  /** @var  string */
+  private $name;
+
+  /** @var array */
+  private $dependency;
+
+  /** @var int */
+  private $state;
+
+
+  public function __construct($name, $title, $dependency = array())
   {
-    if ($name === null || $name === "") {
+    if ($name === null || $name === "")
+    {
       throw new \Exception("plugin requires a name");
     }
+    $this->name = $name;
+    $this->title = $title;
+    $this->dependency = $dependency;
+    $this->state = self::PLUGIN_STATE_VALID;
 
     $this->register();
 
     global $container;
     $this->container = $container;
     $this->renderer = $this->container->get('twig.environment');
+
+    $this->state = self::PLUGIN_STATE_READY;
   }
 
-  private function register() {
+  /**
+   * @return string
+   */
+  public function getName()
+  {
+    return $this->name;
+  }
+
+  /**
+   * @return string
+   */
+  public function getTitle()
+  {
+    return $this->title;
+  }
+
+  /**
+   * @return array
+   */
+  public function getDependency()
+  {
+    return $this->dependency;
+  }
+
+  public function getState()
+  {
+    return $this->state;
+  }
+
+
+  private function register()
+  {
     global $Plugins;
 
     array_push($Plugins, $this);
@@ -77,7 +132,8 @@ abstract class DefaultPlugin implements Plugin
    * @param $name
    * @return object
    */
-  public function getObject($name) {
+  public function getObject($name)
+  {
     return $this->container->get($name);
   }
 
@@ -104,13 +160,35 @@ abstract class DefaultPlugin implements Plugin
     );
   }
 
-  public function initialize() {
+  public function initialize()
+  {
   }
 
-  public function execute() {
+  public function PostInitialize()
+  {
+  }
+
+  public function RegisterMenus()
+  {
+  }
+
+  public function execute()
+  {
     $response = $this->getResponse();
 
     $response->send();
+  }
+
+  /**
+   * @param string name
+   * @return string|null
+   */
+  public function __get($name)
+  {
+    if (method_exists($this, ($method = 'get' . ucwords($name))))
+    {
+      return $this->$method();
+    } else return null;
   }
 
 }

@@ -60,7 +60,12 @@ class ui_about extends DefaultPlugin
       'text' => _TEXT
     );
 
-    return $this->render('about.twig.html', $vars);
+    return $this->render('about.html.twig', $vars);
+  }
+
+  function Install()
+  {
+    return 0;
   }
 }
 

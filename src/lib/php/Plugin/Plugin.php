@@ -20,4 +20,6 @@ namespace Fossology\Lib\Plugin;
 
 interface Plugin {
   function execute();
+
+  function Install();
 }
