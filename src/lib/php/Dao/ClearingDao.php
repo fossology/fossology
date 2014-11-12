@@ -622,13 +622,14 @@ insert into clearing_decision (
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
               where lr.upload_fk = $1
               and $3 between ut2.lft and ut2.rgt
+              order by lr.lrb_pk
             )
-            SELECT distinct on (lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
+            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
             FROM (
               SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
               SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
-            ) AS result";
+            ) AS result ORDER BY lrb_pk, matched DESC";
 
     $this->dbManager->prepare($stmt, $sql);
 

@@ -287,7 +287,6 @@ class ClearingView extends FO_Plugin
     $this->vars['bulkHistory'] = $bulkHistory;
   }
 
-  
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @return array
