@@ -41,8 +41,7 @@ coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
 	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
-	lcov --directory $(SRCDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	$(call coverage-report-html,$(SRCDIR))
 
 $(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
 	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)

@@ -22,6 +22,6 @@ You should have received a copy of the GNU General Public License along with thi
 void bulkArguments_contents_free(BulkArguments* bulkArguments);
 int queryBulkArguments(long bulkId, MonkState* state);
 int handleBulkMode(MonkState* state, long bulkId);
-void processMatches_Bulk(MonkState* state, File* file, GArray* matches);
+int processMatches_Bulk(MonkState* state, File* file, GArray* matches);
 
 #endif // MONK_AGENT_BULK_H
