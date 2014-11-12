@@ -55,7 +55,32 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     M::close();
   }
 
-  public function testGetLatestAgentDetectedLicenses()
+  public function testGetScannerDetectedLicenses()
+  {
+    $uploadId = 2;
+    list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
+    list($licenseMatch2, $licenseRef2, $agentRef2) = $this->createLicenseMatch(5, "licA", 22, "monk", 665, 95);
+    list($licenseMatch3, $licenseRef3, $agentRef3) = $this->createLicenseMatch(7, "licB", 22, "monk", 545, 97);
+    $licenseMatches = array($licenseMatch1, $licenseMatch2, $licenseMatch3);
+
+    $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'monk')))->andReturn(
+        array(
+            'nomos' => 23,
+            'monk' => 22
+        )
+    );
+
+    $scannerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($this->itemTreeBounds);
+
+    assertThat($scannerDetectedLicenses, is(array(
+        'licA' => $licenseRef1,
+        'licB' => $licenseRef3
+    )));
+  }
+
+  public function testGetScannerDetectedLicenseDetails()
   {
     $uploadId = 2;
     list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
@@ -86,7 +111,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   }
 
-  public function testGetLatestAgentDetectedLicensesWithUnknownAgent()
+  public function testGetScannerDetectedLicenseDetailsWithUnknownAgent()
   {
     $uploadId = 2;
     list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
@@ -112,7 +137,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     )));
   }
 
-  public function testGetLatestAgentDetectedWithOutdatedMatches()
+  public function testGetScannerDetectedLicenseDetailsWithOutdatedMatches()
   {
     $uploadId = 2;
     list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 17, "nomos", 453, null);
@@ -133,7 +158,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     assertThat($latestAgentDetectedLicenses, is(array()));
   }
 
-  public function testGetLatestAgentDetectedNoLicenseFoundShouldBeSkipped()
+  public function testGetScannerDetectedLicenseDetailsNoLicenseFoundShouldBeSkipped()
   {
     $uploadId = 2;
     list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "No_license_found", 23, "nomos", 453, null);
