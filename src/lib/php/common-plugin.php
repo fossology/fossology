@@ -95,15 +95,14 @@ function plugin_cmp($a, $b)
  */
 function plugin_disable($Level)
 {
+  /** @var Plugin[] $Plugins */
   global $Plugins;
 
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
   $LoginFlag = empty($_SESSION['User']);
-  $Max = count($Plugins);
-  for ($i = 0; $i < $Max; $i++)
+  foreach ($Plugins as $pluginName => &$P)
   {
-    $P = &$Plugins[$i];
     if ($P->State == PLUGIN_STATE_INVALID)
     {
       //echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
@@ -113,9 +112,10 @@ function plugin_disable($Level)
     {
       //echo "<pre>COMP: Going to disable $P->Name\n</pre>";
       //echo "<pre>COMP: disabling plugins with $P->DBaccess  >= $Level\n</pre>";
-      $P->Destroy();
-      $P->State = PLUGIN_STATE_INVALID;
+      $P->unInstall();
+      unset($Plugins[$pluginName]);
     }
+    unset($P);
   }
 } // plugin_disable
 
@@ -141,9 +141,8 @@ function plugin_sort()
 
   /* for each plugin, store the dependencies in a matrix */
   $DepArray = array();
-  for ($i = 0; $i < count($Plugins); $i++)
+  foreach ($Plugins as &$P)
   {
-    $P = &$Plugins[$i];
     if (empty($P->Dependency[0])) continue; // ignore no dependencies
     $DepArray[$P->Name] = array();
     $D = &$DepArray[$P->Name];
@@ -151,6 +150,7 @@ function plugin_sort()
     {
       $D[$P->Dependency[$j]] = $P->PluginLevel;
     }
+    unset($P);
   }
 
   /* Now iterate through the array.
@@ -172,15 +172,15 @@ function plugin_sort()
   }
 
   /* Finally: Put the direct dependencies back into the structures */
-  for ($i = 0; $i < count($Plugins); $i++)
+  foreach ($Plugins as &$P)
   {
-    $P = &$Plugins[$i];
     if (empty($P->Dependency[0])) continue; // ignore no dependencies
     $P->Dependency = array_keys($DepArray[$P->Name]);
+    unset($P);
   }
 
   /* Now it is safe to sort */
-  usort($Plugins, 'plugin_cmp');
+  uasort($Plugins, 'plugin_cmp');
 } // plugin_sort()
 
 /**
@@ -190,24 +190,18 @@ function plugin_sort()
  * \param $Name Plugin name
  * \return -1 if the plugin $Name is not found.
  **/
-function plugin_find_id($Name)
+function plugin_find_id($pluginName)
 {
+  /** @var Plugin[] $Plugins */
   global $Plugins;
 
-  foreach ($Plugins as $key => $val)
-  {
-    if (empty($val)) continue;
-    if (!strcmp($val->Name, $Name))
-    {
-      if ($val->State != PLUGIN_STATE_READY)
-      {
-        return (-1);
-      }
-      return ($key);
-    }
+  if (array_key_exists($pluginName, $Plugins)) {
+    $plugin = $Plugins[$pluginName];
+    return $plugin->State === PLUGIN_STATE_READY ? $pluginName : -1;
   }
-  return (-1);
-} // plugin_find_id()
+
+  return -1;
+}
 
 /**
  * \brief Given the official name of a plugin, find the index to it in the
@@ -217,57 +211,24 @@ function plugin_find_id($Name)
  * \param $Name Plugin name
  * \return -1 if it is not found.
  **/
-function plugin_find_any_id($Name)
+function plugin_find_any_id($pluginName)
 {
+  /** @var Plugin[] $Plugins */
   global $Plugins;
-  foreach ($Plugins as $key => $val)
-  {
-    if (!strcmp($val->Name, $Name))
-    {
-      return ($key);
-    }
-  }
-  return (-1);
-} // plugin_find_any_id()
+
+  return array_key_exists($pluginName, $Plugins) ? $Plugins[$pluginName] : -1;
+}
 
 /**
  * \brief Given the official name of a plugin, return the $Plugins object.
  *        Only plugins in PLUGIN_STATE_READY are scanned.
  * \return NULL if the plugin name isn't found.
  **/
-function plugin_find($Name)
+function plugin_find($pluginName)
 {
   global $Plugins;
-  foreach ($Plugins as $key => $val)
-  {
-    if (!strcmp($val->Name, $Name))
-    {
-      if ($val->State != PLUGIN_STATE_READY) return (-1);
-      $P = &$Plugins[$key];
-      return ($P);
-    }
-  }
-  return NULL;
-} // plugin_find()
-
-/**
- * \brief Given the official name of a plugin, return the $Plugins object.
- *        All plugins are scanned regardless of state.
- * \return NULL if the plugin name isn't found.
- **/
-function plugin_find_any($Name)
-{
-  global $Plugins;
-  foreach ($Plugins as $key => $val)
-  {
-    if (!strcmp($val->Name, $Name))
-    {
-      $P = &$Plugins[$key];
-      return ($P);
-    }
-  }
-  return NULL;
-} // plugin_find_any()
+  return array_key_exists($pluginName, $Plugins) ? $Plugins[$pluginName] : null;
+}
 
 /**
  * \brief Initialize every plugin in the global $Plugins array.
@@ -359,3 +320,38 @@ function plugin_unload()
     $plugin->unInstall();
   }
 } // plugin_unload()
+
+
+function register_plugin(Plugin $plugin) {
+  /** @var Plugin[] $Plugins */
+  global $Plugins;
+
+  $name = $plugin->getName();
+
+  if (empty($name)) {
+    throw new \Exception("cannot create module without name");
+  }
+
+  if (array_key_exists($name, $Plugins)) {
+    throw new \Exception("duplicate definition of plugin with name $name");
+  }
+
+  $Plugins[$name] = $plugin;
+}
+
+function getStringRepresentation($vars, $classname) {
+  $output = $classname . " {\n";
+  foreach($vars as $name => $value) {
+    if (!is_object($value))
+    {
+      $representation = print_r($value, true);
+      $lines = explode("\n", $representation);
+      $lines = array_map(function ($line) {return "      " . $line;}, $lines);
+      $representation = trim(implode("\n", $lines));
+
+      $output .= "   $name: " . $representation . "\n";
+    }
+  }
+  $output .= "}\n";
+  return $output;
+}

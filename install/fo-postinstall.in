@@ -166,6 +166,12 @@ if [ $COMMON ]; then
    fi
    chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
    chmod 2775 {$PROJECTSTATEDIR}/agents
+
+   if [ ! -d "{$CACHEDIR}" ] ; then
+       mkdir -p "{$CACHEDIR}"
+   fi
+   chown root:{$PROJECTGROUP} {$CACHEDIR}
+   chmod 2775 {$CACHEDIR}
   
    if [ ! -d "$REPO" ] ; then
       mkdir -p "$REPO"

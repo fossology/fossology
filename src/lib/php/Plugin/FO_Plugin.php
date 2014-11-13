@@ -195,19 +195,8 @@ class FO_Plugin implements Plugin
    */
   public function __construct()
   {
-    global $Plugins;
-
-    if ($this->State != PLUGIN_STATE_INVALID)
-    {
-      //print "<pre>TDB: returning state invalid\n</pre>";
-      return (1); // don't re-run
-    }
-    if ($this->Name !== "")
-    { // Name must be defined
-      $this->State = PLUGIN_STATE_VALID;
-      array_push($Plugins, $this);
-    }
-    return ($this->State == PLUGIN_STATE_VALID);
+    $this->State = PLUGIN_STATE_VALID;
+    register_plugin($this);
   }
 
   /**
@@ -356,9 +345,13 @@ class FO_Plugin implements Plugin
     }
 
     global $SysConf;
-    $this->vars['VERSION'] = $SysConf['BUILD'];
+    $this->vars['versionInfo'] = array(
+        'version' => $SysConf['BUILD']['VERSION'],
+        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
+        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
+        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+    );
 
-    return;
   } // OutputOpen()
 
   /**
@@ -479,4 +472,16 @@ class FO_Plugin implements Plugin
   {
     $this->Destroy();
   }
+
+  public function getName()
+  {
+    return $this->Name;
+  }
+
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
+
+
 }

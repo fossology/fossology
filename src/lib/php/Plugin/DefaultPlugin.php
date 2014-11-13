@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Plugin;
 
+use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,6 +57,8 @@ abstract class DefaultPlugin implements Plugin
    */
   private $renderer;
 
+  /** @var Logger */
+  private $logger;
 
   /** @var string */
   private $name;
@@ -70,7 +73,7 @@ abstract class DefaultPlugin implements Plugin
   private $permission = self::PERM_NONE;
 
   /** @var int */
-  private $LoginFlag = 0;
+  private $requiresLogin = 0;
 
   /** @var int */
   private $PluginLevel = 10;
@@ -83,10 +86,6 @@ abstract class DefaultPlugin implements Plugin
   private $MenuOrder = 0;
   private $MenuTarget = NULL;
 
-  protected $vars = array();
-
-  private $requiresLogin = false;
-
   public function __construct($name, $parameters = array())
   {
     if ($name === null || $name === "")
@@ -96,11 +95,10 @@ abstract class DefaultPlugin implements Plugin
     $this->name = $name;
     $this->setParameters($parameters);
 
-    $this->register();
-
     global $container;
     $this->container = $container;
-    $this->renderer = $this->container->get('twig.environment');
+    $this->renderer = $this->getObject('twig.environment');
+    $this->logger = $this->getObject('logger');
   }
 
   private function setParameters($parameters)
@@ -118,7 +116,7 @@ abstract class DefaultPlugin implements Plugin
           break;
 
         case self::REQUIRES_LOGIN:
-          $this->LoginFlag = $value ? 1 : 0;
+          $this->requiresLogin = $value;
           break;
 
         case self::LEVEL:
@@ -212,11 +210,15 @@ abstract class DefaultPlugin implements Plugin
     return 0;
   }
 
-  private function register()
+  /**
+   * \brief Customize submenus.
+   */
+  protected function RegisterMenus()
   {
-    global $Plugins;
-
-    array_push($Plugins, $this);
+    if (isset($this->MenuList))
+    {
+      menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
+    }
   }
 
   /**
@@ -228,7 +230,10 @@ abstract class DefaultPlugin implements Plugin
 
     $this->checkPrerequisites();
 
-    return $this->handle($request);
+    $startTime = microtime(true);
+    $response = $this->handle($request);
+    $this->logger->debug(sprintf("handle request in %.3fs", microtime(true) - $startTime));
+    return $response;
   }
 
   /**
@@ -242,6 +247,7 @@ abstract class DefaultPlugin implements Plugin
 
   public function preInstall()
   {
+    $this->RegisterMenus();
   }
 
   public function postInstall()
@@ -254,7 +260,11 @@ abstract class DefaultPlugin implements Plugin
 
   public function execute()
   {
+    $startTime = microtime(true);
+
     $response = $this->getResponse();
+
+    $this->logger->debug(sprintf("prepare response in %.3fs", microtime(true) - $startTime));
 
     $response->send();
   }
@@ -273,13 +283,19 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function render($templateName, $vars = null, $headers = null)
   {
+    $startTime = microtime(true);
+
+    $content = $this->renderer->loadTemplate($templateName)
+        ->render($vars ?: $this->getDefaultVars());
+
+    $this->logger->debug(sprintf("render response in %.3fs", microtime(true) - $startTime));
     return new Response(
-        $this->renderer->loadTemplate($templateName)
-            ->render($vars ?: $this->getDefaultVars()),
+        $content,
         Response::HTTP_OK,
         $headers ?: $this->getDefaultHeaders()
     );
   }
+
   private function checkPrerequisites()
   {
     if (empty($_SESSION['User']) && $this->requiresLogin)
@@ -378,5 +394,11 @@ abstract class DefaultPlugin implements Plugin
       throw new \Exception("property '$name' not found in module " . $this->name);
     }
   }
+
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
+
 
 }

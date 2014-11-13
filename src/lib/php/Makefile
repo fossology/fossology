@@ -26,6 +26,9 @@ all: bootstrap
 # generate the postinstall script
 bootstrap: bootstrap-process_php
 
+# generate service.xml
+service.xml: service.xml-process
+
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 

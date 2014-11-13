@@ -25,4 +25,9 @@ interface Plugin {
   function postInstall();
 
   function unInstall();
+
+  /**
+   * @return string
+   */
+  function getName();
 }
