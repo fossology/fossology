@@ -47,11 +47,10 @@ class AgentsDao extends Object
    *  The purpose of this function is to return an array of
    *  _ars records for an agent so that the latest agent_pk(s)
    *  can be determined.
-   *
    *  This is for _ars tables only, for example, nomos_ars and bucket_ars.
    *  The _ars tables have a standard format but the specific agent ars table
    *  may have additional fields.
-   *
+   * @todo make this function private
    * @param string $tableName - name of the ars table (e.g. nomos_ars)
    * @param int $upload_pk
    * @param int $limit - limit number of rows returned.  0=No limit, default=1
@@ -61,7 +60,7 @@ class AgentsDao extends Object
    * assoc array of _ars records.
    *         or FALSE on error, or no rows
    */
-  private function agentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $agentSuccess = TRUE)
+  public function agentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $agentSuccess = TRUE)
   {
     //based on common-agents.php AgentARSList
     if (!$this->dbManager->existsTable($tableName))

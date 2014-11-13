@@ -16,22 +16,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\License;
+namespace Fossology\Lib\Data;
 
 
-interface LicenseAlike {
-  /**
-   * @return int
-   */
-  function getId();
+use Fossology\Lib\Test\EnumMapTestBase;
 
-  /**
-   * @return string
-   */
-  function getFullName();
+class DecisionTypesTest extends EnumMapTestBase {
+  public function setUp() {
+    $this->setTypes(new DecisionTypes());
+  }
 
-  /**
-   * @return string
-   */
-  function getShortName();
+  public function testTypeToBeDiscussed()
+  {
+    $this->checkMapping(DecisionTypes::TO_BE_DISCUSSED, "To be discussed");
+  }
+
+  public function testTypeIrrelevant()
+  {
+    $this->checkMapping(DecisionTypes::IRRELEVANT, "Irrelevant");
+  }
+
+  public function testTypeIdentified()
+  {
+    $this->checkMapping(DecisionTypes::IDENTIFIED, "Identified");
+  }
 }
+ 
