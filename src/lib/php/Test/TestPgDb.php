@@ -231,6 +231,7 @@ class TestPgDb
         break;
       }
     }
+    $this->dbManager->queryOnce("SELECT setval('license_ref_rf_pk_seq', (SELECT MAX(rf_pk) FROM license_ref))");
   }
 
   /**

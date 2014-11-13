@@ -115,19 +115,6 @@ $start_time = get_time();
 
 */
 
-/* We are going to break some testing rules here, by including and
-   using application code within the testing framework:
-
-   PHP Library:                    Function we use:
-   ------------	                   ----------------
-   ../../lib/php/libschema.php     ApplySchema() (used to load core-schema.dat)
-   ../../lib/php/common-db.php     DBCheckResult()
-   ../../lib/php/common-cache.php  ReportCachePurgeAll() (required by ApplySchema)
-
-*/
-require_once(__DIR__ . '/../../lib/php/libschema.php');
-require_once(__DIR__ . '/../../lib/php/common-db.php');
-require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
 $test_username = 'fossologytest';
 $test_environment_variable = 'FOSSOLOGY_TESTCONFIG';
@@ -297,7 +284,7 @@ $test_pg_conn = @pg_connect($initial_postgres_params)
 // unless the LC_CTYPE environment variable is set correctly
 //$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 // In the long run, FOSSology should be using a UTF8 encoding for text
-$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8'";
+$sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8' TEMPLATE template0";
 $result = pg_query($test_pg_conn, $sql_statement) 
     or die("FAIL: Could not create test database!\n");
 
@@ -461,6 +448,20 @@ if (isset($PG_CONN)) {
 
 // assign the global PG_CONN variable used by ApplySchema
 $PG_CONN = $test_db_conn;
+
+/* We are going to break some testing rules here, by including and
+   using application code within the testing framework:
+
+   PHP Library:                    Function we use:
+   ------------	                   ----------------
+   ../../lib/php/libschema.php     ApplySchema() (used to load core-schema.dat)
+   ../../lib/php/common-db.php     DBCheckResult()
+   ../../lib/php/common-cache.php  ReportCachePurgeAll() (required by ApplySchema)
+
+*/
+require_once(__DIR__ . '/../../lib/php/libschema.php');
+require_once(__DIR__ . '/../../lib/php/common-db.php');
+require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
 // apply the core schema
 // We need to buffer the output in order to silence the normal 

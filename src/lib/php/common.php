@@ -37,7 +37,6 @@ require_once("common-dir.php");
 require_once("common-parm.php");
 require_once("common-repo.php");
 require_once("common-license-file.php");
-require_once("common-copyright-file.php");
 require_once("common-job.php");
 require_once("common-agents.php");
 require_once("common-active.php");
