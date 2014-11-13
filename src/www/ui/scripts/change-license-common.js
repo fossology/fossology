@@ -114,9 +114,10 @@ function scheduledDeciderError (responseobject, resultEntity) {
 
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   var post_data = {
-    "removing": $('#bulkRemoving').val(),
+    "bulkAction": $('#bulkAction').val(),
     "refText": $('#bulkRefText').val(),
     "licenseId": $('#bulkLicense').val(),
+    "shortname": $('#shortname').val(),
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0
@@ -177,7 +178,7 @@ function addLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
       .done(function (data) {
       if(data){
-          markAsModified();
+        markAsModified();
       }
       var table = createClearingTable();
       table.fnDraw(false);
@@ -190,7 +191,7 @@ function removeLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
       if(data) {
-          markAsModified();
+        markAsModified();
       }
       var table = createClearingTable();
       table.fnDraw(false);

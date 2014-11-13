@@ -30,15 +30,12 @@ use Monolog\Logger;
 
 class LicenseDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
+  private $licenseView;
+  
 
 
   function __construct(DbManager $dbManager)
@@ -68,7 +65,9 @@ class LicenseDao extends Object
                   AG.agent_pk AS agent_id,
                   AG.agent_rev AS agent_revision,
                   LFR.rf_match_pct AS percent_match
-          FROM license_file_ref as LFR
+          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+   FROM license_file
+   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
@@ -198,17 +197,19 @@ class LicenseDao extends Object
       $param[] = $itemTreeBounds->getUploadId();
     }
 
-    $sql = "SELECT license_file_ref.pfile_fk as file_id,
+    $sql = "SELECT pfile_ref.pfile_fk as file_id,
            rf_shortname as license_shortname,
            rf_pk as license_id,
            agent_name,
            max(agent_pk) as agent_id,
            rf_match_pct as match_percentage
-         FROM license_file_ref
-         INNER JOIN $uploadTreeTableName utree ON license_file_ref.pfile_fk = utree.pfile_fk
+         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+   FROM license_file
+   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
+         INNER JOIN $uploadTreeTableName utree ON pfile_ref.pfile_fk = utree.pfile_fk
          INNER JOIN agent ON agent_fk = agent_pk
          WHERE (lft BETWEEN $1 AND $2) $sql_upload
-           AND license_file_ref.pfile_fk = utree.pfile_fk
+           AND pfile_ref.pfile_fk = utree.pfile_fk
            $noLicenseFoundStmt";
 
     if (!empty($selectedAgentId)){
@@ -237,7 +238,9 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
+         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+   FROM license_file
+   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
          WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
     if (!empty($agentId))
     {
@@ -267,12 +270,11 @@ class LicenseDao extends Object
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
 
-
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
     $this->dbManager->prepare($statementName,
-        "SELECT rf_shortname
-              FROM license_file_ref
-              INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file_ref.pfile_fk
+        "SELECT license_ref.rf_shortname
+              FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk
+              INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file.pfile_fk
               WHERE upload_fk=$1
                 AND lft BETWEEN $2 AND $3
                 $noLicenseFoundStmt
@@ -326,18 +328,51 @@ class LicenseDao extends Object
     return $license;
   }
 
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+  /**
+   * @param int $userId
+   * @param int $groupId
+   * @param int $uploadTreeId
+   * @param int $licenseId
+   * @param bool $removing
+   * @param string $refText
+   * @param string|null $newShortname
+   * @return int lrp_pk on success or -1 on fail
+   */
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText, $newShortname=NULL)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-      VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-      array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text, lrb_shortname)
+      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING lrb_pk",
+      array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText, $newShortname),
+      __METHOD__.'.getLrb'
     );
 
-    if ($licenseRefBulkIdResult !== false) {
-      return $licenseRefBulkIdResult['lrb_pk'];
-    } else {
+    if ($licenseRefBulkIdResult === false) {
       return -1;
     }
+    
+    if(!empty($newShortname))
+    {
+      $this->dbManager->prepare($stmt=__METHOD__.'.updLrb' , 'UPDATE license_ref_bulk SET rf_fk=lrb_pk WHERE lrb_pk=$1');
+      $this->dbManager->execute($stmt,array($licenseRefBulkIdResult['lrb_pk']));
+    }
+    return $licenseRefBulkIdResult['lrb_pk'];
   }
+  
+  /**
+   * @param string $newShortname
+   * @param int $groupId
+   * @return bool
+   */
+  public function isNewLicense($newShortname, $groupId)
+  {
+    $duplicatedRef = $this->dbManager->getSingleRow('SELECT rf_text FROM license_ref WHERE rf_shortname=$1',array($newShortname),__METHOD__.'.references');
+    if ($duplicatedRef !== false)
+    {
+      return false;
+    }
+    $duplicatedCandidate = $this->dbManager->getSingleRow('SELECT rf_text FROM license_ref_bulk WHERE lrb_shortname=$1 AND group_fk=$2',array($newShortname,$groupId),__METHOD__.'.candidates');
+    return ($duplicatedCandidate===false);
+  }
+  
 }
