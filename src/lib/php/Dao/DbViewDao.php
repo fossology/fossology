@@ -78,8 +78,14 @@ class DbViewDao
    * @brief Common Table Expressions
    * @return string
    */
-  public function asCTE(){
+  public function asCTE()
+  {
     return "WITH $this->dbViewName AS (".$this->dbViewQuery.")";
+  }
+  
+  public function getDbViewQuery()
+  {
+    return $this->dbViewQuery;
   }
 
 }

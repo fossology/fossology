@@ -55,8 +55,8 @@ class AjaxClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
-
-  /** @var LicenseRenderer */
+  /** @var int */
+  private $uploadId;
 
   function __construct()
   {
@@ -93,7 +93,7 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function getLicenseFullTextLink($licenseShortName)
   {
-    $uri = Traceback_uri() . '?mod=popup-license&lic=' . $licenseShortName;
+    $uri = Traceback_uri() . '?mod=popup-license&lic=' . $licenseShortName . '&upload=' . $this->uploadId;
     $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('$uri','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
     return $licenseShortNameWithLink;
   }
@@ -101,14 +101,13 @@ class AjaxClearingView extends FO_Plugin
   /**
    * @param $orderAscending
    * @param $userId
-   * @param $uploadId
    * @param $uploadTreeId
    * @internal param $itemTreeBounds
    * @return string
    */
-  protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
+  protected function doLicenses($orderAscending, $userId, $uploadTreeId)
   {
-    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $this->uploadId);
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
@@ -123,7 +122,7 @@ class AjaxClearingView extends FO_Plugin
 
       $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseShortName);
       $licenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -229,10 +228,11 @@ class AjaxClearingView extends FO_Plugin
             $orderAscending = $sort0 === "asc";
           }
       }
+      $this->uploadId = $uploadId;
       switch ($action)
       {
         case "licenses":
-          return $this->doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId);
+          return $this->doLicenses($orderAscending, $userId, $uploadTreeId);
 
         case "licenseDecisions":
           return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);

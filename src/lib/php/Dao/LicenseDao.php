@@ -311,14 +311,21 @@ class LicenseDao extends Object
 
   /**
    * @param string $licenseShortname
+   * @param int $uploadId
    * @return License|null
    */
-  public function getLicenseByShortName($licenseShortname)
+  public function getLicenseByShortName($licenseShortname,$uploadId=0)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE rf_shortname=$1",
-        array($licenseShortname));
-    if (false === $row)
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE rf_shortname=$1",
+        array($licenseShortname),__METHOD__.'.only');
+    if (false===$row && !empty($uploadId))
+    {
+      $licenseViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text', 'rf_url'),
+          'diff'=>TRUE,'extraCondition'=>'rf_shortname=$1'));
+      $row = $this->dbManager->getSingleRow($licenseViewDao->getDbViewQuery(), array($licenseShortname),__METHOD__.'.candidate');
+    }
+    if (false===$row)
     {
       return null;
     }
@@ -333,7 +340,6 @@ class LicenseDao extends Object
    * @param int $licenseId
    * @param bool $removing
    * @param string $refText
-   * @param string|null $newShortname
    * @return int lrp_pk on success or -1 on fail
    */
   public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText, $newShortname=NULL)
@@ -359,18 +365,22 @@ class LicenseDao extends Object
   
   /**
    * @param string $newShortname
-   * @param int $groupId
+   * @param int $uploadId
    * @return bool
    */
-  public function isNewLicense($newShortname, $groupId)
+  public function isNewLicense($newShortname, $uploadId)
   {
-    $duplicatedRef = $this->dbManager->getSingleRow('SELECT rf_text FROM license_ref WHERE rf_shortname=$1',array($newShortname),__METHOD__.'.references');
-    if ($duplicatedRef !== false)
-    {
-      return false;
-    }
-    $duplicatedCandidate = $this->dbManager->getSingleRow('SELECT rf_text FROM license_ref_bulk WHERE lrb_shortname=$1 AND group_fk=$2',array($newShortname,$groupId),__METHOD__.'.candidates');
-    return ($duplicatedCandidate===false);
+    $licenceViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_shortname')));
+    $sql = 'SELECT count(*) cnt FROM ('.$licenceViewDao->getDbViewQuery().') AS license_all WHERE rf_shortname=$1';
+    $duplicatedRef = $this->dbManager->getSingleRow($sql,array($newShortname),__METHOD__);
+    return $duplicatedRef['cnt']==0;
   }
-  
+
+  public function insertUploadLicense($uploadId, $newShortname, $refText)
+  {
+    $sql = 'INSERT INTO license_candidate (upload_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
+    $refArray = $this->dbManager->getSingleRow($sql, array($uploadId, $newShortname, $refText), __METHOD__);
+    return $refArray['rf_pk'];
+  }
+
 }

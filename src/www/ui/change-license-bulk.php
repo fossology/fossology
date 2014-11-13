@@ -102,7 +102,6 @@ class changeLicenseBulk extends FO_Plugin
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
     $refText = filter_input(INPUT_POST,'refText');
-    $licenseId = GetParm('licenseId',PARM_INTEGER);
     $action = filter_input(INPUT_POST,'bulkAction');
     if($action==='new')
     {
@@ -115,10 +114,12 @@ class changeLicenseBulk extends FO_Plugin
       {
         throw new Exception('license shortname already in use');
       }
-      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText, $newShortname);
+      $licenseId = $this->licenseDao->insertUploadLicense($uploadId,$newShortname,$refText);
+      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText);
     }
     else
     {
+      $licenseId = GetParm('licenseId',PARM_INTEGER);
       $removing = ($action==='remove');
       $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
     }
