@@ -51,7 +51,7 @@ function cli_Init()
   /* Initialize plugins */
   /** This registers plugins with the menu structure and start the DB
    connection. **/
-  plugin_init(); /* this registers plugins with menus */
+  plugin_preinstall(); /* this registers plugins with menus */
 
   return(true);
 } // cli_Init()

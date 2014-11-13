@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Plugin\Plugin;
+
 define("TITLE_core_debug", _("Debug Plugins"));
 
 class core_debug extends FO_Plugin
@@ -60,19 +62,23 @@ class core_debug extends FO_Plugin
    */
   protected function htmlContent()
   {
-    $V="";
+    $V = "";
+    /** @var Plugin[] $Plugins */
     global $Plugins;
 
     $text = _("Plugin Summary");
     $V .= "<H2>$text</H2>";
     foreach ($Plugins as $key => $val)
     {
-      $V .=  "$key : $val->Name (state=$val->State)<br>\n";
+      $V .= "$key : $val->Name (state=$val->State)<br>\n";
     }
     $text = _("Plugin State Details");
     $V .= "<H2>$text</H2>";
     $V .= "<pre>";
-    $V .= print_r($Plugins,1);
+    foreach ($Plugins as $plugin)
+    {
+      $V .= strval($plugin) . "\n";
+    }
     $V .= "</pre>";
 
     return $V;

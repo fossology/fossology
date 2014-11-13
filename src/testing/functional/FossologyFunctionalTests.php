@@ -208,6 +208,6 @@ if($bytes > 0)
 }
 else
 {
-  echo "ERROR: No data written to file:\n$file\n";
+  echo "ERROR: No data written to file:\n$cacheFile\n";
 }
 ?>
