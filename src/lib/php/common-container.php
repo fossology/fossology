@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 $containerClassName = 'FossologyCachedContainer';
 
 $cacheDir = $GLOBALS['CACHEDIR'];
-$cacheFile = '$cacheDir/container.php';
+$cacheFile = "$cacheDir/container.php";
 
 if (file_exists($cacheFile)) {
   require_once($cacheFile);
