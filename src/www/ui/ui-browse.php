@@ -52,12 +52,7 @@ class ui_browse extends FO_Plugin
    */
   function Install()
   {
-    if (!$this->folderDao->hasTopLevelFolder())
-    {
-      $this->folderDao->insertFolder(1, 'Software Repository', 'Top Folder');
-      $this->folderDao->insertFolderContents(1,0,0);
-      $this->folderDao->fixFolderSequence();
-    }
+
     return (0);
   }
 
@@ -251,6 +246,7 @@ class ui_browse extends FO_Plugin
     {
       return 0;
     }
+    $this->performSanityCheck();
 
     $folder_pk = GetParm("folder", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
@@ -396,6 +392,15 @@ class ui_browse extends FO_Plugin
     $assigneeArray[1] = _('Unassigned');
     $assigneeArray[0] = '';
     return $assigneeArray;
+  }
+
+  private function performSanityCheck() {
+    if (!$this->folderDao->hasTopLevelFolder())
+    {
+      $this->folderDao->insertFolder(1, 'Software Repository', 'Top Folder');
+      $this->folderDao->insertFolderContents(1,0,0);
+      $this->folderDao->fixFolderSequence();
+    }
   }
 
 }

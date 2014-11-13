@@ -56,12 +56,6 @@ abstract class DefaultPlugin implements Plugin
    */
   private $renderer;
 
-  /** @var string[] */
-  private $defaultHeaders = array(
-      'Content-type' => 'text/html',
-      'Pragma' => 'no-cache',
-      'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
-      'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
 
   /** @var string */
   private $name;
@@ -73,13 +67,14 @@ abstract class DefaultPlugin implements Plugin
   private $title;
 
   /** @var int */
-  private $DBaccess = self::PERM_NONE;
+  private $permission = self::PERM_NONE;
 
   /** @var int */
   private $LoginFlag = 0;
 
   /** @var int */
   private $PluginLevel = 10;
+
   /** @var array */
   private $dependencies = array();
   private $InitOrder = 0;
@@ -119,7 +114,7 @@ abstract class DefaultPlugin implements Plugin
           break;
 
         case self::PERMISSION:
-          $this->DBaccess = $value;
+          $this->permission = $value;
           break;
 
         case self::REQUIRES_LOGIN:
@@ -201,7 +196,7 @@ abstract class DefaultPlugin implements Plugin
    */
   public function getDBaccess()
   {
-    return $this->DBaccess;
+    return $this->permission;
   }
 
   /**
@@ -231,6 +226,8 @@ abstract class DefaultPlugin implements Plugin
   {
     $request = Request::createFromGlobals();
 
+    $this->checkPrerequisites();
+
     return $this->handle($request);
   }
 
@@ -243,90 +240,12 @@ abstract class DefaultPlugin implements Plugin
     return $this->container->get($name);
   }
 
-  /**
-   * @param Request $request
-   * @return Response
-   */
-  protected abstract function handle(Request $request);
-
-  /**
-   * @param string $templateName
-   * @param array $vars
-   * @param string[] $headers
-   * @return Response
-   */
-  protected function render($templateName, $vars, $headers = array())
+  public function preInstall()
   {
-    $vars = array_merge($this->vars, $vars);
-
-    $headers = array_merge($this->defaultHeaders, $headers);
-
-    return new Response(
-        $this->renderer->loadTemplate($templateName)->render($vars),
-        Response::HTTP_OK,
-        $headers
-    );
   }
 
   public function postInstall()
   {
-  }
-
-  public function preInstall()
-  {
-    if (empty($_SESSION['User']) && $this->requiresLogin)
-    {
-      return 0;
-    }
-
-    // Make sure dependencies are met
-    foreach ($this->dependencies as $dependency)
-    {
-      $id = plugin_find_id($dependency);
-      if ($id < 0)
-      {
-        $this->unInstall();
-        throw new \Exception("unsatisfied dependency '$dependency' in module '" . $this->getName() . "'");
-      }
-    }
-
-    global $Plugins;
-    $menu = ($this->name != "menus") ? $Plugins[plugin_find_id("menus")] : null;
-
-    $metadata = "<meta name='description' content='The study of Open Source'>\n";
-    $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
-
-    $this->vars['metadata'] = $metadata;
-
-    if (!empty($this->title))
-    {
-      $this->vars[self::TITLE] = htmlentities($this->title);
-    }
-
-    $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
-    $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
-    $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
-    $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
-
-    if (!empty($menu))
-    {
-      $styles .= $menu->OutputCSS();
-    }
-
-    $this->vars['styles'] = $styles;
-
-    if (!empty($menu))
-    {
-      $this->vars['menu'] = $menu->Output($this->title);
-    }
-
-    global $SysConf;
-    $this->vars['versionInfo'] = array(
-        'version' => $SysConf['BUILD']['VERSION'],
-        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
-        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
-        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
-    );
   }
 
   public function unInstall()
@@ -341,6 +260,110 @@ abstract class DefaultPlugin implements Plugin
   }
 
   /**
+   * @param Request $request
+   * @return Response
+   */
+  protected abstract function handle(Request $request);
+
+  /**
+   * @param string $templateName
+   * @param array $vars
+   * @param string[] $headers
+   * @return Response
+   */
+  protected function render($templateName, $vars = null, $headers = null)
+  {
+    return new Response(
+        $this->renderer->loadTemplate($templateName)
+            ->render($vars ?: $this->getDefaultVars()),
+        Response::HTTP_OK,
+        $headers ?: $this->getDefaultHeaders()
+    );
+  }
+  private function checkPrerequisites()
+  {
+    if (empty($_SESSION['User']) && $this->requiresLogin)
+    {
+      throw new \Exception("not allowed without login");
+    }
+
+    foreach ($this->dependencies as $dependency)
+    {
+      $id = plugin_find_id($dependency);
+      if ($id < 0)
+      {
+        $this->unInstall();
+        throw new \Exception("unsatisfied dependency '$dependency' in module '" . $this->getName() . "'");
+      }
+    }
+  }
+
+  /**
+   * @return array
+   */
+  protected function getDefaultHeaders()
+  {
+    return array(
+        'Content-type' => 'text/html',
+        'Pragma' => 'no-cache',
+        'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
+        'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
+  }
+
+  /**
+   * @return array
+   */
+  protected function getDefaultVars()
+  {
+    $vars = array();
+
+    global $Plugins;
+    $menu = ($this->name != "menus") ? $Plugins[plugin_find_id("menus")] : null;
+
+    $metadata = "<meta name='description' content='The study of Open Source'>\n";
+    $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
+
+    $vars['metadata'] = $metadata;
+
+    if (!empty($this->title))
+    {
+      $vars[self::TITLE] = htmlentities($this->title);
+    }
+
+    $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
+    $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
+    $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
+
+    if (!empty($menu))
+    {
+      $styles .= $menu->OutputCSS();
+    }
+
+    $vars['styles'] = $styles;
+
+    if (!empty($menu))
+    {
+      $vars['menu'] = $menu->Output($this->title);
+    }
+
+    global $SysConf;
+    $vars['versionInfo'] = array(
+        'version' => $SysConf['BUILD']['VERSION'],
+        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
+        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
+        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+    );
+
+    return $vars;
+  }
+
+  protected function mergeWithDefault($vars)
+  {
+    return array_merge($this->getDefaultVars(), $vars);
+  }
+
+  /**
    * @param string $name
    * @throws \Exception
    * @return string|null
@@ -350,10 +373,10 @@ abstract class DefaultPlugin implements Plugin
     if (method_exists($this, ($method = 'get' . ucwords($name))))
     {
       return $this->$method();
-    } else {
+    } else
+    {
       throw new \Exception("property '$name' not found in module " . $this->name);
     }
   }
-
 
 }

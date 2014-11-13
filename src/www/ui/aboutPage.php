@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * \class ui_about extends FO_Plugin
  * \brief about page on UI
  */
 class AboutPage extends DefaultPlugin
@@ -59,8 +58,9 @@ class AboutPage extends DefaultPlugin
         'text' => _("This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\nYou should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.")
     );
 
-    return $this->render('about.html.twig', $vars);
+    return $this->render('about.html.twig', $this->mergeWithDefault($vars));
   }
+
 }
 
 $newPlugin = new AboutPage();
