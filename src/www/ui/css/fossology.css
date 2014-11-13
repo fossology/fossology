@@ -292,30 +292,28 @@ table.dataTable tr.even.match {
     font-weight: bold;
 }
 
-.delete {
-    background-image: url('../images/icons/close_16.png');
+div.delete, div.deleted, div.add, div.added {
     background-size: 100% 100%;
     height: 16px;
     width: 16px;
     margin: 0 auto;
 }
 
-.selectedRow .delete {
-    background-image: url('../images/icons/close_32.png');
-    height: 32px;
-    width: 32px;
-}
-
-.add {
+div.add {
     background-image: url('../images/icons/add_16.png');
-    background-size: 100% 100%;
-    height: 16px;
-    width: 16px;
-    margin: 0 auto;
 }
 
-.selectedRow .add {
-    background-image: url('../images/icons/add_32.png');
-    height: 32px;
-    width: 32px;
+div.added {
+    background-image: url('../images/icons/added_16.png');
+}
+
+div.delete {
+    background-image: url('../images/icons/close_16.png');
+}
+div.deleted {
+    background-image: url('../images/icons/closed_16.png');
+}
+
+.inactive {
+    color: gray;
 }

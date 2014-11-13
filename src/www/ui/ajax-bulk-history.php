@@ -42,31 +42,6 @@ class Ajax_BulkHistory extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
   }
 
-
-  function OutputOpen()
-  {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return (0);
-    }
-    $uploadId = GetParm("upload", PARM_INTEGER);
-    if (empty($uploadId))
-    {
-      return;
-    }
-
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
-    {
-      return;
-    }
-
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
-    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-
-    return parent::OutputOpen();
-  }
-
   protected function htmlContent()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);

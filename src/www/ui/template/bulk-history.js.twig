@@ -1,0 +1,9 @@
+function refreshBulkHistory(callbacksuccess) {
+  $.ajax({
+    url: "{{ baseuri }}?mod=bulk-history&upload={{ uploadId }}&item={{ itemId }}{{ bulkHistoryOptions }}",
+    success: function(data) {
+      $('#bulkHistoryTable').html(data);
+      callbacksuccess(data);
+    }
+  });
+}

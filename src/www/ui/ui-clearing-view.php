@@ -228,7 +228,10 @@ class ClearingView extends FO_Plugin
       $clearingId = -1;
     }
 
-    $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
+    $baseUri = Traceback_uri();
+    $this->vars['baseuri'] = $baseUri;
+    $this->vars['uri'] = $baseUri . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
+    $this->vars['bulkHistoryHighlightUri'] = $this->vars['uri'];
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";

@@ -39,12 +39,8 @@ function closeBulkModal() {
 }
 
 function loadBulkHistoryModal() {
-  $.ajax({
-    url: "?mod=bulk-history&upload=1&item=3",
-    success: function(data) {
-      $('#bulkHistoryTable').html(data);
-      $('#bulkHistoryModal').plainModal('open');
-    }
+  refreshBulkHistory(function(data) {
+    $('#bulkHistoryModal').plainModal('open');
   });
 }
 

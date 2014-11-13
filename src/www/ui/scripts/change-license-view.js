@@ -51,6 +51,9 @@ function reloadClearingTable() {
   var table = createClearingTable();
   table.fnDraw(false);
   $('#bulkIdResult').hide();
+  refreshBulkHistory(function (data) {
+    $('#bulkHistory').show();
+  });
 }
 
 function scheduleBulkScan() {

@@ -239,6 +239,10 @@ class ui_browse_license extends FO_Plugin
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $updateCache = GetParm("updcache", PARM_INTEGER);
 
+    $this->vars['baseuri'] = Traceback_uri();
+    $this->vars['uploadId'] = $Upload;
+    $this->vars['itemId'] = $Item;
+
     $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 

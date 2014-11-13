@@ -605,23 +605,24 @@ insert into clearing_decision (
     $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
     $itemId = $itemTreeBound->getItemId();
     $uploadId = $itemTreeBound->getUploadId();
+    $left = $itemTreeBound->getLeft();
 
-    $params = array($uploadId, $itemId);
+    $params = array($uploadId, $itemId, $left);
     $stmt = __METHOD__.".".$uploadTreeTableName;
 
+    $triedExpr = "$3 between ut2.lft and ut2.rgt";
     $triedFilter = "";
     if ($onlyTried)
     {
-      $left = $itemTreeBound->getLeft();
-      $params[] = $left;
-      $triedFilter = "and $".count($params)." between ut2.lft and ut2.rgt";
+      $triedFilter = "and ".$triedExpr;
       $stmt .= ".tried";
     }
 
     $sql = "with alltried as (
             select lr.lrb_pk,
               ce.clearing_event_pk ce_pk, lr.rf_text, lrf.rf_shortname, removing,
-              ce.uploadtree_fk
+              ce.uploadtree_fk,
+              $triedExpr as tried
               from license_ref_bulk lr
               left join highlight_bulk h on lrb_fk = lrb_pk
               left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
@@ -632,11 +633,11 @@ insert into clearing_decision (
               $triedFilter
               order by lr.lrb_pk
             )
-            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, matched
+            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, true as matched FROM alltried WHERE uploadtree_fk = $2
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, true as matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
             ) AS result ORDER BY lrb_pk, matched DESC";
 
     $this->dbManager->prepare($stmt, $sql);
@@ -652,7 +653,8 @@ insert into clearing_decision (
         "text" => $row['text'],
         "lic" => $row['lic'],
         "removing" => $this->dbManager->booleanFromDb($row['removing']),
-        "matched" => $this->dbManager->booleanFromDb($row['matched'])
+        "matched" => $this->dbManager->booleanFromDb($row['matched']),
+        "tried" => $this->dbManager->booleanFromDb($row['tried'])
       );
     }
 

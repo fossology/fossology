@@ -3,33 +3,28 @@
     <th>{{ 'License'| trans }}</th>
     <th>{{ 'Text'| trans }}</th>
   </tr>
+  {% if bulkHistory %}
   {% for row in bulkHistory %}
-    <tr class="{{ cycle(['odd','even'], loop.index0) }} {% if row.matched %}match{% endif %}">
+    <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
       <td>
           <table>
-            <td><div class='{% if row.removing %}delete{% else %}add{% endif %} inactive'></td>
+            <td><div class='{% if row.removing %}deleted{% else %}added{% endif %}'></td>
             <td>{{ row.lic|e }}</td>
           </table>
       </td>
       <td>
-      {% if uri and row.id > 0 and row.matched %}
-      <a href="{{ uri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
+      {% if bulkHistoryHighlightUri and row.id > 0 and row.matched %}
+      <a href="{{ bulkHistoryHighlightUri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
       {% else %}
       {{ row.text|e }}
       {% endif %}
       </td>
     </tr>
   {% endfor %}
+  {% else %}
+    <tr class="even">
+      <td>&lt;no entries&gt;</td>
+      <td>&lt;no entries&gt;</td>
+    </tr>
+  {% endif%}
 </table>
-
-<script type='text/javascript'>
-function refreshBulkHistoryModal(callbacksuccess) {
-  $.ajax({
-    url: "{{ baseuri }}?mod=bulk-history&upload={{ upload }}&item={{ item }}",
-    success: function(data) {
-      $('#bulkHistoryTable').html(data);
-      $('#bulkHistoryModal').plainModal('open');
-    }
-  });
-}
-</script>
