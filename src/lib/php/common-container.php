@@ -10,10 +10,10 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 $containerClassName = 'FossologyCachedContainer';
 
-$cacheDir = $GLOBALS['CACHEDIR'];
+$cacheDir = array_key_exists('CACHEDIR', $GLOBALS) ? $GLOBALS['CACHEDIR'] : null;
 $cacheFile = "$cacheDir/container.php";
 
-if (file_exists($cacheFile)) {
+if ($cacheDir && file_exists($cacheFile)) {
   require_once($cacheFile);
   $container = new $containerClassName();
 } else {
@@ -26,7 +26,7 @@ if (file_exists($cacheFile)) {
 
   $container->compile();
 
-  if (is_dir($cacheDir))
+  if ($cacheDir && is_dir($cacheDir))
   {
     $dumper = new PhpDumper($container);
     file_put_contents(
