@@ -169,6 +169,9 @@ if [ $COMMON ]; then
 
    if [ ! -d "{$CACHEDIR}" ] ; then
        mkdir -p "{$CACHEDIR}"
+   else
+       echo "*** clearing file cache ***"
+       rm -rf {$CACHEDIR}/*
    fi
    chown root:{$PROJECTGROUP} {$CACHEDIR}
    chmod 2775 {$CACHEDIR}
