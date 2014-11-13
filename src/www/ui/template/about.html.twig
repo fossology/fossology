@@ -2,10 +2,17 @@
 
 {% block content %}
 
-<b> {{ "FOSSology version" | trans }} {{ VERSION }} ({{ 'code revision' | trans }} {{ SVN_REV }})</b>
-with {{ licenseCount }} known licenses in database
-<p/>
-{{ copyright }}<p>
+<p>
+<b> {{ "FOSSology version" | trans }} {{ versionInfo.version }} ({{ 'code revision' | trans }} {{ versionInfo.commitHash }})</b>
+{{ "with" | trans }} {{ licenseCount }} {{ "known licenses in database" |trans }}
+</p>
+
+<p>
+{{ copyright }}
+</p>
+
+<p>
 {{ text | nl2br }}
+</p>
 {% endblock %}
 

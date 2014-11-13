@@ -461,4 +461,22 @@ class FO_Plugin implements Plugin
     $this->renderOutput();
   }
 
+  function preInstall()
+  {
+    if ($this->State == PLUGIN_STATE_VALID) { $this->PostInitialize(); }
+    if ($this->State == PLUGIN_STATE_READY) { $this->RegisterMenus(); }
+  }
+
+  function postInstall()
+  {
+    $state = $this->Install();
+    if ($state != 0) {
+      throw new \Exception("install of plugin ". $this->Name . " failed");
+    }
+  }
+
+  function unInstall()
+  {
+    $this->Destroy();
+  }
 }

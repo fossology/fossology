@@ -326,4 +326,9 @@ class LicenseDao extends Object
     return $license;
   }
 
+  public function getLicenseCount() {
+    $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
+    return intval($licenseRefTable['cnt']);
+  }
+
 }

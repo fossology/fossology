@@ -33,10 +33,11 @@ $SysConf = bootstrap();
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 plugin_load();
+plugin_preinstall();
 
 // call install method of every plugin, core-auth creates the default user and
 // the fossy user
-plugin_install(FALSE);
+plugin_postinstall();
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -66,5 +67,6 @@ else
   print "</script>\n";
 }
 plugin_unload();
+global $container;
 $container->get("db.manager")->flushStats();
 return 0;

@@ -1,6 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
+Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,11 +26,25 @@ use Twig_Environment;
 
 abstract class DefaultPlugin implements Plugin
 {
+  const PERMISSION = "permission";
+  const REQUIRES_LOGIN = "requiresLogin";
+  const ENABLE_MENU = "ENABLE_MENU";
+  const LEVEL = "level";
+  const DEPENDENCIES = "dependencies";
+  const INIT_ORDER = "initOrder";
+  const MENU_LIST = "menuList";
+  const MENU_ORDER = "menuOrder";
+  const MENU_TARGET = "menuTarget";
+  const TITLE = "title";
 
-  const PLUGIN_STATE_FAIL = -1; // mark it as a total failure
-  const PLUGIN_STATE_INVALID = 0;
-  const PLUGIN_STATE_VALID = 1; // used during install
-  const PLUGIN_STATE_READY = 2;
+  /**
+   * Permissions
+   * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
+   */
+  const PERM_NONE = 0;
+  const PERM_READ = 1;
+  const PERM_WRITE = 3;        /* DB writes permitted */
+  const PERM_ADMIN = 10;
 
   /**
    * @var ContainerBuilder
@@ -48,37 +63,97 @@ abstract class DefaultPlugin implements Plugin
       'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
       'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
 
-  /** @var  string */
-  private $title;
-
-  /** @var  string */
+  /** @var string */
   private $name;
 
-  /** @var array */
-  private $dependency;
+  /** @var string */
+  private $version = "1.0";
+
+  /** @var string */
+  private $title;
 
   /** @var int */
-  private $state;
+  private $DBaccess = self::PERM_NONE;
 
+  /** @var int */
+  private $LoginFlag = 0;
 
-  public function __construct($name, $title, $dependency = array())
+  /** @var int */
+  private $PluginLevel = 10;
+  /** @var array */
+  private $dependencies = array();
+  private $InitOrder = 0;
+
+  private $MenuList = NULL;
+  private $MenuOrder = 0;
+  private $MenuTarget = NULL;
+
+  protected $vars = array();
+
+  private $requiresLogin = false;
+
+  public function __construct($name, $parameters = array())
   {
     if ($name === null || $name === "")
     {
-      throw new \Exception("plugin requires a name");
+      throw new \InvalidArgumentException("plugin requires a name");
     }
     $this->name = $name;
-    $this->title = $title;
-    $this->dependency = $dependency;
-    $this->state = self::PLUGIN_STATE_VALID;
+    $this->setParameters($parameters);
 
     $this->register();
 
     global $container;
     $this->container = $container;
     $this->renderer = $this->container->get('twig.environment');
+  }
 
-    $this->state = self::PLUGIN_STATE_READY;
+  private function setParameters($parameters)
+  {
+    foreach ($parameters as $key => $value)
+    {
+      switch ($key)
+      {
+        case self::TITLE:
+          $this->title = $value;
+          break;
+
+        case self::PERMISSION:
+          $this->DBaccess = $value;
+          break;
+
+        case self::REQUIRES_LOGIN:
+          $this->LoginFlag = $value ? 1 : 0;
+          break;
+
+        case self::LEVEL:
+          $this->PluginLevel = $value;
+          break;
+
+        case self::DEPENDENCIES:
+          $this->dependencies = $value;
+          break;
+
+        case self::INIT_ORDER:
+          $this->InitOrder = $value;
+          break;
+
+        case self::MENU_LIST:
+          $this->MenuList = $value;
+          break;
+
+        case self::MENU_ORDER:
+          $this->MenuOrder = $value;
+          break;
+
+        case self::MENU_TARGET:
+          $this->MenuTarget = $value;
+          break;
+
+        default:
+          throw new \Exception("unhandled parameter $key in module " . $this->name);
+      }
+    }
   }
 
   /**
@@ -87,6 +162,14 @@ abstract class DefaultPlugin implements Plugin
   public function getName()
   {
     return $this->name;
+  }
+
+  /**
+   * @return string
+   */
+  public function getVersion()
+  {
+    return $this->version;
   }
 
   /**
@@ -102,14 +185,37 @@ abstract class DefaultPlugin implements Plugin
    */
   public function getDependency()
   {
-    return $this->dependency;
+    return $this->dependencies;
   }
 
+  /**
+   * @return int
+   */
+  public function getPluginLevel()
+  {
+    return $this->PluginLevel;
+  }
+
+  /**
+   * @return int
+   */
+  public function getDBaccess()
+  {
+    return $this->DBaccess;
+  }
+
+  /**
+   * @return int
+   */
   public function getState()
   {
-    return $this->state;
+    return PLUGIN_STATE_READY;
   }
 
+  public function getNoMenu()
+  {
+    return 0;
+  }
 
   private function register()
   {
@@ -125,7 +231,7 @@ abstract class DefaultPlugin implements Plugin
   {
     $request = Request::createFromGlobals();
 
-    return $this->handleRequest($request);
+    return $this->handle($request);
   }
 
   /**
@@ -141,7 +247,7 @@ abstract class DefaultPlugin implements Plugin
    * @param Request $request
    * @return Response
    */
-  protected abstract function handleRequest(Request $request);
+  protected abstract function handle(Request $request);
 
   /**
    * @param string $templateName
@@ -151,6 +257,8 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function render($templateName, $vars, $headers = array())
   {
+    $vars = array_merge($this->vars, $vars);
+
     $headers = array_merge($this->defaultHeaders, $headers);
 
     return new Response(
@@ -160,15 +268,68 @@ abstract class DefaultPlugin implements Plugin
     );
   }
 
-  public function initialize()
+  public function postInstall()
   {
   }
 
-  public function PostInitialize()
+  public function preInstall()
   {
+    if (empty($_SESSION['User']) && $this->requiresLogin)
+    {
+      return 0;
+    }
+
+    // Make sure dependencies are met
+    foreach ($this->dependencies as $dependency)
+    {
+      $id = plugin_find_id($dependency);
+      if ($id < 0)
+      {
+        $this->unInstall();
+        throw new \Exception("unsatisfied dependency '$dependency' in module '" . $this->getName() . "'");
+      }
+    }
+
+    global $Plugins;
+    $menu = ($this->name != "menus") ? $Plugins[plugin_find_id("menus")] : null;
+
+    $metadata = "<meta name='description' content='The study of Open Source'>\n";
+    $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
+
+    $this->vars['metadata'] = $metadata;
+
+    if (!empty($this->title))
+    {
+      $this->vars[self::TITLE] = htmlentities($this->title);
+    }
+
+    $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
+    $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
+    $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
+
+    if (!empty($menu))
+    {
+      $styles .= $menu->OutputCSS();
+    }
+
+    $this->vars['styles'] = $styles;
+
+    if (!empty($menu))
+    {
+      $this->vars['menu'] = $menu->Output($this->title);
+    }
+
+    global $SysConf;
+    $this->vars['versionInfo'] = array(
+        'version' => $SysConf['BUILD']['VERSION'],
+        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
+        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
+        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+    );
   }
 
-  public function RegisterMenus()
+  public function unInstall()
   {
   }
 
@@ -180,7 +341,8 @@ abstract class DefaultPlugin implements Plugin
   }
 
   /**
-   * @param string name
+   * @param string $name
+   * @throws \Exception
    * @return string|null
    */
   public function __get($name)
@@ -188,7 +350,10 @@ abstract class DefaultPlugin implements Plugin
     if (method_exists($this, ($method = 'get' . ucwords($name))))
     {
       return $this->$method();
-    } else return null;
+    } else {
+      throw new \Exception("property '$name' not found in module " . $this->name);
+    }
   }
+
 
 }
