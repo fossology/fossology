@@ -34,8 +34,6 @@ class LicenseDao extends Object
   private $dbManager;
   /** @var Logger */
   private $logger;
-  private $licenseView;
-  
 
 
   function __construct(DbManager $dbManager)
@@ -65,9 +63,9 @@ class LicenseDao extends Object
                   AG.agent_pk AS agent_id,
                   AG.agent_rev AS agent_revision,
                   LFR.rf_match_pct AS percent_match
-          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-   FROM license_file
-   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
+          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+               FROM license_file
+               JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
@@ -197,19 +195,18 @@ class LicenseDao extends Object
       $param[] = $itemTreeBounds->getUploadId();
     }
 
-    $sql = "SELECT pfile_ref.pfile_fk as file_id,
+    $sql = "SELECT utree.pfile_fk as file_id,
            rf_shortname as license_shortname,
            rf_pk as license_id,
            agent_name,
            max(agent_pk) as agent_id,
            rf_match_pct as match_percentage
-         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-   FROM license_file
-   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
+         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.rf_match_pct, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+               FROM license_file
+               JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
          INNER JOIN $uploadTreeTableName utree ON pfile_ref.pfile_fk = utree.pfile_fk
          INNER JOIN agent ON agent_fk = agent_pk
          WHERE (lft BETWEEN $1 AND $2) $sql_upload
-           AND pfile_ref.pfile_fk = utree.pfile_fk
            $noLicenseFoundStmt";
 
     if (!empty($selectedAgentId)){
@@ -238,9 +235,10 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-   FROM license_file
-   JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
+         FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+             FROM license_file
+             JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
+         RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
          WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
     if (!empty($agentId))
     {
