@@ -146,7 +146,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
         array(3, 403, 'TextBAZ', true,  101, 301),
         array(4, 403, 'TextBAZ', false, 101, 299),
         array(5, 404, 'TextQUX', true,  101, 299),
-        array(6, 404, 'TextQUX', true,  101, 302),
+        array(6, 401, 'TexxFOO', true,  101, 302),
         array(7, 403, 'TextBAZ', false, 102, 300),
         array(8, 403, 'TextBAZ', true,  102, 306)
     );
@@ -301,7 +301,11 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $bulks = $this->clearingDao->getBulkHistory($treeBounds);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkText = array_map(function($bulk){ return $bulk['text']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($bulkText, arrayContaining('TextFOO', 'TextBAR', 'TextBAZ', 'TextBAZ', 'TextQUX'));
   }
 
  public function testBulkHistoryWithoutMatchesFromDifferentFolder()
@@ -332,11 +336,36 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
     $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
-    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
 
     assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null));
     assertThat($bulkMatched, arrayContaining(true, false, false, true, false));
     assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true));
+    assertThat($bulkTried, arrayContaining(true, true, true, true, true));
+  }
+
+  public function testBulkHistoryWithAMatchReturningAlsoNotTried()
+  {
+    $this->insertBulkEvents();
+
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, false);
+
+    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
+
+    assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null, null));
+    assertThat($bulkMatched, arrayContaining(true, false, false, true, false, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX', 'FOO'));
+    assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
+    assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
 }
