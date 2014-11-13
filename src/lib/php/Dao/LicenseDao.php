@@ -59,11 +59,11 @@ class LicenseDao extends Object
                   LFR.rf_pk AS license_id,
                   LFR.fl_pk AS license_file_id,
                   LFR.pfile_fk as file_id,
+                  LFR.rf_match_pct AS percent_match,
                   AG.agent_name AS agent_name,
                   AG.agent_pk AS agent_id,
-                  AG.agent_rev AS agent_revision,
-                  LFR.rf_match_pct AS percent_match
-          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
+                  AG.agent_rev AS agent_revision
+          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
                FROM license_file
                JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
