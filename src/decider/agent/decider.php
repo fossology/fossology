@@ -25,7 +25,6 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");
-require_once(__DIR__ . "/../../lib/php/bootstrap.php");
 
 class DeciderAgent extends Agent
 {
