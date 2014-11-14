@@ -73,7 +73,7 @@ abstract class DefaultPlugin implements Plugin
   private $permission = self::PERM_NONE;
 
   /** @var int */
-  private $requiresLogin = 0;
+  private $requiresLogin = true;
 
   /** @var int */
   private $PluginLevel = 10;
@@ -174,6 +174,14 @@ abstract class DefaultPlugin implements Plugin
   }
 
   /**
+   * @return int
+   */
+  public function isRequiresLogin()
+  {
+    return $this->requiresLogin;
+  }
+
+  /**
    * @return array
    */
   public function getDependency()
@@ -204,6 +212,15 @@ abstract class DefaultPlugin implements Plugin
   {
     return PLUGIN_STATE_READY;
   }
+
+  /**
+   * @return int
+   */
+  public function getInitOrder()
+  {
+    return $this->InitOrder;
+  }
+
 
   public function getNoMenu()
   {
