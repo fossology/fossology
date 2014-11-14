@@ -42,7 +42,7 @@ function cli_Init()
 
   /* Turn off authentication */
   /** The auth module hijacks and disables plugins, so turn it off. **/
-  $P = &$Plugins[plugin_find_any_id("auth")];
+  $P = &$Plugins["auth"];
   if (!empty($P)) {
     $P->State = PLUGIN_STATE_FAIL;
   }

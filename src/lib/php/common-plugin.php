@@ -192,6 +192,7 @@ function plugin_sort()
  **/
 function plugin_find_id($pluginName)
 {
+  /** TODO: has to be removed */
   /** @var Plugin[] $Plugins */
   global $Plugins;
 
@@ -201,22 +202,6 @@ function plugin_find_id($pluginName)
   }
 
   return -1;
-}
-
-/**
- * \brief Given the official name of a plugin, find the index to it in the
- *        global $Plugins array.
- *
- *        Note that Unlike plugin_find_id(), this ignores plugin state.
- * \param $Name Plugin name
- * \return -1 if it is not found.
- **/
-function plugin_find_any_id($pluginName)
-{
-  /** @var Plugin[] $Plugins */
-  global $Plugins;
-
-  return array_key_exists($pluginName, $Plugins) ? $Plugins[$pluginName] : -1;
 }
 
 /**
