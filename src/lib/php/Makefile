@@ -44,7 +44,7 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/lib/php
 
 clean:
-	rm -f *.o core bootstrap.php
+	rm -f *.o core bootstrap.php services.xml
 
 test:
 	$(MAKE) -C tests test
