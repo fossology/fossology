@@ -143,9 +143,11 @@ if (!empty($Row["job_upload_fk"]))
       return _("Job history record is no longer available"); 
     }
 
+    $uploadtree_tablename = GetUploadtreeTableName($Row['job_upload_fk']);
+    if (NULL == $uploadtree_tablename) strcpy($uploadtree_tablename, "uploadtree");
+
     /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-    $uploadtreeRec = GetSingleRec("uploadtree", 
-                                  "where parent is NULL and upload_fk='$Row[job_upload_fk]'");
+    $uploadtreeRec = GetSingleRec($uploadtree_tablename, "where parent is NULL and upload_fk='$Row[job_upload_fk]'");
     $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
 }
     $V .= "<h3>" . _("Geeky Scan Details") . "</h3>";
@@ -377,7 +379,9 @@ if (!empty($Row["job_upload_fk"]))
           $JobData[$job_pk]["upload"] = $UploadRec;
 
           /* Get Upload record for uploadtree */
-          $UploadtreeRec = GetSingleRec("uploadtree", "where upload_fk='$upload_pk' and parent is null");
+          $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
+          if (NULL == $uploadtree_tablename) strcpy($uploadtree_tablename, "uploadtree");
+          $UploadtreeRec = GetSingleRec($uploadtree_tablename, "where upload_fk='$upload_pk' and parent is null");
           $JobData[$job_pk]["uploadtree"] = $UploadtreeRec;
         }
         else
