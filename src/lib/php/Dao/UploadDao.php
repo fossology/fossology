@@ -79,12 +79,25 @@ class UploadDao extends Object
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ . ".$uploadTreeTableName";
-    $row = $this->dbManager->getSingleRow("SELECT count(*) as count FROM $uploadTreeTableName
+
+    /* Strip out added upload_pk condition if it isn't needed */
+    if (($uploadTreeTableName == "uploadtree_a") OR ($uploadTreeTableName == "uploadtree"))
+    {
+      $row = $this->dbManager->getSingleRow("SELECT count(*) as count FROM $uploadTreeTableName
         WHERE upload_fk = $1
           AND lft BETWEEN $2 AND $3
           AND ((ufile_mode & (3<<28))=0)
           AND pfile_fk != 0",
         array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight()), $stmt);
+    }
+    else
+    {
+      $row = $this->dbManager->getSingleRow("SELECT count(*) as count FROM $uploadTreeTableName
+        WHERE lft BETWEEN $1 AND $2
+          AND ((ufile_mode & (3<<28))=0)
+          AND pfile_fk != 0",
+        array($fileTreeBounds->getLeft(), $fileTreeBounds->getRight()), $stmt);
+    }
     $fileCount = intval($row["count"]);
     return $fileCount;
   }
