@@ -9,16 +9,70 @@ cache:
  - apt
 
 install:
- - sudo apt-get update -qq
- - sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev
+ - sudo apt-get install debhelper libglib2.0-dev libmagic-dev libxml2-dev
         libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
         apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
         postgresql libpq-dev
- - sudo apt-get install -qq cppcheck
 
-script:
- - make
- - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
+env:
+  global:
+    - TEST_NAME=""
 
+matrix:
+  include:
+    - env:
+        - TEST_NAME="make (gcc)"
+      compiler: gcc
+      script:
+       - make
+
+    # TODO fix Makefile to use clang
+    - env:
+        - TEST_NAME="make (clang)"
+      compiler: clang
+      script:
+       - make
+
+    - env:
+        - TEST_NAME="make test (gcc)"
+      compiler: gcc
+      before_script:
+       - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
+       - echo "localhost:*:*:fossologytest:fossologytest" > ~/.pgpass
+       - chmod 0600 ~/.pgpass
+       - cat ~/.pgpass
+      script:
+       - mak
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
+       - cd src && composer install && composer update && cd ..
+       - make install
+       - make test
+
+    # QA jobs for code analytics and metrics
+    # static code analysis with cppcheck (we can add --enable=all later)
+    - env:    TEST_NAME="cppcheck"
+      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
+      before_install: sudo apt-get install cppcheck
+    # search for TODO within source tree
+    - env:    TEST_NAME="TODO"
+      script: grep -r TODO *
+    # search for FIXME within source tree
+    - env:    TEST_NAME="FIXME"
+      script: grep -r FIXME *
+    # search for HACK within source tree
+    - env:    TEST_NAME="HACK"
+      script: grep -r HACK *
+    # some statistics about the code base
+    - env:    TEST_NAME="sloccount"
+      script: sloccount .
+      before_install: sudo apt-get install sloccount
+    # some info about the build machine
+    - env:    TEST_NAME="info"
+      script:
+       - dpkg -l
+       - uname -a
+
+# TODO make it perfect ;-r
