@@ -25,10 +25,8 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\LicenseProcessor;
-use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
 
 define("TITLE_ajaxClearingView", _("Change concluded License "));
@@ -45,8 +43,6 @@ class AjaxClearingView extends FO_Plugin
   private $agentsDao;
   /** @var LicenseProcessor */
   private $licenseProcessor;
-  /** @var LicenseOverviewPrinter */
-  private $licenseOverviewPrinter;
   /** @var Logger */
   private $logger;
   /** @var HighlightDao */
@@ -82,21 +78,9 @@ class AjaxClearingView extends FO_Plugin
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->licenseRenderer = $container->get("view.license_renderer");
 
-    $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
-
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
-  /**
-   * @param $licenseShortName
-   * @return string
-   */
-  protected function getLicenseFullTextLink($licenseShortName)
-  {
-    $uri = Traceback_uri() . '?mod=popup-license&lic=' . $licenseShortName . '&upload=' . $this->uploadId;
-    $licenseShortNameWithLink = "<a title=\"License Reference\" href=\"javascript:;\" onclick=\"javascript:window.open('$uri','License Text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$licenseShortName</a>";
-    return $licenseShortNameWithLink;
-  }
 
   /**
    * @param $orderAscending
@@ -118,9 +102,11 @@ class AjaxClearingView extends FO_Plugin
       $licenseShortName = $licenseRef->getShortName();
 
       if (array_key_exists($licenseShortName, $licenseDecisions))
+      {
         continue;
+      }
 
-      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseShortName);
+      $shortNameWithFullTextLink = $licenseRef->getLicenseTextLink();
       $licenseId = $licenseRef->getId();
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 
@@ -281,9 +267,10 @@ class AjaxClearingView extends FO_Plugin
     $licenseEventTypeMap = $licenseEventTypes->getMap();
     
     $table = array();
+    /** @var ClearingResult $clearingResult */
     foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
-      /** @var ClearingResult $clearingResult */
+
       $licenseId = $clearingResult->getLicenseId();
 
       $types = array();
@@ -299,8 +286,8 @@ class AjaxClearingView extends FO_Plugin
       }
 
       $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
-
-      $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
+      
+      $licenseShortNameWithLink = $clearingResult->getLicenseTextLink();
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
 
       $reportInfoField = $reportInfo;
@@ -320,7 +307,7 @@ class AjaxClearingView extends FO_Plugin
       if ($clearingResult->getAgentDecisionEvents())
       {
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
-        $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
+        $licenseShortNameWithLink = $clearingResult->getLicenseTextLink();
         $licenseId = $clearingResult->getLicenseId();
         $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
 

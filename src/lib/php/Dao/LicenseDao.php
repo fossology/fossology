@@ -301,6 +301,12 @@ class LicenseDao extends Object
     $row = $this->dbManager->getSingleRow(
         "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE rf_pk=$1",
         array($licenseId));
+    if (false===$row)
+    {
+      $licenseViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text', 'rf_url'),
+          'diff'=>TRUE,'extraCondition'=>'lrb_pk=$1 AND group_fk=$2'));
+      $row = $this->dbManager->getSingleRow($licenseViewDao->getDbViewQuery(), array($licenseId,$_SESSION['GroupId']),__METHOD__.'.candidate');
+    }
     if (false === $row)
     {
       return null;
@@ -342,23 +348,17 @@ class LicenseDao extends Object
    * @param string $refText
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText, $newShortname=NULL)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text, lrb_shortname)
-      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING lrb_pk",
-      array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText, $newShortname),
+      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
+      VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
+      array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText),
       __METHOD__.'.getLrb'
     );
 
     if ($licenseRefBulkIdResult === false) {
       return -1;
-    }
-    
-    if(!empty($newShortname))
-    {
-      $this->dbManager->prepare($stmt=__METHOD__.'.updLrb' , 'UPDATE license_ref_bulk SET rf_fk=lrb_pk WHERE lrb_pk=$1');
-      $this->dbManager->execute($stmt,array($licenseRefBulkIdResult['lrb_pk']));
     }
     return $licenseRefBulkIdResult['lrb_pk'];
   }

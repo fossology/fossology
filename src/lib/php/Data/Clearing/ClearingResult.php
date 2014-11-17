@@ -177,4 +177,11 @@ class ClearingResult implements LicenseClearing {
     return $dateTime->getTimestamp();
   }
   
+  /**
+   * @return string
+   */
+  public function getLicenseTextLink()
+  {
+    return $this->clearingEvent->getLicenseTextLink();
+  }
 }
