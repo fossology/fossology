@@ -160,6 +160,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $userId = 2;
     $groupId = 2;
     $uploadTreeId = 1;
+    $uploadId = 1;
 
     $licenseId = 225;
     $removing = "f";
@@ -167,14 +168,14 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $jobId = 64;
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
     $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
     $args = $bulkFlag.$bulkId;
 
-    list($output,$retCode) = $this->runMonk($uploadId=1, $userId, $groupId, $jobId, $args);
+    list($output,$retCode) = $this->runMonk($uploadId, $userId, $groupId, $jobId, $args);
 
     $this->rmRepo();
 
@@ -195,6 +196,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $userId = 2;
     $groupId = 2;
     $uploadTreeId = 1;
+    $uploadId = 1;
 
     $licenseId = 225;
     $removing = "f";
@@ -202,14 +204,14 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $jobId = 64;
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
     $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
     $args = $bulkFlag.$bulkId;
 
-    list($output,$retCode) = $this->runMonk($uploadId=1, $userId, $groupId, $jobId, $args);
+    list($output,$retCode) = $this->runMonk($uploadId, $userId, $groupId, $jobId, $args);
 
     $this->rmRepo();
 

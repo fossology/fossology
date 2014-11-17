@@ -114,3 +114,14 @@
     </div>
   </div>
 {% endif %}
+
+<div class="groupBox" id="bulkHistory" {% if not bulkHistory %}hidden{% endif %}>
+
+<h3>
+{{ 'Bulk History'| trans }}
+</h3>
+
+<div class="scrollable2">
+{% include 'bulk-history.html.twig' %}
+</div>
+</div>
