@@ -91,7 +91,7 @@ class core_init extends FO_Plugin
         /* If you are not logged in, then force a login. */
         if (empty($_SESSION['User']))
         {
-          $P = &$Plugins[plugin_find_id("auth")];
+          $P = &$Plugins["auth"];
           $P->OutputSet($this->OutputType,0);
           $V .= $P->Output();
           $P->OutputUnSet();
@@ -100,7 +100,7 @@ class core_init extends FO_Plugin
         {
           $FailFlag=0;
           $Filename = getcwd() . "/init.ui";
-          $Schema = &$Plugins[plugin_find_any_id("schema")];
+          $Schema = &$Plugins["schema"];
           if (empty($Schema))
           {
             $V .= _("Failed to find schema plugin.\n");

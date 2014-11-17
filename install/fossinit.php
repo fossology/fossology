@@ -478,8 +478,7 @@ function bootstrap($sysconfdir="")
   }
 
   //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/lib/php/Plugin/Plugin.php");
-  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   require_once("$MODDIR/lib/php/common.php");
+  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   return $SysConf;
 }
