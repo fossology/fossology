@@ -571,7 +571,7 @@
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"rf_fk\" IS 'refer to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"rf_fk\" int4;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
@@ -1112,7 +1112,7 @@
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref';";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)';";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_fk\" int8;";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["UPDATE"] = "";
@@ -1132,10 +1132,6 @@
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_shortname"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_shortname\" IS 'shortname if candidate for license_ref';";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_shortname"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_shortname\" text;";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_shortname"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_shortname\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_shortname"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["license_test"]["lt_pk"]["DESC"] = "";
@@ -2034,7 +2030,6 @@
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE \"key_key_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\" START 1947;";
   $Schema["SEQUENCE"]["license_test_agent_fk_seq"] = "CREATE SEQUENCE \"license_test_agent_fk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_lt_pk_seq"] = "CREATE SEQUENCE \"license_test_lt_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_pfile_fk_seq"] = "CREATE SEQUENCE \"license_test_pfile_fk_seq\" START 1;";
@@ -2168,7 +2163,6 @@
   $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_licenses_rf_fk_fkey"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_licenses_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -2304,7 +2298,7 @@
   $Schema["TABLE"]["clearing_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_event"]["uploadtree_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_event"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_event"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"rf_fk\" IS 'refer to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"rf_fk\" int4;";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["UPDATE"] = "";
