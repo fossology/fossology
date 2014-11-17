@@ -29,7 +29,10 @@ class DecisionScopes extends Types
   {
     parent::__construct("decision scope");
 
-    $this->map = array(self::ITEM => "local", self::REPO => "global");
+    $this->map = array(
+        self::ITEM => "local",
+        self::PACKAGE => "package",
+        self::REPO => "global");
   }
 
 }

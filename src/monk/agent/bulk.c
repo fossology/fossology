@@ -20,15 +20,29 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 
 int setLeftAndRight(MonkState* state) {
+  char* tableName = getUploadTreeTableName(state->dbManager, state->bulkArguments->uploadId);
+
+  if (!tableName)
+    return 0;
+
+  char* sql = g_strdup_printf( "SELECT lft, rgt FROM %s WHERE uploadtree_pk = $1", tableName);
+  char* stmt = g_strdup_printf("setLeftAndRight.%s", tableName);
+
+  if ((!sql) || (!stmt))
+    return 0;
+
   PGresult* leftAndRightResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       state->dbManager,
-      "setLeftAndRight",
-      "SELECT lft, rgt FROM uploadtree WHERE uploadtree_pk = $1",
+      stmt,
+      sql,
       long
     ),
     state->bulkArguments->uploadTreeId
   );
+
+  g_free(stmt);
+  g_free(sql);
 
   int result = 0;
 
@@ -60,9 +74,9 @@ int queryBulkArguments(long bulkId, MonkState* state) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "queryBulkArguments",
-      "SELECT upload_fk, uploadtree_pk, user_fk, group_fk, rf_fk, rf_text, removing "
-      "FROM license_ref_bulk INNER JOIN uploadtree "
-      "ON uploadtree.uploadtree_pk = license_ref_bulk.uploadtree_fk "
+      "SELECT lrb.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_fk, lrb.rf_text, lrb.removing "
+      "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
+      "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",
       long
     ),
@@ -87,10 +101,13 @@ int queryBulkArguments(long bulkId, MonkState* state) {
       state->bulkArguments = bulkArguments;
 
       if ((!setLeftAndRight(state)) || (!queryDecisionType(state))) {
+        printf("FATAL: could not retrieve left and right for bulk id=%ld\n", bulkId);
         bulkArguments_contents_free(state->bulkArguments);
       } else {
         result = 1;
       }
+    } else {
+      printf("FATAL: could not retrieve arguments for bulk scan with id=%ld\n", bulkId);
     }
     PQclear(bulkArgumentsResult);
   }
@@ -138,11 +155,17 @@ int bulk_identification(MonkState* state) {
         #pragma omp for schedule(dynamic)
 #endif
         for (int i = 0; i<resultsCount; i++) {
+          if (haveError)
+            continue;
+
           long fileId = atol(PQgetvalue(filesResult, i, 0));
 
-          // this will call onFullMatch_Bulk if it finds matches
-          matchPFileWithLicenses(threadLocalState, fileId, licenses);
-          fo_scheduler_heart(1);
+          if (matchPFileWithLicenses(threadLocalState, fileId, licenses)) {
+            fo_scheduler_heart(1);
+          } else {
+            fo_scheduler_heart(0);
+            haveError = 1;
+          }
         }
         fo_dbManager_finish(threadLocalState->dbManager);
       } else {
@@ -175,14 +198,24 @@ int handleBulkMode(MonkState* state, long bulkId) {
   }
 }
 
-void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
-  if (matches->len == 0)
-    return;
+int processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
+  int haveAFullMatch = 0;
+  for (guint j=0; j<matches->len; j++) {
+    Match* match = match_array_get(matches, j);
+
+    if (match->type == MATCH_TYPE_FULL) {
+      haveAFullMatch = 1;
+      break;
+    }
+  }
+
+  if (!haveAFullMatch)
+    return 1;
 
   long licenseId = state->bulkArguments->licenseId;
 
   if (!fo_dbManager_begin(state->dbManager))
-    return;
+    return 0;
 
   PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
@@ -239,15 +272,15 @@ void processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
           PQclear(highlightResult);
         } else {
           fo_dbManager_rollback(state->dbManager);
-          return;
+          return 0;
         }
       }
     }
     PQclear(licenseDecisionIds);
   } else {
     fo_dbManager_rollback(state->dbManager);
-    return;
+    return 0;
   }
 
-  fo_dbManager_commit(state->dbManager);
+  return fo_dbManager_commit(state->dbManager);
 }

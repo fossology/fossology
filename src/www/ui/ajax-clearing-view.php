@@ -27,8 +27,6 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
-use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
 
 define("TITLE_ajaxClearingView", _("Change concluded License "));
@@ -43,8 +41,6 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -55,8 +51,6 @@ class AjaxClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
-
-  /** @var LicenseRenderer */
 
   function __construct()
   {
@@ -75,12 +69,10 @@ class AjaxClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
 
@@ -123,7 +115,7 @@ class AjaxClearingView extends FO_Plugin
 
       $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseShortName);
       $licenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -301,7 +293,7 @@ class AjaxClearingView extends FO_Plugin
       $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
 
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
-      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
 
       $reportInfoField = $reportInfo;
       $commentField = $comment;
@@ -322,7 +314,7 @@ class AjaxClearingView extends FO_Plugin
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
         $licenseId = $clearingResult->getLicenseId();
-        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);

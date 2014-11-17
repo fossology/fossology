@@ -3,6 +3,9 @@
 {% block content %}
   {% include 'change_license_modal.html.twig' %}
   {% include 'ui-clearing-view_bulk.html.twig' %}
+  <div class="modal" id="bulkHistoryModal" hidden>
+  {% include 'bulk-history.html.twig' %}
+  </div>
   {{ parent() }}
 {% endblock %}
 
@@ -14,4 +17,8 @@
   <script src='scripts/change-license-common.js' type='text/javascript'></script>
   <script src='scripts/change-license-browse.js' type='text/javascript'></script>
   <script src='scripts/license.js' type='text/javascript'></script>
+  <script type='text/javascript'>
+    {% set bulkHistoryOptions = '&all=1' %}
+    {% include 'bulk-history.js.twig' %}
+  </script>
 {% endblock %}

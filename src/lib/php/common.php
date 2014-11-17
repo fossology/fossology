@@ -23,10 +23,12 @@
 
 // setup autoloading
 require_once(dirname(dirname(dirname(__FILE__))) . "/vendor/autoload.php");
+
+require_once("common-sysconfig.php");
+
 // setup dependency injection
 require_once("common-container.php");
 
-require_once("common-sysconfig.php");
 require_once("common-scheduler.php");
 require_once("common-menu.php");
 require_once("common-plugin.php");
@@ -35,7 +37,6 @@ require_once("common-dir.php");
 require_once("common-parm.php");
 require_once("common-repo.php");
 require_once("common-license-file.php");
-require_once("common-copyright-file.php");
 require_once("common-job.php");
 require_once("common-agents.php");
 require_once("common-active.php");

@@ -38,6 +38,12 @@ function closeBulkModal() {
   bulkModal.plainModal('close');
 }
 
+function loadBulkHistoryModal() {
+  refreshBulkHistory(function(data) {
+    $('#bulkHistoryModal').plainModal('open');
+  });
+}
+
 function openUserModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
   userModal.plainModal('open');

@@ -16,7 +16,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$loader = new Twig_Loader_Filesystem('/path/to/templates');
-$twig = new Twig_Environment($loader, array(
-    'cache' => '/path/to/compilation_cache',
-));
+namespace Fossology\Lib\Data;
+
+
+use Fossology\Lib\Test\EnumMapTestBase;
+
+class DecisionTypesTest extends EnumMapTestBase {
+  public function setUp() {
+    $this->setTypes(new DecisionTypes());
+  }
+
+  public function testTypeToBeDiscussed()
+  {
+    $this->checkMapping(DecisionTypes::TO_BE_DISCUSSED, "To be discussed");
+  }
+
+  public function testTypeIrrelevant()
+  {
+    $this->checkMapping(DecisionTypes::IRRELEVANT, "Irrelevant");
+  }
+
+  public function testTypeIdentified()
+  {
+    $this->checkMapping(DecisionTypes::IDENTIFIED, "Identified");
+  }
+}
+ 

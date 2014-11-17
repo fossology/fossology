@@ -764,11 +764,6 @@
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"lrb_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"pfile_fk\" int8;";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["UPDATE"] = "";
-
   $Schema["TABLE"]["highlight_bulk"]["start"]["DESC"] = "";
   $Schema["TABLE"]["highlight_bulk"]["start"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"start\" int8;";
   $Schema["TABLE"]["highlight_bulk"]["start"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"start\" DROP NOT NULL;";
@@ -1157,6 +1152,11 @@
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"removing\" bool;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"removing\" SET NOT NULL, ALTER COLUMN \"removing\" SET DEFAULT false;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"upload_fk\" IS 'upload id';";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"upload_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"uploadtree_fk\" IS 'file from which the decision was made';";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"uploadtree_fk\" int8;";
@@ -2258,6 +2258,11 @@
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 
   $Schema["INDEX"]["bucket_file"]["pfile_idx"] = "CREATE INDEX pfile_idx ON bucket_file USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_fk_idx ON clearing_event USING btree (uploadtree_fk);";
+
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_pfile_fk_scope_idx"] = "CREATE INDEX clearing_decision_pfile_fk_scope_idx ON clearing_decision USING btree (pfile_fk, scope);";
 
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";

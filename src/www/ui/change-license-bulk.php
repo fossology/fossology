@@ -87,14 +87,9 @@ class changeLicenseBulk extends FO_Plugin
         }
       }
 
-      $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-        VALUES($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-        array($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
-      );
+      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
 
-      if ($licenseRefBulkIdResult !== false) {
-        $bulkId = $licenseRefBulkIdResult['lrb_pk'];
+      if ($bulkId > 0) {
         $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
         /** @var agent_fodecider $deciderPlugin */

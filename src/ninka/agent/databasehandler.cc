@@ -11,7 +11,10 @@
 #include "databasehandler.hpp"
 #include "libfossUtils.hpp"
 
+#include <iostream>
+
 using namespace fo;
+using namespace std;
 
 NinkaDatabaseHandler::NinkaDatabaseHandler(DbManager dbManager) :
   fo::AgentDatabaseHandler(dbManager)
@@ -42,12 +45,15 @@ bool NinkaDatabaseHandler::saveLicenseMatch(int agentId, long pFileId, long lice
 
 unsigned long NinkaDatabaseHandler::selectOrInsertLicenseIdForName(string rfShortName)
 {
-  bool committed = false;
+  bool success = false;
+  unsigned long result = 0;
 
   unsigned count = 0;
-  while ((!committed) && count++<3)
+  while ((!success) && count++<3)
   {
-    dbManager.begin();
+    if (!dbManager.begin())
+      continue;
+
     dbManager.queryPrintf("LOCK TABLE license_ref");
 
     QueryResult queryResult = dbManager.execPrepared(
@@ -76,14 +82,20 @@ unsigned long NinkaDatabaseHandler::selectOrInsertLicenseIdForName(string rfShor
       3
     );
 
-    committed = dbManager.commit();
+    success = queryResult && queryResult.getRowCount() > 0;
 
-    if (committed && queryResult && queryResult.getRowCount() > 0) {
-      return queryResult.getSimpleResults(0, fo::stringToUnsignedLong)[0];
+    if (success) {
+      success &= dbManager.commit();
+
+      if (success) {
+        result = queryResult.getSimpleResults(0, fo::stringToUnsignedLong)[0];
+      }
+    } else {
+      dbManager.rollback();
     }
   }
 
-  return 0;
+  return result;
 }
 
 NinkaDatabaseHandler NinkaDatabaseHandler::spawn() const

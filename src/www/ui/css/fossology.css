@@ -211,6 +211,14 @@ table.dataTable tr.even.removed {
     background-color: #ffc9c9;
 }
 
+table.dataTable tr.odd.match {
+    background-color: #cea15f;
+}
+
+table.dataTable tr.even.match {
+    background-color: #efbe76;
+}
+
 .inactiveClearing
     {
       background-color: #bebebe;
@@ -282,4 +290,30 @@ table.dataTable tr.even.removed {
 
 .selectedRow {
     font-weight: bold;
+}
+
+div.delete, div.deleted, div.add, div.added {
+    background-size: 100% 100%;
+    height: 16px;
+    width: 16px;
+    margin: 0 auto;
+}
+
+div.add {
+    background-image: url('../images/icons/add_16.png');
+}
+
+div.added {
+    background-image: url('../images/icons/added_16.png');
+}
+
+div.delete {
+    background-image: url('../images/icons/close_16.png');
+}
+div.deleted {
+    background-image: url('../images/icons/closed_16.png');
+}
+
+.inactive {
+    color: gray;
 }
