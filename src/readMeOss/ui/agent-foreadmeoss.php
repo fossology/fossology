@@ -18,25 +18,23 @@
  ***********************************************************/
 
 /**
- * \file agent-fodecider.php
+ * \file agent-foreadmeoss.php
  * \brief run the decider license agent
  */
 
-define("TITLE_agent_fodecider", _("Automatic User License Decider"));
+define("TITLE_agent_foreadmeoss", _("ReadME_OSS generation"));
 
-class agent_fodecider extends FO_Plugin
+class agent_foreadmeoss extends FO_Plugin
 {
   public $AgentName;
 
-  const CONFLICT_STRATEGY_FLAG = "-k";
-
   function __construct() {
-    $this->Name = "agent_decider";
-    $this->Title = TITLE_agent_fodecider;
+    $this->Name = "agent_foreadmeoss";
+    $this->Title = TITLE_agent_foreadmeoss;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "decider";
+    $this->AgentName = "readmeOssAgent";
 
     parent::__construct();
   }
@@ -46,7 +44,12 @@ class agent_fodecider extends FO_Plugin
    */
   function RegisterMenus()
   {
-    return 0;
+    if ($this->State != PLUGIN_STATE_READY) return (0);
+    //do not advertise this agent: it can be scheduled only from directly
+    //menu_insert("Agents::" . $this->Title, 0, $this->Name);
+
+    $text = _("Generate Read me OSS Report");
+    menu_insert("Browse-Pfile::Generate  Read me OSS  Report", 0, $this->Name, $text);
   }
 
   /**
@@ -70,13 +73,13 @@ class agent_fodecider extends FO_Plugin
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * @param int $job_pk
-   * @param int $upload_pk
-   * @param &string $ErrorMsg - error message on failure
-   * @param array $Dependencies - array of plugin names representing dependencies.
+   * \param $job_pk
+   * \param $upload_pk
+   * \param $ErrorMsg - error message on failure
+   * \param $Dependencies - array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
-   * @param int|null $conflictStrategyId
-   * @returns
+   *
+   * \returns
    * - jq_pk Successfully queued
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
@@ -84,15 +87,9 @@ class agent_fodecider extends FO_Plugin
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
   {
     $Dependencies[] = "agent_adj2nest";
-    if ($conflictStrategyId !== null)
-    {
-      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
-    } else
-    {
-      $args = "";
-    }
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
+
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 }
 
-$NewPlugin = new agent_fodecider();
+$NewPlugin = new agent_foreadmeoss();

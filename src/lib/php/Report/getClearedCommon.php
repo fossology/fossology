@@ -19,9 +19,6 @@
 
 namespace Fossology\Reportgen;
 
-require_once("$MODDIR/lib/php/common-cli.php");
-cli_Init();
-
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 

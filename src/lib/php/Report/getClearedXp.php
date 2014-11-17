@@ -22,8 +22,8 @@ namespace Fossology\Reportgen;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Dao\CopyrightDao;
 
-require_once ("getClearedCommon.php");
 
+require_once("getClearedCommon.php");
 class XpClearedGetter extends ClearedGetterCommon
 {
   /** @var CopyrightDao */
