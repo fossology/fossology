@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2014 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -140,7 +141,6 @@ class UploadFilePage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $vars = array();
-
     $description = null;
 
     if ($request->isMethod('POST'))
@@ -152,12 +152,8 @@ class UploadFilePage extends DefaultPlugin
 
       if ($uploadFile !== null && !empty($folderId))
       {
-        list($successful, $message) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
-        if ($successful)
-        {
-          $description = NULL;
-        }
-        $vars['message'] = $message;
+        list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
+        $description = $successful ? null : $description;
       } else
       {
         $vars['message'] = "Error: no file selected";
