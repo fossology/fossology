@@ -139,13 +139,13 @@ abstract class ClearedGetterCommon
    * @param null|int $userId
    * @return array
    */
-  abstract protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null);
+  abstract protected function getStatements($uploadId, $uploadTreeTableName, $userId=null);
 
   public function getCleared($uploadId, $userId=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadTreeTableName($uploadId);
 
-    $ungrupedStatements = $this->getDecisions($uploadId, $uploadTreeTableName, $userId);
+    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId);
 
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName);
 

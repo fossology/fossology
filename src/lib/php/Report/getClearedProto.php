@@ -45,7 +45,7 @@ class LicenseClearedGetterProto extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
