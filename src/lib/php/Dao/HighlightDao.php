@@ -65,7 +65,7 @@ class HighlightDao extends Object
    * @param null $highlightId
    * @return array
    */
-  private function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
+  public function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
     $params =array($itemTreeBounds->getItemId());
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
@@ -120,7 +120,7 @@ class HighlightDao extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  private function getHighlightKeywords(ItemTreeBounds $itemTreeBounds)
+  public function getHighlightKeywords(ItemTreeBounds $itemTreeBounds)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__.$uploadTreeTableName;
@@ -145,10 +145,10 @@ class HighlightDao extends Object
    * @param int|null $clearingId
    * @return array
    */
-  private function getHighlightBulk($uploadTreeId, $clearingId)
+  public function getHighlightBulk($uploadTreeId, $clearingId = null)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT h.clearing_event_fk, h.start, h.len, ce.rf_fk
+    $sql = "SELECT h.clearing_event_fk, h.start, h.len, ce.rf_fk, rf_text
              FROM highlight_bulk h
              INNER JOIN license_ref_bulk lrb ON lrb.lrb_pk = h.lrb_fk
              INNER JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
@@ -169,6 +169,7 @@ class HighlightDao extends Object
           intval($row['start']), intval($row['start'] + $row['len']),
           Highlight::BULK, 0, 0);
       $newHighlight->setLicenseId($row['rf_fk']);
+      $newHighlight->setInfoText($row['rf_text']);
       $highlightEntries[] = $newHighlight;
     }
     $this->dbManager->freeResult($result);

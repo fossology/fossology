@@ -33,11 +33,16 @@ class AgentAndBulkMatchesGetter extends ClearedGetterCommon
   /** @var LicenseDao */
   private $licenseDao;
 
+  //TODO remove
+  /** @var DbManager */
+  private $dbManager;
+
   public function __construct() {
     global $container;
 
     $this->highlightDao = $container->get('dao.highlight');
     $this->licenseDao = $container->get('dao.license');
+    $this->dbManager = $container->get('db.manager');
 
     parent::__construct();
   }
@@ -46,19 +51,34 @@ class AgentAndBulkMatchesGetter extends ClearedGetterCommon
   {
     $result = array();
 
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    foreach($this->highlightDao->getHighlightEntries($itemTreeBounds) as $highlightEntry) {
-      $type = $highlightEntry->getType();
-      /** @var License $license */
-      $license = $this->licenseDao->getLicenseById($highlightEntry->getLicenseId());
-      if ($type === Highlight::MATCH)
-      {
-        $result[] = array(
-          'content' => $license->getShortName(),
-          'textfinding' => $highlightEntry->getStart() ."-". $highlightEntry->getEnd()
-        );
+    $stmt = __METHOD__.".".$uploadTreeTableName;
+    $this->dbManager->prepare($stmt, "SELECT uploadtree_pk FROM $uploadTreeTableName WHERE upload_fk = $1");
+    $res = $this->dbManager->execute($stmt, array($uploadId));
+
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $uploadTreeId = $row['uploadtree_pk'];
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+      foreach($this->highlightDao->getHighlightBulk($uploadTreeId) as $highlightEntry) {
+        $type = $highlightEntry->getType();
+        /** @var License $license */
+        $license = $this->licenseDao->getLicenseById($highlightEntry->getLicenseId());
+//        if ($type === Highlight::MATCH)
+        //{
+          //$content = $highlightEntry->getStart() ."-". $highlightEntry->getEnd();
+
+          $content = $highlightEntry->getInfoText();
+          $result[] = array(
+            'content' => $content,
+            'textfinding' => $license->getShortName(),
+            'description' => $content,
+            'uploadtree_pk' => $uploadTreeId
+          );
+        //}
       }
     }
+    $this->dbManager->freeResult($res);
+
+    return $result;
   }
 }
 
