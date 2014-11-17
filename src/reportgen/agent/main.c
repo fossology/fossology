@@ -491,6 +491,20 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
   return result;
 }
 
+void fillTableFromJson(rg_table* table, const char* json)
+{
+  json_object* jobj = json_tokener_parse(json);
+
+  if (!addRowsFromJson_ContentTextFiles(table, jobj, "statements"))
+  {
+    printf("cannot parse json string: %s\n", json);
+    fo_scheduler_disconnect(1);
+    exit(1);
+  }
+
+  json_object_put(jobj);
+}
+
 int main(int argc, char** argv)
 {  
 FILE *fp1;
@@ -842,39 +856,30 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
-  char* jsonLicenses = getClearedLicenses(uploadId);
-  json_object * jobj = json_tokener_parse(jsonLicenses);
-
-  if (!addRowsFromJson_ContentTextFiles(tableOthers, jobj, "statements")) // TODO change
-  {
-    printf("cannot parse json string: %s\n", jsonLicenses);
-    fo_scheduler_disconnect(1);
-    exit(1);
-  }
-
-  json_object_put(jobj);
-  g_free(jsonLicenses);
+  char* json = getClearedLicenses(uploadId, user_pk);
+  fillTableFromJson(tableOthers, json);
+  g_free(json);
 }
 
 // endrow
-
 addparaheading(createnumsection(body,"0","2"), NULL, "Copyrights","0","2");
 
 rg_table* tableCopyright = table_new(body, 3, "2638", "5000", "2000");
 table_addRow(tableCopyright, "copyright", "text", "files");
 {
-  char* jsonCopyright = getClearedCopyright(uploadId);
-  json_object * jobj = json_tokener_parse(jsonCopyright);
+  char* json = getClearedCopyright(uploadId);
+  fillTableFromJson(tableCopyright, json);
+  g_free(json);
+}
 
-  if (!addRowsFromJson_ContentTextFiles(tableCopyright, jobj, "statements"))
-  {
-    printf("cannot parse json string: %s\n", jsonCopyright);
-    fo_scheduler_disconnect(1);
-    exit(1);
-  }
+addparaheading(createnumsection(body,"0","2"), NULL, "Matches","0","2");
 
-  json_object_put(jobj);
-  g_free(jsonCopyright);
+rg_table* tableMatches = table_new(body, 3, "2638", "5000", "2000");
+table_addRow(tableMatches, "license", "text", "files");
+{
+  char* json = getMatches(uploadId, user_pk);
+  fillTableFromJson(tableMatches, json);
+  g_free(json);
 }
 
 addparaheading(createnumsection(body,"0","2"),NULL, "Special considerations","0","2");
@@ -1164,6 +1169,7 @@ for (uloop2=0;uloop2<3;uloop2++)
 table_free(tableOthers);
 table_free(tableCopyright);
 table_free(tableSecurity);
+table_free(tableMatches);
 
 /*free timestampstring*/
 if(formattedtime)

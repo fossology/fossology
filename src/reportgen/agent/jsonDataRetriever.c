@@ -26,6 +26,7 @@
 #error
 #endif
 
+#define GETMATCHESANDBULKCMD   INSTALLDIR "/getMatches -u %d --uId=%d"
 #define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d --uId=%d"
 #define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
 #define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
@@ -75,4 +76,9 @@ char* getClearedIp(int uploadId)
 char* getClearedEcc(int uploadId)
 {
   return pipeRun(GETCLEAREDECC, uploadId);
+}
+
+char* getMatches(int uploadId,int userId)
+{
+  return pipeRun(GETMATCHESANDBULKCMD, uploadId, userId);
 }
