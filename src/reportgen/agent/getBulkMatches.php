@@ -20,12 +20,12 @@
 
 namespace Fossology\Reportgen;
 require_once("$MODDIR/lib/php/common-cli.php");
-require_once("$MODDIR/lib/php/Report/getAgentAndBulkMatches.php");
+require_once("$MODDIR/lib/php/Report/getBulkMatches.php");
 cli_Init();
 
 use Fossology\Lib\Data\License;
 
-$clearedGetter = new AgentAndBulkMatchesGetter();
+$clearedGetter = new BulkMatchesGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
 $userId = $clearedGetter->getUserId();

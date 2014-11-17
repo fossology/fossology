@@ -32,15 +32,15 @@ abstract class ClearedGetterCommon
 
   private $userId;
   private $uploadId;
+  private $groupBy;
 
- // private $tableName = "copyright";
-  //private $type = null;
-
-  public function __construct() {
+  public function __construct($groupBy = "content") {
     global $container;
 
     $this->uploadDao = $container->get('dao.upload');
     $this->treeDao = $container->get('dao.tree');
+
+    $this->groupBy = $groupBy;
   }
 
   public function getCliArgs()
@@ -56,7 +56,7 @@ abstract class ClearedGetterCommon
     {
       print "missing optional parameter --uId {userId}\n";
     }
-    
+
     $this->uploadId = intval($args['u']);
     $this->userId = intval(@$args['uId']);
   }
@@ -90,8 +90,7 @@ abstract class ClearedGetterCommon
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
-      $filePathRow = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);
-      $fileName = $filePathRow['file_path'];
+      $fileName = $this->treeDao->getShortPath($uploadTreeId, $uploadTreeTableName);
 
       $statement['fileName'] = $fileName;
     }
@@ -103,6 +102,8 @@ abstract class ClearedGetterCommon
     $statements = array();
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
+
+      /* TODO make the subclasses do this logic */
       $description = $statement['description'];
       $textfinding = $statement['textfinding'];
       $fileName = $statement['fileName'];
@@ -113,16 +114,19 @@ abstract class ClearedGetterCommon
         $content = $textfinding;
         $text = $description;
       }
+      // TODO
 
-      if (array_key_exists($content, $statements))
+      $groupBy = $statement[$this->groupBy];
+
+      if (array_key_exists($groupBy, $statements))
       {
-        $currentFiles = &$statements[$content]['files'];
+        $currentFiles = &$statements[$groupBy]['files'];
         if (!in_array($fileName, $currentFiles))
           $currentFiles[] = $fileName;
       }
       else
       {
-        $statements[$content] = array(
+        $statements[$groupBy] = array(
           "content" => $content,
           "text" => $text,
           "files" => array($fileName)

@@ -92,7 +92,7 @@ class TreeDao extends Object
   {
     $statementName = __METHOD__.$tableName;
 
-    return $this->dbManager->getSingleRow(
+    $row = $this->dbManager->getSingleRow(
         "
         WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, file_path, cycle) AS (
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
@@ -111,5 +111,44 @@ class TreeDao extends Object
         )
         SELECT file_path from file_tree WHERE parent IS NULL",
         array($itemId), $statementName);
+
+    return $row['file_path'];
+  }
+
+  public function getShortPath($itemId, $tableName)
+  {
+    $statementName = __METHOD__.$tableName;
+
+    $row = $this->dbManager->getSingleRow(
+        "
+        WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, file_path, cycle) AS (
+          SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
+            ARRAY[ut.uploadtree_pk],
+            CASE WHEN (ut.ufile_mode & (1<<29) = 0) THEN ut.ufile_name ELSE ut.ufile_name || '/' END,
+            false
+          FROM $tableName ut
+          WHERE ut.uploadtree_pk = $1
+        UNION ALL
+          SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
+            path || ut.uploadtree_pk,
+            CASE WHEN (ut.ufile_mode & (1<<28) = 0)
+            THEN
+              CASE WHEN EXISTS (SELECT * FROM $tableName ut2 WHERE (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt)) AND (ut2.ufile_mode & (3<<28) = 0))
+              THEN
+                ut.ufile_name || '/' || file_path
+              ELSE
+                file_path
+              END
+            ELSE
+              file_path
+            END,
+            ut.uploadtree_pk = ANY(path)
+          FROM $tableName ut, file_tree ft
+          WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
+        )
+        SELECT file_path from file_tree WHERE parent IS NULL",
+        array($itemId), $statementName);
+
+     return $row['file_path'];
   }
 }

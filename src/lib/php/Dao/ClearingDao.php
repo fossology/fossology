@@ -67,12 +67,14 @@ class ClearingDao extends Object
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
+    $joinType = $itemTreeBounds->containsFiles() ? "INNER" : "LEFT";
+
     $sql_upload="";
     if ('uploadtree_a' == $uploadTreeTable) {
       $sql_upload = "ut.upload_fk=$1  and ";
     }
 
-    $statementName = __METHOD__.$uploadTreeTable;
+    $statementName = __METHOD__.".".$uploadTreeTable.".".$joinType;
 
     $sql="SELECT
            CD.clearing_decision_pk AS id,
@@ -93,8 +95,8 @@ class ClearingDao extends Object
            LEFT JOIN users ON CD.user_fk=users.user_pk
            INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
            INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
-           INNER JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
-           INNER JOIN license_ref LR on CL.rf_fk=LR.rf_pk
+           $joinType JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
+           $joinType JOIN license_ref LR on CL.rf_fk=LR.rf_pk
          WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
            AND CD.decision_type!=$4
          GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
@@ -633,7 +635,7 @@ insert into clearing_decision (
               $triedFilter
               order by lr.lrb_pk
             )
-            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
+            SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
             FROM (
               SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, true as matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
@@ -649,6 +651,7 @@ insert into clearing_decision (
     while ($row = $this->dbManager->fetchArray($res))
     {
       $bulks[] = array(
+        "bulkId" => $row['lrb_pk'],
         "id" => $row['ce_pk'],
         "text" => $row['text'],
         "lic" => $row['lic'],
@@ -660,5 +663,22 @@ insert into clearing_decision (
 
     $this->dbManager->freeResult($res);
     return $bulks;
+  }
+
+  public function getBulkMatches($bulkId, $userId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT uploadtree_fk as itemid
+            FROM clearing_event ce
+            INNER JOIN highlight_bulk h
+            ON ce.clearing_event_pk = h.clearing_event_fk
+            WHERE lrb_fk = $1 AND user_fk = $2";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($bulkId, $userId));
+
+    $result = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $result;
   }
 }

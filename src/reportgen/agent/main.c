@@ -872,9 +872,9 @@ table_addRow(tableCopyright, "copyright", "text", "files");
   g_free(json);
 }
 
-addparaheading(createnumsection(body,"0","2"), NULL, "Matches","0","2");
+addparaheading(createnumsection(body,"0","2"), NULL, "Bulk Findings","0","2");
 
-rg_table* tableMatches = table_new(body, 3, "2638", "5000", "2000");
+rg_table* tableMatches = table_new(body, 3, "2000", "4000", "3638");
 table_addRow(tableMatches, "license", "text", "files");
 {
   char* json = getMatches(uploadId, user_pk);
