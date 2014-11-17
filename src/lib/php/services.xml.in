@@ -80,7 +80,7 @@ without any warranty.
     </service>
     <service id="view.highlight_renderer" class="Fossology\Lib\View\HighlightRenderer">
     </service>
-    <service id="view.license_processor" class="Fossology\Lib\View\LicenseProcessor">
+    <service id="view.license_renderer" class="Fossology\Lib\View\LicenseRenderer">
     </service>
     <service id="view.text_renderer" class="Fossology\Lib\View\TextRenderer">
       <argument type="service" id="view.highlight_renderer"/>

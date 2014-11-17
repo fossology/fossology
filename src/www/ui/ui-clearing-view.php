@@ -27,7 +27,6 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Data\DecisionScopes;
 use Monolog\Logger;
 
@@ -51,8 +50,6 @@ class ClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
-  /** @var LicenseRenderer */
-  private $licenseRenderer;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
   /** @var bool */
@@ -79,7 +76,6 @@ class ClearingView extends FO_Plugin
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
     $this->decisionTypes = $container->get('decision.types');

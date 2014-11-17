@@ -27,7 +27,6 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
 
 define("TITLE_ajaxClearingView", _("Change concluded License "));
@@ -53,8 +52,6 @@ class AjaxClearingView extends FO_Plugin
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
 
-  /** @var LicenseRenderer */
-
   function __construct()
   {
     $this->Name = "conclude-license";
@@ -76,7 +73,6 @@ class AjaxClearingView extends FO_Plugin
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
 
