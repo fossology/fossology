@@ -29,7 +29,7 @@ class LicenseViewDao extends DbViewDao
    * @param array $options
    * @param string $dbViewName
    */
-  public function __construct($uploadId, $options, $dbViewName='license_all')
+  public function __construct($uploadId, $options=array(), $dbViewName='license_all')
   {
     $this->uploadId = $uploadId;
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');

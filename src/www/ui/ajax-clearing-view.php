@@ -93,7 +93,7 @@ class AjaxClearingView extends FO_Plugin
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $this->uploadId);
 
-    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
+    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending, $this->uploadId);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
 
     $licenses = array();

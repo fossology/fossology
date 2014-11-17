@@ -141,17 +141,28 @@ class LicenseDao extends Object
   /**
    * @return LicenseRef[]
    */
-  public function getLicenseRefs($search = null, $orderAscending = true)
+  public function getLicenseRefs($search=null, $orderAscending=true, $uploadId=0)
   {
-    $searchCondition = $search ? "WHERE lower(rf_shortname) like($1)" : "";
+    if ($uploadId)
+    {
+      $rfTable = 'license_all';
+      $licenseViewDao = new LicenseViewDao($uploadId, array(), $rfTable);
+      $withCte = $licenseViewDao->asCTE();
+    }
+    else
+    {
+      $rfTable = 'ONLY license_ref';
+      $withCte = '';
+    }
+
+    $searchCondition = $search ? "WHERE rf_shortname ilike $1" : "";
 
     $order = $orderAscending ? "ASC" : "DESC";
-    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_" . $order;
+    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_$order" .".u$uploadId";
 
     $this->dbManager->prepare($statementName,
-        "select rf_pk,rf_shortname,rf_fullname from license_ref $searchCondition order by rf_shortname $order");
+      $sql= $withCte." select rf_pk,rf_shortname,rf_fullname from $rfTable $searchCondition order by LOWER(rf_shortname) $order");
     $result = $this->dbManager->execute($statementName, $search ? array('%' . strtolower($search) . '%') : array());
-
     $licenseRefs = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
@@ -164,12 +175,24 @@ class LicenseDao extends Object
   /**
    * @return array 
    */
-  public function getLicenseArray()
+  public function getLicenseArray($uploadId=0)
   {
-    $statementName = __METHOD__;
+    $statementName = __METHOD__.".u$uploadId";
+    
+    if ($uploadId)
+    {
+      $rfTable = 'license_all';
+      $licenseViewDao = new LicenseViewDao($uploadId, array(), $rfTable);
+      $withCte = $licenseViewDao->asCTE();
+    }
+    else
+    {
+      $rfTable = 'ONLY license_ref';
+      $withCte = '';
+    }
 
     $this->dbManager->prepare($statementName,
-        "select rf_pk id,rf_shortname shortname,rf_fullname fullname from license_ref order by rf_shortname");
+       $withCte." select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable order by LOWER(rf_shortname)");
     $result = $this->dbManager->execute($statementName);
     $licenseRefs = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
@@ -296,12 +319,12 @@ class LicenseDao extends Object
    * @param string $licenseId
    * @return License|null
    */
-  public function getLicenseById($licenseId)
+  public function getLicenseById($licenseId, $uploadId=0)
   {
     $row = $this->dbManager->getSingleRow(
         "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE rf_pk=$1",
         array($licenseId));
-    if (false===$row)
+    if (false===$row && !empty($uploadId))
     {
       $licenseViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text', 'rf_url'),
           'diff'=>TRUE,'extraCondition'=>'lrb_pk=$1 AND group_fk=$2'));
