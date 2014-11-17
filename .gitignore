@@ -69,6 +69,7 @@ src/lib/c/tests/testlibs
 src/lib/php/bootstrap.php
 src/lib/php/id.patch
 src/lib/php/tests/lib-php-Xunit-Results.xml
+src/lib/php/services.xml
 src/maintagent/agent/maintagent
 src/mimetype/agent/mimetype
 src/mimetype/agent_tests/Unit/results/

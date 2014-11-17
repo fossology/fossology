@@ -16,7 +16,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$loader = new Twig_Loader_Filesystem('/path/to/templates');
-$twig = new Twig_Environment($loader, array(
-    'cache' => '/path/to/compilation_cache',
-));
+namespace Fossology\Lib\Plugin;
+
+interface Plugin {
+  function execute();
+
+  function preInstall();
+  function postInstall();
+
+  function unInstall();
+
+  /**
+   * @return string
+   */
+  function getName();
+}
