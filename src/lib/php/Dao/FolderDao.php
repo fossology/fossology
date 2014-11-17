@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Folder\Folder;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -73,6 +74,17 @@ class FolderDao extends Object
         "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 FROM folder LIMIT 1))");
     $res = $this->dbManager->execute($statementName);
     $this->dbManager->freeResult($res);
+  }
+
+  public function getRootFolder($userId) {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");
+    $res = $this->dbManager->execute($statementName, array($userId));
+    $row = $this->dbManager->fetchArray($res);
+    $rootFolder = $row ? new Folder(intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])) : null;
+    $this->dbManager->freeResult($res);
+    return $rootFolder;
   }
 
 }

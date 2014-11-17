@@ -24,16 +24,21 @@
                 <select name="folder">
                     {{ folderListOptions }}
                 </select>
+            </li>
             <li>
                 {{ 'Select the file to upload:'| trans }}
                 <br/>
                 <input name="{{ fileInputName }}" type="file"/><br/>
+            </li>
             <li>
                 {{ '(Optional) Enter a description of this file:'| trans }}
                 <br/>
                 <input type="text" name="description" size="60" value="{{ description }}"/>
+            </li>
+            <li>
 
-                <p/>
+
+            </li>
             <li><input type="checkbox" name="public" value="public"/>
                 {{ '(Optional) Make Public'| trans }}
                 {% if agentCheckBoxMake %}
@@ -49,4 +54,8 @@
         <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
         </p>
     </form>
+
+    <div class="modal" id="selectUploadModal" hidden>
+        {% include 'modal/select-upload.html.twig' %}
+    </div>
 {% endblock %}
