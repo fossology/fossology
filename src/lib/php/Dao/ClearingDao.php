@@ -67,12 +67,14 @@ class ClearingDao extends Object
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
+    $joinType = $itemTreeBounds->containsFiles() ? "INNER" : "LEFT";
+
     $sql_upload="";
     if ('uploadtree_a' == $uploadTreeTable) {
       $sql_upload = "ut.upload_fk=$1  and ";
     }
 
-    $statementName = __METHOD__.$uploadTreeTable;
+    $statementName = __METHOD__.".".$uploadTreeTable.".".$joinType;
 
     $sql="SELECT
            CD.clearing_decision_pk AS id,
@@ -93,8 +95,8 @@ class ClearingDao extends Object
            LEFT JOIN users ON CD.user_fk=users.user_pk
            INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
            INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
-           INNER JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
-           INNER JOIN license_ref LR on CL.rf_fk=LR.rf_pk
+           $joinType JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
+           $joinType JOIN license_ref LR on CL.rf_fk=LR.rf_pk
          WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
            AND CD.decision_type!=$4
          GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
