@@ -123,12 +123,7 @@ class ClearingDao extends Object
       $licenseName = $row['fullname'];
       $licenseIsRemoved = $row['removed'];
 
-
-      if($clearingId === $previousClearingId) {
-        //append To last finding
-        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
-      }
-      else {
+      if($clearingId !== $previousClearingId) {
         //store the old one
         if(!$firstMatch) {
           $clearingDec =$clearingDecisionBuilder->setPositiveLicenses($added)
@@ -153,9 +148,10 @@ class ClearingDao extends Object
                                     ->setType($row['type_id'])
                                     ->setScope($row['scope'])
                                     ->setDateAdded($row['date_added']);
+      }
 
+      if ($licenseId !== null) {
         $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
-
       }
     }
 
