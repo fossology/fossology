@@ -93,7 +93,7 @@ class AjaxClearingView extends FO_Plugin
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $this->uploadId);
 
-    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending, $this->uploadId);
+    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
 
     $licenses = array();
@@ -205,7 +205,7 @@ class AjaxClearingView extends FO_Plugin
           {
             return;
           }
-
+          $this->uploadId = $uploadId;
           $licenseId = GetParm("licenseId", PARM_INTEGER);
 
           $sort0 = GetParm("sSortDir_0", PARM_STRING);
@@ -214,7 +214,7 @@ class AjaxClearingView extends FO_Plugin
             $orderAscending = $sort0 === "asc";
           }
       }
-      $this->uploadId = $uploadId;
+
       switch ($action)
       {
         case "licenses":

@@ -13,7 +13,7 @@
           <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
         {% endfor %}
       </select>
-      <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&lic=', '{{ 'License Text'| trans }}');">{{ 'Show origin'| trans }}</button>
+      <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show origin'| trans }}</button>
     </span>
     
     <span id="bulkNewLicense" hidden>

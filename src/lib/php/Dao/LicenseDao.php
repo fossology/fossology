@@ -141,24 +141,16 @@ class LicenseDao extends Object
   /**
    * @return LicenseRef[]
    */
-  public function getLicenseRefs($search=null, $orderAscending=true, $uploadId=0)
+  public function getLicenseRefs($search=null, $orderAscending=true)
   {
-    if ($uploadId)
-    {
-      $rfTable = 'license_all';
-      $licenseViewDao = new LicenseViewDao($uploadId, array(), $rfTable);
-      $withCte = $licenseViewDao->asCTE();
-    }
-    else
-    {
-      $rfTable = 'ONLY license_ref';
-      $withCte = '';
-    }
+    $rfTable = 'license_all';
+    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
+    $withCte = $licenseViewDao->asCTE();
 
     $searchCondition = $search ? "WHERE rf_shortname ilike $1" : "";
 
     $order = $orderAscending ? "ASC" : "DESC";
-    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_$order" .".u$uploadId";
+    $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_$order";
 
     $this->dbManager->prepare($statementName,
       $sql= $withCte." select rf_pk,rf_shortname,rf_fullname from $rfTable $searchCondition order by LOWER(rf_shortname) $order");
@@ -175,21 +167,13 @@ class LicenseDao extends Object
   /**
    * @return array 
    */
-  public function getLicenseArray($uploadId=0)
+  public function getLicenseArray()
   {
-    $statementName = __METHOD__.".u$uploadId";
+    $statementName = __METHOD__;
     
-    if ($uploadId)
-    {
-      $rfTable = 'license_all';
-      $licenseViewDao = new LicenseViewDao($uploadId, array(), $rfTable);
-      $withCte = $licenseViewDao->asCTE();
-    }
-    else
-    {
-      $rfTable = 'ONLY license_ref';
-      $withCte = '';
-    }
+    $rfTable = 'license_all';
+    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
+    $withCte = $licenseViewDao->asCTE();
 
     $this->dbManager->prepare($statementName,
        $withCte." select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable order by LOWER(rf_shortname)");
@@ -319,16 +303,16 @@ class LicenseDao extends Object
    * @param string $licenseId
    * @return License|null
    */
-  public function getLicenseById($licenseId, $uploadId=0)
+  public function getLicenseById($licenseId)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE rf_pk=$1",
-        array($licenseId));
-    if (false===$row && !empty($uploadId))
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE rf_pk=$1",
+        array($licenseId),__METHOD__.'.only');
+    if (false===$row && !empty($_SESSION['GroupId']))
     {
-      $licenseViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text', 'rf_url'),
-          'diff'=>TRUE,'extraCondition'=>'lrb_pk=$1 AND group_fk=$2'));
-      $row = $this->dbManager->getSingleRow($licenseViewDao->getDbViewQuery(), array($licenseId,$_SESSION['GroupId']),__METHOD__.'.candidate');
+      $row = $this->dbManager->getSingleRow(
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE rf_pk=$1 AND group_fk=$2",
+        array($licenseId,$_SESSION['GroupId']),__METHOD__.'.candidate');
     }
     if (false === $row)
     {
@@ -340,19 +324,18 @@ class LicenseDao extends Object
 
   /**
    * @param string $licenseShortname
-   * @param int $uploadId
    * @return License|null
    */
-  public function getLicenseByShortName($licenseShortname,$uploadId=0)
+  public function getLicenseByShortName($licenseShortname)
   {
     $row = $this->dbManager->getSingleRow(
         "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE rf_shortname=$1",
         array($licenseShortname),__METHOD__.'.only');
-    if (false===$row && !empty($uploadId))
+    if (false===$row && !empty($_SESSION['GroupId']))
     {
-      $licenseViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text', 'rf_url'),
-          'diff'=>TRUE,'extraCondition'=>'rf_shortname=$1'));
-      $row = $this->dbManager->getSingleRow($licenseViewDao->getDbViewQuery(), array($licenseShortname),__METHOD__.'.candidate');
+    $row = $this->dbManager->getSingleRow(
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE rf_shortname=$1 AND group_fk=$2",
+        array($licenseShortname,$_SESSION['GroupId']),__METHOD__.'.only');
     }
     if (false===$row)
     {
@@ -386,24 +369,27 @@ class LicenseDao extends Object
     return $licenseRefBulkIdResult['lrb_pk'];
   }
   
-
   /**
    * @param string $newShortname
-   * @param int $uploadId
    * @return bool
    */
-  public function isNewLicense($newShortname, $uploadId)
+  public function isNewLicense($newShortname)
   {
-    $licenceViewDao = new LicenseViewDao($uploadId, array('columns'=>array('rf_shortname')));
+    $licenceViewDao = new LicenseViewDao($_SESSION['GroupId'], array('columns'=>array('rf_shortname')));
     $sql = 'SELECT count(*) cnt FROM ('.$licenceViewDao->getDbViewQuery().') AS license_all WHERE rf_shortname=$1';
     $duplicatedRef = $this->dbManager->getSingleRow($sql,array($newShortname),__METHOD__);
     return $duplicatedRef['cnt']==0;
   }
 
-  public function insertUploadLicense($uploadId, $newShortname, $refText)
+  /**
+   * @param string $newShortname
+   * @param string $refText
+   * @return int Id of license candidate
+   */
+  public function insertUploadLicense($newShortname, $refText)
   {
-    $sql = 'INSERT INTO license_candidate (upload_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
-    $refArray = $this->dbManager->getSingleRow($sql, array($uploadId, $newShortname, $refText), __METHOD__);
+    $sql = 'INSERT INTO license_candidate (group_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
+    $refArray = $this->dbManager->getSingleRow($sql, array($_SESSION['GroupId'], $newShortname, $refText), __METHOD__);
     return $refArray['rf_pk'];
   }
 

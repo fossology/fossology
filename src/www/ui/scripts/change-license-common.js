@@ -165,7 +165,7 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
 
 
 function popUpLicenseText(popUpUri, title) {
-  sel = $("#bulkLicense :selected").text();
+  sel = $("#bulkLicense :selected").val();
   window.open(popUpUri + sel, title, 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
 }
 

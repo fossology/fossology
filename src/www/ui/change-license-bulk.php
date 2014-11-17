@@ -110,11 +110,11 @@ class changeLicenseBulk extends FO_Plugin
       if(!preg_match($shortnamePattern,$newShortname)){
         throw new Exception('invalid shortname pattern');
       }
-      if (!$this->licenseDao->isNewLicense($newShortname, $groupId))
+      if (!$this->licenseDao->isNewLicense($newShortname))
       {
         throw new Exception('license shortname already in use');
       }
-      $licenseId = $this->licenseDao->insertUploadLicense($uploadId,$newShortname,$refText);
+      $licenseId = $this->licenseDao->insertUploadLicense($newShortname,$refText);
       $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText);
     }
     else

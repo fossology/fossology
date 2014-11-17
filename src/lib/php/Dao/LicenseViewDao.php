@@ -23,18 +23,19 @@ class LicenseViewDao extends DbViewDao
   
   static private $verifiedExistanceOfCandidateTable = FALSE;
   /** @var int */
-  private $uploadId;
+  private $groupId;
   
   /**
+   * @param int $groupId
    * @param array $options
    * @param string $dbViewName
    */
-  public function __construct($uploadId, $options=array(), $dbViewName='license_all')
+  public function __construct($groupId, $options=array(), $dbViewName='license_all')
   {
-    $this->uploadId = $uploadId;
+    $this->groupId = $groupId;
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
     $gluedColumns = implode(',', $columns);
-    $dbViewQuery = "SELECT $gluedColumns FROM license_candidate WHERE upload_fk=$this->uploadId";
+    $dbViewQuery = "SELECT $gluedColumns FROM license_candidate WHERE group_fk=$this->groupId";
     
     if(array_key_exists('extraCondition', $options))
     {
@@ -43,7 +44,7 @@ class LicenseViewDao extends DbViewDao
 
     if (!array_key_exists('diff', $options))
     {
-      $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS upload_fk" : $gluedColumns;
+      $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS group_fk" : $gluedColumns;
       $dbViewQuery .= " UNION SELECT $refColumns FROM ONLY license_ref";
       if(array_key_exists('extraCondition', $options))
       {
@@ -65,7 +66,7 @@ class LicenseViewDao extends DbViewDao
     $dbManager = $container->get('db.manager');
     if(!$dbManager->existsTable('license_candidate'))
     {
-      $dbManager->queryOnce("CREATE TABLE license_candidate (upload_fk integer) INHERITS (license_ref)");
+      $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
     }
     self::$verifiedExistanceOfCandidateTable = TRUE;
   }
