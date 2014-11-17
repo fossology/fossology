@@ -87,4 +87,54 @@ class FolderDao extends Object
     return $rootFolder;
   }
 
+  public function getFolderStructure($parentId=null) {
+
+    $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
+    $parentCondition = $parentId ? '= $1' : 'IS NULL';
+
+    $parameters = $parentId ? array($parentId) : array();
+
+    $this->dbManager->prepare($statementName, "
+WITH RECURSIVE folder_tree(folder_pk, folder_name, folder_desc, folder_perm, parent_fk, path, depth, file_path, cycle) AS (
+  SELECT
+    f.*,
+    ARRAY [f.folder_pk],
+    0,
+    ARRAY [f.folder_name],
+    FALSE
+  FROM folder f
+  WHERE parent_fk $parentCondition
+  UNION ALL
+  SELECT
+    f.*,
+    path || f.folder_pk,
+    array_length(path, 1),
+    file_path || f.folder_name,
+    f.folder_pk = ANY (path)
+  FROM folder f, folder_tree ft
+  WHERE f.parent_fk = ft.folder_pk AND NOT cycle
+)
+SELECT
+  folder_pk, folder_name, folder_desc, folder_perm,
+  depth
+FROM folder_tree
+ORDER BY file_path;
+");
+    $res = $this->dbManager->execute($statementName, $parameters);
+    $results = array();
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $results[] = array(
+          'folder' => new Folder(
+              intval($row['folder_pk']),
+              $row['folder_name'],
+              $row['folder_desc'],
+              intval($row['folder_perm'])),
+          'depth' => $row['depth']
+      );
+    }
+    $this->dbManager->freeResult($res);
+    return $results;
+  }
+
 }

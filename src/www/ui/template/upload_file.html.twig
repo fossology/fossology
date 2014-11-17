@@ -21,9 +21,7 @@
         <ol>
             <li>
                 {{ 'Select the folder for storing the uploaded file:'| trans }}
-                <select name="folder">
-                    {{ folderListOptions }}
-                </select>
+                {% include 'modal/select-upload.html.twig' with {'name': 'folder'} %}
             </li>
             <li>
                 {{ 'Select the file to upload:'| trans }}
@@ -55,7 +53,18 @@
         </p>
     </form>
 
-    <div class="modal" id="selectUploadModal" hidden>
-        {% include 'modal/select-upload.html.twig' %}
-    </div>
+    <!--<div class="modal" id="selectUploadModal">-->
+        {% include 'modal/select-upload.html.twig' with {'name': 'package_folder', 'id': 'packageFolder'} %}
+    <!--</div>-->
+{% endblock %}
+
+{% block foot %}
+{{ parent() }}
+<script>
+    $('#packageFolder').change(function (value) {
+        var folderId = parseInt(this.selectedOptions[0].getAttribute('name'));
+
+        alert(folderId);
+    });
+</script>
 {% endblock %}

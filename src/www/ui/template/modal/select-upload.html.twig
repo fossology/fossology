@@ -1,0 +1,10 @@
+{% if selected is not defined %}
+    {% set selected = -1 %}
+{% endif %}
+<select name="{{ name }}"{% if id is defined %} id="{{ id }}{% endif %}">
+    {% for entry in folderStructure %}
+        <option name="{{ entry.folder.id }}"{% if selected == entry.folder.id %} selected="selected"{% endif %}>
+            {% for i in range(0, entry.depth*2) if i > 0 %}&nbsp;{% endfor %}{{ entry.folder.name }}
+        </option>
+    {% endfor %}
+</select>

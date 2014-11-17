@@ -654,6 +654,11 @@
   $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_pk\" SET NOT NULL, ALTER COLUMN \"folder_pk\" SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
   $Schema["TABLE"]["folder"]["folder_pk"]["UPDATE"] = "UPDATE folder SET folder_pk=nextval('folder_folder_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["folder"]["parent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"parent_fk\" int4;";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["folder"]["parent_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text;";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL;";
@@ -2122,6 +2127,7 @@
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
+  $Schema["CONSTRAINT"]["folder_parent_fk_fkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_parent_fk_fkey\" FOREIGN KEY (\"parent_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
   $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";

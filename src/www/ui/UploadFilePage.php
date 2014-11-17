@@ -17,7 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +35,12 @@ class UploadFilePage extends DefaultPlugin
 
   const NAME = "upload_file";
 
+  /** @var FolderDao */
+  private $folderDao;
+
+  /** @var Logger */
+  private $logger;
+
   public function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -41,6 +49,9 @@ class UploadFilePage extends DefaultPlugin
         self::DEPENDENCIES => array("agent_unpack", "showjobs"),
         self::PERMISSION => self::PERM_WRITE
     ));
+
+    $this->folderDao = $this->getObject('dao.folder');
+    $this->logger = $this->getObject('logger');
   }
 
   /**
@@ -162,9 +173,9 @@ class UploadFilePage extends DefaultPlugin
 
     $vars['description'] = $description ?: "";
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
-    $vars['folderListOptions'] = FolderListOption(-1, 0);
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
+    $vars['folderStructure'] = $this->folderDao->getFolderStructure();
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
     {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
