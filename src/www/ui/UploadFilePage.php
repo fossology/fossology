@@ -147,7 +147,7 @@ class UploadFilePage extends DefaultPlugin
     {
       $folderId = intval($request->get('folder'));
       $description = $request->get('description');
-      $public = boolval($request->get('public'));
+      $public = $request->get('public') == true;
       $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
 
       if ($uploadFile !== null && !empty($folderId))
