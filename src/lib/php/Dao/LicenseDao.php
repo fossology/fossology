@@ -399,4 +399,10 @@ class LicenseDao extends Object
     return intval($licenseRefTable['cnt']);
   }
 
+  public function updateCandidate($rf_pk,$shortname,$fullname,$rfText,$url,$marydone)
+  {
+    $marydone = $this->dbManager->booleanToDb($marydone);
+    $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6 WHERE rf_pk=$1',
+            array($rf_pk,$shortname,$fullname,$rfText,$url,$marydone), __METHOD__);
+  }
 }
