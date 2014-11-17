@@ -20,7 +20,9 @@ define("TITLE_ui_menu", _("Menus"));
 
 class ui_menu extends FO_Plugin
 {
-  var $Name = "menus";
+  const NAME = "menus";
+
+  var $Name = self::NAME;
   var $Title = TITLE_ui_menu;
   var $Version = "1.0";
   var $MenuTarget = "treenav";
@@ -43,7 +45,7 @@ class ui_menu extends FO_Plugin
       $id = plugin_find_id($val);
       if ($id < 0)
       {
-        Destroy();
+        $this->Destroy();
         return (0);
       }
     }

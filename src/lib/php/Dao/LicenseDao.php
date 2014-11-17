@@ -363,6 +363,7 @@ class LicenseDao extends Object
     return $licenseRefBulkIdResult['lrb_pk'];
   }
   
+
   /**
    * @param string $newShortname
    * @param int $uploadId
@@ -381,6 +382,12 @@ class LicenseDao extends Object
     $sql = 'INSERT INTO license_candidate (upload_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
     $refArray = $this->dbManager->getSingleRow($sql, array($uploadId, $newShortname, $refText), __METHOD__);
     return $refArray['rf_pk'];
+  }
+
+        
+  public function getLicenseCount() {
+    $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
+    return intval($licenseRefTable['cnt']);
   }
 
 }

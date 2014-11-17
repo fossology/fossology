@@ -21,10 +21,13 @@ include $(VARS)
 
 FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$"`
 
-all: bootstrap
+all: bootstrap services.xml
 
 # generate the postinstall script
 bootstrap: bootstrap-process_php
+
+# generate service.xml
+services.xml: services.xml-process
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
