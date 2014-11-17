@@ -51,7 +51,7 @@ class UploadFilePage extends DefaultPlugin
    * @param int $publicPermission
    * @return null|string
    */
-  function Upload($folderId, UploadedFile $uploadedFile, $description, $publicPermission)
+  function handleFileUpload($folderId, UploadedFile $uploadedFile, $description, $publicPermission)
   {
     global $MODDIR;
     global $SysConf;
@@ -107,7 +107,7 @@ class UploadFilePage extends DefaultPlugin
     }
 
     $wgetAgentCall = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadId '$uploadedTempFile' -c '$SYSCONFDIR'";
-    exec($wgetAgentCall, $wgetOut = array(), $wgetRtn);
+    exec($wgetAgentCall, $wgetOutput = array(), $wgetReturnValue);
     unlink($uploadedTempFile);
 
     $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
@@ -118,22 +118,18 @@ class UploadFilePage extends DefaultPlugin
     $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
     AgentCheckBoxDo($jobId, $uploadId);
 
-    if ($wgetRtn == 0)
+    if ($wgetReturnValue == 0)
     {
-      $message = "";
       $status = GetRunnableJobList();
-      if (empty($status))
-      {
-        $message .= _("Is the scheduler running? ");
-      }
+      $message = empty($status) ? _("Is the scheduler running? ") : "";
       $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
       $message .= _("The file") . " " . $originalFileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
       return array(true, $message);
     } else
     {
-      $ErrMsg = GetArrayVal(0, $wgetOut);
-      if (empty($ErrMsg)) $ErrMsg = _("File upload failed.  Error:") . $wgetRtn;
-      return array(false, $ErrMsg);
+      $message = implode(' ', $wgetOutput);
+      if (empty($message)) $message = _("File upload failed.  Error:") . $wgetReturnValue;
+      return array(false, $message);
     }
   }
 
@@ -151,14 +147,12 @@ class UploadFilePage extends DefaultPlugin
     {
       $folderId = intval($request->get('folder'));
       $description = $request->get('description');
-      $public = $request->get('public');
-      $publicPermission = empty($public) ? PERM_NONE : PERM_READ;
-
+      $public = boolval($request->get('public'));
       $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
 
       if ($uploadFile !== null && !empty($folderId))
       {
-        list($successful, $message) = $this->Upload($folderId, $uploadFile, $description, $publicPermission);
+        list($successful, $message) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
         if ($successful)
         {
           $description = NULL;
