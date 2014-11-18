@@ -276,4 +276,16 @@ abstract class DbManager extends Object
     $this->insertInto($tableName, $keys, $params, $sqlLog);
   }
   
+  /**
+   * @param string $tableName
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    if(!preg_match('/^[a-z0-9_]+$/i',$tableName))
+    {
+      throw new \Exception("invalid table name '$tableName'");
+    }
+    return $this->dbDriver->existsTable($tableName);
+  }
 }

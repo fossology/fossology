@@ -46,7 +46,7 @@ class HighlightRenderer extends Object
       Highlight::COPYRIGHT => 'lightblue',
       Highlight::EMAIL => 'yellow',
       Highlight::URL => 'orange',
-      Highlight::BULK => 'brown',
+      Highlight::BULK => '#EFBE76',
       Highlight::IP => '#FF7F50', // Coral
       Highlight::ECC => '#BA55D3', // MediumOrchid 
 

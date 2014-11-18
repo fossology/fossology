@@ -938,12 +938,13 @@ int fo_RepOpenFull(fo_conf* config)
 #endif
 
   /* Load the depth configuration */
-  RepDepth = atoi(fo_config_get(config, "FOSSOLOGY", "depth", &error));
+  char* repDepthStr = fo_config_get(config, "FOSSOLOGY", "depth", &error);
   if (error)
   {
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
     return 0;
   }
+  RepDepth = atoi(repDepthStr);
 
   /* Load the path configuration */
   path = fo_config_get(config, "FOSSOLOGY", "path", &error);

@@ -74,7 +74,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         . " VALUES ($uploadTreeId, NULL, $uploadId, 1, 33792, $left, 2, 'WXwindows.txt');",
         __METHOD__ . '.insert.data');
     /** @var ItemTreeBounds $itemTreeBounds */
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
     $this->assertInstanceOf('Fossology\Lib\Data\Tree\ItemTreeBounds', $itemTreeBounds);
 
     $this->assertEquals($expected = $uploadId, $itemTreeBounds->getUploadId());

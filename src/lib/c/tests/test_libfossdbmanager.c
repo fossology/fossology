@@ -34,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TESTABLE1(s, i) TESTABLE2(s,i)
 #define TESTTABLE TESTABLE1("test_db_manager_",__LINE__)
 
+extern char* dbConf;
+
 /* <0 unable to perform check
  * 0 does not exists
  * >0 exists
@@ -74,7 +76,7 @@ int _assertFileLines(const char* fileName, const char* expectedContent, int id)
   {
     char buffer[2048];
     ssize_t n = read(fd, buffer, sizeof(buffer) - 1);
-    if (n > 0)
+    if (n >= 0)
     {
       buffer[n] = '\0';
       int patternMatch = g_pattern_match_simple(expectedContent, buffer);
@@ -126,11 +128,11 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
     int tableExists = _tableExists(dbManager, result);
     if (tableExists < 0)
     {
-      free(result);
+      g_free(result);
       return 0;
     } else if (tableExists > 0)
     {
-      free(result);
+      g_free(result);
       result = NULL;
     }
   }
@@ -145,7 +147,7 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
       return 1;
     } else
     {
-      free(result);
+      g_free(result);
       return 0;
     }
   } else
@@ -157,10 +159,9 @@ int _getTestTable(fo_dbManager* dbManager, char** resultTableName, const char* c
 void test_prepare()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* testTableName = TESTTABLE;
@@ -232,8 +233,8 @@ void test_prepare()
       }
       free(c);
     }
-    free(querySelect);
-    free(queryInsert);
+    g_free(querySelect);
+    g_free(queryInsert);
 
     fo_dbManager_Exec_printf(dbManager,
       "DROP TABLE %s",
@@ -331,7 +332,7 @@ PGresult* _insertWithFunction(
     CU_FAIL("could not get test table");
   }
 
-  free(testTableNameVar);
+  g_free(testTableNameVar);
 
   return result;
 }
@@ -339,10 +340,9 @@ PGresult* _insertWithFunction(
 void test_perf()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager1 = fo_dbManager_new(pgConn);
   fo_dbManager* dbManager2 = fo_dbManager_new(pgConn);
   fo_dbManager* dbManager3 = fo_dbManager_new(pgConn);
@@ -424,10 +424,9 @@ void test_perf()
 void test_simple_inject()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* testTableName = TESTTABLE;
@@ -524,11 +523,10 @@ void test_fork_error()
 void test_fork()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  fo_dbManager* dbManager0 = fo_dbManager_new(pgConn);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
+  fo_dbManager* dbManager0 = fo_dbManager_new_withConf(pgConn, dbConf);
 
   char* testTableName = TESTTABLE;
   if (_getTestTable(dbManager0, &testTableName, "a int, b bigint, c varchar"))
@@ -595,11 +593,10 @@ void test_fork()
 void _test_wrongQueries_runner(char* (* test)(fo_dbManager**, const char*), int testNumber)
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  fo_dbManager* dbManager = fo_dbManager_new_withConf(pgConn, DBConfFile);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
+  fo_dbManager* dbManager = fo_dbManager_new_withConf(pgConn, dbConf);
 
   char* testTable = g_strdup_printf(TESTTABLE "runner_%d", testNumber);
   int gotTable = _getTestTable(dbManager, &testTable, "a int, b bigint");
@@ -623,9 +620,9 @@ void _test_wrongQueries_runner(char* (* test)(fo_dbManager**, const char*), int 
 
     fo_dbManager_finish(dbManager);
 
-    free(logFile);
-    free(expectedLog);
-    free(testTable);
+    g_free(logFile);
+    g_free(expectedLog);
+    g_free(testTable);
 
   } else
   {
@@ -689,7 +686,7 @@ char* _test_wrongQueries_noConnectionToServerOnPrepare(fo_dbManager** dbManager,
     "noConnPrepare",
     query
   );
-  free(query);
+  g_free(query);
 
   CU_ASSERT_PTR_NULL(statement);
 
@@ -711,7 +708,7 @@ char* _test_wrongQueries_noConnectionToServerOnExecute(fo_dbManager** dbManager,
     "noConn",
     query
   );
-  free(query);
+  g_free(query);
 
   CU_ASSERT_PTR_NOT_NULL_FATAL(statement);
 
@@ -738,7 +735,7 @@ char* _test_wrongQueries_noParametersFor1ParameterStmt(fo_dbManager** dbManager,
       query
     )
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup(
     "ERROR: ERROR:  bind message supplies 0 parameters, but prepared statement \"name2\" requires 1\n"
@@ -754,7 +751,7 @@ char* _test_wrongQueries_prepareWithNotExistingColumn(fo_dbManager** dbManager, 
     "name",
     query
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup_printf(
     "ERROR: * column \"c\" does not exist\n"
@@ -777,7 +774,7 @@ char* _test_wrongQueries_2ParametersForNoParametersQuery(fo_dbManager** dbManage
   ),
   (int) 5, (size_t) 6
   ));
-  free(query);
+  g_free(query);
 
   return g_strdup(
     "ERROR: ERROR:  bind message supplies 2 parameters, but prepared statement \"name3\" requires 0\n"
@@ -791,13 +788,44 @@ char* _test_wrongQueries_unparsableTypes(fo_dbManager** dbManager, const char* t
     *dbManager,
     "name4",
     "irrelevant",
-    int, , long
+    int, ,long
   ));
 
   return g_strdup(
     "FATAL: dbManager could not comprehend parameter types 'int, ,long'\n"
       "Trying to prepare 'name4' as 'irrelevant'\n"
   );
+}
+
+char* _test_wrongQueries_transactions(fo_dbManager** dbManager, const char* testTableName)
+{
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+  CU_ASSERT_TRUE(fo_dbManager_commit(*dbManager));
+
+  CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, c) VALUES (1,2)", testTableName));
+  PQclear(fo_dbManager_Exec_printf(*dbManager, "INSERT INTO %s (a, b) VALUES (1,2)", testTableName));
+
+  CU_ASSERT_TRUE(fo_dbManager_rollback(*dbManager));
+
+  PGresult* res = fo_dbManager_Exec_printf(*dbManager, "SELECT * FROM %s", testTableName);
+
+  CU_ASSERT_TRUE(PQntuples(res)==1);
+  PQclear(res);
+
+ return g_strdup_printf(
+   "NOTICE: WARNING:  there is already a transaction in progress\n"
+   "ERROR: ERROR:  column \"c\" of relation \"%s\" does not exist\n"
+   "LINE 1: *\n"
+   "*^\n"
+   "On: INSERT INTO %s (a, c) VALUES (1,2)\n"
+   "ERROR: ERROR:  current transaction is aborted, commands ignored until end of transaction block\n"
+   "On: INSERT INTO %s (a, b) VALUES (1,2)\n", testTableName, testTableName, testTableName
+ );
 }
 
 void test_wrongQueries()
@@ -812,6 +840,7 @@ void test_wrongQueries()
   _test_wrongQueries_runner(_test_wrongQueries_noParametersFor1ParameterStmt, ++testNumber);
   _test_wrongQueries_runner(_test_wrongQueries_2ParametersForNoParametersQuery, ++testNumber);
   _test_wrongQueries_runner(_test_wrongQueries_unparsableTypes, ++testNumber);
+  _test_wrongQueries_runner(_test_wrongQueries_transactions, ++testNumber);
 }
 
 void test_executeNull()
@@ -826,10 +855,9 @@ void test_executeNull()
 void test_stringEscape_corners()
 {
   PGconn* pgConn;
-  char* DBConfFile = NULL;  /* use default Db.conf */
   char* ErrorBuf;
 
-  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(dbConf, &ErrorBuf);
   fo_dbManager* dbManager = fo_dbManager_new(pgConn);
 
   char* empty = fo_dbManager_StringEscape(dbManager, "");

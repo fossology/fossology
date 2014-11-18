@@ -842,7 +842,7 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
-  char* jsonLicenses = getClearedLicenses(uploadId);
+  char* jsonLicenses = getClearedLicenses(uploadId, user_pk);
   json_object * jobj = json_tokener_parse(jsonLicenses);
 
   if (!addRowsFromJson_ContentTextFiles(tableOthers, jobj, "statements")) // TODO change

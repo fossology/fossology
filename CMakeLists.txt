@@ -45,6 +45,7 @@ set(SOURCE_FILES
     src/copyright/agent_tests/Unit/run_tests.cc
     src/copyright/agent_tests/Unit/test_regex.cc
     src/copyright/agent_tests/Unit/test_RegMatcher.cc
+    src/copyright/agent_tests/Unit/test_testdataCheckFound.cc
     src/delagent/agent/delagent.c
     src/delagent/agent/delagent.h
     src/delagent/agent/util.c
@@ -96,6 +97,8 @@ set(SOURCE_FILES
     src/lib/cpp/files.hpp
     src/lib/cpp/libfossdbmanagerclass.cc
     src/lib/cpp/libfossdbmanagerclass.hpp
+    src/lib/cpp/libfossdbQueryResult.cc
+    src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
     src/lib/cpp/uniquePtr.hpp
     src/maintagent/agent/maintagent.c

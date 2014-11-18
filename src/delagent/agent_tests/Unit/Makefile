@@ -77,7 +77,7 @@ cunit_lib:
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
-coverage: delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
+coverage: all testdata delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \

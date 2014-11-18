@@ -11,7 +11,7 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
-CFLAGS_LOCAL = -I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
+CFLAGS_LOCAL = -I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB) -lrpmio
 EXE = test_pkgagent
 CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
@@ -29,16 +29,20 @@ coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
 	genhtml -o results cov.txt
 
 $(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
-	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL)
+	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL) 
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 testGetMetadata.o: testGetMetadata.c
-	@if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
-		$(CC) -c $(CFLAGS_LOCAL_RPM) $<; \
+	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
+		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
-		$(CC) -c $(CFLAGS_LOCAL_RPM_4_4) $<; \
+		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
+		else \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+		fi \
 	fi
 
 cunit_lib:

@@ -14,6 +14,7 @@ namespace Fossology\Lib\Agent;
 
 use Fossology\Lib\Util\Object;
 use Fossology\Lib\Db\DbManager;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once(dirname(dirname(__FILE__))."/common-cli.php");
 
@@ -34,6 +35,9 @@ abstract class Agent extends Object
   /** @var DbManager dbManager */
   protected $dbManager;
 
+  /** @var ContainerBuilder */
+  protected $container;
+
   private $schedulerMode;
 
   function __construct($agentName, $version, $revision) {
@@ -51,6 +55,7 @@ abstract class Agent extends Object
     cli_Init();
 
     global $container;
+    $this->container = $container;
     $this->dbManager = $container->get('db.manager');
 
     $this->agentId = $this->queryAgentId();

@@ -70,10 +70,8 @@ class list_bucket_files extends FO_Plugin
    */
   function Initialize()
   {
-    global $Plugins;
     $this->State=PLUGIN_STATE_VALID;
     $this->State=PLUGIN_STATE_READY;
-    array_push($Plugins,$this);
 
     return(true);
   } // Initialize()

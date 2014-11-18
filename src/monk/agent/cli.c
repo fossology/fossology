@@ -14,17 +14,19 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "license.h"
 #include "match.h"
-#include "getopt.h"
 
-void matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char** argv) {
+int matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char** argv) {
   File file;
   file.id = argi;
   file.fileName = argv[argi];
-  file.tokens = readTokensFromFile(file.fileName, DELIMITERS);
+  if (!readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS))
+    return 0;
 
-  matchFileWithLicenses(state, &file, licenses);
+  int result = matchFileWithLicenses(state, &file, licenses);
 
   g_array_free(file.tokens, TRUE);
+
+  return result;
 }
 
 int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {

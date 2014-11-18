@@ -21,10 +21,9 @@ namespace Fossology\Lib\Dao;
 
 use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -47,6 +46,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $clearingDao;
   /** @var int */
   private $now;
+  /** @var array */
+  private $items;
 
 
   public function setUp()
@@ -57,7 +58,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $logger = new Logger('default');
     $logger->pushHandler(new ErrorLogHandler());
 
-    $this->testDb = new TestPgDb(); // TestLiteDb("/tmp/fossology.sqlite");
+    $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
 
     $this->clearingDao = new ClearingDao($this->dbManager, $this->licenseSelector, $this->uploadDao);
@@ -67,31 +68,25 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'clearing_decision',
             'clearing_decision_events',
             'clearing_decision_type',
-            'license_decision_event',
-            'license_decision_type',
+            'clearing_event',
             'clearing_licenses',
+            'highlight_bulk',
             'license_ref',
+            'license_ref_bulk',
             'users',
             'group_user_member',
             'uploadtree'
         ));
 
-    $this->testDb->insertData(
-        array(
-            'clearing_decision_type',
-            'license_decision_type'
-        ));
+    $this->testDb->insertData(array('clearing_decision_type'));
 
-    $this->dbManager->prepare($stmt = 'insert.users',
-        "INSERT INTO users (user_name, root_folder_fk) VALUES ($1,$2)");
     $userArray = array(
         array('myself', 1),
         array('in_same_group', 2),
-        array('in_trusted_group', 3),
-        array('not_in_trusted_group', 4));
+        array('in_trusted_group', 3));
     foreach ($userArray as $ur)
     {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+      $this->dbManager->insertInto('users', 'user_name, root_folder_fk', $ur);
     }
 
     $gumArray = array(
@@ -106,106 +101,115 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $refArray = array(
-        array(1, 'FOO', 'foo text'),
-        array(2, 'BAR', 'bar text'),
-        array(3, 'BAZ', 'baz text'),
-        array(4, 'QUX', 'qux text')
+        array(401, 'FOO', 'foo text'),
+        array(402, 'BAR', 'bar text'),
+        array(403, 'BAZ', 'baz text'),
+        array(404, 'QUX', 'qux text')
     );
     foreach ($refArray as $params)
     {
       $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
-    $directory = 536888320;
-    $file = 33188;
+    $modd = 536888320;
+    $modf = 33188;
 
-    /*                                (pfile, uploadtreeID, left, right)
-      upload1:     Afile              (1000,  5,  1,  2)
-                   Bfile              (1200,  6,  3,  4)
-
-      upload2:     Afile              (1000,  7,  1,  2)
-                   Adirectory/        (   0,  8,  3,  6)
-                   Adirectory/Afile   (1000,  9,  4,  5)
-                   Bfile              (1200, 10,  7,  8)
+    /*                          (pfile,item,lft,rgt)
+      upload101:   upload101/    (  0, 299,  1,  4)
+                   Afile         (201, 301,  1,  2)
+                   Bfile         (202, 302,  3,  4)
+      upload102:   upload102/    (  0, 300,  1,  8)
+                   Afile         (201, 303,  1,  2)
+                   A-dir/        (  0, 304,  3,  6)
+                   A-dir/Afile   (201, 305,  4,  5)
+                   Bfile         (202, 306,  7,  8)
     */
-    $this->dbManager->prepare($stmt = 'insert.uploadtree',
-        "INSERT INTO uploadtree (upload_fk, pfile_fk, uploadtree_pk, ufile_mode,lft,rgt,ufile_name) VALUES ($1, $2,$3,$4,$5,$6,$7)");
-    $utArray = array(
-        array(100, 1000, 5, $file, 1, 2, "Afile"),
-        array(100, 1200, 6, $file, 3, 4, "Bfile"),
-        array(2, 1000, 7, $file, 1, 2, "Afile"),
-        array(2, 0, 8, $directory, 3, 6, "Adirectory"),
-        array(2, 1000, 9, $file, 4, 5, "Afile"),
-        array(2, 1200, 10, $file, 7, 8, "Bfile"),
+    $this->items = array(
+        299=>array(101, 299,   0, $modd, 1, 4, "upload101"),
+        300=>array(102, 300,   0, $modd, 1, 8, "upload102"),
+        301=>array(101, 301, 201, $modf, 1, 2, "Afile"),
+        302=>array(101, 302, 202, $modf, 3, 4, "Bfile"),
+        303=>array(102, 303, 201, $modf, 1, 2, "Afile"),
+        304=>array(102, 304,   0, $modd, 3, 6, "A-dir"),
+        305=>array(102, 305, 201, $modf, 4, 5, "Afile"),
+        306=>array(102, 306, 202, $modf, 7, 8, "Bfile"),
     );
-    foreach ($utArray as $ur)
+    foreach ($this->items as $ur)
     {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+      $this->dbManager->insertInto('uploadtree', 'upload_fk,uploadtree_pk,pfile_fk,ufile_mode,lft,rgt,ufile_name', $ur);
     }
-
     $this->now = time();
-    $ldArray = array(
-        array(1, 100, 1000, 1, 1, false, false, 1, $this->getMyDate($this->now - 888)),
-        array(2, 100, 1000, 1, 2, false, false, 1, $this->getMyDate($this->now - 888)),
-        array(3, 100, 1000, 3, 4, false, false, 1, $this->getMyDate($this->now - 1234)),
-        array(4, 100, 1000, 2, 3, false, true, 2, $this->getMyDate($this->now - 900)),
-        array(5, 100, 1000, 2, 4, true, false, 1, $this->getMyDate($this->now - 999)),
-        array(6, 100, 1200, 1, 3, true, true, 1, $this->getMyDate($this->now - 654)),
-        array(7, 100, 1200, 1, 2, false, false, 1, $this->getMyDate($this->now - 543))
+
+    $bulkLicArray = array(
+        array(1, 401, 'TextFOO', false, 101, 299),
+        array(2, 402, 'TextBAR', false, 101, 299),
+        array(3, 403, 'TextBAZ', true,  101, 301),
+        array(4, 403, 'TextBAZ', false, 101, 299),
+        array(5, 404, 'TextQUX', true,  101, 299),
+        array(6, 401, 'TexxFOO', true,  101, 302),
+        array(7, 403, 'TextBAZ', false, 102, 300),
+        array(8, 403, 'TextBAZ', true,  102, 306)
     );
-    foreach ($ldArray as $params)
+    foreach ($bulkLicArray as $params)
     {
-      $this->dbManager->insertInto('license_decision_event',
-          'license_decision_event_pk, pfile_fk, uploadtree_fk, user_fk, rf_fk, is_removed, is_global, type_fk, date_added',
-          $params, $logStmt = 'insert.lde');
+      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk', $params, $logStmt = 'insert.bulkref');
+    }
+  }
+
+  private function insertBulkEvents()
+  {
+    $bulkFindingsArray = array(
+        array(1, 5001),
+        array(1, 5001),// a second bulk match in the same file in a different place
+        array(1, 5002),
+        array(1, 5003),
+        array(4, 5004),
+        array(7, 5005)
+    );
+    foreach ($bulkFindingsArray as $params)
+    {
+      $this->dbManager->insertInto('highlight_bulk', 'lrb_fk, clearing_event_fk', $params, $logStmt = 'insert.bulkfinds');
     }
 
-    $this->dbManager->prepare($stmt = 'insert.cd',
-        "INSERT INTO clearing_decision (clearing_decision_pk, pfile_fk, uploadtree_fk, user_fk, type_fk, date_added) VALUES ($1, $2, $3, $4, $5, $6)");
-    $cdArray = array(
-        array(1, 1000, 5, 1, 5, $this->getMyDate($this->now - 888)),
-        array(2, 1000, 7, 1, 5, $this->getMyDate($this->now - 888)),
-        array(3, 1000, 9, 3, 5, $this->getMyDate($this->now - 1234))
+    $bulkClearingEvents = array(
+        array(5001, 301),
+        array(5002, 302),
+        array(5003, 303),
+        array(5004, 301),
+        array(5005, 305)
     );
-    foreach ($cdArray as $ur)
+    foreach ($bulkClearingEvents as $params)
     {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $ur));
+      $this->dbManager->insertInto('clearing_event', 'clearing_event_pk, uploadtree_fk', $params, $logStmt = 'insert.bulkevents');
     }
+  }
 
+  private function buildProposals($licProp,$i=0)
+  {
+    foreach($licProp as $lp){
+      $i++;
+      list($item,$user,$rf,$isRm,$t) = $lp;
+      $this->dbManager->insertInto('clearing_event',
+          'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
+          array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
+    }
+  }
+
+  private function buildDecisions($cDec,$j=0)
+  {
+    foreach($cDec as $cd){
+      $j++;
+      list($item,$user,$type,$t,$scope) = $cd;
+      $this->dbManager->insertInto('clearing_decision',
+          'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, decision_type, date_added, scope',
+          array($j,$item,$this->items[$item][2],$user,$type, $this->getMyDate($this->now+$t),$scope));
+    }
   }
 
   function tearDown()
   {
     $this->testDb = null;
     $this->dbManager = null;
-  }
-
-  /**
-   * @param LicenseDecisionEvent[] $input
-   * @return array
-   */
-  private function fixResult($input)
-  {
-    $output = array();
-    foreach ($input as $row)
-    {
-
-      $tmp = array();
-      $tmp[] = $row->getEventId();
-      $tmp[] = $row->getPfileId();
-      $tmp[] = $row->getUploadTreeId();
-      $tmp[] = $row->getUserId();
-      $tmp[] = $row->getLicenseRef()->getId();
-      $tmp[] = $row->getLicenseRef()->getShortName();
-      $tmp[] = $row->isRemoved();
-      $tmp[] = $row->isGlobal();
-      $tmp[] = $row->getEventType();
-      $tmp[] = $row->getDateTime();
-
-
-      $output[] = $tmp;
-    }
-    return $output;
   }
 
   private function getMyDate($in)
@@ -220,128 +224,148 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     return $date->setTimestamp($in);
   }
 
-  public function testLicenseDecisionEventsViaGroupMembership()
+  public function testRelevantClearingEventsViaGroupMembershipShouldBeSymmetric()
   {
-    $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1000));
-
-    assertThat($result, contains(
-        array(5, 100, 1000, 2, 4, "QUX", true, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 999)),
-        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
-        array(1, 100, 1000, 1, 1, "FOO", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
-        array(2, 100, 1000, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
-        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654))
+    $this->buildProposals(array(
+        array(301,1,401,false,-99),
+        array(301,1,402,true,-98)
     ));
+    $this->buildDecisions(array(
+        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+    ));
+    $events1 = $this->clearingDao->getRelevantClearingEvents(1, 301);
+    $events2 = $this->clearingDao->getRelevantClearingEvents(2, 301);
+    assertThat($events1, is($events2));
   }
 
-  public function testLicenseDecisionEventsViaGroupMembershipShouldBeSymmetric()
+  function testWip()
   {
-    $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(2, 1000));
-    assertThat($result, contains(
-        array(5, 100, 1000, 2, 4, "QUX", true, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 999)),
-        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
-        array(1, 100, 1000, 1, 1, "FOO", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
-        array(2, 100, 1000, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 888)),
-        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654))
+    $this->buildProposals(array(
+        array(301,1,401,false,-99),
+        array(301,1,402,false,-98),
+        array(301,1,401,true,-97),
     ));
+    $this->buildDecisions(array(
+        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+    ));
+    $watchThis = $this->clearingDao->isDecisionWip(301, 1);
+    assertThat($watchThis,is(FALSE));
+    $watchOther = $this->clearingDao->isDecisionWip(303, 1);
+    assertThat($watchOther,is(FALSE));
+    $this->buildProposals(array(
+        array(301,1,403,false,-89),
+    ),3);
+    $this->clearingDao->markDecisionAsWip(301, 1);
+    $watchThisNow = $this->clearingDao->isDecisionWip(301, 1);
+    assertThat($watchThisNow,is(TRUE));
+    $watchOtherNow = $this->clearingDao->isDecisionWip(303, 1);
+    assertThat($watchOtherNow,is(FALSE));
   }
 
-  public function testLicenseDecisionEventsUploadScope()
+  public function testInsertMultipleClearingEvents()
   {
-    $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(1, 1200));
-    assertThat($result, contains(
-        array(4, 100, 1000, 2, 3, "BAZ", false, true, LicenseDecision::BULK_RECOGNITION, $this->getMyDate2($this->now - 900)),
-        array(6, 100, 1200, 1, 3, "BAZ", true, true, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 654)),
-        array(7, 100, 1200, 1, 2, "BAR", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 543))
-    ));
-  }
+    $licenses = array(401,402);
+    $oldlicenses = array(401,403);
+    $removed = false;
+    $uploadTreeId = 304;
+    $uploadTreeIdPp = 305;
+    $userid = 1;
+    $jobfk = 501;
+    $comment="<commit>";
+    $remark="<remark>";
 
-  /**
-   * @var ClearingDecision[] $input
-   * @return array[]
-   */
-  private function fixClearingDecArray($input)
-  {
-    $output = array();
-    foreach ($input as $row)
+    foreach($oldlicenses as $lic)
     {
-      $tmp = array();
-      $tmp[] = $row->getClearingId();
-      $tmp[] = $row->getPfileId();
-      $tmp[] = $row->getUploadTreeId();
-      $tmp[] = $row->getUserId();
-      $tmp[] = $row->getScope();
-      $tmp[] = $row->getType();
-      $tmp[] = $row->getDateAdded();
-      $tmp[] = $row->getSameFolder();
-      $tmp[] = $row->getSameUpload();
-
-      $output[] = $tmp;
+      $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid,
+          'rf_fk'=>$lic, 'is_removed'=>$removed, 'job_fk' =>$jobfk,
+          'type_fk'=>ClearingEventTypes::USER, 'comment'=>$comment, 'reportinfo'=>$remark);
+      $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
     }
-    return $output;
+
+    $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
+
+    $refs = $this->dbManager->createMap('clearing_event', 'rf_fk', 'rf_fk');
+    $expected = array_unique(array_merge($licenses, $oldlicenses));
+    sort($refs);
+    sort($expected);
+    assertThat(array_values($refs),equalTo($expected));
   }
 
-  public function testGetFileClearingsFolder()
+  public function testBulkHistoryWithoutMatches()
   {
-    $itemTreeBounds = new ItemTreeBounds(7, "uploadtree", 2, 1, 2);
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
 
-    $clearingDec = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-    $result = $this->fixClearingDecArray($clearingDec);
-    assertThat($result, contains(
-        array(3, 1000, 9, 3, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 1234), false, true),
-        array(2, 1000, 7, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), true, true),
-        array(1, 1000, 5, 1, 'upload', DecisionTypes::IDENTIFIED, $this->getMyDate2($this->now - 888), false, false)
-    ));
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkText = array_map(function($bulk){ return $bulk['text']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+    assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($bulkText, arrayContaining('TextFOO', 'TextBAR', 'TextBAZ', 'TextBAZ', 'TextQUX'));
   }
 
-
-  public function testLicenseDecisionEventsWithoutGroupOverlap()
+ public function testBulkHistoryWithoutMatchesFromDifferentFolder()
   {
-    $result = $this->fixResult($this->clearingDao->getRelevantLicenseDecisionEvents(3, 1000));
-    assertThat(count($result), is(1));
-    assertThat($result[0], is(
-        array(3, 100, 1000, 3, 4, "QUX", false, false, LicenseDecision::USER_DECISION, $this->getMyDate2($this->now - 1234))
-    ));
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(305);
+    $treeBounds->shouldReceive('getLeft')->andReturn(4);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(102);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
+
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    assertThat($bulkMatched, arrayContaining(false));
   }
 
-  public function testLicenseDecisionEventsWithoutMatch()
+  public function testBulkHistoryWithAMatch()
   {
-    $result = $this->clearingDao->getRelevantLicenseDecisionEvents(3, 1200);
-    assertThat($result, is(array()));
+    $this->insertBulkEvents();
+
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
+
+    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
+
+    assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null));
+    assertThat($bulkMatched, arrayContaining(true, false, false, true, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true));
+    assertThat($bulkTried, arrayContaining(true, true, true, true, true));
   }
 
-  public function testCurrentLicenseDecisionViaGroupMembership()
+  public function testBulkHistoryWithAMatchReturningAlsoNotTried()
   {
-    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecisions(1, 1000);
-    assertThat(array_keys($added), is(array("FOO", "BAR")));
-    assertThat(array_keys($removed), is(array("QUX", "BAZ")));
-  }
+    $this->insertBulkEvents();
 
-  public function testCurrentLicenseDecisionViaGroupMembershipShouldBeSymmetric()
-  {
-    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecisions(2, 1000);
-    assertThat(array_keys($added), is(array("FOO", "BAR")));
-    assertThat(array_keys($removed), is(array("QUX", "BAZ")));
-  }
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds->shouldReceive('getItemId')->andReturn(301);
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(101);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, false);
 
-  public function testCurrentLicenseDecisionWithUploadScope()
-  {
-    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecisions(2, 1200);
-    assertThat(array_keys($added), is(array("BAR")));
-    assertThat(array_keys($removed), is(array("BAZ")));
-  }
+    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
 
-  public function testCurrentLicenseDecisionWithoutGroupOverlap()
-  {
-    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecisions(3, 1000);
-    assertThat(array_keys($added), is(array("QUX")));
-    assertThat(array_keys($removed), is(array()));
-  }
-
-  public function testCurrentLicenseDecisionWithoutMatch()
-  {
-    list($added, $removed) = $this->clearingDao->getCurrentLicenseDecisions(3, 1200);
-    assertThat($added, is(array()));
-    assertThat($removed, is(array()));
+    assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null, null));
+    assertThat($bulkMatched, arrayContaining(true, false, false, true, false, false));
+    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX', 'FOO'));
+    assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
+    assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
 }
- 

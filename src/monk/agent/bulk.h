@@ -15,12 +15,13 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 #include "diff.h"
 
-#define BULK_DECISION_TYPE "bulk"
+#define BULK_DECISION_TYPE_MEANING "bulk"
+#define BULK_DECISION_TYPE 2
 #define BULK_DECISION_SCOPE "upload"
 
 void bulkArguments_contents_free(BulkArguments* bulkArguments);
 int queryBulkArguments(long bulkId, MonkState* state);
 int handleBulkMode(MonkState* state, long bulkId);
-void processMatches_Bulk(MonkState* state, File* file, GArray* matches);
+int processMatches_Bulk(MonkState* state, File* file, GArray* matches);
 
 #endif // MONK_AGENT_BULK_H

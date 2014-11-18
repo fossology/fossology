@@ -7,20 +7,15 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-$dataPropertiesStorage['license_decision_type.meaning'] = array(
-  'User decision',
-  'bulk'
-);
-
 $dataPropertiesStorage['clearing_decision_type.type_pk.meaning'] = array(
   3=>'To be discussed',
   4=>'Irrelevant',
   5=>'Identified'
 );
 
-$dataPropertiesStorage['upload_status.meaning'] = array(
-  'open',
-  'in progress',
-  'closed',
-  'rejected'
+$dataPropertiesStorage['upload_status.status_pk.meaning'] = array(
+  1=>'open',
+  2=>'in progress',
+  3=>'closed',
+  4=>'rejected'
 );

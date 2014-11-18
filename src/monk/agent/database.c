@@ -21,7 +21,7 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
     fo_dbManager_PrepareStamement(
       dbManager,
       "queryFileIdsForUploadAndLimits",
-      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3",
+      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and pfile_fk != 0",
       int, long, long),
     uploadId, left, right
   );
@@ -125,24 +125,6 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
   }
 
   return licenseFilePk;
-}
-
-int saveHighlightToDb(fo_dbManager* dbManager, char* type, DiffPoint* highlight, long licenseFileId){
-  PGresult* insertResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "saveHighlightToDb",
-      "insert into highlight(fl_fk, type, start, len) values($1,$2,$3,$4)",
-      long, char*, size_t, size_t),
-    licenseFileId, type, highlight->start, highlight->length
-  );
-
-  if (!insertResult)
-    return 0;
-
-  PQclear(insertResult);
-
-  return 1;
 }
 
 inline int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {

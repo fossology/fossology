@@ -9,7 +9,9 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = Unit
+LOCALAGENTDIR = ../agent
+
+DIRS = Unit Functional
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
@@ -21,8 +23,10 @@ test:
 
 coverage:
 	$(call DIR_LOOP,coverage)
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 clean:
 	$(call DIR_LOOP,clean)
+	rm -rf results/
 
 .PHONY: all test coverage clean

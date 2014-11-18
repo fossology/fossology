@@ -1,4 +1,3 @@
-<script type="text/javascript">
 selectedLicensesTableColumns = [
   {"sTitle": "{{ 'License'| trans }}", "sClass": "left read_only"},
   {"sTitle": "{{ 'Source'| trans }}", "sClass": "left read_only", "bSortable": false},
@@ -20,15 +19,6 @@ selectedLicensesTableConfig = {
       .fail(failed)
   },
   "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-//    if (nRow.classList.contains('removed')) {
-//      $('td', nRow).addClass('read_only');
-//    }
-
-//      if (nRow.className.split('/\\s+/').contains('removed')) {
-//          $('td', nRow).addClass('read_only');
-//      }
-
-
       if (nRow.className.match(/(^| )removed($| )/g)  ) {
           $('td', nRow).addClass('read_only');
       }
@@ -43,17 +33,17 @@ selectedLicensesTableConfig = {
   "bFilter": false
 };
 
-$editableConfiguration  = {
+editableConfiguration  = {
   "sReadOnlyCellClass": "read_only",
-  "sUpdateURL": "?mod=conclude-license&do=updateLicenseDecisions" ,
-  "fnPnEditing": function(input) {return input[0].value;},
-  "fnOnEdited": function (){} ,
+  "sUpdateURL": "?mod=conclude-license&do=updateClearings" ,
+  "fnOnEditing": function(input) {return input[0].value;},
+  "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').css('border-color','red');} } ,
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
   "sSuccessResponse": "success"
 };
 
-function createLicenseDecisionTable() {
-  otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable($editableConfiguration);
+function createClearingTable() {
+  otable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   return otable;
 }
 
@@ -86,7 +76,6 @@ function createLicenseSelectionTable() {
 }
 
 $(document).ready(function () {
-  createLicenseDecisionTable();
+  createClearingTable();
   createLicenseSelectionTable();
 });
-</script>

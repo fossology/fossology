@@ -18,7 +18,7 @@ CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
 EXE =
 LIB = libfossologyCPP.a
 DEPENDENCY = $(CLIBDIR)/libfossology.a
-OBJS = libfossAgentDatabaseHandler.o files.o libfossdbmanagerclass.o libfossUtils.o
+OBJS = libfossAgentDatabaseHandler.o files.o libfossdbmanagerclass.o libfossdbQueryResult.o libfossUtils.o
 
 COVERAGE = $(OBJS:%.o=%_cov.o)
 

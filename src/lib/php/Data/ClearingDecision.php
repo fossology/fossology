@@ -20,9 +20,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use DateTime;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecision extends ClearingDecisionData
+class ClearingDecision extends Object
 {
+  /** @var bool */
+  private $sameUpload;
+  /** @var bool */
+  private $sameFolder;
+  /** @var LicenseRef[] */
+  private $positiveLicenses;
+  /** @var LicenseRef[] */
+  private $negativeLicenses;
+  /** @var int */
+  private $clearingId;
+  /** @var int */
+  private $uploadTreeId;
+  /** @var int */
+  private $pfileId;
+  /** @var string */
+  private $userName;
+  /** @var int */
+  private $userId;
+  /** @var int */
+  private $type;
+  /** @var string */
+  private $comment;
+  /** @var string */
+  private $reportinfo;
+  /** @var int */
+  private $scope;
+  /** @var DateTime */
+  private $dateAdded;
 
   /**
    * @param $sameFolder
@@ -32,8 +61,8 @@ class ClearingDecision extends ClearingDecisionData
    * @param $pfileId
    * @param $userName
    * @param $userId
-   * @param $type
-   * @param $scope
+   * @param int $type
+   * @param int $scope
    * @param $date_added
    * @param $positiveLicenses
    * @param $negativeLicenses
@@ -53,7 +82,7 @@ class ClearingDecision extends ClearingDecisionData
     $this->userId = $userId;
     $this->type = $type;
     $this->scope = $scope;
-    $this->date_added = $date_added;
+    $this->dateAdded = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
     $this->positiveLicenses = $positiveLicenses;
@@ -81,7 +110,7 @@ class ClearingDecision extends ClearingDecisionData
    */
   public function getDateAdded()
   {
-    return $this->date_added;
+    return $this->dateAdded;
   }
 
   /**
@@ -133,7 +162,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getScope()
   {
@@ -141,7 +170,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getType()
   {

@@ -70,13 +70,13 @@ class agent_fodecider extends FO_Plugin
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
+   * @param int $job_pk
+   * @param int $upload_pk
+   * @param &string $ErrorMsg - error message on failure
+   * @param array $Dependencies - array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * \returns
+   * @param int|null $conflictStrategyId
+   * @returns
    * - jq_pk Successfully queued
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg

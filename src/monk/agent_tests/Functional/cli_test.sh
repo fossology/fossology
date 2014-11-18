@@ -1,7 +1,5 @@
 #! /bin/sh
 #
-
-
 # Author: Daniele Fognini, Andreas Wuerl
 # Copyright (C) 2013-2014, Siemens AG
 # 
@@ -14,7 +12,7 @@
 
 _runmonk()
 {
-  ../../agent/monk "$@"
+  ./monk "$@"
 }
 
 _testAllFull()

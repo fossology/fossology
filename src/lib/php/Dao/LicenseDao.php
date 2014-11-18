@@ -69,7 +69,7 @@ class LicenseDao extends Object
                   AG.agent_rev AS agent_revision,
                   LFR.rf_match_pct AS percent_match
           FROM license_file_ref as LFR
-          INNER JOIN $uploadTreeTableName as UT  ON UT.pfile_fk = LFR.pfile_fk
+          INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
            UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
@@ -82,9 +82,9 @@ class LicenseDao extends Object
 
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
-      $agentRef = new AgentRef($row['agent_id'], $row['agent_name'], $row['agent_revision']);
-      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, $row['license_file_id'], $row['percent_match']);
+      $licenseRef = new LicenseRef(intval($row['license_id']), $row['license_shortname'], $row['license_fullname']);
+      $agentRef = new AgentRef(intval($row['agent_id']), $row['agent_name'], $row['agent_revision']);
+      $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']), intval($row['percent_match']));
     }
 
     $this->dbManager->freeResult($result);
@@ -324,6 +324,26 @@ class LicenseDao extends Object
     }
     $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_text'], $row['rf_url']);
     return $license;
+  }
+
+  public function insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText)
+  {
+    $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
+      "INSERT INTO license_ref_bulk (user_fk, group_fk, upload_fk, uploadtree_fk, rf_fk, removing, rf_text)
+      VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING lrb_pk",
+      array($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText)
+    );
+
+    if ($licenseRefBulkIdResult !== false) {
+      return $licenseRefBulkIdResult['lrb_pk'];
+    } else {
+      return -1;
+    }
+  }
+  
+  public function getLicenseCount() {
+    $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
+    return intval($licenseRefTable['cnt']);
   }
 
 }

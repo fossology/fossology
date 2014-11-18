@@ -160,7 +160,7 @@ function bootstrap($sysconfdir="")
     exit(1);
   }
 
-  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   require_once("$MODDIR/lib/php/common.php");
+  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   return $SysConf;
 }

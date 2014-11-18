@@ -6,7 +6,7 @@
   <table>
     <tr>
       <td style="vertical-align:top;">
-        <button type="submit" name="update"  id="prev" disabled>&lt;</button>
+        <button type="submit" name="update" id="prev" disabled>&lt;</button>
         <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
         <button type="submit" name="update" id="next" disabled>&gt;</button>
       </td>
@@ -21,12 +21,12 @@
   <div class="groupBox">
     <fieldset style="display:inline">
       <legend>
-        {{ 'License decision scope'| trans }}
+        {{ 'Clearing decision scope'| trans }}
       </legend>
-      <input type="checkbox" name="globalDecision"/> global
+      <input type="checkbox" name="globalDecision"/> {{ 'global'|trans }}
     </fieldset>
     <br/>
-    <fieldset style="display: inline;">
+    <fieldset style="display: inline; {% if tmpClearingType %}border-color: red; border-width: 5px;{% endif %}" id="decTypeSet">
       <legend>
         {{ 'Clearing decision type'| trans }}
       </legend>
@@ -114,3 +114,14 @@
     </div>
   </div>
 {% endif %}
+
+<div class="groupBox" id="bulkHistory" {% if not bulkHistory %}hidden{% endif %}>
+
+<h3>
+{{ 'Bulk History'| trans }}
+</h3>
+
+<div class="scrollable2">
+{% include 'bulk-history.html.twig' %}
+</div>
+</div>

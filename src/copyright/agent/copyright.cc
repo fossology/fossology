@@ -16,6 +16,13 @@ You should have received a copy of the GNU General Public License along with thi
 #include "copyright.hpp"
 
 using namespace std;
+using namespace fo;
+
+#define return_sched(retval) \
+  do {\
+    fo_scheduler_disconnect((retval));\
+    return (retval);\
+  } while(0)
 
 int main(int argc, char** argv)
 {
@@ -24,29 +31,30 @@ int main(int argc, char** argv)
 
   DbManager dbManager(&argc, argv);
 
-  int verbosity = 8;
-  CopyrightState state = getState(dbManager, verbosity);
-  CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
-
-  if (!copyrightDatabaseHandler.createTables())
+  CliOptions cliOptions;
+  vector<string> fileNames;
+  if (!parseCliOptions(argc, argv, cliOptions, fileNames))
   {
-    std::cout << "FATAL: initialization failed" << std::endl;
-    bail(9);
+    return_sched(1);
   }
+
+  CopyrightState state = getState(dbManager, cliOptions);
+  CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
   fillMatchers(state);
 
-  if (argc > 1)
+  if (!fileNames.empty())
   {
     const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+
+    const unsigned long fileNamesCount = fileNames.size();
 #pragma omp parallel
     {
 #pragma omp for
-      for (int argn = 1; argn < argc; ++argn)
+      for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
       {
-        const char* fileName = argv[argn];
-
-        fo::File file((unsigned long) argn, fileName);
+        const string fileName = fileNames[argn];
+        fo::File file(argn, fileName);
         vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
 
         stringstream ss;
@@ -57,6 +65,12 @@ int main(int argc, char** argv)
   }
   else
   {
+    if (!copyrightDatabaseHandler.createTables())
+    {
+      std::cout << "FATAL: initialization failed" << std::endl;
+      return_sched(9);
+    }
+
     while (fo_scheduler_next() != NULL)
     {
       int uploadId = atoi(fo_scheduler_current());
@@ -66,18 +80,18 @@ int main(int argc, char** argv)
       int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 
       if (arsId <= 0)
-        bail(5);
+        return_sched(5);
 
       if (!processUploadId(state, uploadId, copyrightDatabaseHandler))
-        bail(2);
+        return_sched(2);
 
-      fo_scheduler_heart(1);
+      fo_scheduler_heart(0);
       writeARS(state, arsId, uploadId, 1, dbManager);
     }
     fo_scheduler_heart(0);
   }
 
   /* do not use bail, as it would prevent the destructors from running */
-  fo_scheduler_disconnect(0);
-  return 0;
+  return_sched(0);
 }
+

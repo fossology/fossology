@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along with thi
 #define MODE_SCHEDULER 1
 #define MODE_CLI 2
 #define MODE_BULK 3
-#define MODE_BULK_NEGATIVE 4
 
 #define FULL_MATCH "M"
 #define DIFF_TYPE_MATCH "M0"
@@ -27,10 +26,12 @@ You should have received a copy of the GNU General Public License along with thi
 #define DIFF_TYPE_REMOVAL "M-"
 #define DIFF_TYPE_REPLACE "MR"
 
-#define DELIMITERS " \t\n\r\f"
+#define DELIMITERS " \t\n\r\f#"
 
-#define MAX_ALLOWED_DIFF_LENGTH 200
+#define MONK_CASE_INSENSITIVE
+#define MAX_ALLOWED_DIFF_LENGTH 100
 #define MIN_TRAILING_MATCHES 5
+#define MAX_LEADING_DIFF 3
 #define MIN_ALLOWED_RANK 66
 
 #include <glib.h>

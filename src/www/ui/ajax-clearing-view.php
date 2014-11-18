@@ -16,18 +16,17 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
-use Fossology\Lib\View\LicenseRenderer;
 use Monolog\Logger;
 
 define("TITLE_ajaxClearingView", _("Change concluded License "));
@@ -42,8 +41,6 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -52,10 +49,8 @@ class AjaxClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
-  /** @var ClearingDecisionEventProcessor */
+  /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
-
-  /** @var LicenseRenderer */
 
   function __construct()
   {
@@ -74,16 +69,14 @@ class AjaxClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
 
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
   /**
@@ -99,26 +92,30 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param $orderAscending
-   * @param $itemTreeBounds
    * @param $userId
    * @param $uploadId
    * @param $uploadTreeId
+   * @internal param $itemTreeBounds
    * @return string
    */
   protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
-    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
+    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
-      $currentShortName = $licenseRef->getShortName();
-      if (array_key_exists($currentShortName, $licenseDecisions)) continue;
-      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($currentShortName);
-      $theLicenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $theLicenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+      $licenseShortName = $licenseRef->getShortName();
+
+      if (array_key_exists($licenseShortName, $licenseDecisions))
+        continue;
+
+      $shortNameWithFullTextLink = $this->getLicenseFullTextLink($licenseShortName);
+      $licenseId = $licenseRef->getId();
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -138,9 +135,9 @@ class AjaxClearingView extends FO_Plugin
    * @internal param $itemTreeBounds
    * @return string
    */
-  protected function doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId)
+  protected function doClearings($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $itemTreeBounds = $this->uploadDao->getFileTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
     $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds, $userId, $orderAscending);
 
     return json_encode(
@@ -223,9 +220,6 @@ class AjaxClearingView extends FO_Plugin
           {
             $orderAscending = $sort0 === "asc";
           }
-
-          $global = GetParm("global", PARM_STRING) === "true";
-
       }
       switch ($action)
       {
@@ -233,14 +227,14 @@ class AjaxClearingView extends FO_Plugin
           return $this->doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "licenseDecisions":
-          return $this->doLicenseDecisions($orderAscending, $userId, $uploadId, $uploadTreeId);
+          return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);
 
         case "addLicense":
-          $this->clearingDao->addLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global); //$global was always false, why?
+          $this->clearingDao->addClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
           return json_encode(array());
 
         case "removeLicense":
-          $this->clearingDao->removeLicenseDecision($uploadTreeId, $userId, $licenseId, 1, $global);
+          $this->clearingDao->removeClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
           return json_encode(array());
 
         case "setNextPrev":
@@ -249,14 +243,14 @@ class AjaxClearingView extends FO_Plugin
         case "setNextPrevEcc":
           return $this->doNextPrev($action, $uploadId, $uploadTreeId);
 
-        case "updateLicenseDecisions":
+        case "updateClearings":
           $id = GetParm("id", PARM_STRING);
           if (isset($id))
           {
             list ($uploadTreeId, $licenseId) = explode(',', $id);
             $what = GetParm("columnName", PARM_STRING);
             $changeTo = GetParm("value", PARM_STRING);
-            $this->clearingDao->updateLicenseDecision($uploadTreeId, $userId, $licenseId, $what, $changeTo);
+            $this->clearingDao->updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo);
           }
           return "success";
       }
@@ -270,37 +264,36 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
   {
-    $uploadTreeId = $itemTreeBounds->getUploadTreeId();
+    $uploadTreeId = $itemTreeBounds->getItemId();
     $uploadId = $itemTreeBounds->getUploadId();
-
-
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($licenseDecisions, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentLicenseDecisions($itemTreeBounds, $userId);
-
-
+    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+    $licenseEventTypes = new ClearingEventTypes();
+    $licenseEventTypeMap = $licenseEventTypes->getMap();
+    
     $table = array();
-    foreach ($licenseDecisions as $licenseShortName => $licenseDecisionResult)
+    foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
-      /** @var LicenseDecisionResult $licenseDecisionResult */
-      $licenseId = $licenseDecisionResult->getLicenseId();
+      /** @var ClearingResult $clearingResult */
+      $licenseId = $clearingResult->getLicenseId();
 
       $types = array();
       $reportInfo = "";
       $comment = "";
 
-      if ($licenseDecisionResult->hasLicenseDecisionEvent())
+      if ($clearingResult->hasClearingEvent())
       {
-        $licenseDecisionEvent = $licenseDecisionResult->getLicenseDecisionEvent();
-        $types[] = $licenseDecisionEvent->getEventType();
+        $licenseDecisionEvent = $clearingResult->getClearingEvent();
+        $types[] = $licenseEventTypeMap[$licenseDecisionEvent->getEventType()];
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }
 
-      $types = array_merge($types, $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId));
+      $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
 
       $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
-      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
 
       $reportInfoField = $reportInfo;
       $commentField = $comment;
@@ -314,14 +307,14 @@ class AjaxClearingView extends FO_Plugin
           '4' => $actionLink);
     }
 
-    foreach ($removedLicenses as $licenseShortName => $licenseDecisionResult)
+    foreach ($removedLicenses as $licenseShortName => $clearingResult)
     {
-      if ($licenseDecisionResult->getAgentDecisionEvents())
+      if ($clearingResult->getAgentDecisionEvents())
       {
-        $agents = $this->getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId);
+        $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->getLicenseFullTextLink($licenseShortName);
-        $licenseId = $licenseDecisionResult->getLicenseId();
-        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+        $licenseId = $clearingResult->getLicenseId();
+        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);
@@ -341,7 +334,7 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
-   * @param LicenseDecisionResult $licenseDecisionResult
+   * @param ClearingResult $licenseDecisionResult
    * @param $uberUri
    * @param $uploadTreeId
    * @return array
@@ -353,7 +346,7 @@ class AjaxClearingView extends FO_Plugin
     {
       $licenseId = $agentDecisionEvent->getLicenseId();
       $agentId = $agentDecisionEvent->getAgentId();
-      $matchId = $agentDecisionEvent->getEventId();
+      $matchId = $agentDecisionEvent->getMatchId();
       $percentage = $agentDecisionEvent->getPercentage();
       $agentResults[$agentDecisionEvent->getAgentName()][] = array(
           "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&licenseId=$licenseId&highlightId=$matchId#highlight",

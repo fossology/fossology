@@ -1,5 +1,6 @@
 <?php
 /***********************************************************
+ *
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  *
  * This program is free software; you can redistribute it and/or
@@ -15,6 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+use Fossology\Lib\Plugin\Plugin;
 
 /**
  * Each plugin has a state to identify if it is invalid.
@@ -61,7 +64,7 @@ $GLOBALS['PERM_NAMES'] = array(PERM_NONE => $NoneText, PERM_READ => $ReadText, P
  * $NewPlugin->Name="Fred";
  * if ($NewPlugin->Initialize() != 0) { destroy $NewPlugin; }
  */
-class FO_Plugin
+class FO_Plugin implements Plugin
 {
   /**
    *  All public fields can be empty, indicating that it does not apply.
@@ -192,20 +195,8 @@ class FO_Plugin
    */
   public function __construct()
   {
-
-    global $Plugins;
-
-    if ($this->State != PLUGIN_STATE_INVALID)
-    {
-      //print "<pre>TDB: returning state invalid\n</pre>";
-      return (1); // don't re-run
-    }
-    if ($this->Name !== "")
-    { // Name must be defined
-      $this->State = PLUGIN_STATE_VALID;
-      array_push($Plugins, $this);
-    }
-    return ($this->State == PLUGIN_STATE_VALID);
+    $this->State = PLUGIN_STATE_VALID;
+    register_plugin($this);
   }
 
   /**
@@ -352,7 +343,15 @@ class FO_Plugin
     {
       $this->vars['menu'] = $Menu->Output($this->Title);
     }
-    return;
+
+    global $SysConf;
+    $this->vars['versionInfo'] = array(
+        'version' => $SysConf['BUILD']['VERSION'],
+        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
+        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
+        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+    );
+
   } // OutputOpen()
 
   /**
@@ -449,5 +448,40 @@ class FO_Plugin
 
     return $renderer->loadTemplate($templateName)->render($vars);
   }
+
+  public function execute() {
+    $this->OutputOpen();
+    $this->renderOutput();
+  }
+
+  function preInstall()
+  {
+    if ($this->State == PLUGIN_STATE_VALID) { $this->PostInitialize(); }
+    if ($this->State == PLUGIN_STATE_READY) { $this->RegisterMenus(); }
+  }
+
+  function postInstall()
+  {
+    $state = $this->Install();
+    if ($state != 0) {
+      throw new \Exception("install of plugin ". $this->Name . " failed");
+    }
+  }
+
+  function unInstall()
+  {
+    $this->Destroy();
+  }
+
+  public function getName()
+  {
+    return $this->Name;
+  }
+
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
+
 
 }

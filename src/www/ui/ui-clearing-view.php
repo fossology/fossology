@@ -16,21 +16,18 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-use Fossology\Lib\BusinessRules\ClearingDecisionEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseDecision\LicenseDecisionResult;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Util\ChangeLicenseUtility;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
-use Fossology\Lib\View\LicenseRenderer;
+use Fossology\Lib\Data\DecisionScopes;
 use Monolog\Logger;
 
 define("TITLE_clearingView", _("Change concluded License "));
@@ -45,8 +42,6 @@ class ClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var LicenseOverviewPrinter */
   private $licenseOverviewPrinter;
   /** @var Logger */
@@ -55,9 +50,7 @@ class ClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
-  /** @var LicenseRenderer */
-  private $licenseRenderer;
-  /** @var ClearingDecisionEventProcessor */
+  /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
   /** @var bool */
   private $invalidParm = false;
@@ -79,17 +72,15 @@ class ClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
     $this->decisionTypes = $container->get('decision.types');
 
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_event_processor');
+    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
 
@@ -100,10 +91,10 @@ class ClearingView extends FO_Plugin
    * @param $highlightId
    * @return array
    */
-  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId)
+  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
-    if ($selectedAgentId > 0)
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    if (($selectedAgentId > 0) || ($clearingId > 0))
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
     } else
@@ -211,29 +202,39 @@ class ClearingView extends FO_Plugin
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $itemTreeBounds = $this->uploadDao->getFileTreeBounds($uploadTreeId, $uploadTreeTableName);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
 
     $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;
-    /** @var $view ui_view */
+    /** @var ui_view $view */
     $view = &$Plugins[plugin_find_id("view")];
 
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $selectedAgentId = GetParm("agentId", PARM_INTEGER);
     $highlightId = GetParm("highlightId", PARM_INTEGER);
+    $clearingId = GetParm("clearingId", PARM_INTEGER);
 
-    $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
+    if ($clearingId !== null)
+    {
+      $highlightId = -1;
+    }
+    else if ($highlightId !== null)
+    {
+      $clearingId = -1;
+    }
+
+    $baseUri = Traceback_uri();
+    $this->vars['baseuri'] = $baseUri;
+    $this->vars['uri'] = $baseUri . "?mod=" . $this->Name . Traceback_parm_keep(array('upload', 'folder'));
+    $this->vars['bulkHistoryHighlightUri'] = $this->vars['uri'];
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
     $hasHighlights = count($highlights) > 0;
 
     $permission = GetUploadPerm($uploadId);
-    $licenseInformation = "";
-
-    $output = '';
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
     $hasWritePermission = $permission >= PERM_WRITE;
@@ -246,9 +247,6 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile)
     {
-      $extractedLicenseBulkMatches = $this->licenseProcessor->extractBulkLicenseMatches($clearingDecWithLicenses);
-      $output .= $this->licenseOverviewPrinter->createBulkOverview($extractedLicenseBulkMatches, $itemTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
-
       if ($permission >= PERM_WRITE)
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
@@ -258,9 +256,7 @@ class ClearingView extends FO_Plugin
       {
         $this->vars['auditDenied'] = true;
       }
-
     }
-    $licenseInformation .= $output;
 
     $clearingHistory = array();
     $selectedClearingType = false;
@@ -273,22 +269,23 @@ class ClearingView extends FO_Plugin
       $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
 
+    $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds);
+
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
     list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);
 
     $this->vars['uploadId'] = $uploadId;
     $this->vars['itemId'] = $uploadTreeId;
-    $this->vars['path'] = $output;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
-    $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox($selectedAgentId > 0 && $licenseId > 0);
+    $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['licenseInformation'] = $licenseInformation;
+    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
     $this->vars['clearingHistory'] = $clearingHistory;
+    $this->vars['bulkHistory'] = $bulkHistory;
   }
 
-  
   /**
    * @param ClearingDecision[] $clearingDecWithLicenses
    * @return array
@@ -296,6 +293,7 @@ class ClearingView extends FO_Plugin
   private function getClearingHistory($clearingDecWithLicenses)
   {
     $table = array();
+    $scope = new DecisionScopes();
     foreach ($clearingDecWithLicenses as $clearingDecision)
     {
       $licenseNames = array();
@@ -313,15 +311,14 @@ class ClearingView extends FO_Plugin
       $row = array(
           'date'=>$clearingDecision->getDateAdded(),
           'username'=>$clearingDecision->getUserName(),
-          'scope'=>$clearingDecision->getScope(),
+          'scope'=> $scope->getTypeName( $clearingDecision->getScope() ),
           'type'=>$this->decisionTypes->getTypeName($clearingDecision->getType()),
           'licenses'=>implode(", ", $licenseNames));
       $table[] = $row;
     }
     return $table;
   }
-  
-  
+
   public function getTemplateName()
   {
     return "ui-clearing-view.html.twig";
@@ -349,7 +346,7 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
-    $itemBounds = $this->uploadDao->getFileTreeBounds($lastItem,$uploadTreeTableName);
+    $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem,$uploadTreeTableName);
 
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }

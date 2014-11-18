@@ -22,22 +22,18 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
-use Fossology\Lib\View\Renderer;
 use Monolog\Logger;
 
 class UserDao extends Object {
 
   /* @var DbManager */
   private $dbManager;
-  /* @var Renderer */
-  private $renderer;
   /* @var Logger */
   private $logger;
 
-  function __construct(DbManager $dbManager, Renderer $renderer)
+  function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
-    $this->renderer = $renderer;
     $this->logger = new Logger(self::className());
   }
 
@@ -50,7 +46,7 @@ class UserDao extends Object {
     $userChoices = array();
     $statementN = __METHOD__;
 
-    $this->dbManager->prepare($statementN, "select user_pk, user_name from users left join group_user_member as GUM on users.user_pk  = GUM.user_fk  where GUM.group_fk = $1");
+    $this->dbManager->prepare($statementN, "select user_pk, user_name from users left join group_user_member as GUM on users.user_pk = GUM.user_fk where GUM.group_fk = $1");
     $res = $this->dbManager->execute($statementN, array($_SESSION['GroupId']));
     while ($rw = $this->dbManager->fetchArray($res))
     {
@@ -59,23 +55,4 @@ class UserDao extends Object {
     $this->dbManager->freeResult($res);
     return $userChoices;
   }
-
-
-  /**
-   * @param string $selectElementName
-   * @param array $databaseMap
-   * @param int $selectedValue
-   * @return array
-   */
-  public function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $callbackString ="", $callbackArg = "")
-  {
-    $action =  " onchange =\"$callbackString( this, $callbackArg )\" ";
-    if (array_key_exists($_SESSION['UserId'], $databaseMap))
-    {
-      $databaseMap[$_SESSION['UserId']] = _('-- Me --');
-    }
-    $databaseMap[1] = _('Unassigned');
-    return $this->renderer->createSelect($selectElementName,$databaseMap, $selectedValue,$action);
-  }
-
 } 

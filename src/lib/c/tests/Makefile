@@ -34,15 +34,14 @@ OBJS = test_fossconfig.o \
 
 all: test
 test: $(EXE)
-	@echo "make library tests"
-	./$(EXE)
+	@echo "running library tests"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
 	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
-	./$(EXE)
-	lcov --directory $(SRCDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
+	$(call coverage-report-html,$(SRCDIR))
 
 $(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
 	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)

@@ -31,7 +31,29 @@ void test_tokenize() {
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 2);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
+}
+
+void test_tokenizeWithSpecialDelims() {
+  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo");
+
+  GArray* token = tokenize(test, " \n");
+
+  CU_ASSERT_EQUAL(token->len, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 2);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).hashedContent, hash("bar"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 5);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("baz"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).hashedContent, hash("booo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).length, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).removedBefore, 6);
+  g_array_free(token, TRUE);
+  g_free(test);
 }
 
 void test_streamTokenize() {
@@ -71,7 +93,7 @@ void test_streamTokenize() {
     free(remainder);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
 }
 
 void test_streamTokenizeEventuallyGivesUp() {
@@ -112,7 +134,7 @@ void test_streamTokenizeEventuallyGivesUp() {
     free(remainder);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
 }
 
 void assertTokenPosition(char* string, int count, ...) {
@@ -141,7 +163,7 @@ void assertTokenPosition(char* string, int count, ...) {
   }
 
   g_array_free(tokens, TRUE);
-  free(test);
+  g_free(test);
 }
 
 void test_tokenPosition() {
@@ -173,30 +195,16 @@ void test_token_equal() {
 
   g_array_free(tokenizedText, TRUE);
   g_array_free(tokenizedSearch, TRUE);
-  free(text);
-  free(search);
-}
-
-void test_stringBuilder() {
-  StringBuilder* stringBuilder = stringBuilder_new();
-
-  stringBuilder_printf(stringBuilder, "test null, ");
-  stringBuilder_printf(stringBuilder, "test int '%d', ", 5);
-  stringBuilder_printf(stringBuilder, "test string '%s'", "a string");
-
-  char* result = stringBuilder_build(stringBuilder);
-  stringBuilder_free(stringBuilder);
-
-  CU_ASSERT_STRING_EQUAL(result, "test null, test int '5', test string 'a string'");
-  free(result);
+  g_free(text);
+  g_free(search);
 }
 
 CU_TestInfo string_operations_testcases[] = {
   {"Testing tokenize:", test_tokenize},
+  {"Testing tokenize with special delimiters:", test_tokenizeWithSpecialDelims},
   {"Testing stream tokenize:", test_streamTokenize},
   {"Testing stream tokenize with too long stream:",test_streamTokenizeEventuallyGivesUp},
   {"Testing find token position in string:", test_tokenPosition},
   {"Testing token equals:", test_token_equal},
-  {"Testing string builder:", test_stringBuilder},
   CU_TEST_INFO_NULL
 };

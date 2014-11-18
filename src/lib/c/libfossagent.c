@@ -51,11 +51,9 @@ char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
     return result;
   }
 
-
-  result = strdup(PQgetvalue(resTableName, 0, 0));
+  result = g_strdup(PQgetvalue(resTableName, 0, 0));
   PQclear(resTableName);
   return result;
-
 }
 
 
@@ -207,10 +205,7 @@ FUNCTION int fo_WriteARS(PGconn* pgConn, int ars_pk, int upload_pk, int agent_pk
     snprintf(sql, sizeof(sql), "SELECT currval('nomos_ars_ars_pk_seq')");
     result = PQexec(pgConn, sql);
     if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
-    {
-      PQclear(result);
       return (0);
-    }
     ars_pk = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
   }

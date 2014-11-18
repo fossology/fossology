@@ -1,0 +1,53 @@
+tableColumns = [
+  {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
+  {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
+  {
+    "sTitle": "{{ "Comment" }}", "sClass": "center cc", "bSortable": false, "bSearchable": false,
+    "mRender": 2
+  },
+  {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
+  {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
+  {
+    "sTitle": "{{ "Priority" }}", "sClass": "center priobucket", "bSearchable": false,
+    "mRender": function (source, type, val) {
+      return prioColumn(source, type, val);
+    }
+  }
+];
+
+tableSorting = [
+  [5, "desc"],
+  [0, "asc"],
+  [3, "desc"],
+  [1, "desc"],
+  [4, "desc"]
+];
+
+dataTableConfig =
+    {
+      "bServerSide": true,
+      "sAjaxSource": "?mod=browse-processPost",
+      "fnServerData": function (sSource, aoData, fnCallback) {
+          aoData.push({"name": "folder", "value": "{{ folder }}"});
+          aoData.push({"name": "show", "value": "{{ show }}"});
+        aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
+        aoData.push({"name": "statusSelected", "value": statusSelected});
+        $.getJSON(sSource, aoData, fnCallback).fail(failed);
+      },
+      "aoColumns": tableColumns,
+      "aaSorting": tableSorting,
+      "iDisplayLength": 50,
+      "bProcessing": true,
+      "bStateSave": true,
+      "sCookiePrefix": "fossology_",
+      "bRetrieve": true
+    };
+
+function createBrowseTable() {
+  var otable = $('#browsetbl').dataTable(dataTableConfig);
+  return otable;
+}
+
+$(document).ready(function () {
+  createBrowseTable();
+});

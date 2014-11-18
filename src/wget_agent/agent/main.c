@@ -137,7 +137,9 @@ int main  (int argc, char *argv[])
       case 'C':
         CmdlineFlag = 1;
         break;
-      case 'v': break;
+      case 'v':
+        agent_verbose++;   // global agent verbose flag.
+        break;
       case 'V': 
        printf("%s", BuildVersion);
        SafeExit(0);

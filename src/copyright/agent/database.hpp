@@ -24,7 +24,7 @@
 class CopyrightDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
-  CopyrightDatabaseHandler(DbManager manager);
+  CopyrightDatabaseHandler(fo::DbManager manager);
   CopyrightDatabaseHandler spawn() const;
 
   bool createTables() const;

@@ -97,12 +97,12 @@ class changeLicenseProcessPost extends FO_Plugin
     $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
     $uploadName = $uploadInfo['upload_filename'];
 
-
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
-    if(isset($licenses))
-    $this->clearingDao->insertClearingDecisionTest($licenses, $removed, $itemId, $userId, $job_pk); //,  $_POST['comment'], $_POST['remark']
-
+    if (isset($licenses))
+    {
+      $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $itemId, $userId, $job_pk);
+    } //,  $_POST['comment'], $_POST['remark']
 
     /** @var agent_fodecider $deciderPlugin */
     $deciderPlugin = plugin_find("agent_decider");
@@ -126,7 +126,6 @@ class changeLicenseProcessPost extends FO_Plugin
       return json_encode(array("error" => $ErrorMsg));
     }
   }
-
 
 }
 

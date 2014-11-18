@@ -26,6 +26,8 @@ var statusId = 0;
 var assigneeSelected = 0;
 var statusSelected = 0;
 
+var staSel = null;
+
 $(document).ready(function () {
   table = createBrowseTable();
   $('#insert_browsetbl_filter').append($('#browsetbl_filter'));
@@ -33,6 +35,10 @@ $(document).ready(function () {
   table.on('draw', function () {
     initPrioClick();
     initPrioDraw();
+    $('.cc').dblclick( function (){
+        var source=table.fnGetData(this);
+        openCommentModal(source[0],source[1],source[2]); 
+      } );
   });
   commentModal = $('#commentModal').plainModal();
 });
@@ -119,23 +125,10 @@ function openCommentModal(upload, status, comment) {
 }
 
 function closeCommentModal() {
+  $(staSel).val( $(staSel).find('option[selected]').val() );
   commentModal.plainModal('close');
 }
 
-
-function commentColumn(source, type, val) {
-  if (type === 'set') {
-    source[2] = val;
-    return;
-  }
-  if (type === 'display') {
-    if (source[0]) {
-      return '<span ondblclick="openCommentModal(' + source[0] + ',' + source[1] + ',this.value)">' + source[2] + '</span>';
-    }
-    return source[2];
-  }
-  return source[2];
-}
 
 function mysuccess() {
   var oTable = createBrowseTable();
@@ -157,6 +150,7 @@ function mysuccess4() {
 
 function changeTableEntry(sel, uploadId, columnName) {
   if (columnName == 'status_fk' && (sel.value == 3 || sel.value == 4)) {
+    staSel = sel;
     openCommentModal(uploadId, sel.value, '');
   }
   else {
