@@ -23,7 +23,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Dao\UploadTreeDao;
 use Fossology\Lib\Util\ArrayOperation;
@@ -44,8 +43,6 @@ class ui_browse_license extends FO_Plugin
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var AgentsDao */
   private $agentsDao;
   /** @var DbManager */
@@ -68,7 +65,6 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->dbManager = $container->get('db.manager');
     parent::__construct();
   }
@@ -243,6 +239,10 @@ class ui_browse_license extends FO_Plugin
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $updateCache = GetParm("updcache", PARM_INTEGER);
 
+    $this->vars['baseuri'] = Traceback_uri();
+    $this->vars['uploadId'] = $Upload;
+    $this->vars['itemId'] = $Item;
+
     $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 
@@ -256,6 +256,7 @@ class ui_browse_license extends FO_Plugin
     {
       $V .= js_url();
       $V .= $this->showUploadHist($Item, $tag_pk);
+      $V .= "<button onclick='loadBulkHistoryModal();'>bulk history</button>";
       $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
       /** @todo move text to template */
       if ($this->vars['haveOldVersionResult'])

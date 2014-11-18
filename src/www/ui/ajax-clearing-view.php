@@ -71,12 +71,10 @@ class AjaxClearingView extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->licenseProcessor = $container->get('view.license_processor');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
-    $this->licenseRenderer = $container->get("view.license_renderer");
 
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
@@ -108,7 +106,7 @@ class AjaxClearingView extends FO_Plugin
 
       $shortNameWithFullTextLink = $licenseRef->getLicenseTextLink();
       $licenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -288,7 +286,7 @@ class AjaxClearingView extends FO_Plugin
       $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
       
       $licenseShortNameWithLink = $clearingResult->getLicenseTextLink();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/close_16.png\"></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
 
       $reportInfoField = $reportInfo;
       $commentField = $comment;
@@ -309,7 +307,7 @@ class AjaxClearingView extends FO_Plugin
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $clearingResult->getLicenseTextLink();
         $licenseId = $clearingResult->getLicenseId();
-        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/icons/add_16.png\"></a>";
+        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);

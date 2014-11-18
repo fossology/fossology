@@ -22,7 +22,7 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
     fo_dbManager_PrepareStamement(
       dbManager,
       "queryFileIdsForUploadAndLimits",
-      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3",
+      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and pfile_fk != 0",
       int, long, long),
     uploadId, left, right
   );

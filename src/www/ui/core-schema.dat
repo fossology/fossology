@@ -764,11 +764,6 @@
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"lrb_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["highlight_bulk"]["lrb_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"pfile_fk\" int8;";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["highlight_bulk"]["pfile_fk"]["UPDATE"] = "";
-
   $Schema["TABLE"]["highlight_bulk"]["start"]["DESC"] = "";
   $Schema["TABLE"]["highlight_bulk"]["start"]["ADD"] = "ALTER TABLE \"highlight_bulk\" ADD COLUMN \"start\" int8;";
   $Schema["TABLE"]["highlight_bulk"]["start"]["ALTER"] = "ALTER TABLE \"highlight_bulk\" ALTER COLUMN \"start\" DROP NOT NULL;";
@@ -1126,6 +1121,11 @@
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"removing\" bool;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"removing\" SET NOT NULL, ALTER COLUMN \"removing\" SET DEFAULT false;";
   $Schema["TABLE"]["license_ref_bulk"]["removing"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"upload_fk\" IS 'upload id';";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"upload_fk\" int8;";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"upload_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_ref_bulk"]["upload_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"uploadtree_fk\" IS 'file from which the decision was made';";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"uploadtree_fk\" int8;";

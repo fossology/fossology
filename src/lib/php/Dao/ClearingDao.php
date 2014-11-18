@@ -67,12 +67,14 @@ class ClearingDao extends Object
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
+    $joinType = $itemTreeBounds->containsFiles() ? "INNER" : "LEFT";
+
     $sql_upload="";
     if ('uploadtree_a' == $uploadTreeTable) {
       $sql_upload = "ut.upload_fk=$1  and ";
     }
 
-    $statementName = __METHOD__.$uploadTreeTable;
+    $statementName = __METHOD__.".".$uploadTreeTable.".".$joinType;
 
     $sql="SELECT
            CD.clearing_decision_pk AS id,
@@ -93,8 +95,8 @@ class ClearingDao extends Object
            LEFT JOIN users ON CD.user_fk=users.user_pk
            INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
            INNER JOIN ".$uploadTreeTable." ut ON CD.pfile_fk = ut.pfile_fk
-           LEFT JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
-           LEFT JOIN license_ref LR on CL.rf_fk=LR.rf_pk
+           $joinType JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
+           $joinType JOIN license_ref LR on CL.rf_fk=LR.rf_pk
          WHERE ".$sql_upload." ut.lft BETWEEN $2 and $3
            AND CD.decision_type!=$4
          GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
@@ -121,12 +123,7 @@ class ClearingDao extends Object
       $licenseName = $row['fullname'];
       $licenseIsRemoved = $row['removed'];
 
-
-      if($clearingId === $previousClearingId) {
-        //append To last finding
-        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
-      }
-      else {
+      if($clearingId !== $previousClearingId) {
         //store the old one
         if(!$firstMatch) {
           $clearingDec =$clearingDecisionBuilder->setPositiveLicenses($added)
@@ -151,9 +148,10 @@ class ClearingDao extends Object
                                     ->setType($row['type_id'])
                                     ->setScope($row['scope'])
                                     ->setDateAdded($row['date_added']);
+      }
 
+      if ($licenseId !== null) {
         $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $removed, $added);
-
       }
     }
 
@@ -588,7 +586,7 @@ insert into clearing_decision (
             array($uploadTreeId, $userId, DecisionTypes::WIP, DecisionScopes::ITEM ));
     $this->dbManager->freeResult($res);
   }
-  
+
   public function isDecisionWip($uploadTreeId, $userId)
   {
     $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND user_fk=$2 ORDER BY date_added DESC LIMIT 1";
@@ -600,4 +598,65 @@ insert into clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
+  public function getBulkHistory(ItemTreeBounds $itemTreeBound, $onlyTried = true)
+  {
+    $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
+    $itemId = $itemTreeBound->getItemId();
+    $uploadId = $itemTreeBound->getUploadId();
+    $left = $itemTreeBound->getLeft();
+
+    $params = array($uploadId, $itemId, $left);
+    $stmt = __METHOD__.".".$uploadTreeTableName;
+
+    $triedExpr = "$3 between ut2.lft and ut2.rgt";
+    $triedFilter = "";
+    if ($onlyTried)
+    {
+      $triedFilter = "and ".$triedExpr;
+      $stmt .= ".tried";
+    }
+
+    $sql = "with alltried as (
+            select lr.lrb_pk,
+              ce.clearing_event_pk ce_pk, lr.rf_text, lrf.rf_shortname, removing,
+              ce.uploadtree_fk,
+              $triedExpr as tried
+              from license_ref_bulk lr
+              left join highlight_bulk h on lrb_fk = lrb_pk
+              left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
+              left join $uploadTreeTableName ut on ut.uploadtree_pk = ce.uploadtree_fk
+              inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
+              inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
+              where lr.upload_fk = $1
+              $triedFilter
+              order by lr.lrb_pk
+            )
+            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
+            FROM (
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, true as matched FROM alltried WHERE uploadtree_fk = $2
+              UNION ALL
+              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
+            ) AS result ORDER BY lrb_pk, matched DESC";
+
+    $this->dbManager->prepare($stmt, $sql);
+
+    $res = $this->dbManager->execute($stmt, $params);
+
+    $bulks = array();
+
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $bulks[] = array(
+        "id" => $row['ce_pk'],
+        "text" => $row['text'],
+        "lic" => $row['lic'],
+        "removing" => $this->dbManager->booleanFromDb($row['removing']),
+        "matched" => $this->dbManager->booleanFromDb($row['matched']),
+        "tried" => $this->dbManager->booleanFromDb($row['tried'])
+      );
+    }
+
+    $this->dbManager->freeResult($res);
+    return $bulks;
+  }
 }
