@@ -1,7 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014 Siemens AG
+  Copyright (C) 2014 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -52,13 +51,12 @@ class AdviceLicense extends DefaultPlugin
       );
       return $this->render('advice_license.html.twig', $this->mergeWithDefault($vars));
     }
-
+    
     $vars = $this->getDataRow($_SESSION['GroupId'], $rf);
     if ($vars === false)
     {
-      throw new Exception('invalid license candidate');
+      throw new \Exception('invalid license candidate');
     }
-
 
     if (GetParm('save', PARM_STRING))
     {
@@ -72,7 +70,6 @@ class AdviceLicense extends DefaultPlugin
       }
     }
     
-    $vars['uri'] = Traceback_uri() .'?mod='. Traceback_parm();
     return $this->render('advice_license-edit.html.twig', $this->mergeWithDefault($vars));
   }
 
@@ -102,6 +99,9 @@ class AdviceLicense extends DefaultPlugin
   
   private function getDataRow($groupId,$licId)
   {
+    if($licId==-1){
+      return array('rf_pk'=>-1,'rf_shortname'=>'');
+    }
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
     /** @var DbManager */
     $dbManager = $this->container->get('db.manager');
@@ -122,15 +122,15 @@ class AdviceLicense extends DefaultPlugin
   }
 
   /**
+   * @param array $oldRow
    * @return array $newRow
-   * 
    */
   private function saveInput($oldRow)
   {
     $shortname = GetParm('shortname', PARM_STRING);
     $fullname = GetParm('fullname', PARM_STRING);
     $rfText = GetParm('rf_text', PARM_STRING);
-    $url = GetParm('rf_url', PARM_STRING);
+    $url = GetParm('url', PARM_STRING);
     $marydone = GetParm('marydone', PARM_INTEGER);
     
     if(empty($shortname) || empty($fullname) || empty($rfText)){
@@ -149,8 +149,12 @@ class AdviceLicense extends DefaultPlugin
     {
       throw new \Exception('shortname already in use');
     }
-    
-    $licenseDao->updateCandidate($oldRow['rf_pk'],$shortname,$fullname,$rfText,$url,$marydone);
+    if ($oldRow['rf_pk'] == -1)
+    {
+      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText);
+    }
+
+    $licenseDao->updateCandidate($oldRow['rf_pk'],$shortname,$fullname,$rfText,$url,!empty($marydone));
     return array('rf_pk'=>$oldRow['rf_pk'],'rf_shortname'=>$shortname,'rf_fullname'=>$fullname,'rf_text'=>$rfText,'rf_url'=>$url,'marydone'=>$marydone);            
   }
 

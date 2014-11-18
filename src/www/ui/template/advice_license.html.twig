@@ -1,15 +1,15 @@
 {% extends "include/base.html.twig" %}
 
-{% block head %}
-  {{ parent() }}
-  <style type="text/css">
-  </style>
-{% endblock %}
 
 {% block content %}
 
 <table class="semibordered" id="licenseCandidateTbl" width="100%" cellpadding="0">
 </table>
+  <br/><br/>
+<div style="text-align:center;">
+  <a href="?mod=advice_license&amp;rf=-1" class="buttonLink">{{ 'New License'|trans }}</a>
+</div>
+  
 {% endblock %}
 
 {% block foot %}

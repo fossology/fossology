@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<form>
+<form method="post">
   <input type="hidden" name="mod" value="advice_license"/>
   <input type="hidden" name="rf" value="{{ rf_pk }}"/>
   <table>
@@ -24,7 +24,7 @@
     </tr>
     <tr>
       <td>{{ 'Merge request'|trans }}:</td>
-      <td><input type="checkbox" id="marydone"{%if marydone %} checked="checked"{% endif %}/></td>
+      <td><input type="checkbox" name="marydone"{%if marydone %} checked="checked"{% endif %}/></td>
     </tr>
   </table>
   <input type="submit" name="save" value="{{ 'Save'|trans }}"/>
