@@ -29,6 +29,8 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\License;
 
+define('CONTEXT',25);
+
 require_once("getClearedCommon.php");
 class KeywordsGetter extends ClearedGetterCommon
 {
@@ -47,11 +49,17 @@ class KeywordsGetter extends ClearedGetterCommon
     parent::__construct($groupBy = "text");
   }
 
-  private function readFile(ItemTreeBounds $itemTreeBounds, $start, $end)
+  private function readFile($inputFile, $start, $end)
   {
-   
-    $keyword = "keyword".$start;
-    $context = ($itemTreeBounds->getItemId()).": ".$start."keyword".$end;
+    $length = $end - $start;
+    $startContext = max(0,$start - CONTEXT);
+
+    fseek($inputFile, $startContext, SEEK_SET);
+    $context = fread($inputFile, $length + 2*CONTEXT);
+
+    fseek($inputFile, $start, SEEK_SET);
+    $keyword = fread($inputFile, $length);
+
     return array($keyword, $context);
   }
 
@@ -75,13 +83,18 @@ class KeywordsGetter extends ClearedGetterCommon
       $itemId = $row['itemid'];
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId, $uploadTreeTableName);
 
+      $inputFile = fopen(RepPathItem($itemId), "rb");
+
+      if (!$inputFile)
+        throw new \Exception("could not open item $itemId for reading");
+
       $highlightsKeyword = $this->highlightDao->getHighlightKeywords($itemTreeBounds);
       foreach($highlightsKeyword as $highlight)
       {
         $start = $highlight->getStart();
         $end = $highlight->getEnd();
 
-        list($keyword, $context) = $this->readFile($itemTreeBounds, $start, $end);
+        list($keyword, $context) = $this->readFile($inputFile, $start, $end);
 
         $result[]= array(
           'content' => $keyword,
@@ -89,6 +102,8 @@ class KeywordsGetter extends ClearedGetterCommon
           'uploadtree_pk' => $itemId
         );
       }
+
+      fclose($inputFile);
     }
 
     $this->dbManager->freeResult($res);
