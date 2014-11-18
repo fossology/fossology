@@ -38,17 +38,14 @@ class ReadmeOssAgent extends Agent
     $this->licenseClearedGetter = new LicenseClearedGetterProto();
 
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
-
-
   }
 
   function processUploadId($uploadId)
   {
-
     $userId = $this->userId;
 
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $userId);
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId,$userId);
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $userId);
 
     $contents = array('licenses' => $licenses,
                       'copyrights' => $copyrights
@@ -63,27 +60,26 @@ class ReadmeOssAgent extends Agent
   {
     global $SysConf;
 
-    $ROW = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
-    $Package_Name = $ROW['upload_filename'];
-    $this->dbManager->freeResult($ROW);
+    // TODO use uploadDao
+    $row = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
+    $packageName = $row['upload_filename'];
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $filename = $fileBase. "ReadMe_OSS_".$Package_Name.".txt" ;
+    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
 
-    $message = $this->generateReport($contents, $Package_Name);
+    $message = $this->generateReport($contents, $packageName);
 
-    file_put_contents($filename, $message );
+    file_put_contents($fileName, $message);
 
-    $this->updateReportTable($uploadId, $this->jobId, $filename );
+    $this->updateReportTable($uploadId, $this->jobId, $fileName);
   }
 
   private function updateReportTable($uploadId, $jobId, $filename){
-   $result=$this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",array($uploadId, $jobId, $filename),__METHOD__);
-   $this->dbManager->freeResult($result);
+   $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
   }
 
   private function generateReport($contents, $Package_Name)
@@ -102,7 +98,7 @@ class ReadmeOssAgent extends Agent
       $output .= $contents['licenses']['statements'][$i]['text'];
       $output .= $Break;
       $output .= $separator2;
-      $output .= $Break;           
+      $output .= $Break;
       $i++;
     }
     $j = 0;
