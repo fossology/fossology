@@ -40,7 +40,7 @@ class BulkMatchesGetter extends ClearedGetterCommon
     $this->highlightDao = $container->get('dao.highlight');
     $this->clearingDao = $container->get('dao.clearing');
 
-    parent::__construct("bulkId");
+    parent::__construct($groupBy = "bulkId");
   }
 
   protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
