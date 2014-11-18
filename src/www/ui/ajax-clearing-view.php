@@ -27,6 +27,7 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\LicenseProcessor;
+use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
 
 define("TITLE_ajaxClearingView", _("Change concluded License "));
@@ -41,8 +42,6 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var LicenseProcessor */
-  private $licenseProcessor;
   /** @var Logger */
   private $logger;
   /** @var HighlightDao */
@@ -51,6 +50,8 @@ class AjaxClearingView extends FO_Plugin
   private $highlightProcessor;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
+  /** @var UrlBuilder */
+  private $urlBuilder;
   /** @var int */
   private $uploadId;
 
@@ -75,6 +76,7 @@ class AjaxClearingView extends FO_Plugin
 
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
+    $this->urlBuilder = $container->get('view.url_builder');
 
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
@@ -104,7 +106,7 @@ class AjaxClearingView extends FO_Plugin
         continue;
       }
 
-      $shortNameWithFullTextLink = $licenseRef->getLicenseTextLink();
+      $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
       $licenseId = $licenseRef->getId();
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 

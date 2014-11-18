@@ -73,18 +73,5 @@ class LicenseRef extends Object
   {
     return 'LicenseRef('.$this->id.')';
   }
-  
-  /**
-   * @return string
-   */
-  public function getLicenseTextLink()
-  {
-    $uri = Traceback_uri() . '?mod=popup-license&rf=' . $this->id;
-    $title = _('License text');
-    $licenseShortNameWithLink = '<a title="'.$this->fullName.'" href="javascript:;" onclick="javascript:window.open(\''
-            .$uri. '\',\''.$title.'\',\'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes\');">' 
-            .$this->shortName. '</a>';
-    return $licenseShortNameWithLink;
-  }
 
 }
