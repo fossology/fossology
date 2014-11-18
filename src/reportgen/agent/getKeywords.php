@@ -1,3 +1,4 @@
+<?php
 /*
  Copyright (C) 2014, Siemens AG
  Author: Daniele Fognini
@@ -15,23 +16,16 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef JSON_DATA_RETRIVER_H
-#define JSON_DATA_RETRIVER_H
 
-/*
- *
- * should return a json in this format:
- *
- * { "licenses" : [
- *                  { "name": "Apache-2.0", "text" : "licText", "files" : [ "/a.txt", "/b.txt" ]},
- *                  { "name": "Apache-1.0", "text" : "lic3Text", "files" : [ "/c.txt" ]},
- *                ]
- * }
- */
-char* getClearedLicenses(int uploadId, int userId);
-char* getClearedCopyright(int uploadId);
-char* getClearedIp(int uploadId);
-char* getClearedEcc(int uploadId);
-char* getMatches(int uploadId, int userId);
-char* getKeywords(int uploadId);
-#endif
+
+namespace Fossology\Reportgen;
+require_once("$MODDIR/lib/php/common-cli.php");
+require_once("$MODDIR/lib/php/Report/getKeywords.php");
+cli_Init();
+
+use Fossology\Lib\Data\License;
+
+$clearedGetter = new KeywordsGetter();
+$clearedGetter->getCliArgs();
+$uploadId = $clearedGetter->getUploadId();
+print json_encode($clearedGetter->getCleared($uploadId));

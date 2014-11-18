@@ -882,6 +882,16 @@ table_addRow(tableMatches, "license", "text", "files");
   g_free(json);
 }
 
+addparaheading(createnumsection(body,"0","2"), NULL, "Keywords","0","2");
+
+rg_table* tableKeywords = table_new(body, 3, "2000", "4000", "3638");
+table_addRow(tableKeywords, "keyword", "text", "files");
+{
+  char* json = getKeywords(uploadId);
+  fillTableFromJson(tableKeywords, json);
+  g_free(json);
+}
+
 addparaheading(createnumsection(body,"0","2"),NULL, "Special considerations","0","2");
 addparaheading(createnumsection(body,"1","2"), NULL, "Known Security Vulnerabilities:","1","2");
 //table 5 for known security vulnerabilities
@@ -1170,6 +1180,7 @@ table_free(tableOthers);
 table_free(tableCopyright);
 table_free(tableSecurity);
 table_free(tableMatches);
+table_free(tableKeywords);
 
 /*free timestampstring*/
 if(formattedtime)

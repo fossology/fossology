@@ -103,18 +103,25 @@ abstract class ClearedGetterCommon
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
 
-      /* TODO make the subclasses do this logic */
-      $description = $statement['description'];
-      $textfinding = $statement['textfinding'];
-      $fileName = $statement['fileName'];
+      if (!array_key_exists('text', $statement))
+      {
+        /* TODO make the subclasses do this logic and never fall in this branch */
+        $description = $statement['description'];
+        $textfinding = $statement['textfinding'];
+        $fileName = $statement['fileName'];
 
-      if ($description === null) {
-        $text = "";
-      } else {
-        $content = $textfinding;
-        $text = $description;
+        if ($description === null) {
+          $text = "";
+        } else {
+          $content = $textfinding;
+          $text = $description;
+        }
+        // TODO
       }
-      // TODO
+      else
+      {
+        $text = $statement['text'];
+      }
 
       $groupBy = $statement[$this->groupBy];
 

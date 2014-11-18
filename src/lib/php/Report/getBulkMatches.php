@@ -21,23 +21,18 @@ namespace Fossology\Reportgen;
 
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\License;
 
 require_once("getClearedCommon.php");
 class BulkMatchesGetter extends ClearedGetterCommon
 {
-  /** @var HighlightDao */
-  private $highlightDao;
   /** @var ClearingDao */
   private $clearingDao;
 
   public function __construct() {
     global $container;
 
-    $this->highlightDao = $container->get('dao.highlight');
     $this->clearingDao = $container->get('dao.clearing');
 
     parent::__construct($groupBy = "bulkId");

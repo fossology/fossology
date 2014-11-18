@@ -91,9 +91,9 @@ class UploadDao extends Object
    * @param $uploadTreeTableName
    * @return ItemTreeBounds
    */
-  public function getItemTreeBounds($uploadTreeId, $uploadTreeTableName = "uploadtree")
+  public function getItemTreeBounds($itemId, $uploadTreeTableName = "uploadtree")
   {
-    $uploadEntryData = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
+    $uploadEntryData = $this->getUploadEntry($itemId, $uploadTreeTableName);
     return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
 
