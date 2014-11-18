@@ -143,9 +143,16 @@ class LicenseDao extends Object
    */
   public function getLicenseRefs($search=null, $orderAscending=true)
   {
-    $rfTable = 'license_all';
-    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
-    $withCte = $licenseViewDao->asCTE();
+    if(isset($_SESSION) && array_key_exists('GroupId', $_SESSION)){
+      $rfTable = 'license_all';
+      $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
+      $withCte = $licenseViewDao->asCTE();
+    }
+    else
+    {
+      $withCte = '';
+      $rfTable = 'ONLY license_ref';
+    }
 
     $searchCondition = $search ? "WHERE rf_shortname ilike $1" : "";
 
