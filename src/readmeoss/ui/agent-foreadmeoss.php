@@ -56,8 +56,8 @@ class agent_foreadmeoss extends FO_Plugin
     //do not advertise this agent: it can be scheduled only from directly
     //menu_insert("Agents::" . $this->Title, 0, $this->Name);
 
-    $text = _("Generate Read me OSS Report");
-    menu_insert("Browse-Pfile::Generate  Read me OSS  Report", 0, $this->Name, $text);
+    $text = _("Generate ReadMe_OSS");
+    menu_insert("Browse-Pfile::Generate ReadMe_OSS", 0, $this->Name, $text);
   }
 
   /**
@@ -139,13 +139,13 @@ class agent_foreadmeoss extends FO_Plugin
     $this->vars['jqPk'] = $jq_pk;
     $this->vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
 
-    $text = sprintf(_("Generating new report for '%s'"), $ShortName);
+    $text = sprintf(_("Generating ReadMe_OSS for '%s'"), $ShortName);
     return "<h2>".$text."</h2>";
   }
 
   public function getTemplateName()
   {
-    return "report.html.twig";
+    return "readmeoss.html.twig";
   }
 
 

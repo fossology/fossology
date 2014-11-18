@@ -31,17 +31,11 @@ class ReadmeOssAgent extends Agent
 
   /** @var XpClearedGetter */
   private $cpClearedGetter;
-  /** @var XpClearedGetter */
-  private $ipClearedGetter;
-  /** @var XpClearedGetter */
-  private $eccClearedGetter;
 
 
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
-    $this->ipClearedGetter = new XpClearedGetter("ip", null, true);
-    $this->eccClearedGetter = new XpClearedGetter("ecc", null, true);
     $this->licenseClearedGetter = new LicenseClearedGetterProto();
 
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
@@ -56,13 +50,9 @@ class ReadmeOssAgent extends Agent
 
     $licenses  = $this->licenseClearedGetter->getCleared($uploadId, $userId);
     $copyrights = $this->cpClearedGetter->getCleared($uploadId,$userId);
-    $ecc  = $this->eccClearedGetter ->getCleared($uploadId,$userId);
-    $ip  = $this->ipClearedGetter->getCleared($uploadId,$userId);
 
     $contents = array('licenses' => $licenses,
-                      'copyrights' => $copyrights,
-                      'ecc' => $ecc,
-                      'ip' => $ip
+                      'copyrights' => $copyrights
     );
 
     $this->writeReport($contents, $uploadId);
@@ -74,14 +64,18 @@ class ReadmeOssAgent extends Agent
   {
     global $SysConf;
 
+    $ROW = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
+    $Package_Name = $ROW['upload_filename'];
+    $this->dbManager->freeResult($ROW);
+
     $fileBase=$SysConf['FOSSOLOGY']['path']."/report/";
-    $filename =$fileBase. "ReadMeOss_".$this->jobId.".txt" ;
+    $filename =$fileBase. "ReadMe_OSS_".$Package_Name.".txt" ;
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
 
-    $message = $this->generateReport($contents);
+    $message = $this->generateReport($contents, $Package_Name);
 
     file_put_contents($filename, $message );
 
@@ -95,11 +89,39 @@ class ReadmeOssAgent extends Agent
    $this->dbManager->freeResult($result);
   }
 
-  private function generateReport($contents)
+  private function generateReport($contents, $Package_Name)
   {
-    //TODO fill output with the correct ReadMeOss format
-    $output = print_r($contents, true);
+    $i = 0;
+    $separator1 = "=======================================================================================================================";
+    $separator2 = "-----------------------------------------------------------------------------------------------------------------------";
+    $Break = "\r\n\r\n";
 
+    $output  = "";
+    $output .= $separator1;
+    $output .= $Break;
+    $output .= $Package_Name;
+    $output .= $Break;
+    while($contents['licenses']['statements'][$i]){
+      $output .= $contents['licenses']['statements'][$i]['text'];
+      $output .= $Break;
+      $output .= $separator2;
+      $output .= $Break;           
+      $i++;
+    }
+    $j = 0;
+    while($contents['copyrights']['statements'][$j]){
+      $Copyrights .= $contents['copyrights']['statements'][$j]['content']."\r\n";    
+      $j++;
+    }
+    if(empty($j)){
+      $output .= "<Copyright notices>";
+      $output .= $Break;
+      $output .= "<notices>";
+    }else{
+       $output .= "Copyright notices";
+       $output .= $Break; 
+       $output .= $Copyrights;
+    }
     return $output;
   }
 

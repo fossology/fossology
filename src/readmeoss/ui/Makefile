@@ -9,7 +9,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = readMeOss
+MOD_NAME = readmeoss
 MOD_SUBDIR = ui
 
 all:
