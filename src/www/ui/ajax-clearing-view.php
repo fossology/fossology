@@ -268,9 +268,9 @@ class AjaxClearingView extends FO_Plugin
     
     $table = array();
     /** @var ClearingResult $clearingResult */
+
     foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
-
       $licenseId = $clearingResult->getLicenseId();
 
       $types = array();
