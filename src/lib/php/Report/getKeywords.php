@@ -60,6 +60,9 @@ class KeywordsGetter extends ClearedGetterCommon
     fseek($inputFile, $start, SEEK_SET);
     $keyword = fread($inputFile, $length);
 
+    $context = convertToUTF8($context, false);
+    $keyword = convertToUTF8($keyword, false);
+
     return array($keyword, $context);
   }
 
@@ -97,8 +100,8 @@ class KeywordsGetter extends ClearedGetterCommon
         list($keyword, $context) = $this->readFile($inputFile, $start, $end);
 
         $result[]= array(
-          'content' => convertToUTF8($keyword),
-          'text' => convertToUTF8($context),
+          'content' => $keyword,
+          'text' => $context,
           'uploadtree_pk' => $itemId
         );
       }

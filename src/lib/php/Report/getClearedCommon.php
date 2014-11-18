@@ -134,8 +134,8 @@ abstract class ClearedGetterCommon
       else
       {
         $statements[$groupBy] = array(
-          "content" => $content,
-          "text" => $text,
+          "content" => convertToUTF8($content, false),
+          "text" => convertToUTF8($text, false),
           "files" => array($fileName)
         );
       }
