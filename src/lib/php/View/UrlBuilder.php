@@ -27,7 +27,7 @@ class UrlBuilder extends Object {
    * @param LicenseRef $licenseRef
    * @return string
    */
-  public function getLicenseTextLink(LicenseRef $licenseRef)
+  public function getLicenseTextUrl(LicenseRef $licenseRef)
   {
     $uri = Traceback_uri() . '?mod=popup-license&rf=' . $licenseRef->getId();
     $title = _('License text');

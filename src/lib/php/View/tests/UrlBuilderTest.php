@@ -47,7 +47,7 @@ class UrlBuilderTest extends \PHPUnit_Framework_TestCase
     $licenseRef->shouldReceive("getShortName")->once()->withNoArgs()->andReturn($shortName);
     $licenseRef->shouldReceive("getFullName")->once()->withNoArgs()->andReturn($fullName);
 
-    $linkUrl = $this->urlBuilder->getLicenseTextLink($licenseRef);
+    $linkUrl = $this->urlBuilder->getLicenseTextUrl($licenseRef);
 
     assertThat($linkUrl, is("<a title=\"$fullName\" href=\"javascript:;\" " .
         "onclick=\"javascript:window.open('http://localhost/repo?mod=popup-license&rf=$id'," .
