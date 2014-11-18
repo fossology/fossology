@@ -94,16 +94,17 @@ class ReadmeOssAgent extends Agent
     $output .= $Break;
     $output .= $Package_Name;
     $output .= $Break;
-    while($contents['licenses']['statements'][$i]){
-      $output .= $contents['licenses']['statements'][$i]['text'];
+    foreach($contents['licenses']['statements'] as $licenseStatement){
+      $output .= $licenseStatement['text'];
       $output .= $Break;
       $output .= $separator2;
       $output .= $Break;
       $i++;
     }
     $j = 0;
-    while($contents['copyrights']['statements'][$j]){
-      $Copyrights .= $contents['copyrights']['statements'][$j]['content']."\r\n";    
+    $copyrights = "";
+    foreach($contents['copyrights']['statements'] as $copyrightStatement){
+      $copyrights .= $copyrightStatement['content']."\r\n";
       $j++;
     }
     if(empty($j)){
@@ -113,7 +114,7 @@ class ReadmeOssAgent extends Agent
     }else{
        $output .= "Copyright notices";
        $output .= $Break; 
-       $output .= $Copyrights;
+       $output .= $copyrights;
     }
     return $output;
   }
