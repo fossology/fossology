@@ -164,5 +164,6 @@ function bootstrap($sysconfdir="")
 
   require_once("$MODDIR/lib/php/common.php");
   require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
+  require_once("$MODDIR/www/ui/ui-menus.php");
   return $SysConf;
 }
