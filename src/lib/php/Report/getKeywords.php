@@ -74,7 +74,7 @@ class KeywordsGetter extends ClearedGetterCommon
 
     $this->dbManager->prepare(
       $stmt,
-      "SELECT uploadtree_pk as itemid FROM $uploadTreeTableName ut WHERE ut.upload_fk = $1"
+      "SELECT uploadtree_pk as itemid FROM $uploadTreeTableName ut WHERE ut.upload_fk = $1 AND pfile_fk != 0"
     );
 
     $res = $this->dbManager->execute($stmt, array($uploadId));
