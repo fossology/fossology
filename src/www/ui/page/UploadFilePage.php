@@ -21,6 +21,7 @@ namespace Fossology\UI;
 
 use agent_adj2nest;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -100,7 +101,7 @@ class UploadFilePage extends DefaultPlugin
       $folderId = $folderStructure[0]['folder']->getId();
     }
     $vars['folderStructure'] = $folderStructure;
-    $vars['folderUploads'] = $this->folderDao->getFolderUploads($folderId);
+    $vars['folderUploads'] = $this->prepareFolderUploads($folderId);
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
@@ -113,15 +114,31 @@ class UploadFilePage extends DefaultPlugin
   }
 
   /**
-   * @param $folderId
+   * @param int $folderId
    * @return Response
    */
   protected function getUploadsInFolder($folderId)
   {
+    $uploadsById = $this->prepareFolderUploads($folderId);
+
+    $content = json_encode($uploadsById);
+    return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
+  }
+
+  /**
+   * @param int $folderId
+   * @return Upload[]
+   */
+  protected function prepareFolderUploads($folderId)
+  {
     $folderUploads = $this->folderDao->getFolderUploads($folderId);
 
-    $content = json_encode($folderUploads);
-    return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
+    $uploadsById = array();
+    foreach ($folderUploads as $upload)
+    {
+      $uploadsById[$upload->getId()] = $upload->getFilename() . _(" from ") . $upload->getTimestamp()->format("Y-m-d H:i");
+    }
+    return $uploadsById;
   }
 
   /**
@@ -214,6 +231,7 @@ class UploadFilePage extends DefaultPlugin
       return array(false, $message);
     }
   }
+
 }
 
 register_plugin(new UploadFilePage());

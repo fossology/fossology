@@ -19,7 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Fossology\Lib\Data\Folder\Folder;
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -143,7 +145,7 @@ ORDER BY name_path;
 
   /**
    * @param int $parentId
-   * @return array
+   * @return Upload[]
    */
   public function getFolderUploads($parentId) {
     $statementName = __METHOD__ ;
@@ -159,7 +161,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $results[$row['child_id']] = $row['upload_filename'];
+      $results[] = new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], new DateTime($row['upload_ts']));
     }
     $this->dbManager->freeResult($res);
     return $results;

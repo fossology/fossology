@@ -19,24 +19,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Upload;
 
 
+use DateTime;
+
 class Upload {
-  /**
-   * @var int
-   */
+  /** @var int */
   private $id;
-  /**
-   * @var string
-   */
+
+  /** @var string */
   private $filename;
-  /**
-   * @var string
-   */
+
+  /** @var string */
   private $description;
-  /**
-   * @var string
-   */
+
+  /** @var string */
   private $treeTableName;
 
+  /** @var DateTime */
+  private $timestamp;
 
   /**
    * @param int $id
@@ -44,12 +43,13 @@ class Upload {
    * @param string $description
    * @param string $treeTableName
    */
-  public function __construct($id, $filename, $description, $treeTableName){
+  public function __construct($id, $filename, $description, $treeTableName, $timestamp){
 
     $this->id = $id;
     $this->filename = $filename;
     $this->description = $description;
     $this->treeTableName = $treeTableName;
+    $this->timestamp = $timestamp;
   }
 
   /**
@@ -82,5 +82,13 @@ class Upload {
   public function getTreeTableName()
   {
     return $this->treeTableName;
+  }
+
+  /**
+   * @return DateTime
+   */
+  public function getTimestamp()
+  {
+    return $this->timestamp;
   }
 }
