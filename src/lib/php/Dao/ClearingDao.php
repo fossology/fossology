@@ -627,7 +627,7 @@ insert into clearing_decision (
               left join $uploadTreeTableName ut on ut.uploadtree_pk = ce.uploadtree_fk
               inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
-              where lr.upload_fk = $1
+              where ut2.upload_fk = $1
               $triedFilter
               order by lr.lrb_pk
             )
