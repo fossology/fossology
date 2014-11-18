@@ -88,7 +88,7 @@ class ClearingResult implements LicenseClearing {
    */
   public function getComment()
   {
-    return isset($this->clearingEvent) ? $this->getClearing()->getComment() : '';
+    return isset($this->clearingEvent) ? $this->clearingEvent->getComment() : '';
   }
 
   /**
@@ -175,13 +175,5 @@ class ClearingResult implements LicenseClearing {
   {
     $dateTime = $this->getDateTime();
     return $dateTime->getTimestamp();
-  }
-  
-  /**
-   * @return string
-   */
-  public function getLicenseTextLink()
-  {
-    return $this->getClearing()->getLicenseTextLink();
   }
 }

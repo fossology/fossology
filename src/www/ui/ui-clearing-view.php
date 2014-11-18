@@ -24,10 +24,12 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\LicenseOverviewPrinter;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\View\HighlightRenderer;
 use Monolog\Logger;
 
 define("TITLE_clearingView", _("Change concluded License "));
@@ -50,6 +52,8 @@ class ClearingView extends FO_Plugin
   private $highlightDao;
   /** @var HighlightProcessor */
   private $highlightProcessor;
+  /** @var HighlightRenderer */
+  private $highlightRenderer;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
   /** @var bool */
@@ -75,6 +79,7 @@ class ClearingView extends FO_Plugin
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");
+    $this->highlightRenderer = $container->get("view.highlight_renderer");
     $this->highlightProcessor = $container->get("view.highlight_processor");
 
     $this->licenseOverviewPrinter = $container->get('utils.license_overview_printer');
@@ -133,7 +138,7 @@ class ClearingView extends FO_Plugin
         $this->invalidParm = true;
         return;
       }
-      $uploadTreeId=$item->getId();
+      $uploadTreeId = $item->getId();
       header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
@@ -154,7 +159,7 @@ class ClearingView extends FO_Plugin
         $this->invalidParm = true;
         return;
       }
-      $uploadTreeId=$item->getId();
+      $uploadTreeId = $item->getId();
       header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
@@ -218,8 +223,7 @@ class ClearingView extends FO_Plugin
     if ($clearingId !== null)
     {
       $highlightId = -1;
-    }
-    else if ($highlightId !== null)
+    } else if ($highlightId !== null)
     {
       $clearingId = -1;
     }
@@ -251,8 +255,7 @@ class ClearingView extends FO_Plugin
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
         $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray($uploadId);
-      }
-      else
+      } else
       {
         $this->vars['auditDenied'] = true;
       }
@@ -264,7 +267,7 @@ class ClearingView extends FO_Plugin
     {
       $clearingHistory = $this->getClearingHistory($clearingDecWithLicenses);
     }
-    if(count($clearingHistory)>0)
+    if (count($clearingHistory) > 0)
     {
       $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
@@ -278,12 +281,39 @@ class ClearingView extends FO_Plugin
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
-    $this->vars['legendBox'] = $this->licenseOverviewPrinter->legendBox(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
+    $this->vars['legendData'] = $this->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId,$userId) : FALSE;
+    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $userId) : FALSE;
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
+  }
+
+  /**
+   * @param boolean $hasDiff
+   * @return array
+   */
+  private function getLegendData($hasDiff)
+  {
+    $data = array();
+
+    $colorDefinition = $hasDiff
+        ? array(
+            '' => _('license text:'),
+            Highlight::MATCH => _('&nbsp;- identical'),
+            Highlight::CHANGED => _('&nbsp;- modified'),
+            Highlight::ADDED => _('&nbsp;- added'),
+            Highlight::DELETED => _('&nbsp;- removed'),
+            Highlight::SIGNATURE => _('license relevant text'),
+            Highlight::KEYWORD => _('keyword'),
+            Highlight::BULK => _('bulk'))
+        : array(
+            Highlight::UNDEFINED => _("license relevant text"));
+    foreach ($colorDefinition as $colorKey => $txt)
+    {
+      $data[] = array('style' => $colorKey ? $this->highlightRenderer->createStyle($colorKey) : '', 'text' => $txt);
+    }
+    return $data;
   }
 
   /**
@@ -309,11 +339,11 @@ class ClearingView extends FO_Plugin
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
-          'date'=>$clearingDecision->getDateAdded(),
-          'username'=>$clearingDecision->getUserName(),
-          'scope'=> $scope->getTypeName( $clearingDecision->getScope() ),
-          'type'=>$this->decisionTypes->getTypeName($clearingDecision->getType()),
-          'licenses'=>implode(", ", $licenseNames));
+          'date' => $clearingDecision->getDateAdded(),
+          'username' => $clearingDecision->getUserName(),
+          'scope' => $scope->getTypeName($clearingDecision->getScope()),
+          'type' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
+          'licenses' => implode(", ", $licenseNames));
       $table[] = $row;
     }
     return $table;
@@ -346,7 +376,7 @@ class ClearingView extends FO_Plugin
     $global = GetParm("globalDecision", PARM_STRING) === "on";
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
-    $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem,$uploadTreeTableName);
+    $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
 
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
   }

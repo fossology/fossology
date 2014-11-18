@@ -36,7 +36,7 @@ class HighlightRenderer extends Object
   /**
    * @var array colorMapping
    */
-  public $colorMapping = array(
+  private $colorMapping = array(
       Highlight::MATCH => 'lightgreen',
       Highlight::CHANGED => 'yellow',
       Highlight::ADDED => 'red',
@@ -52,6 +52,14 @@ class HighlightRenderer extends Object
 
       Highlight::UNDEFINED => self::DEFAULT_COLOR
   );
+
+  /**
+   * @return array
+   */
+  public function getColorMapping()
+  {
+    return $this->colorMapping;
+  }
 
   /**
    * @param SplitPosition $entry
@@ -107,7 +115,7 @@ class HighlightRenderer extends Object
    */
   public function createStyleWithPadding($type, $title, $depth = 0)
   {
-    $style = $this->createStyle($type, $title);
+    $style = $this->createStartSpan($type, $title);
     if ($depth < self::DEFAULT_PADDING)
     {
       $padd = (2 * (self::DEFAULT_PADDING - $depth - 2)) . 'px';
@@ -134,7 +142,7 @@ class HighlightRenderer extends Object
    * @param string $title
    * @return string
    */
-  public function createStyle($type, $title)
+  public function createStartSpan($type, $title)
   {
     if ($type == 'K ' || $type == 'K')
     {
@@ -143,6 +151,22 @@ class HighlightRenderer extends Object
     {
       $color = $this->determineColor($type);
       return $this->createHighlightSpanStart($color, $title);
+    }
+  }
+
+  /**
+   * @param string $type
+   * @return string
+   */
+  public function createStyle($type)
+  {
+    if ($type == 'K ' || $type == 'K')
+    {
+      return "font-weight: bold";
+    } else
+    {
+      $color = $this->determineColor($type);
+      return "background-color:$color;";
     }
   }
 
