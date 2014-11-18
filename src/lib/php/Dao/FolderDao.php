@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Folder\Folder;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -88,7 +89,6 @@ class FolderDao extends Object
   }
 
   public function getFolderStructure($parentId=null) {
-
     $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
     $parentCondition = $parentId ? '= $1' : 'IS NULL';
 
@@ -132,6 +132,30 @@ ORDER BY file_path;
               intval($row['folder_perm'])),
           'depth' => $row['depth']
       );
+    }
+    $this->dbManager->freeResult($res);
+    return $results;
+  }
+
+  /**
+   * @param int $parentId
+   * @return array
+   */
+  public function getFolderUploads($parentId) {
+    $statementName = __METHOD__ ;
+
+    $parameters = array($parentId);
+
+    $this->dbManager->prepare($statementName, "
+SELECT * from foldercontents fc
+INNER JOIN upload u ON u.upload_pk = fc.child_id
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
+");
+    $res = $this->dbManager->execute($statementName, $parameters);
+    $results = array();
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $results[$row['child_id']] = $row['upload_filename'];
     }
     $this->dbManager->freeResult($res);
     return $results;

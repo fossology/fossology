@@ -153,21 +153,33 @@ class UploadFilePage extends DefaultPlugin
   {
     $vars = array();
     $description = null;
+    $folderId = intval($request->get('folder'));
+    $reuseUploadId = intval($request->get('reuseUpload'));
+    $ajaxMethodName = $request->get('do');
 
-    if ($request->isMethod('POST'))
+    if ($ajaxMethodName == "getUploads")
     {
-      $folderId = intval($request->get('folder'));
-      $description = $request->get('description');
-      $public = $request->get('public') == true;
-      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+      $folderUploads = $this->folderDao->getFolderUploads($folderId);
 
-      if ($uploadFile !== null && !empty($folderId))
+      $content = json_encode($folderUploads);
+      return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
+    } else
+    {
+      if ($request->isMethod('POST'))
       {
-        list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
-        $description = $successful ? null : $description;
-      } else
-      {
-        $vars['message'] = "Error: no file selected";
+
+        $description = $request->get('description');
+        $public = $request->get('public') == true;
+        $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+
+        if ($uploadFile !== null && !empty($folderId))
+        {
+          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
+          $description = $successful ? null : $description;
+        } else
+        {
+          $vars['message'] = "Error: no file selected";
+        }
       }
     }
 
@@ -175,7 +187,15 @@ class UploadFilePage extends DefaultPlugin
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
-    $vars['folderStructure'] = $this->folderDao->getFolderStructure();
+    $folderStructure = $this->folderDao->getFolderStructure();
+    if (empty($folderId))
+    {
+      $folderId = $folderStructure[0]['folder']->getId();
+    }
+    $vars['folderStructure'] = $folderStructure;
+    $vars['folderUploads'] = $this->folderDao->getFolderUploads($folderId);
+    $vars['baseUrl'] = $request->getBaseUrl();
+    $vars['moduleName'] = $this->getName();
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
     {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

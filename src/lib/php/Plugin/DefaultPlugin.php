@@ -305,7 +305,7 @@ abstract class DefaultPlugin implements Plugin
     $content = $this->renderer->loadTemplate($templateName)
         ->render($vars ?: $this->getDefaultVars());
 
-    $this->logger->debug(sprintf("render response in %.3fs", microtime(true) - $startTime));
+    $this->logger->debug(sprintf("%s: render response in %.3fs", get_class($this), microtime(true) - $startTime));
     return new Response(
         $content,
         Response::HTTP_OK,
