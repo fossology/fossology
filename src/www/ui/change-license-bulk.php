@@ -49,10 +49,11 @@ class changeLicenseBulk extends FO_Plugin
 
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      throw new \Fossology\Lib\Exception("plugin " . $this->Name . " is not ready");
     }
-    
+
     $uploadTreeId = intval($_POST['uploadTreeId']);
     if ($uploadTreeId <= 0)
     {
@@ -60,9 +61,11 @@ class changeLicenseBulk extends FO_Plugin
       return json_encode(array("error" => 'bad request'));
     }
 
-    try{
-      $jq_pk = $this->getJobQueueId($uploadTreeId);
-    } catch (Exception $ex) {
+    try
+    {
+      $jobQueueId = $this->getJobQueueId($uploadTreeId);
+    } catch (Exception $ex)
+    {
       $errorMsg = $ex->getMessage();
       header('Content-type: text/json', true, 500);
       return json_encode(array("error" => $errorMsg));
@@ -70,9 +73,9 @@ class changeLicenseBulk extends FO_Plugin
     ReportCachePurgeAll();
 
     header('Content-type: text/json');
-    return json_encode(array("jqid" => $jq_pk));
-  }  
-    
+    return json_encode(array("jqid" => $jobQueueId));
+  }
+
   private function getJobQueueId($uploadTreeId)
   {
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
@@ -81,62 +84,61 @@ class changeLicenseBulk extends FO_Plugin
     {
       throw new Exception('permission denied');
     }
-    
-    $bulkScope = filter_input(INPUT_POST,'bulkScope');
+
+    $bulkScope = filter_input(INPUT_POST, 'bulkScope');
     if ($bulkScope === 'u')
     {
       $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
       $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
-                                            array($uploadId), __METHOD__."adam".$uploadTreeTable);
+          array($uploadId), __METHOD__ . "adam" . $uploadTreeTable);
       $uploadTreeId = $row['uploadtree_pk'];
-    }
-    else if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
+    } else if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
     {
-      $uploadTreeId = $uploadEntry['parent']?:$uploadTreeId;
-    }
-    else
+      $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
+    } else
     {
       throw new Exception('bad scope request');
     }
 
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
-    $refText = filter_input(INPUT_POST,'refText');
-    $action = filter_input(INPUT_POST,'bulkAction');
-    if($action==='new')
+    $refText = filter_input(INPUT_POST, 'refText');
+    $action = filter_input(INPUT_POST, 'bulkAction');
+    if ($action === 'new')
     {
       $shortnamePattern = '/^[-+_a-z0-9\\.()]{3,100}$/i';
-      $newShortname = filter_input(INPUT_POST,'shortname');
-      if(!preg_match($shortnamePattern,$newShortname)){
+      $newShortname = filter_input(INPUT_POST, 'shortname');
+      if (!preg_match($shortnamePattern, $newShortname))
+      {
         throw new Exception('invalid shortname pattern');
       }
       if (!$this->licenseDao->isNewLicense($newShortname))
       {
         throw new Exception('license shortname already in use');
       }
-      $licenseId = $this->licenseDao->insertUploadLicense($newShortname,$refText);
+      $licenseId = $this->licenseDao->insertUploadLicense($newShortname, $refText);
       $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText);
-    }
-    else
+    } else
     {
-      $licenseId = GetParm('licenseId',PARM_INTEGER);
-      $removing = ($action==='remove');
+      $licenseId = GetParm('licenseId', PARM_INTEGER);
+      $removing = ($action === 'remove');
       $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
     }
-    
-    if ($bulkId <= 0) {
-     throw new Exception('cannot insert bulk reference');
+
+    if ($bulkId <= 0)
+    {
+      throw new Exception('cannot insert bulk reference');
     }
     $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
     $uploadName = $uploadInfo['upload_filename'];
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var agent_fodecider $deciderPlugin */
     $deciderPlugin = plugin_find("agent_decider");
-    $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
-    $conflictStrategyId = intval(filter_input(INPUT_POST,'forceDecision'));
+    $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
+    $conflictStrategyId = intval(filter_input(INPUT_POST, 'forceDecision'));
     $errorMsg = '';
     $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
-    
+
     if (!empty($errorMsg))
     {
       throw new Exception(str_replace('<br>', "\n", $errorMsg));

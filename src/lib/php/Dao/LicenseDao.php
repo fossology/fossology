@@ -122,14 +122,14 @@ class LicenseDao extends Object
     while ($row = $this->dbManager->fetchArray($result))
     {
       $licenseRef = new LicenseRef($row['license_id'], $row['license_shortname'], $row['license_fullname']);
-      if($row['removing'] == 'f') {
-        $agentID=1;
-        $agentName="bulk addition";
-      }
-      else
+      if ($row['removing'] == 'f')
       {
-        $agentID=2;
-        $agentName="bulk removal";
+        $agentID = 1;
+        $agentName = "bulk addition";
+      } else
+      {
+        $agentID = 2;
+        $agentName = "bulk removal";
       }
       $agentRef = new AgentRef($agentID, $agentName, "empty");
       $matches[] = new LicenseMatch(intval($row['file_id']), $licenseRef, $agentRef, intval($row['license_file_id']));
@@ -142,15 +142,15 @@ class LicenseDao extends Object
   /**
    * @return LicenseRef[]
    */
-  public function getLicenseRefs($search=null, $orderAscending=true)
+  public function getLicenseRefs($search = null, $orderAscending = true)
   {
-    if(isset($_SESSION) && array_key_exists('GroupId', $_SESSION)){
+    if (isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
+    {
       $rfTable = 'license_all';
-      $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>$this->candidatePrefix);
+      $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
       $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, $rfTable);
       $withCte = $licenseViewDao->asCTE();
-    }
-    else
+    } else
     {
       $withCte = '';
       $rfTable = 'ONLY license_ref';
@@ -162,7 +162,7 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . ($search ? ".search_" . $search : "") . ".order_$order";
 
     $this->dbManager->prepare($statementName,
-      $sql= $withCte." select rf_pk,rf_shortname,rf_fullname from $rfTable $searchCondition order by LOWER(rf_shortname) $order");
+        $sql = $withCte . " select rf_pk,rf_shortname,rf_fullname from $rfTable $searchCondition order by LOWER(rf_shortname) $order");
     $result = $this->dbManager->execute($statementName, $search ? array('%' . strtolower($search) . '%') : array());
     $licenseRefs = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -174,25 +174,25 @@ class LicenseDao extends Object
   }
 
   /**
-   * @return array 
+   * @return array
    */
   public function getLicenseArray()
   {
     $statementName = __METHOD__;
-    
+
     $rfTable = 'license_all';
-    $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>$this->candidatePrefix);
+    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
     $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, $rfTable);
     $withCte = $licenseViewDao->asCTE();
 
     $this->dbManager->prepare($statementName,
-       $withCte." select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable order by LOWER(rf_shortname)");
+        $withCte . " select rf_pk id,rf_shortname shortname,rf_fullname fullname from $rfTable order by LOWER(rf_shortname)");
     $result = $this->dbManager->execute($statementName);
     $licenseRefs = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
     return $licenseRefs;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param $selectedAgentId
@@ -201,13 +201,14 @@ class LicenseDao extends Object
   public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . '.' . implode("",$filterLicenses);
-    $param = array($itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . '.' . implode("", $filterLicenses);
+    $param = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ('" . implode("', '", $filterLicenses) . "')";
 
     $sql_upload = "";
-    if ('uploadtree_a' == $uploadTreeTableName) {
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
       $sql_upload = " AND utree.upload_fk=$3 ";
       $param[] = $itemTreeBounds->getUploadId();
     }
@@ -226,14 +227,15 @@ class LicenseDao extends Object
          WHERE (lft BETWEEN $1 AND $2) $sql_upload
            $noLicenseFoundStmt";
 
-    if (!empty($selectedAgentId)){
+    if (!empty($selectedAgentId))
+    {
       $param[] = $selectedAgentId;
-      $sql .= " AND agent_pk=$".count($param);
+      $sql .= " AND agent_pk=$" . count($param);
       $statementName .= '.agent';
     }
     $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, match_percentage
          ORDER BY match_percentage ASC, license_shortname ASC";
-    
+
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $licensesPerFileId = array();
@@ -246,7 +248,7 @@ class LicenseDao extends Object
   }
 
 
-  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId=null)
+  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId = null)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
@@ -268,7 +270,7 @@ class LicenseDao extends Object
       $sql .= $orderStatement;
     }
     $this->dbManager->prepare($statementName, $sql);
-    $result = $this->dbManager->execute($statementName,$param);
+    $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();
     while ($res = $this->dbManager->fetchArray($result))
     {
@@ -278,12 +280,15 @@ class LicenseDao extends Object
     return $assocLicenseHist;
   }
 
-  public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $filterLicenses=array('VOID')) //'No_license_found',
+  public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $filterLicenses = array('VOID')) //'No_license_found',
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
-        . implode(", ", array_map(function($name) {return "'" . $name . "'";}, $filterLicenses)) . ")";
+        . implode(", ", array_map(function ($name)
+                {
+                  return "'" . $name . "'";
+                }, $filterLicenses)) . ")";
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
     $this->dbManager->prepare($statementName,
@@ -313,18 +318,18 @@ class LicenseDao extends Object
    * @param array $param
    * @return License|null
    */
-  private function getLicenseByCondition($condition,$param)
+  private function getLicenseByCondition($condition, $param)
   {
     $row = $this->dbManager->getSingleRow(
         "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE $condition",
-        $param, __METHOD__.".$condition.only");
+        $param, __METHOD__ . ".$condition.only");
     if (false === $row && isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
     {
       $param[] = $_SESSION['GroupId'];
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$2",
-        $param, __METHOD__.".$condition.candidate");
-      if(false !== $row)
+          "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$2",
+          $param, __METHOD__ . ".$condition.candidate");
+      if (false !== $row)
       {
         $row['rf_shortname'] = $this->candidatePrefix . $row['rf_shortname'];
       }
@@ -352,7 +357,7 @@ class LicenseDao extends Object
    */
   public function getLicenseByShortName($licenseShortname)
   {
-    return $this->getLicenseByCondition('rf_shortname=$1',array($licenseShortname));
+    return $this->getLicenseByCondition('rf_shortname=$1', array($licenseShortname));
   }
 
   /**
@@ -367,28 +372,29 @@ class LicenseDao extends Object
   public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-      "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
       VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-      array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText),
-      __METHOD__.'.getLrb'
+        array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText),
+        __METHOD__ . '.getLrb'
     );
 
-    if ($licenseRefBulkIdResult === false) {
+    if ($licenseRefBulkIdResult === false)
+    {
       return -1;
     }
     return $licenseRefBulkIdResult['lrb_pk'];
   }
-  
+
   /**
    * @param string $newShortname
    * @return bool
    */
   public function isNewLicense($newShortname)
   {
-    $licenceViewDao = new LicenseViewDao($_SESSION['GroupId'], array('columns'=>array('rf_shortname')));
-    $sql = 'SELECT count(*) cnt FROM ('.$licenceViewDao->getDbViewQuery().') AS license_all WHERE rf_shortname=$1';
-    $duplicatedRef = $this->dbManager->getSingleRow($sql,array($newShortname),__METHOD__);
-    return $duplicatedRef['cnt']==0;
+    $licenceViewDao = new LicenseViewDao($_SESSION['GroupId'], array('columns' => array('rf_shortname')));
+    $sql = 'SELECT count(*) cnt FROM (' . $licenceViewDao->getDbViewQuery() . ') AS license_all WHERE rf_shortname=$1';
+    $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__);
+    return $duplicatedRef['cnt'] == 0;
   }
 
   /**
@@ -403,16 +409,17 @@ class LicenseDao extends Object
     return $refArray['rf_pk'];
   }
 
-        
-  public function getLicenseCount() {
+
+  public function getLicenseCount()
+  {
     $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
     return intval($licenseRefTable['cnt']);
   }
 
-  public function updateCandidate($rf_pk,$shortname,$fullname,$rfText,$url,$readyformerge)
+  public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $readyformerge)
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
     $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6 WHERE rf_pk=$1',
-            array($rf_pk,$shortname,$fullname,$rfText,$url,$marydone), __METHOD__);
+        array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone), __METHOD__);
   }
 }
