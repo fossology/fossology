@@ -35,31 +35,27 @@ all:
 #	php5 fo-render.php m
 
 install:
-	mkdir -p $(DESTDIR)$(WEBDIR)/ui
-	for dir in $(DIRS); do \
+	@mkdir -p $(DESTDIR)$(WEBDIR)/ui
+	@for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
-	for file in $(OBSOLETEFILES); do \
+	@for file in $(OBSOLETEFILES); do \
 		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
 		rm -f $$file; \
 	done
-	for file in $(UIFILES); do \
+	@for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-	for file in $(OTHERFILES); do \
+	@for file in $(OTHERFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
-	mkdir -p $(CONFDIR)/mods-enabled
+	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 		ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled; \
 	fi
-	@if test ! -e $(CONFDIR)/mods-enabled/www-page; then \
-		ln -s $(MODDIR)/www/page $(CONFDIR)/mods-enabled/www-page; \
-	fi
-	@if test ! -e $(CONFDIR)/mods-enabled/www-async; then \
-		ln -s $(MODDIR)/www/async $(CONFDIR)/mods-enabled/www-async; \
-	fi
+	@ln -sf $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
+	@ln -sf $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
 
 uninstall:
 	rm -rf $(DESTDIR)$(WEBDIR)
