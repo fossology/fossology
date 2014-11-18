@@ -70,8 +70,8 @@ class changeLicenseBulk extends FO_Plugin
     $uploadId = intval($uploadEntry['upload_fk']);
 
     if ($uploadId > 0) {
-      $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
-      $uploadName = $uploadInfo['upload_filename'];
+      $upload = $this->uploadDao->getUpload($uploadId);
+      $uploadName = $upload->getFilename();
 
       if ($bulkScope === "u")
       {

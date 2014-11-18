@@ -17,6 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+namespace Fossology\UI;
+
+use agent_adj2nest;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Monolog\Logger;
@@ -26,7 +29,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * \class upload_file extends from FO_Plugin
  * \brief Upload a file from the users computer using the UI.
  */
 class UploadFilePage extends DefaultPlugin
@@ -52,6 +54,74 @@ class UploadFilePage extends DefaultPlugin
 
     $this->folderDao = $this->getObject('dao.folder');
     $this->logger = $this->getObject('logger');
+  }
+
+
+  /**
+   * @param Request $request
+   * @return Response
+   */
+  protected function handle(Request $request)
+  {
+    $vars = array();
+    $folderId = intval($request->get('folder'));
+    $description = $request->get('description');
+    $reuseUploadId = intval($request->get('reuseUpload'));
+    $ajaxMethodName = $request->get('do');
+
+    if ($ajaxMethodName == "getUploads")
+    {
+      return $this->getUploadsInFolder($folderId);
+    } else
+    {
+      if ($request->isMethod('POST'))
+      {
+        $public = $request->get('public') == true;
+        $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+
+        if ($uploadFile !== null && !empty($folderId))
+        {
+          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
+          $description = $successful ? null : $description;
+        } else
+        {
+          $vars['message'] = "Error: no file selected";
+        }
+      }
+    }
+
+    $vars['description'] = $description ?: "";
+    $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
+    $vars['agentCheckBoxMake'] = '';
+    $vars['fileInputName'] = self::FILE_INPUT_NAME;
+    $folderStructure = $this->folderDao->getFolderStructure();
+    if (empty($folderId) && !empty($folderStructure))
+    {
+      $folderId = $folderStructure[0]['folder']->getId();
+    }
+    $vars['folderStructure'] = $folderStructure;
+    $vars['folderUploads'] = $this->folderDao->getFolderUploads($folderId);
+    $vars['baseUrl'] = $request->getBaseUrl();
+    $vars['moduleName'] = $this->getName();
+    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+    {
+      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
+    }
+
+    return $this->render("upload_file.html.twig", $this->mergeWithDefault($vars));
+  }
+
+  /**
+   * @param $folderId
+   * @return Response
+   */
+  protected function getUploadsInFolder($folderId)
+  {
+    $folderUploads = $this->folderDao->getFolderUploads($folderId);
+
+    $content = json_encode($folderUploads);
+    return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
   }
 
   /**
@@ -144,67 +214,6 @@ class UploadFilePage extends DefaultPlugin
       return array(false, $message);
     }
   }
-
-  /**
-   * @param Request $request
-   * @return Response
-   */
-  protected function handle(Request $request)
-  {
-    $vars = array();
-    $description = null;
-    $folderId = intval($request->get('folder'));
-    $reuseUploadId = intval($request->get('reuseUpload'));
-    $ajaxMethodName = $request->get('do');
-
-    if ($ajaxMethodName == "getUploads")
-    {
-      $folderUploads = $this->folderDao->getFolderUploads($folderId);
-
-      $content = json_encode($folderUploads);
-      return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
-    } else
-    {
-      if ($request->isMethod('POST'))
-      {
-
-        $description = $request->get('description');
-        $public = $request->get('public') == true;
-        $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
-
-        if ($uploadFile !== null && !empty($folderId))
-        {
-          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
-          $description = $successful ? null : $description;
-        } else
-        {
-          $vars['message'] = "Error: no file selected";
-        }
-      }
-    }
-
-    $vars['description'] = $description ?: "";
-    $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
-    $vars['agentCheckBoxMake'] = '';
-    $vars['fileInputName'] = self::FILE_INPUT_NAME;
-    $folderStructure = $this->folderDao->getFolderStructure();
-    if (empty($folderId))
-    {
-      $folderId = $folderStructure[0]['folder']->getId();
-    }
-    $vars['folderStructure'] = $folderStructure;
-    $vars['folderUploads'] = $this->folderDao->getFolderUploads($folderId);
-    $vars['baseUrl'] = $request->getBaseUrl();
-    $vars['moduleName'] = $this->getName();
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
-    {
-      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
-    }
-
-    return $this->render("upload_file.html.twig", $this->mergeWithDefault($vars));
-  }
-
 }
 
 register_plugin(new UploadFilePage());

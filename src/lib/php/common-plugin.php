@@ -261,25 +261,22 @@ function plugin_load()
 
   /* Open $ModsEnabledDir and include all the php files found in the ui/ subdirectory */
 
-  if ((is_dir($ModsEnabledDir)) and ($enabledDir = opendir($ModsEnabledDir)))
+  if (is_dir($ModsEnabledDir))
   {
-    while (($ModDir = readdir($enabledDir)) !== false)
-    {
-      $ModDirPath = "$ModsEnabledDir/$ModDir/ui";
-      if (is_dir($ModDirPath) and ($dir = opendir($ModDirPath)))
-      {
-        while (($File = readdir($dir)) !== false)
-        {
-          if (substr($File, -4) === ".php" and !strstr($File, 'ndex.php')) // ignore index.php
-          {
-            /* Load php found in the ui directory */
-            include_once("$ModDirPath/$File");
+    foreach (glob("$ModsEnabledDir/*") as $ModDirPath) {
+      foreach (array("/ui", "") as $subdir) {
+        $targetPath = $ModDirPath . $subdir;
+
+        if (is_dir($targetPath)) {
+          foreach (glob("$targetPath/*.php") as $phpFile) {
+            if (!strstr($phpFile, 'ndex.php')) {
+              include_once("$phpFile");
+            }
           }
+          break;
         }
-        closedir($dir);
       }
     }
-    closedir($enabledDir);
   }
 }
 

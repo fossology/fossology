@@ -95,30 +95,34 @@ class FolderDao extends Object
     $parameters = $parentId ? array($parentId) : array();
 
     $this->dbManager->prepare($statementName, "
-WITH RECURSIVE folder_tree(folder_pk, folder_name, folder_desc, folder_perm, parent_fk, path, depth, file_path, cycle) AS (
+WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folder_perm, id_path, name_path, depth, cycle_detected) AS (
   SELECT
     f.*,
-    ARRAY [f.folder_pk],
-    0,
-    ARRAY [f.folder_name],
-    FALSE
+    ARRAY [f.folder_pk]   AS id_path,
+    ARRAY [f.folder_name] AS name_path,
+    0                     AS depth,
+    FALSE                 AS cycle_detected
   FROM folder f
   WHERE parent_fk $parentCondition
   UNION ALL
   SELECT
     f.*,
-    path || f.folder_pk,
-    array_length(path, 1),
-    file_path || f.folder_name,
-    f.folder_pk = ANY (path)
+    id_path || f.folder_pk,
+    name_path || f.folder_name,
+    array_length(id_path, 1),
+    f.folder_pk = ANY (id_path)
   FROM folder f, folder_tree ft
-  WHERE f.parent_fk = ft.folder_pk AND NOT cycle
+  WHERE f.parent_fk = ft.folder_pk AND NOT cycle_detected
 )
 SELECT
-  folder_pk, folder_name, folder_desc, folder_perm,
+  folder_pk,
+  parent_fk,
+  folder_name,
+  folder_desc,
+  folder_perm,
   depth
 FROM folder_tree
-ORDER BY file_path;
+ORDER BY name_path;
 ");
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = array();

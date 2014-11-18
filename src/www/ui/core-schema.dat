@@ -1819,6 +1819,16 @@
   $Schema["TABLE"]["package"]["package_pk"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_pk\" SET NOT NULL, ALTER COLUMN \"package_pk\" SET DEFAULT nextval('package_package_pk_seq'::regclass);";
   $Schema["TABLE"]["package"]["package_pk"]["UPDATE"] = "UPDATE package SET package_pk=nextval('package_package_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"package_fk\" int4;";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"package_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
   $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_pk\" SET NOT NULL, ALTER COLUMN \"upload_pk\" SET DEFAULT nextval('upload_upload_pk_seq'::regclass);";

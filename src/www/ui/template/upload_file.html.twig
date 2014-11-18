@@ -21,11 +21,14 @@
     <form enctype="multipart/form-data" method="post">
         <ol>
             <li>
-                {{ 'Select the folder for storing the uploaded file:'| trans }}
-                {% include 'modal/select-upload.html.twig' with {'name': 'folder'} %}
+                <label for="folder">{{ 'Select the folder for storing the uploaded file:'| trans }}
+                    {% include 'elements/select-folder.html.twig' with {'name': 'folder'} %}
+                </label>
             </li>
             <li>
-                {{ 'Select the file to upload:'| trans }}
+                <label for="{{ fileInputName }}">
+                    {{ 'Select the file to upload:'| trans }}
+                </label>
                 <br/>
                 <input name="{{ fileInputName }}" type="file"/><br/>
             </li>
@@ -39,18 +42,12 @@
                 </p>
             </li>
             <li>
-                {{ '(Optional) Select an already uploaded package for reuse' | trans }}
-                <!--<div class="modal" id="selectUploadModal">-->
-                <p>
-                    Folder:<br/>
-                    {% include 'modal/select-upload.html.twig' with {'name': 'package_folder', 'id': 'packageFolder'} %}
-                </p>
-
+                {{ '(Optional) Select an already uploaded package for reuse in folder ' | trans }}
+                {% include 'elements/select-folder.html.twig' with {'name': 'package_folder', 'id': 'packageFolder'} %}
                 <p>
                     Upload to reuse:<br/>
                     {{ macro.select("packageForReuse", folderUploads, "packageForReuse", reuseUploadId, 5) }}
                 </p>
-                <!--</div>-->
             </li>
             <li><input type="checkbox" name="public" value="public"/>
                 {{ '(Optional) Make Public'| trans }}
