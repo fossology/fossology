@@ -23,8 +23,6 @@ require_once("$MODDIR/lib/php/common-cli.php");
 require_once("$MODDIR/lib/php/Report/getClearedProto.php");
 cli_Init();
 
-use Fossology\Lib\Data\License;
-
 class LicenseClearedGetter extends LicenseClearedGetterProto
 {
   public function __construct() {

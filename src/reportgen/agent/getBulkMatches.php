@@ -23,8 +23,6 @@ require_once("$MODDIR/lib/php/common-cli.php");
 require_once("$MODDIR/lib/php/Report/getBulkMatches.php");
 cli_Init();
 
-use Fossology\Lib\Data\License;
-
 $clearedGetter = new BulkMatchesGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();

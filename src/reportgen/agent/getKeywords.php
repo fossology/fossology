@@ -23,8 +23,6 @@ require_once("$MODDIR/lib/php/common-cli.php");
 require_once("$MODDIR/lib/php/Report/getKeywords.php");
 cli_Init();
 
-use Fossology\Lib\Data\License;
-
 $clearedGetter = new KeywordsGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
