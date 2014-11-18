@@ -17,12 +17,11 @@ use Fossology\Reportgen\LicenseClearedGetterProto;
 use Fossology\Reportgen\XpClearedGetter;
 
 
-define("CLEARING_DECISION_IS_GLOBAL", false);
-
 include_once(__DIR__ . "/version.php");
 
 require_once("$MODDIR/lib/php/Report/getClearedXp.php");
 require_once("$MODDIR/lib/php/Report/getClearedProto.php");
+
 class ReadmeOssAgent extends Agent
 {
 
@@ -48,7 +47,7 @@ class ReadmeOssAgent extends Agent
 
     $userId = $this->userId;
 
-    $licenses  = $this->licenseClearedGetter->getCleared($uploadId, $userId);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $userId);
     $copyrights = $this->cpClearedGetter->getCleared($uploadId,$userId);
 
     $contents = array('licenses' => $licenses,
@@ -68,8 +67,8 @@ class ReadmeOssAgent extends Agent
     $Package_Name = $ROW['upload_filename'];
     $this->dbManager->freeResult($ROW);
 
-    $fileBase=$SysConf['FOSSOLOGY']['path']."/report/";
-    $filename =$fileBase. "ReadMe_OSS_".$Package_Name.".txt" ;
+    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $filename = $fileBase. "ReadMe_OSS_".$Package_Name.".txt" ;
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
@@ -80,9 +79,7 @@ class ReadmeOssAgent extends Agent
     file_put_contents($filename, $message );
 
     $this->updateReportTable($uploadId, $this->jobId, $filename );
-
   }
-
 
   private function updateReportTable($uploadId, $jobId, $filename){
    $result=$this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",array($uploadId, $jobId, $filename),__METHOD__);
