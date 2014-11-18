@@ -34,10 +34,6 @@ class KeywordsGetter extends ClearedGetterCommon
 {
   /** @var HighlightDao */
   private $highlightDao;
-  /** @var ClearingDao */
-  private $clearingDao;
-  /** @var LicenseDao */
-  private $licenseDao;
   /** @var DbManager */
   private $dbManager;
 
@@ -45,8 +41,6 @@ class KeywordsGetter extends ClearedGetterCommon
     global $container;
 
     $this->highlightDao = $container->get('dao.highlight');
-    $this->clearingDao = $container->get('dao.clearing');
-    $this->licenseDao = $container->get('dao.license');
 
     $this->dbManager = $container->get('db.manager');
 
@@ -55,6 +49,7 @@ class KeywordsGetter extends ClearedGetterCommon
 
   private function readFile(ItemTreeBounds $itemTreeBounds, $start, $end)
   {
+   
     $keyword = "keyword".$start;
     $context = ($itemTreeBounds->getItemId()).": ".$start."keyword".$end;
     return array($keyword, $context);
@@ -97,44 +92,6 @@ class KeywordsGetter extends ClearedGetterCommon
     }
 
     $this->dbManager->freeResult($res);
-
-    /*
-    $licenseMatches = $this->licenseDao->getAgentFileLicenseMatches($parentTreeBounds);
-
-    foreach($licenseMatches as $licenseMatch) {
-      $licenseFileId = $licenseMatch->getLicenseFileId();
-      $agentRef = $licenseMatch->getAgentRef();
-      $licenseRef = $licenseMatch->getLicenseRef();
-      $fileId = $licenseMatch->getFileId();
-
-      $this->highlightDao->getHighlightDiffs();
-
-    }*/
-
-
-    /*
-    $this->highlightDao->getHighlightDiffs();
-
-    foreach($bulkHistory as $bulk) {
-      $bulkId = $bulk['bulkId'];
-      $licenseShortName = $bulk['lic'];
-      $removing = $bulk['removing'];
-
-      $content = $bulk['text'];
-
-      foreach ($this->clearingDao->getBulkMatches($bulkId, $userId) as $bulkMatch)
-      {
-        $uploadTreeId = $bulkMatch['itemid'];
-
-        $result[] = array(
-          'bulkId' => $bulkId,
-          'content' => $content,
-          'textfinding' => ($removing ? "[remove] " : "") . $licenseShortName,
-          'description' => $content,
-          'uploadtree_pk' => $uploadTreeId
-        );
-      }
-    }*/
 
     return $result;
   }
