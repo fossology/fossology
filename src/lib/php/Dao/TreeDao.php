@@ -115,7 +115,7 @@ class TreeDao extends Object
     return $row['file_path'];
   }
 
-  public function getShortPath($itemId, $tableName)
+  public function getShortPath($itemId, $tableName, $uploadId)
   {
     $statementName = __METHOD__.$tableName;
 
@@ -133,7 +133,7 @@ class TreeDao extends Object
             path || ut.uploadtree_pk,
             CASE WHEN (ut.ufile_mode & (1<<28) = 0)
             THEN
-              CASE WHEN EXISTS (SELECT * FROM $tableName ut2 WHERE (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt)) AND (ut2.ufile_mode & (3<<28) = 0))
+              CASE WHEN EXISTS (SELECT * FROM $tableName ut2 WHERE ut2.upload_fk = $2 AND (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt)) AND (ut2.ufile_mode & (3<<28) = 0))
               THEN
                 ut.ufile_name || '/' || file_path
               ELSE
@@ -147,7 +147,7 @@ class TreeDao extends Object
           WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
         )
         SELECT file_path from file_tree WHERE parent IS NULL",
-        array($itemId), $statementName);
+        array($itemId, $uploadId), $statementName);
 
      return $row['file_path'];
   }

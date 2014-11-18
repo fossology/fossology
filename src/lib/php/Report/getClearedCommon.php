@@ -85,12 +85,12 @@ abstract class ClearedGetterCommon
     return $userId;
   }
 
-  protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName)
+  protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
   {
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
-      $fileName = $this->treeDao->getShortPath($uploadTreeId, $uploadTreeTableName);
+      $fileName = $this->treeDao->getShortPath($uploadTreeId, $uploadTreeTableName, $uploadId);
 
       $statement['fileName'] = $fileName;
     }
@@ -151,7 +151,7 @@ abstract class ClearedGetterCommon
 
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId);
 
-    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName);
+    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
 
     $statements = $this->groupStatements($ungrupedStatements);
 
