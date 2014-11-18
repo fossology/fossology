@@ -205,7 +205,7 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getPreviousItem($uploadId, $itemId, $options = null)
   {
-    return $this->getItemByDirection($uploadId, $itemId, self::DIR_BCK, $options);
+      return $this->getItemByDirection($uploadId, $itemId, self::DIR_BCK, $options);
   }
 
   const DIR_FWD = 1;
@@ -414,7 +414,7 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeDao $uploadTreeView)
   {
-    $sql = "SELECT count(*) FROM ". $uploadTreeView->getUploadTreeViewName() ." where lft BETWEEN $1 and $2";
+    $sql = "SELECT count(*) FROM ". $uploadTreeView->getDbViewName() ." where lft BETWEEN $1 and $2";
     $result = $this->dbManager->getSingleRow($sql
         , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeView->asCTE() );
     $output = $result['count'];

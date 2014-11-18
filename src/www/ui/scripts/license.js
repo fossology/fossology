@@ -60,6 +60,16 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 $(document).ready(function () {
   createLicHistTable();
   createDirlistTable();
+    $('#bulkAction').change( function(){
+    if( $('#bulkAction').val()=='new'){
+      $('#bulkExistingLicense').hide();
+      $('#bulkNewLicense').show();
+    }
+    else{
+      $('#bulkExistingLicense').show();
+      $('#bulkNewLicense').hide();
+    }
+  });
 });
 
 

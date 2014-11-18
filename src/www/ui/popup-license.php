@@ -46,11 +46,23 @@ class PopupLicense extends FO_Plugin
       return 0;
     }
     $licenseShortname = GetParm("lic", PARM_TEXT);
-    if (empty($licenseShortname))
+    $licenseId = GetParm("rf", PARM_NUMBER);
+    if (empty($licenseShortname) && empty($licenseId))
     {
       return;
     }
-    $license = $this->licenseDao->getLicenseByShortName($licenseShortname);
+    if ($licenseId)
+    {
+      $license = $this->licenseDao->getLicenseById($licenseId);
+    }
+    else
+    {
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortname);
+    }
+    if ($license === null)
+    {
+      return;
+    }
     $this->vars['shortName'] = $license->getShortName();
     $this->vars['fullName'] = $license->getFullName();
     $licenseUrl = $license->getUrl();

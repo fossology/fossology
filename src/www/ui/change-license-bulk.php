@@ -47,77 +47,106 @@ class changeLicenseBulk extends FO_Plugin
     $this->dbManager = $container->get('db.manager');
   }
 
-  /**
-   * \brief Display the loaded menu and plugins.
-   */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      throw new \Fossology\Lib\Exception("plugin " . $this->Name . " is not ready");
     }
-    $ErrorMsg = "";
-    $jq_pk = -1;
+
+    $uploadTreeId = intval($_POST['uploadTreeId']);
+    if ($uploadTreeId <= 0)
+    {
+      header('Content-type: text/json', true, 500);
+      return json_encode(array("error" => 'bad request'));
+    }
+
+    try
+    {
+      $jobQueueId = $this->getJobQueueId($uploadTreeId);
+    } catch (Exception $ex)
+    {
+      $errorMsg = $ex->getMessage();
+      header('Content-type: text/json', true, 500);
+      return json_encode(array("error" => $errorMsg));
+    }
+    ReportCachePurgeAll();
+
+    header('Content-type: text/json');
+    return json_encode(array("jqid" => $jobQueueId));
+  }
+
+  private function getJobQueueId($uploadTreeId)
+  {
+    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
+    $uploadId = intval($uploadEntry['upload_fk']);
+    if ($uploadId <= 0)
+    {
+      throw new Exception('permission denied');
+    }
+
+    $bulkScope = filter_input(INPUT_POST, 'bulkScope');
+    if ($bulkScope === 'u')
+    {
+      $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+      $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
+          array($uploadId), __METHOD__ . "adam" . $uploadTreeTable);
+      $uploadTreeId = $row['uploadtree_pk'];
+    } else if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
+    {
+      $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
+    } else
+    {
+      throw new Exception('bad scope request');
+    }
 
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
-    $uploadTreeId = intval($_POST['uploadTreeId']);
-    $refText = filter_input(INPUT_POST,'refText');
-    $licenseId = intval($_POST['licenseId']);
-    $removing = filter_input(INPUT_POST,'removing');
-    $bulkScope = filter_input(INPUT_POST,'bulkScope');
-
-    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
-    $uploadId = intval($uploadEntry['upload_fk']);
-
-    if ($uploadId > 0) {
-      $upload = $this->uploadDao->getUpload($uploadId);
-      $uploadName = $upload->getFilename();
-
-      if ($bulkScope === "u")
+    $refText = filter_input(INPUT_POST, 'refText');
+    $action = filter_input(INPUT_POST, 'bulkAction');
+    if ($action === 'new')
+    {
+      $shortnamePattern = '/^[-+_a-z0-9\\.()]{3,100}$/i';
+      $newShortname = filter_input(INPUT_POST, 'shortname');
+      if (!preg_match($shortnamePattern, $newShortname))
       {
-        $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-        $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
-                                              array($uploadId), __METHOD__."adam".$uploadTreeTable);
-        $uploadTreeId = $row['uploadtree_pk'];
+        throw new Exception('invalid shortname pattern');
       }
-      else
+      if (!$this->licenseDao->isNewLicense($newShortname))
       {
-        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode'])) {
-          $uploadTreeId = $uploadEntry['parent'];
-        }
+        throw new Exception('license shortname already in use');
       }
-
-      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
-
-      if ($bulkId > 0) {
-        $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
-
-        /** @var agent_fodecider $deciderPlugin */
-        $deciderPlugin = plugin_find("agent_decider");
-        $dependecies = array(array ('name' => 'agent_monk_bulk', 'args' => $bulkId));
-        $conflictStrategyId = intval(filter_input(INPUT_POST,'forceDecision'));
-        $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, $dependecies, $conflictStrategyId);
-      } else {
-        $ErrorMsg = "can not insert bulk reference";
-      }
-    } else {
-      $ErrorMsg = "bad request";
+      $licenseId = $this->licenseDao->insertUploadLicense($newShortname, $refText);
+      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText);
+    } else
+    {
+      $licenseId = GetParm('licenseId', PARM_INTEGER);
+      $removing = ($action === 'remove');
+      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
     }
 
-    ReportCachePurgeAll();
-
-    if (empty($ErrorMsg) && ($jq_pk>0)) {
-      header('Content-type: text/json');
-      return json_encode(array("jqid" => $jq_pk));
-    } else {
-      header('Content-type: text/json', true, 500);
-      return json_encode(array("error" => $ErrorMsg));
+    if ($bulkId <= 0)
+    {
+      throw new Exception('cannot insert bulk reference');
     }
-  } // Output()
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $uploadName = $upload->getFilename();
+    $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+    /** @var agent_fodecider $deciderPlugin */
+    $deciderPlugin = plugin_find("agent_decider");
+    $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
+    $conflictStrategyId = intval(filter_input(INPUT_POST, 'forceDecision'));
+    $errorMsg = '';
+    $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
+
+    if (!empty($errorMsg))
+    {
+      throw new Exception(str_replace('<br>', "\n", $errorMsg));
+    }
+    return $jq_pk;
+  }
 
 }
 
 $NewPlugin = new changeLicenseBulk;
 $NewPlugin->Initialize();
-
-

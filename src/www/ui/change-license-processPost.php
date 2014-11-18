@@ -17,7 +17,6 @@
  ***********************************************************/
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Util\LicenseOverviewPrinter;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
@@ -25,12 +24,7 @@ class changeLicenseProcessPost extends FO_Plugin
 {
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var LicenseOverviewPrinter */
-  private $licenseOverviewPrinter;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
 
   function __construct()
@@ -47,7 +41,6 @@ class changeLicenseProcessPost extends FO_Plugin
 
     global $container;
     $this->clearingDao = $container->get('dao.clearing');
-    $this->licenseOverviewPrinter =  $container->get('utils.license_overview_printer');
     $this->uploadDao = $container->get('dao.upload');
   }
 

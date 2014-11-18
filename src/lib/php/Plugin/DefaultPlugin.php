@@ -232,7 +232,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList))
+    if (isset($this->MenuList) && (!$this->requiresLogin ||  !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
     {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }
@@ -315,7 +315,7 @@ abstract class DefaultPlugin implements Plugin
 
   private function checkPrerequisites()
   {
-    if (empty($_SESSION['User']) && $this->requiresLogin)
+    if ($this->requiresLogin && (empty($_SESSION['User']) || $_SESSION['User']=='Default User'))
     {
       throw new \Exception("not allowed without login");
     }
