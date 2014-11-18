@@ -17,12 +17,11 @@ use Fossology\Reportgen\LicenseClearedGetterProto;
 use Fossology\Reportgen\XpClearedGetter;
 
 
-define("CLEARING_DECISION_IS_GLOBAL", false);
-
 include_once(__DIR__ . "/version.php");
 
 require_once("$MODDIR/lib/php/Report/getClearedXp.php");
 require_once("$MODDIR/lib/php/Report/getClearedProto.php");
+
 class ReadmeOssAgent extends Agent
 {
 
@@ -39,17 +38,14 @@ class ReadmeOssAgent extends Agent
     $this->licenseClearedGetter = new LicenseClearedGetterProto();
 
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
-
-
   }
 
   function processUploadId($uploadId)
   {
-
     $userId = $this->userId;
 
-    $licenses  = $this->licenseClearedGetter->getCleared($uploadId, $userId);
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId,$userId);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $userId);
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $userId);
 
     $contents = array('licenses' => $licenses,
                       'copyrights' => $copyrights
@@ -64,29 +60,26 @@ class ReadmeOssAgent extends Agent
   {
     global $SysConf;
 
-    $ROW = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
-    $Package_Name = $ROW['upload_filename'];
-    $this->dbManager->freeResult($ROW);
+    // TODO use uploadDao
+    $row = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
+    $packageName = $row['upload_filename'];
 
-    $fileBase=$SysConf['FOSSOLOGY']['path']."/report/";
-    $filename =$fileBase. "ReadMe_OSS_".$Package_Name.".txt" ;
+    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
 
-    $message = $this->generateReport($contents, $Package_Name);
+    $message = $this->generateReport($contents, $packageName);
 
-    file_put_contents($filename, $message );
+    file_put_contents($fileName, $message);
 
-    $this->updateReportTable($uploadId, $this->jobId, $filename );
-
+    $this->updateReportTable($uploadId, $this->jobId, $fileName);
   }
 
-
   private function updateReportTable($uploadId, $jobId, $filename){
-   $result=$this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",array($uploadId, $jobId, $filename),__METHOD__);
-   $this->dbManager->freeResult($result);
+   $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
   }
 
   private function generateReport($contents, $Package_Name)
@@ -101,16 +94,17 @@ class ReadmeOssAgent extends Agent
     $output .= $Break;
     $output .= $Package_Name;
     $output .= $Break;
-    while($contents['licenses']['statements'][$i]){
-      $output .= $contents['licenses']['statements'][$i]['text'];
+    foreach($contents['licenses']['statements'] as $licenseStatement){
+      $output .= $licenseStatement['text'];
       $output .= $Break;
       $output .= $separator2;
-      $output .= $Break;           
+      $output .= $Break;
       $i++;
     }
     $j = 0;
-    while($contents['copyrights']['statements'][$j]){
-      $Copyrights .= $contents['copyrights']['statements'][$j]['content']."\r\n";    
+    $copyrights = "";
+    foreach($contents['copyrights']['statements'] as $copyrightStatement){
+      $copyrights .= $copyrightStatement['content']."\r\n";
       $j++;
     }
     if(empty($j)){
@@ -120,7 +114,7 @@ class ReadmeOssAgent extends Agent
     }else{
        $output .= "Copyright notices";
        $output .= $Break; 
-       $output .= $Copyrights;
+       $output .= $copyrights;
     }
     return $output;
   }
