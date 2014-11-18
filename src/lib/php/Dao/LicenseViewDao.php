@@ -34,6 +34,13 @@ class LicenseViewDao extends DbViewDao
   {
     $this->groupId = $groupId;
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
+    if(array_key_exists('candidatePrefix',$options)){
+      $shortnameId = array_search('rf_shortname',$columns);
+      if ($shortnameId)
+      {
+        $columns[$shortnameId] = "'". pg_escape_string($options['candidatePrefix']). '\'||rf_shortname AS rf_shortname';
+      }
+    }
     $gluedColumns = implode(',', $columns);
     $dbViewQuery = "SELECT $gluedColumns FROM license_candidate WHERE group_fk=$this->groupId";
     
@@ -44,6 +51,8 @@ class LicenseViewDao extends DbViewDao
 
     if (!array_key_exists('diff', $options))
     {
+      $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
+      $gluedColumns = implode(',', $columns);
       $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS group_fk" : $gluedColumns;
       $dbViewQuery .= " UNION SELECT $refColumns FROM ONLY license_ref";
       if(array_key_exists('extraCondition', $options))

@@ -34,7 +34,8 @@ class LicenseDao extends Object
   private $dbManager;
   /** @var Logger */
   private $logger;
-
+  /** @var string */
+  private $candidatePrefix = '*';
 
   function __construct(DbManager $dbManager)
   {
@@ -145,7 +146,8 @@ class LicenseDao extends Object
   {
     if(isset($_SESSION) && array_key_exists('GroupId', $_SESSION)){
       $rfTable = 'license_all';
-      $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
+      $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>$this->candidatePrefix);
+      $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, $rfTable);
       $withCte = $licenseViewDao->asCTE();
     }
     else
@@ -179,7 +181,8 @@ class LicenseDao extends Object
     $statementName = __METHOD__;
     
     $rfTable = 'license_all';
-    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], array(), $rfTable);
+    $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>$this->candidatePrefix);
+    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, $rfTable);
     $withCte = $licenseViewDao->asCTE();
 
     $this->dbManager->prepare($statementName,
@@ -305,21 +308,26 @@ class LicenseDao extends Object
     return $licenses;
   }
 
-
   /**
-   * @param string $licenseId
+   * @param string $condition
+   * @param array $param
    * @return License|null
    */
-  public function getLicenseById($licenseId)
+  private function getLicenseByCondition($condition,$param)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE rf_pk=$1",
-        array($licenseId),__METHOD__.'.only');
-    if (false===$row && !empty($_SESSION['GroupId']))
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE $condition",
+        $param, __METHOD__.".$condition.only");
+    if (false === $row && isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
     {
+      $param[] = $_SESSION['GroupId'];
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE rf_pk=$1 AND group_fk=$2",
-        array($licenseId,$_SESSION['GroupId']),__METHOD__.'.candidate');
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$2",
+        $param, __METHOD__.".$condition.candidate");
+      if(false !== $row)
+      {
+        $row['rf_shortname'] = $this->candidatePrefix . $row['rf_shortname'];
+      }
     }
     if (false === $row)
     {
@@ -330,26 +338,21 @@ class LicenseDao extends Object
   }
 
   /**
+   * @param string $licenseId
+   * @return License|null
+   */
+  public function getLicenseById($licenseId)
+  {
+    return $this->getLicenseByCondition('rf_pk=$1', array($licenseId));
+  }
+
+  /**
    * @param string $licenseShortname
    * @return License|null
    */
   public function getLicenseByShortName($licenseShortname)
   {
-    $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE rf_shortname=$1",
-        array($licenseShortname),__METHOD__.'.only');
-    if (false===$row && !empty($_SESSION['GroupId']))
-    {
-    $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE rf_shortname=$1 AND group_fk=$2",
-        array($licenseShortname,$_SESSION['GroupId']),__METHOD__.'.only');
-    }
-    if (false===$row)
-    {
-      return null;
-    }
-    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_text'], $row['rf_url']);
-    return $license;
+    return $this->getLicenseByCondition('rf_shortname=$1',array($licenseShortname));
   }
 
   /**

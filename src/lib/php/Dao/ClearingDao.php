@@ -20,15 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\DecisionScopes;
-use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\Clearing\LicenseClearing;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
-use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\ClearingDecisionBuilder;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -179,8 +177,8 @@ class ClearingDao extends Object
         "select
                LR.rf_pk as id,
                LR.rf_shortname as shortname,
-               LR.rf_fullname  as fullname,
-               CL.removed  as removed
+               LR.rf_fullname as fullname,
+               CL.removed as removed
            from clearing_licenses CL
            left join license_ref LR on CL.rf_fk=LR.rf_pk
                where CL.clearing_fk=$1");
@@ -374,7 +372,7 @@ insert into clearing_decision (
     $this->dbManager->freeResult($res);
 
     $statementNameLicenseInsert = __METHOD__ . ".insertLicense";
-    $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO  clearing_licenses (clearing_fk, rf_fk, removed) VALUES($1, $2, $3)");
+    $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed) VALUES($1, $2, $3)");
     foreach ($licenses as $license) {
       $res = $this->dbManager->execute($statementNameLicenseInsert, array($clearingDecisionId, $license->getId(), $this->dbManager->booleanToDb(false)));
       $this->dbManager->freeResult($res);
@@ -394,9 +392,13 @@ insert into clearing_decision (
    */
   public function getRelevantClearingEvents($userId, $uploadTreeId)
   {
+    $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>'*');
+    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, 'LR');
+    $withCte = $licenseViewDao->asCTE();
+    
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
-        $sql = "
+        $sql = $withCte."
   SELECT
     LD.clearing_event_pk,
     LD.uploadtree_fk,
@@ -411,7 +413,7 @@ insert into clearing_decision (
     LD.reportinfo,
     LD.comment
   FROM clearing_event LD
-  INNER JOIN license_ref LR ON LR.rf_pk = LD.rf_fk
+  INNER JOIN LR ON LR.rf_pk = LD.rf_fk
   INNER JOIN group_user_member GU ON LD.user_fk = GU.user_fk
   INNER JOIN group_user_member GU2 ON GU.group_fk = GU2.group_fk
   WHERE LD.uploadtree_fk = $1
