@@ -97,8 +97,8 @@ class KeywordsGetter extends ClearedGetterCommon
         list($keyword, $context) = $this->readFile($inputFile, $start, $end);
 
         $result[]= array(
-          'content' => $keyword,
-          'text' => $context,
+          'content' => convertToUTF8($keyword),
+          'text' => convertToUTF8($context),
           'uploadtree_pk' => $itemId
         );
       }
