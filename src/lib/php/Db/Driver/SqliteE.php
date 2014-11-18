@@ -28,20 +28,11 @@ use SQLite3Stmt;
  */
 class SqliteE implements Driver
 {
-  /**
-   * @var Sqlite3
-   */
+  /** @var Sqlite3 */
   private $dbConnection = false;
-
-  /**
-   * @var SQLite3Stmt[] $preparedStmt
-   */
+  /** @var SQLite3Stmt[] $preparedStmt */
   private $preparedStmt = array();
-
-  /**
-   *
-   * @var string
-   */
+  /** @var string */
   private $varPrefix = ':var';
 
   public function __construct($dbConnection)
@@ -65,6 +56,7 @@ class SqliteE implements Driver
       $pgStyleVar = '$' . ($paramCnt + 1);
       if ($paramCnt == 9) break; // limited number of replaced place holders
     }
+    $sqlStatement = str_replace(' ONLY ',' ',$sqlStatement);
     $stmt = $this->dbConnection->prepare($sqlStatement);
     $this->preparedStmt[$statementName] = & $stmt;
     return $stmt;

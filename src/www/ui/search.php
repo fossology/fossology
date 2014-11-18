@@ -106,7 +106,8 @@ class search extends FO_Plugin
 
     if (!empty($License))
     {
-      $SQL .= ",license_file_ref";
+      $SQL .= ", ( SELECT license_ref.rf_shortname, license_file.rf_fk, license_file.pfile_fk
+                  FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref";
     }
     if (!empty($Copyright))
     {
@@ -249,7 +250,7 @@ class search extends FO_Plugin
     {
       if ($NeedAnd) $SQL .= " AND"; 
 
-      $SQL .= " uploadtree.pfile_fk=license_file_ref.pfile_fk and license_file_ref.rf_shortname ilike '$License'";
+      $SQL .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '$License'";
       $NeedAnd=1;
     }
     if (!empty($Copyright))

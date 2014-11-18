@@ -119,8 +119,8 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertInstanceOf('Fossology\Lib\Data\License', $lic);
     $this->assertEquals($id, $lic->getId());
 
-    $id = -1;
-    $lic = $licDao->getLicenseById($id);
+    $invalidId = -1;
+    $lic = $licDao->getLicenseById($invalidId);
     $this->assertNull($lic);
   }
 

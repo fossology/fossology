@@ -115,9 +115,9 @@ class ui_nomos_diff extends FO_Plugin
     $agent_pk = $TreeInfo['agent_pk'];
 
     /*  Get the counts for each license under this UploadtreePk*/
-    $sql = "SELECT distinct(rf_shortname) as licname,
+    $sql = "SELECT rf_shortname as licname,
                    count(rf_shortname) as liccount, rf_shortname
-              from license_ref,license_file,
+              from ONLY license_ref,license_file,
                   (SELECT distinct(pfile_fk) as PF from $TreeInfo[uploadtree_tablename]
                      where upload_fk=$upload_pk 
                        and {$TreeInfo['uploadtree_tablename']}.lft BETWEEN $lft and $rgt) as SS

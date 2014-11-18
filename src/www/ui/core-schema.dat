@@ -571,7 +571,7 @@
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"clearing_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["clearing_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"rf_fk\" IS 'refer to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"rf_fk\" int4;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
@@ -1001,37 +1001,6 @@
   $Schema["TABLE"]["license_file"]["fl_end_byte"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["license_file_audit"]["audit_pk"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"audit_pk\" IS 'audit primary key';";
-  $Schema["TABLE"]["license_file_audit"]["audit_pk"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"audit_pk\" int4;";
-  $Schema["TABLE"]["license_file_audit"]["audit_pk"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"audit_pk\" SET NOT NULL, ALTER COLUMN \"audit_pk\" SET DEFAULT nextval('license_file_audit_audit_pk_seq'::regclass);";
-  $Schema["TABLE"]["license_file_audit"]["audit_pk"]["UPDATE"] = "UPDATE license_file_audit SET audit_pk=nextval('license_file_audit_audit_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_file_audit"]["fl_fk"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"fl_fk\" IS 'license_file ID';";
-  $Schema["TABLE"]["license_file_audit"]["fl_fk"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"fl_fk\" int8;";
-  $Schema["TABLE"]["license_file_audit"]["fl_fk"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"fl_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["license_file_audit"]["fl_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_file_audit"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"rf_fk\" IS 'license reference ID';";
-  $Schema["TABLE"]["license_file_audit"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"rf_fk\" int8;";
-  $Schema["TABLE"]["license_file_audit"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["license_file_audit"]["rf_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_file_audit"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"user_fk\" IS 'who do this change';";
-  $Schema["TABLE"]["license_file_audit"]["user_fk"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"user_fk\" int4;";
-  $Schema["TABLE"]["license_file_audit"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["license_file_audit"]["user_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_file_audit"]["date"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"date\" IS 'change time';";
-  $Schema["TABLE"]["license_file_audit"]["date"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"date\" timestamptz;";
-  $Schema["TABLE"]["license_file_audit"]["date"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"date\" SET NOT NULL, ALTER COLUMN \"date\" SET DEFAULT now();";
-  $Schema["TABLE"]["license_file_audit"]["date"]["UPDATE"] = "UPDATE license_file_audit SET date=now()";
-
-  $Schema["TABLE"]["license_file_audit"]["reason"]["DESC"] = "COMMENT ON COLUMN \"license_file_audit\".\"reason\" IS 'why do this change';";
-  $Schema["TABLE"]["license_file_audit"]["reason"]["ADD"] = "ALTER TABLE \"license_file_audit\" ADD COLUMN \"reason\" text;";
-  $Schema["TABLE"]["license_file_audit"]["reason"]["ALTER"] = "ALTER TABLE \"license_file_audit\" ALTER COLUMN \"reason\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_file_audit"]["reason"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["license_ref"]["rf_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_pk\" IS 'Primary Key';";
   $Schema["TABLE"]["license_ref"]["rf_pk"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;";
   $Schema["TABLE"]["license_ref"]["rf_pk"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_pk\" SET NOT NULL, ALTER COLUMN \"rf_pk\" SET DEFAULT nextval('license_ref_rf_pk_seq'::regclass);";
@@ -1138,7 +1107,7 @@
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref';";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)';";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_fk\" int8;";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["rf_fk"]["UPDATE"] = "";
@@ -2061,7 +2030,6 @@
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE \"key_key_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_agent_fk_seq"] = "CREATE SEQUENCE \"license_test_agent_fk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_lt_pk_seq"] = "CREATE SEQUENCE \"license_test_lt_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_pfile_fk_seq"] = "CREATE SEQUENCE \"license_test_pfile_fk_seq\" START 1;";
@@ -2087,7 +2055,6 @@
   $Schema["SEQUENCE"]["sqlagentproc_sap_pk_seq"] = "CREATE SEQUENCE \"sqlagentproc_sap_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_tag_pk_seq"] = "CREATE SEQUENCE \"tags_tag_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_file_tag_file_pk_seq"] = "CREATE SEQUENCE \"tags_file_tag_file_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_file_audit_audit_pk_seq"] = "CREATE SEQUENCE \"license_file_audit_audit_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_ns_tag_ns_pk_seq"] = "CREATE SEQUENCE \"tags_ns_tag_ns_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tag_ns_group_tag_ns_group_pk_seq"] = "CREATE SEQUENCE \"tag_ns_group_tag_ns_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
@@ -2125,7 +2092,6 @@
   $Schema["CONSTRAINT"]["jobqueue_pkey"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_pkey\" PRIMARY KEY (\"jq_pk\");";
   $Schema["CONSTRAINT"]["key_pkey"] = "ALTER TABLE \"key\" ADD CONSTRAINT \"key_pkey\" PRIMARY KEY (\"key_pk\");";
   $Schema["CONSTRAINT"]["lic_pkey"] = "ALTER TABLE \"agent_lic_raw\" ADD CONSTRAINT \"lic_pkey\" PRIMARY KEY (\"lic_pk\");";
-  $Schema["CONSTRAINT"]["license_file_audit_pkey"] = "ALTER TABLE \"license_file_audit\" ADD CONSTRAINT \"license_file_audit_pkey\" PRIMARY KEY (\"audit_pk\");";
   $Schema["CONSTRAINT"]["license_test_pkey"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"license_test_pkey\" PRIMARY KEY (\"lt_pk\");";
   $Schema["CONSTRAINT"]["licgroup_grps_pkey"] = "ALTER TABLE \"licgroup_grps\" ADD CONSTRAINT \"licgroup_grps_pkey\" PRIMARY KEY (\"licgroup_grps_pk\");";
   $Schema["CONSTRAINT"]["licgroup_lics_pkey"] = "ALTER TABLE \"licgroup_lics\" ADD CONSTRAINT \"licgroup_lics_pkey\" PRIMARY KEY (\"licgroup_lics_pk\");";
@@ -2197,7 +2163,6 @@
   $Schema["CONSTRAINT"]["clearing_decision_clearid_Id"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_decision_clearid_Id\" FOREIGN KEY (\"clearing_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_licenses_rf_fk_fkey"] = "ALTER TABLE \"clearing_licenses\" ADD CONSTRAINT \"clearing_licenses_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -2338,7 +2303,7 @@
   $Schema["TABLE"]["clearing_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_event"]["uploadtree_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_event"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_event"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"rf_fk\" IS 'refer to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"rf_fk\" int4;";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_event"]["rf_fk"]["UPDATE"] = "";

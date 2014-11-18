@@ -250,7 +250,7 @@ class ClearingView extends FO_Plugin
       if ($permission >= PERM_WRITE)
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
-        $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+        $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray($uploadId);
       }
       else
       {
