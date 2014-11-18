@@ -20,8 +20,9 @@ namespace Fossology\Lib\Data\Upload;
 
 
 use DateTime;
+use Fossology\Lib\Util\Object;
 
-class Upload {
+class Upload extends Object{
   /** @var int */
   private $id;
 

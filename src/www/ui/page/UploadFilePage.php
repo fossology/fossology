@@ -206,7 +206,8 @@ class UploadFilePage extends DefaultPlugin
     }
 
     $wgetAgentCall = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadId '$uploadedTempFile' -c '$SYSCONFDIR'";
-    exec($wgetAgentCall, $wgetOutput = array(), $wgetReturnValue);
+    $wgetOutput = array();
+    exec($wgetAgentCall, $wgetOutput , $wgetReturnValue);
     unlink($uploadedTempFile);
 
     $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);

@@ -16,44 +16,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\Folder;
+namespace Fossology\Lib\Data\Package;
 
-
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Util\Object;
 
-class Folder extends Object {
+class Package extends Object {
 
   /** @var int */
   private $id;
 
-  /** @var string */
-  private $name;
-
-  /** @var string */
-  private $description;
-
-  /** @var int */
-  private $permissions;
+  /** @var Upload[] */
+  private $uploads;
 
   /**
    * @param int $id
-   * @param string $name
-   * @param string $description
-   * @param int $permissions
+   * @param Upload[] $uploads
    */
-  public function __construct($id, $name, $description, $permissions) {
+  public function __construct($id, $uploads) {
     $this->id = $id;
-    $this->name = $name;
-    $this->description = $description;
-    $this->permissions = $permissions;
-  }
-
-  /**
-   * @return string
-   */
-  public function getDescription()
-  {
-    return $this->description;
+    $this->uploads = $uploads;
   }
 
   /**
@@ -65,20 +47,11 @@ class Folder extends Object {
   }
 
   /**
-   * @return string
+   * @return Upload[]
    */
-  public function getName()
+  public function getUploads()
   {
-    return $this->name;
+    return $this->uploads;
   }
-
-  /**
-   * @return int
-   */
-  public function getPermissions()
-  {
-    return $this->permissions;
-  }
-
 
 } 
