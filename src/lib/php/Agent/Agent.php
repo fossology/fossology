@@ -45,7 +45,7 @@ abstract class Agent extends Object
     $this->agentVersion = $version;
     $this->agentDesc = $agentName. " agent";
     $this->agentRev = $version.".".$revision;
-    $this->agentArs = $agentName . "_ars";
+    $this->agentArs = strtolower( $agentName ) . "_ars";
     $this->schedulerMode = false;
 
     $GLOBALS['processed'] = 0;

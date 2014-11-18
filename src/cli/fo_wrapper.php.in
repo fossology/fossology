@@ -16,7 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
+//error_reporting( E_ALL | E_STRICT );
 /**
  * @file fo_wrapper.php
  * @brief Bootstrap into the fossology system and then

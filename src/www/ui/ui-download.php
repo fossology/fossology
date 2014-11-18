@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_ui_download", _("Download File"));
 
 /**
@@ -115,6 +117,7 @@ class ui_download extends FO_Plugin
     }
 
     $reportId = GetParm("report",PARM_INTEGER);
+
     if (!empty($reportId))
     {
       $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");

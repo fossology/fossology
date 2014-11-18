@@ -50,7 +50,7 @@ class agent_reportgen extends FO_Plugin
     //menu_insert("Agents::" . $this->Title, 0, $this->Name);
 
     $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Generate Report", 0, $this->Name, $text);
+    menu_insert("Browse-Pfile::Generate Word Report", 0, $this->Name, $text);
   }
 
   /**

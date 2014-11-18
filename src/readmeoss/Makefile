@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = readMeOssAgent
+MOD_NAME = readmeoss
 
 DIRS = agent ui
 TESTDIR =
