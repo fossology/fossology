@@ -21,6 +21,7 @@ namespace Fossology\UI;
 
 use agent_adj2nest;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Monolog\Logger;
@@ -41,6 +42,9 @@ class UploadFilePage extends DefaultPlugin
   /** @var FolderDao */
   private $folderDao;
 
+  /** @var PackageDao */
+  private $packageDao;
+
   /** @var Logger */
   private $logger;
 
@@ -54,6 +58,7 @@ class UploadFilePage extends DefaultPlugin
     ));
 
     $this->folderDao = $this->getObject('dao.folder');
+    $this->packageDao = $this->getObject('dao.package');
     $this->logger = $this->getObject('logger');
   }
 
@@ -82,7 +87,7 @@ class UploadFilePage extends DefaultPlugin
 
         if ($uploadFile !== null && !empty($folderId))
         {
-          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
+          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ, $reuseUploadId);
           $description = $successful ? null : $description;
         } else
         {
@@ -150,7 +155,7 @@ class UploadFilePage extends DefaultPlugin
    * @param int $publicPermission
    * @return null|string
    */
-  function handleFileUpload($folderId, UploadedFile $uploadedFile, $description, $publicPermission)
+  function handleFileUpload($folderId, UploadedFile $uploadedFile, $description, $publicPermission, $reuseUploadId)
   {
     global $MODDIR;
     global $SysConf;
@@ -192,6 +197,8 @@ class UploadFilePage extends DefaultPlugin
     $userId = $SysConf['auth']['UserId'];
     $groupId = $SysConf['auth']['GroupId'];
     $uploadId = JobAddUpload($userId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+    $this->createPackageLink($uploadId, $reuseUploadId);
+
     if (empty($uploadId))
     {
       return array(false, _("Failed to insert upload record"));
@@ -231,6 +238,23 @@ class UploadFilePage extends DefaultPlugin
       if (empty($message)) $message = _("File upload failed.  Error:") . $wgetReturnValue;
       return array(false, $message);
     }
+  }
+
+  /**
+   * @param int $uploadId
+   * @param int $reuseUploadId
+   */
+  private function createPackageLink($uploadId, $reuseUploadId)
+  {
+    $package = $this->packageDao->findPackageForUpload($reuseUploadId);
+
+    if ($package === null) {
+      $package = $this->packageDao->createPackage();
+
+      $this->packageDao->addUploadToPackage($reuseUploadId, $package);
+    }
+
+    $this->packageDao->addUploadToPackage($uploadId, $package);
   }
 
 }
