@@ -1,27 +1,21 @@
 <?php
-/***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014, Siemens AG
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-use Fossology\Lib\Db\DbManager;
+/*
+ Copyright (C) 2014, Siemens AG
 
-/**
- * \file agent-foreadmeoss.php
- * \brief run the decider license agent
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\Db\DbManager;
 
 define("TITLE_agent_foreadmeoss", _("ReadME_OSS generation"));
 
@@ -42,13 +36,16 @@ class agent_foreadmeoss extends FO_Plugin
 
     parent::__construct();
 
+    $this->vars['jqPk'] = -1;
+    $this->vars['downloadLink'] = "";
+    $this->vars['reportType'] = "ReadMe_OSS";
+
     global $container;
     $this->dbManager = $container->get('db.manager');
-
   }
 
   /**
-   * \brief  Register additional menus.
+   * \brief Register additional menus.
    */
   function RegisterMenus()
   {
@@ -76,7 +73,7 @@ class agent_foreadmeoss extends FO_Plugin
   }
 
   /**
-   * @brief Queue the decider agent.
+   * @brief Queue the agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
@@ -145,9 +142,8 @@ class agent_foreadmeoss extends FO_Plugin
 
   public function getTemplateName()
   {
-    return "readmeoss.html.twig";
+    return "report.html.twig";
   }
-
 
 }
 

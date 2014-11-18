@@ -13,19 +13,18 @@
     var resultEntity = $("#jobResult");
 
     function linkDownloadReport() {
-      resultEntity.html("<a href='{{ downloadLink }}'>Download Report</a>");
+      resultEntity.html("<a href='{{ downloadLink }}'>Download {{ reportType }}</a>");
     }
     function genereationFailed(jqPk) {
       var text = (jqPk > 0) ? linkToJob(jqPk) : "no job scheduled";
-      resultEntity.html("report generation failed: " + text);
+      resultEntity.html("{{ reportType }} generation failed: " + text);
     }
 
     function addLinkAndQueueAjaxPolling() {
-      var jqPk
-      = {{ jqPk }};
-              if (jqPk > 0)
+      var jqPk = {{ jqPk }};
+      if (jqPk > 0)
       {
-        resultEntity.html("report generation scheduled as " + linkToJob(jqPk));
+        resultEntity.html("{{ reportType }} generation scheduled as " + linkToJob(jqPk));
         queueUpdateCheck(jqPk, linkDownloadReport, genereationFailed);
       }
       else

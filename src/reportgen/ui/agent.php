@@ -16,11 +16,14 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\Db\DbManager;
 
 define("TITLE_agent_reportgen", _("Report Generator"));
 
 class agent_reportgen extends FO_Plugin
 {
+
+  /** @var DbManager */
   private $dbManager;
 
   function __construct()
@@ -35,13 +38,14 @@ class agent_reportgen extends FO_Plugin
 
     $this->vars['jqPk'] = -1;
     $this->vars['downloadLink'] = "";
+    $this->vars['reportType'] = "report";
 
     global $container;
     $this->dbManager = $container->get('db.manager');
   }
 
   /**
-   * \brief Register copyright agent in "Agents" menu
+   * \brief Register additional menus.
    */
   function RegisterMenus()
   {
@@ -66,29 +70,31 @@ class agent_reportgen extends FO_Plugin
   function AgentHasResults($upload_pk)
   {
     return 0; /* this agent can be re run multiple times */
-  } // AgentHasResults()
+  }
 
   /**
-   * \brief Queue the ip agent.
+   * @brief Queue the agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
+   * @param $job_pk
+   * @param $upload_pk
+   * @param $ErrorMsg - error message on failure
+   * @param $Dependencies - array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
    *
-   * \returns
+   * @return int|null
    * - jq_pk Successfully queued
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
-   **/
+   */
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
+    $Dependencies[] = "agent_adj2nest";
+
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-  } // AgentAdd()
+  }
 
   function htmlContent()
   {
@@ -142,4 +148,3 @@ class agent_reportgen extends FO_Plugin
 }
 
 $NewPlugin = new agent_reportgen;
-
