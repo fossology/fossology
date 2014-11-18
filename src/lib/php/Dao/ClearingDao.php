@@ -393,7 +393,8 @@ insert into clearing_decision (
   public function getRelevantClearingEvents($userId, $uploadTreeId)
   {
     $options = array('columns'=>array('rf_pk','rf_shortname','rf_fullname'),'candidatePrefix'=>'*');
-    $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, 'LR');
+    $groupId = (isset($_SESSION)&&array_key_exists('GroupId',$_SESSION)) ? $_SESSION['GroupId'] : 0;
+    $licenseViewDao = new LicenseViewDao($groupId, $options, 'LR');
     $withCte = $licenseViewDao->asCTE();
     
     $statementName = __METHOD__;
