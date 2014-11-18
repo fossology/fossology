@@ -182,6 +182,6 @@ class ClearingResult implements LicenseClearing {
    */
   public function getLicenseTextLink()
   {
-    return $this->clearingEvent->getLicenseTextLink();
+    return $this->getClearing()->getLicenseTextLink();
   }
 }
