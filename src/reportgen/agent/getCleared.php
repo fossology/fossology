@@ -53,7 +53,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     global $container;
     $dbManager = $container->get('db.manager');
     $userInfo = $dbManager->getSingleRow('SELECT group_fk FROM users WHERE user_pk=$1',array($userId));
-    $_SESSION['GroupId'] = $userInfo===false ? 2 : $userInfo['group_fk'];
+    $_SESSION['GroupId'] = $userInfo['group_fk'];
     
     trigger_error("userid=$userId, groupid=".$_SESSION['GroupId']);    
     
