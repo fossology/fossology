@@ -66,7 +66,7 @@ class LicenseDao extends Object
                   AG.agent_rev AS agent_revision
           FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
                FROM license_file
-               JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
+               JOIN ONLY license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
