@@ -340,7 +340,7 @@ class ui_tag extends FO_Plugin
     global $PG_CONN;
     $VE = "";
     $VE = _("<h3>Current Tags:</h3>\n");
-    $sql = "SELECT tag_pk, tag, tag_desc, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.folder_pk = $Uploadtree_pk UNION SELECT tag_pk, tag, tag_desc, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Uploadtree_pk;";
+    $sql = "SELECT tag_pk, tag, tag_desc, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk UNION SELECT tag_pk, tag, tag_desc, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Uploadtree_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
@@ -604,7 +604,7 @@ class ui_tag extends FO_Plugin
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    $sql = "SELECT tag_pk, tag, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.folder_pk = $Item;";
+    $sql = "SELECT tag_pk, tag, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)

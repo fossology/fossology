@@ -70,7 +70,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $uploadTreeId = 103;
     $left = 1;
     $uploadId = 101;
-    $this->dbManager->queryOnce("INSERT INTO uploadtree (folder_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
+    $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
         . " VALUES ($uploadTreeId, NULL, $uploadId, 1, 33792, $left, 2, 'WXwindows.txt');",
         __METHOD__ . '.insert.data');
     /** @var ItemTreeBounds $itemTreeBounds */
@@ -178,7 +178,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   protected function prepareUploadTree($uploadTreeArray = array())
   {
     $this->dbManager->prepare($stmt = 'insert.uploadtree',
-        "INSERT INTO uploadtree (folder_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
+        "INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
     foreach ($uploadTreeArray as $uploadTreeEntry)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadTreeEntry));
