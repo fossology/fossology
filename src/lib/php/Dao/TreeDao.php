@@ -88,9 +88,18 @@ class TreeDao extends Object
     return $result;
   }
 
-  public function getFullPath($itemId, $tableName)
+  public function getFullPath($itemId, $tableName, $parentId=0)
   {
-    $statementName = __METHOD__.$tableName;
+    $statementName = __METHOD__.".".$tableName;
+
+    if ($parentId > 0) {
+      $params = array($itemId, $parentId);
+      $parentClause = " = $2";
+      $statementName .= ".parent";
+    } else {
+      $params = array($itemId);
+      $parentClause = " IS NULL";
+    }
 
     $row = $this->dbManager->getSingleRow(
         "
@@ -109,12 +118,13 @@ class TreeDao extends Object
           FROM $tableName ut, file_tree ft
           WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
         )
-        SELECT file_path from file_tree WHERE parent IS NULL",
-        array($itemId), $statementName);
+        SELECT file_path from file_tree WHERE parent $parentClause",
+        $params, $statementName);
 
     return $row['file_path'];
   }
 
+  /** @deprecated it takes too long: use getRealParent + getFull with a parent */
   public function getShortPath($itemId, $tableName, $uploadId)
   {
     $statementName = __METHOD__.$tableName;
@@ -150,5 +160,10 @@ class TreeDao extends Object
         array($itemId, $uploadId), $statementName);
 
      return $row['file_path'];
+  }
+
+  public function getRealParent($uploadId, $tableName)
+  {
+    return 0; //TODO implement
   }
 }
