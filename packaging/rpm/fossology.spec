@@ -171,7 +171,7 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %files
 %defattr(-,root,root)
 %doc ChangeLog
-%doc COPYING COPYING.LGPL HACKING README install/INSTALL install/INSTALL.multi LICENSE
+%doc COPYING COPYING.LGPL HACKING README.md install/INSTALL install/INSTALL.multi LICENSE
 
 %files common
 %defattr(-,root,root)

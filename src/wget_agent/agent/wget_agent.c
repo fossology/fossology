@@ -457,12 +457,12 @@ int GetVersionControl()
   int flag = 0; // 0: default; 1: home is null before setting, should rollback
   char *homeenv = NULL;
   homeenv = getenv("HOME");
-  char *repo = "/srv/fossology";
-  if(NULL == strstr(homeenv, repo))
+//  char *repo = "/srv/fossology";
+  if(NULL == homeenv)
   {
-    setenv("HOME", "/srv/fossology", 1);
     flag = 1;
   }
+  setenv("HOME", "/srv/fossology", 1);
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
@@ -485,10 +485,11 @@ int GetVersionControl()
   }
 
   rc = system(command);
+
   if (flag) // rollback
-  {
+    unsetenv("HOME");
+  else
     setenv("HOME", homeenv, 1);
-  }
 
   if (rc != 0)
   {
