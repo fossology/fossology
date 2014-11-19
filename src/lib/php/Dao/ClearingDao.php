@@ -137,12 +137,10 @@ class ClearingDao extends Object
       $licenseId = $row['license_id'];
       $licenseShortName = $row['shortname'];
       $licenseName = $row['fullname'];
-      $licenseIsRemoved = $row['removed'];
-
 
       if($clearingId === $previousClearingId) {
         //append To last finding
-        $this->appendToLicenses($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $licenses);
+        $this->appendToLicenses($licenseId, $licenseShortName, $licenseName, $licenses);
       }
       else {
         //store the old one
@@ -164,12 +162,13 @@ class ClearingDao extends Object
                                     ->setPfileId($row['pfile_id'])
                                     ->setUserName($row['user_name'])
                                     ->setUserId($row['user_id'])
-                                    ->setType($row['type_id'])
-                                    ->setScope($this->dbManager->booleanFromDb($row['is_global']) ? "global" : "upload")
+                                    ->setType($row['type'])
+                                    ->setScope($row['scope'])
+                                    ->setComment($row['comment'])
+                                    ->setReportinfo($row['reportinfo'])
                                     ->setDateAdded($row['date_added']);
 
-        $this->appendToLicenses($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $licenses);
-
+        $this->appendToLicenses($licenseId, $licenseShortName, $licenseName, $licenses);
       }
     }
 
