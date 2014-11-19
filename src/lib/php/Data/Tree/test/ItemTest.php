@@ -65,7 +65,12 @@ class ItemTest extends \PHPUnit_Framework_TestCase
     assertThat($this->item->getFileName(), is($this->fileName));
   }
 
-  public function getItemTreeBounds()
+  public function testGetFileId()
+  {
+    assertThat($this->item->getFileId(), is($this->fileId));
+  }
+
+  public function testGetItemTreeBounds()
   {
     assertThat($this->item->getItemTreeBounds(), is($this->itemTreeBounds));
   }

@@ -69,7 +69,7 @@ class AgentRef extends Object
   
   public function __toString()
   {
-    return 'AgentRef('.$this->agentId.','.$this->agentName.','.$this->agentRevision.')';
+    return 'AgentRef(' . $this->agentId . ', ' . $this->agentName . ', ' . $this->agentRevision . ')';
   }
 
 } 
