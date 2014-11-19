@@ -29,7 +29,7 @@ HDRS = buckets.h
 all: $(EXE)
 
 $(EXE): buckets.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) buckets.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+	$(CC) buckets.c $(OBJS) $(FO_LDFLAGS) -lpq $(CFLAGS_LOCAL) -o $@
 
 write.o: $(HDRS) write.c
 	$(CC) -c $(CFLAGS_LOCAL) write.c

@@ -16,7 +16,7 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 all: $(EXE)
 
 $(EXE): mimetype.c $(FOLIB) libmimetype.a $(DB) $(REPO) $(VARS)
-	$(CC) mimetype.c libmimetype.a $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) mimetype.c libmimetype.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)

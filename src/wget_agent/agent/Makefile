@@ -31,7 +31,7 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
-	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) main.c libwget_agent.a $(FO_LDFLAGS) $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)

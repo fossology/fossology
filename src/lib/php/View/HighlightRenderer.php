@@ -202,4 +202,31 @@ class HighlightRenderer extends Object
   }
 
 
+  /**
+   * @param boolean $containsDiff
+   * @return array
+   */
+  public function getLegendData($containsDiff)
+  {
+    $data = array();
+
+    $colorDefinition = $containsDiff
+        ? array(
+            '' => _('license text:'),
+            Highlight::MATCH => _('&nbsp;- identical'),
+            Highlight::CHANGED => _('&nbsp;- modified'),
+            Highlight::ADDED => _('&nbsp;- added'),
+            Highlight::DELETED => _('&nbsp;- removed'),
+            Highlight::SIGNATURE => _('license relevant text'),
+            Highlight::KEYWORD => _('keyword'),
+            Highlight::BULK => _('bulk'))
+        : array(
+            Highlight::UNDEFINED => _("license relevant text"));
+    foreach ($colorDefinition as $colorKey => $txt)
+    {
+      $data[] = array('style' => $colorKey ? $this->createStyle($colorKey) : '', 'text' => $txt);
+    }
+    return $data;
+  }
+
 } 
