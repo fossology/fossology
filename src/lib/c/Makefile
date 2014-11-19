@@ -5,7 +5,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = -fPIC $(ALL_CFLAGS) $(CFLAGS_FO)
+CFLAGS_LOCAL = -fPIC $(ALL_CFLAGS)
 
 CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
 		  -DFOSSGROUP='"$(PROJECTGROUP)"' \
@@ -26,7 +26,7 @@ libfossology_cov.a: $(COVERAGE)
 	$(AR) cr $@ $(COVERAGE)
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CONFDEF) $(CFLAGS_LOCAL) $(LIB) -o $@
+	$(CC) $< $(CONFDEF) $(LIB) $(CFLAGS_LOCAL) -o $@
 
 %.o: %.c %.h
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_LOCAL)

@@ -37,7 +37,7 @@ departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
-	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) ununpack.c libununpack.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all $(VARS)
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition

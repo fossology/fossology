@@ -58,12 +58,17 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
 
     $agentIdCondition = $agent != "any" ?  "and agent_fk=$agent" : "";
 
+    /* Strip out added upload_pk condition if it isn't needed */
+    if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
+      $UploadClause = "upload_fk=$upload_pk and ";
+    else
+      $UploadClause = "";
+
     /*  Get the licenses under this $uploadtree_pk*/
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk, fl_pk
               from license_file_ref,
                   (SELECT distinct(pfile_fk) as PF from $uploadtree_tablename 
-                     where upload_fk=$upload_pk 
-                       and lft BETWEEN $lft and $rgt) as SS
+                     where $UploadClause lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk $agentIdCondition
               order by rf_shortname asc";
     $result = pg_query($PG_CONN, $sql);
@@ -178,10 +183,16 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $agentCondition = "and agent_fk=$agent_pk";
   }
 
+  /* Strip out added upload_pk condition if it isn't needed */
+  if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
+    $UploadClause = "upload_fk=$upload_pk and ";
+  else
+    $UploadClause = "";
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
           from license_file, agent, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
-                 where upload_fk=$upload_pk and lft BETWEEN $lft and $rgt 
+                 where $UploadClause
+                 lft BETWEEN $lft and $rgt 
                  and ufile_mode & (3<<28) = 0 )  as SS
           where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
               AND agent_pk=agent_fk
@@ -254,11 +265,17 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
 
   $agentCondition = $agent_pk != "any" ? "and agent_fk=$agent_pk" : "";
 
+
+  /* Strip out added upload_pk condition if it isn't needed */
+  if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
+    $UploadClause = "upload_fk=$upload_pk and ";
+  else
+    $UploadClause = "";
+
   $sql = "select count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
           from license_file, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
-                 where upload_fk=$upload_pk
-                   and lft BETWEEN $lft and $rgt) as SS
+                 where $UploadClause lft BETWEEN $lft and $rgt) as SS
           where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
                 $TagClause $chkonly";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's

@@ -122,12 +122,15 @@ class UploadDao extends Object
     }
 
     $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $parameters = array();
+    $uploadCondition = $this->handleUploadIdForTable($uploadTreeTableName, $uploadId, $parameters);
+
     $uploadEntryData = $this->dbManager->getSingleRow("
 SELECT * FROM $uploadTreeTableName
-        WHERE upload_fk = $1
-          AND parent IS NULL
+        WHERE parent IS NULL
+              $uploadCondition
           ",
-        array($uploadId), $stmt);
+        $parameters, $stmt);
 
     return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
   }
@@ -139,15 +142,29 @@ SELECT * FROM $uploadTreeTableName
   public function countPlainFiles(ItemTreeBounds $itemTreeBounds)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+
     $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $parameters = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $uploadCondition = $this->handleUploadIdForTable($uploadTreeTableName, $itemTreeBounds->getUploadId(), $parameters);
+
     $row = $this->dbManager->getSingleRow("SELECT count(*) as count FROM $uploadTreeTableName
-        WHERE upload_fk = $1
-          AND lft BETWEEN $2 AND $3
+        WHERE  lft BETWEEN $1 AND $2
+          $uploadCondition
           AND ((ufile_mode & (3<<28))=0)
           AND pfile_fk != 0",
-        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), $stmt);
+        $parameters, $stmt);
     $fileCount = intval($row["count"]);
     return $fileCount;
+  }
+
+  private function handleUploadIdForTable($uploadTreeTableName, $uploadId, &$parameters)
+  {
+    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a") {
+      $parameters[] = $uploadId;
+      return " AND upload_fk = $" . count($parameters) . " ";
+    } else {
+      return "";
+    }
   }
 
   /**

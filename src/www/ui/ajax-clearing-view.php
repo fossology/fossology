@@ -26,39 +26,47 @@ use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\View\LicenseProcessor;
 use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
 
-define("TITLE_ajaxClearingView", _("Change concluded License "));
-
 class AjaxClearingView extends FO_Plugin
 {
+  const OPTION_SKIP_FILE = "option_skipFile";
+  const OPTION_SKIP_FILE_COPYRIGHT = "option_skipFileCopyRight";
+  const OPTION_SKIP_FILE_IP = "option_skipFileIp";
+  const OPTION_SKIP_FILE_ECC = "option_skipFileEcc";
+
   /** @var UploadDao */
   private $uploadDao;
+
   /** @var LicenseDao */
   private $licenseDao;
+
   /** @var ClearingDao */
   private $clearingDao;
+
   /** @var AgentsDao */
   private $agentsDao;
+
   /** @var Logger */
   private $logger;
+
   /** @var HighlightDao */
   private $highlightDao;
+
   /** @var HighlightProcessor */
   private $highlightProcessor;
+
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
+
   /** @var UrlBuilder */
   private $urlBuilder;
-  /** @var int */
-  private $uploadId;
 
   function __construct()
   {
     $this->Name = "conclude-license";
-    $this->Title = TITLE_ajaxClearingView;
+    $this->Title = _("Change concluded License ");
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->Dependency = array("view");
     $this->LoginFlag = 0;
@@ -83,15 +91,15 @@ class AjaxClearingView extends FO_Plugin
 
 
   /**
-   * @param $orderAscending
-   * @param $userId
-   * @param $uploadTreeId
-   * @internal param $itemTreeBounds
+   * @param boolean $orderAscending
+   * @param int $userId
+   * @param int $uploadId
+   * @param int $uploadTreeId
    * @return string
    */
-  protected function doLicenses($orderAscending, $userId, $uploadTreeId)
+  protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
   {
-    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $this->uploadId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
@@ -108,7 +116,7 @@ class AjaxClearingView extends FO_Plugin
 
       $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
       $licenseId = $licenseRef->getId();
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($this->uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
@@ -166,7 +174,7 @@ class AjaxClearingView extends FO_Plugin
     if (!$this->OutputToStdout)
     {
       $this->vars['content'] = $output;
-      return;
+      return null;
     }
     if ($output === "success")
     {
@@ -183,77 +191,56 @@ class AjaxClearingView extends FO_Plugin
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
     $action = GetParm("do", PARM_STRING);
-    if ($action)
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    if (empty($action) || empty($uploadId) || empty($uploadTreeId))
     {
-      switch ($action)
-      {
-        case "licenses":
-        case "licenseDecisions":
-        case "addLicense":
-        case "removeLicense":
-        case "setNextPrev":
-        case "setNextPrevCopyRight":
-        case "setNextPrevIp":
-        case "setNextPrevEcc":
-          $uploadId = GetParm("upload", PARM_INTEGER);
-          if (empty($uploadId))
-          {
-            return;
-          }
-          $uploadTreeId = GetParm("item", PARM_INTEGER);
-          if (empty($uploadTreeId))
-          {
-            return;
-          }
-          $this->uploadId = $uploadId;
-          $licenseId = GetParm("licenseId", PARM_INTEGER);
+      return "";
+    }
+    $licenseId = GetParm("licenseId", PARM_INTEGER);
+    $sort0 = GetParm("sSortDir_0", PARM_STRING);
 
-          $sort0 = GetParm("sSortDir_0", PARM_STRING);
-          if (isset($sort0))
-          {
-            $orderAscending = $sort0 === "asc";
-          }
-      }
+    $orderAscending = isset($sort0) ? $sort0 === "asc" : true;
 
-      switch ($action)
-      {
-        case "licenses":
-          return $this->doLicenses($orderAscending, $userId, $uploadTreeId);
+    switch ($action)
+    {
+      case "licenses":
+        return $this->doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId);
 
-        case "licenseDecisions":
-          return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);
+      case "licenseDecisions":
+        return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);
 
-        case "addLicense":
-          $this->clearingDao->addClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
-          return json_encode(array());
+      case "addLicense":
+        $this->clearingDao->addClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
+        return json_encode(array());
 
-        case "removeLicense":
-          $this->clearingDao->removeClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
-          return json_encode(array());
+      case "removeLicense":
+        $this->clearingDao->removeClearing($uploadTreeId, $userId, $licenseId, ClearingEventTypes::USER);
+        return json_encode(array());
 
-        case "setNextPrev":
-        case "setNextPrevCopyRight":
-        case "setNextPrevIp":
-        case "setNextPrevEcc":
-          return $this->doNextPrev($action, $uploadId, $uploadTreeId);
+      case "setNextPrev":
+      case "setNextPrevCopyRight":
+      case "setNextPrevIp":
+      case "setNextPrevEcc":
+        return $this->doNextPrev($action, $uploadId, $uploadTreeId);
 
-        case "updateClearings":
-          $id = GetParm("id", PARM_STRING);
-          if (isset($id))
-          {
-            list ($uploadTreeId, $licenseId) = explode(',', $id);
-            $what = GetParm("columnName", PARM_STRING);
-            $changeTo = GetParm("value", PARM_STRING);
-            $this->clearingDao->updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo);
-          }
-          return "success";
-      }
+      case "updateClearings":
+        $id = GetParm("id", PARM_STRING);
+        if (isset($id))
+        {
+          list ($uploadTreeId, $licenseId) = explode(',', $id);
+          $what = GetParm("columnName", PARM_STRING);
+          $changeTo = GetParm("value", PARM_STRING);
+          $this->clearingDao->updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo);
+        }
+        return "success";
     }
   }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $userId
+   * @param int $userId
+   * @param boolean $orderAscending
    * @return array
    */
   protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
@@ -265,7 +252,7 @@ class AjaxClearingView extends FO_Plugin
     list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
     $licenseEventTypes = new ClearingEventTypes();
     $licenseEventTypeMap = $licenseEventTypes->getMap();
-    
+
     $table = array();
     /** @var ClearingResult $clearingResult */
 
@@ -286,7 +273,7 @@ class AjaxClearingView extends FO_Plugin
       }
 
       $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
-      
+
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
 
@@ -330,8 +317,8 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param ClearingResult $licenseDecisionResult
-   * @param $uberUri
-   * @param $uploadTreeId
+   * @param string $uberUri
+   * @param int $uploadTreeId
    * @return array
    */
   protected function getAgentInfo($licenseDecisionResult, $uberUri, $uploadTreeId)
@@ -389,51 +376,38 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function doNextPrev($action, $uploadId, $uploadTreeId)
   {
-    switch($action)
+    switch ($action)
     {
       case "setNextPrev":
         $modName = "view-license";
-        $opt = "option_skipFile";
+        $opt = self::OPTION_SKIP_FILE;
         break;
 
       case "setNextPrevCopyRight":
         $modName = "copyright-view";
-        $opt = "option_skipFileCopyRight";
+        $opt = self::OPTION_SKIP_FILE_COPYRIGHT;
         break;
 
       case "setNextPrevIp":
         $modName = "ip-view";
-        $opt = "option_skipFileIp";
+        $opt = self::OPTION_SKIP_FILE_IP;
         break;
 
       case "setNextPrevEcc":
         $modName = "ecc-view";
-        $opt = "option_skipFileEcc";
+        $opt = self::OPTION_SKIP_FILE_ECC;
         break;
     }
 
     $options = array('skipThese' => GetParm($opt, PARM_STRING));
+
     $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
+    $prevItemId = $prevItem ? $prevItem->getId() : null;
+
     $nextItem = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
+    $nextItemId = $nextItem ? $nextItem->getId() : null;
 
-    if ($prevItem === null)
-    {
-      $prev = null;
-    } else
-    {
-      $prev = $prevItem->getId();
-    }
-
-    if ($nextItem === null)
-    {
-      $next = null;
-    } else
-    {
-      $next = $nextItem->getId();
-    }
-
-
-    return json_encode(array('prev' => $prev, 'next' => $next, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
+    return json_encode(array('prev' => $prevItemId, 'next' => $nextItemId, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
   }
 }
 

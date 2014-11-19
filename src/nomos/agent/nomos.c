@@ -309,16 +309,16 @@ int main(int argc, char **argv)
 
   if (putenv("LANG=C") < 0)
   {
-    (void) strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
-    LOG_FATAL("Cannot set LANG=C in environment.  Error: %s", sErrorBuf)
+    char * estr = strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+    LOG_FATAL("Cannot set LANG=C in environment.  Error: %s", estr)
     Bail(-__LINE__);
   }
 
   /* Save the current directory */
   if (getcwd(gl.initwd, sizeof(gl.initwd)) == NULL_STR)
   {
-    (void) strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
-    LOG_FATAL("Cannot obtain starting directory.  Error: %s", sErrorBuf)
+    char *estr = strerror_r(errno, sErrorBuf, sizeof(sErrorBuf));
+    LOG_FATAL("Cannot obtain starting directory.  Error: %s", estr)
     Bail(-__LINE__);
   }
 

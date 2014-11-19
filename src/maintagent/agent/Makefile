@@ -29,7 +29,7 @@ HDRS = maintagent.h
 all: $(EXE)
 
 $(EXE): maintagent.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) maintagent.c $(OBJS) -lpq $(CFLAGS_LOCAL) -o $@
+	$(CC) maintagent.c $(OBJS) $(FO_LDFLAGS) $(CFLAGS_LOCAL) -o $@
 
 usage.o: $(HDRS) usage.c
 	$(CC) -c $(CFLAGS_LOCAL) usage.c
