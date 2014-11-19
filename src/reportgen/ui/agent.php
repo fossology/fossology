@@ -87,7 +87,7 @@ class agent_reportgen extends FO_Plugin
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, '--uId'.$_SESSION['UserId']);
   } // AgentAdd()
 
   function htmlContent()

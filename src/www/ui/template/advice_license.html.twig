@@ -1,0 +1,54 @@
+{% extends "include/base.html.twig" %}
+
+
+{% block content %}
+
+<table class="semibordered" id="licenseCandidateTbl" width="100%" cellpadding="0">
+  <thead>
+    <tr><th width="5%"></th><th width="10%"></th><th width="10%"></th><th width="60%"></th><th width="10%"></th><th width="5%"></th></tr>
+  </thead>
+</table>
+  <br/><br/>
+<div style="text-align:center;">
+  <a href="?mod=advice_license&amp;rf=-1" class="buttonLink">{{ 'New License'|trans }}</a>
+</div>
+  
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    function createBrowseTable() {
+      
+    tableColumns = [
+    {"sTitle": "{{ "Edit" }}", "sClass": "center", "bSearchable": false},
+    {"sTitle": "{{ "Shortname" }}", "sClass": "center", "bSearchable": true},
+    {"sTitle": "{{ "Fullname" }}", "sClass": "center", "bSearchable": false},
+    {"sTitle": "{{ "Text" }}", "sClass": "left", "bSearchable": false},
+    {"sTitle": "{{ "URL" }}", "sClass": "center", "bSearchable": false},
+    {"sTitle": "{{ "Merge Request" }}", "sClass": "center", "bSearchable": false}
+  ];
+
+  tableSorting = [ [1, "asc"] ];
+
+  dataTableConfig =
+      {
+        "aoColumns": tableColumns,
+        "aaSorting": tableSorting,
+        "iDisplayLength": 20,
+        "aaData": {{ aaData }},
+        "bStateSave": true
+      };
+
+    var otable = $('#licenseCandidateTbl').dataTable(dataTableConfig);
+    return otable;
+  }
+    
+    
+    $(document).ready(function () {
+      createBrowseTable();
+    });
+    
+  </script>
+{% endblock %}

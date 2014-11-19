@@ -62,7 +62,7 @@ unsigned long NinkaDatabaseHandler::selectOrInsertLicenseIdForName(string rfShor
         "selectOrInsertLicenseIdForName",
         "WITH "
           "selectExisting AS ("
-            "SELECT rf_pk FROM license_ref"
+            "SELECT rf_pk FROM ONLY license_ref"
             " WHERE rf_shortname = $1"
           "),"
           "insertNew AS ("

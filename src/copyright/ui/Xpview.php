@@ -214,7 +214,7 @@ class Xpview extends FO_Plugin
    */
   function legendBox()
   {
-    $colorMapping = $this->highlightRenderer->colorMapping;
+    $colorMapping = $this->highlightRenderer->getColorMapping();
 
     $output = '';
     $output .= _("file text");
@@ -222,7 +222,7 @@ class Xpview extends FO_Plugin
     foreach ($this->hightlightTypeToStringMap
              as $colorKey => $txt)
     {
-      $output .= '<br/>' . $this->highlightRenderer->createStyle($colorKey, $txt, $colorMapping) . $txt . '</span>';
+      $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt, $colorMapping) . $txt . '</span>';
     }
     return $output;
   }

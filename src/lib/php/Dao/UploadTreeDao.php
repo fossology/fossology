@@ -20,18 +20,11 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\DecisionScopes;
 
-class UploadTreeDao
+class UploadTreeDao extends DbViewDao
 {
-  /** @var string */
-  private $uploadTreeViewName;
-  /** @var string */
-  private $uploadTreeViewQuery;
-  /** @var string */
   private $uploadTreeTableName;
   /** @var int */
   private $uploadId;
-  /** @var bool */
-  private $materialized = false;
   
   /**
    * @param int $uploadId
@@ -42,8 +35,9 @@ class UploadTreeDao
   {
     $this->uploadId = $uploadId;
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $this->uploadTreeViewName = $uploadTreeViewName ?: 'UploadTreeView';
-    $this->uploadTreeViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
+    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView';
+    $dbViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
+    parent::__construct($dbViewQuery, $dbViewName);
   }
 
   /**
@@ -54,44 +48,6 @@ class UploadTreeDao
     return $this->uploadTreeTableName;
   }
   
-  /**
-   * @return string
-   */
-  public function getUploadTreeViewName()
-  {
-    return $this->uploadTreeViewName;
-  }
-
-  /**
-   * @brief create temp table
-   */
-  public function materialize()
-  {
-    if ($this->materialized)
-    {
-      return;
-    }
-    global $container;
-    $dbManager = $container->get('db.manager');
-    $dbManager->queryOnce("CREATE TEMPORARY TABLE $this->uploadTreeViewName AS $this->uploadTreeViewQuery");
-    $this->materialized = true;
-  }
-
-  /**
-   * @brief drops temp table
-   */
-  public function unmaterialize()
-  {
-    if (!$this->materialized)
-    {
-      return;
-    }
-    global $container;
-    $dbManager = $container->get('db.manager');
-    $dbManager->queryOnce("DROP TABLE $this->uploadTreeViewName");
-    $this->materialized = false;
-  }    
-    
   /**
    * @param array $options
    * @param string $uploadTreeTableName
@@ -107,14 +63,6 @@ class UploadTreeDao
     {
       return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
     }
-  }
-  
-  /**
-   * @brief Common Table Expressions
-   * @return string
-   */
-  public function asCTE(){
-    return "WITH $this->uploadTreeViewName AS (".$this->uploadTreeViewQuery.")";
   }
 
   /**
@@ -207,9 +155,9 @@ class UploadTreeDao
     global $container;
     $dbManager = $container->get('db.manager');
         $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
-            . $this->uploadTreeViewName ." v where u.upload_fk=$1"
+            . $this->getDbViewName() ." v where u.upload_fk=$1"
             . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
-    $dbManager->prepare($stmt=__METHOD__.$this->uploadTreeViewName,$sql);
+    $dbManager->prepare($stmt=__METHOD__.$this->getDbViewName() ,$sql);
     $res = $dbManager->execute($stmt,array($this->uploadId,$parent));
     $children = array();
     $artifactContainers = array();

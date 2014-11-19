@@ -74,7 +74,7 @@ int queryBulkArguments(long bulkId, MonkState* state) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "queryBulkArguments",
-      "SELECT lrb.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_fk, lrb.rf_text, lrb.removing "
+      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_fk, lrb.rf_text, lrb.removing "
       "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
       "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",

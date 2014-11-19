@@ -285,7 +285,8 @@ class browseProcessPost extends FO_Plugin
     }
     if ($this->userPerm)
     {
-      $currentAssignee = $this->userDao->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], "changeTableEntry", $uploadId . ", 'assignee'");
+      $action = " onchange =\"changeTableEntry(this, $uploadId, 'assignee')\"";
+      $currentAssignee = $this->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], $action );
     } else
     {
       $currentAssignee = array_key_exists($Row['assignee'], $users) ? $users[$Row['assignee']] : _('Unassigned');
@@ -295,6 +296,24 @@ class browseProcessPost extends FO_Plugin
     $output = array($nameColumn, $currentStatus, $tripleComment, $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
+  
+
+  /**
+   * @param string $selectElementName
+   * @param array $databaseMap
+   * @param int $selectedValue
+   * @return array
+   */
+  public function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $action = "")
+  {
+    if (array_key_exists($_SESSION['UserId'], $databaseMap))
+    {
+      $databaseMap[$_SESSION['UserId']] = _('-- Me --');
+    }
+    $databaseMap[1] = _('Unassigned');
+    return $this->renderer->createSelect($selectElementName,$databaseMap, $selectedValue,$action);
+  }
+  
 
   /**
    * @param $Folder

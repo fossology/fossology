@@ -1,0 +1,33 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<form method="post">
+  <input type="hidden" name="mod" value="advice_license"/>
+  <input type="hidden" name="rf" value="{{ rf_pk }}"/>
+  <table>
+    <tr>
+      <td>{{ 'Shortname'|trans }}:</td>
+      <td><input type="input" name="shortname" value="{{ rf_shortname|e }}"/></td>
+    </tr>
+    <tr>
+      <td>{{ 'Fullname'|trans }}:</td>
+      <td><input type="input" name="fullname" value="{{ rf_fullname|e }}"/></td>
+    </tr>
+    <tr>
+      <td valign="top">{{ 'Reference text'|trans }}:</td>
+      <td><textarea name="rf_text" cols="120" rows="10">{{ rf_text|e }}</textarea></td>
+    </tr>
+    <tr>
+      <td>{{ 'URL'|trans }}:</td>
+      <td><input type="input" name="url" value="{{ rf_url|e }}"/></td>
+    </tr>
+    <tr>
+      <td>{{ 'Merge request'|trans }}:</td>
+      <td><input type="checkbox" name="marydone"{%if marydone %} checked="checked"{% endif %}/></td>
+    </tr>
+  </table>
+  <input type="submit" name="save" value="{{ 'Save'|trans }}"/>
+</form>  
+  
+{% endblock %}

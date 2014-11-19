@@ -15,8 +15,7 @@ without any warranty.
 
   <parameters>
     <parameter key="twig.environment.config" type="collection">
-      <!--            <parameter key="cache" type="string">/tmp/twigcache</parameter> -->
-      <parameter key="cache" type="string">{$CACHEDIR}</parameter>
+      {$TWIG_CACHE}
       <parameter key="autoescape" type="constant">false</parameter>
     </parameter>
     <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
@@ -56,7 +55,6 @@ without any warranty.
     </service>
     <service id="dao.user" class="Fossology\Lib\Dao\UserDao">
       <argument type="service" id="db.manager"/>
-      <argument type="service" id="renderer"/>
     </service>
     <service id="dao.copyright" class="Fossology\Lib\Dao\CopyrightDao">
       <argument type="service" id="db.manager"/>
@@ -82,6 +80,8 @@ without any warranty.
     </service>
     <service id="view.license_renderer" class="Fossology\Lib\View\LicenseRenderer">
     </service>
+    <service id="view.url_builder" class="Fossology\Lib\View\UrlBuilder">
+    </service>
     <service id="view.text_renderer" class="Fossology\Lib\View\TextRenderer">
       <argument type="service" id="view.highlight_renderer"/>
     </service>
@@ -91,15 +91,6 @@ without any warranty.
     </service>
 
     <service id="utils.data_tables_utility" class="Fossology\Lib\Util\DataTablesUtility">
-    </service>
-
-    <service id="utils.license_overview_printer" class="Fossology\Lib\Util\LicenseOverviewPrinter">
-      <argument type="service" id="dao.license"/>
-      <argument type="service" id="dao.upload"/>
-      <argument type="service" id="dao.clearing"/>
-      <argument type="service" id="view.highlight_renderer"/>
-      <argument type="service" id="renderer"/>
-      <argument type="service" id="decision.types"/>
     </service>
 
     <service id="businessrules.newest_license_selector" class="Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">
