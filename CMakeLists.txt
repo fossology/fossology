@@ -43,9 +43,9 @@ set(SOURCE_FILES
     src/copyright/agent/regTypes.cc
     src/copyright/agent/regTypes.hpp
     src/copyright/agent_tests/Unit/run_tests.cc
+    src/copyright/agent_tests/Unit/test_accuracy.cc
     src/copyright/agent_tests/Unit/test_regex.cc
     src/copyright/agent_tests/Unit/test_RegMatcher.cc
-    src/copyright/agent_tests/Unit/test_testdataCheckFound.cc
     src/delagent/agent/delagent.c
     src/delagent/agent/delagent.h
     src/delagent/agent/util.c
@@ -309,6 +309,10 @@ set(SOURCE_FILES
     src/wget_agent/agent_tests/Unit/utility.h
     src/dox.c)
 
-include_directories(/usr/include/glib-2.0)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB_PKG glib-2.0)
+
+include_directories(${GLIB_PKG_INCLUDE_DIRS})
+
 
 add_executable(others ${SOURCE_FILES})
