@@ -39,6 +39,14 @@ class Upload extends Object{
   private $timestamp;
 
   /**
+   * @param $row
+   * @return Upload
+   */
+  public static function createFromTable($row) {
+    return new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], new DateTime($row['upload_ts']));
+  }
+
+  /**
    * @param int $id
    * @param string $filename
    * @param string $description

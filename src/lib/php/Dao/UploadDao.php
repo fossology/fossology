@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Data\Tree\Item;
@@ -84,7 +85,7 @@ class UploadDao extends Object
     $row = $this->dbManager->getSingleRow("SELECT * FROM upload WHERE upload_pk = $1",
         array($uploadId), $stmt);
 
-    return $row ? new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_description'], $row['uploadtree_tablename']) : null;
+    return $row ? Upload::createFromTable($row) : null;
   }
 
   /**

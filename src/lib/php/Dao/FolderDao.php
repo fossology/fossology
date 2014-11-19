@@ -29,6 +29,8 @@ use Monolog\Logger;
 
 class FolderDao extends Object
 {
+  const FOLDER_KEY = "folder" ;
+  const DEPTH_KEY = "depth" ;
   /**
    * @var DbManager
    */
@@ -131,12 +133,12 @@ ORDER BY name_path;
     while ($row = $this->dbManager->fetchArray($res))
     {
       $results[] = array(
-          'folder' => new Folder(
+          self::FOLDER_KEY => new Folder(
               intval($row['folder_pk']),
               $row['folder_name'],
               $row['folder_desc'],
               intval($row['folder_perm'])),
-          'depth' => $row['depth']
+          self::DEPTH_KEY => $row['depth']
       );
     }
     $this->dbManager->freeResult($res);
@@ -153,7 +155,7 @@ ORDER BY name_path;
     $parameters = array($parentId);
 
     $this->dbManager->prepare($statementName, "
-SELECT * from foldercontents fc
+SELECT u.* from foldercontents fc
 INNER JOIN upload u ON u.upload_pk = fc.child_id
 WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
 ");
@@ -161,7 +163,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $results[] = new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], new DateTime($row['upload_ts']));
+      $results[] = Upload::createFromTable($row);
     }
     $this->dbManager->freeResult($res);
     return $results;

@@ -21,8 +21,8 @@ namespace Fossology\Lib\Data\Upload;
 
 use DateTime;
 
-class UploadTest extends \PHPUnit_Framework_TestCase {
-
+class UploadTest extends \PHPUnit_Framework_TestCase
+{
   private $id = 132;
 
   private $fileName = "<fileName>";
@@ -31,6 +31,7 @@ class UploadTest extends \PHPUnit_Framework_TestCase {
 
   private $treeTableName = "<treeTableName>";
 
+  /** @var DateTime */
   private $timestamp;
 
   /** @var Upload */
@@ -66,6 +67,24 @@ class UploadTest extends \PHPUnit_Framework_TestCase {
   public function testGetTimeStamp()
   {
     assertThat($this->upload->getTimestamp(), is($this->timestamp));
+  }
+
+  public function testCreateFromTableRow()
+  {
+    $row = array(
+        'upload_pk' => $this->id,
+        'upload_filename' => $this->fileName,
+        'upload_desc' => $this->description,
+        'uploadtree_tablename' => $this->treeTableName,
+        'upload_ts' => $this->timestamp->format('Y-m-d H:i:s')
+    );
+
+    $upload = Upload::createFromTable($row);
+    assertThat($upload->getId(), is($this->id));
+    assertThat($upload->getFilename(), is($this->fileName));
+    assertThat($upload->getDescription(), is($this->description));
+    assertThat($upload->getTreeTableName(), is($this->treeTableName));
+    assertThat($upload->getTimestamp(), is($this->timestamp));
   }
 }
  

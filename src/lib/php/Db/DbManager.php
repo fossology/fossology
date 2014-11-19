@@ -236,7 +236,7 @@ abstract class DbManager extends Object
    * @param array
    * @param string
    */
-  public function insertInto($tableName,$keys,$params,$sqlLog='')
+  public function insertInto($tableName, $keys,$params,$sqlLog='')
   {
     if (empty($sqlLog))
     {

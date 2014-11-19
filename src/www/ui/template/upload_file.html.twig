@@ -21,8 +21,8 @@
     <form enctype="multipart/form-data" method="post">
         <ol>
             <li>
-                <label for="folder">{{ 'Select the folder for storing the uploaded file:'| trans }}
-                    {% include 'elements/select-folder.html.twig' with {'name': 'folder'} %}
+                <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded file:'| trans }}
+                    {% include 'elements/select-folder.html.twig' with {'name': folderParameterName} %}
                 </label>
             </li>
             <li>
@@ -37,16 +37,16 @@
 
                 <p>
                     <label>
-                        <input type="text" name="description" size="120" value="{{ description }}"/>
+                        <input type="text" name="{{ descriptionInputName }}" size="120" value="{{ descriptionInputValue }}"/>
                     </label>
                 </p>
             </li>
             <li>
                 {{ '(Optional) Select an already uploaded package for reuse in folder ' | trans }}
-                {% include 'elements/select-folder.html.twig' with {'name': 'package_folder', 'id': 'packageFolder'} %}
+                {% include 'elements/select-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
                 <p>
                     Upload to reuse:<br/>
-                    {{ macro.select("packageForReuse", folderUploads, "packageForReuse", reuseUploadId, 5) }}
+                    {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 5) }}
                 </p>
             </li>
             <li><input type="checkbox" name="public" value="public"/>
@@ -71,12 +71,12 @@
     {{ parent() }}
     <script src="scripts/tools.js" type="text/javascript"></script>
     <script>
-        $('#packageFolder').change(function () {
+        $('#{{ reuseFolderSelectorName }}').change(function () {
             var folderId = parseInt(this.selectedOptions[0].value);
 
-            $.getJSON("?mod={{ moduleName }}&do=getUploads&folder=" + folderId)
+            $.getJSON("?mod={{ moduleName }}&do=getUploads&{{ folderParameterName }}=" + folderId)
                     .done(function (data) {
-                        var packageForReuse = $('#packageForReuse');
+                        var packageForReuse = $('#{{ uploadToReuseSelectorName }}');
                         packageForReuse.empty();
                         $.each(data, function (key, value) {
                             var option = document.createElement("option");

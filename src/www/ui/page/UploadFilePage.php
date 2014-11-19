@@ -22,6 +22,7 @@ namespace Fossology\UI\Page;
 use agent_adj2nest;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\PackageDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Monolog\Logger;
@@ -36,14 +37,22 @@ use Symfony\Component\HttpFoundation\Response;
 class UploadFilePage extends DefaultPlugin
 {
   const FILE_INPUT_NAME = 'fileInput';
+  const UPLOAD_TO_REUSE_SELECTOR_NAME = 'uploadToReuse';
 
   const NAME = "upload_file";
+  const FOLDER_PARAMETER_NAME = 'folder';
+  const REUSE_FOLDER_SELECTOR_NAME = 'reuseFolderSelectorName';
+  const DESCRIPTION_INPUT_NAME = 'descriptionInputName';
+  const DESCRIPTION_VALUE = 'descriptionValue';
 
   /** @var FolderDao */
   private $folderDao;
 
   /** @var PackageDao */
   private $packageDao;
+
+  /** @var UploadDao */
+  private $uploadDao;
 
   /** @var Logger */
   private $logger;
@@ -58,6 +67,7 @@ class UploadFilePage extends DefaultPlugin
     ));
 
     $this->folderDao = $this->getObject('dao.folder');
+    $this->uploadDao = $this->getObject('dao.upload');
     $this->packageDao = $this->getObject('dao.package');
     $this->logger = $this->getObject('logger');
   }
@@ -70,9 +80,9 @@ class UploadFilePage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $vars = array();
-    $folderId = intval($request->get('folder'));
-    $description = $request->get('description');
-    $reuseUploadId = intval($request->get('reuseUpload'));
+    $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
+    $description = $request->get(self::DESCRIPTION_INPUT_NAME);
+    $reuseUploadId = intval($request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME));
     $ajaxMethodName = $request->get('do');
 
     if ($ajaxMethodName == "getUploads")
@@ -89,6 +99,7 @@ class UploadFilePage extends DefaultPlugin
         {
           list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ, $reuseUploadId);
           $description = $successful ? null : $description;
+
         } else
         {
           $vars['message'] = "Error: no file selected";
@@ -96,14 +107,18 @@ class UploadFilePage extends DefaultPlugin
       }
     }
 
-    $vars['description'] = $description ?: "";
+    $vars['descriptionInputValue'] = $description ?: "";
+    $vars['descriptionInputName'] = self::DESCRIPTION_INPUT_NAME;
+    $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
+    $vars['reuseFolderSelectorName'] = self::REUSE_FOLDER_SELECTOR_NAME;
+    $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $folderStructure = $this->folderDao->getFolderStructure();
     if (empty($folderId) && !empty($folderStructure))
     {
-      $folderId = $folderStructure[0]['folder']->getId();
+      $folderId = $folderStructure[0][FolderDao::FOLDER_KEY]->getId();
     }
     $vars['folderStructure'] = $folderStructure;
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId);
@@ -197,7 +212,6 @@ class UploadFilePage extends DefaultPlugin
     $userId = $SysConf['auth']['UserId'];
     $groupId = $SysConf['auth']['GroupId'];
     $uploadId = JobAddUpload($userId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
-    $this->createPackageLink($uploadId, $reuseUploadId);
 
     if (empty($uploadId))
     {
@@ -227,6 +241,10 @@ class UploadFilePage extends DefaultPlugin
 
     if ($wgetReturnValue == 0)
     {
+      if ($reuseUploadId > 0)
+      {
+        $this->createPackageLink($uploadId, $reuseUploadId);
+      }
       $status = GetRunnableJobList();
       $message = empty($status) ? _("Is the scheduler running? ") : "";
       $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
@@ -246,15 +264,38 @@ class UploadFilePage extends DefaultPlugin
    */
   private function createPackageLink($uploadId, $reuseUploadId)
   {
+    $newUpload = $this->uploadDao->getUpload($uploadId);
+    $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
+
     $package = $this->packageDao->findPackageForUpload($reuseUploadId);
 
     if ($package === null) {
-      $package = $this->packageDao->createPackage();
+      $packageName = $this->determinePackageName($uploadForReuse->getFilename(), $newUpload->getFilename());
+
+      $package = $this->packageDao->createPackage($packageName);
 
       $this->packageDao->addUploadToPackage($reuseUploadId, $package);
     }
 
     $this->packageDao->addUploadToPackage($uploadId, $package);
+  }
+
+  private function determinePackageName($firstName, $secondName)
+  {
+    $name = "";
+
+    $maxNumberOfCharsToCompare = min(strlen($firstName), strlen($secondName));
+    for ($i=0; $i < $maxNumberOfCharsToCompare; $i++) {
+      $character = substr($firstName, $i, 1);
+      $secondCharacter = substr($secondName, $i, 1);
+      if ($character === $secondCharacter) {
+        $name .= $character;
+      } else {
+        break;
+      }
+    }
+
+    return strlen($name) > 0 ? $name : $firstName;
   }
 
 }

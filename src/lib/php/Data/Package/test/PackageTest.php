@@ -26,6 +26,8 @@ class PackageTest extends \PHPUnit_Framework_TestCase {
 
   private $id = 123;
 
+  private $name = "<packageName>";
+
   private $uploads;
 
   /** @var Package */
@@ -34,12 +36,17 @@ class PackageTest extends \PHPUnit_Framework_TestCase {
   public function setUp() {
     $this->uploads = array(M::mock(Upload::classname()));
 
-    $this->package = new Package($this->id, $this->uploads);
+    $this->package = new Package($this->id, $this->name, $this->uploads);
   }
 
   public function testGetId()
   {
     assertThat($this->package->getId(), is($this->id));
+  }
+
+  public function testGetName()
+  {
+    assertThat($this->package->getName(), is($this->name));
   }
 
   public function testGetUploads()
