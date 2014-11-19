@@ -155,12 +155,4 @@ class AgentClearingEvent extends Object implements LicenseClearing {
   {
     return $this->percentage;
   }
-  
-  /**
-   * @return string
-   */
-  public function getLicenseTextLink()
-  {
-    return $this->getLicenseRef()->getLicenseTextLink();
-  }
 }

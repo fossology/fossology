@@ -175,12 +175,4 @@ class ClearingEvent extends Object implements LicenseClearing
   {
     return $this->licenseRef->getFullName();
   }
-  
-  /**
-   * @return string
-   */
-  public function getLicenseTextLink()
-  {
-    return $this->licenseRef->getLicenseTextLink();
-  }
 }

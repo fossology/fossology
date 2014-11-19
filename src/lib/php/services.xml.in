@@ -83,6 +83,8 @@ without any warranty.
     </service>
     <service id="view.license_renderer" class="Fossology\Lib\View\LicenseRenderer">
     </service>
+    <service id="view.url_builder" class="Fossology\Lib\View\UrlBuilder">
+    </service>
     <service id="view.text_renderer" class="Fossology\Lib\View\TextRenderer">
       <argument type="service" id="view.highlight_renderer"/>
     </service>
@@ -92,15 +94,6 @@ without any warranty.
     </service>
 
     <service id="utils.data_tables_utility" class="Fossology\Lib\Util\DataTablesUtility">
-    </service>
-
-    <service id="utils.license_overview_printer" class="Fossology\Lib\Util\LicenseOverviewPrinter">
-      <argument type="service" id="dao.license"/>
-      <argument type="service" id="dao.upload"/>
-      <argument type="service" id="dao.clearing"/>
-      <argument type="service" id="view.highlight_renderer"/>
-      <argument type="service" id="renderer"/>
-      <argument type="service" id="decision.types"/>
     </service>
 
     <service id="businessrules.newest_license_selector" class="Fossology\Lib\BusinessRules\NewestEditedLicenseSelector">

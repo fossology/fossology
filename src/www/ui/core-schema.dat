@@ -2050,6 +2050,7 @@
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE \"key_key_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_agent_fk_seq"] = "CREATE SEQUENCE \"license_test_agent_fk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_lt_pk_seq"] = "CREATE SEQUENCE \"license_test_lt_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_test_pfile_fk_seq"] = "CREATE SEQUENCE \"license_test_pfile_fk_seq\" START 1;";

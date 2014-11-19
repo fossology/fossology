@@ -43,9 +43,9 @@ set(SOURCE_FILES
     src/copyright/agent/regTypes.cc
     src/copyright/agent/regTypes.hpp
     src/copyright/agent_tests/Unit/run_tests.cc
+    src/copyright/agent_tests/Unit/test_accuracy.cc
     src/copyright/agent_tests/Unit/test_regex.cc
     src/copyright/agent_tests/Unit/test_RegMatcher.cc
-    src/copyright/agent_tests/Unit/test_testdataCheckFound.cc
     src/delagent/agent/delagent.c
     src/delagent/agent/delagent.h
     src/delagent/agent/util.c
@@ -166,9 +166,6 @@ set(SOURCE_FILES
     src/ninka/agent/utils.hpp
     src/ninka/agent_tests/Unit/run_tests.cc
     src/ninka/agent_tests/Unit/test_ninkawrapper.cc
-    src/nomos/agent/_autodata.c
-    src/nomos/agent/_autodefs.h
-    src/nomos/agent/_precheck.c
     src/nomos/agent/DMalloc.c
     src/nomos/agent/DMalloc.h
     src/nomos/agent/doctorBuffer_utils.c
@@ -309,6 +306,13 @@ set(SOURCE_FILES
     src/wget_agent/agent_tests/Unit/utility.h
     src/dox.c)
 
-include_directories(/usr/include/glib-2.0)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB_PKG glib-2.0)
+
+execute_process(COMMAND pg_config --includedir OUTPUT_VARIABLE PG_TMP)
+set(POSTGRES_INCLUDE_DIR ${PG_TMP} CACHE STRING INTERNAL)
+
+include_directories(${GLIB_PKG_INCLUDE_DIRS} ${POSTGRES_INCLUDE_DIR})
+
 
 add_executable(others ${SOURCE_FILES})

@@ -11,7 +11,7 @@ include $(VARS)
 
 DEF = -DDATADIR='"$(MODDIR)"'
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -fopenmp
-CXXFLAGS_LINK = $(ALL_CXXFLAGS) -fopenmp
+CXXFLAGS_LINK = $(ALL_CXXFLAGS) -fopenmp $(FO_LDFLAGS)
 
 EXE = ninka
 
