@@ -1,0 +1,41 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  
+{{ "Select the group to manage"|trans }}:
+{% import "include/macro.html.twig" as macro %}
+{{ macro.select('groupselect',groupMap,groupId,groupMapAction) }}
+
+<table border="1">
+  <tr><th>{{ "User"|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
+  {% for gum in usersWithGroup if gum.group_user_member_pk %}
+    <tr>
+      <td>{{ gum.user_name }}</td>
+      <td>
+        {% set onchange = ' onchange="js_url(this.value, \'' ~ baseUrl ~ '&gum_pk=' ~ gum.group_user_member_pk ~ '&perm=\')"' %}
+        {{ macro.select('permselect',permissionMap,gum.group_perm,onchange) }}
+      </td>
+    </tr>
+  {% endfor %}
+  {% if existsOtherUsers %}
+    <tr>
+      <td>
+      {{ macro.select("userselectnew", otherUsers, '', ' onchange="js_url(this.value, newpermurl)"') }}
+    </td>
+    <td>
+      {{ macro.select("permselectnew",newPermissionMap,-1,' onchange="setNewPermUrl(this.value)"') }}
+    </td>
+    </tr>
+  {% endif %}
+</table>
+
+<br/>
+{{ 'All user permissions take place immediately when a value is changed.  There is no submit button.'|trans }}
+<br/>
+{{ 'Add new users on the last line.'|trans }}  
+
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+{% endblock %}

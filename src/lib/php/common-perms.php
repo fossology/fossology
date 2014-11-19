@@ -172,6 +172,7 @@
   }
 
   /* @brief Get array of groups that this user has admin access to
+   * @depricated use UserDao->getAdminGroupMap
    * @param $user_pk
    *
    * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
