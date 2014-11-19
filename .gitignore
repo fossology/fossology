@@ -108,6 +108,7 @@ src/nomos/agent_tests/Unit/results/
 src/pkgagent/agent/pkgagent
 src/pkgagent/agent_tests/Unit/results/
 src/pkgagent/agent_tests/Unit/test_pkgagent
+src/readmeoss/agent/version.php
 src/regexscan/agent/regexscan
 src/results/
 src/scheduler/agent/defconf/init.d/fossology
