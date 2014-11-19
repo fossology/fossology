@@ -54,7 +54,7 @@ class agent_foreadmeoss extends FO_Plugin
     //menu_insert("Agents::" . $this->Title, 0, $this->Name);
 
     $text = _("Generate ReadMe_OSS");
-    menu_insert("Browse-Pfile::Generate ReadMe_OSS", 0, $this->Name, $text);
+    menu_insert("Browse-Pfile::Generate&nbsp;ReadMe_OSS", 0, $this->Name, $text);
   }
 
   /**
