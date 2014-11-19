@@ -21,17 +21,20 @@ define("TITLE_ui_menu", _("Menus"));
 class ui_menu extends FO_Plugin
 {
   const NAME = "menus";
-
-  var $Name = self::NAME;
-  var $Title = TITLE_ui_menu;
-  var $Version = "1.0";
-  var $MenuTarget = "treenav";
-  var $LoginFlag = 0;
-
-  var $_CSSdone = 0; /* has the CSS been displayed? */
-
   const FULL_MENU_DEBUG = 'fullmenudebug';
 
+  var $LoginFlag = 0;
+  var $_CSSdone = 0; /* has the CSS been displayed? */
+
+  function __construct()
+  {
+    $this->Name = self::NAME;
+    $this->Title = TITLE_ui_menu;
+    $this->Version = "1.0";
+    $this->MenuTarget = "treenav";
+    parent::__construct();
+  }
+  
   function PostInitialize()
   {
     global $Plugins;
@@ -40,7 +43,7 @@ class ui_menu extends FO_Plugin
       return (0);
     } // don't run
     // Make sure dependencies are met
-    foreach ($this->Dependency as $key => $val)
+    foreach ($this->Dependency as $val)
     {
       $id = plugin_find_id($val);
       if ($id < 0)
@@ -286,95 +289,47 @@ class ui_menu extends FO_Plugin
   function Output($Title = NULL)
   {
     global $SysConf;
-
+    $sysConfig = $SysConf['SYSCONFIG'];
     if ($this->State != PLUGIN_STATE_READY)
     {
       return (0);
     }
-    $V = "";
-    if (empty($Title))
-    {
-      $Title = _("Welcome to FOSSology");
-    }
-    /* Banner Message? */
-    if (@$SysConf['SYSCONFIG']['BannerMsg'])
-    {
-      $V .= "<h4 style='background-color:#ffbbbb'>" . $SysConf['SYSCONFIG']['BannerMsg'] . "</h4>";
-    }
+    $vars = array();
+    $vars['title'] = empty($Title) ? _("Welcome to FOSSology") : $Title;
+    $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
+    $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
+    $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 
+    if ( array_key_exists('SupportEmailLabel',$sysConfig) && !empty($sysConfig['SupportEmailLabel'])
+            && array_key_exists('SupportEmailAddr',$sysConfig) && !empty($sysConfig['SupportEmailAddr'])){
+      $menuItem = '<a href="mailto:'.$sysConfig['SupportEmailAddr'].'?subject='.@$sysConfig['SupportEmailSubject'].'">'.$sysConfig['SupportEmailLabel'].'</a>';
+      menu_insert("Main::Help::".$sysConfig['SupportEmailLabel'], 0, NULL, NULL, NULL, $menuItem);
+    }    
+    
     $Menu = menu_find("Main", $MenuDepth);
-
-    /** Same height at FOSSology logo **/
-    $V .= "<table border=0 width='100%'>";
-    $V .= "<tr>";
-    /* custom or default logo? */
-    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-    {
-      $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
-      $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
-    } else
-    {
-      $LogoLink = 'http://fossology.org';
-      //$LogoImg = Traceback_uri() ."images/fossology-logo.gif";
-      $LogoImg = "images/fossology-logo.gif";
-    }
-
-    $V .= "<td width='150' rowspan='2'><a href='$LogoLink' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$LogoImg' border=0></a></td>";
-
-    $V .= "<td colspan='2'>";
-    $V .= $this->menu_html($Menu, 0);
-    $V .= "</td>";
-    $V .= "</tr><tr>";
-    $V .= "<td>";
-    $V .= "<font size='+2'><b>$Title</b></font>";
-    $V .= "</td>";
-
-    $V .= "<td align='right' valign='bottom'>";
+    $vars['mainMenu'] = $this->menu_html($Menu, 0);
+    $vars['uri'] = Traceback_uri();
+    
     /* Handle login information */
-    if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
+    $vars['isLoggedOut'] = ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"));
+    
+    if(!$vars['isLoggedOut'])
     {
-      if ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"))
-      {
-        $text = _("login");
-        $V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
-      } else
-      {
-        $V .= $this->createHtmlFromUser();
-      }
-
-      /* Use global system SupportEmail variables, if addr and label are set */
-      if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
-      {
-        $V .= " | ";
-        $V .= "<small><a href='mailto:" . $SysConf['SYSCONFIG']['SupportEmailAddr'] . "?subject=" . $SysConf['SYSCONFIG']['SupportEmailSubject'] . "'>" . $SysConf['SYSCONFIG']['SupportEmailLabel'] . "</a>";
-      }
+      $this->mergeUserLoginVars($vars);
     }
-    $V .= "</td>";
-    $V .= "</tr>";
-    $V .= "</table>";
-    $V .= "<hr />";
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    return $V;
+    
+    $out = $this->renderTemplate('menu.html.twig', $vars);
+    return $out;
   }
 
-  function createHtmlFromUser()
+  private function mergeUserLoginVars(&$vars)
   {
     global $container;
     $dbManager = $container->get("db.manager");
-    $renderer = $container->get("renderer");
 
-    if (plugin_find_id("auth") >= 0)
-      $html = "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
-    else
-      $html = "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
-    $gettextUser = _("User");
-    $gettextGroup = _('Group');
-
-    $html .= "<table style='align:left;'><tr><td align='right'><small>$gettextUser:</small></td><td>" . @$_SESSION['User'] . "</td></tr>";
-    $html .= "<tr><td align='right'><small>$gettextGroup:</small></td><td>";
+    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
+    $vars['userName'] = $_SESSION['User'];
+    
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
     $stmt = __METHOD__ . '.availableGroups';
     $dbManager->prepare($stmt, $sql);
@@ -387,15 +342,14 @@ class ui_menu extends FO_Plugin
     $dbManager->freeResult($res);
     if (count($allAssignedGroups) > 1)
     {
-      $html .= "<form action='" . Traceback_uri() . "?mod=" . Traceback_parm() . "' method='post'>";
-      $html .= $renderer->createSelect('selectMemberGroup', $allAssignedGroups, $_SESSION['GroupId'], $action = " onChange='this.form.submit()'");
-      $html .= "</form>";
-    } else
-    {
-      $html .= @$_SESSION['GroupName'];
+      $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
+      $vars['groupId'] = $_SESSION['GroupId'];
+      $vars['allAssignedGroups'] = $allAssignedGroups;
     }
-    $html .= '</td></tr></table>';
-    return $html;
+    else
+    {
+      $vars['singleGroup'] = @$_SESSION['GroupName'];
+    }
   }
 }
 
