@@ -50,6 +50,13 @@ class LicenseClearedGetterProto extends ClearedGetterCommon
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
 
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $userInfo = $dbManager->getSingleRow('SELECT group_fk FROM users WHERE user_pk=$1',array($userId));
+    $_SESSION['GroupId'] = $userInfo['group_fk'];
+     
+    trigger_error("userid=$userId, groupid=".$_SESSION['GroupId']); 
+
     $latestClearingDecisions = array();
     foreach ($clearingDecisions as $clearingDecision)
     {
@@ -64,6 +71,13 @@ class LicenseClearedGetterProto extends ClearedGetterCommon
     foreach ($latestClearingDecisions as $clearingDecision) {
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getPositiveLicenses() as $clearingLicense) {
+        $clid = $clearingLicense->getId();
+        if(empty($clid))
+        {
+          $msg = "The CdId is ".$clearingDecision->getClearingId();
+          trigger_error($msg);
+        }
+
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),

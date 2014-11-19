@@ -25,21 +25,13 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
 class AgentClearingEvent extends Object implements LicenseClearing {
-  /**
-   * @var LicenseRef
-   */
+  /** @var LicenseRef */
   private $licenseRef;
-  /**
-   * @var AgentRef
-   */
+  /** @var AgentRef */
   private $agentRef;
-  /**
-   * @var int
-   */
+  /** @var int */
   private $matchId;
-  /**
-   * @var int
-   */
+  /** @var int */
   private $percentage;
 
   /**

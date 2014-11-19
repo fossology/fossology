@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "libfossdb.h"
 #include "libfossdbmanager.h"
+#define LICENSE_REF_TABLE "ONLY license_ref"
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right) {
   return fo_dbManager_ExecPrepared(
@@ -33,7 +34,7 @@ PGresult* queryAllLicenses(fo_dbManager* dbManager) {
     fo_dbManager_PrepareStamement(
       dbManager,
       "queryAllLicenses",
-      "select rf_pk, rf_shortname from license_ref where rf_detector_type = 1"
+      "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1"
     )
   );
 }
@@ -43,7 +44,7 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
     fo_dbManager_PrepareStamement(
       dbManager,
       "getLicenseTextForLicenseRefId",
-      "select rf_text from license_ref where rf_pk = $1",
+      "select rf_text from " LICENSE_REF_TABLE " where rf_pk = $1",
       long),
     refId
   );

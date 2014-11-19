@@ -14,7 +14,7 @@ LOCALAGENTDIR = ../../agent
 CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp $(FO_LDFLAGS)
 
 EXE = test_copyright
 

@@ -1159,6 +1159,7 @@ function configYum($objRef)
        echo "transcript is:\n";print_r($out) . "\n";
        return(FALSE);
      }
+     /* comment out the epel repo installation
      $last = exec("wget -e http_proxy=http://web-proxy.cce.hp.com:8088 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm", $out, $rtn);
      if($rtn != 0)
      {
@@ -1172,7 +1173,7 @@ function configYum($objRef)
        echo "FATAL! install EPEL repo fail\n";
        echo "transcript is:\n";print_r($out) . "\n";
        return(FALSE);
-     }
+     }*/
      $last = exec("yum -y install php-phpunit-PHPUnit", $out, $rtn);
      if($rtn != 0)
      {
