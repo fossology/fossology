@@ -14,6 +14,7 @@
 
     function linkDownloadReport() {
       resultEntity.html("<a href='{{ downloadLink }}'>Download {{ reportType }}</a>");
+      window.location = "{{ downloadLink }}";
     }
     function genereationFailed(jqPk) {
       var text = (jqPk > 0) ? linkToJob(jqPk) : "no job scheduled";
