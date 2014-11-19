@@ -26,8 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * \class upload_file extends from FO_Plugin
- * \brief Upload a file from the users computer using the UI.
+  * \brief Upload a file from the users computer using the UI.
  */
 class UploadFilePage extends DefaultPlugin
 {
