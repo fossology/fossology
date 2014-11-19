@@ -47,14 +47,10 @@ abstract class DefaultPlugin implements Plugin
   const PERM_WRITE = 3;        /* DB writes permitted */
   const PERM_ADMIN = 10;
 
-  /**
-   * @var ContainerBuilder
-   */
+  /** @var ContainerBuilder */
   protected $container;
 
-  /**
-   * @var Twig_Environment
-   */
+  /** @var Twig_Environment */
   private $renderer;
 
   /** @var Logger */
@@ -93,7 +89,10 @@ abstract class DefaultPlugin implements Plugin
       throw new \InvalidArgumentException("plugin requires a name");
     }
     $this->name = $name;
-    $this->setParameters($parameters);
+    foreach ($parameters as $key => $value)
+    {
+      $this->setParameter($key,$value);
+    }
 
     global $container;
     $this->container = $container;
@@ -101,51 +100,48 @@ abstract class DefaultPlugin implements Plugin
     $this->logger = $this->getObject('logger');
   }
 
-  private function setParameters($parameters)
+  private function setParameter($key, $value)
   {
-    foreach ($parameters as $key => $value)
+    switch ($key)
     {
-      switch ($key)
-      {
-        case self::TITLE:
-          $this->title = $value;
-          break;
+      case self::TITLE:
+        $this->title = $value;
+        break;
 
-        case self::PERMISSION:
-          $this->permission = $value;
-          break;
+      case self::PERMISSION:
+        $this->permission = $value;
+        break;
 
-        case self::REQUIRES_LOGIN:
-          $this->requiresLogin = $value;
-          break;
+      case self::REQUIRES_LOGIN:
+        $this->requiresLogin = $value;
+        break;
 
-        case self::LEVEL:
-          $this->PluginLevel = $value;
-          break;
+      case self::LEVEL:
+        $this->PluginLevel = $value;
+        break;
 
-        case self::DEPENDENCIES:
-          $this->dependencies = $value;
-          break;
+      case self::DEPENDENCIES:
+        $this->dependencies = $value;
+        break;
 
-        case self::INIT_ORDER:
-          $this->InitOrder = $value;
-          break;
+      case self::INIT_ORDER:
+        $this->InitOrder = $value;
+        break;
 
-        case self::MENU_LIST:
-          $this->MenuList = $value;
-          break;
+      case self::MENU_LIST:
+        $this->MenuList = $value;
+        break;
 
-        case self::MENU_ORDER:
-          $this->MenuOrder = $value;
-          break;
+      case self::MENU_ORDER:
+        $this->MenuOrder = $value;
+        break;
 
-        case self::MENU_TARGET:
-          $this->MenuTarget = $value;
-          break;
+      case self::MENU_TARGET:
+        $this->MenuTarget = $value;
+        break;
 
-        default:
-          throw new \Exception("unhandled parameter $key in module " . $this->name);
-      }
+      default:
+        throw new \Exception("unhandled parameter $key in module " . $this->name);
     }
   }
 
@@ -232,7 +228,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList) && (!$this->requiresLogin ||  !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
+    if (isset($this->MenuList) && (!$this->requiresLogin || !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
     {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }

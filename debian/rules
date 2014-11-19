@@ -85,6 +85,8 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src composer_install
+	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
+	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
