@@ -80,7 +80,7 @@ class AdviceLicense extends DefaultPlugin
   {
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1";
     /** @var DbManager */
-    $dbManager = $this->container->get('db.manager');
+    $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
     $res = $dbManager->execute($stmt, array($groupId));
     $aaData = array();
@@ -107,7 +107,7 @@ class AdviceLicense extends DefaultPlugin
     }
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
     /** @var DbManager */
-    $dbManager = $this->container->get('db.manager');
+    $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
     $row = $dbManager->getSingleRow($stmt, array($groupId, $licId), __METHOD__);
     if (false !== $row)
@@ -144,7 +144,7 @@ class AdviceLicense extends DefaultPlugin
     }
 
     /** @var LicenseDao $licenseDao */
-    $licenseDao = $this->container->get('dao.license');
+    $licenseDao = $this->getObject('dao.license');
 
     $ok = ($oldRow['rf_shortname'] == $shortname);
     if (!$ok)
