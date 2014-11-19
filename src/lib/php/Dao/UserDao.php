@@ -55,4 +55,29 @@ class UserDao extends Object {
     $this->dbManager->freeResult($res);
     return $userChoices;
   }
+  
+  /**
+   * @brief get array of groups that this user has admin access to
+   * @param int $userId
+   * @return array in the format {group_pk=>group_name, group_pk=>group_name, ...}
+   */
+  function getAdminGroupMap($userId)
+  {
+    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
+    {
+      return $this->dbManager->createMap('groups', 'group_pk', 'group_name');
+    }
+    $sql = "SELECT group_pk, group_name FROM groups, group_user_member"
+            . " WHERE group_pk=group_fk AND user_fk=$1 AND group_perm=1";
+    $param = array($userId);
+    $this->dbManager->prepare($stmt=__METHOD__, $sql);
+    $res = $this->dbManager->execute($stmt,$param);
+    $groupMap = array();
+    while($row = $this->dbManager->fetchArray($res))
+    {
+      $groupMap[$row['group_pk']] = $row['group_name'];
+    }
+    $this->dbManager->freeResult($res);
+    return $groupMap;
+  }
 } 
