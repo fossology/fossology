@@ -1788,7 +1788,7 @@
   $Schema["TABLE"]["package"]["package_pk"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_pk\" SET NOT NULL, ALTER COLUMN \"package_pk\" SET DEFAULT nextval('package_package_pk_seq'::regclass);";
   $Schema["TABLE"]["package"]["package_pk"]["UPDATE"] = "UPDATE package SET package_pk=nextval('package_package_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["package"]["package_name"]["DESC"] = "name of package";
+  $Schema["TABLE"]["package"]["package_name"]["DESC"] = "";
   $Schema["TABLE"]["package"]["package_name"]["ADD"] = "ALTER TABLE \"package\" ADD COLUMN \"package_name\" text;";
   $Schema["TABLE"]["package"]["package_name"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_name\" SET NOT NULL;";
   $Schema["TABLE"]["package"]["package_name"]["UPDATE"] = "";
