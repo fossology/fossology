@@ -224,7 +224,7 @@ class HighlightRenderer extends Object
             Highlight::UNDEFINED => _("license relevant text"));
     foreach ($colorDefinition as $colorKey => $txt)
     {
-      $data[] = array('style' => $colorKey ? $this->highlightRenderer->createStyle($colorKey) : '', 'text' => $txt);
+      $data[] = array('style' => $colorKey ? $this->createStyle($colorKey) : '', 'text' => $txt);
     }
     return $data;
   }
