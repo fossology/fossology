@@ -29,7 +29,7 @@ HDRS = delagent.h
 all: $(EXE)
 
 $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
-	$(CC) $< delagent.o $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) $< delagent.o $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 delagent.o: util.c $(HDRS)
 	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
