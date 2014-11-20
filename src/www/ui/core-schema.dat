@@ -656,7 +656,7 @@
 
   $Schema["TABLE"]["folder"]["parent_fk"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["parent_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"parent_fk\" int4;";
-  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["folder"]["parent_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
