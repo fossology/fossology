@@ -79,7 +79,6 @@ src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
 src/monk/agent/monk_cov
 src/monk/agent/squareBuilder
-src/monk/agent_tests/Functional/monk
 src/monk/agent_tests/Unit/test_monk
 src/monk/agent_tests/results/
 src/ninka/agent/ninka
