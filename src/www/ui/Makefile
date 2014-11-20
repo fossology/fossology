@@ -54,8 +54,8 @@ install:
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
 		ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled; \
 	fi
-	@ln -sf $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
-	@ln -sf $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
+	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
+	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
 
 uninstall:
 	rm -rf $(DESTDIR)$(WEBDIR)
