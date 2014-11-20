@@ -23,8 +23,6 @@ include_once(__DIR__ . "/version.php");
 
 class ReuserAgent extends Agent
 {
-  const AGENT_NAME = "reuser";
-
   const FORCE_DECISION = 1;
 
   /** @var int */
@@ -53,7 +51,7 @@ class ReuserAgent extends Agent
 
   function __construct()
   {
-    parent::__construct(self::AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
     $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
