@@ -37,12 +37,12 @@ global $container;
 $logger = $container->get("logger");
 
 $endTime = microtime(true);
-$logger->debug(sprintf("bootstrap in %.3fs", $endTime - $startTime));
+$logger->debug(sprintf("bootstrap in %.3fms", ($endTime - $startTime) * 1000));
 $startTime = $endTime;
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 $endTime = microtime(true);
-$logger->debug(sprintf("setup init in %.3fs", $endTime - $startTime));
+$logger->debug(sprintf("setup init in %.3fms", ($endTime - $startTime) * 1000));
 $startTime = $endTime;
 
 plugin_load();
@@ -51,8 +51,8 @@ plugin_preinstall();
 // call install method of every plugin, core-auth creates the default user and
 // the fossy user
 plugin_postinstall();
-$logger->debug(sprintf("setup plugins in %.3fs", microtime(true) - $startTime));
-
+$endTime = microtime(true);
+$logger->debug(sprintf("setup plugins in %.3fms", ($endTime - $startTime) * 1000));
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -63,7 +63,7 @@ if ($PluginId >= 0)
   /** @var Plugin[] $Plugins */
   $plugin = $Plugins[$PluginId];
   $plugin->execute();
-  $logger->debug(sprintf("plugin execution in %.3fs", microtime(true) - $startTime));
+  $logger->debug(sprintf("plugin execution in %.3fms", (microtime(true) - $startTime) * 1000));
 }
 else
 {
