@@ -85,7 +85,7 @@ class ReuserAgentPlugin extends DefaultPlugin
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
     $Dependencies[] = "agent_adj2nest";
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, array());
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 
   /**
