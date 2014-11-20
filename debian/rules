@@ -149,6 +149,10 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reportgen install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/reuser install
+
 
 	dh_install -s
 # Must not depend on anything. This is to be called by

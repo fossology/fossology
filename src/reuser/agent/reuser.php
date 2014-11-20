@@ -18,8 +18,6 @@ use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 include_once(__DIR__ . "/version.php");
 
