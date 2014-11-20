@@ -23,6 +23,7 @@ DIRS = \
 	nomos \
 	pkgagent \
 	reportgen \
+	reuser \
 	scheduler \
 	ununpack \
 	wget_agent \
