@@ -77,13 +77,14 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->prepareModularTable(array(
       array(6,5,1,0,0,5,6,"file"),
-      array(11,1,1,0,0,11,12,"file2")
+      array(11,4,1,0,0,11,12,"file2")
     ));
     // file2 is outside of archive/ , but inside archive.tar.gz
 
     $path = $this->treeDao->getShortPath(6, "uploadtree", 1);
     $this->assertEquals("archive/file", $path);
 
+    $this->assertEquals(4, $this->treeDao->getRealParent(1, "uploadtree"));
     $path = $this->treeDao->getShortPath(11, "uploadtree", 1);
     $this->assertEquals("file2", $path);
   }
@@ -258,7 +259,7 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->prepareUploadTree($this->getTestFileStructure());
 
-    $this->assertEquals("L/L1/", $this->treeDao->getShortPath(3666, "uploadtree", 32));
+    $this->assertEquals("L/L1", $this->treeDao->getShortPath(3666, "uploadtree", 32));
   }
 
   public function testWithComlpexStructureFromFile()

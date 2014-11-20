@@ -30,6 +30,9 @@ abstract class ClearedGetterCommon
   /** @var TreeDao */
   protected $treeDao;
 
+  /** @var array */
+  private $fileNameCache = array();
+
   private $userId;
   private $uploadId;
   private $groupBy;
@@ -92,7 +95,12 @@ abstract class ClearedGetterCommon
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
-      $fileName = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
+
+      if (!array_key_exists($uploadTreeId, $this->fileNameCache)) {
+        $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
+      }
+
+      $fileName = $this->fileNameCache[$uploadTreeId];
 
       $statement['fileName'] = $fileName;
     }
