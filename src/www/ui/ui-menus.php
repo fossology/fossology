@@ -32,14 +32,12 @@ class ui_menu extends FO_Plugin
   {
     $this->Name = self::NAME;
     $this->Title = TITLE_ui_menu;
-    $this->Version = "1.0";
     $this->MenuTarget = "treenav";
     parent::__construct();
   }
   
   function PostInitialize()
   {
-    global $Plugins;
     if ($this->State != PLUGIN_STATE_VALID)
     {
       return (0);
@@ -107,57 +105,15 @@ class ui_menu extends FO_Plugin
   function createHtmlFromMenuEntry(menu $M, $Indent)
   {
     $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
-    $V = "";
-    if (!empty($M->URI))
+    if (empty($M->URI) && empty($M->SubMenu) && !$isFullMenuDebug)
     {
-      $V .= '<a  id="'. htmlentities($M->FullName) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
-      if (empty($M->Target) || ($M->Target == ""))
-      {
-        // $V .= '" target="basenav">';
-        $V .= '">';
-      } else
-      {
-        $V .= '" target="' . $M->Target . '">';
-      }
-      if ($isFullMenuDebug)
-      {
-        $V .= $M->FullName . "(" . $M->Order . ")";
-      } else
-      {
-        $V .= $M->Name;
-      }
-    } else
-    {
-      $V .= '<a id="'. htmlentities($M->FullName) .'" href="#">';
-      if (empty($M->SubMenu))
-      {
-        $V .= "<font color='#C0C0C0'>";
-        if ($isFullMenuDebug)
-        {
-          $V .= $M->FullName . "(" . $M->Order . ")";
-        } //else { $V .= $M->Name; }
-        else
-        {
-          $V .= '';
-        }
-        $V .= "</font>";
-      } else
-      {
-        if ($isFullMenuDebug)
-        {
-          $V .= $M->FullName . "(" . $M->Order . ")";
-        } else
-        {
-          $V .= $M->Name;
-        }
-      }
+      return '';
     }
-
-    if (!empty($M->SubMenu) && ($Indent > 0))
-    {
-      $V .= " <span>&raquo;</span>";
-    }
-    $V .= "</a>\n";
+    $name = $isFullMenuDebug ? "$M->FullName($M->Order)" : $M->Name;
+    $vars = array('name'=>$name,'uri'=>$M->URI, 'target'=>$M->Target,'subMenu'=>$M->SubMenu,'fullName'=>$M->FullName);
+    $vars['actionUri'] = empty($M->URI) ? '#' : Traceback_uri() . "?mod=" . $M->URI;
+    $vars['indent'] = $Indent;
+    $V = $this->renderTemplate('menu-entry.html.twig', $vars);
     return $V;
   }
 

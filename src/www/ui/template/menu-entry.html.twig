@@ -1,0 +1,5 @@
+<a id="{{ FullName|e() }}" href="{{ actionUri }}"
+   {% if target %} target="{{ target }}"{% endif %}
+   {% if (uri is empty) and (subMenu is empty) %} style="color:#C0C0C0;"{% endif %}
+   >{{ name }}{% if (subMenu is not empty) and (indent > 0) %}<span>&raquo;</span>{% endif %}
+</a>
