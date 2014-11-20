@@ -64,9 +64,10 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $agentName = "monk";
 
     $agentDir = dirname(dirname(__DIR__));
+    $execDir = __DIR__;
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
     
-    $pipeFd = popen("echo $uploadId | $agentDir/agent/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
+    $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
     $output = "";
