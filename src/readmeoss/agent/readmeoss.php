@@ -44,8 +44,11 @@ class ReadmeOssAgent extends Agent
   {
     $userId = $this->userId;
 
+    $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $userId);
+    $this->heartbeat(count($licenses['statements']));
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $userId);
+    $this->heartbeat(count($copyrights['statements']));
 
     $contents = array('licenses' => $licenses,
                       'copyrights' => $copyrights

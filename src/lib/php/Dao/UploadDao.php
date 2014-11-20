@@ -19,10 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Dao\UploadTreeDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
@@ -75,15 +76,16 @@ class UploadDao extends Object
   }
 
   /**
-   * @param $uploadId
-   * @return array
+   * @param int $uploadId
+   * @return Upload|null
    */
-  public function getUploadInfo($uploadId)
+  public function getUpload($uploadId)
   {
     $stmt = __METHOD__;
-    $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM upload WHERE upload_pk = $1",
+    $row = $this->dbManager->getSingleRow("SELECT * FROM upload WHERE upload_pk = $1",
         array($uploadId), $stmt);
-    return $uploadEntry;
+
+    return $row ? Upload::createFromTable($row) : null;
   }
 
   /**

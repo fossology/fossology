@@ -95,10 +95,12 @@ class TreeDao extends Object
     if ($parentId > 0) {
       $params = array($itemId, $parentId);
       $parentClause = " = $2";
+      $parentLoopCondition = "AND (ut.parent != $2)";
       $statementName .= ".parent";
     } else {
       $params = array($itemId);
       $parentClause = " IS NULL";
+      $parentLoopCondition = "";
     }
 
     $row = $this->dbManager->getSingleRow(
@@ -114,7 +116,7 @@ class TreeDao extends Object
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             path || ut.uploadtree_pk,
             CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN ut.ufile_name || '/' || file_path ELSE file_path END,
-            ut.uploadtree_pk = ANY(path)
+            (ut.uploadtree_pk = ANY(path)) $parentLoopCondition
           FROM $tableName ut, file_tree ft
           WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
         )
@@ -127,6 +129,10 @@ class TreeDao extends Object
   /** @deprecated it takes too long: use getRealParent + getFull with a parent */
   public function getShortPath($itemId, $tableName, $uploadId)
   {
+    $parentId = $this->getRealParent($uploadId, $tableName);
+    return $this->getFullPath($itemId, $tableName, $parentId);
+
+    /*
     $statementName = __METHOD__.$tableName;
 
     $row = $this->dbManager->getSingleRow(
@@ -159,11 +165,25 @@ class TreeDao extends Object
         SELECT file_path from file_tree WHERE parent IS NULL",
         array($itemId, $uploadId), $statementName);
 
-     return $row['file_path'];
+     return $row['file_path'];*/
   }
 
   public function getRealParent($uploadId, $tableName)
   {
-    return 0; //TODO implement
+    $statementName = __METHOD__.".".$tableName;
+
+    $row = $this->dbManager->getSingleRow(
+      "SELECT uploadtree_pk FROM $tableName ut WHERE ut.upload_fk = $1
+      AND NOT EXISTS (
+        SELECT 1 FROM $tableName ut2 WHERE ut2.upload_fk = $1
+        AND (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt))
+        AND (ut2.ufile_mode & (3<<28) = 0)
+      )
+      ORDER BY ut.lft DESC LIMIT 1",
+      array($uploadId),
+      $statementName
+     );
+
+     return $row ? $row['uploadtree_pk'] : 0;
   }
 }

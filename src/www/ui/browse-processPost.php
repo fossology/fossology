@@ -21,7 +21,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
-use Fossology\Lib\View\Renderer;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
@@ -39,8 +38,6 @@ class browseProcessPost extends FO_Plugin
   private $filterParams;
   /** @var int */
   private $userPerm;
-  /** @var Renderer */
-  private $renderer;
   /** @var array */
   private $statusTypes;
 
@@ -50,18 +47,18 @@ class browseProcessPost extends FO_Plugin
     $this->Title = TITLE_browseProcessPost;
     $this->Version = "1.0";
     $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
     $this->NoHTML = 1;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
     parent::__construct();
+    $this->DBaccess = PLUGIN_DB_WRITE;
+
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->userDao = $container->get('dao.user');
     $this->dbManager = $container->get('db.manager');
     $this->dataTablesUtility = $container->get('utils.data_tables_utility');
-    $this->renderer = $container->get('renderer');
   }
 
   /**
@@ -281,7 +278,7 @@ class browseProcessPost extends FO_Plugin
     } else
     {
       $statusAction = " onchange =\"changeTableEntry(this, $uploadId,'status_fk' )\" ";
-      $currentStatus = $this->renderer->createSelect("Status" . $this->userPerm . "Of_$rowCounter", $statusTypesAvailable, $Row['status_fk'], $statusAction);
+      $currentStatus = $this->createSelect("Status" . $this->userPerm . "Of_$rowCounter", $statusTypesAvailable, $Row['status_fk'], $statusAction);
     }
     if ($this->userPerm)
     {
@@ -304,14 +301,31 @@ class browseProcessPost extends FO_Plugin
    * @param int $selectedValue
    * @return array
    */
-  public function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $action = "")
+  private function createSelectUsers($selectElementName, $databaseMap, $selectedValue, $action = "")
   {
     if (array_key_exists($_SESSION['UserId'], $databaseMap))
     {
       $databaseMap[$_SESSION['UserId']] = _('-- Me --');
     }
     $databaseMap[1] = _('Unassigned');
-    return $this->renderer->createSelect($selectElementName,$databaseMap, $selectedValue,$action);
+    return $this->createSelect($selectElementName,$databaseMap, $selectedValue,$action);
+  }
+  
+  
+  private function createSelect($id,$options,$select='',$action='')
+  {
+    $html = "<select name=\"$id\" id=\"$id\" $action>";
+    foreach($options as $key=>$disp)
+    {
+      $html .= '<option value="'.$key.'"';
+      if ($key == $select)
+      {
+        $html .= ' selected';
+      }
+      $html .= ">$disp</option>";
+    }
+    $html .= '</select>';
+    return $html;    
   }
   
 
