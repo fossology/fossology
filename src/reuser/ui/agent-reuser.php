@@ -96,4 +96,4 @@ class ReuserAgentPlugin extends DefaultPlugin
   }
 }
 
-register_plugin(new ReuserAgent());
+register_plugin(new ReuserAgentPlugin());
