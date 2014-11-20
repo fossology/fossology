@@ -76,6 +76,8 @@ class LicenseRenderer
       $rendered = '<b>'._('Neither license found by scanner nor concluded by user.').'</b>';
     }
 
+    $rendered .= "<h3>" . _("Summary") . "</h3>";
+
     $rendered .= $this->totalCountHist($fileCount, $uniqueLicenseCount, $scannerUniqueLicenseCount,
         $editedUniqueLicenseCount, $totalScannerLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedNoLicenseFoundCount);
 
