@@ -51,7 +51,7 @@ class AdminGroupUsers extends DefaultPlugin {
     $userId = $SysConf['auth']['UserId'];
         /** @var UserDao */
     $userDao = $this->getObject('dao.user');
-    $groupMap = $userDao->getAdminGroupMap($userId);
+    $groupMap = $userDao->getAdminGroupMap($userId,@$_SESSION['UserLevel']);
     if (empty($groupMap))
     {
       $text = _("You have no permission to manage any group.");
@@ -70,7 +70,7 @@ class AdminGroupUsers extends DefaultPlugin {
     {
       $perm = intval($request->get('perm'));
       $this->updateGUMPermission($gum_pk,$perm);
-      $groupMap = $userDao->getAdminGroupMap($userId);
+      $groupMap = $userDao->getAdminGroupMap($userId,@$_SESSION['UserLevel']);
     }
 
     $newuser = intval($request->get('newuser'));
@@ -90,7 +90,7 @@ class AdminGroupUsers extends DefaultPlugin {
       }
       if ($newuser == $userId)
       {
-        $groupMap = $userDao->getAdminGroupMap($userId);
+        $groupMap = $userDao->getAdminGroupMap($userId,@$_SESSION['UserLevel']);
       }
       $newperm = $newuser = 0;
     }

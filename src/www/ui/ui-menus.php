@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\UserDao;
 /***********************************************************
  * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
  *
@@ -325,21 +327,9 @@ class ui_menu extends FO_Plugin
   private function mergeUserLoginVars(&$vars)
   {
     global $container;
-    $dbManager = $container->get("db.manager");
-
-    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
-    $vars['userName'] = $_SESSION['User'];
-    
-    $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
-    $stmt = __METHOD__ . '.availableGroups';
-    $dbManager->prepare($stmt, $sql);
-    $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
-    $allAssignedGroups = array();
-    while ($row = $dbManager->fetchArray($res))
-    {
-      $allAssignedGroups[$row['group_pk']] = $row['group_name'];
-    }
-    $dbManager->freeResult($res);
+    /** @var UserDao */
+    $userDao = $container->get("dao.user");
+    $allAssignedGroups = $userDao->getUserGroupMap($_SESSION['UserId']);
     if (count($allAssignedGroups) > 1)
     {
       $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
@@ -350,6 +340,8 @@ class ui_menu extends FO_Plugin
     {
       $vars['singleGroup'] = @$_SESSION['GroupName'];
     }
+    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
+    $vars['userName'] = $_SESSION['User'];
   }
 }
 
