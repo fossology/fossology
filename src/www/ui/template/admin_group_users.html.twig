@@ -4,7 +4,7 @@
   
 {{ "Select the group to manage"|trans }}:
 {% import "include/macro.html.twig" as macro %}
-{{ macro.select('groupselect',groupMap,groupId,groupMapAction) }}
+{{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction) }}
 
 <table border="1">
   <tr><th>{{ "User"|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
@@ -13,17 +13,17 @@
       <td>{{ gum.user_name }}</td>
       <td>
         {% set onchange = ' onchange="js_url(this.value, \'' ~ baseUrl ~ '&gum_pk=' ~ gum.group_user_member_pk ~ '&perm=\')"' %}
-        {{ macro.select('permselect',permissionMap,gum.group_perm,onchange) }}
+        {{ macro.select('permselect',permissionMap,'permselect',gum.group_perm,onchange) }}
       </td>
     </tr>
   {% endfor %}
   {% if existsOtherUsers %}
     <tr>
       <td>
-      {{ macro.select("userselectnew", otherUsers, '', ' onchange="js_url(this.value, newpermurl)"') }}
+      {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' onchange="js_url(this.value, newpermurl)"') }}
     </td>
     <td>
-      {{ macro.select("permselectnew",newPermissionMap,-1,' onchange="setNewPermUrl(this.value)"') }}
+      {{ macro.select("permselectnew",newPermissionMap, "permselectnew",-1,' onchange="setNewPermUrl(this.value)"') }}
     </td>
     </tr>
   {% endif %}
