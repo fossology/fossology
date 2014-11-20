@@ -47,4 +47,5 @@ $logger = $container->get('logger');
 $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::INFO));
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
 
-$logger->debug(sprintf("DI container setup (cached: %s) in %.2fms", $cached ? 'yes' : 'no', ($endTime - $startTime)* 1000 ));
+$timingLogger = new \Fossology\Lib\Util\TimingLogger($logger);
+$timingLogger->logWithStartAndEndTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime, $endTime);

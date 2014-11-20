@@ -16,6 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\Plugin\Plugin;
+use Fossology\Lib\Util\TimingLogger;
 use Monolog\Logger;
 
 /**
@@ -35,15 +36,15 @@ $SysConf = bootstrap();
 global $container;
 /** @var Logger $logger */
 $logger = $container->get("logger");
+$timingLogger = new TimingLogger($logger);
 
 $endTime = microtime(true);
-$logger->debug(sprintf("bootstrap in %.3fms", ($endTime - $startTime) * 1000));
-$startTime = $endTime;
+$timingLogger->logWithStartTime("bootstrap", $startTime);
+
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 $endTime = microtime(true);
-$logger->debug(sprintf("setup init in %.3fms", ($endTime - $startTime) * 1000));
-$startTime = $endTime;
+$timingLogger->log("setup init");
 
 plugin_load();
 plugin_preinstall();
@@ -51,8 +52,8 @@ plugin_preinstall();
 // call install method of every plugin, core-auth creates the default user and
 // the fossy user
 plugin_postinstall();
-$endTime = microtime(true);
-$logger->debug(sprintf("setup plugins in %.3fms", ($endTime - $startTime) * 1000));
+
+$timingLogger->log("setup plugins");
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
@@ -63,7 +64,7 @@ if ($PluginId >= 0)
   /** @var Plugin[] $Plugins */
   $plugin = $Plugins[$PluginId];
   $plugin->execute();
-  $logger->debug(sprintf("plugin execution in %.3fms", (microtime(true) - $startTime) * 1000));
+  $timingLogger->logWithStartTime("plugin execution", $startTime);
 }
 else
 {

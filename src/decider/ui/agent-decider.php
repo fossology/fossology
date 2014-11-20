@@ -24,6 +24,8 @@
 
 define("TITLE_agent_fodecider", _("Automatic User License Decider"));
 
+include_once(__DIR__ . "/../agent/version.php");
+
 class agent_fodecider extends FO_Plugin
 {
   public $AgentName;
@@ -36,7 +38,7 @@ class agent_fodecider extends FO_Plugin
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "decider";
+    $this->AgentName = AGENT_NAME;
 
     parent::__construct();
   }

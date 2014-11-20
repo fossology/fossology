@@ -27,9 +27,11 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief run the reuser license agent
  */
 
+include_once(__DIR__ . "/../agent/version.php");
+
 class ReuserAgentPlugin extends DefaultPlugin
 {
-  private $agentName;
+  public $AgentName;
 
   function __construct()
   {
@@ -37,7 +39,7 @@ class ReuserAgentPlugin extends DefaultPlugin
         self::TITLE => _("Automatic Clearing Decision Reuser"),
         self::PERMISSION => self::PERM_WRITE
     ));
-    $this->agentName = ReuserAgent::AGENT_NAME;
+    $this->AgentName = REUSER_AGENT_NAME;
   }
 
   /**
@@ -83,7 +85,7 @@ class ReuserAgentPlugin extends DefaultPlugin
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
     $Dependencies[] = "agent_adj2nest";
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, array());
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 
   /**
@@ -96,4 +98,4 @@ class ReuserAgentPlugin extends DefaultPlugin
   }
 }
 
-register_plugin(new ReuserAgent());
+register_plugin(new ReuserAgentPlugin());

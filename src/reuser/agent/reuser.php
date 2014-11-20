@@ -18,15 +18,11 @@ use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 include_once(__DIR__ . "/version.php");
 
 class ReuserAgent extends Agent
 {
-  const AGENT_NAME = "reuser";
-
   const FORCE_DECISION = 1;
 
   /** @var int */
@@ -55,7 +51,7 @@ class ReuserAgent extends Agent
 
   function __construct()
   {
-    parent::__construct(self::AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    parent::__construct(REUSER_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
     $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
@@ -79,7 +75,7 @@ class ReuserAgent extends Agent
 
 }
 
-$agent = new DeciderAgent();
+$agent = new ReuserAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->bail(0);
