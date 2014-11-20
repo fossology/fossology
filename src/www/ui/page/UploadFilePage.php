@@ -278,6 +278,8 @@ class UploadFilePage extends DefaultPlugin
     }
 
     $this->packageDao->addUploadToPackage($uploadId, $package);
+
+    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId);
   }
 
   private function determinePackageName($firstName, $secondName)

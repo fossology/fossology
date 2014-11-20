@@ -439,6 +439,20 @@ SELECT * FROM $uploadTreeTableName
     return $output;
   }
 
+  /**
+   * @param int $uploadId
+   * @param int $reusedUploadId
+   */
+  public function addReusedUpload($uploadId, $reusedUploadId)
+  {
+    $statementName = __METHOD__;
+
+    $this->dbManager->prepare($statementName,
+        "INSERT INTO upload_reuse (upload_fk, reused_upload_fk) VALUES($1, $2)");
+    $res = $this->dbManager->execute($statementName, array($uploadId, $reusedUploadId));
+    $this->dbManager->freeResult($res);
+  }
+
 
   /**
    * @param array $uploadEntry
