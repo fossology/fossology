@@ -87,8 +87,8 @@ class changeLicenseProcessPost extends FO_Plugin
 
     $uploadEntry = $this->uploadDao->getUploadEntry($itemId);
     $uploadId = intval($uploadEntry['upload_fk']);
-    $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
-    $uploadName = $uploadInfo['upload_filename'];
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $uploadName = $upload->getFilename();
 
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 

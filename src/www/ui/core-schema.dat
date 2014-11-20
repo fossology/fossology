@@ -654,6 +654,11 @@
   $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_pk\" SET NOT NULL, ALTER COLUMN \"folder_pk\" SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
   $Schema["TABLE"]["folder"]["folder_pk"]["UPDATE"] = "UPDATE folder SET folder_pk=nextval('folder_folder_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["folder"]["parent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"parent_fk\" int4;";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["folder"]["parent_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text;";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL;";
@@ -1778,6 +1783,25 @@
   $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["ALTER"] = "ALTER TABLE \"tag_uploadtree\" ALTER COLUMN \"tag_uploadtree_text\" DROP NOT NULL;";
   $Schema["TABLE"]["tag_uploadtree"]["tag_uploadtree_text"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["package"]["package_pk"]["DESC"] = "";
+  $Schema["TABLE"]["package"]["package_pk"]["ADD"] = "ALTER TABLE \"package\" ADD COLUMN \"package_pk\" int4;";
+  $Schema["TABLE"]["package"]["package_pk"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_pk\" SET NOT NULL, ALTER COLUMN \"package_pk\" SET DEFAULT nextval('package_package_pk_seq'::regclass);";
+  $Schema["TABLE"]["package"]["package_pk"]["UPDATE"] = "UPDATE package SET package_pk=nextval('package_package_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["package"]["package_name"]["DESC"] = "";
+  $Schema["TABLE"]["package"]["package_name"]["ADD"] = "ALTER TABLE \"package\" ADD COLUMN \"package_name\" text;";
+  $Schema["TABLE"]["package"]["package_name"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_name\" SET NOT NULL;";
+  $Schema["TABLE"]["package"]["package_name"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"package_fk\" int4;";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"package_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_packages"]["package_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_packages"]["upload_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
@@ -2024,6 +2048,7 @@
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"] = "CREATE SEQUENCE \"folder_folder_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"] = "CREATE SEQUENCE \"foldercontents_foldercontents_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["package_package_pk_seq"] = "CREATE SEQUENCE \"package_package_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["upload_upload_pk_seq"] = "CREATE SEQUENCE \"upload_upload_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["group_group_pk_seq"] = "CREATE SEQUENCE \"group_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["group_user_member_group_user_member_pk_seq"] = "CREATE SEQUENCE \"group_user_member_group_user_member_pk_seq\" START 1;";
@@ -2086,6 +2111,7 @@
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
+  $Schema["CONSTRAINT"]["folder_parent_fk_fkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_parent_fk_fkey\" FOREIGN KEY (\"parent_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
   $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";
@@ -2200,9 +2226,12 @@
   $Schema["CONSTRAINT"]["tags_file_tag_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["upload_packages_package_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_package_fk\" FOREIGN KEY (\"package_fk\") REFERENCES \"package\" (\"package_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["upload_packages_upload_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_upload_fk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
 
   $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
   $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
