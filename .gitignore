@@ -130,3 +130,4 @@ src/wget_agent/agent_tests/Unit/results/
 src/www/ui/template/*.htm
 utils/freshmeat/FMDir
 utils/freshmeat/fm-paths.php
+/src/reuser/agent/version.php

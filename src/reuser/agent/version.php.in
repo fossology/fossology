@@ -1,4 +1,4 @@
 <?php
 define("REUSER_AGENT_NAME", "reuser");
-define("AGENT_VERSION", "{$VERSION}");
-define("AGENT_REV", "{$SVN_REV}");
+defined("AGENT_VERSION") or define("AGENT_VERSION", "{$VERSION}");
+defined("AGENT_REV") or define("AGENT_REV", "{$SVN_REV}");

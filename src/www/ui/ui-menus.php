@@ -177,6 +177,16 @@ class ui_menu extends FO_Plugin
       $Depth++;
     }
 
+    function styling($Label, $Depth, $Padding, $fgColor, $bgColor){
+      $V = $Label . ":hover a,\n";
+      $V .= $Label . " a:active,\n";
+      $V .= $Label . " a:hover\n";
+      $V .= "  { z-index:$Depth; $Padding color:$fgColor; background:$bgColor; width:150px; display:block; visibility:visible; }\n";
+      $V .= $Label . " a span\n";
+      $V .= "  { text-align:left; }\n";
+      return $V;
+    }
+    
     /* Depth 1 is special: position is absolute. Left is 0, top is 24 */
     if ($Depth < $MenuDepth)
     {
@@ -195,16 +205,6 @@ class ui_menu extends FO_Plugin
       $Depth++;
     }
     
-    function styling($Label, $Depth, $Padding, $fgColor, $bgColor){
-      $V = $Label . ":hover a,\n";
-      $V .= $Label . " a:active,\n";
-      $V .= $Label . " a:hover\n";
-      $V .= "  { z-index:$Depth; $Padding color:$fgColor; background:$bgColor; width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . " a span\n";
-      $V .= "  { text-align:left; }\n";
-      return $V;
-    }
-
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
     for (; $Depth < $MenuDepth; $Depth++)
     {
