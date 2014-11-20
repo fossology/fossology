@@ -51,7 +51,7 @@ class ReuserAgent extends Agent
 
   function __construct()
   {
-    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    parent::__construct(REUSER_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $args = getopt("k:", array(""));
     $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
