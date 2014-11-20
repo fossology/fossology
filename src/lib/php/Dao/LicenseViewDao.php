@@ -33,6 +33,12 @@ class LicenseViewDao extends DbViewDao
   public function __construct($groupId, $options=array(), $dbViewName='license_all')
   {
     $this->groupId = $groupId;
+    if($groupId==0){
+      $dbViewQuery = $this->queryOnlyLicenseRef($options);
+      parent::__construct($dbViewQuery, $dbViewName);
+      return;
+    }    
+    
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
     if(array_key_exists('candidatePrefix',$options)){
       $shortnameId = array_search('rf_shortname',$columns);
@@ -48,20 +54,24 @@ class LicenseViewDao extends DbViewDao
     {
       $dbViewQuery .= " AND $options[extraCondition]";
     }
-
     if (!array_key_exists('diff', $options))
     {
-      $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
-      $gluedColumns = implode(',', $columns);
-      $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS group_fk" : $gluedColumns;
-      $dbViewQuery .= " UNION SELECT $refColumns FROM ONLY license_ref";
-      if(array_key_exists('extraCondition', $options))
-      {
-        $dbViewQuery .= " AND $options[extraCondition]";
-      }
+      $dbViewQuery .= " UNION ".$this->queryOnlyLicenseRef($options);
     }
     parent::__construct($dbViewQuery, $dbViewName);
     self::createTableLicenseCandidate();
+  }
+  
+  private function queryOnlyLicenseRef($options){
+    $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
+    $gluedColumns = implode(',', $columns);
+    $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS group_fk" : $gluedColumns;
+    $dbViewQuery = "SELECT $refColumns FROM ONLY license_ref";
+    if(array_key_exists('extraCondition', $options))
+    {
+      $dbViewQuery .= " AND $options[extraCondition]";
+    }
+    return $dbViewQuery;
   }
 
   static public function createTableLicenseCandidate()

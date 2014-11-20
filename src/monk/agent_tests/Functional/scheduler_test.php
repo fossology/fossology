@@ -22,12 +22,6 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 
-if (!function_exists('Traceback_uri'))
-{
-  function Traceback_uri(){
-    return 'Traceback_uri_if_desired';
-  }
-}
 
 class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 {
@@ -71,8 +65,8 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $agentDir = dirname(dirname(__DIR__));
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
-
-    $pipeFd = popen("echo $uploadId | ./$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
+    
+    $pipeFd = popen("echo $uploadId | $agentDir/agent/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
     $output = "";
@@ -163,12 +157,12 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $uploadId = 1;
 
     $licenseId = 225;
-    $removing = "f";
+    $removing = false;
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
     $jobId = 64;
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 

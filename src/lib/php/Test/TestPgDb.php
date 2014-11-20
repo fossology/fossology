@@ -76,8 +76,8 @@ class TestPgDb
 
   private function dropAllTables()
   {
-    $this->dbManager->prepare(__METHOD__.'.get',"SELECT table_name FROM information_schema.tables WHERE table_schema=$1");
-    $res = $this->dbManager->execute(__METHOD__.'.get',array('public'));
+    $this->dbManager->prepare(__METHOD__.'.get',"SELECT table_name FROM information_schema.tables WHERE table_schema=$1 AND table_type=$2");
+    $res = $this->dbManager->execute(__METHOD__.'.get',array('public','BASE TABLE'));
     $tableNames = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
     foreach($tableNames as $row){
