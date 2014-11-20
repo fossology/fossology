@@ -46,7 +46,7 @@
         {% include 'elements/select-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
         <p>
           {{ 'Upload to reuse'|trans }}:<br/>
-          {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 5) }}
+          {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, '', 5) }}
         </p>
       </li>
       <li><input type="checkbox" name="public" value="public"/>
