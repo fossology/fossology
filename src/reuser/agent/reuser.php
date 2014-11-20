@@ -77,7 +77,7 @@ class ReuserAgent extends Agent
 
 }
 
-$agent = new DeciderAgent();
+$agent = new ReuserAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->bail(0);
