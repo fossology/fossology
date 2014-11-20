@@ -1,7 +1,6 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,59 +16,69 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Data\Folder;
+
 
 use Fossology\Lib\Util\Object;
 
-class AgentRef extends Object
-{
-  /**
-   * @var int
-   */
-  private $agentId;
-  /**
-   * @var string
-   */
-  private $agentName;
-  /**
-   * @var string
-   */
-  private $agentRevision;
+class Folder extends Object {
 
-  public function __construct($agentId, $agentName, $agentRevision)
+  /** @var int */
+  private $id;
+
+  /** @var string */
+  private $name;
+
+  /** @var string */
+  private $description;
+
+  /** @var int */
+  private $permissions;
+
+  /**
+   * @param int $id
+   * @param string $name
+   * @param string $description
+   * @param int $permissions
+   */
+  public function __construct($id, $name, $description, $permissions) {
+    $this->id = $id;
+    $this->name = $name;
+    $this->description = $description;
+    $this->permissions = $permissions;
+  }
+
+  /**
+   * @return string
+   */
+  public function getDescription()
   {
-    $this->agentId = $agentId;
-    $this->agentName = $agentName;
-    $this->agentRevision = $agentRevision;
+    return $this->description;
   }
 
   /**
    * @return int
    */
-  public function getAgentId()
+  public function getId()
   {
-    return $this->agentId;
+    return $this->id;
   }
 
   /**
    * @return string
    */
-  public function getAgentName()
+  public function getName()
   {
-    return $this->agentName;
+    return $this->name;
   }
 
   /**
-   * @return string
+   * @return int
    */
-  public function getAgentRevision()
+  public function getPermissions()
   {
-    return $this->agentRevision;
+    return $this->permissions;
   }
-  
-  public function __toString()
-  {
-    return 'AgentRef(' . $this->agentId . ', ' . $this->agentName . ', ' . $this->agentRevision . ')';
-  }
+
 
 } 

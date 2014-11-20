@@ -19,36 +19,44 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-class AgentRefTest extends \PHPUnit_Framework_TestCase {
+class AgentRefTest extends \PHPUnit_Framework_TestCase
+{
 
-    private $agentId = 1243;
+  private $agentId = 1243;
 
-    private $agentName = "<agentName>";
+  private $agentName = "<agentName>";
 
-    private $agentRevision = "<agentRevision";
+  private $agentRevision = "<agentRevision";
 
-    /**
-     * @var AgentRef
-     */
-    private $agentRef;
+  /**
+   * @var AgentRef
+   */
+  private $agentRef;
 
-    public function setUp() {
-        $this->agentRef = new AgentRef($this->agentId, $this->agentName, $this->agentRevision);
-    }
+  public function setUp()
+  {
+    $this->agentRef = new AgentRef($this->agentId, $this->agentName, $this->agentRevision);
+  }
 
-    public function testGetAgentId()
-    {
-        assertThat($this->agentRef->getAgentId(), is($this->agentId));
-    }
+  public function testGetAgentId()
+  {
+    assertThat($this->agentRef->getAgentId(), is($this->agentId));
+  }
 
-    public function testGetAgentName()
-    {
-        assertThat($this->agentRef->getAgentName(), is($this->agentName));
-    }
-    
-    public function testGetAgentRevision()
-    {
-        assertThat($this->agentRef->getAgentRevision(), is($this->agentRevision));
-    }
+  public function testGetAgentName()
+  {
+    assertThat($this->agentRef->getAgentName(), is($this->agentName));
+  }
+
+  public function testGetAgentRevision()
+  {
+    assertThat($this->agentRef->getAgentRevision(), is($this->agentRevision));
+  }
+
+  public function testToString()
+  {
+    assertThat(strval($this->agentRef), is("AgentRef(1243, <agentName>, <agentRevision)"));
+  }
+
 }
  

@@ -464,7 +464,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   {
     /* Mode 2 means child_id is an upload_pk */
     $Parm = $Uploadpk;
-    $sql = "SELECT parent_fk,folder_name FROM foldercontents
+    $sql = "SELECT foldercontents.parent_fk,folder_name FROM foldercontents
               INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 2
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
@@ -473,7 +473,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   {
     /* Mode 1 means child_id is a folder_pk */
     $Parm = $Folder;
-    $sql = "SELECT parent_fk,folder_name FROM foldercontents
+    $sql = "SELECT foldercontents.parent_fk,folder_name FROM foldercontents
 			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 1
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";

@@ -17,7 +17,7 @@
         <small><a href="{{ uri }}?mod=auth"><b>{{ 'Login'|trans }}</b></a></small>
       {% else %}
         <small><a href="{{ logOutUrl }}"><b>logout</b></a></small>
-        <table style='align:left;'>
+        <table style="align:left;">
           <tr>
             <td align="right"><small>{{ 'User'|trans }}:</small></td>
             <td>{{ userName }}</td>
@@ -29,7 +29,7 @@
               {%else%}       
                 <form action="{{ backtraceUri }}" method="post">
                   {% import "include/macro.html.twig" as macro %}
-                  {{ macro.select('selectMemberGroup',allAssignedGroups,groupId,' onchange="this.form.submit()"') }}
+                  {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' onchange="this.form.submit()"') }}
               </form>
               {% endif %}
             </td>

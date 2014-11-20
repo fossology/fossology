@@ -1,7 +1,6 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,59 +16,55 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data;
+namespace Fossology\Lib\Data\Package;
 
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Util\Object;
 
-class AgentRef extends Object
-{
-  /**
-   * @var int
-   */
-  private $agentId;
-  /**
-   * @var string
-   */
-  private $agentName;
-  /**
-   * @var string
-   */
-  private $agentRevision;
+class Package extends Object {
 
-  public function __construct($agentId, $agentName, $agentRevision)
-  {
-    $this->agentId = $agentId;
-    $this->agentName = $agentName;
-    $this->agentRevision = $agentRevision;
+  /** @var int */
+  private $id;
+
+  /** @var string*/
+  private $name;
+
+  /** @var Upload[] */
+  private $uploads;
+
+  /**
+   * @param int $id
+   * @param string $name
+   * @param Upload[] $uploads
+   */
+  public function __construct($id, $name, $uploads) {
+    $this->id = $id;
+    $this->uploads = $uploads;
+    $this->name = $name;
   }
 
   /**
    * @return int
    */
-  public function getAgentId()
+  public function getId()
   {
-    return $this->agentId;
+    return $this->id;
   }
 
   /**
    * @return string
    */
-  public function getAgentName()
+  public function getName()
   {
-    return $this->agentName;
+    return $this->name;
   }
 
   /**
-   * @return string
+   * @return Upload[]
    */
-  public function getAgentRevision()
+  public function getUploads()
   {
-    return $this->agentRevision;
-  }
-  
-  public function __toString()
-  {
-    return 'AgentRef(' . $this->agentId . ', ' . $this->agentName . ', ' . $this->agentRevision . ')';
+    return $this->uploads;
   }
 
 } 
