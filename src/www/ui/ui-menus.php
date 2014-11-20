@@ -191,13 +191,18 @@ class ui_menu extends FO_Plugin
       $V .= $Label . " a:link,\n";
       $V .= $Label . " a:visited\n";
       $V .= "  { z-index:$Depth; $Padding color:$FOSSfg2; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . ":hover a,\n";
+      $V .= styling($Label, $Depth, $Padding, $FOSSfg2h, $FOSSbg2h);
+      $Depth++;
+    }
+    
+    function styling($Label, $Depth, $Padding, $fgColor, $bgColor){
+      $V = $Label . ":hover a,\n";
       $V .= $Label . " a:active,\n";
       $V .= $Label . " a:hover\n";
-      $V .= "  { z-index:$Depth; $Padding color:$FOSSfg2h; background:$FOSSbg2h; width:150px; display:block; visibility:visible; }\n";
+      $V .= "  { z-index:$Depth; $Padding color:$fgColor; background:$bgColor; width:150px; display:block; visibility:visible; }\n";
       $V .= $Label . " a span\n";
       $V .= "  { text-align:left; }\n";
-      $Depth++;
+      return $V;
     }
 
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
@@ -214,12 +219,7 @@ class ui_menu extends FO_Plugin
       $V .= $Label . " a:link,\n";
       $V .= $Label . " a:visited\n";
       $V .= "  { z-index:$Depth; $Padding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $Border width:150px; display:block; }\n";
-      $V .= $Label . ":hover a,\n";
-      $V .= $Label . " a:active,\n";
-      $V .= $Label . " a:hover\n";
-      $V .= "  { z-index:$Depth; $Padding color:$FOSSfg3h; background:$FOSSbg3h; width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . " a span\n";
-      $V .= "  { text-align:left; }\n";
+      $V .= styling($Label, $Depth, $Padding, $FOSSfg3h, $FOSSbg3h);
     }
     $V .= "</style>\n";
 
