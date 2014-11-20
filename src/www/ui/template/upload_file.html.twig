@@ -1,52 +1,91 @@
 {% extends "include/base.html.twig" %}
+{% import "include/macro.html.twig" as macro %}
 
 {% block content %}
-    <p>
-        <b>
-            {{ 'Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
+  <p>
+    <b>
+      {{ 'Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
             uploaded files.'| trans }}
-        </b>
-        {{ 'To manage your own group go into'| trans }}
-        <b>Admin &gt; Groups &gt; Manage Group Users</b>.
-        {{ 'To manage permissions for this one upload, go to'| trans }}
-        <b>Admin &gt; Upload Permissions</b>.
-    </p>
-    <p>
-        {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
+    </b>
+    {{ 'To manage your own group go into'| trans }}
+    <b>Admin &gt; Groups &gt; Manage Group Users</b>.
+    {{ 'To manage permissions for this one upload, go to'| trans }}
+    <b>Admin &gt; Upload Permissions</b>.
+  </p>
+  <p>
+    {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
         your computer to FOSSology.'| trans }}
-        {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
-        {{ upload_max_filesize }}bytes.
-    </p>
-    <form enctype="multipart/form-data" method="post">
-        <ol>
-            <li>
-                {{ 'Select the folder for storing the uploaded file:'| trans }}
-                <select name="folder">
-                    {{ folderListOptions }}
-                </select>
-            <li>
-                {{ 'Select the file to upload:'| trans }}
-                <br/>
-                <input name="{{ fileInputName }}" type="file"/><br/>
-            <li>
-                {{ '(Optional) Enter a description of this file:'| trans }}
-                <br/>
-                <input type="text" name="description" size="60" value="{{ description }}"/>
-
-                <p/>
-            <li><input type="checkbox" name="public" value="public"/>
-                {{ '(Optional) Make Public'| trans }}
-                {% if agentCheckBoxMake %}
-            <li>
-                {{ 'Select optional analysis'| trans }}
-                <br/>
-                {{ agentCheckBoxMake }}
-                {% endif %}
-        </ol>
-        {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
+    {{ upload_max_filesize }}bytes.
+  </p>
+  <form enctype="multipart/form-data" method="post">
+    <ol>
+      <li>
+        <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded file:'| trans }}
+          {% include 'elements/select-folder.html.twig' with {'name': folderParameterName} %}
+        </label>
+      </li>
+      <li>
+        <label for="{{ fileInputName }}">
+          {{ 'Select the file to upload'| trans }}:
+        </label>
         <br/>
+        <input name="{{ fileInputName }}" type="file"/><br/>
+      </li>
+      <li>
+        ({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:<br/>
 
-        <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+        <p>
+          <label>
+            <input type="text" name="{{ descriptionInputName }}" size="120" value="{{ descriptionInputValue }}"/>
+          </label>
         </p>
-    </form>
+      </li>
+      <li>
+        ({{ 'Optional'|trans }}) {{ 'Select an already uploaded package for reuse in folder ' | trans }}
+        {% include 'elements/select-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
+        <p>
+          {{ 'Upload to reuse'|trans }}:<br/>
+          {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 5) }}
+        </p>
+      </li>
+      <li><input type="checkbox" name="public" value="public"/>
+        ({{ 'Optional'|trans }}) {{ 'Make Public'| trans }}
+        {% if agentCheckBoxMake %}
+        <li>
+          {{ 'Select optional analysis'| trans }}
+          <br/>
+          {{ agentCheckBoxMake }}
+        {% endif %}
+    </ol>
+    {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    <br/>
+
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+    </p>
+  </form>
+
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/tools.js" type="text/javascript"></script>
+  <script>
+    $('#{{ reuseFolderSelectorName }}').change(function () {
+      var folderId = parseInt(this.selectedOptions[0].value);
+
+      $.getJSON("?mod={{ moduleName }}&do=getUploads&{{ folderParameterName }}=" + folderId)
+          .done(function (data) {
+            var packageForReuse = $('#{{ uploadToReuseSelectorName }}');
+            packageForReuse.empty();
+            $.each(data, function (key, value) {
+              var option = document.createElement("option");
+              option.innerHTML = value;
+              option.value = key;
+              packageForReuse.append(option);
+            });
+          })
+          .fail(failed);
+    });
+  </script>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% macro select(id,options,select,action) %}
   <select name="{{ id }}" id="{{ id }}" {{ action }}>
     {% for key,disp in options %}
-      <option value="{{ key }}" {%if key == select %} selected{% endif %}>{{ disp }}</option>
+      <option value="{{ key }}" {% if key == select %}selected="selected"{% endif %}>{{ disp }}</option>
     {% endfor %}
   </select>
 {% endmacro %}
@@ -9,7 +9,8 @@
 {% macro radioGroup(id,options,select,action,separator) %}
   {% for key,disp in options %}
     {% if not loop.first %}{{ separator }}{% endif %}
-    <input type="radio" name="{{ id }}" value="{{ key }}" {%if key == select %} selected{% endif %}{{ action }}>{{ disp }}
+    <input type="radio" name="{{ id }}" value="{{ key }}"
+           {% if key == select %}selected="selected" {% endif %}{{ action }}>{{ disp }}
   {% endfor %}
 {% endmacro %}
 
@@ -25,4 +26,20 @@
       </tr>
     </thead>
   </table>
+{% endmacro %}
+
+{% macro select(name, options, id, selected, size) %}
+  {% if selected is not defined %}
+    {% set selected = -1 %}
+  {% endif %}
+  {% if size is not defined %}
+    {% set size = 0 %}
+  {% endif %}
+  <select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}{% if size > 0  %} multiple="multiple" size="{{ size }}"{% endif %}>
+    {% for key, value in options %}
+      <option value="{{ key }}"{% if selected == key %} selected="selected"{% endif %}>
+        {{ value }}
+      </option>
+    {% endfor %}
+  </select>
 {% endmacro %}

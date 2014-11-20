@@ -102,6 +102,8 @@ exit(0);
  */
 function bootstrap($sysconfdir="")
 {
+  error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
   $rcfile = "fossology.rc";
   if (empty($sysconfdir))
   {

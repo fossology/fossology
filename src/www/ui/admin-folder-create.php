@@ -86,7 +86,7 @@ class folder_create extends FO_Plugin
      */
     $NewFolder = str_replace("'", "''", $NewFolder); // PostgreSQL quoting
     $Desc = str_replace("'", "''", $Desc); // PostgreSQL quoting
-    $sql = "INSERT INTO folder (folder_name,folder_desc) VALUES ('$NewFolder','$Desc');";
+    $sql = "INSERT INTO folder (folder_name, folder_desc, parent_fk) VALUES ('$NewFolder','$Desc', $ParentId);";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);

@@ -129,8 +129,8 @@ class changeLicenseBulk extends FO_Plugin
     {
       throw new Exception('cannot insert bulk reference');
     }
-    $uploadInfo = $this->uploadDao->getUploadInfo($uploadId);
-    $uploadName = $uploadInfo['upload_filename'];
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $uploadName = $upload->getFilename();
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var agent_fodecider $deciderPlugin */
     $deciderPlugin = plugin_find("agent_decider");
