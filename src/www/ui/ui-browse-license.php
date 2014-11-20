@@ -257,7 +257,7 @@ class ui_browse_license extends FO_Plugin
     {
       $V .= js_url();
       $V .= $this->showUploadHist($Item, $tag_pk);
-      $V .= "<button onclick='loadBulkHistoryModal();'>bulk history</button>";
+      $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
       $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
       /** @todo move text to template */
       if ($this->vars['haveOldVersionResult'])
