@@ -26,6 +26,8 @@ use Mockery\MockInterface;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 
+include_once(dirname(dirname(__DIR__))."/common-string.php");
+
 class ClearedGetterTest extends ClearedGetterCommon
 {
   public function __construct($groupBy = "content")
@@ -75,30 +77,100 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
 
     $this->uploadDao
          ->shouldReceive('getUploadtreeTableName')
-         ->withArgs(array($uploadId))
+         ->with($uploadId)
          ->andReturn($uploadTreeTableName);
 
     $this->treeDao
          ->shouldReceive('getRealParent')
-         ->withArgs(array($uploadId,$uploadTreeTableName))
+         ->with($uploadId,$uploadTreeTableName)
          ->andReturn($parentId);
 
     $this->treeDao
          ->shouldReceive('getFullPath')
-         ->withArgs(array(1, $uploadTreeTableName, $parentId))
+         ->with(1, $uploadTreeTableName, $parentId)
          ->andReturn("a/1");
 
     $this->treeDao
          ->shouldReceive('getFullPath')
-         ->withArgs(array(2, $uploadTreeTableName, $parentId))
+         ->with(2, $uploadTreeTableName, $parentId)
          ->andReturn("a/2");
 
     $this->treeDao
          ->shouldReceive('getFullPath')
-         ->withArgs(array(3, $uploadTreeTableName, $parentId))
+         ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
     $statements = $this->clearedGetterTest->getCleared($uploadId);
-    $this->assertEquals(array(), $statements);
+    $expected = array(
+      "statements" => array(
+        array(
+          "content" => "1",
+          "text" => "t1",
+          "files" => array("a/1", "a/2")
+        ),
+        array(
+          "content" => "2",
+          "text" => "t3",
+          "files" => array("a/b/1")
+        )
+      )
+    );
+    $this->assertEquals($expected, $statements);
   }
+
+  public function testGetFileNamesGroupByText()
+  {
+    $uploadId = 1;
+    $parentId = 112;
+    $uploadTreeTableName = "ut";
+
+    $this->uploadDao
+         ->shouldReceive('getUploadtreeTableName')
+         ->with($uploadId)
+         ->andReturn($uploadTreeTableName);
+
+    $this->treeDao
+         ->shouldReceive('getRealParent')
+         ->with($uploadId,$uploadTreeTableName)
+         ->andReturn($parentId);
+
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(1, $uploadTreeTableName, $parentId)
+         ->andReturn("a/1");
+
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(2, $uploadTreeTableName, $parentId)
+         ->andReturn("a/2");
+
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(3, $uploadTreeTableName, $parentId)
+         ->andReturn("a/b/1");
+
+    $statements = (new ClearedGetterTest("text"))->getCleared($uploadId);
+    $expected = array(
+      "statements" => array(
+        array(
+          "content" => "1",
+          "text" => "t1",
+          "files" => array("a/1")
+        ),
+        array(
+          "content" => "1",
+          "text" => "t2",
+          "files" => array("a/2")
+        ),
+        array(
+          "content" => "2",
+          "text" => "t3",
+          "files" => array("a/b/1")
+        )
+      )
+    );
+    $this->assertEquals($expected, $statements);
+  }
+
+
 }
