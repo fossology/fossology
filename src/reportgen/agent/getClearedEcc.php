@@ -18,12 +18,12 @@
  */
 
 namespace Fossology\Reportgen;
+
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
-require_once("$MODDIR/lib/php/Report/getClearedXp.php");
-class EccClearedGetter extends XpClearedGetter
-{
 
+class EccClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
+{
   public function __construct()
   {
     parent::__construct("ecc", null, true);

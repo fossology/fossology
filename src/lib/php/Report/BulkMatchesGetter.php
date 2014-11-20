@@ -17,14 +17,13 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace Fossology\Reportgen;
+namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\License;
 
-require_once("getClearedCommon.php");
 class BulkMatchesGetter extends ClearedGetterCommon
 {
   /** @var ClearingDao */

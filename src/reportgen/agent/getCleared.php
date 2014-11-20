@@ -19,19 +19,11 @@
 
 
 namespace Fossology\Reportgen;
+
 require_once("$MODDIR/lib/php/common-cli.php");
-require_once("$MODDIR/lib/php/Report/getClearedProto.php");
 cli_Init();
 
-class LicenseClearedGetter extends LicenseClearedGetterProto
-{
-  public function __construct() {
-    parent::__construct();
-  }
-
-}
-
-$clearedGetter = new LicenseClearedGetter();
+$clearedGetter = new \Fossology\Lib\Report\LicenseClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
 $userId = $clearedGetter->getUserId();

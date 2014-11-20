@@ -17,13 +17,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 namespace Fossology\Reportgen;
+
 require_once("$MODDIR/lib/php/common-cli.php");
-require_once("$MODDIR/lib/php/Report/getKeywords.php");
 cli_Init();
 
-$clearedGetter = new KeywordsGetter();
+$clearedGetter = new \Fossology\Lib\Report\KeywordsGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
 print json_encode($clearedGetter->getCleared($uploadId));

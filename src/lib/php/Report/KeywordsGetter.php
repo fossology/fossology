@@ -17,7 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace Fossology\Reportgen;
+namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
@@ -31,7 +31,6 @@ use Fossology\Lib\Data\License;
 
 define('CONTEXT',25);
 
-require_once("getClearedCommon.php");
 class KeywordsGetter extends ClearedGetterCommon
 {
   /** @var HighlightDao */

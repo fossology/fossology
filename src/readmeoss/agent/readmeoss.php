@@ -10,18 +10,14 @@
  You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-define("AGENT_NAME", "readmeoss");
+define("README_AGENT_NAME", "readmeoss");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Reportgen\LicenseClearedGetterProto;
-use Fossology\Reportgen\XpClearedGetter;
-
+use Fossology\Lib\Report\LicenseClearedGetter;
+use Fossology\Lib\Report\XpClearedGetter;
 
 include_once(__DIR__ . "/version.php");
-
-require_once("$MODDIR/lib/php/Report/getClearedXp.php");
-require_once("$MODDIR/lib/php/Report/getClearedProto.php");
 
 class ReadmeOssAgent extends Agent
 {
@@ -38,9 +34,9 @@ class ReadmeOssAgent extends Agent
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
-    $this->licenseClearedGetter = new LicenseClearedGetterProto();
+    $this->licenseClearedGetter = new LicenseClearedGetter();
 
-    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
   }
