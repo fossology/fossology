@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Reportgen;
+namespace Fossology\Lib\Report;
 
 use DateTime;
 use Fossology\Lib\Dao\UploadDao;
@@ -26,7 +26,6 @@ use Mockery\MockInterface;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 
-require_once(dirname(__DIR__)."/getClearedCommon.php");
 class ClearedGetterTest extends ClearedGetterCommon
 {
   public function __construct($groupBy = "content")
