@@ -17,20 +17,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
 namespace Fossology\Reportgen;
 
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 
-class EccClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
-{
-  public function __construct()
-  {
-    parent::__construct("ecc", null, true);
-  }
-}
-
-$clearedGetter = new EccClearedGetter();
+$clearedGetter = new \Fossology\Lib\Report\BulkMatchesGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
-print json_encode($clearedGetter->getCleared($uploadId));
+$userId = $clearedGetter->getUserId();
+print json_encode($clearedGetter->getCleared($uploadId, $userId));

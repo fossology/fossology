@@ -1,7 +1,6 @@
 <?php
 /*
  Copyright (C) 2014, Siemens AG
- Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,27 +17,28 @@
  */
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_agent_reportgen", _("Report Generator"));
+define("TITLE_agent_foreadmeoss", _("ReadME_OSS generation"));
 
-class agent_reportgen extends FO_Plugin
+class agent_foreadmeoss extends FO_Plugin
 {
 
   /** @var DbManager */
   private $dbManager;
 
-  function __construct()
-  {
-    $this->Name = "agent_reportgen";
-    $this->Title = TITLE_agent_reportgen;
+
+  function __construct() {
+    $this->Name = "agent_foreadmeoss";
+    $this->Title = TITLE_agent_foreadmeoss;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "reportgen"; // agent.agent_name
+    $this->AgentName = "readmeoss";
+
     parent::__construct();
 
     $this->vars['jqPk'] = -1;
     $this->vars['downloadLink'] = "";
-    $this->vars['reportType'] = "report";
+    $this->vars['reportType'] = "ReadMe_OSS";
 
     global $container;
     $this->dbManager = $container->get('db.manager');
@@ -53,8 +53,8 @@ class agent_reportgen extends FO_Plugin
     //do not advertise this agent: it can be scheduled only from directly
     //menu_insert("Agents::" . $this->Title, 0, $this->Name);
 
-    $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Generate&nbsp;Word&nbsp;Report", 0, $this->Name, $text);
+    $text = _("Generate ReadMe_OSS");
+    menu_insert("Browse-Pfile::Generate&nbsp;ReadMe_OSS", 0, $this->Name, $text);
   }
 
   /**
@@ -93,7 +93,7 @@ class agent_reportgen extends FO_Plugin
   {
     $Dependencies[] = "agent_adj2nest";
 
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 
   function htmlContent()
@@ -115,8 +115,8 @@ class agent_reportgen extends FO_Plugin
       return _("permission denied");
 
     $row = $this->dbManager->getSingleRow(
-      "SELECT upload_filename FROM upload WHERE upload_pk = $1",
-      array($uploadId), "getUploadName"
+        "SELECT upload_filename FROM upload WHERE upload_pk = $1",
+        array($uploadId), "getUploadName"
     );
 
     if ($row === false)
@@ -136,7 +136,7 @@ class agent_reportgen extends FO_Plugin
     $this->vars['jqPk'] = $jq_pk;
     $this->vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
 
-    $text = sprintf(_("Generating new report for '%s'"), $ShortName);
+    $text = sprintf(_("Generating ReadMe_OSS for '%s'"), $ShortName);
     return "<h2>".$text."</h2>";
   }
 
@@ -147,4 +147,4 @@ class agent_reportgen extends FO_Plugin
 
 }
 
-$NewPlugin = new agent_reportgen;
+$NewPlugin = new agent_foreadmeoss();

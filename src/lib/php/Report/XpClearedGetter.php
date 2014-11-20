@@ -17,12 +17,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace Fossology\Reportgen;
+namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Dao\CopyrightDao;
-
-require_once ("getClearedCommon.php");
 
 class XpClearedGetter extends ClearedGetterCommon
 {
@@ -46,7 +44,7 @@ class XpClearedGetter extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
   {
     return $this->copyrightDao->getAllEntries($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere);
   }

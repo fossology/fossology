@@ -19,13 +19,11 @@
 
 namespace Fossology\Reportgen;
 
-use Fossology\Reportgen\XpClearedGetter;
-require_once ("getClearedXp.php");
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
 
-
-class IpClearedGetter extends XpClearedGetter
+class IpClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
 {
-
   public function __construct()
   {
     parent::__construct("ip", null, true);

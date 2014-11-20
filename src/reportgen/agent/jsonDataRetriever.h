@@ -32,4 +32,6 @@ char* getClearedLicenses(int uploadId, int userId);
 char* getClearedCopyright(int uploadId);
 char* getClearedIp(int uploadId);
 char* getClearedEcc(int uploadId);
+char* getMatches(int uploadId, int userId);
+char* getKeywords(int uploadId);
 #endif

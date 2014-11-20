@@ -646,7 +646,7 @@ insert into clearing_decision (
               $triedFilter
               order by lr.lrb_pk
             )
-            SELECT distinct on(lrb_pk) ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
+            SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
             FROM (
               SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, true as matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
@@ -662,6 +662,7 @@ insert into clearing_decision (
     while ($row = $this->dbManager->fetchArray($res))
     {
       $bulks[] = array(
+          "bulkId" => $row['lrb_pk'],
           "id" => $row['ce_pk'],
           "text" => $row['text'],
           "lic" => $row['lic'],
@@ -673,5 +674,22 @@ insert into clearing_decision (
 
     $this->dbManager->freeResult($res);
     return $bulks;
+  }
+
+  public function getBulkMatches($bulkId, $userId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT uploadtree_fk as itemid
+            FROM clearing_event ce
+            INNER JOIN highlight_bulk h
+            ON ce.clearing_event_pk = h.clearing_event_fk
+            WHERE lrb_fk = $1 AND user_fk = $2";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($bulkId, $userId));
+
+    $result = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $result;
   }
 }

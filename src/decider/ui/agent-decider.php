@@ -18,7 +18,7 @@
  ***********************************************************/
 
 /**
- * \file agent-decider.php
+ * \file agent-fodecider.php
  * \brief run the decider license agent
  */
 

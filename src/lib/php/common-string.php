@@ -24,26 +24,34 @@
  */
 function convertToUTF8($content, $toHTML=true)
 {
-  $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
-  if (!$in_charset)
-  {
-    $output1 = false;
-    $charsets = array('iso-8859-1', 'windows-1251', 'GB2312');
-    foreach ($charsets as $charset)
-    {
-      $output1 = @iconv($charset, "UTF-8", $content);
-      if ($output1) break;
-    }
-  } else if ($in_charset != "UTF-8")
-  {
-    $output1 = @iconv($in_charset, "UTF-8", $content);
-  } else
-  {
+  if (checkUTF8($content)) {
     $output1 = $content;
+  } else {
+    $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
+    $output1 = false;
+    if (!$in_charset)
+    {
+      $charsets = array('iso-8859-1', 'windows-1251', 'GB2312');
+      foreach ($charsets as $charset)
+      {
+        $output1 = iconv($charset, "UTF-8", $content);
+        if ($output1) break;
+      }
+    } else if ($in_charset != "UTF-8")
+    {
+      $output1 = iconv($in_charset, "UTF-8", $content);
+    }
+
+    if (!$output1 || !checkUTF8($output1)) {
+      $output1 = $toHTML ? "<Unknown encoding>" : "<b>Unknown encoding</b>";
+    }
   }
-  if (!$output1) $output1 = $content;
 
-  if (! $toHTML) return $output1;
-  return (@htmlentities($output1)) ?: "<b>Unknown encoding</b>";
+  if (!$toHTML) return $output1;
+  return (htmlentities($output1, ENT_COMPAT, "UTF-8")) ?: "<b>Unknown encoding</b>";
+}
 
+function checkUTF8($content)
+{
+  return mb_check_encoding($content, "UTF-8");
 }

@@ -17,10 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace Fossology\Reportgen;
-
-require_once("$MODDIR/lib/php/common-cli.php");
-cli_Init();
+namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -33,17 +30,20 @@ abstract class ClearedGetterCommon
   /** @var TreeDao */
   protected $treeDao;
 
+  /** @var array */
+  private $fileNameCache = array();
+
   private $userId;
   private $uploadId;
+  private $groupBy;
 
- // private $tableName = "copyright";
-  //private $type = null;
-
-  public function __construct() {
+  public function __construct($groupBy = "content") {
     global $container;
 
     $this->uploadDao = $container->get('dao.upload');
     $this->treeDao = $container->get('dao.tree');
+
+    $this->groupBy = $groupBy;
   }
 
   public function getCliArgs()
@@ -59,7 +59,7 @@ abstract class ClearedGetterCommon
     {
       print "missing optional parameter --uId {userId}\n";
     }
-    
+
     $this->uploadId = intval($args['u']);
     $this->userId = intval(@$args['uId']);
   }
@@ -88,13 +88,19 @@ abstract class ClearedGetterCommon
     return $userId;
   }
 
-  protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName)
+  protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
   {
+    $parentId = $this->treeDao->getRealParent($uploadId, $uploadTreeTableName);
+
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
-      $filePathRow = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName);
-      $fileName = $filePathRow['file_path'];
+
+      if (!array_key_exists($uploadTreeId, $this->fileNameCache)) {
+        $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
+      }
+
+      $fileName = $this->fileNameCache[$uploadTreeId];
 
       $statement['fileName'] = $fileName;
     }
@@ -106,28 +112,40 @@ abstract class ClearedGetterCommon
     $statements = array();
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
-      $description = $statement['description'];
-      $textfinding = $statement['textfinding'];
       $fileName = $statement['fileName'];
 
-      if ($description === null) {
-        $text = "";
-      } else {
-        $content = $textfinding;
-        $text = $description;
+      if (!array_key_exists('text', $statement))
+      {
+        /* TODO make the subclasses do this logic and never fall in this branch */
+        $description = $statement['description'];
+        $textfinding = $statement['textfinding'];
+
+        if ($description === null) {
+          $text = "";
+        } else {
+          $content = $textfinding;
+          $text = $description;
+        }
+        // TODO
+      }
+      else
+      {
+        $text = $statement['text'];
       }
 
-      if (array_key_exists($content, $statements))
+      $groupBy = $statement[$this->groupBy];
+
+      if (array_key_exists($groupBy, $statements))
       {
-        $currentFiles = &$statements[$content]['files'];
+        $currentFiles = &$statements[$groupBy]['files'];
         if (!in_array($fileName, $currentFiles))
           $currentFiles[] = $fileName;
       }
       else
       {
-        $statements[$content] = array(
-          "content" => $content,
-          "text" => $text,
+        $statements[$groupBy] = array(
+          "content" => convertToUTF8($content, false),
+          "text" => convertToUTF8($text, false),
           "files" => array($fileName)
         );
       }
@@ -142,15 +160,15 @@ abstract class ClearedGetterCommon
    * @param null|int $userId
    * @return array
    */
-  abstract protected function getDecisions($uploadId, $uploadTreeTableName, $userId=null);
+  abstract protected function getStatements($uploadId, $uploadTreeTableName, $userId=null);
 
   public function getCleared($uploadId, $userId=null)
   {
-    $uploadTreeTableName = $this->uploadDao->getUploadTreeTableName($uploadId);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
-    $ungrupedStatements = $this->getDecisions($uploadId, $uploadTreeTableName, $userId);
+    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId);
 
-    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName);
+    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
 
     $statements = $this->groupStatements($ungrupedStatements);
 

@@ -22,6 +22,7 @@ DIRS = \
 	ninka \
 	nomos \
 	pkgagent \
+	readmeoss \
 	reportgen \
 	reuser \
 	scheduler \
