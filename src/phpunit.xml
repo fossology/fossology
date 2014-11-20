@@ -11,7 +11,7 @@
         <testsuite name="Fossology PhpUnit Test Suite">
             <directory suffix="Test.php">lib/php</directory>
             <!--<directory suffix=".php">lib/php/tests</directory>-->
-            <!--<directory suffix=".php">www/ui_tests/Unit</directory>-->
+            <directory suffix="Test.php">www/ui_tests/Unit/</directory>
         </testsuite>
     </testsuites>
 
