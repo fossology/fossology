@@ -667,7 +667,7 @@ class ui_browse_license extends FO_Plugin
       }
       $this->dbManager->freeResult($res);
 
-      $V .= "<p>\n";
+      $V = "<p>\n";
       if (false === $latestRun)
       {
         $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
