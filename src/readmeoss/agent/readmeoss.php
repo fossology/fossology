@@ -13,6 +13,7 @@
 define("AGENT_NAME", "readmeoss");
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Reportgen\LicenseClearedGetterProto;
 use Fossology\Reportgen\XpClearedGetter;
 
@@ -31,6 +32,8 @@ class ReadmeOssAgent extends Agent
   /** @var XpClearedGetter */
   private $cpClearedGetter;
 
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
@@ -38,6 +41,8 @@ class ReadmeOssAgent extends Agent
     $this->licenseClearedGetter = new LicenseClearedGetterProto();
 
     parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
+
+    $this->uploadDao = $this->container->get('dao.upload');
   }
 
   function processUploadId($uploadId)
@@ -63,9 +68,7 @@ class ReadmeOssAgent extends Agent
   {
     global $SysConf;
 
-    // TODO use uploadDao
-    $row = $this->dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk = $1",array($uploadId),__METHOD__);
-    $packageName = $row['upload_filename'];
+    $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
     $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
@@ -87,7 +90,6 @@ class ReadmeOssAgent extends Agent
 
   private function generateReport($contents, $Package_Name)
   {
-    $i = 0;
     $separator1 = "=======================================================================================================================";
     $separator2 = "-----------------------------------------------------------------------------------------------------------------------";
     $Break = "\r\n\r\n";
@@ -102,15 +104,12 @@ class ReadmeOssAgent extends Agent
       $output .= $Break;
       $output .= $separator2;
       $output .= $Break;
-      $i++;
     }
-    $j = 0;
     $copyrights = "";
     foreach($contents['copyrights']['statements'] as $copyrightStatement){
       $copyrights .= $copyrightStatement['content']."\r\n";
-      $j++;
     }
-    if(empty($j)){
+    if(empty($copyrights)){
       $output .= "<Copyright notices>";
       $output .= $Break;
       $output .= "<notices>";
