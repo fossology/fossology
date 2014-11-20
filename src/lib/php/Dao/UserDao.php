@@ -61,9 +61,9 @@ class UserDao extends Object {
    * @param int $userId
    * @return array in the format {group_pk=>group_name, group_pk=>group_name, ...}
    */
-  function getAdminGroupMap($userId)
+  function getAdminGroupMap($userId,$userLevel=0)
   {
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
+    if ($userLevel == PLUGIN_DB_ADMIN)
     {
       return $this->dbManager->createMap('groups', 'group_pk', 'group_name');
     }
@@ -72,6 +72,25 @@ class UserDao extends Object {
     $param = array($userId);
     $this->dbManager->prepare($stmt=__METHOD__, $sql);
     $res = $this->dbManager->execute($stmt,$param);
+    $groupMap = array();
+    while($row = $this->dbManager->fetchArray($res))
+    {
+      $groupMap[$row['group_pk']] = $row['group_name'];
+    }
+    $this->dbManager->freeResult($res);
+    return $groupMap;
+  }
+  
+  /**
+   * @brief get array of groups that this user has admin access to
+   * @param int $userId
+   * @return array in the format {group_pk=>group_name, group_pk=>group_name, ...}
+   */
+  function getUserGroupMap($userId)
+  {
+    $sql = "SELECT group_pk, group_name FROM groups, group_user_member WHERE group_pk=group_fk AND user_fk=$1";
+    $this->dbManager->prepare($stmt=__METHOD__, $sql);
+    $res = $this->dbManager->execute($stmt,array($userId));
     $groupMap = array();
     while($row = $this->dbManager->fetchArray($res))
     {

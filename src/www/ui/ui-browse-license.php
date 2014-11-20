@@ -154,19 +154,18 @@ class ui_browse_license extends FO_Plugin
     $scannerAgents = array('nomos', 'monk', 'ninka');
 
     $V = "";
-    list($agentStatus, $allScans) = $this->createAgentStatus($scannerAgents, $uploadId);
+    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
 
-    if (empty($allScans))
+    if (!$agentStatus)
     {
       $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
       return $out;
     }
 
-    $V .= $this->buildAgentSelector($allScans);
-
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
+
     $VLic .= "\n" . $agentStatus;
 
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
@@ -258,7 +257,7 @@ class ui_browse_license extends FO_Plugin
     {
       $V .= js_url();
       $V .= $this->showUploadHist($Item, $tag_pk);
-      $V .= "<button onclick='loadBulkHistoryModal();'>bulk history</button>";
+      $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
       $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
       /** @todo move text to template */
       if ($this->vars['haveOldVersionResult'])
@@ -551,7 +550,6 @@ class ui_browse_license extends FO_Plugin
 
     $licenses = $goodLicenses ?: $this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
 
-
     $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;
     /** @var LicenseRenderer $licenseRenderer */
@@ -642,7 +640,7 @@ class ui_browse_license extends FO_Plugin
   private function createAgentStatus($scannerAgents, $uploadId)
   {
     $allScans = array();
-    $V = "<h3>" . _("Scanner details") . "</h3>";
+
     foreach ($scannerAgents as $agentName)
     {
       $agentHasArsTable = $this->dbManager->existsTable($agentName . "_ars");
@@ -669,7 +667,7 @@ class ui_browse_license extends FO_Plugin
       }
       $this->dbManager->freeResult($res);
 
-      $V .= "<p>\n";
+      $V = "<p>\n";
       if (false === $latestRun)
       {
         $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
@@ -707,7 +705,11 @@ class ui_browse_license extends FO_Plugin
       }
       $V .= "</p>\n";
     }
-    return array($V, $allScans);
+
+    $header = "<h3>" . _("Scanner details") . "</h3>";
+    $header .= $this->buildAgentSelector($allScans) . "\n";
+
+    return empty($allScans) ? false : ($header . $V);
   }
 
   public function getTemplateName()

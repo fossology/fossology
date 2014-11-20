@@ -243,7 +243,7 @@ class UploadFilePage extends DefaultPlugin
     {
       if ($reuseUploadId > 0)
       {
-        $this->createPackageLink($uploadId, $reuseUploadId);
+        $this->createPackageLink($jobId, $uploadId, $reuseUploadId);
       }
       $status = GetRunnableJobList();
       $message = empty($status) ? _("Is the scheduler running? ") : "";
@@ -259,10 +259,11 @@ class UploadFilePage extends DefaultPlugin
   }
 
   /**
+   * @param int $jobId
    * @param int $uploadId
    * @param int $reuseUploadId
    */
-  private function createPackageLink($uploadId, $reuseUploadId)
+  private function createPackageLink($jobId, $uploadId, $reuseUploadId)
   {
     $newUpload = $this->uploadDao->getUpload($uploadId);
     $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
@@ -278,6 +279,16 @@ class UploadFilePage extends DefaultPlugin
     }
 
     $this->packageDao->addUploadToPackage($uploadId, $package);
+
+    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId);
+
+    global $Plugins;
+    $reuserAgent = &$Plugins['agent_reuser'];
+    if ($reuserAgent) {
+      $Dependencies = array();
+      $ErrorMsg="Bad thing";
+      $reuserAgent->AgentAdd($jobId, $uploadId, $ErrorMsg, $Dependencies);
+    }
   }
 
   private function determinePackageName($firstName, $secondName)

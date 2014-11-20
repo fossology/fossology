@@ -13,7 +13,10 @@ $containerClassName = 'FossologyCachedContainer';
 $cacheDir = array_key_exists('CACHEDIR', $GLOBALS) ? $GLOBALS['CACHEDIR'] : null;
 $cacheFile = "$cacheDir/container.php";
 
-if ($cacheDir && file_exists($cacheFile)) {
+$startTime = microtime(true);
+$cached = $cacheDir && file_exists($cacheFile);
+
+if ($cached) {
   require_once($cacheFile);
   $container = new $containerClassName();
 } else {
@@ -36,8 +39,13 @@ if ($cacheDir && file_exists($cacheFile)) {
   }
 }
 
+$endTime = microtime(true);
+
 $GLOBALS['container'] = $container;
 
 $logger = $container->get('logger');
 $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::INFO));
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
+
+$timingLogger = new \Fossology\Lib\Util\TimingLogger($logger);
+$timingLogger->logWithStartAndEndTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime, $endTime);

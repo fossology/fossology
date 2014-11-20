@@ -24,6 +24,7 @@ DIRS = \
 	pkgagent \
 	readmeoss \
 	reportgen \
+	reuser \
 	scheduler \
 	ununpack \
 	wget_agent \

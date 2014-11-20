@@ -16,31 +16,30 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Plugin\DefaultPlugin;
+
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- * \file agent-fodecider.php
- * \brief run the decider license agent
+ * \file agent-reuser.php
+ * \brief run the reuser license agent
  */
-
-define("TITLE_agent_fodecider", _("Automatic User License Decider"));
 
 include_once(__DIR__ . "/../agent/version.php");
 
-class agent_fodecider extends FO_Plugin
+class ReuserAgentPlugin extends DefaultPlugin
 {
   public $AgentName;
 
-  const CONFLICT_STRATEGY_FLAG = "-k";
-
-  function __construct() {
-    $this->Name = "agent_decider";
-    $this->Title = TITLE_agent_fodecider;
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = AGENT_NAME;
-
-    parent::__construct();
+  function __construct()
+  {
+    parent::__construct("agent_reuser", array(
+        self::TITLE => _("Automatic Clearing Decision Reuser"),
+        self::PERMISSION => self::PERM_WRITE
+    ));
+    $this->AgentName = REUSER_AGENT_NAME;
   }
 
   /**
@@ -67,7 +66,7 @@ class agent_fodecider extends FO_Plugin
   }
 
   /**
-   * \brief Queue the decider agent.
+   * \brief Queue the reuser agent.
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
@@ -83,18 +82,20 @@ class agent_fodecider extends FO_Plugin
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
+  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
     $Dependencies[] = "agent_adj2nest";
-    if ($conflictStrategyId !== null)
-    {
-      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
-    } else
-    {
-      $args = "";
-    }
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
+  }
+
+  /**
+   * @param Request $request
+   * @return Response
+   */
+  protected function handle(Request $request)
+  {
+    return RedirectResponse::create("/");
   }
 }
 
-$NewPlugin = new agent_fodecider();
+register_plugin(new ReuserAgentPlugin());

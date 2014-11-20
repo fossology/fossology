@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\UserDao;
 /***********************************************************
  * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
  *
@@ -30,14 +32,12 @@ class ui_menu extends FO_Plugin
   {
     $this->Name = self::NAME;
     $this->Title = TITLE_ui_menu;
-    $this->Version = "1.0";
     $this->MenuTarget = "treenav";
     parent::__construct();
   }
   
   function PostInitialize()
   {
-    global $Plugins;
     if ($this->State != PLUGIN_STATE_VALID)
     {
       return (0);
@@ -105,57 +105,15 @@ class ui_menu extends FO_Plugin
   function createHtmlFromMenuEntry(menu $M, $Indent)
   {
     $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
-    $V = "";
-    if (!empty($M->URI))
+    if (empty($M->URI) && empty($M->SubMenu) && !$isFullMenuDebug)
     {
-      $V .= '<a  id="'. htmlentities($M->FullName) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
-      if (empty($M->Target) || ($M->Target == ""))
-      {
-        // $V .= '" target="basenav">';
-        $V .= '">';
-      } else
-      {
-        $V .= '" target="' . $M->Target . '">';
-      }
-      if ($isFullMenuDebug)
-      {
-        $V .= $M->FullName . "(" . $M->Order . ")";
-      } else
-      {
-        $V .= $M->Name;
-      }
-    } else
-    {
-      $V .= '<a id="'. htmlentities($M->FullName) .'" href="#">';
-      if (empty($M->SubMenu))
-      {
-        $V .= "<font color='#C0C0C0'>";
-        if ($isFullMenuDebug)
-        {
-          $V .= $M->FullName . "(" . $M->Order . ")";
-        } //else { $V .= $M->Name; }
-        else
-        {
-          $V .= '';
-        }
-        $V .= "</font>";
-      } else
-      {
-        if ($isFullMenuDebug)
-        {
-          $V .= $M->FullName . "(" . $M->Order . ")";
-        } else
-        {
-          $V .= $M->Name;
-        }
-      }
+      return '';
     }
-
-    if (!empty($M->SubMenu) && ($Indent > 0))
-    {
-      $V .= " <span>&raquo;</span>";
-    }
-    $V .= "</a>\n";
+    $name = $isFullMenuDebug ? "$M->FullName($M->Order)" : $M->Name;
+    $vars = array('name'=>$name,'uri'=>$M->URI, 'target'=>$M->Target,'subMenu'=>$M->SubMenu,'fullName'=>$M->FullName);
+    $vars['actionUri'] = empty($M->URI) ? '#' : Traceback_uri() . "?mod=" . $M->URI;
+    $vars['indent'] = $Indent;
+    $V = $this->renderTemplate('menu-entry.html.twig', $vars);
     return $V;
   }
 
@@ -219,6 +177,16 @@ class ui_menu extends FO_Plugin
       $Depth++;
     }
 
+    function styling($Label, $Depth, $Padding, $fgColor, $bgColor){
+      $V = $Label . ":hover a,\n";
+      $V .= $Label . " a:active,\n";
+      $V .= $Label . " a:hover\n";
+      $V .= "  { z-index:$Depth; $Padding color:$fgColor; background:$bgColor; width:150px; display:block; visibility:visible; }\n";
+      $V .= $Label . " a span\n";
+      $V .= "  { text-align:left; }\n";
+      return $V;
+    }
+    
     /* Depth 1 is special: position is absolute. Left is 0, top is 24 */
     if ($Depth < $MenuDepth)
     {
@@ -233,15 +201,10 @@ class ui_menu extends FO_Plugin
       $V .= $Label . " a:link,\n";
       $V .= $Label . " a:visited\n";
       $V .= "  { z-index:$Depth; $Padding color:$FOSSfg2; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . ":hover a,\n";
-      $V .= $Label . " a:active,\n";
-      $V .= $Label . " a:hover\n";
-      $V .= "  { z-index:$Depth; $Padding color:$FOSSfg2h; background:$FOSSbg2h; width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . " a span\n";
-      $V .= "  { text-align:left; }\n";
+      $V .= styling($Label, $Depth, $Padding, $FOSSfg2h, $FOSSbg2h);
       $Depth++;
     }
-
+    
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
     for (; $Depth < $MenuDepth; $Depth++)
     {
@@ -256,12 +219,7 @@ class ui_menu extends FO_Plugin
       $V .= $Label . " a:link,\n";
       $V .= $Label . " a:visited\n";
       $V .= "  { z-index:$Depth; $Padding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $Border width:150px; display:block; }\n";
-      $V .= $Label . ":hover a,\n";
-      $V .= $Label . " a:active,\n";
-      $V .= $Label . " a:hover\n";
-      $V .= "  { z-index:$Depth; $Padding color:$FOSSfg3h; background:$FOSSbg3h; width:150px; display:block; visibility:visible; }\n";
-      $V .= $Label . " a span\n";
-      $V .= "  { text-align:left; }\n";
+      $V .= styling($Label, $Depth, $Padding, $FOSSfg3h, $FOSSbg3h);
     }
     $V .= "</style>\n";
 
@@ -325,21 +283,9 @@ class ui_menu extends FO_Plugin
   private function mergeUserLoginVars(&$vars)
   {
     global $container;
-    $dbManager = $container->get("db.manager");
-
-    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
-    $vars['userName'] = $_SESSION['User'];
-    
-    $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
-    $stmt = __METHOD__ . '.availableGroups';
-    $dbManager->prepare($stmt, $sql);
-    $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
-    $allAssignedGroups = array();
-    while ($row = $dbManager->fetchArray($res))
-    {
-      $allAssignedGroups[$row['group_pk']] = $row['group_name'];
-    }
-    $dbManager->freeResult($res);
+    /** @var UserDao */
+    $userDao = $container->get("dao.user");
+    $allAssignedGroups = $userDao->getUserGroupMap($_SESSION['UserId']);
     if (count($allAssignedGroups) > 1)
     {
       $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
@@ -350,6 +296,8 @@ class ui_menu extends FO_Plugin
     {
       $vars['singleGroup'] = @$_SESSION['GroupName'];
     }
+    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
+    $vars['userName'] = $_SESSION['User'];
   }
 }
 
