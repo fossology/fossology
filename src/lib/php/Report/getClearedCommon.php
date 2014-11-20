@@ -164,7 +164,7 @@ abstract class ClearedGetterCommon
 
   public function getCleared($uploadId, $userId=null)
   {
-    $uploadTreeTableName = $this->uploadDao->getUploadTreeTableName($uploadId);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId);
 

@@ -75,7 +75,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
     $uploadTreeTableName = "ut";
 
     $this->uploadDao
-         ->shouldReceive('getUploadTreeTableName')
+         ->shouldReceive('getUploadtreeTableName')
          ->withArgs(array($uploadId))
          ->andReturn($uploadTreeTableName);
 
