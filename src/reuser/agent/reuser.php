@@ -69,88 +69,14 @@ class ReuserAgent extends Agent
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
-  static protected function hasNewerUserEvents($events, $date)
-  {
-    foreach ($events as $licenseDecisionResult)
-    {
-      /** @var ClearingResult $licenseDecisionResult */
-      $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)) && $licenseDecisionResult->hasAgentDecisionEvent() && !$licenseDecisionResult->hasClearingEvent())
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  protected function getDateOfLastRelevantClearing($userId, $uploadTreeId)
-  {
-    $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
-    return $lastDecision !== null ? $lastDecision->getDateAdded() : null;
-  }
-
-
-  /* true if small is a subset of big */
-  static protected function array_contains($big, $small)
-  {
-    return count(array_diff($small, $big)) == 0;
-  }
-
-  function processClearingEventOfCurrentJob()
-  {
-    $userId = $this->userId;
-    $jobId = $this->jobId;
-
-    $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
-    foreach ($changedItems as $uploadTreeId)
-    {
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      $this->processClearingEventsForItem($itemTreeBounds, $userId);
-    }
-  }
-
 
   function processUploadId($uploadId)
   {
-    $this->processClearingEventOfCurrentJob();
+    $reusedUploadId = $this->uploadDao->getReusedUpload();
 
     return true;
   }
 
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int $userId
-   */
-  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId)
-  {
-    $this->dbManager->begin();  /* start transaction */
-
-    $itemId = $itemTreeBounds->getItemId();
-
-    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $userId);
-
-    switch ($this->conflictStrategyId)
-    {
-      case DeciderAgent::FORCE_DECISION:
-        $createDecision = true;
-        break;
-
-      default:
-        $createDecision = count($unhandledScannerDetectedLicenses) == 0;
-    }
-
-    if ($createDecision)
-    {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
-    }
-    else
-    {
-      $this->clearingDao->markDecisionAsWip($itemId, $userId);
-    }
-    $this->heartbeat(1);
-    
-    $this->dbManager->commit();  /* end transaction */
-  }
 }
 
 $agent = new DeciderAgent();
