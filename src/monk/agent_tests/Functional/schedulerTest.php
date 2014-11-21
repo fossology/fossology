@@ -20,8 +20,11 @@ use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -42,6 +45,8 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
   private $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var HighlightDao */
+  private $highlightDao;
 
   public function setUp()
   {
@@ -50,6 +55,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $this->uploadDao = new UploadDao($this->dbManager);
+    $this->highlightDao = new HighlightDao($this->dbManager);
     $this->newestEditedLicenseSelector = new LicenseFilter(new ClearingDecisionFilter());
     $this->clearingDao = new ClearingDao($this->dbManager, $this->newestEditedLicenseSelector, $this->uploadDao);
   }
@@ -59,6 +65,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
+    $this->highlightDao = null;
     $this->clearingDao = null;
   }
 
@@ -160,8 +167,22 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     /** @var AgentRef */
     $agentRef = $licenseMatch->getAgentRef();
-
     $this->assertEquals($agentRef->getAgentName(), "monk");
+
+    $itemBounds = $this->uploadDao->getItemTreeBounds(7);
+    $highlights = $this->highlightDao->getHighlightDiffs($itemBounds);
+
+    $this->assertEquals(1, count($highlights));
+    /** @var Highlight $highlight */
+    $highlight = $highlights[0];
+
+    $this->assertEquals(Highlight::MATCH, $highlight->getType());
+    $this->assertEquals(18, $highlight->getStart());
+    $this->assertEquals(20, $highlight->getRefStart());
+    $this->assertEquals(35825, $highlight->getEnd());
+    $this->assertEquals(35819, $highlight->getRefEnd());
+
+    $this->assertEquals($matchedLicense->getId(), $highlight->getLicenseId());
   }
 
   /** @group Functional */
@@ -236,6 +257,25 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($expected=1, count($relevantDecisionsItem6));
     $this->assertEquals($expected=1, count($relevantDecisionsItem7));
+
+    /** @var ClearingEvent $clearingEvent */
+    $clearingEvent = $relevantDecisionsItem6[0];
+    $eventId = $clearingEvent->getEventId();
+    $bulkHighlights = $this->highlightDao->getHighlightBulk(6, $eventId);
+
+    $this->assertEquals(1, count($bulkHighlights));
+
+    /** @var Highlight $bulkHighlight */
+    $bulkHighlight = $bulkHighlights[0];
+    $this->assertEquals($licenseId, $bulkHighlight->getLicenseId());
+    $this->assertEquals(Highlight::BULK, $bulkHighlight->getType());
+    $this->assertEquals(3, $bulkHighlight->getStart());
+    $this->assertEquals(103, $bulkHighlight->getEnd());
+
+    $bulkHighlights = $this->highlightDao->getHighlightBulk(6);
+
+    $this->assertEquals(1, count($bulkHighlights));
+    $this->assertEquals($bulkHighlight, $bulkHighlights[0]);
   }
 
   /** @group Functional */
