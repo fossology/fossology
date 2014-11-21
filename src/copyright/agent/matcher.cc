@@ -15,6 +15,6 @@ const std::string Matcher::getType() const {
   return type;
 }
 
-Matcher::Matcher(const std::string _type): type(_type){};
+Matcher::Matcher(const std::string& type): type(type){};
 
 Matcher::~Matcher(){};

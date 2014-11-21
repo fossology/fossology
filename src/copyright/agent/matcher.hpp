@@ -19,10 +19,10 @@
 class Matcher
 {
 public:
-  Matcher(const std::string _type);
+  Matcher(const std::string& type);
   virtual ~Matcher();
 
-  virtual std::vector<CopyrightMatch> match(const std::string content) const = 0;
+  virtual std::vector<CopyrightMatch> match(const std::string& content) const = 0;
 
   const std::string getType() const;
 

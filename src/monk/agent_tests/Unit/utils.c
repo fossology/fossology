@@ -15,9 +15,10 @@ PGconn* dbRealConnect() {
   PGconn* dbConn = fo_dbconnect(NULL, &errorBuf);
 
   if (errorBuf != NULL) {
-    dbConn = NULL;
     printf("Could not connect to real database for test. Error: %s\n", errorBuf);
-    free(dbConn);
+    if (dbConn)
+      free(dbConn);
+    dbConn = NULL;
   }
 
   return dbConn;

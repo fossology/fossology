@@ -309,7 +309,7 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
     {
       unsigned long pFileId = fileIds[it];
 
-      if (pFileId <= 0)
+      if (pFileId == 0)
       {
         continue;
       }

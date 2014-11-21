@@ -95,7 +95,6 @@ bool CopyrightDatabaseHandler::createTables() const
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
   {
-// keep only one sequence
 #define SEQUENCE_NAME IDENTITY"_ct_pk_seq"
     {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
     {"agent_fk", "bigint", "NOT NULL"},
@@ -169,7 +168,6 @@ bool CopyrightDatabaseHandler::createTableAgentFindings() const
 
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
-  // keep only one sequence for clearing
 #define SEQUENCE_NAMEClearing IDENTITY"_decision_pk_seq"
   {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
   {"user_fk", "bigint", "NOT NULL"},
@@ -182,7 +180,8 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
 
 bool CopyrightDatabaseHandler::createTableClearing() const
 {
-  char* tableName = g_strdup_printf("%s_decision", IDENTITY);
+  #define CLEARING_TABLE IDENTITY "_decision"
+
   if (!dbManager.sequenceExists(SEQUENCE_NAMEClearing))
   {
     RETURN_IF_FALSE(dbManager.queryPrintf("CREATE SEQUENCE "
@@ -194,31 +193,31 @@ bool CopyrightDatabaseHandler::createTableClearing() const
         " CACHE 1"));
   }
 
-  if (!dbManager.tableExists(tableName))
+  if (!dbManager.tableExists(CLEARING_TABLE))
   {
     size_t nDec = (sizeof(CopyrightDatabaseHandler::columnsDecision) / sizeof(CopyrightDatabaseHandler::ColumnDef));
-    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", tableName,
+    RETURN_IF_FALSE(dbManager.queryPrintf("CREATE table %s(%s)", CLEARING_TABLE,
       getColumnCreationString(CopyrightDatabaseHandler::columnsDecision, nDec).c_str()));
 
     RETURN_IF_FALSE(dbManager.queryPrintf(
       "CREATE INDEX %s_pfile_fk_index"
         " ON %s"
         " USING BTREE (pfile_fk)",
-      tableName, tableName
+      CLEARING_TABLE, CLEARING_TABLE
     ));
 
     RETURN_IF_FALSE(dbManager.queryPrintf(
       "CREATE INDEX %s_user_fk_index"
         " ON %s"
         " USING BTREE (user_fk)",
-      tableName, tableName
+      CLEARING_TABLE, CLEARING_TABLE
     ));
 
     RETURN_IF_FALSE(dbManager.queryPrintf(
       "CREATE INDEX %s_clearing_decision_type_fk_index"
         " ON %s"
         " USING BTREE (clearing_decision_type_fk)",
-      tableName, tableName
+      CLEARING_TABLE, CLEARING_TABLE
     ));
 
     RETURN_IF_FALSE(dbManager.queryPrintf(
@@ -226,7 +225,7 @@ bool CopyrightDatabaseHandler::createTableClearing() const
         " ADD CONSTRAINT user_fk"
         " FOREIGN KEY (user_fk)"
         " REFERENCES  users(user_pk) ON DELETE CASCADE",
-      tableName
+      CLEARING_TABLE
     ));
 
     RETURN_IF_FALSE(dbManager.queryPrintf(
@@ -234,7 +233,7 @@ bool CopyrightDatabaseHandler::createTableClearing() const
         " ADD CONSTRAINT pfile_fk"
         " FOREIGN KEY (pfile_fk)"
         " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
-      tableName
+      CLEARING_TABLE
     ));
 
 
@@ -243,11 +242,10 @@ bool CopyrightDatabaseHandler::createTableClearing() const
         " ADD CONSTRAINT clearing_decision_type_fk"
         " FOREIGN KEY (clearing_decision_type_fk)"
         " REFERENCES clearing_decision_type(type_pk) ON DELETE CASCADE",
-      tableName
+      CLEARING_TABLE
     ));
   }
 
-  g_free(tableName);
   return true;
 }
 

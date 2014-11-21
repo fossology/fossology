@@ -7,12 +7,9 @@
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
-DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 LOCALAGENTDIR = ../../agent
-
-test: test-cli test-sched
 
 all: version
 	$(MAKE) -C $(LOCALAGENTDIR) monk
@@ -25,28 +22,19 @@ all-cov: version
 version:
 	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
 
-test-cli: all
+test-cli:
 	@echo "make functional tests for cli mode"
-	./shunit2 cli_test.sh
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) cliTest.php
 
-test-sched: all
+test-sched:
 	@echo "make functional tests for scheduler mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
-coverage: coverage-cli coverage-sched
+test: all test-cli test-sched
 
-coverage-cli: all-cov
-	@echo "make functional tests for cli mode with coverage"
-	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
-	./shunit2 cli_test.sh
-
-coverage-sched: all-cov
-	@echo "make functional tests for scheduler mode with coverage"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+coverage: all-cov test-cli test-sched
 
 clean:
 	@echo "nothing to do"
 
 .PHONY: all test coverage clean
-
-include $(DEPS)
