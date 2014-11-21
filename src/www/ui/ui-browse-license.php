@@ -16,6 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\BusinessRules\LicenseFilter;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -47,6 +48,8 @@ class ui_browse_license extends FO_Plugin
   private $agentsDao;
   /** @var DbManager */
   private $dbManager;
+  /** @var LicenseFilter */
+  private $licenseFilter;
   /** @var array [uploadtree_id]=>cnt */
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
@@ -59,6 +62,7 @@ class ui_browse_license extends FO_Plugin
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
+    parent::__construct();
 
     global $container;
     $this->uploadDao = $container->get('dao.upload');
@@ -66,7 +70,7 @@ class ui_browse_license extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
     $this->dbManager = $container->get('db.manager');
-    parent::__construct();
+    $this->licenseFilter = $container->get('businessrules.license_filter');
   }
 
   /**
@@ -346,7 +350,7 @@ class ui_browse_license extends FO_Plugin
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
     /** @var LicenseRef[][] */
-    $editedPfileLicenses = $this->clearingDao->extractGoodLicensesPerFileID($allDecisions);
+    $editedPfileLicenses = $this->licenseFilter->extractGoodLicensesPerItem($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -546,7 +550,7 @@ class ui_browse_license extends FO_Plugin
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $goodLicenses = $this->clearingDao->extractGoodLicenses($allDecisions);
+    $goodLicenses = $this->licenseFilter->extractGoodLicenses($allDecisions);
 
     $licenses = $goodLicenses ?: $this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
 
