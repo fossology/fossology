@@ -216,6 +216,10 @@ if($sysconfig['Release'] == '2.6')
   $writer = new dataPropertiesWriter($dbManager);
   $writer->writeDataProperties();
   $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
+  if(!$dbManager->existsTable('license_candidate'))
+  {
+    $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+  }
 }
 
 /* sanity check */
@@ -402,6 +406,34 @@ function initLicenseRefTable($Verbose)
   return (0);
 } // initLicenseRefTable()
 
+
+function guessSysconfdir()
+{
+  $rcfile = "fossology.rc";
+  $varfile = dirname(__DIR__).'/variable.list';
+  $sysconfdir = getenv('SYSCONFDIR');
+  if ((false===$sysconfdir) && file_exists($rcfile))
+  {
+    $sysconfdir = file_get_contents($rcfile);
+  }
+  if ((false===$sysconfdir) && file_exists($varfile))
+  {
+    $ini_array = parse_ini_file($varfile);
+    if($ini_array!==false && array_key_exists('SYSCONFDIR', $ini_array))
+    {
+      $sysconfdir = $ini_array['SYSCONFDIR'];
+    }
+  }
+  if (false===$sysconfdir)
+  {
+    $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
+    echo "$text\n";
+    exit(1);
+  }
+  return $sysconfdir;
+}
+
+
 /**
  * \brief Determine SYSCONFDIR, parse fossology.conf
  *
@@ -420,21 +452,10 @@ function initLicenseRefTable($Verbose)
  */
 function bootstrap($sysconfdir="")
 {
-  $rcfile = "fossology.rc";
-
   if (empty($sysconfdir))
   {
-    $sysconfdir = getenv('SYSCONFDIR');
-    if ((false===$sysconfdir) && file_exists($rcfile))
-    {
-      $sysconfdir = file_get_contents($rcfile);
-    }
-    if ($sysconfdir === false)
-    {
-      $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
-      echo "$text\n";
-      exit(1);
-    }
+    $sysconfdir = guessSysconfdir();
+    echo "assuming SYSCONFDIR=$sysconfdir\n";
   }
 
   $sysconfdir = trim($sysconfdir);

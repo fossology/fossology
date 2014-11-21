@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along with thi
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
-char* getFileNameForFileId(fo_dbManager* dbManager, long int pFileId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);
 long saveToDb(fo_dbManager* dbManager, int agentId, long int refId, long int pFileId, unsigned int percent);
 int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long int licenseFileId);

@@ -149,7 +149,8 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
-    $statements = (new ClearedGetterTest("text"))->getCleared($uploadId);
+    $tester = new ClearedGetterTest("text");
+    $statements = $tester->getCleared($uploadId);
     $expected = array(
       "statements" => array(
         array(

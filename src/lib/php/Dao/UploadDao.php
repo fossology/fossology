@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Data\Tree\Item;
@@ -27,6 +26,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Monolog\Logger;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
@@ -46,10 +46,10 @@ class UploadDao extends Object
 
   /**
    * @param int $itemId
-   * @param UploadTreeDao $uploadTreeView
+   * @param UploadTreeProxy $uploadTreeView
    * @return Item
    */
-  public function getUploadEntryFromView($itemId, UploadTreeDao $uploadTreeView)
+  public function getUploadEntryFromView($itemId, UploadTreeProxy $uploadTreeView)
   {
     $uploadTreeViewQuery = $uploadTreeView->asCTE();
     $stmt = __METHOD__ . ".$uploadTreeViewQuery";
@@ -243,7 +243,7 @@ SELECT * FROM $uploadTreeTableName
   {
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
-    $uploadTreeView = new UploadTreeDao($uploadId, $options, $uploadTreeTableName);
+    $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
 
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
@@ -274,7 +274,7 @@ SELECT * FROM $uploadTreeTableName
    * @param $uploadTreeView
    * @return mixed
    */
-  protected function findNextItem(Item $item, $direction, UploadTreeDao $uploadTreeView, $enterFolders = true)
+  protected function findNextItem(Item $item, $direction, UploadTreeProxy $uploadTreeView, $enterFolders = true)
   {
     if ($item->getParentId() === null && $direction !== self::DIR_FWD)
     {
@@ -326,10 +326,10 @@ SELECT * FROM $uploadTreeTableName
 
   /**
    * @param Item $item
-   * @param UploadTreeDao $uploadTreeView
+   * @param UploadTreeProxy $uploadTreeView
    * @return int
    */
-  protected function getItemIndex(Item $item, UploadTreeDao $uploadTreeView)
+  protected function getItemIndex(Item $item, UploadTreeProxy $uploadTreeView)
   {
     if ($item->getParentId() === null)
     {
@@ -354,10 +354,10 @@ SELECT * FROM $uploadTreeTableName
 
   /**
    * @param int $parent
-   * @param UploadTreeDao $uploadTreeView
+   * @param UploadTreeProxy $uploadTreeView
    * @return int
    */
-  protected function getParentSize($parent, UploadTreeDao $uploadTreeView)
+  protected function getParentSize($parent, UploadTreeProxy $uploadTreeView)
   {
     if ($parent === null)
     {
@@ -375,10 +375,10 @@ SELECT * FROM $uploadTreeTableName
   /**
    * @param int $parent
    * @param int $targetOffset
-   * @param UploadTreeDao $uploadTreeView
+   * @param UploadTreeProxy $uploadTreeView
    * @return Item
    */
-  protected function getNewItemByIndex($parent, $targetOffset, UploadTreeDao $uploadTreeView)
+  protected function getNewItemByIndex($parent, $targetOffset, UploadTreeProxy $uploadTreeView)
   {
     if ($targetOffset < 0)
     {
@@ -433,7 +433,7 @@ SELECT * FROM $uploadTreeTableName
    * @param $uploadTreeView
    * @return int
    */
-  public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeDao $uploadTreeView)
+  public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeProxy $uploadTreeView)
   {
     $sql = "SELECT count(*) FROM " . $uploadTreeView->getDbViewName() . " WHERE lft BETWEEN $1 AND $2";
     $result = $this->dbManager->getSingleRow($sql
@@ -454,7 +454,7 @@ SELECT * FROM $uploadTreeTableName
 
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
-    $view = new UploadTreeView($itemTreeBounds, array(UploadTreeView::CONDITION_PLAIN_FILES));
+    $view = new UploadTreeView($itemTreeBounds, array(UploadTreeViewProxy::CONDITION_PLAIN_FILES));
 
     $this->dbManager->prepare($statementName,
         $view->asCTE() . " SELECT * FROM " . $view->getDbViewName() .

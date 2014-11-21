@@ -16,12 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
+namespace Fossology\Lib\Proxy;
 
-class LicenseViewDao extends DbViewDao
+class LicenseViewProxy extends DbViewProxy
 {
-  
-  static private $verifiedExistanceOfCandidateTable = FALSE;
   /** @var int */
   private $groupId;
   
@@ -59,7 +57,6 @@ class LicenseViewDao extends DbViewDao
       $dbViewQuery .= " UNION ".$this->queryOnlyLicenseRef($options);
     }
     parent::__construct($dbViewQuery, $dbViewName);
-    self::createTableLicenseCandidate();
   }
   
   private function queryOnlyLicenseRef($options){
@@ -72,22 +69,6 @@ class LicenseViewDao extends DbViewDao
       $dbViewQuery .= " AND $options[extraCondition]";
     }
     return $dbViewQuery;
-  }
-
-  static public function createTableLicenseCandidate()
-  {
-    if (self::$verifiedExistanceOfCandidateTable)
-    {
-      return;
-    }
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-    if(!$dbManager->existsTable('license_candidate'))
-    {
-      $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
-    }
-    self::$verifiedExistanceOfCandidateTable = TRUE;
   }
   
 }

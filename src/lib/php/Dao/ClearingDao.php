@@ -33,6 +33,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
+use Fossology\Lib\Proxy\LicenseViewProxy;
 
 class ClearingDao extends Object
 {
@@ -404,7 +405,7 @@ INSERT INTO clearing_decision (
   {
     $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => '*');
     $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
-    $licenseViewDao = new LicenseViewDao($groupId, $options, 'LR');
+    $licenseViewDao = new LicenseViewProxy($groupId, $options, 'LR');
     $withCte = $licenseViewDao->asCTE();
 
     $statementName = __METHOD__;

@@ -3,6 +3,7 @@
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
+use Fossology\Lib\Util\TimingLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
@@ -39,13 +40,10 @@ if ($cached) {
   }
 }
 
-$endTime = microtime(true);
-
 $GLOBALS['container'] = $container;
-
 $logger = $container->get('logger');
 $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::INFO));
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
-
-$timingLogger = new \Fossology\Lib\Util\TimingLogger($logger);
-$timingLogger->logWithStartAndEndTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime, $endTime);
+/** @var TimingLogger */
+$timingLogger = $container->get("log.timing");
+$timingLogger->logWithStartTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime);

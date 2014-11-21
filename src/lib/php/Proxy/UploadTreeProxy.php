@@ -16,12 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
+namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\DecisionScopes;
 
-class UploadTreeDao extends DbViewDao
+class UploadTreeProxy extends DbViewProxy
 {
+  /** @vars string */
   private $uploadTreeTableName;
   /** @var int */
   private $uploadId;
@@ -172,8 +173,10 @@ class UploadTreeDao extends DbViewDao
     $dbManager->freeResult($res);
     foreach ($artifactContainers as $ac)
     {
-      foreach($this->countMaskedNonArtifactChildren($ac) as $utid=>$cnt)
-      $children[$utid] = $cnt;
+      foreach ($this->countMaskedNonArtifactChildren($ac) as $utid => $cnt)
+      {
+        $children[$utid] = $cnt;
+      }
     }
     return $children;
   }

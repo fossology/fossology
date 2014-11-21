@@ -26,7 +26,7 @@ void test_ignoreLicense_withGoodLicense() {
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
 
   g_array_free(notIgnored.tokens, TRUE);
-  free(text_ptr);
+  g_free(text_ptr);
 }
 
 void test_ignoreLicense_withGoodLicenseBranch2() {
@@ -52,7 +52,7 @@ void test_ignoreLicense_withNomosLicense() {
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
 
   g_array_free(notIgnored.tokens, TRUE);
-  free(text_ptr);
+  g_free(text_ptr);
 }
 
 void test_ignoreLicense_withIgnoredName() {
@@ -69,7 +69,7 @@ void test_ignoreLicense_withIgnoredName() {
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
 
   g_array_free(notIgnored.tokens, TRUE);
-  free(text_ptr);
+  g_free(text_ptr);
 }
 
 void assertTokens(GArray* tokens, ...) {

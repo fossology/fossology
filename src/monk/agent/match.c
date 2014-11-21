@@ -349,8 +349,7 @@ inline void processFullMatch(MonkState* state, File* file, License* license, Dif
     fo_dbManager_commit(state->dbManager);
 
 #ifdef DEBUG
-    printf("found full match between \"%s\" (pFile=%ld) and \"%s\" (rf_pk=%ld)\n",
-             getFileNameForFileId(state->dbManager, file->id), file->id, license->shortname, license->refId);
+    printf("found full match between (pFile=%ld) and \"%s\" (rf_pk=%ld)\n", file->id, license->shortname, license->refId);
 #endif //DEBUG
   } else {
     onFullMatch(state, file, license, matchInfo);
@@ -368,8 +367,7 @@ inline void processDiffMatch(MonkState* state, File* file, License* license, Dif
     fo_dbManager_commit(state->dbManager);
 
 #ifdef DEBUG
-    printf("found diff match between \"%s\" (pFile=%ld) and \"%s\" (rf_pk=%ld); ",
-           getFileNameForFileId(state->dbManager, file->id), file->id, license->shortname, license->refId);
+    printf("found diff match between (pFile=%ld) and \"%s\" (rf_pk=%ld); ", file->id, license->shortname, license->refId);
     printf("%u%%; ", diffResult->percentual);
 
     char * formattedMatchArray = formatMatchArray(diffResult->matchedInfo);
