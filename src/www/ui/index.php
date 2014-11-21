@@ -17,7 +17,6 @@
  ***********************************************************/
 use Fossology\Lib\Plugin\Plugin;
 use Fossology\Lib\Util\TimingLogger;
-use Monolog\Logger;
 
 /**
  * \file index.php
@@ -34,37 +33,31 @@ $PG_CONN = 0;   // Database connection
 $SysConf = bootstrap();
 
 global $container;
-/** @var Logger $logger */
-$logger = $container->get("logger");
-$timingLogger = new TimingLogger($logger);
-
-$endTime = microtime(true);
+/** @var TimingLogger $logger */
+$timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 
 /* Initialize global system configuration variables $SysConfig[] */
+$timingLogger->tic();
 ConfigInit($SYSCONFDIR, $SysConf);
-$endTime = microtime(true);
-$timingLogger->log("setup init");
+$timingLogger->toc("setup init");
 
+$timingLogger->tic();
 plugin_load();
 plugin_preinstall();
-
-// call install method of every plugin, core-auth creates the default user and
-// the fossy user
 plugin_postinstall();
-
-$timingLogger->log("setup plugins");
+$timingLogger->toc("setup plugins");
 
 $Mod = GetParm("mod",PARM_STRING);
 if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
 {
-  $startTime = microtime(true);
+  $timingLogger->tic();
   /** @var Plugin[] $Plugins */
   $plugin = $Plugins[$PluginId];
   $plugin->execute();
-  $timingLogger->logWithStartTime("plugin execution", $startTime);
+  $timingLogger->toc("plugin execution");
 }
 else
 {

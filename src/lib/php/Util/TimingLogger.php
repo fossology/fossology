@@ -18,28 +18,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Util;
 
-
 use Monolog\Logger;
 
 class TimingLogger extends Object {
-
-  /** @var float */
-  private $startTime;
-
   /** @var Logger */
   private $logger;
+  /** @var float[] */
+  private $watchTimes;
 
   public function __construct(Logger $logger)
   {
     $this->logger = $logger;
-    $this->startTime = $this->getTimestamp();
+    $this->watchTimes = array('default'=>$this->getTimestamp());
   }
 
   /**
-   * @param string $text
+   * @brief start stopwatch timer
    */
-  public function log($text) {
-    $this->logWithStartTime($text, $this->startTime);
+  public function tic($watch='default')
+  {
+    $this->watchTimes[$watch] = $this->getTimestamp();
+  }
+  
+  /**
+   * @param string $text
+   * @param string $watch
+   */
+  public function toc($text,$watch='default')
+  {
+    if (!array_key_exists($watch, $this->watchTimes))
+    {
+      $watch = 'default';
+      $text .= " using watch '$watch'";
+    }
+    else if (empty($text)){
+      $text = "Using watch '$watch'";
+    }
+    $this->logWithStartAndEndTime($text, $this->watchTimes[$watch], $this->getTimestamp());
   }
 
   /**

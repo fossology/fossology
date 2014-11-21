@@ -30,6 +30,10 @@ without any warranty.
       <tag name="monolog.processor" method="processRecord" handler="main"/>
     </service>
 
+    <service id="log.timing" class="Fossology\Lib\Util\TimingLogger">
+      <argument type="service" id="logger"/>
+    </service>
+
     <service id="dao.upload" class="Fossology\Lib\Dao\UploadDao">
       <argument type="service" id="db.manager"/>
     </service>
