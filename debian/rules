@@ -149,6 +149,10 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reportgen install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-readmeoss \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/readmeoss install
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install

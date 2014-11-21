@@ -16,8 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
-
+use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
@@ -124,7 +125,6 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($retCode, 0, 'copyright failed: '.$output);
 
-    $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
     $matches = $this->copyrightDao->getAllEntries("copyright", $uploadId, $uploadTreeTableName);
