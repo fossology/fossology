@@ -154,7 +154,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
 
-    $this->assertEquals($expected=1, count($matches));
+    $this->assertEquals($expected=2, count($matches));
 
     /** @var LicenseMatch */
     $licenseMatch = $matches[0];
@@ -169,20 +169,23 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $agentRef = $licenseMatch->getAgentRef();
     $this->assertEquals($agentRef->getAgentName(), "monk");
 
-    $itemBounds = $this->uploadDao->getItemTreeBounds(7);
-    $highlights = $this->highlightDao->getHighlightDiffs($itemBounds);
+    $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(7));
 
-    $this->assertEquals(1, count($highlights));
-    /** @var Highlight $highlight */
-    $highlight = $highlights[0];
+    $expectedHighlight = new Highlight(18, 35825, Highlight::MATCH, 20, 35819);
+    $expectedHighlight->setLicenseId($matchedLicense->getId());
 
-    $this->assertEquals(Highlight::MATCH, $highlight->getType());
-    $this->assertEquals(18, $highlight->getStart());
-    $this->assertEquals(20, $highlight->getRefStart());
-    $this->assertEquals(35825, $highlight->getEnd());
-    $this->assertEquals(35819, $highlight->getRefEnd());
+    $this->assertEquals(array($expectedHighlight), $highlights);
 
-    $this->assertEquals($matchedLicense->getId(), $highlight->getLicenseId());
+    $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(11));
+
+    $expectedHighlights = array();
+    $expectedHighlights[] = new Highlight(18, 339, Highlight::MATCH, 20, 350);
+    $expectedHighlights[] = new Highlight(340, 347, Highlight::CHANGED, 351, 357);
+    $expectedHighlights[] = new Highlight(348, 35149, Highlight::MATCH, 358, 35819);
+    foreach($expectedHighlights as $expectedHighlight) {
+      $expectedHighlight->setLicenseId($matchedLicense->getId());
+    }
+    assertThat($highlights, containsInAnyOrder($expectedHighlights));
   }
 
   /** @group Functional */
@@ -205,7 +208,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
 
-    $this->assertEquals($expected=1, count($matches));
+    $this->assertEquals($expected=2, count($matches));
 
     /** @var LicenseMatch */
     $licenseMatch = $matches[0];

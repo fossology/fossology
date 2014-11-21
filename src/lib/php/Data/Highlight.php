@@ -160,6 +160,11 @@ class Highlight extends Object
     return $this->refStart;
   }
 
+  private function hasRef()
+  {
+    return $this->getRefStart() >= 0;
+  }
+
   /**
    * @return int
    */
@@ -207,7 +212,12 @@ class Highlight extends Object
 
   public function __toString()
   {
-    return "Highlight(" . $this->start . "-" . $this->end . ", type=" . $this->type . ", id=" . $this->licenseId . ")";
+    return "Highlight("
+      . $this->start . "-" . $this->end
+      . ", type=" . $this->type
+      . ", id=" . $this->licenseId .
+      ($this->hasRef() ? ":". $this->refStart . "-" . $this->refEnd : "")
+      .")";
   }
 
 } 
