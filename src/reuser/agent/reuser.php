@@ -70,7 +70,7 @@ class ReuserAgent extends Agent
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
-    $clearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearingDecisions);
+    $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
 
     $clearingDecisionByFileId = array();
     foreach ($clearingDecisions as $clearingDecision)

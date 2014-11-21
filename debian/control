@@ -235,17 +235,17 @@ Description: architecture for analyzing software, Microsoft Word report generato
  .
  This package contains the reportgen agent programs and their resources.
 
- Package: fossology-readmeoss
- Architecture: any
- Depends: fossology-common, ${misc:Depends}
- Description: architecture for analyzing software, OSS readme generator
-  The FOSSology project is a web based framework that allows you to
-  upload software to be picked apart and then analyzed by software agents
-  which produce results that are then browsable via the web interface.
-  Existing agents include license analysis, metadata extraction, and MIME
-  type identification.
-  .
-  This package contains the readmeoss agent programs and their resources.
+Package: fossology-readmeoss
+Architecture: any
+Depends: fossology-common, ${misc:Depends}
+Description: architecture for analyzing software, OSS readme generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the readmeoss agent programs and their resources.
 
 Package: fossology-reuser
 Architecture: any

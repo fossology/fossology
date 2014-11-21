@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 namespace Fossology\Lib\BusinessRules;
 
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
