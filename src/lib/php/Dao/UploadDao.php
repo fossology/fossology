@@ -91,7 +91,7 @@ class UploadDao extends Object
   }
 
   /**
-   * @param $uploadTreeId
+   * @param $itemId
    * @param $uploadTreeTableName
    * @return ItemTreeBounds
    */
@@ -534,9 +534,5 @@ SELECT * FROM $uploadTreeTableName
       throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
     }
     return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
-  }
-
-  public function getItemsWithFileId($newItemTreeBounds, $fileIdsWithClearingDecision)
-  {
   }
 }

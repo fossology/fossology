@@ -35,8 +35,18 @@ class LicenseViewProxy extends DbViewProxy
       $dbViewQuery = $this->queryOnlyLicenseRef($options);
       parent::__construct($dbViewQuery, $dbViewName);
       return;
-    }    
-    
+    }
+    $dbViewQuery = $this->queryLicenseCandidate($options);
+    if (!array_key_exists('diff', $options))
+    {
+      $dbViewQuery .= " UNION ".$this->queryOnlyLicenseRef($options);
+    }
+    parent::__construct($dbViewQuery, $dbViewName);
+  }
+
+  
+  private function queryLicenseCandidate($options)
+  {
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
     if(array_key_exists('candidatePrefix',$options)){
       $shortnameId = array_search('rf_shortname',$columns);
@@ -47,17 +57,12 @@ class LicenseViewProxy extends DbViewProxy
     }
     $gluedColumns = implode(',', $columns);
     $dbViewQuery = "SELECT $gluedColumns FROM license_candidate WHERE group_fk=$this->groupId";
-    
     if(array_key_exists('extraCondition', $options))
     {
       $dbViewQuery .= " AND $options[extraCondition]";
     }
-    if (!array_key_exists('diff', $options))
-    {
-      $dbViewQuery .= " UNION ".$this->queryOnlyLicenseRef($options);
-    }
-    parent::__construct($dbViewQuery, $dbViewName);
-  }
+    return $dbViewQuery;
+}
   
   private function queryOnlyLicenseRef($options){
     $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
@@ -66,7 +71,7 @@ class LicenseViewProxy extends DbViewProxy
     $dbViewQuery = "SELECT $refColumns FROM ONLY license_ref";
     if(array_key_exists('extraCondition', $options))
     {
-      $dbViewQuery .= " AND $options[extraCondition]";
+      $dbViewQuery .= " WHERE $options[extraCondition]";
     }
     return $dbViewQuery;
   }
