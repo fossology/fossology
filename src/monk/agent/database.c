@@ -81,6 +81,25 @@ int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
   return exists;
 }
 
+int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId) {
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "saveToDb",
+      "insert into license_file(agent_fk, pfile_fk) values($1,$2)",
+      int, long),
+    agentId, pFileId
+  );
+
+  int result = 0;
+  if (insertResult) {
+    result = 1;
+    PQclear(insertResult);
+  }
+
+  return result;
+}
+
 long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, unsigned percent) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(

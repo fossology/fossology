@@ -399,19 +399,32 @@ inline int processMatches(MonkState* state, File* file, GArray* matches) {
    * We do it now to minimize races with a concurrent scan of this file:
    * the same file could be inside more than upload
    */
-  if ((state->scanMode == MODE_SCHEDULER) && (matches->len>0) &&
+  if ((state->scanMode == MODE_SCHEDULER) &&
        hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
+  {
     return 1;
+  }
 
-  if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0)) {
+  if ((state->scanMode == MODE_SCHEDULER) && (matches->len == 0))
+  {
+    saveNoResultToDb(state->dbManager, state->agentId, file->id);
+    return 1;
+  }
+
+  if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0))
+  {
     onNoMatch(state, file);
     return 1;
   }
 
-  if (state->scanMode == MODE_BULK) {
+  if (state->scanMode == MODE_BULK)
+  {
     return processMatches_Bulk(state, file, matches);
-  } else {
-    for (guint matchIndex = 0; matchIndex < matches->len; matchIndex++) {
+  }
+  else
+  {
+    for (guint matchIndex = 0; matchIndex < matches->len; matchIndex++)
+    {
       Match* match = match_array_get(matches, matchIndex);
       processMatch(state, file, match);
     }

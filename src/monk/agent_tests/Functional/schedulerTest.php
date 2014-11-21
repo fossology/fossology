@@ -71,7 +71,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
-    
+
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
@@ -84,7 +84,6 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     unlink("$sysConf/mods-enabled/$agentName/VERSION");
     rmdir("$sysConf/mods-enabled/$agentName");
     rmdir("$sysConf/mods-enabled");
-    unlink($sysConf."/fossology.conf");
 
     return array($output,$retCode);
   }
@@ -106,6 +105,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     system("rm $sysConf/repo -rf");
+    unlink($sysConf."/fossology.conf");
   }
 
   private function setUpTables()
@@ -121,6 +121,16 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData_license_ref();
   }
 
+  private function getHeartCount($output)
+  {
+    $matches = array();
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
+      return intval($matches[1]);
+    else
+      return 0;
+  }
+
+  /** @group Functional */
   public function testRunMonkScan()
   {
     $this->setUpTables();
@@ -131,6 +141,8 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
 
     $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+
+    $this->assertEquals(6, $this->getHeartCount($output));
 
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
@@ -152,6 +164,44 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($agentRef->getAgentName(), "monk");
   }
 
+  /** @group Functional */
+  public function testRunMonkTwiceOnAScan()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    list($output,$retCode) = $this->runMonk($uploadId=1);
+    list($output2,$retCode2) = $this->runMonk($uploadId);
+
+    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+    $this->assertEquals(6, $this->getHeartCount($output));
+
+    $this->assertEquals($retCode2, 0, 'monk failed: '.$output2);
+    $this->assertEquals(0, $this->getHeartCount($output2));
+
+    $this->rmRepo();
+
+    $bounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
+
+    $this->assertEquals($expected=1, count($matches));
+
+    /** @var LicenseMatch */
+    $licenseMatch = $matches[0];
+
+    $this->assertEquals($expected=4, $licenseMatch->getFileId());
+
+    /** @var LicenseRef */
+    $matchedLicense = $licenseMatch->getLicenseRef();
+    $this->assertEquals($matchedLicense->getShortName(), "GPL-3.0");
+
+    /** @var AgentRef */
+    $agentRef = $licenseMatch->getAgentRef();
+
+    $this->assertEquals($agentRef->getAgentName(), "monk");
+  }
+
+  /** @group Functional */
   public function testRunMonkBulkScan()
   {
     $this->setUpTables();
@@ -188,6 +238,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals($expected=1, count($relevantDecisionsItem7));
   }
 
+  /** @group Functional */
   public function testRunMonkBulkScanWithBadSearchForDiff()
   {
     $this->setUpTables();
