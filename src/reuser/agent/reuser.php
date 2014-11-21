@@ -120,7 +120,10 @@ class ReuserAgent extends Agent
       {
         $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, true);
       }
+
+      $this->heartbeat(1);
     }
+
     return true;
   }
 
