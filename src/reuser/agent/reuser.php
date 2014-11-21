@@ -134,7 +134,7 @@ class ReuserAgent extends Agent
   function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item, LicenseRef $license, $remove)
   {
     $this->clearingDao->insertHistoricalClearingEvent(
-        $clearingDecision->getDateAdded()->sub(new DateInterval('p1s')),
+        $clearingDecision->getDateAdded()->sub(new DateInterval('PT1S')),
         $item->getId(),
         $this->userInfo->getUserId(),
         $license->getId(),

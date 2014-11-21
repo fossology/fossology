@@ -127,12 +127,10 @@ class ReuserAgentPlugin extends DefaultPlugin
 
     $itemTreeBounds = $uploadDao->getParentItemBounds($reusedUploadId);
 
-    $vars['reusedTree'] .= $itemTreeBounds;
+    $vars['reusedTree'] = $itemTreeBounds;
 
     /** @var ClearingDao $clearingDao */
     $clearingDao = $this->getObject('dao.clearing');
-    /** @var LicenseDao $licenseDao */
-    $licenseDao = $this->getObject('dao.license');
 
     $clearingDecisions = $clearingDao->getFileClearingsFolder($itemTreeBounds);
 
@@ -207,7 +205,7 @@ class ReuserAgentPlugin extends DefaultPlugin
   protected function insertHistoricalClearingEvent(ClearingDao $clearingDao, ClearingDecision $clearingDecision, Item $item, UserInfo $userInfo, LicenseRef $license, $remove)
   {
     $clearingDao->insertHistoricalClearingEvent(
-        $clearingDecision->getDateAdded()->sub(new DateInterval('p1s')),
+        $clearingDecision->getDateAdded()->sub(new DateInterval('PT1S')),
         $item->getId(),
         $userInfo->getUserId(),
         $license->getId(),
