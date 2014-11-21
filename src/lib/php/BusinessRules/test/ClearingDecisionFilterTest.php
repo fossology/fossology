@@ -20,6 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
+use IllegalArguentException;
 use Mockery as M;
 
 class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
@@ -124,7 +125,21 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     assertThat($filteredClearingDecisions, containsInAnyOrder($decision1));
   }
 
-  public function testFilterCurrenteusableClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
+  /**
+   * @expectedException \InvalidArgumentException
+   * @expectedExceptionMessage unhandled clearing decision scope '12345'
+   */
+  public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
+  {
+    $itemId = 543;
+    $decision = M::mock(ClearingDecision::classname());
+    $decision->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(12345);
+    $decision->shouldReceive("getUploadTreeId")->andReturn($itemId);
+
+    $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision));
+  }
+
+  public function testFilterCurrentReusableClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
     $itemId = 543;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
