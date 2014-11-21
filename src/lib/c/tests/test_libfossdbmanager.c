@@ -231,7 +231,7 @@ void test_prepare()
       {
         CU_FAIL("insert failed");
       }
-      free(c);
+      g_free(c);
     }
     g_free(querySelect);
     g_free(queryInsert);

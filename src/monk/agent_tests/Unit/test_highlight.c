@@ -95,7 +95,7 @@ void test_getFullHighlightFor() {
   _CU_ASSERT_EQUAL(fullHighlight.start, 5, "start %zu!=%zu\n");
   _CU_ASSERT_EQUAL(fullHighlight.length, 7, "length %zu!=%zu\n");
 
-  free(text);
+  g_free(text);
   g_array_free(tokens, TRUE);
 }
 
@@ -109,7 +109,7 @@ void test_getFullHighlightFor_2() {
   _CU_ASSERT_EQUAL(fullHighlight.start, 5, "start %zu!=%zu\n");
   _CU_ASSERT_EQUAL(fullHighlight.length, 0, "length %zu!=%zu\n");
 
-  free(text);
+  g_free(text);
   g_array_free(tokens, TRUE);
 }
 
