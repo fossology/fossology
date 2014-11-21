@@ -213,4 +213,21 @@ class ClearingDecision extends Object
     }
     return false;
   }
+
+  function __toString()
+  {
+    $output = "ClearingDecision(#" . $this->clearingId . ", ";
+
+    foreach ($this->positiveLicenses as $license) {
+      $output .= $license->getShortName() . ", ";
+    }
+
+    foreach ($this->negativeLicenses as $license) {
+      $output .= '-'.$license->getShortName() . ", ";
+    }
+
+    return $output . $this->getUserName() . ")";
+  }
+
+
 }

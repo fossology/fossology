@@ -124,4 +124,10 @@ class Item {
     return $this->parentId !== null;
   }
 
+  function __toString()
+  {
+    return "Item(#" . $this->getId() . ", '" . $this->fileName . "')";
+  }
+
+
 }

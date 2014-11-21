@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
@@ -46,6 +47,8 @@ class ClearingDao extends Object
 
   /**
    * @param DbManager $dbManager
+   * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
+   * @param UploadDao $uploadDao
    */
   function __construct(DbManager $dbManager, NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao)
   {
@@ -178,14 +181,14 @@ class ClearingDao extends Object
   {
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
-        "select
-               LR.rf_pk as id,
-               LR.rf_shortname as shortname,
-               LR.rf_fullname as fullname,
-               CL.removed as removed
-           from clearing_licenses CL
-           left join license_ref LR on CL.rf_fk=LR.rf_pk
-               where CL.clearing_fk=$1");
+        "SELECT
+               LR.rf_pk AS id,
+               LR.rf_shortname AS shortname,
+               LR.rf_fullname AS fullname,
+               CL.removed AS removed
+           FROM clearing_licenses CL
+           LEFT JOIN license_ref LR ON CL.rf_fk=LR.rf_pk
+               WHERE CL.clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($clearingId));
     $added = array();
@@ -231,7 +234,7 @@ class ClearingDao extends Object
 
     $tbdColumnStatementName = __METHOD__ . ".d";
     $this->dbManager->prepare($tbdColumnStatementName,
-        "delete from clearing_event where uploadtree_fk = $1 and rf_fk = $2 and type_fk = $3");
+        "DELETE FROM clearing_event WHERE uploadtree_fk = $1 AND rf_fk = $2 AND type_fk = $3");
 
     while ($item = $this->dbManager->fetchArray($items))
     {
@@ -357,7 +360,7 @@ ORDER BY CD.date_added DESC LIMIT 1
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "
-insert into clearing_decision (
+INSERT INTO clearing_decision (
   uploadtree_fk,
   pfile_fk,
   user_fk,
@@ -365,7 +368,7 @@ insert into clearing_decision (
   scope
 ) VALUES (
   $1,
-  (select pfile_fk from uploadtree where uploadtree_pk=$1),
+  (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),
   $2,
   $3,
   $4) RETURNING clearing_decision_pk
@@ -484,7 +487,7 @@ insert into clearing_decision (
   {
     $this->dbManager->begin();
 
-    $statementGetOldata = "SELECT * from clearing_event where uploadtree_fk=$1 and rf_fk=$2  order by clearing_event_pk desc limit 1";
+    $statementGetOldata = "SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2  ORDER BY clearing_event_pk DESC LIMIT 1";
     $statementName = __METHOD__ . 'getOld';
     $params = array($uploadTreeId, $licenseId); //, $this->dbManager->booleanToDb(true)
     $row = $this->dbManager->getSingleRow($statementGetOldata, $params, $statementName);
@@ -517,14 +520,18 @@ insert into clearing_decision (
   private function insertClearingEvent($uploadTreeId, $userId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
   {
     $this->markDecisionAsWip($uploadTreeId, $userId);
-    if ($isRemoved != null)
-    {
-      $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
-    } else
-    {
-      $insertIsRemoved = null;
-    }
+    $insertIsRemoved = $isRemoved ? $this->dbManager->booleanToDb($isRemoved) : false;
+
     $this->dbManager->insertTableRow('clearing_event', array(
+        'uploadtree_fk' => $uploadTreeId, 'user_fk' => $userId, 'rf_fk' => $licenseId, 'type_fk' => $type,
+        'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
+  }
+
+  public function insertHistoricalClearingEvent(DateTime $dateAdded, $uploadTreeId, $userId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
+  {
+    $insertIsRemoved = $isRemoved ? $this->dbManager->booleanToDb($isRemoved) : false;
+    $this->dbManager->insertTableRow('clearing_event', array(
+        'date_added' => $dateAdded->format("Y-m-d H:i:s.u"),
         'uploadtree_fk' => $uploadTreeId, 'user_fk' => $userId, 'rf_fk' => $licenseId, 'type_fk' => $type,
         'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
   }
@@ -596,7 +603,7 @@ insert into clearing_decision (
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,decision_type,scope) VALUES (
-            $1, (select pfile_fk from uploadtree where uploadtree_pk=$1),  $2,  $3,  $4)");
+            $1, (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1),  $2,  $3,  $4)");
     $res = $this->dbManager->execute($statementName,
         array($uploadTreeId, $userId, DecisionTypes::WIP, DecisionScopes::ITEM));
     $this->dbManager->freeResult($res);
@@ -679,7 +686,7 @@ insert into clearing_decision (
   public function getBulkMatches($bulkId, $userId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT uploadtree_fk as itemid
+    $sql = "SELECT uploadtree_fk AS itemid
             FROM clearing_event ce
             INNER JOIN highlight_bulk h
             ON ce.clearing_event_pk = h.clearing_event_fk

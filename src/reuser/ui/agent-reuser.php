@@ -16,6 +16,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Application\UserInfo;
+use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\ClearingDecisionBuilder;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Plugin\DefaultPlugin;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -94,7 +105,121 @@ class ReuserAgentPlugin extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    return RedirectResponse::create("/");
+    $vars = array();
+
+    /** @var UploadDao $uploadDao */
+    $uploadDao = $this->getObject('dao.upload');
+    $uploadId = intval($request->get('uploadId'));
+
+    if ($uploadId == 0)
+    {
+      return Response::create("", Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    $reusedUpload = $uploadDao->getReusedUpload($uploadId);
+
+    $vars['title'] = "reuser agent: upload $uploadId reuses decisions of upload $reusedUpload";
+
+    $itemTreeBounds = $uploadDao->getParentItemBounds($reusedUpload);
+
+    $vars['reusedTree'] .= $itemTreeBounds;
+
+    /** @var ClearingDao $clearingDao */
+    $clearingDao = $this->getObject('dao.clearing');
+    /** @var LicenseDao $licenseDao */
+    $licenseDao = $this->getObject('dao.license');
+
+    $clearingDecisions = $clearingDao->getFileClearingsFolder($itemTreeBounds);
+
+    $clearingDecisionByFileId = array();
+    $fileIdsWithClearingDecision = array();
+    $lines = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $lines [] = strval($clearingDecision);
+      $fileId = $clearingDecision->getPfileId();
+      $fileIdsWithClearingDecision[] = $fileId;
+      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+    }
+
+    $newItemTreeBounds = $uploadDao->getParentItemBounds($uploadId);
+
+    $containedItems = $uploadDao->getContainedItems($newItemTreeBounds, "pfile_fk = ANY($1)", array('{' . implode(', ', $fileIdsWithClearingDecision) . '}'));
+
+    $timestamp = new DateTime();
+    $userInfo = new UserInfo();
+    $rows = array();
+    /** @var ClearingDecisionProcessor $clearingDecisionProcessor */
+    $clearingDecisionProcessor = $this->getObject('businessrules.clearing_decision_processor');
+    foreach ($containedItems as $item)
+    {
+      $row = array('item' => $item);
+
+      /** @var ClearingDecision $clearingDecision */
+      $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
+      $desiredLicenses = $clearingDecision->getPositiveLicenses();
+      $row['decision'] = $desiredLicenses;
+
+      list($added, $removed) = $clearingDecisionProcessor->getCurrentClearings($item->getItemTreeBounds(), $userInfo->getUserId());
+
+      $actualLicenses = array_map(function (ClearingResult $result)
+      {
+        return $result->getLicenseRef();
+      }, $added);
+
+      $row['current'] = $actualLicenses;
+
+      $toAdd = array_diff($desiredLicenses, $actualLicenses);
+      $row['add'] = $toAdd;
+      $toRemove = array_diff($actualLicenses, $desiredLicenses);
+      $row['remove'] = $toRemove;
+
+      foreach ($toAdd as $license)
+      {
+        $this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, false);
+      }
+
+      foreach ($toRemove as $license)
+      {
+        $this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, true);
+      }
+
+      /*$clearingDao->insertClearingDecision(
+          $item->getId(),
+          $userInfo->getUserId(),
+          $clearingDecision->getType(),
+          $clearingDecision->getScope() == \Fossology\Lib\Data\DecisionScopes::REPO,
+          $clearingDecision->getPositiveLicenses(),
+          $clearingDecision->getNegativeLicenses()
+      );*/
+
+      $rows[] = $row;
+    }
+    $vars['results'] = $rows;
+
+    return $this->render('reuser.html.twig', $this->mergeWithDefault($vars));
+  }
+
+  /**
+   * @param $clearingDao
+   * @param $clearingDecision
+   * @param $item
+   * @param $userInfo
+   * @param $license
+   * @param $remove
+   */
+  protected function insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, $remove)
+  {
+    $clearingDao->insertHistoricalClearingEvent(
+        $clearingDecision->getDateAdded(),
+        $item->getId(),
+        $userInfo->getUserId(),
+        $license->getId(),
+        ClearingEventTypes::USER,
+        $remove,
+        '',
+        ''
+    );
   }
 }
 

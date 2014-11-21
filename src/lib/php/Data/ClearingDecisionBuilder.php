@@ -200,6 +200,23 @@ class ClearingDecisionBuilder extends Object
     return new ClearingDecisionBuilder();
   }
 
+  public function copy(ClearingDecision $clearingDecision)
+  {
+    $this->sameUpload = $clearingDecision->getSameUpload();
+    $this->sameFolder = $clearingDecision->getSameFolder();
+    $this->positiveLicenses = $clearingDecision->getPositiveLicenses();
+    $this->negativeLicenses = $clearingDecision->getNegativeLicenses();
+    $this->clearingId = $clearingDecision->getClearingId();
+    $this->uploadTreeId = $clearingDecision->getUploadTreeId();
+    $this->pfileId = $clearingDecision->getPfileId();
+    $this->userName = $clearingDecision->getUserName();
+    $this->userId = $clearingDecision->getUserId();
+    $this->type = $clearingDecision->getType();
+    $this->comment = $clearingDecision->getComment();
+    $this->reportinfo = $clearingDecision->getReportinfo();
+    $this->scope = $clearingDecision->getScope();
+    $this->dateAdded = $clearingDecision->getDateAdded();
+  }
 
   /**
    * @throws Exception

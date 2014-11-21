@@ -1,0 +1,38 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <h2>reused parent</h2>
+    {{ reusedTree.id }}
+
+    <h2>results</h2>
+
+    <table border="1">
+        <tr>
+            <th>item</th>
+            <th>decision</th>
+            <th>current</th>
+            <th>add</th>
+            <th>remove</th>
+        </tr>
+        {% for row in results %}
+            <tr>
+                <td>{{ row.item.fileName }} ({{ row.item.id }}, #{{ row.item.fileId }})</td>
+                <td>{% for license in row.decision %}
+                    {{ license.shortName }}{% if not loop.last %}, {% endif %}
+                {% endfor %}</td>
+                <td>{% for license in row.current %}
+                        {{ license.shortName }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}</td>
+                <td>{% for license in row.add %}
+                        {{ license.shortName }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}</td>
+                <td>{% for license in row.remove %}
+                        {{ license.shortName }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+

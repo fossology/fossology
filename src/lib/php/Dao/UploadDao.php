@@ -69,7 +69,8 @@ class UploadDao extends Object
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
-    if ($uploadEntry) {
+    if ($uploadEntry)
+    {
       $uploadEntry['tablename'] = $uploadTreeTableName;
     }
     return $uploadEntry;
@@ -116,7 +117,7 @@ class UploadDao extends Object
    * @throws Exception
    * @return ItemTreeBounds
    */
-  public function getParentItemBounds($uploadId,$uploadTreeTableName=NULL)
+  public function getParentItemBounds($uploadId, $uploadTreeTableName = NULL)
   {
     if ($uploadTreeTableName === null)
     {
@@ -161,10 +162,12 @@ SELECT * FROM $uploadTreeTableName
 
   private function handleUploadIdForTable($uploadTreeTableName, $uploadId, &$parameters)
   {
-    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a") {
+    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a")
+    {
       $parameters[] = $uploadId;
       return " AND upload_fk = $" . count($parameters) . " ";
-    } else {
+    } else
+    {
       return "";
     }
   }
@@ -194,7 +197,7 @@ SELECT * FROM $uploadTreeTableName
     {
       $statementName = __METHOD__;
       $row = $this->dbManager->getSingleRow(
-          "select uploadtree_tablename from upload where upload_pk=$1",
+          "SELECT uploadtree_tablename FROM upload WHERE upload_pk=$1",
           array($uploadId),
           $statementName
       );
@@ -223,7 +226,7 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getPreviousItem($uploadId, $itemId, $options = null)
   {
-      return $this->getItemByDirection($uploadId, $itemId, self::DIR_BCK, $options);
+    return $this->getItemByDirection($uploadId, $itemId, self::DIR_BCK, $options);
   }
 
   const DIR_FWD = 1;
@@ -295,11 +298,11 @@ SELECT * FROM $uploadTreeTableName
         $firstIteration = false;
         if ($enterItem)
         {
-            $nextItem = $this->getNewItemByIndex(
-                $item->getId(),
-                $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1,
-                $uploadTreeView
-            );
+          $nextItem = $this->getNewItemByIndex(
+              $item->getId(),
+              $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1,
+              $uploadTreeView
+          );
         }
       } else
       {
@@ -359,8 +362,7 @@ SELECT * FROM $uploadTreeTableName
     if ($parent === null)
     {
       return 1;
-    }
-    else
+    } else
     {
       $uploadTreeViewQuery = $uploadTreeView->asCTE();
       $result = $this->dbManager->getSingleRow("$uploadTreeViewQuery
@@ -378,7 +380,8 @@ SELECT * FROM $uploadTreeTableName
    */
   protected function getNewItemByIndex($parent, $targetOffset, UploadTreeDao $uploadTreeView)
   {
-    if ($targetOffset < 0) {
+    if ($targetOffset < 0)
+    {
       return null;
     }
     $uploadTreeViewQuery = $uploadTreeView->asCTE();
@@ -432,17 +435,43 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getContainingFileCount(ItemTreeBounds $itemTreeBounds, UploadTreeDao $uploadTreeView)
   {
-    $sql = "SELECT count(*) FROM ". $uploadTreeView->getDbViewName() ." where lft BETWEEN $1 and $2";
+    $sql = "SELECT count(*) FROM " . $uploadTreeView->getDbViewName() . " WHERE lft BETWEEN $1 AND $2";
     $result = $this->dbManager->getSingleRow($sql
-        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeView->asCTE() );
+        , array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight()), __METHOD__ . $uploadTreeView->asCTE());
     $output = $result['count'];
     return $output;
   }
 
   /**
- * @param int $uploadId
- * @param int $reusedUploadId
- */
+   * @var ItemTreeBounds $itemTreeBounds
+   * @param string $addCondition
+   * @param array $addParameters
+   * @return Item[]
+   */
+  public function getContainedItems(ItemTreeBounds $itemTreeBounds, $addCondition = "", $addParameters = array())
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+
+    $statementName = __METHOD__ . ".$uploadTreeTableName";
+
+    $view = new UploadTreeView($itemTreeBounds, array(UploadTreeView::CONDITION_PLAIN_FILES));
+
+    $this->dbManager->prepare($statementName,
+        $view->asCTE() . " SELECT * FROM " . $view->getDbViewName() .
+        ($addCondition ? " WHERE " . $addCondition : ''));
+    $res = $this->dbManager->execute($statementName, $addParameters);
+    $items = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $items[] = $this->createItem($row, $uploadTreeTableName);
+    }
+    $this->dbManager->freeResult($res);
+    return $items;
+  }
+
+  /**
+   * @param int $uploadId
+   * @param int $reusedUploadId
+   */
   public function addReusedUpload($uploadId, $reusedUploadId)
   {
     $statementName = __METHOD__;
@@ -455,9 +484,9 @@ SELECT * FROM $uploadTreeTableName
 
   /**
    * @param int $uploadId
-   * @param int $reusedUploadId
+   * @return int
    */
-  public function addGetReusedUpload($uploadId)
+  public function getReusedUpload($uploadId)
   {
     $statementName = __METHOD__;
 
@@ -504,5 +533,9 @@ SELECT * FROM $uploadTreeTableName
       throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
     }
     return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
+  }
+
+  public function getItemsWithFileId($newItemTreeBounds, $fileIdsWithClearingDecision)
+  {
   }
 }

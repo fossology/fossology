@@ -106,4 +106,11 @@ class ItemTreeBounds extends Object
     return $this->right - $this->left > 1;
   }
 
+  function __toString()
+  {
+    return "ItemTreeBounds([" . $this->left . ", " . $this->right . "] " .
+    "upload " . $this->uploadId . "@" . $this->uploadTreeTableName . ")";
+  }
+
+
 } 
