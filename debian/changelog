@@ -3,6 +3,7 @@ fossology (2.1.0-ng) unstable; urgency=low
   * bugfixes
     * [SOSS-42] - Added license not saved
     * [SOSS-2] - fix prev/next button target determination
+    * [SOSS-94] - filter relevant clearing decisions in clearing history view
 
   * improvements
     * [SOSS-31] - Adjustments on Report generation
