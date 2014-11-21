@@ -56,6 +56,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->resetEnv();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;

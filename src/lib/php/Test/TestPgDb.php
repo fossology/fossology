@@ -108,6 +108,11 @@ class TestPgDb
     }
     $this->connection = null;
   }
+
+  function resetEnv()
+  {
+    putenv("TSYSCONFDIR=");
+  }
   
   function fullDestruct()
   {
