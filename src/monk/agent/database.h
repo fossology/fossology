@@ -21,6 +21,7 @@ PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);
 long saveToDb(fo_dbManager* dbManager, int agentId, long int refId, long int pFileId, unsigned int percent);
+int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId);
 int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long int licenseFileId);
 int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId);
 
