@@ -527,11 +527,11 @@ INSERT INTO clearing_decision (
         'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
   }
 
-  public function insertHistoricalClearingEvent(DateTime $dateAdded, $uploadTreeId, $userId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
+  public function insertHistoricalClearingEvent(DateTime $dateAdded, $uploadTreeId, $userId, $jobId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
   {
     $insertIsRemoved = $isRemoved ? $this->dbManager->booleanToDb($isRemoved) : false;
     $this->dbManager->insertTableRow('clearing_event', array(
-        'date_added' => $dateAdded->format("Y-m-d H:i:s.u"),
+        'date_added' => $dateAdded->format("Y-m-d H:i:s.u"), 'job_fk' => $jobId,
         'uploadtree_fk' => $uploadTreeId, 'user_fk' => $userId, 'rf_fk' => $licenseId, 'type_fk' => $type,
         'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
   }

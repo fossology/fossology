@@ -48,9 +48,6 @@ class ReuserAgent extends Agent
   /** @var ClearingDao */
   private $clearingDao;
 
-  /** @var UserInfo */
-  private $userInfo;
-
   /** @var DecisionTypes */
   private $decisionTypes;
 
@@ -67,7 +64,6 @@ class ReuserAgent extends Agent
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
-    $this->userInfo = new UserInfo();
   }
 
 
@@ -101,7 +97,7 @@ class ReuserAgent extends Agent
       $row['decision'] = $desiredLicenses;
 
       list($added, $removed) = $this->clearingDecisionProcessor->getCurrentClearings(
-          $item->getItemTreeBounds(), $this->userInfo->getUserId());
+          $item->getItemTreeBounds(), $this->userId);
 
       $actualLicenses = array_map(function (ClearingResult $result)
       {
@@ -136,10 +132,12 @@ class ReuserAgent extends Agent
   protected
   function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item, LicenseRef $license, $remove)
   {
+    $dateTime = $clearingDecision->getDateAdded();
     $this->clearingDao->insertHistoricalClearingEvent(
-        $clearingDecision->getDateAdded()->sub(new DateInterval('PT1S')),
+        $dateTime->sub(new DateInterval('PT1S')),
         $item->getId(),
-        $this->userInfo->getUserId(),
+        $this->userId,
+        $this->jobId,
         $license->getId(),
         ClearingEventTypes::USER,
         $remove,
