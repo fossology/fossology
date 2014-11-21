@@ -49,7 +49,7 @@ plugin_postinstall();
 $timingLogger->toc("setup plugins");
 
 $Mod = GetParm("mod",PARM_STRING);
-if (!isset($Mod)) { $Mod = "Default"; }
+if (!isset($Mod)) { $Mod = "home"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
 {
