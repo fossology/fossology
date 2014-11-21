@@ -16,8 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
-
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
