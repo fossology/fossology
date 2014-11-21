@@ -60,32 +60,6 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
   return result;
 }
 
-char* getFileNameForFileId(fo_dbManager* dbManager, long pFileId) {
- //TODO refactor to use filetreeBounds struct as input
- 
-  char* result;
-  PGresult* resultUploadFilename = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "getFileNameForFileId",
-      "select ufile_name from uploadtree where pfile_fk = $1",
-      long),
-    pFileId
-  );
-
-  if (!resultUploadFilename)
-    return NULL;
-
-  if (PQntuples(resultUploadFilename) == 0) {
-    PQclear(resultUploadFilename);
-    return NULL;
-  }
-
-  result = strdup(PQgetvalue(resultUploadFilename, 0, 0));
-  PQclear(resultUploadFilename);
-  return result;
-}
-
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
