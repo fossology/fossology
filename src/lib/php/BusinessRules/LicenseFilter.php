@@ -28,8 +28,17 @@ use Fossology\Lib\Data\DecisionScopes;
  * @brief filter newest license from array of [ClearingDecisions or LicenceRef array]
  * @package Fossology\Lib\BusinessRules
  */
-class NewestEditedLicenseSelector extends Object
+class LicenseFilter extends Object
 {
+
+  /** @var ClearingDecisionFilter */
+  private $clearingDecisionFilter;
+
+  public function __construct(ClearingDecisionFilter $clearingDecisionFilter)
+  {
+    $this->clearingDecisionFilter = $clearingDecisionFilter;
+  }
+
   /**
    * @param ClearingDecision[] $editedDecArray
    * @return LicenseRef[][]
@@ -48,7 +57,7 @@ class NewestEditedLicenseSelector extends Object
         $editedLicensesArrayGrouped[$pfileId][] = $editedLicense;
       }
     }
-    
+
     $goodLicenses = array();
     foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
@@ -88,45 +97,14 @@ class NewestEditedLicenseSelector extends Object
    */
   private function selectNewestEditedLicensePerItem($sortedClearingDecArray)
   {
-    $upload = array();
-    $global = array();
-    foreach ($sortedClearingDecArray as $clearingDecision)
-    {
-      $utid = $clearingDecision->getUploadTreeId();
-      if( array_key_exists($utid, $upload) )
-      {
-        continue;
-      }
-      if ($clearingDecision->getScope() == DecisionScopes::ITEM && $clearingDecision->getSameFolder() )
-      {
-        unset($global[$utid]);
-        $upload[$utid] = $clearingDecision->getPositiveLicenses();
-      }
-      if ($clearingDecision->getScope() == DecisionScopes::REPO && !array_key_exists($utid, $upload) && !array_key_exists($utid, $global))
-      {
-        $global[$utid] = $clearingDecision->getPositiveLicenses();
-      }
-    }
-    $licenseArrays = array_merge($global,$upload); // not ($upload,$global)
-    if(count($licenseArrays) > 0) {
-      return $this->flatten($licenseArrays);
-    }
-    return null;
-  }
+    $clearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions($sortedClearingDecArray);
 
-
-  /**
-   * @param LicenseRef[][] $in
-   * @return LicenseRef[]
-   */
-  private function flatten($in)
-  {
     $licenses = array();
-    foreach ($in as $clearingD) {
-     $licenses = array_merge($licenses, $clearingD);
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $licenses = array_merge($licenses, $clearingDecision->getPositiveLicenses());
     }
-    $out = array_unique($licenses);
-    return $out;
+    return count($licenses) > 0 ? $licenses : null;
   }
-        
+
 }

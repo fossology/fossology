@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use DateTime;
-use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\BusinessRules\LicenseFilter;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
@@ -38,7 +38,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
-  /** @var NewestEditedLicenseSelector|MockInterface */
+  /** @var LicenseFilter|MockInterface */
   private $licenseSelector;
   /** @var UploadDao|MockInterface */
   private $uploadDao;
@@ -52,7 +52,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->licenseSelector = M::mock(NewestEditedLicenseSelector::classname());
+    $this->licenseSelector = M::mock(LicenseFilter::classname());
     $this->uploadDao = M::mock(UploadDao::classname());
 
     $logger = new Logger('default');

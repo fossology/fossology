@@ -27,7 +27,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 {
 
   /**
-   * @var NewestEditedLicenseSelector
+   * @var LicenseFilter
    */
   private $newestEditedLicenseSelector;
 
@@ -82,7 +82,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->newestEditedLicenseSelector = new NewestEditedLicenseSelector();
+    $this->newestEditedLicenseSelector = new LicenseFilter(new ClearingDecisionFilter());
   }
 
   public function testCreateClearingDec()

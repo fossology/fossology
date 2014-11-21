@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use DateTime;
-use Fossology\Lib\BusinessRules\NewestEditedLicenseSelector;
+use Fossology\Lib\BusinessRules\LicenseFilter;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
@@ -41,17 +41,17 @@ class ClearingDao extends Object
   private $dbManager;
   /** @var Logger */
   private $logger;
-  /** @var NewestEditedLicenseSelector */
+  /** @var LicenseFilter */
   protected $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
 
   /**
    * @param DbManager $dbManager
-   * @param NewestEditedLicenseSelector $newestEditedLicenseSelector
+   * @param LicenseFilter $newestEditedLicenseSelector
    * @param UploadDao $uploadDao
    */
-  function __construct(DbManager $dbManager, NewestEditedLicenseSelector $newestEditedLicenseSelector, UploadDao $uploadDao)
+  function __construct(DbManager $dbManager, LicenseFilter $newestEditedLicenseSelector, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className()); //$container->get("logger");
@@ -555,24 +555,6 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return $items;
-  }
-
-  /**
-   * @param ClearingDecision[] $decisions
-   * @return LicenseRef[][]
-   */
-  public function extractGoodLicensesPerFileID($decisions)
-  {
-    return $this->newestEditedLicenseSelector->extractGoodLicensesPerItem($decisions);
-  }
-
-  /**
-   * @param LicenseRef[][] $editedLicensesArray
-   * @return string[]
-   */
-  public function extractGoodLicenses($editedLicensesArray)
-  {
-    return $this->newestEditedLicenseSelector->extractGoodLicenses($editedLicensesArray);
   }
 
   /**

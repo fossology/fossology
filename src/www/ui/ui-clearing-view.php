@@ -16,6 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
@@ -52,6 +53,8 @@ class ClearingView extends FO_Plugin
   private $highlightRenderer;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
+  /** @var ClearingDecisionFilter */
+  private $clearingDecisionFilter;
   /** @var bool */
   private $invalidParm = false;
   /** @var DecisionTypes */
@@ -81,6 +84,7 @@ class ClearingView extends FO_Plugin
     $this->decisionTypes = $container->get('decision.types');
 
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
+    $this->clearingDecisionFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
 
@@ -231,17 +235,17 @@ class ClearingView extends FO_Plugin
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
     $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
-    $hasHighlights = count($highlights) > 0;
 
     $permission = GetUploadPerm($uploadId);
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
     $hasWritePermission = $permission >= PERM_WRITE;
 
-    $clearingDecWithLicenses = null;
+    $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecWithLicenses = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+      $clearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearingDecisions);
     }
 
     if ($isSingleFile)
@@ -260,7 +264,7 @@ class ClearingView extends FO_Plugin
     $selectedClearingType = false;
     if ($hasWritePermission)
     {
-      $clearingHistory = $this->getClearingHistory($clearingDecWithLicenses);
+      $clearingHistory = $this->getClearingHistory($clearingDecisions);
     }
     if (count($clearingHistory) > 0)
     {
