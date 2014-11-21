@@ -16,12 +16,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
+namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Mockery as M;
 
-class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
+class UploadTreeViewProxyTest extends \PHPUnit_Framework_TestCase
 {
   private $viewSuffix = "<suffix>";
 
@@ -37,7 +37,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
   {
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds);
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds);
 
     assertThat($uploadTreeView->getDbViewName(), is("UploadTreeView"));
   }
@@ -46,7 +46,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
   {
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(), $this->viewSuffix);
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(), $this->viewSuffix);
 
     assertThat($uploadTreeView->getDbViewName(), is("UploadTreeView.<suffix>"));
   }
@@ -55,7 +55,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
   {
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds);
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds);
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo"));
   }
@@ -65,7 +65,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("uploadtree_a");
     $this->itemTreeBounds->shouldReceive("getUploadId")->once()->withNoArgs()->andReturn(23);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds);
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds);
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM uploadtree_a WHERE upload_fk = 23"));
   }
@@ -75,7 +75,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("uploadtree");
     $this->itemTreeBounds->shouldReceive("getUploadId")->once()->withNoArgs()->andReturn(23);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds);
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds);
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM uploadtree WHERE upload_fk = 23"));
   }
@@ -85,7 +85,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
     $this->itemTreeBounds->shouldReceive("getUploadId")->once()->withNoArgs()->andReturn(76);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(UploadTreeView::CONDITION_UPLOAD));
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(UploadTreeViewProxy::CONDITION_UPLOAD));
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE upload_fk = 76"));
   }
@@ -95,7 +95,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
     $this->itemTreeBounds->shouldReceive("getUploadId")->once()->withNoArgs()->andReturn(76);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(UploadTreeView::CONDITION_UPLOAD, UploadTreeView::CONDITION_UPLOAD));
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(UploadTreeViewProxy::CONDITION_UPLOAD, UploadTreeViewProxy::CONDITION_UPLOAD));
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE upload_fk = 76"));
   }
@@ -106,7 +106,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getLeft")->once()->withNoArgs()->andReturn(25);
     $this->itemTreeBounds->shouldReceive("getRight")->once()->withNoArgs()->andReturn(50);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(UploadTreeView::CONDITION_RANGE));
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(UploadTreeViewProxy::CONDITION_RANGE));
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE lft BETWEEN 25 AND 50"));
   }
@@ -115,7 +115,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
   {
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(UploadTreeView::CONDITION_PLAIN_FILES));
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(UploadTreeViewProxy::CONDITION_PLAIN_FILES));
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE ((ufile_mode & (3<<28))=0) AND pfile_fk != 0"));
   }
@@ -127,7 +127,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getLeft")->once()->withNoArgs()->andReturn(22);
     $this->itemTreeBounds->shouldReceive("getRight")->once()->withNoArgs()->andReturn(43);
 
-    $uploadTreeView = new UploadTreeView($this->itemTreeBounds, array(UploadTreeView::CONDITION_UPLOAD, UploadTreeView::CONDITION_PLAIN_FILES, UploadTreeView::CONDITION_RANGE));
+    $uploadTreeView = new UploadTreeViewProxy($this->itemTreeBounds, array(UploadTreeViewProxy::CONDITION_UPLOAD, UploadTreeViewProxy::CONDITION_PLAIN_FILES, UploadTreeViewProxy::CONDITION_RANGE));
 
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE upload_fk = 5 AND ((ufile_mode & (3<<28))=0) AND pfile_fk != 0 AND lft BETWEEN 22 AND 43"));
   }
@@ -140,7 +140,7 @@ class UploadTreeViewTest extends \PHPUnit_Framework_TestCase
   {
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
-    new UploadTreeView($this->itemTreeBounds, array('bar'));
+    new UploadTreeViewProxy($this->itemTreeBounds, array('bar'));
   }
 }
  

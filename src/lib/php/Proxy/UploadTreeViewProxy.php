@@ -16,12 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
-
+namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
-class UploadTreeView extends DbViewDao
+class UploadTreeViewProxy extends DbViewProxy
 {
   const CONDITION_UPLOAD = 1;
   const CONDITION_RANGE = 2;

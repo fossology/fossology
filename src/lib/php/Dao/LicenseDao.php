@@ -26,6 +26,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
+use Fossology\Lib\Proxy\LicenseViewProxy;
 use Monolog\Logger;
 
 class LicenseDao extends Object
@@ -148,7 +149,7 @@ class LicenseDao extends Object
     {
       $rfTable = 'license_all';
       $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
-      $licenseViewDao = new LicenseViewDao($_SESSION['GroupId'], $options, $rfTable);
+      $licenseViewDao = new LicenseViewProxy($_SESSION['GroupId'], $options, $rfTable);
       $withCte = $licenseViewDao->asCTE();
     } else
     {
@@ -183,7 +184,7 @@ class LicenseDao extends Object
     $rfTable = 'license_all';
     $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
     $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
-    $licenseViewDao = new LicenseViewDao($groupId, $options, $rfTable);
+    $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $withCte = $licenseViewDao->asCTE();
 
     $this->dbManager->prepare($statementName,
@@ -393,7 +394,7 @@ class LicenseDao extends Object
   public function isNewLicense($newShortname)
   {
     $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
-    $licenceViewDao = new LicenseViewDao($groupId, array('columns' => array('rf_shortname')));
+    $licenceViewDao = new LicenseViewProxy($groupId, array('columns' => array('rf_shortname')));
     $sql = 'SELECT count(*) cnt FROM (' . $licenceViewDao->getDbViewQuery() . ') AS license_all WHERE rf_shortname=$1';
     $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__);
     return $duplicatedRef['cnt'] == 0;

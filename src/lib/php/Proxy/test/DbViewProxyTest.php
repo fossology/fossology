@@ -16,22 +16,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Dao;
+namespace Fossology\Lib\Proxy;
 
 use Mockery as M;
 use Fossology\Lib\Db\DbManager;
 
-class DbViewDaoTest extends \PHPUnit_Framework_TestCase
+class DbViewProxyTest extends \PHPUnit_Framework_TestCase
 {
   private $dbViewName;
   private $dbViewQuery;
-  /** @var DbViewDao */
+  /** @var DbViewProxy */
   private $dbViewDao;
   private $dbManagerMock;
 
   public function setUp()
   {
-    $this->dbViewDao = new DbViewDao($this->dbViewQuery, $this->dbViewName);
+    $this->dbViewDao = new DbViewProxy($this->dbViewQuery, $this->dbViewName);
     global $container;
     $container = M::mock('ContainerBuilder');
     $this->dbManagerMock = M::mock(DbManager::classname());
