@@ -85,7 +85,7 @@ int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
-      "saveToDb",
+      "saveNoResultToDb",
       "insert into license_file(agent_fk, pfile_fk) values($1,$2)",
       int, long),
     agentId, pFileId

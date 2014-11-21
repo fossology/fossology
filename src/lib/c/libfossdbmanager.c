@@ -37,6 +37,7 @@ struct fo_dbmanager_preparedstatement
   fo_dbManager* dbManager;
   param* params;
   char* name;
+  char* query;
   int paramc;
 };
 
@@ -587,6 +588,10 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(
   if (cached)
   {
     LOG_DEBUG("returning cached statement '%s'\n", cached->name);
+    if (strcmp(cached->query, query) != 0) {
+      LOG_ERROR("mismatcing query for %s\n", name);
+      return NULL;
+    }
     return cached;
   }
 
@@ -596,6 +601,7 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(
 
   result->dbManager = dbManager;
   result->name = g_strdup(name);
+  result->query = g_strdup(query);
 
   int failure = 0;
   if (parseParamStr(result, paramtypes))
