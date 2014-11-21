@@ -27,6 +27,8 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\LicenseMatch;
+use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Plugin\DefaultPlugin;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -115,12 +117,15 @@ class ReuserAgentPlugin extends DefaultPlugin
     {
       return Response::create("", Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+    $reusedUploadId = intval($request->get('reuseUploadId'));
+    if ($reusedUploadId === 0)
+    {
+      $reusedUploadId = $uploadDao->getReusedUpload($uploadId);
+    }
 
-    $reusedUpload = $uploadDao->getReusedUpload($uploadId);
+    $vars['title'] = "reuser agent: upload $uploadId reuses decisions of upload $reusedUploadId";
 
-    $vars['title'] = "reuser agent: upload $uploadId reuses decisions of upload $reusedUpload";
-
-    $itemTreeBounds = $uploadDao->getParentItemBounds($reusedUpload);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($reusedUploadId);
 
     $vars['reusedTree'] .= $itemTreeBounds;
 
@@ -176,22 +181,13 @@ class ReuserAgentPlugin extends DefaultPlugin
 
       foreach ($toAdd as $license)
       {
-        $this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, false);
+        //$this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, false);
       }
 
       foreach ($toRemove as $license)
       {
-        $this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, true);
+        //$this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, true);
       }
-
-      /*$clearingDao->insertClearingDecision(
-          $item->getId(),
-          $userInfo->getUserId(),
-          $clearingDecision->getType(),
-          $clearingDecision->getScope() == \Fossology\Lib\Data\DecisionScopes::REPO,
-          $clearingDecision->getPositiveLicenses(),
-          $clearingDecision->getNegativeLicenses()
-      );*/
 
       $rows[] = $row;
     }
@@ -208,10 +204,10 @@ class ReuserAgentPlugin extends DefaultPlugin
    * @param $license
    * @param $remove
    */
-  protected function insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, $remove)
+  protected function insertHistoricalClearingEvent(ClearingDao $clearingDao, ClearingDecision $clearingDecision, Item $item, UserInfo $userInfo, LicenseRef $license, $remove)
   {
     $clearingDao->insertHistoricalClearingEvent(
-        $clearingDecision->getDateAdded(),
+        $clearingDecision->getDateAdded()->sub(new DateInterval('p1s')),
         $item->getId(),
         $userInfo->getUserId(),
         $license->getId(),

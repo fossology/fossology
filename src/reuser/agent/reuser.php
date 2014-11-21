@@ -12,18 +12,23 @@
 
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Application\UserInfo;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\Item;
 
 include_once(__DIR__ . "/version.php");
 
 class ReuserAgent extends Agent
 {
-  const FORCE_DECISION = 1;
 
   /** @var int */
   private $conflictStrategyId;
@@ -43,8 +48,8 @@ class ReuserAgent extends Agent
   /** @var ClearingDao */
   private $clearingDao;
 
-  /** @var int */
-  private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
+  /** @var UserInfo */
+  private $userInfo;
 
   /** @var DecisionTypes */
   private $decisionTypes;
@@ -57,20 +62,87 @@ class ReuserAgent extends Agent
     $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
 
     $this->uploadDao = $this->container->get('dao.upload');
-
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
+    $this->userInfo = new UserInfo();
   }
 
 
   function processUploadId($uploadId)
   {
-    $reusedUploadId = $this->uploadDao->getReusedUpload();
+    $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
+    $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
 
+    $clearingDecisionByFileId = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $fileId = $clearingDecision->getPfileId();
+      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+    }
+
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $containedItems = $this->uploadDao->getContainedItems(
+        $itemTreeBounds,
+        "pfile_fk = ANY($1)",
+        array('{' . implode(', ', array_keys($clearingDecisionByFileId)) . '}')
+    );
+
+    foreach ($containedItems as $item)
+    {
+      $row = array('item' => $item);
+
+      /** @var ClearingDecision $clearingDecision */
+      $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
+      $desiredLicenses = $clearingDecision->getPositiveLicenses();
+      $row['decision'] = $desiredLicenses;
+
+      list($added, $removed) = $this->clearingDecisionProcessor->getCurrentClearings(
+          $item->getItemTreeBounds(), $this->userInfo->getUserId());
+
+      $actualLicenses = array_map(function (ClearingResult $result)
+      {
+        return $result->getLicenseRef();
+      }, $added);
+
+      $toAdd = array_diff($desiredLicenses, $actualLicenses);
+      $toRemove = array_diff($actualLicenses, $desiredLicenses);
+
+      foreach ($toAdd as $license)
+      {
+        $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, false);
+      }
+
+      foreach ($toRemove as $license)
+      {
+        $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, true);
+      }
+    }
     return true;
+  }
+
+  /**
+   * @param ClearingDecision $clearingDecision
+   * @param Item $item
+   * @param LicenseRef $license
+   * @param boolean $remove
+   */
+  protected
+  function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item, LicenseRef $license, $remove)
+  {
+    $this->clearingDao->insertHistoricalClearingEvent(
+        $clearingDecision->getDateAdded()->sub(new DateInterval('p1s')),
+        $item->getId(),
+        $this->userInfo->getUserId(),
+        $license->getId(),
+        ClearingEventTypes::USER,
+        $remove,
+        '',
+        ''
+    );
   }
 
 }
