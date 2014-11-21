@@ -1,0 +1,49 @@
+<form name="Updatefm" action="{{ actionUri }}" method="post">
+  <input type="hidden" name="req_marydone" value="{{ req_marydone }}"/>
+  <input type="hidden" name="req_shortname" value="{{ req_shortname }}"/>
+  <input type="hidden" name="rf_pk" value="{{ rf_pk }}"/>
+  <input type="hidden" name="{% if rf_pk %}updateit{% else %}addit{% endif %}" value="true"/>
+  <table>
+    {% import 'include/macro.html.twig' as macro %}
+    <tr>
+      <td align="right">{{ 'Active'|trans }}</td>
+      <td align="left">{{ macro.select('rf_active',boolYesNoMap,'rf_active',rf_active) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Checked'|trans }}</td>
+      <td align="left">{{ macro.select('marydone',boolYesNoMap,'marydone',marydone) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ "Short name"|trans }}</td>
+      <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30"> ({{ 'must be unique'|trans }})</td>
+    </tr>
+    <tr>
+      <td align="right">{{ "Full name"|trans }}</td>
+      <td><input type="text" name="rf_fullname" value="{{ rf_fullname|e }}" size="60"></td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'License Text'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}</td>
+      <td><textarea name="rf_text" rows="10" cols="80" {% if isReadOnly %} readonly="readonly"{% endif %}>{{ rf_text|e }}</textarea></td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Text Updatable'|trans }}</td>
+      <td align="left">{{ macro.select('rf_text_updatable',boolYesNoMap,'rf_text_updatable',rf_text_updatable) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Detector Type'|trans }}</td>
+      <td align="left">{{ macro.select('rf_detector_type',detectorTypes,'rf_detector_type',rf_detector_type) }}</td>
+    </tr>
+    <tr>
+      <td align=right>
+        {{ 'URL'|trans }}
+        {% if rf_url %}<a href="{{ rf_url }}"><img border="0" src="images/right-point-bullet.gif"/></a>{% endif %}
+      </td>
+      <td><input type="text" name="rf_url" value="{{ rf_url }}" size="60"></td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Public notes'|trans }}</td>
+      <td><textarea name="rf_notes" rows="5" cols="80">{{ rf_notes|e }}</textarea></td>
+    </tr>
+  </table>
+  <input type="submit" value="{% if rfId %}{{ 'Update'|trans }}{% else %}{{ 'Add license'|trans }}{% endif %}"/>
+</form>
