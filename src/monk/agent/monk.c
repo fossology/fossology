@@ -76,12 +76,15 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
 
         long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
 
-        if (pFileId <= 0)
+        if ((pFileId <= 0) || hasAlreadyResultsFor(threadLocalState->dbManager, threadLocalState->agentId, pFileId))
+        {
+          fo_scheduler_heart(0);
           continue;
+        }
 
-        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses))
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses)) {
           fo_scheduler_heart(1);
-        else {
+        } else {
           fo_scheduler_heart(0);
           threadError = 1;
         }
