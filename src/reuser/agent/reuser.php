@@ -14,6 +14,7 @@
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Application\UserInfo;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
@@ -39,11 +40,14 @@ class ReuserAgent extends Agent
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
 
-  /** @var ClearingDecisionProcessor */
-  private $clearingDecisionProcessor;
-
   /** @var AgentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
+
+  /** @var ClearingDecisionFilter */
+  private $clearingDecisionFilter;
+
+  /** @var ClearingDecisionProcessor */
+  private $clearingDecisionProcessor;
 
   /** @var ClearingDao */
   private $clearingDao;
@@ -62,6 +66,7 @@ class ReuserAgent extends Agent
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
+    $this->clearingDecisionFilter = $this->container->get('businessrules.clearing_decision_filter');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
@@ -72,6 +77,7 @@ class ReuserAgent extends Agent
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
+    $clearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearingDecisions);
 
     $clearingDecisionByFileId = array();
     foreach ($clearingDecisions as $clearingDecision)
