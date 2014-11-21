@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Fossology\Lib\Util\Object;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Monolog\Logger;
@@ -454,7 +455,7 @@ SELECT * FROM $uploadTreeTableName
 
     $statementName = __METHOD__ . ".$uploadTreeTableName";
 
-    $view = new UploadTreeView($itemTreeBounds, array(UploadTreeViewProxy::CONDITION_PLAIN_FILES));
+    $view = new UploadTreeViewProxy($itemTreeBounds, array(UploadTreeViewProxy::CONDITION_PLAIN_FILES));
 
     $this->dbManager->prepare($statementName,
         $view->asCTE() . " SELECT * FROM " . $view->getDbViewName() .
