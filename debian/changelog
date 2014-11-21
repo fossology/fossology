@@ -1,8 +1,29 @@
-fossology (2.1.0-ng-SNAPSHOT) unstable; urgency=low
+fossology (2.1.0-ng) unstable; urgency=low
 
-  * unofficial build version
+  * bugfixes
+    * [SOSS-42] - Added license not saved
+    * [SOSS-2] - fix prev/next button target determination
 
- -- madong <madong@bl480c1>  Fri, 08 Jun 2012 16:35:55 +0800
+  * improvements
+    * [SOSS-31] - Adjustments on Report generation
+    * [SOSS-36] - refactor copyright agent to more modern c++
+    * [SOSS-72] - add tests for ClearingDecisionProcessor
+
+  * new features
+    * [SOSS-17] - add "package" scope for clearing decision
+    * [SOSS-18] - analyze how "package" relation between uploads can be established
+    * [SOSS-30] - create simple debian package build for fossology ng
+    * [SOSS-67] - Showing Bulk Scan Text Phrases in UI
+    * [SOSS-68] - Text Phrase Listing in Report
+    * [SOSS-69] - Allow for Adding New Licenses for Group
+    * [SOSS-78] - create plugin baseclass for template based plugins
+    * [SOSS-81] - enable caching of templates
+    * [SOSS-82] - enable caching of dependency injection container
+    * [SOSS-11] - Bulk: maybe special characters could be filtered out for scan
+    * [SOSS-16] - Login Fields already on Startup Page
+    * [SOSS-21] - fix bulk scan decision logic
+
+ -- Andreas Wuerl <andreas.wuerl.ext@siemens.com>  Fri, 21 Nov 2014 08:00:00 +0100
 
 fossology (2.0.0-1) unstable; urgency=low
 
