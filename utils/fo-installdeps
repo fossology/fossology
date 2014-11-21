@@ -145,7 +145,7 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
-            perl-Text-Template subversion
+            perl-Text-Template subversion redhat-lsb php-xml php-mbstring
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
