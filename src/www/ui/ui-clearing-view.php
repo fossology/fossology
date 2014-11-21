@@ -60,8 +60,6 @@ class ClearingView extends FO_Plugin
   /** @var DecisionTypes */
   private $decisionTypes;
 
-  private $vars = array();
-
   function __construct()
   {
     $this->Name = "view-license";
