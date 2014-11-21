@@ -42,6 +42,7 @@ class SanityChecker
     $this->checkDecisionScopes();
     $this->checkUploadStatus();
     $this->checkLicenseEventTypes();
+    $this->checkExistsTable('license_candidate');
     return $this->errors;
   }
 
@@ -98,5 +99,17 @@ class SanityChecker
     $this->dbManager->freeResult($res);
     return $errors;
   }
-
+  
+  private function checkExistsTable($tableName)
+  {
+    $error = intval(!$this->dbManager->existsTable('license_candidate'));
+    if($error){
+      echo "(-) table $tableName does not exists";
+    }
+    else if($this->verbose)
+    {
+      echo "(+) table $tableName exists";
+    }
+    $this->errors += $error;
+  }
 }
