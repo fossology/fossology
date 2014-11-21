@@ -136,7 +136,7 @@ class AdviceLicense extends DefaultPlugin
     $fullname = $request->get('fullname');
     $rfText = $request->get('rf_text');
     $url = $request->get('url');
-    $marydone = intval($request->get('marydone'));
+    $marydone = $request->get('marydone');
 
     if (empty($shortname) || empty($fullname) || empty($rfText))
     {
