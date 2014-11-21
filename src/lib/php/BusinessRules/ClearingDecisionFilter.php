@@ -34,7 +34,8 @@ class ClearingDecisionFilter
     $relevantClearingDecisions = array();
     foreach ($clearingDecisions as $clearingDecision)
     {
-      if ($clearingDecision->getScope() === DecisionScopes::ITEM && !$clearingDecision->getSameFolder()) {
+      if ($clearingDecision->getScope() === DecisionScopes::ITEM && !$clearingDecision->getSameFolder())
+      {
         continue;
       }
       $relevantClearingDecisions[] = $clearingDecision;
@@ -79,6 +80,28 @@ class ClearingDecisionFilter
         default:
           throw new \InvalidArgumentException("unhandled clearing decision scope '" . $scope . "'");
       }
+    }
+    return $clearingDecisionsByItemId;
+  }
+
+  /** @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[]
+   */
+  public function filterCurrentReusableClearingDecisions($clearingDecisions)
+  {
+    /** @var ClearingDecision[] $clearingDecisionsByItemId */
+    $clearingDecisionsByItemId = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $itemId = $clearingDecision->getUploadTreeId();
+      $scope = $clearingDecision->getScope();
+
+      if (array_key_exists($itemId, $clearingDecisionsByItemId) || $scope === DecisionScopes::ITEM)
+      {
+        continue;
+      }
+
+      $clearingDecisionsByItemId[$itemId] = $clearingDecision;
     }
     return $clearingDecisionsByItemId;
   }

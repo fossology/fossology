@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\Application\UserInfo;
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -133,6 +134,9 @@ class ReuserAgentPlugin extends DefaultPlugin
     $clearingDao = $this->getObject('dao.clearing');
 
     $clearingDecisions = $clearingDao->getFileClearingsFolder($itemTreeBounds);
+    /** @var ClearingDecisionFilter $clearingDecisionFilter */
+    $clearingDecisionFilter = $this->getObject('businessrules.clearing_decision_filter');
+    $clearingDecisions = $clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
 
     $clearingDecisionByFileId = array();
     $fileIdsWithClearingDecision = array();

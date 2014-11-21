@@ -150,8 +150,8 @@ class ClearingDao extends Object
             ->setPfileId($row['pfile_id'])
             ->setUserName($row['user_name'])
             ->setUserId($row['user_id'])
-            ->setType($row['type_id'])
-            ->setScope($row['scope'])
+            ->setType(intval($row['type_id']))
+            ->setScope(intval($row['scope']))
             ->setDateAdded($row['date_added']);
       }
 
