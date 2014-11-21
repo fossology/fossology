@@ -18,7 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
-class DbViewProxy
+use Fossology\Lib\Util\Object;
+
+class DbViewProxy extends Object
 {
   /** @var string */
   private $dbViewName;
