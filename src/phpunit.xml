@@ -23,6 +23,7 @@
                 <directory suffix=".php">vendor</directory>
                 <directory suffix="Test.php">.</directory>
                 <directory suffix=".php">testing</directory>
+                <directory suffix=".php">tutorials</directory>
             </exclude>
         </whitelist>
     </filter>
