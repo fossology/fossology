@@ -31,9 +31,6 @@ include_once(__DIR__ . "/version.php");
 class ReuserAgent extends Agent
 {
 
-  /** @var int */
-  private $conflictStrategyId;
-
   /** @var UploadDao */
   private $uploadDao;
 
@@ -58,10 +55,6 @@ class ReuserAgent extends Agent
   function __construct()
   {
     parent::__construct(REUSER_AGENT_NAME, AGENT_VERSION, AGENT_REV);
-
-    $args = getopt("k:", array(""));
-    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
-
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
