@@ -26,7 +26,7 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
-CFLAGS_LOCAL = -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB)
+CFLAGS_LOCAL = -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(CUNIT_LIB) $(TEST_LIB) -lcrypto -lssl
 EXE = test_delagent
 TEST_OBJ_RUN = testRun.o
 TEST_OBJ = testListFolders.o testDeleteFolders.o testReadParameter.o
