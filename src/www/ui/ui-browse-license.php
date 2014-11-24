@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\AgentsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -38,6 +39,7 @@ class ui_browse_license extends FO_Plugin
 {
 
   private $uploadtree_tablename = "";
+  const SELECTED_ATTRIBUTE = ' selected="selected"';
   /** @var UploadDao */
   private $uploadDao;
   /** @var LicenseDao */
@@ -46,8 +48,6 @@ class ui_browse_license extends FO_Plugin
   private $clearingDao;
   /** @var AgentsDao */
   private $agentsDao;
-  /** @var DbManager */
-  private $dbManager;
   /** @var LicenseFilter */
   private $licenseFilter;
   /** @var array [uploadtree_id]=>cnt */
@@ -69,7 +69,6 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agents');
-    $this->dbManager = $container->get('db.manager');
     $this->licenseFilter = $container->get('businessrules.license_filter');
   }
 
@@ -337,14 +336,14 @@ class ui_browse_license extends FO_Plugin
     $uploadTreeId = $itemTreeBounds->getItemId();
 
     $latestNomos = LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos = $this->agentsDao->getNewestAgent("nomos");
+    $newestNomos = $this->agentsDao->getCurrentAgent("nomos");
     $latestMonk = LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk = $this->agentsDao->getNewestAgent("monk");
+    $newestMonk = $this->agentsDao->getCurrentAgent("monk");
     $latestNinka = LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka = $this->agentsDao->getNewestAgent("ninka");
-    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' => $newestNomos, 'latestIsNewest' => $latestNomos == $newestNomos['agent_pk']),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' => $newestMonk, 'latestIsNewest' => $latestMonk == $newestMonk['agent_pk']),
-        'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka['agent_pk']));
+    $newestNinka = $this->agentsDao->getCurrentAgent("ninka");
+    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' => $newestNomos, 'latestIsNewest' => $latestNomos == $newestNomos->getAgentId()),
+        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' => $newestMonk, 'latestIsNewest' => $latestMonk == $newestMonk->getAgentId()),
+        'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
 
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
@@ -405,7 +404,7 @@ class ui_browse_license extends FO_Plugin
    * @param array $child
    * @param int $uploadId
    * @param int $selectedAgentId
-   * @param array $goodAgents
+   * @param AgentRef[] $goodAgents
    * @param array $pfileLicenses
    * @param array $editedPfileLicenses
    * @param string $Uri
@@ -476,9 +475,9 @@ class ui_browse_license extends FO_Plugin
           foreach ($rfInfo as $agent => $match)
           {
             $agentInfo = $goodAgents[$agent];
-            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>$agentInfo[name]</a>";
+            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>$agentInfo->getAgentName()</a>";
 
-            if ($match['agent_id'] != $agentInfo['newest']['agent_pk'])
+            if ($match['agent_id'] != $agentInfo['newest']->getAgentId())
             {
               $agentEntry .= "&dagger;";
               $this->vars['haveOldVersionResult'] = "&dagger;";
@@ -561,31 +560,30 @@ class ui_browse_license extends FO_Plugin
     return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
   }
 
-  private function buildAgentSelector($allScans)
+  /**
+   * @param AgentRef[] $successfulAgents
+   * @return string
+   */
+  private function buildAgentSelector($successfulAgents)
   {
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    if (count($allScans) == 1)
+    if (count($successfulAgents) == 1)
     {
-      $run = reset($allScans);
-      return "Only one revision of <b>$run[agent_name]</b> ran for this upload. <br/>";
+      $agent = $successfulAgents[0];
+      return "Only one revision of <b>" . $agent->getAgentName() . "</b> ran for this upload. <br/>";
     }
+
     $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $V = "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
-    $isSelected = (0 == $selectedAgentId) ? " selected='selected'" : '';
-    $V .= "<option value='0' $isSelected>" . _('Latest run of all available agents') . "</option>\n";
-    foreach ($allScans as $run)
+    $output = "<form action=\"$URI\" method=\"post\"><select name=\"agentId\" id=\"agentId\">";
+    $isSelected = (0 == $selectedAgentId) ? self::SELECTED_ATTRIBUTE : '';
+    $output .= "<option value=\"0\" $isSelected>" . _('Latest run of all available agents') . "</option>\n";
+    foreach ($successfulAgents as $agent)
     {
-      if ($run['agent_pk'] == $selectedAgentId)
-      {
-        $isSelected = " selected='selected'";
-      } else
-      {
-        $isSelected = "";
-      }
-      $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
+      $isSelected = $agent->getAgentId() == $selectedAgentId ? self::SELECTED_ATTRIBUTE : '';
+      $output .= "<option value=\"" . $agent->getAgentId() . "\"$isSelected>" . $agent->getAgentName() . " " . $agent->getAgentRevision() . "</option>\n";
     }
-    $V .= "</select><input type='submit' name='' value='Show'/></form>";
-    return $V;
+    $output .= "</select><input type='submit' name='' value='Show'/></form>";
+    return $output;
   }
 
   /**
@@ -622,7 +620,7 @@ class ui_browse_license extends FO_Plugin
 
     foreach ($scannerAgents as $agentName)
     {
-      $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
+      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
       if (count($runningJobs) > 0)
       {
         $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
@@ -643,77 +641,65 @@ class ui_browse_license extends FO_Plugin
    */
   private function createAgentStatus($scannerAgents, $uploadId)
   {
-    $allScans = array();
+    $output = "";
+
+    $allSuccessfulAgents = array();
 
     foreach ($scannerAgents as $agentName)
     {
-      $agentHasArsTable = $this->dbManager->existsTable($agentName . "_ars");
+      $agentHasArsTable = $this->agentsDao->arsTableExists($agentName);
       if (empty($agentHasArsTable))
       {
         continue;
       }
 
-      $newestAgent = $this->agentsDao->getNewestAgent($agentName);
-      $stmt = __METHOD__ . ".getAgent.$agentName";
-      $this->dbManager->prepare($stmt,
-          $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $agentName . "_ars ON agent_fk=agent_pk "
-              . "WHERE agent_name=$2 AND agent_enabled AND upload_fk=$1 AND ars_success "
-              . "ORDER BY agent_pk DESC");
-      $res = $this->dbManager->execute($stmt, array($uploadId, $agentName));
-      $latestRun = $this->dbManager->fetchArray($res);
-      if ($latestRun)
-      {
-        $allScans[] = $latestRun;
-      }
-      while ($run = $this->dbManager->fetchArray($res))
-      {
-        $allScans[] = $run;
-      }
-      $this->dbManager->freeResult($res);
+      $currentAgent = $this->agentsDao->getCurrentAgent($agentName);
+      $successfulAgents = $this->agentsDao->getSuccessfulAgentRuns($agentName, $uploadId);
+      $allSuccessfulAgents = array_merge($allSuccessfulAgents, $successfulAgents);
+      $latestSuccessfulAgent = count($successfulAgents) > 0 ? $successfulAgents[0] : false;
 
-      $V = "<p>\n";
-      if (false === $latestRun)
+      $output .= "<p>\n";
+      if (false === $latestSuccessfulAgent)
       {
-        $V .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
+        $output .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
 
-        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
+        $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
         if (count($runningJobs) > 0)
         {
-          $V .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
-          $V .= $this->getViewJobsLink($uploadId);
-          $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
+          $output .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
+          $output .= $this->getViewJobsLink($uploadId);
+          $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
         } else
         {
-          $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+          $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
         }
-        $V .= "</p>\n";
+        $output .= "</p>\n";
         continue;
       }
 
-      $V .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . "$latestRun[agent_rev].";
-      if ($latestRun['agent_pk'] != $newestAgent['agent_pk'])
+      $output .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . $latestSuccessfulAgent->getAgentRevision() . ".";
+      if ($latestSuccessfulAgent->getAgentId() != $currentAgent->getAgentId())
       {
-
-        $runningJobs = $this->agentsDao->runningAgentIds($uploadId, $agentName . "_ars");
-        if (in_array($newestAgent['agent_pk'], $runningJobs))
+        $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
+        if (in_array($currentAgent->getAgentId(), $runningJobs))
         {
-          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" is scheduled to run on this upload.");
-          $V .= $this->getViewJobsLink($uploadId);
-          $V .= " " . _("or") . " ";
+          $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" is scheduled to run on this upload.");
+          $output .= $this->getViewJobsLink($uploadId);
+          $output .= " " . _("or") . " ";
         } else
         {
-          $V .= _(" The newest agent revision ") . $newestAgent['agent_rev'] . _(" has not been run on this upload.");
+          $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" has not been run on this upload.");
 
         }
-        $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
       }
-      $V .= "</p>\n";
+      $output .= "</p>\n";
     }
 
     $header = "<h3>" . _("Scanner details") . "</h3>";
-    $header .= $this->buildAgentSelector($allScans) . "\n";
+    $header .= $this->buildAgentSelector($allSuccessfulAgents) . "\n";
 
-    return empty($allScans) ? false : ($header . $V);
+    return empty($successfulAgents) ? false : ($header . $output);
   }
 
   public function getTemplateName()

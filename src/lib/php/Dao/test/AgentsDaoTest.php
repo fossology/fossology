@@ -18,15 +18,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 use Monolog\Logger;
 
 class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
 
-  private $agentName = "<agentName>";
+  private $uploadId = 25;
+  private $olderAgentId = 3;
+  private $otherAgentId = 4;
+  private $agentId = 5;
+  private $incompleteAgentId = 6;
 
-  /** @var DbManager|M\MockInterface */
+  private $agentName = "agentName";
+  private $otherAgentName = "otherAgentName";
+
+  private $agentRev = "<agentRev>";
+  private $olderAgentRev = "<olderAgentRev>";
+  private $otherAgentRev = "<otherAgentRev>";
+  private $incompleteAgentRev = "<incompleteAgentRev>";
+
+  private $agentDesc = "<agentDesc>";
+  private $otherAgentDesc = "<otherAgentDesc>";
+
+  private $agentEnabled = true;
+
+  /** @var TestPgDb */
+  private $testDb;
+
+  /** @var DbManager */
   private $dbManager;
 
   /** @var Logger|M\MockInterface */
@@ -35,24 +57,101 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
   /** @var AgentsDao */
   private $agentsDao;
 
+  /** @var AgentRef */
+  private $agent;
+  /** @var AgentRef */
+  private $olderAgent;
+  /** @var AgentRef */
+  private $otherAgent;
+  /** @var AgentRef */
+  private $incompleteAgent;
+
   public function setUp() {
     $this->dbManager = M::mock(DbManager::classname());
     $this->logger = M::mock('Monolog\Logger');
 
+    $this->testDb = new TestPgDb();
+    $this->dbManager = &$this->testDb->getDbManager();
+
+    $this->agent = new AgentRef($this->agentId, $this->agentName, $this->agentRev);
+    $this->olderAgent = new AgentRef($this->olderAgentId, $this->agentName, $this->olderAgentRev);
+    $this->otherAgent = new AgentRef($this->otherAgentId, $this->otherAgentName, $this->otherAgentRev);
+    $this->incompleteAgent = new AgentRef($this->incompleteAgentId, $this->agentName, $this->incompleteAgentRev);
+
+    $this->testDb->createPlainTables(
+        array(
+            'agent'
+        ));
+
+    $agentArray = array(
+        array($this->olderAgentId, $this->agentName, $this->olderAgentRev, $this->agentDesc, $this->dbManager->booleanToDb($this->agentEnabled)),
+        array($this->otherAgentId, $this->otherAgentName, $this->otherAgentRev, $this->otherAgentDesc, $this->dbManager->booleanToDb($this->agentEnabled)),
+        array($this->agentId, $this->agentName, $this->agentRev, $this->agentDesc, $this->dbManager->booleanToDb($this->agentEnabled)),
+        array($this->incompleteAgentId, $this->agentName, $this->incompleteAgentRev, $this->agentDesc, $this->dbManager->booleanToDb($this->agentEnabled)),
+    );
+    foreach ($agentArray as $agentRow)
+    {
+      $this->dbManager->insertInto('agent', 'agent_pk, agent_name, agent_rev, agent_desc, agent_enabled', $agentRow);
+    }
     $this->agentsDao = new AgentsDao($this->dbManager, $this->logger);
+
+    $this->dbManager->queryOnce("create table " . $this->agentName . "_ars (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
+    $arsArray = array(
+      array(1, $this->olderAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
+      array(2, $this->agentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
+      array(3, $this->incompleteAgentId, $this->uploadId, $this->dbManager->booleanToDb(false))
+    );
+    foreach ($arsArray as $arsRow)
+    {
+      $this->dbManager->insertInto($this->agentName . '_ars', 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
+    }
+
+    $this->dbManager->queryOnce("create table " . $this->otherAgentName . "_ars (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
+    $arsArray = array(
+        array(1, $this->otherAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
+    );
+    foreach ($arsArray as $arsRow)
+    {
+      $this->dbManager->insertInto($this->otherAgentName . '_ars', 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
+    }
   }
 
   public function tearDown() {
     M::close();
   }
 
-  public function testGetNewestAgent()
+  public function testGetCurrentAgent()
   {
-    $result = array(5, '<rev>');
-    $this->dbManager->shouldReceive('getSingleRow')->with("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
-        . "ORDER BY agent_pk DESC LIMIT 1", array($this->agentName))->once()->andReturn($result);
+    assertThat($this->agentsDao->getCurrentAgent($this->agentName), is($this->incompleteAgent));
+  }
 
-    assertThat($this->agentsDao->getNewestAgent($this->agentName), is($result));
+  public function testGetSuccessfulAgentRuns()
+  {
+    assertThat($this->agentsDao->getSuccessfulAgentRuns($this->agentName, $this->uploadId), is(array($this->agent, $this->olderAgent)));
+  }
+
+  public function testGetLatestAgentResultForUpload()
+  {
+    $latestAgentResults = $this->agentsDao->getLatestAgentResultForUpload($this->uploadId, array($this->agentName, $this->otherAgentName));
+    assertThat($latestAgentResults, is(array(
+      $this->agentName => $this->agentId,
+      $this->otherAgentName => $this->otherAgentId
+    )));
+  }
+
+  public function testGetRunningAgentIds()
+  {
+    assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, $this->agentName), is(array($this->incompleteAgentId)));
+  }
+
+  public function testGetRunningAgentIdsForFinishedAgent()
+  {
+    assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, $this->otherAgentName), is(emptyArray()));
+  }
+
+  public function testGetRunningAgentIdsForUnknownAgent()
+  {
+    assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, "unknown"), is(emptyArray()));
   }
 }
  

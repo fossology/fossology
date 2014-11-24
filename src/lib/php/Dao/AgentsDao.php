@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -30,6 +31,8 @@ use Monolog\Logger;
  */
 class AgentsDao extends Object
 {
+  const ARS_TABLE_SUFFIX = "_ars";
+
   /** @var DbManager */
   private $dbManager;
 
@@ -43,6 +46,10 @@ class AgentsDao extends Object
     $this->logger = $logger;
   }
 
+  public function arsTableExists($agentName) {
+    return $this->dbManager->existsTable($this->getArsTableName($agentName));
+  }
+
   /**
    * @brief
    *  The purpose of this function is to return an array of
@@ -53,15 +60,15 @@ class AgentsDao extends Object
    *  may have additional fields.
    * @todo make this function private
    * @param string $tableName - name of the ars table (e.g. nomos_ars)
-   * @param int $upload_pk
+   * @param int $uploadId
    * @param int $limit - limit number of rows returned.  0=No limit, default=1
-   * @param int $agent_fk - ARS table agent_fk, optional
+   * @param int $agentId - ARS table agent_fk, optional
    *
    * @return mixed
    * assoc array of _ars records.
    *         or FALSE on error, or no rows
    */
-  public function agentARSList($tableName, $upload_pk, $limit = 1, $agent_fk = 0, $agentSuccess = TRUE)
+  public function agentARSList($tableName, $uploadId, $limit = 1, $agentId = 0, $agentSuccess = TRUE)
   {
     //based on common-agents.php AgentARSList
     if (!$this->dbManager->existsTable($tableName))
@@ -69,12 +76,12 @@ class AgentsDao extends Object
       return false;
     }
 
-    $arguments = array($upload_pk);
+    $arguments = array($uploadId);
     $statementName = __METHOD__ . $tableName;
     $sql = "SELECT * FROM $tableName, agent WHERE agent_pk=agent_fk AND upload_fk=$1 AND agent_enabled";
-    if ($agent_fk)
+    if ($agentId)
     {
-      $arguments[] = $agent_fk;
+      $arguments[] = $agentId;
       $sql .= ' AND agent_fk=$'.count($arguments);
       $statementName .= ".agent";
     }
@@ -100,13 +107,15 @@ class AgentsDao extends Object
 
   /**
    * @brief Returns the list of running or failed agent_pk s. Before latest successful run
-   * @param $upload_pk
-   * @param $arsTableName
-   * @return array  - list of running agent pks
+   *
+   * @param int $uploadId
+   * @param $agentName
+   * @return int[]  - list of running agent pks
    */
-  public function runningAgentIds($upload_pk, $arsTableName)
+  public function getRunningAgentIds($uploadId, $agentName)
   {
-    $listOfAllJobs = $this->agentARSList($arsTableName, $upload_pk, 0, 0, FALSE);
+    $arsTableName = $this->getArsTableName($agentName);
+    $listOfAllJobs = $this->agentARSList($arsTableName, $uploadId, 0, 0, FALSE);
 
     $listOfRunningAgents = array();
 
@@ -116,9 +125,9 @@ class AgentsDao extends Object
       {
         if ($job ['ars_success'] === $this->dbManager->booleanToDb(true) )
         {
-          break;
+          continue;
         }
-        $listOfRunningAgents[] = $job['agent_fk'];
+        $listOfRunningAgents[] = intval($job['agent_fk']);
       }
     }
     return $listOfRunningAgents;
@@ -133,9 +142,8 @@ class AgentsDao extends Object
 SELECT
   agent_pk,
   ars_success,
-  ars_endtime,
   agent_name
-FROM " . $agentName . "_ars ARS
+FROM " . $this->getArsTableName($agentName) . " ARS
 INNER JOIN agent A ON ARS.agent_fk = A.agent_pk
 WHERE upload_fk=$1
   AND A.agent_name = $2
@@ -147,7 +155,7 @@ ORDER BY agent_fk DESC";
 
       while ($row = $this->dbManager->fetchArray($res))
       {
-        if ($row['ars_success'])
+        if ($this->dbManager->booleanFromDb($row['ars_success']))
         {
           $agentLatestMap[$agentName] = intval($row['agent_pk']);
           break;
@@ -160,11 +168,52 @@ ORDER BY agent_fk DESC";
     
   /**
    * @param string $agentName
-   * @return array
+   * @return AgentRef
    */
-  public function getNewestAgent($agentName)
+  public function getCurrentAgent($agentName)
   {
-    return $this->dbManager->getSingleRow("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
+    $row = $this->dbManager->getSingleRow("SELECT agent_pk, agent_name, agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
         . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
+    return $this->createAgentRef($row);
+  }
+
+  /**
+   * @param string $agentName
+   * @param int $uploadId
+   * @return AgentRef[]
+   */
+  public function getSuccessfulAgentRuns($agentName, $uploadId)
+  {
+    $stmt = __METHOD__ . ".getAgent.$agentName";
+    $this->dbManager->prepare($stmt,
+        $sql = "SELECT agent_pk,agent_rev,agent_name FROM agent LEFT JOIN " . $this->getArsTableName($agentName) . " ON agent_fk=agent_pk "
+            . "WHERE agent_name=$2 AND agent_enabled AND upload_fk=$1 AND ars_success "
+            . "ORDER BY agent_pk DESC");
+    $res = $this->dbManager->execute($stmt, array($uploadId, $agentName));
+    $agents = array();
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $agents[] = $this->createAgentRef($row);
+    }
+    $this->dbManager->freeResult($res);
+    return $agents;
+  }
+
+  /**
+   * @param string[] $row
+   * @return AgentRef
+   */
+  private function createAgentRef($row)
+  {
+    return new AgentRef(intval($row['agent_pk']), $row['agent_name'], $row['agent_rev']);
+  }
+
+  /**
+   * @param $agentName
+   * @return string
+   */
+  private function getArsTableName($agentName)
+  {
+    return $agentName . self::ARS_TABLE_SUFFIX;
   }
 } 

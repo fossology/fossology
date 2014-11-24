@@ -275,9 +275,10 @@ abstract class DbManager extends Object
     }
     $this->insertInto($tableName, $keys, $params, $sqlLog);
   }
-  
+
   /**
    * @param string $tableName
+   * @throws \Exception
    * @return bool
    */
   public function existsTable($tableName)
