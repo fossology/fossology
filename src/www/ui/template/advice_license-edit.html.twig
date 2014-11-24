@@ -23,6 +23,10 @@
       <td><input type="input" name="url" value="{{ rf_url|e }}"/></td>
     </tr>
     <tr>
+      <td valign="top">{{ 'Public notes'|trans }}:</td>
+      <td><textarea name="note" cols="120" rows="10">{{ rf_notes|e }}</textarea></td>
+    </tr>
+    <tr>
       <td>{{ 'Merge request'|trans }}:</td>
       <td><input type="checkbox" name="marydone"{%if marydone %} checked="checked"{% endif %}/></td>
     </tr>
