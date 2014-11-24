@@ -169,4 +169,13 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
     return $results;
   }
 
+  public function ensureTopLevelFolder() {
+    if (!$this->hasTopLevelFolder())
+    {
+      $this->insertFolder(1, 'Software Repository', 'Top Folder');
+      $this->insertFolderContents(1,0,0);
+      $this->fixFolderSequence();
+    }
+  }
+
 }

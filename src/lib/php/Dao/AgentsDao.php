@@ -32,14 +32,15 @@ class AgentsDao extends Object
 {
   /** @var DbManager */
   private $dbManager;
-  
+
   /**
    * @param DbManager $dbManager
+   * @param Logger $logger
    */
-  function __construct(DbManager $dbManager)
+  function __construct(DbManager $dbManager, Logger $logger)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = $logger;
   }
 
   /**

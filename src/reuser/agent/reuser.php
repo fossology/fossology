@@ -12,7 +12,6 @@
 
 
 use Fossology\Lib\Agent\Agent;
-use Fossology\Lib\Application\UserInfo;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
@@ -25,6 +24,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\Item;
+use Fossology\Lib\Util\ArrayOperation;
 
 include_once(__DIR__ . "/version.php");
 
@@ -67,24 +67,34 @@ class ReuserAgent extends Agent
 
   function processUploadId($uploadId)
   {
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
-    $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
-
-    $clearingDecisionByFileId = array();
-    foreach ($clearingDecisions as $clearingDecision)
+    if ($itemTreeBoundsReused)
     {
-      $fileId = $clearingDecision->getPfileId();
-      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
+      $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+      $clearingDecisionsToImport = array_diff($clearingDecisions, $filteredClearingDecisions);
+    } else
+    {
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+      $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+      $clearingDecisionsToImport = array();
     }
 
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $containedItems = $this->uploadDao->getContainedItems(
-        $itemTreeBounds,
-        "pfile_fk = ANY($1)",
-        array('{' . implode(', ', array_keys($clearingDecisionByFileId)) . '}')
-    );
+    $clearingDecisionByFileId = $this->mapByFileId($clearingDecisions);
+    $clearingDecisionToImportByFileId = $this->mapByFileId($clearingDecisionsToImport);
+
+    /** @var Item[] $containedItems */
+    $containedItems = ArrayOperation::callChunked(
+        function ($fileIds) use ($itemTreeBounds)
+        {
+          return $this->uploadDao->getContainedItems(
+              $itemTreeBounds,
+              "pfile_fk = ANY($1)",
+              array('{' . implode(', ', $fileIds) . '}')
+          );
+        }, array_keys($clearingDecisionByFileId), 100);
 
     foreach ($containedItems as $item)
     {
@@ -116,6 +126,12 @@ class ReuserAgent extends Agent
         $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, true);
       }
 
+      $fileId = $item->getFileId();
+      if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
+      {
+        $this->createCopyOfClearingDecision($item->getId(), $clearingDecisionToImportByFileId[$fileId]);
+      }
+
       $this->heartbeat(1);
     }
 
@@ -145,6 +161,36 @@ class ReuserAgent extends Agent
     );
   }
 
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[]
+   */
+  protected function mapByFileId($clearingDecisions)
+  {
+    $clearingDecisionByFileId = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $fileId = $clearingDecision->getPfileId();
+      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+    }
+    return $clearingDecisionByFileId;
+  }
+
+  /**
+   * @param int $itemId
+   * @param ClearingDecision $clearingDecisionToCopy
+   */
+  protected function createCopyOfClearingDecision($itemId, $clearingDecisionToCopy)
+  {
+    $this->clearingDao->insertClearingDecision(
+        $itemId,
+        $this->userId,
+        $clearingDecisionToCopy->getType(),
+        $clearingDecisionToCopy->getScope(),
+        $clearingDecisionToCopy->getPositiveLicenses(),
+        $clearingDecisionToCopy->getNegativeLicenses()
+    );
+  }
 }
 
 $agent = new ReuserAgent();

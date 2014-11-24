@@ -350,11 +350,11 @@ ORDER BY CD.date_added DESC LIMIT 1
    * @param $uploadTreeId
    * @param $userId
    * @param $decType
-   * @param $isGlobal
+   * @param $scope
    * @param LicenseRef[] $licenses
    * @param LicenseRef[] $removedLicenses
    */
-  public function insertClearingDecision($uploadTreeId, $userId, $decType, $isGlobal, $licenses, $removedLicenses)
+  public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $licenses, $removedLicenses)
   {
     $this->dbManager->begin();
 
@@ -375,7 +375,7 @@ INSERT INTO clearing_decision (
   $4) RETURNING clearing_decision_pk
   ");
     $res = $this->dbManager->execute($statementName,
-        array($uploadTreeId, $userId, $decType, $isGlobal ? DecisionScopes::REPO : DecisionScopes::ITEM));
+        array($uploadTreeId, $userId, $decType, $scope));
     $result = $this->dbManager->fetchArray($res);
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
