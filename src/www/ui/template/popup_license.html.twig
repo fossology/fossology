@@ -23,7 +23,7 @@
         {% endif %}
         {% if text %}
           <h2>License Text</h2>
-          {{ text|e }}
+          {{ text|e|nl2br }}
         {% else %}
           {{ 'Original license text is not in the FOSSology database.'| trans }}
         {% endif %}
