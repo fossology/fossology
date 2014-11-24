@@ -27,13 +27,13 @@ version:
 
 test-sched: all
 	@echo "make functional tests for scheduler mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 coverage: coverage-sched
 
 coverage-sched: all-cov
 	@echo "make functional tests for scheduler mode with coverage"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 clean:
 	@echo "nothing to do"

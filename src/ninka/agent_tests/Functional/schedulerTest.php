@@ -64,9 +64,10 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $agentName = "ninka";
 
     $agentDir = dirname(dirname(__DIR__));
+    $execDir = __DIR__;
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
-    $pipeFd = popen("echo $uploadId | ./$agentName -c $sysConf --scheduler_start", "r");
+    $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start", "r");
     $this->assertTrue($pipeFd !== false, 'running ninka failed');
 
     $output = "";
@@ -78,7 +79,6 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     unlink("$sysConf/mods-enabled/$agentName/VERSION");
     rmdir("$sysConf/mods-enabled/$agentName");
     rmdir("$sysConf/mods-enabled");
-    unlink($sysConf."/fossology.conf");
 
     return array($output,$retCode);
   }
@@ -100,6 +100,8 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     system("rm $sysConf/repo -rf");
+
+    unlink($sysConf."/fossology.conf");
   }
 
   private function setUpTables()
@@ -114,6 +116,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData_license_ref();
   }
 
+  /** @group Functional */
   public function testRun()
   {
     $this->setUpTables();
