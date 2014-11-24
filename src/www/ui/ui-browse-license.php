@@ -475,7 +475,7 @@ class ui_browse_license extends FO_Plugin
           foreach ($rfInfo as $agent => $match)
           {
             $agentInfo = $goodAgents[$agent];
-            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>$agentInfo->getAgentName()</a>";
+            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentInfo['name'] . "</a>";
 
             if ($match['agent_id'] != $agentInfo['newest']->getAgentId())
             {

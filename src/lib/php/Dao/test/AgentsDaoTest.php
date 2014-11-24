@@ -95,7 +95,8 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
     }
     $this->agentsDao = new AgentsDao($this->dbManager, $this->logger);
 
-    $this->dbManager->queryOnce("create table " . $this->agentName . "_ars (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
+    $arsTableName = $this->agentName . AgentsDao::ARS_TABLE_SUFFIX;
+    $this->dbManager->queryOnce("create table " . $arsTableName . " (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
     $arsArray = array(
       array(1, $this->olderAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
       array(2, $this->agentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
@@ -103,20 +104,23 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
     );
     foreach ($arsArray as $arsRow)
     {
-      $this->dbManager->insertInto($this->agentName . '_ars', 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
+      $this->dbManager->insertInto($arsTableName, 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
     }
 
-    $this->dbManager->queryOnce("create table " . $this->otherAgentName . "_ars (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
+    $arsTableName = $this->otherAgentName . AgentsDao::ARS_TABLE_SUFFIX;
+    $this->dbManager->queryOnce("create table " . $arsTableName . " (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
     $arsArray = array(
         array(1, $this->otherAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
     );
     foreach ($arsArray as $arsRow)
     {
-      $this->dbManager->insertInto($this->otherAgentName . '_ars', 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
+      $this->dbManager->insertInto($arsTableName, 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
     }
   }
 
   public function tearDown() {
+    $this->dbManager->queryOnce("drop table " . $this->agentName . AgentsDao::ARS_TABLE_SUFFIX);
+    $this->dbManager->queryOnce("drop table " . $this->otherAgentName . AgentsDao::ARS_TABLE_SUFFIX);
     M::close();
   }
 
