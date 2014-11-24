@@ -22,6 +22,7 @@
             <exclude>
                 <directory suffix="Test.php">.</directory>
                 <directory suffix=".php">lib/php/tests</directory>
+                <directory suffix=".php">*/*tests</directory>
                 <directory suffix=".php">testing</directory>
                 <directory suffix=".php">tutorials</directory>
                 <directory suffix=".php">vendor</directory>
