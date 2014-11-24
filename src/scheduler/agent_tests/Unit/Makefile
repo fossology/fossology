@@ -53,9 +53,8 @@ test: all fossology_testconfig
 
 coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
-	./$(EXE); \
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	./$(EXE)
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
