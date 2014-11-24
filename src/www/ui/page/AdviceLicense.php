@@ -105,7 +105,7 @@ class AdviceLicense extends DefaultPlugin
     {
       return array('rf_pk' => -1, 'rf_shortname' => '');
     }
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
+    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
@@ -137,6 +137,7 @@ class AdviceLicense extends DefaultPlugin
     $rfText = $request->get('rf_text');
     $url = $request->get('url');
     $marydone = $request->get('marydone');
+    $note = $request->get('note');
 
     if (empty($shortname) || empty($fullname) || empty($rfText))
     {
@@ -161,7 +162,13 @@ class AdviceLicense extends DefaultPlugin
     }
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, !empty($marydone));
-    return array('rf_pk' => $oldRow['rf_pk'], 'rf_shortname' => $shortname, 'rf_fullname' => $fullname, 'rf_text' => $rfText, 'rf_url' => $url, 'marydone' => $marydone);
+    return array('rf_pk' => $oldRow['rf_pk'],
+        'rf_shortname' => $shortname,
+        'rf_fullname' => $fullname,
+        'rf_text' => $rfText,
+        'rf_url' => $url,
+        'rf_notes' => $note,
+        'marydone' => $marydone);
   }
 
 }
