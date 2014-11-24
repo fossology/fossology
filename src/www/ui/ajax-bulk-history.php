@@ -19,7 +19,6 @@
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Monolog\Logger;
 
 class Ajax_BulkHistory extends FO_Plugin
 {
@@ -56,10 +55,8 @@ class Ajax_BulkHistory extends FO_Plugin
     }
     $onlyTried = !GetParm("all", PARM_RAW);
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    /** @var ItemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
 
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $onlyTried);
