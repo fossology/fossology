@@ -121,6 +121,10 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
   public function tearDown() {
     $this->dbManager->queryOnce("drop table " . $this->agentName . AgentsDao::ARS_TABLE_SUFFIX);
     $this->dbManager->queryOnce("drop table " . $this->otherAgentName . AgentsDao::ARS_TABLE_SUFFIX);
+
+    $this->dbManager = null;
+    $this->testDb = null;
+
     M::close();
   }
 
