@@ -300,9 +300,8 @@ function FolderGetName($FolderPk,$Top=-1)
 {
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,parent_fk FROM folder
-	LEFT JOIN foldercontents ON foldercontents_mode = 1
-	AND child_id = '$FolderPk'
+  $sql = "SELECT folder_name,folder.parent_fk FROM folder
+	LEFT JOIN foldercontents ON foldercontents_mode = 1 AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'
 	LIMIT 1;";
   $result = pg_query($PG_CONN, $sql);

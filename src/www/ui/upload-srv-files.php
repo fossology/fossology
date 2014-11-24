@@ -180,7 +180,7 @@ class upload_srv_files extends FO_Plugin {
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $msg .= "The file $SourceFiles has been uploaded. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print displayMessage($msg,$keep);
+    $this->vars['message'] = $msg.$keep;
     return (NULL);
   } // Upload()
 

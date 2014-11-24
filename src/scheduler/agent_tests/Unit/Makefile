@@ -23,7 +23,7 @@ include $(VARS)
 LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgthread-2.0 -lgio-2.0
+TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR) -lgthread-2.0 -lgio-2.0 -lgobject-2.0
 CFLAGS_LOCAL = $(ALL_CFLAGS) -I. -I$(LOCALAGENTDIR) -lpcre -lcunit $(TESTLIB)
 DEF = -DLOG_DIR='"$(LOGDIR)"' \
       -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
@@ -53,9 +53,8 @@ test: all fossology_testconfig
 
 coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EXE)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(COV) $(CFLAGS_LOCAL) $(FLAG_COV); \
-	./$(EXE); \
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	./$(EXE)
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 $(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL)
