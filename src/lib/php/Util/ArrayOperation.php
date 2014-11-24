@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Util;
 
+use Closure;
 
 class ArrayOperation extends Object
 {
@@ -44,5 +45,23 @@ class ArrayOperation extends Object
     }
 
     return $valueMultiplicityMap;
+  }
+
+  public static function callChunked(Closure $callback, $values, $chunkSize)
+  {
+    if ($chunkSize <= 0) {
+      throw new \InvalidArgumentException('chunk size should be positive');
+    }
+    $result = array();
+    for ($offset = 0; $offset < count($values); $offset += $chunkSize)
+    {
+      $valueChunk = array_slice($values, $offset, $chunkSize);
+      if (empty($valueChunk))
+      {
+        break;
+      }
+      $result = array_merge($result, $callback($valueChunk));
+    }
+    return $result;
   }
 }

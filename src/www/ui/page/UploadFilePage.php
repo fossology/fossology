@@ -228,13 +228,13 @@ class UploadFilePage extends DefaultPlugin
 
     $wgetAgentCall = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadId '$uploadedTempFile' -c '$SYSCONFDIR'";
     $wgetOutput = array();
-    exec($wgetAgentCall, $wgetOutput , $wgetReturnValue);
+    exec($wgetAgentCall, $wgetOutput, $wgetReturnValue);
     unlink($uploadedTempFile);
 
     $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
     global $Plugins;
     /** @var agent_adj2nest $adj2nestplugin */
-    $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest")];
+    $adj2nestplugin = &$Plugins['agent_adj2nest'];
 
     $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
     AgentCheckBoxDo($jobId, $uploadId);
@@ -243,8 +243,11 @@ class UploadFilePage extends DefaultPlugin
     {
       if ($reuseUploadId > 0)
       {
-        $this->createPackageLink($jobId, $uploadId, $reuseUploadId);
+        $this->createPackageLink($uploadId, $reuseUploadId);
       }
+
+      $this->scheduleReuserAgent($jobId, $uploadId);
+
       $status = GetRunnableJobList();
       $message = empty($status) ? _("Is the scheduler running? ") : "";
       $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
@@ -259,18 +262,18 @@ class UploadFilePage extends DefaultPlugin
   }
 
   /**
-   * @param int $jobId
    * @param int $uploadId
    * @param int $reuseUploadId
    */
-  private function createPackageLink($jobId, $uploadId, $reuseUploadId)
+  private function createPackageLink($uploadId, $reuseUploadId)
   {
     $newUpload = $this->uploadDao->getUpload($uploadId);
     $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
 
     $package = $this->packageDao->findPackageForUpload($reuseUploadId);
 
-    if ($package === null) {
+    if ($package === null)
+    {
       $packageName = $this->determinePackageName($uploadForReuse->getFilename(), $newUpload->getFilename());
 
       $package = $this->packageDao->createPackage($packageName);
@@ -282,13 +285,6 @@ class UploadFilePage extends DefaultPlugin
 
     $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId);
 
-    global $Plugins;
-    $reuserAgent = &$Plugins['agent_reuser'];
-    if ($reuserAgent) {
-      $Dependencies = array();
-      $ErrorMsg="Bad thing";
-      $reuserAgent->AgentAdd($jobId, $uploadId, $ErrorMsg, $Dependencies);
-    }
   }
 
   private function determinePackageName($firstName, $secondName)
@@ -296,17 +292,36 @@ class UploadFilePage extends DefaultPlugin
     $name = "";
 
     $maxNumberOfCharsToCompare = min(strlen($firstName), strlen($secondName));
-    for ($i=0; $i < $maxNumberOfCharsToCompare; $i++) {
+    for ($i = 0; $i < $maxNumberOfCharsToCompare; $i++)
+    {
       $character = substr($firstName, $i, 1);
       $secondCharacter = substr($secondName, $i, 1);
-      if ($character === $secondCharacter) {
+      if ($character === $secondCharacter)
+      {
         $name .= $character;
-      } else {
+      } else
+      {
         break;
       }
     }
 
     return strlen($name) > 0 ? $name : $firstName;
+  }
+
+  /**
+   * @param int $jobId
+   * @param int $uploadId
+   */
+  private function scheduleReuserAgent($jobId, $uploadId)
+  {
+    global $Plugins;
+    $reuserAgent = &$Plugins['agent_reuser'];
+    if ($reuserAgent)
+    {
+      $Dependencies = array();
+      $ErrorMsg = "Bad thing";
+      $reuserAgent->AgentAdd($jobId, $uploadId, $ErrorMsg, $Dependencies);
+    }
   }
 
 }

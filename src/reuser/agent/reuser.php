@@ -24,6 +24,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\Item;
+use Fossology\Lib\Util\ArrayOperation;
 
 include_once(__DIR__ . "/version.php");
 
@@ -66,21 +67,34 @@ class ReuserAgent extends Agent
 
   function processUploadId($uploadId)
   {
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
-    $clearingDecisionsToImport = array_diff($clearingDecisions, $filteredClearingDecisions);
+    if ($itemTreeBoundsReused)
+    {
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
+      $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+      $clearingDecisionsToImport = array_diff($clearingDecisions, $filteredClearingDecisions);
+    } else
+    {
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+      $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+      $clearingDecisionsToImport = array();
+    }
 
     $clearingDecisionByFileId = $this->mapByFileId($clearingDecisions);
     $clearingDecisionToImportByFileId = $this->mapByFileId($clearingDecisionsToImport);
 
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $containedItems = $this->uploadDao->getContainedItems(
-        $itemTreeBounds,
-        "pfile_fk = ANY($1)",
-        array('{' . implode(', ', array_keys($clearingDecisionByFileId)) . '}')
-    );
+    /** @var Item[] $containedItems */
+    $containedItems = ArrayOperation::callChunked(
+        function ($fileIds) use ($itemTreeBounds)
+        {
+          return $this->uploadDao->getContainedItems(
+              $itemTreeBounds,
+              "pfile_fk = ANY($1)",
+              array('{' . implode(', ', $fileIds) . '}')
+          );
+        }, array_keys($clearingDecisionByFileId), 100);
 
     foreach ($containedItems as $item)
     {
@@ -177,7 +191,6 @@ class ReuserAgent extends Agent
         $clearingDecisionToCopy->getNegativeLicenses()
     );
   }
-
 }
 
 $agent = new ReuserAgent();
