@@ -55,12 +55,10 @@ class ArrayOperation extends Object
     $result = array();
     for ($offset = 0; $offset < count($values); $offset += $chunkSize)
     {
-      $valueChunk = array_slice($values, $offset, $chunkSize);
-      if (empty($valueChunk))
-      {
-        break;
-      }
-      $result = array_merge($result, $callback($valueChunk));
+      $result = array_merge(
+          $result,
+          $callback(array_slice($values, $offset, $chunkSize))
+      );
     }
     return $result;
   }
