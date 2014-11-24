@@ -42,10 +42,15 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
     $this->agentsDao = new AgentsDao($this->dbManager, $this->logger);
   }
 
+  public function tearDown() {
+    M::close();
+  }
+
   public function testGetNewestAgent()
   {
     $result = array(5, '<rev>');
-    $this->dbManager->shouldReceive('getSingleRow')->with()->andReturn($result);
+    $this->dbManager->shouldReceive('getSingleRow')->with("SELECT agent_pk,agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
+        . "ORDER BY agent_pk DESC LIMIT 1", array($this->agentName))->once()->andReturn($result);
 
     assertThat($this->agentsDao->getNewestAgent($this->agentName), is($result));
   }

@@ -246,7 +246,7 @@ class ui_browse extends FO_Plugin
     {
       return 0;
     }
-    $this->performSanityCheck();
+    $this->folderDao->ensureTopLevelFolder();
 
     $folder_pk = GetParm("folder", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
@@ -393,16 +393,6 @@ class ui_browse extends FO_Plugin
     $assigneeArray[0] = '';
     return $assigneeArray;
   }
-
-  private function performSanityCheck() {
-    if (!$this->folderDao->hasTopLevelFolder())
-    {
-      $this->folderDao->insertFolder(1, 'Software Repository', 'Top Folder');
-      $this->folderDao->insertFolderContents(1,0,0);
-      $this->folderDao->fixFolderSequence();
-    }
-  }
-
 }
 
 $NewPlugin = new ui_browse();

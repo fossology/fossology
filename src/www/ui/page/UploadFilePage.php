@@ -79,6 +79,8 @@ class UploadFilePage extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $this->folderDao->ensureTopLevelFolder();
+
     $vars = array();
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = $request->get(self::DESCRIPTION_INPUT_NAME);
