@@ -97,8 +97,29 @@ class admin_license_file extends FO_Plugin
       $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
 
     return $V;
-  }  
+  }
   
+  
+  function suggestLicenseId($str){
+    $tmpfname = tempnam("/tmp", "monk");
+    $handle = fopen($tmpfname, "w");
+    fwrite($handle, $str);
+    fclose($handle);
+
+    $cmd = dirname(dirname(__DIR__)).'/monk/agent/monk '.$tmpfname;
+    exec($cmd, $output, $return_var);
+    // found diff match between "$tmpfname" and "EUPL-1.0" (rf_pk=424); rank 99; diffs: {t[0+42] M0 s[0+46], ...
+    unlink($tmpfname);
+    if ($return_var)
+    {
+      return false;
+    }
+    if(preg_match('/\\(rf_pk=[0-9]+\\)/',$output[0], $matches))
+    {
+      return $matches[0];
+    }
+    else return 0;
+  }
   
 
   /**
@@ -279,6 +300,7 @@ class admin_license_file extends FO_Plugin
         $text1 = _("was found");
         return "$text ($rf_pk) $text1.";
       }
+      $this->vars['row'] = $row;
     }
     else
     {
@@ -303,6 +325,9 @@ class admin_license_file extends FO_Plugin
 
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
+    $vars['hint'] = $this->suggestLicenseId($row['rf_text']);
+    
+    
     $allVars = array_merge($vars,$row);
     return $this->renderTemplate('admin_license-upload_form.html.twig', $allVars);
   }

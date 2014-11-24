@@ -108,8 +108,7 @@ class AdviceLicense extends DefaultPlugin
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
-    $dbManager->prepare($stmt = __METHOD__, $sql);
-    $row = $dbManager->getSingleRow($stmt, array($groupId, $licId), __METHOD__);
+    $row = $dbManager->getSingleRow($sql, array($groupId, $licId), __METHOD__);
     if (false !== $row)
     {
       $row['marydone'] = $dbManager->booleanFromDb($row['marydone']);
