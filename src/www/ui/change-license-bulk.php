@@ -86,18 +86,24 @@ class changeLicenseBulk extends FO_Plugin
     }
 
     $bulkScope = filter_input(INPUT_POST, 'bulkScope');
-    if ($bulkScope === 'u')
+    switch ($bulkScope)
     {
-      $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-      $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
-          array($uploadId), __METHOD__ . "adam" . $uploadTreeTable);
-      $uploadTreeId = $row['uploadtree_pk'];
-    } else if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
-    {
-      $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
-    } else
-    {
-      throw new Exception('bad scope request');
+      case 'u':
+        $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+        $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
+            array($uploadId), __METHOD__ . "adam" . $uploadTreeTable);
+        $uploadTreeId = $row['uploadtree_pk'];
+        break;
+
+      case 'f':
+        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
+        {
+          $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
+        }
+        break;
+
+      default:
+        throw new \InvalidArgumentException('bad scope request');
     }
 
     $userId = $_SESSION['UserId'];
