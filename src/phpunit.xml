@@ -24,6 +24,7 @@
                 <directory suffix="Test.php">.</directory>
                 <directory suffix=".php">testing</directory>
                 <directory suffix=".php">tutorials</directory>
+                <directory suffix=".php">*/*tests</directory>
             </exclude>
         </whitelist>
     </filter>
