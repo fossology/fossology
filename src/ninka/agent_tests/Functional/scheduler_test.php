@@ -133,18 +133,21 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     foreach($matches as $licenseMatch) {
       /** @var LicenseRef */
       $matchedLicense = $licenseMatch->getLicenseRef();
-      if ($licenseMatch->getFileId() == 4)
-      {
-        $this->assertEquals($matchedLicense->getShortName(), "GPLv3+");
+
+      switch ($licenseMatch->getFileId()) {
+        case 7:
+        case 4:
+          $expectedLicense = "GPLv3+";
+          break;
+        case 3:
+          $expectedLicense = "UnclassifiedLicense";
+          break;
+        default:
+          $expectedLicense = "No_license_found";
+            break;
       }
-      else if ($licenseMatch->getFileId() == 3)
-      {
-        $this->assertEquals($matchedLicense->getShortName(), "UnclassifiedLicense");
-      }
-      else
-      {
-        $this->assertEquals($matchedLicense->getShortName(), "No_license_found");
-      }
+
+      $this->assertEquals($expectedLicense, $matchedLicense->getShortName(), "unexpected license for fileId ".$licenseMatch->getFileId());
 
       /** @var AgentRef */
       $agentRef = $licenseMatch->getAgentRef();
