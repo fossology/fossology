@@ -157,5 +157,16 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
   {
     assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, "unknown"), is(emptyArray()));
   }
+
+  public function testArsTableExists()
+  {
+    $this->assertTrue($this->agentsDao->arsTableExists($this->agentName));
+  }
+
+  public function testArsTableExistsReturnsFalseIfTableDoesNotExist()
+  {
+    $this->assertFalse($this->agentsDao->arsTableExists("unknown"));
+  }
+
 }
  
