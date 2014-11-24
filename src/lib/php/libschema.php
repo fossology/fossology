@@ -854,6 +854,14 @@ class fo_libschema
    **/
   function exportSchema($filename = NULL)
   {
+    global $PG_CONN;
+
+    /* set driver */
+    $dbDriver = $this->dbman->getDriver();
+    if (empty($dbDriver)) {
+      $this->dbman->setDriver(new Postgres($PG_CONN));
+    }
+
     if (empty($filename))
     {
       $filename = stdout;
