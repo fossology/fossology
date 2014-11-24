@@ -12,7 +12,6 @@
 
 
 use Fossology\Lib\Agent\Agent;
-use Fossology\Lib\Application\UserInfo;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
@@ -70,14 +69,11 @@ class ReuserAgent extends Agent
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
-    $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
+    $clearingDecisionsToImport = array_diff($clearingDecisions, $filteredClearingDecisions);
 
-    $clearingDecisionByFileId = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      $fileId = $clearingDecision->getPfileId();
-      $clearingDecisionByFileId[$fileId] = $clearingDecision;
-    }
+    $clearingDecisionByFileId = $this->mapByFileId($clearingDecisions);
+    $clearingDecisionToImportByFileId = $this->mapByFileId($clearingDecisionsToImport);
 
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $containedItems = $this->uploadDao->getContainedItems(
@@ -116,6 +112,12 @@ class ReuserAgent extends Agent
         $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, true);
       }
 
+      $fileId = $item->getFileId();
+      if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
+      {
+        $this->createCopyOfClearingDecision($item->getId(), $clearingDecisionToImportByFileId[$fileId]);
+      }
+
       $this->heartbeat(1);
     }
 
@@ -142,6 +144,37 @@ class ReuserAgent extends Agent
         $remove,
         '',
         ''
+    );
+  }
+
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[]
+   */
+  protected function mapByFileId($clearingDecisions)
+  {
+    $clearingDecisionByFileId = array();
+    foreach ($clearingDecisions as $clearingDecision)
+    {
+      $fileId = $clearingDecision->getPfileId();
+      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+    }
+    return $clearingDecisionByFileId;
+  }
+
+  /**
+   * @param int $itemId
+   * @param ClearingDecision $clearingDecisionToCopy
+   */
+  protected function createCopyOfClearingDecision($itemId, $clearingDecisionToCopy)
+  {
+    $this->clearingDao->insertClearingDecision(
+        $itemId,
+        $this->userId,
+        $clearingDecisionToCopy->getType(),
+        $clearingDecisionToCopy->getScope(),
+        $clearingDecisionToCopy->getPositiveLicenses(),
+        $clearingDecisionToCopy->getNegativeLicenses()
     );
   }
 

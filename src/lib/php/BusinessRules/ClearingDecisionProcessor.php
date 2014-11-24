@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
@@ -65,9 +66,9 @@ class ClearingDecisionProcessor
    * @param ItemTreeBounds $itemBounds
    * @param int $userId
    * @param int $type
-   * @param boolean $isGlobal
+   * @param boolean $global
    */
-  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $isGlobal)
+  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $type, $global)
   {
     if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
@@ -102,7 +103,8 @@ class ClearingDecisionProcessor
 
     if ($insertDecision)
     {
-      $this->insertClearingDecision($userId, $itemId, $type, $isGlobal, $selection, $removedLicenses);
+      $scope =  $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
+      $this->insertClearingDecision($userId, $itemId, $type, $scope, $selection, $removedLicenses);
     }
   }
 
@@ -197,13 +199,13 @@ class ClearingDecisionProcessor
    * @param $userId
    * @param $itemId
    * @param $type
-   * @param $isGlobal
+   * @param $scope
    * @param $addedLicenses
    * @param $removedLicenses
    */
-  private function insertClearingDecision($userId, $itemId, $type, $isGlobal, $addedLicenses, $removedLicenses)
+  private function insertClearingDecision($userId, $itemId, $type, $scope, $addedLicenses, $removedLicenses)
   {
-    $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $isGlobal, $addedLicenses, $removedLicenses);
+    $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $scope, $addedLicenses, $removedLicenses);
     $this->clearingDao->removeWipClearingDecision($itemId, $userId);
     ReportCachePurgeAll();
   }
