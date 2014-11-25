@@ -31,11 +31,17 @@
       {% if suggest_rf %}<td>{{ suggest_url|e }}</td>{% endif %}
     </tr>
     <tr>
+      <td>{{ 'Public notes'|trans }}:</td>
+      <td>{{ rf_notes|e }}</td>
+      {% if suggest_rf %}<td>{{ suggest_notes|e }}</td>{% endif %}
+    </tr>
+    <tr style="background-color:#F5F5DC;">
       <td></td>
       <td><input type="button" id="verify-button" value="{{ 'Verify'|trans }}"/></td>
       {% if suggest_rf %}<td>
-        <a href="?mod=admin_license_candidate&amp;rf={{ rf_pk }}&amp;suggest_rf={{ suggest_rf }}&amp;do=merge" class="buttonLink">{{ 'Merge'|trans }}</a>
-        </td>{% endif %}
+        <input type="button" id="merge-button" value="{{ 'Merge'|trans }}"/>
+        </td>
+      {% endif %}
     </tr>
   </table>
 
@@ -55,7 +61,11 @@
     $('#verify-button').click(function(){
       js_url($('#shortname').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&do=verify&shortname=");
     });
-
+    {% if suggest_rf %}
+      $('#merge-button').click(function(){
+        js_url({{ suggest_rf }},"?mod=admin_license_candidate&rf={{ rf_pk }}&do=merge&suggest_rf=");
+      });
+    {% endif %}
     $('#cmp').change(function(){
       js_url($('#cmp').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&shortname="+$('#shortname').val()+"&suggest_rf=");
     });

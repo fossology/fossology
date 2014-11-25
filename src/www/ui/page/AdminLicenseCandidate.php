@@ -19,7 +19,6 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\License;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,19 +63,19 @@ class AdminLicenseCandidate extends DefaultPlugin
     $shortname = $request->get('shortname') ?: $vars['rf_shortname'];
     $vars['shortname'] = $shortname;
     $suggest = intval($request->get('suggest_rf')) ?: $this->suggestLicenseId($vars['rf_text']);
+    $suggestLicense = $suggest ? $this->getDataRow($suggest, 'ONLY license_ref') : false;
+    if($suggestLicense!==false){
+      $vars['suggest_rf'] = $suggest;
+      $vars['suggest_shortname'] = $suggestLicense['rf_shortname'];
+      $vars['suggest_fullname'] = $suggestLicense['rf_fullname'];
+      $vars['suggest_text'] = $suggestLicense['rf_text'];
+      $vars['suggest_url'] = $suggestLicense['rf_url'];
+      $vars['suggest_notes'] = $suggestLicense['rf_notes'];
+    }
+
     /** @var LicenseDao */
     $licenseDao = $this->getObject('dao.license');
-    /** @var License */
-    $suggestLicense = $suggest ? $licenseDao->getLicenseById($suggest) : null;
-    if($suggestLicense!==null){
-      $vars['suggest_rf'] = $suggest;
-      $vars['suggest_shortname'] = $suggestLicense->getShortName();
-      $vars['suggest_fullname'] = $suggestLicense->getFullName();
-      $vars['suggest_text'] = $suggestLicense->getText();
-      $vars['suggest_url'] = $suggestLicense->getUrl();
-    }
-    
-    $vars['licenseArray'] = $licenseDao->getLicenseArray();
+    $vars['licenseArray'] = $licenseDao->getLicenseArray(0);
     $vars['scripts'] = js_url();
 
     $ok = true;
@@ -87,15 +86,21 @@ class AdminLicenseCandidate extends DefaultPlugin
         if($ok)
         {
           $vars = array(
-              'aaData' => json_encode($this->getArrayArrayData())
-          );
-          $vars['message'] = 'Successfully verified candidate '.$shortname;
+              'aaData' => json_encode($this->getArrayArrayData()),
+              'message' => 'Successfully verified candidate '.$shortname);
           return $this->render('admin_license_candidate.html.twig', $this->mergeWithDefault($vars));
         }
         $vars['message'] = 'Short name must be unique';
         break;
       case 'merge':
-        $this->mergeCandidate($rf,$suggest,$vars);
+        $ok = $this->mergeCandidate($rf,$suggest,$vars);
+        if($ok)
+        {
+          $vars = array(
+              'aaData' => json_encode($this->getArrayArrayData()),
+              'message' => "Successfully merged candidate <i>$vars[suggest_shortname]</i> ($suggest) into <i>$vars[rf_shortname]</i> ($rf)");
+          return $this->render('admin_license_candidate.html.twig', $this->mergeWithDefault($vars));
+        }
         $vars['message'] = 'Sorry, this feature is not ready yet.';
         break;
     }
@@ -129,14 +134,21 @@ class AdminLicenseCandidate extends DefaultPlugin
   }
 
 
-  private function getDataRow($licId)
+  private function getDataRow($licId,$table='license_candidate')
   {
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,group_name,group_pk "
-            . "FROM license_candidate, groups "
-            . "WHERE group_pk=group_fk AND marydone AND rf_pk=$1";
+    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes";
+    if ($table == 'license_candidate')
+    {
+      $sql .= ',group_name,group_pk FROM license_candidate LEFT JOIN groups ON group_pk=group_fk '
+              . 'WHERE rf_pk=$1 AND marydone';
+    }
+    else
+    {
+      $sql .= " FROM $table WHERE rf_pk=$1";
+    }
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
-    $row = $dbManager->getSingleRow($sql, array($licId), __METHOD__);
+    $row = $dbManager->getSingleRow($sql, array($licId), __METHOD__.".$table");
     return $row;
   }
 
@@ -169,53 +181,6 @@ class AdminLicenseCandidate extends DefaultPlugin
   
   
   /**
-   * @param Request $request
-   * @param array $oldRow
-   * @throws \Exception
-   * @return array $newRow
-   */
-  private function saveInput(Request $request, $oldRow)
-  {
-    $shortname = $request->get('shortname');
-    $fullname = $request->get('fullname');
-    $rfText = $request->get('rf_text');
-    $url = $request->get('url');
-    $marydone = $request->get('marydone');
-    $note = $request->get('note');
-
-    if (empty($shortname) || empty($fullname) || empty($rfText))
-    {
-      throw new \Exception('missing parameter');
-    }
-
-    /** @var LicenseDao $licenseDao */
-    $licenseDao = $this->getObject('dao.license');
-
-    $ok = ($oldRow['rf_shortname'] == $shortname);
-    if (!$ok)
-    {
-      $ok = $licenseDao->isNewLicense($shortname);
-    }
-    if (!$ok)
-    {
-      throw new \Exception('shortname already in use');
-    }
-    if ($oldRow['rf_pk'] == -1)
-    {
-      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText);
-    }
-
-    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, !empty($marydone));
-    return array('rf_pk' => $oldRow['rf_pk'],
-        'rf_shortname' => $shortname,
-        'rf_fullname' => $fullname,
-        'rf_text' => $rfText,
-        'rf_url' => $url,
-        'rf_notes' => $note,
-        'marydone' => $marydone);
-  }
-
-  /**
    * @param int $rf
    * @param string $shortname
    * @return bool
@@ -232,17 +197,47 @@ class AdminLicenseCandidate extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->begin();
-    $dbManager->getSingleRow('INSERT INTO license_ref (SELECT   rf_pk, $2 rf_shortname ,  rf_text ,  rf_url, now() as rf_add_date, rf_copyleft ,
-  "rf_OSIapproved",  rf_fullname ,  "rf_FSFfree",  "rf_GPLv2compatible" ,  "rf_GPLv3compatible",  rf_notes,  "rf_Fedora"
- ,false  marydone ,  rf_active ,  rf_text_updatable ,md5(rf_text) rf_md5 , 1 rf_detector_type  FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
+    $dbManager->getSingleRow('INSERT INTO license_ref (SELECT rf_pk, $2 as rf_shortname, rf_text, rf_url, now() as rf_add_date, rf_copyleft,
+        "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
+        false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type
+  FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
     $dbManager->getSingleRow('DELETE FROM license_candidate WHERE rf_pk=$1',array($rf),__METHOD__.'.delete');
     $dbManager->commit();
     return true;
   }
 
-  private function mergeCandidate($rf, $suggest, $vars)
+  private function mergeCandidate($candidate, $suggest, $vars)
   {
-    return false;
+    /** @var DbManager */
+    $dbManager = $this->getObject('db.manager');
+    $tableColumnMap = array("clearing_licenses"=>"rf_fk",
+        "license_file"=>"rf_fk",
+        "license_ref_bulk"=>"rf_fk",
+        "clearing_event"=>"rf_fk");
+    foreach($tableColumnMap as $table=>$column){
+      $dbManager->prepare($stmt=__METHOD__.".$table","UPDATE $table SET $column=$1 WHERE $column=$2");
+      $dbManager->freeResult( $dbManager->execute($stmt,array($suggest,$candidate)) );
+    }
+    $updates = array();
+    if (empty($vars['suggest_url']) && $vars['rf_url'])
+    {
+      $updates[$vars['rf_url']] = 'rf_url=$' . (count($updates)+1);
+    }
+    if (!$vars['rf_notes'])
+    {
+      $updates[$vars['suggest_notes']."\n".$vars['rf_notes']] = 'rf_notes=$' . (count($updates)+1);
+    }
+    if(count($updates))
+    {
+      $sql = 'UPDATE license_ref SET '.implode(',', $updates).' WHERE rf_pk=$'.(count($updates)+1);
+      $dbManager->prepare($stmt=__METHOD__.'.update',$sql);
+      $params = array_keys($updates);
+      $params[] = $suggest;
+      $dbManager->freeResult( $dbManager->execute($stmt,$params) );
+    }
+    $dbManager->prepare($stmt=__METHOD__.'.delete','DELETE FROM license_candidate WHERE rf_pk=$1');
+    $dbManager->freeResult( $dbManager->execute($stmt,array($candidate)) );
+    return TRUE;
   }
 
 }

@@ -177,13 +177,15 @@ class LicenseDao extends Object
   /**
    * @return array
    */
-  public function getLicenseArray()
+  public function getLicenseArray($groupId = null)
   {
     $statementName = __METHOD__;
-
     $rfTable = 'license_all';
     $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => $this->candidatePrefix);
-    $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
+    if ($groupId === null)
+    {
+      $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
+    }
     $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $withCte = $licenseViewDao->asCTE();
 
