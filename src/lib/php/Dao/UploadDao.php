@@ -136,7 +136,7 @@ SELECT * FROM $uploadTreeTableName
           ",
         $parameters, $stmt);
 
-    return $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName);
+    return $uploadEntryData ? $this->createItemTreeBounds($uploadEntryData, $uploadTreeTableName) : false;
   }
 
   /**
