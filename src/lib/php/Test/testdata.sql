@@ -59,6 +59,7 @@ INSERT INTO pfile (pfile_pk, pfile_md5, pfile_sha1, pfile_size, pfile_mimetypefk
 INSERT INTO pfile (pfile_pk, pfile_md5, pfile_sha1, pfile_size, pfile_mimetypefk) VALUES (10, '1E035D39ED1AF3B40164BACB620C21CD', '226B68B9DFBB7AA72DB1A8540A175988F0963EE2', 16884, 30);
 INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mode, upload_ts, pfile_fk, upload_origin, uploadtree_tablename, expire_date, expire_action, public_perm) VALUES (1, '', 'A.zip', 2, 104, '2014-08-07 09:57:19.18654+00', 1, 'A.zip', 'uploadtree_a', NULL, NULL, 0);
 INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mode, upload_ts, pfile_fk, upload_origin, uploadtree_tablename, expire_date, expire_action, public_perm) VALUES (2, '', 'B.zip', 2, 104, '2014-08-07 09:57:26.512497+00', 9, 'B.zip', 'uploadtree_a', NULL, NULL, 0);
+INSERT INTO upload (upload_pk, upload_desc, upload_filename, user_fk, upload_mode, upload_ts, pfile_fk, upload_origin, uploadtree_tablename, expire_date, expire_action, public_perm) VALUES (3, '', 'C.zip', 2, 104, '2014-08-07 09:57:26.512497+00', 9, 'C.zip', 'uploadtree_a', NULL, NULL, 0);
 INSERT INTO bucketpool (bucketpool_pk, bucketpool_name, version, active, description) VALUES (1, 'GPL Demo bucket pool', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (1, 'GPL Licenses (Demo)', 'orange', 50, 50, 1, 3, '(affero|gpl)', NULL, 'N', 'f');
 INSERT INTO bucket_def (bucket_pk, bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) VALUES (2, 'non-gpl (Demo)', 'yellow', 50, 1000, 1, 99, NULL, NULL, 'N', 'f');
@@ -738,3 +739,15 @@ INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (16, 15, 2, 0, 536888320, 5, 22, 'B');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (15, 13, 2, 0, 805323776, 4, 23, 'artifact.dir');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (13, NULL, 2, 9, 536904704, 1, 24, 'B.zip');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (34, 33, 3, 10, 268469248, 2, 3, 'artifact.meta');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (42, 41, 3, 3, 32768, 7, 8, 'ACE_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (43, 41, 3, 4, 32768, 9, 10, '3DFX_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (44, 41, 3, 5, 32768, 11, 12, 'AAL_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (41, 36, 3, 0, 536888320, 6, 13, '1b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (39, 37, 3, 8, 32768, 15, 16, 'Adobe_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (38, 37, 3, 7, 32768, 17, 18, 'Adaptec_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (40, 37, 3, 6, 32768, 19, 20, 'AFL-1.1_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (37, 36, 3, 0, 536888320, 14, 21, '2b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (36, 35, 3, 0, 536888320, 5, 22, 'B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (35, 33, 3, 0, 805323776, 4, 23, 'artifact.dir');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (33, NULL, 3, 9, 536904704, 1, 24, 'C.zip');

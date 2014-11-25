@@ -51,8 +51,8 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
   /** @var string */
   private $comment = "<comment>";
 
-  /** @var LicenseRef|M/MockInterface */
-  private $licenseRef;
+  /** @var ClearingLicense|M/MockInterface */
+  private $clearingLicense;
 
   /** @var ClearingEvent */
   private $licenseDecisionEvent;
@@ -60,9 +60,9 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->dateTime = new DateTime();
-    $this->licenseRef = M::mock(LicenseRef::classname());
+    $this->clearingLicense = M::mock(ClearingLicense::classname());
 
-    $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->licenseRef, false, $this->reportinfo, $this->comment);
+    $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->clearingLicense);
   }
 
   public function testGetEventId() {
@@ -77,8 +77,8 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionEvent->getDateTime(), is($this->dateTime));
   }
 
-  public function testGetLicenseRef() {
-    assertThat($this->licenseDecisionEvent->getLicenseRef(), is($this->licenseRef));
+  public function testGetClearingLicense() {
+    assertThat($this->licenseDecisionEvent->getClearingLicense(), is($this->clearingLicense));
   }
 
   public function testGetUploadTreeId() {
@@ -87,35 +87,23 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
 
   public function testGetLicenseId() {
     $licenseId = 1234;
-    $this->licenseRef->shouldReceive('getId')->once()->withNoArgs()->andReturn($licenseId);
+    $this->clearingLicense->shouldReceive('getLicenseId')->once()->withNoArgs()->andReturn($licenseId);
 
     assertThat($this->licenseDecisionEvent->getLicenseId(), is($licenseId));
   }
 
   public function testGetLicenseShortName() {
     $licenseShortname = "<licenseShortname>";
-    $this->licenseRef->shouldReceive('getShortName')->once()->withNoArgs()->andReturn($licenseShortname);
+    $this->clearingLicense->shouldReceive('getShortName')->once()->withNoArgs()->andReturn($licenseShortname);
 
     assertThat($this->licenseDecisionEvent->getLicenseShortName(), is($licenseShortname));
   }
 
   public function testGetLicenseFullName() {
-    $licenseFullName = "<licenseFullName>";
-    $this->licenseRef->shouldReceive('getFullName')->once()->withNoArgs()->andReturn($licenseFullName);
+    $licenseFullname = "<licenseFullname>";
+    $this->clearingLicense->shouldReceive('getFullName')->once()->withNoArgs()->andReturn($licenseFullname);
 
-    assertThat($this->licenseDecisionEvent->getLicenseFullName(), is($licenseFullName));
-  }
-
-  public function testIsRemoved() {
-    assertThat($this->licenseDecisionEvent->isRemoved(), is(false));
-  }
-
-  public function testGetComment() {
-    assertThat($this->licenseDecisionEvent->getComment(), is($this->comment));
-  }
-
-  public function testGetReportinfo() {
-    assertThat($this->licenseDecisionEvent->getReportinfo(), is($this->reportinfo));
+    assertThat($this->licenseDecisionEvent->getLicenseFullName(), is($licenseFullname));
   }
 
   public function testGetUserId() {

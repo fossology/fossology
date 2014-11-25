@@ -30,7 +30,7 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
-   * @return LicenseRef[]
+   * @return ClearingLicense[][]
    */
   public function getState($events)
   {
@@ -39,17 +39,17 @@ class ClearingEventProcessor extends Object
 
     foreach ($events as $event)
     {
-      $licenseRef = $event->getLicenseRef();
-      $shortName = $licenseRef->getShortName();
+      $clearingLicense = $event->getClearingLicense();
+      $shortName = $clearingLicense->getShortName();
 
       if ($event->isRemoved())
       {
         unset($selection[$shortName]);
       } else
       {
-        $selection[$shortName] = $licenseRef;
+        $selection[$shortName] = $clearingLicense;
       }
-      $total[$shortName] = $licenseRef;
+      $total[$shortName] = $clearingLicense;
     }
 
     return array($selection, $total);
@@ -58,7 +58,7 @@ class ClearingEventProcessor extends Object
   /**
    * @param DateTime|null $lastDecision
    * @param ClearingEvent[] $events
-   * @return LicenseRef[]
+   * @return ClearingLicense[][]
    */
   public function getStateAt($lastDecision, $events)
   {
@@ -67,9 +67,9 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param LicenseRef[] $previousSelection
-   * @param LicenseRef[] $currentSelection
-   * @return LicenseRef[][]
+   * @param ClearingLicense[] $previousSelection
+   * @param ClearingLicense[] $currentSelection
+   * @return ClearingLicense[][]
    */
   public function getStateChanges($previousSelection, $currentSelection)
   {

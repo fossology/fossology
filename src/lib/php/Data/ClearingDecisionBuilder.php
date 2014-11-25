@@ -30,9 +30,9 @@ class ClearingDecisionBuilder extends Object
   private $sameUpload;
   /** @var bool */
   private $sameFolder;
-  /** @var LicenseRef[] */
+  /** @var ClearingLicense[] */
   private $positiveLicenses;
-  /** @var LicenseRef[] */
+  /** @var ClearingLicense[] */
   private $negativeLicenses;
   /** @var int */
   private $clearingId;
@@ -92,7 +92,7 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingLicense[] $licenses
    * @return ClearingDecisionBuilder
    */
   public function setPositiveLicenses($licenses)
@@ -102,7 +102,7 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingLicense[] $licenses
    * @return ClearingDecisionBuilder
    */
   public function setNegativeLicenses($licenses)

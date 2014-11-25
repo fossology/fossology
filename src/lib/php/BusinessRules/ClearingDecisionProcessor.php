@@ -86,7 +86,7 @@ class ClearingDecisionProcessor
     list($addedLicenses, $removedLicenses) = $this->clearingEventProcessor->getStateChanges($previousSelection, $selection);
 
     $unhandledScannerDetectedLicenses = array_diff_key($scannerDetectedLicenses, $total);
-    $this->addClearingEventsForLicenses($userId, $itemId, $unhandledScannerDetectedLicenses);
+    $this->insertClearingEventsForClearingLicenses($itemId, $userId, $unhandledScannerDetectedLicenses, ClearingEventTypes::USER); //TODO pass correct type
     $addedLicenses = array_merge($addedLicenses, $unhandledScannerDetectedLicenses);
     $selection = array_merge($selection, $unhandledScannerDetectedLicenses);
 
@@ -95,7 +95,7 @@ class ClearingDecisionProcessor
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       $type = DecisionTypes::IDENTIFIED;
-      $this->removeClearingEvents($userId, $itemId, $selection);
+      $this->insertClearingEventsForClearingLicenses($itemId, $userId, $selection, ClearingEventTypes::USER); //TODO pass correct type
       $removedLicenses = $selection;
       $selection = array();
       $insertDecision = count($previousSelection) > 0;
@@ -149,30 +149,16 @@ class ClearingDecisionProcessor
 
 
   /**
-   * @param int $userId
    * @param int $itemId
-   * @param LicenseRef[] $licenseRefs
+   * @param int $userId
+   * @param ClearingLicense[] $clearinLicenses
    * @param int $eventType
    */
-  protected function addClearingEventsForLicenses($userId, $itemId, $licenseRefs, $eventType = ClearingEventTypes::USER)
+  protected function insertClearingEventsForClearingLicenses($itemId, $userId, $clearinLicenses, $eventType)
   {
-    foreach ($licenseRefs as $licenseRef)
+    foreach ($clearinLicenses as $clearingLicense)
     {
-      $this->clearingDao->addClearing($itemId, $userId, $licenseRef->getId(), $eventType);
-    }
-  }
-
-  /**
-   * @param int $userId
-   * @param int $itemId
-   * @param LicenseRef[] $licenses
-   * @return LicenseRef[]
-   */
-  private function removeClearingEvents($userId, $itemId, $licenses)
-  {
-    foreach ($licenses as $license)
-    {
-      $this->clearingDao->removeClearing($itemId, $userId, $license->getId(), ClearingEventTypes::USER);
+      $this->clearingDao->insertClearingEventFromClearingLicense($itemId, $userId, $clearingLicense, $eventType);
     }
   }
 

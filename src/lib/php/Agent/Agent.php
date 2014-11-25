@@ -63,12 +63,13 @@ abstract class Agent extends Object
 
   function scheduler_connect()
   {
+    /** @todo getopt is not smart enough */
     $args = getopt("", array("userID:","jobId:","scheduler_start"));
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
-    $this->userId = @$args['userID'];
-    $this->jobId = @$args['jobId'];
+    $this->userId = $args['userID'];
+    $this->jobId = $args['jobId'];
 
     $this->initArsTable();
 

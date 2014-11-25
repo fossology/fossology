@@ -102,30 +102,8 @@ class ReuserAgent extends Agent
 
       /** @var ClearingDecision $clearingDecision */
       $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
-      $desiredLicenses = $clearingDecision->getPositiveLicenses();
-      $row['decision'] = $desiredLicenses;
 
-      list($added, $removed) = $this->clearingDecisionProcessor->getCurrentClearings(
-          $item->getItemTreeBounds(), $this->userId);
-
-      $actualLicenses = array_map(function (ClearingResult $result)
-      {
-        return $result->getLicenseRef();
-      }, $added);
-
-      $toAdd = array_diff($desiredLicenses, $actualLicenses);
-      $toRemove = array_diff($actualLicenses, $desiredLicenses);
-
-      foreach ($toAdd as $license)
-      {
-        $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, false);
-      }
-
-      foreach ($toRemove as $license)
-      {
-        $this->insertHistoricalClearingEvent($clearingDecision, $item, $license, true);
-      }
-
+      $this->insertHistoricalClearingEvent($clearingDecision, $item);
       $fileId = $item->getFileId();
       if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
       {
@@ -145,20 +123,24 @@ class ReuserAgent extends Agent
    * @param boolean $remove
    */
   protected
-  function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item, LicenseRef $license, $remove)
+  function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item)
   {
     $dateTime = $clearingDecision->getDateAdded();
-    $this->clearingDao->insertHistoricalClearingEvent(
-        $dateTime->sub(new DateInterval('PT1S')),
-        $item->getId(),
+    $dateTime->sub(new DateInterval('PT1S'));
+    $itemId = $item->getId();
+    foreach(array_merge($clearingDecision->getPositiveLicenses(), $clearingDecision->getNegativeLicenses()) as $clearingLicense) {
+      $this->clearingDao->insertHistoricalClearingEvent(
+        $dateTime,
+        $itemId,
         $this->userId,
         $this->jobId,
-        $license->getId(),
-        ClearingEventTypes::USER,
-        $remove,
-        '',
-        ''
-    );
+        $clearingLicense->getId(),
+        $clearingDecision->getType(),
+        $clearingLicense->isRemoved(),
+        $clearingLicense->getReportInfo(),
+        $clearingLicense->getComment()
+      );
+    }
   }
 
   /**

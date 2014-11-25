@@ -28,9 +28,9 @@ class ClearingDecision extends Object
   private $sameUpload;
   /** @var bool */
   private $sameFolder;
-  /** @var LicenseRef[] */
+  /** @var ClearingLicense[] */
   private $positiveLicenses;
-  /** @var LicenseRef[] */
+  /** @var ClearingLicense[] */
   private $negativeLicenses;
   /** @var int */
   private $clearingId;
@@ -114,7 +114,7 @@ class ClearingDecision extends Object
   }
 
   /**
-   * @return LicenseRef[]
+   * @return ClearingLicense[]
    */
   public function getPositiveLicenses()
   {
@@ -122,7 +122,7 @@ class ClearingDecision extends Object
   }
 
   /**
-   * @return LicenseRef[]
+   * @return ClearingLicense[]
    */
   public function getNegativeLicenses()
   {

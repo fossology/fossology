@@ -5,13 +5,13 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=reuser.php version.php
-WRAP=reuser
+COPY = reuser.php version.php
+WRAP = reuser
 
 all: version.php
 
@@ -20,9 +20,14 @@ version.php: version-process_php
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
+reuser: all
+	@echo "making locally runnable reuser (only for testing)"
+	$(MAKE) -C $(FOCLIDIR) fo_wrapper
+	ln -sf $(FOCLIDIR)/fo_wrapper.php reuser
+
 install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/reuser/agent/
-	for file in $(EXE); do \
+	for file in $(COPY); do \
 		echo "installing $$file"; \
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/reuser/agent/$$file; \
 	done

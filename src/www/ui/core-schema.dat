@@ -581,6 +581,15 @@
   $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT false;";
   $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["clearing_licenses"]["comment"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"comment\" IS 'User comment';";
+  $Schema["TABLE"]["clearing_licenses"]["comment"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"comment\" text;";
+  $Schema["TABLE"]["clearing_licenses"]["comment"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"comment\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["comment"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["clearing_licenses"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"reportinfo\" IS 'public comment';";
+  $Schema["TABLE"]["clearing_licenses"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"reportinfo\" text;";
+  $Schema["TABLE"]["clearing_licenses"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"reportinfo\" DROP NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["reportinfo"]["UPDATE"] = "";
 
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";

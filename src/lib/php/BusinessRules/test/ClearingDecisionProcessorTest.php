@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\ClearingDecision;
@@ -409,7 +410,8 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   private function createClearingEvent($eventId, $timestamp, $licenseId, $licenseShortName, $licenseFullName, $eventType = ClearingEventTypes::USER, $isRemoved = false, $reportInfo = "<reportInfo>", $comment = "<comment>")
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseFullName);
-    return new ClearingEvent($eventId, $this->uploadTreeId, $timestamp, $this->userId, $this->groupId, $eventType, $licenseRef, $isRemoved, $reportInfo, $comment);
+    $clearingLicense = new ClearingLicense($licenseRef, $isRemoved, $reportInfo, $comment);
+    return new ClearingEvent($eventId, $this->uploadTreeId, $timestamp, $this->userId, $this->groupId, $eventType, $clearingLicense);
   }
 
   /**
