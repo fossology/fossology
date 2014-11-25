@@ -24,7 +24,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Util\ArrayOperation;
@@ -615,8 +614,8 @@ class ui_browse_license extends FO_Plugin
    */
   private function handleAllScansEmpty($scannerAgents, $uploadId)
   {
-    $out = "";
-    $out .= _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
+    $this->vars['noUploadHist'] = TRUE;
+    $out = _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
 
     foreach ($scannerAgents as $agentName)
     {
@@ -678,6 +677,7 @@ class ui_browse_license extends FO_Plugin
       }
 
       $output .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . $latestSuccessfulAgent->getAgentRevision() . ".";
+
       if ($latestSuccessfulAgent->getAgentId() != $currentAgent->getAgentId())
       {
         $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
@@ -699,7 +699,7 @@ class ui_browse_license extends FO_Plugin
     $header = "<h3>" . _("Scanner details") . "</h3>";
     $header .= $this->buildAgentSelector($allSuccessfulAgents) . "\n";
 
-    return empty($successfulAgents) ? false : ($header . $output);
+    return empty($allSuccessfulAgents) ? false : ($header . $output);
   }
 
   public function getTemplateName()
