@@ -318,7 +318,7 @@ function LatestAgentpk($upload_pk, $arsTableName)
   if ($AgentRec === false)
     $Agent_pk = 0;
   else
-    $Agent_pk = $AgentRec[0]['agent_fk'];
+    $Agent_pk = intval($AgentRec[0]['agent_fk']);
   return $Agent_pk;
 }
 

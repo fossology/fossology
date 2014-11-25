@@ -59,6 +59,7 @@ without any warranty.
     </service>
     <service id="dao.agents" class="Fossology\Lib\Dao\AgentsDao">
       <argument type="service" id="db.manager"/>
+      <argument type="service" id="logger"/>
     </service>
     <service id="dao.user" class="Fossology\Lib\Dao\UserDao">
       <argument type="service" id="db.manager"/>
