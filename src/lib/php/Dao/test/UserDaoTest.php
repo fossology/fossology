@@ -60,5 +60,29 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $defaultGroups = $userDao->getAdminGroupMap($userId=2,$userLevel=PLUGIN_DB_ADMIN);
     assertThat($defaultGroups, equalTo(array(1=>'Default User',2=>'fossy')));
   }
+  
+  
+  public function testGetDeletableAdminGroupMap()
+  {
+    $this->testDb->createPlainTables(array('groups','group_user_member','users'));
+    $username = 'testi';
+    $userId = 101;
+    $this->dbManager->insertTableRow('users',array('user_pk'=>$userId,'user_name'=>$username));
+    $this->dbManager->insertTableRow('groups', array('group_pk'=>201,'group_name'=>$username));
+    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>201,'user_fk'=>$userId));
+    $deletable = array('group_pk'=>202,'group_name'=>'anyName');
+    $this->dbManager->insertTableRow('groups', $deletable);
+    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>202,'user_fk'=>$userId,'group_perm'=>1));
+    $userDao = new UserDao($this->dbManager);
+
+    $groups = $userDao->getDeletableAdminGroupMap($userId,$userLevel=PLUGIN_DB_ADMIN);
+    assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
+
+    $groups = $userDao->getDeletableAdminGroupMap($userId);
+    assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
+    
+    $groups = $userDao->getDeletableAdminGroupMap($userId+1);
+    assertThat($groups, equalTo(array()));
+  }  
 
 }

@@ -99,4 +99,82 @@ class UserDao extends Object {
     $this->dbManager->freeResult($res);
     return $groupMap;
   }
+  
+  /**
+   * @brief get array of groups that this user has admin access to
+   * @param int $userId
+   * @return array in the format {group_pk=>group_name, group_pk=>group_name, ...}
+   */
+  function getDeletableAdminGroupMap($userId,$userLevel=0)
+  {
+    if ($userLevel == PLUGIN_DB_ADMIN)
+    {
+      $sql = "SELECT group_pk, group_name FROM groups LEFT JOIN users ON group_name=user_name "
+           . "WHERE user_name IS NULL";
+      $param = array();
+    }
+    else{
+      $sql = "SELECT group_pk, group_name FROM groups LEFT JOIN users ON group_name=user_name "
+           . " INNER JOIN group_user_member ON group_pk=group_user_member.group_fk AND user_fk=$1 AND group_perm=$2 "
+           . "WHERE user_name IS NULL";
+      $param = array($userId,1);
+    }
+    $this->dbManager->prepare($stmt=__METHOD__.".$userLevel", $sql);
+    $res = $this->dbManager->execute($stmt,$param);
+    $groupMap = array();
+    while($row = $this->dbManager->fetchArray($res))
+    {
+      $groupMap[$row['group_pk']] = $row['group_name'];
+    }
+    $this->dbManager->freeResult($res);
+    return $groupMap;
+  }
+  
+  
+  /**
+   * @brief Delete a group (for constraint, see http://www.fossology.org/projects/fossology/wiki/GroupsPerms )
+   * @param $groupId
+   * Returns true on success
+   */
+  function deleteGroup($groupId) 
+  {
+    $groupArray = $this->dbManager->getSingleRow('SELECT group_pk, group_name FROM groups WHERE group_pk=$1',
+            array($groupId),__METHOD__.'.exists');
+    if ($groupArray===false)
+    {
+      throw new \Exception( _("Group does not exist.  Not deleted.") );
+    }
+    $groupConstraint = $this->dbManager->getSingleRow('SELECT count(*) cnt FROM users WHERE user_name=$1',
+            array($groupArray['group_name']),__METHOD__.'.contraint');
+    if ($groupConstraint['cnt'])
+    {
+      throw new \Exception( _("Group must not be deleted due to name constraint.") );
+    }
+    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    {
+      global $SysConf;
+      $userId = $SysConf['auth']['UserId'];
+      $adminLevel = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk=$1 and user_fk=$2 and group_perm=1",
+              array($groupId,$userId),__METHOD__.'.admin_lvl');
+      if ($adminLevel['cnt']< 1)
+      {
+        $text = _("Permission Denied.");
+        throw new \Exception($text);
+      }
+    }
+
+    $this->dbManager->begin();
+    $this->dbManager->getSingleRow("DELETE FROM perm_upload WHERE group_fk=$1",array($groupId),__METHOD__.'.perm_upload');
+    $this->dbManager->getSingleRow("DELETE FROM group_user_member WHERE group_fk=$1",array($groupId),__METHOD__.'.gum');
+    $this->dbManager->getSingleRow("UPDATE users SET new_upload_group_fk=NULL, new_upload_perm=NULL WHERE new_upload_group_fk=$1",
+            array($groupId),__METHOD__.'.upload_group');
+    $newGroupIdStmt = '(SELECT group_fk FROM group_user_member WHERE user_fk=user_pk LIMIT 1)';
+    $this->dbManager->getSingleRow("UPDATE users SET group_fk=$newGroupIdStmt WHERE group_fk=$1",
+            array($groupId),__METHOD__.'.active_group');
+    $this->dbManager->getSingleRow("DELETE FROM groups WHERE group_pk=$1",array($groupId),__METHOD__.'.delete');
+    $this->dbManager->commit();
+
+    return true;
+  }
+
 } 
