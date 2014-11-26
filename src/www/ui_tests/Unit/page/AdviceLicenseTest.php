@@ -22,26 +22,28 @@ global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
 
-require_once(dirname(dirname(dirname(__DIR__))).'/lib/php/Plugin/FO_Plugin.php');
+if(!class_exists('ui_menu')){class ui_menu{ const NAME='menus';}}
 if(!function_exists('register_plugin')){ function register_plugin(){}}
-require_once ( (dirname(dirname(__DIR__)).'/ui/browse-processPost.php') );
 
+require_once ( dirname(dirname(dirname(__DIR__))).'/ui/page/AdviceLicense.php' );
 
-class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
+class AdviceLicenseTest extends \PHPUnit_Framework_TestCase
 {
-
-  public function testCreateSelect()
+  public function testBool2checkbox()
   {
-    $browseProcessPost = new browseProcessPost();
+    $plugin = new Fossology\UI\Page\AdviceLicense();
 
-    $reflection = new \ReflectionClass( get_class($browseProcessPost) );
-    $method = $reflection->getMethod('createSelect');
+    $reflection = new \ReflectionClass( get_class($plugin) );
+    $method = $reflection->getMethod('bool2checkbox');
     $method->setAccessible(true);
     
-    $result = $method->invoke($browseProcessPost,$id='ok',array('k1'=>'v1','k2'=>'v2'),"k2",$actions=" ");
-    $inner = '<option value="k1">v1</option><option value="k2" selected>v2</option>';
-    $expected = "<select name=\"$id\" id=\"$id\" $actions>$inner</select>";
-    assertThat($result, is($expected));
+    $resultTrue = $method->invoke($plugin,true);
+    $expectedTrue = '<input type="checkbox" checked="checked" disabled="disabled"/>';
+    assertThat($resultTrue, is($expectedTrue));
+    
+    $resultFalse = $method->invoke($plugin,false);
+    $expectedFalse = '<input type="checkbox" disabled="disabled"/>';
+    assertThat($resultFalse, is($expectedFalse));
   }
 
 }
