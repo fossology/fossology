@@ -95,6 +95,7 @@ class ClearingDao extends Object
            LR.rf_shortname as shortname,
            LR.rf_fullname as fullname,
            CL.removed as removed,
+           Cl.type_fk as event_type_id,
            CL.reportinfo as reportinfo,
            CL.comment as comment
          FROM clearing_decision CD
@@ -106,7 +107,7 @@ class ClearingDao extends Object
          WHERE " . $sql_upload . " ut.lft BETWEEN $2 and $3
            AND CD.decision_type!=$4
          GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
-           license_id, shortname, fullname, removed, comment, reportinfo
+           license_id, shortname, fullname, removed, event_type_id, comment, reportinfo
          ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -129,6 +130,7 @@ class ClearingDao extends Object
       $licenseName = $row['fullname'];
       $licenseIsRemoved = $row['removed'];
 
+      $eventType = $row['event_type_id'];
       $comment = $row['comment'];
       $reportInfo = $row['reportinfo'];
 
@@ -163,7 +165,7 @@ class ClearingDao extends Object
 
       if ($licenseId !== null)
       {
-        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $reportInfo, $comment, $removed, $added);
+        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $eventType, $reportInfo, $comment, $removed, $added);
       }
     }
 
@@ -361,7 +363,7 @@ ORDER BY CD.date_added DESC LIMIT 1
    * @param ClearingLicense[] $removedLicenses
    * @todo $license and $removedLicenses are symmetrically used: merge them before getting here
    */
-  public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $licenses, $removedLicenses)
+  public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $licenses, $removedLicenses = array())
   {
     $this->dbManager->begin();
 
@@ -388,7 +390,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     $statementNameLicenseInsert = __METHOD__ . ".insertLicense";
-    $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed, comment, reportinfo) VALUES($1, $2, $3, $4, $5)");
+    $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6)");
     foreach (array_merge($licenses,$removedLicenses) as $clearingLicense)
     {
       $res = $this->dbManager->execute(
@@ -396,6 +398,7 @@ INSERT INTO clearing_decision (
         array(
           $clearingDecisionId,
           $clearingLicense->getLicenseId(), $this->dbManager->booleanToDb($clearingLicense->isRemoved()),
+          $clearingLicense->getType(),
           $clearingLicense->getComment(), $clearingLicense->getReportInfo()
         )
       );
@@ -477,11 +480,11 @@ INSERT INTO clearing_decision (
    * @param ClearingLicense $clearingLicense
    * @param $type
    */
-  public function insertClearingEventFromClearingLicense($uploadTreeId, $userId, $clearingLicense, $type)
+  public function insertClearingEventFromClearingLicense($uploadTreeId, $userId, $clearingLicense)
   {
     $this->insertClearingEvent(
       $uploadTreeId, $userId, $clearingLicense->getLicenseId(),
-      $clearingLicense->isRemoved(), $type,
+      $clearingLicense->isRemoved(), $clearingLicense->getType(),
       $clearingLicense->getReportinfo(), $clearingLicense->getComment()
     );
   }
@@ -498,7 +501,7 @@ INSERT INTO clearing_decision (
     if (!$row)
     {  //The license was not added as user decision yet -> we promote it here
       $type = ClearingEventTypes::USER;
-      $this->addClearing($uploadTreeId, $userId, $licenseId, $type);
+      $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, false, $type);
       $row['type_fk'] = $type;
       $row['comment'] = "";
       $row['reportinfo'] = "";
@@ -514,7 +517,7 @@ INSERT INTO clearing_decision (
       $comment = $changeTo;
 
     }
-    $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, $row['type_fk'], null, $reportInfo, $comment);
+    $this->insertClearingEvent($uploadTreeId, $userId, $licenseId, false, $row['type_fk'], $reportInfo, $comment);
 
     $this->dbManager->commit();
 
@@ -567,15 +570,15 @@ INSERT INTO clearing_decision (
    * @param $removed
    * @param $added
    */
-  protected function appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $reportInfo, $comment, &$removed, &$added)
+  protected function appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $type, $reportInfo, $comment, &$removed, &$added)
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseName);
     if ($this->dbManager->booleanFromDb($licenseIsRemoved))
     {
-      $removed[] = new ClearingLicense($licenseRef, true, $reportInfo, $comment);
+      $removed[] = new ClearingLicense($licenseRef, true, $type, $reportInfo, $comment);
     } else
     {
-      $added[] = new ClearingLicense($licenseRef, false, $reportInfo, $comment);
+      $added[] = new ClearingLicense($licenseRef, false, $type, $reportInfo, $comment);
     }
   }
 

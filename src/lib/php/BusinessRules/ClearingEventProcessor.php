@@ -30,40 +30,51 @@ class ClearingEventProcessor extends Object
 
   /**
    * @param ClearingEvent[] $events
-   * @return ClearingLicense[][]
+   * @return ClearingLicense[]
    */
-  public function getState($events)
+  public function getClearingLicenses($events)
   {
-    $selection = array();
-    $total = array();
+    $result = array();
 
     foreach ($events as $event)
     {
       $clearingLicense = $event->getClearingLicense();
       $shortName = $clearingLicense->getShortName();
 
-      if ($event->isRemoved())
-      {
-        unset($selection[$shortName]);
-      } else
-      {
-        $selection[$shortName] = $clearingLicense;
-      }
-      $total[$shortName] = $clearingLicense;
+      $result[$shortName] = $clearingLicense;
     }
 
-    return array($selection, $total);
+    return $result;
+  }
+
+  /**
+   * @param ClearingEvent[] $events
+   * @return LicenseRef[]
+   */
+  public function getClearingLicenseRefs($events)
+  {
+    $result = array();
+
+    foreach ($events as $event)
+    {
+      $clearingLicense = $event->getClearingLicense();
+      $shortName = $clearingLicense->getShortName();
+
+      $result[$shortName] = $clearingLicense->getLicenseRef();
+    }
+
+    return $result;
   }
 
   /**
    * @param DateTime|null $lastDecision
    * @param ClearingEvent[] $events
-   * @return ClearingLicense[][]
+   * @return ClearingLicense[]
    */
-  public function getStateAt($lastDecision, $events)
+  public function getClearingLicensesAt($lastDecision, $events)
   {
     $filteredEvents = $this->selectEventsUntilTime($events, $lastDecision);
-    return $this->getState($filteredEvents);
+    return $this->getClearingLicenses($filteredEvents);
   }
 
   /**
@@ -73,10 +84,7 @@ class ClearingEventProcessor extends Object
    */
   public function getStateChanges($previousSelection, $currentSelection)
   {
-    return array(
-        array_diff($currentSelection, $previousSelection),
-        array_diff($previousSelection, $currentSelection)
-    );
+    return array_diff($previousSelection, $currentSelection);
   }
 
   /**

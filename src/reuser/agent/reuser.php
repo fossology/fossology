@@ -135,7 +135,7 @@ class ReuserAgent extends Agent
         $this->userId,
         $this->jobId,
         $clearingLicense->getLicenseId(),
-        $clearingDecision->getType(),
+        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
         $clearingLicense->isRemoved(),
         $clearingLicense->getReportInfo(),
         $clearingLicense->getComment()

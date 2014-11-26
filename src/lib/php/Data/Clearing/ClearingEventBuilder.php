@@ -69,7 +69,7 @@ class ClearingEventBuilder extends Object
   public function build()
   {
     //TODO change setters
-    $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->reportinfo, $this->comment );
+    $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->eventType, $this->reportinfo, $this->comment );
     return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
         $this->groupId, $this->eventType, $clearingLicense);
   }

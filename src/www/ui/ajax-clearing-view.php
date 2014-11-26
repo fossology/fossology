@@ -193,11 +193,11 @@ class AjaxClearingView extends FO_Plugin
         return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);
 
       case "addLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, true, ClearingEventTypes::USER);
+        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, false, ClearingEventTypes::USER);
         return json_encode(array());
 
       case "removeLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, false ,ClearingEventTypes::USER);
+        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, true, ClearingEventTypes::USER);
         return json_encode(array());
 
       case "setNextPrev":
@@ -236,7 +236,6 @@ class AjaxClearingView extends FO_Plugin
 
     list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
     $licenseEventTypes = new ClearingEventTypes();
-    $licenseEventTypeMap = $licenseEventTypes->getMap();
 
     $table = array();
     /** @var ClearingResult $clearingResult */
@@ -252,7 +251,7 @@ class AjaxClearingView extends FO_Plugin
       if ($clearingResult->hasClearingEvent())
       {
         $licenseDecisionEvent = $clearingResult->getClearingEvent();
-        $types[] = $licenseEventTypeMap[$licenseDecisionEvent->getEventType()];
+        $types[] = $licenseEventTypes->getTypeName($licenseDecisionEvent->getEventType());
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }

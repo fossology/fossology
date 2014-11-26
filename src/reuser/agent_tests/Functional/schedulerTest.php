@@ -168,15 +168,17 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n[DIRECTORIES]\nMODDIR = $fakeInstallationDir";
     file_put_contents($confFile, $config);
     if (!is_dir($fakeInstallationDir))
-      mkdir($fakeInstallationDir);
+    {
+      mkdir($fakeInstallationDir, 077, true);
+      system("ln -sf $libDir $fakeInstallationDir/lib");
+      if (!is_dir("$fakeInstallationDir/www/ui")) {
+        mkdir("$fakeInstallationDir/www/ui/", 0777, true);
+        touch("$fakeInstallationDir/www/ui/ui-menus.php");
+      }
+    }
 
     $topDir = dirname(dirname(dirname(dirname(__DIR__))));
     system("install -D $topDir/VERSION $sysConf");
-
-    system("ln -sf $libDir $fakeInstallationDir/lib");
-    if (!is_dir("$fakeInstallationDir/www/ui"))
-      mkdir("$fakeInstallationDir/www/ui/", 0777, true);
-    touch("$fakeInstallationDir/www/ui/ui-menus.php");
 
     $testRepoDir = "$libDir/php/Test/";
     system("cp -a $testRepoDir/repo $sysConf/");

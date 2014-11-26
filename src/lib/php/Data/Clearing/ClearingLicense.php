@@ -32,7 +32,8 @@ class ClearingLicense extends Object
   private $reportInfo;
   /** @var string */
   private $comment;
-
+  /** @var int */
+  private $type;
 
   /**
    * @param LicenseRef $licenseRef
@@ -40,12 +41,21 @@ class ClearingLicense extends Object
    * @param string $reportinfo
    * @param string $comment
    */
-  public function __construct(LicenseRef $licenseRef, $removed, $reportInfo, $comment)
+  public function __construct(LicenseRef $licenseRef, $removed, $type, $reportInfo = "", $comment = "")
   {
     $this->licenseRef = $licenseRef;
     $this->removed = $removed;
+    $this->type = $type;
     $this->reportInfo = $reportInfo;
     $this->comment = $comment;
+  }
+
+  /**
+   * @return ClearingLicense
+   */
+  public function copyNegated()
+  {
+    return new ClearingLicense($this->licenseRef, !($this->removed), $this->type, $this->reportInfo, $this->comment);
   }
 
   /**
@@ -86,6 +96,14 @@ class ClearingLicense extends Object
   public function isRemoved()
   {
     return $this->removed;
+  }
+
+  /**
+   * @return int
+   */
+  public function getType()
+  {
+    return $this->type;
   }
 
   /**

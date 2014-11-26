@@ -23,6 +23,7 @@ use Fossology\Lib\Data\Types;
 class ClearingEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
+  const REUSED_BIT = 0b100;
 
   public function __construct()
   {
@@ -32,6 +33,11 @@ class ClearingEventTypes extends Types {
         self::USER => "User decision",
         self::BULK => "Bulk"
     );
+  }
+
+  public function getTypeName($typeId)
+  {
+    return $this->map[$typeId & ~self::REUSED_BIT ] . (($typeId & self::REUSED_BIT)!=0 ? ", reused" :"");
   }
 
 } 

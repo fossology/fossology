@@ -581,6 +581,11 @@
   $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT false;";
   $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["clearing_licenses"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"type_fk\" IS 'type id of event refer to user, bulk, ...'";
+  $Schema["TABLE"]["clearing_licenses"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"type_fk\" int4;";
+  $Schema["TABLE"]["clearing_licenses"]["type_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"type_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_licenses"]["type_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["clearing_licenses"]["comment"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"comment\" IS 'User comment';";
   $Schema["TABLE"]["clearing_licenses"]["comment"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"comment\" text;";
   $Schema["TABLE"]["clearing_licenses"]["comment"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"comment\" DROP NOT NULL;";
