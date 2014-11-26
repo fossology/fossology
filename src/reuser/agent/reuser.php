@@ -153,7 +153,9 @@ class ReuserAgent extends Agent
     foreach ($clearingDecisions as $clearingDecision)
     {
       $fileId = $clearingDecision->getPfileId();
-      $clearingDecisionByFileId[$fileId] = $clearingDecision;
+      if (!array_key_exists($fileId, $clearingDecisionByFileId)) {
+        $clearingDecisionByFileId[$fileId] = $clearingDecision;
+      }
     }
     return $clearingDecisionByFileId;
   }
