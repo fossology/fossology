@@ -21,10 +21,10 @@ use Mockery as M;
 global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
-
-require_once(dirname(dirname(dirname(__DIR__))).'/lib/php/Plugin/FO_Plugin.php');
+$wwwPath = dirname(dirname(__DIR__));
+require_once(dirname($wwwPath).'/lib/php/Plugin/FO_Plugin.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
-require_once ( (dirname(dirname(__DIR__)).'/ui/browse-processPost.php') );
+require_once ($wwwPath.'/ui/browse-processPost.php');
 
 
 class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase

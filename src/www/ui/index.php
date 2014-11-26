@@ -26,7 +26,6 @@ use Fossology\Lib\Util\TimingLogger;
 $startTime = microtime(true);
 require_once(__DIR__ . "/../../lib/php/bootstrap.php");
 
-$SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */

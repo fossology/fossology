@@ -21,10 +21,9 @@ use Mockery as M;
 global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
-
-if(!class_exists('ui_menu')){class ui_menu{ const NAME='menus';}}
+$wwwPath = dirname(dirname(dirname(__DIR__)));
+require_once($wwwPath.'/ui/ui-menus.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
-
 require_once ( dirname(dirname(dirname(__DIR__))).'/ui/page/AdviceLicense.php' );
 
 class AdviceLicenseTest extends \PHPUnit_Framework_TestCase
