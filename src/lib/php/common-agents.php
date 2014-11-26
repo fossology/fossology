@@ -45,7 +45,7 @@
  *
  * \return string containing formatted checkbox list HTML
  */
-function AgentCheckBoxMake($upload_pk,$SkipAgents=array()) 
+function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = "") 
 {
 
   global $Plugins;
@@ -57,6 +57,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
   if (!empty($AgentList)) {
     // get user agent preferences
     $userName = $_SESSION['User'];
+    if (!empty($specified_username)) $userName = $specified_username;
     $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);

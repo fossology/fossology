@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -259,15 +259,17 @@ class user_edit_any extends FO_Plugin {
       case "HTML":
         /* If this is a POST, then process the request. */
         $UserId = GetParm('userid', PARM_INTEGER);
+        $current_user_row = "";
         if (!empty($UserId)) {
           $rc = $this->Edit();
+          $sql = "SELECT * FROM users WHERE user_pk=$UserId;";
+          $result = pg_query($PG_CONN, $sql);
+          DBCheckResult($result, $sql, __FILE__, __LINE__);
+          $row = pg_fetch_assoc($result);
+          $current_user_row = $row;
+          pg_free_result($result);
+          $userName = $row['user_name'];
           if (empty($rc)) {
-            $sql = "SELECT user_pk, user_name FROM users WHERE user_pk=$UserId;";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            $row = pg_fetch_assoc($result);
-            pg_free_result($result);
-            $userName = $row['user_name'];
             // display status
             $V.= displayMessage("User $userName updated.");
           }
@@ -287,7 +289,7 @@ class user_edit_any extends FO_Plugin {
         /* Create JavaScript for updating users */
         $V.= "\n<script language='javascript'>\n";
         $V.= "document.onreadystatechange = function(){
-        if(document.readyState=='complete'){SetInfo(" . $row0['user_pk'] . ");}
+        //if(document.readyState=='complete'){SetInfo(" . $row0['user_pk'] . ");}
       }";
         $V.= "</script>\n";
         $V.= "\n<script language='javascript'>\n";
@@ -406,18 +408,6 @@ class user_edit_any extends FO_Plugin {
                   if (Userenote[id] == \"\") { document.userEditAny.enote.checked=false; }
                   else { document.userEditAny.enote.checked=true; }
                   
-                  if (UiPref[id] == \"\") {
-                    document.getElementById('simple').checked=true;
-                  }
-                  else if (UiPref[id] == 'simple') {
-                    document.getElementById('original').checked=false;
-                    document.getElementById('simple').checked=true;
-		              }
-		              else {
-		                document.getElementById('simple').checked=false;
-  	                document.getElementById('original').checked=true;
-		              }
-                  
                   if(Useragents[id].length == 0)
                   {
                       clearBoxes();
@@ -435,6 +425,7 @@ class user_edit_any extends FO_Plugin {
 
         if (empty($UserId)) {
           $UserId = $row0['user_pk'];
+          $current_user_row = $row0;
         }
         $Uri = Traceback_uri();
         $V.= "<P />\n";
@@ -451,7 +442,7 @@ class user_edit_any extends FO_Plugin {
          <a href='${Uri}?mod=user_edit_self'>$text3</a><P />\n";
 
         $V.= _("Select the user to edit: ");
-        $V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
+        $V.= "<select name='userid' onchange='SetInfo(this.value);'>\n";
 
         //$V .= "<option selected value='0'>--select user--</option>\n";
         pg_result_seek($result, 0);
@@ -469,24 +460,24 @@ class user_edit_any extends FO_Plugin {
         $V.= "</select>\n";
         $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
         $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
-        $Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
+        $Val = $current_user_row['user_name']; 
         $text = _("Change the username.");
         $V.= "$Style<th width='25%'>$text</th>";
         $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
         $V.= "</tr>\n";
-        $Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
+        $Val = $current_user_row['user_desc']; 
         $text = _("Change the user's description (name, contact, or other information).  This may be blank.");
         $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
-        $Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
+        $Val = $current_user_row['user_email']; 
         $text = _("Change the user's email address. This may be blank.");
         $V.= "$Style<th>$text</th>\n";
         $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
         $V.= "</tr>\n";
         $text = _("Select the user's access level.");
         $V.= "$Style<th>$text</th>";
-        $Val = GetParm('permission', PARM_INTEGER);
+        $Val = $current_user_row['user_perm']; 
         $V.= "<td><select name='permission'>\n";
         $text1 = _("None (very basic, no database access)");
         $text2 = _("Read-only (read, but no writes or downloads)");
@@ -507,8 +498,9 @@ class user_edit_any extends FO_Plugin {
         $text = _("Select the user's top-level folder. Access is restricted to this folder.");
         $V.= "$Style<th>$text";
         $V.= "</th>";
+        $FolderSelectId = $current_user_row['root_folder_fk'];
         $V.= "<td><select name='folder'>";
-        $V.= FolderListOption(-1, 0);
+        $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
         $V.= "</select></td>\n";
         $V.= "</tr>\n";
         $text = _("Block the user's account. This will prevent logins.");
@@ -521,17 +513,21 @@ class user_edit_any extends FO_Plugin {
         $text = _("Re-enter the user's password.");
         $V.= "<tr><th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
         $V.= "</tr>\n";
+        $email_notify = $current_user_row['email_notify'];
         $text = _("E-mail Notification");
-        $V.= "$Style<th>$text</th><td><input type=checkbox name='enote'";
-        $V.= "</tr>\n";
-        $V.= "</tr>\n";
+        if ('y' == $email_notify) {
+          $V.= "$Style<th>$text</th><td><input type=checkbox name='enote' checked>";
+        } else {
+          $V.= "$Style<th>$text</th><td><input type=checkbox name='enote'>";
+        }
+
         $text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
         $V .= "$Style<th>$text\n</th><td> ";
-        $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"));
+        $V.= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"), $current_user_row['user_name']);
 
         $V .= "</td>\n";
         $V .= "</tr>\n";
-        $Val = GetParm('default_bucketpool_fk', PARM_INTEGER);
+        $Val = $current_user_row['default_bucketpool_fk']; 
         $text = _("Default bucket pool");
         $V.= "$Style<th>$text</th>\n";
         $V.= "<td>";
@@ -539,41 +535,6 @@ class user_edit_any extends FO_Plugin {
         $V.= "</td>\n";
         $V.= "</tr>\n";
 
-/*
-        / ******  New Upload Group ****** /
-        / * Get master array of groups * /
-        $sql = "select group_pk, group_name from groups order by group_name";
-        $groupresult = pg_query($PG_CONN, $sql);
-        DBCheckResult($groupresult, $sql, __FILE__, __LINE__);
-        $GroupArray = array();
-        while ($GroupRow = pg_fetch_assoc($groupresult))
-          $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
-        pg_free_result($groupresult);
-        $text = _("Group to give access permission for every new upload");
-        $V.= "$Style<th>$text</th>";
-        $V.= "<td>";
-        $V .= Array2SingleSelect($GroupArray, "new_upload_group_fk", $R['new_upload_group_fk'], true, false);
-        $V.= "</td>";
-        $V .= "</tr>\n";
-
-        / ******  New Upload Permissions ****** /
-        $text = _("Access Permission to give the above group");
-        $V.= "$Style<th>$text</th>";
-        $V.= "<td>";
-        $Selected = (empty($R['new_upload_perm'])) ? -1 : $R['new_upload_perm'];
-        $V .= Array2SingleSelect($PERM_NAMES, "new_upload_perm", $Selected, true, false);
-        $V.= "</td>";
-        $V .= "</tr>\n";
-*/
-
-        $text = _("User Interface Options");
-        $text1 = _("Use the simplified UI (Default)");
-        $text2 = _("Use the original UI");
-        //$V .= "$Style<th>$text</th><td><input type='radio'" .
-                "name='whichui' id='simple' value='simple' checked='checked'>" .
-                "$text1<br><input type='radio'" .
-                "name='whichui' id='original' value='original'>" .
-                "$text2</td>\n";
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
