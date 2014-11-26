@@ -30,6 +30,7 @@ abstract class Agent extends Object
   private $agentId;
 
   protected $userId;
+  protected $groupId;
   protected $jobId;
 
   /** @var DbManager dbManager */
@@ -64,11 +65,12 @@ abstract class Agent extends Object
   function scheduler_connect()
   {
     /** @todo getopt is not smart enough */
-    $args = getopt("", array("userID:","jobId:","scheduler_start"));
+    $args = getopt("", array("userID:","groupID:","jobId:","scheduler_start"));
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = $args['userID'];
+    $this->groupId = $args['groupID'];
     $this->jobId = $args['jobId'];
 
     $this->initArsTable();
@@ -108,12 +110,18 @@ abstract class Agent extends Object
 
   function bail($exitvalue)
   {
+    debug_print_backtrace();
+    $this->scheduler_disconnect();
+    exit($exitvalue);
+  }
+
+  function scheduler_disconnect($exitvalue)
+  {
     if ($this->schedulerMode)
     {
       Agent::heartbeat_handler(SIGALRM);
       echo "BYE $exitvalue\n";
     }
-    exit($exitvalue);
   }
 
   function scheduler_greet()
@@ -133,14 +141,13 @@ abstract class Agent extends Object
 
   function initArsTable()
   {
-    if (!DB_TableExists($this->agentArs)) {
+    if (!$this->dbManager->existsTable($this->agentArs)) {
       $this->createArsTable();
     }
   }
 
   function writeArsRecord($uploadId,$arsId=0,$success=false,$status="")
   {
-
     $arsTableName = $this->agentArs;
     if ($arsId) {
       $this->dbManager->queryOnce("UPDATE $arsTableName SET ars_success='".($success ? "t" : "f")."', ars_endtime=now() ".(
@@ -187,7 +194,8 @@ abstract class Agent extends Object
     return $line;
   }
 
-  function run_scheduler_event_loop(){
+  function run_scheduler_event_loop()
+  {
     while (false !== ($line = $this->scheduler_current()))
     {
       $uploadId = intval($line);

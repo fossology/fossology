@@ -36,6 +36,10 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\BusinessRules\LicenseFilter;
 
+use Mockery as M;
+use Mockery\MockInterface;
+
+include_once(__DIR__.'/AgentTestMockHelper.php');
 
 class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 {
@@ -69,7 +73,6 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->newestEditedLicenseSelector = new LicenseFilter($this->clearingDecisionFilter);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->newestEditedLicenseSelector, $this->uploadDao);
-//    $this->clearingDecisionProcessor = new ClearingDecisionProcessor();
   }
 
   public function tearDown()
@@ -81,7 +84,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = null;
   }
 
-  private function runReuser($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  private function runReuserCli($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $sysConf = $this->testDb->getFossSysConf();
 
@@ -107,6 +110,53 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     return array($output,$retCode);
   }
 
+  private function runReuser($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  {
+    $GLOBALS['userId'] = $userId;
+    $GLOBALS['jobId'] = $jobId;
+    $GLOBALS['groupId'] = $groupId;
+
+    /* these appear not to be used by the reuser: mock them to something wrong
+     */
+    $this->clearingEventProcessor = M::mock(LicenseRef::classname());
+    $this->decisionTypes = M::mock(LicenseRef::classname());
+    $this->agentLicenseEventProcessor = M::mock(LicenseRef::classname());
+
+    $container = M::mock('Container');
+    $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
+    $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
+    $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
+    $container->shouldReceive('get')->with('businessrules.clearing_event_processor')->andReturn($this->clearingEventProcessor);
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_filter')->andReturn($this->clearingDecisionFilter);
+    $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
+    $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
+    $GLOBALS['container'] = $container;
+
+    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
+    $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
+    $GLOBALS['fgetsMock'] = $fgetsMock;
+
+    $exitval = 0;
+
+    ob_start();
+
+    if (!class_exists('ReuserAgent', false))
+    {
+      include(dirname(dirname(__DIR__)).'/agent/reuser.php');
+    } else {
+      $reuser = new ReuserAgent();
+
+      $reuser->scheduler_connect();
+      $reuser->run_scheduler_event_loop();
+      $reuser->scheduler_disconnect($exitval);
+    }
+
+    $output = ob_get_clean();
+
+    return array($output, $exitval);
+  }
+
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -117,13 +167,15 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n[DIRECTORIES]\nMODDIR = $fakeInstallationDir";
     file_put_contents($confFile, $config);
-    mkdir($fakeInstallationDir);
+    if (!is_dir($fakeInstallationDir))
+      mkdir($fakeInstallationDir);
 
     $topDir = dirname(dirname(dirname(dirname(__DIR__))));
     system("install -D $topDir/VERSION $sysConf");
 
-    system("ln -s $libDir $fakeInstallationDir/lib");
-    mkdir("$fakeInstallationDir/www/ui/", 0777, true);
+    system("ln -sf $libDir $fakeInstallationDir/lib");
+    if (!is_dir("$fakeInstallationDir/www/ui"))
+      mkdir("$fakeInstallationDir/www/ui/", 0777, true);
     touch("$fakeInstallationDir/www/ui/ui-menus.php");
 
     $testRepoDir = "$libDir/php/Test/";
@@ -173,8 +225,24 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     return $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearings);
   }
 
+
   /** @group Functional */
-  public function testReuserScanWithoutAnyUploadToCopyAndNoClearing()
+  public function testReuserMockedScanWithoutAnyUploadToCopyAndNoClearing()
+  {
+    $this->runnerReuserScanWithoutAnyUploadToCopyAndNoClearing(function($uploadId, $userId) {
+      return $this->runReuser($uploadId, $userId);
+    });
+  }
+
+  /** @group Functional */
+  public function testReuserRealScanWithoutAnyUploadToCopyAndNoClearing()
+  {
+    $this->runnerReuserScanWithoutAnyUploadToCopyAndNoClearing(function($uploadId, $userId) {
+      return $this->runReuserCli($uploadId, $userId);
+    });
+  }
+
+  private function runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -191,12 +259,69 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
-  private function getClearingLicenses()
+  /** @group Functional */
+  public function testReuserMockedScanWithoutAnyUploadToCopyAndAClearing()
   {
+    $this->runnerReuserScanWithoutAnyUploadToCopyAndAClearing(function($uploadId, $userId) {
+      return $this->runReuser($uploadId, $userId);
+    });
   }
 
   /** @group Functional */
-  public function testReuserScanWithALocalClearing()
+  public function testReuserRealScanWithoutAnyUploadToCopyAndAClearing()
+  {
+    $this->runnerReuserScanWithoutAnyUploadToCopyAndAClearing(function($uploadId, $userId) {
+      return $this->runReuserCli($uploadId, $userId);
+    });
+  }
+
+  private function runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, "42", "44");
+    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, "-42", "-44");
+
+    assertThat($addedLicense,notNullValue());
+    assertThat($removedLicense,notNullValue());
+
+    $addedLicenses = array($addedLicense);
+    $removedLicenses = array($removedLicense);
+
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses, $removedLicenses);
+
+    list($output,$retCode) = $this->runReuser($uploadId=3);
+
+    $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(0));
+
+    $bounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($bounds);
+    $relevantDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($decisions);
+    assertThat($relevantDecisions, is(emptyArray()));
+
+    $this->rmRepo();
+  }
+
+  /** @group Functional */
+  public function testReuserMockedScanWithALocalClearing()
+  {
+    $this->runnerReuserScanWithALocalClearing(function($uploadId, $userId) {
+      return $this->runReuser($uploadId, $userId);
+    });
+  }
+
+  /** @group Functional */
+  public function testReuserRealScanWithALocalClearing()
+  {
+    $this->runnerReuserScanWithALocalClearing(function($uploadId, $userId) {
+      return $this->runReuserCli($uploadId, $userId);
+    });
+  }
+
+  private function runnerReuserScanWithALocalClearing($runner)
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -217,7 +342,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
 
-    list($output,$retCode) = $this->runReuser($uploadId, $userId);
+    list($output,$retCode) = $runner($uploadId, $userId);
 
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
 
@@ -248,7 +373,22 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
   }
 
   /** @group Functional */
-  public function testReuserScanWithARepoClearing()
+  public function testReuserMockedScanWithARepoClearing()
+  {
+    $this->runnerReuserScanWithARepoClearing(function($uploadId, $userId) {
+      return $this->runReuser($uploadId, $userId);
+    });
+  }
+
+  /** @group Functional */
+  public function testReuserRealScanWithARepoClearing()
+  {
+    $this->runnerReuserScanWithARepoClearing(function($uploadId, $userId) {
+      return $this->runReuserCli($uploadId, $userId);
+    });
+  }
+
+  private function runnerReuserScanWithARepoClearing($runner)
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -266,24 +406,14 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $userId = 2;
     $originallyClearedItemId=23;
-    /*foreach ($addedLicenses as $addedLicense)
-    {
-      $this->clearingDao->addClearing($originallyClearedItemId, $userId, $addedLicense->getId(), ClearingEventTypes::USER);
-    }
-    foreach ($removedLicenses as $removedLicense)
-    {
-      $this->clearingDao->removeClearing($originallyClearedItemId, $userId, $removedLicense->getId(), ClearingEventTypes::USER);
-    }
 
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($originallyClearedItemId);
-    $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $global=true);*/
     $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $addedLicenses, $removedLicenses);
 
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
 
-    list($output,$retCode) = $this->runReuser($uploadId, $userId);
+    list($output,$retCode) = $runner($uploadId, $userId);
 
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
 
@@ -318,7 +448,6 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     /* reuser should have created a correct local event history */
     $newEvents = $this->clearingDao->getRelevantClearingEvents($userId, $originallyClearedItemId + $reusingUploadItemShift);
 
-    /* TODO this assert Fails: bug or bad expectation? */
     assertThat($newEvents, is(arrayWithSize(count($addedLicenses)+count($removedLicenses))));
 
     /** @var ClearingEvent $newEvent */
