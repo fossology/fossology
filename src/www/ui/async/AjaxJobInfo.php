@@ -15,51 +15,45 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+namespace Fossology\UI\Ajax;
+
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_jobinfo", _("Private: reply to job status information"));
-
-class ajaxJobInfo extends FO_Plugin
+class AjaxJobInfo extends DefaultPlugin
 {
-  /**
-   * @var DbManager
-   */
+  const NAME = "jobinfo";
+  /** @var DbManager */
   private $dbManager;
 
   function __construct()
   {
-    $this->Name = "jobinfo";
-    $this->Title = TITLE_jobinfo;
-    $this->DBaccess = PLUGIN_DB_READ;
-    $this->OutputType = 'JSON';
-    $this->LoginFlag = 0;
-    $this->NoMenu = 0;
+    parent::__construct(self::NAME, array(
+        self::PERMISSION => self::PERM_READ
+        // , 'outputtype' => 'JSON'
+    ));
 
-    parent::__construct();
-
-    global $container;
-    $this->dbManager = $container->get('db.manager');
+    $this->dbManager = $this->getObject('db.manager');
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @param Request $request
+   * @return Response
    */
-  function Output()
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-
     $userId = $_SESSION['UserId'];
-    $jqIds = (array)$_POST['jqIds'];
+    $jqIds = (array)$request->get('jqIds');
 
     $result = array();
     foreach($jqIds as $jq_pk) {
       $jobInfo = $this->dbManager->getSingleRow(
-        "SELECT jobqueue.jq_end_bits as end_bits FROM
-        jobqueue INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
-        WHERE jobqueue.jq_pk = $1 AND job_user_fk = $2",
-        array($jq_pk, $userId)
+        "SELECT jobqueue.jq_end_bits as end_bits FROM jobqueue INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
+          WHERE jobqueue.jq_pk = $1 AND job_user_fk = $2",
+          array($jq_pk, $userId)
        );
        if ($jobInfo !== false) {
          $result[$jq_pk] = array('end_bits' => $jobInfo['end_bits']);
@@ -67,19 +61,15 @@ class ajaxJobInfo extends FO_Plugin
     }
 
     ReportCachePurgeAll();
-
-    if (!empty($result)) {
-      header('Content-type: text/json');
-      return json_encode($result);
-    } else {
-      header('Content-type: text/json', true, 500);
-      return json_encode(array("error" => "no info"));
+    $status = empty($result) ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK;
+    if (empty($result)) {
+      $result = array("error" => "no info");
     }
+    $response = new Response(json_encode($result),$status,array('content-type'=>'text/json'));
+    return $response;
   }
-
+  
 }
 
-$NewPlugin = new ajaxJobInfo;
-$NewPlugin->Initialize();
-
+register_plugin(new AjaxJobInfo());
 
