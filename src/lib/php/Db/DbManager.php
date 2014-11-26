@@ -47,6 +47,12 @@ abstract class DbManager extends Object
     $this->dbDriver = $dbDriver;
   }
 
+  /** return Driver */
+  public function getDriver()
+  {
+    return $this->dbDriver;
+  }
+
   public function begin() {
     $this->dbDriver->begin();
   }

@@ -56,7 +56,6 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -A       = alphabet folders; organize uploads into folder a-c, d-f, etc.
     -AA num  = specify the number of letters per folder (default: 3); implies -A
     -n name  = (optional) name for the upload (default: name it after the file)
-    -e addr  = email results to addr
     -d desc  = (optional) description for the update
 
   FOSSology processing queue options:
@@ -94,6 +93,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
 
   Deprecated options:
     -a archive = (deprecated) see archive
+    -e addr    = (deprecated and ignored)
     -p path    = (deprecated) see -f
     -R         = (deprecated and ignored)
     -w         = (deprecated and ignored)
