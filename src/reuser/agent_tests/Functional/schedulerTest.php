@@ -169,7 +169,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     file_put_contents($confFile, $config);
     if (!is_dir($fakeInstallationDir))
     {
-      mkdir($fakeInstallationDir, 077, true);
+      mkdir($fakeInstallationDir, 0777, true);
       system("ln -sf $libDir $fakeInstallationDir/lib");
       if (!is_dir("$fakeInstallationDir/www/ui")) {
         mkdir("$fakeInstallationDir/www/ui/", 0777, true);
@@ -227,6 +227,14 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     return $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearings);
   }
 
+  private function copyClearingLicenseAsReused (ClearingLicense $clearingLicense)
+  {
+    return new ClearingLicense(
+      $clearingLicense->getLicenseRef(), $clearingLicense->isRemoved(),
+      $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
+      $clearingLicense->getReportinfo(), $clearingLicense->getComment()
+    );
+  }
 
   /** @group Functional */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndNoClearing()
@@ -282,8 +290,8 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, "-42", "-44");
+    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
     assertThat($addedLicense,notNullValue());
     assertThat($removedLicense,notNullValue());
@@ -330,8 +338,8 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, "-42", "-44");
+    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
     assertThat($addedLicense,notNullValue());
     assertThat($removedLicense,notNullValue());
@@ -397,8 +405,8 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, "-42", "-44");
+    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
     assertThat($addedLicense,notNullValue());
     assertThat($removedLicense,notNullValue());
@@ -452,10 +460,13 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     assertThat($newEvents, is(arrayWithSize(count($addedLicenses)+count($removedLicenses))));
 
+    $expectedAdded = array($this->copyClearingLicenseAsReused($addedLicense));
+    $expectedRemoved = array($this->copyClearingLicenseAsReused($removedLicense));
+
     /** @var ClearingEvent $newEvent */
     foreach($newEvents as $newEvent)
     {
-      assertThat($newEvent->getClearingLicense(), anyOf($newEvent->isRemoved() ? $removedLicenses : $addedLicenses));
+      assertThat($newEvent->getClearingLicense(), anyOf($newEvent->isRemoved() ? $expectedRemoved : $expectedAdded));
     }
 
     $this->rmRepo();

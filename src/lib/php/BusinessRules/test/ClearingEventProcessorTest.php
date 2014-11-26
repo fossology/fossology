@@ -83,30 +83,27 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testGetStateShouldReturnNothingForEmptyArrays()
   {
-    assertThat($this->clearingEventProcessor->getState(array()), is(array(array(), array())));
+    assertThat($this->clearingEventProcessor->getClearingLicenses(array()), is(array()));
   }
 
   public function testGetStateWithSingleAddedEvent()
   {
     $license = array($this->addedName => $this->addedLicense);
-    assertThat($this->clearingEventProcessor->getState(array($this->addedEvent)),
-        is(array($license, $license)));
+    assertThat($this->clearingEventProcessor->getClearingLicenses(array($this->addedEvent)),
+        is($license));
   }
 
   public function testGetStateWithSingleRemovedEvent()
   {
-    assertThat($this->clearingEventProcessor->getState(array($this->removedEvent)),
-        is(array(array(), array($this->removedName => $this->removedLicense))));
+    assertThat($this->clearingEventProcessor->getClearingLicenses(array($this->removedEvent)),
+        is(array($this->removedName => $this->removedLicense)));
   }
 
   public function testGetStateWithAddedAndRemovedEvent()
   {
-    assertThat($this->clearingEventProcessor->getState(array($this->addedEvent, $this->removedEvent)),
-        is(array(
-            array($this->addedName => $this->addedLicense),
-            array(
-                $this->addedName => $this->addedLicense,
-                $this->removedName => $this->removedLicense))));
+    assertThat($this->clearingEventProcessor->getClearingLicenses(array($this->addedEvent, $this->removedEvent)),
+        is(array($this->addedName => $this->addedLicense,
+                $this->removedName => $this->removedLicense)));
   }
 
   public function testFilterEventsByTimeWhenNoTimeIsSet()

@@ -67,6 +67,10 @@ class ReuserAgent extends Agent
 
   function processUploadId($uploadId)
   {
+    /* TODO here it feels like we need a transaction
+     * but it also feels like it would have too big a scope
+     */
+
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);

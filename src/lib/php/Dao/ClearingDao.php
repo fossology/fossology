@@ -253,7 +253,7 @@ class ClearingDao extends Object
         $res = $this->dbManager->execute($tbdColumnStatementName, array($currentUploadTreeId, $license, $type));
         $this->dbManager->freeResult($res);
         $aDecEvent = array('uploadtree_fk' => $currentUploadTreeId, 'user_fk' => $userId,
-            'rf_fk' => $license, 'is_removed' => $removed, 'job_fk' => $jobId,
+            'rf_fk' => $license, 'removed' => $removed, 'job_fk' => $jobId,
             'type_fk' => $type, 'comment' => $comment, 'reportinfo' => $remark);
         $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog = __METHOD__);
       }
@@ -365,7 +365,11 @@ ORDER BY CD.date_added DESC LIMIT 1
    */
   public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $licenses, $removedLicenses = array())
   {
-    $this->dbManager->begin();
+    $needTransaction = !$this->dbManager->isInTransaction();
+    if ($needTransaction) $this->dbManager->begin();
+
+    $this->removeWipClearingDecision($uploadTreeId, $userId);
+    $this->removeClearingEvents($uploadTreeId, $userId);
 
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -389,23 +393,31 @@ INSERT INTO clearing_decision (
     $clearingDecisionId = $result['clearing_decision_pk'];
     $this->dbManager->freeResult($res);
 
-    $statementNameLicenseInsert = __METHOD__ . ".insertLicense";
-    $this->dbManager->prepare($statementNameLicenseInsert, "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6)");
+    $statementNameClearingLicenseInsert = __METHOD__ . ".insertClearingLicense";
+    $this->dbManager->prepare($statementNameClearingLicenseInsert, "INSERT INTO clearing_licenses (clearing_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6)");
+
+    $statementNameClearingEventInsert = __METHOD__ . ".insertClearingEvent";
+    $this->dbManager->prepare($statementNameClearingEventInsert, "INSERT INTO clearing_event (uploadtree_fk, user_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6, $7)");
+
     foreach (array_merge($licenses,$removedLicenses) as $clearingLicense)
     {
-      $res = $this->dbManager->execute(
-        $statementNameLicenseInsert,
-        array(
-          $clearingDecisionId,
+      $commonParm = array(
           $clearingLicense->getLicenseId(), $this->dbManager->booleanToDb($clearingLicense->isRemoved()),
           $clearingLicense->getType(),
           $clearingLicense->getComment(), $clearingLicense->getReportInfo()
-        )
-      );
-      $this->dbManager->freeResult($res);
+        );
+
+      $clearingLicensesParm = $commonParm;
+      $clearingEventsParm = $commonParm;
+
+      array_unshift($clearingLicensesParm, $clearingDecisionId);
+      array_unshift($clearingEventsParm, $uploadTreeId, $userId);
+
+      $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingLicenseInsert, $clearingLicensesParm));
+      $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingEventInsert, $clearingEventsParm));
     }
 
-    $this->dbManager->commit();
+    if ($needTransaction) $this->dbManager->commit();
   }
 
   /**
@@ -433,7 +445,7 @@ INSERT INTO clearing_decision (
     LR.rf_shortname,
     LR.rf_fullname,
     LD.type_fk event_type,
-    LD.is_removed,
+    LD.removed,
     LD.reportinfo,
     LD.comment
   FROM clearing_event LD
@@ -443,8 +455,8 @@ INSERT INTO clearing_decision (
   WHERE LD.uploadtree_fk = $1
     AND GU2.user_fk=$2
   GROUP BY LD.clearing_event_pk, LD.uploadtree_fk, LD.date_added, LD.user_fk, LD.job_fk, 
-      GU.group_fk,LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.type_fk, LD.is_removed, LD.reportinfo, LD.comment
-  ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.is_removed ASC
+      GU.group_fk,LD.rf_fk, LR.rf_shortname, LR.rf_fullname, LD.type_fk, LD.removed, LD.reportinfo, LD.comment
+  ORDER BY LD.date_added ASC, LD.rf_fk ASC, LD.removed ASC
         ");
     $res = $this->dbManager->execute(
         $statementName,
@@ -453,7 +465,7 @@ INSERT INTO clearing_decision (
     $orderedEvents = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $row['is_removed'] = $this->dbManager->booleanFromDb($row['is_removed']);
+      $row['removed'] = $this->dbManager->booleanFromDb($row['removed']);
       $licenseRef = new LicenseRef(intval($row['rf_fk']), $row['rf_shortname'], $row['rf_fullname']);
       $licenseDecisionEventBuilder = new ClearingEventBuilder();
       $licenseDecisionEventBuilder->setEventId($row['clearing_event_pk'])
@@ -463,7 +475,7 @@ INSERT INTO clearing_decision (
           ->setGroupId($row['group_fk'])
           ->setEventType($row['event_type'])
           ->setLicenseRef($licenseRef)
-          ->setRemoved($row['is_removed'])
+          ->setRemoved($row['removed'])
           ->setReportinfo($row['reportinfo'])
           ->setComment($row['comment']);
 
@@ -523,6 +535,13 @@ INSERT INTO clearing_decision (
 
   }
 
+  public function removeClearingEvents($uploadTreeId, $userId)
+  {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, "DELETE FROM clearing_event WHERE uploadtree_fk = $1 AND user_fk = $2");
+    $this->dbManager->freeResult($this->dbManager->execute($stmt, array($uploadTreeId, $userId)));
+  }
+
   public function insertClearingEvent($uploadTreeId, $userId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '')
   {
     $this->markDecisionAsWip($uploadTreeId, $userId);
@@ -530,7 +549,7 @@ INSERT INTO clearing_decision (
 
     $this->dbManager->insertTableRow('clearing_event', array(
         'uploadtree_fk' => $uploadTreeId, 'user_fk' => $userId, 'rf_fk' => $licenseId, 'type_fk' => $type,
-        'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
+        'removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
   }
 
   public function insertHistoricalClearingEvent(DateTime $dateAdded, $uploadTreeId, $userId, $jobId, $licenseId, $type, $isRemoved, $reportInfo = '', $comment = '')
@@ -539,7 +558,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->insertTableRow('clearing_event', array(
         'date_added' => $dateAdded->format("Y-m-d H:i:s.u"), 'job_fk' => $jobId,
         'uploadtree_fk' => $uploadTreeId, 'user_fk' => $userId, 'rf_fk' => $licenseId, 'type_fk' => $type,
-        'is_removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
+        'removed' => $insertIsRemoved, 'reportinfo' => $reportInfo, 'comment' => $comment));
   }
 
   public function getItemsChangedBy($jobId)

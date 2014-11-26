@@ -147,7 +147,7 @@ class DeciderAgent extends Agent
       $this->clearingDao->markDecisionAsWip($itemId, $userId);
     }
     $this->heartbeat(1);
-    
+
     $this->dbManager->commit();  /* end transaction */
   }
 }

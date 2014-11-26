@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingResult;
@@ -41,16 +42,20 @@ class ClearingDecisionProcessor
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
 
+  /** @var DbManager */
+  private $dbManager;
+
   /**
    * @param ClearingDao $clearingDao
    * @param AgentLicenseEventProcessor $agentLicenseEventProcessor
    * @param ClearingEventProcessor $clearingEventProcessor
    */
-  public function __construct(ClearingDao $clearingDao, AgentLicenseEventProcessor $agentLicenseEventProcessor, ClearingEventProcessor $clearingEventProcessor)
+  public function __construct(ClearingDao $clearingDao, AgentLicenseEventProcessor $agentLicenseEventProcessor, ClearingEventProcessor $clearingEventProcessor, DbManager $dbManager)
   {
     $this->clearingDao = $clearingDao;
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
     $this->clearingEventProcessor = $clearingEventProcessor;
+    $this->dbManager = $dbManager;
   }
 
   public function getUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $userId) {
@@ -61,6 +66,26 @@ class ClearingDecisionProcessor
     $clearingLicenseRefs = $this->clearingEventProcessor->getClearingLicenseRefs($events);
 
     return array_diff_key($scannerDetectedLicenses, $clearingLicenseRefs);
+  }
+
+  private function getClearingLicensesForAgentFindings(ItemTreeBounds $itemBounds, $remove = false)
+  {
+    $clearingLicenses = array();
+    foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $scannerLicenseRef)
+    {
+      $licId = $scannerLicenseRef->getId();
+      $clearingLicensesToDo[$licId] = new ClearingLicense($scannerLicenseRef, $remove, ClearingEventTypes::AGENT);
+    }
+    return $clearingLicenses;
+  }
+
+  public function makeClearingEventToSetNoLicense(ItemTreeBounds $itemBounds, $userId)
+  {
+    $itemId = $itemBounds->getItemId();
+
+    $this->clearingDao->removeClearingEvents($itemId, $userId);
+    $clearingLicensesToDo = $this->getClearingLicensesForAgentFindings($itemBounds, true);
+    $this->insertClearingEventsForClearingLicenses($itemId, $userId, $clearingLicensesToDo);
   }
 
   /**
@@ -76,45 +101,34 @@ class ClearingDecisionProcessor
       return;
     }
 
+    $needTransaction = !$this->dbManager->isInTransaction();
+    if ($needTransaction) $this->dbManager->begin();
+
     $itemId = $itemBounds->getItemId();
-    list($lastDecision, $lastType) = $this->getRelevantClearingDecisionParameters($userId, $itemId);
-    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
-
-    $previousSelection = $this->clearingEventProcessor->getClearingLicensesAt($lastDecision, $events);
-    $selection = $this->clearingEventProcessor->getClearingLicenses($events);
-
-    $addedLicenses = $this->clearingEventProcessor->getStateChanges($previousSelection, $selection);
-
-    $insertDecision = $type !== $lastType || count($addedLicenses) > 0;
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
+      $this->makeClearingEventToSetNoLicense($itemBounds, $userId);
       $type = DecisionTypes::IDENTIFIED;
-      $newselection = array();
-      foreach($selection as $clearingLicense) {
-        if (!$clearingLicense->isRemoved()) {
-          $newselection[] = $clearingLicense->copyNegated();
-        }
-      }
-
-      foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $scannerLicenseRef) {
-        $newselection[] = new ClearingLicense($scannerLicenseRef, true, ClearingEventTypes::USER);
-      }
-
-      $selection = $newselection;
-
-      if (count($selection)>0) {
-        $this->insertClearingEventsForClearingLicenses($itemId, $userId, $selection);
-      }
-
-      $insertDecision = count($selection) > 0;
+    }
+    else
+    {
+      $agentClearingLicenses = $this->getClearingLicensesForAgentFindings($itemBounds);
+      $this->insertClearingEventsForClearingLicenses($itemId, $userId, $agentClearingLicenses);
+      $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds);
     }
 
-    if ($insertDecision)
+    list($lastDecision, $lastType) = $this->getRelevantClearingDecisionParameters($userId, $itemId);
+    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+
+    $clearingLicensesToDecide = $this->clearingEventProcessor->getClearingLicenses($events);
+    if ($type !== $lastType || count($clearingLicensesToDecide) > 0)
     {
       $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
-      $this->insertClearingDecision($userId, $itemId, $type, $scope, $selection);
+      $this->insertClearingDecision($userId, $itemId, $type, $scope, $clearingLicensesToDecide);
     }
+
+    if ($needTransaction) $this->dbManager->commit();
   }
 
   /**
@@ -205,7 +219,6 @@ class ClearingDecisionProcessor
   private function insertClearingDecision($userId, $itemId, $type, $scope, $addedLicenses, $removedLicenses = array())
   {
     $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $scope, $addedLicenses, $removedLicenses);
-    $this->clearingDao->removeWipClearingDecision($itemId, $userId);
     ReportCachePurgeAll();
   }
 

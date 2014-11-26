@@ -124,7 +124,14 @@ class ClearingLicense extends Object
 
   public function __toString()
   {
-    return "ClearingLicense(".($this->isRemoved() ? "-" : "").$this->getLicenseRef().",comment=".$this->comment.",reportinfo=".$this->reportInfo.")";
+    $eventTypes = new ClearingEventTypes();
+    return "ClearingLicense("
+       .($this->isRemoved() ? "-" : "")
+       .$this->getLicenseRef()
+       .",type='".($eventTypes->getTypeName($this->type))."'(".$this->type.")"
+       .",comment='".$this->comment."'"
+       .",reportinfo='".$this->reportInfo."'"
+      .")";
 
   }
 

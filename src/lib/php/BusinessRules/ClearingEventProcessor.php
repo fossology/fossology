@@ -78,19 +78,9 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param ClearingLicense[] $previousSelection
-   * @param ClearingLicense[] $currentSelection
-   * @return ClearingLicense[][]
-   */
-  public function getStateChanges($previousSelection, $currentSelection)
-  {
-    return array_diff($previousSelection, $currentSelection);
-  }
-
-  /**
    * @param ClearingEvent[] $events
    * @param DateTime|null $lastDecisionDate
-   * @return array
+   * @return ClearingEvent[]
    */
   public function selectEventsUntilTime($events, $lastDecisionDate)
   {

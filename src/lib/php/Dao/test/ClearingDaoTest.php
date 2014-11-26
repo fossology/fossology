@@ -190,7 +190,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
       $i++;
       list($item,$user,$rf,$isRm,$t) = $lp;
       $this->dbManager->insertInto('clearing_event',
-          'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
+          'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, removed, type_fk, date_added',
           array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
     }
   }
@@ -277,7 +277,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     foreach($oldlicenses as $lic)
     {
       $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid,
-          'rf_fk'=>$lic, 'is_removed'=>$removed, 'job_fk' =>$jobfk,
+          'rf_fk'=>$lic, 'removed'=>$removed, 'job_fk' =>$jobfk,
           'type_fk'=>ClearingEventTypes::USER, 'comment'=>$comment, 'reportinfo'=>$remark);
       $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
     }

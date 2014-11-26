@@ -576,10 +576,10 @@
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
   $Schema["TABLE"]["clearing_licenses"]["rf_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"removed\" bool;";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT false;";
-  $Schema["TABLE"]["clearing_licenses"]["removed"]["UPDATE"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["is_removed"]["DESC"] = "";
+  $Schema["TABLE"]["clearing_licenses"]["is_removed"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"is_removed\" bool;";
+  $Schema["TABLE"]["clearing_licenses"]["is_removed"]["ALTER"] = "ALTER TABLE \"clearing_licenses\" ALTER COLUMN \"is_removed\" SET NOT NULL, ALTER COLUMN \"removed\" SET DEFAULT false;";
+  $Schema["TABLE"]["clearing_licenses"]["is_removed"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_licenses"]["type_fk"]["DESC"] = "COMMENT ON COLUMN \"clearing_licenses\".\"type_fk\" IS 'type id of event refer to user, bulk, ...'";
   $Schema["TABLE"]["clearing_licenses"]["type_fk"]["ADD"] = "ALTER TABLE \"clearing_licenses\" ADD COLUMN \"type_fk\" int4;";
