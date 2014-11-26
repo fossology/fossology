@@ -134,7 +134,7 @@ class ReuserAgent extends Agent
         $itemId,
         $this->userId,
         $this->jobId,
-        $clearingLicense->getId(),
+        $clearingLicense->getLicenseId(),
         $clearingDecision->getType(),
         $clearingLicense->isRemoved(),
         $clearingLicense->getReportInfo(),

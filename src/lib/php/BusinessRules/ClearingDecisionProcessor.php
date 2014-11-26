@@ -154,9 +154,9 @@ class ClearingDecisionProcessor
    * @param ClearingLicense[] $clearinLicenses
    * @param int $eventType
    */
-  protected function insertClearingEventsForClearingLicenses($itemId, $userId, $clearinLicenses, $eventType)
+  protected function insertClearingEventsForClearingLicenses($itemId, $userId, $clearingLicenses, $eventType)
   {
-    foreach ($clearinLicenses as $clearingLicense)
+    foreach ($clearingLicenses as $clearingLicense)
     {
       $this->clearingDao->insertClearingEventFromClearingLicense($itemId, $userId, $clearingLicense, $eventType);
     }

@@ -92,7 +92,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $isGlobal = false;
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
-    $addedLicense = $addedEvent->getLicenseRef();
+    $addedLicense = $addedEvent->getClearingLicense();
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
@@ -120,7 +120,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $isGlobal = true;
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
-    $addedLicense = $addedEvent->getLicenseRef();
+    $addedLicenseId = $addedEvent->getLicenseId();
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
@@ -137,7 +137,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn($clearingDecision);
 
-    $this->clearingDao->shouldReceive("removeClearing")->once()->with($this->uploadTreeId, $this->userId, $addedLicense->getId(), ClearingEventTypes::USER);
+    $this->clearingDao->shouldReceive("insertClearingEventFromClearingLicense")->once()->with($this->uploadTreeId, $this->userId, $addedEvent->getClearingLicense(), ClearingEventTypes::USER);
 
     $this->clearingDao->shouldReceive("insertClearingDecision")->never();
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->never();
@@ -151,7 +151,6 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $eventTime = new DateTime();
     $eventTime->sub(new DateInterval("PT2H"));
     $addedEvent = $this->createClearingEvent(123, $eventTime, 13, "licA", "License A");
-    $addedLicense = $addedEvent->getLicenseRef();
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->userId, $this->uploadTreeId)
@@ -168,7 +167,8 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->userId, $this->uploadTreeId)
         ->andReturn($clearingDecision);
 
-    $this->clearingDao->shouldReceive("removeClearing")->once()->with($this->uploadTreeId, $this->userId, $addedLicense->getId(), ClearingEventTypes::USER);
+
+    $this->clearingDao->shouldReceive("insertClearingEventFromClearingLicense")->once()->with($this->uploadTreeId, $this->userId, $addedEvent->getClearingLicense(), ClearingEventTypes::USER);
 
     $this->clearingDao->shouldReceive("insertClearingDecision")->once();
     $this->clearingDao->shouldReceive("removeWipClearingDecision")->once();
