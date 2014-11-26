@@ -51,7 +51,7 @@ abstract class DefaultPlugin implements Plugin
   protected $container;
 
   /** @var Twig_Environment */
-  private $renderer;
+  protected $renderer;
 
   /** @var Logger */
   private $logger;

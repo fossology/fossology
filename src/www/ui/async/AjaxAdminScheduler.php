@@ -48,31 +48,22 @@ class AjaxAdminScheduler extends DefaultPlugin
   {
     $V = '';
     $operation = $request->get('operation');
-    $job_list_option = $this->jobListOption($operation);
-    if ('pause' == $operation || 'restart' == $operation)
+    $vars['jobOptions'] = $this->jobListOption($operation);
+    $vars['operation'] = $operation;
+    $vars['priorityList'] = $this->priorityListOption();
+    $content = $this->renderer->loadTemplate('ajax-admin-scheduler.html.twig')->render($vars);
+    
+    if ('pause' == $operation || 'restart' == $operation || 'status' == $operation || 'priority' == $operation)
     {
-      $text = _("Select a job");
-      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
+      $V = $content;
     }
     else if ('verbose' == $operation)
     {
       $verbose_list_option = $this->verboseListOption();
-      $text1 = _("Select the scheduler or a job");
       $text2 = _("Select a verbosity level");
-      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
+      $V = $content."<br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
     }
-    else if ('status' == $operation)
-    {
-      $text = _("Select the scheduler or a job");
-      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
-    }
-    else if ('priority' == $operation)
-    {
-      $priority_list_option = $this->priorityListOption();
-      $text1 = _("Select a job");
-      $text2 = _("Select a priority level");
-      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
-    }
+
     else if('agents' == $operation)
     {
       /** @var DbManager */
@@ -93,37 +84,34 @@ class AjaxAdminScheduler extends DefaultPlugin
   /**
    * @brief get the job list for the specified operation
    * @param string $type operation type
-   * @return string job list of option elements
+   * @return array job list of option elements
    **/
   function jobListOption($type)
   {
     if (empty($type))
     {
-      return '';
+      return array();
     }
     
-    $job_list_option = "";
     $job_array = array();
     if ('status' == $type || 'verbose' == $type || 'priority' == $type)
     {
-      /* you can select scheduler besides jobs for 'status' and 'verbose',
-       for 'priority', only jobs to select */
+      $job_array = GetRunnableJobList();
       if ('priority' != $type)
       {
-        $job_list_option .= "<option value='0'>scheduler</option>";
+        $job_array[0] = "scheduler";
       }
-      $job_array = GetRunnableJobList();
     }
-    /* get job list from the table jobqueque */
-    if ('pause' == $type)  $job_array = GetJobList("tart");
-    if ('restart' == $type)  $job_array = GetJobList("Paused");
-
-    for($i = 0; $i < count($job_array); $i++)
+    if ('pause' == $type)
+      $job_array = GetJobList("tart");
+    if ('restart' == $type)
+      $job_array = GetJobList("Paused");
+    $job_options = array();
+    foreach($job_array as $job_id)
     {
-      $job_id = $job_array[$i];
-      $job_list_option .= "<option value='$job_id'>$job_id</option>";
+      $job_option[$job_id] = $job_id;
     }
-    return $job_list_option;
+    return $job_array;
   }
 
   /**
@@ -144,20 +132,19 @@ class AjaxAdminScheduler extends DefaultPlugin
   }
 
   /**
-   * @brief get the priority list for setting, -20-20
+   * @brief get the priority list for setting, -20..20
    * @return string of priority options
    **/
   function priorityListOption()
   {
-    $priority_list_option = "";
     $min = -20;
     $max = 20;
+    $priority_list = array();
     for ($i = $min; $i <= $max; $i++)
     {
-      $selected = (0 == $i) ? ' selected="selected"' : '';
-      $priority_list_option .= "<option $selected value=\"$i\">$i</option>";
+      $priority_list[$i]=$i;
     }
-    return $priority_list_option;
+    return $priority_list;
   }
 
 }
