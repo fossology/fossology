@@ -151,16 +151,7 @@ class AjaxClearingView extends FO_Plugin
 
   function OutputOpen()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return null;
-    }
-    $uploadId = GetParm("upload", PARM_INTEGER);
-    if (empty($uploadId))
-    {
-      return null;
-    }
-
+    // nothing
   }
 
 
@@ -171,11 +162,6 @@ class AjaxClearingView extends FO_Plugin
       return 0;
     }
     $output = $this->jsonContent();
-    if (!$this->OutputToStdout)
-    {
-      $this->vars['content'] = $output;
-      return null;
-    }
     if ($output === "success")
     {
       header('Content-type: text/plain');
@@ -193,10 +179,6 @@ class AjaxClearingView extends FO_Plugin
     $action = GetParm("do", PARM_STRING);
     $uploadId = GetParm("upload", PARM_INTEGER);
     $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($action) || empty($uploadId) || empty($uploadTreeId))
-    {
-      return "";
-    }
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     $sort0 = GetParm("sSortDir_0", PARM_STRING);
 
@@ -234,6 +216,9 @@ class AjaxClearingView extends FO_Plugin
           $this->clearingDao->updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo);
         }
         return "success";
+        
+      default:
+        return "fail";
     }
   }
 
