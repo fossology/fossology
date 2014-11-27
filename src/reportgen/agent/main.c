@@ -432,8 +432,7 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
 
 int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const char* keyName)
 {
-  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
-  if ((jobj==NULL) || ((int)jobj < 0))
+  if ((jobj==NULL) || is_error(jobj))
     return 0;
 
   int result = 0;
