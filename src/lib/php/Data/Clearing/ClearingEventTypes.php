@@ -37,7 +37,7 @@ class ClearingEventTypes extends Types {
     );
 
     foreach(array_keys($this->map) as $key) {
-      $newKey = $key | slef::REUSED_BIT;
+      $newKey = $key | self::REUSED_BIT;
       $this->map[$newKey] = $this->getTypeName($newKey);
     }
   }

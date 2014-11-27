@@ -227,13 +227,17 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     return $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearings);
   }
 
-  private function copyClearingLicenseAsReused (ClearingLicense $clearingLicense)
+  private function copyClearingLicensesAsReused($clearingLicenses)
   {
-    return new ClearingLicense(
-      $clearingLicense->getLicenseRef(), $clearingLicense->isRemoved(),
-      $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
-      $clearingLicense->getReportinfo(), $clearingLicense->getComment()
-    );
+    $result = array();
+    foreach($clearingLicenses as $clearingLicense) {
+      $result[] = new ClearingLicense(
+        $clearingLicense->getLicenseRef(), $clearingLicense->isRemoved(),
+        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
+        $clearingLicense->getReportinfo(), $clearingLicense->getComment()
+        );
+    }
+    return $result;
   }
 
   /** @group Functional */
@@ -285,6 +289,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     });
   }
 
+
   private function runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
   {
     $this->setUpTables();
@@ -334,16 +339,12 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
+    $clearingLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $clearingLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
-    assertThat($addedLicense,notNullValue());
-    assertThat($removedLicense,notNullValue());
+    assertThat($clearingLicenses, not(arrayContaining(null)));
 
-    $addedLicenses = array($addedLicense);
-    $removedLicenses = array($removedLicense);
-
-    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses); // TODO see line 300 , $removedLicenses);
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $clearingLicenses);
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
@@ -367,8 +368,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     assertThat($newClearing, not(equalTo($potentiallyReusableClearing)));
 
-    assertThat($newClearing->getPositiveLicenses(), arrayContainingInAnyOrder($addedLicenses));
-    assertThat($newClearing->getNegativeLicenses(), arrayContainingInAnyOrder($removedLicenses));
+    assertThat($newClearing->getClearingLicenses(), arrayContainingInAnyOrder($this->copyClearingLicensesAsReused($clearingLicenses)));
 
     assertThat($newClearing->getType(), equalTo($potentiallyReusableClearing->getType()));
     assertThat($newClearing->getScope(), equalTo($potentiallyReusableClearing->getScope()));
@@ -401,19 +401,15 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
+    $clearingLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $clearingLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
-    assertThat($addedLicense,notNullValue());
-    assertThat($removedLicense,notNullValue());
-
-    $addedLicenses = array($addedLicense);
-    $removedLicenses = array($removedLicense);
+    assertThat($clearingLicenses, not(arrayContaining(null)));
 
     $userId = 2;
     $originallyClearedItemId=23;
 
-    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $addedLicenses); // TODO
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $clearingLicenses);
 
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
@@ -443,8 +439,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     /* reuser should have not created a new clearing decision */
     assertThat($newClearing->getClearingId(), equalTo($potentiallyReusableClearing->getClearingId()));
 
-    assertThat($newClearing->getPositiveLicenses(), arrayContainingInAnyOrder($addedLicenses));
-    assertThat($newClearing->getNegativeLicenses(), arrayContainingInAnyOrder($removedLicenses));
+    assertThat($newClearing->getClearingLicenses(), arrayContainingInAnyOrder($clearingLicenses));
 
     assertThat($newClearing->getType(), equalTo($potentiallyReusableClearing->getType()));
     assertThat($newClearing->getScope(), equalTo($potentiallyReusableClearing->getScope()));
@@ -454,15 +449,14 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     /* reuser should have created a correct local event history */
     $newEvents = $this->clearingDao->getRelevantClearingEvents($userId, $originallyClearedItemId + $reusingUploadItemShift);
 
-    assertThat($newEvents, is(arrayWithSize(count($addedLicenses)+count($removedLicenses))));
+    assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
-    $expectedAdded = array($this->copyClearingLicenseAsReused($addedLicense));
-    $expectedRemoved = array($this->copyClearingLicenseAsReused($removedLicense));
+    $expectedClearingLicenses = $this->copyClearingLicensesAsReused($clearingLicenses);
 
     /** @var ClearingEvent $newEvent */
     foreach($newEvents as $newEvent)
     {
-      assertThat($newEvent->getClearingLicense(), anyOf($newEvent->isRemoved() ? $expectedRemoved : $expectedAdded));
+      assertThat($newEvent->getClearingLicense(), anyOf($expectedClearingLicenses));
     }
 
     $this->rmRepo();

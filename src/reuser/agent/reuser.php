@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
@@ -107,11 +108,14 @@ class ReuserAgent extends Agent
       /** @var ClearingDecision $clearingDecision */
       $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
 
-      $this->insertHistoricalClearingEvent($clearingDecision, $item);
       $fileId = $item->getFileId();
       if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
       {
         $this->createCopyOfClearingDecision($item->getId(), $clearingDecisionToImportByFileId[$fileId]);
+      }
+      else
+      {
+        $this->insertHistoricalClearingEventsFrom($clearingDecision, $item);
       }
 
       $this->heartbeat(1);
@@ -126,8 +130,7 @@ class ReuserAgent extends Agent
    * @param LicenseRef $license
    * @param boolean $remove
    */
-  protected
-  function insertHistoricalClearingEvent(ClearingDecision $clearingDecision, Item $item)
+  protected function insertHistoricalClearingEventsFrom(ClearingDecision $clearingDecision, Item $item)
   {
     $dateTime = $clearingDecision->getDateAdded();
     $dateTime->sub(new DateInterval('PT1S'));
@@ -165,6 +168,24 @@ class ReuserAgent extends Agent
   }
 
   /**
+   * @param ClearingLicense[] $clearingLicenses
+   * @return ClearingLicense[]
+   */
+  protected function getReusedClearingLicenses($clearingLicenses) {
+    $result = array();
+    foreach($clearingLicenses as $clearingLicense) {
+      $result[] = new ClearingLicense(
+        $clearingLicense->getLicenseRef(),
+        $clearingLicense->isRemoved(),
+        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
+        $clearingLicense->getReportInfo(),
+        $clearingLicense->getComment()
+      );
+    }
+    return $result;
+  }
+
+  /**
    * @param int $itemId
    * @param ClearingDecision $clearingDecisionToCopy
    */
@@ -175,7 +196,7 @@ class ReuserAgent extends Agent
         $this->userId,
         $clearingDecisionToCopy->getType(),
         $clearingDecisionToCopy->getScope(),
-        $clearingDecisionToCopy->getClearingLicenses()
+        $this->getReusedClearingLicenses($clearingDecisionToCopy->getClearingLicenses())
     );
   }
 }

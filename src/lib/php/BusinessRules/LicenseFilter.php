@@ -45,28 +45,6 @@ class LicenseFilter extends Object
    */
   public function extractGoodLicensesPerItem($editedDecArray)
   {
-    /*$editedLicensesArrayGrouped = array();
-    foreach ($editedDecArray as $editedLicense)
-    {
-      $pfileId = $editedLicense->getPfileId();
-      if (!array_key_exists($pfileId, $editedLicensesArrayGrouped))
-      {
-        $editedLicensesArrayGrouped[$pfileId] = array($editedLicense);
-      } else
-      {
-        $editedLicensesArrayGrouped[$pfileId][] = $editedLicense;
-      }
-    }
-
-    $goodLicenses = array();
-    foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
-    {
-      if ($licArr !== null)
-      {
-        $goodLicenses[$fileId] = $licArr;
-      }
-    }*/
-
     $goodLicenses = $this->selectNewestEditedLicensePerItem($editedDecArray);
 
     return $goodLicenses;

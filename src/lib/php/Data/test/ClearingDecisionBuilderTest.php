@@ -23,6 +23,10 @@ namespace Fossology\Lib\Data;
 use DateTime;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
+
+//TODO what is wrong here?
+//use Mockery\Mock as M;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -33,10 +37,8 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   /** @var bool */
   private $sameFolder = true;
 
-  /** @var LicenseRef[] */
-  private $positiveLicenses;
-  /** @var LicenseRef[] */
-  private $negativeLicenses;
+  /** @var ClearingLicense[] */
+  private $clearingLicenses;
 
   /** @var int */
   private $clearingId;
@@ -75,8 +77,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
-    $this->positiveLicenses = array(new LicenseRef(8, "testSN", "testFN"), new LicenseRef(100, "test2SN", "test2FN"), new LicenseRef(1007, "test3SN", "test3FN"));
-    $this->negativeLicenses = array();
+ //   $this->clearingLicenses = M::mock('Fossology\Lib\Data\Clearing\ClearingLicense');
     $this->clearingId = 8;
     $this->uploadTreeId = 9;
     $this->pfileId = 10;
@@ -87,8 +88,13 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->reportinfo = "Test reportinfo";
     $this->scope = DecisionScopes::ITEM;
     $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
-    
+
     $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);
+  }
+
+  public function tearDown()
+  {
+    //M::close();
   }
 
   public function testSameUpload()
@@ -107,13 +113,28 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
   }
 
-  //TODO test public function testPositiveLicenses()
-  public function testPositiveLicenses()
+  public function testClearingLicenses()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setClearingLicenses($this->positiveLicenses)
+        ->setClearingLicenses($this->clearingLicenses)
         ->build();
-    assertThat($clearingDec->getPositiveLicenses(), is($this->positiveLicenses));
+    assertThat($clearingDec->getClearingLicenses(), is($this->clearingLicenses));
+  }
+
+  public function testPositiveLicenses()
+  {
+  /*  $addedClearingLic = M::mock(ClearingLicense::classname());
+    $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
+
+    $removedClearingLic = M::mock(ClearingLicense::classname());
+    $removedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(true);
+
+    $clearingLicenses = array($addedClearingLic, $removedClearingLic);
+
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setClearingLicenses($this->clearingLicenses)
+        ->build();
+    assertThat($clearingDec->getClearingLicenses(), is(arrayContaining($addedClearingLic)));*/
   }
 
   public function testClearingId()

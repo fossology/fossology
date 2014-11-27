@@ -54,16 +54,17 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setUploadTreeId($uploadTreeId);
 
     $licref = $this->licenseRef($id, $name);
-    $clearingDecision->setClearingLicenses(array($licref));
+    $clearingLic = new ClearingLicense($licref, false, 43);
+    $clearingDecision->setClearingLicenses(array($clearingLic));
 
     return $clearingDecision->build();
   }
-  
+
   private function licenseRef($rf,$name)
   {
     return new LicenseRef($rf, $name . 'shortName', $name . 'fullName');
   }
-  
+
   private function localClearingDec($id, $type, $positive, $negative)
   {
     $eventType = 42;
@@ -84,8 +85,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setScope(DecisionScopes::ITEM)
         ->setPfileId(123)
         ->setUploadTreeId(456)
-        ->setPositiveLicenses($positive)
-        ->setNegativeLicenses($negative)
+        ->setClearingLicenses($clearingLicenses)
         ->build();
     return $clearingDecision;
   }
@@ -220,16 +220,18 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
     $reflection = new \ReflectionClass($this->newestEditedLicenseSelector->classname() );
     $method = $reflection->getMethod('selectNewestEditedLicensePerItem');
     $method->setAccessible(true);
-    
+
     $licenses = $method->invoke($this->newestEditedLicenseSelector,$editedLicensesArray);
     $licenseNames = array();
-    foreach ($licenses as $lic)
+    foreach ($licenses as $lics)
     {
-      $licenseNames[] = $lic->getShortName();
+      foreach($lics as $lic) {
+        $licenseNames[] = $lic->getShortName();
+      }
     }
     assertThat($licenseNames, is(arrayContainingInAnyOrder(array("AesashortName", "CescshortName", "TestshortName"))));
   }
-  
+
   public function testSelectNewestEditedLicensePerFileID_complexeDecision()
   {
     $added1 = array($this->licenseRef(1,'licA'));
@@ -240,12 +242,12 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         $this->localClearingDec(2,DecisionTypes::IDENTIFIED,$added2,$removed2),
         $this->localClearingDec(1,DecisionTypes::IRRELEVANT,$added1,$removed1)
       );
-    
+
     $reflection = new \ReflectionClass($this->newestEditedLicenseSelector->classname() );
     $method = $reflection->getMethod('selectNewestEditedLicensePerItem');
     $method->setAccessible(true);
-    
+
     $licenses = $method->invoke($this->newestEditedLicenseSelector,$editedLicensesArray);
-    assertThat($licenses, is($added2) );
+    assertThat($licenses, is(array(456=>$added2)));
   }
 }

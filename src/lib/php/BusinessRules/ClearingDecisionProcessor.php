@@ -72,9 +72,8 @@ class ClearingDecisionProcessor
   private function getClearingLicensesForAgentFindings(ItemTreeBounds $itemBounds, $remove = false, $type = ClearingEventTypes::AGENT)
   {
     $clearingLicenses = array();
-    foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $scannerLicenseRef)
+    foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $shortName => $scannerLicenseRef)
     {
-      $shortName = $scannerLicenseRef->getShortName();
       $clearingLicenses[$shortName] = new ClearingLicense($scannerLicenseRef, $remove, $type);
     }
     return $clearingLicenses;

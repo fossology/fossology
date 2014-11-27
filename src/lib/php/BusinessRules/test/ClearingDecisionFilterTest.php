@@ -67,12 +67,15 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
@@ -81,14 +84,17 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentClearingDecisionsShouldKeepNewerItemScopedDecisions() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision1->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
@@ -97,13 +103,16 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentClearingDecisionsShouldPrioritizeOlderItemScopedDecisionsOverRepoScopedOnes() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
@@ -112,13 +121,16 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentClearingDecisionsShouldNotPrioritizeOlderRepoScopedDecisionsOverItemScopedOnes() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision1->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
@@ -132,21 +144,26 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
   public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
     $itemId = 543;
+    $pfileId = 432;
     $decision = M::mock(ClearingDecision::classname());
     $decision->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(12345);
     $decision->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision));
   }
 
   public function testFilterCurrentReusableClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions(array($decision1, $decision2));
 
@@ -155,14 +172,17 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentReusableClearingDecisionsShouldNotKeepNewerItemScopedDecisions() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision1->shouldReceive("getSameFolder")->never()->withNoArgs();
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getSameFolder")->never()->withNoArgs();
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions(array($decision1, $decision2));
 
@@ -171,13 +191,16 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentReusableClearingDecisionsShouldPrioritizeOlderItemScopedDecisionsOverRepoScopedOnes() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getSameFolder")->never()->withNoArgs();
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions(array($decision1, $decision2));
 
@@ -186,13 +209,16 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
   public function testFilterCurrentReusableClearingDecisionsShouldNotPrioritizeOlderRepoScopedDecisionsOverItemScopedOnes() {
     $itemId = 543;
+    $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision1->shouldReceive("getSameFolder")->never()->withNoArgs();
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions(array($decision1, $decision2));
 
