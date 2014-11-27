@@ -41,7 +41,10 @@ class LicenseFilter extends Object
 
   /**
    * @param ClearingDecision[] $editedDecArray
-   * @return LicenseRef[]
+   * @return LicenseRef[][][]
+   *      array of LicenseRef mapped by fileId, itemId
+   *
+   * @todo refactor all this call stack to return an object
    */
   public function extractGoodLicensesPerItem($editedDecArray)
   {
@@ -56,14 +59,20 @@ class LicenseFilter extends Object
    */
   public function extractGoodLicenses($editedLicensesArray)
   {
-    $licensesPerId = $this->extractGoodLicensesPerItem($editedLicensesArray);
+    $licensesPerFileItem = $this->extractGoodLicensesPerItem($editedLicensesArray);
 
     $licenses = array();
-    foreach ($licensesPerId as $licInfo)
+    foreach ($licensesPerFileItem as $licensesPerItem)
     {
-      foreach ($licInfo as $licRef)
+      foreach ($licensesPerItem as $licenseRefs)
       {
-        $licenses[] = $licRef->getShortName();
+        /** @var LicenseRef $licenseRef */
+        foreach ($licenseRefs as $licenseRef)
+        {
+          $shortName = $licenseRef->getShortName();
+          if (!in_array($shortName, $licenses))
+            $licenses[] = $shortName;
+        }
       }
     }
     return $licenses;
@@ -72,19 +81,22 @@ class LicenseFilter extends Object
   /**
    * @brief $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
    * @param ClearingDecision[] $sortedClearingDecArray
-   * @return LicenseRef[]
+   * @return LicenseRef[][][]
    */
   private function selectNewestEditedLicensePerItem($sortedClearingDecArray)
   {
-    $clearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions($sortedClearingDecArray);
+    $mappedClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions($sortedClearingDecArray);
 
-    $licenses = array();
-    foreach ($clearingDecisions as $itemId => $clearingDecision)
+    $mappedLicenses = array();
+    foreach ($mappedClearingDecisions as $fileId => $mappedClearingDecision)
     {
-      $currentLicensesByThisItem = array_key_exists($itemId, $licenses) ? $licenses[$itemId] : array();
-      $licenses[$itemId] = array_merge($currentLicensesByThisItem, $clearingDecision->getPositiveLicenses());
+      /** @var ClearingDecision $clearingDecision */
+      foreach ($mappedClearingDecision as $itemId => $clearingDecision)
+      {
+        $mappedLicenses[$fileId][$itemId] = $clearingDecision->getPositiveLicenses();
+      }
     }
-    return $licenses;
+    return $mappedLicenses;
   }
 
 }

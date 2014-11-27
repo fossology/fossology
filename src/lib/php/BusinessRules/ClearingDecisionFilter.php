@@ -24,6 +24,7 @@ use Fossology\Lib\Data\DecisionScopes;
 
 class ClearingDecisionFilter
 {
+  const KEYREPO = "all";
 
   /** @param ClearingDecision[] $clearingDecisions
    * @return \Fossology\Lib\Data\ClearingDecision[]
@@ -45,15 +46,14 @@ class ClearingDecisionFilter
 
   /**
    * @param ClearingDecision[] $clearingDecisions sorted by newer decision comes before
-   * @return ClearingDecision[] indexed by itemId
+   * @return ClearingDecision[][] indexed by pfileId and than itemId
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
     $clearingDecisions = $this->filterRelevantClearingDecisions($clearingDecisions);
 
-    /** @var ClearingDecision[] $clearingDecisionsByItemId */
-    $clearingDecisionsByItemId = array();
-    $clearingDecisionsByPfileId = array();
+    /** @var ClearingDecision[][] $clearingDecisionsByItemId */
+    $clearingDecisionsMapped = array();
 
     foreach ($clearingDecisions as $clearingDecision)
     {
@@ -61,8 +61,12 @@ class ClearingDecisionFilter
       $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
 
-      $alreadyExistingInScopeItem = array_key_exists($itemId, $clearingDecisionsByItemId) ? $clearingDecisionsByItemId[$itemId]->getScope() : false;
-      $alreadyExistingInScopeFile = array_key_exists($fileId, $clearingDecisionsByPfileId) ? $clearingDecisionsByPfileId[$fileId]->getScope() : false;
+      $alreadyExistingInScopeFile = array_key_exists($fileId, $clearingDecisionsMapped)
+         ? $clearingDecisionsMapped[$fileId][self::KEYREPO]->getScope()
+         : false;
+      $alreadyExistingInScopeItem = ((false !== $alreadyExistingInScopeFile) && array_key_exists($fileId, $clearingDecisionsMapped))
+         ? $clearingDecisionsMapped[$fileId][$itemId]->getScope()
+         : false;
 
       if ($alreadyExistingInScopeItem === DecisionScopes::ITEM)
       {
@@ -72,21 +76,18 @@ class ClearingDecisionFilter
       switch ($scope)
       {
         case DecisionScopes::ITEM:
-          if ($alreadyExistingInScopeItem === false || $alreadyExistingInScopeItem === DecisionScopes::REPO)
+          if ($alreadyExistingInScopeItem === false)
           {
-            $clearingDecisionsByItemId[$itemId] = $clearingDecision;
+            $clearingDecisionsMapped[$fileId][$itemId] = $clearingDecision;
           }
           break;
 
         case DecisionScopes::REPO:
-          if ($alreadyExistingInScopeItem === false)
-          {
-            $clearingDecisionsByItemId[$itemId] = $clearingDecision;
-          }
           if ($alreadyExistingInScopeFile === false)
           {
-            $clearingDecisionsByPfileId[$fileId] = $clearingDecision;
+            $clearingDecisionsMapped[$fileId][self::KEYREPO] = $clearingDecision;
           }
+
           break;
 
         default:
@@ -94,7 +95,7 @@ class ClearingDecisionFilter
       }
     }
 
-    return $clearingDecisionsByItemId;
+    return $clearingDecisionsMapped;
   }
 
   /** @param ClearingDecision[] $clearingDecisions

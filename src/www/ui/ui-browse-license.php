@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\BusinessRules\LicenseFilter;
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -348,7 +349,7 @@ class ui_browse_license extends FO_Plugin
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
     /** @var LicenseRef[][] */
-    $editedPfileLicenses = $this->licenseFilter->extractGoodLicensesPerItem($allDecisions);
+    $editedMappedLicenses = $this->licenseFilter->extractGoodLicensesPerItem($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -389,7 +390,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
     $VF .= '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
@@ -411,7 +412,7 @@ class ui_browse_license extends FO_Plugin
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -495,9 +496,21 @@ class ui_browse_license extends FO_Plugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
-      if (array_key_exists($childUploadTreeId, $editedPfileLicenses))
+      if (array_key_exists($fileId, $editedMappedLicenses))
       {
-        $addedLicenses = $editedPfileLicenses[$childUploadTreeId];
+        $itemMappedLicenses = $editedMappedLicenses[$fileId];
+        if (array_key_exists($childUploadTreeId, $itemMappedLicenses))
+        {
+          $addedLicenses = $itemMappedLicenses[$childUploadTreeId];
+        }
+        else
+        {
+          if (!array_key_exists(ClearingDecisionFilter::KEYREPO, $itemMappedLicenses))
+          {
+            throw new Exception("bad mapped edited licenses for item=$childUploadTreeId");
+          }
+          $addedLicenses = $itemMappedLicenses[ClearingDecisionFilter::KEYREPO];
+        }
         $editedLicenseList .= implode(", ",
             array_map(
                 function ($licenseRef) use ($uploadId, $childUploadTreeId)
