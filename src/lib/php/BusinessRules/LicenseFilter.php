@@ -72,7 +72,7 @@ class LicenseFilter extends Object
   }
 
   /**
-   * @param LicenseRef[][] $editedLicensesArray
+   * @param CleringDecision[] $editedLicensesArray
    * @return string[]
    */
   public function extractGoodLicenses($editedLicensesArray)

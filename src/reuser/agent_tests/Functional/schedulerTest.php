@@ -290,16 +290,12 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $addedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
-    $removedLicense = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
+    $addedLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef(), false, ClearingEventTypes::USER, "42", "44");
+    $addedLicenses[] = new ClearingLicense($this->licenseDao->getLicenseByShortName("3DFX")->getRef(), true, ClearingEventTypes::USER, "-42", "-44");
 
-    assertThat($addedLicense,notNullValue());
-    assertThat($removedLicense,notNullValue());
+    assertThat($addedLicenses, not(arrayContaining(null)));
 
-    $addedLicenses = array($addedLicense);
-    $removedLicenses = array($removedLicense);
-
-    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses, $removedLicenses);
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses);
 
     list($output,$retCode) = $this->runReuser($uploadId=3);
 
@@ -347,7 +343,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $addedLicenses = array($addedLicense);
     $removedLicenses = array($removedLicense);
 
-    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses, $removedLicenses);
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedLicenses); // TODO see line 300 , $removedLicenses);
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
@@ -417,7 +413,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $userId = 2;
     $originallyClearedItemId=23;
 
-    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $addedLicenses, $removedLicenses);
+    $this->clearingDao->insertClearingDecision($originallyClearedItemId=23, $userId=2, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $addedLicenses); // TODO
 
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */

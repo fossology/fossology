@@ -105,6 +105,8 @@ class ReuserAgentPlugin extends DefaultPlugin
   /**
    * @param Request $request
    * @return Response
+   * @todo cleanup: used only for debug
+   * @deprecated use functional tests
    */
   protected function handle(Request $request)
   {
@@ -205,6 +207,9 @@ class ReuserAgentPlugin extends DefaultPlugin
    * @param $userInfo
    * @param $license
    * @param $remove
+   *
+   * @todo cleanup: used only for debug
+   * @deprecated use functional tests
    */
   protected function insertHistoricalClearingEvent(ClearingDao $clearingDao, ClearingDecision $clearingDecision, Item $item, UserInfo $userInfo, LicenseRef $license, $remove)
   {

@@ -132,7 +132,7 @@ class ReuserAgent extends Agent
     $dateTime = $clearingDecision->getDateAdded();
     $dateTime->sub(new DateInterval('PT1S'));
     $itemId = $item->getId();
-    foreach(array_merge($clearingDecision->getPositiveLicenses(), $clearingDecision->getNegativeLicenses()) as $clearingLicense) {
+    foreach($clearingDecision->getClearingLicenses() as $clearingLicense) {
       $this->clearingDao->insertHistoricalClearingEvent(
         $dateTime,
         $itemId,
@@ -175,8 +175,7 @@ class ReuserAgent extends Agent
         $this->userId,
         $clearingDecisionToCopy->getType(),
         $clearingDecisionToCopy->getScope(),
-        $clearingDecisionToCopy->getPositiveLicenses(),
-        $clearingDecisionToCopy->getNegativeLicenses()
+        $clearingDecisionToCopy->getClearingLicenses()
     );
   }
 }

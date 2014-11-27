@@ -213,10 +213,10 @@ class AjaxClearingView extends FO_Plugin
           list ($uploadTreeId, $licenseId) = explode(',', $id);
           $what = GetParm("columnName", PARM_STRING);
           $changeTo = GetParm("value", PARM_STRING);
-          $this->clearingDao->updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo);
+          $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $licenseId, $what, $changeTo);
         }
         return "success";
-        
+
       default:
         return "fail";
     }

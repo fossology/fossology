@@ -118,8 +118,7 @@ class ClearingDao extends Object
     $clearingsWithLicensesArray = array();
 
     $previousClearingId = -1;
-    $added = array();
-    $removed = array();
+    $clearingLicenses = array();
     $clearingDecisionBuilder = ClearingDecisionBuilder::create();
     $firstMatch = true;
     while ($row = $this->dbManager->fetchArray($result))
@@ -139,17 +138,13 @@ class ClearingDao extends Object
         //store the old one
         if (!$firstMatch)
         {
-          $clearingDec = $clearingDecisionBuilder->setPositiveLicenses($added)
-              ->setNegativeLicenses($removed)
-              ->build();
-          $clearingsWithLicensesArray[] = $clearingDec;
+          $clearingsWithLicensesArray[] = $clearingDecisionBuilder->setClearingLicenses($clearingLicenses)->build();
         }
 
         $firstMatch = false;
         //prepare the new one
         $previousClearingId = $clearingId;
-        $added = array();
-        $removed = array();
+        $clearingLicenses = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
             ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
             ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
@@ -165,17 +160,14 @@ class ClearingDao extends Object
 
       if ($licenseId !== null)
       {
-        $this->appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $eventType, $reportInfo, $comment, $removed, $added);
+        $this->appendToClearingLicenses($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $eventType, $reportInfo, $comment, $clearingLicenses);
       }
     }
 
     //! Add the last match
     if (!$firstMatch)
     {
-      $clearingDec = $clearingDecisionBuilder->setPositiveLicenses($added)
-          ->setNegativeLicenses($removed)
-          ->build();
-      $clearingsWithLicensesArray[] = $clearingDec;
+      $clearingsWithLicensesArray[] = $clearingDecisionBuilder->setClearingLicenses($clearingLicenses)->build();
     }
 
     $this->dbManager->freeResult($result);
@@ -184,9 +176,9 @@ class ClearingDao extends Object
 
   /**
    * @param int $clearingId
-   * @return array pair of LicenseRef[]
+   * @return ClearingLicense[]
    */
-  private function getFileClearingLicenses($clearingId)
+  private function getClearingLicensesForId($clearingId)
   {
     $statementN = __METHOD__;
     $this->dbManager->prepare($statementN,
@@ -194,27 +186,24 @@ class ClearingDao extends Object
                LR.rf_pk AS id,
                LR.rf_shortname AS shortname,
                LR.rf_fullname AS fullname,
-               CL.removed AS removed
+               CL.removed AS removed,
+               CL.type_fk AS type,
+               CL.reportinfo AS reportinfo,
+               CL.comment AS comment
            FROM clearing_licenses CL
            LEFT JOIN license_ref LR ON CL.rf_fk=LR.rf_pk
                WHERE CL.clearing_fk=$1");
 
     $res = $this->dbManager->execute($statementN, array($clearingId));
-    $added = array();
-    $removed = array();
+    $clearingLicenses = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
       $licenseRef = new LicenseRef($row['id'], $row['shortname'], $row['fullname']);
-      if ($this->dbManager->booleanFromDb($row['removed']))
-      {
-        $removed[] = $licenseRef;
-      } else
-      {
-        $added[] = $licenseRef;
-      }
+      $removed = $this->dbManager->booleanFromDb($row['removed']);
+      $clearingLicenses[] = new ClearingLicense($licenseRef, $removed,$row['type'],$row['reportinfo'],$row['comment'] );
     }
     $this->dbManager->freeResult($res);
-    return array($added, $removed);
+    return $clearingLicenses;
   }
 
   /**
@@ -326,10 +315,8 @@ ORDER BY CD.date_added DESC LIMIT 1
     $result = null;
     if ($row !== false && count($row) != 0)
     {
-      list($added, $removed) = $this->getFileClearingLicenses($row['id']);
       $result = ClearingDecisionBuilder::create()
-          ->setPositiveLicenses($added)
-          ->setNegativeLicenses($removed)
+          ->setClearingLicenses($this->getClearingLicensesForId($row['id']))
           ->setClearingId($row['id'])
           ->setUploadTreeId($row['uploadtree_id'])
           ->setPfileId($row['file_id'])
@@ -359,17 +346,16 @@ ORDER BY CD.date_added DESC LIMIT 1
    * @param $userId
    * @param $decType
    * @param $scope
-   * @param ClearingLicense[] $licenses
-   * @param ClearingLicense[] $removedLicenses
-   * @todo $license and $removedLicenses are symmetrically used: merge them before getting here
+   * @param ClearingLicense[] $clearingDecisions
+   * @param ClearingLicense[] $agentClearingDecisions
    */
-  public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $licenses, $removedLicenses = array())
+  public function insertClearingDecision($uploadTreeId, $userId, $decType, $scope, $clearingLicenses, $agentClearingDecisions = array())
   {
     $needTransaction = !$this->dbManager->isInTransaction();
     if ($needTransaction) $this->dbManager->begin();
 
     $this->removeWipClearingDecision($uploadTreeId, $userId);
-    $this->removeClearingEvents($uploadTreeId, $userId);
+    $this->removeAllClearingEvents($uploadTreeId, $userId);
 
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -399,7 +385,7 @@ INSERT INTO clearing_decision (
     $statementNameClearingEventInsert = __METHOD__ . ".insertClearingEvent";
     $this->dbManager->prepare($statementNameClearingEventInsert, "INSERT INTO clearing_event (uploadtree_fk, user_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6, $7)");
 
-    foreach (array_merge($licenses,$removedLicenses) as $clearingLicense)
+    foreach (array_merge($clearingLicenses,$agentClearingDecisions) as $clearingLicense)
     {
       $commonParm = array(
           $clearingLicense->getLicenseId(), $this->dbManager->booleanToDb($clearingLicense->isRemoved()),
@@ -408,13 +394,16 @@ INSERT INTO clearing_decision (
         );
 
       $clearingLicensesParm = $commonParm;
-      $clearingEventsParm = $commonParm;
-
       array_unshift($clearingLicensesParm, $clearingDecisionId);
-      array_unshift($clearingEventsParm, $uploadTreeId, $userId);
-
       $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingLicenseInsert, $clearingLicensesParm));
-      $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingEventInsert, $clearingEventsParm));
+
+      /* non-agent clearing decision licenses also go to the temporary state */
+      if (false === array_search($clearingLicense, $agentClearingDecisions, true))
+      {
+        $clearingEventsParm = $commonParm;
+        array_unshift($clearingEventsParm, $uploadTreeId, $userId);
+        $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingEventInsert, $clearingEventsParm));
+      }
     }
 
     if ($needTransaction) $this->dbManager->commit();
@@ -501,7 +490,7 @@ INSERT INTO clearing_decision (
     );
   }
 
-  public function updateClearing($uploadTreeId, $userId, $licenseId, $what, $changeTo)
+  public function updateClearingEvent($uploadTreeId, $userId, $licenseId, $what, $changeTo)
   {
     $this->dbManager->begin();
 
@@ -535,7 +524,7 @@ INSERT INTO clearing_decision (
 
   }
 
-  public function removeClearingEvents($uploadTreeId, $userId)
+  public function removeAllClearingEvents($uploadTreeId, $userId)
   {
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt, "DELETE FROM clearing_event WHERE uploadtree_fk = $1 AND user_fk = $2");
@@ -586,19 +575,13 @@ INSERT INTO clearing_decision (
    * @param $licenseShortName
    * @param $licenseName
    * @param $licenseIsRemoved
-   * @param $removed
-   * @param $added
+   * @param $clearingLicenses
    */
-  protected function appendToRemovedAdded($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $type, $reportInfo, $comment, &$removed, &$added)
+  protected function appendToClearingLicenses($licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $type, $reportInfo, $comment, &$clearingLicenses)
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseName);
-    if ($this->dbManager->booleanFromDb($licenseIsRemoved))
-    {
-      $removed[] = new ClearingLicense($licenseRef, true, $type, $reportInfo, $comment);
-    } else
-    {
-      $added[] = new ClearingLicense($licenseRef, false, $type, $reportInfo, $comment);
-    }
+    $removed = $this->dbManager->booleanFromDb($licenseIsRemoved);
+    $clearingLicenses[] = new ClearingLicense($licenseRef, $removed, $type, $reportInfo, $comment);
   }
 
   /**

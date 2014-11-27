@@ -126,8 +126,6 @@ class DeciderAgent extends Agent
 
     $itemId = $itemTreeBounds->getItemId();
 
-    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $userId);
-
     switch ($this->conflictStrategyId)
     {
       case DeciderAgent::FORCE_DECISION:
@@ -135,6 +133,7 @@ class DeciderAgent extends Agent
         break;
 
       default:
+        $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $userId);
         $createDecision = count($unhandledScannerDetectedLicenses) == 0;
     }
 

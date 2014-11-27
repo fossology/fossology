@@ -96,6 +96,7 @@ class AgentLicenseEventProcessor extends Object
   protected function filterDetectedLicenses($agentDetectedLicenses, $agentLatestMap)
   {
     $latestAgentDetectedLicenses = array();
+
     foreach ($agentDetectedLicenses as $agentName => $licensesFoundPerAgentId)
     {
       if (!array_key_exists($agentName, $agentLatestMap))
@@ -112,6 +113,7 @@ class AgentLicenseEventProcessor extends Object
         $latestAgentDetectedLicenses[$licenseShortName][$agentName] = $properties;
       }
     }
+
     return $latestAgentDetectedLicenses;
   }
 

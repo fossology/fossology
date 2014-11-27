@@ -43,8 +43,9 @@ class ClearingDecisionFilter
     return $relevantClearingDecisions;
   }
 
-  /** @param ClearingDecision[] $clearingDecisions
-   * @return ClearingDecision[]
+  /**
+   * @param ClearingDecision[] $clearingDecisions sorted by newer decision comes before
+   * @return ClearingDecision[] indexed by itemId
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
@@ -59,7 +60,7 @@ class ClearingDecisionFilter
 
       $alreadyExistingInScope = array_key_exists($itemId, $clearingDecisionsByItemId) ? $clearingDecisionsByItemId[$itemId]->getScope() : false;
 
-      if ($alreadyExistingInScope !== false && $alreadyExistingInScope === DecisionScopes::ITEM)
+      if ($alreadyExistingInScope === DecisionScopes::ITEM)
       {
         continue;
       }
@@ -81,6 +82,7 @@ class ClearingDecisionFilter
           throw new \InvalidArgumentException("unhandled clearing decision scope '" . $scope . "'");
       }
     }
+
     return $clearingDecisionsByItemId;
   }
 

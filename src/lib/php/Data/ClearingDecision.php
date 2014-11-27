@@ -29,9 +29,7 @@ class ClearingDecision extends Object
   /** @var bool */
   private $sameFolder;
   /** @var ClearingLicense[] */
-  private $positiveLicenses;
-  /** @var ClearingLicense[] */
-  private $negativeLicenses;
+  private $clearingLicenses;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -71,7 +69,7 @@ class ClearingDecision extends Object
    * @internal param $licenses
    */
   public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
-          $scope, $date_added, $positiveLicenses, $negativeLicenses, $comment = "", $reportinfo = "")
+          $scope, $date_added, $clearingLicenses, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
     $this->sameUpload = $sameUpload;
@@ -85,8 +83,7 @@ class ClearingDecision extends Object
     $this->dateAdded = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
-    $this->positiveLicenses = $positiveLicenses;
-    $this->negativeLicenses = $negativeLicenses;
+    $this->clearingLicenses = $clearingLicenses;
   }
 
   /**
@@ -116,17 +113,24 @@ class ClearingDecision extends Object
   /**
    * @return ClearingLicense[]
    */
-  public function getPositiveLicenses()
+  public function getClearingLicenses()
   {
-    return $this->positiveLicenses;
+    return $this->clearingLicenses;
   }
 
   /**
-   * @return ClearingLicense[]
+   * @return LicenseRef[]
    */
-  public function getNegativeLicenses()
+  public function getPositiveLicenses()
   {
-    return $this->negativeLicenses;
+    $result = array();
+    foreach($this->clearingLicenses as $clearingLicense)
+    {
+      if (!$clearingLicense->isRemoved())
+        $result[] = $clearingLicense->getLicenseRef();
+    }
+
+    return $result;
   }
 
   /**
@@ -218,12 +222,8 @@ class ClearingDecision extends Object
   {
     $output = "ClearingDecision(#" . $this->clearingId . ", ";
 
-    foreach ($this->positiveLicenses as $license) {
-      $output .= $license->getShortName() . ", ";
-    }
-
-    foreach ($this->negativeLicenses as $license) {
-      $output .= '-'.$license->getShortName() . ", ";
+    foreach ($this->clearingLicenses as $clearingLicense) {
+      $output .= ($clearingLicense->isRemoved() ? "-": "" ). $clearingLicense->getShortName() . ", ";
     }
 
     return $output . $this->getUserName() . ")";

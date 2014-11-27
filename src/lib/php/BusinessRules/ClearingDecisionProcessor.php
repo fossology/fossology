@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Data\DecisionTypes;
@@ -68,24 +69,26 @@ class ClearingDecisionProcessor
     return array_diff_key($scannerDetectedLicenses, $clearingLicenseRefs);
   }
 
-  private function getClearingLicensesForAgentFindings(ItemTreeBounds $itemBounds, $remove = false)
+  private function getClearingLicensesForAgentFindings(ItemTreeBounds $itemBounds, $remove = false, $type = ClearingEventTypes::AGENT)
   {
     $clearingLicenses = array();
     foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $scannerLicenseRef)
     {
-      $licId = $scannerLicenseRef->getId();
-      $clearingLicensesToDo[$licId] = new ClearingLicense($scannerLicenseRef, $remove, ClearingEventTypes::AGENT);
+      $shortName = $scannerLicenseRef->getShortName();
+      $clearingLicenses[$shortName] = new ClearingLicense($scannerLicenseRef, $remove, $type);
     }
     return $clearingLicenses;
   }
 
-  public function makeClearingEventToSetNoLicense(ItemTreeBounds $itemBounds, $userId)
+  /**
+   * @param ClearingDecision $decision
+   * @param int $type
+   * @param ClearingLicense[] $clearingLicenses
+   * @return boolean
+   */
+  private function clearingDecisionIsDifferentFrom(ClearingDecision $decision, $type, $clearingLicenses)
   {
-    $itemId = $itemBounds->getItemId();
-
-    $this->clearingDao->removeClearingEvents($itemId, $userId);
-    $clearingLicensesToDo = $this->getClearingLicensesForAgentFindings($itemBounds, true);
-    $this->insertClearingEventsForClearingLicenses($itemId, $userId, $clearingLicensesToDo);
+    return ($type !== $decision->getType() || ($clearingLicenses !== $decision->getClearingLicenses()));
   }
 
   /**
@@ -108,24 +111,26 @@ class ClearingDecisionProcessor
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
-      $this->makeClearingEventToSetNoLicense($itemBounds, $userId);
       $type = DecisionTypes::IDENTIFIED;
+      $clearingLicensesToDecide = $this->getClearingLicensesForAgentFindings($itemBounds, true, ClearingEventTypes::USER);
+      $agentClearingLicenses = array();
     }
     else
     {
+      $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+      $clearingLicensesToDecide = $this->clearingEventProcessor->getClearingLicenses($events);
+
       $agentClearingLicenses = $this->getClearingLicensesForAgentFindings($itemBounds);
-      $this->insertClearingEventsForClearingLicenses($itemId, $userId, $agentClearingLicenses);
-      $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds);
+      $agentClearingLicenses = array_diff_key($agentClearingLicenses, $clearingLicensesToDecide);
     }
 
-    list($lastDecision, $lastType) = $this->getRelevantClearingDecisionParameters($userId, $itemId);
-    $events = $this->clearingDao->getRelevantClearingEvents($userId, $itemId);
+    $currentDecision = $this->clearingDao->getRelevantClearingDecision($userId, $itemId);
+    $doingLicenses = array_values(array_merge($clearingLicensesToDecide, $agentClearingLicenses));
 
-    $clearingLicensesToDecide = $this->clearingEventProcessor->getClearingLicenses($events);
-    if ($type !== $lastType || count($clearingLicensesToDecide) > 0)
+    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $doingLicenses));
     {
       $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
-      $this->insertClearingDecision($userId, $itemId, $type, $scope, $clearingLicensesToDecide);
+      $this->insertClearingDecision($userId, $itemId, $type, $scope, $clearingLicensesToDecide, $agentClearingLicenses);
     }
 
     if ($needTransaction) $this->dbManager->commit();
@@ -190,35 +195,15 @@ class ClearingDecisionProcessor
 
   /**
    * @param $userId
-   * @param $item
-   * @return array
-   */
-  private function getRelevantClearingDecisionParameters($userId, $item)
-  {
-    $clearingDecision = $this->clearingDao->getRelevantClearingDecision($userId, $item);
-
-    if ($clearingDecision)
-    {
-      return array(
-          $clearingDecision->getDateAdded(),
-          $clearingDecision->getType()
-      );
-    }
-    return array(null, null);
-  }
-
-  /**
-   * @param $userId
    * @param $itemId
    * @param $type
    * @param $scope
-   * @param $addedLicenses
-   * @param $removedLicenses
-   * @todo $license and $removedLicenses are symmetrically used: merge them before getting here
+   * @param $clearingLicenses
+   * @param $agentClearingEvents
    */
-  private function insertClearingDecision($userId, $itemId, $type, $scope, $addedLicenses, $removedLicenses = array())
+  private function insertClearingDecision($userId, $itemId, $type, $scope, $clearingLicenses, $agentClearingLicenses)
   {
-    $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $scope, $addedLicenses, $removedLicenses);
+    $this->clearingDao->insertClearingDecision($itemId, $userId, $type, $scope, $clearingLicenses, $agentClearingLicenses);
     ReportCachePurgeAll();
   }
 

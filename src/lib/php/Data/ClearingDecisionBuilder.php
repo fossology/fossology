@@ -31,9 +31,7 @@ class ClearingDecisionBuilder extends Object
   /** @var bool */
   private $sameFolder;
   /** @var ClearingLicense[] */
-  private $positiveLicenses;
-  /** @var ClearingLicense[] */
-  private $negativeLicenses;
+  private $clearingLicenses;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -59,8 +57,7 @@ class ClearingDecisionBuilder extends Object
   {
     $this->sameUpload = false;
     $this->sameFolder = false;
-    $this->positiveLicenses = array();
-    $this->negativeLicenses = array();
+    $this->clearingLicenses = array();
     $this->clearingId = -1;
     $this->uploadTreeId = -1;
     $this->pfileId = -1;
@@ -95,19 +92,9 @@ class ClearingDecisionBuilder extends Object
    * @param ClearingLicense[] $licenses
    * @return ClearingDecisionBuilder
    */
-  public function setPositiveLicenses($licenses)
+  public function setClearingLicenses($licenses)
   {
-    $this->positiveLicenses = $licenses;
-    return $this;
-  }
-
-  /**
-   * @param ClearingLicense[] $licenses
-   * @return ClearingDecisionBuilder
-   */
-  public function setNegativeLicenses($licenses)
-  {
-    $this->negativeLicenses = $licenses;
+    $this->clearingLicenses = $licenses;
     return $this;
   }
  
@@ -204,8 +191,7 @@ class ClearingDecisionBuilder extends Object
   {
     $this->sameUpload = $clearingDecision->getSameUpload();
     $this->sameFolder = $clearingDecision->getSameFolder();
-    $this->positiveLicenses = $clearingDecision->getPositiveLicenses();
-    $this->negativeLicenses = $clearingDecision->getNegativeLicenses();
+    $this->clearingLicenses = $clearingDecision->getClearingLicenses();
     $this->clearingId = $clearingDecision->getClearingId();
     $this->uploadTreeId = $clearingDecision->getUploadTreeId();
     $this->pfileId = $clearingDecision->getPfileId();
@@ -231,7 +217,7 @@ class ClearingDecisionBuilder extends Object
 
     return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->dateAdded, $this->positiveLicenses, $this->negativeLicenses);
+        $this->dateAdded, $this->clearingLicenses, $this->reportinfo, $this->comment);
   }
 
 }
