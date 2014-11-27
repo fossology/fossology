@@ -495,9 +495,9 @@ class ui_browse_license extends FO_Plugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
-      if (array_key_exists($fileId, $editedPfileLicenses))
+      if (array_key_exists($childUploadTreeId, $editedPfileLicenses))
       {
-        $addedLicenses = $editedPfileLicenses[$fileId];
+        $addedLicenses = $editedPfileLicenses[$childUploadTreeId];
         $editedLicenseList .= implode(", ",
             array_map(
                 function ($licenseRef) use ($uploadId, $childUploadTreeId)

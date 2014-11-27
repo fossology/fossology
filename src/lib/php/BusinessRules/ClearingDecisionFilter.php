@@ -53,14 +53,18 @@ class ClearingDecisionFilter
 
     /** @var ClearingDecision[] $clearingDecisionsByItemId */
     $clearingDecisionsByItemId = array();
+    $clearingDecisionsByPfileId = array();
+
     foreach ($clearingDecisions as $clearingDecision)
     {
       $itemId = $clearingDecision->getUploadTreeId();
+      $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
 
-      $alreadyExistingInScope = array_key_exists($itemId, $clearingDecisionsByItemId) ? $clearingDecisionsByItemId[$itemId]->getScope() : false;
+      $alreadyExistingInScopeItem = array_key_exists($itemId, $clearingDecisionsByItemId) ? $clearingDecisionsByItemId[$itemId]->getScope() : false;
+      $alreadyExistingInScopeFile = array_key_exists($fileId, $clearingDecisionsByPfileId) ? $clearingDecisionsByPfileId[$fileId]->getScope() : false;
 
-      if ($alreadyExistingInScope === DecisionScopes::ITEM)
+      if ($alreadyExistingInScopeItem === DecisionScopes::ITEM)
       {
         continue;
       }
@@ -68,13 +72,20 @@ class ClearingDecisionFilter
       switch ($scope)
       {
         case DecisionScopes::ITEM:
-          $clearingDecisionsByItemId[$itemId] = $clearingDecision;
+          if ($alreadyExistingInScopeItem === false || $alreadyExistingInScopeItem === DecisionScopes::REPO)
+          {
+            $clearingDecisionsByItemId[$itemId] = $clearingDecision;
+          }
           break;
 
         case DecisionScopes::REPO:
-          if ($alreadyExistingInScope === false)
+          if ($alreadyExistingInScopeItem === false)
           {
             $clearingDecisionsByItemId[$itemId] = $clearingDecision;
+          }
+          if ($alreadyExistingInScopeFile === false)
+          {
+            $clearingDecisionsByPfileId[$fileId] = $clearingDecision;
           }
           break;
 

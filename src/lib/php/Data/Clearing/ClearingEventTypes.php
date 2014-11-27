@@ -35,6 +35,11 @@ class ClearingEventTypes extends Types {
         self::BULK => "Bulk",
         self::AGENT => "Agent finding"
     );
+
+    foreach(array_keys($this->map) as $key) {
+      $newKey = $key | slef::REUSED_BIT;
+      $this->map[$newKey] = $this->getTypeName($newKey);
+    }
   }
 
   public function getTypeName($typeId)

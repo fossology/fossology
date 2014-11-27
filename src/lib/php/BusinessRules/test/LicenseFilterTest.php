@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
 use Fossology\Lib\Data\DecisionTypes;
@@ -53,7 +54,7 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
         ->setUploadTreeId($uploadTreeId);
 
     $licref = $this->licenseRef($id, $name);
-    $clearingDecision->setPositiveLicenses(array($licref));
+    $clearingDecision->setClearingLicenses(array($licref));
 
     return $clearingDecision->build();
   }
@@ -65,6 +66,15 @@ class NewestEditedLicenseSelectorTest extends \PHPUnit_Framework_TestCase
   
   private function localClearingDec($id, $type, $positive, $negative)
   {
+    $eventType = 42;
+    $clearingLicenses = array();
+    foreach($positive as $pos) {
+      $clearingLicenses[] = new ClearingLicense($pos, false, $eventType);
+    }
+    foreach($negative as $neg) {
+      $clearingLicenses[] = new ClearingLicense($neg, true, $eventType);
+    }
+
     $clearingDecision = ClearingDecisionBuilder::create()
         ->setClearingId($id)
         ->setUserName('anyUser')

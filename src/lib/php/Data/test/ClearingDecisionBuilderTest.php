@@ -107,10 +107,11 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
   }
 
+  //TODO test public function testPositiveLicenses()
   public function testPositiveLicenses()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setPositiveLicenses($this->positiveLicenses)
+        ->setClearingLicenses($this->positiveLicenses)
         ->build();
     assertThat($clearingDec->getPositiveLicenses(), is($this->positiveLicenses));
   }

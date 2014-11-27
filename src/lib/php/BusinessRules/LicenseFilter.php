@@ -41,11 +41,11 @@ class LicenseFilter extends Object
 
   /**
    * @param ClearingDecision[] $editedDecArray
-   * @return LicenseRef[][]
+   * @return LicenseRef[]
    */
   public function extractGoodLicensesPerItem($editedDecArray)
   {
-    $editedLicensesArrayGrouped = array();
+    /*$editedLicensesArrayGrouped = array();
     foreach ($editedDecArray as $editedLicense)
     {
       $pfileId = $editedLicense->getPfileId();
@@ -61,12 +61,13 @@ class LicenseFilter extends Object
     $goodLicenses = array();
     foreach ($editedLicensesArrayGrouped as $fileId => $editedLicensesArray)
     {
-      $licArr = $this->selectNewestEditedLicensePerItem($editedLicensesArray);
       if ($licArr !== null)
       {
         $goodLicenses[$fileId] = $licArr;
       }
-    }
+    }*/
+
+    $goodLicenses = $this->selectNewestEditedLicensePerItem($editedDecArray);
 
     return $goodLicenses;
   }
@@ -93,18 +94,19 @@ class LicenseFilter extends Object
   /**
    * @brief $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
    * @param ClearingDecision[] $sortedClearingDecArray
-   * @return LicenseRef[]|null
+   * @return LicenseRef[]
    */
   private function selectNewestEditedLicensePerItem($sortedClearingDecArray)
   {
     $clearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions($sortedClearingDecArray);
 
     $licenses = array();
-    foreach ($clearingDecisions as $clearingDecision)
+    foreach ($clearingDecisions as $itemId => $clearingDecision)
     {
-      $licenses = array_merge($licenses, $clearingDecision->getPositiveLicenses());
+      $currentLicensesByThisItem = array_key_exists($itemId, $licenses) ? $licenses[$itemId] : array();
+      $licenses[$itemId] = array_merge($currentLicensesByThisItem, $clearingDecision->getPositiveLicenses());
     }
-    return count($licenses) > 0 ? $licenses : null;
+    return $licenses;
   }
 
 }
