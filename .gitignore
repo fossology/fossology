@@ -110,6 +110,7 @@ src/pkgagent/agent_tests/Unit/test_pkgagent
 src/readmeoss/agent/version.php
 src/regexscan/agent/regexscan
 src/results/
+/src/reuser/agent/version.php
 src/scheduler/agent/defconf/init.d/fossology
 src/scheduler/agent/fo_cli
 src/scheduler/agent/fo_scheduler
@@ -131,4 +132,3 @@ src/wget_agent/agent_tests/Unit/results/
 src/www/ui/template/*.htm
 utils/freshmeat/FMDir
 utils/freshmeat/fm-paths.php
-/src/reuser/agent/version.php
