@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
@@ -31,7 +31,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   /** @var LicenseDao|M\MockInterface */
   private $licenseDao;
 
-  /** @var AgentsDao|M\MockInterface */
+  /** @var AgentDao|M\MockInterface */
   private $agentsDao;
 
   /** @var ItemTreeBounds|M\MockInterface */
@@ -43,7 +43,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->licenseDao = M::mock(LicenseDao::classname());
-    $this->agentsDao = M::mock(AgentsDao::classname());
+    $this->agentsDao = M::mock(AgentDao::classname());
 
     $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
 

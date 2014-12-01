@@ -18,7 +18,7 @@
  */
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -41,7 +41,7 @@ class ClearingView extends FO_Plugin
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var AgentsDao */
+  /** @var AgentDao */
   private $agentsDao;
   /** @var Logger */
   private $logger;
@@ -74,7 +74,7 @@ class ClearingView extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
-    $this->agentsDao = $container->get('dao.agents');
+    $this->agentsDao = $container->get('dao.agent');
     $this->logger = $container->get("logger");
 
     $this->highlightDao = $container->get("dao.highlight");

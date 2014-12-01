@@ -20,7 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use DateInterval;
 use DateTime;
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
@@ -52,7 +52,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   /** @var AgentLicenseEventProcessor|M\MockInterface */
   private $agentLicenseEventProcessor;
 
-  /** @var AgentsDao|M\MockInterface */
+  /** @var AgentDao|M\MockInterface */
   private $agentsDao;
 
   /** @var ClearingDao|M\MockInterface */

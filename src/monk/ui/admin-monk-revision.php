@@ -18,7 +18,7 @@
 
 namespace Fossology\Monk;
 
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,8 +43,8 @@ class AdminMonkRevision extends DefaultPlugin {
    */
   protected function handle(Request $request)
   {
-    /** @var AgentsDao */
-    $agentDao = $this->getObject('dao.agents');
+    /** @var AgentDao */
+    $agentDao = $this->getObject('dao.agent');
     /** @var AgentRef */
     $monk = $agentDao->getCurrentAgent('monk');
     $rev = $request->get('rev');

@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\BusinessRules\LicenseFilter;
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -45,7 +45,7 @@ class ui_browse_license extends FO_Plugin
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var AgentsDao */
+  /** @var AgentDao */
   private $agentsDao;
   /** @var LicenseFilter */
   private $licenseFilter;
@@ -67,7 +67,7 @@ class ui_browse_license extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
-    $this->agentsDao = $container->get('dao.agents');
+    $this->agentsDao = $container->get('dao.agent');
     $this->licenseFilter = $container->get('businessrules.license_filter');
   }
 

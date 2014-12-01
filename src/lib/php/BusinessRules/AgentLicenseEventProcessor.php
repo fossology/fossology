@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -31,10 +31,10 @@ class AgentLicenseEventProcessor extends Object
   /** @var LicenseDao */
   private $licenseDao;
 
-  /** @var AgentsDao */
+  /** @var AgentDao */
   private $agentsDao;
 
-  public function __construct(LicenseDao $licenseDao, AgentsDao $agentsDao)
+  public function __construct(LicenseDao $licenseDao, AgentDao $agentsDao)
   {
     $this->licenseDao = $licenseDao;
     $this->agentsDao = $agentsDao;

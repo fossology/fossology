@@ -26,10 +26,10 @@ use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 /**
- * Class AgentsDao
+ * Class AgentDao
  * @package Fossology\Lib\Dao
  */
-class AgentsDao extends Object
+class AgentDao extends Object
 {
   const ARS_TABLE_SUFFIX = "_ars";
 

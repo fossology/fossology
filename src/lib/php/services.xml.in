@@ -57,7 +57,7 @@ without any warranty.
     <service id="dao.highlight" class="Fossology\Lib\Dao\HighlightDao">
       <argument type="service" id="db.manager"/>
     </service>
-    <service id="dao.agents" class="Fossology\Lib\Dao\AgentsDao">
+    <service id="dao.agent" class="Fossology\Lib\Dao\AgentDao">
       <argument type="service" id="db.manager"/>
       <argument type="service" id="logger"/>
     </service>
@@ -105,7 +105,7 @@ without any warranty.
     <service id="businessrules.agent_license_event_processor"
                 class="Fossology\Lib\BusinessRules\AgentLicenseEventProcessor">
       <argument type="service" id="dao.license"/>
-      <argument type="service" id="dao.agents"/>
+      <argument type="service" id="dao.agent"/>
     </service>
 
     <service id="businessrules.clearing_event_processor"

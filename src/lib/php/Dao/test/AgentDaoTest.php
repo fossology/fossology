@@ -24,7 +24,7 @@ use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 use Monolog\Logger;
 
-class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
+class AgentDaoTest extends \PHPUnit_Framework_TestCase {
 
   private $uploadId = 25;
   private $olderAgentId = 3;
@@ -54,7 +54,7 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
   /** @var Logger|M\MockInterface */
   private $logger;
 
-  /** @var AgentsDao */
+  /** @var AgentDao */
   private $agentsDao;
 
   /** @var AgentRef */
@@ -93,9 +93,9 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
     {
       $this->dbManager->insertInto('agent', 'agent_pk, agent_name, agent_rev, agent_desc, agent_enabled', $agentRow);
     }
-    $this->agentsDao = new AgentsDao($this->dbManager, $this->logger);
+    $this->agentsDao = new AgentDao($this->dbManager, $this->logger);
 
-    $arsTableName = $this->agentName . AgentsDao::ARS_TABLE_SUFFIX;
+    $arsTableName = $this->agentName . AgentDao::ARS_TABLE_SUFFIX;
     $this->dbManager->queryOnce("create table " . $arsTableName . " (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
     $arsArray = array(
       array(1, $this->olderAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
@@ -107,7 +107,7 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
       $this->dbManager->insertInto($arsTableName, 'ars_pk, agent_fk, upload_fk, ars_success', $arsRow);
     }
 
-    $arsTableName = $this->otherAgentName . AgentsDao::ARS_TABLE_SUFFIX;
+    $arsTableName = $this->otherAgentName . AgentDao::ARS_TABLE_SUFFIX;
     $this->dbManager->queryOnce("create table " . $arsTableName . " (ars_pk int, agent_fk int, upload_fk int, ars_success bool)");
     $arsArray = array(
         array(1, $this->otherAgentId, $this->uploadId, $this->dbManager->booleanToDb(true)),
@@ -119,8 +119,8 @@ class AgentsDaoTest extends \PHPUnit_Framework_TestCase {
   }
 
   public function tearDown() {
-    $this->dbManager->queryOnce("drop table " . $this->agentName . AgentsDao::ARS_TABLE_SUFFIX);
-    $this->dbManager->queryOnce("drop table " . $this->otherAgentName . AgentsDao::ARS_TABLE_SUFFIX);
+    $this->dbManager->queryOnce("drop table " . $this->agentName . AgentDao::ARS_TABLE_SUFFIX);
+    $this->dbManager->queryOnce("drop table " . $this->otherAgentName . AgentDao::ARS_TABLE_SUFFIX);
 
     $this->dbManager = null;
     $this->testDb = null;
