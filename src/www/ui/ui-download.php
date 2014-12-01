@@ -26,12 +26,16 @@ define("TITLE_ui_download", _("Download File"));
  */
 class ui_download extends FO_Plugin
 {
-  var $Name       = "download";
-  var $Title      = TITLE_ui_download;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_WRITE;
   var $NoHTML     = 1;
+
+  function __construct()
+  {
+    $this->Name       = "download";
+    $this->Title      = TITLE_ui_download;
+    $this->Dependency = array();
+    $this->DBaccess   = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.
@@ -97,26 +101,23 @@ class ui_download extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    global $Plugins;
-    global $PG_CONN;
-    global $container;
+    if ($this->State != \PLUGIN_STATE_READY) {
+      return;
+    }
 
+    global $container;
     /** @var DbManager $dbManager */
     $dbManager = $container->get('db.manager');
 
-    if (!$PG_CONN)
+    if (!$dbManager->getDriver())
     {
-      DBconnect();
-      if (!$PG_CONN)
-      {
-        $text = _("Missing database connection.");
-        echo "<h2>$text</h2>";
-        return;
-      }
+      $text = _("Missing database connection.");
+      echo "<h2>$text</h2>";
+      return;
     }
 
     $reportId = GetParm("report",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
 
     if (!empty($reportId))
     {
@@ -134,8 +135,6 @@ class ui_download extends FO_Plugin
     }
     else
     {
-      $Item = GetParm("item",PARM_INTEGER);
-
       $text = _("Invalid item parameter");
       if (empty($Item))
       {
@@ -152,23 +151,20 @@ class ui_download extends FO_Plugin
 
       $Fin = @fopen( RepPathItem($Item) ,"rb");
       /* note that CheckRestore() does not return. */
-      if (empty($Fin)) $this->CheckRestore($Item, $Filename);
+      if (empty($Fin))
+      {
+        $this->CheckRestore($Item, $Filename);
+      }
 
-      $sql = "SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
-      if (pg_num_rows($result) != 1)
+      $row = $dbManager->getSingleRow("SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $1",array($Item));
+      if ($row===false)
       {
         $text = _("Missing item");
         echo "<h2>$text: $Item</h2>";
-        pg_free_result($result);
         return;
       }
-
       $Name = $row['ufile_name'];
       $Upload = $row['upload_fk'];
-      pg_free_result($result);
     }
 
     $UploadPerm = GetUploadPerm($Upload);
@@ -184,9 +180,8 @@ class ui_download extends FO_Plugin
       $text = _("Download failed");
       echo "<h2>$text</h2>$Filename<br>$rv";
     }
-  } // Output()
+  }
 
-};
+}
 $NewPlugin = new ui_download;
 $NewPlugin->Initialize();
-?>
