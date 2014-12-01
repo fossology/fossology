@@ -42,7 +42,7 @@ uninstall:
 	done
 
 clean:
-	rm -f *.o core version.php $(WRAP)
+	rm -f *.o core version.php
 
 .PHONY: all install uninstall clean
 
