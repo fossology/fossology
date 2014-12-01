@@ -12,7 +12,7 @@
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
+ along with this library; if not, write to the Free Software Foundation, Inc.
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************/
 
@@ -118,8 +118,7 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
 
   $address = $SysConf['FOSSOLOGY']['address'];
   $port =  $SysConf['FOSSOLOGY']['port'];
-  $response_from_scheduler;
-  $sock = fo_scheduler_connect($address, $port, $error_msg); /* Connect to the scheduler */
+  $sock = fo_scheduler_connect($address, $port, $error_msg);
   if ($sock)
   {
     $msg = trim($input);
@@ -133,9 +132,9 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
         if (substr($buf, 0, 3) == "end") break; 
         if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
         {
-          /* 1. if the command is not 'status'or 'status <job_id>' or 'agents', when receiving 
+          /* 1. if the command is not 'status' or 'status <job_id>' or 'agents', when receiving 
                 a string 'received', that mean this communication is over.
-             2. if the command is 'status'or 'status <job_id>' or 'agents', first receiving
+             2. if the command is 'status' or 'status <job_id>' or 'agents', first receiving
                 a string 'received', then will receive related response.
                 then a string 'end' as ending.
            */
@@ -155,16 +154,8 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
     fo_scheduler_close($sock);
   }
 
-  /* failed to communicate with the scheduler */
-  if (empty($error_msg))
-  {
-    return true;
-  } 
-  else  /* communicate with the scheduler successfully */
-  {
-    return false;
-  }
-} // fo_communicate_with_scheduler()
+  return empty($error_msg);
+}
 
 /**
  * \brief  Get runnable job list, the process is below:
@@ -195,6 +186,4 @@ function GetRunnableJobList()
   $job_array = $matches[1];
   sort($job_array, SORT_NUMERIC);
   return $job_array;
-} // GetRunnableJobList()
-
-?>
+}
