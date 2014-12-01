@@ -64,9 +64,14 @@ class ClearingDecisionCache extends Object
     $result = array();
     foreach($decisionMap as $pfileId => $pFileMap)
     {
+      /** @var ClearingDecision $decision */
       foreach($pFileMap as $itemId => $decision)
       {
-        // TODO those with ($itemId === self::KEYREPO) are counted only once
+        // TODO bug: licenses for files with only a global clearing will be ignored
+        // removing "if": local decisions will not overwrite globals
+        // res: we need to findout
+        if ($itemId === self::KEYREPO)
+          continue;
 
         foreach($decision->getPositiveLicenses() as $toAdd)
         {

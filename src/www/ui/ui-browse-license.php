@@ -461,9 +461,10 @@ class ui_browse_license extends FO_Plugin
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
+
       $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds);
-      $editedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($childDecisions)->getAllLicenseNames();
-      $editedLicenses = array_unique($editedLicenses);
+      $currentDecisions = $this->clearingFilter->filterCurrentClearingDecisions($childDecisions);
+      $editedLicenses = array_unique($currentDecisions->getAllLicenseNames());
     } else
     {
       $licenseEntries = array();
@@ -496,6 +497,7 @@ class ui_browse_license extends FO_Plugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
+
       /** @var ClearingDecision $decision */
       if (false !== ($decision = $editedMappedLicenses->getDecisionOf($childUploadTreeId, $fileId)))
       {
