@@ -725,26 +725,22 @@ class ui_picker extends FO_Plugin
     }
     $this->vars['content'] = $OutBuf;
   }
-
   
   /**
- * \brief Get string representation of uploadtree path.
- *  Use Dir2Path to get $PathArray.
- *
- * \param $PathArry an array containing the path
- *
- * \return string representation of uploadtree path
- */
-function Uploadtree2PathStr ($PathArray)
-{
-  $Path = "";
-  if (count($PathArray))
-    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
-  return $Path;
-}
-
-  
-  
+   * \brief Get string representation of uploadtree path.
+   *  Use Dir2Path to get $PathArray.
+   *
+   * \param $PathArry an array containing the path
+   *
+   * \return string representation of uploadtree path
+   */
+  private function Uploadtree2PathStr ($PathArray)
+  {
+    $Path = "";
+    if (count($PathArray))
+      foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
+    return $Path;
+  }
 }
 
 $NewPlugin = new ui_picker;
