@@ -48,7 +48,7 @@ const char* upload_common =
 
 const char* folder_name =
     " SELECT folder_name FROM folder "
-    "   LEFT JOIN foldercontents ON folder_pk = parent_fk "
+    "   LEFT JOIN foldercontents ON folder_pk = foldercontents.parent_fk "
     "   LEFT JOIN job ON child_id = job_upload_fk "
     "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
     "   WHERE jq_pk = %d;";
