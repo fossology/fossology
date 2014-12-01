@@ -53,10 +53,10 @@ $(document).ready(function() {
 });
 
 $('#nav-hider').click(function() {
-  $('#nav-cell').hide();
-  $('#nav-shower').show();  
+  $('#nav-cell').hide('slow');
+  $('#nav-shower').show('slow');  
 });
 $('#nav-shower').click(function() {
-  $('#nav-cell').show();
-  $('#nav-shower').hide();  
+  $('#nav-shower').hide('slow');
+  $('#nav-cell').show('slow');
 });
