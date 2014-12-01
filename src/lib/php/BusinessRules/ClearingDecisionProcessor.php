@@ -184,21 +184,6 @@ class ClearingDecisionProcessor
     return array($addedResults, $removedResults);
   }
 
-
-  /**
-   * @param int $itemId
-   * @param int $userId
-   * @param ClearingLicense[] $clearingLicenses
-   * @param int $eventType
-   */
-  protected function insertClearingEventsForClearingLicenses($itemId, $userId, $clearingLicenses)
-  {
-    foreach ($clearingLicenses as $clearingLicense)
-    {
-      $this->clearingDao->insertClearingEventFromClearingLicense($itemId, $userId, $clearingLicense);
-    }
-  }
-
   /**
    * @param $userId
    * @param $itemId

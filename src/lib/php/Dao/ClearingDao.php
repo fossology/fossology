@@ -446,21 +446,6 @@ INSERT INTO clearing_decision (
     return $orderedEvents;
   }
 
-  /**
-   * @param $uploadTreeId
-   * @param $userId
-   * @param ClearingLicense $clearingLicense
-   * @param $type
-   */
-  public function insertClearingEventFromClearingLicense($uploadTreeId, $userId, $clearingLicense)
-  {
-    $this->insertClearingEvent(
-      $uploadTreeId, $userId, $clearingLicense->getLicenseId(),
-      $clearingLicense->isRemoved(), $clearingLicense->getType(),
-      $clearingLicense->getReportinfo(), $clearingLicense->getComment()
-    );
-  }
-
   public function updateClearingEvent($uploadTreeId, $userId, $licenseId, $what, $changeTo)
   {
     $this->dbManager->begin();
