@@ -111,7 +111,7 @@ abstract class Agent extends Object
   function bail($exitvalue)
   {
     debug_print_backtrace();
-    $this->scheduler_disconnect();
+    $this->scheduler_disconnect($exitvalue);
     exit($exitvalue);
   }
 
@@ -184,11 +184,11 @@ abstract class Agent extends Object
     ($line = fgets(STDIN));
     if ("CLOSE\n" === $line)
     {
-      $this->bail(0);
+      return false;
     }
     if ("END\n" === $line)
     {
-      $this->bail(0);
+      return false;
     }
 
     return $line;
