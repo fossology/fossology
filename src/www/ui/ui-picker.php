@@ -371,7 +371,7 @@ class ui_picker extends FO_Plugin
       else
       $item2 = $PickRec["uploadtree_fk1"];
       $PathArray = Dir2Path($item2, 'uploadtree');
-      $Path = Uploadtree2PathStr($PathArray);
+      $Path = $this->Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
     }
     $Options = "id=HistoryPick onchange='AppJump(this.value)')";
@@ -416,7 +416,7 @@ class ui_picker extends FO_Plugin
     while ($row = pg_fetch_assoc($result))
     {
       $PathArray = Dir2Path($row['uploadtree_pk'], 'uploadtree');
-      $SuggestionsArray[$row['uploadtree_pk']] = Uploadtree2PathStr($PathArray);
+      $SuggestionsArray[$row['uploadtree_pk']] = $this->Uploadtree2PathStr($PathArray);
     }
     pg_free_result($result);
 
@@ -602,7 +602,7 @@ class ui_picker extends FO_Plugin
     $OutBuf .= "<div style=background-color:lavender>";
     $OutBuf .= "<center><table style='border:5px groove red'>";
     $OutBuf .= "<tr><td><b>File 1: </b></td><td>&nbsp;&nbsp;</td><td>";
-    $PathStr = Uploadtree2PathStr($PathArray);
+    $PathStr = $this->Uploadtree2PathStr($PathArray);
     $OutBuf .= "$PathStr";
     $OutBuf .= "</td></tr>";
     $OutBuf .= "</table></center>";
@@ -726,6 +726,25 @@ class ui_picker extends FO_Plugin
     $this->vars['content'] = $OutBuf;
   }
 
+  
+  /**
+ * \brief Get string representation of uploadtree path.
+ *  Use Dir2Path to get $PathArray.
+ *
+ * \param $PathArry an array containing the path
+ *
+ * \return string representation of uploadtree path
+ */
+function Uploadtree2PathStr ($PathArray)
+{
+  $Path = "";
+  if (count($PathArray))
+    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
+  return $Path;
+}
+
+  
+  
 }
 
 $NewPlugin = new ui_picker;
