@@ -18,13 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 
 class ClearingDecisionFilter
 {
-  const KEYREPO = "all";
 
   /** @param ClearingDecision[] $clearingDecisions
    * @return \Fossology\Lib\Data\ClearingDecision[]
@@ -46,7 +45,7 @@ class ClearingDecisionFilter
 
   /**
    * @param ClearingDecision[] $clearingDecisions sorted by newer decision comes before
-   * @return ClearingDecision[][] indexed by pfileId and than itemId
+   * @return ClearingDecisionCache
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
@@ -61,11 +60,16 @@ class ClearingDecisionFilter
       $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
 
-      $alreadyExistingInScopeFile = array_key_exists($fileId, $clearingDecisionsMapped)
-         ? $clearingDecisionsMapped[$fileId][self::KEYREPO]->getScope()
+      $alreadyExistingInScope = array_key_exists($fileId, $clearingDecisionsMapped);
+      $fileIdmapped = $alreadyExistingInScope ? $clearingDecisionsMapped[$fileId] : null;
+
+      $alreadyExistingInScopeFile =
+         $alreadyExistingInScope && array_key_exists(ClearingDecisionCache::KEYREPO, $fileIdmapped)
+         ? $fileIdmapped[ClearingDecisionCache::KEYREPO]->getScope()
          : false;
-      $alreadyExistingInScopeItem = ((false !== $alreadyExistingInScopeFile) && array_key_exists($fileId, $clearingDecisionsMapped))
-         ? $clearingDecisionsMapped[$fileId][$itemId]->getScope()
+      $alreadyExistingInScopeItem =
+         ($alreadyExistingInScope && array_key_exists($itemId, $fileIdmapped))
+         ? $fileIdmapped[$itemId]->getScope()
          : false;
 
       if ($alreadyExistingInScopeItem === DecisionScopes::ITEM)
@@ -85,7 +89,7 @@ class ClearingDecisionFilter
         case DecisionScopes::REPO:
           if ($alreadyExistingInScopeFile === false)
           {
-            $clearingDecisionsMapped[$fileId][self::KEYREPO] = $clearingDecision;
+            $clearingDecisionsMapped[$fileId][ClearingDecisionCache::KEYREPO] = $clearingDecision;
           }
 
           break;
@@ -95,7 +99,7 @@ class ClearingDecisionFilter
       }
     }
 
-    return $clearingDecisionsMapped;
+    return new ClearingDecisionCache($clearingDecisionsMapped);
   }
 
   /** @param ClearingDecision[] $clearingDecisions

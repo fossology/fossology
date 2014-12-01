@@ -20,6 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 use IllegalArguentException;
 use Mockery as M;
 
@@ -79,7 +80,7 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
-    assertThat($filteredClearingDecisions, containsInAnyOrder($decision1));
+    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
   }
 
   public function testFilterCurrentClearingDecisionsShouldKeepNewerItemScopedDecisions() {
@@ -96,9 +97,10 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
+    /** @var ClearingDecisionCache $filteredClearingDecisions */
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
-    assertThat($filteredClearingDecisions, containsInAnyOrder($decision1));
+    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
   }
 
   public function testFilterCurrentClearingDecisionsShouldPrioritizeOlderItemScopedDecisionsOverRepoScopedOnes() {
@@ -114,9 +116,10 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
+    /** @var ClearingDecisionCache $filteredClearingDecisions */
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
-    assertThat($filteredClearingDecisions, containsInAnyOrder($decision2));
+    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision2)));
   }
 
   public function testFilterCurrentClearingDecisionsShouldNotPrioritizeOlderRepoScopedDecisionsOverItemScopedOnes() {
@@ -132,9 +135,10 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
+    /** @var ClearingDecisionCache $filteredClearingDecisions */
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
-    assertThat($filteredClearingDecisions, containsInAnyOrder($decision1));
+    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
   }
 
   /**

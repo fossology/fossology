@@ -51,7 +51,6 @@ without any warranty.
     </service>
     <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
       <argument type="service" id="db.manager"/>
-      <argument type="service" id="businessrules.license_filter"/>
       <argument type="service" id="dao.upload"/>
     </service>
     <service id="dao.highlight" class="Fossology\Lib\Dao\HighlightDao">

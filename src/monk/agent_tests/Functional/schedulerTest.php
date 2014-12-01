@@ -28,7 +28,6 @@ use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-use Fossology\Lib\BusinessRules\LicenseFilter;
 
 
 class MonkScheduledTest extends \PHPUnit_Framework_TestCase
@@ -41,8 +40,6 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var LicenseFilter */
-  private $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
   /** @var HighlightDao */
@@ -56,8 +53,7 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->licenseDao = new LicenseDao($this->dbManager);
     $this->uploadDao = new UploadDao($this->dbManager);
     $this->highlightDao = new HighlightDao($this->dbManager);
-    $this->newestEditedLicenseSelector = new LicenseFilter(new ClearingDecisionFilter());
-    $this->clearingDao = new ClearingDao($this->dbManager, $this->newestEditedLicenseSelector, $this->uploadDao);
+    $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }
 
   public function tearDown()

@@ -34,7 +34,6 @@ use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-use Fossology\Lib\BusinessRules\LicenseFilter;
 
 use Mockery as M;
 use Mockery\MockInterface;
@@ -51,8 +50,6 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var LicenseFilter */
-  private $newestEditedLicenseSelector;
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
   /** @var ClearingDecisionProcessor */
@@ -71,8 +68,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
     $this->uploadDao = new UploadDao($this->dbManager);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
-    $this->newestEditedLicenseSelector = new LicenseFilter($this->clearingDecisionFilter);
-    $this->clearingDao = new ClearingDao($this->dbManager, $this->newestEditedLicenseSelector, $this->uploadDao);
+    $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }
 
   public function tearDown()

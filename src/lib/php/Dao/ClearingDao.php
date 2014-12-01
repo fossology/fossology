@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use DateTime;
-use Fossology\Lib\BusinessRules\LicenseFilter;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
@@ -42,21 +41,17 @@ class ClearingDao extends Object
   private $dbManager;
   /** @var Logger */
   private $logger;
-  /** @var LicenseFilter */
-  protected $newestEditedLicenseSelector;
   /** @var UploadDao */
   private $uploadDao;
 
   /**
    * @param DbManager $dbManager
-   * @param LicenseFilter $newestEditedLicenseSelector
    * @param UploadDao $uploadDao
    */
-  function __construct(DbManager $dbManager, LicenseFilter $newestEditedLicenseSelector, UploadDao $uploadDao)
+  function __construct(DbManager $dbManager, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className()); //$container->get("logger");
-    $this->newestEditedLicenseSelector = $newestEditedLicenseSelector;
     $this->uploadDao = $uploadDao;
   }
 
@@ -251,30 +246,6 @@ class ClearingDao extends Object
 
     $this->dbManager->commit();
   }
-
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return array
-   */
-  public function getEditedLicenseShortNamesFullList(ItemTreeBounds $itemTreeBounds)
-  {
-    $licenseCandidates = $this->getFileClearingsFolder($itemTreeBounds);
-    $licenses = $this->newestEditedLicenseSelector->extractGoodLicenses($licenseCandidates);
-    return $licenses;
-  }
-
-
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return string[]
-   */
-  public function getEditedLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds)
-  {
-    $licenses = $this->getEditedLicenseShortNamesFullList($itemTreeBounds);
-
-    return array_unique($licenses);
-  }
-
 
   /**
    * @param int $userId

@@ -16,8 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\BusinessRules\LicenseFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
+use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -48,8 +48,8 @@ class ui_browse_license extends FO_Plugin
   private $clearingDao;
   /** @var AgentDao */
   private $agentsDao;
-  /** @var LicenseFilter */
-  private $licenseFilter;
+  /** @var ClearingDecisionFilter */
+  private $clearingFilter;
   /** @var array [uploadtree_id]=>cnt */
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
@@ -69,7 +69,7 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agent');
-    $this->licenseFilter = $container->get('businessrules.license_filter');
+    $this->clearingFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
   /**
@@ -348,8 +348,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    /** @var LicenseRef[][] */
-    $editedMappedLicenses = $this->licenseFilter->extractGoodLicensesPerItem($allDecisions);
+    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -412,7 +411,7 @@ class ui_browse_license extends FO_Plugin
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, ClearingDecisionCache $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -462,8 +461,9 @@ class ui_browse_license extends FO_Plugin
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
-      $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
-      $editedLicenseList .= implode(', ', $editedLicenses);
+      $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds);
+      $editedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($childDecisions)->getAllLicenseNames();
+      $editedLicenses = array_unique($editedLicenses);
     } else
     {
       $licenseEntries = array();
@@ -496,34 +496,21 @@ class ui_browse_license extends FO_Plugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
-      if (array_key_exists($fileId, $editedMappedLicenses))
+      /** @var ClearingDecision $decision */
+      if (false !== ($decision = $editedMappedLicenses->getDecisionOf($childUploadTreeId, $fileId)))
       {
-        $itemMappedLicenses = $editedMappedLicenses[$fileId];
-        if (array_key_exists($childUploadTreeId, $itemMappedLicenses))
-        {
-          $addedLicenses = $itemMappedLicenses[$childUploadTreeId];
-        }
-        else
-        {
-          if (!array_key_exists(ClearingDecisionFilter::KEYREPO, $itemMappedLicenses))
-          {
-            throw new Exception("bad mapped edited licenses for item=$childUploadTreeId");
-          }
-          $addedLicenses = $itemMappedLicenses[ClearingDecisionFilter::KEYREPO];
-        }
-        $editedLicenseList .= implode(", ",
-            array_map(
+        $editedLicenses = array_map(
                 function ($licenseRef) use ($uploadId, $childUploadTreeId)
                 {
                   /** @var LicenseRef $licenseRef */
                   return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
                 },
-                $addedLicenses
-            )
+                $decision->getPositiveLicenses()
         );
       }
     }
 
+    $editedLicenseList .= implode(', ', $editedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
@@ -561,9 +548,8 @@ class ui_browse_license extends FO_Plugin
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $goodLicenses = $this->licenseFilter->extractGoodLicenses($allDecisions);
-
-    $licenses = $goodLicenses ?: $this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
+    $decisionsCache = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
+    $licenses = $decisionsCache->getAllLicenseNames();
 
     $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;

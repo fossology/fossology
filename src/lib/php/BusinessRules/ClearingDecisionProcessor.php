@@ -113,6 +113,8 @@ class ClearingDecisionProcessor
       $type = DecisionTypes::IDENTIFIED;
       $clearingLicensesToDecide = $this->getClearingLicensesForAgentFindings($itemBounds, true, ClearingEventTypes::USER);
       $agentClearingLicenses = array();
+
+      $this->clearingDao->removeAllClearingEvents($itemId, $userId);
     }
     else
     {
@@ -126,10 +128,14 @@ class ClearingDecisionProcessor
     $currentDecision = $this->clearingDao->getRelevantClearingDecision($userId, $itemId);
     $doingLicenses = array_values(array_merge($clearingLicensesToDecide, $agentClearingLicenses));
 
-    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $doingLicenses));
+    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $doingLicenses))
     {
       $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
       $this->insertClearingDecision($userId, $itemId, $type, $scope, $clearingLicensesToDecide, $agentClearingLicenses);
+    }
+    else
+    {
+      $this->clearingDao->removeWipClearingDecision($itemId, $userId);
     }
 
     if ($needTransaction) $this->dbManager->commit();
@@ -153,7 +159,8 @@ class ClearingDecisionProcessor
     $addedResults = array();
     $removedResults = array();
 
-    foreach (array_merge($selection, $this->agentLicenseEventProcessor->getScannedLicenses($scannedLicenseDetails)) as $shortName => $clearingLicense)
+    $agentLicenseRefs = $this->agentLicenseEventProcessor->getScannedLicenses($scannedLicenseDetails);
+    foreach (array_merge(array_keys($selection), array_keys($agentLicenseRefs)) as $shortName)
     {
       $licenseDecisionEvent = array_key_exists($shortName, $events) ? $events[$shortName] : null;
       $agentClearingEvents = $this->collectAgentDetectedLicenses($shortName, $scannedLicenseDetails);
