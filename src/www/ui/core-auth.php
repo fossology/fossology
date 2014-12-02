@@ -183,13 +183,13 @@ class core_auth extends FO_Plugin
     if (empty($_SESSION['ip']))
     {
       $_SESSION['ip'] = $this->GetIP();
-    } else
-      if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
-      {
-        /* Sessions are not transferable. */
-        $this->UpdateSess("");
-        $_SESSION['ip'] = $this->GetIP();
-      }
+    }
+    else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
+    {
+      /* Sessions are not transferable. */
+      $this->UpdateSess("");
+      $_SESSION['ip'] = $this->GetIP();
+    }
 
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
@@ -258,7 +258,7 @@ class core_auth extends FO_Plugin
     $_SESSION['GroupName'] = $UserRow['group_name'];
   }
 
-/**
+  /**
    * \brief Retrieve the user's IP address.
    * Some proxy systems pass forwarded IP address info.
    * This ensures that someone who steals the cookie won't

@@ -716,8 +716,8 @@ class ui_picker extends FO_Plugin
     if ($this->OutputType=='HTML')
     {
       if (empty($uploadtree_pk))
-      $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
-        else
+        $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
+      else
       {
         $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
         $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);
@@ -743,10 +743,12 @@ class ui_picker extends FO_Plugin
   {
     $Path = "";
     if (count($PathArray))
+    {
       foreach ($PathArray as $PathRow)
       {
         $Path .= "/" . $PathRow['ufile_name'];
       }
+    }
     return $Path;
   }
   
