@@ -419,6 +419,11 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
   for (int jf = 0; jf < lenght; jf++)
   {
     json_object* value = json_object_array_get_idx(jsonArray, jf);
+    if (value == NULL)
+    {
+      printf("unexpected NULL in json object\n");
+      return NULL;
+    }
     if (json_object_is_type(value, json_type_string))
     {
       const char* file = json_object_get_string(value);
@@ -475,6 +480,10 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
           }
         }
 
+        if (fileNames == NULL)
+        {
+          return 0;
+        }
         if (content && text && fileNames) {
           table_addRow(table, content, text, fileNames);
         } else if (content && fileNames) { // TODO use a count argument in addRowsFromJson_ContentTextFiles
