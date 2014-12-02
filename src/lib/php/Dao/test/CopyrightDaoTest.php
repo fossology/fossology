@@ -62,11 +62,6 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertSame(array(), $highlights);
     
     $this->testDb->insertData(array('copyright'));
-/*    $this->dbManager->queryOnce("INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (15, 8, 8, 'written permission.
-
-you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 698, 899)
-",
-            __METHOD__.'.insert.data');*/
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     $highlight0 = reset($highlights);
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);

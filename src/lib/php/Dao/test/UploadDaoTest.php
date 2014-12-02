@@ -153,7 +153,6 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetNextItemWithMultipleFiles()
   {
-//    $this->markTestSkipped("not possible with sqlite");
     $subentries = $this->getSubentriesForMultipleFiles();
     $this->prepareModularTable($subentries);
 
@@ -163,7 +162,6 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetPreviousItemWithMultipleFiles()
   {
-//    $this->markTestSkipped("not possible with sqlite");
     $subentries = $this->getSubentriesForMultipleFiles();
     $this->prepareModularTable($subentries);
 
