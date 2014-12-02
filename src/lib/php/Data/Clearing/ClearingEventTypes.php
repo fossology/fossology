@@ -24,7 +24,7 @@ class ClearingEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
   const AGENT = 3;
-  const REUSED_BIT = 0b100;
+  const REUSED_BIT = 4; // 0b100 only in php>5.3
 
   public function __construct()
   {
