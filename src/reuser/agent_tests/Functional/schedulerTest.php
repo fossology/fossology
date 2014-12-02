@@ -218,9 +218,7 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
   private function getFilteredClearings($uploadId)
   {
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
-
-    $clearings = $this->clearingDao->getFileClearingsFolder($bounds);
-    return $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearings);
+    return $this->clearingDao->getFileClearingsFolder($bounds);
   }
 
   private function copyClearingLicensesAsReused($clearingLicenses)
@@ -304,10 +302,8 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
 
     assertThat($this->getHeartCount($output), equalTo(0));
 
-    $bounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $decisions = $this->clearingDao->getFileClearingsFolder($bounds);
-    $relevantDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($decisions);
-    assertThat($relevantDecisions, is(emptyArray()));
+    $decisions = $this->getFilteredClearings($uploadId);
+    assertThat($decisions, is(emptyArray()));
 
     $this->rmRepo();
   }

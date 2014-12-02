@@ -455,7 +455,6 @@ class ui_browse_license extends FO_Plugin
       $fileName = "<a href='$LinkUri'>$fileName</a>";
     }
     /* show licenses under file name */
-    $editedLicenseList = "";
     $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
@@ -510,9 +509,13 @@ class ui_browse_license extends FO_Plugin
                 $decision->getPositiveLicenses()
         );
       }
+      else
+      {
+        $editedLicenses = array();
+      }
     }
 
-    $editedLicenseList .= implode(', ', $editedLicenses);
+    $editedLicenseList = implode(', ', $editedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);

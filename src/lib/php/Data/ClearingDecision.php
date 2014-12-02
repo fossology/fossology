@@ -25,8 +25,6 @@ use Fossology\Lib\Util\Object;
 class ClearingDecision extends Object
 {
   /** @var bool */
-  private $sameUpload;
-  /** @var bool */
   private $sameFolder;
   /** @var ClearingLicense[] */
   private $clearingLicenses;
@@ -53,7 +51,6 @@ class ClearingDecision extends Object
 
   /**
    * @param $sameFolder
-   * @param $sameUpload
    * @param int $clearingId
    * @param $uploadTreeId
    * @param $pfileId
@@ -62,17 +59,15 @@ class ClearingDecision extends Object
    * @param int $type
    * @param int $scope
    * @param $date_added
-   * @param $positiveLicenses
-   * @param $negativeLicenses
+   * @param ClearingLicense[] $clearingLicenses
    * @param string $comment
    * @param string $reportinfo
    * @internal param $licenses
    */
-  public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
+  public function __construct($sameFolder, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
           $scope, $date_added, $clearingLicenses, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
-    $this->sameUpload = $sameUpload;
     $this->clearingId = $clearingId;
     $this->uploadTreeId = $uploadTreeId;
     $this->pfileId = $pfileId;
@@ -155,14 +150,6 @@ class ClearingDecision extends Object
   public function getSameFolder()
   {
     return $this->sameFolder;
-  }
-
-  /**
-   * @return boolean
-   */
-  public function getSameUpload()
-  {
-    return $this->sameUpload;
   }
 
   /**

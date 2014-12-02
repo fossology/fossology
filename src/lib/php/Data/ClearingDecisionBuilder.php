@@ -27,8 +27,6 @@ use Fossology\Lib\Util\Object;
 class ClearingDecisionBuilder extends Object
 {
   /** @var bool */
-  private $sameUpload;
-  /** @var bool */
   private $sameFolder;
   /** @var ClearingLicense[] */
   private $clearingLicenses;
@@ -55,7 +53,6 @@ class ClearingDecisionBuilder extends Object
 
   function __construct()
   {
-    $this->sameUpload = false;
     $this->sameFolder = false;
     $this->clearingLicenses = array();
     $this->clearingId = -1;
@@ -107,17 +104,6 @@ class ClearingDecisionBuilder extends Object
     $this->pfileId = intval($pfileId);
     return $this;
   }
-
-  /**
-   * @param boolean $sameUpload
-   * @return ClearingDecisionBuilder
-   */
-  public function setSameUpload($sameUpload)
-  {
-    $this->sameUpload = $sameUpload;
-    return $this;
-  }
-
 
   /**
    * @param boolean $sameFolder
@@ -189,7 +175,6 @@ class ClearingDecisionBuilder extends Object
 
   public function copy(ClearingDecision $clearingDecision)
   {
-    $this->sameUpload = $clearingDecision->getSameUpload();
     $this->sameFolder = $clearingDecision->getSameFolder();
     $this->clearingLicenses = $clearingDecision->getClearingLicenses();
     $this->clearingId = $clearingDecision->getClearingId();
@@ -215,7 +200,7 @@ class ClearingDecisionBuilder extends Object
       throw new Exception("decision type should be set");
     }
 
-    return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
+    return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
         $this->dateAdded, $this->clearingLicenses, $this->reportinfo, $this->comment);
   }

@@ -90,11 +90,12 @@ class ReuserAgent extends Agent
     $clearingDecisionByFileId = $this->mapByFileId($clearingDecisions);
     $clearingDecisionToImportByFileId = $this->mapByFileId($clearingDecisionsToImport);
 
+    $uploadDao = $this->uploadDao;
     /** @var Item[] $containedItems */
     $containedItems = ArrayOperation::callChunked(
-        function ($fileIds) use ($itemTreeBounds)
+        function ($fileIds) use ($itemTreeBounds, $uploadDao)
         {
-          return $this->uploadDao->getContainedItems(
+          return $uploadDao->getContainedItems(
               $itemTreeBounds,
               "pfile_fk = ANY($1)",
               array('{' . implode(', ', $fileIds) . '}')

@@ -37,35 +37,6 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     M::close();
   }
 
-  public function testFilterRelevantClearingDecisionsFiltersItemScopedDecisionsNotFromSameFolder() {
-    $irrelevantDecision = M::mock(ClearingDecision::classname());
-    $irrelevantDecision->shouldReceive("getScope")->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $irrelevantDecision->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(false);
-
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions(array($irrelevantDecision));
-
-    assertThat($filteredClearingDecisions, is(emptyArray()));
-  }
-
-  public function testFilterRelevantClearingDecisionsFiltersItemScopedDecisionsFromSameFolder() {
-    $relevantDecision = M::mock(ClearingDecision::classname());
-    $relevantDecision->shouldReceive("getScope")->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $relevantDecision->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
-
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions(array($relevantDecision));
-
-    assertThat($filteredClearingDecisions, containsInAnyOrder($relevantDecision));
-  }
-
-  public function testFilterRelevantClearingDecisionsFiltersRepoScopedDecisions() {
-    $relevantDecision = M::mock(ClearingDecision::classname());
-    $relevantDecision->shouldReceive("getScope")->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
-
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions(array($relevantDecision));
-
-    assertThat($filteredClearingDecisions, containsInAnyOrder($relevantDecision));
-  }
-
   public function testFilterCurrentClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
     $itemId = 543;
     $pfileId = 432;

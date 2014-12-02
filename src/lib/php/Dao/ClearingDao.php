@@ -59,7 +59,7 @@ class ClearingDao extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return ClearingDecision[]
    */
-  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds)
+  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $onlyCurrent=true)
   {
     //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
@@ -73,37 +73,47 @@ class ClearingDao extends Object
       $sql_upload = "ut.upload_fk=$1  and ";
     }
 
-    $statementName = __METHOD__ . "." . $uploadTreeTable . "." . $joinType;
+    $filterClause = $onlyCurrent ? "distinct on(itemid)" : "";
 
-    $sql = "SELECT
-           CD.clearing_decision_pk AS id,
-           CD.uploadtree_fk AS uploadtree_id,
-           CD.pfile_fk AS pfile_id,
-           users.user_name AS user_name,
-           CD.user_fk AS user_id,
-           CD.decision_type AS type_id,
-           CD.scope as scope,
-           EXTRACT(EPOCH FROM CD.date_added) AS date_added,
-           ut2.upload_fk = $1 AS same_upload,
-           ut2.upload_fk = $1 and ut2.lft BETWEEN $2 and $3 AS is_local,
-           LR.rf_pk as license_id,
-           LR.rf_shortname as shortname,
-           LR.rf_fullname as fullname,
-           CL.removed as removed,
-           Cl.type_fk as event_type_id,
-           CL.reportinfo as reportinfo,
-           CL.comment as comment
-         FROM clearing_decision CD
-           LEFT JOIN users ON CD.user_fk=users.user_pk
-           INNER JOIN uploadtree ut2 ON CD.uploadtree_fk = ut2.uploadtree_pk
-           INNER JOIN " . $uploadTreeTable . " ut ON CD.pfile_fk = ut.pfile_fk
-           $joinType JOIN clearing_licenses CL on CL.clearing_fk = CD.clearing_decision_pk
-           $joinType JOIN license_ref LR on CL.rf_fk=LR.rf_pk
-         WHERE " . $sql_upload . " ut.lft BETWEEN $2 and $3
-           AND CD.decision_type!=$4
-         GROUP BY id, uploadtree_id, pfile_id, user_name, user_id, type_id, scope, date_added, same_upload, is_local,
-           license_id, shortname, fullname, removed, event_type_id, comment, reportinfo
-         ORDER by CD.pfile_fk, CD.clearing_decision_pk desc";
+    $statementName = __METHOD__ . "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
+
+    $sql = "WITH allDecs AS (
+              SELECT
+                cd.clearing_decision_pk AS id,
+                cd.pfile_fk AS pfile_id,
+                users.user_name AS user_name,
+                cd.user_fk AS user_id,
+                cd.decision_type AS type_id,
+                cd.scope AS scope,
+                EXTRACT(EPOCH FROM cd.date_added) AS date_added,
+                ut2.upload_fk = $1 AND ut2.lft BETWEEN $2 AND $3 AS is_local,
+                ut.uploadtree_pk AS itemid
+              FROM clearing_decision cd
+                LEFT JOIN users ON cd.user_fk=users.user_pk
+                INNER JOIN uploadtree ut2 ON cd.uploadtree_fk = ut2.uploadtree_pk
+                INNER JOIN " . $uploadTreeTable . " ut ON cd.pfile_fk = ut.pfile_fk
+              WHERE " . $sql_upload . " ut.lft BETWEEN $2 AND $3
+                AND CD.decision_type!=$4
+              GROUP BY id, itemid, pfile_id, user_name, user_id, type_id, scope, date_added, is_local
+              ORDER by cd.clearing_decision_pk DESC),
+            relevant AS (
+              SELECT $filterClause *
+              FROM allDecs
+              ORDER BY itemid, is_local DESC, id DESC
+            )
+            SELECT
+              r.*,
+              lr.rf_pk AS license_id,
+              lr.rf_shortname AS shortname,
+              lr.rf_fullname AS fullname,
+              cl.removed AS removed,
+              cl.type_fk AS event_type_id,
+              cl.reportinfo AS reportinfo,
+              cl.comment AS comment
+            FROM relevant r
+            LEFT JOIN clearing_licenses cl ON cl.clearing_fk = r.id
+            LEFT JOIN license_ref lr ON lr.rf_pk = cl.rf_fk
+            ORDER BY r.id DESC";
 
     $this->dbManager->prepare($statementName, $sql);
 
@@ -141,10 +151,9 @@ class ClearingDao extends Object
         $previousClearingId = $clearingId;
         $clearingLicenses = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
-            ->setSameUpload($this->dbManager->booleanFromDb($row['same_upload']))
             ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
             ->setClearingId($row['id'])
-            ->setUploadTreeId($row['uploadtree_id'])
+            ->setUploadTreeId($row['itemid'])
             ->setPfileId($row['pfile_id'])
             ->setUserName($row['user_name'])
             ->setUserId($row['user_id'])

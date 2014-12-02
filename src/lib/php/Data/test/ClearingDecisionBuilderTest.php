@@ -97,14 +97,6 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     //M::close();
   }
 
-  public function testSameUpload()
-  {
-    $clearingDec = $this->clearingDecisionBuilder
-        ->setSameUpload($this->sameUpload)
-        ->build();
-    assertThat($clearingDec->getSameUpload(), is($this->sameUpload));
-  }
-
   public function testSameFolder()
   {
     $clearingDec =$this->clearingDecisionBuilder 
