@@ -34,6 +34,7 @@ abstract class ClearedGetterCommon
   private $fileNameCache = array();
 
   private $userId;
+  private $groupId;
   private $uploadId;
   private $groupBy;
 
@@ -48,20 +49,17 @@ abstract class ClearedGetterCommon
 
   public function getCliArgs()
   {
-    $args = getopt("u:", array("uId:"));
+    $args = getopt("u:", array("uId:","gId:"));
 
     if (!array_key_exists('u',$args))
     {
       print "missing required parameter -u {uploadId}\n";
       exit(2);
     }
-    if (false && !array_key_exists('uId',$args))
-    {
-      print "missing optional parameter --uId {userId}\n";
-    }
 
     $this->uploadId = intval($args['u']);
     $this->userId = intval(@$args['uId']);
+    $this->groupId = intval(@$args['gId']);
   }
 
   public function getUploadId()
@@ -86,6 +84,18 @@ abstract class ClearedGetterCommon
       exit(2);
     }
     return $userId;
+  }
+
+  public function getGroupId()
+  {
+    $groupId = $this->groupId;
+
+    if ($groupId<=0)
+    {
+      print "invalid group ".$groupId;
+      exit(2);
+    }
+    return $groupId;
   }
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
@@ -158,15 +168,16 @@ abstract class ClearedGetterCommon
    * @param int $uploadId
    * @param string $uploadTreeTableName
    * @param null|int $userId
+   * @param null|int $groupId
    * @return array
    */
-  abstract protected function getStatements($uploadId, $uploadTreeTableName, $userId=null);
+  abstract protected function getStatements($uploadId, $uploadTreeTableName, $userId=null, $groupId=null);
 
-  public function getCleared($uploadId, $userId=null)
+  public function getCleared($uploadId, $userId=null, $groupId=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
-    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId);
+    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId, $groupId);
 
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
 

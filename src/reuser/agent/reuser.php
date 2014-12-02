@@ -72,6 +72,10 @@ class ReuserAgent extends Agent
      * but it also feels like it would have too big a scope
      */
 
+    /* TODO update all */
+
+    return;
+
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);

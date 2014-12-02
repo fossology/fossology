@@ -97,12 +97,12 @@ class AjaxClearingView extends FO_Plugin
    * @param int $uploadTreeId
    * @return string
    */
-  protected function doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId)
+  protected function doLicenses($orderAscending, $groupId, $uploadId, $uploadTreeId)
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
     $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
-    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+    list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
 
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
@@ -136,10 +136,10 @@ class AjaxClearingView extends FO_Plugin
    * @internal param $itemTreeBounds
    * @return string
    */
-  protected function doClearings($orderAscending, $userId, $uploadId, $uploadTreeId)
+  protected function doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId)
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
-    $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds, $userId, $orderAscending);
+    $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds, $groupId, $orderAscending);
 
     return json_encode(
         array(
@@ -176,6 +176,7 @@ class AjaxClearingView extends FO_Plugin
   {
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
     $action = GetParm("do", PARM_STRING);
     $uploadId = GetParm("upload", PARM_INTEGER);
     $uploadTreeId = GetParm("item", PARM_INTEGER);
@@ -187,17 +188,17 @@ class AjaxClearingView extends FO_Plugin
     switch ($action)
     {
       case "licenses":
-        return $this->doLicenses($orderAscending, $userId, $uploadId, $uploadTreeId);
+        return $this->doLicenses($orderAscending, $groupId, $uploadId, $uploadTreeId);
 
       case "licenseDecisions":
-        return $this->doClearings($orderAscending, $userId, $uploadId, $uploadTreeId);
+        return $this->doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId);
 
       case "addLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, false, ClearingEventTypes::USER);
+        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, ClearingEventTypes::USER);
         return json_encode(array());
 
       case "removeLicense":
-        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $licenseId, true, ClearingEventTypes::USER);
+        $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, true, ClearingEventTypes::USER);
         return json_encode(array());
 
       case "setNextPrev":
@@ -213,7 +214,7 @@ class AjaxClearingView extends FO_Plugin
           list ($uploadTreeId, $licenseId) = explode(',', $id);
           $what = GetParm("columnName", PARM_STRING);
           $changeTo = GetParm("value", PARM_STRING);
-          $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $licenseId, $what, $changeTo);
+          $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
         return "success";
 
@@ -228,13 +229,13 @@ class AjaxClearingView extends FO_Plugin
    * @param boolean $orderAscending
    * @return array
    */
-  protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $userId, $orderAscending)
+  protected function getCurrentSelectedLicensesTableData(ItemTreeBounds $itemTreeBounds, $groupId, $orderAscending)
   {
     $uploadTreeId = $itemTreeBounds->getItemId();
     $uploadId = $itemTreeBounds->getUploadId();
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $userId);
+    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
     $licenseEventTypes = new ClearingEventTypes();
 
     $table = array();

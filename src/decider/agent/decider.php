@@ -82,13 +82,6 @@ class DeciderAgent extends Agent
     return true;
   }
 
-  protected function getDateOfLastRelevantClearing($userId, $uploadTreeId)
-  {
-    $lastDecision = $this->clearingDao->getRelevantClearingDecision($userId, $uploadTreeId);
-    return $lastDecision !== null ? $lastDecision->getDateAdded() : null;
-  }
-
-
   /* true if small is a subset of big */
   static protected function array_contains($big, $small)
   {
@@ -120,7 +113,7 @@ class DeciderAgent extends Agent
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
    */
-  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId)
+  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId)
   {
     $this->dbManager->begin();  /* start transaction */
 
@@ -133,17 +126,17 @@ class DeciderAgent extends Agent
         break;
 
       default:
-        $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $userId);
+        $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId);
         $createDecision = count($unhandledScannerDetectedLicenses) == 0;
     }
 
     if ($createDecision)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
     }
     else
     {
-      $this->clearingDao->markDecisionAsWip($itemId, $userId);
+      $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
     }
     $this->heartbeat(1);
 

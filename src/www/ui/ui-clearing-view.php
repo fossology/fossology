@@ -197,6 +197,7 @@ class ClearingView extends FO_Plugin
 
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
@@ -244,7 +245,7 @@ class ClearingView extends FO_Plugin
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, false);
+      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, false);
     }
 
     if ($isSingleFile)
@@ -282,7 +283,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendData'] = $this->highlightRenderer->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $userId) : FALSE;
+    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $groupId) : FALSE;
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
   }

@@ -26,8 +26,8 @@ class ClearingDecision extends Object
 {
   /** @var bool */
   private $sameFolder;
-  /** @var ClearingLicense[] */
-  private $clearingLicenses;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -59,13 +59,13 @@ class ClearingDecision extends Object
    * @param int $type
    * @param int $scope
    * @param $date_added
-   * @param ClearingLicense[] $clearingLicenses
+   * @param ClearingEvent[] $clearingEvents
    * @param string $comment
    * @param string $reportinfo
    * @internal param $licenses
    */
   public function __construct($sameFolder, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
-          $scope, $date_added, $clearingLicenses, $comment = "", $reportinfo = "")
+          $scope, $date_added, $clearingEvents, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
     $this->clearingId = $clearingId;
@@ -78,7 +78,7 @@ class ClearingDecision extends Object
     $this->dateAdded = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
-    $this->clearingLicenses = $clearingLicenses;
+    $this->clearingEvents = $clearingEvents;
   }
 
   /**
@@ -110,7 +110,11 @@ class ClearingDecision extends Object
    */
   public function getClearingLicenses()
   {
-    return $this->clearingLicenses;
+    $clearingLicenses = array();
+    foreach($this->clearingEvents as $clearingEvent) {
+      $clearingLicenses[] = $clearingEvent->getClearingLicense();
+    }
+    return $clearingLicenses;
   }
 
   /**
@@ -119,13 +123,21 @@ class ClearingDecision extends Object
   public function getPositiveLicenses()
   {
     $result = array();
-    foreach($this->clearingLicenses as $clearingLicense)
+    foreach($this->getClearingLicenses() as $clearingLicense)
     {
       if (!$clearingLicense->isRemoved())
         $result[] = $clearingLicense->getLicenseRef();
     }
 
     return $result;
+  }
+
+  /**
+   * @return ClearingEvent[]
+   */
+  public function getClearingEvents()
+  {
+    return $this->clearingEvents;
   }
 
   /**

@@ -63,6 +63,11 @@ class ClearingEventBuilder extends Object
     $this->comment = "";
   }
 
+  public static function create()
+  {
+    return new ClearingEventBuilder();
+  }
+
   /**
    * @return ClearingEvent
    */

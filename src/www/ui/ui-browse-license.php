@@ -165,13 +165,16 @@ class ui_browse_license extends FO_Plugin
       return $out;
     }
 
+    global $SysConf;
+    $groupId = $SysConf['auth']['GroupId'];
+
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
 
     $VLic .= "\n" . $agentStatus;
 
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $allDecisions);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -327,7 +330,7 @@ class ui_browse_license extends FO_Plugin
    * @internal param $uploadId
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $allDecisions)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $allDecisions)
   {
     $this->vars['haveOldVersionResult'] = false;
     $this->vars['haveRunningResult'] = false;
@@ -389,7 +392,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
     $VF .= '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
@@ -405,13 +408,14 @@ class ui_browse_license extends FO_Plugin
    * @param int $selectedAgentId
    * @param AgentRef[] $goodAgents
    * @param array $pfileLicenses
-   * @param array $editedPfileLicenses
+   * @param int $groupId
+   * @param ClearingDecisionCache $editedMappedLicenses
    * @param string $Uri
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, ClearingDecisionCache $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, ClearingDecisionCache $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -461,7 +465,7 @@ class ui_browse_license extends FO_Plugin
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
 
-      $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds);
+      $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds, $groupId);
       $currentDecisions = $this->clearingFilter->filterCurrentClearingDecisions($childDecisions);
       $editedLicenses = array_unique($currentDecisions->getAllLicenseNames());
     } else

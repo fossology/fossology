@@ -65,6 +65,7 @@ class AjaxBulkHistory extends DefaultPlugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     /** @var ItemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
+    //TODO pass group
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $onlyTried);
     return $this->render("bulk-history.html.twig",$this->mergeWithDefault(array('bulkHistory'=>$bulkHistory)));
   }

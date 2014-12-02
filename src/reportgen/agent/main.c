@@ -569,6 +569,7 @@ sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
 
 agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
 user_pk = fo_scheduler_userID();
+int groupId = fo_scheduler_groupID();
 while(fo_scheduler_next()!=NULL)
 {
 uploadId=atoi(fo_scheduler_current());
@@ -876,7 +877,7 @@ addparaheading(createnumsection(body,"0","2"), NULL, "Bulk Findings","0","2");
 rg_table* tableMatches = table_new(body, 3, "2000", "4000", "3638");
 table_addRow(tableMatches, "license", "text", "files");
 {
-  char* json = getMatches(uploadId, user_pk);
+  char* json = getMatches(uploadId, groupId);
   fillTableFromJson(tableMatches, json);
   g_free(json);
 }

@@ -43,10 +43,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId = null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
 
     $latestClearingDecisions = array();
     foreach ($clearingDecisions as $clearingDecision)

@@ -51,7 +51,8 @@ class BulkMatchesGetter extends ClearedGetterCommon
 
       $content = $bulk['text'];
 
-      foreach ($this->clearingDao->getBulkMatches($bulkId, $userId) as $bulkMatch)
+      //TODO pass groupId
+      foreach ($this->clearingDao->getBulkMatches($bulkId) as $bulkMatch)
       {
         $uploadTreeId = $bulkMatch['itemid'];
 

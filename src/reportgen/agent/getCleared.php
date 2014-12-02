@@ -26,5 +26,5 @@ cli_Init();
 $clearedGetter = new \Fossology\Lib\Report\LicenseClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
-$userId = $clearedGetter->getUserId();
-print json_encode($clearedGetter->getCleared($uploadId, $userId));
+$groupId = $clearedGetter->getGroupId();
+print json_encode($clearedGetter->getCleared($uploadId, $userId, $groupId));

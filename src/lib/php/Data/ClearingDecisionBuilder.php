@@ -28,8 +28,8 @@ class ClearingDecisionBuilder extends Object
 {
   /** @var bool */
   private $sameFolder;
-  /** @var ClearingLicense[] */
-  private $clearingLicenses;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -54,7 +54,7 @@ class ClearingDecisionBuilder extends Object
   function __construct()
   {
     $this->sameFolder = false;
-    $this->clearingLicenses = array();
+    $this->clearingEvents = array();
     $this->clearingId = -1;
     $this->uploadTreeId = -1;
     $this->pfileId = -1;
@@ -86,12 +86,12 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param ClearingLicense[] $licenses
+   * @param ClearingEvent[] $licenses
    * @return ClearingDecisionBuilder
    */
-  public function setClearingLicenses($licenses)
+  public function setClearingEvents($events)
   {
-    $this->clearingLicenses = $licenses;
+    $this->clearingEvents = $events;
     return $this;
   }
  
@@ -176,7 +176,7 @@ class ClearingDecisionBuilder extends Object
   public function copy(ClearingDecision $clearingDecision)
   {
     $this->sameFolder = $clearingDecision->getSameFolder();
-    $this->clearingLicenses = $clearingDecision->getClearingLicenses();
+    $this->clearingEvents = $clearingDecision->getClearingEvents();
     $this->clearingId = $clearingDecision->getClearingId();
     $this->uploadTreeId = $clearingDecision->getUploadTreeId();
     $this->pfileId = $clearingDecision->getPfileId();
@@ -202,7 +202,7 @@ class ClearingDecisionBuilder extends Object
 
     return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->dateAdded, $this->clearingLicenses, $this->reportinfo, $this->comment);
+        $this->dateAdded, $this->clearingEvents, $this->reportinfo, $this->comment);
   }
 
 }
