@@ -139,7 +139,9 @@ class LicenseListFiles extends FO_Plugin
         $text = _("files found");
         $text1 =_("unique");
         $text2 = _("with license");
-        $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
+        $text3 = _("Notice: one scanner may report mutiple same licenses for a file, you will see licenese_name(#1, #2, ...) when view license for one file.");
+        $V.= "$Unique $text ($Count $text1) $text2 <b>$rf_shortname</b>";
+        $V.= "</br>$text3</br>";
         if ($Count < $Max) $Max = $Count;
         $limit = ($Page < 0) ? "ALL":$Max;
         $order = " order by ufile_name asc";
