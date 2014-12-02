@@ -77,6 +77,8 @@ class ClearingDao extends Object
 
     $statementName = __METHOD__ . "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
 
+    $globalScope = DecisionScopes::REPO;
+
     $sql = "WITH allDecs AS (
               SELECT
                 cd.clearing_decision_pk AS id,
@@ -91,7 +93,7 @@ class ClearingDao extends Object
               FROM clearing_decision cd
                 LEFT JOIN users ON cd.user_fk=users.user_pk
                 INNER JOIN uploadtree ut2 ON cd.uploadtree_fk = ut2.uploadtree_pk
-                INNER JOIN " . $uploadTreeTable . " ut ON cd.pfile_fk = ut.pfile_fk
+                INNER JOIN " . $uploadTreeTable . " ut ON cd.pfile_fk = ut.pfile_fk AND scope = $globalScope OR ut.uploadtree_pk = ut2.uploadtree_pk
               WHERE " . $sql_upload . " ut.lft BETWEEN $2 AND $3
                 AND CD.decision_type!=$4
               GROUP BY id, itemid, pfile_id, user_name, user_id, type_id, scope, date_added, is_local
