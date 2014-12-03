@@ -241,7 +241,7 @@ class TestPgDb
 
   /**
    * @param string $type
-   * @param array $viewList
+   * @param array $elementList
    * @param bool $invert
    */
   private function applySchema($type, $elementList, $invert=FALSE)
@@ -288,4 +288,13 @@ class TestPgDb
   {
     return $this->dbManager;
   }
+  
+  public function createInheritedTables()
+  {
+    if(!$this->dbManager->existsTable('license_candidate'))
+    {
+      $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+    }
+  }
+ 
 }

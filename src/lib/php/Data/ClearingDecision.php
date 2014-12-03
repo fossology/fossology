@@ -126,7 +126,9 @@ class ClearingDecision extends Object
     foreach($this->getClearingLicenses() as $clearingLicense)
     {
       if (!$clearingLicense->isRemoved())
+      {
         $result[] = $clearingLicense->getLicenseRef();
+      }
     }
 
     return $result;

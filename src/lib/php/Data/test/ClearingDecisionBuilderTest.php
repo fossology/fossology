@@ -19,14 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 use DateTime;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
-
-//TODO what is wrong here?
-//use Mockery\Mock as M;
+use Mockery as M;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -37,8 +35,8 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   /** @var bool */
   private $sameFolder = true;
 
-  /** @var ClearingLicense[] */
-  private $clearingLicenses;
+  /** @var ClearingEvent */
+  private $clearingEvent;
 
   /** @var int */
   private $clearingId;
@@ -77,7 +75,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
- //   $this->clearingLicenses = M::mock('Fossology\Lib\Data\Clearing\ClearingLicense');
+    $this->clearingEvent = M::mock(ClearingEvent::classname());
     $this->clearingId = 8;
     $this->uploadTreeId = 9;
     $this->pfileId = 10;
@@ -94,7 +92,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
-    //M::close();
+    M::close();
   }
 
   public function testSameFolder()
@@ -108,25 +106,31 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   public function testClearingLicenses()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setClearingLicenses($this->clearingLicenses)
+        ->setClearingEvents(array($this->clearingEvent))
         ->build();
-    assertThat($clearingDec->getClearingLicenses(), is($this->clearingLicenses));
+    assertThat($clearingDec->getClearingEvents(), is(arrayContaining($this->clearingEvent)));
   }
 
   public function testPositiveLicenses()
   {
-  /*  $addedClearingLic = M::mock(ClearingLicense::classname());
+    $addedLic = M::mock(LicenseRef::classname());
+    
+    $addedClearingLic = M::mock(ClearingLicense::classname());
     $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
-
+    $addedClearingLic->shouldReceive('getLicenseRef')->withNoArgs()->andReturn($addedLic);
+    
     $removedClearingLic = M::mock(ClearingLicense::classname());
-    $removedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(true);
+    $removedClearingLic->shouldReceive('isRemoved')->andReturn(true);
 
-    $clearingLicenses = array($addedClearingLic, $removedClearingLic);
+    $removedClearingEvent = M::mock(ClearingEvent::classname());
+    
+    $this->clearingEvent->shouldReceive('getClearingLicense')->andReturn($addedClearingLic);
+    $removedClearingEvent->shouldReceive('getClearingLicense')->andReturn($removedClearingLic);
 
     $clearingDec = $this->clearingDecisionBuilder
-        ->setClearingLicenses($this->clearingLicenses)
+        ->setClearingEvents(array($this->clearingEvent, $removedClearingEvent))
         ->build();
-    assertThat($clearingDec->getClearingLicenses(), is(arrayContaining($addedClearingLic)));*/
+    assertThat($clearingDec->getPositiveLicenses(), is(arrayContaining($addedLic)));
   }
 
   public function testClearingId()

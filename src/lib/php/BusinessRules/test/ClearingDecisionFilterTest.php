@@ -21,7 +21,7 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\BusinessRules\ClearingDecisionCache;
-use IllegalArguentException;
+
 use Mockery as M;
 
 class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
@@ -37,7 +37,7 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     M::close();
   }
 
-  public function testFilterCurrentClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
+  public function testFilterCurrentClearingDecisions() {
     $itemId = 543;
     $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
@@ -54,63 +54,6 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
   }
 
-  public function testFilterCurrentClearingDecisionsShouldKeepNewerItemScopedDecisions() {
-    $itemId = 543;
-    $pfileId = 432;
-    $decision1 = M::mock(ClearingDecision::classname());
-    $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $decision1->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
-    $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
-    $decision2 = M::mock(ClearingDecision::classname());
-    $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $decision2->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
-    $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
-
-    /** @var ClearingDecisionCache $filteredClearingDecisions */
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
-
-    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
-  }
-
-  public function testFilterCurrentClearingDecisionsShouldPrioritizeOlderItemScopedDecisionsOverRepoScopedOnes() {
-    $itemId = 543;
-    $pfileId = 432;
-    $decision1 = M::mock(ClearingDecision::classname());
-    $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
-    $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
-    $decision2 = M::mock(ClearingDecision::classname());
-    $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $decision2->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
-    $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
-
-    /** @var ClearingDecisionCache $filteredClearingDecisions */
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
-
-    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision2)));
-  }
-
-  public function testFilterCurrentClearingDecisionsShouldNotPrioritizeOlderRepoScopedDecisionsOverItemScopedOnes() {
-    $itemId = 543;
-    $pfileId = 432;
-    $decision1 = M::mock(ClearingDecision::classname());
-    $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
-    $decision1->shouldReceive("getSameFolder")->once()->withNoArgs()->andReturn(true);
-    $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
-    $decision2 = M::mock(ClearingDecision::classname());
-    $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
-    $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
-
-    /** @var ClearingDecisionCache $filteredClearingDecisions */
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
-
-    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
-  }
 
   /**
    * @expectedException \InvalidArgumentException

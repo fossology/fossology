@@ -18,13 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Report;
 
-use DateTime;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\TreeDao;
 use Mockery as M;
 use Mockery\MockInterface;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Logger;
 
 include_once(dirname(dirname(__DIR__))."/common-string.php");
 
@@ -35,7 +32,7 @@ class ClearedGetterTest extends ClearedGetterCommon
     parent::__construct($groupBy);
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null)
   {
     return array(
       array("content" => "1", "text" => "t1", "uploadtree_pk" => 1),

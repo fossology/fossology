@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
-use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -409,13 +408,13 @@ class ui_browse_license extends FO_Plugin
    * @param AgentRef[] $goodAgents
    * @param array $pfileLicenses
    * @param int $groupId
-   * @param ClearingDecisionCache $editedMappedLicenses
+   * @param ClearingDecision[][] $editedMappedLicenses
    * @param string $Uri
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, ClearingDecisionCache $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -466,8 +465,7 @@ class ui_browse_license extends FO_Plugin
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
 
       $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds, $groupId);
-      $currentDecisions = $this->clearingFilter->filterCurrentClearingDecisions($childDecisions);
-      $editedLicenses = array_unique($currentDecisions->getAllLicenseNames());
+      $editedLicenses = array_unique($this->clearingFilter->getAllLicenseNames($childDecisions));
     } else
     {
       $licenseEntries = array();
@@ -502,7 +500,7 @@ class ui_browse_license extends FO_Plugin
       }
 
       /** @var ClearingDecision $decision */
-      if (false !== ($decision = $editedMappedLicenses->getDecisionOf($childUploadTreeId, $fileId)))
+      if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
       {
         $editedLicenses = array_map(
                 function ($licenseRef) use ($uploadId, $childUploadTreeId)
@@ -557,8 +555,7 @@ class ui_browse_license extends FO_Plugin
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $decisionsCache = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
-    $licenses = $decisionsCache->getAllLicenseNames();
+    $licenses = $this->clearingFilter->getAllLicenseNames($allDecisions);
 
     $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;

@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
@@ -62,7 +63,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(
         array(
             'clearing_decision',
-            'clearing_decision_events',
+            'clearing_decision_event',
             'clearing_decision_type',
             'clearing_event',
             'clearing_licenses',
@@ -70,9 +71,10 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'license_ref',
             'license_ref_bulk',
             'users',
-            'group_user_member',
             'uploadtree'
         ));
+    
+    $this->testDb->createInheritedTables();
 
     $this->testDb->insertData(array('clearing_decision_type'));
 
@@ -83,17 +85,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     foreach ($userArray as $ur)
     {
       $this->dbManager->insertInto('users', 'user_name, root_folder_fk', $ur);
-    }
-
-    $gumArray = array(
-        array(1, 1, 0),
-        array(1, 2, 0),
-        array(2, 3, 0),
-        array(3, 4, 0)
-    );
-    foreach ($gumArray as $params)
-    {
-      $this->dbManager->insertInto('group_user_member', $keys = 'group_fk, user_fk, group_perm', $params, $logStmt = 'insert.gum');
     }
 
     $refArray = array(
@@ -183,22 +174,26 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private function buildProposals($licProp,$i=0)
   {
     foreach($licProp as $lp){
-      $i++;
-      list($item,$user,$rf,$isRm,$t) = $lp;
+      list($item,$user,$group,$rf,$isRm,$t) = $lp;
       $this->dbManager->insertInto('clearing_event',
-          'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, removed, type_fk, date_added',
-          array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
+          'clearing_event_pk, uploadtree_fk, user_fk, group_fk, rf_fk, removed, type_fk, date_added',
+          array($i,$item,$user,$group,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
+      $i++;
     }
   }
 
   private function buildDecisions($cDec,$j=0)
   {
     foreach($cDec as $cd){
-      $j++;
-      list($item,$user,$type,$t,$scope) = $cd;
+      list($item,$user,$group,$type,$t,$scope,$eventIds) = $cd;
       $this->dbManager->insertInto('clearing_decision',
-          'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, decision_type, date_added, scope',
-          array($j,$item,$this->items[$item][2],$user,$type, $this->getMyDate($this->now+$t),$scope));
+          'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, date_added, scope',
+          array($j,$item,$this->items[$item][2],$user,$group,$type, $this->getMyDate($this->now+$t),$scope));
+      foreach ($eventIds as $eId)
+      {
+        $this->dbManager->insertTableRow('clearing_decision_event', array('clearing_decision_fk' => $j, 'clearing_event_fk' => $eId));
+      }
+      $j++;
     }
   }
 
@@ -220,46 +215,63 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     return $date->setTimestamp($in);
   }
 
-  public function testRelevantClearingEventsViaGroupMembershipShouldBeSymmetric()
+  public function testRelevantClearingEvents()
   {
+    $groupId = 701;
     $this->buildProposals(array(
-        array(301,1,401,false,-99),
-        array(301,1,402,true,-98)
-    ));
+        array(301,1,$groupId,401,false,-99),
+        array(301,2,$groupId,402,true,-98),
+        array(301,2,$groupId,401,true,-97)
+    ),$firstEventId=0);
     $this->buildDecisions(array(
-        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+        array(301,1,$groupId,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO,array($firstEventId,$firstEventId+1,$firstEventId+2))
     ));
-    $events1 = $this->clearingDao->getRelevantClearingEvents(1, 301);
-    $events2 = $this->clearingDao->getRelevantClearingEvents(2, 301);
-    assertThat($events1, is($events2));
+    $itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $itemTreeBounds->shouldReceive('getItemId')->andReturn(301);
+    $itemTreeBounds->shouldReceive('getUploadTreeTableName')->andReturn('uploadtree');
+    $itemTreeBounds->shouldReceive('containsFiles')->andReturn(false);
+    $itemTreeBounds->shouldReceive('getUploadId')->andReturn($this->items[301][0]);
+    $itemTreeBounds->shouldReceive('getLeft')->andReturn($this->items[301][4]);
+    $itemTreeBounds->shouldReceive('getRight')->andReturn($this->items[301][5]);
+
+    $events1 = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
+
+    assertThat($events1, arrayWithSize(2));
+    assertThat($events1, hasKeyInArray(401));
+    assertThat($events1, hasKeyInArray(402));
+    assertThat($events1[401], is(anInstanceOf(ClearingEvent::classname())));
+    assertThat($events1[402]->getEventId(), is($firstEventId+1));
+    assertThat($events1[401]->getEventId(), is($firstEventId+2));
   }
 
   function testWip()
   {
+    $groupId = 701;
     $this->buildProposals(array(
-        array(301,1,401,false,-99),
-        array(301,1,402,false,-98),
-        array(301,1,401,true,-97),
-    ));
+        array(301,1,$groupId,401,false,-99),
+        array(301,1,$groupId,402,false,-98),
+        array(301,1,$groupId,401,true,-89),
+    ),$firstEventId=0);
     $this->buildDecisions(array(
-        array(301,1,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO)
+        array(301,1,$groupId,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO,array($firstEventId,$firstEventId+1))
     ));
-    $watchThis = $this->clearingDao->isDecisionWip(301, 1);
+    $watchThis = $this->clearingDao->isDecisionWip(301, $groupId);
     assertThat($watchThis,is(FALSE));
-    $watchOther = $this->clearingDao->isDecisionWip(303, 1);
+    $watchOther = $this->clearingDao->isDecisionWip(303, $groupId);
     assertThat($watchOther,is(FALSE));
     $this->buildProposals(array(
-        array(301,1,403,false,-89),
-    ),3);
-    $this->clearingDao->markDecisionAsWip(301, 1);
-    $watchThisNow = $this->clearingDao->isDecisionWip(301, 1);
+        array(301,1,$groupId,403,false,-89),
+    ),$firstEventId+3);
+    $this->clearingDao->markDecisionAsWip(301, 1, $groupId);
+    $watchThisNow = $this->clearingDao->isDecisionWip(301, $groupId);
     assertThat($watchThisNow,is(TRUE));
-    $watchOtherNow = $this->clearingDao->isDecisionWip(303, 1);
+    $watchOtherNow = $this->clearingDao->isDecisionWip(303, $groupId);
     assertThat($watchOtherNow,is(FALSE));
   }
 
   public function testInsertMultipleClearingEvents()
   {
+    $groupId = 701;
     $licenses = array(401,402);
     $oldlicenses = array(401,403);
     $removed = false;
@@ -272,13 +284,13 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     foreach($oldlicenses as $lic)
     {
-      $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid,
+      $aDecEvent = array('uploadtree_fk'=>$uploadTreeIdPp, 'user_fk'=>$userid, 'group_fk'=>$groupId,
           'rf_fk'=>$lic, 'removed'=>$removed, 'job_fk' =>$jobfk,
           'type_fk'=>ClearingEventTypes::USER, 'comment'=>$comment, 'reportinfo'=>$remark);
       $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog=__METHOD__.'.oldclearing');
     }
 
-    $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid,$jobfk, $comment, $remark);
+    $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $uploadTreeId, $userid, $groupId, $jobfk, $comment, $remark);
 
     $refs = $this->dbManager->createMap('clearing_event', 'rf_fk', 'rf_fk');
     $expected = array_unique(array_merge($licenses, $oldlicenses));
@@ -287,6 +299,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat(array_values($refs),equalTo($expected));
   }
 
+ 
   public function testBulkHistoryWithoutMatches()
   {
     $treeBounds = M::mock(ItemTreeBounds::classname());
@@ -304,6 +317,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($bulkText, arrayContaining('TextFOO', 'TextBAR', 'TextBAZ', 'TextBAZ', 'TextQUX'));
   }
 
+  
  public function testBulkHistoryWithoutMatchesFromDifferentFolder()
   {
     $treeBounds = M::mock(ItemTreeBounds::classname());
@@ -364,4 +378,5 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
+  
 }

@@ -86,7 +86,7 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param ClearingEvent[] $licenses
+   * @param ClearingEvent[] $events
    * @return ClearingDecisionBuilder
    */
   public function setClearingEvents($events)

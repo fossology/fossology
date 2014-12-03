@@ -20,13 +20,14 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
-use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 
 class ClearingDecisionFilter
 {
+  const KEYREPO = "all";
+  
   /**
-   * @param ClearingDecision[] $clearingDecisions sorted by newer decision comes before
-   * @return ClearingDecisionCache
+   * @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[][]
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
@@ -46,7 +47,7 @@ class ClearingDecisionFilter
           break;
 
         case DecisionScopes::REPO:
-          $clearingDecisionsMapped[$fileId][ClearingDecisionCache::KEYREPO] = $clearingDecision;
+          $clearingDecisionsMapped[$fileId][self::KEYREPO] = $clearingDecision;
           break;
 
         default:
@@ -54,7 +55,7 @@ class ClearingDecisionFilter
       }
     }
 
-    return new ClearingDecisionCache($clearingDecisionsMapped);
+    return $clearingDecisionsMapped;
   }
 
   /** @param ClearingDecision[] $clearingDecisions
@@ -71,4 +72,53 @@ class ClearingDecisionFilter
     }
     return $clearingDecisionsByItemId;
   }
+  
+  
+  /**
+   * @return ClearingDecision|false
+   */
+  public function getDecisionOf($decisionMap, $itemId, $pfileId)
+  {
+    if (array_key_exists($pfileId, $decisionMap))
+    {
+      $pfileMap = $decisionMap[$pfileId];
+      if (array_key_exists($itemId, $pfileMap))
+      {
+        return $pfileMap[$itemId];
+      }
+      else
+      {
+        return $pfileMap[self::KEYREPO];
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return array
+   */
+  public function getAllLicenseNames($clearingDecisions)
+  {
+    $result = array();
+    $decisionMap = $this->filterCurrentClearingDecisions($clearingDecisions);
+    
+    foreach($decisionMap as $pFileMap)
+    {
+      /** @var ClearingDecision $decision */
+      foreach($pFileMap as $decision)
+      {
+        foreach($decision->getPositiveLicenses() as $toAdd)
+        {
+          array_push($result, $toAdd->getShortName());
+        }
+
+      }
+    }
+
+    return $result;
+  }
+
+  
 } 
