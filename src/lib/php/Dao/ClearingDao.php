@@ -57,6 +57,8 @@ class ClearingDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param bool 
    * @return ClearingDecision[]
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
@@ -235,18 +237,23 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param int $userId
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
    * @return ClearingDecision|null
    */
   public function getRelevantClearingDecision(ItemTreeBounds $itemTreeBounds, $groupId)
   {
-    return $this->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $clearingDecisions = $this->getFileClearingsFolder($itemTreeBounds, $groupId);
+    if (count($clearingDecisions) > 0)
+    {
+      return $clearingDecisions[0];
+    }
+    return null;
   }
 
   /**
    * @param int $uploadTreeId
-   * @param int $userId
+   * @param int $groupId
    */
   public function removeWipClearingDecision($uploadTreeId, $groupId)
   {
@@ -304,6 +311,13 @@ class ClearingDao extends Object
     if ($needTransaction) $this->dbManager->commit();
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $userId
+   * @param int $groupId
+   * @param int $decType
+   * @param int $scope
+   */
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
     $needTransaction = !$this->dbManager->isInTransaction();
@@ -357,7 +371,7 @@ INSERT INTO clearing_decision (
     $events = array();
     foreach($this->getFileClearingsFolder($itemTreeBounds, $groupId) as $clearingDecision) {
       $newEvents = $clearingDecision->getClearingEvents();
-      $events[] = array_merge($events, $newEvents);
+      $events = array_merge($events, $newEvents);
     }
     return $events;
   }

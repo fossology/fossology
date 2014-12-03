@@ -20,8 +20,6 @@ namespace Fossology\Lib\BusinessRules;
 
 use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 

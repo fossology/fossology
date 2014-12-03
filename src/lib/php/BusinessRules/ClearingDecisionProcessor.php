@@ -136,7 +136,7 @@ class ClearingDecisionProcessor
     if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $clearingEventIds))
     {
       $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
-      $this->clearingDao->createDecisionFromEvents($itemBounds, $userId, $groupId, $type, $scope,
+      $this->clearingDao->createDecisionFromEvents($itemBounds->getItemId(), $userId, $groupId, $type, $scope,
       $clearingEventIds);
     }
     else
@@ -149,7 +149,7 @@ class ClearingDecisionProcessor
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int $userId
+   * @param int $groupId
    * @return array
    */
   public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId)
