@@ -30,7 +30,7 @@ class ClearingEventProcessor extends Object
    * @param ClearingEvent[] $events
    * @return ClearingEvent[]
    */
-  protected function getClearingLicenses($events)
+  public function getClearingLicenses($events)
   {
     $result = array();
 

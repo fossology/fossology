@@ -48,8 +48,10 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
   private $removedEvent;
 
   private $addedName = "<added>";
+  private $addedId = 400;
 
   private $removedName = "<removed>";
+  private $removedId = 399;
 
   /** @var ClearingEventProcessor */
   protected $clearingEventProcessor;
@@ -61,16 +63,21 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
 
     $this->addedLicense = M::mock(ClearingLicense::classname());
     $this->addedLicense->shouldReceive("getShortName")->withNoArgs()->andReturn($this->addedName);
+    $this->addedLicense->shouldReceive("getId")->withNoArgs()->andReturn($this->addedId);
+    
     $this->addedEvent = M::mock(ClearingEvent::classname());
     $this->addedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->addedName);
+    $this->addedEvent->shouldReceive("getLicenseId")->withNoArgs()->andReturn($this->addedId);
     $this->addedEvent->shouldReceive("getClearingLicense")->withNoArgs()->andReturn($this->addedLicense);
     $this->addedEvent->shouldReceive("getDateTime")->withNoArgs()->andReturn($this->timestamp);
     $this->addedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(false);
 
     $this->removedLicense = M::mock(ClearingLicense::classname());
     $this->removedLicense->shouldReceive("getShortName")->withNoArgs()->andReturn($this->removedName);
+    $this->removedLicense->shouldReceive("getId")->withNoArgs()->andReturn($this->removedId);
     $this->removedEvent = M::mock(ClearingEvent::classname());
     $this->removedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->removedName);
+    $this->removedEvent->shouldReceive("getLicenseId")->withNoArgs()->andReturn($this->removedId);
     $this->removedEvent->shouldReceive("getClearingLicense")->withNoArgs()->andReturn($this->removedLicense);
     $this->removedEvent->shouldReceive("getDateTime")->withNoArgs()->andReturn($this->timestamp);
     $this->removedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(true);
