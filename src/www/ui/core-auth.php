@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Symfony\Component\HttpFoundation\Session\Session;
+
 define("TITLE_core_auth", _("Login"));
 
 class core_auth extends FO_Plugin
@@ -156,9 +158,11 @@ class core_auth extends FO_Plugin
       return (0);
     }
 
-    session_name("Login");
-    $mysess = session_id();
-    if (empty($mysess)) session_start();
+    global $container;
+    /** @var Session $session */
+    $session = $container->get('session');
+    $session->setName('Login');
+    if (!$session->isStarted()) $session->start();
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
