@@ -140,9 +140,10 @@ class user_edit extends FO_Plugin {
 
     if ($SessionIsAdmin)
     {
+      $Checked = ($UserRec['_blank_pass'] == 'on') ? "checked" : "";
       $text = _("Blank the user's account. This will will set the password to a blank password.");
       $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-      $OutS .= "<td><input type='checkbox' name='_blank_pass' value='0'></td>\n";
+      $OutS .= "<td><input type='checkbox' name='_blank_pass' $Checked ></td>\n";
       $OutS .= "</tr>\n";
     }
 
@@ -190,7 +191,7 @@ class user_edit extends FO_Plugin {
 
     /**** Validations ****/
     /* Make sure we have a user_pk */
-    if (empty($UserRec['user_pk'])) $Errors .= "<li>" . _("Consistency error.  User_pk missing.");
+    if (empty($UserRec['user_pk'])) $Errors .= "<li>" . _("Consistency error (User_pk missing).  Please start over.");
 
     /* Make sure username looks valid */
     if (empty($UserRec['user_name'])) $Errors .= "<li>" . _("Username must be specified.");
@@ -207,15 +208,20 @@ class user_edit extends FO_Plugin {
     $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $UserRec['user_email']);
     if ($Check != $UserRec['user_email']) $Errors .= "<li>". _("Invalid email address.");
 
+    /* Did they specify a password and also request a blank password?  */
+    if (!empty($UserRec['_blank_pass']) and (!empty($UserRec['_pass1']) or !empty($UserRec['_pass2'])))
+      $Errors .= "<li>" . _("You cannot specify both a password and a blank password.");
+
     /* If we have any errors, return them */
     if (!empty($Errors)) return _("Errors") . ":<ol>$Errors </ol>";
 
+
     /**** Update the users database record ****/
     /* First remove user_pass and user_seed if the password wasn't changed. */
-    if ($UserRec['_blank_pass'] == 1) 
+    if (!empty($UserRec['_blank_pass']) )
     {
-      $UserRec['user_pass'] = "";
-      $UserRec['user_seed'] = "";
+      $UserRec['user_seed'] = rand() . rand();
+      $UserRec['user_pass'] = sha1($UserRec['user_seed'] . "");
     }
     else if (empty($UserRec['_pass1']))   // password wasn't changed
     {
@@ -223,7 +229,7 @@ class user_edit extends FO_Plugin {
       unset( $UserRec['user_seed']);
     }
     
-
+    /* Build the sql update */
     $sql = "UPDATE users SET ";
     $first = TRUE;
     foreach($UserRec as $key=>$val)
@@ -237,11 +243,10 @@ class user_edit extends FO_Plugin {
       }
 
       if (!$first) $sql .= ",";
-      $sql .= "$key='$val'";
+      $sql .= "$key='" . pg_escape_string($val) . "'";
       $first = FALSE;
     }
     $sql .= " where user_pk=$UserRec[user_pk]";
-
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -262,6 +267,7 @@ class user_edit extends FO_Plugin {
       echo _("Invalid access.  Your session has expired.");
       exit(1);
     }
+
     $UserRec = GetSingleRec("users", "WHERE user_pk=$user_pk");
     if (empty($UserRec))
     {
@@ -284,51 +290,61 @@ class user_edit extends FO_Plugin {
 
   /**
    * \brief Create a user record.
-   *        If there is post data, use that to create the user record
-   *        else use $user_pk (the session user).
-   * \param integer $user_pk: the session user
+   * \param integer $user_pk: If empty, use form data
    * 
    * \return A user record in the same associated array format that you get from a pg_fetch_assoc().
    *         However, there may be additional fields from the data input form that are not in the 
    *         users table.  These additional fields start with an underscore (_pass1, _pass2, _blank_pass)
    *         that come from the edit form.
    */
-  function CreateUserRec($user_pk) 
+  function CreateUserRec($user_pk="") 
   {
     global $PG_CONN;
 
-    /* If this is a result of pressing the update button then use the post data 
-     * Otherwise, use the users own data.
+    /* If a $user_pk was given, use it to read the user db record.
+     * Otherwise, use the form data.
      */
-    $BtnText = GetParm('UpdateBtn', PARM_TEXT);
-    if (!empty($BtnText)) 
+    if (!empty($user_pk)) 
+    {
+      $UserRec = $this->GetUserRec($user_pk);
+      $UserRec['_pass1'] = "";
+      $UserRec['_pass2'] = "";
+      $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($UserRec['user_seed'] . "")) ? "on" : "";
+    }
+    else
     {
       $UserRec = array();
       $UserRec['user_pk'] = GetParm('user_pk', PARM_TEXT);
       $UserRec['user_name'] = GetParm('user_name', PARM_TEXT);
       $UserRec['root_folder_fk'] = GetParm('root_folder_fk', PARM_INTEGER);
       $UserRec['user_desc'] = GetParm('user_desc', PARM_TEXT);
-      $UserRec['user_seed'] = rand() . rand();
+
       $UserRec['_pass1'] = GetParm('_pass1', PARM_TEXT);
       $UserRec['_pass2'] = GetParm('_pass2', PARM_TEXT);
       if (!empty($UserRec['_pass1']))
+      {
+        $UserRec['user_seed'] = rand() . rand();
         $UserRec['user_pass'] = sha1($UserRec['user_seed'] . $UserRec['_pass1']);
+        $UserRec['_blank_pass'] = "";
+      }
       else
+      {
         $UserRec['user_pass'] = "";
+        $UserRec['_blank_pass'] = GetParm("_blank_pass", PARM_TEXT);
+        if (empty($UserRec['_blank_pass']))  // check for blank password
+        {
+          // get the stored seed
+          $StoredUserRec = $this->GetUserRec($UserRec['user_pk']);
+          $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($StoredUserRec['user_seed'] . "")) ? "on" : "";
+        }
+      }
+
       $UserRec['user_perm'] = GetParm('user_perm', PARM_INTEGER);
       $UserRec['user_email'] = GetParm('user_email', PARM_TEXT);
       $UserRec['email_notify'] = GetParm('email_notify', PARM_TEXT);
       if (!empty($UserRec['email_notify'])) $UserRec['email_notify'] = 'y';
       $UserRec['user_agent_list'] = userAgents();
-      $UserRec['_blank_pass'] = GetParm("_blank_pass", PARM_INTEGER);
       $UserRec['default_bucketpool_fk'] = GetParm("default_bucketpool_fk", PARM_INTEGER);
-    }
-    else
-    {
-      $UserRec = GetSingleRec("users", "WHERE user_pk=$user_pk");
-      $UserRec['_pass1'] = "";
-      $UserRec['_pass2'] = "";
-      $UserRec['_blank_pass'] = 0;
     }
     return $UserRec;
   }
@@ -353,9 +369,6 @@ class user_edit extends FO_Plugin {
     $SessionUserRec = $this->GetUserRec($user_pk);
     $SessionIsAdmin = $this->IsSessionAdmin($SessionUserRec);
 
-    /* Get the data to edit in an associated array */
-    $UserRec = $this->CreateUserRec($user_pk);
-
     $V = "";
 
     /* script to refresh this page with the selected user data (newuser=user_pk) */
@@ -372,6 +385,9 @@ class user_edit extends FO_Plugin {
     $BtnText = GetParm('UpdateBtn', PARM_TEXT);
     if (!empty($BtnText)) 
     {
+      /* Get the form data to in an associated array */
+      $UserRec = $this->CreateUserRec("");
+
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
       if (empty($rv)) 
       {
@@ -387,10 +403,14 @@ class user_edit extends FO_Plugin {
         $V .= displayMessage($rv);
       }
     }
-    else  // was a new user record requested (admin only)?
+    else  
     {
+      // was a new user record requested (admin only)?
       $NewUserpk = GetParm('newuser', PARM_INTEGER);
-      if (!empty($NewUserpk)) $UserRec = $this->CreateUserRec($NewUserpk);
+      if (!empty($NewUserpk)) 
+        $UserRec = $this->CreateUserRec($NewUserpk);
+      else
+        $UserRec = $this->CreateUserRec($user_pk);  // initial call from menu
     }
     
     /* display the edit form with the requested user data */
