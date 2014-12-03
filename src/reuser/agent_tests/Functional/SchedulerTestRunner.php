@@ -16,23 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Data\Clearing;
-
-use Fossology\Lib\Data\Types;
-
-class ClearingEventTypes extends Types {
-  const USER = 1;
-  const BULK = 2;
-  const AGENT = 3;
-
-  public function __construct()
-  {
-    parent::__construct("license decision type");
-
-    $this->map = array(
-        self::USER => "User decision",
-        self::BULK => "Bulk",
-        self::AGENT => "Agent finding"
-    );
-  }
-} 
+interface SchedulerTestRunner
+{
+  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = "");
+}

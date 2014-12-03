@@ -110,7 +110,7 @@ abstract class Agent extends Object
 
   function bail($exitvalue)
   {
-    debug_print_backtrace();
+    debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     $this->scheduler_disconnect($exitvalue);
     exit($exitvalue);
   }

@@ -65,6 +65,9 @@ class ClearingDao extends Object
   {
     //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
+    $needTransaction = !$this->dbManager->isInTransaction();
+    if ($needTransaction) $this->dbManager->begin();
+    
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
     $joinType = $itemTreeBounds->containsFiles() ? "INNER" : "LEFT";
@@ -191,6 +194,8 @@ class ClearingDao extends Object
     }
 
     $this->dbManager->freeResult($result);
+    
+    if ($needTransaction) $this->dbManager->commit();
     return $clearingsWithLicensesArray;
   }
 
@@ -263,55 +268,6 @@ class ClearingDao extends Object
   }
 
   /**
-   * @param $uploadTreeId
-   * @param $userId
-   * @param $decType
-   * @param $scope
-   * @param ClearingLicense[] $clearingDecisions
-   * @param ClearingLicense[] $agentClearingDecisions
-   *
-   * @deprecated
-   */
-  public function insertClearingDecision($uploadTreeId, $userId, $groupId, $decType, $scope, $clearingLicenses, $agentClearingDecisions = array())
-  {
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
-
-    $statementNameClearingEventInsert = __METHOD__ . ".insertClearingEvent";
-    $this->dbManager->prepare($statementNameClearingEventInsert,
-      "INSERT INTO clearing_event (uploadtree_fk, user_fk, group_fk, rf_fk, removed, type_fk, comment, reportinfo) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING clearing_event_pk AS id"
-    );
-
-    $eventIds = array();
-
-    foreach (array_merge($clearingLicenses,$agentClearingDecisions) as $clearingLicense)
-    {
-      $resI = $this->dbManager->execute($statementNameClearingEventInsert,
-        array(
-          $uploadTreeId, $userId, $groupId,
-          $clearingLicense->getLicenseId(), $this->dbManager->booleanToDb($clearingLicense->isRemoved()),
-          $clearingLicense->getType(),
-          $clearingLicense->getComment(), $clearingLicense->getReportInfo()
-        )
-      );
-      $row = $this->dbManager->fetchArray($resI);
-      if (false !== $row)
-      {
-        $eventIds[] = $row['id'];
-      }
-      else
-      {
-        throw new \Exception("cannot insert clearing_decision_event");
-      }
-      $this->dbManager->freeResult($resI);
-    }
-
-    $this->createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds);
-
-    if ($needTransaction) $this->dbManager->commit();
-  }
-
-  /**
    * @param int $uploadTreeId
    * @param int $userId
    * @param int $groupId
@@ -358,6 +314,7 @@ INSERT INTO clearing_decision (
     {
       $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingDecisionEventInsert, array($clearingDecisionId, $eventId)));
     }
+
     if ($needTransaction) $this->dbManager->commit();
   }
 

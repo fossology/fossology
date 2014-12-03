@@ -72,26 +72,26 @@ class ReuserAgent extends Agent
      * but it also feels like it would have too big a scope
      */
 
-    /* TODO update all */
-
-    return;
+    $groupId = $this->groupId;
+    $userId = $this->userId;
 
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
     $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-    if ($itemTreeBoundsReused)
+
+    if (false === $itemTreeBoundsReused)
     {
-      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused);
-      $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
-      $clearingDecisionsToImport = array_diff($clearingDecisions, $filteredClearingDecisions);
-    } else
-    {
-      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-      $clearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
-      $clearingDecisionsToImport = array();
+      return true;
     }
 
-    $clearingDecisionByFileId = $this->mapByFileId($clearingDecisions);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $groupId);
+    $currenlyVisibleClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+
+    $currenlyVisibleClearingDecisionsById = $this->mapByClearingId($currenlyVisibleClearingDecisions);
+    $clearingDecisionsById = $this->mapByClearingId($clearingDecisions);
+
+    $clearingDecisionsToImport = array_diff_key($clearingDecisionsById,$currenlyVisibleClearingDecisionsById);
+
     $clearingDecisionToImportByFileId = $this->mapByFileId($clearingDecisionsToImport);
 
     $uploadDao = $this->uploadDao;
@@ -104,55 +104,24 @@ class ReuserAgent extends Agent
               "pfile_fk = ANY($1)",
               array('{' . implode(', ', $fileIds) . '}')
           );
-        }, array_keys($clearingDecisionByFileId), 100);
+        }, array_keys($clearingDecisionToImportByFileId), 100);
 
     foreach ($containedItems as $item)
     {
-      $row = array('item' => $item);
-
-      /** @var ClearingDecision $clearingDecision */
-      $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
-
       $fileId = $item->getFileId();
       if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
       {
-        $this->createCopyOfClearingDecision($item->getId(), $clearingDecisionToImportByFileId[$fileId]);
+        $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId, $clearingDecisionToImportByFileId[$fileId]);
       }
       else
       {
-        $this->insertHistoricalClearingEventsFrom($clearingDecision, $item);
+        throw new \Exception("bad internal state");
       }
 
       $this->heartbeat(1);
     }
 
     return true;
-  }
-
-  /**
-   * @param ClearingDecision $clearingDecision
-   * @param Item $item
-   * @param LicenseRef $license
-   * @param boolean $remove
-   */
-  protected function insertHistoricalClearingEventsFrom(ClearingDecision $clearingDecision, Item $item)
-  {
-    $dateTime = $clearingDecision->getDateAdded();
-    $dateTime->sub(new DateInterval('PT1S'));
-    $itemId = $item->getId();
-    foreach($clearingDecision->getClearingLicenses() as $clearingLicense) {
-      $this->clearingDao->insertHistoricalClearingEvent(
-        $dateTime,
-        $itemId,
-        $this->userId,
-        $this->jobId,
-        $clearingLicense->getLicenseId(),
-        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
-        $clearingLicense->isRemoved(),
-        $clearingLicense->getReportInfo(),
-        $clearingLicense->getComment()
-      );
-    }
   }
 
   /**
@@ -173,37 +142,40 @@ class ReuserAgent extends Agent
   }
 
   /**
-   * @param ClearingLicense[] $clearingLicenses
-   * @return ClearingLicense[]
-   */
-  protected function getReusedClearingLicenses($clearingLicenses) {
-    $result = array();
-    foreach($clearingLicenses as $clearingLicense) {
-      $result[] = new ClearingLicense(
-        $clearingLicense->getLicenseRef(),
-        $clearingLicense->isRemoved(),
-        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
-        $clearingLicense->getReportInfo(),
-        $clearingLicense->getComment()
-      );
-    }
-    return $result;
-  }
-
-  /**
    * @param int $itemId
    * @param ClearingDecision $clearingDecisionToCopy
    */
-  protected function createCopyOfClearingDecision($itemId, $clearingDecisionToCopy)
+  protected function createCopyOfClearingDecision($itemId, $userId, $groupId, $clearingDecisionToCopy)
   {
-    $this->clearingDao->insertClearingDecision(
+    $clearingEventIdsToCopy = array();
+    /** @var ClearingEvent $clearingEvent */
+    foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent)
+    {
+      $clearingEventIdsToCopy[] = $clearingEvent->getEventId();
+    }
+
+    $this->clearingDao->createDecisionFromEvents(
         $itemId,
-        $this->userId,
+        $userId,
+        $groupId,
         $clearingDecisionToCopy->getType(),
         $clearingDecisionToCopy->getScope(),
-        $this->getReusedClearingLicenses($clearingDecisionToCopy->getClearingLicenses())
+        $clearingEventIdsToCopy
     );
   }
+
+  /** @parm ClearingDecision[] $clearingDecisions */
+  public function mapByClearingId($clearingDecisions)
+  {
+    $mapped = array();
+
+    foreach ($clearingDecisions as $clearingDecision) {
+      $mapped[$clearingDecision->getClearingId()] = $clearingDecision;
+    }
+
+    return $mapped;
+  }
+
 }
 
 $agent = new ReuserAgent();
