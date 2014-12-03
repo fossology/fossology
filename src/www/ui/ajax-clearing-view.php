@@ -92,7 +92,7 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param boolean $orderAscending
-   * @param int $userId
+   * @param int $groupId
    * @param int $uploadId
    * @param int $uploadTreeId
    * @return string
@@ -130,7 +130,7 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param $orderAscending
-   * @param $userId
+   * @param $groupId
    * @param $uploadId
    * @param $uploadTreeId
    * @internal param $itemTreeBounds
@@ -225,7 +225,7 @@ class AjaxClearingView extends FO_Plugin
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int $userId
+   * @param int $groupId
    * @param boolean $orderAscending
    * @return array
    */

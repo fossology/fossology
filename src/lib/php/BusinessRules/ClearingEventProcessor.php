@@ -36,9 +36,9 @@ class ClearingEventProcessor extends Object
 
     foreach ($events as $event)
     {
-      $shortName = $event->getLicenseShortName();
+      $licenseId = $event->getLicenseId();
 
-      $result[$shortName] = $event;
+      $result[$licenseId] = $event;
     }
 
     return $result;

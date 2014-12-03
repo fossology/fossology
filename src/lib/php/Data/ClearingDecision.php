@@ -216,6 +216,14 @@ class ClearingDecision extends Object
     }
     return false;
   }
+  
+  /**
+   * @return int
+   */
+  public function getTimeStamp()
+  {
+    return $this->dateAdded->getTimestamp();
+  }
 
   function __toString()
   {

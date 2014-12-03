@@ -64,8 +64,8 @@ class AgentLicenseEventProcessor extends Object
     foreach ($licenseFileMatches as $licenseMatch)
     {
       $licenseRef = $licenseMatch->getLicenseRef();
-      $licenseShortName = $licenseRef->getShortName();
-      if ($licenseShortName === "No_license_found")
+      $licenseId = $licenseRef->getId();
+      if ($licenseRef->getShortName() === "No_license_found")
       {
         continue;
       }
@@ -73,8 +73,8 @@ class AgentLicenseEventProcessor extends Object
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
 
-      $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
-          'id' => $licenseRef->getId(),
+      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = array(
+          'id' => $licenseId,
           'licenseRef' => $licenseRef,
           'agentRef' => $agentRef,
           'matchId' => $licenseMatch->getLicenseFileId(),
@@ -108,9 +108,9 @@ class AgentLicenseEventProcessor extends Object
       {
         continue;
       }
-      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseShortName => $properties)
+      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseId => $properties)
       {
-        $latestAgentDetectedLicenses[$licenseShortName][$agentName] = $properties;
+        $latestAgentDetectedLicenses[$licenseId][$agentName] = $properties;
       }
     }
 
@@ -125,11 +125,11 @@ class AgentLicenseEventProcessor extends Object
   {
     $licenses = array();
 
-    foreach ($details as $licenseShortName => $agentEntries)
+    foreach ($details as $licenseId => $agentEntries)
     {
-      foreach ($agentEntries as $agentName => $matchProperties)
+      foreach ($agentEntries as $matchProperties)
       {
-        $licenses[$licenseShortName] = $matchProperties[0]['licenseRef'];
+        $licenses[$licenseId] = $matchProperties[0]['licenseRef'];
         break;
       }
     }

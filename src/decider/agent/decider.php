@@ -91,13 +91,14 @@ class DeciderAgent extends Agent
   function processClearingEventOfCurrentJob()
   {
     $userId = $this->userId;
+    $groupId = $this->groupId;
     $jobId = $this->jobId;
 
     $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
     foreach ($changedItems as $uploadTreeId)
     {
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      $this->processClearingEventsForItem($itemTreeBounds, $userId);
+      $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId);
     }
   }
 

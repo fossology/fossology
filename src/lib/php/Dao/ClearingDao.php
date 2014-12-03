@@ -368,11 +368,43 @@ INSERT INTO clearing_decision (
    */
   public function getRelevantClearingEvents($itemTreeBounds, $groupId)
   {
+    $decision = $this->getFileClearingsFolder($itemTreeBounds, $groupId, $onlyCurrent=true);
     $events = array();
-    foreach($this->getFileClearingsFolder($itemTreeBounds, $groupId) as $clearingDecision) {
-      $newEvents = $clearingDecision->getClearingEvents();
-      $events = array_merge($events, $newEvents);
+    $date = 0;
+
+    if(count($decision))
+    {
+      foreach ($decision[0]->getClearingEvents() as $event)
+      {
+        $events[$event->getLicenseId()] = $event;
+      }
+      $date = $decision[0]->getTimeStamp();
     }
+    
+    /* @TODO use LicenseViewProxy */
+    
+    $stmt = __METHOD__;
+    $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
+             FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
+             WHERE uploadtree_fk=$1 AND group_fk=$2 AND EXTRACT(EPOCH FROM date_added)>$3
+             ORDER BY ts_added ASC';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
+
+    while($row=  $this->dbManager->fetchArray($res)){
+      $licenseRef = new LicenseRef($row['rf_fk'],$row['rf_shortname'],$row['rf_fullname']);
+      $events[$row['rf_fk']] = ClearingEventBuilder::create()
+              ->setEventId($row['clearing_event_pk'])
+              ->setComment($row['comment'])
+              ->setDateFromTimeStamp($row['ts_added'])
+              ->setEventType($row['type_fk'])
+              ->setLicenseRef($licenseRef)
+              ->setRemoved($this->dbManager->booleanFromDb($row['removed']))
+              ->setReportinfo($row['reportinfo'])
+              ->setUploadTreeId($itemTreeBounds->getItemId())
+              ->build();
+    }
+    $this->dbManager->freeResult($res);
     return $events;
   }
 
