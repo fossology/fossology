@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 define("TITLE_core_auth", _("Login"));
@@ -23,7 +26,16 @@ define("TITLE_core_auth", _("Login"));
 class core_auth extends FO_Plugin
 {
   public static $origReferer;
-  
+
+  /** @var DbManager */
+  private $dbManager;
+
+  /** @var UserDao */
+  private $userDao;
+
+  /** @var Twig_Environment */
+  private $renderer;
+
   function __construct()
   {
     $this->Name = "auth";
@@ -31,6 +43,11 @@ class core_auth extends FO_Plugin
     $this->PluginLevel = 1000; /* make this run first! */
     $this->LoginFlag = 0;
     parent::__construct();
+
+    global $container;
+    $this->dbManager = $container->get("db.manager");
+    $this->userDao = $container->get('dao.user');
+    $this->renderer = $container->get('twig.environment');
   }
 
   /**
@@ -50,93 +67,8 @@ class core_auth extends FO_Plugin
    */
   function Install()
   {
-    global $PG_CONN;
-
-    if (empty($PG_CONN))
-    {
-      return (1);
-    } /* No DB */
-    /* No users with no seed and no pass */
-    $sql = "UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-    /* No users with no seed and no perm -- make them read-only */
-    $sql = "UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /* There must always be at least one default user. */
-    $sql = "SELECT * FROM users WHERE user_name = 'Default User';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['user_name']))
-    {
-      /* User "fossy" does not exist.  Create it. */
-      /* No valid username/password */
-      $Level = PLUGIN_DB_NONE;
-      $sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-        VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      $text = _("*** Created default user: 'Default User'.");
-      //print "$text\n";
-    }
-    /* There must always be at least one user with user-admin access.
-     If he does not exist, make it user "fossy".
-     If user "fossy" does not exist, add him with the default password 'fossy'. */
-    $Perm = PLUGIN_DB_ADMIN;
-    $sql = "SELECT * FROM users WHERE user_perm = $Perm;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['user_name']))
-    {
-      /* No user with PLUGIN_DB_ADMIN access. */
-      $Seed = rand() . rand();
-      $Hash = sha1($Seed . "fossy");
-      $sql = "SELECT * FROM users WHERE user_name = 'fossy';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row0 = pg_fetch_assoc($result);
-      pg_free_result($result);
-      if (empty($row0['user_name']))
-      {
-        /* User "fossy" does not exist.  Create it. */
-        $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
-            "user_perm,user_email,email_notify,root_folder_fk)
-      VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
-        $text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
-        //print "$text\n";
-      } else
-      {
-        /* User "fossy" exists!  Update it. */
-        $SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y'," .
-            " user_email= 'fossy' WHERE user_name = 'fossy';";
-        $text = _("*** Existing user 'fossy' promoted to default administrator.");
-        //print "$text\n";
-      }
-      $result = pg_query($PG_CONN, $SQL);
-      DBCheckResult($result, $SQL, __FILE__, __LINE__);
-      pg_free_result($result);
-
-      $sql = "SELECT * FROM users WHERE user_perm = $Perm;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
-      pg_free_result($result);
-    }
-    if (empty($row['user_name']))
-    {
-      return (1);
-    } /* Failed to insert */
-    return (0);
-  } // Install()
+    return $this->userDao->updateUserTable();
+  }
 
   /**
    * \brief This is where the magic for
@@ -166,21 +98,21 @@ class core_auth extends FO_Plugin
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
-      global $container;
-      $dbManager = $container->get("db.manager");
-      $dbManager->prepare("selectMemberGroup", "UPDATE users SET group_fk=$1 WHERE user_pk=$2");
-      $dbManager->execute("selectMemberGroup", array($_POST['selectMemberGroup'], $_SESSION['UserId']));
-      $_SESSION['GroupId'] = $_POST['selectMemberGroup'];
-      $SysConf['auth']['GroupId'] = $_SESSION['GroupId'];
+      $selectedGroupId = intval($_POST['selectMemberGroup']);
+      $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
+      $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
+      $session->set(Auth::GROUP_ID, $selectedGroupId);
+      $SysConf['auth']['GroupId'] = $selectedGroupId;
     }
 
-    if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
-    if (array_key_exists('GroupId', $_SESSION)) $SysConf['auth']['GroupId'] = $_SESSION['GroupId'];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION[Auth::USER_ID];
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth']['GroupId'] = $_SESSION[Auth::GROUP_ID];
+
     $Now = time();
     if (!empty($_SESSION['time']))
     {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->UpdateSess("");
+      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
     }
 
     $_SESSION['time'] = $Now;
@@ -191,22 +123,12 @@ class core_auth extends FO_Plugin
     else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
     {
       /* Sessions are not transferable. */
-      $this->UpdateSess("");
+      $this->updateSession("");
       $_SESSION['ip'] = $this->GetIP();
     }
 
-    /* Enable or disable plugins based on login status */
-    $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User'])
     {
-      /* If you are logged in, then the default level is "Download". */
-      if ("X" . $_SESSION['UserLevel'] == "X")
-      {
-        $Level = PLUGIN_DB_WRITE;
-      } else
-      {
-        $Level = @$_SESSION['UserLevel'];
-      }
       /* Recheck the user in case he is suddenly blocked or changed. */
       if (empty($_SESSION['time_check']))
       {
@@ -214,22 +136,19 @@ class core_auth extends FO_Plugin
       }
       if (time() >= @$_SESSION['time_check'])
       {
-        global $container;
-        $dbManager = $container->get("db.manager");
-        $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1";
-        $R = $dbManager->getSingleRow($sql, array(@$_SESSION['UserId']));
+        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
         /* Check for instant logouts */
-        if (empty($R['user_pass']))
+        if (empty($row['user_pass']))
         {
-          $R = "";
+          $row = "";
         }
-        $this->UpdateSess($R);
+        $this->updateSession($row);
       }
     } else
-      $this->UpdateSess("");
+      $this->updateSession("");
 
     /* Disable all plugins with >= level access */
-    plugin_disable($_SESSION['UserLevel']);
+    plugin_disable($_SESSION[Auth::USER_LEVEL]);
     $this->State = PLUGIN_STATE_READY;
   } // GetIP()
 
@@ -238,28 +157,25 @@ class core_auth extends FO_Plugin
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
    */
-  function UpdateSess($UserRow)
+  function updateSession($userRow)
   {
     global $SysConf;
 
-    if (empty($UserRow))
+    if (empty($userRow))
     {
-      global $container;
-      $dbManager = $container->get("db.manager");
-      $sql = "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1";
-      $UserRow = $dbManager->getSingleRow($sql, array('Default User'));
+      $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
     }
 
-    $_SESSION['UserId'] = $UserRow['user_pk'];
-    $SysConf['auth']['UserId'] = $UserRow['user_pk'];
-    $_SESSION['User'] = $UserRow['user_name'];
-    $_SESSION['Folder'] = $UserRow['root_folder_fk'];
-    $_SESSION['UserLevel'] = $UserRow['user_perm'];
-    $_SESSION['UserEmail'] = $UserRow['user_email'];
-    $_SESSION['UserEnote'] = $UserRow['email_notify'];
-    $_SESSION['GroupId'] = $UserRow['group_fk'];
-    $SysConf['auth']['GroupId'] = $UserRow['group_fk'];
-    $_SESSION['GroupName'] = $UserRow['group_name'];
+    $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
+    $SysConf['auth']['UserId'] = $userRow['user_pk'];
+    $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
+    $_SESSION['Folder'] = $userRow['root_folder_fk'];
+    $_SESSION['UserLevel'] = $userRow['user_perm'];
+    $_SESSION['UserEmail'] = $userRow['user_email'];
+    $_SESSION['UserEnote'] = $userRow['email_notify'];
+    $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
+    $SysConf['auth']['GroupId'] = $userRow['group_fk'];
+    $_SESSION['GroupName'] = $userRow['group_name'];
   }
 
   /**
@@ -287,34 +203,33 @@ class core_auth extends FO_Plugin
    */
   protected function htmlContent()
   {
-    $User = GetParm("username", PARM_TEXT);
-    $Pass = GetParm("password", PARM_TEXT);
-    $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
-    if (empty($Referer))
+    $userName = GetParm("username", PARM_TEXT);
+    $password = GetParm("password", PARM_TEXT);
+    $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+    if (empty($referrer))
     {
-      $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
+      $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
-    $VP = !empty($User) ? $this->CheckUser($User, $Pass, $Referer) : '';
-    if (!empty($VP))
+
+    $output = !empty($userName) ? $this->checkUsernameAndPassword($userName, $password, $referrer) : '';
+    if (!empty($output))
     {
-      return $VP;
+      return $output;
     }
     
-    $V = "";    
+    $output = "";
     $initPluginId = plugin_find_id("init");
     if ( $initPluginId>= 0)
     {
       global $Plugins;
-      $V .= $Plugins[$initPluginId]->infoFirstTimeUsage();
+      $output .= $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    $this->vars['referer'] = $Referer;
+    $this->vars['referer'] = $referrer;
 
-    global $container;
-    $renderer = $container->get('twig.environment');
-    $V .= $renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
+    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
 
-    return $V;
+    return $output;
   }
   
   /**
@@ -324,7 +239,7 @@ class core_auth extends FO_Plugin
   {
     if (array_key_exists('User',$_SESSION) && $_SESSION['User'] != "Default User")
     {
-      $this->UpdateSess("");
+      $this->updateSession("");
       $Uri = Traceback_uri();
       header("Location: $Uri");
       exit;
@@ -338,49 +253,49 @@ class core_auth extends FO_Plugin
    *
    * \return string on match, or null on no-match.
    */
-  function CheckUser($User, $Pass, $Referer)
+  function checkUsernameAndPassword($userName, $password, $referrer)
   {
-    global $container;
-
-    if (empty($User) || $User == 'Default User')
+    if (empty($userName) || $userName == 'Default User')
     {
       return;
     }
-    $dbManager = $container->get('db.manager');
 
-    $R = $dbManager->getSingleRow("SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
-                                array($User),$logNote=__METHOD__ . 'select.user');
-    if (empty($R['user_name']))
+    $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+
+    if (empty($row['user_name']))
     {
       return;
     }
+
     /* Check the password -- only if a password exists */
-    if (!empty($R['user_seed']) && !empty($R['user_pass']))
+    if (!empty($row['user_seed']) && !empty($row['user_pass']))
     {
-      $Hash = sha1($R['user_seed'] . $Pass);
-      if (strcmp($Hash, $R['user_pass']) != 0)
+      $passwordHash = sha1($row['user_seed'] . $password);
+      if (strcmp($passwordHash, $row['user_pass']) != 0)
       {
         return;
       }
-    } else if (!empty($R['user_seed']))
+    } else if (!empty($row['user_seed']))
     {
       /* Seed with no password hash = no login */
       return;
-    } else if (!empty($Pass))
+    } else if (!empty($password))
     {
       /* empty password required */
       return;
     }
+
     /* If you make it here, then username and password were good! */
-    $this->UpdateSess($R);
+    $this->updateSession($row);
+
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
-    if ("X" . $R['user_perm'] == "X")
+    if ("X" . $row['user_perm'] == "X")
     {
       $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
     } else
     {
-      $_SESSION['UserLevel'] = $R['user_perm'];
+      $_SESSION['UserLevel'] = $row['user_perm'];
     }
     $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
     /* Check for the no-popup flag */
@@ -392,23 +307,8 @@ class core_auth extends FO_Plugin
       $_SESSION['NoPopup'] = 0;
     }
 
-    /* Use the previous redirect, but only use it if it comes from this
-      server's Traceback_uri().  (Ignore hostname.) */
-    $Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
-    $Uri = Traceback_uri();
-    if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect))
-    {
-      $Redirect = ""; /* don't reference myself! */
-    }
-    if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri)))
-    {
-      $Uri = Traceback_uri();
-    } else
-    {
-      $Uri = $Redirect;
-    }
     /* Redirect window */
-    header("Location: $Referer");
+    header("Location: $referrer");
   }
 
 }
