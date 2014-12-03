@@ -72,12 +72,13 @@ class ClearingDecisionProcessor
   private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds=array())
   {
     $eventIds = array();
-    foreach($this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemBounds) as $scannerLicenseRef)
+    foreach($this->agentLicenseEventProcessor->getScannerEvents($itemBounds) as $licenseId => $scannerEvents)
     {
-      if (array_key_exists($scannerLicenseRef->getId(), $removedIds))
+      if (array_key_exists($licenseId, $removedIds))
       {
         continue;
       }
+      $scannerLicenseRef = $scannerEvents[0]->getLicenseRef();
       $eventIds[$scannerLicenseRef->getId()] = $this->clearingDao->insertClearingEvent($itemBounds->getItemId(), $userId, $groupId, $scannerLicenseRef->getId(), $remove, $type);
     }
     return $eventIds;
@@ -161,20 +162,17 @@ class ClearingDecisionProcessor
    */
   public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId)
   {
-    $scannedLicenseDetails = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($itemTreeBounds);
-    $agentLicenseRefs = $this->agentLicenseEventProcessor->getScannedLicenses($scannedLicenseDetails);
-
+    $agentEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
     $events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
-    $selection = $this->clearingEventProcessor->getClearingLicenses($events);
 
     $addedResults = array();
     $removedResults = array();
     
-    foreach (array_unique(array_merge(array_keys($selection), array_keys($agentLicenseRefs))) as $licenseId)
+    foreach (array_unique(array_merge(array_keys($events), array_keys($agentEvents))) as $licenseId)
     {
       $licenseDecisionEvent = array_key_exists($licenseId, $events) ? $events[$licenseId] : null;
-      $agentClearingEvents = $this->collectAgentDetectedLicenses($licenseId, $scannedLicenseDetails);
-
+      $agentClearingEvents = array_key_exists($licenseId, $agentEvents) ? $agentEvents[$licenseId] : array();
+      
       if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0))
         continue;
 
@@ -189,40 +187,7 @@ class ClearingDecisionProcessor
     return array($addedResults, $removedResults);
   }
 
-  /**
-   * @param $licenseProperty
-   * @return AgentClearingEvent
-   */
-  private function createAgentClearingEvent($licenseProperty)
-  {
-    return new AgentClearingEvent(
-        $licenseProperty['licenseRef'],
-        $licenseProperty['agentRef'],
-        $licenseProperty['matchId'],
-        array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
-    );
-  }
 
-  /**
-   * @param $licenseShortName
-   * @param $agentDetectedLicenses
-   * @return array
-   */
-  private function collectAgentDetectedLicenses($licenseShortName, $agentDetectedLicenses)
-  {
-    $agentClearingEvents = array();
-    if (array_key_exists($licenseShortName, $agentDetectedLicenses))
-    {
-      foreach ($agentDetectedLicenses[$licenseShortName] as $agentName => $licenseProperties)
-      {
-        foreach ($licenseProperties as $licenseProperty)
-        {
-          $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
-        }
-      }
-    }
-    return $agentClearingEvents;
-  }
 
 
 }

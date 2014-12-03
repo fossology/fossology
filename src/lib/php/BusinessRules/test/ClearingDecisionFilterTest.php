@@ -20,7 +20,6 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
-use Fossology\Lib\BusinessRules\ClearingDecisionCache;
 
 use Mockery as M;
 
@@ -45,13 +44,15 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
-    $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
-    $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId);
+    $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
+    $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId+1);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
 
-    assertThat($filteredClearingDecisions->getDecisionOf($itemId, $pfileId), is(sameInstance($decision1)));
+    assertThat($this->clearingDecisionFilter->getDecisionOf($filteredClearingDecisions, $itemId, $pfileId), is(sameInstance($decision1)));
+    assertThat($this->clearingDecisionFilter->getDecisionOf($filteredClearingDecisions, $itemId+1, $pfileId), is(sameInstance($decision2)));
+    assertThat($this->clearingDecisionFilter->getDecisionOf($filteredClearingDecisions, $itemId+2, $pfileId), is(sameInstance($decision1)));
   }
 
 
@@ -71,7 +72,7 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision));
   }
 
-  public function testFilterCurrentReusableClearingDecisionsShouldKeepNewerRepoScopedDecisions() {
+  public function testFilterCurrentReusableClearingDecisions() {
     $itemId = 543;
     $itemId2 = 432;
     $decision1 = M::mock(ClearingDecision::classname());

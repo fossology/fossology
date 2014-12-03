@@ -18,9 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\Clearing\AgentClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\Object;
@@ -135,5 +135,45 @@ class AgentLicenseEventProcessor extends Object
     }
 
     return $licenses;
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return AgentClearingEvent[][] indexed by LicenseId
+   */
+  public function getScannerEvents(ItemTreeBounds $itemTreeBounds) {
+    $result = array();
+    
+    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
+    
+    foreach ($agentDetails as $licenseId => $properties) {
+      $agentClearingEvents = array();
+      
+      foreach ($properties as $agentName => $licenseProperties)
+      {
+        foreach ($licenseProperties as $licenseProperty)
+        {
+          $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
+        }
+      }
+      
+      $result[$licenseId] = $agentClearingEvents;
+    }
+    
+    return $result;
+  }
+  
+    /**
+   * @param $licenseProperty
+   * @return AgentClearingEvent
+   */
+  private function createAgentClearingEvent($licenseProperty)
+  {
+    return new AgentClearingEvent(
+        $licenseProperty['licenseRef'],
+        $licenseProperty['agentRef'],
+        $licenseProperty['matchId'],
+        array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
+    );
   }
 }
