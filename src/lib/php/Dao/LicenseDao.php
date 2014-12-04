@@ -121,7 +121,8 @@ class LicenseDao extends Object
   public function getTopLevelLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
+    $selectedAgentText = $selectedAgentId ?: '-';
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . '.' . $selectedAgentText . '.' . implode("",$filterLicenses);
     $param = array($fileTreeBounds->getUploadTreeId());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
@@ -159,14 +160,20 @@ class LicenseDao extends Object
     return $licensesPerFileId;
   }
 
-
+  /**
+   * @param FileTreeBounds $fileTreeBounds
+   * @param string $orderStatement
+   * @param null|int|int[] $agentId
+   * @return array
+   */
   public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
+    $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentText";
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
     $sql = "
-      SELECT LFR.rf_shortname AS license_shortname, count(*) AS count
+      SELECT LFR.rf_shortname AS license_shortname, count(*) AS count, count(distinct LFR.pfile_fk) AS unique
         FROM license_file_ref LFR RIGHT JOIN $uploadTreeTableName UT ON LFR.pfile_fk = UT.pfile_fk ";
     if (empty($agentId))
     {
@@ -177,8 +184,13 @@ class LicenseDao extends Object
 
     if (!empty($agentId))
     {
-      $sql .= ' AND LFR.agent_fk=$4';
-      $param[] = $agentId;
+      if (is_array($agentId)) {
+        $sql .= ' AND LFR.agent_fk=ANY($4)';
+        $param[] = '{' . implode(',', $agentId) . '}';
+      } else {
+        $sql .= ' AND LFR.agent_fk=$4';
+        $param[] = $agentId;
+      }
     } else {
       $sql .= ' AND LFR2.agent_fk IS NOT NULL';
     }
@@ -190,9 +202,9 @@ class LicenseDao extends Object
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName,$param);
     $assocLicenseHist = array();
-    while ($res = $this->dbManager->fetchArray($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
-      $assocLicenseHist[$res['license_shortname']] = $res['count'];
+      $assocLicenseHist[$row['license_shortname']] = array('count' => intval($row['count']), 'unique' => intval($row['unique']));
     }
     $this->dbManager->freeResult($result);
     return $assocLicenseHist;

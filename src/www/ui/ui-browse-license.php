@@ -177,7 +177,7 @@ class ui_browse_license extends FO_Plugin
 
 
 
-    list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
+    list($V, $allScans, $latestAgentIds) = $this->createHeader($scannerAgents, $uploadId);
 
     if (empty($allScans))
     {
@@ -189,7 +189,7 @@ class ui_browse_license extends FO_Plugin
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $licenseCandidates = $this->clearingDao->getFileClearingsFolder($fileTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId, $licenseCandidates);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId ?: $latestAgentIds, $licenseCandidates);
     list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
 
     /***************************************
@@ -677,6 +677,7 @@ class ui_browse_license extends FO_Plugin
    */
   private function createHeader($scannerAgents, $uploadId)
   {
+    $latestAgentIds = array();
     $allScans = array();
     $V = ""; // total return value
     foreach ($scannerAgents as $agentName)
@@ -741,9 +742,11 @@ class ui_browse_license extends FO_Plugin
         }
         $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
       }
+
+      $latestAgentIds[$agentName] = intval($latestRun['agent_pk']);
       $V .= '<br/>';
     }
-    return array($V, $allScans);
+    return array($V, $allScans, $latestAgentIds);
   }
 
 }
