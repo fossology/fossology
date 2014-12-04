@@ -643,6 +643,7 @@ class ui_browse_license extends FO_Plugin
     $output = "";
 
     $allSuccessfulAgents = array();
+    $latestAgentIds = array();
 
     foreach ($scannerAgents as $agentName)
     {
@@ -693,13 +694,14 @@ class ui_browse_license extends FO_Plugin
         }
         $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
       }
+      $latestAgentIds[$agentName] = $latestSuccessfulAgent->getAgentId();
       $output .= "</p>\n";
     }
 
     $header = "<h3>" . _("Scanner details") . "</h3>";
     $header .= $this->buildAgentSelector($allSuccessfulAgents) . "\n";
 
-    return empty($allSuccessfulAgents) ? false : ($header . $output);
+    return array(empty($allSuccessfulAgents) ? false : ($header . $output), $latestAgentIds);
   }
 
   public function getTemplateName()
