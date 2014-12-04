@@ -263,8 +263,10 @@ class LicenseDao extends Object
          WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
     if (!empty($agentId))
     {
-      $sql .= ' AND agent_fk=$4';
+      $sql .= ' AND LFR.agent_fk=$4';
       $param[] = $agentId;
+    } else {
+      $sql .= ' AND LFR2.agent_fk IS NOT NULL';
     }
     $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
