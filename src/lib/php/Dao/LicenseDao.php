@@ -165,13 +165,22 @@ class LicenseDao extends Object
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
+    $sql = "
+      SELECT LFR.rf_shortname AS license_shortname, count(*) AS count
+        FROM license_file_ref LFR RIGHT JOIN $uploadTreeTableName UT ON LFR.pfile_fk = UT.pfile_fk ";
+    if (empty($agentId))
+    {
+      $sql .= "LEFT OUTER JOIN license_file_ref LFR2
+          ON(LFR.pfile_fk = LFR2.pfile_fk and LFR.rf_pk = LFR2.rf_pk and (LFR.agent_fk > LFR2.agent_fk)) ";
+    }
+    $sql .= "WHERE LFR.rf_shortname NOT IN ('Void') AND UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
+
     if (!empty($agentId))
     {
-      $sql .= ' AND agent_fk=$4';
+      $sql .= ' AND LFR.agent_fk=$4';
       $param[] = $agentId;
+    } else {
+      $sql .= ' AND LFR2.agent_fk IS NOT NULL';
     }
     $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
