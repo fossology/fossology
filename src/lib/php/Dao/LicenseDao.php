@@ -251,18 +251,18 @@ class LicenseDao extends Object
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param string $orderStatement
    * @param null|int|int[] $agentId
    * @return array
    */
-  public function getLicenseHistogram(ItemTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
+  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId=null)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
+    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.rf_pk) as unique
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
@@ -271,14 +271,12 @@ class LicenseDao extends Object
     if (!empty($agentId))
     {
       if (is_array($agentId)) {
-        $sql .= ' AND LFR.agent_fk=ANY($4)';
+        $sql .= ' AND agent_fk=ANY($4)';
         $param[] = '{' . implode(',', $agentId) . '}';
       } else {
-        $sql .= ' AND LFR.agent_fk=$4';
+        $sql .= ' AND agent_fk=$4';
         $param[] = $agentId;
       }
-    } else {
-      $sql .= ' AND LFR2.agent_fk IS NOT NULL';
     }
     $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
