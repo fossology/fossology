@@ -156,7 +156,7 @@ class ui_browse_license extends FO_Plugin
     $scannerAgents = array('nomos', 'monk', 'ninka');
 
     $V = "";
-    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
+    list($agentStatus, $latestAgentIds) = $this->createAgentStatus($scannerAgents, $uploadId);
 
     if (!$agentStatus)
     {
