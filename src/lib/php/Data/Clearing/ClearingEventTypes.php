@@ -32,7 +32,7 @@ class ClearingEventTypes extends Types {
     $this->map = array(
         self::USER => "User decision",
         self::BULK => "Bulk",
-        self::AGENT => "Agent finding"
+        self::AGENT => "User confirmed agent finding"
     );
   }
 } 

@@ -64,14 +64,35 @@ class DeciderAgent extends Agent
     $groupId = $this->groupId;
     $jobId = $this->jobId;
 
-    $changedItems = $this->clearingDao->getItemsChangedBy($jobId);
-    foreach ($changedItems as $uploadTreeId)
+    $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
+    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob)
     {
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId);
+      foreach($this->loopContainedItems($uploadTreeId) as $itemTreeBounds)
+      {
+        $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
+      }
     }
   }
 
+  private function loopContainedItems($uploadTreeId)
+  {
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
+    if (!$itemTreeBounds->containsFiles())
+    {
+      return array($itemTreeBounds);
+    }
+    else
+    {
+      $result = array();
+      $condition = "ut.lft BETWEEN $1 AND $2";
+      $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+      foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
+      {
+        $result[] = $item->getItemTreeBounds();
+      }
+      return $result;
+    }
+  }
 
   function processUploadId($uploadId)
   {
@@ -84,7 +105,7 @@ class DeciderAgent extends Agent
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
    */
-  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId)
+  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
   {
     $this->dbManager->begin();  /* start transaction */
 
@@ -97,12 +118,12 @@ class DeciderAgent extends Agent
         break;
 
       default:
-        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId);
+        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob);
     }
 
     if ($createDecision)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
     }
     else
     {

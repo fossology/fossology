@@ -67,7 +67,7 @@ class ClearingDao extends Object
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $needTransaction = !$this->dbManager->isInTransaction();
     if ($needTransaction) $this->dbManager->begin();
-    
+
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
     $sql_upload = "";
@@ -192,51 +192,9 @@ class ClearingDao extends Object
     }
 
     $this->dbManager->freeResult($result);
-    
+
     if ($needTransaction) $this->dbManager->commit();
     return $clearingsWithLicensesArray;
-  }
-
-  /**
-   * @param int[] $licenseIds
-   * @param bool $removed
-   * @param int $uploadTreeId
-   * @param int $userId
-   * @param int $groupId
-   * @param int $jobId
-   * @param string $comment
-   * @param string $remark
-   */
-  public function insertMultipleClearingEvents($licenseIds, $removed, $uploadTreeId, $userId, $groupId, $jobId, $comment = "", $remark = "")
-  {
-    $this->dbManager->begin();
-
-    $statementName = __METHOD__ . ".s";
-    $this->dbManager->prepare($statementName,
-        "with thisItem AS (select * from uploadtree where uploadtree_pk = $1)
-         SELECT uploadtree.* from uploadtree, thisItem
-         WHERE uploadtree.lft BETWEEN thisItem.lft AND thisItem.rgt AND ((uploadtree.ufile_mode & (3<<28))=0) AND uploadtree.pfile_fk != 0",
-        array($uploadTreeId),
-        $statementName);
-    $items = $this->dbManager->execute($statementName, array($uploadTreeId));
-
-    $type = ClearingEventTypes::USER;
-
-    while ($item = $this->dbManager->fetchArray($items))
-    {
-      $currentUploadTreeId = $item['uploadtree_pk'];
-      foreach ($licenseIds as $license)
-      {
-        $aDecEvent = array('uploadtree_fk' => $currentUploadTreeId, 'user_fk' => $userId,
-            'group_fk' => $groupId,
-            'rf_fk' => $license, 'removed' => $removed, 'job_fk' => $jobId,
-            'type_fk' => $type, 'comment' => $comment, 'reportinfo' => $remark);
-        $this->dbManager->insertTableRow('clearing_event', $aDecEvent, $sqlLog = __METHOD__);
-      }
-    }
-    $this->dbManager->freeResult($items);
-
-    $this->dbManager->commit();
   }
 
   /**
@@ -335,7 +293,7 @@ INSERT INTO clearing_decision (
       }
       $date = $decision[0]->getTimeStamp();
     }
-    
+
     $stmt = __METHOD__;
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
              FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
@@ -395,19 +353,31 @@ INSERT INTO clearing_decision (
 
   }
 
-  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '')
+  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=false, $jobId=0)
   {
-    $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
+    if (!$dontMarkWip)
+    {
+      $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
+    }
+
     $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
 
     $stmt = __METHOD__;
-    $this->dbManager->prepare($stmt,
-    "INSERT INTO clearing_event (uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING clearing_event_pk"
-    );
-    $res = $this->dbManager->execute(
-        $stmt,
-        array($uploadTreeId, $userId, $groupId, $type, $licenseId, $insertIsRemoved, $reportInfo, $comment)
-    );
+    $params = array($uploadTreeId, $userId, $groupId, $type, $licenseId, $insertIsRemoved, $reportInfo, $comment);
+    $columns = "uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment";
+    $values = "$1,$2,$3,$4,$5,$6,$7,$8";
+
+    if ($jobId>0)
+    {
+      $stmt.= ".jobId";
+      $params[] = $jobId;
+      $columns .= ", job_fk";
+      $values .= ",$".count($params);
+    }
+
+
+    $this->dbManager->prepare($stmt, "INSERT INTO clearing_event ($columns) VALUES($values) RETURNING clearing_event_pk");
+    $res = $this->dbManager->execute($stmt, $params);
 
     $row = $this->dbManager->fetchArray($res);
     $this->dbManager->freeResult($res);
@@ -415,24 +385,32 @@ INSERT INTO clearing_decision (
     return $row['clearing_event_pk'];
   }
 
-  public function getItemsChangedBy($jobId)
+  /**
+   * @param int $jobId
+   * @return int[][] eventIds indexed by itemId and licenseId
+   */
+  public function getEventIdsOfJob($jobId)
   {
     $statementName = __METHOD__;
     $this->dbManager->prepare(
         $statementName,
-        "SELECT DISTINCT(uploadtree_fk) FROM clearing_event WHERE job_fk = $1"
+        "SELECT uploadtree_fk, clearing_event_pk, rf_fk FROM clearing_event WHERE job_fk = $1"
     );
 
     $res = $this->dbManager->execute($statementName, array($jobId));
 
-    $items = array();
+    $events = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $items[] = $row['uploadtree_fk'];
+      $itemId = $row['uploadtree_fk'];
+      $eventId = $row['clearing_event_pk'];
+      $licenseId = $row['rf_fk'];
+
+      $events[$itemId][$licenseId] = $eventId;
     }
     $this->dbManager->freeResult($res);
 
-    return $items;
+    return $events;
   }
 
   /**

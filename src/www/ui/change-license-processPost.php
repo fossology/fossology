@@ -17,6 +17,7 @@
  ***********************************************************/
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
@@ -83,19 +84,34 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
-    $removed = $_POST['removed'];
+    $removed = $_POST['removed'] === 't';
 
-    $uploadEntry = $this->uploadDao->getUploadEntry($itemId);
-    $uploadId = intval($uploadEntry['upload_fk']);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId);
+    $uploadId = $itemTreeBounds->getUploadId();
     $upload = $this->uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
+
+    if (!$itemTreeBounds->containsFiles()) {
+      return $this->errorJson("the given Item is not valid");
+    }
 
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
     if (isset($licenses))
     {
-      $this->clearingDao->insertMultipleClearingEvents($licenses, $removed, $itemId, $userId, $groupId, $job_pk);
-    } //,  $_POST['comment'], $_POST['remark']
+      if (!is_array($licenses)) {
+        return $this->errorJson("bad license array");
+      }
+      foreach($licenses as $licenseId) {
+        if (intval($licenseId) <= 0) {
+          return $this->errorJson("bad license");
+        }
+
+        //,  $_POST['comment'], $_POST['remark']
+        $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
+          ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=true, $job_pk);
+      }
+    }
 
     /** @var agent_fodecider $deciderPlugin */
     $deciderPlugin = plugin_find("agent_decider");
@@ -115,9 +131,14 @@ class changeLicenseProcessPost extends FO_Plugin
       header('Content-type: text/json');
       return json_encode(array("jqid" => $jq_pk));
     } else {
-      header('Content-type: text/json', true, 500);
-      return json_encode(array("error" => $ErrorMsg));
+      return $this->errorJson($ErrorMsg, 500);
     }
+  }
+
+  private function errorJson($msg, $code=404)
+  {
+    header('Content-type: text/json', true, $code);
+    return json_encode(array("error" => $msg));
   }
 
 }

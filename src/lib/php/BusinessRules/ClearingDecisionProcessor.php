@@ -61,13 +61,14 @@ class ClearingDecisionProcessor extends Object
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
+   * @param int[] $additionalEventIds  additional event ids to include, indexed by licenseId
    * @return bool
    */
-  public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId) {
+  public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $additionalEventIds = array()) {
     $userEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
     $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
     foreach(array_keys($scannerDetectedEvents) as $licenseId){
-      if (!array_key_exists($licenseId, $userEvents))
+      if (!array_key_exists($licenseId, $userEvents) && !array_key_exists($licenseId, $additionalEventIds))
       {
         return true;
       }
@@ -96,7 +97,7 @@ class ClearingDecisionProcessor extends Object
    * @param int[] $clearingEventIds
    * @return boolean
    */
-  private function clearingDecisionIsDifferentFrom(ClearingDecision $decision, $type, $clearingEventIds)
+  private function clearingDecisionIsDifferentFrom(ClearingDecision $decision, $type, $scope, $clearingEventIds)
   {
     $clearingEvents = $decision->getClearingEvents();
     if (count($clearingEvents) != count($clearingEventIds))
@@ -106,7 +107,7 @@ class ClearingDecisionProcessor extends Object
       if (false === array_search($clearingEvent->getEventId(), $clearingEventIds))
         return true;
     }
-    return $type !== $decision->getType();
+    return ($type !== $decision->getType()) || ($scope !== $decision->getScope());
   }
 
   /**
@@ -114,8 +115,9 @@ class ClearingDecisionProcessor extends Object
    * @param int $userId
    * @param int $type
    * @param boolean $global
+   * @param int[] $additionalEventIds  additional event ids to include, indexed by licenseId
    */
-  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global)
+  public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global, $additionalEventIds = array())
   {
     if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
@@ -136,17 +138,18 @@ class ClearingDecisionProcessor extends Object
       $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, true, ClearingEventTypes::USER);
     } else {
       $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId);
-      $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false, ClearingEventTypes::USER, $previousEvents);
+      $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false, ClearingEventTypes::AGENT, $previousEvents);
       foreach($previousEvents as $clearingEvent) {
         $clearingEventIds[$clearingEvent->getLicenseId()] = $clearingEvent->getEventId();
       }
     }
 
     $currentDecision = $this->clearingDao->getRelevantClearingDecision($itemBounds, $groupId);
+    $clearingEventIds = array_merge($clearingEventIds, $additionalEventIds);
 
-    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $clearingEventIds))
+    $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
+    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $scope, $clearingEventIds))
     {
-      $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
       $this->clearingDao->createDecisionFromEvents($itemBounds->getItemId(), $userId, $groupId, $type, $scope,
       $clearingEventIds);
     }
@@ -173,12 +176,12 @@ class ClearingDecisionProcessor extends Object
 
     $addedResults = array();
     $removedResults = array();
-    
+
     foreach (array_unique(array_merge(array_keys($events), array_keys($agentEvents))) as $licenseId)
     {
       $licenseDecisionEvent = array_key_exists($licenseId, $events) ? $events[$licenseId] : null;
       $agentClearingEvents = array_key_exists($licenseId, $agentEvents) ? $agentEvents[$licenseId] : array();
-      
+
       if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0))
         throw new Exception('not in merge');
 

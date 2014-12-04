@@ -458,10 +458,11 @@ SELECT * FROM $uploadTreeTableName
     $view = new UploadTreeViewProxy($itemTreeBounds, array(UploadTreeViewProxy::CONDITION_PLAIN_FILES));
 
     $this->dbManager->prepare($statementName,
-        $view->asCTE() . " SELECT * FROM " . $view->getDbViewName() .
+        $view->asCTE() . " SELECT * FROM " . $view->getDbViewName() ." ut ".
         ($addCondition ? " WHERE " . $addCondition : ''));
     $res = $this->dbManager->execute($statementName, $addParameters);
     $items = array();
+
     while ($row = $this->dbManager->fetchArray($res)) {
       $items[] = $this->createItem($row, $uploadTreeTableName);
     }
