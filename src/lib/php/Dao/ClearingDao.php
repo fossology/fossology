@@ -348,7 +348,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
 
-    while($row=  $this->dbManager->fetchArray($res)){
+    while($row = $this->dbManager->fetchArray($res)){
       $licenseRef = new LicenseRef($row['rf_fk'],$row['rf_shortname'],$row['rf_fullname']);
       $events[$row['rf_fk']] = ClearingEventBuilder::create()
               ->setEventId($row['clearing_event_pk'])

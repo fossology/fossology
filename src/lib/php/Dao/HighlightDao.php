@@ -149,10 +149,10 @@ class HighlightDao extends Object
   {
     $stmt = __METHOD__;
     $sql = "SELECT h.clearing_event_fk, h.start, h.len, ce.rf_fk, rf_text
-             FROM highlight_bulk h
-             INNER JOIN license_ref_bulk lrb ON lrb.lrb_pk = h.lrb_fk
-             INNER JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
-             WHERE ce.uploadtree_fk = $1";
+            FROM clearing_event ce
+              INNER JOIN highlight_bulk h ON ce.clearing_event_pk = h.clearing_event_fk
+              INNER JOIN license_ref_bulk lrb ON lrb.lrb_pk = h.lrb_fk
+            WHERE ce.uploadtree_fk = $1";
     $params = array($uploadTreeId);
     if (!empty($clearingId))
     {

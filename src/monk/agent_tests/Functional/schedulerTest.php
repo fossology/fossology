@@ -16,21 +16,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\HighlightDao;
-use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
 
-class MonkScheduledTest extends \PHPUnit_Framework_TestCase
+class MonkScheduledTest extends PHPUnit_Framework_TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -113,14 +113,15 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','group_user_member'),false);
+    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
+        'clearing_event','clearing_decision','clearing_decision_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','license_file','highlight'),false);
     $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
-
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a','group_user_member'), false);
+    $this->testDb->createInheritedTables();
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
     $this->testDb->insertData_license_ref();
   }
 
@@ -250,15 +251,17 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
 
     $this->assertEquals($retCode, 0, 'monk failed: '.$output);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
 
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
-
-    $this->assertEquals($expected=1, count($relevantDecisionsItem6));
-    $this->assertEquals($expected=1, count($relevantDecisionsItem7));
-
+    assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
+    assertThat(count($relevantDecisionsItem7),is(equalTo(1)));
+    $rfForACE = 225;
+    assertThat($relevantDecisionsItem6,hasKeyInArray($rfForACE));
     /** @var ClearingEvent $clearingEvent */
-    $clearingEvent = $relevantDecisionsItem6[0];
+    $clearingEvent = $relevantDecisionsItem6[$rfForACE];
     $eventId = $clearingEvent->getEventId();
     $bulkHighlights = $this->highlightDao->getHighlightBulk(6, $eventId);
 
@@ -305,10 +308,11 @@ class MonkScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->rmRepo();
 
-    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
-
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($userId, 6);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($userId, 7);
+    $this->assertEquals($retCode, 0, "monk failed: $output");
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
 
     $this->assertEquals($expected=0, count($relevantDecisionsItem6));
     $this->assertEquals($expected=0, count($relevantDecisionsItem7));
