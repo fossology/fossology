@@ -129,7 +129,7 @@ class UploadTreeProxy extends DbViewProxy
       case "alreadyCleared":
         $decisionQuery = "SELECT decision_type FROM clearing_decision AS cd
                         WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                              OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
+                              OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO." AND cd.group_fk = 
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (4,5) )";

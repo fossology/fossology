@@ -70,8 +70,6 @@ class ClearingDao extends Object
     
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
-    $joinType = $itemTreeBounds->containsFiles() ? "INNER" : "LEFT";
-
     $sql_upload = "";
     if ('uploadtree' === $uploadTreeTable || 'uploadtree_a' === $uploadTreeTable)
     {
@@ -338,8 +336,6 @@ INSERT INTO clearing_decision (
       $date = $decision[0]->getTimeStamp();
     }
     
-    /* @TODO use LicenseViewProxy */
-    
     $stmt = __METHOD__;
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
              FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
@@ -450,8 +446,6 @@ INSERT INTO clearing_decision (
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseName);
     $removed = $this->dbManager->booleanFromDb($licenseIsRemoved);
-
-    // TODO set date itemId
 
     $clearingEvents[] = ClearingEventBuilder::create()
       ->setEventId($eventId)

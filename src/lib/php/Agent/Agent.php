@@ -67,7 +67,6 @@ abstract class Agent extends Object
 
   function scheduler_connect()
   {
-    /** @todo getopt is not smart enough */
     $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
