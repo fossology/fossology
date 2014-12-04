@@ -55,9 +55,9 @@ class AjaxJobInfo extends DefaultPlugin
           WHERE jobqueue.jq_pk = $1 AND job_user_fk = $2",
           array($jq_pk, $userId)
        );
-       if ($jobInfo !== false) {
-         $result[$jq_pk] = array('end_bits' => $jobInfo['end_bits']);
-       }
+      if ($jobInfo !== false) {
+        $result[$jq_pk] = array('end_bits' => $jobInfo['end_bits']);
+      }
     }
 
     ReportCachePurgeAll();

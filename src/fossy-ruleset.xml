@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Standard">
+  <description>A custom coding standard</description>
+  <rule ref="Generic.WhiteSpace.ScopeIndent">
+    <properties>
+      <property name="indent" value="2"/>
+    </properties>
+  </rule>
+  
+  <rule ref="Zend.Files.ClosingTag"></rule>
+  
+
+  <rule ref="Generic.Commenting.Todo"/>
+  <rule ref="Generic.Commenting.Todo.CommentFound">
+    <message>Please review this TODO comment: %s</message>
+    <severity>3</severity>
+  </rule>
+
+</ruleset>

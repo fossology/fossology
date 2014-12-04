@@ -94,7 +94,6 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
     return NULL;
   }
   $group_pk = $GroupRow['group_pk'];
-  $user_pk = $SysConf['auth']['UserId'];
   $perm_admin = PERM_ADMIN;
 
   // before inserting this new record, delete any record for the same upload and group since
@@ -103,7 +102,7 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
                array($perm_admin, $upload_pk, $group_pk),'insert.perm_upload');
 
-return ($upload_pk);
+  return ($upload_pk);
 } // JobAddUpload()
 
 

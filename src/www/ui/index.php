@@ -66,15 +66,15 @@ else
   print "$text <P />";
   $text01= _("Click here to continue.");
   print "<a href='$Uri'>" . $text01 . "</a>";
-
+  /*
   print "<script language='JavaScript'>\n";
   print "function Redirect()\n";
   print "{\n";
   print "window.location.href = '$Uri';\n";
   print "}\n";
-  /* Redirect in 5 seconds. */
-//  print "window.setTimeout('Redirect()',5000);\n";
+  print "window.setTimeout('Redirect()',5000);\n";
   print "</script>\n";
+   */
 }
 plugin_unload();
 global $container;

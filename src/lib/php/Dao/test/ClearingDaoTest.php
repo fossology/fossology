@@ -317,8 +317,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($bulkText, arrayContaining('TextFOO', 'TextBAR', 'TextBAZ', 'TextBAZ', 'TextQUX'));
   }
 
-  
- public function testBulkHistoryWithoutMatchesFromDifferentFolder()
+  public function testBulkHistoryWithoutMatchesFromDifferentFolder()
   {
     $treeBounds = M::mock(ItemTreeBounds::classname());
     $treeBounds->shouldReceive('getItemId')->andReturn(305);

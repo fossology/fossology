@@ -456,7 +456,7 @@ class ui_view extends FO_Plugin
     $PageSize = VIEW_BLOCK_HEX * $Page;
     if (!empty($PageMenu) and !$getPageMenuInline)
     {
-     $output .=  "<center>$PageMenu</center><br>\n";
+      $output .= "<center>$PageMenu</center><br>\n";
     }
 
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlightEntries);

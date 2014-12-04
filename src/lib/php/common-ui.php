@@ -15,6 +15,7 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************/
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * \file common-ui.php
@@ -174,7 +175,9 @@ function DownloadFile($path, $name)
   $connstat = connection_status();
   if ($connstat != 0) return _("Lost connection.");
 
-  session_write_close();
+  global $container;
+  $session = $container->get('session');
+  $session->save();
   ob_end_clean();
   //    header("Cache-Control: no-store, no-cache, must-revalidate");
   //    header("Cache-Control: post-check=0, pre-check=0", false);
@@ -215,7 +218,9 @@ function DownloadString2File($text, $name, $contentType)
   $connstat = connection_status();
   if ($connstat != 0) return _("Lost connection.");
 
-  session_write_close();
+  $session = new Session();
+  $session->save();
+
   ob_end_clean();
   header("Expires: ".gmdate("D, d M Y H:i:s", mktime(date("H")+2, date("i"), date("s"), date("m"), date("d"), date("Y")))." GMT");
   header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -304,22 +309,3 @@ function Get1stUploadtreeID($upload)
   return $uploadtree_id;
 }
 
-/**
- * \brief execute a shell command
- *
- * \param $cmd - command to execute
- *
- * \return command results
- */
-function DoCmd($Cmd)
-{
-  $Fin = popen($Cmd,"r");
-
-  /* Read results */
-  $Buf = "";
-  while(!feof($Fin)) $Buf .= fread($Fin,8192);
-  pclose($Fin);
-  return $Buf;
-}
-
-?>

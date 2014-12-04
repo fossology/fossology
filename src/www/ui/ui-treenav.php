@@ -41,8 +41,7 @@ class ui_treenav extends FO_Plugin
     print("$V");
     return;
   }
+}
 
-};
 $NewPlugin = new ui_treenav;
 $NewPlugin->Initialize();
-?>

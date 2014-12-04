@@ -213,7 +213,7 @@ class ui_browse_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
     $V .= "</table>\n";
 
-    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&lic=";
+    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
     $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
 
 
