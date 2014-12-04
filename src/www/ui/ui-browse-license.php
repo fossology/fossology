@@ -591,7 +591,7 @@ class ui_browse_license extends FO_Plugin
       return "Only one revision of <b>$run[agent_name]</b> ran for this upload. <br/>";
     }
     $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $V = "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
+    $V = "<form action='$URI' method='post' data-autosubmit=\"\"><select name='agentId' id='agentId'>";
     $isSelected = (0 == $selectedAgentId) ? " selected='selected'" : '';
     $V .= "<option value='0' $isSelected>" . _('Latest run of all available agents') . "</option>\n";
     foreach ($allScans as $run)
@@ -605,7 +605,7 @@ class ui_browse_license extends FO_Plugin
       }
       $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
     }
-    $V .= "</select><input type='submit' name='' value='Show'/></form>";
+    $V .= "</select><noscript><input type='submit' name='' value='Show'/></noscript></form>";
     return $V;
   }
 
