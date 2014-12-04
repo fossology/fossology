@@ -166,7 +166,7 @@ class ui_browse_license extends FO_Plugin
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId ?: $latestAgentIds, $allDecisions);
 
     $VLic .= "\n" . $agentStatus;
 
