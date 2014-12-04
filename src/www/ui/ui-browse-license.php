@@ -573,7 +573,7 @@ class ui_browse_license extends FO_Plugin
     }
 
     $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $output = "<form action=\"$URI\" method=\"post\"><select name=\"agentId\" id=\"agentId\">";
+    $output = "<form action=\"$URI\" method=\"post\" data-autosubmit=\"\"><select name=\"agentId\" id=\"agentId\">";
     $isSelected = (0 == $selectedAgentId) ? self::SELECTED_ATTRIBUTE : '';
     $output .= "<option value=\"0\" $isSelected>" . _('Latest run of all available agents') . "</option>\n";
     foreach ($successfulAgents as $agent)
@@ -581,7 +581,7 @@ class ui_browse_license extends FO_Plugin
       $isSelected = $agent->getAgentId() == $selectedAgentId ? self::SELECTED_ATTRIBUTE : '';
       $output .= "<option value=\"" . $agent->getAgentId() . "\"$isSelected>" . $agent->getAgentName() . " " . $agent->getAgentRevision() . "</option>\n";
     }
-    $output .= "</select><input type='submit' name='' value='Show'/></form>";
+    $output .= "</select><noscript><input type='submit' name='' value='Show'/></noscript></form>";
     return $output;
   }
 

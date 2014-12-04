@@ -60,6 +60,10 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 $(document).ready(function () {
   createLicHistTable();
   createDirlistTable();
+    $("form[data-autosubmit] select").change(function() {
+        $(this).closest('form').submit();
+    });
+    
     $('#bulkAction').change( function(){
     if( $('#bulkAction').val()=='new'){
       $('#bulkExistingLicense').hide();
@@ -143,5 +147,4 @@ function dressContents ( data, type, full ) {
 
 
 }
-
 
