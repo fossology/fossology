@@ -13,8 +13,16 @@ function getopt($arg1, $arg2)
   global $userId;
   global $jobId;
   global $groupId;
+  global $extraOpts;
+  
+  if (!is_array($extraOpts))
+  {
+    $extraOpts = array();
+  }
 
-  return array("scheduler_start" => "", "userID" => $userId, "jobId" => $jobId, "groupID" => $groupId);
+  $opts = array_merge(array("scheduler_start" => "", "userID" => $userId, "jobId" => $jobId, "groupID" => $groupId), $extraOpts);
+  
+  return $opts;
 }
 
 function fgets($in)

@@ -16,13 +16,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Reuser\Test;
+namespace Fossology\Decider\Test;
 
 use Fossology\Lib\Test\TestPgDb;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
 
+/**
+ * @todo move to lib/test
+ */
 class SchedulerTestRunnerCli implements SchedulerTestRunner
 {
   /** @var TestPgDb */
@@ -37,7 +40,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $agentName = "reuser";
+    $agentName = "decider";
 
     $agentDir = dirname(dirname(__DIR__));
     $execDir = "$agentDir/agent";
@@ -45,7 +48,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $pipeFd = popen($cmd = "echo $uploadId | $execDir/$agentName --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start -c $sysConf $args", "r");
     $success = $pipeFd !== false;
-
+    
     $output = "";
     $retCode = -1;
     if ($success) 

@@ -16,22 +16,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Reuser\Test;
+namespace Fossology\Decider\Test;
 
-use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 
 use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
+include_once(__DIR__.'/AgentTestMockHelper.php');
 
-include(dirname(dirname(__DIR__)).'/agent/ReuserAgent.php');
+include_once(dirname(dirname(__DIR__)).'/agent/DeciderAgent.php');
 
 class SchedulerTestRunnerMock implements SchedulerTestRunner
 {
@@ -40,44 +39,36 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var ClearingDecisionFilter */
-  private $clearingDecisionFilter;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionProcessor;
   /** @var UploadDao */
   private $uploadDao;
 
 
-  public function __construct(DbManager $dbManager, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter) 
+  public function __construct(DbManager $dbManager, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionProcessor $clearingDecisionProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->uploadDao = $uploadDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
-    $this->clearingDecisionFilter = $clearingDecisionFilter;
+    $this->clearingDecisionProcessor = $clearingDecisionProcessor;
   }
 
-    public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $GLOBALS['userId'] = $userId;
     $GLOBALS['jobId'] = $jobId;
     $GLOBALS['groupId'] = $groupId;
-
-    /* these appear not to be used by the reuser: mock them to something wrong
-     */
-    $this->clearingEventProcessor = M::mock(LicenseRef::classname());
-    $this->decisionTypes = M::mock(LicenseRef::classname());
-    $this->agentLicenseEventProcessor = M::mock(LicenseRef::classname());
+    
+    $matches;
+    $GLOBALS['extraOpts'] = preg_match("/-k([0-9]*)/", $args, $matches) ? array("k" => $matches[1]) : array();
 
     $container = M::mock('Container');
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
-    $container->shouldReceive('get')->with('businessrules.clearing_event_processor')->andReturn($this->clearingEventProcessor);
-    $container->shouldReceive('get')->with('businessrules.clearing_decision_filter')->andReturn($this->clearingDecisionFilter);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
-    $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
     $GLOBALS['container'] = $container;
 
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
@@ -88,8 +79,8 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     ob_start();
 
-    include(dirname(dirname(__DIR__)).'/agent/reuser.php');
-    
+    include(dirname(dirname(__DIR__)).'/agent/decider.php');
+
     $output = ob_get_clean();
 
     return array(true, $output, $exitval);

@@ -32,12 +32,12 @@ class AgentLicenseEventProcessor extends Object
   private $licenseDao;
 
   /** @var AgentDao */
-  private $agentsDao;
+  private $agentDao;
 
-  public function __construct(LicenseDao $licenseDao, AgentDao $agentsDao)
+  public function __construct(LicenseDao $licenseDao, AgentDao $agentDao)
   {
     $this->licenseDao = $licenseDao;
-    $this->agentsDao = $agentsDao;
+    $this->agentDao = $agentDao;
   }
 
   /**
@@ -82,7 +82,7 @@ class AgentLicenseEventProcessor extends Object
       );
     }
 
-    $latestAgentIdPerAgent = $this->agentsDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }

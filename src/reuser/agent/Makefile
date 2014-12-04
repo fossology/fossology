@@ -10,7 +10,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-COPY = reuser.php version.php
+COPY = reuser.php version.php ReuserAgent.php
 WRAP = reuser
 
 all: version.php

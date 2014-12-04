@@ -32,6 +32,9 @@ abstract class Agent extends Object
   protected $userId;
   protected $groupId;
   protected $jobId;
+  
+  protected $schedulerHandledOpts = "c:";
+  protected $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
 
   /** @var DbManager dbManager */
   protected $dbManager;
@@ -65,7 +68,7 @@ abstract class Agent extends Object
   function scheduler_connect()
   {
     /** @todo getopt is not smart enough */
-    $args = getopt("", array("userID:","groupID:","jobId:","scheduler_start"));
+    $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
@@ -149,12 +152,36 @@ abstract class Agent extends Object
   function writeArsRecord($uploadId,$arsId=0,$success=false,$status="")
   {
     $arsTableName = $this->agentArs;
-    if ($arsId) {
-      $this->dbManager->queryOnce("UPDATE $arsTableName SET ars_success='".($success ? "t" : "f")."', ars_endtime=now() ".(
-        !empty($status) ? ", ars_status = $status" : ""
-        )." WHERE ars_pk = $arsId");
-    } else {
-      $row = $this->dbManager->getSingleRow("INSERT INTO $arsTableName(agent_fk,upload_fk) VALUES (".$this->agentId.",$uploadId) RETURNING ars_pk");
+    if ($arsId)
+    {
+      $successDb = $this->dbManager->booleanToDb($success);
+      $parms = array($successDb, $arsId);
+      
+      $stmt = __METHOD__.".$arsTableName";
+      
+      if (!empty($status)) {
+        $stmt .= ".status";
+        $parms[] = $status;
+        $statusClause = ", ars_status = $".count($parms);
+      }
+      else 
+      {
+        $statusClause = "";
+      }
+      
+      $this->dbManager->getSingleRow(
+              "UPDATE $arsTableName
+              SET ars_success=$1,
+                  ars_endtime=now() $statusClause
+              WHERE ars_pk = $2",
+              $parms, $stmt);
+    } else
+    {
+      $row = $this->dbManager->getSingleRow(
+              "INSERT INTO $arsTableName(agent_fk,upload_fk)
+               VALUES ($1,$2) RETURNING ars_pk",
+              array($this->agentId, $uploadId),
+              __METHOD__.".update.".$arsTableName);
       if ($row !== false)
       {
         return $row['ars_pk'];

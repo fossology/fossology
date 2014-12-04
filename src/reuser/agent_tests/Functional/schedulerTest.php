@@ -16,6 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+namespace Fossology\Reuser\Test;
+
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
@@ -31,13 +33,11 @@ use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-use Mockery as M;
-
-include_once(__DIR__.'/AgentTestMockHelper.php');
+include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
-class ReusercheduledTest extends \PHPUnit_Framework_TestCase
+class SchedulerTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -156,19 +156,6 @@ class ReusercheduledTest extends \PHPUnit_Framework_TestCase
   {
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     return $this->clearingDao->getFileClearingsFolder($bounds, $groupId);
-  }
-
-  private function copyClearingLicensesAsReused($clearingLicenses)
-  {
-    $result = array();
-    foreach($clearingLicenses as $clearingLicense) {
-      $result[] = new ClearingLicense(
-        $clearingLicense->getLicenseRef(), $clearingLicense->isRemoved(),
-        $clearingLicense->getType() | ClearingEventTypes::REUSED_BIT,
-        $clearingLicense->getReportinfo(), $clearingLicense->getComment()
-        );
-    }
-    return $result;
   }
 
   /** @group Functional */

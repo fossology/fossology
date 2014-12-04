@@ -27,8 +27,9 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecisionProcessor
+class ClearingDecisionProcessor extends Object
 {
   const NO_LICENSE_KNOWN_DECISION_TYPE = 2;
 

@@ -296,5 +296,18 @@ class TestPgDb
       $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
     }
   }
- 
+
+  
+  public function createInheritedArsTables($agents)
+  {
+    foreach ($agents as $agent)
+    {
+      if (!$this->dbManager->existsTable($agent . '_ars'))
+      {
+        $this->dbManager->queryOnce("create table " . $agent . "_ars() inherits(ars_master)");
+      }
+    }
+  }
+
+  
 }
