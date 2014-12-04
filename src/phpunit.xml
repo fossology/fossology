@@ -13,7 +13,9 @@
             <!--<directory suffix=".php">lib/php/tests</directory>-->
             <directory suffix="Test.php">www/ui_tests/Unit</directory>
             <directory suffix="Test.php">monk/agent_tests/Functional</directory>
+            <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
             <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
+            <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
         </testsuite>
     </testsuites>
 
