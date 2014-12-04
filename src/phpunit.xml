@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phpunit bootstrap="./phpunit-bootstrap.php">
-    <php>
-        <env name="SYSCONFDIR" value="/usr/local/etc/fossology/"/>
-    </php>
-    <logging>
-        <log type="coverage-html" target="../testReport" charset="UTF-8" highlight="false"/>
-    </logging>
+  <php>
+    <env name="SYSCONFDIR" value="/usr/local/etc/fossology/"/>
+  </php>
+  <logging>
+    <log type="coverage-html" target="../testReport" charset="UTF-8" highlight="false"/>
+  </logging>
 
-    <testsuites>
-        <testsuite name="Fossology PhpUnit Test Suite">
-            <directory suffix="Test.php">lib/php</directory>
-            <!--<directory suffix=".php">lib/php/tests</directory>-->
-            <directory suffix="Test.php">www/ui_tests/Unit</directory>
-            <directory suffix="Test.php">monk/agent_tests/Functional</directory>
-            <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
-            <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
-            <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
-        </testsuite>
-    </testsuites>
+  <testsuites>
+    <testsuite name="Fossology PhpUnit Lib Test Suite">
+      <directory suffix="Test.php">lib/php</directory>
+      <directory suffix="Test.php">www/ui_tests/Unit</directory>
+    </testsuite>
 
-    <filter>
-        <whitelist addUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">.</directory>
-            <exclude>
-                <directory suffix="Test.php">.</directory>
-                <directory suffix=".php">lib/php/tests</directory>
-                <directory suffix=".php">*/*tests</directory>
-                <directory suffix=".php">testing</directory>
-                <directory suffix=".php">tutorials</directory>
-                <directory suffix=".php">vendor</directory>
-            </exclude>
-        </whitelist>
-    </filter>
+    <testsuite name="Fossology PhpUnit Agent Test Suite">
+      <directory suffix="Test.php">monk/agent_tests/Functional</directory>
+      <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
+      <directory suffix="Test.php">reuser/agent_tests/Functional</directory>
+      <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
+    </testsuite>
+  
+
+    <!--             
+    <testsuite name="Fossology PhpUnit Slow Test Suite">
+      <directory suffix=".php">lib/php/tests</directory>
+    </testsuite>
+    //-->
+
+  </testsuites>
+
+  <filter>
+    <whitelist addUncoveredFilesFromWhitelist="true">
+      <directory suffix=".php">.</directory>
+      <exclude>
+        <directory suffix="Test.php">.</directory>
+        <directory suffix=".php">lib/php/tests</directory>
+        <directory suffix=".php">lib/c</directory>
+        <directory suffix=".php">*/*tests</directory>
+        <directory suffix=".php">testing</directory>
+        <directory suffix=".php">tutorials</directory>
+        <directory suffix=".php">vendor</directory>
+      </exclude>
+    </whitelist>
+  </filter>
 </phpunit>

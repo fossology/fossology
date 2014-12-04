@@ -368,9 +368,9 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
-    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
+    $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
-    assertThat($unhandledScannerDetectedLicenses, is(array($licenseRef->getId() => $licenseRef)));
+    assertThat($hasUnhandledScannerDetectedLicenses);
   }
 
   public function testGetUnhandledScannerDetectedLicensesWithMatch()
@@ -385,16 +385,16 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
-    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
+    $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
-    assertThat($unhandledScannerDetectedLicenses, is(emptyArray()));
+    assertThat(not( $hasUnhandledScannerDetectedLicenses) );
   }
 
   public function testGetUnhandledScannerDetectedLicensesWithoutMatch()
   {
     /** @var LicenseRef $licenseRef */
     list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
-    $clearingEvent = $this->createClearingEvent(123, new DateTime(), 321, "licB", "License-B");
+    $clearingEvent = $this->createClearingEvent(123, new DateTime(), $licenseRef->getId(), $licenseRef->getShortName(), $licenseRef->getFullName());
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
@@ -402,9 +402,9 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
-    $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
+    $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
-    assertThat($unhandledScannerDetectedLicenses, is(array($licenseRef->getId() => $licenseRef)));
+    assertThat($hasUnhandledScannerDetectedLicenses);
   }
 
   /**

@@ -17,7 +17,6 @@ use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
@@ -68,26 +67,6 @@ class DeciderAgent extends Agent
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
-  static protected function hasNewerUserEvents($events, $date)
-  {
-    foreach ($events as $licenseDecisionResult)
-    {
-      /** @var ClearingResult $licenseDecisionResult */
-      $eventDate = $licenseDecisionResult->getDateTime();
-      if ((($date === null) || ($eventDate > $date)) && $licenseDecisionResult->hasAgentDecisionEvent() && !$licenseDecisionResult->hasClearingEvent())
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /* true if small is a subset of big */
-  static protected function array_contains($big, $small)
-  {
-    return count(array_diff($small, $big)) == 0;
-  }
-
   function processClearingEventOfCurrentJob()
   {
     $userId = $this->userId;
@@ -127,8 +106,7 @@ class DeciderAgent extends Agent
         break;
 
       default:
-        $unhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->getUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId);
-        $createDecision = count($unhandledScannerDetectedLicenses) == 0;
+        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId);
     }
 
     if ($createDecision)

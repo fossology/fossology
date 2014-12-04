@@ -59,14 +59,21 @@ class ClearingDecisionProcessor
     $this->dbManager = $dbManager;
   }
 
-  public function getUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId) {
-    $events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
-
-    $scannerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($itemTreeBounds);
-
-    $clearingLicenseRefs = $this->clearingEventProcessor->getClearingLicenseRefs($events);
-
-    return array_diff_key($scannerDetectedLicenses, $clearingLicenseRefs);
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @return bool
+   */
+  public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId) {
+    $userEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
+    $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
+    foreach(array_keys($scannerDetectedEvents) as $licenseId){
+      if (!array_key_exists($licenseId, $userEvents))
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds=array())

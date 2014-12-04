@@ -18,31 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
 class ClearingEventProcessor extends Object
 {
-
-  /**
-   * @param ClearingEvent[] $events
-   * @return ClearingEvent[]
-   */
-  public function getClearingLicenses($events)
-  {
-    $result = array();
-
-    foreach ($events as $event)
-    {
-      $licenseId = $event->getLicenseId();
-
-      $result[$licenseId] = $event;
-    }
-
-    return $result;
-  }
 
   /**
    * @param ClearingEvent[] $events
@@ -64,35 +45,6 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param DateTime|null $lastDecision
-   * @param ClearingEvent[] $events
-   * @return ClearingLicense[]
-   */
-  public function getClearingLicensesAt($lastDecision, $events)
-  {
-    $filteredEvents = $this->selectEventsUntilTime($events, $lastDecision);
-    return $this->getClearingLicenses($filteredEvents);
-  }
-
-  /**
-   * @param ClearingEvent[] $events
-   * @param DateTime|null $lastDecisionDate
-   * @return ClearingEvent[]
-   */
-  public function selectEventsUntilTime($events, $lastDecisionDate)
-  {
-    if ($lastDecisionDate !== null)
-    {
-      $filterEventsBefore = function (ClearingEvent $event) use ($lastDecisionDate)
-      {
-        return $event->getDateTime() <= $lastDecisionDate;
-      };
-      return array_filter($events, $filterEventsBefore);
-    }
-    return $events;
-  }
-
-  /**
    * @param ClearingEvent[] $events
    * @return ClearingEvent[]
    */
@@ -101,23 +53,10 @@ class ClearingEventProcessor extends Object
     $reducedEvents = array();
     foreach ($events as $event)
     {
-      $licenseShortName = $event->getLicenseShortName();
-      $reducedEvents[$licenseShortName] = $event;
+      $licenseId = $event->getLicenseId();
+      $reducedEvents[$licenseId] = $event;
     }
     return $reducedEvents;
   }
 
-  /**
-   * @param ClearingEvent[] $events
-   * @return ClearingEvent[]
-   */
-  public function indexByLicenseShortName($events)
-  {
-    $values = array();
-    foreach ($events as $license)
-    {
-      $values[$license->getLicenseShortName()] = $license;
-    }
-    return $values;
-  }
 }

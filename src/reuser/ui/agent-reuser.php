@@ -16,25 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Application\UserInfo;
-use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
-use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\ClearingDecisionBuilder;
-use Fossology\Lib\Data\LicenseMatch;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\Item;
-use Fossology\Lib\Plugin\DefaultPlugin;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Plugin\DefaultPlugin;
 
 /**
  * \file agent-reuser.php
@@ -102,128 +85,6 @@ class ReuserAgentPlugin extends DefaultPlugin
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 
-  /**
-   * @param Request $request
-   * @return Response
-   * @todo cleanup: used only for debug
-   * @deprecated use functional tests
-   */
-  protected function handle(Request $request)
-  {
-    $vars = array();
-
-    /** @var UploadDao $uploadDao */
-    $uploadDao = $this->getObject('dao.upload');
-    $uploadId = intval($request->get('uploadId'));
-
-    if ($uploadId == 0)
-    {
-      return Response::create("", Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-    $reusedUploadId = intval($request->get('reuseUploadId'));
-    if ($reusedUploadId === 0)
-    {
-      $reusedUploadId = $uploadDao->getReusedUpload($uploadId);
-    }
-
-    $vars['title'] = "reuser agent: upload $uploadId reuses decisions of upload $reusedUploadId";
-
-    $itemTreeBounds = $uploadDao->getParentItemBounds($reusedUploadId);
-
-    $vars['reusedTree'] = $itemTreeBounds;
-
-    /** @var ClearingDao $clearingDao */
-    $clearingDao = $this->getObject('dao.clearing');
-
-    $clearingDecisions = $clearingDao->getFileClearingsFolder($itemTreeBounds);
-    /** @var ClearingDecisionFilter $clearingDecisionFilter */
-    $clearingDecisionFilter = $this->getObject('businessrules.clearing_decision_filter');
-    $clearingDecisions = $clearingDecisionFilter->filterCurrentReusableClearingDecisions($clearingDecisions);
-
-    $clearingDecisionByFileId = array();
-    $fileIdsWithClearingDecision = array();
-    $lines = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      $lines [] = strval($clearingDecision);
-      $fileId = $clearingDecision->getPfileId();
-      $fileIdsWithClearingDecision[] = $fileId;
-      $clearingDecisionByFileId[$fileId] = $clearingDecision;
-    }
-
-    $newItemTreeBounds = $uploadDao->getParentItemBounds($uploadId);
-
-    $containedItems = $uploadDao->getContainedItems($newItemTreeBounds, "pfile_fk = ANY($1)", array('{' . implode(', ', $fileIdsWithClearingDecision) . '}'));
-
-    $timestamp = new DateTime();
-    $userInfo = new UserInfo();
-    $rows = array();
-    /** @var ClearingDecisionProcessor $clearingDecisionProcessor */
-    $clearingDecisionProcessor = $this->getObject('businessrules.clearing_decision_processor');
-    foreach ($containedItems as $item)
-    {
-      $row = array('item' => $item);
-
-      /** @var ClearingDecision $clearingDecision */
-      $clearingDecision = $clearingDecisionByFileId[$item->getFileId()];
-      $desiredLicenses = $clearingDecision->getPositiveLicenses();
-      $row['decision'] = $desiredLicenses;
-
-      list($added, $removed) = $clearingDecisionProcessor->getCurrentClearings($item->getItemTreeBounds(), $userInfo->getUserId());
-
-      $actualLicenses = array_map(function (ClearingResult $result)
-      {
-        return $result->getLicenseRef();
-      }, $added);
-
-      $row['current'] = $actualLicenses;
-
-      $toAdd = array_diff($desiredLicenses, $actualLicenses);
-      $row['add'] = $toAdd;
-      $toRemove = array_diff($actualLicenses, $desiredLicenses);
-      $row['remove'] = $toRemove;
-
-      foreach ($toAdd as $license)
-      {
-        //$this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, false);
-      }
-
-      foreach ($toRemove as $license)
-      {
-        //$this->insertHistoricalClearingEvent($clearingDao, $clearingDecision, $item, $userInfo, $license, true);
-      }
-
-      $rows[] = $row;
-    }
-    $vars['results'] = $rows;
-
-    return $this->render('reuser.html.twig', $this->mergeWithDefault($vars));
-  }
-
-  /**
-   * @param $clearingDao
-   * @param $clearingDecision
-   * @param $item
-   * @param $userInfo
-   * @param $license
-   * @param $remove
-   *
-   * @todo cleanup: used only for debug
-   * @deprecated use functional tests
-   */
-  protected function insertHistoricalClearingEvent(ClearingDao $clearingDao, ClearingDecision $clearingDecision, Item $item, UserInfo $userInfo, LicenseRef $license, $remove)
-  {
-    $clearingDao->insertHistoricalClearingEvent(
-        $clearingDecision->getDateAdded()->sub(new DateInterval('PT1S')),
-        $item->getId(),
-        $userInfo->getUserId(),
-        $license->getId(),
-        ClearingEventTypes::USER,
-        $remove,
-        '',
-        ''
-    );
-  }
 }
 
 register_plugin(new ReuserAgentPlugin());
