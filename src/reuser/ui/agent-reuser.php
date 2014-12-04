@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-use Fossology\Lib\Plugin\DefaultPlugin;
-
 /**
  * \file agent-reuser.php
  * \brief run the reuser license agent
@@ -26,17 +24,20 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 
 include_once(__DIR__ . "/../agent/version.php");
 
-class ReuserAgentPlugin extends DefaultPlugin
+/**
+ * @todo create AgentPlugin
+ */
+class ReuserAgentPlugin extends FO_Plugin
 {
   public $AgentName;
 
-  function __construct()
-  {
-    parent::__construct("agent_reuser", array(
-        self::TITLE => _("Automatic Clearing Decision Reuser"),
-        self::PERMISSION => self::PERM_WRITE
-    ));
+    function __construct() {
+    $this->Name = "agent_reuser";
+    $this->Title =  _("Automatic Clearing Decision Reuser");
+    $this->DBaccess = PLUGIN_DB_WRITE;
     $this->AgentName = REUSER_AGENT_NAME;
+
+    parent::__construct();
   }
 
   /**
@@ -87,4 +88,4 @@ class ReuserAgentPlugin extends DefaultPlugin
 
 }
 
-register_plugin(new ReuserAgentPlugin());
+$NewPlugin = new ReuserAgentPlugin();

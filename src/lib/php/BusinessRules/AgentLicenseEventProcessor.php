@@ -145,7 +145,7 @@ class AgentLicenseEventProcessor extends Object
     $result = array();
     
     $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
-    
+
     foreach ($agentDetails as $licenseId => $properties) {
       $agentClearingEvents = array();
       

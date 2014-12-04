@@ -18,17 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\Clearing\AgentClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingResult;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 
 class ClearingDecisionProcessor
 {
@@ -181,7 +179,7 @@ class ClearingDecisionProcessor
       $agentClearingEvents = array_key_exists($licenseId, $agentEvents) ? $agentEvents[$licenseId] : array();
       
       if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0))
-        continue;
+        throw new Exception('not in merge');
 
       $licenseDecisionResult = new ClearingResult($licenseDecisionEvent, $agentClearingEvents);
       if ($licenseDecisionResult->isRemoved()) {

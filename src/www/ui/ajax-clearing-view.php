@@ -107,15 +107,14 @@ class AjaxClearingView extends FO_Plugin
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
-      $licenseShortName = $licenseRef->getShortName();
+      $licenseId = $licenseRef->getId();
 
-      if (array_key_exists($licenseShortName, $licenseDecisions))
+      if (array_key_exists($licenseId, $licenseDecisions))
       {
         continue;
       }
 
       $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
-      $licenseId = $licenseRef->getId();
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
@@ -245,7 +244,7 @@ class AjaxClearingView extends FO_Plugin
     {
       $licenseId = $clearingResult->getLicenseId();
 
-      $types = array();
+      $types = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
       $reportInfo = "";
       $comment = "";
 
@@ -256,8 +255,6 @@ class AjaxClearingView extends FO_Plugin
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }
-
-      $types = array_merge($types, $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId));
 
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
