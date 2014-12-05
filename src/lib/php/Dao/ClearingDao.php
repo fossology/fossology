@@ -60,18 +60,16 @@ class ClearingDao extends Object
 
   private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
   {
-    $this->dbManager->begin();
-
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
-    $params[] = $itemTreeBounds->getUploadId(); $p1 = "$". count($params);
-    $params[] = DecisionTypes::WIP; $p2 = "$". count($params);
-    $params[] = $groupId; $p3 = "$". count($params);
+    $params[] = DecisionTypes::WIP; $p1 = "$". count($params);
+    $params[] = $groupId; $p2 = "$". count($params);
 
     $sql_upload = "";
     if ('uploadtree' === $uploadTreeTable || 'uploadtree_a' === $uploadTreeTable)
     {
-      $sql_upload = "ut.upload_fk=$p1 AND ";
+      $params[] = $itemTreeBounds->getUploadId(); $p = "$". count($params);
+      $sql_upload = "ut.upload_fk=$p AND ";
     }
     if (!empty($condition))
     {
@@ -105,7 +103,7 @@ class ClearingDao extends Object
                       OR ut.uploadtree_pk = cd.uploadtree_fk
                 LEFT JOIN users ON cd.user_fk = users.user_pk
               WHERE $sql_upload $condition
-                cd.decision_type!=$p2 AND cd.group_fk = $p3),
+                cd.decision_type!=$p1 AND cd.group_fk = $p2),
             decision AS (
               SELECT $filterClause *
               FROM allDecs
@@ -197,7 +195,7 @@ class ClearingDao extends Object
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            ORDER BY decision.id DESC";
+            ORDER BY decision.id DESC, event_id DESC";
 
     $this->dbManager->prepare($statementName, $sql);
 
@@ -520,6 +518,7 @@ INSERT INTO clearing_decision (
   public function markDecisionAsWip($uploadTreeId, $userId, $groupId)
   {
     $statementName = __METHOD__;
+
     $this->dbManager->prepare($statementName,
         "INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) VALUES (
             $1, (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk=$1), $2, $3, $4, $5)");

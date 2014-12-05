@@ -219,6 +219,11 @@ abstract class DbManager extends Object
           . $this->formatMilliseconds($seconds)
           . " ($queryCount queries" . ($queryCount > 0 ? ", avg " . $this->formatMilliseconds($seconds / $queryCount) : "") . ")");
     }
+
+    if ($this->transactionDepth != 0)
+    {
+      throw new \Fossology\Lib\Exception("you have not committed enough");
+    }
   }
 
   /**

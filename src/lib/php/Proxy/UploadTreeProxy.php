@@ -121,7 +121,7 @@ class UploadTreeProxy extends DbViewProxy
   private static function getQueryCondition($skipThese, $groupId = null)
   {
     $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
-        OR EXISTS (SELECT 1 FROM clearing_event AS lde WHERE ut.uploadtree_pk = lde.uploadtree_fk))";
+        OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese)
     {

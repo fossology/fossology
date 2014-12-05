@@ -146,6 +146,36 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $dateTime->sub(new \DateInterval("PT1H"));
     $clearingDecision->shouldReceive("getDateAdded")->withNoArgs()->andReturn($dateTime);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
+    $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn(DecisionScopes::REPO);
+    $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
+
+    $this->clearingDao->shouldReceive("getRelevantClearingDecision")
+        ->with($this->itemTreeBounds, $this->groupId)
+        ->andReturn($clearingDecision);
+
+    $this->clearingDao->shouldReceive("createDecisionFromEvents")->never();
+    $this->clearingDao->shouldReceive("removeWipClearingDecision")->once()->with($this->uploadTreeId, $this->groupId);
+
+    $this->clearingDecisionProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, $this->groupId, ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
+  }
+
+  public function testMakeDecisionFromLastEventsWithNoLicenseKnownTypeShouldNotCreateANewDecisionWhenNoLicensesShouldBeRemovedAndTheScopeDoesNotChange()
+  {
+    $isGlobal = DecisionScopes::UPLOAD;
+    $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
+
+    $this->clearingDao->shouldReceive("getRelevantClearingEvents")
+        ->with($this->itemTreeBounds, $this->groupId)
+        ->andReturn(array($addedEvent));
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
+            ->with($this->itemTreeBounds)->andReturn(array());
+
+    $clearingDecision = M::mock(ClearingDecision::classname());
+    $dateTime = new DateTime();
+    $dateTime->sub(new \DateInterval("PT1H"));
+    $clearingDecision->shouldReceive("getDateAdded")->withNoArgs()->andReturn($dateTime);
+    $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
+    $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn($isGlobal);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
 
     $this->clearingDao->shouldReceive("getRelevantClearingDecision")
@@ -161,7 +191,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   public function testMakeDecisionFromLastEventsWithNoLicenseKnownType()
   {
     $isGlobal = true;
-    
+
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
             ->with($this->itemTreeBounds)->andReturn(array());
 
