@@ -65,8 +65,7 @@ class ClearingDao extends Object
   {
     //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
     //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
+    $this->dbManager->begin();
     
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
@@ -193,7 +192,7 @@ class ClearingDao extends Object
 
     $this->dbManager->freeResult($result);
     
-    if ($needTransaction) $this->dbManager->commit();
+    $this->dbManager->commit();
     return $clearingsWithLicensesArray;
   }
 
@@ -274,8 +273,7 @@ class ClearingDao extends Object
    */
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
+    $this->dbManager->begin();
 
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
 
@@ -313,7 +311,7 @@ INSERT INTO clearing_decision (
       $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingDecisionEventInsert, array($clearingDecisionId, $eventId)));
     }
 
-    if ($needTransaction) $this->dbManager->commit();
+    $this->dbManager->commit();
   }
 
   /**

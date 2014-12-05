@@ -121,13 +121,8 @@ class ClearingDecisionProcessor extends Object
     {
       return;
     }
-
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction)
-    {
-      $this->dbManager->begin();
-    }
-
+    $this->dbManager->begin();
+ 
     $itemId = $itemBounds->getItemId();
 
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
@@ -155,10 +150,7 @@ class ClearingDecisionProcessor extends Object
       $this->clearingDao->removeWipClearingDecision($itemId, $groupId);
     }
 
-    if ($needTransaction)
-    {
-      $this->dbManager->commit();
-    }
+    $this->dbManager->commit();
   }
 
   /**
