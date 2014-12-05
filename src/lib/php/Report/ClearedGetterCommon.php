@@ -167,22 +167,22 @@ abstract class ClearedGetterCommon
   /**
    * @param int $uploadId
    * @param string $uploadTreeTableName
-   * @param null|int $userId
    * @param null|int $groupId
    * @return array
    */
-  abstract protected function getStatements($uploadId, $uploadTreeTableName, $userId=null, $groupId=null);
+  abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $userId=null, $groupId=null)
+  public function getCleared($uploadId, $groupId=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
-    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $userId, $groupId);
+    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
 
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
 
     $statements = $this->groupStatements($ungrupedStatements);
 
+//    error_log(json_encode($statements), 3, "/tmp/reportgenjson".time().".log");
     return array("statements" => array_values($statements));
   }
 }

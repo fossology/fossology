@@ -548,18 +548,18 @@ INSERT INTO clearing_decision (
     return $bulks;
   }
 
-  // TODO add group
-  public function getBulkMatches($bulkId, $userId)
+
+  public function getBulkMatches($bulkId, $groupId)
   {
     $stmt = __METHOD__;
     $sql = "SELECT uploadtree_fk AS itemid
             FROM clearing_event ce
             INNER JOIN highlight_bulk h
             ON ce.clearing_event_pk = h.clearing_event_fk
-            WHERE lrb_fk = $1 AND user_fk = $2";
+            WHERE lrb_fk = $1 AND group_fk = $2";
 
     $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt, array($bulkId, $userId));
+    $res = $this->dbManager->execute($stmt, array($bulkId, $groupId));
 
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

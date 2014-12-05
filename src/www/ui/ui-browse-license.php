@@ -369,7 +369,7 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array('skipThese' => "alreadyCleared"),
+        $options = array('skipThese' => "alreadyCleared",'groupId'=>$groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
