@@ -123,8 +123,9 @@ class ClearingDecision extends Object
   public function getPositiveLicenses()
   {
     $result = array();
-    foreach($this->getClearingLicenses() as $clearingLicense)
+    foreach($this->clearingEvents as $clearingEvent)
     {
+      $clearingLicense = $clearingEvent->getClearingLicense();
       if (!$clearingLicense->isRemoved())
       {
         $result[] = $clearingLicense->getLicenseRef();

@@ -94,7 +94,7 @@ class LicenseRenderer
   public function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
   {
     $agentId = GetParm('agentId', PARM_INTEGER);
-            
+
     $allScannerLicenseNames = array_keys($scannerLics);
     $allEditedLicenseNames = array_keys($editedLics);
 

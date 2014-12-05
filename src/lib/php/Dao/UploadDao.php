@@ -501,7 +501,6 @@ SELECT * FROM $uploadTreeTableName
     return $reusedUploadId;
   }
 
-
   /**
    * @param array $uploadEntry
    * @param string $uploadTreeTableName

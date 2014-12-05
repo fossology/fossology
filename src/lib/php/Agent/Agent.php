@@ -155,9 +155,9 @@ abstract class Agent extends Object
     {
       $successDb = $this->dbManager->booleanToDb($success);
       $parms = array($successDb, $arsId);
-      
+
       $stmt = __METHOD__.".$arsTableName";
-      
+
       if (!empty($status)) {
         $stmt .= ".status";
         $parms[] = $status;
@@ -167,7 +167,7 @@ abstract class Agent extends Object
       {
         $statusClause = "";
       }
-      
+
       $this->dbManager->getSingleRow(
               "UPDATE $arsTableName
               SET ars_success=$1,

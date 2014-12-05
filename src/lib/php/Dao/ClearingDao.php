@@ -43,6 +43,8 @@ class ClearingDao extends Object
   private $logger;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var LicenseRef[] */
+  private $licenseRefCache;
 
   /**
    * @param DbManager $dbManager
@@ -53,6 +55,112 @@ class ClearingDao extends Object
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className()); //$container->get("logger");
     $this->uploadDao = $uploadDao;
+    $this->licenseRefCache = array();
+  }
+
+  private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
+  {
+    $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
+
+    $params[] = $itemTreeBounds->getUploadId(); $p1 = "$". count($params);
+    $params[] = DecisionTypes::WIP; $p2 = "$". count($params);
+    $params[] = $groupId; $p3 = "$". count($params);
+
+    $sql_upload = "";
+    if ('uploadtree' === $uploadTreeTable || 'uploadtree_a' === $uploadTreeTable)
+    {
+      $sql_upload = "ut.upload_fk=$p1 AND ";
+    }
+    if (!empty($condition))
+    {
+      $statementName .= ".(".$condition.")";
+      $condition .= " AND ";
+    }
+
+    $filterClause = $onlyCurrent ? "DISTINCT ON(itemid)" : "";
+
+    $statementName .= "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
+
+    $globalScope = DecisionScopes::REPO;
+
+    return "WITH allDecs AS (
+              SELECT
+                cd.clearing_decision_pk AS id,
+                cd.pfile_fk AS pfile_id,
+                ut.uploadtree_pk AS itemid,
+                users.user_name AS user_name,
+                cd.user_fk AS user_id,
+                cd.decision_type AS type_id,
+                cd.scope AS scope,
+                EXTRACT(EPOCH FROM cd.date_added) AS date_added,
+                CASE cd.scope
+                WHEN $globalScope THEN 1
+                ELSE 0
+                END AS scopesort
+              FROM clearing_decision cd
+                INNER JOIN $uploadTreeTable ut
+                      ON ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope
+                      OR ut.uploadtree_pk = cd.uploadtree_fk
+                LEFT JOIN users ON cd.user_fk = users.user_pk
+              WHERE $sql_upload $condition
+                cd.decision_type!=$p2 AND cd.group_fk = $p3),
+            decision AS (
+              SELECT $filterClause *
+              FROM allDecs
+              ORDER BY itemid, scopesort, id DESC
+            )";
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @return LicenseRef[]
+   */
+  function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, &$counts=null)
+  {
+    $needTransaction = !$this->dbManager->isInTransaction();
+    if ($needTransaction) $this->dbManager->begin();
+
+    $statementName = __METHOD__;
+
+
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $condition = "ut.lft BETWEEN $1 AND $2";
+
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
+
+    $sql = "$decisionsCte
+            SELECT
+              COUNT(*) AS count,
+              lr.rf_pk AS license_id,
+              lr.rf_shortname AS shortname,
+              lr.rf_fullname AS fullname
+            FROM decision
+            INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
+            INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
+            INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+            WHERE NOT ce.removed
+            GROUP BY license_id";
+
+    $this->dbManager->prepare($statementName, $sql);
+
+    $res = $this->dbManager->execute($statementName, $params);
+
+    $licenses = array();
+    while ($row = $this->dbManager->fetchArray($res))
+    {
+      $licenseId = $row['license_id'];
+      $licenseShortName = $row['shortname'];
+      $licenseName = $row['fullname'];
+      $licenses[] = new LicenseRef($licenseId, $licenseShortName, $licenseName);
+      if (is_array($counts))
+      {
+        $counts[] = intval($row['count']);
+      }
+    }
+    $this->dbManager->freeResult($res);
+
+    return $licenses;
   }
 
   /**
@@ -63,56 +171,19 @@ class ClearingDao extends Object
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
   {
-    //The first join to uploadtree is to find out if this is the same upload <= this needs to be uploadtree
-    //The second gives all the clearing decisions which correspond to a filehash in the folder <= we can use the special upload table
     $needTransaction = !$this->dbManager->isInTransaction();
     if ($needTransaction) $this->dbManager->begin();
 
-    $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__;
 
-    $sql_upload = "";
-    if ('uploadtree' === $uploadTreeTable || 'uploadtree_a' === $uploadTreeTable)
-    {
-      $sql_upload = "ut.upload_fk=$1  and ";
-    }
+    $params = array($itemTreeBounds->getItemId());
+    $condition = "(ut.parent = $1 OR ut.uploadtree_pk = $1)";
 
-    $filterClause = $onlyCurrent ? "distinct on(itemid)" : "";
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
 
-    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'), 'candidatePrefix' => '*');
-    $licenseViewDao = new LicenseViewProxy($groupId, $options, 'lr');
-    $withCte = $licenseViewDao->asCTE();
-
-    $statementName = __METHOD__ . "." . $groupId . "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
-
-    $globalScope = DecisionScopes::REPO;
-
-    $sql = "$withCte,
-            allDecs AS (
-              SELECT
-                cd.clearing_decision_pk AS id,
-                cd.pfile_fk AS pfile_id,
-                users.user_name AS user_name,
-                cd.user_fk AS user_id,
-                cd.decision_type AS type_id,
-                cd.scope AS scope,
-                EXTRACT(EPOCH FROM cd.date_added) AS date_added,
-                ut2.upload_fk = $1 AND ut2.lft BETWEEN $2 AND $3 AS is_local,
-                ut.uploadtree_pk AS itemid
-              FROM clearing_decision cd
-                LEFT JOIN users ON cd.user_fk=users.user_pk
-                INNER JOIN uploadtree ut2 ON cd.uploadtree_fk = ut2.uploadtree_pk
-                INNER JOIN " . $uploadTreeTable . " ut ON cd.pfile_fk = ut.pfile_fk AND scope = $globalScope OR ut.uploadtree_pk = ut2.uploadtree_pk
-              WHERE " . $sql_upload . " ut.lft BETWEEN $2 AND $3
-                AND CD.decision_type!=$4 AND cd.group_fk = $5
-              GROUP BY id, itemid, pfile_id, user_name, user_id, type_id, scope, date_added, is_local
-              ORDER by cd.clearing_decision_pk DESC),
-            relevant AS (
-              SELECT $filterClause *
-              FROM allDecs
-              ORDER BY itemid, is_local DESC, id DESC
-            )
+    $sql = "$decisionsCte
             SELECT
-              r.*,
+              decision.*,
               ce.clearing_event_pk as event_id,
               ce.user_fk as event_user_id,
               ce.group_fk as event_group_id,
@@ -123,21 +194,21 @@ class ClearingDao extends Object
               ce.type_fk AS event_type_id,
               ce.reportinfo AS reportinfo,
               ce.comment AS comment
-            FROM relevant r
-            LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = r.id
+            FROM decision
+            LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
-            LEFT JOIN lr ON lr.rf_pk = ce.rf_fk
-            ORDER BY r.id DESC";
+            LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+            ORDER BY decision.id DESC";
 
     $this->dbManager->prepare($statementName, $sql);
 
-    // the array needs to be sorted with the newest clearingDecision first.
-    $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight(), DecisionTypes::WIP, $groupId);
     $result = $this->dbManager->execute($statementName, $params);
+
     $clearingsWithLicensesArray = array();
 
     $previousClearingId = -1;
     $clearingEvents = array();
+    $clearingEventCache = array();
     $clearingDecisionBuilder = ClearingDecisionBuilder::create();
     $firstMatch = true;
     while ($row = $this->dbManager->fetchArray($result))
@@ -168,7 +239,6 @@ class ClearingDao extends Object
         $previousClearingId = $clearingId;
         $clearingEvents = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
-            ->setSameFolder($this->dbManager->booleanFromDb($row['is_local']))
             ->setClearingId($row['id'])
             ->setUploadTreeId($row['itemid'])
             ->setPfileId($row['pfile_id'])
@@ -181,7 +251,14 @@ class ClearingDao extends Object
 
       if ($licenseId !== null)
       {
-        $this->appendToClearingEvents($eventId, $eventUserId, $eventGroupId, $licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $eventType, $reportInfo, $comment, $clearingEvents);
+        if (!array_key_exists($eventId, $clearingEventCache)) {
+          if (!array_key_exists($licenseId, $this->licenseRefCache)) {
+            $this->licenseRefCache[$licenseId] = new LicenseRef($licenseId, $licenseShortName, $licenseName);
+          }
+          $licenseRef = $this->licenseRefCache[$licenseId];
+          $clearingEventCache[$eventId] = $this->buildClearingEvent($eventId, $eventUserId, $eventGroupId, $licenseRef, $licenseIsRemoved, $eventType, $reportInfo, $comment);
+        }
+        $clearingEvents[] = $clearingEventCache[$eventId];
       }
     }
 
@@ -419,13 +496,13 @@ INSERT INTO clearing_decision (
    * @param $licenseName
    * @param $licenseIsRemoved
    * @param $clearingLicenses
+   * @return ClearingEvent
    */
-  protected function appendToClearingEvents($eventId, $userId, $groupId, $licenseId, $licenseShortName, $licenseName, $licenseIsRemoved, $type, $reportInfo, $comment, &$clearingEvents)
+  protected function buildClearingEvent($eventId, $userId, $groupId, $licenseRef, $licenseIsRemoved, $type, $reportInfo, $comment)
   {
-    $licenseRef = new LicenseRef($licenseId, $licenseShortName, $licenseName);
     $removed = $this->dbManager->booleanFromDb($licenseIsRemoved);
 
-    $clearingEvents[] = ClearingEventBuilder::create()
+    return ClearingEventBuilder::create()
       ->setEventId($eventId)
       ->setUserId($userId)
       ->setGroupId($groupId)

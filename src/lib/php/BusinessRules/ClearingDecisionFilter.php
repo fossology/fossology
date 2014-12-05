@@ -102,23 +102,16 @@ class ClearingDecisionFilter
   public function getAllLicenseNames($clearingDecisions)
   {
     $result = array();
-    $decisionMap = $this->filterCurrentClearingDecisions($clearingDecisions);
-    
-    foreach($decisionMap as $pFileMap)
-    {
-      /** @var ClearingDecision $decision */
-      foreach($pFileMap as $decision)
-      {
-        foreach($decision->getPositiveLicenses() as $toAdd)
-        {
-          array_push($result, $toAdd->getShortName());
-        }
 
+    foreach($clearingDecisions as $decision)
+    {
+      foreach($decision->getPositiveLicenses() as $toAdd)
+      {
+        $result[] = $toAdd->getShortName();
       }
     }
 
     return $result;
   }
 
-  
-} 
+}

@@ -168,12 +168,11 @@ class ui_browse_license extends FO_Plugin
     $groupId = $SysConf['auth']['GroupId'];
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $allDecisions);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
 
     $VLic .= "\n" . $agentStatus;
 
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $allDecisions);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -324,12 +323,11 @@ class ui_browse_license extends FO_Plugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param $UniqueTagArray
    * @param $selectedAgentId
-   * @param ClearingDecision []
    * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $allDecisions)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId)
   {
     $this->vars['haveOldVersionResult'] = false;
     $this->vars['haveRunningResult'] = false;
@@ -350,7 +348,6 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -385,6 +382,8 @@ class ui_browse_license extends FO_Plugin
     $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $noLicenseUploadTreeView->unmaterialize();
 
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     foreach ($Children as $child)
     {
       if (empty($child))
@@ -463,9 +462,7 @@ class ui_browse_license extends FO_Plugin
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
-
-      $childDecisions = $this->clearingDao->getFileClearingsFolder($childItemTreeBounds, $groupId);
-      $editedLicenses = array_unique($this->clearingFilter->getAllLicenseNames($childDecisions));
+      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
     } else
     {
       $licenseEntries = array();
@@ -502,20 +499,22 @@ class ui_browse_license extends FO_Plugin
       /** @var ClearingDecision $decision */
       if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
       {
-        $editedLicenses = array_map(
-                function ($licenseRef) use ($uploadId, $childUploadTreeId)
-                {
-                  /** @var LicenseRef $licenseRef */
-                  return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-                },
-                $decision->getPositiveLicenses()
-        );
+        $editedLicenses = $decision->getPositiveLicenses();
       }
       else
       {
         $editedLicenses = array();
       }
     }
+
+    $editedLicenses = array_map(
+      function ($licenseRef) use ($uploadId, $childUploadTreeId)
+      {
+        /** @var LicenseRef $licenseRef */
+        return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
+      },
+      $editedLicenses
+    );
 
     $editedLicenseList = implode(', ', $editedLicenses);
     $licenseList = implode(', ', $licenseEntries);
@@ -551,13 +550,18 @@ class ui_browse_license extends FO_Plugin
    * @param ClearingDecision []
    * @return string
    */
-  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
+  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $groupId)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $licenses = $this->clearingFilter->getAllLicenseNames($allDecisions);
+    $counts = array();
+    $licenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, $counts);
 
-    $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
+    for ($i=0;$i<count($licenses);++$i)
+    {
+      $editedLicensesHist[$licenses[$i]->getShortName()] = $counts[$i];
+    }
+
     global $container;
     /** @var LicenseRenderer $licenseRenderer */
     $licenseRenderer = $container->get('view.license_renderer');
