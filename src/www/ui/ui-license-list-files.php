@@ -137,9 +137,8 @@ class LicenseListFiles extends FO_Plugin
         $Unique = $CountArray['unique'];
 
         $text = _("files found");
-        $text1 =_("unique");
         $text2 = _("with license");
-        $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
+        $V.= "$Unique $text $text2 <b>$rf_shortname</b>";
         if ($Count < $Max) $Max = $Count;
         $limit = ($Page < 0) ? "ALL":$Max;
         $order = " order by ufile_name asc";

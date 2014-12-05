@@ -265,7 +265,7 @@ function GetLastAnalyzeTime($TableName)
     global $SysConf;
 
     $Cmd = "df -hP";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
 
     /* Separate lines */
     $Lines = explode("\n",$Buf);
@@ -329,7 +329,7 @@ function GetLastAnalyzeTime($TableName)
     // just query the database with "show data_directory", but we are not.
     // So try to get it from a ps and parse the -D argument
     $Cmd = "ps -eo cmd | grep postgres | grep -- -D";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
     // Find the -D
     $DargToEndOfStr = trim(substr($Buf, strpos($Buf, "-D") + 2 ));
     $DargArray = explode(' ', $DargToEndOfStr);
@@ -343,7 +343,6 @@ function GetLastAnalyzeTime($TableName)
 
     return($V);
   }
-
 
   
   protected function htmlContent() {
@@ -369,7 +368,23 @@ function GetLastAnalyzeTime($TableName)
 
     return $V;
   }
-
+  
+  /**
+   * \brief execute a shell command
+   * \param $cmd - command to execute
+   * \return command results
+   */
+  protected function DoCmd($cmd)
+  {
+    $fin = popen($cmd,"r");
+    $buffer = "";
+    while (!feof($fin)) {
+      $buffer .= fread($fin, 8192);
+    }
+    pclose($fin);
+    return $buffer;
+  }
 }
+
 $NewPlugin = new dashboard;
 $NewPlugin->Initialize();

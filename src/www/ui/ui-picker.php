@@ -609,7 +609,7 @@ class ui_picker extends FO_Plugin
 
     $text = _("Choose the program to run after you select the second file.");
     $OutBuf .= "<b>$text</b><br>";
-    $OutBuf .= ApplicationPick("PickRtnApp", $RtnMod, "will run after chosing a file");
+    $OutBuf .= $this->ApplicationPick("PickRtnApp", $RtnMod, "will run after chosing a file");
     $OutBuf .= "</div>";
     $OutBuf .= "<br>";
 
@@ -659,6 +659,11 @@ class ui_picker extends FO_Plugin
 
     $RtnMod = GetParm("rtnmod",PARM_TEXT);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
+    if (!$uploadtree_pk)
+    {
+      echo "<h2>Unidentified item 1<h2>";
+      return;
+    }
     $uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
     $folder_pk = GetParm("folder",PARM_INTEGER);
     $user_pk = $_SESSION['UserId'];
@@ -711,8 +716,8 @@ class ui_picker extends FO_Plugin
     if ($this->OutputType=='HTML')
     {
       if (empty($uploadtree_pk))
-      $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
-        else
+        $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
+      else
       {
         $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
         $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);
@@ -725,26 +730,56 @@ class ui_picker extends FO_Plugin
     }
     $this->vars['content'] = $OutBuf;
   }
-
   
   /**
- * \brief Get string representation of uploadtree path.
- *  Use Dir2Path to get $PathArray.
- *
- * \param $PathArry an array containing the path
- *
- * \return string representation of uploadtree path
- */
-function Uploadtree2PathStr ($PathArray)
-{
-  $Path = "";
-  if (count($PathArray))
-    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
-  return $Path;
-}
-
+   * \brief Get string representation of uploadtree path.
+   *  Use Dir2Path to get $PathArray.
+   *
+   * \param $PathArry an array containing the path
+   *
+   * \return string representation of uploadtree path
+   */
+  private function Uploadtree2PathStr ($PathArray)
+  {
+    $Path = "";
+    if (count($PathArray))
+    {
+      foreach ($PathArray as $PathRow)
+      {
+        $Path .= "/" . $PathRow['ufile_name'];
+      }
+    }
+    return $Path;
+  }
   
-  
+  /**
+   * \brief Generate html to pick the application that will be called after
+   * the items are identified.
+   *
+   * Select list element ID is "apick"
+   *
+   * \param $SLName - select list name
+   * \param $SelectedVal - selected value
+   * \param $label - label of select list
+   *
+   * \return string containing html to pick the application that will be called after
+   * the items are identified
+   */
+  protected function ApplicationPick($SLName, $SelectedVal, $label)
+  {
+    /* select the apps that are registered to accept item1, item2 pairs.
+     * At this time (pre 2.x) we don't know enough about the plugins
+     * to know if they can take a pair.  Till then, the list is
+     * hardcoded.
+     */
+    $AppList = array("nomosdiff" => "License Difference",
+                     "bucketsdiff" => "Bucket Difference");
+    $Options = "id=apick";
+    $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal,
+                                     false, true, $Options);
+    $StrOut = "$SelectList $label";
+    return $StrOut;
+  }
 }
 
 $NewPlugin = new ui_picker;

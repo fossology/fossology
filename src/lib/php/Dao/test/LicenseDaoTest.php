@@ -87,7 +87,6 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
     
     assertThat($matches, equalTo($expected));
-//    $this->assertInstanceOf(LicenseMatch::className(), $matches[0]);
     assertThat($matches[0], is(anInstanceOf(LicenseMatch::classname())) );
   }
   

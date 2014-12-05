@@ -71,6 +71,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'license_ref',
             'license_ref_bulk',
             'users',
+            'group_user_member',
             'uploadtree'
         ));
     
@@ -179,6 +180,10 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
           'clearing_event_pk, uploadtree_fk, user_fk, group_fk, rf_fk, removed, type_fk, date_added',
           array($i,$item,$user,$group,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
       $i++;
+      list($item,$user,$rf,$isRm,$t) = $lp;
+      $this->dbManager->insertInto('clearing_event',
+          'clearing_event_pk, uploadtree_fk, user_fk, rf_fk, is_removed, type_fk, date_added',
+          array($i,$item,$user,$rf,$isRm,1, $this->getMyDate($this->now+$t)));
     }
   }
 
@@ -378,5 +383,4 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
-  
 }

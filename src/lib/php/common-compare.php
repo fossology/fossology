@@ -22,30 +22,6 @@
  * the diff tools.
  */
 
-/**
- * \brief Do garbage collection on table file_picker.
- *
- * History that hasn't been accessed (picked) in the last $ExpireDays is deleted.
- *
- * This executes roughly every $ExeFreq times
- * it is called.
- *
- * \param None
- *
- * \return None
- */
-function PickGarbage()
-{
-  global $PG_CONN;
-  $ExpireDays = 60;  // max days to keep in pick history
-  $ExeFreq = 100;
-
-  if ( rand(1,$ExeFreq) != 1) return;
-
-  $sql = "delete from file_picker where last_access_date < (now() - interval '$ExpireDays days')";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-}
 
 /**
  * \brief FuzzyName comparison function for diff tools
@@ -57,48 +33,11 @@ function PickGarbage()
  */
 function FuzzyCmp($Master1, $Master2)
 {
-  if (empty($Master1[1])) 
-    $str1 = $Master1[2]['fuzzyname'];
-  else 
-    $str1 = $Master1[1]['fuzzyname'];
-
-  if (empty($Master2[1])) 
-    $str2 = $Master2[2]['fuzzyname'];
-  else 
-    $str2 = $Master2[1]['fuzzyname'];
-
+  $key1 = empty($Master1[1]) ? 2 : 1;
+  $str1 = $Master1[$key1]['fuzzyname'];
+  $key2 = empty($Master2[1]) ? 2 : 1;
+  $str2 = $Master2[$key2]['fuzzyname'];
   return strcasecmp($str1, $str2);
-}
-
-
-/**
- * \brief Generate html to pick the application that will be called after
- * the items are identified.
- *
- * Select list element ID is "apick"
- *
- * \param $SLName - select list name
- * \param $SelectedVal - selected value
- * \param $label - label of select list
- *
- * \return string containing html to pick the application that will be called after
- * the items are identified
- */
-function ApplicationPick($SLName, $SelectedVal, $label)
-{
-  /* select the apps that are registered to accept item1, item2 pairs.
-   * At this time (pre 2.x) we don't know enough about the plugins
-   * to know if they can take a pair.  Till then, the list is
-   * hardcoded.
-   */
-  $AppList = array("nomosdiff" => "License Difference",
-                   "bucketsdiff" => "Bucket Difference");
-
-  $Options = "id=apick";
-  $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal,
-                                   false, true, $Options);
-  $StrOut = "$SelectList $label";
-  return $StrOut;
 }
 
 
@@ -219,7 +158,6 @@ function MakeMaster($Children1, $Children2)
  */
 function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin, $uploadtree_pk1, $uploadtree_pk2)
 {
-  global $PG_CONN;
   global $Plugins;
 
   $ModLicView = &$Plugins[plugin_find_id("view-license")];
@@ -405,33 +343,6 @@ function FuzzyName(&$Children)
 
 
 /**
- * \brief Compare (recursively) the contents of two directories.
- *
- * \param $Child1 - child 1 to compare
- * \param $Child2 - child 2 to compare
- *
- * \return If they are identical (matching pfile's)
- * Then return True.  Else return False.
- */
-function CompareDir($Child1, $Child2)
-{
-  global $PG_CONN;
-
-  $sql = "select pfile_fk from uploadtree where upload_fk=$Child1[upload_fk] 
-                 and lft between $Child1[lft] and $Child1[rgt]
-          except
-          select pfile_fk from uploadtree where upload_fk=$Child2[upload_fk] 
-                 and lft between $Child2[lft] and $Child2[rgt]
-          limit 1";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $numrows = pg_num_rows($result);
-  pg_free_result($result);
-  return ($numrows == 0) ? TRUE : FALSE;
-}   
-
-
-/**
  * \brief Return a string which is a linked path to the file.
  *  This is a modified Dir2Browse() to support browsediff links.
  *  \param $Path1 - path array for tree 1
@@ -442,21 +353,16 @@ function CompareDir($Child1, $Child2)
  ************************************************************/
 function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
 {
-  global $Plugins;
-
-  if ((count($Path1) < 1) || (count($Path2) < 1)) return "No path specified";
-
-  $V = "";
-  $Last1 = $Path1[count($Path1)-1];
-  $Last2 = $Path2[count($Path2)-1];
-  $item1 = $Last1['uploadtree_pk'];
-  $item2 = $Last2['uploadtree_pk'];
+  if ((count($Path1) < 1) || (count($Path2) < 1))
+  {
+    return "No path specified";
+  }
   $filter_clause = (empty($filter)) ? "" : "&filter=$filter";
   $Path = ($Column == 1) ? $Path1 : $Path2;
   $Last = $Path[count($Path)-1];
 
   /* Banner Box decorations */
-  $V .= "<div style='border: double gray; background-color:lightyellow'>\n";
+  $V = "<div style='border: double gray; background-color:lightyellow'>\n";
 
   /* Get/write the FOLDER list (in banner) */
   $text = _("Folder");
@@ -485,35 +391,28 @@ function Dir2BrowseDiff ($Path1, $Path2, $filter, $Column, $plugin)
   /* Show the path within the upload */
   for ($PathLev = 0; $PathLev < count($Path); $PathLev++)
   {
-    @$PathElt1 = $Path1[$PathLev];
-    @$PathElt2 = $Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
+    $PathElt1 = @$Path1[$PathLev];
+    $PathElt2 = @$Path2[$PathLev];  // temporarily ignore notice of missing Path2[PathLev]
     $PathElt = ($Column == 1) ? $PathElt1: $PathElt2;
-
     /* Prevent a malformed href if any path information is missing */
-    if (!empty($PathElt1) and (!empty($PathElt2)))
-    {
-      $UseHref = true;
-    }
-    else
-    {
-      $UseHref = false;
-    }
-
-    if (($UseHref) and ($PathElt != $Last))
+    $UseHref = (!empty($PathElt1) and (!empty($PathElt2)));
+    if ($UseHref and ($PathElt != $Last))
     {
       $href = "$Uri2&item1=$PathElt1[uploadtree_pk]&item2=$PathElt2[uploadtree_pk]{$filter_clause}&col=$Column";
-//      $href = "$Uri2&item1=$item1&item2=$item2&newitem{$Column}=$PathElt[uploadtree_pk]{$filter_clause}&col=$Column";
       $V .= "<a href='$href'>";
     }
-
-    if (!$FirstPath) $V .= "<br>";
+    if (!$FirstPath)
+    {
+      $V .= "<br>";
+    }
     $V .= "&nbsp;&nbsp;<b>" . $PathElt['ufile_name'] . "/</b>";
-
-    if ($UseHref and ($PathElt != $Last)) $V .= "</a>";
+    if ($UseHref and ( $PathElt != $Last))
+    {
+      $V .= "</a>";
+    }
     $FirstPath = false;
   }
 
   $V .= "</div>\n";  // for box
   return($V);
-} // Dir2BrowseDiff()
-?>
+}

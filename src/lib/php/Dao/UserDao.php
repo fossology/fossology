@@ -28,13 +28,14 @@ class UserDao extends Object {
 
   /* @var DbManager */
   private $dbManager;
+
   /* @var Logger */
   private $logger;
 
-  function __construct(DbManager $dbManager)
+  function __construct(DbManager $dbManager, Logger $logger)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = $logger;
   }
 
 
@@ -129,12 +130,14 @@ class UserDao extends Object {
     $this->dbManager->freeResult($res);
     return $groupMap;
   }
-  
-  
+
+
   /**
    * @brief Delete a group (for constraint, see http://www.fossology.org/projects/fossology/wiki/GroupsPerms )
    * @param $groupId
    * Returns true on success
+   * @throws \Exception
+   * @return bool
    */
   function deleteGroup($groupId) 
   {
@@ -175,6 +178,93 @@ class UserDao extends Object {
     $this->dbManager->commit();
 
     return true;
+  }
+
+  function updateUserTable() {
+    $statementBasename = __FUNCTION__;
+
+    $this->dbManager->getSingleRow("UPDATE users SET user_seed = $1 WHERE user_seed IS NULL;", array(rand()), $statementBasename . '.randomizeEmptySeeds');
+
+    /* No users with no seed and no perm -- make them read-only */
+    $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1 WHERE user_perm IS NULL;", array(PLUGIN_DB_READ), $statementBasename . '.setDefaultPermission');
+
+    /* There must always be at least one default user. */
+    $row = $this->getUserByName('Default User');
+
+    if (empty($row['user_name']))
+    {
+      /* User "fossy" does not exist.  Create it. */
+      /* No valid username/password */
+      $Level = PLUGIN_DB_NONE;
+      $this->dbManager->getSingleRow("
+        INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+          VALUES ('Default User','Default User when nobody is logged in','Seed','Pass', $1,NULL,1);",
+          array($Level), $statementBasename . '.createDefaultUser');
+    }
+    /* There must always be at least one user with user-admin access.
+     If he does not exist, make it user "fossy".
+     If user "fossy" does not exist, add him with the default password 'fossy'. */
+    $Perm = PLUGIN_DB_ADMIN;
+    $row = $this->getUserByPermission($Perm);
+    if (empty($row['user_name']))
+    {
+      /* No user with PLUGIN_DB_ADMIN access. */
+      $Seed = rand() . rand();
+      $Hash = sha1($Seed . "fossy");
+      $row0 = $this->getUserByName('fossy');
+
+      if (empty($row0['user_name']))
+      {
+        /* User "fossy" does not exist.  Create it. */
+        $this->dbManager->getSingleRow("
+          INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk)
+            VALUES ('fossy','Default Administrator',$1, $2, $3, 'fossy','y',1)",
+            array($Seed, $Hash, $Perm), $statementBasename . '.createDefaultAdmin');
+      } else
+      {
+        /* User "fossy" exists!  Update it. */
+        $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1, email_notify = 'y'," .
+            " user_email= 'fossy' WHERE user_name = 'fossy'",
+            array($Perm), $statementBasename . '.updateDefaultUserToDefaultAdmin');
+      }
+
+      $row = $this->getUserByPermission($Perm);
+    }
+
+    return empty($row['user_name']) ? 1 : 0;
+  }
+
+  /**
+   * @param $userName
+   * @return array
+   */
+  private function getUserByName($userName)
+  {
+    return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1", array($userName), __FUNCTION__);
+  }
+
+  /**
+   * @param $permission
+   * @return array
+   */
+  private function getUserByPermission($permission)
+  {
+    return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_perm = $1", array($permission), __FUNCTION__);
+  }
+
+  /**
+   * @param int $userId
+   * @param int $groupId
+   */
+  public function setDefaultGroupMembership($userId, $groupId) {
+    $this->dbManager->getSingleRow("UPDATE users SET group_fk=$2 WHERE user_pk=$1",
+        array($userId, $groupId), __FUNCTION__);
+  }
+
+  public function getUserAndDefaultGroupByUserName($userName) {
+    return $this->dbManager->getSingleRow(
+        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
+        array($userName), __FUNCTION__);
   }
 
 } 

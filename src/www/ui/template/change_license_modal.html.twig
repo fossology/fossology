@@ -6,7 +6,7 @@
           <select name="licenseLeft" id=licenseLeft" style="min-width:200px" size="20" multiple="multiple">
             {%  for opt in licenseArray  %}
             <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
-                    ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.shortname|url_encode }}',
+                    ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
                               '{{ 'License Text'|trans}}','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');" >
               {{ opt.shortname }}
             </option>

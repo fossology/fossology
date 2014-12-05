@@ -23,6 +23,7 @@ use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Twig_Environment;
 
 abstract class DefaultPlugin implements Plugin
@@ -52,6 +53,9 @@ abstract class DefaultPlugin implements Plugin
 
   /** @var Twig_Environment */
   protected $renderer;
+
+  /** @var Session */
+  private $session;
 
   /** @var Logger */
   private $logger;
@@ -96,6 +100,7 @@ abstract class DefaultPlugin implements Plugin
 
     global $container;
     $this->container = $container;
+    $this->session = $this->getObject('session');
     $this->renderer = $this->getObject('twig.environment');
     $this->logger = $this->getObject('logger');
   }
@@ -240,11 +245,13 @@ abstract class DefaultPlugin implements Plugin
   public function getResponse()
   {
     $request = Request::createFromGlobals();
+    $request->setSession($this->session);
 
     $this->checkPrerequisites();
 
     $startTime = microtime(true);
     $response = $this->handle($request);
+    $response->prepare($request);
     $this->logger->debug(sprintf("handle request in %.3fs", microtime(true) - $startTime));
     return $response;
   }
