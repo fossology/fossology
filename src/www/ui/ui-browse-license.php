@@ -556,7 +556,7 @@ class ui_browse_license extends FO_Plugin
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
     $counts = array();
     $licenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, $counts);
-
+    $editedLicensesHist = array();
     for ($i=0;$i<count($licenses);++$i)
     {
       $editedLicensesHist[$licenses[$i]->getShortName()] = $counts[$i];
