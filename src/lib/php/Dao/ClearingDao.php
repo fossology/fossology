@@ -195,7 +195,7 @@ class ClearingDao extends Object
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            ORDER BY decision.id DESC, event_id DESC";
+            ORDER BY decision.id DESC, event_id ASC";
 
     $this->dbManager->prepare($statementName, $sql);
 
