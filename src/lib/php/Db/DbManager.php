@@ -34,8 +34,8 @@ abstract class DbManager extends Object
   protected $cumulatedTime = array();
   /** @var array */
   protected $queryCount = array();
-  /** @var bool */
-  private $inTransaction = false;
+  /** @var int */
+  private $transactionDepth = 0;
 
   function __construct(Logger $logger)
   {
@@ -55,23 +55,24 @@ abstract class DbManager extends Object
     return $this->dbDriver;
   }
 
-  /** return boolean */
-  public function isInTransaction()
-  {
-    return $this->inTransaction;
-  }
-
   public function begin() {
-    if ($this->inTransaction)
-      throw new \Exception("already in transaction");
-
-    $this->dbDriver->begin();
-    $this->inTransaction = true;
-  }
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->begin();
+    }
+    $this->transactionDepth++;
+   }
 
   public function commit() {
-    $this->dbDriver->commit();
-    $this->inTransaction = false;
+    $this->transactionDepth--;
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->commit();
+    }
+    else if ($this->transactionDepth < 0)
+    {
+      throw new \Exception('too much transaction commits');
+    }
   }
 
   /**

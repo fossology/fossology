@@ -193,7 +193,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     list($success,$output,$retCode) = $runner->run($uploadId=2, $userId, $groupId, $jobId, $args="");
 
     $this->assertTrue($success, 'cannot run runner');
-    $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
 
     assertThat($this->getHeartCount($output), equalTo(1));
 

@@ -102,10 +102,6 @@ class TestPgDb
   function __destruct()
   {
     $this->dbManager = null;
-    if (!pg_close($this->connection))
-    {
-      throw new \Exception('Could not close connection');
-    }
     $this->connection = null;
   }
   

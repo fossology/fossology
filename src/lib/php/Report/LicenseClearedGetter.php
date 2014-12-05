@@ -72,7 +72,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicense($clearingLicense->getId())->getText(),
+          'description' => $this->getCachedLicenseText($clearingLicense->getId()),
           'textfinding' => $clearingLicense->getShortName()
         );
       }
@@ -90,6 +90,6 @@ class LicenseClearedGetter extends ClearedGetterCommon
     if (!array_key_exists($licenseId, $this->licenseCache)) {
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
     }
-    return $this->licenseCache[$licenseId];
+    return $this->licenseCache[$licenseId]->getText();
   }
 }

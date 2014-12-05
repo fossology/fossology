@@ -29,7 +29,7 @@ class UploadTreeProxy extends DbViewProxy
 
   /**
    * @param int $uploadId
-   * @param array $options (keys skipThese, ut.filter supported)
+   * @param array $options (keys skipThese, ut.filter, groupId supported)
    * @param string $uploadTreeTableName
    */
   public function __construct($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName=null)
@@ -92,6 +92,7 @@ class UploadTreeProxy extends DbViewProxy
   {
     $additionalCondition = array_key_exists('ut.filter', $options) ? $options['ut.filter'] : '';
     $skipThese = array_key_exists('skipThese',$options) ? $options['skipThese'] : 'none';
+    $groupId = array_key_exists('groupId', $options) ? $options['groupId'] : null;
     switch ($skipThese)
     {
       case "none":
@@ -102,7 +103,7 @@ class UploadTreeProxy extends DbViewProxy
       case "noIp":
       case "noEcc":
 
-        $queryCondition = self::getQueryCondition($skipThese);
+        $queryCondition = self::getQueryCondition($skipThese, $groupId);
         $sql_upload = ('uploadtree_a' == $uploadTreeTableName) ? "ut.upload_fk=$uploadId AND " : '';
         $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut
                            WHERE $sql_upload $queryCondition $additionalCondition";
@@ -117,7 +118,7 @@ class UploadTreeProxy extends DbViewProxy
    * @param $skipThese
    * @return string
    */
-  private static function getQueryCondition($skipThese)
+  private static function getQueryCondition($skipThese, $groupId = null)
   {
     $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
         OR EXISTS (SELECT 1 FROM clearing_event AS lde WHERE ut.uploadtree_pk = lde.uploadtree_fk))";
@@ -128,8 +129,8 @@ class UploadTreeProxy extends DbViewProxy
         return $conditionQueryHasLicense;
       case "alreadyCleared":
         $decisionQuery = "SELECT decision_type FROM clearing_decision AS cd
-                        WHERE ut.uploadtree_pk = cd.uploadtree_fk
-                              OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
+                        WHERE cd.group_fk = $groupId
+                          AND (ut.uploadtree_pk = cd.uploadtree_fk OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO.")
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
         $conditionQuery = " $conditionQueryHasLicense
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (4,5) )";

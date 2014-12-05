@@ -60,6 +60,8 @@ class ClearingDao extends Object
 
   private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
   {
+    $this->dbManager->begin();
+
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
 
     $params[] = $itemTreeBounds->getUploadId(); $p1 = "$". count($params);
@@ -118,11 +120,9 @@ class ClearingDao extends Object
    */
   function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, &$counts=null)
   {
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
+    $this->dbManager->begin();
 
     $statementName = __METHOD__;
-
 
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
@@ -171,8 +171,7 @@ class ClearingDao extends Object
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
   {
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
+    $this->dbManager->begin();
 
     $statementName = __METHOD__;
 
@@ -270,7 +269,7 @@ class ClearingDao extends Object
 
     $this->dbManager->freeResult($result);
 
-    if ($needTransaction) $this->dbManager->commit();
+    $this->dbManager->commit();
     return $clearingsWithLicensesArray;
   }
 
@@ -309,8 +308,7 @@ class ClearingDao extends Object
    */
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
-    $needTransaction = !$this->dbManager->isInTransaction();
-    if ($needTransaction) $this->dbManager->begin();
+    $this->dbManager->begin();
 
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
 
@@ -348,7 +346,7 @@ INSERT INTO clearing_decision (
       $this->dbManager->freeResult($this->dbManager->execute($statementNameClearingDecisionEventInsert, array($clearingDecisionId, $eventId)));
     }
 
-    if ($needTransaction) $this->dbManager->commit();
+    $this->dbManager->commit();
   }
 
   /**
@@ -605,18 +603,18 @@ INSERT INTO clearing_decision (
     return $bulks;
   }
 
-  // TODO add group
-  public function getBulkMatches($bulkId, $userId)
+
+  public function getBulkMatches($bulkId, $groupId)
   {
     $stmt = __METHOD__;
     $sql = "SELECT uploadtree_fk AS itemid
             FROM clearing_event ce
             INNER JOIN highlight_bulk h
             ON ce.clearing_event_pk = h.clearing_event_fk
-            WHERE lrb_fk = $1 AND user_fk = $2";
+            WHERE lrb_fk = $1 AND group_fk = $2";
 
     $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt, array($bulkId, $userId));
+    $res = $this->dbManager->execute($stmt, array($bulkId, $groupId));
 
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

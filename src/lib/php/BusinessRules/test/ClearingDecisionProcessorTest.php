@@ -20,7 +20,6 @@ namespace Fossology\Lib\BusinessRules;
 
 use DateInterval;
 use DateTime;
-use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
@@ -60,9 +59,6 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   /** @var DbManager|M\MockInterface */
   private $dbManager;
 
-  /** @var AgentDao|M\MockInterface */
-  private $agentsDao;
-
   /** @var ClearingDao|M\MockInterface */
   private $clearingDao;
 
@@ -91,7 +87,8 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->itemTreeBounds->shouldReceive("getPfileId")->withNoArgs()->andReturn($this->pfileId);
 
     $this->dbManager = M::mock(DbManager::classname());
-    $this->dbManager->shouldReceive('isInTransaction')->withNoArgs()->andReturn(true);
+    $this->dbManager->shouldReceive('begin')->withNoArgs();
+    $this->dbManager->shouldReceive('commit')->withNoArgs();
 
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor(
         $this->clearingDao, $this->agentLicenseEventProcessor, $this->clearingEventProcessor,

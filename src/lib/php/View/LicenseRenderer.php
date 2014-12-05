@@ -117,7 +117,7 @@ class LicenseRenderer
 
       if (array_key_exists($licenseShortName, $scannerLics))
       {
-        $count = $scannerLics[$licenseShortName];
+        $count = $scannerLics[$licenseShortName]['count'];
       } else
       {
         $count = 0;
