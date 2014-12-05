@@ -68,7 +68,7 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agent');
-    $this->licenseFilter = $container->get('businessrules.license_filter');
+    $this->clearingFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
   /**
