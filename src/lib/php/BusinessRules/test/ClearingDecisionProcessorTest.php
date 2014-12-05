@@ -132,7 +132,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testMakeDecisionFromLastEventsWithNoLicenseKnownTypeShouldNotCreateANewDecisionWhenNoLicensesShouldBeRemoved()
   {
-    $isGlobal = DecisionScopes::UPLOAD;
+    $isGlobal = DecisionScopes::REPO;
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
@@ -146,22 +146,22 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $dateTime->sub(new \DateInterval("PT1H"));
     $clearingDecision->shouldReceive("getDateAdded")->withNoArgs()->andReturn($dateTime);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
-    $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn(DecisionScopes::REPO);
+    $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
 
     $this->clearingDao->shouldReceive("getRelevantClearingDecision")
         ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn($clearingDecision);
 
-    $this->clearingDao->shouldReceive("createDecisionFromEvents")->never();
-    $this->clearingDao->shouldReceive("removeWipClearingDecision")->once()->with($this->uploadTreeId, $this->groupId);
+    $this->clearingDao->shouldReceive("createDecisionFromEvents")->once()->with($this->uploadTreeId, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $isGlobal, array());
+    $this->clearingDao->shouldReceive("removeWipClearingDecision")->never();
 
     $this->clearingDecisionProcessor->makeDecisionFromLastEvents($this->itemTreeBounds, $this->userId, $this->groupId, ClearingDecisionProcessor::NO_LICENSE_KNOWN_DECISION_TYPE, $isGlobal);
   }
 
   public function testMakeDecisionFromLastEventsWithNoLicenseKnownTypeShouldNotCreateANewDecisionWhenNoLicensesShouldBeRemovedAndTheScopeDoesNotChange()
   {
-    $isGlobal = DecisionScopes::UPLOAD;
+    $isGlobal = DecisionScopes::REPO;
     $addedEvent = $this->createClearingEvent(123, new DateTime(), 13, "licA", "License A");
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
