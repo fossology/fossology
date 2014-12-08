@@ -167,14 +167,21 @@ class ClearingDao extends Object
    * @param bool 
    * @return ClearingDecision[]
    */
-  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
+  function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $includeSubFolders=true, $onlyCurrent=true)
   {
     $this->dbManager->begin();
 
     $statementName = __METHOD__;
 
-    $params = array($itemTreeBounds->getItemId());
-    $condition = "(ut.parent = $1 OR ut.uploadtree_pk = $1)";
+    if (!$includeSubFolders)
+    {
+      $params = array($itemTreeBounds->getItemId());
+      $condition = "(ut.parent = $1 OR ut.uploadtree_pk = $1)";
+    }
+    else {
+      $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+      $condition = "ut.lft BETWEEN $1 AND $2";
+    }
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
 

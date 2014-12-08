@@ -382,7 +382,7 @@ class ui_browse_license extends FO_Plugin
     $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $noLicenseUploadTreeView->unmaterialize();
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, false);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     foreach ($Children as $child)
     {
