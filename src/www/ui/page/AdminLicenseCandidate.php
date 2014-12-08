@@ -82,12 +82,15 @@ class AdminLicenseCandidate extends DefaultPlugin
     switch ($request->get('do'))
     {
       case 'verify':
-        $ok = $this->verifyCandidate($rf,$shortname,$vars);
+      case 'variant':
+        $rf_parent = ($request->get('do')=='verify') ? $rf : $suggest;
+        $ok = $this->verifyCandidate($rf,$shortname,$rf_parent);
         if($ok)
         {
+          $with = $rf_parent?'':" as variant of <i>$vars[suggest_shortname]</i> ($rf_parent)";
           $vars = array(
               'aaData' => json_encode($this->getArrayArrayData()),
-              'message' => 'Successfully verified candidate '.$shortname);
+              'message' => 'Successfully verified candidate '.$shortname.$with);
           return $this->render('admin_license_candidate.html.twig', $this->mergeWithDefault($vars));
         }
         $vars['message'] = 'Short name must be unique';
@@ -183,9 +186,10 @@ class AdminLicenseCandidate extends DefaultPlugin
   /**
    * @param int $rf
    * @param string $shortname
+   * @param int $rf_parent
    * @return bool
    */
-  private function verifyCandidate($rf, $shortname)
+  private function verifyCandidate($rf, $shortname, $rf_parent)
   {
     /** @var LicenseDao */
     $licenseDao = $this->getObject('dao.license');
@@ -201,6 +205,7 @@ class AdminLicenseCandidate extends DefaultPlugin
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
         false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type
   FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
+    $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rf_parent));
     $dbManager->getSingleRow('DELETE FROM license_candidate WHERE rf_pk=$1',array($rf),__METHOD__.'.delete');
     $dbManager->commit();
     return true;

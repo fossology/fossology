@@ -2434,3 +2434,29 @@
   $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"pfile_fk\" int4;";
   $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["UPDATE"] = "";
+
+  
+  $Schema["TABLE"]["license_map"]["licence_map_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_map"]["licence_map_pk"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"licence_map_pk\" int8;";
+  $Schema["TABLE"]["license_map"]["licence_map_pk"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"licence_map_pk\" SET NOT NULL, ALTER COLUMN \"licence_map_pk\" SET DEFAULT nextval('license_map_licence_map_pk_seq'::regclass);";
+  $Schema["TABLE"]["license_map"]["licence_map_pk"]["UPDATE"] = "UPDATE license_map SET licence_map_pk=nextval('license_map_licence_map_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["license_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_map\".\"rf_fk\" IS 'License';";
+  $Schema["TABLE"]["license_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"rf_fk\" int4;";
+  $Schema["TABLE"]["license_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["license_map"]["rf_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_map"]["rf_parent"]["DESC"] = "COMMENT ON COLUMN \"license_map\".\"rf_parent\" IS 'self or generalization';";
+  $Schema["TABLE"]["license_map"]["rf_parent"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"rf_parent\" int4;";
+  $Schema["TABLE"]["license_map"]["rf_parent"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"rf_parent\" SET NOT NULL;";
+  $Schema["TABLE"]["license_map"]["rf_parent"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["license_map"]["usage"]["DESC"] = "COMMENT ON COLUMN \"license_map\".\"usage\" IS '0: license, 1: family';";
+  $Schema["TABLE"]["license_map"]["usage"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"usage\" int4;";
+  $Schema["TABLE"]["license_map"]["usage"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"usage\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_map"]["usage"]["UPDATE"] = "";
+  
+  $Schema["SEQUENCE"]["license_map_licence_map_pk_seq"] = "CREATE SEQUENCE \"license_map_licence_map_pk_seq\" START 1;";
+  
+  $Schema["CONSTRAINT"]["licence_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"licence_map_pkpk\" PRIMARY KEY (\"licence_map_pk\");";
+  $Schema["CONSTRAINT"]["rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";

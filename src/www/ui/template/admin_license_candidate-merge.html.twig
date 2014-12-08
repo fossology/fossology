@@ -37,8 +37,11 @@
     </tr>
     <tr style="background-color:#F5F5DC;">
       <td></td>
-      <td><input type="button" id="verify-button" value="{{ 'Verify'|trans }}"/></td>
+      <td>
+        <input type="button" id="verify-button" value="{{ 'Verify as new license'|trans }}"/>
+      </td>
       {% if suggest_rf %}<td>
+        <input type="button" id="variant-button" value="{{ 'Variant of license'|trans }}"/>
         <input type="button" id="merge-button" value="{{ 'Merge'|trans }}"/>
         </td>
       {% endif %}
@@ -62,6 +65,9 @@
       js_url($('#shortname').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&do=verify&shortname=");
     });
     {% if suggest_rf %}
+      $('#variant-button').click(function(){
+        js_url($('#shortname').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&do=variant&suggest_rf={{ suggest_rf }}&shortname=");
+      });
       $('#merge-button').click(function(){
         js_url({{ suggest_rf }},"?mod=admin_license_candidate&rf={{ rf_pk }}&do=merge&suggest_rf=");
       });
