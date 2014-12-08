@@ -76,8 +76,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $clearingEventProcessor = new ClearingEventProcessor();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
-        
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $this->clearingDao, $this->uploadDao, $this->clearingDecisionProcessor);
+
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -201,7 +201,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
     assertThat($decisions, is(arrayWithSize(1)));
 
-    /* @var ClearingDecision $deciderMadeDecision*/
+    /** @var ClearingDecision $deciderMadeDecision*/
     $deciderMadeDecision = $decisions[0];
 
     foreach ($deciderMadeDecision->getClearingEvents() as $event) {
@@ -217,6 +217,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpRepo();
 
     $dbManager = M::mock(DbManager::classname());
+    $agentDao = M::mock(AgentDao::classname());
     $clearingDao = M::mock(ClearingDao::classname());
     $uploadDao = M::mock(UploadDao::classname());
     $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
@@ -230,17 +231,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
             startsWith("SELECT agent_pk FROM agent"),
             array("decider"), anything())->andReturn(array('agent_pk' => $agentId=232));
 
-    $dbManager->shouldReceive('existsTable')->andReturn(true);
+    $agentDao->shouldReceive('arsTableExists')->andReturn(true);
 
-    $dbManager->shouldReceive('getSingleRow')
-            ->with(startsWith("INSERT INTO decider_ars"), arrayContaining($agentId, $uploadId), anything())
-            ->andReturn(array('ars_pk' => $arsId=2));
-
-    $dbManager->shouldReceive('booleanToDb')->with(true)->andReturn($t="pg thinks this is true");
-
-    $dbManager->shouldReceive('getSingleRow')
-            ->with(startsWith("UPDATE decider_ars"), arrayContaining($t, $arsId), anything())
-            ->andReturn(array());
+    $agentDao->shouldReceive('getCurrentAgentId')->andReturn($agentId=24);
+    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId)->andReturn($arsId=2);
+    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId, $arsId, true)->andReturn(0);
 
     $jobId = 42;
     $groupId = 6;
@@ -275,7 +270,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $decisionProcessor->shouldReceive('makeDecisionFromLastEvents')
             ->with($bounds1, $userId, $groupId, DecisionTypes::IDENTIFIED, false, array());
 
-    $runner = new SchedulerTestRunnerMock($dbManager, $clearingDao, $uploadDao, $decisionProcessor);
+    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $decisionProcessor);
 
     list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, $args="");
 

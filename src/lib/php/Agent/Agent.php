@@ -14,6 +14,7 @@ namespace Fossology\Lib\Agent;
 
 use Fossology\Lib\Util\Object;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\AgentDao;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once(dirname(dirname(__FILE__))."/common-cli.php");
@@ -32,12 +33,14 @@ abstract class Agent extends Object
   protected $userId;
   protected $groupId;
   protected $jobId;
-  
+
   protected $schedulerHandledOpts = "c:";
   protected $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
 
   /** @var DbManager dbManager */
   protected $dbManager;
+  /** @var Agent agentDao */
+  protected $agentDao;
 
   /** @var ContainerBuilder */
   protected $container;
@@ -61,8 +64,9 @@ abstract class Agent extends Object
     global $container;
     $this->container = $container;
     $this->dbManager = $container->get('db.manager');
+    $this->agentDao = $container->get('dao.agent');
 
-    $this->agentId = $this->queryAgentId();
+    $this->agentId = $this->agentDao->getCurrentAgentId($this->agentName, $this->agentDesc, $this->agentRev);
   }
 
   function scheduler_connect()
@@ -132,75 +136,11 @@ abstract class Agent extends Object
     echo "OK\n";
   }
 
-  function createArsTable()
-  {
-    $tableName = $this->agentArs;
-
-    $this->dbManager->queryOnce("CREATE TABLE ".$tableName."() INHERITS(ars_master);
-    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);
-    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE");
-  }
-
   function initArsTable()
   {
-    if (!$this->dbManager->existsTable($this->agentArs)) {
-      $this->createArsTable();
+    if (!$this->agentDao->arsTableExists($this->agentName)) {
+      $this->agentDao->createArsTable($this->agentName);
     }
-  }
-
-  function writeArsRecord($uploadId,$arsId=0,$success=false,$status="")
-  {
-    $arsTableName = $this->agentArs;
-    if ($arsId)
-    {
-      $successDb = $this->dbManager->booleanToDb($success);
-      $parms = array($successDb, $arsId);
-
-      $stmt = __METHOD__.".$arsTableName";
-
-      if (!empty($status)) {
-        $stmt .= ".status";
-        $parms[] = $status;
-        $statusClause = ", ars_status = $".count($parms);
-      }
-      else 
-      {
-        $statusClause = "";
-      }
-
-      $this->dbManager->getSingleRow(
-              "UPDATE $arsTableName
-              SET ars_success=$1,
-                  ars_endtime=now() $statusClause
-              WHERE ars_pk = $2",
-              $parms, $stmt);
-    } else
-    {
-      $row = $this->dbManager->getSingleRow(
-              "INSERT INTO $arsTableName(agent_fk,upload_fk)
-               VALUES ($1,$2) RETURNING ars_pk",
-              array($this->agentId, $uploadId),
-              __METHOD__.".update.".$arsTableName);
-      if ($row !== false)
-      {
-        return $row['ars_pk'];
-      }
-    }
-
-    return -1;
-  }
-
-  function queryAgentId()
-  {
-    $row = $this->dbManager->getSingleRow("SELECT agent_pk FROM agent WHERE agent_name = $1 order by agent_ts desc limit 1", array($this->agentName), __METHOD__."select");
-
-    if ($row === false)
-    {
-      $row = $this->dbManager->getSingleRow("INSERT INTO agent(agent_name,agent_desc,agent_rev) VALUES ($1,$2,$3) RETURNING agent_pk", array($this->agentName, $this->agentDesc, $this->agentRev), __METHOD__."insert");
-      return $row['agent_pk'];
-    }
-
-    return $row['agent_pk'];
   }
 
   abstract protected function processUploadId($uploadId);
@@ -228,15 +168,20 @@ abstract class Agent extends Object
 
       if ($uploadId > 0)
       {
-        $arsId = $this->writeArsRecord($uploadId);
+        $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
 
-        if ($arsId<0)
+        if ($arsId<0) {
+          print "cannot insert ars record";
           $this->bail(2);
+        }
 
         $success = $this->processUploadId($uploadId);
-        $this->writeArsRecord($uploadId, $arsId, $success);
-        if (!$success)
+        $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
+
+        if (!$success) {
+          print "agent failed on uploadId=$uploadId";
           $this->bail(1);
+        }
       }
 
       $this->heartbeat(0);
