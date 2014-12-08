@@ -19,10 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
@@ -190,9 +188,9 @@ class ClearingDao extends Object
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
             ORDER BY decision.id DESC, event_id ASC";
-
+print($sql);
     $this->dbManager->prepare($statementName, $sql);
-
+var_dump($params);
     $result = $this->dbManager->execute($statementName, $params);
 
     $clearingsWithLicensesArray = array();
@@ -420,13 +418,8 @@ INSERT INTO clearing_decision (
 
   }
 
-  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=false, $jobId=0)
+  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId=0)
   {
-    if (!$dontMarkWip)
-    {
-      $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
-    }
-
     $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
 
     $stmt = __METHOD__;
@@ -441,7 +434,10 @@ INSERT INTO clearing_decision (
       $columns .= ", job_fk";
       $values .= ",$".count($params);
     }
-
+    else
+    {
+      $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
+    }
 
     $this->dbManager->prepare($stmt, "INSERT INTO clearing_event ($columns) VALUES($values) RETURNING clearing_event_pk");
     $res = $this->dbManager->execute($stmt, $params);
