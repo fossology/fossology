@@ -84,7 +84,7 @@ class DeciderAgent extends Agent
     else
     {
       $result = array();
-      $condition = "ut.lft BETWEEN $1 AND $2";
+      $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) = 0)";
       $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
       foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
       {
@@ -127,6 +127,10 @@ class DeciderAgent extends Agent
     }
     else
     {
+      foreach ($additionalEventsFromThisJob as $eventId)
+      {
+        $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
+      }
       $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
     }
     $this->heartbeat(1);

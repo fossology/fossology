@@ -140,7 +140,7 @@ class ClearingDecisionProcessor extends Object
     }
 
     $currentDecision = $this->clearingDao->getRelevantClearingDecision($itemBounds, $groupId);
-    $clearingEventIds = array_merge($clearingEventIds, $additionalEventIds);
+    $clearingEventIds = array_unique(array_merge($clearingEventIds, $additionalEventIds));
 
     $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
     if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $scope, $clearingEventIds))

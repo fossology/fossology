@@ -48,7 +48,7 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $pipeFd = popen($cmd = "echo $uploadId | $execDir/$agentName --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start -c $sysConf $args", "r");
     $success = $pipeFd !== false;
-    
+
     $output = "";
     $retCode = -1;
     if ($success) 

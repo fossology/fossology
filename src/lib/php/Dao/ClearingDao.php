@@ -161,10 +161,35 @@ class ClearingDao extends Object
     return $licenses;
   }
 
+
+   /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param bool $onlyCurrent
+   * @return ClearingDecision[]
+   */
+  function getFileClearings(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
+  {
+    $this->dbManager->begin();
+
+    $statementName = __METHOD__;
+
+    $params = array($itemTreeBounds->getItemId());
+    $condition = "ut.uploadtree_pk = $1";
+
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
+
+    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params);
+
+    $this->dbManager->commit();
+    return $clearingsWithLicensesArray;
+  }
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @param bool 
+   * @param bool $includeSubFolders
+   * @param bool $onlyCurrent
    * @return ClearingDecision[]
    */
   function getFileClearingsFolder(ItemTreeBounds $itemTreeBounds, $groupId, $includeSubFolders=true, $onlyCurrent=true)
@@ -176,7 +201,7 @@ class ClearingDao extends Object
     if (!$includeSubFolders)
     {
       $params = array($itemTreeBounds->getItemId());
-      $condition = "(ut.parent = $1 OR ut.uploadtree_pk = $1)";
+      $condition = "ut.parent = $1";
     }
     else {
       $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
@@ -185,6 +210,19 @@ class ClearingDao extends Object
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params, $condition);
 
+    $clearingsWithLicensesArray = $this->getDecisionsFromCte($decisionsCte, $statementName, $params);
+
+    $this->dbManager->commit();
+    return $clearingsWithLicensesArray;
+  }
+
+  /**
+   * @param string $decisionsCte
+   * @param string $statementName
+   * @param array $params
+   * @return ClearingDecision[]
+   */
+  private function getDecisionsFromCte($decisionsCte, $statementName, $params) {
     $sql = "$decisionsCte
             SELECT
               decision.*,
@@ -207,7 +245,6 @@ class ClearingDao extends Object
     $this->dbManager->prepare($statementName, $sql);
 
     $result = $this->dbManager->execute($statementName, $params);
-
     $clearingsWithLicensesArray = array();
 
     $previousClearingId = -1;
@@ -271,13 +308,10 @@ class ClearingDao extends Object
     {
       $clearingsWithLicensesArray[] = $clearingDecisionBuilder->setClearingEvents($clearingEvents)->build();
     }
-
     $this->dbManager->freeResult($result);
 
-    $this->dbManager->commit();
     return $clearingsWithLicensesArray;
   }
-
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -285,7 +319,7 @@ class ClearingDao extends Object
    */
   public function getRelevantClearingDecision(ItemTreeBounds $itemTreeBounds, $groupId)
   {
-    $clearingDecisions = $this->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $clearingDecisions = $this->getFileClearings($itemTreeBounds, $groupId);
     if (count($clearingDecisions) > 0)
     {
       return $clearingDecisions[0];
@@ -433,6 +467,16 @@ INSERT INTO clearing_decision (
 
   }
 
+  public function copyEventIdTo($eventId, $itemId, $userId, $groupId) {
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,
+      "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment)
+        SELECT $2, $3, $4, type_fk, rf_fk, removed, reportinfo, comment FROM clearing_event WHERE clearing_event_pk = $1"
+      );
+
+    $this->dbManager->freeResult($this->dbManager->execute($stmt, array($eventId, $itemId, $userId, $groupId)));
+  }
+
   public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=false, $jobId=0)
   {
     if (!$dontMarkWip)
@@ -462,7 +506,7 @@ INSERT INTO clearing_decision (
     $row = $this->dbManager->fetchArray($res);
     $this->dbManager->freeResult($res);
 
-    return $row['clearing_event_pk'];
+    return intval($row['clearing_event_pk']);
   }
 
   /**
@@ -482,9 +526,9 @@ INSERT INTO clearing_decision (
     $events = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $itemId = $row['uploadtree_fk'];
-      $eventId = $row['clearing_event_pk'];
-      $licenseId = $row['rf_fk'];
+      $itemId = intval($row['uploadtree_fk']);
+      $eventId = intval($row['clearing_event_pk']);
+      $licenseId = intval($row['rf_fk']);
 
       $events[$itemId][$licenseId] = $eventId;
     }
