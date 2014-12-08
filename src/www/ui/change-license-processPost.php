@@ -109,7 +109,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
         //,  $_POST['comment'], $_POST['remark']
         $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
-          ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=true, $job_pk);
+          ClearingEventTypes::USER, $reportInfo = '', $comment = '', $job_pk);
       }
     }
 

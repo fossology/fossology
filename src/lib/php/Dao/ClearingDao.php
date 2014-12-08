@@ -19,10 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventBuilder;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\ClearingDecisionBuilder;
@@ -88,20 +86,14 @@ class ClearingDao extends Object
                 cd.clearing_decision_pk AS id,
                 cd.pfile_fk AS pfile_id,
                 ut.uploadtree_pk AS itemid,
-                users.user_name AS user_name,
                 cd.user_fk AS user_id,
                 cd.decision_type AS type_id,
                 cd.scope AS scope,
                 EXTRACT(EPOCH FROM cd.date_added) AS date_added,
-                CASE cd.scope
-                WHEN $globalScope THEN 1
-                ELSE 0
-                END AS scopesort
+                CASE cd.scope WHEN $globalScope THEN 1 ELSE 0 END AS scopesort
               FROM clearing_decision cd
                 INNER JOIN $uploadTreeTable ut
-                      ON ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope
-                      OR ut.uploadtree_pk = cd.uploadtree_fk
-                LEFT JOIN users ON cd.user_fk = users.user_pk
+                  ON ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope   OR ut.uploadtree_pk = cd.uploadtree_fk
               WHERE $sql_upload $condition
                 cd.decision_type!=$p1 AND cd.group_fk = $p2),
             decision AS (
@@ -118,8 +110,6 @@ class ClearingDao extends Object
    */
   function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, &$counts=null)
   {
-    $this->dbManager->begin();
-
     $statementName = __METHOD__;
 
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
@@ -134,9 +124,9 @@ class ClearingDao extends Object
               lr.rf_shortname AS shortname,
               lr.rf_fullname AS fullname
             FROM decision
-            INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
-            INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
-            INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+              INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
+              INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
+              INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
             WHERE NOT ce.removed
             GROUP BY license_id";
 
@@ -226,6 +216,7 @@ class ClearingDao extends Object
     $sql = "$decisionsCte
             SELECT
               decision.*,
+              users.user_name AS user_name,
               ce.clearing_event_pk as event_id,
               ce.user_fk as event_user_id,
               ce.group_fk as event_group_id,
@@ -237,6 +228,7 @@ class ClearingDao extends Object
               ce.reportinfo AS reportinfo,
               ce.comment AS comment
             FROM decision
+              LEFT JOIN users ON decision.user_id = users.user_pk
             LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
             LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
             LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
@@ -477,13 +469,8 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($this->dbManager->execute($stmt, array($eventId, $itemId, $userId, $groupId)));
   }
 
-  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $dontMarkWip=false, $jobId=0)
+  public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId=0)
   {
-    if (!$dontMarkWip)
-    {
-      $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
-    }
-
     $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
 
     $stmt = __METHOD__;
@@ -498,7 +485,10 @@ INSERT INTO clearing_decision (
       $columns .= ", job_fk";
       $values .= ",$".count($params);
     }
-
+    else
+    {
+      $this->markDecisionAsWip($uploadTreeId, $userId, $groupId);
+    }
 
     $this->dbManager->prepare($stmt, "INSERT INTO clearing_event ($columns) VALUES($values) RETURNING clearing_event_pk");
     $res = $this->dbManager->execute($stmt, $params);
