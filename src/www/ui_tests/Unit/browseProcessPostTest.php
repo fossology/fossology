@@ -18,18 +18,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 use Mockery as M;
 
-
 global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
-// require_once (dirname(dirname(dirname(__DIR__))).'/lib/php/common.php');
-// require_once (dirname(dirname(dirname(__DIR__))).'/lib/php/Plugin/FO_Plugin.php');
-    
-class FO_Plugin{
-  function __construct(){ defined('PLUGIN_DB_WRITE') or define('PLUGIN_DB_WRITE',3);}
-  function Initialize(){}
-}
-require_once ( (dirname(dirname(__DIR__)).'/ui/browse-processPost.php') );
+$wwwPath = dirname(dirname(__DIR__));
+require_once(dirname($wwwPath).'/lib/php/Plugin/FO_Plugin.php');
+if(!function_exists('register_plugin')){ function register_plugin(){}}
+require_once ($wwwPath.'/ui/browse-processPost.php');
 
 
 class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
@@ -37,10 +32,6 @@ class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
 
   public function testCreateSelect()
   {
-    
-
-    
-    
     $browseProcessPost = new browseProcessPost();
 
     $reflection = new \ReflectionClass( get_class($browseProcessPost) );

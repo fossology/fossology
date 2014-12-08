@@ -26,10 +26,10 @@ use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 /**
- * Class AgentsDao
+ * Class AgentDao
  * @package Fossology\Lib\Dao
  */
-class AgentsDao extends Object
+class AgentDao extends Object
 {
   const ARS_TABLE_SUFFIX = "_ars";
 
@@ -215,5 +215,23 @@ ORDER BY agent_fk DESC";
   private function getArsTableName($agentName)
   {
     return $agentName . self::ARS_TABLE_SUFFIX;
+  }
+  
+  
+  /**
+   * @param string $agentName
+   * @return bool
+   */
+  public function renewCurrentAgent($agentName)
+  {
+    $this->dbManager->begin();
+    $row = $this->dbManager->getSingleRow("SELECT agent_pk, agent_name, agent_rev, agent_desc FROM agent "
+        . "WHERE agent_enabled AND agent_name=$1 ORDER BY agent_pk DESC LIMIT 1", array($agentName),__METHOD__.'.get');
+    $this->dbManager->getSingleRow("UPDATE agent SET agent_rev=agent_rev||'.'||substr(md5(agent_ts::text),0,6) "
+            ."WHERE agent_pk=$1",array($row['agent_pk']),__METHOD__.'.upd');
+    unset($row['agent_pk']);
+    $this->dbManager->insertTableRow('agent',$row);
+    $this->dbManager->commit();
+    return true;
   }
 } 

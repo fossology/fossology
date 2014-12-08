@@ -28,10 +28,10 @@
  *                ]
  * }
  */
-char* getClearedLicenses(int uploadId, int userId);
+char* getClearedLicenses(int uploadId, int groupId);
 char* getClearedCopyright(int uploadId);
 char* getClearedIp(int uploadId);
 char* getClearedEcc(int uploadId);
-char* getMatches(int uploadId, int userId);
+char* getMatches(int uploadId, int groupId);
 char* getKeywords(int uploadId);
 #endif

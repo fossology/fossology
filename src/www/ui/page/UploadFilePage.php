@@ -83,7 +83,7 @@ class UploadFilePage extends DefaultPlugin
 
     $vars = array();
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
-    $description = $request->get(self::DESCRIPTION_INPUT_NAME);
+    $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $reuseUploadId = intval($request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME));
     $ajaxMethodName = $request->get('do');
 

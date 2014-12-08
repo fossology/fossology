@@ -79,7 +79,7 @@ class admin_license_file extends FO_Plugin
         $V .= $this->Updatefm(0);
       }
       else {
-      $V .= $this->Inputfm();
+        $V .= $this->Inputfm();
       }
       return $V;
     }

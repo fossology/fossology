@@ -1,7 +1,2 @@
-<div id="footer" style="position: fixed; right:5px; bottom:5px; font-size: 8px;">
-{%if versionInfo %}
-    {# versionInfo contains all the variables defined at build time in the [BUILD] section of /VERSION #}
-    <span>{{ versionInfo.version }}, commit: [#{{ versionInfo.commitHash }}] {{ versionInfo.commitDate }} built @ {{ versionInfo.buildDate }}</span>
-{% endif %}
 <script src="scripts/jquery-1.11.1.min.js" type="text/javascript"></script>
 {{ scripts }}

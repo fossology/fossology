@@ -48,6 +48,15 @@ function createBrowseTable() {
   return otable;
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
   createBrowseTable();
+});
+
+$('#nav-hider').click(function() {
+  $('#nav-cell').hide('slow');
+  $('#nav-shower').show('slow');  
+});
+$('#nav-shower').click(function() {
+  $('#nav-shower').hide('slow');
+  $('#nav-cell').show('slow');
 });

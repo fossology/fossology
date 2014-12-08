@@ -45,7 +45,7 @@
  *
  * \return string containing formatted checkbox list HTML
  */
-function AgentCheckBoxMake($upload_pk,$SkipAgents=array()) 
+function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = "") 
 {
 
   global $Plugins;
@@ -57,6 +57,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
   if (!empty($AgentList)) {
     // get user agent preferences
     $userName = $_SESSION['User'];
+    if (!empty($specified_username)) $userName = $specified_username;
     $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);
@@ -83,11 +84,13 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array())
       // ignore agents to skip from list
       $FoundSkip = false;
       foreach($SkipAgents as $SkipAgent)
+      {
         if ($Agent->Name == $SkipAgent)  
         {
           $FoundSkip = true;
           break;
         }
+      }
       if ($FoundSkip) continue;
  
       if ($upload_pk != -1) {
@@ -348,40 +351,38 @@ function LatestAgentpk($upload_pk, $arsTableName)
  */
 function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
 {
-   global $PG_CONN;
-   /* get the agent recs */
-   $TableName .= '_ars';
-   $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC;";
-   $result = pg_query($PG_CONN, $sql);
-   DBCheckResult($result, $sql, __FILE__, __LINE__);
+  global $PG_CONN;
+  /* get the agent recs */
+  $TableName .= '_ars';
+  $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-   $NumRows = pg_num_rows($result);
-   if ($NumRows == 1) // only one result
-   {
-     pg_free_result($result);
-     return ;  /* only one result*/
-   }
+  $NumRows = pg_num_rows($result);
+  if ($NumRows == 1) // only one result
+  {
+    pg_free_result($result);
+    return;  /* only one result */
+  }
 
-   $select = "<select name='$SLName' id='$SLName' $extra>";
-   while ($row = pg_fetch_assoc($result))
-   {
-     $select .= "<option value='$row[agent_pk]'";
+  $select = "<select name='$SLName' id='$SLName' $extra>";
+  while ($row = pg_fetch_assoc($result)) {
+    $select .= "<option value='$row[agent_pk]'";
 
-     if (empty($agent_pk))
-     {
-       $select .= " SELECTED ";
-       $agent_pk = $row["agent_pk"];
-     }
-     else if ($agent_pk == $row['agent_pk'])
-     {
-       $select .= " SELECTED ";
-     }
+    if (empty($agent_pk))
+    {
+      $select .= " SELECTED ";
+      $agent_pk = $row["agent_pk"];
+    } else if ($agent_pk == $row['agent_pk'])
+    {
+      $select .= " SELECTED ";
+    }
 
-     $select .= ">$row[agent_name], v $row[agent_rev]\n";
-   }
-   $select .= "</select>";
-   pg_free_result($result);
-   return $select;
+    $select .= ">$row[agent_name], v $row[agent_rev]\n";
+  }
+  $select .= "</select>";
+  pg_free_result($result);
+  return $select;
 }
 
 
@@ -394,7 +395,6 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
 function userAgents()
 {
   global $Plugins;
-  global $PG_CONN;
 
   $agentsChecked = "";
 
@@ -439,8 +439,6 @@ function userAgents()
  */
 function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
 {
-  global $PG_CONN;
-
   /* get the latest agent_pk */
   $Latest_agent_pk = GetAgentKey($AgentName, $AgentDesc);
 
@@ -453,4 +451,3 @@ function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
 
   return 0;
 } // CheckARS()
-?>

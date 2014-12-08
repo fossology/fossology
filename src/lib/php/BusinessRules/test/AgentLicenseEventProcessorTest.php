@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
@@ -31,7 +31,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   /** @var LicenseDao|M\MockInterface */
   private $licenseDao;
 
-  /** @var AgentsDao|M\MockInterface */
+  /** @var AgentDao|M\MockInterface */
   private $agentsDao;
 
   /** @var ItemTreeBounds|M\MockInterface */
@@ -43,7 +43,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->licenseDao = M::mock(LicenseDao::classname());
-    $this->agentsDao = M::mock(AgentsDao::classname());
+    $this->agentsDao = M::mock(AgentDao::classname());
 
     $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
 
@@ -75,8 +75,8 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $scannerDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenses($this->itemTreeBounds);
 
     assertThat($scannerDetectedLicenses, is(array(
-        'licA' => $licenseRef1,
-        'licB' => $licenseRef3
+        5 => $licenseRef1,
+        7 => $licenseRef3
     )));
   }
 
@@ -99,7 +99,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
-        'licA' => array(
+        5 => array(
             'nomos' => array(
                 array('id' => 5, 'licenseRef' => $licenseRef1, 'agentRef' => $agentRef1, 'matchId' => 453, 'percentage' => null)
             ),
@@ -129,7 +129,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
-        'licA' => array(
+        5 => array(
             'nomos' => array(
                 array('id' => 5, 'licenseRef' => $licenseRef1, 'agentRef' => $agentRef1, 'matchId' => 453, 'percentage' => null)
             )
@@ -206,7 +206,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     list($licenseMatch1, $licenseRef1, $agentRef1) = $this->createLicenseMatch(5, "licA", 23, "nomos", 453, null);
 
     $details = array(
-        'licA' => array(
+        5 => array(
             'nomos' => array(
                 array('id' => 5, 'licenseRef' => $licenseRef1, 'agentRef' => $agentRef1, 'matchId' => 453, 'percentage' => null)
             )
@@ -215,7 +215,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
 
     $result = $this->agentLicenseEventProcessor->getScannedLicenses($details);
 
-    assertThat($result, is(array($licenseRef1->getShortName() => $licenseRef1)));
+    assertThat($result, is(array($licenseRef1->getId() => $licenseRef1)));
   }
 
   public function testGetScannedLicensesWithEmptyDetails()

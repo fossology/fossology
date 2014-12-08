@@ -25,12 +25,17 @@ use Symfony\Component\DependencyInjection\Container;
 use Mockery as M;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 
 class TestPlugin extends DefaultPlugin
 {
 
+  /** @var Response */
   private $response;
+
+  /** @var Request */
+  private $request;
 
   public function __construct($title, $parameters = array())
   {
@@ -44,6 +49,24 @@ class TestPlugin extends DefaultPlugin
    * @return Response
    */
   protected function handle(Request $request)
+  {
+    $this->request = $request;
+
+    return $this->response;
+  }
+
+  /**
+   * @return Request
+   */
+  public function getTestRequest()
+  {
+    return $this->request;
+  }
+
+  /**
+   * @return Response
+   */
+  public function getTestResponse()
   {
     return $this->response;
   }
@@ -59,6 +82,9 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
   /** @var \Twig_Environment */
   private $twigEnvironment;
 
+  /** @var Session|M\MockInterface */
+  private $session;
+
   /** @var Container|M\MockInterface */
   private $container;
 
@@ -67,18 +93,25 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
+    $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
+
     global $container;
     $container = M::mock('Container');
 
     $this->twigEnvironment = M::mock('\Twig_Environment');
-    $this->logger = M::mock('Logger');
+    $this->logger = M::mock('Monolog\Logger');
 
     $container->shouldReceive('get')->with('twig.environment')->andReturn($this->twigEnvironment);
     $container->shouldReceive('get')->with('logger')->andReturn($this->logger);
+    $container->shouldReceive('get')->with('session')->andReturn($this->session);
     $this->container = $container;
     $GLOBAL['container'] = $container;
 
     $this->plugin = new TestPlugin($this->name);
+  }
+
+  public function tearDown() {
+    M::close();
   }
 
   public function testGetName()
@@ -149,6 +182,18 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
   public function testExceptionWhenLoginIsRequired()
   {
     $this->plugin->getResponse();
+  }
+
+  public function testSessionIsWrappedInRequest() {
+    $this->logger->shouldReceive("debug")->once()->with(startsWith("handle request in"));
+
+    $this->plugin = new TestPlugin($this->name, array(TestPlugin::REQUIRES_LOGIN => false));
+
+    $this->plugin->getResponse();
+
+    $request = $this->plugin->getTestRequest();
+
+    assertThat($request->getSession(), is($this->session));
   }
 }
  

@@ -221,17 +221,18 @@ int processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "saveBulkResult:decision",
-      "INSERT INTO clearing_event(uploadtree_fk, user_fk, job_fk, type_fk, rf_fk, is_removed)"
-      " SELECT uploadtree_pk, $2, $3, $4, $5, $6"
+      "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed)"
+      " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7"
       " FROM uploadtree"
-      " WHERE upload_fk = $7 AND pfile_fk = $1 AND lft BETWEEN $8 AND $9"
+      " WHERE upload_fk = $8 AND pfile_fk = $1 AND lft BETWEEN $9 AND $10"
       "RETURNING clearing_event_pk",
-      long, int, int, int, long, int,
+      long, int, int, int, int, long, int,
       int, long, long
     ),
     file->id,
 
     state->bulkArguments->userId,
+    state->bulkArguments->groupId,
     state->jobId,
     state->bulkArguments->decisionType,
     licenseId,

@@ -419,6 +419,11 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
   for (int jf = 0; jf < lenght; jf++)
   {
     json_object* value = json_object_array_get_idx(jsonArray, jf);
+    if (value == NULL)
+    {
+      printf("unexpected NULL in json object\n");
+      return NULL;
+    }
     if (json_object_is_type(value, json_type_string))
     {
       const char* file = json_object_get_string(value);
@@ -432,8 +437,7 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
 
 int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const char* keyName)
 {
-  // TODO the json library method json_tokener_parse is broken beyond repair: change to json_tokener_parse_ex
-  if ((jobj==NULL) || ((int)jobj < 0))
+  if ((jobj==NULL) || is_error(jobj))
     return 0;
 
   int result = 0;
@@ -476,6 +480,10 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
           }
         }
 
+        if (fileNames == NULL)
+        {
+          return 0;
+        }
         if (content && text && fileNames) {
           table_addRow(table, content, text, fileNames);
         } else if (content && fileNames) { // TODO use a count argument in addRowsFromJson_ContentTextFiles
@@ -570,6 +578,7 @@ sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
 
 agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
 user_pk = fo_scheduler_userID();
+int groupId = fo_scheduler_groupID();
 while(fo_scheduler_next()!=NULL)
 {
 uploadId=atoi(fo_scheduler_current());
@@ -877,7 +886,7 @@ addparaheading(createnumsection(body,"0","2"), NULL, "Bulk Findings","0","2");
 rg_table* tableMatches = table_new(body, 3, "2000", "4000", "3638");
 table_addRow(tableMatches, "license", "text", "files");
 {
-  char* json = getMatches(uploadId, user_pk);
+  char* json = getMatches(uploadId, groupId);
   fillTableFromJson(tableMatches, json);
   g_free(json);
 }

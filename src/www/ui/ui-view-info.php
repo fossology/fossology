@@ -218,7 +218,7 @@ class ui_view_info extends FO_Plugin
         $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
         $V .= "</td><td>" . htmlentities($pmRow['mimetype_name']) . "</td></tr>\n";
       }
-    pg_free_result($result);
+      pg_free_result($result);
     }
 
     /* display upload origin */

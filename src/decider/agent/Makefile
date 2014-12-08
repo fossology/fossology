@@ -5,13 +5,13 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=decider.php version.php
-WRAP=decider
+EXE = decider.php version.php DeciderAgent.php
+WRAP = decider
 
 all: version.php
 
@@ -19,6 +19,11 @@ version.php: version-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
+
+decider: all
+	@echo "making locally runnable decider (only for testing)"
+	$(MAKE) -C $(FOCLIDIR) fo_wrapper
+	ln -sf $(FOCLIDIR)/fo_wrapper.php decider
 
 install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/decider/agent/

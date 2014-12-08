@@ -92,7 +92,11 @@ class TreeDao extends Object
   {
     $statementName = __METHOD__.".".$tableName;
 
-    if ($parentId > 0) {
+    if ($parentId==$itemId)
+    {
+      return $this->getFullPath($itemId, $tableName);
+    }    
+    else if ($parentId > 0) {
       $params = array($itemId, $parentId);
       $parentClause = " = $2";
       $parentLoopCondition = "AND (ut.parent != $2)";
@@ -104,7 +108,7 @@ class TreeDao extends Object
     }
 
     $row = $this->dbManager->getSingleRow(
-        "
+       $sql= "
         WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, file_path, cycle) AS (
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             ARRAY[ut.uploadtree_pk],
@@ -123,7 +127,11 @@ class TreeDao extends Object
         SELECT file_path from file_tree WHERE parent $parentClause",
         $params, $statementName);
 
-    return $row ? $row['file_path'] : null;
+    if (false === $row) {
+      throw new \Exception("could not find path of $itemId:\n$sql");
+    }
+
+    return $row['file_path'];
   }
 
   /** @deprecated it takes too long: use getRealParent + getFull with a parent */

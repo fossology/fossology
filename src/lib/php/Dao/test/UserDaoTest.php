@@ -21,18 +21,29 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
+use Monolog\Logger;
 
 class UserDaoTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestLiteDb */
   private $testDb;
+
   /** @var DbManager */
   private $dbManager;
+
+  /** @var Logger */
+  private $logger;
+
+  /** @var UserDao */
+  private $userDao;
 
   public function setUp()
   {
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
+    $this->logger = new Logger("test");
+
+    $this->userDao = new UserDao($this->dbManager, $this->logger);
   }
   
   public function tearDown()
@@ -46,8 +57,7 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array('groups','group_user_member'));
     $this->testDb->insertData(array('groups','group_user_member'));
     
-    $userDao = new UserDao($this->dbManager);
-    $defaultGroups = $userDao->getUserGroupMap($userId=1);
+    $defaultGroups = $this->userDao->getUserGroupMap($userId=1);
     assertThat($defaultGroups, equalTo(array(1=>'Default User')));
   }
   
@@ -56,9 +66,32 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array('groups','group_user_member'));
     $this->testDb->insertData(array('groups','group_user_member'));
     defined('PLUGIN_DB_ADMIN') or define('PLUGIN_DB_ADMIN',10);
-    $userDao = new UserDao($this->dbManager);
-    $defaultGroups = $userDao->getAdminGroupMap($userId=2,$userLevel=PLUGIN_DB_ADMIN);
+
+    $defaultGroups = $this->userDao->getAdminGroupMap($userId=2,$userLevel=PLUGIN_DB_ADMIN);
     assertThat($defaultGroups, equalTo(array(1=>'Default User',2=>'fossy')));
   }
+  
+  
+  public function testGetDeletableAdminGroupMap()
+  {
+    $this->testDb->createPlainTables(array('groups','group_user_member','users'));
+    $username = 'testi';
+    $userId = 101;
+    $this->dbManager->insertTableRow('users',array('user_pk'=>$userId,'user_name'=>$username));
+    $this->dbManager->insertTableRow('groups', array('group_pk'=>201,'group_name'=>$username));
+    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>201,'user_fk'=>$userId));
+    $deletable = array('group_pk'=>202,'group_name'=>'anyName');
+    $this->dbManager->insertTableRow('groups', $deletable);
+    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>202,'user_fk'=>$userId,'group_perm'=>1));
+
+    $groups = $this->userDao->getDeletableAdminGroupMap($userId,$userLevel=PLUGIN_DB_ADMIN);
+    assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
+
+    $groups = $this->userDao->getDeletableAdminGroupMap($userId);
+    assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
+    
+    $groups = $this->userDao->getDeletableAdminGroupMap($userId+1);
+    assertThat($groups, equalTo(array()));
+  }  
 
 }

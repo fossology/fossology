@@ -19,10 +19,7 @@
 
 namespace Fossology\Lib\Report;
 
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\License;
 
 class BulkMatchesGetter extends ClearedGetterCommon
 {
@@ -31,13 +28,11 @@ class BulkMatchesGetter extends ClearedGetterCommon
 
   public function __construct() {
     global $container;
-
     $this->clearingDao = $container->get('dao.clearing');
-
     parent::__construct($groupBy = "bulkId");
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null)
   {
     $result = array();
 
@@ -51,7 +46,7 @@ class BulkMatchesGetter extends ClearedGetterCommon
 
       $content = $bulk['text'];
 
-      foreach ($this->clearingDao->getBulkMatches($bulkId, $userId) as $bulkMatch)
+      foreach ($this->clearingDao->getBulkMatches($bulkId,$groupId) as $bulkMatch)
       {
         $uploadTreeId = $bulkMatch['itemid'];
 

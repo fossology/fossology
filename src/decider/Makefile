@@ -12,7 +12,7 @@ include $(VARS)
 MOD_NAME = decider
 
 DIRS = agent ui
-TESTDIR =
+TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
@@ -20,7 +20,7 @@ all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	@echo "nothing to do"
+	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
 	@echo "nothing to do"
@@ -44,6 +44,7 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,clean)
+	$(MAKE) -C $(TESTDIR) clean
 	rm -f VERSION
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean

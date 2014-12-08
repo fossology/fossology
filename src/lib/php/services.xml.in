@@ -22,6 +22,9 @@ without any warranty.
   </parameters>
 
   <services>
+    <service id="session" class="Symfony\Component\HttpFoundation\Session\Session">
+    </service>
+
     <service id="logger" class="Monolog\Logger">
       <argument type="string">default</argument>
     </service>
@@ -51,18 +54,18 @@ without any warranty.
     </service>
     <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
       <argument type="service" id="db.manager"/>
-      <argument type="service" id="businessrules.license_filter"/>
       <argument type="service" id="dao.upload"/>
     </service>
     <service id="dao.highlight" class="Fossology\Lib\Dao\HighlightDao">
       <argument type="service" id="db.manager"/>
     </service>
-    <service id="dao.agents" class="Fossology\Lib\Dao\AgentsDao">
+    <service id="dao.agent" class="Fossology\Lib\Dao\AgentDao">
       <argument type="service" id="db.manager"/>
       <argument type="service" id="logger"/>
     </service>
     <service id="dao.user" class="Fossology\Lib\Dao\UserDao">
       <argument type="service" id="db.manager"/>
+      <argument type="service" id="logger"/>
     </service>
     <service id="dao.copyright" class="Fossology\Lib\Dao\CopyrightDao">
       <argument type="service" id="db.manager"/>
@@ -105,7 +108,7 @@ without any warranty.
     <service id="businessrules.agent_license_event_processor"
                 class="Fossology\Lib\BusinessRules\AgentLicenseEventProcessor">
       <argument type="service" id="dao.license"/>
-      <argument type="service" id="dao.agents"/>
+      <argument type="service" id="dao.agent"/>
     </service>
 
     <service id="businessrules.clearing_event_processor"
@@ -115,7 +118,8 @@ without any warranty.
                  class="Fossology\Lib\BusinessRules\ClearingDecisionProcessor">
       <argument type="service" id="dao.clearing"/>
       <argument type="service" id="businessrules.agent_license_event_processor"/>
-        <argument type="service" id="businessrules.clearing_event_processor"/>
+      <argument type="service" id="businessrules.clearing_event_processor"/>
+      <argument type="service" id="db.manager"/>
     </service>
 
     <service id="twig.loader" class="Twig_Loader_Filesystem">

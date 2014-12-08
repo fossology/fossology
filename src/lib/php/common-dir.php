@@ -152,61 +152,6 @@ function _DirCmp($a,$b)
   return(strcasecmp($a['ufile_name'],$b['ufile_name']));
 } // _DirCmp()
 
-/**
- * \brief Given a directory (uploadtree_pk),
- *  return the directory contents but resolve artifacts.
- *  TBD: "username" will be added in the future and it may change
- *  how this function works.
- *  \todo DEPRECATED use GetNonArtifactChildren($uploadtree_pk)
- *
- * \param $Upload upload_pk
- * \param $UploadtreePk uploadtree_pk (may be empty, to specify the whole upload)
- * \param $uploadtree_tablename
- *
- * \return array of uploadtree records sorted by file name
- */
-$DirGetList_Prepared=0;
-function DirGetList($Upload, $UploadtreePk, $uploadtree_tablename='uploadtree')
-{
-  global $PG_CONN;
-
-  /* Get the basic directory contents */
-  global $DirGetList_Prepared;
-  if (!$DirGetList_Prepared)
-  {
-    $DirGetList_Prepared=1;
-  }
-  if (empty($UploadtreePk))
-  {
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent IS NULL ORDER BY ufile_name ASC;";
-  }
-  else 
-  {
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent = $UploadtreePk ORDER BY ufile_name ASC;";
-  }
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $rows = pg_fetch_all($result);
-  pg_free_result($result);
-  if (is_array($rows))
-  {
-    $Results = $rows;
-    usort($Results,'_DirCmp');
-  }
-  
-  /* Replace all artifact directories */
-  foreach($Results as $Key => $Val)
-  {
-    /* if artifact and directory */
-    $R = &$Results[$Key];
-    if (Isartifact($R['ufile_mode']) && Iscontainer($R['ufile_mode']))
-    {
-      $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk'], $uploadtree_tablename);
-    }
-  }
-  return($Results);
-} // DirGetList()
-
 
 /**
  * \brief Return the path (without artifacts) of an uploadtree_pk.
@@ -529,8 +474,6 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  * If any children are artifacts, resolve them until you get
  * to a non-artifact.
  *
- * This function replaces DirGetList()
- *
  * \param $uploadtree_pk
  * \param $uploadtree_tablename
  *
@@ -580,21 +523,4 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
   }
   uasort($foundChildren, '_DirCmp');
   return $foundChildren;
-}
-
-
-/**
- * \brief Get string representation of uploadtree path.
- *  Use Dir2Path to get $PathArray.
- *
- * \param $PathArry an array containing the path
- *
- * \return string representation of uploadtree path
- */
-function Uploadtree2PathStr ($PathArray)
-{
-  $Path = "";
-  if (count($PathArray))
-    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
-  return $Path;
 }

@@ -25,7 +25,7 @@
 namespace Fossology\Lib\Util;
 
 // use Fossology\Lib\Util\Object;
-use Fossology\Lib\Dao\AgentsDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Db\DbManager;
 
 class CopyrightLister extends Object
@@ -110,8 +110,8 @@ class CopyrightLister extends Object
   private function selectAgentId($uploadId)
   {
     global $container;
-    /** @var AgentsDao $agentDao */
-    $agentDao = $container->get('dao.agents');
+    /** @var AgentDao $agentDao */
+    $agentDao = $container->get('dao.agent');
     $agentRec = $agentDao->agentARSList($tableName="copyright_ars", $uploadId, $limit=1);
 
     if ($agentRec === false)

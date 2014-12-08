@@ -102,10 +102,6 @@ class TestPgDb
   function __destruct()
   {
     $this->dbManager = null;
-    if (!pg_close($this->connection))
-    {
-      throw new \Exception('Could not close connection');
-    }
     $this->connection = null;
   }
   
@@ -231,12 +227,17 @@ class TestPgDb
         break;
       }
     }
-    $this->dbManager->queryOnce("SELECT setval('license_ref_rf_pk_seq', (SELECT MAX(rf_pk) FROM license_ref))");
+    $this->resetSequenceAsMaxOf('license_ref_rf_pk_seq', 'license_ref', 'rf_pk');
+  }
+
+  public function resetSequenceAsMaxOf($sequenceName, $tableName, $columnName)
+  {
+    $this->dbManager->queryOnce("SELECT setval('$sequenceName', (SELECT MAX($columnName) FROM $tableName))");
   }
 
   /**
    * @param string $type
-   * @param array $viewList
+   * @param array $elementList
    * @param bool $invert
    */
   private function applySchema($type, $elementList, $invert=FALSE)
@@ -283,4 +284,26 @@ class TestPgDb
   {
     return $this->dbManager;
   }
+  
+  public function createInheritedTables()
+  {
+    if(!$this->dbManager->existsTable('license_candidate'))
+    {
+      $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+    }
+  }
+
+  
+  public function createInheritedArsTables($agents)
+  {
+    foreach ($agents as $agent)
+    {
+      if (!$this->dbManager->existsTable($agent . '_ars'))
+      {
+        $this->dbManager->queryOnce("create table " . $agent . "_ars() inherits(ars_master)");
+      }
+    }
+  }
+
+  
 }

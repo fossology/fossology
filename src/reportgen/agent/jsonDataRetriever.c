@@ -26,9 +26,9 @@
 #error
 #endif
 
-#define GETBULKMATCHECMD   INSTALLDIR "/getBulkMatches -u %d --uId=%d"
+#define GETBULKMATCHECMD   INSTALLDIR "/getBulkMatches -u %d --gId=%d"
 #define GETKEYWORDSCMD   INSTALLDIR "/getKeywords -u %d"
-#define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d --uId=%d"
+#define GETCLEAREDCMD   INSTALLDIR "/getCleared -u %d --gId=%d"
 #define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
 #define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
 #define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
@@ -59,9 +59,9 @@ static char* pipeRun(const char* cmdLineFmt, ...)
   return g_string_free(stringBuffer, FALSE);
 }
 
-char* getClearedLicenses(int uploadId,int userId)
+char* getClearedLicenses(int uploadId,int groupId)
 {
-  return pipeRun(GETCLEAREDCMD, uploadId, userId);
+  return pipeRun(GETCLEAREDCMD, uploadId, groupId);
 }
 
 char* getClearedCopyright(int uploadId)
@@ -79,9 +79,9 @@ char* getClearedEcc(int uploadId)
   return pipeRun(GETCLEAREDECC, uploadId);
 }
 
-char* getMatches(int uploadId,int userId)
+char* getMatches(int uploadId,int groupId)
 {
-  return pipeRun(GETBULKMATCHECMD, uploadId, userId);
+  return pipeRun(GETBULKMATCHECMD, uploadId, groupId);
 }
 
 char* getKeywords(int uploadId)

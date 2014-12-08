@@ -94,7 +94,7 @@ class LicenseRenderer
   public function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
   {
     $agentId = GetParm('agentId', PARM_INTEGER);
-            
+
     $allScannerLicenseNames = array_keys($scannerLics);
     $allEditedLicenseNames = array_keys($editedLics);
 
@@ -117,7 +117,7 @@ class LicenseRenderer
 
       if (array_key_exists($licenseShortName, $scannerLics))
       {
-        $count = $scannerLics[$licenseShortName];
+        $count = $scannerLics[$licenseShortName]['count'];
       } else
       {
         $count = 0;
