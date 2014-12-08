@@ -25,13 +25,9 @@ use Fossology\Lib\Util\Object;
 class ClearingDecision extends Object
 {
   /** @var bool */
-  private $sameUpload;
-  /** @var bool */
   private $sameFolder;
-  /** @var LicenseRef[] */
-  private $positiveLicenses;
-  /** @var LicenseRef[] */
-  private $negativeLicenses;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -55,7 +51,6 @@ class ClearingDecision extends Object
 
   /**
    * @param $sameFolder
-   * @param $sameUpload
    * @param int $clearingId
    * @param $uploadTreeId
    * @param $pfileId
@@ -64,17 +59,15 @@ class ClearingDecision extends Object
    * @param int $type
    * @param int $scope
    * @param $date_added
-   * @param $positiveLicenses
-   * @param $negativeLicenses
+   * @param ClearingEvent[] $clearingEvents
    * @param string $comment
    * @param string $reportinfo
    * @internal param $licenses
    */
-  public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
-          $scope, $date_added, $positiveLicenses, $negativeLicenses, $comment = "", $reportinfo = "")
+  public function __construct($sameFolder, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
+          $scope, $date_added, $clearingEvents, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
-    $this->sameUpload = $sameUpload;
     $this->clearingId = $clearingId;
     $this->uploadTreeId = $uploadTreeId;
     $this->pfileId = $pfileId;
@@ -85,8 +78,7 @@ class ClearingDecision extends Object
     $this->dateAdded = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
-    $this->positiveLicenses = $positiveLicenses;
-    $this->negativeLicenses = $negativeLicenses;
+    $this->clearingEvents = $clearingEvents;
   }
 
   /**
@@ -114,19 +106,41 @@ class ClearingDecision extends Object
   }
 
   /**
-   * @return LicenseRef[]
+   * @return ClearingLicense[]
    */
-  public function getPositiveLicenses()
+  public function getClearingLicenses()
   {
-    return $this->positiveLicenses;
+    $clearingLicenses = array();
+    foreach($this->clearingEvents as $clearingEvent) {
+      $clearingLicenses[] = $clearingEvent->getClearingLicense();
+    }
+    return $clearingLicenses;
   }
 
   /**
    * @return LicenseRef[]
    */
-  public function getNegativeLicenses()
+  public function getPositiveLicenses()
   {
-    return $this->negativeLicenses;
+    $result = array();
+    foreach($this->clearingEvents as $clearingEvent)
+    {
+      $clearingLicense = $clearingEvent->getClearingLicense();
+      if (!$clearingLicense->isRemoved())
+      {
+        $result[] = $clearingLicense->getLicenseRef();
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * @return ClearingEvent[]
+   */
+  public function getClearingEvents()
+  {
+    return $this->clearingEvents;
   }
 
   /**
@@ -151,14 +165,6 @@ class ClearingDecision extends Object
   public function getSameFolder()
   {
     return $this->sameFolder;
-  }
-
-  /**
-   * @return boolean
-   */
-  public function getSameUpload()
-  {
-    return $this->sameUpload;
   }
 
   /**
@@ -213,17 +219,21 @@ class ClearingDecision extends Object
     }
     return false;
   }
+  
+  /**
+   * @return int
+   */
+  public function getTimeStamp()
+  {
+    return $this->dateAdded->getTimestamp();
+  }
 
   function __toString()
   {
     $output = "ClearingDecision(#" . $this->clearingId . ", ";
 
-    foreach ($this->positiveLicenses as $license) {
-      $output .= $license->getShortName() . ", ";
-    }
-
-    foreach ($this->negativeLicenses as $license) {
-      $output .= '-'.$license->getShortName() . ", ";
+    foreach ($this->clearingLicenses as $clearingLicense) {
+      $output .= ($clearingLicense->isRemoved() ? "-": "" ). $clearingLicense->getShortName() . ", ";
     }
 
     return $output . $this->getUserName() . ")";

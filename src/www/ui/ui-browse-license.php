@@ -16,7 +16,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\BusinessRules\LicenseFilter;
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -47,8 +47,8 @@ class ui_browse_license extends FO_Plugin
   private $clearingDao;
   /** @var AgentDao */
   private $agentsDao;
-  /** @var LicenseFilter */
-  private $licenseFilter;
+  /** @var ClearingDecisionFilter */
+  private $clearingFilter;
   /** @var array [uploadtree_id]=>cnt */
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
@@ -68,7 +68,7 @@ class ui_browse_license extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agent');
-    $this->licenseFilter = $container->get('businessrules.license_filter');
+    $this->clearingFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
   /**
@@ -156,7 +156,7 @@ class ui_browse_license extends FO_Plugin
     $scannerAgents = array('nomos', 'monk', 'ninka');
 
     $V = "";
-    list($agentStatus, $latestAgentIds) = $this->createAgentStatus($scannerAgents, $uploadId);
+    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
 
     if (!$agentStatus)
     {
@@ -164,13 +164,15 @@ class ui_browse_license extends FO_Plugin
       return $out;
     }
 
+    global $SysConf;
+    $groupId = $SysConf['auth']['GroupId'];
+
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId ?: $latestAgentIds, $allDecisions);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
 
     $VLic .= "\n" . $agentStatus;
 
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $allDecisions);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
 
     /***************************************
      * Problem: $ChildCount can be zero!
@@ -321,12 +323,11 @@ class ui_browse_license extends FO_Plugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param $UniqueTagArray
    * @param $selectedAgentId
-   * @param ClearingDecision []
    * @internal param $uploadTreeId
    * @internal param $uploadId
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $allDecisions)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId)
   {
     $this->vars['haveOldVersionResult'] = false;
     $this->vars['haveRunningResult'] = false;
@@ -347,8 +348,6 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    /** @var LicenseRef[][] */
-    $editedPfileLicenses = $this->licenseFilter->extractGoodLicensesPerItem($allDecisions);
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
 
@@ -367,7 +366,7 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array('skipThese' => "alreadyCleared"),
+        $options = array('skipThese' => "alreadyCleared",'groupId'=>$groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
@@ -383,13 +382,15 @@ class ui_browse_license extends FO_Plugin
     $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $noLicenseUploadTreeView->unmaterialize();
 
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, false);
+    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     foreach ($Children as $child)
     {
       if (empty($child))
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
     $VF .= '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
@@ -405,13 +406,14 @@ class ui_browse_license extends FO_Plugin
    * @param int $selectedAgentId
    * @param AgentRef[] $goodAgents
    * @param array $pfileLicenses
-   * @param array $editedPfileLicenses
+   * @param int $groupId
+   * @param ClearingDecision[][] $editedMappedLicenses
    * @param string $Uri
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $editedPfileLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -455,14 +457,12 @@ class ui_browse_license extends FO_Plugin
       $fileName = "<a href='$LinkUri'>$fileName</a>";
     }
     /* show licenses under file name */
-    $editedLicenseList = "";
     $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
-      $editedLicenses = $this->clearingDao->getEditedLicenseShortnamesContained($childItemTreeBounds);
-      $editedLicenseList .= implode(', ', $editedLicenses);
+      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
     } else
     {
       $licenseEntries = array();
@@ -495,22 +495,28 @@ class ui_browse_license extends FO_Plugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
-      if (array_key_exists($fileId, $editedPfileLicenses))
+
+      /** @var ClearingDecision $decision */
+      if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
       {
-        $addedLicenses = $editedPfileLicenses[$fileId];
-        $editedLicenseList .= implode(", ",
-            array_map(
-                function ($licenseRef) use ($uploadId, $childUploadTreeId)
-                {
-                  /** @var LicenseRef $licenseRef */
-                  return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-                },
-                $addedLicenses
-            )
-        );
+        $editedLicenses = $decision->getPositiveLicenses();
+      }
+      else
+      {
+        $editedLicenses = array();
       }
     }
 
+    $editedLicenses = array_map(
+      function ($licenseRef) use ($uploadId, $childUploadTreeId)
+      {
+        /** @var LicenseRef $licenseRef */
+        return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
+      },
+      $editedLicenses
+    );
+
+    $editedLicenseList = implode(', ', $editedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
@@ -544,15 +550,18 @@ class ui_browse_license extends FO_Plugin
    * @param ClearingDecision []
    * @return string
    */
-  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $allDecisions)
+  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $groupId)
   {
     $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $goodLicenses = $this->licenseFilter->extractGoodLicenses($allDecisions);
+    $counts = array();
+    $licenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, $counts);
+    $editedLicensesHist = array();
+    for ($i=0;$i<count($licenses);++$i)
+    {
+      $editedLicensesHist[$licenses[$i]->getShortName()] = $counts[$i];
+    }
 
-    $licenses = $goodLicenses ?: $this->clearingDao->getEditedLicenseShortNamesFullList($itemTreeBounds);
-
-    $editedLicensesHist = ArrayOperation::getMultiplicityOfValues($licenses);
     global $container;
     /** @var LicenseRenderer $licenseRenderer */
     $licenseRenderer = $container->get('view.license_renderer');
@@ -573,7 +582,7 @@ class ui_browse_license extends FO_Plugin
     }
 
     $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $output = "<form action=\"$URI\" method=\"post\" data-autosubmit=\"\"><select name=\"agentId\" id=\"agentId\">";
+    $output = "<form action=\"$URI\" method=\"post\"><select name=\"agentId\" id=\"agentId\">";
     $isSelected = (0 == $selectedAgentId) ? self::SELECTED_ATTRIBUTE : '';
     $output .= "<option value=\"0\" $isSelected>" . _('Latest run of all available agents') . "</option>\n";
     foreach ($successfulAgents as $agent)
@@ -581,7 +590,7 @@ class ui_browse_license extends FO_Plugin
       $isSelected = $agent->getAgentId() == $selectedAgentId ? self::SELECTED_ATTRIBUTE : '';
       $output .= "<option value=\"" . $agent->getAgentId() . "\"$isSelected>" . $agent->getAgentName() . " " . $agent->getAgentRevision() . "</option>\n";
     }
-    $output .= "</select><noscript><input type='submit' name='' value='Show'/></noscript></form>";
+    $output .= "</select><input type='submit' name='' value='Show'/></form>";
     return $output;
   }
 
@@ -643,7 +652,6 @@ class ui_browse_license extends FO_Plugin
     $output = "";
 
     $allSuccessfulAgents = array();
-    $latestAgentIds = array();
 
     foreach ($scannerAgents as $agentName)
     {
@@ -694,14 +702,13 @@ class ui_browse_license extends FO_Plugin
         }
         $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
       }
-      $latestAgentIds[$agentName] = $latestSuccessfulAgent->getAgentId();
       $output .= "</p>\n";
     }
 
     $header = "<h3>" . _("Scanner details") . "</h3>";
     $header .= $this->buildAgentSelector($allSuccessfulAgents) . "\n";
 
-    return array(empty($allSuccessfulAgents) ? false : ($header . $output), $latestAgentIds);
+    return empty($allSuccessfulAgents) ? false : ($header . $output);
   }
 
   public function getTemplateName()

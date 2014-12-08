@@ -30,7 +30,11 @@ abstract class Agent extends Object
   private $agentId;
 
   protected $userId;
+  protected $groupId;
   protected $jobId;
+  
+  protected $schedulerHandledOpts = "c:";
+  protected $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
 
   /** @var DbManager dbManager */
   protected $dbManager;
@@ -63,12 +67,13 @@ abstract class Agent extends Object
 
   function scheduler_connect()
   {
-    $args = getopt("", array("userID:","jobId:","scheduler_start"));
+    $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
-    $this->userId = @$args['userID'];
-    $this->jobId = @$args['jobId'];
+    $this->userId = $args['userID'];
+    $this->groupId = $args['groupID'];
+    $this->jobId = $args['jobId'];
 
     $this->initArsTable();
 
@@ -107,12 +112,18 @@ abstract class Agent extends Object
 
   function bail($exitvalue)
   {
+    debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+    $this->scheduler_disconnect($exitvalue);
+    exit($exitvalue);
+  }
+
+  function scheduler_disconnect($exitvalue)
+  {
     if ($this->schedulerMode)
     {
       Agent::heartbeat_handler(SIGALRM);
       echo "BYE $exitvalue\n";
     }
-    exit($exitvalue);
   }
 
   function scheduler_greet()
@@ -132,21 +143,44 @@ abstract class Agent extends Object
 
   function initArsTable()
   {
-    if (!DB_TableExists($this->agentArs)) {
+    if (!$this->dbManager->existsTable($this->agentArs)) {
       $this->createArsTable();
     }
   }
 
   function writeArsRecord($uploadId,$arsId=0,$success=false,$status="")
   {
-
     $arsTableName = $this->agentArs;
-    if ($arsId) {
-      $this->dbManager->queryOnce("UPDATE $arsTableName SET ars_success='".($success ? "t" : "f")."', ars_endtime=now() ".(
-        !empty($status) ? ", ars_status = $status" : ""
-        )." WHERE ars_pk = $arsId");
-    } else {
-      $row = $this->dbManager->getSingleRow("INSERT INTO $arsTableName(agent_fk,upload_fk) VALUES (".$this->agentId.",$uploadId) RETURNING ars_pk");
+    if ($arsId)
+    {
+      $successDb = $this->dbManager->booleanToDb($success);
+      $parms = array($successDb, $arsId);
+
+      $stmt = __METHOD__.".$arsTableName";
+
+      if (!empty($status)) {
+        $stmt .= ".status";
+        $parms[] = $status;
+        $statusClause = ", ars_status = $".count($parms);
+      }
+      else 
+      {
+        $statusClause = "";
+      }
+
+      $this->dbManager->getSingleRow(
+              "UPDATE $arsTableName
+              SET ars_success=$1,
+                  ars_endtime=now() $statusClause
+              WHERE ars_pk = $2",
+              $parms, $stmt);
+    } else
+    {
+      $row = $this->dbManager->getSingleRow(
+              "INSERT INTO $arsTableName(agent_fk,upload_fk)
+               VALUES ($1,$2) RETURNING ars_pk",
+              array($this->agentId, $uploadId),
+              __METHOD__.".update.".$arsTableName);
       if ($row !== false)
       {
         return $row['ars_pk'];
@@ -176,17 +210,18 @@ abstract class Agent extends Object
     ($line = fgets(STDIN));
     if ("CLOSE\n" === $line)
     {
-      $this->bail(0);
+      return false;
     }
     if ("END\n" === $line)
     {
-      $this->bail(0);
+      return false;
     }
 
     return $line;
   }
 
-  function run_scheduler_event_loop(){
+  function run_scheduler_event_loop()
+  {
     while (false !== ($line = $this->scheduler_current()))
     {
       $uploadId = intval($line);

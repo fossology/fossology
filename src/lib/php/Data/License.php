@@ -52,4 +52,10 @@ class License extends LicenseRef
   {
     return $this->url;
   }
+
+  /** @return LicenseRef */
+  public function getRef()
+  {
+    return new parent($this->getId(), $this->getShortName(), $this->getFullName());
+  }
 }

@@ -63,13 +63,19 @@ class ClearingEventBuilder extends Object
     $this->comment = "";
   }
 
+  public static function create()
+  {
+    return new ClearingEventBuilder();
+  }
+
   /**
    * @return ClearingEvent
    */
   public function build()
   {
+    $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->eventType, $this->reportinfo, $this->comment );
     return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
-        $this->groupId, $this->eventType, $this->licenseRef, $this->removed, $this->reportinfo, $this->comment);
+        $this->groupId, $this->eventType, $clearingLicense);
   }
 
   /**

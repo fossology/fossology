@@ -197,12 +197,13 @@ class ClearingView extends FO_Plugin
 
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
     if (!empty($lastItem))
     {
-      $this->updateLastItem($userId, $lastItem);
+      $this->updateLastItem($userId, $groupId,$lastItem);
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -244,8 +245,7 @@ class ClearingView extends FO_Plugin
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
-      $clearingDecisions = $this->clearingDecisionFilter->filterRelevantClearingDecisions($clearingDecisions);
+      $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false);
     }
 
     if ($isSingleFile)
@@ -283,7 +283,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendData'] = $this->highlightRenderer->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $userId) : FALSE;
+    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $groupId) : FALSE;
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
   }
@@ -300,15 +300,11 @@ class ClearingView extends FO_Plugin
     foreach ($clearingDecWithLicenses as $clearingDecision)
     {
       $licenseNames = array();
-      foreach ($clearingDecision->getPositiveLicenses() as $lic)
+      foreach ($clearingDecision->getClearingLicenses() as $lic)
       {
         $licenseShortName = $lic->getShortName();
-        $licenseNames[$lic->getShortName()] = $licenseShortName;
-      }
-      foreach ($clearingDecision->getNegativeLicenses() as $lic)
-      {
-        $licenseShortName = $lic->getShortName();
-        $licenseNames[$lic->getShortName()] = "<span style=\"color:red\">" . $licenseShortName . "</span>";
+        $ftm = $lic->isRemoved() ? "<span style=\"color:red\">%s</span>" : "%s";
+        $licenseNames[] = sprintf($ftm, $licenseShortName);
       }
       ksort($licenseNames, SORT_STRING);
       $row = array(
@@ -339,11 +335,12 @@ class ClearingView extends FO_Plugin
   }
 
   /**
-   * @param $userId
-   * @param $lastItem
+   * @param int $userId
+   * @param int
+   * @param int $lastItem
    * @return array
    */
-  protected function updateLastItem($userId, $lastItem)
+  protected function updateLastItem($userId, $groupId, $lastItem)
   {
     $type = GetParm("clearingTypes", PARM_INTEGER);
     $global = GetParm("globalDecision", PARM_STRING) === "on";
@@ -351,7 +348,7 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
     $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
 
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $type, $global);
+    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
   }
 }
 

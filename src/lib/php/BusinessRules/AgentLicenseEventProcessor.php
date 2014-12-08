@@ -18,9 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\Clearing\AgentClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Util\Object;
@@ -32,12 +32,12 @@ class AgentLicenseEventProcessor extends Object
   private $licenseDao;
 
   /** @var AgentDao */
-  private $agentsDao;
+  private $agentDao;
 
-  public function __construct(LicenseDao $licenseDao, AgentDao $agentsDao)
+  public function __construct(LicenseDao $licenseDao, AgentDao $agentDao)
   {
     $this->licenseDao = $licenseDao;
-    $this->agentsDao = $agentsDao;
+    $this->agentDao = $agentDao;
   }
 
   /**
@@ -64,8 +64,8 @@ class AgentLicenseEventProcessor extends Object
     foreach ($licenseFileMatches as $licenseMatch)
     {
       $licenseRef = $licenseMatch->getLicenseRef();
-      $licenseShortName = $licenseRef->getShortName();
-      if ($licenseShortName === "No_license_found")
+      $licenseId = $licenseRef->getId();
+      if ($licenseRef->getShortName() === "No_license_found")
       {
         continue;
       }
@@ -73,8 +73,8 @@ class AgentLicenseEventProcessor extends Object
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
 
-      $agentDetectedLicenses[$agentName][$agentId][$licenseShortName][] = array(
-          'id' => $licenseRef->getId(),
+      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = array(
+          'id' => $licenseId,
           'licenseRef' => $licenseRef,
           'agentRef' => $agentRef,
           'matchId' => $licenseMatch->getLicenseFileId(),
@@ -82,7 +82,7 @@ class AgentLicenseEventProcessor extends Object
       );
     }
 
-    $latestAgentIdPerAgent = $this->agentsDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }
@@ -96,6 +96,7 @@ class AgentLicenseEventProcessor extends Object
   protected function filterDetectedLicenses($agentDetectedLicenses, $agentLatestMap)
   {
     $latestAgentDetectedLicenses = array();
+
     foreach ($agentDetectedLicenses as $agentName => $licensesFoundPerAgentId)
     {
       if (!array_key_exists($agentName, $agentLatestMap))
@@ -107,11 +108,12 @@ class AgentLicenseEventProcessor extends Object
       {
         continue;
       }
-      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseShortName => $properties)
+      foreach ($licensesFoundPerAgentId[$latestAgentId] as $licenseId => $properties)
       {
-        $latestAgentDetectedLicenses[$licenseShortName][$agentName] = $properties;
+        $latestAgentDetectedLicenses[$licenseId][$agentName] = $properties;
       }
     }
+
     return $latestAgentDetectedLicenses;
   }
 
@@ -123,15 +125,55 @@ class AgentLicenseEventProcessor extends Object
   {
     $licenses = array();
 
-    foreach ($details as $licenseShortName => $agentEntries)
+    foreach ($details as $licenseId => $agentEntries)
     {
-      foreach ($agentEntries as $agentName => $matchProperties)
+      foreach ($agentEntries as $matchProperties)
       {
-        $licenses[$licenseShortName] = $matchProperties[0]['licenseRef'];
+        $licenses[$licenseId] = $matchProperties[0]['licenseRef'];
         break;
       }
     }
 
     return $licenses;
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return AgentClearingEvent[][] indexed by LicenseId
+   */
+  public function getScannerEvents(ItemTreeBounds $itemTreeBounds) {
+    $result = array();
+    
+    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
+
+    foreach ($agentDetails as $licenseId => $properties) {
+      $agentClearingEvents = array();
+      
+      foreach ($properties as $agentName => $licenseProperties)
+      {
+        foreach ($licenseProperties as $licenseProperty)
+        {
+          $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
+        }
+      }
+      
+      $result[$licenseId] = $agentClearingEvents;
+    }
+    
+    return $result;
+  }
+  
+    /**
+   * @param $licenseProperty
+   * @return AgentClearingEvent
+   */
+  private function createAgentClearingEvent($licenseProperty)
+  {
+    return new AgentClearingEvent(
+        $licenseProperty['licenseRef'],
+        $licenseProperty['agentRef'],
+        $licenseProperty['matchId'],
+        array_key_exists('percentage', $licenseProperty) ? $licenseProperty['percentage'] : null
+    );
   }
 }

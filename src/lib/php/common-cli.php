@@ -42,9 +42,11 @@ function cli_Init()
 
   /* Turn off authentication */
   /** The auth module hijacks and disables plugins, so turn it off. **/
-  $P = &$Plugins["auth"];
-  if (!empty($P)) {
-    $P->State = PLUGIN_STATE_FAIL;
+  if (array_key_exists("auth", $Plugins)) {
+    $P = &$Plugins["auth"];
+    if (!empty($P)) {
+      $P->State = PLUGIN_STATE_FAIL;
+    }
   }
   $_SESSION['User'] = 'fossy';
 

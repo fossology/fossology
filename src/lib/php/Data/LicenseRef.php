@@ -68,10 +68,14 @@ class LicenseRef extends Object
   {
     return $this->shortName;
   }
-  
+
   public function __toString()
   {
-    return 'LicenseRef('.$this->id.')';
+    return 'LicenseRef('
+      .$this->id
+      .", ".$this->shortName
+      .", ".$this->fullName
+    .')';
   }
 
 }

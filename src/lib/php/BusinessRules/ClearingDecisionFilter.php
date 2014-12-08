@@ -18,70 +18,44 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
 
 class ClearingDecisionFilter
 {
-
-  /** @param ClearingDecision[] $clearingDecisions
-   * @return \Fossology\Lib\Data\ClearingDecision[]
-   */
-  public function filterRelevantClearingDecisions($clearingDecisions)
-  {
-    /** @var ClearingDecision[] $relevantClearingDecisions */
-    $relevantClearingDecisions = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      if ($clearingDecision->getScope() === DecisionScopes::ITEM && !$clearingDecision->getSameFolder())
-      {
-        continue;
-      }
-      $relevantClearingDecisions[] = $clearingDecision;
-    }
-    return $relevantClearingDecisions;
-  }
-
-  /** @param ClearingDecision[] $clearingDecisions
-   * @return ClearingDecision[]
+  const KEYREPO = "all";
+  
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[][]
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
-    $clearingDecisions = $this->filterRelevantClearingDecisions($clearingDecisions);
+    /** @var ClearingDecision[][] $clearingDecisionsByItemId */
+    $clearingDecisionsMapped = array();
 
-    /** @var ClearingDecision[] $clearingDecisionsByItemId */
-    $clearingDecisionsByItemId = array();
     foreach ($clearingDecisions as $clearingDecision)
     {
       $itemId = $clearingDecision->getUploadTreeId();
+      $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
-
-      $alreadyExistingInScope = array_key_exists($itemId, $clearingDecisionsByItemId) ? $clearingDecisionsByItemId[$itemId]->getScope() : false;
-
-      if ($alreadyExistingInScope !== false && $alreadyExistingInScope === DecisionScopes::ITEM)
-      {
-        continue;
-      }
 
       switch ($scope)
       {
         case DecisionScopes::ITEM:
-          $clearingDecisionsByItemId[$itemId] = $clearingDecision;
+          $clearingDecisionsMapped[$fileId][$itemId] = $clearingDecision;
           break;
 
         case DecisionScopes::REPO:
-          if ($alreadyExistingInScope === false)
-          {
-            $clearingDecisionsByItemId[$itemId] = $clearingDecision;
-          }
+          $clearingDecisionsMapped[$fileId][self::KEYREPO] = $clearingDecision;
           break;
 
         default:
           throw new \InvalidArgumentException("unhandled clearing decision scope '" . $scope . "'");
       }
     }
-    return $clearingDecisionsByItemId;
+
+    return $clearingDecisionsMapped;
   }
 
   /** @param ClearingDecision[] $clearingDecisions
@@ -94,15 +68,50 @@ class ClearingDecisionFilter
     foreach ($clearingDecisions as $clearingDecision)
     {
       $itemId = $clearingDecision->getUploadTreeId();
-      $scope = $clearingDecision->getScope();
-
-      if (array_key_exists($itemId, $clearingDecisionsByItemId) || $scope === DecisionScopes::ITEM)
-      {
-        continue;
-      }
-
       $clearingDecisionsByItemId[$itemId] = $clearingDecision;
     }
     return $clearingDecisionsByItemId;
   }
-} 
+  
+  
+  /**
+   * @return ClearingDecision|false
+   */
+  public function getDecisionOf($decisionMap, $itemId, $pfileId)
+  {
+    if (array_key_exists($pfileId, $decisionMap))
+    {
+      $pfileMap = $decisionMap[$pfileId];
+      if (array_key_exists($itemId, $pfileMap))
+      {
+        return $pfileMap[$itemId];
+      }
+      else
+      {
+        return $pfileMap[self::KEYREPO];
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return array
+   */
+  public function getAllLicenseNames($clearingDecisions)
+  {
+    $result = array();
+
+    foreach($clearingDecisions as $decision)
+    {
+      foreach($decision->getPositiveLicenses() as $toAdd)
+      {
+        $result[] = $toAdd->getShortName();
+      }
+    }
+
+    return $result;
+  }
+
+}

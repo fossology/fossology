@@ -27,13 +27,9 @@ use Fossology\Lib\Util\Object;
 class ClearingDecisionBuilder extends Object
 {
   /** @var bool */
-  private $sameUpload;
-  /** @var bool */
   private $sameFolder;
-  /** @var LicenseRef[] */
-  private $positiveLicenses;
-  /** @var LicenseRef[] */
-  private $negativeLicenses;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
   /** @var int */
   private $clearingId;
   /** @var int */
@@ -57,10 +53,8 @@ class ClearingDecisionBuilder extends Object
 
   function __construct()
   {
-    $this->sameUpload = false;
     $this->sameFolder = false;
-    $this->positiveLicenses = array();
-    $this->negativeLicenses = array();
+    $this->clearingEvents = array();
     $this->clearingId = -1;
     $this->uploadTreeId = -1;
     $this->pfileId = -1;
@@ -92,22 +86,12 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingEvent[] $events
    * @return ClearingDecisionBuilder
    */
-  public function setPositiveLicenses($licenses)
+  public function setClearingEvents($events)
   {
-    $this->positiveLicenses = $licenses;
-    return $this;
-  }
-
-  /**
-   * @param LicenseRef[] $licenses
-   * @return ClearingDecisionBuilder
-   */
-  public function setNegativeLicenses($licenses)
-  {
-    $this->negativeLicenses = $licenses;
+    $this->clearingEvents = $events;
     return $this;
   }
  
@@ -120,17 +104,6 @@ class ClearingDecisionBuilder extends Object
     $this->pfileId = intval($pfileId);
     return $this;
   }
-
-  /**
-   * @param boolean $sameUpload
-   * @return ClearingDecisionBuilder
-   */
-  public function setSameUpload($sameUpload)
-  {
-    $this->sameUpload = $sameUpload;
-    return $this;
-  }
-
 
   /**
    * @param boolean $sameFolder
@@ -202,10 +175,8 @@ class ClearingDecisionBuilder extends Object
 
   public function copy(ClearingDecision $clearingDecision)
   {
-    $this->sameUpload = $clearingDecision->getSameUpload();
     $this->sameFolder = $clearingDecision->getSameFolder();
-    $this->positiveLicenses = $clearingDecision->getPositiveLicenses();
-    $this->negativeLicenses = $clearingDecision->getNegativeLicenses();
+    $this->clearingEvents = $clearingDecision->getClearingEvents();
     $this->clearingId = $clearingDecision->getClearingId();
     $this->uploadTreeId = $clearingDecision->getUploadTreeId();
     $this->pfileId = $clearingDecision->getPfileId();
@@ -229,9 +200,9 @@ class ClearingDecisionBuilder extends Object
       throw new Exception("decision type should be set");
     }
 
-    return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
+    return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->dateAdded, $this->positiveLicenses, $this->negativeLicenses);
+        $this->dateAdded, $this->clearingEvents, $this->reportinfo, $this->comment);
   }
 
 }

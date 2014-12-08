@@ -36,15 +36,8 @@ class ClearingEvent extends Object implements LicenseClearing
   private $groupId;
   /** @var int */
   private $eventType;
-  /** @var LicenseRef */
-  private $licenseRef;
-  /** @var boolean */
-  private $removed;
-  /** @var string */
-  private $reportinfo;
-  /** @var string */
-  private $comment;
-
+  /** @var ClearingLicense */
+  private $clearingLicense;
 
   /**
    * @param int $eventId
@@ -53,12 +46,12 @@ class ClearingEvent extends Object implements LicenseClearing
    * @param int $userId
    * @param int $groupId
    * @param int $eventType
-   * @param LicenseRef $licenseRef
+   * @param ClearingLicense $clearingLicense
    * @param boolean $removed
    * @param string $reportinfo
    * @param string $comment
    */
-  public function __construct($eventId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, LicenseRef $licenseRef, $removed, $reportinfo, $comment)
+  public function __construct($eventId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, ClearingLicense $clearingLicense)
   {
     $this->eventId = $eventId;
     $this->uploadTreeId = $uploadTreeId;
@@ -66,18 +59,15 @@ class ClearingEvent extends Object implements LicenseClearing
     $this->userId = $userId;
     $this->groupId = $groupId;
     $this->eventType = $eventType;
-    $this->licenseRef = $licenseRef;
-    $this->removed = $removed;
-    $this->reportinfo = $reportinfo;
-    $this->comment = $comment;
+    $this->clearingLicense = $clearingLicense;
   }
 
   /**
-   * @return string
+   * @return ClearingLicense
    */
-  public function getComment()
+  public function getClearingLicense()
   {
-    return $this->comment;
+    return $this->clearingLicense;
   }
 
   /**
@@ -114,26 +104,38 @@ class ClearingEvent extends Object implements LicenseClearing
 
   /**
    * @return LicenseRef
+   * @deprecated
    */
   public function getLicenseRef()
   {
-    return $this->licenseRef;
+    return $this->clearingLicense->getLicenseRef();
   }
 
   /**
    * @return boolean
+   * @deprecated
    */
   public function isRemoved()
   {
-    return $this->removed;
+    return $this->clearingLicense->isRemoved();
   }
 
   /**
    * @return string
+   * @deprecated
    */
   public function getReportinfo()
   {
-    return $this->reportinfo;
+    return $this->clearingLicense->getReportinfo();
+  }
+
+  /**
+   * @return string
+   * @deprecated
+   */
+  public function getComment()
+  {
+    return $this->clearingLicense->getComment();
   }
 
   /**
@@ -157,7 +159,7 @@ class ClearingEvent extends Object implements LicenseClearing
    */
   public function getLicenseId()
   {
-    return $this->licenseRef->getId();
+    return $this->clearingLicense->getLicenseId();
   }
 
   /**
@@ -165,7 +167,7 @@ class ClearingEvent extends Object implements LicenseClearing
    */
   public function getLicenseShortName()
   {
-    return $this->licenseRef->getShortName();
+    return $this->clearingLicense->getShortName();
   }
 
   /**
@@ -173,6 +175,6 @@ class ClearingEvent extends Object implements LicenseClearing
    */
   public function getLicenseFullName()
   {
-    return $this->licenseRef->getFullName();
+    return $this->clearingLicense->getFullName();
   }
 }

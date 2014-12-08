@@ -34,6 +34,8 @@ abstract class DbManager extends Object
   protected $cumulatedTime = array();
   /** @var array */
   protected $queryCount = array();
+  /** @var int */
+  private $transactionDepth = 0;
 
   function __construct(Logger $logger)
   {
@@ -54,11 +56,23 @@ abstract class DbManager extends Object
   }
 
   public function begin() {
-    $this->dbDriver->begin();
-  }
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->begin();
+    }
+    $this->transactionDepth++;
+   }
 
   public function commit() {
-    $this->dbDriver->commit();
+    $this->transactionDepth--;
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->commit();
+    }
+    else if ($this->transactionDepth < 0)
+    {
+      throw new \Exception('too much transaction commits');
+    }
   }
 
   /**
@@ -204,6 +218,11 @@ abstract class DbManager extends Object
       $this->logger->addDebug("executing '$statementName' took "
           . $this->formatMilliseconds($seconds)
           . " ($queryCount queries" . ($queryCount > 0 ? ", avg " . $this->formatMilliseconds($seconds / $queryCount) : "") . ")");
+    }
+
+    if ($this->transactionDepth != 0)
+    {
+      throw new \Fossology\Lib\Exception("you have not committed enough");
     }
   }
 

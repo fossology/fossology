@@ -18,10 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingEventTypes;
-use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
@@ -32,69 +29,19 @@ class ClearingEventProcessor extends Object
    * @param ClearingEvent[] $events
    * @return LicenseRef[]
    */
-  public function getState($events)
+  public function getClearingLicenseRefs($events)
   {
-    $selection = array();
-    $total = array();
+    $result = array();
 
     foreach ($events as $event)
     {
-      $licenseRef = $event->getLicenseRef();
-      $shortName = $licenseRef->getShortName();
+      $clearingLicense = $event->getClearingLicense();
+      $licenseId = $clearingLicense->getLicenseId();
 
-      if ($event->isRemoved())
-      {
-        unset($selection[$shortName]);
-      } else
-      {
-        $selection[$shortName] = $licenseRef;
-      }
-      $total[$shortName] = $licenseRef;
+      $result[$licenseId] = $clearingLicense->getLicenseRef();
     }
 
-    return array($selection, $total);
-  }
-
-  /**
-   * @param DateTime|null $lastDecision
-   * @param ClearingEvent[] $events
-   * @return LicenseRef[]
-   */
-  public function getStateAt($lastDecision, $events)
-  {
-    $filteredEvents = $this->selectEventsUntilTime($events, $lastDecision);
-    return $this->getState($filteredEvents);
-  }
-
-  /**
-   * @param LicenseRef[] $previousSelection
-   * @param LicenseRef[] $currentSelection
-   * @return LicenseRef[][]
-   */
-  public function getStateChanges($previousSelection, $currentSelection)
-  {
-    return array(
-        array_diff($currentSelection, $previousSelection),
-        array_diff($previousSelection, $currentSelection)
-    );
-  }
-
-  /**
-   * @param ClearingEvent[] $events
-   * @param DateTime|null $lastDecisionDate
-   * @return array
-   */
-  public function selectEventsUntilTime($events, $lastDecisionDate)
-  {
-    if ($lastDecisionDate !== null)
-    {
-      $filterEventsBefore = function (ClearingEvent $event) use ($lastDecisionDate)
-      {
-        return $event->getDateTime() <= $lastDecisionDate;
-      };
-      return array_filter($events, $filterEventsBefore);
-    }
-    return $events;
+    return $result;
   }
 
   /**
@@ -106,23 +53,10 @@ class ClearingEventProcessor extends Object
     $reducedEvents = array();
     foreach ($events as $event)
     {
-      $licenseShortName = $event->getLicenseShortName();
-      $reducedEvents[$licenseShortName] = $event;
+      $licenseId = $event->getLicenseId();
+      $reducedEvents[$licenseId] = $event;
     }
     return $reducedEvents;
   }
 
-  /**
-   * @param ClearingEvent[] $events
-   * @return ClearingEvent[]
-   */
-  public function indexByLicenseShortName($events)
-  {
-    $values = array();
-    foreach ($events as $license)
-    {
-      $values[$license->getLicenseShortName()] = $license;
-    }
-    return $values;
-  }
 }

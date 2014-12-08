@@ -43,10 +43,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId = null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
 
     $latestClearingDecisions = array();
     foreach ($clearingDecisions as $clearingDecision)
@@ -72,7 +72,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicense($clearingLicense->getId())->getText(),
+          'description' => $this->getCachedLicenseText($clearingLicense->getId()),
           'textfinding' => $clearingLicense->getShortName()
         );
       }
@@ -90,6 +90,6 @@ class LicenseClearedGetter extends ClearedGetterCommon
     if (!array_key_exists($licenseId, $this->licenseCache)) {
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
     }
-    return $this->licenseCache[$licenseId];
+    return $this->licenseCache[$licenseId]->getText();
   }
 }

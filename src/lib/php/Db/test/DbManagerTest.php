@@ -54,8 +54,26 @@ abstract class DbManagerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->begin();
   }
 
+  function testBeginTransactionTwice()
+  {
+    $this->driver->shouldReceive("begin")->withNoArgs()->once();
+    $this->dbManager->begin();
+    $this->dbManager->begin();
+  }
+  
+  /**
+   * @expectedException \Exception
+   */
   function testCommitTransaction()
   {
+    $this->driver->shouldReceive("commit")->withNoArgs()->never();
+    $this->dbManager->commit();
+  }
+  
+    function testBeginAndCommitTransaction()
+  {
+    $this->driver->shouldReceive("begin")->withNoArgs()->once();
+    $this->dbManager->begin();
     $this->driver->shouldReceive("commit")->withNoArgs()->once();
     $this->dbManager->commit();
   }
