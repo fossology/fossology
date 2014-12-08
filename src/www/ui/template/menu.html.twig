@@ -7,6 +7,10 @@
         <img alt="FOSSology" title="FOSSology" src="{{ logoImg }}" border="0"></a>
     </td>
     <td colspan="2">
+      {% if versionInfo %}
+        {# versionInfo contains all the variables defined at build time in the [BUILD] section of /VERSION #}
+        <span style="float:right; font-size: xx-small; color: gray;">{{ versionInfo.version }}, commit: [#{{ versionInfo.commitHash }}] {{ versionInfo.commitDate }} built @ {{ versionInfo.buildDate }}</span>
+      {% endif %}
       {{ mainMenu }}
     </td>
   </tr>
@@ -17,7 +21,7 @@
         <small><a href="{{ uri }}?mod=auth"><b>{{ 'Login'|trans }}</b></a></small>
       {% else %}
         <small><a href="{{ logOutUrl }}"><b>logout</b></a></small>
-        <table style="align:left;">
+        <table style="text-align: left;">
           <tr>
             <td align="right"><small>{{ 'User'|trans }}:</small></td>
             <td>{{ userName }}</td>
