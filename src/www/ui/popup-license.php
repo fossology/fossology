@@ -65,6 +65,12 @@ class PopupLicense extends FO_Plugin
     }
     $this->vars['shortName'] = $license->getShortName();
     $this->vars['fullName'] = $license->getFullName();
+    $parent = $this->licenseDao->getLicenseParentById($license->getId());
+    if($parent!==null)
+    {
+      $this->vars['parentId'] = $parent->getId();
+      $this->vars['parentShortName'] = $parent->getShortName();
+    }
     $licenseUrl = $license->getUrl();
     if (strtolower($licenseUrl) == 'none')
     {

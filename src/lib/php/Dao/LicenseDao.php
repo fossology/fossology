@@ -27,6 +27,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Fossology\Lib\Proxy\LicenseViewProxy;
+use Fossology\Lib\Data\LicenseUsageTypes;
 use Monolog\Logger;
 
 class LicenseDao extends Object
@@ -173,6 +174,48 @@ class LicenseDao extends Object
     $this->dbManager->freeResult($result);
     return $licenseRefs;
   }
+  
+  
+  /**
+   * @return LicenseRef[]
+   */
+  public function getConclusionLicenseRefs($groupId, $search = null, $orderAscending = true, $exclude=array())
+  {
+    $rfTable = 'license_all';
+    $options = array('columns' => array('rf_pk', 'rf_shortname', 'rf_fullname'),
+                     'candidatePrefix' => $this->candidatePrefix);
+    $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
+    $order = $orderAscending ? "ASC" : "DESC";
+    $statementName = __METHOD__ . ".order_$order";
+    $param = array();
+    /* exclude license with parent, excluded child or selfexcluded */
+    $sql = $licenseViewDao->asCTE()." SELECT rf_pk,rf_shortname,rf_fullname FROM $rfTable
+                  WHERE NOT EXISTS (select * from license_map WHERE rf_pk=rf_fk AND rf_fk!=rf_parent)";
+    if($search)
+    {
+      $param[] = '%' . $search . '%';
+      $statementName .= '.search';
+      $sql .=  " AND rf_shortname ilike $1";
+    }
+    if(count($exclude)>0)
+    {
+      // $param[] = $exclude;
+      $tuple = implode(',', $exclude);
+      $statementName .= '.exclude'.$tuple;
+      $sql .=  " AND NOT EXISTS (select * from license_map WHERE rf_pk=rf_parent AND rf_fk IN ($tuple))
+              AND rf_pk NOT IN($tuple)";
+    }
+    $this->dbManager->prepare($statementName, "$sql ORDER BY LOWER(rf_shortname) $order");
+    $result = $this->dbManager->execute($statementName, $param);
+    $licenseRefs = array();
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      $licenseRefs[] = new LicenseRef(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname']);
+    }
+    $this->dbManager->freeResult($result);
+    return $licenseRefs;
+  }
+  
 
   /**
    * @return array
@@ -343,7 +386,7 @@ class LicenseDao extends Object
     {
       $param[] = $_SESSION['GroupId'];
       $row = $this->dbManager->getSingleRow(
-          "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$2",
+          "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$".count($param),
           $param, __METHOD__ . ".$condition.candidate");
       if (false !== $row)
       {
@@ -438,5 +481,11 @@ class LicenseDao extends Object
     $marydone = $this->dbManager->booleanToDb($readyformerge);
     $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6 WHERE rf_pk=$1',
         array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone), __METHOD__);
+  }
+  
+  public function getLicenseParentById($licenseId)
+  {
+    return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
+            array(LicenseUsageTypes::CONCLUSION,$licenseId));
   }
 }
