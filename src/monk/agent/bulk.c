@@ -128,8 +128,10 @@ int bulk_identification(MonkState* state) {
   };
   license.tokens = tokenize(bulkArguments->refText, DELIMITERS);
 
-  GArray* licenses = g_array_new(TRUE, FALSE, sizeof (License));
-  g_array_append_val(licenses, license);
+  GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof (License));
+  g_array_append_val(licenseArray, license);
+
+  Licenses* licenses = buildLicenseIndexes(licenseArray, MIN_ADJACENT_MATCHES, 0);
 
   PGresult* filesResult = queryFileIdsForUploadAndLimits(
     state->dbManager,
@@ -175,7 +177,7 @@ int bulk_identification(MonkState* state) {
     PQclear(filesResult);
   }
 
-  freeLicenseArray(licenses);
+  licenses_free(licenses);
 
   return !haveError;
 }

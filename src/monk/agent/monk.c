@@ -11,18 +11,22 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <libfossology.h>
 
+#include <libfossology.h>
 #include "monk.h"
+
 #include "database.h"
 #include "license.h"
 #include "match.h"
 #include "extended.h"
-#include "glib.h"
 
-void bail(MonkState* state, int exitval) {
+void scheduler_disconnect(MonkState* state, int exitval) {
   fo_dbManager_finish(state->dbManager);
   fo_scheduler_disconnect(exitval);
+}
+
+void bail(MonkState* state, int exitval) {
+  scheduler_disconnect(state, exitval);
   exit(exitval);
 }
 
@@ -44,7 +48,7 @@ void queryAgentId(MonkState* state) {
     bail(state, 1);
 }
 
-inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
+inline int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
 
   if (!fileIdResult)
@@ -100,9 +104,6 @@ inline int processUploadId(MonkState* state, int uploadId, GArray* licenses) {
 }
 
 int main(int argc, char** argv) {
-  /* before parsing argv and argc make sure */
-  /* to initialize the scheduler connection */
-
   MonkState stateStore;
   MonkState* state = &stateStore;
 
@@ -115,13 +116,10 @@ int main(int argc, char** argv) {
     if (!handleArguments(state, argc, argv))
       bail(state, 3);
   } else {
-    /* scheduler mode
-     *
-     * enter the main agent loop, continue to */
-    /* loop until receiving NULL */
+    /* scheduler mode */
     state->scanMode = MODE_SCHEDULER;
     PGresult* licensesResult = queryAllLicenses(state->dbManager);
-    GArray* licenses = extractLicenses(state->dbManager, licensesResult);
+    Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 
     while (fo_scheduler_next() != NULL) {
       int uploadId = atoi(fo_scheduler_current());
@@ -142,11 +140,10 @@ int main(int argc, char** argv) {
     }
     fo_scheduler_heart(0);
 
-    freeLicenseArray(licenses);
+    licenses_free(licenses);
     PQclear(licensesResult);
   }
 
-  /* after cleaning up agent, disconnect from */
-  /* the scheduler, this doesn't return */
-  bail(state, 0);
+  scheduler_disconnect(state, 0);
+  return 0;
 }

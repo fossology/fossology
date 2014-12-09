@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "license.h"
 #include "match.h"
 
-int matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char** argv) {
+int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, char** argv) {
   File file;
   file.id = argi;
   file.fileName = argv[argi];
@@ -31,7 +31,7 @@ int matchCliFileWithLicenses(MonkState* state, GArray* licenses, int argi, char*
 
 int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {
   PGresult* licensesResult = queryAllLicenses(state->dbManager);
-  GArray* licenses = extractLicenses(state->dbManager, licensesResult);
+  Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 
   int threadError = 0;
 #ifdef MONK_MULTI_THREAD
@@ -55,7 +55,7 @@ int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {
     }
   }
 
-  freeLicenseArray(licenses);
+  licenses_free(licenses);
   PQclear(licensesResult);
 
   return !threadError;

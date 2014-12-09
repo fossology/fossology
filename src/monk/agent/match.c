@@ -16,26 +16,28 @@ You should have received a copy of the GNU General Public License along with thi
 #include "math.h"
 #include "extended.h"
 #include "bulk.h"
+#include "monk.h"
 
-inline GArray* findAllMatchesBetween(File* file, GArray* licenses,
-                                     unsigned maxAllowedDiff, unsigned minTrailingMatches, unsigned maxLeadingDiff) {
+inline GArray* findAllMatchesBetween(File* file, Licenses* licenses,
+                                     unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
   GArray* textTokens = file->tokens;
   guint textLength = textTokens->len;
 
   for (guint tPos=0; tPos<textLength; tPos++) {
-    for (guint i=0; i < licenses->len; i++) {
-      License* license = &g_array_index(licenses, License, i);
-      GArray* searchTokens = license->tokens;
-      guint searchLength = searchTokens->len;
+    for (guint sPos = 0; sPos <= maxLeadingDiff; sPos++) {
+      const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, file->tokens, tPos);
 
-      for (guint sPos=0; (sPos<searchLength) && (sPos<=maxLeadingDiff); sPos++){
-        if (tokenEquals(&g_array_index(textTokens, Token, tPos),
-                        &g_array_index(searchTokens, Token, sPos))) {
-          findDiffMatches(file, license, tPos, sPos, matches, maxAllowedDiff, minTrailingMatches);
-          break;
-        }
+      if (!availableLicenses)
+      {
+        /* we hope to get here very often */
+        continue;
+      }
+
+      for (guint i = 0; i < availableLicenses->len; i++) {
+        License* license = &g_array_index(availableLicenses, License, i);
+        findDiffMatches(file, license, tPos, sPos, matches, maxAllowedDiff, minAdjacentMatches);
       }
     }
   }
@@ -85,9 +87,9 @@ Match* match_array_get(GArray* matches, guint i) {
   return g_array_index(matches, Match*, i);
 }
 
-int matchFileWithLicenses(MonkState* state, File* file, GArray* licenses) {
+int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses) {
   GArray* matches = findAllMatchesBetween(file, licenses,
-                                          MAX_ALLOWED_DIFF_LENGTH, MIN_TRAILING_MATCHES, MAX_LEADING_DIFF);
+                                          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
   int result = processMatches(state, file, matches);
 
   // we are done: free memory
@@ -96,7 +98,7 @@ int matchFileWithLicenses(MonkState* state, File* file, GArray* licenses) {
   return result;
 }
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, GArray* licenses) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses) {
   File file;
   file.id = pFileId;
 
@@ -452,13 +454,19 @@ inline Match* diffResult2Match(DiffResult* diffResult, License* license){
 }
 
 void findDiffMatches(File* file, License* license,
-                     size_t textStartPosition, size_t searchStartPosition,
-                     GArray* matches,
-                     int maxAllowedDiff, int minTrailingMatches) {
+  size_t textStartPosition, size_t searchStartPosition,
+  GArray* matches,
+  unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
+
+  if (!matchNTokens(file->tokens, textStartPosition, file->tokens->len,
+                    license->tokens, searchStartPosition, license->tokens->len,
+    minAdjacentMatches)) {
+    return;
+  }
 
   DiffResult* diffResult = findMatchAsDiffs(file->tokens, license->tokens,
                                             textStartPosition, searchStartPosition,
-                                            maxAllowedDiff, minTrailingMatches);
+                                            maxAllowedDiff, minAdjacentMatches);
 
   if (diffResult) {
     Match* newMatch = diffResult2Match(diffResult, license);

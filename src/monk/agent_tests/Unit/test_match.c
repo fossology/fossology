@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdarg.h>
 
 #include "match.h"
+#include "license.h"
 
 File* getFileWithText(const char* text) {
   char* fileText = g_strdup(text);
@@ -26,8 +27,8 @@ File* getFileWithText(const char* text) {
   return result;
 }
 
-GArray* getNLicensesWithText(int count, ...) {
-  GArray* result = g_array_new(TRUE, FALSE, sizeof(License));
+Licenses* getNLicensesWithText(int count, ...) {
+  GArray* licenseArray = g_array_new(TRUE, FALSE, sizeof(License));
   va_list texts;
   va_start(texts, count);
   for (int i = 0; i < count; i++) {
@@ -37,26 +38,17 @@ GArray* getNLicensesWithText(int count, ...) {
     license.shortname = g_strdup_printf("%d-testLic", i);
     license.tokens = tokenize(text, "^" );
 
-    g_array_append_val(result, license);
+    g_array_append_val(licenseArray, license);
     g_free(text);
   }
   va_end(texts);
 
-  return result;
+  return buildLicenseIndexes(licenseArray, 1, 0);
 }
 
 void file_free(File* file) {
   g_array_free(file->tokens, TRUE);
   free(file);
-}
-
-void licenses_free(GArray* licenses) {
-  for (guint i = 0; i < licenses->len; i++) {
-    License license = g_array_index(licenses, License, i);
-    g_array_free(license.tokens, TRUE);
-    g_free(license.shortname);
-  }
-  g_array_free(licenses, TRUE);
 }
 
 void matchesArray_free(GArray* matches) {
@@ -79,7 +71,8 @@ int _matchEquals(Match* match, long refId, size_t start, size_t end) {
 
 void test_findAllMatchesDisjoint() {
   File* file = getFileWithText("^e^a^b^c^d^e");
-  GArray* licenses = getNLicensesWithText(3, "a", "b^c", "d");
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "d");
+
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
@@ -96,7 +89,7 @@ void test_findAllMatchesDisjoint() {
 
 void test_findDiffsAtBeginning() {
   File* file = getFileWithText("^e^a^b^c^d^e");
-  GArray* licenses = getNLicensesWithText(2, "a", "e^b^c^d^e");
+  Licenses* licenses = getNLicensesWithText(2, "a", "e^b^c^d^e");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
 
   CU_ASSERT_EQUAL(matches->len, 2);
@@ -115,7 +108,7 @@ void test_findDiffsAtBeginning() {
 
 void test_findAllMatchesWithDiff() {
   File* file = getFileWithText("a^b^c^d^e^f");
-  GArray* licenses = getNLicensesWithText(4, "a^c^d", "a^b^d^e", "d", "e^f");
+  Licenses* licenses = getNLicensesWithText(4, "a^c^d", "a^b^d^e", "d", "e^f");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);
@@ -130,7 +123,7 @@ void test_findAllMatchesWithDiff() {
 
 void test_findAllMatchesTwoGroups() {
   File* file = getFileWithText("a^b^c^d^e^f^g");
-  GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^d", "d", "e", "f", "e^f^g");
+  Licenses* licenses = getNLicensesWithText(6, "a^b", "a^b^c^d", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 2);
@@ -146,7 +139,7 @@ void test_findAllMatchesTwoGroups() {
 
 void test_findAllMatchesTwoGroupsWithDiff() {
   File* file = getFileWithText("a^b^c^d^e^f^g");
-  GArray* licenses = getNLicensesWithText(6, "a^b", "a^b^c^e", "d", "e", "f", "e^f^g");
+  Licenses* licenses = getNLicensesWithText(6, "a^b", "a^b^c^e", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 3);
@@ -163,7 +156,7 @@ void test_findAllMatchesTwoGroupsWithDiff() {
 
 void test_findAllMatchesAllIncluded() {
   File* file = getFileWithText("a^b^c^d");
-  GArray* licenses = getNLicensesWithText(3, "a^b^c^d", "b^c", "d");
+  Licenses* licenses = getNLicensesWithText(3, "a^b^c^d", "b^c", "d");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
   CU_ASSERT_EQUAL(matches->len, 1);

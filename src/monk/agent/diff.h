@@ -36,8 +36,9 @@ typedef struct {
 } DiffResult;
 
 int lookForDiff(GArray* textTokens, GArray* searchTokens,
-        size_t iText, size_t iSearch, int maxAllowedDiff, int minTrailingMatches,
-        DiffMatchInfo* result);
+                size_t iText, size_t iSearch,
+                unsigned int maxAllowedDiff, unsigned int minAdjacentMatches,
+                DiffMatchInfo* result);
 
 int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                  GArray* searchTokens, size_t searchStart, size_t searchLength,
@@ -45,7 +46,7 @@ int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
 
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
                              size_t textStartPosition, size_t searchStartPosition,
-                             int maxAllowedDiff, int minTrailingMatches);
+                             unsigned int maxAllowedDiff, unsigned int minAdjacentMatches);
 
 void diffResult_free(DiffResult* diffResult);
 
