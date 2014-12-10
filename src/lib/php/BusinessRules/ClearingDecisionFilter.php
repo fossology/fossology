@@ -24,7 +24,7 @@ use Fossology\Lib\Data\DecisionScopes;
 class ClearingDecisionFilter
 {
   const KEYREPO = "all";
-  
+
   /**
    * @param ClearingDecision[] $clearingDecisions
    * @return ClearingDecision[][]
@@ -58,7 +58,8 @@ class ClearingDecisionFilter
     return $clearingDecisionsMapped;
   }
 
-  /** @param ClearingDecision[] $clearingDecisions
+  /**
+   * @param ClearingDecision[] $clearingDecisions
    * @return ClearingDecision[]
    */
   public function filterCurrentReusableClearingDecisions($clearingDecisions)
@@ -72,8 +73,7 @@ class ClearingDecisionFilter
     }
     return $clearingDecisionsByItemId;
   }
-  
-  
+
   /**
    * @return ClearingDecision|false
    */
@@ -88,7 +88,11 @@ class ClearingDecisionFilter
       }
       else
       {
-        return $pfileMap[self::KEYREPO];
+        if (array_key_exists(self::KEYREPO, $pfileMap)) {
+          return $pfileMap[self::KEYREPO];
+        } else {
+          return false;
+        }
       }
     }
 
