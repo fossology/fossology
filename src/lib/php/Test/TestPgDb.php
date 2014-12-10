@@ -36,7 +36,7 @@ class TestPgDb
   private $dbName;
   /** @var string logFileName */
   private $logFileName;
-  /** @var ressource */
+  /** @var resource */
   private $connection;
   /** @var array */
   private $sys_conf;
