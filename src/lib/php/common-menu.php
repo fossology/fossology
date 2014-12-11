@@ -1,24 +1,26 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2014 Siemens AG
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License version 2.1 as published by the Free Software Foundation.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License version 2.1 as published by the Free Software Foundation.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation, Inc.0
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
 /**
  * \file common-menu.php
  * \brief common menu functions
  */
+const MENU_PATH_SEPARATOR = "::";
 
 /**
  * \brief
@@ -31,11 +33,12 @@ class menu {
   var $Order = 0; // Used for ordering menu items
   var $Target = NULL; // recommended name of window for showing results
   var $MaxDepth = 0; // How deep is SubMenu?
-  var $SubMenu = NULL; // list to submenu list
+  var $SubMenu = NULL;
+  public $FullName; // list to submenu list
 
 };
 /*********************************
- Global array: don't touch!
+Global array: don't touch!
  *********************************/
 $MenuList = array();
 $MenuMaxDepth = 0; // how deep is the tree (for UI display)
@@ -89,7 +92,7 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   return ($V);
 } // MenuPage
 /**
- * \brief Create a "First Prev 1 2 ... Next" page links for paged output. 
+ * \brief Create a "First Prev 1 2 ... Next" page links for paged output.
  *
  * \param $Page  Page number of the current page
  * \param $Next  true display "Next" and false don't display
@@ -157,100 +160,87 @@ function menu_cmp(&$a, &$b) {
  * This is VERY recursive and returns the new menu.
  * If $URI is blank, nothing is added.
  *
- * \param &$Menu     menu list needed to add to
- * \param $Path      path of the new menu item
- * \param $LastOrder is used for grouping items in order.
- * \param $Target    target of the new menu item
- * \param $URI       URL link of the new menu item
- * \param $HTML      HTML of the new menu item
- * \param $Depth     depth of the submenu
- * \param $FullName  FullName of the menu item e.g. (Help::About)
- * \param $Title     Title of the new menu item
- *
- * \return the max depth of menu
+ * @param $menuItems
+ * @param $path
+ * @param $pathRemainder
+ * @param $LastOrder
+ * @param $Target
+ * @param $URI
+ * @param $HTML
+ * @param $Title
+ * @return int the max depth of menu
  */
-function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, &$FullName, &$Title) 
+function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
 {
-  $AddNew = 0;
-  $NeedSort = 0;
-  $PathParts = explode("::", $Path, 2);
-  if (!isset($PathParts[0]) || !strcmp($PathParts[0], "")) {
-    return (0);
-  } // nothing to do
-  if (!isset($PathParts[1])) {
-    $LastPart = 1;
+  $splitPath = explode(MENU_PATH_SEPARATOR, $pathRemainder, 2);
+  $pathElement = count($splitPath) > 0 ? $splitPath[0] : null;
+  $pathRemainder = count($splitPath) > 1 ? $splitPath[1] : null;
+  $hasPathComponent = $pathElement !== null && $pathElement !== "";
+
+  if (!$hasPathComponent) {
+    return 0;
   }
-  else {
-    $LastPart = 0;
-  }
-  /*****
-   $Menu is the top of the list.
-   $M is an object in the list.
-   *****/
-  /* Check if the name exists in the array */
-  $M = NULL;
-  if (is_array($Menu)) {
-    foreach($Menu as $Key => $Val) {
+
+  $isLeaf = $pathRemainder === null;
+  $menuItemsExist = isset($menuItems) && is_array($menuItems);
+
+  $currentMenuItem = NULL;
+  if ($menuItemsExist) {
+    foreach($menuItems as &$menuItem) {
       // need to escape the [ ] or the string will not match
-      if (!strcmp($Val->Name, $PathParts[0]) && strcmp($Val->Name, "\[BREAK\]")) {
-        $M = & $Menu[$Key];
+      if (!strcmp($menuItem->Name, $pathElement) && strcmp($menuItem->Name, "\\[BREAK\\]")) {
+        $currentMenuItem = $menuItem;
         break;
       }
-      else if (!strcmp($Val->Name, "\[BREAK\]") && ($Val->Order == $LastOrder)) {
-        $M = & $Menu[$Key];
+      else if (!strcmp($menuItem->Name, "\\[BREAK\\]") && ($menuItem->Order == $LastOrder)) {
+        $currentMenuItem = $menuItem;
         break;
       }
     }
   }
-  /* if it does not exist in the array, then add it */
-  if (empty($M)) {
-    $AddNew = 1;
-    $NeedSort = 1;
-    $M = new menu;
-    $M->Name = $PathParts[0];
-    $M->FullName = $FullName;
+
+  $path[] = $pathElement;
+  $FullName = str_replace(" ", "_", implode(MENU_PATH_SEPARATOR, $path));
+
+  $sortItems = false;
+  $currentItemIsMissing = empty($currentMenuItem);
+  if ($currentItemIsMissing) {
+    $currentMenuItem = new menu;
+    $currentMenuItem->Name = $pathElement;
+    $currentMenuItem->FullName = $FullName;
+
+    if (!$menuItemsExist)
+    {
+      $menuItems = array();
+    }
+    array_push($menuItems, $currentMenuItem);
+    $sortItems = true;
   }
+
   /* $M is set! See if we need to traverse submenus */
-  if ($LastPart != 1) {
-    $Depth = menu_insert_r($M->SubMenu, $PathParts[1], $LastOrder, $Target, $URI, $HTML, $Depth + 1, $FullName, $Title);
-    $NewDepth = $Depth + 1;
-    if ($M->MaxDepth < $NewDepth) {
-      $M->MaxDepth = $NewDepth;
+  if ($isLeaf) {
+    if ($LastOrder != 0) {
+      if ($currentMenuItem->Order != $LastOrder) {
+        $sortItems = true;
+      }
+      $currentMenuItem->Order = $LastOrder;
     }
+    $currentMenuItem->Target = $Target;
+    $currentMenuItem->URI = $URI;
+    $currentMenuItem->HTML = $HTML;
+    $currentMenuItem->Title = $Title;
   }
   else {
-    /* No traversal -- save the final values */
-    /** If the menu order is already set, don't reset it to the default **/
-    if ($LastOrder != 0) {
-      if ($M->Order != $LastOrder) {
-        $NeedSort = 1;
-      }
-      $M->Order = $LastOrder;
-    }
-    $M->Target = $Target;
-    $M->URI = $URI;
-    $M->HTML = $HTML;
-    $M->FullName = $FullName;
-    $M->Title = $Title;
+    $Depth = menu_insert_r($currentMenuItem->SubMenu, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, $Title);
+    $currentMenuItem->MaxDepth = max ($currentMenuItem->MaxDepth, $Depth + 1);
   }
-  if ($AddNew == 1) {
-    if (isset($Menu)) {
-      array_push($Menu, $M);
-    }
-    else {
-      $Menu = array(
-      $M
-      );
-    }
+
+  if ($sortItems) {
+    usort($menuItems, 'menu_cmp');
   }
-  if ($NeedSort == 1) {
-    usort($Menu, 'menu_cmp');
-  }
-  global $MenuMaxDepth;
-  if ($Depth + 1 > $MenuMaxDepth) {
-    $MenuMaxDepth = $Depth + 1;
-  }
-  return ($M->MaxDepth);
+
+  array_pop($path);
+  return ($currentMenuItem->MaxDepth);
 } // menu_insert_r()
 
 
@@ -265,11 +255,10 @@ function menu_insert_r(&$Menu, $Path, $LastOrder, $Target, $URI, $HTML, $Depth, 
  * \param $HTML      HTML of the new menu item
  * \param $Title     Title of the new menu item
  */
-function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) 
+function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL)
 {
   global $MenuList;
-  $FullName = $Path;
-  menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
+  menu_insert_r($MenuList, array(), $Path, $LastOrder, $Target, $URI, $HTML, $Title);
 } // menu_insert()
 
 
@@ -287,7 +276,7 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
  *
  * \return array of sub-menus.  $MaxDepth is also returned
  */
-function menu_find($Name, &$MaxDepth, $Menu = NULL) 
+function menu_find($Name, &$MaxDepth, $Menu = NULL)
 {
   global $MenuList;
   if (empty($Menu)) {
@@ -296,7 +285,7 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
   if (empty($Name)) {
     return ($Menu);
   }
-  $PathParts = explode("::", $Name, 2);
+  $PathParts = explode(PATH_SEPARATOR, $Name, 2);
   foreach($Menu as $Key => $Val) {
     if ($Val->Name == $PathParts[0]) {
       if (empty($PathParts[1])) {
@@ -325,7 +314,7 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
  * \return HTML string
  */
 $menu_to_1html_counter = 0;
-function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) 
+function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1)
 {
   $V = "";
   $Std = "";
@@ -368,7 +357,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
           $V.= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
         }
         $V.= ">";
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
+        {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -381,7 +371,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
         if (!$First) {
           $V.= " | ";
         }
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
+        {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -414,10 +405,10 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  * \param $Post     string after "[name]"
  * \param $ShowAll  If $ShowAll==0, then items without hyperlinks are hidden.
  * \param $upload_id upload id
- * 
+ *
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "")
 {
   $V = "";
   $Std = "";
@@ -474,7 +465,7 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
  * \param $Menu    menu list to be printed
  * \param $Indent  indent char
  */
-function menu_print(&$Menu, $Indent) 
+function menu_print(&$Menu, $Indent)
 {
   if (!isset($Menu)) {
     return;
@@ -490,23 +481,23 @@ function menu_print(&$Menu, $Indent)
 
 // DEBUG CODE
 /**********
- if (0)
- {
- menu_insert("abc::def::",0,"");
- menu_insert("Applications::Accessories::Dictionary",0,"");
- menu_insert("Applications::Accessories::Ark",0,"");
- menu_insert("Places::Computer",3,"");
- menu_insert("Places::CD/DVD Creator",3,"");
- menu_insert("Places::Home Folder",4,"");
- menu_insert("Places::Network Servers",2,"");
- menu_insert("Places::Search for Files...",0,"");
- menu_insert("Places::Desktop",4,"");
- menu_insert("Places::Recent Documents",0,"");
- menu_insert("Places::Connect to Server...",2,"");
- menu_insert("Applications::Accessories::Calculator",0,"");
- menu_print($MenuList,0);
- print "Max depth: $MenuMaxDepth\n";
- }
+if (0)
+{
+menu_insert("abc::def::",0,"");
+menu_insert("Applications::Accessories::Dictionary",0,"");
+menu_insert("Applications::Accessories::Ark",0,"");
+menu_insert("Places::Computer",3,"");
+menu_insert("Places::CD/DVD Creator",3,"");
+menu_insert("Places::Home Folder",4,"");
+menu_insert("Places::Network Servers",2,"");
+menu_insert("Places::Search for Files...",0,"");
+menu_insert("Places::Desktop",4,"");
+menu_insert("Places::Recent Documents",0,"");
+menu_insert("Places::Connect to Server...",2,"");
+menu_insert("Applications::Accessories::Calculator",0,"");
+menu_print($MenuList,0);
+print "Max depth: $MenuMaxDepth\n";
+}
  **********/
 
 
