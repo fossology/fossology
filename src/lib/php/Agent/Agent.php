@@ -178,7 +178,7 @@ abstract class Agent extends Object
 
         try {
           $success = $this->processUploadId($uploadId);
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
           print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
           print "";
           print $e->getTraceAsString();
