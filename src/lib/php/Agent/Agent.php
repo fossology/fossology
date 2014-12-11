@@ -39,6 +39,7 @@ abstract class Agent extends Object
 
   /** @var DbManager dbManager */
   protected $dbManager;
+
   /** @var Agent agentDao */
   protected $agentDao;
 
@@ -175,7 +176,15 @@ abstract class Agent extends Object
           $this->bail(2);
         }
 
-        $success = $this->processUploadId($uploadId);
+        try {
+          $success = $this->processUploadId($uploadId);
+        } catch(Exception $e) {
+          print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
+          print "";
+          print $e->getTraceAsString();
+          $success = false;
+        }
+
         $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
 
         if (!$success) {
