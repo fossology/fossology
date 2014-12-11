@@ -47,7 +47,7 @@ function plugin_cmp($a, $b)
     $rc = strcmp($a->Version, $b->Version);
     if ($rc != 0)
     {
-      return (-$rc);
+      return -$rc;
     }
   }
 
@@ -59,7 +59,7 @@ function plugin_cmp($a, $b)
     // print "Comparing $a->Name :: $val with $b->Name\n";
     if ($val == $b->Name)
     {
-      return (1);
+      return 1;
     }
   }
   /* check if $b is a dependency for $a */
@@ -68,7 +68,7 @@ function plugin_cmp($a, $b)
     // print "Comparing $b->Name :: $val with $a->Name\n";
     if ($val == $a->Name)
     {
-      return (-1);
+      return -1;
     }
   }
   // print "STILL Comparing $a->Name with $b->Name\n";
@@ -76,16 +76,16 @@ function plugin_cmp($a, $b)
   /* If same dependencies, then sort by plugin level (highest comes first) */
   if ($a->PluginLevel > $b->PluginLevel)
   {
-    return (-1);
+    return -1;
   } elseif ($a->PluginLevel < $b->PluginLevel)
   {
-    return (1);
+    return 1;
   }
 
   /* Nothing else to sort by -- sort by number of dependencies */
   $rc = count($a->Dependency) - count($b->Dependency);
-  return ($rc);
-} // plugin_cmp()
+  return $rc;
+}
 
 /**
  * \brief Disable all plugins that have a level greater than the users permission level.
