@@ -5,14 +5,20 @@
 
 <table class="semibordered" id="licenseCandidateTbl" width="100%" cellpadding="0">
   <thead>
-    <tr><th width="5%"></th><th width="10%"></th><th width="10%"></th><th width="60%"></th><th width="10%"></th><th width="5%"></th></tr>
+    <tr> {% if canEdit %}<th width="5%"></th>{% endif %}
+      <th width="10%"></th>
+      <th width="10%"></th>
+      <th width="{% if canEdit %}65{% else %}60{% endif %}%"></th>
+      <th width="10%"></th>
+      <th width="5%"></th></tr>
   </thead>
 </table>
+{% if canEdit %} 
   <br/><br/>
-<div style="text-align:center;">
-  <a href="?mod=advice_license&amp;rf=-1" class="buttonLink">{{ 'New License'|trans }}</a>
-</div>
-  
+  <div style="text-align:center;">
+    <a href="?mod=advice_license&amp;rf=-1" class="buttonLink">{{ 'New License'|trans }}</a>
+  </div>
+{% endif %}  
 {% endblock %}
 
 {% block foot %}
@@ -22,29 +28,30 @@
     function createBrowseTable() {
       
     tableColumns = [
-    {"sTitle": "{{ "Edit" }}", "sClass": "center", "bSearchable": false},
-    {"sTitle": "{{ "Shortname" }}", "sClass": "center", "bSearchable": true},
-    {"sTitle": "{{ "Fullname" }}", "sClass": "center", "bSearchable": false},
-    {"sTitle": "{{ "Text" }}", "sClass": "left", "bSearchable": false},
-    {"sTitle": "{{ "URL" }}", "sClass": "center", "bSearchable": false},
-    {"sTitle": "{{ "Merge Request" }}", "sClass": "center", "bSearchable": false}
-  ];
+      {% if canEdit %}
+        {"sTitle": "{{ "Edit"|trans }}", "sClass": "center", "bSearchable": false},
+      {% endif %}
+      {"sTitle": "{{ "Shortname"|trans }}", "sClass": "center", "bSearchable": true},
+      {"sTitle": "{{ "Fullname"|trans }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Text"|trans }}", "sClass": "left", "bSearchable": false},
+      {"sTitle": "{{ "URL"|trans }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Merge Request"|trans }}", "sClass": "center", "bSearchable": false}
+    ];
 
-  tableSorting = [ [1, "asc"] ];
+    tableSorting = [ [1, "asc"] ];
 
-  dataTableConfig =
-      {
-        "aoColumns": tableColumns,
-        "aaSorting": tableSorting,
-        "iDisplayLength": 20,
-        "aaData": {{ aaData }},
-        "bStateSave": true
-      };
+    dataTableConfig =
+        {
+          "aoColumns": tableColumns,
+          "aaSorting": tableSorting,
+          "iDisplayLength": 20,
+          "aaData": {{ aaData }},
+          "bStateSave": true
+        };
 
-    var otable = $('#licenseCandidateTbl').dataTable(dataTableConfig);
-    return otable;
-  }
-    
+      var otable = $('#licenseCandidateTbl').dataTable(dataTableConfig);
+      return otable;
+    }
     
     $(document).ready(function () {
       createBrowseTable();

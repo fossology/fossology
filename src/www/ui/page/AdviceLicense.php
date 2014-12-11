@@ -46,10 +46,16 @@ class AdviceLicense extends DefaultPlugin
   protected function handle(Request $request)
   {
     $rf = intval($request->get('rf'));
-    if (empty($rf))
+    $userId = $_SESSION['UserId'];
+    $groupId = $_SESSION['GroupId'];
+    /** @var UserDao */
+    $userDao = $this->getObject('dao.user');
+    $canEdit = $userDao->isAdvisorOrAdmin($userId,$groupId);
+    if (empty($rf) || !$canEdit)
     {
       $vars = array(
-          'aaData' => json_encode($this->getArrayArrayData($_SESSION['GroupId']))
+          'aaData' => json_encode($this->getArrayArrayData($groupId,$canEdit)),
+          'canEdit' => $canEdit
       );
       return $this->render('advice_license.html.twig', $this->mergeWithDefault($vars));
     }
@@ -76,7 +82,7 @@ class AdviceLicense extends DefaultPlugin
   }
 
 
-  private function getArrayArrayData($groupId)
+  private function getArrayArrayData($groupId,$canEdit)
   {
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1";
     /** @var DbManager */
@@ -86,13 +92,18 @@ class AdviceLicense extends DefaultPlugin
     $aaData = array();
     while ($row = $dbManager->fetchArray($res))
     {
-      $link = Traceback_uri() . '?mod=' . Traceback_parm() . '&rf=' . $row['rf_pk'];
-      $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
-      $aaData[] = array($edit, htmlentities($row['rf_shortname']),
+      $aData = array(htmlentities($row['rf_shortname']),
           htmlentities($row['rf_fullname']),
           '<div style="overflow-y:scroll;max-height:150px;margin:0;">' . nl2br(htmlentities($row['rf_text'])) . '</div>',
           htmlentities($row['rf_url']),
           $this->bool2checkbox($dbManager->booleanFromDb($row['marydone'])));
+      if($canEdit)
+      {
+        $link = Traceback_uri() . '?mod=' . Traceback_parm() . '&rf=' . $row['rf_pk'];
+        $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
+        array_unshift($aData,$edit);
+      } 
+      $aaData[] = $aData;
     }
     $dbManager->freeResult($res);
     return $aaData;
