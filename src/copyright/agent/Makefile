@@ -37,6 +37,9 @@ all: $(CXXFOLIB) $(EXE)
 
 $(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
 	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
+    # "making locally runnable" $(EXE_COP) "(only for testing)"
+	$(MAKE) -C $(FOCLIDIR) fo_wrapper
+	ln -sf $(FOCLIDIR)/fo_wrapper.php $(EXE_COP)
 
 $(EXE_IP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_IP)
 	$(CXX) $(OBJECTS) $(OBJECTS_IP) $(DEF_ID_IP) $(DEF) $(CXXFLAGS_LINK) -o $@
