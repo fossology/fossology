@@ -65,8 +65,8 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
 
     $agentName = "copyright";
 
-    $execDir = __DIR__;
     $agentDir = dirname(dirname(__DIR__));
+    $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start", "r");
