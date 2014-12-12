@@ -1828,6 +1828,28 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("XFree86");
     lmem[_mMIT] = 1;
   }
+  else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
+        INFILE(_LT_MIT_5) || INFILE(_LT_MIT_6) || INFILE(_LT_MIT_7))) { 
+    if(INFILE(_LT_MIT_NO_EVIL)) {
+      INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
+      lmem[_mMIT] = 1;
+    } else if (INFILE(_LT_Imlib2)) {
+      INTERESTING("Imlib2");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_X11_5)) {
+      INTERESTING("X11");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_Xnet_STYLE)) {
+      INTERESTING("Xnet");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_TAPJOY)) {
+      INTERESTING("Tapjoy");
+      lmem[_mMIT] = 1;
+    } else {
+      INTERESTING("MIT");
+      lmem[_mMIT] = 1;
+    }
+  }
   else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
       NOT_INFILE(_TITLE_MIT_EXHIBIT) && NOT_INFILE(_TITLE_SGI) && !lmem[_fBSD] && !lmem[_mMIT]) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
@@ -1957,7 +1979,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   else if (INFILE(_LT_MITref2)) {
-    INTERESTING(lDebug ? "MIT(ref2)" : "MIT");
+    INTERESTING(lDebug ? "MIT(ref2)" : "MIT-style");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MITref3)) {
+    INTERESTING(lDebug ? "MIT(ref3)" : "MIT-style");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_OG_1)) {
@@ -5895,7 +5921,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* 
    * Dual licenses
    */
-  if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
+  if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
+    INTERESTING(lDebug ? "Dual-license(0)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
     INTERESTING(lDebug ? "Dual-license(1)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_2)) { 
