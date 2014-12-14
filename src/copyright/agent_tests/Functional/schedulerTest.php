@@ -68,8 +68,8 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $agentDir = dirname(dirname(__DIR__));
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
-
-    $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start", "r");
+    $pCmd = "echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start";
+    $pipeFd = popen($pCmd, "r");
     $this->assertTrue($pipeFd !== false, 'running copyright failed');
 
     $output = "";
@@ -83,7 +83,8 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     rmdir("$sysConf/mods-enabled");
     unlink($sysConf."/fossology.conf");
 
-    return array($output,$retCode);
+    $this->assertEquals($retCode, 0, "copyright failed ($retCode): $output [$pCmd]");
+    return $output;
   }
 
   private function setUpRepo()
@@ -119,15 +120,10 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
   {
     $this->setUpTables();
     $this->setUpRepo();
-
-    list($output,$retCode) = $this->runCopyright($uploadId=1);
-
+    $output = $this->runCopyright($uploadId=1);
     $this->rmRepo();
 
-    $this->assertEquals($retCode, 0, "copyright failed ($retCode): ".$output);
-
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-
     $matches = $this->copyrightDao->getAllEntries("copyright", $uploadId, $uploadTreeTableName);
     $this->assertGreaterThan($expected=5, count($matches), $output);
   }
