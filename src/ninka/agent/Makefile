@@ -22,9 +22,6 @@ all: $(CXXFOLIB) $(EXE)
 
 $(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
-    # "making locally runnable" $(EXE_COP) "(only for testing)"
-	$(MAKE) -C $(FOCLIDIR) fo_wrapper
-	ln -sf $(FOCLIDIR)/fo_wrapper.php $(EXE_COP)
 
 $(EXE)_cov: $(CXXFOLIB) $(VARS) $(COVERAGE)
 	$(CXX) $(COVERAGE) $(FLAG_COV) $(DEF) $(CXXFLAGS_LINK) -o $@

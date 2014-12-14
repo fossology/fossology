@@ -31,7 +31,7 @@ test-cli: all
 
 test-sched: all
 	@echo "make functional tests for scheduler mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 coverage: coverage-cli coverage-sched
 
