@@ -124,7 +124,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->rmRepo();
 
-    $this->assertEquals($retCode, 0, 'copyright failed: '.$output);
+    $this->assertEquals($retCode, 0, "copyright failed ($retCode): ".$output);
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
 
