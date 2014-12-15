@@ -12,11 +12,8 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef MONK_AGENT_LICENSE_H
 #define MONK_AGENT_LICENSE_H
 
-#include "string_operations.h"
 #include "database.h"
 #include "monk.h"
-#include "libfossdbmanager.h"
-
 
 int isIgnoredLicense(License* license);
 Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff);

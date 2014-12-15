@@ -26,10 +26,10 @@ uint32_t hash(char* string) {
   return result;
 }
 
-inline uint32_t hash_init() {
+uint32_t hash_init() {
   return 5231;
 }
 
-inline void hash_add(const char* value, uint32_t* currentHash) {
+void hash_add(const char* value, uint32_t* currentHash) {
   *currentHash = ((*currentHash << 6) + *currentHash) + *value;
 }

@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "bulk.h"
 #include "monk.h"
 
-inline GArray* findAllMatchesBetween(File* file, Licenses* licenses,
+GArray* findAllMatchesBetween(File* file, Licenses* licenses,
                                      unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
@@ -154,7 +154,7 @@ char* formatMatchArray(GArray * matchInfo) {
   return g_string_free(stringBuilder, FALSE);
 }
 
-inline unsigned short match_rank(Match* match) {
+static unsigned short match_rank(Match* match) {
   if (match->type == MATCH_TYPE_FULL) {
     return 100;
   } else {
@@ -178,7 +178,7 @@ inline unsigned short match_rank(Match* match) {
   }
 }
 
-inline size_t match_getStart(const Match* match) {
+size_t match_getStart(const Match* match) {
   if (match->type == MATCH_TYPE_FULL) {
     return match->ptr.full->start;
   } else {
@@ -190,7 +190,7 @@ inline size_t match_getStart(const Match* match) {
   }
 }
 
-inline size_t match_getEnd(const Match* match) {
+size_t match_getEnd(const Match* match) {
   if (match->type == MATCH_TYPE_FULL) {
     return match->ptr.full->length + match->ptr.full->start;
   } else {
@@ -226,7 +226,7 @@ gint compareMatchIncluded (gconstpointer a, gconstpointer b) {
 }
 
 // make sure to call it after a match_rank or the result will be junk
-inline double match_getRank(const Match* match) {
+double match_getRank(const Match* match) {
   if (match->type == MATCH_TYPE_FULL)
     return 100.0;
   else
@@ -257,7 +257,7 @@ gint compareMatchByRank (gconstpointer a, gconstpointer b) {
  * input: [GArray of Match*]
  * output: [GArray of GArray of Match*]
  */
-inline GArray* groupOverlapping(GArray* matches) {
+GArray* groupOverlapping(GArray* matches) {
   g_array_sort(matches, compareMatchIncluded);
 
   GArray* result = g_array_new(TRUE, FALSE, sizeof(GArray*));
@@ -341,7 +341,7 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
   return result;
 }
 
-inline void processFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+void processFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
   if (state->scanMode == MODE_SCHEDULER) {
     fo_dbManager_begin(state->dbManager);
     long licenseFileId = saveToDb(state->dbManager, state->agentId,
@@ -358,7 +358,7 @@ inline void processFullMatch(MonkState* state, File* file, License* license, Dif
   }
 }
 
-inline void processDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+void processDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult) {
   unsigned short matchPercent = diffResult->percentual;
   convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
   if (state->scanMode == MODE_SCHEDULER) {
@@ -381,7 +381,7 @@ inline void processDiffMatch(MonkState* state, File* file, License* license, Dif
   }
 }
 
-inline void processMatch(MonkState* state, File* file, Match* match) {
+void processMatch(MonkState* state, File* file, Match* match) {
   License* license = match->license;
   if (match->type == MATCH_TYPE_DIFF) {
     DiffResult* diffResult = match->ptr.diff;
@@ -396,7 +396,7 @@ inline void processMatch(MonkState* state, File* file, Match* match) {
   }
 }
 
-inline int processMatches(MonkState* state, File* file, GArray* matches) {
+int processMatches(MonkState* state, File* file, GArray* matches) {
   /* check if we have other results for this file.
    * We do it now to minimize races with a concurrent scan of this file:
    * the same file could be inside more than upload
@@ -435,7 +435,7 @@ inline int processMatches(MonkState* state, File* file, GArray* matches) {
   return 1; //TODO return errors
 }
 
-inline Match* diffResult2Match(DiffResult* diffResult, License* license){
+Match* diffResult2Match(DiffResult* diffResult, License* license){
   Match* newMatch = malloc(sizeof(Match));
   newMatch->license = license;
 

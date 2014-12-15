@@ -48,7 +48,7 @@ void queryAgentId(MonkState* state) {
     bail(state, 1);
 }
 
-inline int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
+int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
 
   if (!fileIdResult)

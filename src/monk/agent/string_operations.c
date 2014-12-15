@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
 
-inline int isDelim(char a, const char * delimiters) {
+int isDelim(char a, const char * delimiters) {
   if (a == '\0')
     return 1;
   const char * ptr = delimiters;
@@ -36,7 +36,7 @@ inline int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
-inline int specialDelim(const char* z){
+int specialDelim(const char* z){
   char a, b;
   a = *z;
   b = *(z+1);
