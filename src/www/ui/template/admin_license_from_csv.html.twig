@@ -1,0 +1,23 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <p>
+    {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
+        your computer to FOSSology.'| trans }}
+    {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
+    {{ upload_max_filesize }}bytes.
+  </p>
+  <form enctype="multipart/form-data" method="post">
+    <label for="file_input">
+      {{ 'Select the file to upload'| trans }}:
+    </label>
+    <input name="file_input" type="file"/><br/>
+
+    {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    <br/>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+    </p>
+  </form>
+
+{% endblock %}
+

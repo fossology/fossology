@@ -121,7 +121,11 @@ without any warranty.
       <argument type="service" id="businessrules.clearing_event_processor"/>
       <argument type="service" id="db.manager"/>
     </service>
-
+    
+    <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport">
+      <argument type="service" id="db.manager"/>
+    </service>
+    
     <service id="twig.loader" class="Twig_Loader_Filesystem">
       <argument id="option">%twig.loader.source_path%</argument>
     </service>
