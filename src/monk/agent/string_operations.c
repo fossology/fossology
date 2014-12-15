@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
 
-int isDelim(char a, const char * delimiters) {
+unsigned splittingDelim(char a, const char* delimiters) {
   if (a == '\0')
     return 1;
   const char * ptr = delimiters;
@@ -36,7 +36,7 @@ int isDelim(char a, const char * delimiters) {
   return 0;
 }
 
-int specialDelim(const char* z){
+unsigned specialDelim(const char* z){
   char a, b;
   a = *z;
   b = *(z+1);
@@ -63,6 +63,9 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
     stateToken = *remainder;
     if ((stateToken) && (stateToken->length > 0))
       g_array_append_val(tokens, *stateToken);
+    if (stateToken) {
+      free(stateToken);
+    }
   }
 
   if (!*remainder) {
@@ -86,12 +89,12 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
 
   size_t readBytes = 0;
   while (readBytes < inputSize) {
-    int delimLen = 0;
+    unsigned delimLen = 0;
     if(inputSize-readBytes>=2) {
       delimLen = specialDelim(ptr);
     }
     if(!delimLen) {
-      delimLen = isDelim(*ptr, delimiters);
+      delimLen = splittingDelim(*ptr, delimiters);
     }
     if (delimLen>0) {
       if (stateToken->length > 0) {

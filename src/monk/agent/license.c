@@ -43,7 +43,6 @@ Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, uns
 
   for (int j = 0; j < PQntuples(licensesResult); j++) {
     long refId = atol(PQgetvalue(licensesResult, j, 0));
-    //TODO create a copy of this string and track where we need to free it -> than we have no need keep licensesResult
     char* licShortName = PQgetvalue(licensesResult, j, 1);
 
     License license;

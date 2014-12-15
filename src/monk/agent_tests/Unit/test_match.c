@@ -359,6 +359,27 @@ void test_filterMatchesWithTwoGroups() {
   }
 }
 
+void test_filterMatchesWithBadGroupingAtFirstPass() {
+  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 95.0, 0, 10);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 99.0, 5, 10);
+  Match* match3 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 95.0, 5, 9);
+  Match* match4 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 95.0, 5, 14);
+
+  g_array_append_val(matches, match1);
+  g_array_append_val(matches, match2);
+  g_array_append_val(matches, match3);
+  g_array_append_val(matches, match4);
+
+  GArray* filteredMatches = filterNonOverlappingMatches(matches);
+
+  CU_ASSERT_EQUAL(filteredMatches->len, 1);
+  if (filteredMatches->len == 1) {
+    CU_ASSERT_EQUAL(g_array_index(filteredMatches, Match*, 0), match2);
+    matchesArray_free(filteredMatches);
+  }
+}
+
 CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with disjoint full matches:", test_findAllMatchesDisjoint},
   {"Testing match of all licenses with diff at beginning", test_findDiffsAtBeginning},
@@ -373,5 +394,6 @@ CU_TestInfo match_testcases[] = {
   {"Testing filtering matches empty:", test_filterMatchesEmpty},
   {"Testing filtering matches with a full match:", test_filterMatches2},
   {"Testing filtering matches with two groups:", test_filterMatchesWithTwoGroups},
+  {"Testing filtering matches with bad grouping at first pass:", test_filterMatchesWithBadGroupingAtFirstPass},
   CU_TEST_INFO_NULL
 };

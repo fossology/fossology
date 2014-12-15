@@ -312,7 +312,7 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
   for (guint i = 0; i < overlappingGroups->len; i++) {
     GArray* currentGroup = g_array_index(overlappingGroups, GArray*, i);
 
-    Match* biggestInGroup = g_array_index(currentGroup, Match*, 0);
+    Match* biggestInGroup = match_array_get(currentGroup, 0);
     Match* bestInGroup = greatestMatchInGroup(currentGroup, compareMatchByRank);
 
     if (bestInGroup != biggestInGroup) {
@@ -337,6 +337,18 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
 
   g_array_free(matches, TRUE);
   g_array_free(overlappingGroups, TRUE);
+
+  // some discarded matches could have distorted grouping
+  // if grouping again would put some matches together redo all filtering
+  GArray* regroupResult = groupOverlapping(result);
+  guint regroupCount = regroupResult->len;
+  for (guint i = 0; i<regroupResult->len; i++) {
+    g_array_free(g_array_index(regroupResult, GArray*, i), TRUE);
+  }
+  g_array_free(regroupResult, TRUE);
+  if (result->len != regroupCount) {
+    result = filterNonOverlappingMatches(result);
+  }
 
   return result;
 }

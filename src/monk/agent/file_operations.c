@@ -43,9 +43,6 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
   }
   streamTokenize(NULL, 0, NULL, tokens, &remainder);
 
-  if (remainder)
-    free(remainder);
-
   close(fd);
 
   return 1;
