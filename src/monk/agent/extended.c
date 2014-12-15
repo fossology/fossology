@@ -9,13 +9,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <glib.h>
+#include "monk.h"
 #include "extended.h"
-#include "cli.h"
-#include "bulk.h"
-#include "file_operations.h"
 #include "database.h"
-#include "license.h"
-#include "match.h"
 #include "getopt.h"
 
 int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd, long* bulkOptId) {
@@ -52,41 +51,27 @@ int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd, lon
   return 1;
 }
 
-int handleArguments(MonkState* state, int argc, char** argv) {
-  int fileOptInd;
-  long bulkOptId = -1;
-  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
-    return 0;
-
-  int result;
-  if (bulkOptId > 0) {
-    state->scanMode = MODE_BULK;
-    result = handleBulkMode(state, bulkOptId);
-  } else {
-    state->scanMode = MODE_CLI;
-    result = handleCliMode(state, argc, argv, fileOptInd);
-  }
-  return result;
+void scheduler_disconnect(MonkState* state, int exitval) {
+  fo_dbManager_finish(state->dbManager);
+  fo_scheduler_disconnect(exitval);
 }
 
-void onNoMatch(MonkState* state, File* file) {
-  if (state->scanMode == MODE_CLI) {
-    onNoMatch_Cli(file);
-  } else {
-    // ignore for bulk mode
-  }
+void bail(MonkState* state, int exitval) {
+  scheduler_disconnect(state, exitval);
+  exit(exitval);
 }
 
-void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
-  if (state->scanMode == MODE_CLI) {
-    onFullMatch_Cli(file, license, matchInfo);
-  }
-}
+void queryAgentId(MonkState* state, const char* agentName, const char* agentDesc) {
+  char* svnRev = fo_sysconfig(agentName, "SVN_REV");
+  char* version = fo_sysconfig(agentName, "VERSION");
+  gchar* agentRevision = g_strdup_printf("%s.%s", version, svnRev);
 
-void onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult, unsigned short rank) {
-  if (state->scanMode == MODE_CLI) {
-    onDiffMatch_Cli(file, license, diffResult, rank);
-  } else {
-    // ignore for bulk mode
-  }
+  int agentId = fo_GetAgentKey(fo_dbManager_getWrappedConnection(state->dbManager),
+                               agentName, 0, agentRevision, agentDesc);
+  g_free(agentRevision);
+
+  if (agentId > 0)
+    state->agentId = agentId;
+  else
+    bail(state, 1);
 }

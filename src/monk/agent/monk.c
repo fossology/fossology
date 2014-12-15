@@ -9,44 +9,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#define _GNU_SOURCE
-#include <stdio.h>
-
-#include <libfossology.h>
 #include "monk.h"
 
-#include "database.h"
 #include "license.h"
-#include "match.h"
+#include "scheduler.h"
+#include "cli.h"
 #include "extended.h"
 
-void scheduler_disconnect(MonkState* state, int exitval) {
-  fo_dbManager_finish(state->dbManager);
-  fo_scheduler_disconnect(exitval);
-}
-
-void bail(MonkState* state, int exitval) {
-  scheduler_disconnect(state, exitval);
-  exit(exitval);
-}
-
-void queryAgentId(MonkState* state) {
-  char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
-  char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
-  char* agentRevision;
-  if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV)) {
-    bail(state, -1);
-  };
-
-  int agentId = fo_GetAgentKey(fo_dbManager_getWrappedConnection(state->dbManager),
-                               AGENT_NAME, 0, agentRevision, AGENT_DESC);
-  free(agentRevision);
-
-  if (agentId > 0)
-    state->agentId = agentId;
-  else
-    bail(state, 1);
-}
+MatchCallbacks schedulerCallbacks = {NULL, sched_onNoMatch, sched_onFullMatch, sched_onDiffMatch};
 
 int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
@@ -86,7 +56,7 @@ int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
           continue;
         }
 
-        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses)) {
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses, &schedulerCallbacks)) {
           fo_scheduler_heart(1);
         } else {
           fo_scheduler_heart(0);
@@ -109,15 +79,14 @@ int main(int argc, char** argv) {
 
   fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
 
-  queryAgentId(state);
-  state->jobId = fo_scheduler_jobId();
-
   if (argc > 1) {
-    if (!handleArguments(state, argc, argv))
+    if (!handleCliMode(state, argc, argv))
       bail(state, 3);
   } else {
     /* scheduler mode */
     state->scanMode = MODE_SCHEDULER;
+    queryAgentId(state, AGENT_NAME, AGENT_DESC);
+
     PGresult* licensesResult = queryAllLicenses(state->dbManager);
     Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 

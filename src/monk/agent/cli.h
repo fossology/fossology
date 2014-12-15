@@ -15,9 +15,9 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 #include "diff.h"
 
-int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd);
-void onNoMatch_Cli(File* file);
-void onFullMatch_Cli(File* file, License* license, DiffMatchInfo* matchInfo);
-void onDiffMatch_Cli(File* file, License* license, DiffResult* diffResult, unsigned short rank);
+int handleCliMode(MonkState* state, int argc, char** argv);
+int cli_onNoMatch(MonkState* state, File* file);
+int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
+int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult);
 
 #endif // MONK_AGENT_CLI_H

@@ -9,15 +9,18 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#define _GNU_SOURCE
 #include <libfossology.h>
-#include <string.h>
-#include <stddef.h>
 
-#include "bulk.h"
+#include "monkbulk.h"
 #include "database.h"
 #include "license.h"
 #include "match.h"
+#include "extended.h"
+
+int bulk_onAllMatches(MonkState* state, File* file, GArray* matches);
+int queryBulkArguments(long bulkId, MonkState* state);
+
+MatchCallbacks bulkCallbacks = {.onAll = bulk_onAllMatches};
 
 int setLeftAndRight(MonkState* state) {
   char* tableName = getUploadTreeTableName(state->dbManager, state->bulkArguments->uploadId);
@@ -67,6 +70,8 @@ int queryDecisionType(MonkState* state) {
   return 1;
 }
 
+void bulkArguments_contents_free(BulkArguments* bulkArguments);
+
 int queryBulkArguments(long bulkId, MonkState* state) {
   int result = 0;
 
@@ -88,7 +93,7 @@ int queryBulkArguments(long bulkId, MonkState* state) {
       BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
 
       int i = 0;
-      bulkArguments->uploadId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
+      bulkArguments->uploadId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
       bulkArguments->uploadTreeId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
       bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
       bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
@@ -162,7 +167,7 @@ int bulk_identification(MonkState* state) {
 
           long fileId = atol(PQgetvalue(filesResult, i, 0));
 
-          if (matchPFileWithLicenses(threadLocalState, fileId, licenses)) {
+          if (matchPFileWithLicenses(threadLocalState, fileId, licenses, &bulkCallbacks)) {
             fo_scheduler_heart(1);
           } else {
             fo_scheduler_heart(0);
@@ -182,17 +187,32 @@ int bulk_identification(MonkState* state) {
   return !haveError;
 }
 
-int handleBulkMode(MonkState* state, long bulkId) {
-  if (queryBulkArguments(bulkId, state)) {
+int main(int argc, char** argv) {
+  MonkState stateStore;
+  MonkState* state = &stateStore;
+
+  fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
+
+  queryAgentId(state, AGENT_BULK_NAME, AGENT_BULK_DESC);
+
+  int fileOptInd;
+  long bulkOptId = -1;
+  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
+    return 0;
+
+  state->scanMode = MODE_BULK;
+
+  state->jobId = fo_scheduler_jobId();
+  if (queryBulkArguments(bulkOptId, state)) {
     BulkArguments* bulkArguments = state->bulkArguments;
 
     int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-                            0, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 0);
+                            0, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 0);
 
     int result = bulk_identification(state);
 
     fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-                arsId, bulkArguments->uploadId, state->agentId, AGENT_ARS, NULL, 1);
+                arsId, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 1);
 
     return result;
   } else {
@@ -200,7 +220,7 @@ int handleBulkMode(MonkState* state, long bulkId) {
   }
 }
 
-int processMatches_Bulk(MonkState* state, File* file, GArray* matches) {
+int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
   int haveAFullMatch = 0;
   for (guint j=0; j<matches->len; j++) {
     Match* match = match_array_get(matches, j);

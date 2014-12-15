@@ -9,15 +9,17 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef MONK_AGENT_EXTENDED_H
-#define MONK_AGENT_EXTENDED_H
+#ifndef MONK_AGENT_BULK_H
+#define MONK_AGENT_BULK_H
+
+#define AGENT_BULK_NAME "monkbulk" ///< the name of the agent, used to get agent key
+#define AGENT_BULK_DESC "monkbulk agent" ///< what program this is
+#define AGENT_BULK_ARS  "monkbulk_ars"
 
 #include "monk.h"
-#include "diff.h"
 
-int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd, long* bulkOptId);
+#define BULK_DECISION_TYPE_MEANING "bulk"
+#define BULK_DECISION_TYPE 2
+#define BULK_DECISION_SCOPE "upload"
 
-void scheduler_disconnect(MonkState* state, int exitval);
-void bail(MonkState* state, int exitval);
-void queryAgentId(MonkState* state, const char* agentName, const char* agentDesc);
-#endif // MONK_AGENT_EXTENDED_H
+#endif // MONK_AGENT_BULK_H

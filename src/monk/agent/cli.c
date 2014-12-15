@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "license.h"
 #include "match.h"
+#include "extended.h"
+#include "monk.h"
+
+MatchCallbacks cliCallbacks = {NULL, cli_onNoMatch, cli_onFullMatch, cli_onDiff};
 
 int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, char** argv) {
   File file;
@@ -22,14 +26,21 @@ int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, cha
   if (!readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS))
     return 0;
 
-  int result = matchFileWithLicenses(state, &file, licenses);
+  int result = matchFileWithLicenses(state, &file, licenses, &cliCallbacks);
 
   g_array_free(file.tokens, TRUE);
 
   return result;
 }
 
-int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {
+int handleCliMode(MonkState* state, int argc, char** argv) {
+  int fileOptInd;
+  long bulkOptId = -1;
+  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
+    return 0;
+
+  state->scanMode = MODE_CLI;
+
   PGresult* licensesResult = queryAllLicenses(state->dbManager);
   Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 
@@ -61,17 +72,29 @@ int handleCliMode(MonkState* state, int argc, char** argv, int fileOptInd) {
   return !threadError;
 }
 
-void onNoMatch_Cli(File* file) {
-  printf("File %s contains license(s) No_license_found\n", file->fileName);
+int cli_onNoMatch(MonkState* state, File* file) {
+  if (state->verbosity >= 1) {
+    printf("File %s contains license(s) No_license_found\n", file->fileName);
+  }
+  return 1;
 }
 
-void onFullMatch_Cli(File* file, License* license, DiffMatchInfo* matchInfo) {
+int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+  if (state->scanMode != MODE_CLI)
+    return 0;
+
   printf("found full match between \"%s\" and \"%s\" (rf_pk=%ld); ",
          file->fileName, license->shortname, license->refId);
   printf("matched: %zu+%zu\n", matchInfo->text.start, matchInfo->text.length);
+  return 1;
 }
 
-void onDiffMatch_Cli(File* file, License* license, DiffResult* diffResult, unsigned short rank) {
+int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+  if (state->scanMode != MODE_CLI)
+    return 0;
+
+  unsigned short rank = diffResult->percentual;
+
   printf("found diff match between \"%s\" and \"%s\" (rf_pk=%ld); ",
          file->fileName, license->shortname, license->refId);
   printf("rank %u; ", rank);
@@ -79,4 +102,5 @@ void onDiffMatch_Cli(File* file, License* license, DiffResult* diffResult, unsig
   char * formattedMatchArray = formatMatchArray(diffResult->matchedInfo);
   printf("diffs: {%s}\n", formattedMatchArray);
   free(formattedMatchArray);
+  return 1;
 }

@@ -116,8 +116,8 @@ set(SOURCE_FILES
     src/mimetype/agent_tests/Unit/testRun.c
     src/mimetype/agent_tests/Unit/testRun.h
     src/monk/agent/buildSquareVisitor.c
-    src/monk/agent/bulk.c
-    src/monk/agent/bulk.h
+    src/monk/agent/monkbulk.c
+    src/monk/agent/monkbulk.h
     src/monk/agent/cli.c
     src/monk/agent/cli.h
     src/monk/agent/database.c
@@ -138,6 +138,8 @@ set(SOURCE_FILES
     src/monk/agent/match.h
     src/monk/agent/monk.c
     src/monk/agent/monk.h
+    src/monk/agent/scheduler.c
+    src/monk/agent/scheduler.h
     src/monk/agent/string_operations.c
     src/monk/agent/string_operations.h
     src/monk/agent_tests/Unit/run_tests.c

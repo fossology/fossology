@@ -11,12 +11,11 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "match.h"
 
-#include "file_operations.h"
 #include "license.h"
 #include "math.h"
-#include "extended.h"
-#include "bulk.h"
 #include "monk.h"
+#include "diff.h"
+#include "file_operations.h"
 
 GArray* findAllMatchesBetween(File* file, Licenses* licenses,
                                      unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
@@ -47,7 +46,34 @@ GArray* findAllMatchesBetween(File* file, Licenses* licenses,
   return filteredMatches;
 }
 
-char* getFileName(MonkState* state, long pFileId) {
+void match_array_free(GArray* matches) {
+#if GLIB_CHECK_VERSION(2,32,0)
+  g_array_set_clear_func(matches, match_destroyNotify);
+#else
+  for (unsigned int i=0; i< matches->len; ++i) {
+    Match* tmp = g_array_index(matches, Match*, i);
+    match_free(tmp);
+  }
+#endif
+    g_array_free(matches, TRUE);
+}
+
+Match* match_array_get(GArray* matches, guint i) {
+  return g_array_index(matches, Match*, i);
+}
+
+int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses, MatchCallbacks* callbacks) {
+  GArray* matches = findAllMatchesBetween(file, licenses,
+                                          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+  int result = processMatches(state, file, matches, callbacks);
+
+  // we are done: free memory
+  match_array_free(matches);
+
+  return result;
+}
+
+static char* getFileName(MonkState* state, long pFileId) {
   char* pFile = queryPFileForFileId(state->dbManager, pFileId);
 
   if (!pFile) {
@@ -71,34 +97,7 @@ char* getFileName(MonkState* state, long pFileId) {
   return pFileName;
 }
 
-void match_array_free(GArray* matches) {
-#if GLIB_CHECK_VERSION(2,32,0)
-  g_array_set_clear_func(matches, match_destroyNotify);
-#else
-  for (unsigned int i=0; i< matches->len; ++i) {
-    Match* tmp = g_array_index(matches, Match*, i);
-    match_free(tmp);
-  }
-#endif
-    g_array_free(matches, TRUE);
-}
-
-Match* match_array_get(GArray* matches, guint i) {
-  return g_array_index(matches, Match*, i);
-}
-
-int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses) {
-  GArray* matches = findAllMatchesBetween(file, licenses,
-                                          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
-  int result = processMatches(state, file, matches);
-
-  // we are done: free memory
-  match_array_free(matches);
-
-  return result;
-}
-
-int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, MatchCallbacks* callbacks) {
   File file;
   file.id = pFileId;
 
@@ -110,7 +109,7 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses) {
 
     if (result)
     {
-      result = matchFileWithLicenses(state, &file, licenses);
+      result = matchFileWithLicenses(state, &file, licenses, callbacks);
 
       g_array_free(file.tokens, TRUE);
     }
@@ -353,98 +352,40 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
   return result;
 }
 
-void processFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
-  if (state->scanMode == MODE_SCHEDULER) {
-    fo_dbManager_begin(state->dbManager);
-    long licenseFileId = saveToDb(state->dbManager, state->agentId,
-                                  license->refId, file->id, 100);
-    if (licenseFileId > 0)
-      saveDiffHighlightToDb(state->dbManager, matchInfo, licenseFileId);
-    fo_dbManager_commit(state->dbManager);
-
-#ifdef DEBUG
-    printf("found full match between (pFile=%ld) and \"%s\" (rf_pk=%ld)\n", file->id, license->shortname, license->refId);
-#endif //DEBUG
-  } else {
-    onFullMatch(state, file, license, matchInfo);
-  }
-}
-
-void processDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult) {
-  unsigned short matchPercent = diffResult->percentual;
-  convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
-  if (state->scanMode == MODE_SCHEDULER) {
-    fo_dbManager_begin(state->dbManager);
-    long licenseFileId = saveToDb(state->dbManager, state->agentId, license->refId, file->id, matchPercent);
-    if (licenseFileId > 0)
-      saveDiffHighlightsToDb(state->dbManager, diffResult->matchedInfo, licenseFileId);
-    fo_dbManager_commit(state->dbManager);
-
-#ifdef DEBUG
-    printf("found diff match between (pFile=%ld) and \"%s\" (rf_pk=%ld); ", file->id, license->shortname, license->refId);
-    printf("%u%%; ", diffResult->percentual);
-
-    char * formattedMatchArray = formatMatchArray(diffResult->matchedInfo);
-    printf("diffs: {%s}\n", formattedMatchArray);
-    free(formattedMatchArray);
-#endif //DEBUG
-  } else {
-    onDiffMatch(state, file, license, diffResult, matchPercent);
-  }
-}
-
-void processMatch(MonkState* state, File* file, Match* match) {
+int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* callbacks) {
   License* license = match->license;
   if (match->type == MATCH_TYPE_DIFF) {
     DiffResult* diffResult = match->ptr.diff;
-    processDiffMatch(state, file, license, diffResult);
+
+    return callbacks->onDiff(state, file, license, diffResult);
   } else {
     DiffMatchInfo matchInfo;
     matchInfo.text = getFullHighlightFor(file->tokens, match->ptr.full->start, match->ptr.full->length);
     matchInfo.search = getFullHighlightFor(license->tokens, 0, license->tokens->len);
     matchInfo.diffType = FULL_MATCH;
 
-    processFullMatch(state, file, license, &matchInfo);
+    return callbacks->onFull(state, file, license, &matchInfo);
   }
 }
 
-int processMatches(MonkState* state, File* file, GArray* matches) {
-  /* check if we have other results for this file.
-   * We do it now to minimize races with a concurrent scan of this file:
-   * the same file could be inside more than upload
-   */
-  if ((state->scanMode == MODE_SCHEDULER) &&
-       hasAlreadyResultsFor(state->dbManager, state->agentId, file->id))
-  {
-    return 1;
+int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks* callbacks) {
+  if (callbacks->onAll) {
+    return callbacks->onAll(state, file, matches);
   }
 
-  if ((state->scanMode == MODE_SCHEDULER) && (matches->len == 0))
+  if (matches->len == 0)
   {
-    saveNoResultToDb(state->dbManager, state->agentId, file->id);
-    return 1;
+    return callbacks->onNo(state, file);
   }
 
-  if ((state->scanMode != MODE_SCHEDULER) && (state->verbosity >= 1) && (matches->len == 0))
+  int result = 1;
+  for (guint matchIndex = 0; result && (matchIndex < matches->len); matchIndex++)
   {
-    onNoMatch(state, file);
-    return 1;
+    Match* match = match_array_get(matches, matchIndex);
+    result &= processMatch(state, file, match, callbacks);
   }
 
-  if (state->scanMode == MODE_BULK)
-  {
-    return processMatches_Bulk(state, file, matches);
-  }
-  else
-  {
-    for (guint matchIndex = 0; matchIndex < matches->len; matchIndex++)
-    {
-      Match* match = match_array_get(matches, matchIndex);
-      processMatch(state, file, match);
-    }
-  }
-
-  return 1; //TODO return errors
+  return result;
 }
 
 Match* diffResult2Match(DiffResult* diffResult, License* license){

@@ -10,18 +10,17 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
-DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
 EXE = monk
 OBJECTS = monk.o string_operations.o file_operations.o database.o \
           license.o highlight.o match.o hash.o diff.o extended.o \
-          cli.o bulk.o \
+          cli.o scheduler.o \
           _squareVisitor.o
 COVERAGE = monk_cov.o string_operations_cov.o file_operations_cov.o \
            database_cov.o license_cov.o highlight_cov.o match_cov.o \
-           cli_cov.o bulk_cov.o \
+           cli_cov.o scheduler_cov.o \
            hash_cov.o diff_cov.o extended_cov.o _squareVisitor_cov.o
 
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
@@ -50,7 +49,7 @@ libmonk_cov.a: $(COVERAGE)
 ######################
 
 monk.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+	$(CC) -c $(CFLAGS_LOCAL) $<
 
 string_operations.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
@@ -73,16 +72,19 @@ hash.o: %.o: %.c %.h
 diff.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
+extended.o: %.o: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
+scheduler.o: %.o: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
 match.o: %.o: %.c %.h _squareVisitor.o
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-bulk.o: %.o: %.c %.h
+monkbulk.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 cli.o: %.o: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
-
-extended.o: %.o: %.c %.h
 	$(CC) -c $(CFLAGS_LOCAL) $(DEFS) $<
 
 _squareVisitor.o: _squareVisitor.c

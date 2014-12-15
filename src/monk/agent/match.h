@@ -30,6 +30,13 @@ typedef struct {
   int type;
 } Match;
 
+typedef struct {
+  int (*onAll)(MonkState* state, File* file, GArray* matches);
+  int (*onNo)(MonkState* state, File* file);
+  int (*onFull)(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
+  int (*onDiff)(MonkState* state, File* file, License* license, DiffResult* diffResult);
+} MatchCallbacks;
+
 void match_array_free(GArray* matches);
 Match* match_array_get(GArray* matches, guint i);
 
@@ -48,8 +55,8 @@ Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare);
 
 GArray* findAllMatchesBetween(File* file, Licenses* licenses, unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses);
-int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses);
+int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, MatchCallbacks* callbacks);
+int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses, MatchCallbacks* callbacks);
 
 void findDiffMatches(File* file, License* license,
                      size_t textStartPosition, size_t searchStartPosition,
@@ -57,7 +64,7 @@ void findDiffMatches(File* file, License* license,
                      unsigned maxAllowedDiff, unsigned minAdjacentMatches);
 
 GArray* filterNonOverlappingMatches(GArray* matches);
-int processMatches(MonkState* state, File* file, GArray* matches);
+int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks* callbacks);
 
 char* formatMatchArray(GArray* matchInfo);
 
