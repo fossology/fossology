@@ -31,7 +31,6 @@ use Fossology\Lib\Application\LicenseCsvImport;
 class AdminLicenseFromCSV extends DefaultPlugin
 {
   const NAME = "admin_license_from_csv";
-  var $headrow = false;
 
   function __construct()
   {
@@ -55,7 +54,9 @@ class AdminLicenseFromCSV extends DefaultPlugin
     if ($request->isMethod('POST'))
     {
       $uploadFile = $request->files->get('file_input');
-      $vars['message'] = $this->handleFileUpload($uploadFile);
+      $delimiter = $request->get('delimiter')?:',';
+      $enclosure = $request->get('enclosure')?:'"';
+      $vars['message'] = $this->handleFileUpload($uploadFile,$delimiter,$enclosure);
     }
 
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
@@ -68,9 +69,9 @@ class AdminLicenseFromCSV extends DefaultPlugin
    * @param UploadedFile $uploadedFile
    * @return null|string
    */
-  protected function handleFileUpload(UploadedFile $uploadedFile)
+  protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
   {
-    if ($uploadedFile == null)
+    if ( !($uploadedFile instanceof UploadedFile) )
     {
       return _("Error: no file selected");
     }
@@ -84,6 +85,8 @@ class AdminLicenseFromCSV extends DefaultPlugin
     }
     /** @var LicenseCsvImport */
     $licenseCsvImport = $this->getObject('app.license_csv_import');
+    $licenseCsvImport->setDelimiter($delimiter);
+    $licenseCsvImport->setEnclosure($enclosure);
     return $licenseCsvImport->handleFile($uploadedFile->getRealPath());
   }
 

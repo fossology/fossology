@@ -1085,6 +1085,12 @@
   $Schema["TABLE"]["license_ref"]["rf_detector_type"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_detector_type\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref"]["rf_detector_type"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["license_ref"]["rf_source"]["DESC"] = "";
+  $Schema["TABLE"]["license_ref"]["rf_source"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_source\" text;";
+  $Schema["TABLE"]["license_ref"]["rf_source"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_source\" DROP NOT NULL;";
+  $Schema["TABLE"]["license_ref"]["rf_source"]["UPDATE"] = "";
+
+  
 
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key';";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8;";

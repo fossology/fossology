@@ -24,6 +24,10 @@ use Fossology\Lib\Data\LicenseUsageTypes;
 class LicenseCsvImport {
   /** @var DbManager */
   protected $dbManager;
+  /** @var string */
+  protected $delimiter = ',';
+  /** @var string */
+  protected $enclosure = '"';
   /** @var null|array */
   protected $headrow = null;
   /** @var array */
@@ -32,6 +36,16 @@ class LicenseCsvImport {
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
+  }
+  
+  public function setDelimiter($delimiter=',')
+  {
+    $this->delimiter = substr($delimiter,0,1);
+  }
+
+  public function setEnclosure($enclosure='"')
+  {
+    $this->enclosure = substr($enclosure,0,1);
   }
   
   /**
@@ -46,7 +60,7 @@ class LicenseCsvImport {
     $cnt = -1;
     try
     {
-      while(($row = fgetcsv($handle)) !== FALSE) {
+      while(($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== FALSE) {
         $this->handleCsv($row);
         $cnt++;
       }
@@ -72,10 +86,10 @@ class LicenseCsvImport {
     foreach( array('shortname','fullname','text') as $needle){
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
-    foreach(array('parent_shortname'=>null,'url'=>'','notes'=>'') as $optNeedle=>$defaultValue)
+    foreach(array('parent_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
     {
       $mRow[$optNeedle] = $defaultValue;
-      if (array_key_exists($optNeedle,$this->headrow) && array_key_exists($this->headrow[$optNeedle], $row))
+      if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row))
       {
         $mRow[$optNeedle] = $row[$this->headrow[$optNeedle]];
       }
@@ -95,7 +109,7 @@ class LicenseCsvImport {
       }
       $headrow[$needle] = $col;
     }
-    foreach( array('parent_shortname','url','notes') as $optNeedle){
+    foreach( array('parent_shortname','url','notes','source') as $optNeedle){
       $headrow[$optNeedle] = array_search($optNeedle, $row);
     }
     return $headrow;
@@ -110,10 +124,13 @@ class LicenseCsvImport {
       throw new \Exception("Shortname '$row[shortname]' already in DB");
     }
     $stmtInsert = __METHOD__.'.insert';
-    $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_detector_type,rf_url,rf_notes) VALUES ($1,$2,$3,$4,$5,$6) RETURNING rf_pk');
-    $resi = $dbManager->execute($stmtInsert,array($row['shortname'],$row['fullname'],$row['text'],$userDetected=1,$row['url'],$row['notes']));
+    $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source)'
+            . ' VALUES ($1,$2,$3,md5($3),$4,$5,$6,$7) RETURNING rf_pk');
+    $resi = $dbManager->execute($stmtInsert,
+            array($row['shortname'],$row['fullname'],$row['text'],$userDetected=1,$row['url'],$row['notes'],$row['source']));
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
+    $this->nkMap[$row['shortname']] = $new['rf_pk'];
     if ($row['parent_shortname']===null || $this->getKeyFromShortname($row['parent_shortname'])===false)
     {
       return;
@@ -131,7 +148,7 @@ class LicenseCsvImport {
     {
       return $this->nkMap[$shortname];
     }
-    $row = $this->dbManager->getSingleRow('SELECT rf_pk,rf_shortname FROM license_ref WHERE rf_shortname=$1',array($shortname));
+    $row = $this->dbManager->getSingleRow('SELECT rf_pk FROM license_ref WHERE rf_shortname=$1',array($shortname));
     $this->nkMap[$shortname] = ($row===false) ? false : $row['rf_pk'];
     return $this->nkMap[$shortname];
   }
