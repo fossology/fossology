@@ -13,17 +13,20 @@ include $(VARS)
 EXE = decider.php version.php DeciderAgent.php
 WRAP = decider
 
-all: version.php
+all: version.php decider
 
 version.php: version-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
-decider: all
+decider: services.xml
 	@echo "making locally runnable decider (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
 	ln -sf $(FOCLIDIR)/fo_wrapper.php decider
+
+services.xml:
+	$(MAKE) -C $(FOLIBPHPDIR) services.xml
 
 install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/decider/agent/

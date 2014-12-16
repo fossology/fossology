@@ -123,4 +123,4 @@ class ReadmeOssAgent extends Agent
 $agent = new ReadmeOssAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
-$agent->bail(0);
+$agent->scheduler_disconnect(0);

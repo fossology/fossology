@@ -15,7 +15,11 @@
         <h1>{{ shortName|e }}</h1>
         {% if fullName %}
           <h2>License Fullname</h2>
-          {{ fullName }}
+          {{ fullName|e }}
+        {% endif %}
+        {% if parentId %}
+          <h2>{{ 'Concluded license'|trans }}</h2>
+          <a href="?mod=popup-license&rf={{ parentId }}">{{ parentShortName|e }}</a>
         {% endif %}
         {% if url %}
           <h2>Reference UR:</h2>

@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief edit group user permissions
  */
 class AdminGroupUsers extends DefaultPlugin {
-  var $groupPermissions = array(-1 => "None", 0=>"User", 1=>"Admin", 2=>"Advisor");
+  var $groupPermissions = array(-1 => "None", UserDao::USER=>"User", UserDao::ADMIN=>"Admin", UserDao::ADVISOR=>"Advisor");
   const NAME = 'group_manage_users';
           
   function __construct(){

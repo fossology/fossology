@@ -50,6 +50,77 @@ class AgentDao extends Object
     return $this->dbManager->existsTable($this->getArsTableName($agentName));
   }
 
+  public function createArsTable($agentName)
+  {
+    $tableName = $this->getArsTableName($agentName);
+
+    $this->dbManager->queryOnce("CREATE TABLE ".$tableName."() INHERITS(ars_master);
+    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);
+    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE");
+  }
+
+  public function writeArsRecord($agentName,$agentId,$uploadId,$arsId=0,$success=false,$status="")
+  {
+    $arsTableName = $this->getArsTableName($agentName);
+
+    if ($arsId)
+    {
+      $successDb = $this->dbManager->booleanToDb($success);
+      $parms = array($successDb, $arsId);
+
+      $stmt = __METHOD__.".$arsTableName";
+
+      if (!empty($status)) {
+        $stmt .= ".status";
+        $parms[] = $status;
+        $statusClause = ", ars_status = $".count($parms);
+      }
+      else
+      {
+        $statusClause = "";
+      }
+
+      $this->dbManager->getSingleRow(
+              "UPDATE $arsTableName
+              SET ars_success=$1,
+                  ars_endtime=now() $statusClause
+              WHERE ars_pk = $2",
+              $parms, $stmt);
+    } else
+    {
+      $row = $this->dbManager->getSingleRow(
+              "INSERT INTO $arsTableName(agent_fk,upload_fk)
+               VALUES ($1,$2) RETURNING ars_pk",
+              array($agentId, $uploadId),
+              __METHOD__.".update.".$arsTableName);
+      if ($row !== false)
+      {
+        return $row['ars_pk'];
+      }
+    }
+
+    return -1;
+  }
+
+  public function getCurrentAgentId($agentName, $agentDesc="", $agentRev="")
+  {
+    $row = $this->dbManager->getSingleRow(
+      "SELECT agent_pk FROM agent WHERE agent_name = $1 order by agent_ts desc limit 1",
+      array($agentName), __METHOD__."select"
+    );
+
+    if ($row === false)
+    {
+      $row = $this->dbManager->getSingleRow(
+        "INSERT INTO agent(agent_name,agent_desc,agent_rev) VALUES ($1,$2,$3) RETURNING agent_pk",
+        array($agentName, $agentDesc, $agentRev), __METHOD__."insert"
+      );
+      return false !== $row ? intval($row['agent_pk']) : -1;
+    }
+
+    return intval($row['agent_pk']);
+  }
+
   /**
    * @brief
    *  The purpose of this function is to return an array of
@@ -216,8 +287,7 @@ ORDER BY agent_fk DESC";
   {
     return $agentName . self::ARS_TABLE_SUFFIX;
   }
-  
-  
+
   /**
    * @param string $agentName
    * @return bool

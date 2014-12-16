@@ -24,7 +24,6 @@
 
 namespace Fossology\Lib\Util;
 
-// use Fossology\Lib\Util\Object;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Db\DbManager;
 
@@ -35,7 +34,7 @@ class CopyrightLister extends Object
   private $includeContainer = FALSE;
   private $excludingCopyright = -1;
   private $includingCopyright = -1;
-  /** @var string $type copyright type(all/statement/url/email) */
+  /** @var string $type copyright type(all|statement|url|email) */
   private $type = "";
   private $agentId;
   

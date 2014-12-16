@@ -158,6 +158,14 @@ class SqliteE implements Driver
   }
 
   /**
+   * @return void
+   */
+  public function rollback(){
+    $this->dbConnection->query("ROLLBACK");
+    return;
+  }
+
+  /**
    * @param $booleanValue
    * @return boolean
    */

@@ -63,7 +63,7 @@ class HighlightDao extends Object
    * @param int $licenseId
    * @param int $agentId
    * @param null $highlightId
-   * @return array
+   * @return Highlight[]
    */
   public function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
@@ -118,7 +118,7 @@ class HighlightDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @return array
+   * @return Highlight[]
    */
   public function getHighlightKeywords(ItemTreeBounds $itemTreeBounds)
   {
@@ -143,7 +143,7 @@ class HighlightDao extends Object
   /**
    * @param int $uploadTreeId
    * @param int|null $clearingId
-   * @return array
+   * @return Highlight[]
    */
   public function getHighlightBulk($uploadTreeId, $clearingId = null)
   {
@@ -181,7 +181,7 @@ class HighlightDao extends Object
    * @param int|null $agentId
    * @param int|null $highlightId
    * @param int|null $clearingId
-   * @return array
+   * @return Highlight[]
    */
   public function getHighlightEntries(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null, $clearingId = null){
     $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
