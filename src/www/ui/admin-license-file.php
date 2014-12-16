@@ -98,29 +98,6 @@ class admin_license_file extends FO_Plugin
 
     return $V;
   }
-  
-  
-  function suggestLicenseId($str){
-    $tmpfname = tempnam("/tmp", "monk");
-    $handle = fopen($tmpfname, "w");
-    fwrite($handle, $str);
-    fclose($handle);
-
-    $cmd = dirname(dirname(__DIR__)).'/monk/agent/monk '.$tmpfname;
-    exec($cmd, $output, $return_var);
-    // found diff match between "$tmpfname" and "EUPL-1.0" (rf_pk=424); rank 99; diffs: {t[0+42] M0 s[0+46], ...
-    unlink($tmpfname);
-    if ($return_var)
-    {
-      return false;
-    }
-    if(preg_match('/\\(rf_pk=[0-9]+\\)/',$output[0], $matches))
-    {
-      return $matches[0];
-    }
-    else return 0;
-  }
-  
 
   /**
    * \brief Build the input form
@@ -319,15 +296,12 @@ class admin_license_file extends FO_Plugin
     $row['rf_active'] = $dbManager->booleanFromDb($row['rf_active'])?'true':'false';
     $row['marydone'] = $dbManager->booleanFromDb($row['marydone'])?'true':'false';
     $row['rf_text_updatable'] = $dbManager->booleanFromDb($row['rf_text_updatable'])?'true':'false';
-    
+
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
     $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos");
 
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
-    $vars['hint'] = $this->suggestLicenseId($row['rf_text']);
-    
-    
     $allVars = array_merge($vars,$row);
     return $this->renderTemplate('admin_license-upload_form.html.twig', $allVars);
   }

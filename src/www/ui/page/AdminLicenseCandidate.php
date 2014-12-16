@@ -162,7 +162,8 @@ class AdminLicenseCandidate extends DefaultPlugin
     fwrite($handle, $str);
     fclose($handle);
 
-    $cmd = dirname(dirname(dirname(__DIR__))).'/monk/agent/monk '.$tmpfname;
+    global $SYSCONFDIR;
+    $cmd = dirname(dirname(dirname(__DIR__))).'/monk/agent/monk -c '.$SYSCONFDIR.' '.$tmpfname;
     exec($cmd, $output, $return_var);
     unlink($tmpfname);
     if ($return_var)

@@ -22,9 +22,7 @@
       <td><input type="text" name="rf_fullname" value="{{ rf_fullname|e }}" size="60"></td>
     </tr>
     <tr>
-      <td align="right">{{ 'License Text'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}
-        {{ hint }}
-      </td>
+      <td align="right">{{ 'License Text'|trans }}{% if isReadOnly %} ({{ 'read only'|trans }}){% endif %}</td>
       <td><textarea name="rf_text" rows="10" cols="80" {% if isReadOnly %} readonly="readonly"{% endif %}>{{ rf_text|e }}</textarea></td>
     </tr>
     <tr>
