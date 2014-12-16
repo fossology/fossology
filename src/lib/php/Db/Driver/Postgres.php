@@ -145,6 +145,14 @@ class Postgres implements Driver
   }
 
   /**
+   * @return void
+   */
+  public function rollback(){
+    pg_query($this->dbConnection, "ROLLBACK");
+    return;
+  }
+
+  /**
    * @param $booleanValue
    * @return boolean
    */

@@ -95,7 +95,7 @@ abstract class DbManager extends Object
    * @param resource $result command result object
    * @param string $sqlStatement SQL command (optional)
    */
-  private function checkResult($result, $sqlStatement = "")
+  protected function checkResult($result, $sqlStatement = "")
   {
     if ($result !== false)
     {
@@ -106,15 +106,17 @@ abstract class DbManager extends Object
     {
       $lastError = $this->dbDriver->getLastError();
       $this->logger->addCritical($lastError);
+      if ($this->transactionDepth>0)
+      {
+        $this->dbDriver->rollback();
+      }
     } else
     {
       $this->logger->addCritical("DB connection lost.");
     }
-    echo "<br/><pre>$sqlStatement</pre><pre>";
-    debug_print_backtrace();
-    print "\n" . $lastError;
-    echo "</pre><hr>";
-    exit(1);
+
+    $message = "error executing: $sqlStatement\n\n$lastError";
+    throw new \Fossology\Lib\Exception($message);
   }
 
   /**

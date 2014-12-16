@@ -20,6 +20,7 @@ namespace Fossology\Decider\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
@@ -43,11 +44,14 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $clearingDecisionProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var AgentDao */
+  private $agentDao;
 
 
-  public function __construct(DbManager $dbManager, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionProcessor $clearingDecisionProcessor)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionProcessor $clearingDecisionProcessor)
   {
     $this->clearingDao = $clearingDao;
+    $this->agentDao = $agentDao;
     $this->uploadDao = $uploadDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
@@ -59,12 +63,13 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $GLOBALS['userId'] = $userId;
     $GLOBALS['jobId'] = $jobId;
     $GLOBALS['groupId'] = $groupId;
-    
+
     $matches;
     $GLOBALS['extraOpts'] = preg_match("/-k([0-9]*)/", $args, $matches) ? array("k" => $matches[1]) : array();
 
     $container = M::mock('Container');
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
+    $container->shouldReceive('get')->with('dao.agent')->andReturn($this->agentDao);
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
