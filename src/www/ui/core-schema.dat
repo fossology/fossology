@@ -2465,4 +2465,4 @@
   $Schema["SEQUENCE"]["license_map_licence_map_pk_seq"] = "CREATE SEQUENCE \"license_map_licence_map_pk_seq\" START 1;";
   
   $Schema["CONSTRAINT"]["licence_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"licence_map_pkpk\" PRIMARY KEY (\"licence_map_pk\");";
-  $Schema["CONSTRAINT"]["licence_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["licence_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"licence_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
