@@ -49,7 +49,7 @@ uninstall: $(MOD_NAME:%=uninstall-%)
 	$(call DIR_LOOP,uninstall)
 
 $(MOD_NAME:%=uninstall-%): NAME = $(@:uninstall-%=%)
-$(MOD_NAME:%=uninstall-%): uninstall_% :
+$(MOD_NAME:%=uninstall-%):
 	rm -rf $(DESTDIR)$(MODDIR)/$(NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME)
 
