@@ -33,11 +33,11 @@ $(MOD_NAME:%=VERSIONFILE-%):
 	$(call WriteVERSIONFile,$(NAME))
 	mv VERSION $(VERSIONFILE)
 
-install: all $(MOD_NAME:%=install_%)
+install: $(MOD_NAME:%=install-%)
 
-$(MOD_NAME:%=install_%): NAME = $(@:install_%=%)
-$(MOD_NAME:%=install_%):
-	$(call DIR_LOOP,install)
+$(MOD_NAME:%=install-%): NAME = $(@:install-%=%)
+$(MOD_NAME:%=install-%): all
+	$(call DIR_LOOP,$@)
 	$(INSTALL_DATA) VERSION-$(NAME) $(DESTDIR)$(MODDIR)/$(NAME)/VERSION
 	$(INSTALL_DATA) $(NAME).conf $(DESTDIR)$(MODDIR)/$(NAME)/$(NAME).conf
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
@@ -45,11 +45,11 @@ $(MOD_NAME:%=install_%):
 		ln -s $(MODDIR)/$(NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 
-uninstall: $(MOD_NAME:%=uninstall_%)
+uninstall: $(MOD_NAME:%=uninstall-%)
 	$(call DIR_LOOP,uninstall)
 
-$(MOD_NAME:%=uninstall_%): NAME = $(@:uninstall_%=%)
-$(MOD_NAME:%=uninstall_%): uninstall_% :
+$(MOD_NAME:%=uninstall-%): NAME = $(@:uninstall-%=%)
+$(MOD_NAME:%=uninstall-%): uninstall_% :
 	rm -rf $(DESTDIR)$(MODDIR)/$(NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME)
 

@@ -69,14 +69,14 @@ $(COVERAGE): %_cov.o: %.c _squareVisitor.c
 # install build rules #
 #######################
 
-install: all $(EXE:%=install_%)
+install: all $(EXE:%=install-%)
 
-$(EXE:%=install_%): install_% : %
+$(EXE:%=install-%): install-% : %
 	$(INSTALL_PROGRAM) $< $(DESTDIR)$(MODDIR)/$</agent/$<
 
-uninstall: $(EXE:%=uninstall_%)
+uninstall: $(EXE:%=uninstall-%)
 
-$(EXE:%=uninstall_%): uninstall_% :
+$(EXE:%=uninstall-%): uninstall-% :
 	rm -rf $(DESTDIR)$(MODDIR)/$</agent
 
 clean:
