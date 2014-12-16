@@ -131,11 +131,13 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
   public function testGetCurrentAgent()
   {
     assertThat($this->agentsDao->getCurrentAgent($this->agentName), is($this->incompleteAgent));
+    $this->addToAssertionCount(1);
   }
 
   public function testGetSuccessfulAgentRuns()
   {
     assertThat($this->agentsDao->getSuccessfulAgentRuns($this->agentName, $this->uploadId), is(array($this->agent, $this->olderAgent)));
+    $this->addToAssertionCount(1);
   }
 
   public function testGetLatestAgentResultForUpload()
@@ -145,21 +147,25 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
       $this->agentName => $this->agentId,
       $this->otherAgentName => $this->otherAgentId
     )));
+    $this->addToAssertionCount(1);
   }
 
   public function testGetRunningAgentIds()
   {
     assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, $this->agentName), is(array($this->incompleteAgentId)));
+    $this->addToAssertionCount(1);
   }
 
   public function testGetRunningAgentIdsForFinishedAgent()
   {
     assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, $this->otherAgentName), is(emptyArray()));
+    $this->addToAssertionCount(1);
   }
 
   public function testGetRunningAgentIdsForUnknownAgent()
   {
     assertThat($this->agentsDao->getRunningAgentIds($this->uploadId, "unknown"), is(emptyArray()));
+    $this->addToAssertionCount(1);
   }
 
   public function testArsTableExists()

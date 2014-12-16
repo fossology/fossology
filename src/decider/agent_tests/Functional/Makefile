@@ -12,8 +12,7 @@ include $(VARS)
 LOCALAGENTDIR = ../../agent
 
 all: version
-	$(MAKE) -C $(FOLIBPHPDIR) services.xml
-	$(MAKE) -C $(LOCALAGENTDIR) decider
+	$(MAKE) -C $(LOCALAGENTDIR) all
 
 version:
 	$(MAKE) -C $(TOP) VERSIONFILE
