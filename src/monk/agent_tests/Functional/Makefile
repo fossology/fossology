@@ -33,7 +33,7 @@ test-sched:
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 test-bulk:
-	@echo "make functional tests for scheduler mode"
+	@echo "make functional tests for bulk mode"
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) bulkTest.php
 
 test: all test-cli test-sched test-bulk

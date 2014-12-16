@@ -24,7 +24,6 @@ OBJECTS = test_string_operations.o \
           test_highlight.o \
           test_hash.o \
           test_match.o \
-          test_extended.o \
           test_diff.o \
           test_database.o \
           utils.o
