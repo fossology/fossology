@@ -124,10 +124,7 @@ function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
   /** @var DbManager $dbManager */
   $dbManager = $container->get('db.manager');
 
-  if (empty($upload_pk))
-    $upload_pk_val = "null";
-  else
-    $upload_pk_val = $upload_pk;
+  $upload_pk_val = empty($upload_pk) ? null : $upload_pk;
 
   $params = array($user_pk, $priority, $job_name, $upload_pk_val);
   $stmtName = __METHOD__;
