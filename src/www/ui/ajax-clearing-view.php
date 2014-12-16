@@ -38,28 +38,20 @@ class AjaxClearingView extends FO_Plugin
 
   /** @var UploadDao */
   private $uploadDao;
-
   /** @var LicenseDao */
   private $licenseDao;
-
   /** @var ClearingDao */
   private $clearingDao;
-
   /** @var AgentDao */
   private $agentsDao;
-
   /** @var Logger */
   private $logger;
-
   /** @var HighlightDao */
   private $highlightDao;
-
   /** @var HighlightProcessor */
   private $highlightProcessor;
-
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionEventProcessor;
-
   /** @var UrlBuilder */
   private $urlBuilder;
 
@@ -101,19 +93,13 @@ class AjaxClearingView extends FO_Plugin
   {
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
 
-    $licenseRefs = $this->licenseDao->getLicenseRefs($_GET['sSearch'], $orderAscending);
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
 
+    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs($_SESSION['GroupId'], $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions));
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
       $licenseId = $licenseRef->getId();
-
-      if (array_key_exists($licenseId, $licenseDecisions))
-      {
-        continue;
-      }
-
       $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
       $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
 
@@ -239,7 +225,6 @@ class AjaxClearingView extends FO_Plugin
 
     $table = array();
     /** @var ClearingResult $clearingResult */
-
     foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
       $licenseId = $clearingResult->getLicenseId();
@@ -292,9 +277,8 @@ class AjaxClearingView extends FO_Plugin
       }
     }
 
-    $table = array_values($this->sortByKeys($table, $orderAscending));
-
-    return $table;
+    $valueTable = array_values($this->sortByKeys($table, $orderAscending));
+    return $valueTable;
   }
 
   /**
@@ -334,8 +318,8 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
-   * @param $orderAscending
    * @param $arrayToBeSortedByKeys
+   * @param $orderAscending
    * @return array
    */
   protected function sortByKeys($arrayToBeSortedByKeys, $orderAscending)
