@@ -1,0 +1,64 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+    <p>
+        <b>
+            {{ 'Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
+            uploaded files.'| trans }}
+        </b>
+        {{ 'To manage your own group go into'| trans }}
+        <b>Admin &gt; Groups &gt; Manage Group Users</b>.
+        {{ 'To manage permissions for this one upload, go to'| trans }}
+        <b>Admin &gt; Upload Permissions</b>.
+    </p>
+    <p>
+        {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from
+        your computer to FOSSology.'| trans }}
+        {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
+        {{ upload_max_filesize }}bytes.
+    </p>
+    <form enctype="multipart/form-data" method="post">
+        <input type="hidden" name="{{ uploadFormBuildParameterName }}" value="{{ uploadFormBuild }}"/>
+        <ol>
+            <li>
+                <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded file:'| trans }}
+                    {% include 'components/select-folder.html.twig' with {'name': folderParameterName, 'folderStructure': folderStructure} only %}
+                </label>
+            </li>
+            <li>
+                <label for="{{ fileInputName }}">
+                    {{ 'Select the file to upload'| trans }}:
+                </label>
+                <br/>
+                <input name="{{ fileInputName }}" type="file"/><br/>
+            </li>
+            <li>
+                ({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:<br/>
+
+                <p>
+                    <label>
+                        <input type="text" name="{{ descriptionInputName }}" size="120"
+                               value="{{ descriptionInputValue }}"/>
+                    </label>
+                </p>
+            </li>
+            <li>
+                <label for="public">
+                    <input type="checkbox" name="public" value="public"/>
+                    ({{ 'Optional'|trans }}) {{ 'Make Public'| trans }}
+                </label>
+                {% if agentCheckBoxMake %}
+            <li>
+                {{ 'Select optional analysis'| trans }}
+                <br/>
+                {{ agentCheckBoxMake }}
+                {% endif %}
+        </ol>
+        {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+        <br/>
+
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+        </p>
+    </form>
+
+{% endblock %}

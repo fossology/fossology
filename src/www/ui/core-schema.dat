@@ -670,6 +670,11 @@
   $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_pk\" SET NOT NULL, ALTER COLUMN \"folder_pk\" SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
   $Schema["TABLE"]["folder"]["folder_pk"]["UPDATE"] = "UPDATE folder SET folder_pk=nextval('folder_folder_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["folder"]["parent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"parent_fk\" int4;";
+  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["folder"]["parent_fk"]["UPDATE"] = "";
+
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text;";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL;";

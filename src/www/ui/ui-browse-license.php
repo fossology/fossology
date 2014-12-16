@@ -272,27 +272,17 @@ class ui_browse_license extends FO_Plugin
 
     if (empty($V)) // no cache exists
     {
-      switch ($this->OutputType)
+      /* Show the folder path */
+      $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+
+      if (!empty($Upload))
       {
-        case "XML":
-          break;
-        case "HTML":
-          /* Show the folder path */
-          $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
-
-          if (!empty($Upload))
-          {
-            $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
-            $V .= js_url();
-            $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
-          }
-
-          $V .= $this->createJavaScriptBlock();
-          break;
-        case "Text":
-          break;
-        default:
+        $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+        $V .= js_url();
+        $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
       }
+
+      $this->vars['scripts'] = $this->createJavaScriptBlock();
 
       $Cached = false;
     } else
@@ -323,9 +313,8 @@ class ui_browse_license extends FO_Plugin
 
   private function createJavaScriptBlock()
   {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
+    $output = "<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
     $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
     return $output;
   }

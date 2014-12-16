@@ -180,7 +180,7 @@ class core_auth extends FO_Plugin {
 			$_SESSION['ip'] = $this->GetIP();
 		} 
         else 
-        if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP())) 
+        if (array_key_exists('checkip', $_SESSION) && ($_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
         {
 			/* Sessions are not transferable. */
             $this->UpdateSess("");
@@ -189,7 +189,7 @@ class core_auth extends FO_Plugin {
 
 		/* Enable or disable plugins based on login status */
 		$Level = PLUGIN_DB_NONE;
-		if (@$_SESSION['User']) 
+		if (array_key_exists('User', $_SESSION))
         {
 			/* If you are logged in, then the default level is "Download". */
 			if ("X" . $_SESSION['UserLevel'] == "X") {
@@ -325,16 +325,7 @@ class core_auth extends FO_Plugin {
 	 */
 	function Output() 
     {
-		global $SysConf;
-
-		if ($this->State != PLUGIN_STATE_READY) {
-			return;
-		}
 		$V = "";
-		switch ($this->OutputType) {
-			case "XML":
-				break;
-			case "HTML":
 				if ($_SESSION['User'] == "Default User") {
 					$User = GetParm("username", PARM_TEXT);
 					$Pass = GetParm("password", PARM_TEXT);
@@ -404,17 +395,7 @@ class core_auth extends FO_Plugin {
 				$V.= "window.open('$Uri','_top');\n";
 				$V.= "</script>\n";
 				}
-				break;
-			case "Text":
-				break;
-			default:
-				break;
-		}
-		if (!$this->OutputToStdout) {
 			return ($V);
-		}
-		print ($V);
-		return;
 	} // Output()
 
 };
