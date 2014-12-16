@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "license.h"
 #include "scheduler.h"
 #include "cli.h"
-#include "extended.h"
+#include "common.h"
 
 MatchCallbacks schedulerCallbacks = {NULL, sched_onNoMatch, sched_onFullMatch, sched_onDiffMatch};
 
@@ -79,16 +79,16 @@ int main(int argc, char** argv) {
 
   fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
 
+  PGresult* licensesResult = queryAllLicenses(state->dbManager);
+  Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+
   if (argc > 1) {
-    if (!handleCliMode(state, argc, argv))
+    if (!handleCliMode(state, licenses, argc, argv))
       bail(state, 3);
   } else {
     /* scheduler mode */
     state->scanMode = MODE_SCHEDULER;
     queryAgentId(state, AGENT_NAME, AGENT_DESC);
-
-    PGresult* licensesResult = queryAllLicenses(state->dbManager);
-    Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 
     while (fo_scheduler_next() != NULL) {
       int uploadId = atoi(fo_scheduler_current());
@@ -108,10 +108,10 @@ int main(int argc, char** argv) {
                   arsId, uploadId, state->agentId, AGENT_ARS, NULL, 1);
     }
     fo_scheduler_heart(0);
-
-    licenses_free(licenses);
-    PQclear(licensesResult);
   }
+
+  licenses_free(licenses);
+  PQclear(licensesResult);
 
   scheduler_disconnect(state, 0);
   return 0;

@@ -22,4 +22,18 @@ You should have received a copy of the GNU General Public License along with thi
 #define BULK_DECISION_TYPE 2
 #define BULK_DECISION_SCOPE "upload"
 
+typedef struct {
+  long bulkId;
+  long uploadTreeId;
+  long uploadTreeLeft;
+  long uploadTreeRight;
+  long licenseId;
+  int uploadId;
+  int jobId;
+  int removing;
+  int userId;
+  int groupId;
+  char* refText;
+} BulkArguments;
+
 #endif // MONK_AGENT_BULK_H

@@ -75,9 +75,12 @@ src/mimetype/agent/mimetype
 src/mimetype/agent_tests/Unit/results/
 src/mimetype/agent_tests/Unit/test_mimetype
 src/mimetype/mimetype
+src/monk/VERSION-*
 src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
+src/monk/agent/monkbulk
 src/monk/agent/monk_cov
+src/monk/agent/monkbulk_cov
 src/monk/agent/squareBuilder
 src/monk/agent_tests/Unit/test_monk
 src/monk/agent_tests/results/

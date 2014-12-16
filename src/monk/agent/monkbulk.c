@@ -15,15 +15,17 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "license.h"
 #include "match.h"
-#include "extended.h"
+#include "common.h"
+#include "monk.h"
 
 int bulk_onAllMatches(MonkState* state, File* file, GArray* matches);
-int queryBulkArguments(long bulkId, MonkState* state);
 
 MatchCallbacks bulkCallbacks = {.onAll = bulk_onAllMatches};
 
 int setLeftAndRight(MonkState* state) {
-  char* tableName = getUploadTreeTableName(state->dbManager, state->bulkArguments->uploadId);
+  BulkArguments* bulkArguments = state->ptr;
+
+  char* tableName = getUploadTreeTableName(state->dbManager, bulkArguments->uploadId);
 
   if (!tableName)
     return 0;
@@ -41,7 +43,7 @@ int setLeftAndRight(MonkState* state) {
       sql,
       long
     ),
-    state->bulkArguments->uploadTreeId
+    bulkArguments->uploadTreeId
   );
 
   g_free(stmt);
@@ -51,8 +53,6 @@ int setLeftAndRight(MonkState* state) {
 
   if (leftAndRightResult) {
     if (PQntuples(leftAndRightResult)==1) {
-      BulkArguments* bulkArguments = state->bulkArguments;
-
       int i = 0;
       bulkArguments->uploadTreeLeft = atol(PQgetvalue(leftAndRightResult, 0, i++));
       bulkArguments->uploadTreeRight = atol(PQgetvalue(leftAndRightResult, 0, i));
@@ -64,15 +64,9 @@ int setLeftAndRight(MonkState* state) {
   return result;
 }
 
-int queryDecisionType(MonkState* state) {
-  int decisionType = BULK_DECISION_TYPE;
-  state->bulkArguments->decisionType = decisionType;
-  return 1;
-}
-
 void bulkArguments_contents_free(BulkArguments* bulkArguments);
 
-int queryBulkArguments(long bulkId, MonkState* state) {
+int queryBulkArguments(MonkState* state, long bulkId) {
   int result = 0;
 
   PGresult* bulkArgumentsResult = fo_dbManager_ExecPrepared(
@@ -102,12 +96,13 @@ int queryBulkArguments(long bulkId, MonkState* state) {
       bulkArguments->removing = (strcmp(PQgetvalue(bulkArgumentsResult, 0, i), "t") == 0);
 
       bulkArguments->bulkId = bulkId;
+      bulkArguments->jobId = fo_scheduler_jobId();
 
-      state->bulkArguments = bulkArguments;
+      state->ptr = bulkArguments;
 
-      if ((!setLeftAndRight(state)) || (!queryDecisionType(state))) {
+      if (!setLeftAndRight(state)) {
         printf("FATAL: could not retrieve left and right for bulk id=%ld\n", bulkId);
-        bulkArguments_contents_free(state->bulkArguments);
+        bulkArguments_contents_free(state->ptr);
       } else {
         result = 1;
       }
@@ -126,7 +121,7 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
 }
 
 int bulk_identification(MonkState* state) {
-  BulkArguments* bulkArguments = state->bulkArguments;
+  BulkArguments* bulkArguments = state->ptr;
 
   License license = (License){
     .refId = bulkArguments->licenseId,
@@ -195,29 +190,39 @@ int main(int argc, char** argv) {
 
   queryAgentId(state, AGENT_BULK_NAME, AGENT_BULK_DESC);
 
-  int fileOptInd;
-  long bulkOptId = -1;
-  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
-    return 0;
-
   state->scanMode = MODE_BULK;
 
-  state->jobId = fo_scheduler_jobId();
-  if (queryBulkArguments(bulkOptId, state)) {
-    BulkArguments* bulkArguments = state->bulkArguments;
+  while (fo_scheduler_next() != NULL) {
+    const char* schedulerCurrent = fo_scheduler_current();
+
+    long bulkId = atol(schedulerCurrent);
+
+    if (bulkId == 0) continue;
+
+    if (!queryBulkArguments(state, bulkId)) {
+      bail(state, 1);
+    }
+
+    BulkArguments* bulkArguments = state->ptr;
 
     int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-                            0, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 0);
+      0, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 0);
 
-    int result = bulk_identification(state);
+    if (arsId<=0)
+      bail(state, 2);
+
+    if (!bulk_identification(state))
+      bail(state, 3);
 
     fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
-                arsId, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 1);
+      arsId, bulkArguments->uploadId, state->agentId, AGENT_BULK_ARS, NULL, 1);
 
-    return result;
-  } else {
-    return 0;
+    bulkArguments_contents_free(bulkArguments);
+    fo_scheduler_heart(0);
   }
+
+  scheduler_disconnect(state, 0);
+  return 0;
 }
 
 int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
@@ -234,7 +239,9 @@ int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
   if (!haveAFullMatch)
     return 1;
 
-  long licenseId = state->bulkArguments->licenseId;
+  BulkArguments* bulkArguments = state->ptr;
+
+  long licenseId = bulkArguments->licenseId;
 
   if (!fo_dbManager_begin(state->dbManager))
     return 0;
@@ -253,16 +260,16 @@ int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
     ),
     file->id,
 
-    state->bulkArguments->userId,
-    state->bulkArguments->groupId,
-    state->jobId,
-    state->bulkArguments->decisionType,
+    bulkArguments->userId,
+    bulkArguments->groupId,
+    bulkArguments->jobId,
+    BULK_DECISION_TYPE,
     licenseId,
-    state->bulkArguments->removing ? 1 : 0,
+    bulkArguments->removing ? 1 : 0,
 
-    state->bulkArguments->uploadId,
-    state->bulkArguments->uploadTreeLeft,
-    state->bulkArguments->uploadTreeRight
+    bulkArguments->uploadId,
+    bulkArguments->uploadTreeLeft,
+    bulkArguments->uploadTreeRight
   );
 
   if (licenseDecisionIds) {
@@ -286,7 +293,7 @@ int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
             long, long, size_t, size_t
           ),
           licenseDecisionEventId,
-          state->bulkArguments->bulkId,
+          bulkArguments->bulkId,
           highlight.start,
           highlight.length
         );

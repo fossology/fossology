@@ -41,27 +41,13 @@ You should have received a copy of the GNU General Public License along with thi
 #define MONK_MULTI_THREAD
 #endif
 
-typedef struct {
-  long bulkId;
-  long uploadTreeId;
-  long uploadTreeLeft;
-  long uploadTreeRight;
-  long licenseId;
-  int decisionType;
-  int uploadId;
-  int removing;
-  int userId;
-  int groupId;
-  char* refText;
-} BulkArguments;
 
 typedef struct {
   fo_dbManager* dbManager;
   int agentId;
   int scanMode;
   int verbosity;
-  int jobId;
-  BulkArguments* bulkArguments;
+  void* ptr;
 } MonkState;
 
 typedef struct {

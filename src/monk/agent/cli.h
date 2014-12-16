@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "monk.h"
 #include "diff.h"
 
-int handleCliMode(MonkState* state, int argc, char** argv);
+int handleCliMode(MonkState* state, Licenses* licenses, int argc, char** argv);
 int cli_onNoMatch(MonkState* state, File* file);
 int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
 int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult);

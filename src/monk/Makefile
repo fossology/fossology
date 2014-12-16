@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = monk
+MOD_NAME = monk monkbulk
 
 DIRS = agent ui
 TESTDIR = agent_tests
@@ -25,25 +25,36 @@ test: all
 coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
-VERSIONFILE:
-	$(call WriteVERSIONFile,$(MOD_NAME))
+VERSIONFILE: $(MOD_NAME:%=VERSIONFILE-%)
 
-install: all
+$(MOD_NAME:%=VERSIONFILE-%): NAME = $(@:VERSIONFILE-%=%)
+$(MOD_NAME:%=VERSIONFILE-%): VERSIONFILE = $(@:VERSIONFILE-%=VERSION-%)
+$(MOD_NAME:%=VERSIONFILE-%):
+	$(call WriteVERSIONFile,$(NAME))
+	mv VERSION $(VERSIONFILE)
+
+install: all $(MOD_NAME:%=install_%)
+
+$(MOD_NAME:%=install_%): NAME = $(@:install_%=%)
+$(MOD_NAME:%=install_%):
 	$(call DIR_LOOP,install)
-	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(INSTALL_DATA) VERSION-$(NAME) $(DESTDIR)$(MODDIR)/$(NAME)/VERSION
+	$(INSTALL_DATA) $(NAME).conf $(DESTDIR)$(MODDIR)/$(NAME)/$(NAME).conf
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME); then \
+		ln -s $(MODDIR)/$(NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 
-uninstall:
+uninstall: $(MOD_NAME:%=uninstall_%)
 	$(call DIR_LOOP,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
-	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+
+$(MOD_NAME:%=uninstall_%): NAME = $(@:uninstall_%=%)
+$(MOD_NAME:%=uninstall_%): uninstall_% :
+	rm -rf $(DESTDIR)$(MODDIR)/$(NAME)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME)
 
 clean:
 	$(call DIR_LOOP,clean)
-	rm -f VERSION
+	rm -f $(MOD_NAME:%=VERSION-%)
 
-.PHONY: all test coverage VERSIONFILE install uninstall clean
+.PHONY: all test coverage $(MOD_NAME:%=VERSION-%) install uninstall clean

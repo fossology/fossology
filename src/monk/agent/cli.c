@@ -10,12 +10,12 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 #include "cli.h"
+
+#include "monk.h"
 #include "file_operations.h"
 #include "database.h"
-#include "license.h"
 #include "match.h"
-#include "extended.h"
-#include "monk.h"
+#include <getopt.h>
 
 MatchCallbacks cliCallbacks = {NULL, cli_onNoMatch, cli_onFullMatch, cli_onDiff};
 
@@ -33,16 +33,44 @@ int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, cha
   return result;
 }
 
-int handleCliMode(MonkState* state, int argc, char** argv) {
+int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd)
+{
+  int c;
+  state->verbosity = 0;
+  while ((c = getopt(argc, argv, "VvhB:")) != -1) {
+    switch (c) {
+      case 'v':
+        state->verbosity++;
+        break;
+       case 'V':
+#ifdef SVN_REV_S
+        printf(AGENT_NAME " version " VERSION_S " r(" SVN_REV_S ")\n");
+#else
+        printf(AGENT_NAME " (no version available)\n");
+#endif
+        return 0;
+      case 'h':
+      default:
+        printf("Usage: %s [options] -- [file [file [...]]\n", argv[0]);
+        printf("  -h   :: help (print this message), then exit.\n"
+               "  -c   :: specify the directory for the system configuration.\n"
+               "  -v   :: verbose output.\n"
+               "  file :: scan file and print licenses detected within it.\n"
+               "  no file :: process data from the scheduler.\n"
+               "  -V   :: print the version info, then exit.\n");
+        return 0;
+    }
+  }
+  *fileOptInd = optind;
+  return 1;
+}
+
+int handleCliMode(MonkState* state, Licenses* licenses, int argc, char** argv) {
   int fileOptInd;
-  long bulkOptId = -1;
-  if (!parseArguments(state, argc, argv, &fileOptInd, &bulkOptId))
+  if (!parseArguments(state, argc, argv, &fileOptInd))
     return 0;
 
   state->scanMode = MODE_CLI;
-
-  PGresult* licensesResult = queryAllLicenses(state->dbManager);
-  Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
 
   int threadError = 0;
 #ifdef MONK_MULTI_THREAD
@@ -65,9 +93,6 @@ int handleCliMode(MonkState* state, int argc, char** argv) {
       threadError = 1;
     }
   }
-
-  licenses_free(licenses);
-  PQclear(licensesResult);
 
   return !threadError;
 }
@@ -104,3 +129,4 @@ int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffR
   free(formattedMatchArray);
   return 1;
 }
+

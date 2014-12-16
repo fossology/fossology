@@ -73,7 +73,9 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
 
     $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
+    $instRet = 0;
+    system($install="install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION", $instRet);
+    $this->assertEquals(0, $instRet, 'copying version file failed '.$install);
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
@@ -220,101 +222,5 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $agentRef = $licenseMatch->getAgentRef();
 
     $this->assertEquals($agentRef->getAgentName(), "monk");
-  }
-
-  /** @group Functional */
-  public function testRunMonkBulkScan()
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $userId = 2;
-    $groupId = 2;
-    $uploadTreeId = 1;
-    $uploadId = 1;
-
-    $licenseId = 225;
-    $removing = false;
-    $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
-
-    $jobId = 64;
-
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
-
-    $this->assertGreaterThan($expected=0, $bulkId);
-
-    $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
-    $args = $bulkFlag.$bulkId;
-
-    list($output,$retCode) = $this->runMonk($uploadId, $userId, $groupId, $jobId, $args);
-
-    $this->rmRepo();
-
-    $this->assertEquals($retCode, 0, 'monk failed: '.$output);
-    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
-    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
-
-    assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
-    assertThat(count($relevantDecisionsItem7),is(equalTo(1)));
-    $rfForACE = 225;
-    assertThat($relevantDecisionsItem6,hasKeyInArray($rfForACE));
-    /** @var ClearingEvent $clearingEvent */
-    $clearingEvent = $relevantDecisionsItem6[$rfForACE];
-    $eventId = $clearingEvent->getEventId();
-    $bulkHighlights = $this->highlightDao->getHighlightBulk(6, $eventId);
-
-    $this->assertEquals(1, count($bulkHighlights));
-
-    /** @var Highlight $bulkHighlight */
-    $bulkHighlight = $bulkHighlights[0];
-    $this->assertEquals($licenseId, $bulkHighlight->getLicenseId());
-    $this->assertEquals(Highlight::BULK, $bulkHighlight->getType());
-    $this->assertEquals(3, $bulkHighlight->getStart());
-    $this->assertEquals(103, $bulkHighlight->getEnd());
-
-    $bulkHighlights = $this->highlightDao->getHighlightBulk(6);
-
-    $this->assertEquals(1, count($bulkHighlights));
-    $this->assertEquals($bulkHighlight, $bulkHighlights[0]);
-  }
-
-  /** @group Functional */
-  public function testRunMonkBulkScanWithBadSearchForDiff()
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $userId = 2;
-    $groupId = 2;
-    $uploadTreeId = 1;
-    $uploadId = 1;
-
-    $licenseId = 225;
-    $removing = "f";
-    $refText = "The GNU General Public License is copyleft license for software and other kinds of works.";
-
-    $jobId = 64;
-
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadId, $uploadTreeId, $licenseId, $removing, $refText);
-
-    $this->assertGreaterThan($expected=0, $bulkId);
-
-    $bulkFlag = "-B"; // TODO agent_fomonkbulk::BULKFLAG
-    $args = $bulkFlag.$bulkId;
-
-    list($output,$retCode) = $this->runMonk($uploadId, $userId, $groupId, $jobId, $args);
-
-    $this->rmRepo();
-
-    $this->assertEquals($retCode, 0, "monk failed: $output");
-    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
-    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
-    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
-    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
-
-    $this->assertEquals($expected=0, count($relevantDecisionsItem6));
-    $this->assertEquals($expected=0, count($relevantDecisionsItem7));
   }
 }

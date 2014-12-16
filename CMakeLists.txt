@@ -124,8 +124,8 @@ set(SOURCE_FILES
     src/monk/agent/database.h
     src/monk/agent/diff.c
     src/monk/agent/diff.h
-    src/monk/agent/extended.c
-    src/monk/agent/extended.h
+    src/monk/agent/common.c
+    src/monk/agent/common.h
     src/monk/agent/file_operations.c
     src/monk/agent/file_operations.h
     src/monk/agent/hash.c
