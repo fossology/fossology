@@ -19,15 +19,8 @@
 
 namespace Fossology\Lib\Report;
 
-use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\HighlightDao;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\Highlight;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Data\LicenseMatch;
-use Fossology\Lib\Data\License;
 
 define('CONTEXT',25);
 
@@ -66,9 +59,6 @@ class KeywordsGetter extends ClearedGetterCommon
   {
     $result = array();
 
-    $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-
-
     $stmt = "listItems.$uploadTreeTableName";
 
     $this->dbManager->prepare(
@@ -83,9 +73,10 @@ class KeywordsGetter extends ClearedGetterCommon
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId, $uploadTreeTableName);
 
       $inputFile = fopen(RepPathItem($itemId), "rb");
-
       if (!$inputFile)
+      {
         throw new \Exception("could not open item $itemId for reading");
+      }
 
       $highlightsKeyword = $this->highlightDao->getHighlightKeywords($itemTreeBounds);
       foreach($highlightsKeyword as $highlight)

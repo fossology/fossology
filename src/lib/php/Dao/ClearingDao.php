@@ -31,7 +31,6 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
-use Fossology\Lib\Proxy\LicenseViewProxy;
 
 class ClearingDao extends Object
 {

@@ -93,11 +93,12 @@ class ClearingView extends FO_Plugin
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
-   * @return array
+   * @return Highlight[]
    */
   private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
   {
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
