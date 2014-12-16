@@ -19,6 +19,8 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\TextFragment;
+use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Data\LicenseUsageTypes;
@@ -29,6 +31,15 @@ class AdminLicenseCandidate extends DefaultPlugin
 {
   const NAME = "admin_license_candidate";
 
+  /** @var HighlightProcessor */
+  private $highlightProcessor;
+  /** @var HighlightRenderer */
+  private $highlightRenderer;
+  /** @var TextRenderer */
+  private $textRenderer;
+  private $licenseDao;
+
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -38,6 +49,11 @@ class AdminLicenseCandidate extends DefaultPlugin
         self::DEPENDENCIES => array(\ui_menu::NAME),
         self::PERMISSION => self::PERM_ADMIN
     ));
+
+    $this->highlightProcessor = $this->getObject('view.highlight_processor');
+    $this->highlightRenderer = $this->getObject('view.highlight_renderer');
+    $this->textRenderer = $this->getObject('view.text_renderer');
+    $this->licenseDao = $this->getObject('dao.license');
   }
 
   /**
@@ -63,8 +79,28 @@ class AdminLicenseCandidate extends DefaultPlugin
     }
     $shortname = $request->get('shortname') ?: $vars['rf_shortname'];
     $vars['shortname'] = $shortname;
-    $suggest = intval($request->get('suggest_rf')) ?: $this->suggestLicenseId($vars['rf_text']);
-    $suggestLicense = $suggest ? $this->getDataRow($suggest, 'ONLY license_ref') : false;
+    $rfText = $vars['rf_text'];
+    $vars['rf_text'] = htmlentities($rfText);
+
+    $suggest = intval($request->get('suggest_rf'));
+    $suggestLicense = false;
+    if ($suggest>0)
+    {
+      $suggestLicense = $this->getDataRow($suggest, 'ONLY license_ref');
+    }
+    if (!$suggestLicense) {
+      list($suggestIds, $rendered) = $this->suggestLicenseId($rfText);
+      if (!empty($suggestIds)) {
+        $suggest = $suggestIds[0];
+        $suggestLicense = $this->getDataRow($suggest, 'ONLY license_ref');
+        $vars['rf_text'] = $rendered;
+      }
+    }
+    /* TODO not working yet
+    if (false !== $suggestLicense) {
+      list($suggestIds, $rendered) = $this->renderLicense($suggest, $rfText);
+      $suggestLicense['rf_text'] = $rendered;
+    }*/
     if($suggestLicense!==false){
       $vars['suggest_rf'] = $suggest;
       $vars['suggest_shortname'] = $suggestLicense['rf_shortname'];
@@ -157,34 +193,60 @@ class AdminLicenseCandidate extends DefaultPlugin
   }
 
   private function suggestLicenseId($str){
-    $tmpfname = tempnam("/tmp", "monk");
-    $handle = fopen($tmpfname, "w");
-    fwrite($handle, $str);
-    fclose($handle);
+    /** @var \Fossology\Monk\UI\Oneshot */
+    $monkOneShotPlugin = plugin_find("oneshot-monk");
 
-    global $SYSCONFDIR;
-    $cmd = dirname(dirname(dirname(__DIR__))).'/monk/agent/monk -c '.$SYSCONFDIR.' '.$tmpfname;
-    exec($cmd, $output, $return_var);
-    unlink($tmpfname);
-    if ($return_var)
+    if (null !== $monkOneShotPlugin)
     {
-      return false;
-    }
-    if (empty($output))
-    {
-      return 0;
-    }
-    // found diff match between "$tmpfname" and "EUPL-1.0" (rf_pk=424); rank 99; diffs: {t[0+42] M0 s[0+46], ...
-    if (preg_match('/\\(rf_pk=(?P<rf>[0-9]+)\\)/', $output[0], $matches))
-    {
-      return $matches['rf'];
+      return $monkOneShotPlugin->scanMonkRendered($str);
     } else
     {
-      return 0;
+      return array(array(), $str);
     }
   }
-  
-  
+
+  private function renderLicense($licenseId, $str){
+    /** @var \Fossology\Monk\UI\Oneshot */
+    $monkOneShotPlugin = plugin_find("oneshot-monk");
+
+    if (null !== $monkOneShotPlugin)
+    {
+      list($licenseIds, $highlights) = $monkOneShotPlugin->scanMonk($str);
+      if (!empty($licenseIds) && ($licenseId == $licenseIds[0]))
+      {
+        $suggestedLicense = $this->licenseDao->getLicenseById($licenseId);
+        $licenseText = $suggestedLicense->getText();
+        $textFragment = new TextFragment(0, $licenseText);
+
+        $this->flipHighlights($highlights);
+        $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
+
+        $rendered = $this->textRenderer->renderText($textFragment, $splitPositions);
+
+        return array($licenseIds, $rendered);
+      }
+    }
+    return array(array($licenseId), htmlentities($str));
+  }
+
+  function flipHighlights(&$highlights) {
+    foreach($highlights as &$highlight) {
+      switch ($type = $highlight->getType())
+      {
+        case Highlight::ADDED:
+          $newType = Highlight::DELETED;
+          break;
+        case Highlight::DELETED:
+          $newType = Highlight::ADDED;
+          break;
+        default:
+          $newType = $type;
+          break;
+      }
+      $highlight = new Highlight($highlight->getRefStart(), $highlight->getRefEnd(), $newType);
+    }
+  }
+
   /**
    * @param int $rf
    * @param string $shortname
