@@ -113,7 +113,6 @@ class ClearingEvent extends Object implements LicenseClearing
 
   /**
    * @return boolean
-   * @deprecated
    */
   public function isRemoved()
   {

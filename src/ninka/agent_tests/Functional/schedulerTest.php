@@ -64,7 +64,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $agentName = "ninka";
 
     $agentDir = dirname(dirname(__DIR__));
-    $execDir = __DIR__;
+    $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start", "r");
