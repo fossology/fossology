@@ -12,18 +12,20 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 
-test: test-cli test-sched
-
 all: version
 	$(MAKE) -C $(LOCALAGENTDIR) copyright
 	ln -fs $(LOCALAGENTDIR)/copyright ./copyright
 
+version:
+	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
+
+test: all test-cli test-sched
+
+coverage: all-cov test-cli test-sched
+
 all-cov: version
 	$(MAKE) -C $(LOCALAGENTDIR) copyright_cov
 	ln -fs $(LOCALAGENTDIR)/copyright_cov ./copyright
-
-version:
-	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
 
 test-cli: all
 	@echo "make functional tests for cli mode"
@@ -32,17 +34,6 @@ test-cli: all
 test-sched: all
 	@echo "make functional tests for scheduler mode"
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
-
-coverage: coverage-cli coverage-sched
-
-coverage-cli: all-cov
-	@echo "make functional tests for cli mode with coverage"
-	$(MAKE) -C $(LOCALAGENTDIR) copyright_cov
-	./shunit2 cli_test.sh
-
-coverage-sched: all-cov
-	@echo "make functional tests for scheduler mode with coverage"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) scheduler_test.php
 
 clean:
 	@echo "nothing to do"
