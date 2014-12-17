@@ -60,11 +60,15 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $reflection = new \ReflectionClass($licenseCsvImport); 
     $nkMap = $reflection->getProperty('nkMap');
     $nkMap->setAccessible(true);
-    $nkMap->setValue($licenseCsvImport,array('licA'=>101,'licB'=>false,'licC'=>false));
+    $nkMap->setValue($licenseCsvImport,array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false));
     
     $method = $reflection->getMethod('handleCsvLicense');
     $method->setAccessible(true);
-    
+
+    $dbManager->shouldReceive('getSingleRow')
+            ->with('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',anything())
+            ->times(3)
+            ->andReturn(false,false,array('rf_shortname'=>'licD'));
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
@@ -72,35 +76,25 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
         array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseUsageTypes::CONCLUSION)))->once();
     
-    $return = $method->invoke($licenseCsvImport,
+    $returnB = $method->invoke($licenseCsvImport,
             array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
                 'parent_shortname'=>'licA'));
-    assertThat($return, is(null));
+    assertThat($returnB, is("Inserted 'licB' in DB with conclusion 'licA'"));
     
-    $method->invoke($licenseCsvImport,
+    $returnC = $method->invoke($licenseCsvImport,
             array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'',
                 'parent_shortname'=>null));
-  }
-  
-  /**
-   * @expectedException Exception
-   *  "Shortname 'licA' already in DB"
-   */
-  public function testHandleCsvLicense_withKnownShortname()
-  {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
-    $reflection = new \ReflectionClass($licenseCsvImport); 
-    $nkMap = $reflection->getProperty('nkMap');
-    $nkMap->setAccessible(true);
-    $nkMap->setValue($licenseCsvImport,array('licA'=>101,'licB'=>false));
+    assertThat($returnC, is("Inserted 'licC' in DB"));
     
-    $method = $reflection->getMethod('handleCsvLicense');
-    $method->setAccessible(true);
-    
-    $method->invoke($licenseCsvImport,
+    $returnA = $method->invoke($licenseCsvImport,
             array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
                 'parent_shortname'=>null));
+    assertThat($returnA, is("Shortname 'licA' already in DB"));
+
+    $returnE = $method->invoke($licenseCsvImport,
+            array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'',
+                'parent_shortname'=>null));
+    assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
   }
   
   public function testHandleHeadCsv()
@@ -177,6 +171,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $headRow->setAccessible(true);
     assertThat($headRow->getValue($licenseCsvImport),is(notNullValue()));
     
+    $dbManager->shouldReceive('getSingleRow')->with('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',anything())->andReturn(false);
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');

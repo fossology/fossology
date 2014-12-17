@@ -68,28 +68,37 @@ class LicenseCsvImport {
       return _('Internal error');
     }
     $cnt = -1;
+    $msg = '';
     try
     {
       while(($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== FALSE) {
-        $this->handleCsv($row);
+        $log = $this->handleCsv($row);
+        if (!empty($log))
+        {
+          $msg .= "$log\n";
+        }
         $cnt++;
       }
+      $msg .= _('Read csv').(": $cnt ")._('licenses');
     }
     catch(\Exception $e)
     {
-      fclose($handle);
-      return _('Error while parsing file: '.$e->getMessage());
+      return $msg .= _('Error while parsing file: '.$e->getMessage());
     }
     fclose($handle);
-    return _('Read csv').(": $cnt ")._('licenses');
+    return $msg;
   }
 
+  /**
+   * @param array $row
+   * @return string $log
+   */
   private function handleCsv($row)
   {
     if($this->headrow===null)
     {
       $this->headrow = $this->handleHeadCsv($row);
-      return;
+      return 'head okay';
     }
 
     $mRow = array();
@@ -105,7 +114,7 @@ class LicenseCsvImport {
       }
     }
     
-    $this->handleCsvLicense($mRow);
+    return $this->handleCsvLicense($mRow);
   }
   
   private function handleHeadCsv($row)
@@ -125,13 +134,22 @@ class LicenseCsvImport {
     return $headrow;
   }
 
+  /**
+   * @param array $row
+   * @return string
+   */
   private function handleCsvLicense($row)
   {
     /** @var DbManager $dbManager */
     $dbManager = $this->dbManager;
     if ($this->getKeyFromShortname($row['shortname'])!==false)
     {
-      throw new \Exception("Shortname '$row[shortname]' already in DB");
+      return "Shortname '$row[shortname]' already in DB";
+    }
+    $sameText = $dbManager->getSingleRow('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
+    if ($sameText!==false)
+    {
+      return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
     }
     $stmtInsert = __METHOD__.'.insert';
     $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source)'
@@ -143,13 +161,14 @@ class LicenseCsvImport {
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
     if ($row['parent_shortname']===null || $this->getKeyFromShortname($row['parent_shortname'])===false)
     {
-      return;
+      return "Inserted '$row[shortname]' in DB";
     }
 
     $dbManager->insertTableRow('license_map',
         array('rf_fk'=>$new['rf_pk'],
             'rf_parent'=>$this->getKeyFromShortname($row['parent_shortname']),
             'usage'=>LicenseUsageTypes::CONCLUSION));
+    return "Inserted '$row[shortname]' in DB with conclusion '$row[parent_shortname]'";
   }
   
   private function getKeyFromShortname($shortname)
