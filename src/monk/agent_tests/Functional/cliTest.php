@@ -55,7 +55,7 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
     $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
+    system("install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION");
 
     foreach ($files as $file) {
       $args .= " ".escapeshellarg($file);
@@ -81,9 +81,8 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('license_ref','agent'),false);
-    $this->testDb->createSequences(array('license_ref_rf_pk_seq','agent_agent_pk_seq'),false);
-    $this->testDb->alterTables(array('agent'),false);
+    $this->testDb->createPlainTables(array('license_ref'),false);
+    $this->testDb->createSequences(array('license_ref_rf_pk_seq'),false);
 
     $this->testDb->insertData_license_ref(1<<10);
   }
@@ -104,12 +103,12 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
     sort($lines, SORT_STRING);
     foreach($lines as $key => $val) {
-      if (empty($val))
+    if (empty($val))
+      {
         unset($lines[$key]);
+      }
     }
-    $lines = array_values($lines);
-
-    return $lines;
+    return array_values($lines);
   }
 
   private function assertLinesRegex($regexFmt, $lines, $testFiles) {

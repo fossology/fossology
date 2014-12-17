@@ -12,16 +12,28 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef MONK_AGENT_BULK_H
 #define MONK_AGENT_BULK_H
 
+#define AGENT_BULK_NAME "monkbulk" ///< the name of the agent, used to get agent key
+#define AGENT_BULK_DESC "monkbulk agent" ///< what program this is
+#define AGENT_BULK_ARS  "monkbulk_ars"
+
 #include "monk.h"
-#include "diff.h"
 
 #define BULK_DECISION_TYPE_MEANING "bulk"
 #define BULK_DECISION_TYPE 2
 #define BULK_DECISION_SCOPE "upload"
 
-void bulkArguments_contents_free(BulkArguments* bulkArguments);
-int queryBulkArguments(long bulkId, MonkState* state);
-int handleBulkMode(MonkState* state, long bulkId);
-int processMatches_Bulk(MonkState* state, File* file, GArray* matches);
+typedef struct {
+  long bulkId;
+  long uploadTreeId;
+  long uploadTreeLeft;
+  long uploadTreeRight;
+  long licenseId;
+  int uploadId;
+  int jobId;
+  int removing;
+  int userId;
+  int groupId;
+  char* refText;
+} BulkArguments;
 
 #endif // MONK_AGENT_BULK_H

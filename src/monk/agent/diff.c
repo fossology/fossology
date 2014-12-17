@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "_squareVisitor.h"
 #include <stdlib.h>
 
-inline int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
+int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
                         GArray* searchTokens, size_t searchStart, size_t searchLength,
                         unsigned int numberOfWantedMatches) {
 
@@ -39,9 +39,9 @@ inline int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
   return 0;
 }
 
-inline int lookForDiff(GArray* textTokens, GArray* searchTokens,
+int lookForDiff(GArray* textTokens, GArray* searchTokens,
                        size_t iText, size_t iSearch,
-                       int maxAllowedDiff, int minTrailingMatches,
+                       unsigned int maxAllowedDiff, unsigned int minAdjacentMatches,
                        DiffMatchInfo* result) {
   size_t searchLength = searchTokens->len;
   size_t textLength = textTokens->len;
@@ -61,7 +61,7 @@ inline int lookForDiff(GArray* textTokens, GArray* searchTokens,
     if ((textPos < textStopAt) && (searchPos < searchStopAt))
       if (matchNTokens(textTokens, textPos, textLength,
                        searchTokens, searchPos, searchLength,
-                       minTrailingMatches)) {
+                       minAdjacentMatches)) {
         result->search.start = searchPos;
         result->search.length = searchPos - iSearch;
         result->text.start = textPos;
@@ -73,7 +73,7 @@ inline int lookForDiff(GArray* textTokens, GArray* searchTokens,
   return 0;
 }
 
-inline int applyDiff(const DiffMatchInfo* diff,
+int applyDiff(const DiffMatchInfo* diff,
                      GArray* matchedInfo,
                      size_t* additionsCounter, size_t* removedCounter,
                      size_t* iText, size_t* iSearch) {
@@ -100,7 +100,7 @@ inline int applyDiff(const DiffMatchInfo* diff,
   return 1;
 }
 
-inline void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSearch) {
+void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSearch) {
   simpleMatch->text.start = iText;
   simpleMatch->text.length = 0;
   simpleMatch->search.start = iSearch;
@@ -114,14 +114,14 @@ inline void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSe
  @param searchTokens array containing the Tokens of the reference text to be searched
  @param textStartPosition position in the text where the search starts,
                           it will be updated to a value for a successive search
- @param maxAllowedDiff maximum number of Tokens that can be avoid
- @param minTrailingMatches minimum number of matched Tokens that
+ @param maxAllowedDiff maximum number of Tokens that can be avoided
+ @param minAdjacentMatches minimum number of adjacent matched Tokens that must be equal
 
  @return pointer to the result, or NULL on negative match. To be freed with diffResult_free
  ****************************************************/
 DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
                              size_t textStartPosition, size_t searchStartPosition,
-                             int maxAllowedDiff, int minTrailingMatches) {
+                             unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
   size_t textLength = textTokens->len;
   size_t searchLength = searchTokens->len;
 
@@ -188,7 +188,7 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
         DiffMatchInfo diff;
         if (lookForDiff(textTokens, searchTokens,
                         iText, iSearch,
-                        maxAllowedDiff, minTrailingMatches,
+                        maxAllowedDiff, minAdjacentMatches,
                         &diff)) {
           applyDiff(&diff,
                     matchedInfo,

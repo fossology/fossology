@@ -12,14 +12,14 @@ You should have received a copy of the GNU General Public License along with thi
 #ifndef MONK_AGENT_LICENSE_H
 #define MONK_AGENT_LICENSE_H
 
-#include "string_operations.h"
 #include "database.h"
 #include "monk.h"
-#include "libfossdbmanager.h"
 
 int isIgnoredLicense(License* license);
-GArray* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult);
-void freeLicenseArray(GArray* licenses);
+Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
+Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
+void licenses_free(Licenses* licenses);
 void sortLicenses(GArray* licenses);
+const GArray* getLicenseArrayFor(Licenses* licenses, unsigned searchPos, GArray* searchedTokens, unsigned searchedStart);
 
 #endif // MONK_AGENT_LICENSE_H

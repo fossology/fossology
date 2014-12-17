@@ -9,15 +9,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef MONK_AGENT_EXTENDED_H
-#define MONK_AGENT_EXTENDED_H
+#ifndef MONK_AGENT_COMMON_H
+#define MONK_AGENT_COMMON_H
 
 #include "monk.h"
 #include "diff.h"
 
-int handleArguments(MonkState* state, int argc, char** argv);
-void onNoMatch(MonkState* state, File* file);
-void onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
-void onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult, unsigned short rank);
-
-#endif // MONK_AGENT_EXTENDED_H
+void scheduler_disconnect(MonkState* state, int exitval);
+void bail(MonkState* state, int exitval);
+void queryAgentId(MonkState* state, const char* agentName, const char* agentDesc);
+#endif // MONK_AGENT_COMMON_H
