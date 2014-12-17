@@ -43,23 +43,13 @@ class LicenseClearedGetter extends ClearedGetterCommon
     parent::__construct();
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId = null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
 
-    $latestClearingDecisions = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      $itemId = $clearingDecision->getUploadTreeId();
-
-      if (!array_key_exists($itemId, $latestClearingDecisions)) {
-        $latestClearingDecisions[$itemId] = $clearingDecision;
-      }
-    }
-
     $ungroupedStatements = array();
-    foreach ($latestClearingDecisions as $clearingDecision) {
+    foreach ($clearingDecisions as $clearingDecision) {
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getPositiveLicenses() as $clearingLicense) {
         $clid = $clearingLicense->getId();
@@ -85,7 +75,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
    * @param int $licenseId
    * @return License
    */
-  protected function getCachedLicense($licenseId)
+  protected function getCachedLicenseText($licenseId)
   {
     if (!array_key_exists($licenseId, $this->licenseCache)) {
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
