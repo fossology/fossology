@@ -21,11 +21,9 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
@@ -131,9 +129,10 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   {
     $matches = array();
     if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
+    {
       return intval($matches[1]);
-    else
-      return 0;
+    }
+    return 0;
   }
 
   /** @group Functional */
@@ -206,12 +205,10 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
 
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     $matches = $this->licenseDao->getAgentFileLicenseMatches($bounds);
-
     $this->assertEquals($expected=2, count($matches));
 
     /** @var LicenseMatch */
     $licenseMatch = $matches[0];
-
     $this->assertEquals($expected=4, $licenseMatch->getFileId());
 
     /** @var LicenseRef */
@@ -220,7 +217,6 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
 
     /** @var AgentRef */
     $agentRef = $licenseMatch->getAgentRef();
-
     $this->assertEquals($agentRef->getAgentName(), "monk");
   }
 }

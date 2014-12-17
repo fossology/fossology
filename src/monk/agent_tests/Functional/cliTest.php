@@ -103,12 +103,12 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
     sort($lines, SORT_STRING);
     foreach($lines as $key => $val) {
-      if (empty($val))
+    if (empty($val))
+      {
         unset($lines[$key]);
+      }
     }
-    $lines = array_values($lines);
-
-    return $lines;
+    return array_values($lines);
   }
 
   private function assertLinesRegex($regexFmt, $lines, $testFiles) {
