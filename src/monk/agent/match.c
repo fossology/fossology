@@ -369,17 +369,23 @@ int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* cal
 }
 
 int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks* callbacks) {
+  if (callbacks->ignore && callbacks->ignore(state, file)) {
+    return 1;
+  }
+
   if (callbacks->onAll) {
     return callbacks->onAll(state, file, matches);
   }
 
-  if (matches->len == 0)
+  const guint matchCount = matches->len;
+
+  if (matchCount == 0)
   {
     return callbacks->onNo(state, file);
   }
 
   int result = 1;
-  for (guint matchIndex = 0; result && (matchIndex < matches->len); matchIndex++)
+  for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++)
   {
     Match* match = match_array_get(matches, matchIndex);
     result &= processMatch(state, file, match, callbacks);

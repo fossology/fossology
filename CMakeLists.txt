@@ -145,7 +145,6 @@ set(SOURCE_FILES
     src/monk/agent_tests/Unit/run_tests.c
     src/monk/agent_tests/Unit/test_database.c
     src/monk/agent_tests/Unit/test_diff.c
-    src/monk/agent_tests/Unit/test_extended.c
     src/monk/agent_tests/Unit/test_file_operations.c
     src/monk/agent_tests/Unit/test_hash.c
     src/monk/agent_tests/Unit/test_highlight.c

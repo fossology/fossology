@@ -12,37 +12,10 @@ You should have received a copy of the GNU General Public License along with thi
 #include "scheduler.h"
 
 #include "database.h"
-
-/* check if we have other results for this file.
- * We do it now to minimize races with a concurrent scan of this file:
- * the same file could be inside more than upload
- */
-#define checkPreviousAndBegin(dbManager,agentId,fileId) \
-  fo_dbManager_begin(dbManager); \
-  if (hasAlreadyResultsFor(dbManager, agentId, fileId)) \
-  {\
-    fo_dbManager_commit(dbManager);\
-    return 1;\
-  }
-
-#define commitAndReturn(dbManager,success) \
-  if (success) \
-    return fo_dbManager_commit(dbManager); \
-  else { \
-    fo_dbManager_rollback(dbManager); \
-    return 0; \
-  }
+#include "monk.h"
 
 int sched_onNoMatch(MonkState* state, File* file) {
-  fo_dbManager* dbManager = state->dbManager;
-  const int agentId = state->agentId;
-  const long fileId = file->id;
-
-  checkPreviousAndBegin(dbManager, agentId, fileId);
-
-  int success = saveNoResultToDb(dbManager, agentId, fileId);
-
-  commitAndReturn(dbManager, success);
+  return saveNoResultToDb(state->dbManager, state->agentId, file->id);
 }
 
 int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
@@ -54,7 +27,7 @@ int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchI
     printf("found full match between (pFile=%ld) and \"%s\" (rf_pk=%ld)\n", file->id, license->shortname, license->refId);
 #endif //DEBUG
 
-  checkPreviousAndBegin(dbManager, agentId, fileId);
+  fo_dbManager_begin(dbManager);
 
   int success = 0;
   long licenseFileId = saveToDb(dbManager, agentId, license->refId, fileId, 100);
@@ -62,7 +35,12 @@ int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchI
     success = saveDiffHighlightToDb(dbManager, matchInfo, licenseFileId);
   }
 
-  commitAndReturn(dbManager, success);
+  if (success) {
+    fo_dbManager_commit(dbManager);
+  } else {
+    fo_dbManager_rollback(dbManager);
+  }
+  return success;
 }
 
 int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult) {
@@ -82,7 +60,7 @@ int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult
     free(formattedMatchArray);
 #endif //DEBUG
 
-  checkPreviousAndBegin(dbManager, agentId, fileId);
+  fo_dbManager_begin(dbManager);
 
   int success = 0;
   long licenseFileId = saveToDb(dbManager, agentId, license->refId, fileId, matchPercent);
@@ -90,5 +68,20 @@ int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult
     success = saveDiffHighlightsToDb(dbManager, diffResult->matchedInfo, licenseFileId);
   }
 
-  commitAndReturn(dbManager, success);
+  if (success) {
+    fo_dbManager_commit(dbManager);
+  } else {
+    fo_dbManager_rollback(dbManager);
+  }
+
+  return success;
+}
+
+/* check if we have other results for this file.
+ * We do it now to minimize races with a concurrent scan of this file:
+ * the same file could be inside more than upload
+ */
+int sched_ignore(MonkState* state, File* file)
+{
+  return hasAlreadyResultsFor(state->dbManager, state->agentId, file->id);
 }

@@ -35,6 +35,7 @@ typedef struct {
   int (*onNo)(MonkState* state, File* file);
   int (*onFull)(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
   int (*onDiff)(MonkState* state, File* file, License* license, DiffResult* diffResult);
+  int (*ignore)(MonkState* state, File* file);
 } MatchCallbacks;
 
 void match_array_free(GArray* matches);

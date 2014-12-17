@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License along with thi
 #include "cli.h"
 #include "common.h"
 
-MatchCallbacks schedulerCallbacks = {NULL, sched_onNoMatch, sched_onFullMatch, sched_onDiffMatch};
+MatchCallbacks schedulerCallbacks =
+  { .onNo = sched_onNoMatch, .onFull = sched_onFullMatch, .onDiff = sched_onDiffMatch, .ignore = sched_ignore};
 
 int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);

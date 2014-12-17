@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include <getopt.h>
 
-MatchCallbacks cliCallbacks = {NULL, cli_onNoMatch, cli_onFullMatch, cli_onDiff};
+MatchCallbacks cliCallbacks = { .onNo = cli_onNoMatch, .onFull = cli_onFullMatch, .onDiff = cli_onDiff};
 
 int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, char** argv) {
   File file;
