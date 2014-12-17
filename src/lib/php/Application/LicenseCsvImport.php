@@ -18,8 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\ArrayOperation;
 
 class LicenseCsvImport {
   /** @var DbManager */
@@ -32,6 +33,15 @@ class LicenseCsvImport {
   protected $headrow = null;
   /** @var array */
   protected $nkMap = array();
+  protected $alias = array(
+      'shortname'=>array('shortname','Short Name'),
+      'fullname'=>array('fullname','Long Name'),
+      'text'=>array('text','Full Text'),
+      'parent_shortname'=>array('parent_shortname','Regular License Text Short Name'),
+      'url'=>array('url','URL'),
+      'notes'=>array('notes'),
+      'source'=>array('source','Foreign ID')
+      );
 
   public function __construct(DbManager $dbManager)
   {
@@ -102,7 +112,7 @@ class LicenseCsvImport {
   {
     $headrow = array();
     foreach( array('shortname','fullname','text') as $needle){
-      $col = array_search($needle, $row);
+      $col = ArrayOperation::multiSearch($this->alias[$needle], $row);
       if (false === $col)
       {
         throw new \Exception("Undetermined position of $needle");
@@ -110,7 +120,7 @@ class LicenseCsvImport {
       $headrow[$needle] = $col;
     }
     foreach( array('parent_shortname','url','notes','source') as $optNeedle){
-      $headrow[$optNeedle] = array_search($optNeedle, $row);
+      $headrow[$optNeedle] = ArrayOperation::multiSearch($this->alias[$optNeedle], $row);
     }
     return $headrow;
   }

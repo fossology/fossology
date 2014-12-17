@@ -114,8 +114,11 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
     assertThat($method->invoke($licenseCsvImport,array('shortname','foo','text','fullname','notes','bar')),
             is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false) ) );
+    
+    assertThat($method->invoke($licenseCsvImport,array('Short Name','URL','text','fullname','notes','Foreign ID')),
+            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5) ) );
   }
-  
+   
   /**
    * @expectedException Exception
    */
