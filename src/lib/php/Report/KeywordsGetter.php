@@ -55,7 +55,7 @@ class KeywordsGetter extends ClearedGetterCommon
     return array($keyword, $context);
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId=null, $groupId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null)
   {
     $result = array();
 

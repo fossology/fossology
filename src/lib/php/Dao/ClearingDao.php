@@ -403,7 +403,7 @@ INSERT INTO clearing_decision (
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
              FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
              WHERE uploadtree_fk=$1 AND group_fk=$2 AND EXTRACT(EPOCH FROM date_added)>$3
-             ORDER BY ts_added ASC';
+             ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
 
@@ -436,7 +436,6 @@ INSERT INTO clearing_decision (
     if (!$row)
     {  //The license was not added as user decision yet -> we promote it here
       $type = ClearingEventTypes::USER;
-      $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $type);
       $row['type_fk'] = $type;
       $row['comment'] = "";
       $row['reportinfo'] = "";
