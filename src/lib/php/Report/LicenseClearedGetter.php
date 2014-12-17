@@ -40,7 +40,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
 
-    parent::__construct();
+    parent::__construct($groupBy = 'text');
   }
 
   protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
@@ -51,19 +51,22 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
       /** @var ClearingDecision $clearingDecision */
-      foreach ($clearingDecision->getPositiveLicenses() as $clearingLicense) {
-        $clid = $clearingLicense->getId();
-        if(empty($clid))
-        {
-          $msg = "The CdId is ".$clearingDecision->getClearingId();
-          trigger_error($msg);
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved())
+          continue;
+
+        $reportInfo = $clearingLicense->getReportInfo();
+
+        if (!empty($reportInfo)) {
+          $text = $reportInfo;
+        } else {
+          $text = $this->getCachedLicenseText($clearingLicense->getLicenseId());
         }
 
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicenseText($clearingLicense->getId()),
-          'textfinding' => $clearingLicense->getShortName()
+          'text' => $text
         );
       }
     }
