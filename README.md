@@ -2,6 +2,7 @@
 
 Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 
+[![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.png)](https://travis-ci.org/fossology/fossology/)
 
 ## About
 FOSSology is a framework for software analysis, both source and binary.
