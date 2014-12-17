@@ -20,7 +20,8 @@ namespace Fossology\Lib\Util;
 
 use Monolog\Logger;
 
-class TimingLogger extends Object {
+class TimingLogger extends Object
+{
   /** @var Logger */
   private $logger;
   /** @var float[] */
@@ -29,29 +30,29 @@ class TimingLogger extends Object {
   public function __construct(Logger $logger)
   {
     $this->logger = $logger;
-    $this->watchTimes = array('default'=>$this->getTimestamp());
+    $this->watchTimes = array('default' => $this->getTimestamp());
   }
 
   /**
    * @brief start stopwatch timer
    */
-  public function tic($watch='default')
+  public function tic($watch = 'default')
   {
     $this->watchTimes[$watch] = $this->getTimestamp();
   }
-  
+
   /**
    * @param string $text
    * @param string $watch
    */
-  public function toc($text,$watch='default')
+  public function toc($text, $watch = 'default')
   {
     if (!array_key_exists($watch, $this->watchTimes))
     {
       $watch = 'default';
       $text .= " using watch '$watch'";
-    }
-    else if (empty($text)){
+    } else if (empty($text))
+    {
       $text = "Using watch '$watch'";
     }
     $this->logWithStartAndEndTime($text, $this->watchTimes[$watch], $this->getTimestamp());
@@ -60,7 +61,8 @@ class TimingLogger extends Object {
   /**
    * @param string $text
    */
-  public function logWithStartTime($text, $startTime) {
+  public function logWithStartTime($text, $startTime)
+  {
     $endTime = $this->getTimestamp();
     $this->logWithStartAndEndTime($text, $startTime, $endTime);
   }
@@ -68,7 +70,8 @@ class TimingLogger extends Object {
   /**
    * @param string $text
    */
-  public function logWithStartAndEndTime($text, $startTime, $endTime) {
+  public function logWithStartAndEndTime($text, $startTime, $endTime)
+  {
     $this->logger->debug(sprintf("%s (%.3fms)", $text, ($endTime - $startTime) * 1000));
     $this->startTime = $endTime;
   }

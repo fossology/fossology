@@ -20,6 +20,7 @@
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
 
 define("TITLE_ui_browse", _("Browse"));
 
@@ -46,16 +47,6 @@ class ui_browse extends FO_Plugin
 
     parent::__construct();
   }
-
-  /**
-   * @brief Create top-level folder if not exists
-   */
-  function Install()
-  {
-
-    return (0);
-  }
-
 
   /**
    * \brief Customize submenus.
