@@ -58,7 +58,10 @@ class OneShot extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-//    $uploadFile = $request->files->get('file_input');
+    $uploadFile = $request->files->get('file_input');
+    if($uploadFile===null){
+      return $this->render('oneshot-upload.html.twig', $this->getDefaultVars());
+    }
 
     $text = $request->get('text');
 

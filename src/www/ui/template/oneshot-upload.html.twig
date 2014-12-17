@@ -1,0 +1,18 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  {{ 'This analyzer allows you to upload a single file for license analysis.'|trans }}
+  {{ 'The limitations'|trans }}:
+  <ul>
+    <li> {{ 'The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.'|trans }}</li>
+    <li>{{ 'Files that contain files are'|trans }} <b>{{ 'not'|trans }}</b> {{ "unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found."|trans }}</li>
+    <li>{{ 'Results are'|trans }} <b>{{ 'not'|trans }}</b> {{ 'stored. As soon as you get your results, your uploaded file is removed from the system.'|trans }}</li>
+  </ul>
+  <form enctype="multipart/form-data" method="post">
+    {{ 'Select the file to upload'|trans }}:<br />
+    <input name="file_input" size="60" type="file" /><br />
+    <input type="hidden" name="showheader" value="1"/>
+    <input type="submit" value="{{ 'Analyze'|trans }}!"/>
+  </form>
+{% endblock %}
+

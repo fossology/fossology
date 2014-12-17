@@ -157,9 +157,9 @@ class agent_nomos_once extends FO_Plugin {
     }
 
     $tmp_name = '';
-    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
+    if (array_key_exists('file_input', $_FILES) && array_key_exists('tmp_name', $_FILES['file_input']))
     {
-      $tmp_name = $_FILES['licfile']['tmp_name'];
+      $tmp_name = $_FILES['file_input']['tmp_name'];
     }
 
     /* For REST API:
@@ -172,20 +172,20 @@ class agent_nomos_once extends FO_Plugin {
       return;
     }
     if (file_exists($tmp_name)) {
-      $this->vars['content'] = $this->htmlAnalyzedContent($tmp_name);
+      $this->vars['content'] = $this->htmlAnalyzedContent($tmp_name, $_FILES['file_input']['name']);
     }
     else if ($this->OutputType=='HTML') {
-      $this->vars['content'] = $this->htmlContent();
+      return $this->renderTemplate('oneshot-upload.html.twig');
     }
     if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
       unlink($tmp_name);
     }
-    $_FILES['licfile'] = NULL;
+    $_FILES['file_input'] = NULL;
   }
   
-  private function htmlAnalyzedContent($tmp_name){
+  private function htmlAnalyzedContent($tmp_name, $filename){
     $text = _("A one shot license analysis shows the following license(s) in file");
-    $keep = "$text <em>{$_FILES['licfile']['name']}:</em> ";
+    $keep = "$text <em>$filename:</em> ";
     $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
     $this->vars['message'] = $keep;
 
@@ -220,35 +220,7 @@ class agent_nomos_once extends FO_Plugin {
       return $rtn;
     }
   }
-  
-  protected function htmlContent()
-  {
-    $V = _("This analyzer allows you to upload a single file for license analysis.\n");
-    $V.= _("The limitations:\n");
-    $V.= "<ul>\n";
-    $V.= _("<li>The analysis is done in real-time. Large files may take a while." .
-         " This method is not recommended for files larger than a few hundred kilobytes.\n");
-    $text = _("Files that contain files are");
-    $text1 = _("not");
-    $text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
-    $V.= "<li>$text <b>$text1</b> $text2\n";
-    $text = _("Results are");
-    $text1 = _("not");
-    $text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
-    $V.= "<li>$text <b>$text1</b> $text2\n";
-    $V.= "</ul>\n";
-    /* Display the form */
-    $V.= "<form enctype='multipart/form-data' method='post'>\n";
-    $V.= "<ul>\n";
-    $V.= _("<li>Select the file to upload:<br />\n");
-    $V.= "<input name='licfile' size='60' type='file' /><br />\n";
-    $V.= "</ul>\n";
-    $V.= "<input type='hidden' name='showheader' value='1'>";
-    $text = _("Analyze");
-    $V.= "<input type='submit' value='$text!'>\n";
-    $V.= "</form>\n";
-    return $V;
-  }
+
 }
 
 $NewPlugin = new agent_nomos_once;
