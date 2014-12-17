@@ -190,7 +190,7 @@ class AjaxClearingView extends FO_Plugin
       case "setNextPrevCopyRight":
       case "setNextPrevIp":
       case "setNextPrevEcc":
-        return $this->doNextPrev($action, $uploadId, $uploadTreeId);
+        return $this->doNextPrev($action, $uploadId, $uploadTreeId, $groupId);
 
       case "updateClearings":
         $id = GetParm("id", PARM_STRING);
@@ -335,12 +335,13 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
-   * @param $action
-   * @param $uploadId
-   * @param $uploadTreeId
+   * @param string $action
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @param int $groupId
    * @return string
    */
-  protected function doNextPrev($action, $uploadId, $uploadTreeId)
+  protected function doNextPrev($action, $uploadId, $uploadTreeId, $groupId)
   {
     switch ($action)
     {
@@ -365,7 +366,7 @@ class AjaxClearingView extends FO_Plugin
         break;
     }
 
-    $options = array('skipThese' => GetParm($opt, PARM_STRING));
+    $options = array('skipThese' => GetParm($opt, PARM_STRING), 'groupId'=>$groupId);
 
     $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
     $prevItemId = $prevItem ? $prevItem->getId() : null;
