@@ -25,14 +25,15 @@ use Fossology\Lib\Util\Object;
 class LicenseMap extends Object
 {
   const CONCLUSION = 1;
-  const FAMILY = 2;
+  const TRIVIAL = 2;
+  const FAMILY = 3;
   
   /** @var int */
   private $usageId;
   /** @var int */
   private $groupId;
   /** @var array */
-  private $map;
+  private $map = array();
   
   /**
    * @param DbManager $dbManager
@@ -42,6 +43,10 @@ class LicenseMap extends Object
   public function __construct(DbManager $dbManager, $groupId, $usageId=null)
   {
     $this->usageId = $usageId?:self::CONCLUSION;
+    if ($this->usageId == self::TRIVIAL)
+    {
+      return;
+    }
     $licenseView = new LicenseViewProxy($groupId);
     $query = $licenseView->asCTE()
             .' SELECT rf_fk, rf_shortname parent_shortname, rf_parent FROM license_map, '.$licenseView->getDbViewName()
@@ -49,14 +54,12 @@ class LicenseMap extends Object
     $stmt = __METHOD__.".$this->usageId,$groupId";
     $dbManager->prepare($stmt,$query);
     $res = $dbManager->execute($stmt,array($this->usageId));
-    $this->map = array();
     while($row = $dbManager->fetchArray($res))
     {
       $this->map[$row['rf_fk']] = $row;
     }
     $dbManager->freeResult($res);
   }
-  
   
   public function getProjectedId($licenseId)
   {
@@ -86,5 +89,5 @@ class LicenseMap extends Object
   {
     return $this->groupId;
   }
-  
+
 }

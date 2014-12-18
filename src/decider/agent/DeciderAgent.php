@@ -47,8 +47,8 @@ class DeciderAgent extends Agent
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
   /** @var DecisionTypes */
   private $decisionTypes;
-  /** @var LicenseMap */
-  private $licenseMap;
+  /** @var null|LicenseMap */
+  private $licenseMap = null;
   
   function __construct()
   {
@@ -61,7 +61,12 @@ class DeciderAgent extends Agent
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
-    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::CONCLUSION);
+  }
+  
+  function scheduler_connect($licenseMapUsage=null)
+  {
+    parent::scheduler_connect();
+    $this->licenseMap = $licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
   }
 
   function processClearingEventOfCurrentJob()
@@ -121,7 +126,7 @@ class DeciderAgent extends Agent
         break;
 
       default:
-        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob);
+        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
     }
 
     if ($createDecision)

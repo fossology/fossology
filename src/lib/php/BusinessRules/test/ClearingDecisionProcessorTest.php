@@ -93,10 +93,12 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor(
         $this->clearingDao, $this->agentLicenseEventProcessor, $this->clearingEventProcessor,
         $this->dbManager);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
@@ -469,7 +471,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
-
+    
     assertThat($hasUnhandledScannerDetectedLicenses);
   }
 
@@ -479,32 +481,54 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
     $clearingEvent = $this->createClearingEvent(123, new DateTime(), $licenseRef->getId(), $licenseRef->getShortName(), $licenseRef->getFullName());
 
-    $this->clearingDao->shouldReceive("getRelevantClearingEvents")
-        ->with($this->itemTreeBounds, $this->groupId)
-        ->andReturn(array($clearingEvent));
-    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
+    $this->clearingDao->shouldReceive("getRelevantClearingEvents")->once()
+         ->with($this->itemTreeBounds, $this->groupId)
+        ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")->once()
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
-    assertThat(not( $hasUnhandledScannerDetectedLicenses) );
+    assertThat( $hasUnhandledScannerDetectedLicenses, is(False));
   }
 
   public function testGetUnhandledScannerDetectedLicensesWithoutMatch()
   {
     /** @var LicenseRef $licenseRef */
     list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
-    $clearingEvent = $this->createClearingEvent(123, new DateTime(), $licenseRef->getId(), $licenseRef->getShortName(), $licenseRef->getFullName());
+    $offset = 23;
+    $clearingEvent = $this->createClearingEvent(123, new DateTime(), $licenseRef->getId()+$offset, $licenseRef->getShortName(), $licenseRef->getFullName());
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
-        ->andReturn(array($clearingEvent));
+        ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
         ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
-    assertThat($hasUnhandledScannerDetectedLicenses);
+    assertThat($hasUnhandledScannerDetectedLicenses, is(True));
+  }
+  
+  public function testGetUnhandledScannerDetectedLicensesWithMappedMatch()
+  {
+    /** @var LicenseRef $licenseRef */
+    list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
+    $offset = 0;
+    $clearingEvent = $this->createClearingEvent($eventId=123, new DateTime(), $licenseRef->getId()+$offset, $licenseRef->getShortName(), $licenseRef->getFullName());
+
+    $this->clearingDao->shouldReceive("getRelevantClearingEvents")
+        ->with($this->itemTreeBounds, $this->groupId)
+        ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
+        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+
+    $licenseMap = M::mock(LicenseMap::classname());
+    $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {return $id;});
+    
+    $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId, array(), $licenseMap);
+
+    assertThat( $hasUnhandledScannerDetectedLicenses, is(False) );
   }
 
   /**
