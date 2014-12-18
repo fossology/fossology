@@ -31,8 +31,8 @@ You should have received a copy of the GNU General Public License along with thi
 #define MONK_CASE_INSENSITIVE
 #define MAX_ALLOWED_DIFF_LENGTH 100
 #define MIN_ADJACENT_MATCHES 3
-#define MAX_LEADING_DIFF 10
-#define MIN_ALLOWED_RANK 66
+#define MAX_LEADING_DIFF 2
+#define MIN_ALLOWED_RANK 80
 
 #include <glib.h>
 #include "libfossdbmanager.h"
