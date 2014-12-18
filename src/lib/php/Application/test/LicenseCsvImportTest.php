@@ -18,8 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
@@ -74,7 +75,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $dbManager->shouldReceive('freeResult');
     $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>102));
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
-        array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseUsageTypes::CONCLUSION)))->once();
+        array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
     
     $returnB = $method->invoke($licenseCsvImport,
             array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',

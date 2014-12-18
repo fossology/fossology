@@ -18,13 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\BusinessRules;
 
-use Fossology\Lib\Data\LicenseUsageTypes;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Util\Object;
 
 class LicenseMap extends Object
 {
+  const CONCLUSION = 1;
+  const FAMILY = 2;
+  
   /** @var int */
   private $usageId;
   /** @var int */
@@ -39,7 +41,7 @@ class LicenseMap extends Object
    */
   public function __construct(DbManager $dbManager, $groupId, $usageId=null)
   {
-    $this->usageId = $usageId?:LicenseUsageTypes::CONCLUSION;
+    $this->usageId = $usageId?:self::CONCLUSION;
     $licenseView = new LicenseViewProxy($groupId);
     $query = $licenseView->asCTE()
             .' SELECT rf_fk, rf_shortname parent_shortname, rf_parent FROM license_map, '.$licenseView->getDbViewName()

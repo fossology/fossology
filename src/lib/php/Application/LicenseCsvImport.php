@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
 
@@ -167,7 +167,7 @@ class LicenseCsvImport {
     $dbManager->insertTableRow('license_map',
         array('rf_fk'=>$new['rf_pk'],
             'rf_parent'=>$this->getKeyFromShortname($row['parent_shortname']),
-            'usage'=>LicenseUsageTypes::CONCLUSION));
+            'usage'=>  LicenseMap::CONCLUSION));
     return "Inserted '$row[shortname]' in DB with conclusion '$row[parent_shortname]'";
   }
   

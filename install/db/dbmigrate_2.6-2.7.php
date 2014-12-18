@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\BusinessRules\LicenseMap;
 
 function setLicenseMap($verbose)
 {
@@ -30,7 +30,7 @@ function setLicenseMap($verbose)
   $dbManager->freeResult($res);
   foreach ($unmapped as $um)
   {
-    $dbManager->insertTableRow('license_map',array('rf_fk'=>$um['rf_pk'],'rf_parent'=>$um['rf_pk'],'usage'=>LicenseUsageTypes::CONCLUSION));
+    $dbManager->insertTableRow('license_map',array('rf_fk'=>$um['rf_pk'],'rf_parent'=>$um['rf_pk'],'usage'=>LicenseMap::CONCLUSION));
   }
   if ($verbose)
   {
