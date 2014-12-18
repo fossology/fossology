@@ -32,6 +32,7 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
     $container = M::mock('ContainerBuilder');
     $this->dbManagerMock = M::mock(DbManager::classname());
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
+    $this->almostAllColumns = 'rf_pk,rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,rf_fullname,rf_notes,marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type,rf_source';
   }
 
   public function tearDown()
@@ -53,7 +54,7 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
     
     $options2 = array('extraCondition'=>'rf_pk<100');
     $query2 = $method->invoke($licenseViewProxy,$options2);
-    assertThat($query2, is("SELECT *,0 AS group_fk FROM ONLY license_ref WHERE rf_pk<100"));
+    assertThat($query2, is("SELECT $this->almostAllColumns,0 AS group_fk FROM ONLY license_ref WHERE rf_pk<100"));
   }
   
   public function testQueryLicenseCandidate()
@@ -71,19 +72,19 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
     
     $options2 = array('extraCondition'=>'rf_pk<100');
     $query2 = $method->invoke($licenseViewProxy,$options2);
-    assertThat($query2, is("SELECT * FROM license_candidate WHERE group_fk=$groupId AND rf_pk<100"));
+    assertThat($query2, is("SELECT $this->almostAllColumns,group_fk FROM license_candidate WHERE group_fk=$groupId AND rf_pk<100"));
   }
 
   public function testConstruct()
   {
     $licenseViewProxy0 = new LicenseViewProxy(0);
     $query0 = $licenseViewProxy0->getDbViewQuery();
-    $expected0 = 'SELECT *,0 AS group_fk FROM ONLY license_ref';
+    $expected0 = "SELECT $this->almostAllColumns,0 AS group_fk FROM ONLY license_ref";
     assertThat($query0,is($expected0));
     
     $licenseViewProxy123 = new LicenseViewProxy(123,array('diff'=>true));
     $query123 = $licenseViewProxy123->getDbViewQuery();
-    $expected123 = "SELECT * FROM license_candidate WHERE group_fk=123";
+    $expected123 = "SELECT $this->almostAllColumns,group_fk FROM license_candidate WHERE group_fk=123";
     assertThat($query123,is($expected123));
 
     $licenseViewProxy0123 = new LicenseViewProxy(123);
