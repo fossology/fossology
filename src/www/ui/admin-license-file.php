@@ -97,9 +97,7 @@ class admin_license_file extends FO_Plugin
       $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
 
     return $V;
-  }  
-  
-  
+  }
 
   /**
    * \brief Build the input form
@@ -279,6 +277,7 @@ class admin_license_file extends FO_Plugin
         $text1 = _("was found");
         return "$text ($rf_pk) $text1.";
       }
+      $this->vars['row'] = $row;
     }
     else
     {
@@ -297,7 +296,7 @@ class admin_license_file extends FO_Plugin
     $row['rf_active'] = $dbManager->booleanFromDb($row['rf_active'])?'true':'false';
     $row['marydone'] = $dbManager->booleanFromDb($row['marydone'])?'true':'false';
     $row['rf_text_updatable'] = $dbManager->booleanFromDb($row['rf_text_updatable'])?'true':'false';
-    
+
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
     $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos");
 

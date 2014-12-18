@@ -31,7 +31,6 @@ extern CU_TestInfo highlight_testcases[];
 extern CU_TestInfo hash_testcases[];
 extern CU_TestInfo diff_testcases[];
 extern CU_TestInfo match_testcases[];
-extern CU_TestInfo extended_testcases[];
 extern CU_TestInfo database_testcases[];
 
 /* ************************************************************************** */
@@ -46,7 +45,6 @@ CU_SuiteInfo suites[] = {
     {"Testing hash:", NULL, NULL, hash_testcases},
     {"Testing diff:", NULL, NULL, diff_testcases},
     {"Testing match:", NULL, NULL, match_testcases},
-    {"Testing extended:", NULL, NULL, extended_testcases},
     {"Testing database:", NULL, NULL, database_testcases},
     CU_SUITE_INFO_NULL
 };

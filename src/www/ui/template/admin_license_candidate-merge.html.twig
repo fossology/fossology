@@ -1,0 +1,81 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  {{ parent() }}
+
+  <table class="semibordered">
+    {% if suggest_rf %}
+      <tr>
+        <th></th>
+        <th>{{ 'Candidate'|trans }}</th>
+        <th>{{ 'Reference'|trans }}</th>
+      </tr>{% endif %}
+    <tr >
+      <td>{{ 'Shortname'|trans }}:</td>
+      <td><input type="text" id="shortname" value="{{ shortname|e }}" size="30"></td>
+      {% if suggest_rf %}<td>{{ suggest_shortname|e }}</td>{% endif %}
+    </tr>
+    <tr style="background-color:#F5F5DC;">
+      <td>{{ 'Fullname'|trans }}:</td>
+      <td>{{ rf_fullname|e }}</td>
+      {% if suggest_rf %}<td>{{ suggest_fullname|e }}</td>{% endif %}
+    </tr>
+    <tr>
+      <td valign="top">{{ 'Reference text'|trans }}:</td>
+      <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text|e }}</div></td>
+      {% if suggest_rf %}<td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ suggest_text|e }}</div></td>{% endif %}
+    </tr>
+    <tr style="background-color:#F5F5DC;">
+      <td>{{ 'URL'|trans }}:</td>
+      <td>{{ rf_url|e }}</td>
+      {% if suggest_rf %}<td>{{ suggest_url|e }}</td>{% endif %}
+    </tr>
+    <tr>
+      <td>{{ 'Public notes'|trans }}:</td>
+      <td>{{ rf_notes|e }}</td>
+      {% if suggest_rf %}<td>{{ suggest_notes|e }}</td>{% endif %}
+    </tr>
+    <tr style="background-color:#F5F5DC;">
+      <td></td>
+      <td>
+        <input type="button" id="verify-button" value="{{ 'Verify as new license'|trans }}"/>
+      </td>
+      {% if suggest_rf %}<td>
+        <input type="button" id="variant-button" value="{{ 'Variant of license'|trans }}"/>
+        <input type="button" id="merge-button" value="{{ 'Merge'|trans }}"/>
+        </td>
+      {% endif %}
+    </tr>
+  </table>
+
+  {{ 'Compare with'| trans }}
+  <select id="cmp">
+    <option value="0">--{{ 'existing license'|trans }}--</option>
+  {% for lic in licenseArray %}
+    <option value="{{ lic.id }}" title="{{ lic.fullname }}">{{ lic.shortname }}</option>
+  {% endfor %}
+  </select>
+  
+{% endblock %}
+  
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    $('#verify-button').click(function(){
+      js_url($('#shortname').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&do=verify&shortname=");
+    });
+    {% if suggest_rf %}
+      $('#variant-button').click(function(){
+        js_url($('#shortname').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&do=variant&suggest_rf={{ suggest_rf }}&shortname=");
+      });
+      $('#merge-button').click(function(){
+        js_url({{ suggest_rf }},"?mod=admin_license_candidate&rf={{ rf_pk }}&do=merge&suggest_rf=");
+      });
+    {% endif %}
+    $('#cmp').change(function(){
+      js_url($('#cmp').val(),"?mod=admin_license_candidate&rf={{ rf_pk }}&shortname="+$('#shortname').val()+"&suggest_rf=");
+    });
+
+  </script>
+{% endblock %}
+  

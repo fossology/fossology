@@ -22,6 +22,7 @@ use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\ClearingDecision;
@@ -32,6 +33,8 @@ use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+
+use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -55,10 +58,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadDao;
   /** @var HighlightDao */
   private $highlightDao;
-  
+
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
-  
+
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
@@ -72,8 +75,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
-    
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter);
+
+    $logger = M::mock('Monolog\Logger');
+    $agentDao = new AgentDao($this->dbManager, $logger);
+
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 

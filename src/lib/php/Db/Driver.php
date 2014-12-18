@@ -82,6 +82,11 @@ interface Driver
   public function commit();
 
   /**
+   * @return void
+   */
+  public function rollback();
+
+  /**
    * @param $booleanValue
    * @return boolean
    */

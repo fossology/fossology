@@ -116,16 +116,16 @@ set(SOURCE_FILES
     src/mimetype/agent_tests/Unit/testRun.c
     src/mimetype/agent_tests/Unit/testRun.h
     src/monk/agent/buildSquareVisitor.c
-    src/monk/agent/bulk.c
-    src/monk/agent/bulk.h
+    src/monk/agent/monkbulk.c
+    src/monk/agent/monkbulk.h
     src/monk/agent/cli.c
     src/monk/agent/cli.h
     src/monk/agent/database.c
     src/monk/agent/database.h
     src/monk/agent/diff.c
     src/monk/agent/diff.h
-    src/monk/agent/extended.c
-    src/monk/agent/extended.h
+    src/monk/agent/common.c
+    src/monk/agent/common.h
     src/monk/agent/file_operations.c
     src/monk/agent/file_operations.h
     src/monk/agent/hash.c
@@ -138,12 +138,13 @@ set(SOURCE_FILES
     src/monk/agent/match.h
     src/monk/agent/monk.c
     src/monk/agent/monk.h
+    src/monk/agent/scheduler.c
+    src/monk/agent/scheduler.h
     src/monk/agent/string_operations.c
     src/monk/agent/string_operations.h
     src/monk/agent_tests/Unit/run_tests.c
     src/monk/agent_tests/Unit/test_database.c
     src/monk/agent_tests/Unit/test_diff.c
-    src/monk/agent_tests/Unit/test_extended.c
     src/monk/agent_tests/Unit/test_file_operations.c
     src/monk/agent_tests/Unit/test_hash.c
     src/monk/agent_tests/Unit/test_highlight.c

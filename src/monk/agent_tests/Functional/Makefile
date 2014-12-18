@@ -12,12 +12,14 @@ include $(VARS)
 LOCALAGENTDIR = ../../agent
 
 all: version
-	$(MAKE) -C $(LOCALAGENTDIR) monk
+	$(MAKE) -C $(LOCALAGENTDIR) all
 	ln -fs $(LOCALAGENTDIR)/monk ./monk
+	ln -fs $(LOCALAGENTDIR)/monkbulk ./monkbulk
 
 all-cov: version
-	$(MAKE) -C $(LOCALAGENTDIR) monk_cov
+	$(MAKE) -C $(LOCALAGENTDIR) all_cov
 	ln -fs $(LOCALAGENTDIR)/monk_cov ./monk
+	ln -fs $(LOCALAGENTDIR)/monkbulk_cov ./monkbulk
 
 version:
 	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
@@ -30,9 +32,13 @@ test-sched:
 	@echo "make functional tests for scheduler mode"
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
-test: all test-cli test-sched
+test-bulk:
+	@echo "make functional tests for bulk mode"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) bulkTest.php
 
-coverage: all-cov test-cli test-sched
+test: all test-cli test-sched test-bulk
+
+coverage: all-cov test-cli test-sched test-bulk
 
 clean:
 	@echo "nothing to do"

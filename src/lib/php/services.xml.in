@@ -116,12 +116,17 @@ without any warranty.
         </service>
         <service id="businessrules.clearing_decision_processor"
                  class="Fossology\Lib\BusinessRules\ClearingDecisionProcessor">
+
             <argument type="service" id="dao.clearing"/>
             <argument type="service" id="businessrules.agent_license_event_processor"/>
             <argument type="service" id="businessrules.clearing_event_processor"/>
             <argument type="service" id="db.manager"/>
         </service>
 
+        <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport">
+            <argument type="service" id="db.manager"/>
+        </service>
+    
         <service id="twig.loader" class="Twig_Loader_Filesystem">
             <argument id="option">%twig.loader.source_path%</argument>
         </service>

@@ -207,6 +207,8 @@ if(!array_key_exists('Release', $sysconfig)){
   Migrate_21_22($Verbose);
   require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
   migrate_25_26($Verbose);
+  require_once("$LIBEXECDIR/dbmigrate_2.6-2.7.php");
+  migrate_26_27($Verbose);
   $dbManager->insertTableRow('sysconfig',
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
   $sysconfig['Release'] = '2.6';

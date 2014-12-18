@@ -254,7 +254,7 @@ class ui_menu extends FO_Plugin
     }
     $vars = array();
     $vars['title'] = empty($Title) ? _("Welcome to FOSSology") : $Title;
-    $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
+    $vars['bannerMsg'] = $sysConfig['BannerMsg']?:'';
     $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
     $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 

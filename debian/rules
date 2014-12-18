@@ -135,7 +135,11 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/monk install
+           -C src/monk install-monk
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monkbulk \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/monk install-monkbulk
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ninka \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \

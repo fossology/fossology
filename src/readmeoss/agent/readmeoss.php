@@ -22,7 +22,7 @@ include_once(__DIR__ . "/version.php");
 class ReadmeOssAgent extends Agent
 {
 
-  /** @var  LicenseClearedGetterProto  */
+  /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
 
   /** @var XpClearedGetter */
@@ -43,12 +43,12 @@ class ReadmeOssAgent extends Agent
 
   function processUploadId($uploadId)
   {
-    $userId = $this->userId;
+    $groupId = $this->groupId;
 
     $this->heartbeat(0);
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $userId);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licenses['statements']));
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $userId);
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($copyrights['statements']));
 
     $contents = array('licenses' => $licenses,
@@ -123,4 +123,4 @@ class ReadmeOssAgent extends Agent
 $agent = new ReadmeOssAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
-$agent->bail(0);
+$agent->scheduler_disconnect(0);
