@@ -580,7 +580,8 @@ class ui_browse_license extends FO_Plugin
 
   public function scheduleScan($uploadId, $agentName, $buttonText)
   {
-    $out = "<span id=" . $agentName . "_span><br><button type=\"button\" id=$agentName name=$agentName onclick='scheduleScan($uploadId, \"agent_$agentName\",\"#job" . $agentName . "IdResult\")'>$buttonText</button> </span>";
+    $out = "<span id=" . $agentName . "_span><br>"
+           . "<button type=\"button\" id=$agentName name=$agentName onclick='scheduleScan($uploadId, \"agent_$agentName\",\"#job" . $agentName . "IdResult\")'>$buttonText</button> </span>";
     $out .= "<br><span id=\"job" . $agentName . "IdResult\" name=\"job" . $agentName . "IdResult\" hidden></span>";
 
     return $out;
@@ -621,9 +622,7 @@ class ui_browse_license extends FO_Plugin
   private function createAgentStatus($scannerAgents, $uploadId)
   {
     $output = "";
-
-    $allSuccessfulAgents = array();
-
+    $successfulAgents = array();
     foreach ($scannerAgents as $agentName)
     {
       $agentHasArsTable = $this->agentsDao->arsTableExists($agentName);
@@ -631,55 +630,12 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-
-      $currentAgent = $this->agentsDao->getCurrentAgent($agentName);
-      $successfulAgents = $this->agentsDao->getSuccessfulAgentRuns($agentName, $uploadId);
-      $allSuccessfulAgents = array_merge($allSuccessfulAgents, $successfulAgents);
-      $latestSuccessfulAgent = count($successfulAgents) > 0 ? $successfulAgents[0] : false;
-
-      $output .= "<p>\n";
-      if (false === $latestSuccessfulAgent)
-      {
-        $output .= _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
-
-        $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-        if (count($runningJobs) > 0)
-        {
-          $output .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
-          $output .= $this->getViewJobsLink($uploadId);
-          $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
-        } else
-        {
-          $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
-        }
-        $output .= "</p>\n";
-        continue;
-      }
-
-      $output .= _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . $latestSuccessfulAgent->getAgentRevision() . ".";
-
-      if ($latestSuccessfulAgent->getAgentId() != $currentAgent->getAgentId())
-      {
-        $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-        if (in_array($currentAgent->getAgentId(), $runningJobs))
-        {
-          $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" is scheduled to run on this upload.");
-          $output .= $this->getViewJobsLink($uploadId);
-          $output .= " " . _("or") . " ";
-        } else
-        {
-          $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" has not been run on this upload.");
-
-        }
-        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
-      }
-      $output .= "</p>\n";
+      $output .= '<p>'.$this->renderAgentStatusWithSideEffect($agentName,$uploadId,$successfulAgents).'</p>';
     }
-    if (empty($allSuccessfulAgents))
+    if (empty($successfulAgents))
     {
       return false;
     }
-
 
     $agentMap = array();
     foreach ($successfulAgents as $agent)
@@ -700,6 +656,48 @@ class ui_browse_license extends FO_Plugin
   public function getTemplateName()
   {
     return "browse_license.html.twig";
+  }
+
+  private function renderAgentStatusWithSideEffect($agentName, $uploadId, &$allSuccessfulAgents)
+  {
+    $currentAgent = $this->agentsDao->getCurrentAgent($agentName);
+    $successfulAgents = $this->agentsDao->getSuccessfulAgentRuns($agentName, $uploadId);
+   
+    if (!count($successfulAgents))
+    {
+      $output = _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
+      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
+      if (count($runningJobs) > 0)
+      {
+        $output .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
+        $output .= $this->getViewJobsLink($uploadId);
+        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
+      } else
+      {
+        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+      }
+      return $output;
+    }  
+    
+    $allSuccessfulAgents = array_merge($allSuccessfulAgents, $successfulAgents);
+    $latestSuccessfulAgent = $successfulAgents[0];
+
+    $output = _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . $latestSuccessfulAgent->getAgentRevision() . ".";
+
+    if ($latestSuccessfulAgent->getAgentId() != $currentAgent->getAgentId())
+    {
+      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
+      if (in_array($currentAgent->getAgentId(), $runningJobs))
+      {
+        $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" is scheduled to run on this upload.");
+        $output .= $this->getViewJobsLink($uploadId);
+      } else
+      {
+        $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" has not been run on this upload.");
+      }
+      $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+    }
+    return $output;
   }
 
 }
