@@ -134,94 +134,6 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * \brief Given an $Uploadtree_pk, display:
-   *   - The histogram for the directory BY LICENSE.
-   *   - The file listing for the directory.
-   */
-  private function showUploadHist($Uploadtree_pk, $tag_pk)
-  {
-    $UniqueTagArray = array();
-
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($Uploadtree_pk, $this->uploadtree_tablename);
-
-    $left = $itemTreeBounds->getLeft();
-    if (empty($left))
-    {
-      $text = _("Job unpack/adj2nest hasn't completed.");
-      $V = "<b>$text</b><p>";
-      return $V;
-    }
-
-    $uploadId = GetParm('upload', PARM_NUMBER);
-    $scannerAgents = array('nomos', 'monk', 'ninka');
-
-    $V = "";
-    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
-
-    if (!$agentStatus)
-    {
-      $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
-      return $out;
-    }
-
-    global $SysConf;
-    $groupId = $SysConf['auth']['GroupId'];
-
-    $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
-
-    $VLic .= "\n" . $agentStatus;
-
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
-
-    /***************************************
-     * Problem: $ChildCount can be zero!
-     * This happens if you have a container that does not
-     * unpack to a directory.  For example:
-     * file.gz extracts to archive.txt that contains a license.
-     * Same problem seen with .pdf and .Z files.
-     * Solution: if $ChildCount == 0, then just view the license!
-     *
-     * $ChildCount can also be zero if the directory is empty.
-     * **************************************/
-    if ($ChildCount == 0)
-    {
-      header("Location: ?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
-    }
-
-    /******  Filters  *******/
-    /* Only display the filter pulldown if there are filters available
-     * Currently, this is only tags.
-     */
-    /** @todo qualify with tag namespace to avoid tag name collisions.  * */
-    /* turn $UniqueTagArray into key value pairs ($SelectData) for select list */
-    $SelectData = array();
-    if (count($UniqueTagArray))
-    {
-      foreach ($UniqueTagArray as $UTA_row)
-        $SelectData[$UTA_row['tag_pk']] = $UTA_row['tag_name'];
-      $V .= "Tag filter";
-      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item"));
-      $Options = " id='filterselect' onchange=\"js_url(this.value, '$myurl&tag=')\"";
-      $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk", $tag_pk, true, false, $Options);
-    }
-
-    $dirlistPlaceHolder = "<table border=0 id='dirlist' style=\"margin-left: 9px;\" class='semibordered'></table>\n";
-    /****** Combine VF and VLic ********/
-    $V .= "<table border=0 cellpadding=2 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
-    $V .= "</table>\n";
-
-    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
-    $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
-
-
-    $V .= $jsBlockDirlist;
-    $V .= $jsBlockLicenseHist;
-    return ($V);
-  }
-
-  /**
    * \brief This function returns the scheduler status.
    */
   function Output()
@@ -231,8 +143,8 @@ class ui_browse_license extends FO_Plugin
     {
       return (0);
     }
-    $Upload = GetParm("upload", PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($Upload);
+    $upload = GetParm("upload", PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($upload);
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
@@ -240,27 +152,28 @@ class ui_browse_license extends FO_Plugin
       return;
     }
 
-    $Item = GetParm("item", PARM_INTEGER);
+    $item = GetParm("item", PARM_INTEGER);
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $updateCache = GetParm("updcache", PARM_INTEGER);
 
     $this->vars['baseuri'] = Traceback_uri();
-    $this->vars['uploadId'] = $Upload;
-    $this->vars['itemId'] = $Item;
+    $this->vars['uploadId'] = $upload;
+    $this->vars['itemId'] = $item;
 
-    $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 
-    $this->vars['micromenu'] = Dir2Browse($this->Name, $Item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
+    $this->uploadtree_tablename = GetUploadtreeTableName($upload);
+    $this->vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $this->vars['haveRunningResult'] = false;
     $this->vars['haveOldVersionResult'] = false;
     $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $Cached = !empty($V);
-    if (!$Cached && !empty($Upload))
+    if (!$Cached && !empty($upload))
     {
       $V .= js_url();
-      $V .= $this->showUploadHist($Item, $tag_pk);
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
+      $V .= $this->showUploadHist($itemTreeBounds, $tag_pk);
       $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
       $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
       /** @todo move text to template */
@@ -294,11 +207,95 @@ class ui_browse_license extends FO_Plugin
     return;
   }
 
+  
+  /**
+   * \brief Given an $Uploadtree_pk, display:
+   *   - The histogram for the directory BY LICENSE.
+   *   - The file listing for the directory.
+   */
+  private function showUploadHist(ItemTreeBounds $itemTreeBounds, $tag_pk)
+  {
+    $left = $itemTreeBounds->getLeft();
+    if (empty($left))
+    {
+      $text = _("Job unpack/adj2nest hasn't completed.");
+      $V = "<b>$text</b><p>";
+      return $V;
+    }
+
+    $uploadId = $itemTreeBounds->getUploadId();
+    $scannerAgents = array('nomos', 'monk', 'ninka');
+
+    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
+
+    if (!$agentStatus)
+    {
+      $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
+      return $out;
+    }
+
+    global $SysConf;
+    $groupId = $SysConf['auth']['GroupId'];
+
+    $selectedAgentId = GetParm('agentId', PARM_INTEGER);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
+    $VLic .= "\n" . $agentStatus;
+    
+    $UniqueTagArray = array();
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
+
+    /***************************************
+     * Problem: $ChildCount can be zero if you have a container that does not
+     * unpack to a directory.  For example:
+     * file.gz extracts to archive.txt that contains a license.
+     * Same problem seen with .pdf and .Z files.
+     * Solution: if $ChildCount == 0, then just view the license!
+     *
+     * $ChildCount can also be zero if the directory is empty.
+     * **************************************/
+    if ($ChildCount == 0)
+    {
+      header("Location: ?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
+    }
+
+    /******  Filters  *******/
+    /* Only display the filter pulldown if there are filters available
+     * Currently, this is only tags.
+     */
+    /** @todo qualify with tag namespace to avoid tag name collisions.  * */
+    /* turn $UniqueTagArray into key value pairs ($SelectData) for select list */
+    $V = "";
+    $SelectData = array();
+    if (count($UniqueTagArray))
+    {
+      foreach ($UniqueTagArray as $UTA_row)
+        $SelectData[$UTA_row['tag_pk']] = $UTA_row['tag_name'];
+      $V .= "Tag filter";
+      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item"));
+      $Options = " id='filterselect' onchange=\"js_url(this.value, '$myurl&tag=')\"";
+      $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk", $tag_pk, true, false, $Options);
+    }
+
+    $dirlistPlaceHolder = "<table border=0 id='dirlist' style=\"margin-left: 9px;\" class='semibordered'></table>\n";
+    /****** Combine VF and VLic ********/
+    $V .= "<table border=0 cellpadding=2 width='100%'>\n";
+    $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
+    $V .= "</table>\n";
+
+    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
+    $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+
+    $V .= $jsBlockDirlist;
+    $V .= $jsBlockLicenseHist;
+    return ($V);
+  }
+  
+  
   /**
    * @param $updcache
    * @return array
    */
-  public function cleanGetArgs($updcache)
+  protected function cleanGetArgs($updcache)
   {
     /* Remove "updcache" from the GET args.
          * This way all the url's based on the input args won't be
@@ -310,12 +307,12 @@ class ui_browse_license extends FO_Plugin
       $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/", "", $_SERVER['REQUEST_URI']);
       unset($_GET['updcache']);
       $V = ReportCachePurgeByKey($CacheKey);
-      return array($CacheKey, $V);
-    } else
+    }
+    else
     {
       $V = ReportCacheGet($CacheKey);
-      return array($CacheKey, $V);
     }
+    return array($CacheKey, $V);
   }
 
   /**
@@ -574,24 +571,20 @@ class ui_browse_license extends FO_Plugin
    */
   private function buildAgentSelector($successfulAgents)
   {
-    $selectedAgentId = GetParm('agentId', PARM_INTEGER);
-    if (count($successfulAgents) == 1)
-    {
-      $agent = $successfulAgents[0];
-      return "Only one revision of <b>" . $agent->getAgentName() . "</b> ran for this upload. <br/>";
-    }
-
-    $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $output = "<form action=\"$URI\" method=\"post\"><select name=\"agentId\" id=\"agentId\">";
-    $isSelected = (0 == $selectedAgentId) ? self::SELECTED_ATTRIBUTE : '';
-    $output .= "<option value=\"0\" $isSelected>" . _('Latest run of all available agents') . "</option>\n";
+    $agentMap = array();
     foreach ($successfulAgents as $agent)
     {
-      $isSelected = $agent->getAgentId() == $selectedAgentId ? self::SELECTED_ATTRIBUTE : '';
-      $output .= "<option value=\"" . $agent->getAgentId() . "\"$isSelected>" . $agent->getAgentName() . " " . $agent->getAgentRevision() . "</option>\n";
+      $agentMap[$agent->getAgentId()] = $agent->getAgentName() . " " . $agent->getAgentRevision();
     }
-    $output .= "</select><input type='submit' name='' value='Show'/></form>";
-    return $output;
+    if (count($successfulAgents) > 1)
+    {
+      $agentMap[0] = _('Latest run of all available agents');
+    }
+
+    $vars = array('selectedAgentId' => GetParm('agentId', PARM_INTEGER),
+                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
+                  'agentMap' => $agentMap);
+    return $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
   }
 
   /**
