@@ -22,6 +22,7 @@ namespace Fossology\Lib\Report;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\License;
 
 class LicenseClearedGetter extends ClearedGetterCommon
@@ -50,6 +51,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
+   if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      {
+        continue;
+      }
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
         if ($clearingLicense->isRemoved())
