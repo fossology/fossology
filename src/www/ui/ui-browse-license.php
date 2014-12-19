@@ -566,28 +566,6 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * @param AgentRef[] $successfulAgents
-   * @return string
-   */
-  private function buildAgentSelector($successfulAgents)
-  {
-    $agentMap = array();
-    foreach ($successfulAgents as $agent)
-    {
-      $agentMap[$agent->getAgentId()] = $agent->getAgentName() . " " . $agent->getAgentRevision();
-    }
-    if (count($successfulAgents) > 1)
-    {
-      $agentMap[0] = _('Latest run of all available agents');
-    }
-
-    $vars = array('selectedAgentId' => GetParm('agentId', PARM_INTEGER),
-                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
-                  'agentMap' => $agentMap);
-    return $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
-  }
-
-  /**
    * @param $uploadId
    * @return string
    */
@@ -697,11 +675,26 @@ class ui_browse_license extends FO_Plugin
       }
       $output .= "</p>\n";
     }
+    if (empty($allSuccessfulAgents))
+    {
+      return false;
+    }
 
-    $header = "<h3>" . _("Scanner details") . "</h3>";
-    $header .= $this->buildAgentSelector($allSuccessfulAgents) . "\n";
 
-    return empty($allSuccessfulAgents) ? false : ($header . $output);
+    $agentMap = array();
+    foreach ($successfulAgents as $agent)
+    {
+      $agentMap[$agent->getAgentId()] = $agent->getAgentName() . " " . $agent->getAgentRevision();
+    }
+    if (count($successfulAgents) > 1)
+    {
+      $agentMap[0] = _('Latest run of all available agents');
+    }
+    $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
+                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
+                  'agentMap' => $agentMap);
+    $header =  $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
+    return ($header . $output);
   }
 
   public function getTemplateName()
