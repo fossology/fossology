@@ -655,29 +655,31 @@ class ui_browse_license extends FO_Plugin
     $editedUniqueLicenseCount = 0;
     $editedNoLicenseFoundCount = 0;
 
+    $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
+    if ($tagId)
+    {
+      $licListUri .= "&tag=$tagId";
+    }
+    if ($agentId)
+    {
+      $licListUri .= "&agentId=$agentId";
+    }
+
     $tableData = array();
     foreach ($allLicNames as $licenseShortName)
     {
       $uniqueLicenseCount++;
-
+      $count = 0;
       if (array_key_exists($licenseShortName, $scannerLics))
       {
         $count = $scannerLics[$licenseShortName]['count'];
-      } else
-      {
-        $count = 0;
       }
-
-
+      $editedCount = 0;
       if (array_key_exists($licenseShortName, $editedLics))
       {
         $editedCount = $editedLics[$licenseShortName];
         $editedUniqueLicenseCount++;
-      } else
-      {
-        $editedCount = 0;
       }
-
 
       $totalScannerLicenseCount += $count;
       $editedTotalLicenseCount += $editedCount;
@@ -687,71 +689,14 @@ class ui_browse_license extends FO_Plugin
         $noScannerLicenseFoundCount = $count;
         $editedNoLicenseFoundCount = $editedCount;
       }
-      //else
-      {
+      $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" . urlencode($licenseShortName) . "'>$count</a>": "0";
+      $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
-        /*  Count  */
-        if ($count > 0)
-        {
-          $scannerCountLink = "<a href='";
-          $scannerCountLink .= Traceback_uri();
-          $tagClause = ($tagId) ? "&tag=$tagId" : "";
-          if ($agentId)
-          {
-            $tagClause .= "&agentId=$agentId";
-          }
-          $scannerCountLink .= "?mod=license_list_files&item=$uploadTreeId&lic=" . urlencode($licenseShortName) . $tagClause . "'>$count</a>";
-        } else
-        {
-          $scannerCountLink = "0";
-        }
-
-
-        if ($editedCount > 0)
-        {
-          $editedLink = $editedCount;
-        } else
-        {
-          $editedLink = "0";
-        }
-
-        $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
-      }
+      $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
     }
 
-    $tableColumns = array(
-        array("sTitle" => _("Scanner Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
-        array("sTitle" => _("Concluded License Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
-        array("sTitle" => _("License Name"), "sClass" => "left", "mRender" => '###dressContents###'),
-    );
-
-    $tableSorting = array(
-        array(0, "desc"),
-        array(1, "desc"),
-        array(2, "desc")
-    );
-
-    $tableLanguage = array(
-        "sInfo" => "Showing _START_ to _END_ of _TOTAL_ licenses",
-        "sSearch" => "Search _INPUT_ <button onclick='clearSearchLicense()' >" . _("Clear") . "</button>",
-        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> licenses"
-    );
-
-    $dataTableConfig = array(
-        "aaData" => $tableData,
-        "aoColumns" => $tableColumns,
-        "aaSorting" => $tableSorting,
-        "iDisplayLength" => 25,
-        "oLanguage" => $tableLanguage
-    );
-
-    $dataTableJS = str_replace('"###dressContents###"', "dressContents", json_encode($dataTableConfig));
-
-    $rendered = "<script>
-      function createLicHistTable() {
-        dTable=$('#lichistogram').dataTable(" . $dataTableJS . ");
-    }
-</script>";
+    $js = $this->renderTemplate('browse_license-lic_hist.js.twig', array('tableDataJson'=>json_encode($tableData)));
+    $rendered = "<script>$js</script>";
 
     return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedUniqueLicenseCount, $editedNoLicenseFoundCount);
   }

@@ -1,0 +1,32 @@
+function createLicHistTable() {
+
+  tableColumns = [
+      {"sTitle": "{{ "Scanner Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
+      {"sTitle": "{{ "Concluded License Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
+      {"sTitle": "{{ "License Name"|trans }}", "sClass": "left", "mRender": dressContents}
+  ];
+
+  tableSorting = [
+      [0, "desc"],
+      [1, "desc"],
+      [2, "desc"]
+  ];
+
+  tableLanguage = {
+      "sInfo": "Showing _START_ to _END_ of _TOTAL_ licenses",
+      "sSearch": "Search _INPUT_ <button onclick=\"clearSearchLicense()\" >{{ "Clear"|trans }}</button>",
+      "sLengthMenu": "{{ 'Display'|trans }} <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> {{ 'licenses'|trans }}"
+  };
+
+  licHistTableConfig = {
+      "aaData": {{ tableDataJson }},
+      "aoColumns": tableColumns,
+      "aaSorting": tableSorting,
+      "iDisplayLength": 25,
+      "oLanguage": tableLanguage
+  };
+
+  dTable=$('#lichistogram').dataTable(licHistTableConfig);
+}
+
+
