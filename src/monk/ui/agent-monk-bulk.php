@@ -28,15 +28,13 @@ class agent_fomonkbulk extends FO_Plugin
 {
   public $AgentName;
 
-  const BULKFLAG = "-B";
-
   function __construct() {
     $this->Name = "agent_monk_bulk";
     $this->Title = "TITLE_agent_fomonkbulk";
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "monk";
+    $this->AgentName = "monkbulk";
 
     parent::__construct();
   }
@@ -83,7 +81,7 @@ class agent_fomonkbulk extends FO_Plugin
    **/
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $bulkId)
   {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $bulkId, $this::BULKFLAG . $bulkId);
+    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $bulkId);
   }
 }
 

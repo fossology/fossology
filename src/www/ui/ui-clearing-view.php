@@ -93,11 +93,12 @@ class ClearingView extends FO_Plugin
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
-   * @return array
+   * @return Highlight[]
    */
   private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
   {
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries);
@@ -270,7 +271,6 @@ class ClearingView extends FO_Plugin
     {
       $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
-
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds);
 
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
@@ -283,7 +283,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendData'] = $this->highlightRenderer->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
-    $this->vars['tmpClearingType'] = $selectedClearingType ? $this->clearingDao->isDecisionWip($uploadTreeId, $groupId) : FALSE;
+    $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
   }

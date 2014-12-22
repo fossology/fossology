@@ -24,11 +24,14 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class UserDao extends Object {
+class UserDao extends Object
+{
+  const USER=0;
+  const ADMIN=1;
+  const ADVISOR=2;
 
   /* @var DbManager */
   private $dbManager;
-
   /* @var Logger */
   private $logger;
 
@@ -69,8 +72,8 @@ class UserDao extends Object {
       return $this->dbManager->createMap('groups', 'group_pk', 'group_name');
     }
     $sql = "SELECT group_pk, group_name FROM groups, group_user_member"
-            . " WHERE group_pk=group_fk AND user_fk=$1 AND group_perm=1";
-    $param = array($userId);
+            . " WHERE group_pk=group_fk AND user_fk=$1 AND group_perm=$2";
+    $param = array($userId,self::ADMIN);
     $this->dbManager->prepare($stmt=__METHOD__, $sql);
     $res = $this->dbManager->execute($stmt,$param);
     $groupMap = array();
@@ -265,6 +268,13 @@ class UserDao extends Object {
     return $this->dbManager->getSingleRow(
         "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
         array($userName), __FUNCTION__);
+  }
+  
+  public function isAdvisorOrAdmin($userId, $groupId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2",
+        array($userId, $groupId), __METHOD__);
+    return $row!==false && ($row['group_perm']==self::ADVISOR || $row['group_perm']==self::ADMIN);
   }
 
 } 

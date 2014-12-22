@@ -1,0 +1,10 @@
+{% import "include/macro.html.twig" as macro %}
+<h3>{{ "Scanner details"|trans }}</h3>
+{% if agentMap|length==1 %}
+  {{ 'Only one revision of'|trans }} <b>{{ agentMap|first }}</b> {{ 'ran for this upload'|trans }}. <br/>
+{% else %}
+  <form action="{{ agentShowURI }}" method="post">
+    {{ macro.select('agentId',agentMap,'agentId',agentId) }}
+    <input type="submit" name="s" value="{{'Show'|trans}}"/>
+  </form>
+{% endif %}

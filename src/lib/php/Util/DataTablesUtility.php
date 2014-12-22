@@ -78,7 +78,6 @@ class DataTablesUtility extends Object
       $isSortable = $inputArray['bSortable_' . $i];
       if ($isSortable !== "true") continue;
 
-
       $name = $columNamesInDatabase[$colNumber];
 
       $whichDir = 'sSortDir_' . $i;

@@ -96,7 +96,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    $reflection = new \ReflectionClass($this->agentLicenseEventProcessor); 
+    $method = $reflection->getMethod('getScannerDetectedLicenseDetails');
+    $method->setAccessible(true);
+    $latestAgentDetectedLicenses = $method->invoke($this->agentLicenseEventProcessor,$this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         5 => array(
@@ -126,7 +130,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    $reflection = new \ReflectionClass($this->agentLicenseEventProcessor); 
+    $method = $reflection->getMethod('getScannerDetectedLicenseDetails');
+    $method->setAccessible(true);
+    $latestAgentDetectedLicenses = $method->invoke($this->agentLicenseEventProcessor,$this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array(
         5 => array(
@@ -153,7 +161,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    $reflection = new \ReflectionClass($this->agentLicenseEventProcessor); 
+    $method = $reflection->getMethod('getScannerDetectedLicenseDetails');
+    $method->setAccessible(true);
+    $latestAgentDetectedLicenses = $method->invoke($this->agentLicenseEventProcessor,$this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }
@@ -173,7 +185,11 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
         )
     );
 
-    $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
+    $reflection = new \ReflectionClass($this->agentLicenseEventProcessor); 
+    $method = $reflection->getMethod('getScannerDetectedLicenseDetails');
+    $method->setAccessible(true);
+    $latestAgentDetectedLicenses = $method->invoke($this->agentLicenseEventProcessor,$this->itemTreeBounds);
 
     assertThat($latestAgentDetectedLicenses, is(array()));
   }

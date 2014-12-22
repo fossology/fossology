@@ -21,6 +21,7 @@ namespace Fossology\Reuser\Test;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
@@ -46,12 +47,15 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $clearingDecisionProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var AgentDao */
+  private $agentDao;
 
 
-  public function __construct(DbManager $dbManager, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter) 
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter)
   {
     $this->clearingDao = $clearingDao;
     $this->uploadDao = $uploadDao;
+    $this->agentDao = $agentDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionFilter = $clearingDecisionFilter;
@@ -71,6 +75,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     $container = M::mock('Container');
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
+    $container->shouldReceive('get')->with('dao.agent')->andReturn($this->agentDao);
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);

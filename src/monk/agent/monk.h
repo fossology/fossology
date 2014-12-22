@@ -30,9 +30,9 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define MONK_CASE_INSENSITIVE
 #define MAX_ALLOWED_DIFF_LENGTH 100
-#define MIN_TRAILING_MATCHES 5
-#define MAX_LEADING_DIFF 3
-#define MIN_ALLOWED_RANK 66
+#define MIN_ADJACENT_MATCHES 3
+#define MAX_LEADING_DIFF 2
+#define MIN_ALLOWED_RANK 80
 
 #include <glib.h>
 #include "libfossdbmanager.h"
@@ -41,27 +41,13 @@ You should have received a copy of the GNU General Public License along with thi
 #define MONK_MULTI_THREAD
 #endif
 
-typedef struct {
-  long bulkId;
-  long uploadTreeId;
-  long uploadTreeLeft;
-  long uploadTreeRight;
-  long licenseId;
-  int decisionType;
-  int uploadId;
-  int removing;
-  int userId;
-  int groupId;
-  char* refText;
-} BulkArguments;
 
 typedef struct {
   fo_dbManager* dbManager;
   int agentId;
   int scanMode;
   int verbosity;
-  int jobId;
-  BulkArguments* bulkArguments;
+  void* ptr;
 } MonkState;
 
 typedef struct {
@@ -69,6 +55,12 @@ typedef struct {
   char* shortname;
   GArray* tokens;
 } License;
+
+typedef struct {
+  GArray* licenses;
+  GArray* indexes;
+  unsigned minAdjacentMatches;
+} Licenses;
 
 typedef struct {
   long id;

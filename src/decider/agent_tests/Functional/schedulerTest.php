@@ -76,8 +76,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $clearingEventProcessor = new ClearingEventProcessor();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
-        
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $this->clearingDao, $this->uploadDao, $this->clearingDecisionProcessor);
+
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -128,7 +128,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member'),false);
+    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member','license_map'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_id_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey'),false);
@@ -201,7 +201,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
     assertThat($decisions, is(arrayWithSize(1)));
 
-    /* @var ClearingDecision $deciderMadeDecision*/
+    /** @var ClearingDecision $deciderMadeDecision*/
     $deciderMadeDecision = $decisions[0];
 
     foreach ($deciderMadeDecision->getClearingEvents() as $event) {
@@ -217,30 +217,21 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpRepo();
 
     $dbManager = M::mock(DbManager::classname());
+    $agentDao = M::mock(AgentDao::classname());
     $clearingDao = M::mock(ClearingDao::classname());
     $uploadDao = M::mock(UploadDao::classname());
     $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
 
     $uploadId = 13243;
 
-    /*
-     * mock for Agent class
-     **/
+    /*mock for Agent class **/
     $dbManager->shouldReceive('getSingleRow')->with(
             startsWith("SELECT agent_pk FROM agent"),
             array("decider"), anything())->andReturn(array('agent_pk' => $agentId=232));
-
-    $dbManager->shouldReceive('existsTable')->andReturn(true);
-
-    $dbManager->shouldReceive('getSingleRow')
-            ->with(startsWith("INSERT INTO decider_ars"), arrayContaining($agentId, $uploadId), anything())
-            ->andReturn(array('ars_pk' => $arsId=2));
-
-    $dbManager->shouldReceive('booleanToDb')->with(true)->andReturn($t="pg thinks this is true");
-
-    $dbManager->shouldReceive('getSingleRow')
-            ->with(startsWith("UPDATE decider_ars"), arrayContaining($t, $arsId), anything())
-            ->andReturn(array());
+    $agentDao->shouldReceive('arsTableExists')->andReturn(true);
+    $agentDao->shouldReceive('getCurrentAgentId')->andReturn($agentId=24);
+    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId)->andReturn($arsId=2);
+    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId, $arsId, true)->andReturn(0);
 
     $jobId = 42;
     $groupId = 6;
@@ -266,16 +257,16 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $dbManager->shouldReceive('commit')->times(count($itemIds));
 
     $decisionProcessor->shouldReceive('hasUnhandledScannerDetectedLicenses')
-            ->with($bounds0, $groupId, array())->andReturn(true);
+            ->with($bounds0, $groupId, array(), anything())->andReturn(true);
     $clearingDao->shouldReceive('markDecisionAsWip')
             ->with($itemIds[0], $userId, $groupId);
 
     $decisionProcessor->shouldReceive('hasUnhandledScannerDetectedLicenses')
-            ->with($bounds1, $groupId, array())->andReturn(false);
+            ->with($bounds1, $groupId, array(), anything())->andReturn(false);
     $decisionProcessor->shouldReceive('makeDecisionFromLastEvents')
             ->with($bounds1, $userId, $groupId, DecisionTypes::IDENTIFIED, false, array());
 
-    $runner = new SchedulerTestRunnerMock($dbManager, $clearingDao, $uploadDao, $decisionProcessor);
+    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $decisionProcessor);
 
     list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, $args="");
 

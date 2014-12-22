@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 use Fossology\Lib\Util\Object;
 
 class SplitPosition extends Object
@@ -28,7 +27,6 @@ class SplitPosition extends Object
   const END = 'end';
   const ATOM = 'atom';
   const TYPE = 'type';
-  const LICENSE_REF = 'license_ref';
 
   /**
    * @var int

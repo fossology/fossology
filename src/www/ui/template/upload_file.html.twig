@@ -44,10 +44,12 @@
       <li>
         ({{ 'Optional'|trans }}) {{ 'Select an already uploaded package for reuse in folder ' | trans }}
         {% include 'elements/select-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
+        {% if folderUploads is not empty %}
         <p>
           {{ 'Upload to reuse'|trans }}:<br/>
           {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, '', 5) }}
         </p>
+        {% endif %}
       </li>
       <li><input type="checkbox" name="public" value="public"/>
         ({{ 'Optional'|trans }}) {{ 'Make Public'| trans }}
