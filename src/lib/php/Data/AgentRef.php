@@ -38,7 +38,7 @@ class AgentRef extends Object
 
   public function __construct($agentId, $agentName, $agentRevision)
   {
-    $this->agentId = $agentId;
+    $this->agentId = intval($agentId);
     $this->agentName = $agentName;
     $this->agentRevision = $agentRevision;
   }

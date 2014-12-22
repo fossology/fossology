@@ -130,7 +130,7 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetCurrentAgent()
   {
-    assertThat($this->agentsDao->getCurrentAgent($this->agentName), is($this->incompleteAgent));
+    assertThat($this->agentsDao->getCurrentAgentRef($this->agentName), is($this->incompleteAgent));
     $this->addToAssertionCount(1);
   }
 

@@ -16,17 +16,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\View\LicenseRenderer;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Lib\View\LicenseRenderer;
 
 /**
  * \file ui-browse-license.php
@@ -36,9 +37,7 @@ define("TITLE_ui_license", _("License Browser"));
 
 class ui_browse_license extends FO_Plugin
 {
-
   private $uploadtree_tablename = "";
-  const SELECTED_ATTRIBUTE = ' selected="selected"';
   /** @var UploadDao */
   private $uploadDao;
   /** @var LicenseDao */
@@ -72,16 +71,6 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * \brief  Only used during installation.
-   * \return 0 on success, non-zero on failure.
-   */
-  function Install()
-  {
-    global $PG_CONN;
-    return (int)(!$PG_CONN);
-  }
-
-  /**
    * \brief Customize submenus.
    */
   function RegisterMenus()
@@ -108,13 +97,7 @@ class ui_browse_license extends FO_Plugin
 
   /**
    * \brief This is called before the plugin is used.
-   * It should assume that Install() was already run one time
-   * (possibly years ago and not during this object's creation).
-   *
    * \return true on success, false on failure.
-   * A failed initialize is not used by the system.
-   *
-   * \note This function must NOT assume that other plugins are installed.
    */
   function Initialize()
   {
@@ -133,15 +116,12 @@ class ui_browse_license extends FO_Plugin
     return ($this->State == PLUGIN_STATE_VALID);
   }
 
-  /**
-   * \brief This function returns the scheduler status.
-   */
   function Output()
   {
     $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return (0);
+      return 0;
     }
     $upload = GetParm("upload", PARM_INTEGER);
     $UploadPerm = GetUploadPerm($upload);
@@ -171,23 +151,16 @@ class ui_browse_license extends FO_Plugin
     $Cached = !empty($V);
     if (!$Cached && !empty($upload))
     {
-      $V .= js_url();
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
+      $left = $itemTreeBounds->getLeft();
+      if (empty($left))
+      {
+        $text = _("Job unpack/adj2nest hasn't completed.");
+        $this->vars['content'] = "<b>$text</b><p>";
+        return;
+      }
       $V .= $this->showUploadHist($itemTreeBounds, $tag_pk);
-      $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
-      $AddInfoText = "<br/><span id='bulkIdResult' hidden></span>";
-      /** @todo move text to template */
-      if ($this->vars['haveOldVersionResult'])
-      {
-        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . $this->vars['haveOldVersionResult'] . _(" are from an older version, or were not confirmed in latest successful scan or were found during incomplete scan.");
-      }
-      if ($this->vars['haveRunningResult'])
-      {
-        $AddInfoText .= "<br/>" . _("Hint: Results marked with ") . $this->vars['haveRunningResult'] . _(" are from the newest version and come from a currently running or incomplete scan.");
-      }
-      $V .= $AddInfoText;
     }
-
 
     $this->vars['content'] = $V;
     $Time = microtime(true) - $uTime;
@@ -197,13 +170,16 @@ class ui_browse_license extends FO_Plugin
       $text = _("This is cached view.");
       $text1 = _("Update now.");
       $this->vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
-    } else
+    }
+    else
     {
       $text = _("Elapsed time: %.3f seconds");
       $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
       if ($Time > 3.0)
         ReportCachePut($CacheKey, $V);
     }
+    $this->vars['content'] .= js_url();
+    
     return;
   }
 
@@ -215,32 +191,22 @@ class ui_browse_license extends FO_Plugin
    */
   private function showUploadHist(ItemTreeBounds $itemTreeBounds, $tag_pk)
   {
-    $left = $itemTreeBounds->getLeft();
-    if (empty($left))
-    {
-      $text = _("Job unpack/adj2nest hasn't completed.");
-      $V = "<b>$text</b><p>";
-      return $V;
-    }
-
-    $uploadId = $itemTreeBounds->getUploadId();
-    $scannerAgents = array('nomos', 'monk', 'ninka');
-
-    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
-
-    if (!$agentStatus)
-    {
-      $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
-      return $out;
-    }
-
     global $SysConf;
     $groupId = $SysConf['auth']['GroupId'];
-
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
+        
+    $uploadId = $itemTreeBounds->getUploadId();
+    $scannerAgents = array('nomos', 'monk', 'ninka');
+    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
+    if (!$agentStatus)
+    {
+       $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
+       return $out;
+    }
+
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
     $VLic .= "\n" . $agentStatus;
-    
+  
     $UniqueTagArray = array();
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
 
@@ -287,7 +253,11 @@ class ui_browse_license extends FO_Plugin
 
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
-    return ($V);
+    
+    $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
+    $V .= "<br/><span id='bulkIdResult' hidden></span>";
+    
+    return $V;
   }
   
   
@@ -333,11 +303,11 @@ class ui_browse_license extends FO_Plugin
     $uploadTreeId = $itemTreeBounds->getItemId();
 
     $latestNomos = LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos = $this->agentsDao->getCurrentAgent("nomos");
+    $newestNomos = $this->agentsDao->getCurrentAgentRef("nomos");
     $latestMonk = LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk = $this->agentsDao->getCurrentAgent("monk");
+    $newestMonk = $this->agentsDao->getCurrentAgentRef("monk");
     $latestNinka = LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka = $this->agentsDao->getCurrentAgent("ninka");
+    $newestNinka = $this->agentsDao->getCurrentAgentRef("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' => $newestNomos, 'latestIsNewest' => $latestNomos == $newestNomos->getAgentId()),
         'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' => $newestMonk, 'latestIsNewest' => $latestMonk == $newestMonk->getAgentId()),
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
@@ -577,17 +547,6 @@ class ui_browse_license extends FO_Plugin
     return $out;
   }
 
-
-  public function scheduleScan($uploadId, $agentName, $buttonText)
-  {
-    $out = "<span id=" . $agentName . "_span><br>"
-           . "<button type=\"button\" id=$agentName name=$agentName onclick='scheduleScan($uploadId, \"agent_$agentName\",\"#job" . $agentName . "IdResult\")'>$buttonText</button> </span>";
-    $out .= "<br><span id=\"job" . $agentName . "IdResult\" name=\"job" . $agentName . "IdResult\" hidden></span>";
-
-    return $out;
-  }
-
-
   /**
    * @param $scannerAgents
    * @param $uploadId
@@ -660,44 +619,32 @@ class ui_browse_license extends FO_Plugin
 
   private function renderAgentStatusWithSideEffect($agentName, $uploadId, &$allSuccessfulAgents)
   {
-    $currentAgent = $this->agentsDao->getCurrentAgent($agentName);
-    $successfulAgents = $this->agentsDao->getSuccessfulAgentRuns($agentName, $uploadId);
+    $successfulAgents = $this->agentsDao->getSuccessfulAgentEntries($agentName, $uploadId);
+    $vars['successfulAgents'] = $successfulAgents;
+    $vars['uploadId'] = $uploadId;
+    $vars['agentName'] = $agentName;
    
     if (!count($successfulAgents))
     {
-      $output = _("The agent") . " <b>$agentName</b> " . _("has not been run on this upload.");
-      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-      if (count($runningJobs) > 0)
-      {
-        $output .= _("But there were scheduled jobs for this agent. So it is either running or has failed.");
-        $output .= $this->getViewJobsLink($uploadId);
-        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Reschedule %s scan"), $agentName));
-      } else
-      {
-        $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
-      }
-      return $output;
+      $vars['isAgentRunning'] = count($this->agentsDao->getRunningAgentIds($uploadId, $agentName)) > 0;
+      return $this->renderTemplate('browse_license-agent.html.twig', $vars);
     }  
     
-    $allSuccessfulAgents = array_merge($allSuccessfulAgents, $successfulAgents);
     $latestSuccessfulAgent = $successfulAgents[0];
-
-    $output = _("The latest results of agent") . " <b>$agentName</b> " . _("are from revision ") . $latestSuccessfulAgent->getAgentRevision() . ".";
-
-    if ($latestSuccessfulAgent->getAgentId() != $currentAgent->getAgentId())
+    $currentAgentRef = $this->agentsDao->getCurrentAgentRef($agentName);
+    $vars['currentAgentId'] = $currentAgentRef->getAgentId();
+    $vars['currentAgentRev'] = $currentAgentRef->getAgentRevision();
+    if ($currentAgentRef->getAgentId() != $latestSuccessfulAgent['agent_id'])
     {
       $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-      if (in_array($currentAgent->getAgentId(), $runningJobs))
-      {
-        $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" is scheduled to run on this upload.");
-        $output .= $this->getViewJobsLink($uploadId);
-      } else
-      {
-        $output .= _(" The newest agent revision ") . $currentAgent->getAgentRevision() . _(" has not been run on this upload.");
-      }
-      $output .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
+      $vars['isAgentRunning'] = in_array($currentAgentRef->getAgentId(), $runningJobs);
     }
-    return $output;
+
+    foreach ($successfulAgents as $agent)
+    {
+      $allSuccessfulAgents[] = new AgentRef($agent['agent_id'], $agent['agent_name'], $agent['agent_rev']);
+    }
+    return $this->renderTemplate('browse_license-agent.html.twig', $vars);
   }
 
 }

@@ -241,7 +241,7 @@ ORDER BY agent_fk DESC";
    * @param string $agentName
    * @return AgentRef
    */
-  public function getCurrentAgent($agentName)
+  public function getCurrentAgentRef($agentName)
   {
     $row = $this->dbManager->getSingleRow("SELECT agent_pk, agent_name, agent_rev from agent WHERE agent_enabled AND agent_name=$1 "
         . "ORDER BY agent_pk DESC LIMIT 1", array($agentName));
@@ -269,6 +269,26 @@ ORDER BY agent_fk DESC";
     $this->dbManager->freeResult($res);
     return $agents;
   }
+  
+  /**
+   * @param string $scannerName
+   * @param int $uploadId
+   * @return array[] with keys agent_id,agent_rev,agent_name
+   */
+  public function getSuccessfulAgentEntries($scannerName, $uploadId)
+  {
+    $stmt = __METHOD__ . ".getAgent.$scannerName";
+    $this->dbManager->prepare($stmt,
+        $sql = "SELECT agent_pk AS agent_id,agent_rev,agent_name "
+            . "FROM agent LEFT JOIN $scannerName" . self::ARS_TABLE_SUFFIX . " ON agent_fk=agent_pk "
+            . "WHERE agent_name=$2 AND agent_enabled AND upload_fk=$1 AND ars_success "
+            . "ORDER BY agent_id DESC");
+    $res = $this->dbManager->execute($stmt, array($uploadId, $scannerName));
+    $agents = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $agents;
+  }
+  
 
   /**
    * @param string[] $row
