@@ -198,15 +198,10 @@ class ui_browse_license extends FO_Plugin
     $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array('nomos', 'monk', 'ninka');
     $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
-    if (!$agentStatus)
-    {
-       $out = $this->handleAllScansEmpty($scannerAgents, $uploadId);
-       return $out;
-    }
-
+    
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
     $VLic .= "\n" . $agentStatus;
-  
+    
     $UniqueTagArray = array();
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
 
@@ -519,7 +514,11 @@ class ui_browse_license extends FO_Plugin
    */
   private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $groupId)
   {
-    $FileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
+    if(array_key_exists('noUploadHist',$this->vars))
+    {
+      return array('','');
+    }
+    $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
     $counts = array();
     $licenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, $counts);
@@ -529,49 +528,29 @@ class ui_browse_license extends FO_Plugin
       $editedLicensesHist[$licenses[$i]->getShortName()] = $counts[$i];
     }
 
-    global $container;
-    /** @var LicenseRenderer $licenseRenderer */
-    $licenseRenderer = $container->get('view.license_renderer');
-    return $licenseRenderer->renderLicenseHistogram($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId, $FileCount);
+    /* Write license histogram to $VLic  */
+    $rendered = "<table border=0 class='semibordered' id='lichistogram'></table>\n";
+    list($jsBlockLicenseHist, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount,
+        $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedUniqueLicenseCount, $editedNoLicenseFoundCount)
+        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId);
+
+    $rendered .= "<br/><br/>";
+    $rendered .= _("Hint: Click on the license name to search for where the license is found in the file listing.") . "<br/><br/>\n";
+    
+
+    $vars = array('uniqueLicenseCount'=>$uniqueLicenseCount,
+        'fileCount'=>$fileCount,
+        'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
+        'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
+        'scannerLicenseCount'=> $totalScannerLicenseCount-$noScannerLicenseFoundCount,
+        'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
+        'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
+        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
+    $rendered .= $this->renderTemplate('browse_license-summary.html.twig', $vars);
+    
+    return array($jsBlockLicenseHist, $rendered);
   }
 
-  /**
-   * @param $uploadId
-   * @return string
-   */
-  public function getViewJobsLink($uploadId)
-  {
-    $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-    $linkText = _("View Jobs");
-    $out = "<a href=$URL>$linkText</a>";
-    return $out;
-  }
-
-  /**
-   * @param $scannerAgents
-   * @param $uploadId
-   * @return string
-   */
-  private function handleAllScansEmpty($scannerAgents, $uploadId)
-  {
-    $this->vars['noUploadHist'] = TRUE;
-    $out = _("There is no successful scan for this upload, please schedule one license scanner on this upload. ");
-
-    foreach ($scannerAgents as $agentName)
-    {
-      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-      if (count($runningJobs) > 0)
-      {
-        $out .= _("The agent ") . $agentName . _(" was already scheduled. Maybe it is running at the moment?");
-        $out .= $this->getViewJobsLink($uploadId);
-        $out .= "<br/>";
-      }
-    }
-    $out .= _("Do you want to ");
-    $link = Traceback_uri() . '?mod=agent_add&upload=' . $uploadId;
-    $out .= "<a href='$link'>" . _("schedule agents") . "</a>";
-    return $out;
-  }
 
   /**
    * @param $scannerAgents
@@ -591,9 +570,11 @@ class ui_browse_license extends FO_Plugin
       }
       $output .= '<p>'.$this->renderAgentStatusWithSideEffect($agentName,$uploadId,$successfulAgents).'</p>';
     }
+
     if (empty($successfulAgents))
     {
-      return false;
+      $this->vars['noUploadHist'] = TRUE;
+      return _("There is no successful scan for this upload, please schedule one license scanner on this upload. ").$output;
     }
 
     $agentMap = array();
@@ -646,6 +627,135 @@ class ui_browse_license extends FO_Plugin
     }
     return $this->renderTemplate('browse_license-agent.html.twig', $vars);
   }
+  
+  /**
+   * @param array $scannerLics
+   * @param array $editedLics
+   * @param $uploadTreeId
+   * @param $tagId
+   * @return array
+   * @todo convert to template
+   */
+  public function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
+  {
+    $agentId = GetParm('agentId', PARM_INTEGER);
+
+    $allScannerLicenseNames = array_keys($scannerLics);
+    $allEditedLicenseNames = array_keys($editedLics);
+
+    $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
+
+    $uniqueLicenseCount = 0;
+
+    $totalScannerLicenseCount = 0;
+    $scannerUniqueLicenseCount = count (array_unique( $allScannerLicenseNames ) );
+    $noScannerLicenseFoundCount = 0;
+
+    $editedTotalLicenseCount = 0;
+    $editedUniqueLicenseCount = 0;
+    $editedNoLicenseFoundCount = 0;
+
+    $tableData = array();
+    foreach ($allLicNames as $licenseShortName)
+    {
+      $uniqueLicenseCount++;
+
+      if (array_key_exists($licenseShortName, $scannerLics))
+      {
+        $count = $scannerLics[$licenseShortName]['count'];
+      } else
+      {
+        $count = 0;
+      }
+
+
+      if (array_key_exists($licenseShortName, $editedLics))
+      {
+        $editedCount = $editedLics[$licenseShortName];
+        $editedUniqueLicenseCount++;
+      } else
+      {
+        $editedCount = 0;
+      }
+
+
+      $totalScannerLicenseCount += $count;
+      $editedTotalLicenseCount += $editedCount;
+
+      if ($licenseShortName == "No_license_found")
+      {
+        $noScannerLicenseFoundCount = $count;
+        $editedNoLicenseFoundCount = $editedCount;
+      }
+      //else
+      {
+
+        /*  Count  */
+        if ($count > 0)
+        {
+          $scannerCountLink = "<a href='";
+          $scannerCountLink .= Traceback_uri();
+          $tagClause = ($tagId) ? "&tag=$tagId" : "";
+          if ($agentId)
+          {
+            $tagClause .= "&agentId=$agentId";
+          }
+          $scannerCountLink .= "?mod=license_list_files&item=$uploadTreeId&lic=" . urlencode($licenseShortName) . $tagClause . "'>$count</a>";
+        } else
+        {
+          $scannerCountLink = "0";
+        }
+
+
+        if ($editedCount > 0)
+        {
+          $editedLink = $editedCount;
+        } else
+        {
+          $editedLink = "0";
+        }
+
+        $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
+      }
+    }
+
+    $tableColumns = array(
+        array("sTitle" => _("Scanner Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
+        array("sTitle" => _("Concluded License Count"), "sClass" => "right", "sWidth" => "5%", "bSearchable" => false, "sType" => "num-html"),
+        array("sTitle" => _("License Name"), "sClass" => "left", "mRender" => '###dressContents###'),
+    );
+
+    $tableSorting = array(
+        array(0, "desc"),
+        array(1, "desc"),
+        array(2, "desc")
+    );
+
+    $tableLanguage = array(
+        "sInfo" => "Showing _START_ to _END_ of _TOTAL_ licenses",
+        "sSearch" => "Search _INPUT_ <button onclick='clearSearchLicense()' >" . _("Clear") . "</button>",
+        "sLengthMenu" => "Display <select><option value=\"10\">10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"100\">100</option></select> licenses"
+    );
+
+    $dataTableConfig = array(
+        "aaData" => $tableData,
+        "aoColumns" => $tableColumns,
+        "aaSorting" => $tableSorting,
+        "iDisplayLength" => 25,
+        "oLanguage" => $tableLanguage
+    );
+
+    $dataTableJS = str_replace('"###dressContents###"', "dressContents", json_encode($dataTableConfig));
+
+    $rendered = "<script>
+      function createLicHistTable() {
+        dTable=$('#lichistogram').dataTable(" . $dataTableJS . ");
+    }
+</script>";
+
+    return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedUniqueLicenseCount, $editedNoLicenseFoundCount);
+  }
+
 
 }
 

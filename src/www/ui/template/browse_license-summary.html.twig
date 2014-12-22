@@ -1,0 +1,19 @@
+<h3>{{ "Summary"|trans }}</h3>
+{% if uniqueLicenseCount==0 %}
+  <b>{{ 'Neither license found by scanner nor concluded by user'|trans }}</b>
+{% endif %}
+
+<table border="0" cellpadding="2" id="licsummary" class="simpleTable">
+  <tr><td class="odd">{{ "Unique licenses"|trans }}</td> <td align="right" class="odd">{{ uniqueLicenseCount }}</td>
+    <td align="right" class="even">{{ fileCount }}</td><td class="even">{{ "Files"|trans }}</td></tr>
+
+  <tr><td class="even">{{ "Unique scanner detected licenses"|trans }}</td><td align="right" class="even">{{ scannerUniqueLicenseCount }}</td>
+  <td align="right" class="odd">{{ editedUniqueLicenseCount }}</td><td class="odd">{{ "Unique concluded licenses"|trans }}</td></tr>
+
+  <tr><td class="odd">{{ "Licenses found"|trans }}</td><td align="right" class="odd">{{ scannerLicenseCount }}</td>
+    <td align="right" class="even">{{ editedLicenseCount}}</td><td class="even">{{ "Licenses concluded"|trans }}</td></tr>
+
+  <tr><td class="even">{{ "Files with no detected licenses"|trans }}</td><td align="right" class="even">{{ noScannerLicenseFoundCount }}</td>
+  <td align="right" class="odd">{{ editedNoLicenseFoundCount }}</td><td class="odd">{{ "Concluded files with no license information"|trans }}</td></tr>
+
+</table>
