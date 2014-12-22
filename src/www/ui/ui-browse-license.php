@@ -518,24 +518,19 @@ class ui_browse_license extends FO_Plugin
     }
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
-    $counts = array();
-    $licenses = $this->clearingDao->getClearedLicenses($itemTreeBounds, $groupId, $counts);
-    $editedLicensesHist = array();
-    for ($i=0;$i<count($licenses);++$i)
-    {
-      $editedLicensesHist[$licenses[$i]->getShortName()] = $counts[$i];
-    }
+    $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
 
     /* Write license histogram to $VLic  */
     $rendered = "<table border=0 class='semibordered' id='lichistogram'></table>\n";
     list($jsBlockLicenseHist, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount,
-        $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedUniqueLicenseCount, $editedNoLicenseFoundCount)
+        $editedTotalLicenseCount, $editedUniqueLicenseCount)
         = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId);
+    $noScannerLicenseFoundCount = array_key_exists("No_license_found", $licenseHistogram) ? $licenseHistogram["No_license_found"]['count'] : 0;
+    $editedNoLicenseFoundCount = array_key_exists("No_license_found", $editedLicensesHist) ? $editedLicensesHist["No_license_found"]['count'] : 0;
 
     $rendered .= "<br/><br/>";
     $rendered .= _("Hint: Click on the license name to search for where the license is found in the file listing.") . "<br/><br/>\n";
     
-
     $vars = array('uniqueLicenseCount'=>$uniqueLicenseCount,
         'fileCount'=>$fileCount,
         'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
@@ -646,12 +641,10 @@ class ui_browse_license extends FO_Plugin
     $uniqueLicenseCount = 0;
 
     $totalScannerLicenseCount = 0;
-    $scannerUniqueLicenseCount = count (array_unique( $allScannerLicenseNames ) );
-    $noScannerLicenseFoundCount = 0;
+    $scannerUniqueLicenseCount = count ( array_keys($scannerLics) );
 
     $editedTotalLicenseCount = 0;
     $editedUniqueLicenseCount = 0;
-    $editedNoLicenseFoundCount = 0;
 
     $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
     if ($tagId)
@@ -682,11 +675,6 @@ class ui_browse_license extends FO_Plugin
       $totalScannerLicenseCount += $count;
       $editedTotalLicenseCount += $editedCount;
 
-      if ($licenseShortName == "No_license_found")
-      {
-        $noScannerLicenseFoundCount = $count;
-        $editedNoLicenseFoundCount = $editedCount;
-      }
       $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" . urlencode($licenseShortName) . "'>$count</a>": "0";
       $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
@@ -696,7 +684,7 @@ class ui_browse_license extends FO_Plugin
     $js = $this->renderTemplate('browse_license-lic_hist.js.twig', array('tableDataJson'=>json_encode($tableData)));
     $rendered = "<script>$js</script>";
 
-    return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $noScannerLicenseFoundCount, $editedTotalLicenseCount, $editedUniqueLicenseCount, $editedNoLicenseFoundCount);
+    return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $editedTotalLicenseCount, $editedUniqueLicenseCount);
   }
 
 
