@@ -27,7 +27,6 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\View\LicenseRenderer;
 
 /**
  * \file ui-browse-license.php
@@ -308,18 +307,17 @@ class ui_browse_license extends FO_Plugin
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
 
     /*******    File Listing     ************/
-    $VF = ""; // return values for file listing
     $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($uploadTreeId, $this->uploadtree_tablename);
+    $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
 
     /* Filter out Children that don't have tag */
     if (!empty($tagId))
-      TagFilter($Children, $tagId, $this->uploadtree_tablename);
+      TagFilter($Children, $tagId, $itemTreeBounds->getUploadTreeTableName());
 
     if (empty($Children))
     {
-      return array($ChildCount = 0, $VF);
+      return array($ChildCount = 0, "");
     }
 
     global $Plugins;
@@ -355,7 +353,7 @@ class ui_browse_license extends FO_Plugin
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
-    $VF .= '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
+    $VF = '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
