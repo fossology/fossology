@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ include $(VARS)
 
 DoxDir=$(FOSRCDIR)/srcdocs
 SchemaSpy=/usr/local/bin/schemaSpy
-PgJDBC=/usr/share/java/postgresql-jdbc3-8.4.jar
+PgJDBC=/usr/share/java/postgresql-jdbc4-9.1.jar
 
 all: doxygen schemaspy
 
