@@ -19,15 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Fossology\Lib\Proxy\LicenseViewProxy;
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 class LicenseDao extends Object
@@ -486,6 +486,6 @@ class LicenseDao extends Object
   public function getLicenseParentById($licenseId)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
-            array(LicenseUsageTypes::CONCLUSION,$licenseId));
+            array(LicenseMap::CONCLUSION,$licenseId));
   }
 }

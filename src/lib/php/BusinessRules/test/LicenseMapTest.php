@@ -19,8 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Test\TestPgDb;
-use Fossology\Lib\Data\LicenseUsageTypes;
-
 
 class LicenseMapTest extends \PHPUnit_Framework_TestCase
 {
@@ -36,14 +34,16 @@ class LicenseMapTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array('license_ref','license_map'));
     $this->dbManager = $this->testDb->getDbManager();
     $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
-    $this->dbManager->insertTableRow('license_map',array('rf_fk'=>2,'rf_parent'=>1,'usage'=>LicenseUsageTypes::CONCLUSION));
+    $this->dbManager->insertTableRow('license_map',array('rf_fk'=>2,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
     $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>1,'rf_shortname'=>'One'));
     $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>2,'rf_shortname'=>'Two'));
     $this->dbManager->insertTableRow('license_candidate',array('rf_pk'=>3,'rf_shortname'=>'Three','group_fk'=>$this->groupId));
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
   
   function testProjectedIdOfUnmappedIdIsIdItself()
@@ -67,11 +67,16 @@ class LicenseMapTest extends \PHPUnit_Framework_TestCase
     assertThat($licenseMap->getProjectedId(2),is(1));
   }
   
-  function testProjectedShortNameOfUnmappedId()
+  function testProjectedShortNameOfMappedId()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
     assertThat($licenseMap->getProjectedShortName(2),is('One'));
   }
   
+  function testProjectedIdOfMappedIdIsIdItselfIfTrivialMap()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::TRIVIAL);
+    assertThat($licenseMap->getProjectedId(2),is(2));
+  }
+  
 }
- 

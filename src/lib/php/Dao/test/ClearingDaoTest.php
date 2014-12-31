@@ -21,7 +21,6 @@ namespace Fossology\Lib\Dao;
 
 use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -141,6 +140,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk', $params, $logStmt = 'insert.bulkref');
     }
+    
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   private function insertBulkEvents()
@@ -201,6 +202,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = null;
     $this->dbManager = null;
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
   private function getMyDate($in)
@@ -346,4 +348,29 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
+  
+  public function testGetClearedLicenseMultiplicities()
+  {
+    $user = 1;
+    $groupId = 601;
+    $rf = 401;
+    $isRm = false;
+    $t = -10815;
+    $this->buildProposals(array(array(303,$user,$groupId,$rf,$isRm,$t),
+        array(305,$user,$groupId,$rf,$isRm,$t+1)),$eventId=0);
+    $type = DecisionTypes::IDENTIFIED;
+    $scope = DecisionScopes::ITEM;
+    $this->buildDecisions(array(array(303,$user,$groupId,$type,$t,$scope,array($eventId)),
+        array(305,$user,$groupId,$type,$t,$scope,array($eventId+1))));
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getRight')->andReturn(8);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(102);
+            
+    $map = $this->clearingDao->getClearedLicenseMultiplicities($treeBounds, $groupId);
+    assertThat($map, is(array('FOO'=>2)));
+  }
+  
 }

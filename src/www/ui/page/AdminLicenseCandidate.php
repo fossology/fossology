@@ -18,10 +18,10 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Data\LicenseUsageTypes;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -207,7 +207,7 @@ class AdminLicenseCandidate extends DefaultPlugin
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
         false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type
   FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
-    $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rf_parent,'usage'=>LicenseUsageTypes::CONCLUSION));
+    $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rf_parent,'usage'=>LicenseMap::CONCLUSION));
     $dbManager->getSingleRow('DELETE FROM license_candidate WHERE rf_pk=$1',array($rf),__METHOD__.'.delete');
     $dbManager->commit();
     return true;

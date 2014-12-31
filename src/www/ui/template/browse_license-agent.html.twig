@@ -1,0 +1,31 @@
+{% if successfulAgents|length <1 %}
+  {{ "The agent"|trans }} <b>{{agentName}}</b> {{ "has not been run on this upload."|trans }}
+  {% if isAgentRunning %}
+    {{ "But there were scheduled jobs for this agent. So it is either running or has failed."|trans }}
+    <a href="?mod=showjobs&upload={{ uploadId}}">{{ "View Jobs"|trans }}</a>
+  {% endif %}
+{% else %}
+  {% set latestSuccess = successfulAgents|first %}
+  {{ "The latest results of agent"|trans }} <b>{{ agentName }}</b> {{ "are from revision"|trans }} {{ latestSuccess.agent_rev }}.
+  {% if currentAgentId != latestSuccess.agent_id %}
+    {% if isAgentRunning %}
+      {{ "The newest agent revision"|trans }} {{ currentAgentRev }} {{ " is scheduled to run on this upload"|trans }}.
+      <a href="?mod=showjobs&upload={{ uploadId}}">{{ "View Jobs"|trans }}</a>
+    {% else %}
+      {{ "The newest agent revision" }} {{ currentAgentRev }} {{ "has not been run on this upload"|trans }}.
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% if successfulAgents|length <1 or latestSuccess.agent_id != currentAgentId %}
+  <span id="{{ agentName }}_span"><br/>
+    <button type="button" id="{{ agentName }}" name="{{ agentName }}"
+            onclick="scheduleScan({{ uploadId }}, 'agent_{{ agentName }}','#job{{ agentName }}IdResult');">
+      {% if isAgentRunning %}{{ "Reschedule %s scan"|trans|format(agentName) }}
+      {% else %}{{ "Schedule %s scan"|trans|format(agentName) }}
+      {% endif %}
+    </button>
+  </span>
+  <br/>
+  <span id="job{{ agentName }}IdResult" name="job{{ agentName }}IdResult" hidden></span>
+{% endif %}

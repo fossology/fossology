@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Util\Object;
 
 class ClearingDecision extends Object

@@ -40,7 +40,7 @@ abstract class Agent extends Object
   /** @var DbManager dbManager */
   protected $dbManager;
 
-  /** @var Agent agentDao */
+  /** @var AgentDao agentDao */
   protected $agentDao;
 
   /** @var ContainerBuilder */
