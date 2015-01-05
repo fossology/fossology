@@ -36,7 +36,7 @@ $(MOD_NAME:%=VERSIONFILE-%):
 install: $(MOD_NAME:%=install-%)
 
 $(MOD_NAME:%=install-%): NAME = $(@:install-%=%)
-$(MOD_NAME:%=install-%): all
+$(MOD_NAME:%=install-%):
 	$(call DIR_LOOP,$@)
 	$(INSTALL_DATA) VERSION-$(NAME) $(DESTDIR)$(MODDIR)/$(NAME)/VERSION
 	$(INSTALL_DATA) $(NAME).conf $(DESTDIR)$(MODDIR)/$(NAME)/$(NAME).conf

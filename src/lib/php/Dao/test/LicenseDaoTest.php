@@ -37,18 +37,13 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
   
   public function tearDown()
   {
     $this->testDb = null;
     $this->dbManager = null;
-  }
-
-  public function testSimple()
-  {
-    $licDao = new LicenseDao($this->dbManager);
-    $this->assertInstanceOf('Fossology\Lib\Dao\LicenseDao', $licDao);
   }
 
   public function testGetFileLicenseMatches()
@@ -172,10 +167,11 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     
     asort($licAll);    
     assertThat($licenses, is(array_values($licAll)));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
   
 
-  public function testGetTopLevelLicensesPerFileId()
+  public function testGetLicenseIdPerPfileForAgentId()
   {
     $this->testDb->createPlainTables(array('license_ref','license_file','uploadtree','agent'));
     $this->testDb->insertData(array('agent'));
@@ -205,18 +201,15 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $licDao = new LicenseDao($this->dbManager);
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,$uploadtreetable_name,$uploadId,$left,$left+5);
 
-    $row = array('file_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,
-               'agent_name'=>'monk', 'agent_id'=>$agentId, 'match_percentage'=>$matchPercent);
-    $expected = array($pfileId=>array($licAll[$rf_pk]=>array('monk'=>$row)));
-
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo($expected)));
+    $row = array('pfile_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,'match_percentage'=>$matchPercent,'agent_id'=>$agentId);
+    $expected = array($pfileId=>array($rf_pk=>$row));
     
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = $agentId, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo($expected)));
+    $licensesForGoodAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = $agentId);
+    assertThat($licensesForGoodAgent, is(equalTo($expected)));
 
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = 1+$agentId, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo(array())));
+    $licensesForBadAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = 1+$agentId);
+    assertThat($licensesForBadAgent, is(equalTo(array())));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
 }

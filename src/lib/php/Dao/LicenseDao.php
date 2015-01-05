@@ -240,63 +240,8 @@ class LicenseDao extends Object
     return $licenseRefs;
   }
 
+  
   /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param $selectedAgentId
-   * @deprecated use getLicenseIdsPerPfileForAgentId
-   * @return array
-   */
-  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
-  {
-    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . implode("", $filterLicenses);
-    $param = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-
-    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ('" . implode("', '", $filterLicenses) . "')";
-
-    $sql_upload = "";
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
-      $sql_upload = " AND utree.upload_fk=$3 ";
-      $param[] = $itemTreeBounds->getUploadId();
-    }
-
-    $sql = "SELECT utree.pfile_fk as file_id,
-           rf_shortname as license_shortname,
-           rf_pk as license_id,
-           agent_name,
-           max(agent_pk) as agent_id,
-           rf_match_pct as match_percentage
-         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.rf_match_pct, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-               FROM license_file
-               JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
-         INNER JOIN $uploadTreeTableName utree ON pfile_ref.pfile_fk = utree.pfile_fk
-         INNER JOIN agent ON agent_fk = agent_pk
-         WHERE (lft BETWEEN $1 AND $2) $sql_upload
-           $noLicenseFoundStmt";
-
-    if (!empty($selectedAgentId))
-    {
-      $param[] = $selectedAgentId;
-      $sql .= " AND agent_pk=$" . count($param);
-      $statementName .= '.agent';
-    }
-    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, match_percentage
-         ORDER BY match_percentage ASC, license_shortname ASC";
-
-    $this->dbManager->prepare($statementName, $sql);
-    $result = $this->dbManager->execute($statementName, $param);
-    $licensesPerFileId = array();
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      $licensesPerFileId[$row['file_id']][$row['license_shortname']][$row['agent_name']] = $row;
-    }
-    $this->dbManager->freeResult($result);
-    return $licensesPerFileId;
-  }
-  
-  
-    /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param $selectedAgentId
    * @return array
@@ -309,14 +254,14 @@ class LicenseDao extends Object
 
     $sql = "SELECT utree.pfile_fk as pfile_id,
            rf_shortname as license_shortname,
-           rf_pk as license_id,
+           license_ref.rf_pk as license_id,
            rf_match_pct as match_percentage,
-           $1 AS agent_id
-         FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.rf_match_pct, license_file.agent_fk, license_file.pfile_fk
-               FROM license_file, license_ref
-               WHERE license_file.rf_fk = license_ref.rf_pk AND agent_fk=$1) AS pfile_ref
-         INNER JOIN $uploadTreeTableName utree ON pfile_ref.pfile_fk = utree.pfile_fk
-         WHERE (lft BETWEEN $2 AND $3)";
+           CAST($1 AS INT) AS agent_id
+         FROM license_file, license_ref, $uploadTreeTableName utree
+         WHERE agent_fk = $1
+           AND license_file.rf_fk = license_ref.rf_pk
+           AND license_file.pfile_fk = utree.pfile_fk
+           AND (lft BETWEEN $2 AND $3)";
     if ('uploadtree_a' == $uploadTreeTableName)
     {
       $sql .= " AND utree.upload_fk=$4";
