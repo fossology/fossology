@@ -144,8 +144,6 @@ class ui_browse_license extends FO_Plugin
 
     $this->uploadtree_tablename = GetUploadtreeTableName($upload);
     $this->vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
-    $this->vars['haveRunningResult'] = false;
-    $this->vars['haveOldVersionResult'] = false;
     $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $Cached = !empty($V);
@@ -291,8 +289,6 @@ class ui_browse_license extends FO_Plugin
    */
   private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId)
   {
-    $this->vars['haveOldVersionResult'] = false;
-    $this->vars['haveRunningResult'] = false;
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getItemId();
@@ -469,16 +465,6 @@ class ui_browse_license extends FO_Plugin
           {
             $agentInfo = $goodAgents[$agent];
             $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentInfo['name'] . "</a>";
-
-            if ($match['agent_id'] != $agentInfo['newest']->getAgentId())
-            {
-              $agentEntry .= "&dagger;";
-              $this->vars['haveOldVersionResult'] = "&dagger;";
-            } else if (!$agentInfo['latestIsNewest'])
-            {
-              $agentEntry .= "&sect;";
-              $this->vars['haveRunningResult'] = "&sect;";
-            }
 
             if ($match['match_percentage'] > 0)
             {
