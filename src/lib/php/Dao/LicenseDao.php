@@ -432,14 +432,14 @@ class LicenseDao extends Object
 
   /**
    * @param string $newShortname
+   * @param int $groupId 
    * @return bool
    */
-  public function isNewLicense($newShortname)
+  public function isNewLicense($newShortname, $groupId)
   {
-    $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
     $licenceViewDao = new LicenseViewProxy($groupId, array('columns' => array('rf_shortname')));
     $sql = 'SELECT count(*) cnt FROM (' . $licenceViewDao->getDbViewQuery() . ') AS license_all WHERE rf_shortname=$1';
-    $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__);
+    $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__.".$groupId" );
     return $duplicatedRef['cnt'] == 0;
   }
 

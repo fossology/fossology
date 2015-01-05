@@ -212,4 +212,31 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
+  public function testIsNewLicense(){
+    $groupId = 401;
+    $this->testDb->createPlainTables(array('license_ref'));
+    $this->testDb->insertData_license_ref();
+    $this->dbManager->queryOnce("CREATE TABLE license_candidate AS SELECT *,$groupId group_fk FROM license_ref LIMIT 1");
+    $licCandi = $this->dbManager->getSingleRow("SELECT * FROM license_candidate",array(),__METHOD__.'.candi');
+    $this->dbManager->queryOnce("DELETE FROM license_ref WHERE rf_pk=$licCandi[rf_pk]");
+    $licRef = $this->dbManager->getSingleRow("SELECT * FROM license_ref LIMIT 1",array(),__METHOD__.'.ref');
+    $licDao = new LicenseDao($this->dbManager);
+    /* test the test but do not count assert */
+    assertThat($this->dbManager->getSingleRow(
+            "SELECT count(*) cnt FROM license_ref WHERE rf_shortname=$1",array($licCandi['rf_shortname']),__METHOD__.'.check'),
+        is(equalTo(array('cnt'=>0))));
+    $this->assertCountBefore++;
+    /* test the DAO */
+    assertThat($licDao->isNewLicense($licRef['rf_shortname'],$groupId), equalTo(FALSE));
+    assertThat($licDao->isNewLicense($licRef['rf_shortname'],0), equalTo(FALSE));
+
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],$groupId), equalTo(FALSE));
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],$groupId+1), equalTo(TRUE));
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],0), equalTo(TRUE));
+    
+    assertThat($licDao->isNewLicense('(a new shortname)',$groupId), equalTo(TRUE));
+    assertThat($licDao->isNewLicense('(a new shortname)',0), equalTo(TRUE));
+    
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }  
 }
