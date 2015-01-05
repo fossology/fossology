@@ -100,9 +100,6 @@ without any warranty.
 
         <service id="businessrules.clearing_decision_filter" class="Fossology\Lib\BusinessRules\ClearingDecisionFilter">
         </service>
-        <service id="businessrules.license_filter" class="Fossology\Lib\BusinessRules\LicenseFilter">
-            <argument type="service" id="businessrules.clearing_decision_filter"/>
-        </service>
         <service id="businessrules.agent_license_event_processor"
                  class="Fossology\Lib\BusinessRules\AgentLicenseEventProcessor">
             <argument type="service" id="dao.license"/>

@@ -324,4 +324,14 @@ ORDER BY agent_fk DESC";
     $this->dbManager->commit();
     return true;
   }
+  
+  /**
+   * @param int $agentId
+   * @return string
+   */
+  public function getAgentName($agentId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT agent_name FROM agent WHERE agent_enabled AND agent_pk=$1", array($agentId));
+    return ($row===false)?false:$row['agent_name'];
+  }
 } 

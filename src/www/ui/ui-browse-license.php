@@ -18,6 +18,7 @@
  ***********************************************************/
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -295,7 +296,20 @@ class ui_browse_license extends FO_Plugin
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getItemId();
+    
+    /* Get ALL the items under this Uploadtree_pk */
+    $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
 
+    /* Filter out Children that don't have tag */
+    if (!empty($tagId))
+    {
+      TagFilter($Children, $tagId, $itemTreeBounds->getUploadTreeTableName());
+    }
+    if (empty($Children))
+    {
+      return array($ChildCount = 0, "");
+    }
+    
     $latestNomos = LatestAgentpk($uploadId, "nomos_ars");
     $newestNomos = $this->agentsDao->getCurrentAgentRef("nomos");
     $latestMonk = LatestAgentpk($uploadId, "monk_ars");
@@ -307,17 +321,37 @@ class ui_browse_license extends FO_Plugin
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
 
     /*******    File Listing     ************/
-    $pfileLicenses = $this->licenseDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId, array());
-    /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
-
-    /* Filter out Children that don't have tag */
-    if (!empty($tagId))
-      TagFilter($Children, $tagId, $itemTreeBounds->getUploadTreeTableName());
-
-    if (empty($Children))
+    if (!empty($selectedAgentId))
     {
-      return array($ChildCount = 0, "");
+      $agentName = $this->agentsDao->getAgentName($selectedAgentId);
+      $selectedScanners = array($agentName=>$selectedAgentId);
+    }
+    else
+    {
+      foreach ($goodAgents as $agentName=>$goodAgent)
+      {
+        if ($goodAgent['latest'])
+        {
+          $selectedScanners[$agentName] = $goodAgent['latest'];
+        }
+      }
+    }
+ 
+    global $container;
+    $licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
+
+    $pfileLicenses = array();
+    foreach($selectedScanners as $agentName=>$agentId)
+    {
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId);
+      foreach ($licensePerPfile as $pfile => $licenseRow)
+      {
+        foreach ($licenseRow as $licId => $row)
+        {
+          $lic = $licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
+          $pfileLicenses[$pfile][$lic][$agentName] = $row;
+        }
+      }
     }
 
     global $Plugins;
