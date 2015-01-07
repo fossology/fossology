@@ -162,23 +162,28 @@ class LicenseCsvImport {
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
     $return = "Inserted '$row[shortname]' in DB";
     
-    if ($row['parent_shortname']!==null && $this->getKeyFromShortname($row['parent_shortname'])!==false)
+    if ($this->insertMapIfNontrivial($row['parent_shortname'],$row['shortname'],LicenseMap::CONCLUSION))
     {
-      $dbManager->insertTableRow('license_map',
-        array('rf_fk'=>$new['rf_pk'],
-            'rf_parent'=>$this->getKeyFromShortname($row['parent_shortname']),
-            'usage'=>  LicenseMap::CONCLUSION));
       $return .= " with conclusion '$row[parent_shortname]'";
     }
-    if ($row['report_shortname']!==null && $this->getKeyFromShortname($row['report_shortname'])!==false)
+    if ($this->insertMapIfNontrivial($row['report_shortname'],$row['shortname'],LicenseMap::REPORT))
     {
-      $dbManager->insertTableRow('license_map',
-        array('rf_fk'=>$new['rf_pk'],
-            'rf_parent'=>$this->getKeyFromShortname($row['report_shortname']),
-            'usage'=>  LicenseMap::REPORT));
       $return .= " reporting '$row[report_shortname]'";
     }
     return $return;
+  }
+  
+  private function insertMapIfNontrivial($fromName,$toName,$usage)
+  {
+    $isNontrivial = ($fromName!==null && $fromName!=$toName && $this->getKeyFromShortname($fromName)!==false);
+    if ($isNontrivial)
+    {
+      $this->dbManager->insertTableRow('license_map',
+        array('rf_fk'=>$this->getKeyFromShortname($toName),
+            'rf_parent'=>$this->getKeyFromShortname($fromName),
+            'usage'=> $usage));
+    }
+    return $isNontrivial;
   }
   
   private function getKeyFromShortname($shortname)

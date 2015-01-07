@@ -61,40 +61,47 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $reflection = new \ReflectionClass($licenseCsvImport); 
     $nkMap = $reflection->getProperty('nkMap');
     $nkMap->setAccessible(true);
-    $nkMap->setValue($licenseCsvImport,array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false));
+    $nkMap->setValue($licenseCsvImport,array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licZ'=>100));
     
     $method = $reflection->getMethod('handleCsvLicense');
     $method->setAccessible(true);
 
     $dbManager->shouldReceive('getSingleRow')
             ->with('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',anything())
-            ->times(3)
-            ->andReturn(false,false,array('rf_shortname'=>'licD'));
+            ->times(4)
+            ->andReturn(false,false,false,array('rf_shortname'=>'licD'));
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
     $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>102));
+    
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
         array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
-    
     $returnB = $method->invoke($licenseCsvImport,
             array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
-                'parent_shortname'=>'licA'));
+                'parent_shortname'=>'licA','report_shortname'=>null));
     assertThat($returnB, is("Inserted 'licB' in DB with conclusion 'licA'"));
+
+    $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
+        array('rf_fk'=>102,'rf_parent'=>100,'usage'=>LicenseMap::REPORT)))->once();
+    $returnF= $method->invoke($licenseCsvImport,
+            array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'',
+                'parent_shortname'=>null,'report_shortname'=>'licZ'));
+    assertThat($returnF, is("Inserted 'licF' in DB reporting 'licZ'"));
     
     $returnC = $method->invoke($licenseCsvImport,
             array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'',
-                'parent_shortname'=>null));
+                'parent_shortname'=>null,'report_shortname'=>null));
     assertThat($returnC, is("Inserted 'licC' in DB"));
     
     $returnA = $method->invoke($licenseCsvImport,
             array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
-                'parent_shortname'=>null));
-    assertThat($returnA, is("Shortname 'licA' already in DB"));
+                'parent_shortname'=>null,'report_shortname'=>null));
+    assertThat($returnA, is("Shortname 'licA' already in DB (id=101)"));
 
     $returnE = $method->invoke($licenseCsvImport,
             array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'',
-                'parent_shortname'=>null));
+                'parent_shortname'=>null,'report_shortname'=>null));
     assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
   }
   
@@ -108,10 +115,10 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $method->setAccessible(true);
   
     assertThat($method->invoke($licenseCsvImport,array('shortname','foo','text','fullname','notes','bar')),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false) ) );
+            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false) ) );
     
     assertThat($method->invoke($licenseCsvImport,array('Short Name','URL','text','fullname','notes','Foreign ID')),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5) ) );
+            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5) ) );
   }
    
   /**
