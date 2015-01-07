@@ -71,13 +71,13 @@ class LicenseMap extends Object
   }
   
   
-  public function getProjectedShortname($licenseId)
+  public function getProjectedShortname($licenseId, $defaultName=null)
   {
     if(array_key_exists($licenseId, $this->map))
     {
       return $this->map[$licenseId]['parent_shortname'];
     }
-    return null;
+    return $defaultName;
   }
   
   public function getUsage()

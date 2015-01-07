@@ -89,8 +89,6 @@ without any warranty.
         </service>
         <service id="view.highlight_renderer" class="Fossology\Lib\View\HighlightRenderer">
         </service>
-        <service id="view.license_renderer" class="Fossology\Lib\View\LicenseRenderer">
-        </service>
         <service id="view.url_builder" class="Fossology\Lib\View\UrlBuilder">
         </service>
         <service id="view.text_renderer" class="Fossology\Lib\View\TextRenderer">
@@ -101,9 +99,6 @@ without any warranty.
         </service>
 
         <service id="businessrules.clearing_decision_filter" class="Fossology\Lib\BusinessRules\ClearingDecisionFilter">
-        </service>
-        <service id="businessrules.license_filter" class="Fossology\Lib\BusinessRules\LicenseFilter">
-            <argument type="service" id="businessrules.clearing_decision_filter"/>
         </service>
         <service id="businessrules.agent_license_event_processor"
                  class="Fossology\Lib\BusinessRules\AgentLicenseEventProcessor">

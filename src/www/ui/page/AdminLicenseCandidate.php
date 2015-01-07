@@ -195,7 +195,7 @@ class AdminLicenseCandidate extends DefaultPlugin
   {
     /** @var LicenseDao */
     $licenseDao = $this->getObject('dao.license');
-    if (!$licenseDao->isNewLicense($shortname))
+    if (!$licenseDao->isNewLicense($shortname, $groupId=0))
     {
       return false;
     }

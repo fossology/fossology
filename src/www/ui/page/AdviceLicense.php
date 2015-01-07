@@ -156,11 +156,11 @@ class AdviceLicense extends DefaultPlugin
 
     /** @var LicenseDao $licenseDao */
     $licenseDao = $this->getObject('dao.license');
-
+    $groupId = $_SESSION['GroupId'];
     $ok = ($oldRow['rf_shortname'] == $shortname);
     if (!$ok)
     {
-      $ok = $licenseDao->isNewLicense($shortname);
+      $ok = $licenseDao->isNewLicense($shortname, $groupId);
     }
     if (!$ok)
     {

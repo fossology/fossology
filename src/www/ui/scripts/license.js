@@ -58,8 +58,12 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 });
 
 $(document).ready(function () {
-  createLicHistTable();
-  createDirlistTable();
+    if(typeof createLicHistTable==='function') {
+      createLicHistTable();
+    }
+    if(typeof createDirlistTable==='function') {
+      createDirlistTable();
+    }
     $("form[data-autosubmit] select").change(function() {
         $(this).closest('form').submit();
     });

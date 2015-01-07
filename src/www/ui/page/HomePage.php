@@ -53,7 +53,7 @@ class HomePage extends DefaultPlugin
       $vars['referer'] = "?mod=browse";
       $vars['authUrl'] = "?mod=auth";
     }
-    return $this->render("default.html.twig", $this->mergeWithDefault($vars));
+    return $this->render("home.html.twig", $this->mergeWithDefault($vars));
   }
 }
 
