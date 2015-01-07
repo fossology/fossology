@@ -39,7 +39,7 @@ class PagedTextResult extends PagedResult
   {
 
     if(self::TARGET_CHARSET == "UTF-8"){
-      return   convertToUTF8($text,true );
+      return convertToUTF8($text, true);
     }
 
     return htmlspecialchars(mb_convert_encoding($text, self::TARGET_CHARSET), ENT_SUBSTITUTE, self::TARGET_CHARSET);

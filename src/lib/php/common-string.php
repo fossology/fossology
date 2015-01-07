@@ -17,6 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+// For compatibility with older php versions
+if (!defined('ENT_SUBSTITUTE'))
+{
+  define('ENT_SUBSTITUTE', 0); //This might give an empty string, but with the conversion to UTF-8 we might not run into this
+}
 
 /**
  * @param $content
@@ -24,9 +29,16 @@
  */
 function convertToUTF8($content, $toHTML=true)
 {
-  if (checkUTF8($content)) {
+  if (strlen($content) == 0)
+  {
+    return '';
+  }
+  if (checkUTF8($content))
+  {
     $output1 = $content;
-  } else {
+  }
+  else
+  {
     $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
     $output1 = false;
     if (!$in_charset)
@@ -48,7 +60,7 @@ function convertToUTF8($content, $toHTML=true)
   }
 
   if (!$toHTML) return $output1;
-  return (htmlentities($output1, ENT_COMPAT, "UTF-8")) ?: "<b>Unknown encoding</b>";
+  return (htmlspecialchars($output1, ENT_SUBSTITUTE, "UTF-8")) ?: "<b>Unknown encoding</b>";
 }
 
 function checkUTF8($content)
