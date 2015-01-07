@@ -48,6 +48,8 @@ class ui_browse_license extends FO_Plugin
   private $agentsDao;
   /** @var ClearingDecisionFilter */
   private $clearingFilter;
+  /** @var LicenseMap */
+  private $licenseProjector;
   /** @var array [uploadtree_id]=>cnt */
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
@@ -201,6 +203,8 @@ class ui_browse_license extends FO_Plugin
     $VLic .= "\n" . $agentStatus;
     
     $UniqueTagArray = array();
+    global $container;
+    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
 
     /***************************************
@@ -332,9 +336,6 @@ class ui_browse_license extends FO_Plugin
         }
       }
     }
- 
-    global $container;
-    $licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
 
     $pfileLicenses = array();
     foreach($selectedScanners as $agentName=>$agentId)
@@ -344,7 +345,7 @@ class ui_browse_license extends FO_Plugin
       {
         foreach ($licenseRow as $licId => $row)
         {
-          $lic = $licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
+          $lic = $this->licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
@@ -372,7 +373,7 @@ class ui_browse_license extends FO_Plugin
     $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     $noLicenseUploadTreeView->unmaterialize();
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, false);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     foreach ($Children as $child)
     {
@@ -486,17 +487,16 @@ class ui_browse_license extends FO_Plugin
         $editedLicenses = array();
       }
     }
+    
+    $concludedLicenses = array();
+    /** var LicenseRef $licenseRef */
+    foreach($editedLicenses as $licenseRef){
+      $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
+      $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
+      $concludedLicenses[$projectedId] = "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $projectedName . "</a>";
+    }
 
-    $editedLicenses = array_map(
-      function ($licenseRef) use ($uploadId, $childUploadTreeId)
-      {
-        /** @var LicenseRef $licenseRef */
-        return "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $licenseRef->getShortName() . "</a>";
-      },
-      $editedLicenses
-    );
-
-    $editedLicenseList = implode(', ', $editedLicenses);
+    $editedLicenseList = implode(', ', $concludedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
