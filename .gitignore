@@ -51,6 +51,7 @@ src/copyright/agent/ip
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
 src/copyright/agent_tests/results
+src/decider/agent/decider
 src/decider/agent/version.php
 src/delagent/agent/delagent
 src/delagent/agent_tests/Unit/results/
