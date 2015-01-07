@@ -27,6 +27,7 @@ class LicenseMap extends Object
   const CONCLUSION = 1;
   const TRIVIAL = 2;
   const FAMILY = 3;
+  const REPORT = 4;
   
   /** @var int */
   private $usageId;

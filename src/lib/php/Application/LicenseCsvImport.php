@@ -37,7 +37,8 @@ class LicenseCsvImport {
       'shortname'=>array('shortname','Short Name'),
       'fullname'=>array('fullname','Long Name'),
       'text'=>array('text','Full Text'),
-      'parent_shortname'=>array('parent_shortname','Regular License Text Short Name'),
+      'parent_shortname'=>array('parent_shortname','Decider Short Name'),
+      'report_shortname'=>array('report_shortname','Regular License Text Short Name'),
       'url'=>array('url','URL'),
       'notes'=>array('notes'),
       'source'=>array('source','Foreign ID')
@@ -105,7 +106,7 @@ class LicenseCsvImport {
     foreach( array('shortname','fullname','text') as $needle){
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
-    foreach(array('parent_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
+    foreach(array('parent_shortname'=>null,'report_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
     {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row))
@@ -128,7 +129,7 @@ class LicenseCsvImport {
       }
       $headrow[$needle] = $col;
     }
-    foreach( array('parent_shortname','url','notes','source') as $optNeedle){
+    foreach( array('parent_shortname','report_shortname','url','notes','source') as $optNeedle){
       $headrow[$optNeedle] = ArrayOperation::multiSearch($this->alias[$optNeedle], $row);
     }
     return $headrow;
@@ -144,7 +145,7 @@ class LicenseCsvImport {
     $dbManager = $this->dbManager;
     if ($this->getKeyFromShortname($row['shortname'])!==false)
     {
-      return "Shortname '$row[shortname]' already in DB";
+      return "Shortname '$row[shortname]' already in DB (id=".$this->getKeyFromShortname($row['shortname']).")";
     }
     $sameText = $dbManager->getSingleRow('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
     if ($sameText!==false)
@@ -159,16 +160,25 @@ class LicenseCsvImport {
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
-    if ($row['parent_shortname']===null || $this->getKeyFromShortname($row['parent_shortname'])===false)
+    $return = "Inserted '$row[shortname]' in DB";
+    
+    if ($row['parent_shortname']!==null && $this->getKeyFromShortname($row['parent_shortname'])!==false)
     {
-      return "Inserted '$row[shortname]' in DB";
-    }
-
-    $dbManager->insertTableRow('license_map',
+      $dbManager->insertTableRow('license_map',
         array('rf_fk'=>$new['rf_pk'],
             'rf_parent'=>$this->getKeyFromShortname($row['parent_shortname']),
             'usage'=>  LicenseMap::CONCLUSION));
-    return "Inserted '$row[shortname]' in DB with conclusion '$row[parent_shortname]'";
+      $return .= " with conclusion '$row[parent_shortname]'";
+    }
+    if ($row['report_shortname']!==null && $this->getKeyFromShortname($row['report_shortname'])!==false)
+    {
+      $dbManager->insertTableRow('license_map',
+        array('rf_fk'=>$new['rf_pk'],
+            'rf_parent'=>$this->getKeyFromShortname($row['report_shortname']),
+            'usage'=>  LicenseMap::REPORT));
+      $return .= " reporting '$row[report_shortname]'";
+    }
+    return $return;
   }
   
   private function getKeyFromShortname($shortname)
