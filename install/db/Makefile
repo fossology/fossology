@@ -22,7 +22,6 @@ install: all
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
-	$(INSTALL_DATA) dbmigrate_2.6-2.7.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.6-2.7.php
 	$(INSTALL_DATA) sanity_check.php $(DESTDIR)$(LIBEXECDIR)/sanity_check.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 
