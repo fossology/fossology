@@ -135,7 +135,6 @@ class ui_browse_license extends FO_Plugin
     }
 
     $item = GetParm("item", PARM_INTEGER);
-    $tag_pk = GetParm("tag", PARM_INTEGER);
     $updateCache = GetParm("updcache", PARM_INTEGER);
 
     $this->vars['baseuri'] = Traceback_uri();
@@ -159,7 +158,7 @@ class ui_browse_license extends FO_Plugin
         $this->vars['content'] = "<b>$text</b><p>";
         return;
       }
-      $V .= $this->showUploadHist($itemTreeBounds, $tag_pk);
+      $V .= $this->showUploadHist($itemTreeBounds);
     }
 
     $this->vars['content'] = $V;
@@ -189,17 +188,21 @@ class ui_browse_license extends FO_Plugin
    *   - The histogram for the directory BY LICENSE.
    *   - The file listing for the directory.
    */
-  private function showUploadHist(ItemTreeBounds $itemTreeBounds, $tag_pk)
+  private function showUploadHist(ItemTreeBounds $itemTreeBounds)
   {
     global $SysConf;
     $groupId = $SysConf['auth']['GroupId'];
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
+    $tag_pk = GetParm("tag", PARM_INTEGER);
         
     $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array('nomos', 'monk', 'ninka');
-    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId);
+    $latestSucessfulAgents = array();
+    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId, $latestSucessfulAgents);
     
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentId, $groupId);
+    $selectedAgentIds = empty($selectedAgentId) ? $latestSucessfulAgents : $selectedAgentId;
+
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
     $VLic .= "\n" . $agentStatus;
     
     $UniqueTagArray = array();
@@ -489,7 +492,7 @@ class ui_browse_license extends FO_Plugin
     }
     
     $concludedLicenses = array();
-    /** var LicenseRef $licenseRef */
+    /** @var LicenseRef $licenseRef */
     foreach($editedLicenses as $licenseRef){
       $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
       $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
@@ -526,7 +529,7 @@ class ui_browse_license extends FO_Plugin
    * @param $uploadTreeId
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int|null $agentId
+   * @param int|int[]|null $agentId
    * @param ClearingDecision []
    * @return string
    */
@@ -570,7 +573,7 @@ class ui_browse_license extends FO_Plugin
    * @param $uploadId
    * @return array
    */
-  private function createAgentStatus($scannerAgents, $uploadId)
+  private function createAgentStatus($scannerAgents, $uploadId, &$latestSucessfulAgentIds)
   {
     $output = "";
     $successfulAgents = array();
@@ -581,7 +584,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $output .= '<p>'.$this->renderAgentStatusWithSideEffect($agentName,$uploadId,$successfulAgents).'</p>';
+      $output .= '<p>'.$this->renderAgentStatusWithSideEffect($agentName,$uploadId,$successfulAgents,$latestSucessfulAgentIds).'</p>';
     }
 
     if (empty($successfulAgents))
@@ -611,7 +614,7 @@ class ui_browse_license extends FO_Plugin
     return "browse_license.html.twig";
   }
 
-  private function renderAgentStatusWithSideEffect($agentName, $uploadId, &$allSuccessfulAgents)
+  private function renderAgentStatusWithSideEffect($agentName, $uploadId, &$allSuccessfulAgents, &$latestSucessfulAgentIds)
   {
     $successfulAgents = $this->agentsDao->getSuccessfulAgentEntries($agentName, $uploadId);
     $vars['successfulAgents'] = $successfulAgents;
@@ -638,6 +641,7 @@ class ui_browse_license extends FO_Plugin
     {
       $allSuccessfulAgents[] = new AgentRef($agent['agent_id'], $agent['agent_name'], $agent['agent_rev']);
     }
+    $latestSucessfulAgentIds[] = $latestSuccessfulAgent['agent_id'];
     return $this->renderTemplate('browse_license-agent.html.twig', $vars);
   }
   
@@ -649,7 +653,7 @@ class ui_browse_license extends FO_Plugin
    * @return array
    * @todo convert to template
    */
-  public function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
+  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
   {
     $agentId = GetParm('agentId', PARM_INTEGER);
 
