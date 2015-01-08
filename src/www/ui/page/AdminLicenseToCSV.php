@@ -50,9 +50,9 @@ class AdminLicenseToCSV extends DefaultPlugin
     /** @var DbManager $dbManager */
     $dbManager = $this->getObject('db.manager');
     $sql = "SELECT rf.rf_shortname,rf.rf_fullname,rf.rf_text,p.rf_shortname parent_shortname,rf.rf_url,rf.rf_notes,rf.rf_source
-            FROM license_ref rf LEFT JOIN license_map ON rf_pk=rf_fk LEFT JOIN license_ref p on rf_parent=p.rf_pk
+            FROM license_ref rf LEFT JOIN license_map ON rf_pk=rf_fk LEFT JOIN license_ref p on rf_parent=p.rf_pk AND license_map.usage=$2
             WHERE rf.rf_detector_type=$1";
-    $param = array($userDetected=1);
+    $param = array($userDetected=1,\Fossology\Lib\BusinessRules\LicenseMap::CONCLUSION);
     if ($rf>0)
     {
       $param[] = $rf;
