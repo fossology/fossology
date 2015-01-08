@@ -362,12 +362,14 @@ class LicenseDao extends Object
    * @param string $condition
    * @param array $param
    * @return License|null
+   * @todo restrict to $groupId
    */
   private function getLicenseByCondition($condition, $param)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
+    /*
     if (false === $row && isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
     {
       $param[] = $_SESSION['GroupId'];
@@ -379,6 +381,7 @@ class LicenseDao extends Object
         $row['rf_shortname'] = $this->candidatePrefix . $row['rf_shortname'];
       }
     }
+     */
     if (false === $row)
     {
       return null;

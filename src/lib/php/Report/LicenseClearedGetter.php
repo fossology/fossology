@@ -19,20 +19,23 @@
 
 namespace Fossology\Lib\Report;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Db\DbManager;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
   /** @var ClearingDao */
   private $clearingDao;
-
   /** @var LicenseDao */
   private $licenseDao;
-
+  /** @var DbManager */
+  private $dbManager;
+  /** @var string[] */
   private $licenseCache = array();
 
   public function __construct() {
@@ -40,6 +43,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
+    $this->dbManager = $container->get('db.manager');
 
     parent::__construct($groupBy = 'text');
   }
@@ -48,26 +52,24 @@ class LicenseClearedGetter extends ClearedGetterCommon
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
 
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
-   if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
       {
         continue;
       }
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
         if ($clearingLicense->isRemoved())
+        {
           continue;
-
-        $reportInfo = $clearingLicense->getReportInfo();
-
-        if (!empty($reportInfo)) {
-          $text = $reportInfo;
-        } else {
-          $text = $this->getCachedLicenseText($clearingLicense->getLicenseId());
         }
-
+        $reportInfo = $clearingLicense->getReportInfo();
+        $licenseId = $licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $text = $reportInfo ?: $this->getCachedLicenseText($licenseId);
+        
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
