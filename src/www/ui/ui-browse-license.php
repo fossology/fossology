@@ -23,7 +23,6 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -55,6 +54,8 @@ class ui_browse_license extends FO_Plugin
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
+  
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
 
   function __construct()
   {
@@ -195,21 +196,30 @@ class ui_browse_license extends FO_Plugin
     $groupId = $SysConf['auth']['GroupId'];
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $tag_pk = GetParm("tag", PARM_INTEGER);
-        
-    $uploadId = $itemTreeBounds->getUploadId();
-    $scannerAgents = array('nomos', 'monk', 'ninka');
-    $latestSucessfulAgents = array();
-    $agentStatus = $this->createAgentStatus($scannerAgents, $uploadId, $latestSucessfulAgents);
-    
-    $selectedAgentIds = empty($selectedAgentId) ? $latestSucessfulAgents : $selectedAgentId;
 
+    $uploadId = $itemTreeBounds->getUploadId();
+    $scannerAgents = array_keys($this->agentNames);
+    $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
+    $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
+    $agentMap = $scanJobProxy->getAgentMap();
+    if (empty($agentMap))
+    {
+      $this->vars['noUploadHist'] = TRUE;
+    }
+    $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
+                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
+                  'agentMap' => $agentMap,
+                  'scanners'=>$scannerVars);
+    $agentStatus = $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
+
+    $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
     $VLic .= "\n" . $agentStatus;
     
     $UniqueTagArray = array();
     global $container;
     $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId);
+    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
 
     /***************************************
      * Problem: $ChildCount can be zero if you have a container that does not
@@ -291,11 +301,11 @@ class ui_browse_license extends FO_Plugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param $UniqueTagArray
    * @param $selectedAgentId
-   * @internal param $uploadTreeId
-   * @internal param $uploadId
+   * @param int $groupId
+   * @param ScanJobProxy $scanJobProxy
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId)
+  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy)
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
@@ -314,16 +324,6 @@ class ui_browse_license extends FO_Plugin
       return array($ChildCount = 0, "");
     }
     
-    $latestNomos = LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos = $this->agentDao->getCurrentAgentRef("nomos");
-    $latestMonk = LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk = $this->agentDao->getCurrentAgentRef("monk");
-    $latestNinka = LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka = $this->agentDao->getCurrentAgentRef("ninka");
-    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' => $newestNomos, 'latestIsNewest' => $latestNomos == $newestNomos->getAgentId()),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' => $newestMonk, 'latestIsNewest' => $latestMonk == $newestMonk->getAgentId()),
-        'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
-
     /*******    File Listing     ************/
     if (!empty($selectedAgentId))
     {
@@ -332,13 +332,7 @@ class ui_browse_license extends FO_Plugin
     }
     else
     {
-      foreach ($goodAgents as $agentName=>$goodAgent)
-      {
-        if ($goodAgent['latest'])
-        {
-          $selectedScanners[$agentName] = $goodAgent['latest'];
-        }
-      }
+      $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
 
     $pfileLicenses = array();
@@ -385,7 +379,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
     $VF = '<script>' . $this->renderTemplate('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
@@ -399,7 +393,6 @@ class ui_browse_license extends FO_Plugin
    * @param array $child
    * @param int $uploadId
    * @param int $selectedAgentId
-   * @param AgentRef[] $goodAgents
    * @param array $pfileLicenses
    * @param int $groupId
    * @param ClearingDecision[][] $editedMappedLicenses
@@ -408,7 +401,7 @@ class ui_browse_license extends FO_Plugin
    * @param array $UniqueTagArray
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $goodAgents, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -468,8 +461,8 @@ class ui_browse_license extends FO_Plugin
           $agentEntries = array();
           foreach ($rfInfo as $agent => $match)
           {
-            $agentInfo = $goodAgents[$agent];
-            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentInfo['name'] . "</a>";
+            $agentName = $this->agentNames[$agent];
+            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentName . "</a>";
 
             if ($match['match_percentage'] > 0)
             {
@@ -568,30 +561,7 @@ class ui_browse_license extends FO_Plugin
     return array($jsBlockLicenseHist, $rendered);
   }
 
-
-  /**
-   * @param $scannerAgents
-   * @param $uploadId
-   * @return array
-   */
-  private function createAgentStatus($scannerAgents, $uploadId, &$latestSucessfulAgentIds)
-  {
-    $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
-    $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
-    $agentMap = $scanJobProxy->getAgentMap();
-    if (empty($agentMap))
-    {
-      $this->vars['noUploadHist'] = TRUE;
-    }
-    $latestSucessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
-
-    $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
-                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
-                  'agentMap' => $agentMap,
-                  'scanners'=>$scannerVars);
-    return $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
-  }
-
+  
   public function getTemplateName()
   {
     return "browse_license.html.twig";

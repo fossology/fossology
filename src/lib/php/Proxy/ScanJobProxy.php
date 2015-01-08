@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Fossology\Lib\Dao\AgentDao;
 
@@ -35,8 +34,8 @@ class ScanJobProxy extends Object
   private $agentDao;
   /** @var int */
   private $uploadId;
-  /** @var AgentRef */
-  private $successfulAgents = array();
+  /** @var AgentRef[][] */
+  private $successfulScanners = array();
   /** @var int[] */
   private $latestSuccessfulAgentIds = array();
 
@@ -53,12 +52,33 @@ class ScanJobProxy extends Object
   
   public function getSuccessfulAgents()
   {
-    return $this->successfulAgents;
+    $successfulAgents = array();
+    foreach ($this->successfulScanners as $scanAgents)
+    {
+      $successfulAgents = array_merge($successfulAgents, $scanAgents);
+    }
+    return $successfulAgents;
   }
   
   public function getLatestSuccessfulAgentIds()
   {
-   return $this->latestSuccessfulAgentIds; 
+    $agentIds = array();
+    foreach ($this->successfulScanners as $agentName=>$scanAgents)
+    {
+      $agentRef = $scanAgents[0];
+      $agentIds[$agentName] = $agentRef->getAgentId();
+    }
+    return $agentIds;
+  }
+  
+  public function getLatestSucessfulAgentRefs()
+  {
+    $agentRefs = array();
+    foreach ($this->successfulScanners as $agentName=>$scanAgents)
+    {
+      $agentRefs[$agentName] = $scanAgents[0];
+    }
+    return $agentRefs;
   }
   
   public function createAgentStatus($scannerAgents)
@@ -79,7 +99,7 @@ class ScanJobProxy extends Object
   public function getAgentMap()
   {        
     $agentMap = array();
-    foreach ($this->successfulAgents as $agent)
+    foreach ($this->getSuccessfulAgents() as $agent)
     {
       $agentMap[$agent->getAgentId()] = $agent->getAgentName() . " " . $agent->getAgentRevision();
     }
@@ -116,9 +136,8 @@ class ScanJobProxy extends Object
 
     foreach ($successfulAgents as $agent)
     {
-      $this->successfulAgents[] = new AgentRef($agent['agent_id'], $agent['agent_name'], $agent['agent_rev']);
+      $this->successfulScanners[$agentName][] = new AgentRef($agent['agent_id'], $agentName, $agent['agent_rev']);
     }
-    $this->latestSucessfulAgentIds[] = $latestSuccessfulAgent['agent_id'];
     return $vars;
   }
   

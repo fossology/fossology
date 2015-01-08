@@ -6,8 +6,14 @@
   {{ 'Only one revision of'|trans }} <b>{{ agentMap|first }}</b> {{ 'ran for this upload'|trans }}. <br/>
 {% else %}
   <form action="{{ agentShowURI }}" method="post">
-    {% set agentMap = {0:'Latest run of all available agents'|trans}|merge(agentMap) %}
-    {{ macro.select('agentId',agentMap,'agentId',agentId) }}
+    <select name="agentId" id="agentId">
+      <option value="0">{{ 'Latest run of all available agents'|trans }}</option>
+    {% for key, value in agentMap %}
+      <option value="{{ key }}"{% if agentId == key %} selected="selected"{% endif %}>
+        {{ value }}
+      </option>
+    {% endfor %}
+    </select>
     <input type="submit" name="s" value="{{'Show'|trans}}"/>
   </form>
 {% endif %}
