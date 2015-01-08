@@ -28,6 +28,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 /**
  * \file ui-browse-license.php
@@ -45,7 +46,7 @@ class ui_browse_license extends FO_Plugin
   /** @var ClearingDao */
   private $clearingDao;
   /** @var AgentDao */
-  private $agentsDao;
+  private $agentDao;
   /** @var ClearingDecisionFilter */
   private $clearingFilter;
   /** @var LicenseMap */
@@ -68,7 +69,7 @@ class ui_browse_license extends FO_Plugin
     $this->uploadDao = $container->get('dao.upload');
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
-    $this->agentsDao = $container->get('dao.agent');
+    $this->agentDao = $container->get('dao.agent');
     $this->clearingFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
@@ -314,11 +315,11 @@ class ui_browse_license extends FO_Plugin
     }
     
     $latestNomos = LatestAgentpk($uploadId, "nomos_ars");
-    $newestNomos = $this->agentsDao->getCurrentAgentRef("nomos");
+    $newestNomos = $this->agentDao->getCurrentAgentRef("nomos");
     $latestMonk = LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk = $this->agentsDao->getCurrentAgentRef("monk");
+    $newestMonk = $this->agentDao->getCurrentAgentRef("monk");
     $latestNinka = LatestAgentpk($uploadId, "ninka_ars");
-    $newestNinka = $this->agentsDao->getCurrentAgentRef("ninka");
+    $newestNinka = $this->agentDao->getCurrentAgentRef("ninka");
     $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' => $newestNomos, 'latestIsNewest' => $latestNomos == $newestNomos->getAgentId()),
         'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' => $newestMonk, 'latestIsNewest' => $latestMonk == $newestMonk->getAgentId()),
         'ninka' => array('name' => 'Nk', 'latest' => $latestNinka, 'newest' => $newestNinka, 'latestIsNewest' => $latestNinka == $newestNinka->getAgentId()));
@@ -326,7 +327,7 @@ class ui_browse_license extends FO_Plugin
     /*******    File Listing     ************/
     if (!empty($selectedAgentId))
     {
-      $agentName = $this->agentsDao->getAgentName($selectedAgentId);
+      $agentName = $this->agentDao->getAgentName($selectedAgentId);
       $selectedScanners = array($agentName=>$selectedAgentId);
     }
     else
@@ -575,74 +576,25 @@ class ui_browse_license extends FO_Plugin
    */
   private function createAgentStatus($scannerAgents, $uploadId, &$latestSucessfulAgentIds)
   {
-    $output = "";
-    $successfulAgents = array();
-    foreach ($scannerAgents as $agentName)
-    {
-      $agentHasArsTable = $this->agentsDao->arsTableExists($agentName);
-      if (empty($agentHasArsTable))
-      {
-        continue;
-      }
-      $output .= '<p>'.$this->renderAgentStatusWithSideEffect($agentName,$uploadId,$successfulAgents,$latestSucessfulAgentIds).'</p>';
-    }
-
-    if (empty($successfulAgents))
+    $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
+    $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
+    $agentMap = $scanJobProxy->getAgentMap();
+    if (empty($agentMap))
     {
       $this->vars['noUploadHist'] = TRUE;
-      return _("There is no successful scan for this upload, please schedule one license scanner on this upload. ").$output;
     }
+    $latestSucessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
 
-    $agentMap = array();
-    foreach ($successfulAgents as $agent)
-    {
-      $agentMap[$agent->getAgentId()] = $agent->getAgentName() . " " . $agent->getAgentRevision();
-    }
-    if (count($successfulAgents) > 1)
-    {
-      $agentMap[0] = _('Latest run of all available agents');
-    }
     $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
                   'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
-                  'agentMap' => $agentMap);
-    $header =  $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
-    return ($header . $output);
+                  'agentMap' => $agentMap,
+                  'scanners'=>$scannerVars);
+    return $this->renderTemplate('browse_license-agent_selector.html.twig', $vars);
   }
 
   public function getTemplateName()
   {
     return "browse_license.html.twig";
-  }
-
-  private function renderAgentStatusWithSideEffect($agentName, $uploadId, &$allSuccessfulAgents, &$latestSucessfulAgentIds)
-  {
-    $successfulAgents = $this->agentsDao->getSuccessfulAgentEntries($agentName, $uploadId);
-    $vars['successfulAgents'] = $successfulAgents;
-    $vars['uploadId'] = $uploadId;
-    $vars['agentName'] = $agentName;
-   
-    if (!count($successfulAgents))
-    {
-      $vars['isAgentRunning'] = count($this->agentsDao->getRunningAgentIds($uploadId, $agentName)) > 0;
-      return $this->renderTemplate('browse_license-agent.html.twig', $vars);
-    }  
-    
-    $latestSuccessfulAgent = $successfulAgents[0];
-    $currentAgentRef = $this->agentsDao->getCurrentAgentRef($agentName);
-    $vars['currentAgentId'] = $currentAgentRef->getAgentId();
-    $vars['currentAgentRev'] = $currentAgentRef->getAgentRevision();
-    if ($currentAgentRef->getAgentId() != $latestSuccessfulAgent['agent_id'])
-    {
-      $runningJobs = $this->agentsDao->getRunningAgentIds($uploadId, $agentName);
-      $vars['isAgentRunning'] = in_array($currentAgentRef->getAgentId(), $runningJobs);
-    }
-
-    foreach ($successfulAgents as $agent)
-    {
-      $allSuccessfulAgents[] = new AgentRef($agent['agent_id'], $agent['agent_name'], $agent['agent_rev']);
-    }
-    $latestSucessfulAgentIds[] = $latestSuccessfulAgent['agent_id'];
-    return $this->renderTemplate('browse_license-agent.html.twig', $vars);
   }
   
   /**
@@ -662,10 +614,10 @@ class ui_browse_license extends FO_Plugin
 
     $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
 
-    $uniqueLicenseCount = 0;
+    $uniqueLicenseCount = count($allLicNames);
 
     $totalScannerLicenseCount = 0;
-    $scannerUniqueLicenseCount = count ( array_keys($scannerLics) );
+    $scannerUniqueLicenseCount = count( array_keys($scannerLics) );
 
     $editedTotalLicenseCount = 0;
     $editedUniqueLicenseCount = 0;
@@ -683,7 +635,6 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
     foreach ($allLicNames as $licenseShortName)
     {
-      $uniqueLicenseCount++;
       $count = 0;
       if (array_key_exists($licenseShortName, $scannerLics))
       {

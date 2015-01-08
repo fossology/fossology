@@ -1,10 +1,27 @@
 {% import "include/macro.html.twig" as macro %}
 <h3>{{ "Scanner details"|trans }}</h3>
-{% if agentMap|length==1 %}
+{% if agentMap|length==0 %}
+  {{ 'There is no successful scan for this upload, please schedule one license scanner on this upload.'|trans }}
+{% elseif agentMap|length==1 %}
   {{ 'Only one revision of'|trans }} <b>{{ agentMap|first }}</b> {{ 'ran for this upload'|trans }}. <br/>
 {% else %}
   <form action="{{ agentShowURI }}" method="post">
+    {% set agentMap = {0:'Latest run of all available agents'|trans}|merge(agentMap) %}
     {{ macro.select('agentId',agentMap,'agentId',agentId) }}
     <input type="submit" name="s" value="{{'Show'|trans}}"/>
   </form>
 {% endif %}
+
+{% for s in scanners %}
+  <div style="border: 1px dashed gray;">
+  {% include 'browse_license-agent.html.twig' with {
+     'agentName':s.agentName,
+     'successfulAgents':s.successfulAgents,
+     'uploadId':s.uploadId,
+     'agentName':s.agentName,
+     'isAgentRunning':s.isAgentRunning,
+     'currentAgentId':s.currentAgentId,
+     'currentAgentRev':s.currentAgentRev}
+  %}
+  </div>
+{% endfor %}

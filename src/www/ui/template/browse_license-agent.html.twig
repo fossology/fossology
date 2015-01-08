@@ -2,7 +2,7 @@
   {{ "The agent"|trans }} <b>{{agentName}}</b> {{ "has not been run on this upload."|trans }}
   {% if isAgentRunning %}
     {{ "But there were scheduled jobs for this agent. So it is either running or has failed."|trans }}
-    <a href="?mod=showjobs&upload={{ uploadId}}">{{ "View Jobs"|trans }}</a>
+    <a href="?mod=showjobs&upload={{ uploadId }}">{{ "View Jobs"|trans }}</a>
   {% endif %}
 {% else %}
   {% set latestSuccess = successfulAgents|first %}
