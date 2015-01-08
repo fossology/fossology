@@ -529,18 +529,18 @@ class ui_browse_license extends FO_Plugin
    * @param $uploadTreeId
    * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
-   * @param int|int[]|null $agentId
+   * @param int|int[] $agentIds
    * @param ClearingDecision []
    * @return string
    */
-  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentId, $groupId)
+  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentIds, $groupId)
   {
     if(array_key_exists('noUploadHist',$this->vars))
     {
       return array('','');
     }
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentId);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
 
     /* Write license histogram to $VLic  */
@@ -710,7 +710,6 @@ class ui_browse_license extends FO_Plugin
 
     return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $editedTotalLicenseCount, $editedUniqueLicenseCount);
   }
-
 
 }
 

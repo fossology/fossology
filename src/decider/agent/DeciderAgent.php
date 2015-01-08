@@ -66,7 +66,7 @@ class DeciderAgent extends Agent
   function scheduler_connect($licenseMapUsage=null)
   {
     parent::scheduler_connect();
-    $this->licenseMap = $licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
+    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
   }
 
   function processClearingEventOfCurrentJob()
@@ -115,7 +115,7 @@ class DeciderAgent extends Agent
    */
   protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
   {
-    $this->dbManager->begin();  /* start transaction */
+    $this->dbManager->begin();
 
     $itemId = $itemTreeBounds->getItemId();
 
@@ -143,6 +143,6 @@ class DeciderAgent extends Agent
     }
     $this->heartbeat(1);
 
-    $this->dbManager->commit();  /* end transaction */
+    $this->dbManager->commit();
   }
 }
