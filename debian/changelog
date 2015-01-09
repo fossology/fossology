@@ -1,3 +1,22 @@
+fossology (2.2.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [SOSS-75] - License comments do not appear in report
+    * [SOSS-95] - add foreign key constraint for uploadtree_fk in table clearing_event
+    * [SOSS-96] - fix license event comment & report text editing
+    * [SOSS-101] - refactor Fossology\Lib\Agent\Agent to use AgentsDao for database operations
+    * [SOSS-102] - Line breaks in single file clearing
+    * [SOSS-109] - Support the large license set
+
+  * improvements
+    * [SOSS-110] - no remove events are created for existing user license decisions when selecting no license known
+    * [SOSS-112] - separate monk agent for bulk operations
+
+  * new features
+    * [SOSS-104] - contribute new template enabled plugin baseclass
+
+ -- Andreas Wuerl <andreas.wuerl.ext@siemens.com>  Fri, 19 Dec 2014 08:00:00 +0100
+
 fossology (2.1.0-ng) unstable; urgency=low
 
   * bugfixes
