@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,8 +36,6 @@ class ScanJobProxy extends Object
   private $uploadId;
   /** @var AgentRef[][] */
   private $successfulScanners = array();
-  /** @var int[] */
-  private $latestSuccessfulAgentIds = array();
 
   /**
    * @param AgentDao $agentDao
@@ -69,16 +67,6 @@ class ScanJobProxy extends Object
       $agentIds[$agentName] = $agentRef->getAgentId();
     }
     return $agentIds;
-  }
-  
-  public function getLatestSucessfulAgentRefs()
-  {
-    $agentRefs = array();
-    foreach ($this->successfulScanners as $agentName=>$scanAgents)
-    {
-      $agentRefs[$agentName] = $scanAgents[0];
-    }
-    return $agentRefs;
   }
   
   public function createAgentStatus($scannerAgents)
