@@ -20,7 +20,7 @@
 // For compatibility with older php versions
 if (!defined('ENT_SUBSTITUTE'))
 {
-  define('ENT_SUBSTITUTE', 0); //This might give an empty string, but with the conversion to UTF-8 we might not run into this
+  define('ENT_SUBSTITUTE', 0);
 }
 
 /**
@@ -39,22 +39,9 @@ function convertToUTF8($content, $toHTML=true)
   }
   else
   {
-    $in_charset = mb_detect_encoding($content, mb_detect_order(), true);
-    $output1 = false;
-    if (!$in_charset)
+    $output1 = tryConvertToUTF8($content);
+    if (!$output1 || !checkUTF8($output1))
     {
-      $charsets = array('iso-8859-1', 'windows-1251', 'GB2312');
-      foreach ($charsets as $charset)
-      {
-        $output1 = iconv($charset, "UTF-8", $content);
-        if ($output1) break;
-      }
-    } else if ($in_charset != "UTF-8")
-    {
-      $output1 = iconv($in_charset, "UTF-8", $content);
-    }
-
-    if (!$output1 || !checkUTF8($output1)) {
       $output1 = $toHTML ? "<Unknown encoding>" : "<b>Unknown encoding</b>";
     }
   }
@@ -66,4 +53,27 @@ function convertToUTF8($content, $toHTML=true)
 function checkUTF8($content)
 {
   return mb_check_encoding($content, "UTF-8");
+}
+
+function tryConvertToUTF8($content)
+{
+  $inCharset = mb_detect_encoding($content, mb_detect_order(), true);
+  $output1 = false;
+  if (!$inCharset)
+  {
+    $charsets = array('iso-8859-1', 'windows-1251', 'GB2312');
+    foreach ($charsets as $charset)
+    {
+      $output1 = iconv($charset, "UTF-8", $content);
+      if ($output1)
+      {
+        break;
+      }
+    }
+  }
+  else if ($inCharset != "UTF-8")
+  {
+    $output1 = iconv($inCharset, "UTF-8", $content);
+  }
+  return $output1;
 }
