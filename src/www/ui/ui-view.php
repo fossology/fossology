@@ -430,8 +430,6 @@ class ui_view extends FO_Plugin
 
     $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
 
-    $this->highlightProcessor->sortHighlights($highlightEntries);
-
     if (!isset($Page))
     {
       $Page = 0;
@@ -469,6 +467,9 @@ class ui_view extends FO_Plugin
         $relevantHighlightEntries[] = $highlightEntry;
       }
     }
+    
+    $this->highlightProcessor->sortHighlights($relevantHighlightEntries);
+    
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($relevantHighlightEntries);
 
     if ($Format == 'hex')
