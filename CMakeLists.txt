@@ -4,6 +4,7 @@ project(fossology)
 include_directories(
     ${fossology_SOURCE_DIR}/src/lib/c
     ${fossology_SOURCE_DIR}/src/lib/cpp
+    ${fossology_SOURCE_DIR}/src/monk/agent
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Weffc++")
