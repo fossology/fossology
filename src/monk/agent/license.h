@@ -19,7 +19,6 @@ int isIgnoredLicense(License* license);
 Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 void licenses_free(Licenses* licenses);
-void sortLicenses(GArray* licenses);
 const GArray* getLicenseArrayFor(Licenses* licenses, unsigned searchPos, GArray* searchedTokens, unsigned searchedStart);
 
 #endif // MONK_AGENT_LICENSE_H

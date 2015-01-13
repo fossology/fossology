@@ -156,6 +156,17 @@ void test_extractLicenses_One() {
   dbRealDisconnect(dbConnection);
 }
 
+static gint lengthInverseComparator(const void* a, const void* b) {
+  size_t aLen = ((License*) a)->tokens->len;
+  size_t bLen = ((License*) b)->tokens->len;
+
+  return (aLen < bLen) - (aLen > bLen);
+}
+
+void sortLicenses(GArray* licenses) {
+    g_array_sort(licenses, lengthInverseComparator);
+}
+
 void test_extractLicenses_Two() {
   PGconn* dbConnection = dbRealConnect();
   if (!dbConnection) {

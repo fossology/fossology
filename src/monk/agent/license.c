@@ -64,51 +64,6 @@ Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, uns
   return buildLicenseIndexes(licenses, minAdjacentMatches, maxLeadingDiff);
 }
 
-static gint lengthInverseComparator(const void* a, const void* b) {
-  size_t aLen = ((License*) a)->tokens->len;
-  size_t bLen = ((License*) b)->tokens->len;
-
-  return (aLen < bLen) - (aLen > bLen);
-}
-
-static int compareNthToken(GArray* tokensA, GArray* tokensB, unsigned n)
-{
-  guint aLen = tokensA->len;
-  guint bLen = tokensB->len;
-  if (aLen <= n || bLen <= n)
-  {
-    return lengthInverseComparator(tokensA, tokensB);
-  }
-
-  Token* firstTokenA = &g_array_index(tokensA, Token, n);
-  Token* firstTokenB = &g_array_index(tokensB, Token, n);
-
-  uint32_t hashA = firstTokenA->hashedContent;
-  uint32_t hashB = firstTokenB->hashedContent;
-
-  return (hashA > hashB) - (hashB < hashA);
-}
-
-static gint tokenComparator(const void* a, const void* b, void* data) {
-  GArray* tokensA = ((License*) a)->tokens;
-  GArray* tokensB = ((License*) b)->tokens;
-  unsigned search = *(unsigned*) data;
-
-  for (unsigned n = 0; n<search; n++)
-  {
-    int comp = compareNthToken(tokensA, tokensB, n);
-    if (comp != 0) {
-      return comp;
-    }
-  }
-
-  return 0;
-}
-
-void sortLicenses(GArray* licenses) {
-  g_array_sort(licenses, lengthInverseComparator);
-}
-
 void licenses_free(Licenses* licenses) {
   if (licenses) {
     GArray* licenseArray = licenses->licenses;
@@ -161,8 +116,6 @@ Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, uns
   Licenses* result = malloc(sizeof(Licenses));
   if (!result)
     return NULL;
-
-  g_array_sort_with_data(licenses, tokenComparator, &minAdjacentMatches);
 
   GArray* indexes = g_array_new(FALSE, FALSE, sizeof(GHashTable*));
 
