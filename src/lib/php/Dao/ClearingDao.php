@@ -107,7 +107,7 @@ class ClearingDao extends Object
    * @param int $groupId
    * @return LicenseRef[]
    */
-  function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, &$counts=null)
+  function getClearedLicenses(ItemTreeBounds $itemTreeBounds, $groupId)
   {
     $statementName = __METHOD__;
 
@@ -118,7 +118,6 @@ class ClearingDao extends Object
 
     $sql = "$decisionsCte
             SELECT
-              COUNT(*) AS count,
               lr.rf_pk AS license_id,
               lr.rf_shortname AS shortname,
               lr.rf_fullname AS fullname
@@ -136,14 +135,7 @@ class ClearingDao extends Object
     $licenses = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $licenseId = $row['license_id'];
-      $licenseShortName = $row['shortname'];
-      $licenseName = $row['fullname'];
-      $licenses[] = new LicenseRef($licenseId, $licenseShortName, $licenseName);
-      if (is_array($counts))
-      {
-        $counts[] = intval($row['count']);
-      }
+      $licenses[] = new LicenseRef($row['license_id'], $row['shortname'], $row['fullname']);
     }
     $this->dbManager->freeResult($res);
 
@@ -403,7 +395,7 @@ INSERT INTO clearing_decision (
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
              FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
              WHERE uploadtree_fk=$1 AND group_fk=$2 AND EXTRACT(EPOCH FROM date_added)>$3
-             ORDER BY ts_added ASC';
+             ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
 
@@ -436,7 +428,6 @@ INSERT INTO clearing_decision (
     if (!$row)
     {  //The license was not added as user decision yet -> we promote it here
       $type = ClearingEventTypes::USER;
-      $this->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, $type);
       $row['type_fk'] = $type;
       $row['comment'] = "";
       $row['reportinfo'] = "";
@@ -658,5 +649,41 @@ INSERT INTO clearing_decision (
     $result = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
     return $result;
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @return array mapping 'shortname'=>'count'
+   */
+  function getClearedLicenseMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
+  {
+    $statementName = __METHOD__;
+
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $condition = "ut.lft BETWEEN $1 AND $2";
+
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
+
+    $sql = "$decisionsCte
+            SELECT
+              COUNT(*) AS count,
+              lr.rf_shortname AS shortname
+            FROM decision
+              INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
+              INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
+              INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+            WHERE NOT ce.removed
+            GROUP BY shortname";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName, $params);
+    $multiplicity = array();
+    while($row = $this->dbManager->fetchArray($res)){
+      $multiplicity[$row['shortname']] = $row['count'];
+    }
+    $this->dbManager->freeResult($res);
+
+    return $multiplicity;
   }
 }

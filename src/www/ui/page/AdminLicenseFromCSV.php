@@ -31,6 +31,7 @@ use Fossology\Lib\Application\LicenseCsvImport;
 class AdminLicenseFromCSV extends DefaultPlugin
 {
   const NAME = "admin_license_from_csv";
+  const KEY_UPLOAD_MAX_FILESIZE = 'upload_max_filesize';
 
   function __construct()
   {
@@ -59,7 +60,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
       $vars['message'] = $this->handleFileUpload($uploadFile,$delimiter,$enclosure);
     }
 
-    $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
+    $vars[self::KEY_UPLOAD_MAX_FILESIZE] = ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
     $vars['baseUrl'] = $request->getBaseUrl();
 
     return $this->render("admin_license_from_csv.html.twig", $this->mergeWithDefault($vars));
@@ -71,17 +72,22 @@ class AdminLicenseFromCSV extends DefaultPlugin
    */
   protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
   {
+    $errMsg = '';
     if ( !($uploadedFile instanceof UploadedFile) )
     {
-      return _("Error: no file selected");
+      $errMsg = _("No file selected");
     }
-    if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
+    elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
     {
-      return _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize');
+      $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
     }
-    if($uploadedFile->getClientOriginalExtension()!='csv')
+    elseif($uploadedFile->getClientOriginalExtension()!='csv')
     {
-      return _('Invalid extension ').$uploadedFile->getClientOriginalExtension().' of file '.$uploadedFile->getClientOriginalName();
+      $errMsg = _('Invalid extension ').$uploadedFile->getClientOriginalExtension().' of file '.$uploadedFile->getClientOriginalName();
+    }
+    if (!empty($errMsg))
+    {
+      return $errMsg;
     }
     /** @var LicenseCsvImport */
     $licenseCsvImport = $this->getObject('app.license_csv_import');

@@ -118,7 +118,7 @@ class changeLicenseBulk extends FO_Plugin
       {
         throw new Exception('invalid shortname pattern');
       }
-      if (!$this->licenseDao->isNewLicense($newShortname))
+      if (!$this->licenseDao->isNewLicense($newShortname, $groupId))
       {
         throw new Exception('license shortname already in use');
       }

@@ -416,11 +416,14 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
   else { $Title = ""; }
 
-  if (plugin_find_id("basenav") >= 0) { $Target = "target='basenav'"; }
-  else { $Target = ""; }
-  if (!empty($Browse)) { $V .= "<a $Title $Target class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
+ if (!empty($Browse))
+  {
+    $V .= "<a $Title class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>";
+  }
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
-  { $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>"; }
+  {
+    $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>";
+  }
   $V .= htmlentities($Name);
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
   { $V .= "</font>"; }

@@ -55,7 +55,7 @@ class AgentLicenseEventProcessor extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
+  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
 
@@ -163,7 +163,7 @@ class AgentLicenseEventProcessor extends Object
     return $result;
   }
   
-    /**
+  /**
    * @param $licenseProperty
    * @return AgentClearingEvent
    */

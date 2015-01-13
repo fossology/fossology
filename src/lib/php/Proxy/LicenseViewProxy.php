@@ -22,7 +22,11 @@ class LicenseViewProxy extends DbViewProxy
 {
   /** @var int */
   private $groupId;
-  
+  /** @var array */
+  private $allColumns = array('rf_pk', 'rf_shortname', 'rf_text', 'rf_url', 'rf_add_date', 'rf_copyleft', 'rf_fullname',
+             'rf_notes', 'marydone', 'rf_active', 'rf_text_updatable', 'rf_md5', 'rf_detector_type', 'rf_source',
+             'group_fk');
+
   /**
    * @param int $groupId
    * @param array $options
@@ -47,7 +51,7 @@ class LicenseViewProxy extends DbViewProxy
   
   private function queryLicenseCandidate($options)
   {
-    $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
+    $columns = array_key_exists('columns', $options) ? $options['columns'] : $this->allColumns;
     if(array_key_exists('candidatePrefix',$options)){
       $shortnameId = array_search('rf_shortname',$columns);
       if ($shortnameId)
@@ -65,10 +69,13 @@ class LicenseViewProxy extends DbViewProxy
 }
   
   private function queryOnlyLicenseRef($options){
-    $columns = array_key_exists('columns', $options) ? $options['columns'] : array('*');
+    $columns = array_key_exists('columns', $options) ? $options['columns'] : $this->allColumns;
+    $groupFkPos = array_search('group_fk',$columns);
+    if($groupFkPos){
+      $columns[$groupFkPos] = '0 AS group_fk';
+    }
     $gluedColumns = implode(',', $columns);
-    $refColumns = ($gluedColumns=='*') ? "$gluedColumns,0 AS group_fk" : $gluedColumns;
-    $dbViewQuery = "SELECT $refColumns FROM ONLY license_ref";
+    $dbViewQuery = "SELECT $gluedColumns FROM ONLY license_ref";
     if(array_key_exists('extraCondition', $options))
     {
       $dbViewQuery .= " WHERE $options[extraCondition]";

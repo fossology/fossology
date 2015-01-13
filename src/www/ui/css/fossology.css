@@ -158,7 +158,7 @@ a.treetext:active, a.treetext:hover
 	background: -webkit-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Chrome10+,Safari5.1+ */
 	background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
 	background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
-	background: linear-gradient(top, #ffffff 0%,#efefef 100%); /* W3C */
+	background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
 }
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes

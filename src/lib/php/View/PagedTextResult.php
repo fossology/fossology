@@ -37,6 +37,11 @@ class PagedTextResult extends PagedResult
    */
   protected function renderContentText($text)
   {
+
+    if(self::TARGET_CHARSET == "UTF-8"){
+      return convertToUTF8($text, true);
+    }
+
     return htmlspecialchars(mb_convert_encoding($text, self::TARGET_CHARSET), ENT_SUBSTITUTE, self::TARGET_CHARSET);
   }
 }

@@ -18,12 +18,12 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\TextFragment;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Data\LicenseUsageTypes;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -120,11 +120,11 @@ class AdminLicenseCandidate extends DefaultPlugin
     {
       case 'verify':
       case 'variant':
-        $rf_parent = ($request->get('do')=='verify') ? $rf : $suggest;
-        $ok = $this->verifyCandidate($rf,$shortname,$rf_parent);
+        $rfParent = ($request->get('do')=='verify') ? $rf : $suggest;
+        $ok = $this->verifyCandidate($rf,$shortname,$rfParent);
         if($ok)
         {
-          $with = $rf_parent?'':" as variant of <i>$vars[suggest_shortname]</i> ($rf_parent)";
+          $with = $rfParent ? '' : " as variant of <i>$vars[suggest_shortname]</i> ($rfParent)";
           $vars = array(
               'aaData' => json_encode($this->getArrayArrayData()),
               'message' => 'Successfully verified candidate '.$shortname.$with);
@@ -250,14 +250,14 @@ class AdminLicenseCandidate extends DefaultPlugin
   /**
    * @param int $rf
    * @param string $shortname
-   * @param int $rf_parent
+   * @param int $rfParent
    * @return bool
    */
-  private function verifyCandidate($rf, $shortname, $rf_parent)
+  private function verifyCandidate($rf, $shortname, $rfParent)
   {
     /** @var LicenseDao */
     $licenseDao = $this->getObject('dao.license');
-    if (!$licenseDao->isNewLicense($shortname))
+    if (!$licenseDao->isNewLicense($shortname, 0))
     {
       return false;
     }
@@ -269,7 +269,7 @@ class AdminLicenseCandidate extends DefaultPlugin
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
         false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type
   FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
-    $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rf_parent,'usage'=>LicenseUsageTypes::CONCLUSION));
+    $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rfParent,'usage'=>LicenseMap::CONCLUSION));
     $dbManager->getSingleRow('DELETE FROM license_candidate WHERE rf_pk=$1',array($rf),__METHOD__.'.delete');
     $dbManager->commit();
     return true;
@@ -279,8 +279,7 @@ class AdminLicenseCandidate extends DefaultPlugin
   {
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
-    $tableColumnMap = array("clearing_licenses"=>"rf_fk",
-        "license_file"=>"rf_fk",
+    $tableColumnMap = array("license_file"=>"rf_fk",
         "license_ref_bulk"=>"rf_fk",
         "clearing_event"=>"rf_fk");
     foreach($tableColumnMap as $table=>$column){

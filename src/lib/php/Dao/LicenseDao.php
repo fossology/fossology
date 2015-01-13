@@ -19,15 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Fossology\Lib\Proxy\LicenseViewProxy;
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
 class LicenseDao extends Object
@@ -240,57 +240,43 @@ class LicenseDao extends Object
     return $licenseRefs;
   }
 
+  
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param $selectedAgentId
    * @return array
    */
-  public function getTopLevelLicensesPerFileId(ItemTreeBounds $itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-    $selectedAgentText = $selectedAgentId ?: '-';
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$selectedAgentText." . implode("", $filterLicenses);
-    $param = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array($selectedAgentId, $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
 
-    $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ('" . implode("', '", $filterLicenses) . "')";
-
-    $sql_upload = "";
+    $sql = "SELECT utree.pfile_fk as pfile_id,
+           rf_shortname as license_shortname,
+           license_ref.rf_pk as license_id,
+           rf_match_pct as match_percentage,
+           CAST($1 AS INT) AS agent_id
+         FROM license_file, license_ref, $uploadTreeTableName utree
+         WHERE agent_fk = $1
+           AND license_file.rf_fk = license_ref.rf_pk
+           AND license_file.pfile_fk = utree.pfile_fk
+           AND (lft BETWEEN $2 AND $3)";
     if ('uploadtree_a' == $uploadTreeTableName)
     {
-      $sql_upload = " AND utree.upload_fk=$3 ";
+      $sql .= " AND utree.upload_fk=$4";
       $param[] = $itemTreeBounds->getUploadId();
     }
-
-    $sql = "SELECT utree.pfile_fk as file_id,
-           rf_shortname as license_shortname,
-           rf_pk as license_id,
-           agent_name,
-           max(agent_pk) as agent_id,
-           rf_match_pct as match_percentage
-         FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.rf_match_pct, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
-               FROM license_file
-               JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
-         INNER JOIN $uploadTreeTableName utree ON pfile_ref.pfile_fk = utree.pfile_fk
-         INNER JOIN agent ON agent_fk = agent_pk
-         WHERE (lft BETWEEN $1 AND $2) $sql_upload
-           $noLicenseFoundStmt";
-
-    if (!empty($selectedAgentId))
-    {
-      $param[] = $selectedAgentId;
-      $sql .= " AND agent_pk=$" . count($param);
-      $statementName .= '.agent';
-    }
-    $sql .= " GROUP BY file_id, license_shortname, license_id, agent_name, match_percentage
-         ORDER BY match_percentage ASC, license_shortname ASC";
+    $sql .= " ORDER BY match_percentage ASC";
 
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $licensesPerFileId = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $licensesPerFileId[$row['file_id']][$row['license_shortname']][$row['agent_name']] = $row;
+      $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
     }
+
     $this->dbManager->freeResult($result);
     return $licensesPerFileId;
   }
@@ -376,12 +362,14 @@ class LicenseDao extends Object
    * @param string $condition
    * @param array $param
    * @return License|null
+   * @todo restrict to $groupId
    */
   private function getLicenseByCondition($condition, $param)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
+    /*
     if (false === $row && isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
     {
       $param[] = $_SESSION['GroupId'];
@@ -393,6 +381,7 @@ class LicenseDao extends Object
         $row['rf_shortname'] = $this->candidatePrefix . $row['rf_shortname'];
       }
     }
+     */
     if (false === $row)
     {
       return null;
@@ -446,14 +435,14 @@ class LicenseDao extends Object
 
   /**
    * @param string $newShortname
+   * @param int $groupId 
    * @return bool
    */
-  public function isNewLicense($newShortname)
+  public function isNewLicense($newShortname, $groupId)
   {
-    $groupId = (isset($_SESSION) && array_key_exists('GroupId', $_SESSION)) ? $_SESSION['GroupId'] : 0;
     $licenceViewDao = new LicenseViewProxy($groupId, array('columns' => array('rf_shortname')));
     $sql = 'SELECT count(*) cnt FROM (' . $licenceViewDao->getDbViewQuery() . ') AS license_all WHERE rf_shortname=$1';
-    $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__);
+    $duplicatedRef = $this->dbManager->getSingleRow($sql, array($newShortname), __METHOD__.".$groupId" );
     return $duplicatedRef['cnt'] == 0;
   }
 
@@ -486,6 +475,6 @@ class LicenseDao extends Object
   public function getLicenseParentById($licenseId)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
-            array(LicenseUsageTypes::CONCLUSION,$licenseId));
+            array(LicenseMap::CONCLUSION,$licenseId));
   }
 }

@@ -24,7 +24,7 @@
     {% block message %}
       <div id="dmessage" style="border-bottom: 1px dashed gray;">
         <button name="eraseme" value="close" onclick="rmMsg();">{{ 'Close'| trans }}</button>
-        {% if message %}  {{ message }} {% endif %}
+        {% if message %}  {{ message|raw|nl2br }} {% endif %}
       </div>
       <script type="text/javascript">
         function rmMsg() {

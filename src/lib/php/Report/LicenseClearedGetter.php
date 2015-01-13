@@ -19,19 +19,23 @@
 
 namespace Fossology\Lib\Report;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Db\DbManager;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
   /** @var ClearingDao */
   private $clearingDao;
-
   /** @var LicenseDao */
   private $licenseDao;
-
+  /** @var DbManager */
+  private $dbManager;
+  /** @var string[] */
   private $licenseCache = array();
 
   public function __construct() {
@@ -39,41 +43,37 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
+    $this->dbManager = $container->get('db.manager');
 
-    parent::__construct();
+    parent::__construct($groupBy = 'text');
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId = null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
-
-    $latestClearingDecisions = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      $itemId = $clearingDecision->getUploadTreeId();
-
-      if (!array_key_exists($itemId, $latestClearingDecisions)) {
-        $latestClearingDecisions[$itemId] = $clearingDecision;
-      }
-    }
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
 
     $ungroupedStatements = array();
-    foreach ($latestClearingDecisions as $clearingDecision) {
+    foreach ($clearingDecisions as $clearingDecision) {
+      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      {
+        continue;
+      }
       /** @var ClearingDecision $clearingDecision */
-      foreach ($clearingDecision->getPositiveLicenses() as $clearingLicense) {
-        $clid = $clearingLicense->getId();
-        if(empty($clid))
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved())
         {
-          $msg = "The CdId is ".$clearingDecision->getClearingId();
-          trigger_error($msg);
+          continue;
         }
-
+        $reportInfo = $clearingLicense->getReportInfo();
+        $licenseId = $licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $text = $reportInfo ?: $this->getCachedLicenseText($licenseId);
+        
         $ungroupedStatements[] = array(
           'content' => $clearingLicense->getShortName(),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
-          'description' => $this->getCachedLicenseText($clearingLicense->getId()),
-          'textfinding' => $clearingLicense->getShortName()
+          'text' => $text
         );
       }
     }
@@ -85,7 +85,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
    * @param int $licenseId
    * @return License
    */
-  protected function getCachedLicense($licenseId)
+  protected function getCachedLicenseText($licenseId)
   {
     if (!array_key_exists($licenseId, $this->licenseCache)) {
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);

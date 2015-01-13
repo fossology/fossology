@@ -21,6 +21,15 @@ namespace Fossology\Lib\Util;
 
 class ArrayOperationTest extends \PHPUnit_Framework_TestCase
 {
+  
+  public function setUp()
+  {
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+  }
+
+  public function tearDown() {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
 
   public function testCallChunked()
   {
@@ -71,5 +80,16 @@ class ArrayOperationTest extends \PHPUnit_Framework_TestCase
       return array(count($values));
     }, array(), 0);
   }
+  
+  public function testMultiSearch()
+  {
+    $haystack = array(100, 101, 102, 101);
+    assertThat(ArrayOperation::multiSearch(array(100),$haystack),is(0));
+    assertThat(ArrayOperation::multiSearch(array(101),$haystack),is(1));
+    assertThat(ArrayOperation::multiSearch(array(100,102),$haystack),is(0));
+    assertThat(ArrayOperation::multiSearch(array(200),$haystack),is(false));
+    assertThat(ArrayOperation::multiSearch(array(200,102),$haystack),is(2));
+  }
+  
 }
  

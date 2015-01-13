@@ -113,10 +113,10 @@ void test_extractLicenses_Ignored() {
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray* licenses = extractLicenses(dbManager, licensesResult);
-  CU_ASSERT_EQUAL(licenses->len, 0);
+  Licenses* licenses = extractLicenses(dbManager, licensesResult, 0 , 0);
+  CU_ASSERT_EQUAL(licenses->licenses->len, 0);
 
-  freeLicenseArray(licenses);
+  licenses_free(licenses);
   PQclear(licensesResult);
 
   fo_dbManager_free(dbManager);
@@ -139,16 +139,17 @@ void test_extractLicenses_One() {
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray* licenses = extractLicenses(dbManager, licensesResult);
-  CU_ASSERT_EQUAL(licenses->len, 1);
+  Licenses* licenses = extractLicenses(dbManager, licensesResult, 0, 0);
+  GArray* licenseArray = licenses->licenses;
+  CU_ASSERT_EQUAL(licenseArray->len, 1);
 
-  License license = g_array_index(licenses, License, 0);
+  License license = g_array_index(licenseArray, License, 0);
   CU_ASSERT_STRING_EQUAL(license.shortname, gpl3);
 
   assertTokens(license.tokens,
           "gnu", "general", "public", "license", "version", "3,", NULL);
 
-  freeLicenseArray(licenses);
+  licenses_free(licenses);
   PQclear(licensesResult);
 
   fo_dbManager_free(dbManager);
@@ -173,13 +174,14 @@ void test_extractLicenses_Two() {
 
   CU_ASSERT_PTR_NOT_NULL(licensesResult);
 
-  GArray* licenses = extractLicenses(dbManager, licensesResult);
-  CU_ASSERT_EQUAL(licenses->len, 2);
+  Licenses * licenses = extractLicenses(dbManager, licensesResult, 0, 0);
+  GArray* licenseArray = licenses->licenses;
+  CU_ASSERT_EQUAL(licenseArray->len, 2);
 
-  sortLicenses(licenses);
+  sortLicenses(licenseArray);
 
-  License license0 = g_array_index(licenses, License, 0);
-  License license1 = g_array_index(licenses, License, 1);
+  License license0 = g_array_index(licenseArray, License, 0);
+  License license1 = g_array_index(licenseArray, License, 1);
 
   CU_ASSERT_TRUE(license0.tokens->len > license1.tokens->len);
 
@@ -191,7 +193,7 @@ void test_extractLicenses_Two() {
   assertTokens(license1.tokens,
           "gnu", "general", "public", "license,", "version", "2", NULL);
 
-  freeLicenseArray(licenses);
+  licenses_free(licenses);
   PQclear(licensesResult);
 
   fo_dbManager_free(dbManager);

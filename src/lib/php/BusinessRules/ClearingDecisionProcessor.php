@@ -35,13 +35,10 @@ class ClearingDecisionProcessor extends Object
 
   /** @var ClearingDao */
   private $clearingDao;
-
   /** @var AgentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
-
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
-
   /** @var DbManager */
   private $dbManager;
 
@@ -62,15 +59,29 @@ class ClearingDecisionProcessor extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int[] $additionalEventIds additional event ids to include, indexed by licenseId
+   * @param null|LicenseMap $licenseMap if given then license are considered as equal iff mapped to same
    * @return bool
    */
-  public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $additionalEventIds = array())
+  public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $additionalEventIds = array(), $licenseMap=null)
   {
+    if (!empty($licenseMap) && !($licenseMap instanceof LicenseMap))
+    {
+      throw new Exception('invalid license map');
+    }
     $userEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
     $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
+    $eventLicenceIds = array();
+    foreach (array_keys($userEvents) as $licenseId)
+    {
+      $eventLicenceIds[empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId)] = $licenseId;
+    }
+    foreach (array_keys($additionalEventIds) as $licenseId)
+    {
+      $eventLicenceIds[empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId)] = $licenseId;
+    }
     foreach (array_keys($scannerDetectedEvents) as $licenseId)
     {
-      if (!array_key_exists($licenseId, $userEvents) && !array_key_exists($licenseId, $additionalEventIds))
+      if (!array_key_exists(empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId), $eventLicenceIds))
       {
         return true;
       }
@@ -144,7 +155,8 @@ class ClearingDecisionProcessor extends Object
           $clearingEventIds[$licenseId] = $newEventId;
         }
       }
-    } else
+    }
+    else
     {
       $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false, ClearingEventTypes::AGENT, $previousEvents);
       foreach ($previousEvents as $clearingEvent)
@@ -189,13 +201,15 @@ class ClearingDecisionProcessor extends Object
       $agentClearingEvents = array_key_exists($licenseId, $agentEvents) ? $agentEvents[$licenseId] : array();
 
       if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0))
+      {
         throw new Exception('not in merge');
-
+      }
       $licenseDecisionResult = new ClearingResult($licenseDecisionEvent, $agentClearingEvents);
       if ($licenseDecisionResult->isRemoved())
       {
         $removedResults[$licenseId] = $licenseDecisionResult;
-      } else
+      }
+      else
       {
         $addedResults[$licenseId] = $licenseDecisionResult;
       }
@@ -203,6 +217,5 @@ class ClearingDecisionProcessor extends Object
 
     return array($addedResults, $removedResults);
   }
-
 
 }

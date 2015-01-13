@@ -18,8 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Data\LicenseUsageTypes;
+use Fossology\Lib\Util\ArrayOperation;
 
 class LicenseCsvImport {
   /** @var DbManager */
@@ -32,6 +33,16 @@ class LicenseCsvImport {
   protected $headrow = null;
   /** @var array */
   protected $nkMap = array();
+  protected $alias = array(
+      'shortname'=>array('shortname','Short Name'),
+      'fullname'=>array('fullname','Long Name'),
+      'text'=>array('text','Full Text'),
+      'parent_shortname'=>array('parent_shortname','Decider Short Name'),
+      'report_shortname'=>array('report_shortname','Regular License Text Short Name'),
+      'url'=>array('url','URL'),
+      'notes'=>array('notes'),
+      'source'=>array('source','Foreign ID')
+      );
 
   public function __construct(DbManager $dbManager)
   {
@@ -58,35 +69,44 @@ class LicenseCsvImport {
       return _('Internal error');
     }
     $cnt = -1;
+    $msg = '';
     try
     {
       while(($row = fgetcsv($handle,0,$this->delimiter,$this->enclosure)) !== FALSE) {
-        $this->handleCsv($row);
+        $log = $this->handleCsv($row);
+        if (!empty($log))
+        {
+          $msg .= "$log\n";
+        }
         $cnt++;
       }
+      $msg .= _('Read csv').(": $cnt ")._('licenses');
     }
     catch(\Exception $e)
     {
-      fclose($handle);
-      return _('Error while parsing file: '.$e->getMessage());
+      return $msg .= _('Error while parsing file: '.$e->getMessage());
     }
     fclose($handle);
-    return _('Read csv').(": $cnt ")._('licenses');
+    return $msg;
   }
 
+  /**
+   * @param array $row
+   * @return string $log
+   */
   private function handleCsv($row)
   {
     if($this->headrow===null)
     {
       $this->headrow = $this->handleHeadCsv($row);
-      return;
+      return 'head okay';
     }
 
     $mRow = array();
     foreach( array('shortname','fullname','text') as $needle){
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
-    foreach(array('parent_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
+    foreach(array('parent_shortname'=>null,'report_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
     {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row))
@@ -95,33 +115,42 @@ class LicenseCsvImport {
       }
     }
     
-    $this->handleCsvLicense($mRow);
+    return $this->handleCsvLicense($mRow);
   }
   
   private function handleHeadCsv($row)
   {
     $headrow = array();
     foreach( array('shortname','fullname','text') as $needle){
-      $col = array_search($needle, $row);
+      $col = ArrayOperation::multiSearch($this->alias[$needle], $row);
       if (false === $col)
       {
         throw new \Exception("Undetermined position of $needle");
       }
       $headrow[$needle] = $col;
     }
-    foreach( array('parent_shortname','url','notes','source') as $optNeedle){
-      $headrow[$optNeedle] = array_search($optNeedle, $row);
+    foreach( array('parent_shortname','report_shortname','url','notes','source') as $optNeedle){
+      $headrow[$optNeedle] = ArrayOperation::multiSearch($this->alias[$optNeedle], $row);
     }
     return $headrow;
   }
 
+  /**
+   * @param array $row
+   * @return string
+   */
   private function handleCsvLicense($row)
   {
     /** @var DbManager $dbManager */
     $dbManager = $this->dbManager;
     if ($this->getKeyFromShortname($row['shortname'])!==false)
     {
-      throw new \Exception("Shortname '$row[shortname]' already in DB");
+      return "Shortname '$row[shortname]' already in DB (id=".$this->getKeyFromShortname($row['shortname']).")";
+    }
+    $sameText = $dbManager->getSingleRow('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
+    if ($sameText!==false)
+    {
+      return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
     }
     $stmtInsert = __METHOD__.'.insert';
     $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source)'
@@ -131,15 +160,30 @@ class LicenseCsvImport {
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
-    if ($row['parent_shortname']===null || $this->getKeyFromShortname($row['parent_shortname'])===false)
+    $return = "Inserted '$row[shortname]' in DB";
+    
+    if ($this->insertMapIfNontrivial($row['parent_shortname'],$row['shortname'],LicenseMap::CONCLUSION))
     {
-      return;
+      $return .= " with conclusion '$row[parent_shortname]'";
     }
-
-    $dbManager->insertTableRow('license_map',
-        array('rf_fk'=>$new['rf_pk'],
-            'rf_parent'=>$this->getKeyFromShortname($row['parent_shortname']),
-            'usage'=>LicenseUsageTypes::CONCLUSION));
+    if ($this->insertMapIfNontrivial($row['report_shortname'],$row['shortname'],LicenseMap::REPORT))
+    {
+      $return .= " reporting '$row[report_shortname]'";
+    }
+    return $return;
+  }
+  
+  private function insertMapIfNontrivial($fromName,$toName,$usage)
+  {
+    $isNontrivial = ($fromName!==null && $fromName!=$toName && $this->getKeyFromShortname($fromName)!==false);
+    if ($isNontrivial)
+    {
+      $this->dbManager->insertTableRow('license_map',
+        array('rf_fk'=>$this->getKeyFromShortname($toName),
+            'rf_parent'=>$this->getKeyFromShortname($fromName),
+            'usage'=> $usage));
+    }
+    return $isNontrivial;
   }
   
   private function getKeyFromShortname($shortname)

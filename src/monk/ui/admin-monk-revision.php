@@ -46,7 +46,7 @@ class AdminMonkRevision extends DefaultPlugin {
     /** @var AgentDao */
     $agentDao = $this->getObject('dao.agent');
     /** @var AgentRef */
-    $monk = $agentDao->getCurrentAgent('monk');
+    $monk = $agentDao->getCurrentAgentRef('monk');
     $rev = $request->get('rev');
     if($rev==$monk->getAgentRevision() && $agentDao->renewCurrentAgent('monk'))
     {

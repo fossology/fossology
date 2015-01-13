@@ -121,7 +121,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
   return licenseFilePk;
 }
 
-inline int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {
+int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,

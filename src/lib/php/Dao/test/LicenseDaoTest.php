@@ -37,18 +37,13 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
   
   public function tearDown()
   {
     $this->testDb = null;
     $this->dbManager = null;
-  }
-
-  public function testSimple()
-  {
-    $licDao = new LicenseDao($this->dbManager);
-    $this->assertInstanceOf('Fossology\Lib\Dao\LicenseDao', $licDao);
   }
 
   public function testGetFileLicenseMatches()
@@ -172,10 +167,11 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     
     asort($licAll);    
     assertThat($licenses, is(array_values($licAll)));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
   
 
-  public function testGetTopLevelLicensesPerFileId()
+  public function testGetLicenseIdPerPfileForAgentId()
   {
     $this->testDb->createPlainTables(array('license_ref','license_file','uploadtree','agent'));
     $this->testDb->insertData(array('agent'));
@@ -205,18 +201,42 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $licDao = new LicenseDao($this->dbManager);
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,$uploadtreetable_name,$uploadId,$left,$left+5);
 
-    $row = array('file_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,
-               'agent_name'=>'monk', 'agent_id'=>$agentId, 'match_percentage'=>$matchPercent);
-    $expected = array($pfileId=>array($licAll[$rf_pk]=>array('monk'=>$row)));
-
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo($expected)));
+    $row = array('pfile_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,'match_percentage'=>$matchPercent,'agent_id'=>$agentId);
+    $expected = array($pfileId=>array($rf_pk=>$row));
     
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = $agentId, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo($expected)));
+    $licensesForGoodAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = $agentId);
+    assertThat($licensesForGoodAgent, is(equalTo($expected)));
 
-    $licenses = $licDao->getTopLevelLicensesPerFileId($itemTreeBounds, $selectedAgentId = 1+$agentId, $filterLicenses = array('VOID'));
-    assertThat($licenses, is(equalTo(array())));
+    $licensesForBadAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = 1+$agentId);
+    assertThat($licensesForBadAgent, is(equalTo(array())));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
+  public function testIsNewLicense(){
+    $groupId = 401;
+    $this->testDb->createPlainTables(array('license_ref'));
+    $this->testDb->insertData_license_ref();
+    $this->dbManager->queryOnce("CREATE TABLE license_candidate AS SELECT *,$groupId group_fk FROM license_ref LIMIT 1");
+    $licCandi = $this->dbManager->getSingleRow("SELECT * FROM license_candidate",array(),__METHOD__.'.candi');
+    $this->dbManager->queryOnce("DELETE FROM license_ref WHERE rf_pk=$licCandi[rf_pk]");
+    $licRef = $this->dbManager->getSingleRow("SELECT * FROM license_ref LIMIT 1",array(),__METHOD__.'.ref');
+    $licDao = new LicenseDao($this->dbManager);
+    /* test the test but do not count assert */
+    assertThat($this->dbManager->getSingleRow(
+            "SELECT count(*) cnt FROM license_ref WHERE rf_shortname=$1",array($licCandi['rf_shortname']),__METHOD__.'.check'),
+        is(equalTo(array('cnt'=>0))));
+    $this->assertCountBefore++;
+    /* test the DAO */
+    assertThat($licDao->isNewLicense($licRef['rf_shortname'],$groupId), equalTo(FALSE));
+    assertThat($licDao->isNewLicense($licRef['rf_shortname'],0), equalTo(FALSE));
+
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],$groupId), equalTo(FALSE));
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],$groupId+1), equalTo(TRUE));
+    assertThat($licDao->isNewLicense($licCandi['rf_shortname'],0), equalTo(TRUE));
+    
+    assertThat($licDao->isNewLicense('(a new shortname)',$groupId), equalTo(TRUE));
+    assertThat($licDao->isNewLicense('(a new shortname)',0), equalTo(TRUE));
+    
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }  
 }

@@ -430,8 +430,6 @@ class ui_view extends FO_Plugin
 
     $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
 
-    $this->highlightProcessor->sortHighlights($highlightEntries);
-
     if (!isset($Page))
     {
       $Page = 0;
@@ -458,8 +456,21 @@ class ui_view extends FO_Plugin
     {
       $output .= "<center>$PageMenu</center><br>\n";
     }
-
-    $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlightEntries);
+    
+    $startAt = $PageSize;
+    $endAt = $PageSize+($Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT);
+    $relevantHighlightEntries = array();
+    foreach ($highlightEntries as $highlightEntry)
+    {
+      if ($highlightEntry->getStart()<$endAt && $highlightEntry->getEnd()>=$startAt)
+      {
+        $relevantHighlightEntries[] = $highlightEntry;
+      }
+    }
+    
+    $this->highlightProcessor->sortHighlights($relevantHighlightEntries);
+    
+    $splitPositions = $this->highlightProcessor->calculateSplitPositions($relevantHighlightEntries);
 
     if ($Format == 'hex')
     {
@@ -468,7 +479,7 @@ class ui_view extends FO_Plugin
     {
       $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
     }
-
+    
     if (!empty($PageMenu) and !$getPageMenuInline)
     {
       $output .= "<P /><center>$PageMenu</center><br>\n";

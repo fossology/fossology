@@ -18,13 +18,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Decider\Test;
 
+use Fossology\Decider\DeciderAgent;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
-use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
-
 use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
@@ -37,7 +38,6 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 {
   /** @var DbManager */
   private $dbManager;
-
   /** @var ClearingDao */
   private $clearingDao;
   /** @var ClearingDecisionProcessor */
@@ -64,7 +64,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $GLOBALS['jobId'] = $jobId;
     $GLOBALS['groupId'] = $groupId;
 
-    $matches;
+    $matches = array();
     $GLOBALS['extraOpts'] = preg_match("/-k([0-9]*)/", $args, $matches) ? array("k" => $matches[1]) : array();
 
     $container = M::mock('Container');
@@ -84,7 +84,10 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     ob_start();
 
-    include(dirname(dirname(__DIR__)).'/agent/decider.php');
+    $agent = new DeciderAgent();
+    $agent->scheduler_connect(LicenseMap::TRIVIAL);
+    $agent->run_scheduler_event_loop();
+    $agent->scheduler_disconnect(0);
 
     $output = ob_get_clean();
 

@@ -33,7 +33,7 @@ class UploadStatus extends Types
         self::OPEN => "open",
         self::IN_PROGRESS => "in progress",
         self::CLOSED => "closed",
-        self::REJECTED => "recected"
+        self::REJECTED => "rejected"
     );
   }
 }
