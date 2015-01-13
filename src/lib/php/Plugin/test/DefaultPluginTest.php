@@ -195,5 +195,17 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
 
     assertThat($request->getSession(), is($this->session));
   }
+  
+  public function testIsLoggedIn()
+  {
+    global $_SESSION;
+    unset($_SESSION['User']);
+    assertThat($this->plugin->isLoggedIn(), is(equalTo(false)));
+    $_SESSION['User'] = 'Default User';
+    assertThat($this->plugin->isLoggedIn(), is(equalTo(false)));
+    $_SESSION['User'] = 'resU tlaufeD';
+    assertThat($this->plugin->isLoggedIn(), is(equalTo(true)));
+    $this->addToAssertionCount(3);
+  }
 }
  

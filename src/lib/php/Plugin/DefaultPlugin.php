@@ -316,9 +316,14 @@ abstract class DefaultPlugin implements Plugin
     );
   }
 
+  public function isLoggedIn()
+  {
+    return (!empty($_SESSION['User']) && $_SESSION['User']!='Default User');
+  }
+  
   private function checkPrerequisites()
   {
-    if ($this->requiresLogin && (empty($_SESSION['User']) || $_SESSION['User']=='Default User'))
+    if ($this->requiresLogin && !$this->isLoggedIn())
     {
       throw new \Exception("not allowed without login");
     }

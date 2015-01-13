@@ -18,7 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Monk\UI;
 
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\TextFragment;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\View\HighlightProcessor;
@@ -61,37 +63,30 @@ class OneShot extends DefaultPlugin
   {
     /** @var UploadedFile */
     $uploadFile = $request->files->get('file_input');
-    if($uploadFile===null){
+    if($uploadFile===null)
+    {
       return $this->render('oneshot-upload.html.twig', $this->getDefaultVars());
     }
-    
     $fullpath = $uploadFile->getPath().'/'.$uploadFile->getFilename();
 
     list($licenseIds, $rendered) = $this->scanMonkFileRendered($fullpath);
-
-    $content = "Possible licenseIds = ". implode(",", $licenseIds) . "<br>";
-    $content .= $rendered;
-
-    $vars = array(
-        'content' => $content
-    );
-
+    $vars = array('content' => $this->renderLicenseList($licenseIds).$rendered);
     return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
   }
 
   public function scanMonkRendered($text)
   {
-    $tmpfname = tempnam("/tmp", "monk");
-    if (!$tmpfname)
+    $tmpFileName = tempnam("/tmp", "monk");
+    if (!$tmpFileName)
     {
       throw new \Exception("cannot create temporary file");
     }
-    $handle = fopen($tmpfname, "w");
+    $handle = fopen($tmpFileName, "w");
     fwrite($handle, $text);
     fclose($handle);
-
-    list($licenseIds, $highlights) = $this->scanMonk($tmpfname);
-    unlink($tmpfname);
+    list($licenseIds, $highlights) = $this->scanMonk($tmpFileName);
+    unlink($tmpFileName);
+    
     $this->highlightProcessor->addReferenceTexts($highlights);
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
     $textFragment = new TextFragment(0, $text);
@@ -168,8 +163,8 @@ class OneShot extends DefaultPlugin
       {
         $start = $diffMatches['start'];
         $end = $start + $diffMatches['len'];
-        $rf_start = intval($diffMatches['rf_start']);
-        $rf_end = $rf_start + $diffMatches['rf_len'];
+        $rfStart = intval($diffMatches['rf_start']);
+        $rfEnd = $rfStart + $diffMatches['rf_len'];
 
         switch ($diffMatches['type'])
         {
@@ -188,7 +183,7 @@ class OneShot extends DefaultPlugin
           default:
             throw new \Exception('unrecognized diff type');
         }
-        $highlight = new Highlight($start, $end, $type, $rf_start, $rf_end);
+        $highlight = new Highlight($start, $end, $type, $rfStart, $rfEnd);
         $highlight->setLicenseId($licenseId);
 
         $highlights[] = $highlight;
@@ -198,6 +193,31 @@ class OneShot extends DefaultPlugin
       }
     }
   }
+
+
+  public function renderLicenseList($licenseIds)
+  {
+    $content = '';
+    global $container;
+    /** @var LicenseDao $licenseDao */
+    $licenseDao = $container->get('dao.license');
+    $isLoggedIn = $this->isLoggedIn();
+    foreach($licenseIds as $licenseId)
+    {
+      /** @var License */
+      $license = $licenseDao->getLicenseById($licenseId);
+      if ($isLoggedIn)
+      {
+        $js = "javascript:window.open('?mod=popup-license&rf=" . $license->getId() . "','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');";
+        $content .= '<li><a onclick="' . $js . '" href="javascript:;">' . $license->getShortName() . '</a></li>';
+      } else
+      {
+        $content .= '<li>' . $license->getShortName() . '</li>';
+      }
+    }
+    return $content ? _('Possible licenses').":<ul>$content</ul>" : _('No match found').'<hr/>';
+  }
+
 }
 
 register_plugin(new OneShot());
