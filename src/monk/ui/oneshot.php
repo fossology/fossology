@@ -18,12 +18,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Monk\UI;
 
+use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\TextFragment;
+use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
 use Fossology\Lib\View\TextRenderer;
-use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Data\Highlight;
-use Fossology\Lib\Data\TextFragment;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,14 +59,15 @@ class OneShot extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    /** @var UploadedFile */
     $uploadFile = $request->files->get('file_input');
     if($uploadFile===null){
       return $this->render('oneshot-upload.html.twig', $this->getDefaultVars());
     }
+    
+    $fullpath = $uploadFile->getPath().'/'.$uploadFile->getFilename();
 
-    $text = $request->get('text');
-
-    list($licenseIds, $rendered) = $this->scanMonkRendered($text);
+    list($licenseIds, $rendered) = $this->scanMonkFileRendered($fullpath);
 
     $content = "Possible licenseIds = ". implode(",", $licenseIds) . "<br>";
     $content .= $rendered;
@@ -79,7 +81,32 @@ class OneShot extends DefaultPlugin
 
   public function scanMonkRendered($text)
   {
-    list($licenseIds, $highlights) = $this->scanMonk($text);
+    $tmpfname = tempnam("/tmp", "monk");
+    if (!$tmpfname)
+    {
+      throw new \Exception("cannot create temporary file");
+    }
+    $handle = fopen($tmpfname, "w");
+    fwrite($handle, $text);
+    fclose($handle);
+
+    list($licenseIds, $highlights) = $this->scanMonk($tmpfname);
+    unlink($tmpfname);
+    $this->highlightProcessor->addReferenceTexts($highlights);
+    $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
+    $textFragment = new TextFragment(0, $text);
+
+    $rendered = $this->textRenderer->renderText($textFragment, $splitPositions);
+
+    return array($licenseIds, $rendered);
+  }
+  
+  
+  public function scanMonkFileRendered($tmpfname)
+  {
+    list($licenseIds, $highlights) = $this->scanMonk($tmpfname);
+    
+    $text = file_get_contents($tmpfname);
 
     $this->highlightProcessor->addReferenceTexts($highlights);
     $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
@@ -89,27 +116,18 @@ class OneShot extends DefaultPlugin
 
     return array($licenseIds, $rendered);
   }
+  
 
-  public function scanMonk($text)
+  public function scanMonk($fileName)
   {
-    $tmpfname = tempnam("/tmp", "monk");
-    $qFileName = preg_quote($tmpfname, "/");
-    if (!$tmpfname)
-    {
-      throw new \Exception("cannot create temporary file");
-    }
-    $handle = fopen($tmpfname, "w");
-    fwrite($handle, $text);
-    fclose($handle);
-
     global $SYSCONFDIR;
-    $cmd = dirname(__DIR__).'/agent/monk -c '.$SYSCONFDIR.' '.$tmpfname;
-    exec($cmd, $output, $return_var);
-    unlink($tmpfname);
-    if ($return_var != 0) {
-      throw new \Exception("scan failed with $return_var");
+    $cmd = dirname(__DIR__).'/agent/monk -c '.$SYSCONFDIR.' '.$fileName;
+    exec($cmd, $output, $returnVar);
+    if ($returnVar != 0) {
+      throw new \Exception("scan failed with $returnVar");
     }
 
+    $qFileName = preg_quote($fileName, "/");
     $licenseIds = array();
     $highlights = array();
     foreach ($output as $line)
