@@ -233,7 +233,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList) && (!$this->requiresLogin || !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
+    if (isset($this->MenuList) && (!$this->requiresLogin || $this->isLoggedIn()))
     {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }
