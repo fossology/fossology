@@ -67,7 +67,7 @@ class changeLicenseProcessPost extends FO_Plugin
     foreach ($bucketpool_array as $bucketpool)
     {
       $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadTreeId -p $bucketpool";
-      exec($command, $output, $return_var);
+      exec($command);
     }
   }
 
@@ -84,18 +84,14 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
-    $removed = $_POST['removed'] === 't';
+    $removed = $_POST['removed'] === 't' ||  $_POST['removed'] === 'true';
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId);
     $uploadId = $itemTreeBounds->getUploadId();
     $upload = $this->uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
 
-    if (!$itemTreeBounds->containsFiles()) {
-      return $this->errorJson("the given Item is not valid");
-    }
-
-    $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+    $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
     if (isset($licenses))
     {
@@ -109,7 +105,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
         //,  $_POST['comment'], $_POST['remark']
         $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
-          ClearingEventTypes::USER, $reportInfo = '', $comment = '', $job_pk);
+            ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId);
       }
     }
 
@@ -118,7 +114,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
     $conflictStrategyId = null; // TODO add option in GUI
     $ErrorMsg="";
-    $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
+    $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
