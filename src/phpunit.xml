@@ -35,12 +35,13 @@
       <directory suffix=".php">.</directory>
       <exclude>
         <directory suffix="Test.php">.</directory>
-        <directory suffix=".php">lib/php/tests</directory>
-        <directory suffix=".php">lib/c</directory>
-        <directory suffix=".php">*/*tests</directory>
-        <directory suffix=".php">testing</directory>
-        <directory suffix=".php">tutorials</directory>
-        <directory suffix=".php">vendor</directory>
+        <file>./phpunit-bootstrap.php</file>
+        <directory>lib/php/tests</directory>
+        <directory>lib/c</directory>
+        <directory>*/*tests</directory>
+        <directory>testing</directory>
+        <directory>tutorials</directory>
+        <directory>vendor</directory>
       </exclude>
     </whitelist>
   </filter>

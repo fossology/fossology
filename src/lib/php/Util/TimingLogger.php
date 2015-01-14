@@ -76,7 +76,7 @@ class TimingLogger extends Object
     $this->startTime = $endTime;
   }
 
-  private function getTimestamp()
+  protected function getTimestamp()
   {
     return microtime(true);
   }
