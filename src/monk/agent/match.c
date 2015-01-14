@@ -357,6 +357,7 @@ int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* cal
   if (match->type == MATCH_TYPE_DIFF) {
     DiffResult* diffResult = match->ptr.diff;
 
+    convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
     return callbacks->onDiff(state, file, license, diffResult);
   } else {
     DiffMatchInfo matchInfo;
