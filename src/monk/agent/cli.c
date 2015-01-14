@@ -108,9 +108,9 @@ int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInf
   if (state->scanMode != MODE_CLI)
     return 0;
 
-  printf("found full match between \"%s\" and \"%s\" (rf_pk=%ld); ",
-         file->fileName, license->shortname, license->refId);
-  printf("matched: %zu+%zu\n", matchInfo->text.start, matchInfo->text.length);
+  printf("found full match between \"%s\" and \"%s\" (rf_pk=%ld); matched: %zu+%zu\n",
+         file->fileName, license->shortname, license->refId,
+         matchInfo->text.start, matchInfo->text.length);
   return 1;
 }
 
@@ -120,12 +120,13 @@ int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffR
 
   unsigned short rank = diffResult->percentual;
 
-  printf("found diff match between \"%s\" and \"%s\" (rf_pk=%ld); ",
-         file->fileName, license->shortname, license->refId);
-  printf("rank %u; ", rank);
-
   char * formattedMatchArray = formatMatchArray(diffResult->matchedInfo);
-  printf("diffs: {%s}\n", formattedMatchArray);
+
+  printf("found diff match between \"%s\" and \"%s\" (rf_pk=%ld); rank %u; diffs: {%s}\n",
+         file->fileName, license->shortname, license->refId,
+         rank,
+         formattedMatchArray);
+
   free(formattedMatchArray);
   return 1;
 }
