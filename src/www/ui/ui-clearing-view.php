@@ -299,20 +299,19 @@ class ClearingView extends FO_Plugin
     $scope = new DecisionScopes();
     foreach ($clearingDecWithLicenses as $clearingDecision)
     {
-      $licenseNames = array();
+      $licenseOutputs = array();
       foreach ($clearingDecision->getClearingLicenses() as $lic)
       {
-        $licenseShortName = $lic->getShortName();
-        $ftm = $lic->isRemoved() ? "<span style=\"color:red\">%s</span>" : "%s";
-        $licenseNames[] = sprintf($ftm, $licenseShortName);
+        $shortName = $lic->getShortName();
+        $licenseOutputs[$shortName] = $lic->isRemoved() ? "<span style=\"color:red\">$shortName</span>" : $shortName;
       }
-      ksort($licenseNames, SORT_STRING);
+      ksort($licenseOutputs, SORT_STRING);
       $row = array(
           'date' => $clearingDecision->getDateAdded(),
           'username' => $clearingDecision->getUserName(),
           'scope' => $scope->getTypeName($clearingDecision->getScope()),
           'type' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
-          'licenses' => implode(", ", $licenseNames));
+          'licenses' => implode(", ", $licenseOutputs));
       $table[] = $row;
     }
     return $table;
