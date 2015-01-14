@@ -77,7 +77,7 @@ char* fo_RepValidate(fo_conf* config); /* checks the repo config */
 char* fo_RepGetRepPath();
 /* path to mounted repository */
 char* fo_RepGetHost(char* Type, char* Filename);
-char* fo_RepMkPath(char* Type, char* Filename);
+char* fo_RepMkPath(const char* Type, char* Filename);
 
 /* Not intended for external use */
 int _RepMkDirs(char* Filename);

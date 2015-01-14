@@ -69,7 +69,7 @@ int RepGroup;	/* the repository group ID for setgid() */
  \param S string to check
  \return  1=valid, 0=invalid.
  */
-int _RepCheckType(char* S)
+int _RepCheckType(const char* S)
 {
   int i;
   if (S == NULL) return (0);
@@ -164,7 +164,7 @@ int fo_RepHostExist(char* Type, char* Host)
 
  \return Allocates and returns string with hostname or NULL.
  */
-char* _RepGetHost(char* Type, char* Filename, int MatchNum)
+char* _RepGetHost(const char* Type, char* Filename, int MatchNum)
 {
   char** hosts;
   char* entry;
@@ -243,7 +243,7 @@ char* fo_RepGetHost(char* Type, char* Filename)
 
  \return Allocates and returns a string or NULL on error.
  */
-char* fo_RepMkPathTmp(char* Type, char* Filename, char* Ext, int Which)
+char* fo_RepMkPathTmp(const char* Type, char* Filename, char* Ext, int Which)
 {
   char* Path;
   char* Host;
@@ -351,7 +351,7 @@ char* fo_RepMkPathTmp(char* Type, char* Filename, char* Ext, int Which)
  \return Allocates and returns a string.
  \note This scans for alternate file locations, in case the file exists.
  */
-char* fo_RepMkPath(char* Type, char* Filename)
+char* fo_RepMkPath(const char* Type, char* Filename)
 {
   char* Path, * AltPath;
   int i;
