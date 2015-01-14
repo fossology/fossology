@@ -49,7 +49,6 @@ int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult
   const long fileId = file->id;
 
   unsigned short matchPercent = diffResult->percentual;
-  convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
 
 #ifdef DEBUG
     printf("found diff match between (pFile=%ld) and \"%s\" (rf_pk=%ld); ", file->id, license->shortname, license->refId);

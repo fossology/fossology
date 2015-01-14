@@ -1353,6 +1353,10 @@
 %KEY%	"licen[cs]"
 %STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is r?e?-?distributed along with the work"
 #
+%ENTRY%	_LT_DUAL_LICENSE_0
+%KEY%	"licen[cs]"
+%STR%	"(\<dual\>)[ -]license =FEW= and"
+#
 %ENTRY%	_LT_DUAL_LICENSE_1
 %KEY%	"licen[cs]"
 %STR%	"(\<dual\>|multiple)[ -]licensed under"
@@ -3373,6 +3377,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MITref2
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is the MIT licen[cs]e"
+#
+%ENTRY%	_LT_MITref3
+%KEY%	"licen[cs]"
+%STR% "licen[cs]e(:?) =FEW= and MIT"
 #####
 # DELETED: ... =SOME= accompanied by this header"
 #####
@@ -4996,9 +5004,17 @@ e /* (INFILE(j)) */
 %KEY%	"\<under\>"
 %STR%	"(distributed|released) under the (x11|x-consortium) licen[cs]e"
 #
+%ENTRY%	_LT_X11_5
+%KEY%	"notice"
+%STR%	"except as contained in this notice =SOME= shall not be used in advertising or otherwise =SOME= dealings in this Software without prior written authorization from"
+#
 %ENTRY%	_LT_X11_STYLE
 %KEY%	"distribut"
 %STR%	"distributed under an x-consortium[ -]style licen[cs]e"
+#
+%ENTRY%	_LT_Xnet_STYLE
+%KEY%	"agreement"
+%STR%	"This agreement shall be governed in all respects by the laws of the State of California and by the laws of the United States of America"
 #####
 # DELETED: ... of derivative works based upon this software are permitted
 # any distribution of this software or derivative works must comply with

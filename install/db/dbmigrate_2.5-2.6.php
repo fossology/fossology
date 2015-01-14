@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2014 Siemens AG
+ Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -52,10 +53,10 @@ function blowAudit($verbose)
   
   $stmt = __METHOD__.".blowAudit";
   $sql = "SELECT min(ut.uploadtree_pk) uploadtree_id, lfa.user_fk user_id, lfa.date date_added, lfa.reason reportinfo,
-                 lf.rf_fk license_id, ut.pfile_fk pfile_id
+                 lfa.rf_fk license_id, ut.pfile_fk pfile_id
           FROM license_file_audit lfa INNER JOIN license_file lf ON lfa.fl_fk=lf.fl_pk
                INNER JOIN uploadtree ut ON lf.pfile_fk=ut.pfile_fk
-          GROUP BY lfa.user_fk, lfa.date, lfa.reason, lf.rf_fk, ut.pfile_fk";
+          GROUP BY lfa.user_fk, lfa.date, lfa.reason, lfa.rf_fk, ut.pfile_fk";
   // ensure that these results where not inserted before
   $sql = "SELECT pureInserts.* FROM ($sql) pureInserts
             LEFT JOIN clearing_decision cd
