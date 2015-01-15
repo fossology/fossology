@@ -35,7 +35,12 @@ const std::string regCopyright::getRegex() {
  return std::string(
   "("
   "("
-    "(" COPYR_SYM SPACESALL COPYR_TXT "|" COPYR_TXT ":?" SPACESALL COPYR_SYM "|" COPYR_TXT "|" COPYR_SYM_ALONE ")"
+    "("
+      COPYR_SYM "(" SPACESALL COPYR_TXT "|" SPACES "(19|20)[[:digit:]]{2,2}" ")"
+      "|" COPYR_TXT ":?" SPACESALL COPYR_SYM
+      "|" COPYR_TXT
+      "|" COPYR_SYM_ALONE
+    ")"
     "("
       SPACES
       "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
