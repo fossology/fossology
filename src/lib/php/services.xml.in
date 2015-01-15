@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright Siemens AG 2014
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+-->
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="twig.environment.config" type="collection">
+            {$TWIG_CACHE}
+            <parameter key="autoescape" type="constant">false</parameter>
+        </parameter>
+        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
+    </parameters>
+
+    <services>
+        <service id="session" class="Symfony\Component\HttpFoundation\Session\Session">
+        </service>
+
+        <service id="logger" class="Monolog\Logger">
+            <argument type="string">default</argument>
+        </service>
+
+        <service id="db.manager" class="Fossology\Lib\Db\SolidDbManager">
+            <argument type="service" id="logger"/>
+            <tag name="monolog.processor" method="processRecord" handler="main"/>
+        </service>
+
+        <service id="log.timing" class="Fossology\Lib\Util\TimingLogger">
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="dao.upload" class="Fossology\Lib\Dao\UploadDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.folder" class="Fossology\Lib\Dao\FolderDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.license" class="Fossology\Lib\Dao\LicenseDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.highlight" class="Fossology\Lib\Dao\HighlightDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.agents" class="Fossology\Lib\Dao\AgentsDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.copyright" class="Fossology\Lib\Dao\CopyrightDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
+
+        <service id="view.highlight_processor" class="Fossology\Lib\View\HighlightProcessor">
+            <argument type="service" id="dao.license"/>
+        </service>
+        <service id="view.highlight_renderer" class="Fossology\Lib\View\HighlightRenderer">
+        </service>
+        <service id="view.license_processor" class="Fossology\Lib\View\LicenseProcessor">
+        </service>
+        <service id="view.license_renderer" class="Fossology\Lib\View\LicenseRenderer">
+        </service>
+        <service id="view.text_renderer" class="Fossology\Lib\View\TextRenderer">
+            <argument type="service" id="view.highlight_renderer"/>
+        </service>
+
+        <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu">
+        </service>
+
+        <service id="twig.loader" class="Twig_Loader_Filesystem">
+            <argument id="option">%twig.loader.source_path%</argument>
+        </service>
+
+        <service id="twig.environment" class="Twig_Environment">
+            <argument type="service" id="twig.loader"/>
+            <argument id="option">%twig.environment.config%</argument>
+            <call method="addExtension">
+                <argument type="service" id="twig.extension.i18n"/>
+            </call>
+        </service>
+
+        <service id="twig.extension.i18n" class="Twig_Extensions_Extension_I18n">
+            <tag name="twig.extension"/>
+        </service>
+    </services>
+</container>
