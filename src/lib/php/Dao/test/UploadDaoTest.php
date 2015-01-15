@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Fossology\Lib\Data\FileTreeBounds;
+use Mockery as M;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -46,9 +47,15 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb->createPlainTables(array('uploadtree'));
     $uploadDao = new UploadDao($this->dbManager);
-    $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId=103);
-    $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $fileTreeBounds);
-    $this->assertEquals($expected=0, $fileTreeBounds->getLeft());  
+    global $container;
+    $container = M::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
+    $logger = M::mock('Monolog\Logger');
+    $logger->shouldReceive('addWarning');
+    $container->shouldReceive('get')->with('logger')->andReturn($logger);
+    /** @var FileTreeBounds */
+    $badFileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId=103);
+    $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $badFileTreeBounds);
+    $this->assertEquals(0, $badFileTreeBounds->getLeft());  
     
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
             . " VALUES (103, NULL, 101, 1, 33792, 1, 2, 'WXwindows.txt');",
