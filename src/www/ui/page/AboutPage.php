@@ -55,7 +55,7 @@ class AboutPage extends DefaultPlugin
     $vars = array(
         'licenseCount' => $this->licenseDao->getLicenseCount(),
         'project' => _("FOSSology"),
-        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014 Siemens AG."),
+        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014-2015 Siemens AG."),
     );
 
     return $this->render('about.html.twig', $this->mergeWithDefault($vars));
