@@ -79,7 +79,26 @@ class FolderDao extends Object
     $this->dbManager->freeResult($res);
   }
 
+ /**
+ * @param int $userId
+ * @return Folder|null
+ */
   public function getRootFolder($userId) {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");
+    $res = $this->dbManager->execute($statementName, array($userId));
+    $row = $this->dbManager->fetchArray($res);
+    $rootFolder = $row ? new Folder(intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])) : null;
+    $this->dbManager->freeResult($res);
+    return $rootFolder;
+  }
+
+  /**
+   * @param int $userId
+   * @return Folder|null
+   */
+  public function getParentFolder($folder) {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");
@@ -105,7 +124,7 @@ WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folde
     0                     AS depth,
     FALSE                 AS cycle_detected
   FROM folder f
-  WHERE parent_fk $parentCondition
+  WHERE folder_pk $parentCondition
   UNION ALL
   SELECT
     f.*,

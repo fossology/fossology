@@ -41,7 +41,6 @@ class UserDao extends Object
     $this->logger = $logger;
   }
 
-
   /**
    * @return array
    */

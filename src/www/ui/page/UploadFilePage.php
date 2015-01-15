@@ -117,7 +117,9 @@ class UploadFilePage extends DefaultPlugin
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
     $vars['reuseFolderSelectorName'] = self::REUSE_FOLDER_SELECTOR_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
-    $folderStructure = $this->folderDao->getFolderStructure();
+    global $SysConf;
+    $rootFolder = $this->folderDao->getRootFolder($SysConf['auth']['UserId']);
+    $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
     if (empty($folderId) && !empty($folderStructure))
     {
       $folderId = $folderStructure[0][FolderDao::FOLDER_KEY]->getId();
