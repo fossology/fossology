@@ -1,23 +1,25 @@
 <?php
 /***********************************************************
- *
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014 Siemens AG
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
 use Fossology\Lib\Plugin\Plugin;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Each plugin has a state to identify if it is invalid.
@@ -104,6 +106,18 @@ class FO_Plugin implements Plugin
   var $Dependency = array();
   var $InitOrder = 0;
 
+  /** @var Menu */
+  private $menu;
+
+  /** @var Twig_Environment */
+  private $renderer;
+
+  /** @var Request|NULL */
+  private $request;
+
+  /** @var string[] */
+  private $headers = array();
+
   protected $vars = array();
 
   /**
@@ -162,8 +176,8 @@ class FO_Plugin implements Plugin
    */
   function Install()
   {
-    return (0);
-  } // Install()
+    return 0;
+  }
 
   /**
    * \brief This function (when defined) is only called once,
@@ -177,7 +191,7 @@ class FO_Plugin implements Plugin
   function Remove()
   {
     return;
-  } // Remove()
+  }
 
   /**
    * \brief base constructor.  Most plugins will just use this
@@ -195,8 +209,13 @@ class FO_Plugin implements Plugin
    */
   public function __construct()
   {
+    $this->OutputType = $this->OutputType ?: "HTML";
     $this->State = PLUGIN_STATE_VALID;
     register_plugin($this);
+
+    global $container;
+    $this->menu = $container->get('ui.component.menu');
+    $this->renderer = $container->get('twig.environment');
   }
 
   /**
@@ -221,11 +240,12 @@ class FO_Plugin implements Plugin
   {
     if ($this->State != PLUGIN_STATE_VALID)
     {
-      return (0);
+      return 0;
     } // don't run
+
     if (empty($_SESSION['User']) && $this->LoginFlag)
     {
-      return (0);
+      return 0;
     }
     // Make sure dependencies are met
     foreach ($this->Dependency as $key => $val)
@@ -300,22 +320,19 @@ class FO_Plugin implements Plugin
   function OutputOpen()
   {
     global $Plugins;
-    if ($this->State != PLUGIN_STATE_READY)
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    $this->OutputType=$Type;
+    $this->OutputToStdout=$ToStdout;
+    // Put your code here
+    switch($this->OutputType)
     {
       return (0);
     }
 
-    header('Content-type: text/html');
-    header("Pragma: no-cache"); /* for IE cache control */
-    header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
-    header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
-    if (($this->NoMenu == 0) && ($this->Name != "menus"))
-    {
-      $Menu = &$Plugins[plugin_find_id("menus")];
-    } else
-    {
-      $Menu = NULL;
-    }
+    $this->headers['Content-type'] = 'text/html';
+    $this->headers['Pragma'] = 'no-cache';
+    $this->headers['Cache-Control'] = 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0';
+    $this->headers['Expires'] = 'Expires: Thu, 19 Nov 1981 08:52:00 GMT';
 
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
@@ -332,16 +349,15 @@ class FO_Plugin implements Plugin
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
-    if (!empty($Menu))
+    if ($this->NoMenu == 0)
     {
-      $styles .= $Menu->OutputCSS();
+      $styles .= $this->menu->OutputCSS();
     }
-
     $this->vars['styles'] = $styles;
 
-    if (!empty($Menu))
+    if ($this->NoMenu == 0)
     {
-      $this->vars['menu'] = $Menu->Output($this->Title);
+      $this->vars['menu'] = $this->menu->Output($this->Title);
     }
 
     global $SysConf;
@@ -355,7 +371,7 @@ class FO_Plugin implements Plugin
   } // OutputOpen()
 
   /**
-   * \brief Similar to OutputClose, this ends the output type
+   * @brief Similar to OutputClose, this ends the output type
    * for this object.  However, this does NOT change any global
    * settings.  This is called when this object is a dependency
    * for another object.
@@ -366,64 +382,16 @@ class FO_Plugin implements Plugin
     {
       return 0;
     }
-    $V = "";
-    if ($this->OutputType=='XML')
-    {
-      $V = "</xml>";
-    }
-    if (!$this->OutputToStdout)
-    {
-      return $V;
-    }
-    print $V;
+    return "";
   }
-  
-  function renderOutput(){
-    $output = $this->Output();
-    if($output){
-      print $output;
-      return;
-    }
-    global $container;
-    $renderer = $container->get('twig.environment');
-    print $renderer->loadTemplate($this->getTemplateName())->render($this->getVars());
-  }
-
 
   /**
-   * \brief This function is called when user output is
+   * @brief This function is called when user output is
    * requested.  This function is responsible for content.
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
    */
   function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return 0;
-    }
-    $output = "";
-    if ($this->OutputType=='HTML')
-    {
-      $output = $this->htmlContent();
-    }
-    if (!$this->OutputToStdout)
-    {
-      $this->vars['content'] = $output;
-      return;
-    }
-    return $output;
-  }
-
-  /**
-   *
-   * @return string
-   */
-  protected function htmlContent()
   {
     return "";
   }
@@ -433,55 +401,13 @@ class FO_Plugin implements Plugin
     return "include/base.html.twig";
   }
 
-  public function getVars()
+  /**
+   * 
+   * @return string
+   */
+  function outputHtml()
   {
-    return $this->vars;
+    $html = "";
+    return $html;
   }
-
-  public function renderTemplate($templateName = null, $vars = null)
-  {
-    $templateName = $templateName ?: $this->getTemplateName();
-    $vars = $vars ?: $this->vars;
-
-    global $container;
-    $renderer = $container->get('twig.environment');
-
-    return $renderer->loadTemplate($templateName)->render($vars);
-  }
-
-  public function execute() {
-    $this->OutputOpen();
-    $this->renderOutput();
-  }
-
-  function preInstall()
-  {
-    if ($this->State == PLUGIN_STATE_VALID) { $this->PostInitialize(); }
-    if ($this->State == PLUGIN_STATE_READY) { $this->RegisterMenus(); }
-  }
-
-  function postInstall()
-  {
-    $state = $this->Install();
-    if ($state != 0) {
-      throw new \Exception("install of plugin ". $this->Name . " failed");
-    }
-  }
-
-  function unInstall()
-  {
-    $this->Destroy();
-  }
-
-  public function getName()
-  {
-    return $this->Name;
-  }
-
-  function __toString()
-  {
-    return getStringRepresentation(get_object_vars($this), get_class($this));
-  }
-
-
 }

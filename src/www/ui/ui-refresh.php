@@ -39,18 +39,6 @@ class ui_refresh extends FO_Plugin
 
   /**
    * \brief This function is called when user output is
-   * requested.  This function is responsible for assigning headers.
-   */
-  function OutputOpen($Type,$ToStdout)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    global $Plugins;
-    $P = &$Plugins[plugin_find_id("Default")];
-    return($P->OutputOpen($Type,$ToStdout));
-  } // OutputOpen()
-
-  /**
-   * \brief This function is called when user output is
    * requested.  This function is responsible for content.
    */
   function Output()

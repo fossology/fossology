@@ -194,7 +194,7 @@ class ui_browse extends FO_Plugin
     }
     return ($V);
   }
-  
+
   /**
    * @brief Given a upload_pk, list every item in it.
    * If it is an individual file, then list the file contents.
@@ -219,7 +219,7 @@ class ui_browse extends FO_Plugin
     $V .= FolderListDiv($Folder, 0, $Folder, 1);
     $V .= "</form>\n";
     $this->vars['folderNav'] = $V;
-    
+
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
@@ -267,7 +267,7 @@ class ui_browse extends FO_Plugin
     $this->vars['content'] = $this->outputItemHtml($Item, $folder_pk, $Upload);
     return $this->renderTemplate('ui-browse.html.twig');
   }
-  
+
   /**
    * @brief kludge for plugins not supplying a folder parameter.
    * Find what folder this upload is in.  Error if in multiple folders.

@@ -19,6 +19,7 @@
     {{ upload_max_filesize }}bytes.
   </p>
   <form enctype="multipart/form-data" method="post">
+      <input type="hidden" name="{{ uploadFormBuildParameterName }}" value="{{ uploadFormBuild }}"/>
     <ol>
       <li>
         <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded file:'| trans }}

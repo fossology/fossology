@@ -22,34 +22,43 @@ use Monolog\Logger;
 
 class TimingLogger extends Object
 {
+  const DEFAULT_WATCH = 'default';
+
   /** @var Logger */
   private $logger;
+  
   /** @var float[] */
   private $watchTimes;
+
+  private $startTime;
 
   public function __construct(Logger $logger)
   {
     $this->logger = $logger;
-    $this->watchTimes = array('default' => $this->getTimestamp());
+
+    $this->startTime = $this->getTimestamp();
+    $this->watchTimes = array(self::DEFAULT_WATCH => $this->startTime);
   }
 
   /**
    * @brief start stopwatch timer
+   * 
+   * @param string $watch
    */
-  public function tic($watch = 'default')
+  public function tic($watch = self::DEFAULT_WATCH)
   {
     $this->watchTimes[$watch] = $this->getTimestamp();
   }
-
+ 
   /**
    * @param string $text
    * @param string $watch
    */
-  public function toc($text, $watch = 'default')
+  public function toc($text, $watch = self::DEFAULT_WATCH)
   {
     if (!array_key_exists($watch, $this->watchTimes))
     {
-      $watch = 'default';
+      $watch = self::DEFAULT_WATCH;
       $text .= " using watch '$watch'";
     } else if (empty($text))
     {
@@ -60,6 +69,7 @@ class TimingLogger extends Object
 
   /**
    * @param string $text
+   * @param float $startTime
    */
   public function logWithStartTime($text, $startTime)
   {
@@ -69,6 +79,8 @@ class TimingLogger extends Object
 
   /**
    * @param string $text
+   * @param float $startTime
+   * @param float $endTime
    */
   public function logWithStartAndEndTime($text, $startTime, $endTime)
   {
@@ -76,7 +88,7 @@ class TimingLogger extends Object
     $this->startTime = $endTime;
   }
 
-  protected function getTimestamp()
+  private function getTimestamp()
   {
     return microtime(true);
   }

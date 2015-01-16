@@ -28,6 +28,7 @@ without any warranty.
         <service id="logger" class="Monolog\Logger">
             <argument type="string">default</argument>
         </service>
+
         <service id="db.manager" class="Fossology\Lib\Db\ModernDbManager">
             <argument type="service" id="logger"/>
             <tag name="monolog.processor" method="processRecord" handler="main"/>
@@ -47,9 +48,6 @@ without any warranty.
             <argument type="service" id="db.manager"/>
         </service>
         <service id="dao.license" class="Fossology\Lib\Dao\LicenseDao">
-            <argument type="service" id="db.manager"/>
-        </service>
-        <service id="dao.package" class="Fossology\Lib\Dao\PackageDao">
             <argument type="service" id="db.manager"/>
         </service>
         <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
@@ -122,6 +120,9 @@ without any warranty.
             <argument type="service" id="db.manager"/>
         </service>
     
+        <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu">
+        </service>
+
         <service id="twig.loader" class="Twig_Loader_Filesystem">
             <argument id="option">%twig.loader.source_path%</argument>
         </service>

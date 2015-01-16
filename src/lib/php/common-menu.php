@@ -315,6 +315,8 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
 $menu_to_1html_counter = 0;
 function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) 
 {
+  $showFullName = array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
+
   $V = "";
   $Std = "";
   global $menu_to_1html_counter;
@@ -356,8 +358,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
           $V.= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
         }
         $V.= ">";
-        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
-        {
+        if ($showFullName) {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -370,8 +371,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
         if (!$First) {
           $V.= " | ";
         }
-        if (array_key_exists(ui_menu::FULL_MENU_DEBUG, $_SESSION) && @$_SESSION[ui_menu::FULL_MENU_DEBUG] == 1)
-        {
+        if ($showFullName) {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -409,8 +409,9 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  */
 function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
 {
+  $showFullName = array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
+
   $V = "";
-  $Std = "";
   if (!empty($Menu)) {
     foreach($Menu as $Val) {
       if (!empty($Val->HTML)) {
@@ -430,7 +431,7 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
           $V.= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
         }
         $V.= ">";
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if ($showFullName) {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {
@@ -442,7 +443,7 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
       else if ($ShowAll) {
         $V.= $Pre;
         $V.= "[";
-        if (@$_SESSION['fullmenudebug'] == 1) {
+        if ($showFullName) {
           $V.= $Val->FullName . "(" . $Val->Order . ")";
         }
         else {

@@ -20,6 +20,7 @@ namespace Fossology\Lib\Plugin;
 
 
 use Exception;
+use Fossology\Lib\UI\Component\Menu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 use Mockery as M;
@@ -88,6 +89,9 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
   /** @var Container|M\MockInterface */
   private $container;
 
+  /** @var Menu|M\MockInterface */
+  private $menu;
+
   /** @var TestPlugin */
   private $plugin;
 
@@ -98,9 +102,11 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
     global $container;
     $container = M::mock('Container');
 
+    $this->menu = M::mock(Menu::classname());
     $this->twigEnvironment = M::mock('\Twig_Environment');
     $this->logger = M::mock('Monolog\Logger');
 
+    $container->shouldReceive('get')->with('ui.component.menu')->andReturn($this->menu);
     $container->shouldReceive('get')->with('twig.environment')->andReturn($this->twigEnvironment);
     $container->shouldReceive('get')->with('logger')->andReturn($this->logger);
     $container->shouldReceive('get')->with('session')->andReturn($this->session);

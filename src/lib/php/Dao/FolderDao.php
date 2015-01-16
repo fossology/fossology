@@ -19,8 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use DateTime;
 use Fossology\Lib\Data\Folder\Folder;
 use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
