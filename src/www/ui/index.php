@@ -16,9 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Plugin\Plugin;
-use Fossology\Lib\Util\TimingLogger;
 
+use Fossology\Lib\Plugin\Plugin;
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Page\HomePage;
 

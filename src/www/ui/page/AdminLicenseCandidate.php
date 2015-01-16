@@ -35,7 +35,6 @@ class AdminLicenseCandidate extends DefaultPlugin
         self::TITLE => "Admin License Candidates",
         self::MENU_LIST => "Admin::License Admin::Candidates",
         self::REQUIRES_LOGIN => true,
-        self::DEPENDENCIES => array(\ui_menu::NAME),
         self::PERMISSION => self::PERM_ADMIN
     ));
   }

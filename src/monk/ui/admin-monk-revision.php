@@ -32,7 +32,6 @@ class AdminMonkRevision extends DefaultPlugin {
         parent::__construct(self::NAME, array(
         self::TITLE => _("Manage Monk Revision"),
         self::MENU_LIST => "Admin::Agent::Monk",
-        self::DEPENDENCIES => array(\ui_menu::NAME),
         self::PERMISSION => self::PERM_ADMIN
     ));
   }
