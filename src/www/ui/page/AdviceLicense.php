@@ -33,8 +33,7 @@ class AdviceLicense extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => "Advice Licenses",
         self::MENU_LIST => "Organize::Licenses",
-        self::REQUIRES_LOGIN => true,
-        self::DEPENDENCIES => array(\ui_menu::NAME)
+        self::REQUIRES_LOGIN => true
     ));
   }
 
