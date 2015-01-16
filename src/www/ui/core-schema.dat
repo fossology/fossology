@@ -2003,10 +2003,10 @@
   $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["UPDATE"] = "";
 
   
-  $Schema["TABLE"]["license_map"]["licence_map_pk"]["DESC"] = "";
-  $Schema["TABLE"]["license_map"]["licence_map_pk"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"licence_map_pk\" int8;";
-  $Schema["TABLE"]["license_map"]["licence_map_pk"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"licence_map_pk\" SET NOT NULL, ALTER COLUMN \"licence_map_pk\" SET DEFAULT nextval('license_map_licence_map_pk_seq'::regclass);";
-  $Schema["TABLE"]["license_map"]["licence_map_pk"]["UPDATE"] = "UPDATE license_map SET licence_map_pk=nextval('license_map_licence_map_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_map"]["license_map_pk"]["DESC"] = "";
+  $Schema["TABLE"]["license_map"]["license_map_pk"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"license_map_pk\" int8;";
+  $Schema["TABLE"]["license_map"]["license_map_pk"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"license_map_pk\" SET NOT NULL, ALTER COLUMN \"license_map_pk\" SET DEFAULT nextval('license_map_license_map_pk_seq'::regclass);";
+  $Schema["TABLE"]["license_map"]["license_map_pk"]["UPDATE"] = "UPDATE license_map SET license_map_pk=nextval('license_map_license_map_pk_seq'::regclass)";
 
   $Schema["TABLE"]["license_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_map\".\"rf_fk\" IS 'License';";
   $Schema["TABLE"]["license_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_map\" ADD COLUMN \"rf_fk\" int4;";
@@ -2023,7 +2023,7 @@
   $Schema["TABLE"]["license_map"]["usage"]["ALTER"] = "ALTER TABLE \"license_map\" ALTER COLUMN \"usage\" DROP NOT NULL;";
   $Schema["TABLE"]["license_map"]["usage"]["UPDATE"] = "";
   
-  $Schema["SEQUENCE"]["license_map_licence_map_pk_seq"] = "CREATE SEQUENCE \"license_map_licence_map_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["license_map_license_map_pk_seq"] = "CREATE SEQUENCE \"license_map_license_map_pk_seq\" START 1;";
   
-  $Schema["CONSTRAINT"]["licence_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"licence_map_pkpk\" PRIMARY KEY (\"licence_map_pk\");";
+  $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
   $Schema["CONSTRAINT"]["licence_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"licence_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
