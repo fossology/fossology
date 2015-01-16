@@ -235,22 +235,21 @@ class UploadFilePage extends DefaultPlugin
     exec($wgetAgentCall, $wgetOutput, $wgetReturnValue);
     unlink($uploadedTempFile);
 
-    $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
-    global $Plugins;
-    /** @var agent_adj2nest $adj2nestplugin */
-    $adj2nestplugin = &$Plugins['agent_adj2nest'];
-
-    $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
-    AgentCheckBoxDo($jobId, $uploadId);
-
     if ($wgetReturnValue == 0)
     {
+      $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
+      global $Plugins;
+      /** @var agent_adj2nest $adj2nestplugin */
+      $adj2nestplugin = &$Plugins['agent_adj2nest'];
+
+      $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
+
       if ($reuseUploadId > 0)
       {
         $this->createPackageLink($uploadId, $reuseUploadId);
       }
 
-      $this->scheduleReuserAgent($jobId, $uploadId);
+      AgentCheckBoxDo($jobId, $uploadId, array("agent_reuser"));
 
       $status = GetRunnableJobList();
       $message = empty($status) ? _("Is the scheduler running? ") : "";
@@ -311,23 +310,6 @@ class UploadFilePage extends DefaultPlugin
 
     return strlen($name) > 0 ? $name : $firstName;
   }
-
-  /**
-   * @param int $jobId
-   * @param int $uploadId
-   */
-  private function scheduleReuserAgent($jobId, $uploadId)
-  {
-    global $Plugins;
-    $reuserAgent = &$Plugins['agent_reuser'];
-    if ($reuserAgent)
-    {
-      $Dependencies = array();
-      $ErrorMsg = "Bad thing";
-      $reuserAgent->AgentAdd($jobId, $uploadId, $ErrorMsg, $Dependencies);
-    }
-  }
-
 }
 
 register_plugin(new UploadFilePage());
