@@ -48,22 +48,22 @@ define("PARM_RAW",5);
  */
 function GetParm($parameterName, $parameterType)
 {
-  $Var = array_key_exists($Name, $_GET) ? @$_GET[$Name] : null;
+  $Var = array_key_exists($parameterName, $_GET) ? @$_GET[$parameterName] : null;
   if (!isset($Var))
   {
-    $Var = array_key_exists($Name, $_POST) ? @$_POST[$Name] : null;
+    $Var = array_key_exists($parameterName, $_POST) ? @$_POST[$parameterName] : null;
   }
   if (!isset($Var))
   {
-    $Var = array_key_exists($Name, $_SERVER) ? @$_SERVER[$Name] : null;
+    $Var = array_key_exists($parameterName, $_SERVER) ? @$_SERVER[$parameterName] : null;
   }
   if (!isset($Var))
   {
-    $Var = array_key_exists($Name, $_SESSION) ? @$_SESSION[$Name] : null;
+    $Var = array_key_exists($parameterName, $_SESSION) ? @$_SESSION[$parameterName] : null;
   }
   if (!isset($Var))
   {
-    $Var = array_key_exists($Name, $_COOKIE) ? @$_COOKIE[$Name] : null;
+    $Var = array_key_exists($parameterName, $_COOKIE) ? @$_COOKIE[$parameterName] : null;
   }
   if (!isset($Var)) {
     return null;
