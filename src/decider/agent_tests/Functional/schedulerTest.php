@@ -77,7 +77,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -211,6 +211,146 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
+  /** @group Functional */
+  public function testDeciderMockScanWithNoEventsAndOnlyNomosShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($this->runnerMock);
+  }
+
+  /** @group Functional */
+  public function testDeciderRealScanWithNoEventsAndOnlyNomosShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($this->runnerCli);
+  }
+
+  private function runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+
+    $licId1 = $licenseRef1->getId();
+
+    $agentNomosId = 6;
+    $agentMonkId = 5;
+    $pfile = 4;
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentNomosId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(0));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+    assertThat($decisions, is(arrayWithSize(0)));
+
+    $this->rmRepo();
+  }
+
+  /** @group Functional */
+  public function testDeciderMockScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision($this->runnerMock);
+  }
+
+  /** @group Functional */
+  public function testDeciderRealScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision($this->runnerCli);
+  }
+
+  private function runnerDeciderScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+
+    $licId1 = $licenseRef1->getId();
+
+    $agentNomosId = 6;
+    $agentMonkId = 5;
+    $pfile = 4;
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentNomosId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12223,$licId1,$pfile,$agentMonkId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,11,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,13,19)");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(1));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+    assertThat($decisions, is(arrayWithSize(1)));
+
+    $this->rmRepo();
+  }
+
+  /** @group Functional */
+  public function testDeciderMockScanWithNoEventsAndNomosNotContainedInMonkShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosNotContainedInMonkShouldNotMakeADecision($this->runnerMock);
+  }
+
+  /** @group Functional */
+  public function testDeciderRealScanWithNoEventsAndNomosNotContainedInMonkShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosNotContainedInMonkShouldNotMakeADecision($this->runnerCli);
+  }
+
+  private function runnerDeciderScanWithNoEventsAndNomosNotContainedInMonkShouldNotMakeADecision($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+
+    $licId1 = $licenseRef1->getId();
+
+    $agentNomosId = 6;
+    $agentMonkId = 5;
+    $pfile = 4;
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentNomosId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,10,3)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12223,$licId1,$pfile,$agentMonkId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,11,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,13,19)");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(0));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+    assertThat($decisions, is(arrayWithSize(0)));
+
+    $this->rmRepo();
+  }
+
   public function testDeciderScanWithTwoEventAndNoAgentShouldMakeADecision()
   {
     $this->setUpTables();
@@ -220,7 +360,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $agentDao = M::mock(AgentDao::classname());
     $clearingDao = M::mock(ClearingDao::classname());
     $uploadDao = M::mock(UploadDao::classname());
+    $highlightDao = M::mock(HighlightDao::classname());
     $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
+    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
 
     $uploadId = 13243;
 
@@ -266,7 +408,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $decisionProcessor->shouldReceive('makeDecisionFromLastEvents')
             ->with($bounds1, $userId, $groupId, DecisionTypes::IDENTIFIED, false, array());
 
-    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $decisionProcessor);
+    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $highlightDao, $decisionProcessor, $agentLicenseEventProcessor);
 
     list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, $args="");
 

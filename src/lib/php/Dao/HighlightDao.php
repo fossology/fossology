@@ -116,6 +116,15 @@ class HighlightDao extends Object
     return $highlightEntries;
   }
 
+  public function getHighlightRegion($licenseMatchId)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "SELECT MIN(start) AS start, MAX(start+len) AS end FROM highlight WHERE fl_fk = $1",
+      array($licenseMatchId)
+    );
+    return false !== $row ? array($row['start'], $row['end']) : array(-1, -1);
+  }
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @return Highlight[]

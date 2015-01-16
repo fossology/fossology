@@ -57,6 +57,41 @@ class AgentLicenseEventProcessor extends Object
    */
   protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
   {
+    $latestDetails = array();
+    $latestAgentDetectedLicenses = $this->getLatestScannerDetectedMatches($itemTreeBounds);
+
+    foreach ($latestAgentDetectedLicenses as $licenseId => $val)
+    {
+      foreach($val as $agentName => $val2)
+      {
+        foreach($val2 as $licenseMatch)
+        {
+          $licenseRef = $licenseMatch->getLicenseRef();
+          $licenseId = $licenseRef->getId();
+          if ($licenseRef->getShortName() === "No_license_found")
+          {
+            continue;
+          }
+          $agentRef = $licenseMatch->getAgentRef();
+          $agentName = $agentRef->getAgentName();
+          $agentId = $agentRef->getAgentId();
+
+          $latestDetails[$licenseId][$agentName][] = array(
+              'id' => $licenseId,
+              'licenseRef' => $licenseRef,
+              'agentRef' => $agentRef,
+              'matchId' => $licenseMatch->getLicenseFileId(),
+              'percentage' => $licenseMatch->getPercentage()
+          );
+        }
+      }
+    }
+
+    return $latestDetails;
+  }
+
+  public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
+  {
     $agentDetectedLicenses = array();
 
     $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
@@ -73,13 +108,7 @@ class AgentLicenseEventProcessor extends Object
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
 
-      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = array(
-          'id' => $licenseId,
-          'licenseRef' => $licenseRef,
-          'agentRef' => $agentRef,
-          'matchId' => $licenseMatch->getLicenseFileId(),
-          'percentage' => $licenseMatch->getPercentage()
-      );
+      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = $licenseMatch;
     }
 
     $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
@@ -136,19 +165,19 @@ class AgentLicenseEventProcessor extends Object
 
     return $licenses;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @return AgentClearingEvent[][] indexed by LicenseId
    */
   public function getScannerEvents(ItemTreeBounds $itemTreeBounds) {
     $result = array();
-    
+
     $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
 
     foreach ($agentDetails as $licenseId => $properties) {
       $agentClearingEvents = array();
-      
+
       foreach ($properties as $agentName => $licenseProperties)
       {
         foreach ($licenseProperties as $licenseProperty)
@@ -156,13 +185,13 @@ class AgentLicenseEventProcessor extends Object
           $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
         }
       }
-      
+
       $result[$licenseId] = $agentClearingEvents;
     }
-    
+
     return $result;
   }
-  
+
   /**
    * @param $licenseProperty
    * @return AgentClearingEvent

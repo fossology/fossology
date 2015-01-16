@@ -20,10 +20,12 @@ namespace Fossology\Decider\Test;
 
 use Fossology\Decider\DeciderAgent;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -42,20 +44,28 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $clearingDao;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionProcessor;
+  /** @var AgentLicenseEventProcessor */
+  private $agentLicenseEventProcessor;
   /** @var UploadDao */
   private $uploadDao;
   /** @var AgentDao */
   private $agentDao;
+  /** @var DecisionTypes */
+  private $decisionTypes;
+  /** @var HighlightDao */
+  private $highlightDao;
 
-
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionProcessor $clearingDecisionProcessor)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao,
+    ClearingDecisionProcessor $clearingDecisionProcessor, AgentLicenseEventProcessor $agentLicenseEventProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->agentDao = $agentDao;
     $this->uploadDao = $uploadDao;
+    $this->highlightDao = $highlightDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
+    $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
   }
 
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
@@ -72,8 +82,10 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.agent')->andReturn($this->agentDao);
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
+    $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
     $GLOBALS['container'] = $container;
 
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
