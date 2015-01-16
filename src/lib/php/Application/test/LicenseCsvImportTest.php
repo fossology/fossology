@@ -191,6 +191,35 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $method->invoke($licenseCsvImport,array('licA','bar','txA','liceA','noteA'));
     assertThat($nkMap->getValue($licenseCsvImport),is(array('licA'=>101)));
   }
+  
+  
+  public function testHandleFileIfFileNotExists()
+  {
+    $dbManager = M::mock(DbManager::classname());
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists');
+    assertThat($msg, is(equalTo(_('Internal error'))));
+  }
+  
+  public function testHandleFileIfFileIsNotParsable()
+  {
+    $dbManager = M::mock(DbManager::classname());
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $msg = $licenseCsvImport->handleFile(__FILE__);
+    assertThat($msg, startsWith( _('Error while parsing file')));
+  }
 
+  public function testHandleFile()
+  {
+    $dbManager = M::mock(DbManager::classname());
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $filename = tempnam("/tmp", "FOO");
+    $handle = fopen($filename, 'w');
+    fwrite($handle, "shortname,fullname,text");
+    fclose($handle);
+    $msg = $licenseCsvImport->handleFile($filename);
+    assertThat($msg, startsWith( _('head okay')));
+    unlink($filename);
+  }
+  
 }
- 
