@@ -26,7 +26,6 @@ define("TITLE_core_auth", _("Login"));
 class core_auth extends FO_Plugin
 {
   public static $origReferer;
-
   /** @var DbManager */
   private $dbManager;
 
@@ -35,6 +34,10 @@ class core_auth extends FO_Plugin
 
   /** @var Twig_Environment */
   private $renderer;
+
+  /** @var Session */
+  private $session;
+
 
   function __construct()
   {
@@ -48,6 +51,7 @@ class core_auth extends FO_Plugin
     $this->dbManager = $container->get("db.manager");
     $this->userDao = $container->get('dao.user');
     $this->renderer = $container->get('twig.environment');
+    $this->session = $container->get('session');
   }
 
   /**
@@ -76,13 +80,7 @@ class core_auth extends FO_Plugin
    */
   function PostInitialize()
   {
-    global $PG_CONN;
     global $SysConf;
-
-    if (empty($PG_CONN))
-    {
-      return (0);
-    }
 
     /* if Site Minder enabled core-auth will be disabled*/
     if (siteminder_check() != -1)
@@ -90,18 +88,15 @@ class core_auth extends FO_Plugin
       return (0);
     }
 
-    global $container;
-    /** @var Session $session */
-    $session = $container->get('session');
-    $session->setName('Login');
-    if (!$session->isStarted()) $session->start();
+    $this->session->setName('Login');
+    if (!$this->session->isStarted()) $this->session->start();
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
       $selectedGroupId = intval($_POST['selectMemberGroup']);
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
-      $session->set(Auth::GROUP_ID, $selectedGroupId);
+      $this->session->set(Auth::GROUP_ID, $selectedGroupId);
       $SysConf['auth']['GroupId'] = $selectedGroupId;
     }
 
@@ -168,12 +163,15 @@ class core_auth extends FO_Plugin
 
     $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
     $SysConf['auth']['UserId'] = $userRow['user_pk'];
+    $this->session->set(Auth::USER_ID, $userRow['user_pk']);
     $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
+    $this->session->set(Auth::USER_NAME, $userRow['user_name']);
     $_SESSION['Folder'] = $userRow['root_folder_fk'];
     $_SESSION['UserLevel'] = $userRow['user_perm'];
     $_SESSION['UserEmail'] = $userRow['user_email'];
     $_SESSION['UserEnote'] = $userRow['email_notify'];
     $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
+    $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $SysConf['auth']['GroupId'] = $userRow['group_fk'];
     $_SESSION['GroupName'] = $userRow['group_name'];
   }
@@ -201,7 +199,7 @@ class core_auth extends FO_Plugin
   /**
    * \brief This is only called when the user logs out.
    */
-  protected function htmlContent()
+  public function Output()
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
@@ -227,7 +225,7 @@ class core_auth extends FO_Plugin
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     $this->vars['referer'] = $referrer;
 
-    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
+    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->vars);
 
     return $output;
   }

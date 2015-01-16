@@ -91,7 +91,7 @@ class admin_tag_manage extends FO_Plugin
   }
 
 
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     $upload_id = GetParm('upload', PARM_INTEGER);

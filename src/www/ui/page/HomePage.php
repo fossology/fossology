@@ -32,9 +32,9 @@ class HomePage extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Welcome to FOSSology",
-        self::MENU_LIST => "Home",
+        self::TITLE =>  _("Getting Started with FOSSology"),
         self::REQUIRES_LOGIN => false,
+        self::MENU_LIST => "Help::Getting Started",
         self::MENU_ORDER => 100
     ));
   }

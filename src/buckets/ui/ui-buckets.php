@@ -511,7 +511,7 @@ return;
   /**
    * \brief This function returns the scheduler status.
    */
-  protected function htmlContent()
+  public function Output()
   {
     $uTime = microtime(true);
     $V="";

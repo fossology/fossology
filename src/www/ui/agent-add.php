@@ -124,7 +124,7 @@ class agent_add extends FO_Plugin
   /**
    * \brief Generate the text for this plugin.
    */
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     /* If this is a POST, then process the request. */

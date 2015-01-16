@@ -205,7 +205,7 @@ class admin_scheduler extends FO_Plugin
     }
   }
 
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     $status_msg = "";

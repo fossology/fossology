@@ -115,7 +115,7 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
    * The user must then manually modify the bucketpool and/or bucketdef
    * records to create their new (modified) bucketpool.
    */
-  protected function htmlContent()
+  public function Output()
   {
     global $PROJECTSTATEDIR;
 

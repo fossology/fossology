@@ -79,7 +79,7 @@ class folder_properties extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  protected function htmlContent() {
+  public function Output() {
     $V = "";
     global $PG_CONN;
 

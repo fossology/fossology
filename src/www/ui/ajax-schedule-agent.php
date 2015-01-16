@@ -43,7 +43,7 @@ class ajax_schedule_agent extends FO_Plugin
   /**
    * \brief Display the loaded menu and plugins.
    */
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     global $Plugins;

@@ -175,7 +175,7 @@ class ClearingView extends FO_Plugin
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.html.twig");
+      return $this->render("include/base.html.twig");
     }
     parent::Output();
   }

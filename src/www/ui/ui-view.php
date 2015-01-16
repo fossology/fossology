@@ -492,7 +492,7 @@ class ui_view extends FO_Plugin
       return $output;
   }
 
-  protected function htmlContent()
+  public function Output()
   {
     return $this->ShowView(NULL, "browse");
   }

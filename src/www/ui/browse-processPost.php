@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
@@ -106,13 +107,14 @@ class browseProcessPost extends FO_Plugin
       $show = GetParm('show', PARM_STRING);
       header('Content-type: text/json');
       list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->showFolderGetTableData($folder, $show);
-      return json_encode(array(
+      $content = json_encode(array(
               'sEcho' => intval($_GET['sEcho']),
               'aaData' => $aaData,
               'iTotalRecords' => $iTotalRecords,
               'iTotalDisplayRecords' => $iTotalDisplayRecords
           )
       );
+      return new Response($content, Response::HTTP_OK, array('Content-type' => 'text/json'));
     }
   }
 

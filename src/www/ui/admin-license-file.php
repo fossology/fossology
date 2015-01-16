@@ -45,7 +45,7 @@ class admin_license_file extends FO_Plugin
   }
 
 
-  protected function htmlContent()
+  public function Output()
   {
     $V = ""; // menu_to_1html(menu_find($this->Name, $MenuDepth),0);
     $errorstr = "License not added";
@@ -303,7 +303,7 @@ class admin_license_file extends FO_Plugin
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
     $allVars = array_merge($vars,$row);
-    return $this->renderTemplate('admin_license-upload_form.html.twig', $allVars);
+    return $this->render('admin_license-upload_form.html.twig', $allVars);
   }
 
 

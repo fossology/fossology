@@ -345,7 +345,7 @@ function GetLastAnalyzeTime($TableName)
   }
 
   
-  protected function htmlContent() {
+  public function Output() {
     $V="";
     $V .= "<table border=0 width='100%'><tr>\n";
     $V .= "<td valign='top'>\n";

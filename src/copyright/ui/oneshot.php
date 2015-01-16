@@ -242,7 +242,7 @@ class agent_copyright_once extends FO_Plugin {
     }
     $_FILES['licfile'] = NULL;
   }
-  
+
   protected function htmlContent()
   {
     $V = _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");

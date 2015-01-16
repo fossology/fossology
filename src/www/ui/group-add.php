@@ -99,7 +99,7 @@ class group_add extends FO_Plugin {
   }
 
 
-  protected function htmlContent() 
+  public function Output()
   {
     $V = "";
     /* If this is a POST, then process the request. */

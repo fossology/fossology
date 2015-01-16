@@ -391,7 +391,7 @@ class FO_Plugin implements Plugin
     } else
     {
       $this->vars['content'] = $output ?: ob_get_contents();
-      $response = $this->render($this->getTemplateName(), $this->vars);
+      $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
 

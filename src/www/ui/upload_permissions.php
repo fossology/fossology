@@ -101,7 +101,7 @@ class upload_permissions extends FO_Plugin
   }
 
 
-  protected function htmlContent() 
+  public function Output()
   {
     global $PG_CONN;
     global $PERM_NAMES;

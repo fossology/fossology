@@ -187,7 +187,7 @@ class upload_srv_files extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  protected function htmlContent() {
+  public function Output() {
     $SourceFiles = GetParm('sourcefiles', PARM_STRING);
     $GroupNames = GetParm('groupnames', PARM_INTEGER);
     $FolderPk = GetParm('folder', PARM_INTEGER);
