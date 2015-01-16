@@ -44,6 +44,14 @@
       <td align="right">{{ 'Public notes'|trans }}</td>
       <td><textarea name="rf_notes" rows="5" cols="80">{{ rf_notes|e }}</textarea></td>
     </tr>
+    <tr>
+      <td align="right">{{ 'Conclusion'|trans }}</td>
+      <td align="left">{{ macro.select('rf_parent',parentMap,'rf_parent',rf_parent) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Reported license'|trans }}</td>
+      <td align="left">{{ macro.select('rf_report',reportMap,'rf_report',rf_report) }}</td>
+    </tr>
   </table>
   {% if rfId %}
     <a href="?mod=admin_license_to_csv&amp;rf={{ rfId }}" class="buttonLink">{{ 'Export as CSV'|trans }}</a>
