@@ -35,7 +35,6 @@ class AdminGroupUsers extends DefaultPlugin {
         parent::__construct(self::NAME, array(
         self::TITLE => _("Manage Group Users"),
         self::MENU_LIST => "Admin::Groups::Manage Group Users",
-        self::DEPENDENCIES => array(\ui_menu::NAME),
         self::PERMISSION => self::PERM_WRITE
     ));
     $this->LoginFlag = 1;  /* Don't allow Default User to add a group */

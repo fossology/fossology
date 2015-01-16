@@ -34,8 +34,7 @@ class WelcomePage extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE =>  _("Getting Started with FOSSology"),
         self::REQUIRES_LOGIN => false,
-        self::MENU_LIST => "Help::Getting Started",
-        self::DEPENDENCIES => array(\ui_menu::NAME)
+        self::MENU_LIST => "Help::Getting Started"
     ));
   }
 
