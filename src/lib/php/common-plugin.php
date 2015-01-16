@@ -29,15 +29,17 @@ global $Plugins;
 $Plugins = array();
 
 /**
- * \brief Sort compare function.  Sorts by dependency
+ * @brief Sort compare function.  Sorts by dependency
  * relationship.  If a and b are at the same
  * dependency level, then sort by the plugin level.
  *
- * \param Plugin a
- * \param Plugin b
+ * returns -1, 0, 1 for plugin a being <, =, or > than b
  *
- * \return -1, 0, 1 for plugin a being <, =, or > than b
- **/
+ * @param Plugin a
+ * @param Plugin b
+ *
+ * @return int
+ */
 function plugin_cmp($a, $b)
 {
   /* Sort by plugin version only when the name is the same */
@@ -205,10 +207,13 @@ function plugin_find_id($pluginName)
 }
 
 /**
- * \brief Given the official name of a plugin, return the $Plugins object.
+ * @brief Given the official name of a plugin, return the $Plugins object.
  *        Only plugins in PLUGIN_STATE_READY are scanned.
- * \return NULL if the plugin name isn't found.
- **/
+ * returns the plugin or NULL if the plugin name isn't found.
+ *
+ * @param string $pluginName
+ * @return Plugin|NULL
+ */
 function plugin_find($pluginName)
 {
   global $Plugins;

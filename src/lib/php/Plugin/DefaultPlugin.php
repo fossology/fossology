@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Plugin;
 
+use Fossology\Lib\UI\Component\Menu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,6 +60,9 @@ abstract class DefaultPlugin implements Plugin
 
   /** @var Logger */
   private $logger;
+
+  /** @var Menu */
+  private $menu;
 
   /** @var string */
   private $name;
@@ -103,6 +107,7 @@ abstract class DefaultPlugin implements Plugin
     $this->session = $this->getObject('session');
     $this->renderer = $this->getObject('twig.environment');
     $this->logger = $this->getObject('logger');
+    $this->menu = $this->getObject('ui.component.menu');
   }
 
   private function setParameter($key, $value)
@@ -353,9 +358,6 @@ abstract class DefaultPlugin implements Plugin
   {
     $vars = array();
 
-    global $Plugins;
-    $menu = ($this->name != "menus") ? $Plugins[plugin_find_id("menus")] : null;
-
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
 
@@ -371,17 +373,11 @@ abstract class DefaultPlugin implements Plugin
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
-    if (!empty($menu))
-    {
-      $styles .= $menu->OutputCSS();
-    }
+    $styles .= $this->menu->OutputCSS();
 
     $vars['styles'] = $styles;
 
-    if (!empty($menu))
-    {
-      $vars['menu'] = $menu->Output($this->title);
-    }
+    $vars['menu'] = $this->menu->Output($this->title);
 
     global $SysConf;
     $vars['versionInfo'] = array(

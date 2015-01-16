@@ -4,7 +4,7 @@
   <input type="hidden" name="rf_pk" value="{{ rf_pk }}"/>
   <input type="hidden" name="{% if rf_pk %}updateit{% else %}addit{% endif %}" value="true"/>
   <table>
-    {% import 'include/macro.html.twig' as macro %}
+    {% import 'include/macros.html.twig' as macro %}
     <tr>
       <td align="right">{{ 'Active'|trans }}</td>
       <td align="left">{{ macro.select('rf_active',boolYesNoMap,'rf_active',rf_active) }}</td>

@@ -40,170 +40,6 @@
   $Schema["TABLE"]["agent"]["agent_ts"]["UPDATE"] = "UPDATE agent SET agent_ts=now()";
 
 
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_pfile\" IS '# Tokens found in pfile, number of tokens in the unknown (A) segment';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_pfile\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_pfile\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_match\" IS '# tokens from match';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_match\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_match\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"version\" IS 'Version of license agent - this should be replaced by a agent_fk';";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"version\" varchar(32);";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"version\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"phrase_text\" IS 'Section of the file containing the license.';";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"phrase_text\" varchar(256);";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"phrase_text\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_pfile_start\" IS 'Offset of starting byte in the pfile (for display)';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_pfile_start\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_pfile_start\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_pfile_end\" IS 'Offset of ending byte in the pfile (for display)';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_pfile_end\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_pfile_end\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_license_start\" IS 'byte offset in license of start';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_license_start\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_license_start\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_license_end\" IS 'byte offset in license of end';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_license_end\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_license_end\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_license\" IS '# tokens found in license';";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"tok_license\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_license\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"lic_fk\" IS 'Link to the agent_lic_raw table';";
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"lic_fk\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"lic_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"pfile_path\" IS 'The file offsets for the best match path';";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"pfile_path\" varchar;";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"pfile_path\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"license_path\" IS 'The file offsets for the best match in the license';";
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"license_path\" varchar;";
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"license_path\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"agent_lic_meta_pk\" int4;";
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"agent_lic_meta_pk\" SET NOT NULL, ALTER COLUMN \"agent_lic_meta_pk\" SET DEFAULT nextval('agent_lic_meta_agent_lic_meta_pk_seq'::regclass);";
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["UPDATE"] = "UPDATE agent_lic_meta SET agent_lic_meta_pk=nextval('agent_lic_meta_agent_lic_meta_pk_seq'::regclass)";
-
-
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ADD"] = "ALTER TABLE \"agent_lic_phrases\" ADD COLUMN \"phrase_group\" varchar;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ALTER"] = "ALTER TABLE \"agent_lic_phrases\" ALTER COLUMN \"phrase_group\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ADD"] = "ALTER TABLE \"agent_lic_phrases\" ADD COLUMN \"phrase_match\" varchar;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ALTER"] = "ALTER TABLE \"agent_lic_phrases\" ALTER COLUMN \"phrase_match\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_phrases\".\"phrase_unique\" IS 'The unique value to add to the license table';";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ADD"] = "ALTER TABLE \"agent_lic_phrases\" ADD COLUMN \"phrase_unique\" int4;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ALTER"] = "ALTER TABLE \"agent_lic_phrases\" ALTER COLUMN \"phrase_unique\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_pk\" IS 'License primary key.  Uniquely identifies a license section.';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_pk\" int4;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_pk\" SET NOT NULL, ALTER COLUMN \"lic_pk\" SET DEFAULT nextval('agent_lic_raw_lic_pk_seq'::regclass);";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["UPDATE"] = "UPDATE agent_lic_raw SET lic_pk=nextval('agent_lic_raw_lic_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_name\" IS 'Common license name (typically abbreviation like GPLv2)';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_name\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_name\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_unique\" IS 'A unique identifier for the license (used to remove duplicate entries)';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_unique\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_unique\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_text\" IS 'The actual license text';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_text\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_text\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_version\" IS 'Analysis code version (bsam/filter)';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_version\" int4;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_version\" SET NOT NULL, ALTER COLUMN \"lic_version\" SET DEFAULT 1;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["UPDATE"] = "UPDATE agent_lic_raw SET lic_version=1";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_section\" IS 'Section identifier';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_section\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_section\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_id\" IS 'uniquely identifies a license (s opposed to a license section)';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_id\" int4;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_id\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_name_full\" IS 'Full text license name';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_name_full\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_name_full\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_url\" IS 'URL origin of the license';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_url\" text;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_url\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_date\" IS 'when license text was captured';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_date\" timestamptz;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_date\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_raw\".\"lic_tokens\" IS '# of filter_license tokens in license';";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ADD"] = "ALTER TABLE \"agent_lic_raw\" ADD COLUMN \"lic_tokens\" int4;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ALTER"] = "ALTER TABLE \"agent_lic_raw\" ALTER COLUMN \"lic_tokens\" DROP NOT NULL;";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ADD"] = "ALTER TABLE \"agent_lic_status\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"agent_lic_status\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_status\".\"processed\" IS 'Has this file been processed by the license agent?';";
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["ADD"] = "ALTER TABLE \"agent_lic_status\" ADD COLUMN \"processed\" bool;";
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["ALTER"] = "ALTER TABLE \"agent_lic_status\" ALTER COLUMN \"processed\" SET NOT NULL, ALTER COLUMN \"processed\" SET DEFAULT false;";
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["UPDATE"] = "UPDATE agent_lic_status SET processed=false";
-
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_status\".\"inrepository\" IS 'Is the cache file in the repository?';";
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ADD"] = "ALTER TABLE \"agent_lic_status\" ADD COLUMN \"inrepository\" bool;";
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ALTER"] = "ALTER TABLE \"agent_lic_status\" ALTER COLUMN \"inrepository\" SET NOT NULL, ALTER COLUMN \"inrepository\" SET DEFAULT false;";
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["UPDATE"] = "UPDATE agent_lic_status SET inrepository=false";
-
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_status\".\"inspect_name\" IS 'Has licinspect processed the pfile?';";
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ADD"] = "ALTER TABLE \"agent_lic_status\" ADD COLUMN \"inspect_name\" bool;";
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ALTER"] = "ALTER TABLE \"agent_lic_status\" ALTER COLUMN \"inspect_name\" DROP NOT NULL, ALTER COLUMN \"inspect_name\" SET DEFAULT false;";
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["UPDATE"] = "UPDATE agent_lic_status SET inspect_name=false";
-
-
   $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["DESC"] = "";
   $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_pk\" int4;";
   $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_pk\" SET NOT NULL, ALTER COLUMN \"ars_pk\" SET DEFAULT nextval('agent_runstatus_ars_pk_seq'::regclass);";
@@ -316,27 +152,6 @@
   $Schema["TABLE"]["attachments"]["server_fk"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"server_fk\" int4;";
   $Schema["TABLE"]["attachments"]["server_fk"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"server_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["attachments"]["server_fk"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["DESC"] = "";
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"attrib_pk\" int4;";
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"attrib_pk\" SET NOT NULL, ALTER COLUMN \"attrib_pk\" SET DEFAULT nextval('attrib_attrib_pk_seq'::regclass);";
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["UPDATE"] = "UPDATE attrib SET attrib_pk=nextval('attrib_attrib_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["DESC"] = "COMMENT ON COLUMN \"attrib\".\"attrib_key_fk\" IS 'attribute key reference';";
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"attrib_key_fk\" int4;";
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"attrib_key_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["attrib"]["attrib_value"]["DESC"] = "COMMENT ON COLUMN \"attrib\".\"attrib_value\" IS 'attribute value';";
-  $Schema["TABLE"]["attrib"]["attrib_value"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"attrib_value\" text;";
-  $Schema["TABLE"]["attrib"]["attrib_value"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"attrib_value\" DROP NOT NULL;";
-  $Schema["TABLE"]["attrib"]["attrib_value"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"attrib\".\"pfile_fk\" IS 'key of pfile record that attribute refers to';";
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["bucket_ars"]["ars_pk"]["DESC"] = "";
@@ -913,32 +728,6 @@
   $Schema["TABLE"]["jobqueue"]["jq_cmd_args"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["key"]["key_pk"]["DESC"] = "";
-  $Schema["TABLE"]["key"]["key_pk"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_pk\" int4;";
-  $Schema["TABLE"]["key"]["key_pk"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_pk\" SET NOT NULL, ALTER COLUMN \"key_pk\" SET DEFAULT nextval('key_key_pk_seq'::regclass);";
-  $Schema["TABLE"]["key"]["key_pk"]["UPDATE"] = "UPDATE key SET key_pk=nextval('key_key_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["key"]["key_name"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_name\" IS 'displayed key name';";
-  $Schema["TABLE"]["key"]["key_name"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_name\" varchar(32);";
-  $Schema["TABLE"]["key"]["key_name"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_name\" SET NOT NULL;";
-  $Schema["TABLE"]["key"]["key_name"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["key"]["key_desc"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_desc\" IS 'brief description of the key';";
-  $Schema["TABLE"]["key"]["key_desc"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_desc\" varchar(255);";
-  $Schema["TABLE"]["key"]["key_desc"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_desc\" DROP NOT NULL;";
-  $Schema["TABLE"]["key"]["key_desc"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["key"]["key_parent_fk"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_parent_fk\" IS 'parent key_pk (keys may be nested), 0 if no parent, 0 is used instead of null beause of unique constraint';";
-  $Schema["TABLE"]["key"]["key_parent_fk"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_parent_fk\" int4;";
-  $Schema["TABLE"]["key"]["key_parent_fk"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_parent_fk\" SET NOT NULL, ALTER COLUMN \"key_parent_fk\" SET DEFAULT 0;";
-  $Schema["TABLE"]["key"]["key_parent_fk"]["UPDATE"] = "UPDATE key SET key_parent_fk=0";
-
-  $Schema["TABLE"]["key"]["key_agent_fk"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_agent_fk\" IS 'agent id to use to populate this data type';";
-  $Schema["TABLE"]["key"]["key_agent_fk"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_agent_fk\" int4;";
-  $Schema["TABLE"]["key"]["key_agent_fk"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_agent_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["key"]["key_agent_fk"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["license_file"]["fl_pk"]["DESC"] = "COMMENT ON COLUMN \"license_file\".\"fl_pk\" IS 'Primary Key';";
   $Schema["TABLE"]["license_file"]["fl_pk"]["ADD"] = "ALTER TABLE \"license_file\" ADD COLUMN \"fl_pk\" int8;";
   $Schema["TABLE"]["license_file"]["fl_pk"]["ALTER"] = "ALTER TABLE \"license_file\" ALTER COLUMN \"fl_pk\" SET NOT NULL, ALTER COLUMN \"fl_pk\" SET DEFAULT nextval('license_file_fl_pk_seq'::regclass);";
@@ -1131,171 +920,6 @@
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"uploadtree_fk\" int8;";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["UPDATE"] = "";
-
-
-
-  $Schema["TABLE"]["license_test"]["lt_pk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lt_pk\" int8;";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lt_pk\" SET NOT NULL, ALTER COLUMN \"lt_pk\" SET DEFAULT nextval('license_test_lt_pk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["UPDATE"] = "UPDATE license_test SET lt_pk=nextval('license_test_lt_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"agent_fk\" int8;";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"agent_fk\" SET NOT NULL, ALTER COLUMN \"agent_fk\" SET DEFAULT nextval('license_test_agent_fk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["UPDATE"] = "UPDATE license_test SET agent_fk=nextval('license_test_agent_fk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"pfile_fk\" int8;";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"pfile_fk\" SET NOT NULL, ALTER COLUMN \"pfile_fk\" SET DEFAULT nextval('license_test_pfile_fk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["UPDATE"] = "UPDATE license_test SET pfile_fk=nextval('license_test_pfile_fk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["DESC"] = "COMMENT ON COLUMN \"license_test\".\"lic_startbyte\" IS 'starting byte of probable license, null if no license';";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lic_startbyte\" int4;";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lic_startbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["DESC"] = "COMMENT ON COLUMN \"license_test\".\"lic_endbyte\" IS 'end byte of probable license, null if no license';";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lic_endbyte\" int4;";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lic_endbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ADD"] = "ALTER TABLE \"licgroup\" ADD COLUMN \"licgroup_pk\" int4;";
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ALTER"] = "ALTER TABLE \"licgroup\" ALTER COLUMN \"licgroup_pk\" SET NOT NULL, ALTER COLUMN \"licgroup_pk\" SET DEFAULT nextval('licgroup_licgroup_pk_seq'::regclass);";
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["UPDATE"] = "UPDATE licgroup SET licgroup_pk=nextval('licgroup_licgroup_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["DESC"] = "COMMENT ON COLUMN \"licgroup\".\"licgroup_name\" IS 'Name of License Group';";
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ADD"] = "ALTER TABLE \"licgroup\" ADD COLUMN \"licgroup_name\" text;";
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ALTER"] = "ALTER TABLE \"licgroup\" ALTER COLUMN \"licgroup_name\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["DESC"] = "COMMENT ON COLUMN \"licgroup\".\"licgroup_desc\" IS 'Description of License Group';";
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ADD"] = "ALTER TABLE \"licgroup\" ADD COLUMN \"licgroup_desc\" text;";
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ALTER"] = "ALTER TABLE \"licgroup\" ALTER COLUMN \"licgroup_desc\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["DESC"] = "COMMENT ON COLUMN \"licgroup\".\"licgroup_color\" IS 'Color to associate with License Group (#RRGGBB)';";
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ADD"] = "ALTER TABLE \"licgroup\" ADD COLUMN \"licgroup_color\" text;";
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ALTER"] = "ALTER TABLE \"licgroup\" ALTER COLUMN \"licgroup_color\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ADD"] = "ALTER TABLE \"licgroup_grps\" ADD COLUMN \"licgroup_grps_pk\" int4;";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ALTER"] = "ALTER TABLE \"licgroup_grps\" ALTER COLUMN \"licgroup_grps_pk\" SET NOT NULL, ALTER COLUMN \"licgroup_grps_pk\" SET DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'::regclass);";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["UPDATE"] = "UPDATE licgroup_grps SET licgroup_grps_pk=nextval('licgroup_grps_licgroup_grps_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN \"licgroup_grps\".\"licgroup_fk\" IS 'Key of parent license group';";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ADD"] = "ALTER TABLE \"licgroup_grps\" ADD COLUMN \"licgroup_fk\" int4;";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ALTER"] = "ALTER TABLE \"licgroup_grps\" ALTER COLUMN \"licgroup_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["DESC"] = "COMMENT ON COLUMN \"licgroup_grps\".\"licgroup_memberfk\" IS 'Key of license group that belongs to licgroup_fk';";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ADD"] = "ALTER TABLE \"licgroup_grps\" ADD COLUMN \"licgroup_memberfk\" int4;";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ALTER"] = "ALTER TABLE \"licgroup_grps\" ALTER COLUMN \"licgroup_memberfk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ADD"] = "ALTER TABLE \"licgroup_lics\" ADD COLUMN \"licgroup_lics_pk\" int4;";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ALTER"] = "ALTER TABLE \"licgroup_lics\" ALTER COLUMN \"licgroup_lics_pk\" SET NOT NULL, ALTER COLUMN \"licgroup_lics_pk\" SET DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'::regclass);";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["UPDATE"] = "UPDATE licgroup_lics SET licgroup_lics_pk=nextval('licgroup_lics_licgroup_lics_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN \"licgroup_lics\".\"licgroup_fk\" IS 'Parent License Group';";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ADD"] = "ALTER TABLE \"licgroup_lics\" ADD COLUMN \"licgroup_fk\" int4;";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ALTER"] = "ALTER TABLE \"licgroup_lics\" ALTER COLUMN \"licgroup_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN \"licgroup_lics\".\"lic_fk\" IS 'License in Group';";
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ADD"] = "ALTER TABLE \"licgroup_lics\" ADD COLUMN \"lic_fk\" int4;";
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ALTER"] = "ALTER TABLE \"licgroup_lics\" ALTER COLUMN \"lic_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["ADD"] = "ALTER TABLE \"licterm\" ADD COLUMN \"licterm_pk\" int4;";
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["ALTER"] = "ALTER TABLE \"licterm\" ALTER COLUMN \"licterm_pk\" SET NOT NULL, ALTER COLUMN \"licterm_pk\" SET DEFAULT nextval('licterm_licterm_pk_seq'::regclass);";
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["UPDATE"] = "UPDATE licterm SET licterm_pk=nextval('licterm_licterm_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licterm"]["licterm_name"]["DESC"] = "COMMENT ON COLUMN \"licterm\".\"licterm_name\" IS 'Name of License Term Group';";
-  $Schema["TABLE"]["licterm"]["licterm_name"]["ADD"] = "ALTER TABLE \"licterm\" ADD COLUMN \"licterm_name\" text;";
-  $Schema["TABLE"]["licterm"]["licterm_name"]["ALTER"] = "ALTER TABLE \"licterm\" ALTER COLUMN \"licterm_name\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm"]["licterm_name"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["DESC"] = "COMMENT ON COLUMN \"licterm\".\"licterm_desc\" IS 'Description of License Term Group';";
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["ADD"] = "ALTER TABLE \"licterm\" ADD COLUMN \"licterm_desc\" text;";
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["ALTER"] = "ALTER TABLE \"licterm\" ALTER COLUMN \"licterm_desc\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ADD"] = "ALTER TABLE \"licterm_map\" ADD COLUMN \"licterm_map_pk\" int4;";
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ALTER"] = "ALTER TABLE \"licterm_map\" ALTER COLUMN \"licterm_map_pk\" SET NOT NULL, ALTER COLUMN \"licterm_map_pk\" SET DEFAULT nextval('licterm_map_licterm_map_pk_seq'::regclass);";
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["UPDATE"] = "UPDATE licterm_map SET licterm_map_pk=nextval('licterm_map_licterm_map_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ADD"] = "ALTER TABLE \"licterm_map\" ADD COLUMN \"licterm_fk\" int4;";
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ALTER"] = "ALTER TABLE \"licterm_map\" ALTER COLUMN \"licterm_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ADD"] = "ALTER TABLE \"licterm_map\" ADD COLUMN \"licterm_words_fk\" int4;";
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ALTER"] = "ALTER TABLE \"licterm_map\" ALTER COLUMN \"licterm_words_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ADD"] = "ALTER TABLE \"licterm_maplic\" ADD COLUMN \"licterm_maplic_pk\" int4;";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ALTER"] = "ALTER TABLE \"licterm_maplic\" ALTER COLUMN \"licterm_maplic_pk\" SET NOT NULL, ALTER COLUMN \"licterm_maplic_pk\" SET DEFAULT nextval('licterm_maplic_licterm_maplic_pk_seq'::regclass);";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["UPDATE"] = "UPDATE licterm_maplic SET licterm_maplic_pk=nextval('licterm_maplic_licterm_maplic_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN \"licterm_maplic\".\"licterm_fk\" IS 'Key of parent term group';";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ADD"] = "ALTER TABLE \"licterm_maplic\" ADD COLUMN \"licterm_fk\" int4;";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ALTER"] = "ALTER TABLE \"licterm_maplic\" ALTER COLUMN \"licterm_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN \"licterm_maplic\".\"lic_fk\" IS 'License that belongs to licterm_fk';";
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ADD"] = "ALTER TABLE \"licterm_maplic\" ADD COLUMN \"lic_fk\" int4;";
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ALTER"] = "ALTER TABLE \"licterm_maplic\" ALTER COLUMN \"lic_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ADD"] = "ALTER TABLE \"licterm_name\" ADD COLUMN \"licterm_name_pk\" int4;";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ALTER"] = "ALTER TABLE \"licterm_name\" ALTER COLUMN \"licterm_name_pk\" SET NOT NULL, ALTER COLUMN \"licterm_name_pk\" SET DEFAULT nextval('licterm_name_licterm_name_pk_seq'::regclass);";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["UPDATE"] = "UPDATE licterm_name SET licterm_name_pk=nextval('licterm_name_licterm_name_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"licterm_name\".\"pfile_fk\" IS 'Pfile containing this canonical name';";
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ADD"] = "ALTER TABLE \"licterm_name\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"licterm_name\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN \"licterm_name\".\"licterm_fk\" IS 'Canonical name to use (null means use the real license name)';";
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ADD"] = "ALTER TABLE \"licterm_name\" ADD COLUMN \"licterm_fk\" int4;";
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ALTER"] = "ALTER TABLE \"licterm_name\" ALTER COLUMN \"licterm_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["DESC"] = "COMMENT ON COLUMN \"licterm_name\".\"agent_lic_meta_fk\" IS 'License range containing this canonical name';";
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ADD"] = "ALTER TABLE \"licterm_name\" ADD COLUMN \"agent_lic_meta_fk\" int4;";
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ALTER"] = "ALTER TABLE \"licterm_name\" ALTER COLUMN \"agent_lic_meta_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["DESC"] = "COMMENT ON COLUMN \"licterm_name\".\"licterm_name_confidence\" IS 'Confidence that the license template name is correct (3=no, 2=partial, 1=style, 0=use the name)';";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ADD"] = "ALTER TABLE \"licterm_name\" ADD COLUMN \"licterm_name_confidence\" int4;";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ALTER"] = "ALTER TABLE \"licterm_name\" ALTER COLUMN \"licterm_name_confidence\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["UPDATE"] = "";
-
-
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ADD"] = "ALTER TABLE \"licterm_words\" ADD COLUMN \"licterm_words_pk\" int4;";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ALTER"] = "ALTER TABLE \"licterm_words\" ALTER COLUMN \"licterm_words_pk\" SET NOT NULL, ALTER COLUMN \"licterm_words_pk\" SET DEFAULT nextval('licterm_words_licterm_words_pk_seq'::regclass);";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["UPDATE"] = "UPDATE licterm_words SET licterm_words_pk=nextval('licterm_words_licterm_words_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["DESC"] = "COMMENT ON COLUMN \"licterm_words\".\"licterm_words_text\" IS 'Text for a keyword term';";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ADD"] = "ALTER TABLE \"licterm_words\" ADD COLUMN \"licterm_words_text\" text;";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ALTER"] = "ALTER TABLE \"licterm_words\" ALTER COLUMN \"licterm_words_text\" DROP NOT NULL;";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
@@ -2031,14 +1655,13 @@
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
-  $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::unknown AS ts, NULL::unknown AS upload_pk, NULL::unknown AS pfile_fk, NULL::unknown AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::unknown AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+  $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::integer AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+  $Schema["VIEW"]["runstat_up_agent"] = "CREATE VIEW \"runstat_up_agent\" AS SELECT agent_runstatus.ars_status, agent_runstatus.ars_complete, agent_runstatus.ars_pk, agent_runstatus.ars_starttime AS ars_ts, agent_runstatus.agent_fk, agent.agent_desc, agent.agent_name, agent.agent_parms, agent.agent_enabled AS agent_enable, agent.agent_pk, agent.agent_ts, agent.agent_rev, upload.upload_desc, upload.upload_filename, upload.pfile_fk, upload.upload_pk FROM ((agent_runstatus JOIN agent ON ((agent_runstatus.agent_fk = agent.agent_pk))) JOIN upload ON ((agent_runstatus.upload_fk = upload.upload_pk)));";
 
   
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["uploadtree_uploadtree_pk_seq"] = "CREATE SEQUENCE \"uploadtree_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["agent_agent_pk_seq"] = "CREATE SEQUENCE \"agent_agent_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["agent_lic_meta_agent_lic_meta_pk_seq"] = "CREATE SEQUENCE \"agent_lic_meta_agent_lic_meta_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["agent_lic_raw_lic_pk_seq"] = "CREATE SEQUENCE \"agent_lic_raw_lic_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["agent_runstatus_ars_pk_seq"] = "CREATE SEQUENCE \"agent_runstatus_ars_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"] = "CREATE SEQUENCE \"nomos_ars_ars_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["attachments_attachment_pk_seq"] = "CREATE SEQUENCE \"attachments_attachment_pk_seq\" START 1;";
@@ -2058,12 +1681,8 @@
   $Schema["SEQUENCE"]["group_group_pk_seq"] = "CREATE SEQUENCE \"group_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["group_user_member_group_user_member_pk_seq"] = "CREATE SEQUENCE \"group_user_member_group_user_member_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE \"key_key_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_test_agent_fk_seq"] = "CREATE SEQUENCE \"license_test_agent_fk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_test_lt_pk_seq"] = "CREATE SEQUENCE \"license_test_lt_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["license_test_pfile_fk_seq"] = "CREATE SEQUENCE \"license_test_pfile_fk_seq\" START 1;";
   $Schema["SEQUENCE"]["licgroup_licgroup_pk_seq"] = "CREATE SEQUENCE \"licgroup_licgroup_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["licgroup_grps_licgroup_grps_pk_seq"] = "CREATE SEQUENCE \"licgroup_grps_licgroup_grps_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["licgroup_lics_licgroup_lics_pk_seq"] = "CREATE SEQUENCE \"licgroup_lics_licgroup_lics_pk_seq\" START 1;";
@@ -2079,7 +1698,6 @@
   $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["clearing_decision_clearing_id_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_id_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE \"report_cache_report_cache_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
@@ -2099,12 +1717,12 @@
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_decision_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["copyright_audit_ca_pk_seq"] = "CREATE SEQUENCE \"copyright_audit_ca_pk_seq\" START 1;";
 
+  $Schema["SEQUENCE"]["clearing_decision_clearing_id_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_id_seq\" START 1;";
+  
   $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
-  $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
   $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (\"agent_pk\");";
   $Schema["CONSTRAINT"]["agent_runstatus_pkey"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"agent_runstatus_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["attachments_pkey"] = "ALTER TABLE \"attachments\" ADD CONSTRAINT \"attachments_pkey\" PRIMARY KEY (\"attachment_pk\");";
-  $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (\"attrib_pk\");";
   $Schema["CONSTRAINT"]["bucket_ars_pkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_pkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
@@ -2122,17 +1740,6 @@
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";
   $Schema["CONSTRAINT"]["job_pkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_pkey\" PRIMARY KEY (\"job_pk\");";
   $Schema["CONSTRAINT"]["jobqueue_pkey"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_pkey\" PRIMARY KEY (\"jq_pk\");";
-  $Schema["CONSTRAINT"]["key_pkey"] = "ALTER TABLE \"key\" ADD CONSTRAINT \"key_pkey\" PRIMARY KEY (\"key_pk\");";
-  $Schema["CONSTRAINT"]["lic_pkey"] = "ALTER TABLE \"agent_lic_raw\" ADD CONSTRAINT \"lic_pkey\" PRIMARY KEY (\"lic_pk\");";
-  $Schema["CONSTRAINT"]["license_test_pkey"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"license_test_pkey\" PRIMARY KEY (\"lt_pk\");";
-  $Schema["CONSTRAINT"]["licgroup_grps_pkey"] = "ALTER TABLE \"licgroup_grps\" ADD CONSTRAINT \"licgroup_grps_pkey\" PRIMARY KEY (\"licgroup_grps_pk\");";
-  $Schema["CONSTRAINT"]["licgroup_lics_pkey"] = "ALTER TABLE \"licgroup_lics\" ADD CONSTRAINT \"licgroup_lics_pkey\" PRIMARY KEY (\"licgroup_lics_pk\");";
-  $Schema["CONSTRAINT"]["licgroup_pkey"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_pkey\" PRIMARY KEY (\"licgroup_pk\");";
-  $Schema["CONSTRAINT"]["licterm_map_pkey"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"licterm_map_pkey\" PRIMARY KEY (\"licterm_map_pk\");";
-  $Schema["CONSTRAINT"]["licterm_maplic_pkey"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"licterm_maplic_pkey\" PRIMARY KEY (\"licterm_maplic_pk\");";
-  $Schema["CONSTRAINT"]["licterm_name_pkey"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"licterm_name_pkey\" PRIMARY KEY (\"licterm_name_pk\");";
-  $Schema["CONSTRAINT"]["licterm_pkey"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_pkey\" PRIMARY KEY (\"licterm_pk\");";
-  $Schema["CONSTRAINT"]["licterm_words_pkey"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_pkey\" PRIMARY KEY (\"licterm_words_pk\");";
   $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (\"mimetype_pk\");";
   $Schema["CONSTRAINT"]["nomos_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["nomos_ars_pkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_pkey1\" PRIMARY KEY (\"ars_pk\");";
@@ -2154,10 +1761,6 @@
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
-  $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"No duplicates\" UNIQUE (\"pfile_fk\",\"tok_pfile\",\"tok_match\",\"version\",\"tok_pfile_start\",\"tok_pfile_end\",\"tok_license_start\",\"tok_license_end\",\"tok_license\",\"lic_fk\");";
-  $Schema["CONSTRAINT"]["One unique per software version"] = "ALTER TABLE \"agent_lic_raw\" ADD CONSTRAINT \"One unique per software version\" UNIQUE (\"lic_unique\",\"lic_version\");";
-  $Schema["CONSTRAINT"]["agent_lic_phrases_phrase_group_key"] = "ALTER TABLE \"agent_lic_phrases\" ADD CONSTRAINT \"agent_lic_phrases_phrase_group_key\" UNIQUE (\"phrase_group\",\"phrase_match\");";
-  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_key"] = "ALTER TABLE \"agent_lic_status\" ADD CONSTRAINT \"agent_lic_status_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["ars_unique"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"ars_unique\" UNIQUE (\"agent_fk\",\"upload_fk\");";
@@ -2166,25 +1769,13 @@
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_key"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_key\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
-  $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
-  $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (\"licterm_name\");";
-  $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (\"licterm_words_text\");";
   $Schema["CONSTRAINT"]["md5_sha1_size"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"md5_sha1_size\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\");";
-  $Schema["CONSTRAINT"]["name_parent"] = "ALTER TABLE \"key\" ADD CONSTRAINT \"name_parent\" UNIQUE (\"key_name\",\"key_parent_fk\");";
-  $Schema["CONSTRAINT"]["only_one"] = "ALTER TABLE \"licgroup_lics\" ADD CONSTRAINT \"only_one\" UNIQUE (\"licgroup_lics_pk\",\"licgroup_fk\");";
-  $Schema["CONSTRAINT"]["only_one_licterm_map"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"only_one_licterm_map\" UNIQUE (\"licterm_fk\",\"licterm_words_fk\");";
-  $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (\"licterm_fk\",\"lic_fk\");";
-  $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (\"licterm_fk\",\"agent_lic_meta_fk\");";
   $Schema["CONSTRAINT"]["perm_upload_upload_fk_group_fk_key"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_upload_fk_group_fk_key\" UNIQUE (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
-  $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_status\" ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["attrib_attrib_key_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_attrib_key_fk_fkey\" FOREIGN KEY (\"attrib_key_fk\") REFERENCES \"key\" (\"key_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["attrib_pfile_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["bf_bucket_agent_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bf_bucket_agent_fk\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_ars_agent_fk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_ars_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -2197,23 +1788,10 @@
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["highlight_fl_fk_fkey"] = "ALTER TABLE \"highlight\" ADD CONSTRAINT \"highlight_fl_fk_fkey\" FOREIGN KEY (\"fl_fk\") REFERENCES \"license_file\" (\"fl_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["highlight_keyword_pfile_fk_fkey"] = "ALTER TABLE \"highlight_keyword\" ADD CONSTRAINT \"highlight_keyword_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (\"job_folder_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (\"jq_job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["key_key_agent_fk_fkey"] = "ALTER TABLE \"key\" ADD CONSTRAINT \"key_key_agent_fk_fkey\" FOREIGN KEY (\"key_agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["licgroup_exist"] = "ALTER TABLE \"licgroup_lics\" ADD CONSTRAINT \"licgroup_exist\" FOREIGN KEY (\"licgroup_fk\") REFERENCES \"licgroup\" (\"licgroup_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["licgroupmember_exist"] = "ALTER TABLE \"licgroup_grps\" ADD CONSTRAINT \"licgroupmember_exist\" FOREIGN KEY (\"licgroup_memberfk\") REFERENCES \"licgroup\" (\"licgroup_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["licterm_exist"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"licterm_exist\" FOREIGN KEY (\"licterm_fk\") REFERENCES \"licterm\" (\"licterm_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["lictermlicterm_exist"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"lictermlicterm_exist\" FOREIGN KEY (\"licterm_fk\") REFERENCES \"licterm\" (\"licterm_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["lictermname_licmeta_exist"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"lictermname_licmeta_exist\" FOREIGN KEY (\"agent_lic_meta_fk\") REFERENCES \"agent_lic_meta\" (\"agent_lic_meta_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["lictermname_licterm_exist"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"lictermname_licterm_exist\" FOREIGN KEY (\"licterm_fk\") REFERENCES \"licterm\" (\"licterm_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["lictermname_pfile_exist"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"lictermname_pfile_exist\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["lictermwords_exist"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"lictermwords_exist\" FOREIGN KEY (\"licterm_words_fk\") REFERENCES \"licterm_words\" (\"licterm_words_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["ltagent"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltagent\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["ltpfile"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltpfile\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["nomos_ars_agent_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["nomos_ars_agent_fk_fkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_agent_fk_fkey1\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -2238,19 +1816,6 @@
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
-
-  $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
-  $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["agent_lic_phrases"]["phrases_unique"] = "CREATE UNIQUE INDEX phrases_unique ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
-
-  $Schema["INDEX"]["agent_lic_raw"]["lic_pk"] = "CREATE UNIQUE INDEX lic_pk ON agent_lic_raw USING btree (lic_pk);";
-
-  $Schema["INDEX"]["agent_lic_status"]["inrepository_idx"] = "CREATE INDEX inrepository_idx ON agent_lic_status USING btree (inrepository);";
-  $Schema["INDEX"]["agent_lic_status"]["processed_idx"] = "CREATE INDEX processed_idx ON agent_lic_status USING btree (processed);";
-
-  $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
-  $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
 
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 
@@ -2277,10 +1842,6 @@
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
-
-  $Schema["INDEX"]["license_test"]["pfilefk"] = "CREATE INDEX pfilefk ON license_test USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["licterm_name"]["licterm_name_pfile_pk_idx"] = "CREATE UNIQUE INDEX licterm_name_pfile_pk_idx ON licterm_name USING btree (licterm_name_pk, pfile_fk);";
 
   $Schema["INDEX"]["perm_upload"]["group_fk_idx"] = "CREATE INDEX group_fk_idx ON perm_upload USING btree (group_fk);";
   $Schema["INDEX"]["perm_upload"]["upload_fk_idx"] = "CREATE INDEX upload_fk_idx ON perm_upload USING btree (upload_fk);";

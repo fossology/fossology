@@ -273,6 +273,93 @@ class ui_browse_license extends FO_Plugin
   
   
   /**
+   * \brief This function returns the scheduler status.
+   */
+  function Output()
+  {
+    $uTime = microtime(true);
+    if ($this->State != PLUGIN_STATE_READY)
+    {
+      return (0);
+    }
+    $Upload = GetParm("upload", PARM_INTEGER);
+    $UploadPerm = GetUploadPerm($Upload);
+    if ($UploadPerm < PERM_READ)
+    {
+      $text = _("Permission Denied");
+      echo "<h2>$text<h2>";
+      return;
+    }
+
+    $Item = GetParm("item", PARM_INTEGER);
+    $tag_pk = GetParm("tag", PARM_INTEGER);
+    $updateCache = GetParm("updcache", PARM_INTEGER);
+
+    $this->uploadtree_tablename = GetUploadtreeTableName($Upload);
+    list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
+
+
+    if (empty($V)) // no cache exists
+    {
+      switch ($this->OutputType)
+      {
+        case "XML":
+          break;
+        case "HTML":
+          /* Show the folder path */
+          $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+
+          if (!empty($Upload))
+          {
+            $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+            $V .= js_url();
+            $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
+          }
+
+          $V .= $this->createJavaScriptBlock();
+          break;
+        case "Text":
+          break;
+        default:
+      }
+
+      $Cached = false;
+    } else
+      $Cached = true;
+
+    if (!$this->OutputToStdout)
+    {
+      return ($V);
+    }
+    print "$V";
+    $Time = microtime(true) - $uTime; // convert usecs to secs
+    $text = _("Elapsed time: %.3f seconds");
+    printf("<br/><small>$text</small>", $Time);
+
+    if ($Cached)
+    {
+      $text = _("cached");
+      $text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    } else
+    {
+      /*  Cache Report if this took longer than 1/2 second */
+      if ($Time > 0.5)
+        ReportCachePut($CacheKey, $V);
+    }
+    return "";
+  }
+
+  private function createJavaScriptBlock()
+  {
+    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
+    $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
+    return $output;
+  }
+
+  /**
    * @param $updcache
    * @return array
    */

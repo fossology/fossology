@@ -40,7 +40,6 @@ class AboutPage extends DefaultPlugin
         self::TITLE => "About Fossology",
         self::MENU_LIST => "Help::About",
         self::REQUIRES_LOGIN => false,
-        self::DEPENDENCIES => array(\ui_menu::NAME)
     ));
 
     $this->licenseDao = $this->getObject('dao.license');

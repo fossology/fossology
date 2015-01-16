@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -44,6 +45,8 @@ class UploadFilePage extends DefaultPlugin
   const REUSE_FOLDER_SELECTOR_NAME = 'reuseFolderSelectorName';
   const DESCRIPTION_INPUT_NAME = 'descriptionInputName';
   const DESCRIPTION_VALUE = 'descriptionValue';
+  const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
+
 
   /** @var FolderDao */
   private $folderDao;
@@ -99,7 +102,7 @@ class UploadFilePage extends DefaultPlugin
 
         if ($uploadFile !== null && !empty($folderId))
         {
-          list($successful, $vars['message']) = $this->handleFileUpload($folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ, $reuseUploadId);
+          list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ, $reuseUploadId);
           $description = $successful ? null : $description;
 
         } else
@@ -128,6 +131,12 @@ class UploadFilePage extends DefaultPlugin
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId);
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
+
+    $session = $request->getSession();
+    $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time().':'.$_SERVER['REMOTE_ADDR']);
+    $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
+    $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
+
     if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
     {
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
@@ -168,13 +177,15 @@ class UploadFilePage extends DefaultPlugin
   /**
    * @brief Process the upload request.
    *
-   * @param int $folderId
+   * @param Request $request
    * @param UploadedFile $uploadedFile
+   * @param int $folderId
    * @param string $description
    * @param int $publicPermission
+   * @param int $reuseUploadId
    * @return null|string
    */
-  function handleFileUpload($folderId, UploadedFile $uploadedFile, $description, $publicPermission, $reuseUploadId)
+  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description, $publicPermission, $reuseUploadId)
   {
     global $MODDIR;
     global $SysConf;
@@ -197,10 +208,11 @@ class UploadFilePage extends DefaultPlugin
         UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
 
-    if (@$_SESSION['uploadformbuild'] != @$_REQUEST['uploadformbuild'])
+    if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
+        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
     {
       $UploadFile['error'] = UPLOAD_ERR_RESEND;
-      return $upload_errors[$UploadFile['error']];
+      return array(false, $upload_errors[$UploadFile['error']]);
     }
 
     $errorMessage = null;

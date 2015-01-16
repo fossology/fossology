@@ -5,6 +5,8 @@
 
 language: c
 
+addons:
+ - postgresql: "9.3"
 cache:
  - apt
 
@@ -15,7 +17,7 @@ install:
         apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
-        postgresql libpq-dev
+        libpq-dev
  - sudo apt-get install -qq cppcheck
 
 script:

@@ -166,6 +166,12 @@ class ClearingDao extends Object
     return $clearingsWithLicensesArray;
   }
 
+  function booleanFromPG($in)
+  {
+    return $in == 't';
+  }
+
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId

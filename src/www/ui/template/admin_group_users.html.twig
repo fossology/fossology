@@ -3,7 +3,7 @@
 {% block content %}
   
 {{ "Select the group to manage"|trans }}:
-{% import "include/macro.html.twig" as macro %}
+{% import "include/macros.html.twig" as macro %}
 {{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction) }}
 
 <table border="1">
