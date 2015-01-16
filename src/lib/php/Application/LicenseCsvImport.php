@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -65,7 +65,7 @@ class LicenseCsvImport {
    */
   public function handleFile($filename)
   {
-    if (($handle = fopen($filename, 'r')) === FALSE) {
+    if (!is_file($filename) || ($handle = fopen($filename, 'r')) === FALSE) {
       return _('Internal error');
     }
     $cnt = -1;
@@ -84,7 +84,8 @@ class LicenseCsvImport {
     }
     catch(\Exception $e)
     {
-      return $msg .= _('Error while parsing file: '.$e->getMessage());
+      fclose($handle);
+      return $msg .= _('Error while parsing file').': '.$e->getMessage();
     }
     fclose($handle);
     return $msg;

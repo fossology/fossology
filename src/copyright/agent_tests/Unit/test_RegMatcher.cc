@@ -78,6 +78,7 @@ protected:
     expected.push_back(CopyrightMatch("Copyright 2004 my company", type, 21));
     expected.push_back(CopyrightMatch("Copyrights by any strange people", type, 47));
     expected.push_back(CopyrightMatch("(C) copyright 2007-2011, 2013 my favourite company Google", type, 80));
+    expected.push_back(CopyrightMatch("(C) 2007-2011, 2013 my favourite company Google", type, 138));
     expected.push_back(CopyrightMatch("Written by: me, myself and Irene.", type, 204));
     expected.push_back(CopyrightMatch("Authors all the people at ABC", type, 238));
     expected.push_back(CopyrightMatch("maintained by benjamin drieu <benj@debian.org>", type, 456));

@@ -429,20 +429,20 @@ class ui_view extends FO_Plugin
     $Uri = preg_replace('/&page=[0-9]*/', '', Traceback());
 
     $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
-
-    if (!isset($Page))
+    
+    if(!isset($Page) && !empty($licenseId))
     {
-      $Page = 0;
-      if (!empty($licenseId))
+      $startPos = -1;
+      foreach ($highlightEntries as $highlightEntry)
       {
-        foreach ($highlightEntries as $highlightEntry)
+        if ($highlightEntry->getLicenseId()==$licenseId && ($startPos==-1 || $startPos>$highlightEntry->getStart()))
         {
-          if ($highlightEntry->getLicenseId() == $licenseId)
-          {
-            $Page = intval($highlightEntry->getStart() / $blockSize);
-            break;
-          }
+          $startPos = $highlightEntry->getStart();
         }
+      }
+      if ($startPos != -1)
+      {
+        $Page = floor($startPos / $blockSize);
       }
     }
 
