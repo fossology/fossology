@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -56,7 +56,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleCsvLicense()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport); 
     $nkMap = $reflection->getProperty('nkMap');
@@ -107,7 +107,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleHeadCsv()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport);
     
@@ -126,7 +126,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
    */
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport);
     
@@ -138,7 +138,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testSetDelimiter()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport); 
     $delimiter = $reflection->getProperty('delimiter');
@@ -153,7 +153,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testSetEnclosure()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport); 
     $enclosure = $reflection->getProperty('enclosure');
@@ -168,7 +168,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleCsv()
   {
-    $dbManager = M::mock('Fossology\Lib\Db\DbManager');
+    $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvImport);
     $method = $reflection->getMethod('handleCsv');

@@ -18,7 +18,6 @@
 
 namespace Fossology\UI\Page;
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,58 +38,21 @@ class AdminLicenseToCSV extends DefaultPlugin
   }
 
   /**
-   * @
    * @param Request $request
-   * @throws \Exception
    * @return Response
    */
   protected function handle(Request $request)
   {
-    $rf = intval($request->get('rf'));
-    /** @var DbManager $dbManager */
-    $dbManager = $this->getObject('db.manager');
-    $sql = "SELECT rf.rf_shortname,rf.rf_fullname,rf.rf_text,p.rf_shortname parent_shortname,rf.rf_url,rf.rf_notes,rf.rf_source
-            FROM license_ref rf LEFT JOIN license_map ON rf_pk=rf_fk LEFT JOIN license_ref p on rf_parent=p.rf_pk AND license_map.usage=$2
-            WHERE rf.rf_detector_type=$1";
-    $param = array($userDetected=1,\Fossology\Lib\BusinessRules\LicenseMap::CONCLUSION);
-    if ($rf>0)
-    {
-      $param[] = $rf;
-      $sql .= ' AND rf.rf_pk=$'.count($param);
-      $row = $dbManager->getSingleRow($sql,$param);
-      $vars = $row ? array( $row ) : array();
-    }
-    else
-    {
-      $stmt = __METHOD__;
-      $dbManager->prepare($stmt,$sql);
-      $res = $dbManager->execute($stmt,$param);
-      $vars = $dbManager->fetchAll( $res );
-      $dbManager->freeResult($res);
-    }
-    
-    $out = fopen('php://output', 'w');
-    ob_start();
-    fputcsv($out, array('shortname','fullname','text','parent_shortname','url','notes','source'));
-    foreach($vars as $row)
-    {
-      fputcsv($out, $row);
-    }
-    $content = ob_get_contents();
-    ob_end_clean();
-    
-    // Output CSV-specific headers
+    $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
+    $content = $licenseCsvExport->createCsv(intval($request->get('rf')));
+ 
     $headers = array(
         'Content-type' => 'text/csv',
         'Pragma' => 'no-cache',
         'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
         'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
 
-    return new Response(
-        $content,
-        Response::HTTP_OK,
-        $headers
-    );
+    return new Response($content, Response::HTTP_OK, $headers);
   }
 
 }
