@@ -1,20 +1,20 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014 Siemens AG
+Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2014 Siemens AG
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
 use Fossology\Lib\Plugin\Plugin;
@@ -319,12 +319,7 @@ class FO_Plugin implements Plugin
    */
   function OutputOpen()
   {
-    global $Plugins;
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    $this->OutputType=$Type;
-    $this->OutputToStdout=$ToStdout;
-    // Put your code here
-    switch($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
       return (0);
     }
@@ -385,6 +380,26 @@ class FO_Plugin implements Plugin
     return "";
   }
 
+  function renderOutput()
+  {
+    ob_start();
+
+    $output = $this->Output();
+
+    if ($output instanceof Response) {
+      $response = $output;
+    } else
+    {
+      $this->vars['content'] = $output ?: ob_get_contents();
+      $response = $this->render($this->getTemplateName(), $this->vars);
+    }
+    ob_end_clean();
+
+    $response->prepare($this->getRequest());
+    $response->send();
+  }
+
+
   /**
    * @brief This function is called when user output is
    * requested.  This function is responsible for content.
@@ -402,12 +417,72 @@ class FO_Plugin implements Plugin
   }
 
   /**
-   * 
-   * @return string
+   * @param string $templateName
+   * @param array $vars
+   * @return Response
    */
-  function outputHtml()
+  protected function render($templateName, $vars = null)
   {
-    $html = "";
-    return $html;
+    $content = $this->renderer->loadTemplate($templateName)
+        ->render($vars ?: $this->vars);
+
+    return new Response(
+        $content,
+        Response::HTTP_OK,
+        $this->headers
+    );
   }
+
+  /**
+   * @return Request
+   */
+  public function getRequest() {
+    if (!isset($this->request)) {
+      $this->request = Request::createFromGlobals();
+    }
+    return $this->request;
+  }
+
+  public function execute()
+  {
+    $this->OutputOpen();
+    $this->renderOutput();
+  }
+
+  function preInstall()
+  {
+    if ($this->State == PLUGIN_STATE_VALID)
+    {
+      $this->PostInitialize();
+    }
+    if ($this->State == PLUGIN_STATE_READY)
+    {
+      $this->RegisterMenus();
+    }
+  }
+
+  function postInstall()
+  {
+    $state = $this->Install();
+    if ($state != 0)
+    {
+      throw new \Exception("install of plugin " . $this->Name . " failed");
+    }
+  }
+
+  function unInstall()
+  {
+    $this->Destroy();
+  }
+
+  public function getName()
+  {
+    return $this->Name;
+  }
+
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
+
 }
