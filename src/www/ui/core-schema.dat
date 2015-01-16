@@ -1134,32 +1134,6 @@
 
 
 
-  $Schema["TABLE"]["license_test"]["lt_pk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lt_pk\" int8;";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lt_pk\" SET NOT NULL, ALTER COLUMN \"lt_pk\" SET DEFAULT nextval('license_test_lt_pk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["lt_pk"]["UPDATE"] = "UPDATE license_test SET lt_pk=nextval('license_test_lt_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"agent_fk\" int8;";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"agent_fk\" SET NOT NULL, ALTER COLUMN \"agent_fk\" SET DEFAULT nextval('license_test_agent_fk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["agent_fk"]["UPDATE"] = "UPDATE license_test SET agent_fk=nextval('license_test_agent_fk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"pfile_fk\" int8;";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"pfile_fk\" SET NOT NULL, ALTER COLUMN \"pfile_fk\" SET DEFAULT nextval('license_test_pfile_fk_seq'::regclass);";
-  $Schema["TABLE"]["license_test"]["pfile_fk"]["UPDATE"] = "UPDATE license_test SET pfile_fk=nextval('license_test_pfile_fk_seq'::regclass)";
-
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["DESC"] = "COMMENT ON COLUMN \"license_test\".\"lic_startbyte\" IS 'starting byte of probable license, null if no license';";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lic_startbyte\" int4;";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lic_startbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_test"]["lic_startbyte"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["DESC"] = "COMMENT ON COLUMN \"license_test\".\"lic_endbyte\" IS 'end byte of probable license, null if no license';";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["ADD"] = "ALTER TABLE \"license_test\" ADD COLUMN \"lic_endbyte\" int4;";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["ALTER"] = "ALTER TABLE \"license_test\" ALTER COLUMN \"lic_endbyte\" DROP NOT NULL;";
-  $Schema["TABLE"]["license_test"]["lic_endbyte"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["licgroup"]["licgroup_pk"]["DESC"] = "";
   $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ADD"] = "ALTER TABLE \"licgroup\" ADD COLUMN \"licgroup_pk\" int4;";
   $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ALTER"] = "ALTER TABLE \"licgroup\" ALTER COLUMN \"licgroup_pk\" SET NOT NULL, ALTER COLUMN \"licgroup_pk\" SET DEFAULT nextval('licgroup_licgroup_pk_seq'::regclass);";
