@@ -226,7 +226,7 @@ class core_auth extends FO_Plugin
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     $this->vars['referrer'] = $referrer;
-    return $this->render('login-form.html.twig')
+    return $this->render('login-form.html.twig');
   }
 
   /**
