@@ -390,7 +390,13 @@ class FO_Plugin implements Plugin
       $response = $output;
     } else
     {
-      $this->vars['content'] = $output ?: ob_get_contents();
+      if (empty($this->vars['content']) && $output)
+      {
+        $this->vars['content'] = $output;
+      } elseif (empty($this->vars['content']))
+      {
+        $this->vars['content'] = ob_get_contents();
+      }
       $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
@@ -408,9 +414,14 @@ class FO_Plugin implements Plugin
    */
   function Output()
   {
-    return "";
+    return $this->htmlContent();
   }
 
+  protected function htmlContent()
+  {
+    return '';
+  }
+  
   public function getTemplateName()
   {
     return "include/base.html.twig";
@@ -423,8 +434,8 @@ class FO_Plugin implements Plugin
    */
   protected function render($templateName, $vars = null)
   {
-    $content = $this->renderer->loadTemplate($templateName)
-        ->render($vars ?: $this->vars);
+    $useVars = $vars ?: $this->vars;
+    $content = $this->renderer->loadTemplate($templateName)->render($useVars);
 
     return new Response(
         $content,
