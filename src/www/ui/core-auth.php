@@ -20,6 +20,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 define("TITLE_core_auth", _("Login"));
 
@@ -88,8 +89,11 @@ class core_auth extends FO_Plugin
       return (0);
     }
 
-    $this->session->setName('Login');
-    if (!$this->session->isStarted()) $this->session->start();
+    if (!$this->session->isStarted())
+    {
+      $this->session->setName('Login');
+      $this->session->start();
+    }
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
@@ -114,8 +118,7 @@ class core_auth extends FO_Plugin
     if (empty($_SESSION['ip']))
     {
       $_SESSION['ip'] = $this->GetIP();
-    }
-    else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
     {
       /* Sessions are not transferable. */
       $this->updateSession("");
@@ -147,7 +150,7 @@ class core_auth extends FO_Plugin
     $this->State = PLUGIN_STATE_READY;
   } // GetIP()
 
-    /**
+  /**
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
@@ -212,32 +215,26 @@ class core_auth extends FO_Plugin
     $validLogin = $this->checkUsernameAndPassword($userName, $password);
     if ($validLogin)
     {
-      // header("Location: $referrer");
-      //return 'valid login, but redirect failed';
-      return new \Symfony\Component\HttpFoundation\RedirectResponse($referrer);
+      return new RedirectResponse($referrer);
     }
 
-    $output = "";
     $initPluginId = plugin_find_id("init");
-    if ( $initPluginId>= 0)
+    if ($initPluginId >= 0)
     {
       global $Plugins;
-      $output .= $Plugins[$initPluginId]->infoFirstTimeUsage();
+      $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    $this->vars['referer'] = $referrer;
-
-    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->vars);
-
-    return $output;
+    $this->vars['referrer'] = $referrer;
+    return $this->render('login-form.html.twig');
   }
-  
+
   /**
    * @brief perform logout
    */
   function OutputOpen()
   {
-    if (array_key_exists('User',$_SESSION) && $_SESSION['User'] != "Default User")
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
     {
       $this->updateSession("");
       $Uri = Traceback_uri();
@@ -246,12 +243,12 @@ class core_auth extends FO_Plugin
     }
     parent::OutputOpen();
   }
-  
-  
+
+
   /**
    * \brief See if a username/password is valid.
    *
-   * @return boolean 
+   * @return boolean
    */
   function checkUsernameAndPassword($userName, $password)
   {

@@ -262,8 +262,6 @@ class UploadFilePage extends DefaultPlugin
         $this->createPackageLink($uploadId, $reuseUploadId);
       }
 
-      $this->scheduleReuserAgent($jobId, $uploadId);
-
       $status = GetRunnableJobList();
       $message = empty($status) ? _("Is the scheduler running? ") : "";
       $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
