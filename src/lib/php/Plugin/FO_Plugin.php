@@ -1,20 +1,20 @@
 <?php
 /***********************************************************
-Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2014 Siemens AG
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2014 Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
 use Fossology\Lib\Plugin\Plugin;
@@ -386,7 +386,8 @@ class FO_Plugin implements Plugin
 
     $output = $this->Output();
 
-    if ($output instanceof Response) {
+    if ($output instanceof Response)
+    {
       $response = $output;
     } else
     {
@@ -412,16 +413,9 @@ class FO_Plugin implements Plugin
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
    */
-  function Output()
-  {
-    return $this->htmlContent();
-  }
+  abstract function Output();
 
-  protected function htmlContent()
-  {
-    return '';
-  }
-  
+
   public function getTemplateName()
   {
     return "include/base.html.twig";
@@ -447,8 +441,10 @@ class FO_Plugin implements Plugin
   /**
    * @return Request
    */
-  public function getRequest() {
-    if (!isset($this->request)) {
+  public function getRequest()
+  {
+    if (!isset($this->request))
+    {
       $this->request = Request::createFromGlobals();
     }
     return $this->request;
