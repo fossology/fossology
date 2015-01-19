@@ -413,7 +413,10 @@ class FO_Plugin implements Plugin
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
    */
-  abstract function Output();
+  function Output() {
+    return "bad page";
+    //throw new BadMethodCallException("Output method of FO_Plugin should never be called");
+  }
 
 
   public function getTemplateName()

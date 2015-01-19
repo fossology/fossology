@@ -29,7 +29,9 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonRespose;
 
 class AjaxClearingView extends FO_Plugin
 {
@@ -128,36 +130,17 @@ class AjaxClearingView extends FO_Plugin
     $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
     $aaData = $this->getCurrentSelectedLicensesTableData($itemTreeBounds, $groupId, $orderAscending);
 
-    return json_encode(
-        array(
-            'sEcho' => intval($_GET['sEcho']),
-            'aaData' => $aaData,
-            'iTotalRecords' => count($aaData),
-            'iTotalDisplayRecords' => count($aaData)));
+    return array(
+        'sEcho' => intval($_GET['sEcho']),
+        'aaData' => $aaData,
+        'iTotalRecords' => count($aaData),
+        'iTotalDisplayRecords' => count($aaData));
   }
 
-  function OutputOpen()
-  {
-    // nothing
-  }
-
-
+  /**
+   * @return Response
+   */
   function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return 0;
-    }
-    $output = $this->jsonContent();
-    if ($output === "success")
-    {
-      return new Response($output, Response::HTTP_OK, array('Content-type'=>'text/plain')); 
-    }
-    return new Response($output, Response::HTTP_OK, array('Content-type'=>'text/json')); 
-  }
-
-
-  protected function jsonContent()
   {
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
@@ -173,24 +156,24 @@ class AjaxClearingView extends FO_Plugin
     switch ($action)
     {
       case "licenses":
-        return $this->doLicenses($orderAscending, $groupId, $uploadId, $uploadTreeId);
+        return new JsonResponse($this->doLicenses($orderAscending, $groupId, $uploadId, $uploadTreeId));
 
       case "licenseDecisions":
-        return $this->doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId);
+        return new JsonResponse($this->doClearings($orderAscending, $groupId, $uploadId, $uploadTreeId));
 
       case "addLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, false, ClearingEventTypes::USER);
-        return json_encode(array());
+        return new JsonResponse();
 
       case "removeLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, true, ClearingEventTypes::USER);
-        return json_encode(array());
+        return new JsonResponse();
 
       case "setNextPrev":
       case "setNextPrevCopyRight":
       case "setNextPrevIp":
       case "setNextPrevEcc":
-        return $this->doNextPrev($action, $uploadId, $uploadTreeId, $groupId);
+        return new JsonResponse($this->doNextPrev($action, $uploadId, $uploadTreeId, $groupId));
 
       case "updateClearings":
         $id = GetParm("id", PARM_STRING);
@@ -201,10 +184,10 @@ class AjaxClearingView extends FO_Plugin
           $changeTo = GetParm("value", PARM_STRING);
           $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
-        return "success";
+        return $this->createPlainResponse("success");
 
       default:
-        return "fail";
+        return $this->createPlainResponse("fail");
     }
   }
 
@@ -366,7 +349,7 @@ class AjaxClearingView extends FO_Plugin
         break;
     }
 
-    $options = array('skipThese' => GetParm($opt, PARM_STRING), 'groupId'=>$groupId);
+    $options = array('skipThese' => GetParm($opt, PARM_STRING), 'groupId' => $groupId);
 
     $prevItem = $this->uploadDao->getPreviousItem($uploadId, $uploadTreeId, $options);
     $prevItemId = $prevItem ? $prevItem->getId() : null;
@@ -374,7 +357,16 @@ class AjaxClearingView extends FO_Plugin
     $nextItem = $this->uploadDao->getNextItem($uploadId, $uploadTreeId, $options);
     $nextItemId = $nextItem ? $nextItem->getId() : null;
 
-    return json_encode(array('prev' => $prevItemId, 'next' => $nextItemId, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder'))));
+    return array('prev' => $prevItemId, 'next' => $nextItemId, 'uri' => Traceback_uri() . "?mod=" . $modName . Traceback_parm_keep(array('upload', 'folder')));
+  }
+
+  /**
+   * @param $output
+   * @return Response
+   */
+  private function createPlainResponse($output)
+  {
+    return new Response($output, Response::HTTP_OK, array('Content-type' => 'text/plain'));
   }
 }
 
