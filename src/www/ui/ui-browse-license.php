@@ -210,7 +210,7 @@ class ui_browse_license extends FO_Plugin
                   'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
-    $agentStatus = $this->render('browse_license-agent_selector.html.twig', $vars);
+    $agentStatus = $this->renderer->loadTemplate('browse_license-agent_selector.html.twig')->render($vars);
 
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
@@ -381,7 +381,7 @@ class ui_browse_license extends FO_Plugin
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
 
-    $VF = '<script>' . $this->render('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
+    $VF = '<script>' . $this->renderer->loadTemplate('ui-browse-license_file-list.js.twig')->render(array('aaData' => json_encode($tableData))) . '</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
@@ -555,7 +555,7 @@ class ui_browse_license extends FO_Plugin
         'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
         'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
         'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
-    $rendered .= $this->render('browse_license-summary.html.twig', $vars);
+    $rendered .= $this->renderer->loadTemplate('browse_license-summary.html.twig')->render($vars);
     
     return array($jsBlockLicenseHist, $rendered);
   }
@@ -625,7 +625,7 @@ class ui_browse_license extends FO_Plugin
       $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
     }
 
-    $js = $this->render('browse_license-lic_hist.js.twig', array('tableDataJson'=>json_encode($tableData)));
+    $js = $this->renderer->loadTemplate('browse_license-lic_hist.js.twig')->render(array('tableDataJson'=>json_encode($tableData)));
     $rendered = "<script>$js</script>";
 
     return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $editedTotalLicenseCount, $editedUniqueLicenseCount);

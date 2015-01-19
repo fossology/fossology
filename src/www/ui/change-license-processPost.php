@@ -15,6 +15,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+use Symfony\Component\HttpFoundation\Response;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
@@ -76,7 +78,8 @@ class changeLicenseProcessPost extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
+    if ($this->State != PLUGIN_STATE_READY)
+    {
       return;
     }
 
@@ -84,7 +87,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
-    $removed = $_POST['removed'] === 't' ||  $_POST['removed'] === 'true';
+    $removed = $_POST['removed'] === 't' || $_POST['removed'] === 'true';
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId);
     $uploadId = $itemTreeBounds->getUploadId();
@@ -95,11 +98,14 @@ class changeLicenseProcessPost extends FO_Plugin
 
     if (isset($licenses))
     {
-      if (!is_array($licenses)) {
+      if (!is_array($licenses))
+      {
         return $this->errorJson("bad license array");
       }
-      foreach($licenses as $licenseId) {
-        if (intval($licenseId) <= 0) {
+      foreach ($licenses as $licenseId)
+      {
+        if (intval($licenseId) <= 0)
+        {
           return $this->errorJson("bad license");
         }
 
@@ -113,7 +119,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $deciderPlugin = plugin_find("agent_decider");
 
     $conflictStrategyId = null; // TODO add option in GUI
-    $ErrorMsg="";
+    $ErrorMsg = "";
     $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
@@ -123,18 +129,18 @@ class changeLicenseProcessPost extends FO_Plugin
     // $this->ChangeBuckets(); // change bucket accordingly
 
 
-    if (empty($ErrorMsg) && ($jq_pk>0)) {
-      header('Content-type: text/json');
-      return json_encode(array("jqid" => $jq_pk));
-    } else {
+    if (empty($ErrorMsg) && ($jq_pk > 0))
+    {
+      return new Response(json_encode(array("jqid" => $jq_pk)), Response::HTTP_OK, array('Content-type' => 'text/json'));
+    } else
+    {
       return $this->errorJson($ErrorMsg, 500);
     }
   }
 
-  private function errorJson($msg, $code=404)
+  private function errorJson($msg, $code = 404)
   {
-    header('Content-type: text/json', true, $code);
-    return json_encode(array("error" => $msg));
+    return new Response($msg, $code, array('Content-type' => 'text/json'));
   }
 
 }

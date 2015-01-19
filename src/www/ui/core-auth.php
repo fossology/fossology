@@ -33,9 +33,6 @@ class core_auth extends FO_Plugin
   /** @var UserDao */
   private $userDao;
 
-  /** @var Twig_Environment */
-  private $renderer;
-
   /** @var Session */
   private $session;
 
@@ -51,7 +48,6 @@ class core_auth extends FO_Plugin
     global $container;
     $this->dbManager = $container->get("db.manager");
     $this->userDao = $container->get('dao.user');
-    $this->renderer = $container->get('twig.environment');
     $this->session = $container->get('session');
   }
 

@@ -110,7 +110,7 @@ class FO_Plugin implements Plugin
   private $menu;
 
   /** @var Twig_Environment */
-  private $renderer;
+  protected $renderer;
 
   /** @var Request|NULL */
   private $request;
