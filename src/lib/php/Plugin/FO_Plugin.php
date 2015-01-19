@@ -390,7 +390,13 @@ class FO_Plugin implements Plugin
       $response = $output;
     } else
     {
-      $this->vars['content'] = $output ?: ob_get_contents();
+      if (empty($this->vars['content']) && $output)
+      {
+        $this->vars['content'] = $output;
+      } elseif (empty($this->vars['content']))
+      {
+        $this->vars['content'] = ob_get_contents();
+      }
       $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();

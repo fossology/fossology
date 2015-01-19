@@ -209,12 +209,14 @@ class core_auth extends FO_Plugin
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
 
-    $output = !empty($userName) ? $this->checkUsernameAndPassword($userName, $password, $referrer) : '';
-    if (!empty($output))
+    $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    if ($validLogin)
     {
-      return $output;
+      // header("Location: $referrer");
+      //return 'valid login, but redirect failed';
+      return new \Symfony\Component\HttpFoundation\RedirectResponse($referrer);
     }
-    
+
     $output = "";
     $initPluginId = plugin_find_id("init");
     if ( $initPluginId>= 0)
@@ -249,20 +251,20 @@ class core_auth extends FO_Plugin
   /**
    * \brief See if a username/password is valid.
    *
-   * \return string on match, or null on no-match.
+   * @return boolean 
    */
-  function checkUsernameAndPassword($userName, $password, $referrer)
+  function checkUsernameAndPassword($userName, $password)
   {
     if (empty($userName) || $userName == 'Default User')
     {
-      return;
+      return false;
     }
 
     $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
 
     if (empty($row['user_name']))
     {
-      return;
+      return false;
     }
 
     /* Check the password -- only if a password exists */
@@ -271,16 +273,16 @@ class core_auth extends FO_Plugin
       $passwordHash = sha1($row['user_seed'] . $password);
       if (strcmp($passwordHash, $row['user_pass']) != 0)
       {
-        return;
+        return false;
       }
     } else if (!empty($row['user_seed']))
     {
       /* Seed with no password hash = no login */
-      return;
+      return false;
     } else if (!empty($password))
     {
       /* empty password required */
-      return;
+      return false;
     }
 
     /* If you make it here, then username and password were good! */
@@ -304,9 +306,7 @@ class core_auth extends FO_Plugin
     {
       $_SESSION['NoPopup'] = 0;
     }
-
-    /* Redirect window */
-    header("Location: $referrer");
+    return true;
   }
 
 }
