@@ -30,6 +30,7 @@ use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\View\HighlightRenderer;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_clearingView", _("Change concluded License "));
 
@@ -177,22 +178,16 @@ class ClearingView extends FO_Plugin
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
       return $this->render("include/base.html.twig");
     }
-  }
 
-  /**
-   * \brief display the license changing page
-   */
-  protected function htmlContent()
-  {
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
     {
-      return;
+      return new Response("", Response::HTTP_BAD_REQUEST);
     }
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {
-      return;
+      return new Response("", Response::HTTP_BAD_REQUEST);
     }
 
     global $SysConf;
@@ -285,6 +280,8 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
+
+    return $this->render("ui-clearing-view.html.twig");
   }
 
 
@@ -314,11 +311,6 @@ class ClearingView extends FO_Plugin
       $table[] = $row;
     }
     return $table;
-  }
-
-  public function getTemplateName()
-  {
-    return "ui-clearing-view.html.twig";
   }
 
   /*
