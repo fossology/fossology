@@ -271,9 +271,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $uploadId = 13243;
 
     /*mock for Agent class **/
-    $dbManager->shouldReceive('getSingleRow')->with(
-            startsWith("SELECT agent_pk FROM agent"),
-            array("decider"), anything())->andReturn(array('agent_pk' => $agentId=232));
     $agentDao->shouldReceive('arsTableExists')->andReturn(true);
     $agentDao->shouldReceive('getCurrentAgentId')->andReturn($agentId=24);
     $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId)->andReturn($arsId=2);
@@ -301,6 +298,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $dbManager->shouldReceive('begin')->times(count($itemIds));
     $dbManager->shouldReceive('commit')->times(count($itemIds));
+
+    /* dummy expectations needed for unmockable LicenseMap constructor */
     $dbManager->shouldReceive('prepare');
     $res = M::Mock(DbManager::classname());
     $dbManager->shouldReceive('execute')->andReturn($res);
@@ -308,7 +307,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $row2 = array('rf_fk' => 2333, 'parent_fk' => 1);
     $dbManager->shouldReceive('fetchArray')->with($res)->andReturn($row1, $row2, false);
     $dbManager->shouldReceive('freeResult')->with($res);
-
+    /* /expectations for LicenseMap */
 
     $decisionProcessor->shouldReceive('hasUnhandledScannerDetectedLicenses')
             ->with($bounds0, $groupId, array(), anything())->andReturn(true);
