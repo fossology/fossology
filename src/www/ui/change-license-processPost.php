@@ -15,9 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
@@ -122,19 +124,17 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
 
-
     if (empty($ErrorMsg) && ($jq_pk>0)) {
-      header('Content-type: text/json');
-      return json_encode(array("jqid" => $jq_pk));
-    } else {
+      return new Response(json_encode(array("jqid" => $jq_pk)), Response::HTTP_OK, array('Content-type'=>'text/json'));
+    }
+    else {
       return $this->errorJson($ErrorMsg, 500);
     }
   }
 
   private function errorJson($msg, $code=404)
   {
-    header('Content-type: text/json', true, $code);
-    return json_encode(array("error" => $msg));
+    return new Response(json_encode(array("error" => $msg)), $code, array('Content-type'=>'text/json'));
   }
 
 }
