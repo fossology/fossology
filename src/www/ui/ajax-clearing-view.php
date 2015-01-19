@@ -16,6 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
@@ -28,6 +29,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\Response;
 
 class AjaxClearingView extends FO_Plugin
 {
@@ -149,11 +151,9 @@ class AjaxClearingView extends FO_Plugin
     $output = $this->jsonContent();
     if ($output === "success")
     {
-      header('Content-type: text/plain');
-      return $output;
+      return new Response($output, Response::HTTP_OK, array('Content-type'=>'text/plain')); 
     }
-    header('Content-type: text/json');
-    return $output;
+    return new Response($output, Response::HTTP_OK, array('Content-type'=>'text/json')); 
   }
 
 
