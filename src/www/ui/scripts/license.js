@@ -67,17 +67,6 @@ $(document).ready(function () {
     $("form[data-autosubmit] select").change(function() {
         $(this).closest('form').submit();
     });
-    
-    $('#bulkAction').change( function(){
-    if( $('#bulkAction').val()=='new'){
-      $('#bulkExistingLicense').hide();
-      $('#bulkNewLicense').show();
-    }
-    else{
-      $('#bulkExistingLicense').show();
-      $('#bulkNewLicense').hide();
-    }
-  });
 });
 
 

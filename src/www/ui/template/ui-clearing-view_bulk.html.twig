@@ -1,10 +1,11 @@
 <div class="modal" id="bulkModal" hidden>
   <form name="bulkForm">
     <h2>{{ 'Bulk recognition'| trans }}</h2>
+    {{ 'Hint'|trans }}: {{ 'New license candidates can be added via'|trans }}
+    <a href="?mod=advice_license">{{ 'menu Organize&raquo;Licenses'|trans }}</a><br/>
     <select id="bulkAction">
       <option value="add">{{ 'Add license'| trans }}</option>
       <option value="remove">{{ 'Remove license'| trans }}</option>
-      <option value="new">{{ 'Add new license'| trans }}</option>
     </select>
 
     <span id="bulkExistingLicense">
@@ -15,11 +16,6 @@
       </select>
       <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show origin'| trans }}</button>
     </span>
-    
-    <span id="bulkNewLicense" hidden>
-      {{ 'with shortname'|trans}} <input type="text" id="shortname"/>
-    </span>
-    
     <br/>
     {{ 'Reference text'| trans }}:<br/>
     <textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>

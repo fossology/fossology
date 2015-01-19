@@ -78,14 +78,4 @@ function createLicenseSelectionTable() {
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();
-  $('#bulkAction').change( function(){
-    if( $('#bulkAction').val()=='new'){
-      $('#bulkExistingLicense').hide();
-      $('#bulkNewLicense').show();
-    }
-    else{
-      $('#bulkExistingLicense').show();
-      $('#bulkNewLicense').hide();
-    }
-  });
 });
