@@ -414,10 +414,8 @@ class FO_Plugin implements Plugin
    * can call another plugin's Output.)
    */
   function Output() {
-    return "bad page";
-    //throw new BadMethodCallException("Output method of FO_Plugin should never be called");
+    return new Response("ERROR: Output() method of FO_Plugin not defined in class '" . get_class($this) . "'", Response::HTTP_INTERNAL_SERVER_ERROR);
   }
-
 
   public function getTemplateName()
   {

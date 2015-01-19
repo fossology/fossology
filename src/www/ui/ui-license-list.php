@@ -175,7 +175,7 @@ class ui_license_list extends FO_Plugin {
       $response = new Response(implode("\n", $lines), Response::HTTP_OK, $headers);
       return $response;
     } else {
-      return $V;
+      return $V . '<pre>' . implode("\n", $lines) . '</pre>';
     }
   }
 }
