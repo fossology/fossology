@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-use Symfony\Component\HttpFoundation\Response;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
@@ -128,19 +128,17 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
 
-
-    if (empty($ErrorMsg) && ($jq_pk > 0))
-    {
-      return new Response(json_encode(array("jqid" => $jq_pk)), Response::HTTP_OK, array('Content-type' => 'text/json'));
-    } else
-    {
+    if (empty($ErrorMsg) && ($jq_pk>0)) {
+      return new JsonResponse(array("jqid" => $jq_pk));
+    }
+    else {
       return $this->errorJson($ErrorMsg, 500);
     }
   }
 
   private function errorJson($msg, $code = 404)
   {
-    return new Response($msg, $code, array('Content-type' => 'text/json'));
+    return new JsonResponse(array("error" => $msg), $code);
   }
 
 }

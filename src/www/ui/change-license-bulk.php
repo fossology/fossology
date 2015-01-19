@@ -15,9 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_changeLicenseBulk", _("Private: schedule a bulk scan from post"));
 
@@ -57,8 +59,7 @@ class changeLicenseBulk extends FO_Plugin
     $uploadTreeId = intval($_POST['uploadTreeId']);
     if ($uploadTreeId <= 0)
     {
-      header('Content-type: text/json', true, 500);
-      return json_encode(array("error" => 'bad request'));
+      return new Response(json_encode(array("error" => 'bad request')), 500, array('Content-type'=>'text/json'));
     }
 
     try
@@ -67,13 +68,11 @@ class changeLicenseBulk extends FO_Plugin
     } catch (Exception $ex)
     {
       $errorMsg = $ex->getMessage();
-      header('Content-type: text/json', true, 500);
-      return json_encode(array("error" => $errorMsg));
+      return new Response(json_encode(array("error" => $errorMsg)), 500, array('Content-type'=>'text/json'));
     }
     ReportCachePurgeAll();
-
-    header('Content-type: text/json');
-    return json_encode(array("jqid" => $jobQueueId));
+    
+    return new Response(json_encode(array("jqid" => $jobQueueId)), Response::HTTP_OK, array('Content-type'=>'text/json'));
   }
 
   private function getJobQueueId($uploadTreeId)
@@ -103,7 +102,7 @@ class changeLicenseBulk extends FO_Plugin
         break;
 
       default:
-        throw new \InvalidArgumentException('bad scope request');
+        throw new InvalidArgumentException('bad scope request');
     }
 
     $userId = $_SESSION['UserId'];
