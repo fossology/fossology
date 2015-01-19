@@ -177,6 +177,7 @@ class ClearingView extends FO_Plugin
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
       return $this->render("include/base.html.twig");
     }
+    $this->htmlContent();
   }
 
   /**
