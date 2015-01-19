@@ -88,8 +88,10 @@ class core_auth extends FO_Plugin
       return (0);
     }
 
-    $this->session->setName('Login');
-    if (!$this->session->isStarted()) $this->session->start();
+    if (!$this->session->isStarted()) {
+      $this->session->setName('Login');
+      $this->session->start();
+    }
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
@@ -215,19 +217,15 @@ class core_auth extends FO_Plugin
       return $output;
     }
     
-    $output = "";
     $initPluginId = plugin_find_id("init");
     if ( $initPluginId>= 0)
     {
       global $Plugins;
-      $output .= $Plugins[$initPluginId]->infoFirstTimeUsage();
+      $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    $this->vars['referer'] = $referrer;
-
-    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->vars);
-
-    return $output;
+    $this->vars['referrer'] = $referrer;
+    return $this->render('login-form.html.twig')
   }
   
   /**

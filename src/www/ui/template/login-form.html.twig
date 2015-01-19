@@ -1,9 +1,10 @@
 {% if protocol != 'HTTPS' %}
   {{ 'This login uses '|trans }}{{ protocol }}{{', so passwords are transmitted in plain text.'|trans }}
   {{ 'This is not a secure connection.'|trans }} <br/> <br/> 
-{% endif %}  
+{% endif %}
+{{ info }}
 <form method="post" action="{{ authUrl }}">
-  <input type="hidden" name="HTTP_REFERER" value="{{ referer }}"/>
+  <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
   <table border="0">
     <tr>
       <td>{{ 'Username'|trans }}:</td>
