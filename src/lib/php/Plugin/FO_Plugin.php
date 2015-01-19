@@ -430,12 +430,21 @@ class FO_Plugin implements Plugin
   /**
    * @param string $templateName
    * @param array $vars
+   * @return string
+   */
+  public function renderString($templateName, $vars = null)
+  {
+    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+  }  
+  
+  /**
+   * @param string $templateName
+   * @param array $vars
    * @return Response
    */
   protected function render($templateName, $vars = null)
   {
-    $useVars = $vars ?: $this->vars;
-    $content = $this->renderer->loadTemplate($templateName)->render($useVars);
+    $content = $this->renderString($templateName, $vars);
 
     return new Response(
         $content,
