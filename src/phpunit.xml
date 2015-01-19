@@ -16,6 +16,7 @@
     <testsuite name="Fossology PhpUnit Agent Test Suite">
       <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
       <directory suffix="Test.php">decider/agent_tests/Functional</directory>
+      <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
       <directory suffix="Test.php">monk/agent_tests/Functional</directory>
       <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
       <directory suffix="Test.php">reuser/agent_tests/Functional</directory>      
