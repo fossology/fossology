@@ -29,16 +29,15 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
-define("CLEARING_DECISION_IS_GLOBAL", false);
-
 include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
-  const FORCE_DECISION = 1;
+  const RULES_ALL = 0x1;
+  const RULES_NOMOS_IN_MONK = 0x1;
 
   /** @var int */
-  private $conflictStrategyId;
+  private $activeRules;
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDecisionProcessor */
@@ -49,19 +48,14 @@ class DeciderAgent extends Agent
   private $clearingDao;
   /** @var HighlightDao */
   private $highlightDao;
-  /** @var int */
-  private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
   /** @var DecisionTypes */
   private $decisionTypes;
-  /** @var null|LicenseMap */
+  /** @var LicenseMap */
   private $licenseMap = null;
 
   function __construct()
   {
-    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
-
-    $args = getopt($this->schedulerHandledOpts."k:", $this->schedulerHandledLongOpts);
-    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
+    parent::__construct(AGENT_DECIDER_NAME, AGENT_DECIDER_VERSION, AGENT_DECIDER_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
@@ -74,27 +68,12 @@ class DeciderAgent extends Agent
   function scheduler_connect($licenseMapUsage=null)
   {
     parent::scheduler_connect();
+    $args = getopt($this->schedulerHandledOpts."r:", $this->schedulerHandledLongOpts);
+    $this->activeRules = array_key_exists('r', $args) ? $args['r'] : self::RULES_ALL;
+
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
   }
 
-  function processClearingEventOfCurrentJob()
-  {
-    $userId = $this->userId;
-    $groupId = $this->groupId;
-    $jobId = $this->jobId;
-
-    $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
-    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob)
-    {
-      $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      foreach($this->loopContainedItems($containerBounds) as $itemTreeBounds)
-      {
-        $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
-      }
-    }
-
-    return count($eventsOfThisJob) > 0;
-  }
 
   private function loopContainedItems($itemTreeBounds)
   {
@@ -114,44 +93,74 @@ class DeciderAgent extends Agent
 
   function processUploadId($uploadId)
   {
-    $eventsProcessed = $this->processClearingEventOfCurrentJob();
-
-    //TODO switch in which mode we are
-    if (!$eventsProcessed)
-    {
-      $this->processNomosFindings($uploadId);
-    }
-
-    return true;
-  }
-
-  private function processNomosFindings($uploadId)
-  {
     $groupId = $this->groupId;
+    $userId = $this->userId;
 
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->loopContainedItems($parentBounds) as $itemTreeBounds)
     {
       $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+      $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+      $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
-      $canDecide = (count($matches)>0);
-      $canDecide &= null === $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+      $this->processItem($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents);
+    }
+    return true;
+  }
 
-      foreach($matches as $licenseId => $licenseMatches)
-      {
-        $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
-      }
+  private function processItem($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents)
+  {
+    if ($this->activeRules & self::RULES_NOMOS_IN_MONK)
+    {
+      $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents);
+    }
+  }
 
-      if ($canDecide)
+  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents)
+  {
+    $canDecide = (count($matches)>0);
+    $canDecide &= null === $lastDecision;
+    $canDecide &= 0 == count($currentEvents);
+
+    $matches = $this->remapByProjectedId($matches);
+    foreach($matches as $licenseId => $licenseMatches)
+    {
+      $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
+    }
+
+    if ($canDecide)
+    {
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $global=true);
+      $this->heartbeat(1);
+    }
+    else
+    {
+      $this->heartbeat(0);
+    }
+  }
+
+  protected function remapByProjectedId($matches)
+  {
+    $remapped = array();
+    foreach($matches as $licenseId => $licenseMatches)
+    {
+      $projectedId = $this->licenseMap->getProjectedId($licenseId);
+
+      foreach($licenseMatches as $agent => $agentMatches)
       {
-        $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $groupId, DecisionTypes::IDENTIFIED, $global=true);
-        $this->heartbeat(1);
-      }
-      else
-      {
-        $this->heartbeat(0);
+        $haveId = array_key_exists($projectedId, $remapped);
+        $haveAgent = $haveId && array_key_exists($agent, $remapped[$projectedId]);
+        if ($haveAgent)
+        {
+          $remapped[$projectedId][$agent] = array_merge($remapped[$projectedId][$agent], $agentMatches);
+        }
+        else
+        {
+          $remapped[$projectedId][$agent] = $agentMatches;
+        }
       }
     }
+    return $remapped;
   }
 
   private function areNomosMatchesInsideAMonkMatch($licenseMatches)
@@ -187,42 +196,5 @@ class DeciderAgent extends Agent
     }
 
     return true;
-  }
-
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int $userId
-   */
-  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
-  {
-    $this->dbManager->begin();
-
-    $itemId = $itemTreeBounds->getItemId();
-
-    switch ($this->conflictStrategyId)
-    {
-      case DeciderAgent::FORCE_DECISION:
-        $createDecision = true;
-        break;
-
-      default:
-        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
-    }
-
-    if ($createDecision)
-    {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
-    }
-    else
-    {
-      foreach ($additionalEventsFromThisJob as $eventId)
-      {
-        $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
-      }
-      $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
-    }
-    $this->heartbeat(1);
-
-    $this->dbManager->commit();
   }
 }

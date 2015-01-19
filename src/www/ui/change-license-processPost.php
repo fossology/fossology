@@ -110,7 +110,7 @@ class changeLicenseProcessPost extends FO_Plugin
     }
 
     /** @var agent_fodecider $deciderPlugin */
-    $deciderPlugin = plugin_find("agent_decider");
+    $deciderPlugin = plugin_find("agent_deciderjob");
 
     $conflictStrategyId = null; // TODO add option in GUI
     $ErrorMsg="";

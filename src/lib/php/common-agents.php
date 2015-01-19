@@ -136,6 +136,7 @@ function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
   if (!empty($AgentList)) {
     $agentDeciderName = "agent_decider";
     $agents = array();
+    $wantDecider = false;
     foreach($AgentList as $AgentItem) {
       /*
        The URI below contains the agent name e.g agent_license, this is
@@ -146,9 +147,16 @@ function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
       if (empty($Agent)) continue;
       $Name = htmlentities($Agent->Name);
       $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      if (($Parm == 1) && ($Name != $agentDeciderName))
+      if ($Parm == 1)
       {
-        $agents[$Name] = $Agent;
+        if ($Name != $agentDeciderName)
+        {
+          $agents[$Name] = $Agent;
+        }
+        else
+        {
+          $wantDecider = true;
+        }
       }
     }
     foreach($additionalAgentNames as $agentName)
@@ -160,7 +168,7 @@ function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
     }
 
     $ErrorMsg="Bad thing";
-    if (-1 == plugin_find_id($agentDeciderName))
+    if ((!$wantDecider) || (-1 == plugin_find_id($agentDeciderName)))
     {
       foreach($agents as $agentName => &$agent)
       {
@@ -170,7 +178,8 @@ function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
     else
     {
       $agentDecider = &$Plugins[plugin_find_id($agentDeciderName)];
-      $agentDecider->AgentAdd($job_pk, $upload_pk, $ErrorMsg, array_keys($agents));
+      $deciderRules = null;
+      $agentDecider->AgentAdd($job_pk, $upload_pk, $ErrorMsg, array_keys($agents), $deciderRules);
     }
   }
   return($V);

@@ -16,9 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Decider\Test;
+namespace Fossology\DeciderJob\Test;
 
-use Fossology\Decider\DeciderAgent;
+use Fossology\Decider\DeciderJobAgent;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
@@ -34,7 +34,7 @@ include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
 include_once(__DIR__.'/AgentTestMockHelper.php');
 
-include_once(dirname(dirname(__DIR__)).'/agent/DeciderAgent.php');
+include_once(dirname(dirname(__DIR__)).'/agent/DeciderJobAgent.php');
 
 class SchedulerTestRunnerMock implements SchedulerTestRunner
 {
@@ -77,16 +77,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $matches = array();
 
     $opts = array();
-    if (preg_match("/-a/", $args, $matches))
-    {
-      $opts['a'] = null;
-    }
-    elseif (preg_match("/-ak([0-9]*)/", $args, $matches))
-    {
-      $opts['k'] = $matches[1];
-      $opts['a'] = null;
-    }
-    elseif (preg_match("/-k([0-9]*)/", $args, $matches))
+    if (preg_match("/-k([0-9]*)/", $args, $matches))
     {
       $opts['k'] = $matches[1];
     }
@@ -112,7 +103,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     ob_start();
 
-    include(dirname(dirname(__DIR__)).'/agent/decider.php');
+    include(dirname(dirname(__DIR__)).'/agent/deciderjob.php');
 
     $output = ob_get_clean();
 

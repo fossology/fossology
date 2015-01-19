@@ -14,6 +14,7 @@ DIRS = \
 	copyright \
 	debug \
 	decider \
+	deciderjob \
 	delagent \
 	lib \
 	maintagent \

@@ -17,15 +17,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Decider;
+namespace Fossology\DeciderJob;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
 
-include_once(__DIR__ . "/DeciderAgent.php");
+include_once(__DIR__ . "/DeciderJobAgent.php");
 
-$agent = new DeciderAgent();
-//$agent->getOpts();
-//in the test: $agent->setOpts();
+$agent = new DeciderJobAgent();
 $agent->scheduler_connect(LicenseMap::CONCLUSION);
 $agent->run_scheduler_event_loop();
 $agent->scheduler_disconnect(0);

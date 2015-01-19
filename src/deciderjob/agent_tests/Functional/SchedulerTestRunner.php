@@ -1,7 +1,6 @@
 <?php
 /*
- Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,15 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Decider;
+namespace Fossology\DeciderJob\Test;
 
-use Fossology\Lib\BusinessRules\LicenseMap;
-
-include_once(__DIR__ . "/DeciderAgent.php");
-
-$agent = new DeciderAgent();
-//$agent->getOpts();
-//in the test: $agent->setOpts();
-$agent->scheduler_connect(LicenseMap::CONCLUSION);
-$agent->run_scheduler_event_loop();
-$agent->scheduler_disconnect(0);
+interface SchedulerTestRunner
+{
+  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = "");
+}
