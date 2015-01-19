@@ -67,11 +67,12 @@ class LicenseClearedGetter extends ClearedGetterCommon
           continue;
         }
         $reportInfo = $clearingLicense->getReportInfo();
-        $licenseId = $licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $originLicenseId = $clearingLicense->getLicenseId();
+        $licenseId = $licenseMap->getProjectedId($originLicenseId);
         $text = $reportInfo ?: $this->getCachedLicenseText($licenseId);
         
         $ungroupedStatements[] = array(
-          'content' => $clearingLicense->getShortName(),
+          'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
           'text' => $text
         );
