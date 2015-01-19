@@ -136,9 +136,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
     $this->testDb->createInheritedTables();
-    $this->testDb->createInheritedArsTables(array('nomos','monk'));
+    $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars'), false);
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars','copyright_ars'), false);
     $this->testDb->insertData_license_ref();
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
@@ -390,6 +390,125 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,13,19)");
 
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12224,$licId3,$pfile,$agentMonkId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,9,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,13,19)");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(1));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+    assertThat($decisions, is(arrayWithSize(1)));
+
+    $this->rmRepo();
+  }
+
+  /** @group Functional */
+  public function testDeciderMockScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchShouldNotMakeADecision($this->runnerMock);
+  }
+
+  /** @group Functional */
+  public function testDeciderRealScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchShouldNotMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchShouldNotMakeADecision($this->runnerCli);
+  }
+
+  private function runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchShouldNotMakeADecision($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+
+    $licId1 = $licenseRef1->getId();
+    $licId2 = $licenseRef2->getId();
+    $licId3 = $licenseRef3->getId();
+
+    $agentNomosId = 6;
+    $agentMonkId = 5;
+    $agentOther = 8;
+    $pfile = 4;
+
+    $this->dbManager->queryOnce("INSERT INTO license_map(rf_fk, rf_parent, usage) VALUES ($licId2, $licId1, ".LicenseMap::CONCLUSION.")");
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentNomosId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,10,3)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12223,$licId2,$pfile,$agentMonkId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,6,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,13,19)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12224,$licId3,$pfile,$agentOther)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,9,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,13,19)");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+
+    assertThat($this->getHeartCount($output), equalTo(0));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+    assertThat($decisions, is(arrayWithSize(0)));
+
+    $this->rmRepo();
+  }
+
+  /** @group Functional */
+  public function testDeciderMockScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchForSameLicenseShouldMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchForSameLicenseShouldMakeADecision($this->runnerMock);
+  }
+
+  /** @group Functional */
+  public function testDeciderRealScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchForSameLicenseShouldMakeADecision()
+  {
+    $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchForSameLicenseShouldMakeADecision($this->runnerCli);
+  }
+
+  private function runnerDeciderScanWithNoEventsAndNomosContainedInMonkWithButWithOtherAgentMatchForSameLicenseShouldMakeADecision($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+
+    $licId1 = $licenseRef1->getId();
+    $licId2 = $licenseRef2->getId();
+    $licId3 = $licenseRef3->getId();
+
+    $agentNomosId = 6;
+    $agentMonkId = 5;
+    $agentOther = 8;
+    $pfile = 4;
+
+    $this->dbManager->queryOnce("INSERT INTO license_map(rf_fk, rf_parent, usage) VALUES ($licId2, $licId1, ".LicenseMap::CONCLUSION.")");
+    $this->dbManager->queryOnce("INSERT INTO license_map(rf_fk, rf_parent, usage) VALUES ($licId3, $licId1, ".LicenseMap::CONCLUSION.")");
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentNomosId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,10,3)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12223,$licId2,$pfile,$agentMonkId)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,6,2)");
+    $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12223,13,19)");
+
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12224,$licId3,$pfile,$agentOther)");
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,9,2)");
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12224,13,19)");
 
