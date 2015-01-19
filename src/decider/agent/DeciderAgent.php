@@ -77,14 +77,8 @@ class DeciderAgent extends Agent
 
   private function loopContainedItems($itemTreeBounds)
   {
-    if (!$itemTreeBounds->containsFiles())
-    {
-      return array($itemTreeBounds);
-    }
     $result = array();
-    $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) = 0)";
-    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
+    foreach($this->uploadDao->getContainedItems($itemTreeBounds) as $item)
     {
       $result[] = $item->getItemTreeBounds();
     }
