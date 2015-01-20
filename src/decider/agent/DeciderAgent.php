@@ -28,13 +28,14 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Tree\Item;
 
 include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
-  const RULES_ALL = 0x1;
   const RULES_NOMOS_IN_MONK = 0x1;
+  const RULES_ALL = self::RULES_NOMOS_IN_MONK;
 
   /** @var int */
   private $activeRules;
@@ -74,36 +75,30 @@ class DeciderAgent extends Agent
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
   }
 
-
-  private function loopContainedItems($itemTreeBounds)
-  {
-    $result = array();
-    foreach($this->uploadDao->getContainedItems($itemTreeBounds) as $item)
-    {
-      $result[] = $item->getItemTreeBounds();
-    }
-    return $result;
-  }
-
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
     $userId = $this->userId;
 
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    foreach ($this->loopContainedItems($parentBounds) as $itemTreeBounds)
+    foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
+      $itemTreeBounds = $item->getItemTreeBounds();
+
       $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+      $matches = $this->remapByProjectedId($matches);
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
-      $this->processItem($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents);
+      $this->processItem($item, $userId, $groupId, $matches, $lastDecision, $currentEvents);
     }
     return true;
   }
 
-  private function processItem($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents)
+  private function processItem(Item $item, $userId, $groupId, $matches, $lastDecision, $currentEvents)
   {
+    $itemTreeBounds = $item->getItemTreeBounds();
+
     if ($this->activeRules & self::RULES_NOMOS_IN_MONK)
     {
       $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents);
@@ -116,7 +111,6 @@ class DeciderAgent extends Agent
     $canDecide &= null === $lastDecision;
     $canDecide &= 0 == count($currentEvents);
 
-    $matches = $this->remapByProjectedId($matches);
     foreach($matches as $licenseId => $licenseMatches)
     {
       $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
@@ -157,6 +151,11 @@ class DeciderAgent extends Agent
     return $remapped;
   }
 
+  private function isRegionIncluded($small, $big)
+  {
+    return ($small[0] >= 0) && ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
+  }
+
   private function areNomosMatchesInsideAMonkMatch($licenseMatches)
   {
     if (!array_key_exists("nomos", $licenseMatches))
@@ -177,7 +176,7 @@ class DeciderAgent extends Agent
       foreach($licenseMatches["monk"] as $monkLicenseMatch)
       {
         $monkRegion = $this->highlightDao->getHighlightRegion($monkLicenseMatch->getLicenseFileId());
-        if (($nomosRegion[0] >= $monkRegion[0]) && ($nomosRegion[1] <= $monkRegion[1]))
+        if ($this->isRegionIncluded($nomosRegion, $monkRegion))
         {
           $found = true;
           break;
