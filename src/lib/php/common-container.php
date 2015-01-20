@@ -45,7 +45,7 @@ $GLOBALS['container'] = $container;
 $logger = $container->get('logger');
 $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::INFO));
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
-$logger->pushHandler(new StreamHandler('/tmp/fossology.log', Logger::DEBUG));
+//$logger->pushHandler(new StreamHandler('/tmp/fossology.log', Logger::DEBUG));
 /** @var TimingLogger */
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime);
