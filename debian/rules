@@ -148,6 +148,9 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/decider install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-deciderjob \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/deciderjob install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reportgen \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
