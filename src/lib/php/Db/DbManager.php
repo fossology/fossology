@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -116,7 +117,7 @@ abstract class DbManager extends Object
     }
 
     $message = "error executing: $sqlStatement\n\n$lastError";
-    throw new \Fossology\Lib\Exception($message);
+    throw new Exception($message);
   }
 
   /**
