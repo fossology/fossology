@@ -32,6 +32,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
 use Mockery as M;
+use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -68,7 +69,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = new Logger("SchedulerTest");
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
     $agentDao = new AgentDao($this->dbManager, $logger);

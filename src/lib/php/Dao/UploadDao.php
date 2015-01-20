@@ -293,6 +293,7 @@ SELECT * FROM $uploadTreeTableName
     $parentSize = $this->getParentSize($parent, $uploadTreeView);
     $targetIndex = $this->getItemIndex($item, $uploadTreeView);
 
+    /** @var null|Item $nextItem */
     $nextItem = null;
     $firstIteration = true;
     while (($targetIndex >= 0 && $targetIndex < $parentSize))
@@ -315,16 +316,19 @@ SELECT * FROM $uploadTreeTableName
 
       if ($nextItem !== null && $nextItem->isContainer())
       {
+        $this->logger->debug("findNextItem() enter container");
         $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
       }
 
       if ($nextItem !== null)
       {
+        $this->logger->debug("findNextItem() found " . $nextItem->getFileName() . " #" . $nextItem->getFileId());
         return $nextItem;
       }
 
       $targetIndex += $indexIncrement;
     }
+    $this->logger->debug("findNextItem() nothing found ");
     return null;
   }
 

@@ -162,6 +162,11 @@ install-arch:
            -C src/reuser install
 
 
+	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
+	cp $(which composer) $(CURDIR)/debian/fossology-dev/usr/bin
+	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
+
+
 	dh_install -s
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep

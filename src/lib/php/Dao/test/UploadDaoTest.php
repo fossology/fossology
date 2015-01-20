@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -53,7 +54,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = new Logger("UploadDaoTest");
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
   }
 
   public function tearDown()

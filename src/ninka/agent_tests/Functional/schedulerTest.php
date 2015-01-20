@@ -22,6 +22,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
 
 if (!function_exists('Traceback_uri'))
 {
@@ -47,7 +48,8 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = new Logger("NinkaSchedulerTest");
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
   }
   
   public function tearDown()

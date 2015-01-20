@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
 
 
 class MonkBulkTest extends PHPUnit_Framework_TestCase
@@ -48,7 +49,8 @@ class MonkBulkTest extends PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = new Logger("MonkBulkTest");
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }
