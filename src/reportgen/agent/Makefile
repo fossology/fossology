@@ -21,8 +21,6 @@ CFLAGS_LINK  = $(ALL_CFLAGS) -lmxml -L ./libmxml.a `pkg-config json --cflags --l
 OBJECTS  = utils.o main.o table.o jsonDataRetriever.o
 COVERAGE = 
 
-TESTDIR = ../agent_tests
-
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
 	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
 
@@ -50,14 +48,12 @@ install: all
 		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(EXE)/agent/$$file; \
 	done
 
-
 uninstall:
 	@echo "make reportgen agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-
 clean:
-	rm -f reportgen *.o *.a
+	rm -f $(EXE) *.o *.a
 
 include $(DEPS)
 
