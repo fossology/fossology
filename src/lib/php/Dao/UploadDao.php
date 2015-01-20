@@ -282,6 +282,7 @@ SELECT * FROM $uploadTreeTableName
     $this->logger->debug("findNextItem(" . $item->getFileName() . " " . $item->getFileId() . ", " . $direction . ", enter=" . $enterFolders . ")");
     if ($item->getParentId() === null && $direction !== self::DIR_FWD)
     {
+      $this->logger->debug("findNextItem() not found ");
       return self::NOT_FOUND;
     }
 
