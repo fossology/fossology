@@ -31,7 +31,6 @@ use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonRespose;
 
 class AjaxClearingView extends FO_Plugin
 {
@@ -109,12 +108,11 @@ class AjaxClearingView extends FO_Plugin
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
-    return json_encode(
-        array(
+    return array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $licenses,
             'iTotalRecords' => count($licenses),
-            'iTotalDisplayRecords' => count($licenses)));
+            'iTotalDisplayRecords' => count($licenses));
   }
 
   /**
