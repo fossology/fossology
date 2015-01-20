@@ -8,7 +8,7 @@ Homepage: http://fossology.org
 
 Package: fossology-dev
 Architecture: any
-Depends:
+Depends: php5-cli
 Description: architecture for analyzing software, development utils
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
