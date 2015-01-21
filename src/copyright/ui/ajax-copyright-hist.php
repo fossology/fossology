@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  * Author: Daniele Fognini, Steffen Weber, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or
@@ -17,11 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-
-use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_copyrightHistogramProcessPost", _("Private: Browse post"));
 
@@ -115,13 +115,12 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     header('Content-type: text/json');
     list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
-    return (json_encode(array(
+    return new JsonResponse(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $aaData,
             'iTotalRecords' => $iTotalRecords,
             'iTotalDisplayRecords' => $iTotalDisplayRecords
         )
-    )
     );
   }
 
@@ -223,8 +222,8 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $this->dbManager->prepare($statement, $sql);
 
     $result = $this->dbManager->execute($statement, $filterParms);
-    $rows = pg_fetch_all($result);
-    pg_free_result($result);
+    $rows = $this->dbManager->fetchAll($result);
+    $this->dbManager->freeResult($result);
 
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -351,8 +350,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       }
     }
     $this->dbManager->freeResult($oldData);
-    header('Content-type: text/plain');
-    return 'success';
+    return new Response('success', Response::HTTP_OK,array('Content-type'=>'text/plain'));
   }
 
   protected function doDelete($uploadId, $item, $hash, $type)
