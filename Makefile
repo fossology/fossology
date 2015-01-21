@@ -81,6 +81,8 @@ tar-release: dist
 dist:
 	utils/fo-mktar
 
+empty-cache:
+	rm -rf $(CACHEDIR)/*
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
