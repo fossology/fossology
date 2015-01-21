@@ -32,7 +32,7 @@ class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
 
   public function testCreateSelect()
   {
-    $browseProcessPost = new browseProcessPost();
+    $browseProcessPost = new AjaxBrowse();
 
     $reflection = new \ReflectionClass( get_class($browseProcessPost) );
     $method = $reflection->getMethod('createSelect');
