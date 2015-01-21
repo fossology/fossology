@@ -2,6 +2,6 @@
 
 {% block content %}
 
-    {% include "login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
 
 {% endblock %}
