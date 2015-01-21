@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -115,12 +115,8 @@ int zipdir(char* name)
         if(child_pid == 0)
         {
           char* chdir_cmd = g_strdup_printf("%s/%s", targetdir, name);
-          if (chdir_cmd)
+          if (chdir_cmd && chdir(chdir_cmd) != -1)
           {
-            if(chdir(chdir_cmd) == -1)
-            {
-              exit(1);
-            }
             g_free(chdir_cmd);
           }
           else
@@ -182,7 +178,6 @@ int createdir(char* path)
 	if(dir)
 	{
 		closedir(dir);
-		return 1;
 	}
 	else
 	{
@@ -190,10 +185,6 @@ int createdir(char* path)
 		{
 			return 0;
 		}
-		else 
-		{
-			return 1;
-		}	
 	}
    return 1;
 }
@@ -229,17 +220,12 @@ int checkdest()
 	if(dir)
 	{
 		closedir(dir);
-		return 1;
 	}
 	else
 	{
 		if(system(CMD) == -1)	
 		{
 			return 0;
-		}
-		else
-		{
-			return 1;
 		}
 	}
 	return 1;
@@ -272,7 +258,7 @@ char* replaceunderscore(char* systime)
 		ptr = systime;
 		while(*ptr != '\0')
 		{
-			if( !isspace(*ptr)  && (*ptr != 58) && (*ptr != 32))
+			if( !isspace(*ptr) && (*ptr != ':') && (*ptr != ' '))
 			{
 				formattedtime[i] = *ptr;
 				i++;		
