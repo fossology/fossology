@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,6 +16,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * \file ajax_admin_scheduler
@@ -120,49 +123,34 @@ class ajax_admin_scheduler extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) return;
 
     $V = "";
-    switch ($this->OutputType)
+    $operation = GetParm('operation', PARM_TEXT);
+    $job_list_option = $this->JobListOption($operation);
+    if ('pause' == $operation || 'restart' == $operation)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $operation = GetParm('operation', PARM_TEXT);
-        $job_list_option = $this->JobListOption($operation);
-        if ('pause' == $operation || 'restart' == $operation)
-        {
-          $text = _("Select a job");
-          $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
-        }
-        else if ('verbose'  == $operation)
-        {
-          $verbose_list_option = $this->VerboseListOption();
-          $text1 = _("Select the scheduler or a job");
-          $text2 = _("Select a verbosity level");
-          $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
-        }
-        else if ('status'  == $operation)
-        {
-          $text = _("Select the scheduler or a job");
-          $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
-        }
-        else if ('priority'  == $operation)
-        {
-          $priority_list_option = $this->PriorityListOption();
-          $text1 = _("Select a job");
-          $text2 = _("Select a priority level");
-          $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $text = _("Select a job");
+      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select>";
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
+    else if ('verbose'  == $operation)
+    {
+      $verbose_list_option = $this->VerboseListOption();
+      $text1 = _("Select the scheduler or a job");
+      $text2 = _("Select a verbosity level");
+      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option</select><br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
     }
-    print ("$V");
-    return;
-  } // Output()
-};
+    else if ('status'  == $operation)
+    {
+      $text = _("Select the scheduler or a job");
+      $V.= "$text: <select name='job_list' id='job_list'>$job_list_option</select><br></select>";
+    }
+    else if ('priority'  == $operation)
+    {
+      $priority_list_option = $this->PriorityListOption();
+      $text1 = _("Select a job");
+      $text2 = _("Select a priority level");
+      $V.= "$text1: <select name='job_list' id='job_list'>$job_list_option </select> <br>$text2: <select name='priority_list' id='priority_list'>$priority_list_option</select>";
+        }
+        
+    return new Response($V, Response::HTTP_OK, array('Content-Type'=>'text/plain'));
+  }
+}
 $NewPlugin = new ajax_admin_scheduler();
-?>
