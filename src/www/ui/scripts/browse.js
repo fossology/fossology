@@ -97,18 +97,18 @@ function prioColumn(source, type, val) {
   }
   if (type === 'display') {
     if (myKey === 0) {
-      return '<img alt="move" src="images/icons/blue_arrow_up_32.png" class="icon-small" onclick="move2limit(' + source[0] + ',\'top\')"/>'
-              + ' <img alt="move" src="images/icons/arrow_updown_32.png" class="icon-small"/>'
-              + ' <img alt="move" src="images/icons/blue_arrow_down_32.png" class="icon-small" onclick="move2limit(' + source[0] + ',\'-1\')"/>';
+      return '<img alt="[to top]" src="images/icons/blue_arrow_up_32.png" class="icon-small" onclick="move2limit(' + source[0] + ',\'top\')"/>'
+              + ' <img alt="[select]" src="images/icons/arrow_updown_32.png" class="icon-small"/>'
+              + ' <img alt="[to bottom]" src="images/icons/blue_arrow_down_32.png" class="icon-small" onclick="move2limit(' + source[0] + ',\'-1\')"/>';
     }
     else if (myVal < source[1]) {
-      return '<img alt="move" src="images/icons/arrow_up_32.png" class="icon-small"/>';
+      return '<img alt="[move here]" src="images/icons/arrow_up_32.png" class="icon-small"/>';
     }
     else if (myVal > source[1]) {
-      return '<img alt="move" src="images/icons/arrow_down_32.png" class="icon-small"/>';
+      return '<img alt="[move here]" src="images/icons/arrow_down_32.png" class="icon-small"/>';
     }
     else
-      return 'click icon to insert<img alt="move" src="images/icons/close_32.png" class="icon-small"/>';
+      return 'cancel <img alt="[x]" src="images/icons/close_32.png" class="icon-small"/>';
   }
   if (type === 'sort') {
     return -source[1];

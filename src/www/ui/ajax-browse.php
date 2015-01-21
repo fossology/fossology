@@ -25,8 +25,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_browseProcessPost", _("Private: Browse post"));
 
-class browseProcessPost extends FO_Plugin
+class AjaxBrowse extends FO_Plugin
 {
+  const NAME = "browse-processPost";
+
   /** @var  UploadDao $uploadDao */
   private $uploadDao;
   /** @var  UserDao $userDao */
@@ -44,7 +46,7 @@ class browseProcessPost extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "browse-processPost";
+    $this->Name = self::NAME;
     $this->Title = TITLE_browseProcessPost;
     $this->Version = "1.0";
     $this->Dependency = array();
@@ -67,11 +69,6 @@ class browseProcessPost extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return;
-    }
-
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
         array($_SESSION['UserId'], $_SESSION['GroupId']), $logNote = __METHOD__ . '.user_perm');
     if ($gup === false)
@@ -432,5 +429,5 @@ class browseProcessPost extends FO_Plugin
 
 }
 
-$NewPlugin = new browseProcessPost;
+$NewPlugin = new AjaxBrowse;
 $NewPlugin->Initialize();
