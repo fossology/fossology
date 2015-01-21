@@ -242,7 +242,7 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getItemByDirection($uploadId, $itemId, $direction, $options)
   {
-    $this->logger->debug("getItemByDirection(" . $uploadId . ", " . $itemId . ", " . $direction . ", " . $options . ")");
+    $this->logger->debug("getItemByDirection(" . $uploadId . ", " . $itemId . ", " . $direction . ", " . print_r($options, true) . ")");
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
