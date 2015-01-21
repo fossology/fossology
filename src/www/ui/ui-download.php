@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,6 +16,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+use Fossology\Lib\Db\DbManager;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 define("TITLE_ui_download", _("Download File"));
 
@@ -88,79 +93,122 @@ class ui_download extends FO_Plugin
     exit;
   } // CheckRestore()
 
+  
+  function renderOutput()
+  {
+    try
+    {
+      $output = $this->getPathAndName();
+      list($Filename, $Name) = $output;
+      $response = $this->downloadFile($Filename, $Name);
+    }
+    catch(Exception $e)
+    {
+      $this->vars['content'] = $e->getMessage();
+      $response = $this->render($this->getTemplateName());
+    }
+    $response->prepare($this->getRequest());
+    $response->send();
+  }
 
   /**
    * \brief This function is called when user output is
    * requested.  This function is responsible for content.
    */
-  function Output()
+  protected function getPathAndName()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    global $Plugins;
-    global $PG_CONN;
+    if ($this->State != \PLUGIN_STATE_READY) {
+      throw new Exception('Download plugin is not ready');
+    }
 
-    if (!$PG_CONN)
+    global $container;
+    /** @var DbManager $dbManager */
+    $dbManager = $container->get('db.manager');
+    if (!$dbManager->getDriver())
     {
-      DBconnect();
-      if (!$PG_CONN)
+      throw new Exception("Missing database connection.");
+    }
+
+    $reportId = GetParm("report",PARM_INTEGER);
+    $item = GetParm("item",PARM_INTEGER);
+
+    if (!empty($reportId))
+    {
+      $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");
+      if ($row === false)
       {
-        $text = _("Missing database connection.");
-        echo "<h2>$text</h2>";
-        return;
+        throw new Exception("Missing report");
       }
+
+      $path = $row['filepath'];
+      $filename = basename($path);
+      $uploadId = $row['upload_fk'];
     }
-
-    $Item = GetParm("item",PARM_INTEGER);
-
-    $text = _("Invalid item parameter");
-    if (empty($Item))
+    else if (empty($item))
     {
-      echo "<h2>$text</h2>";
-      return;
+      throw new Exception("Invalid item parameter");
     }
-
-    $Filename = RepPathItem($Item);
-    if (empty($Filename))
+    else
     {
-      echo "<h2>$text: $Filename</h2>";
-      return;
+      $path = RepPathItem($item);
+      if (empty($path))
+      {
+        throw new Exception("Invalid item parameter");
+      }
+
+      $fileHandle = @fopen( RepPathItem($item) ,"rb");
+      /* note that CheckRestore() does not return. */
+      if (empty($fileHandle))
+      {
+        $this->CheckRestore($item, $path);
+      }
+
+      $row = $dbManager->getSingleRow("SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $1",array($item));
+      if ($row===false)
+      {
+        throw new Exception("Missing item");
+      }
+      $filename = $row['ufile_name'];
+      $uploadId = $row['upload_fk'];
     }
 
-    $Fin = @fopen( RepPathItem($Item) ,"rb");
-    /* note that CheckRestore() does not return. */
-    if (empty($Fin)) $this->CheckRestore($Item, $Filename);
-
-    $sql = "SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if (pg_num_rows($result) != 1)
+    $uploadPerm = GetUploadPerm($uploadId);
+    if ($uploadPerm < PERM_WRITE)
     {
-      $text = _("Missing item");
-      echo "<h2>$text: $Item</h2>";
-      pg_free_result($result);
-      return;
+      throw new Exception("No Permission: $uploadId");
     }
-    $Upload = $row['upload_fk'];
-    $UploadPerm = GetUploadPerm($Upload);
-    if ($UploadPerm < PERM_WRITE)
+    if (!file_exists($path))
     {
-      $text = _("No Permission");
-      echo "<h2>$text: $Item</h2>";
-      return;
+      throw new Exception("File does not exist");
     }
-
-    $Name = $row['ufile_name'];
-    pg_free_result($result);
-
-    if (($rv = DownloadFile($Filename, $Name)) !== True)
+    if (!is_file($path))
     {
-      $text = _("Download failed");
-      echo "<h2>$text</h2>$Filename<br>$rv";
+      throw new Exception("Not a regular file");
     }
-  } // Output()
+    return array($path, $filename);
+  }
 
-};
+  /**
+   * @global type $container
+   * @param type $path
+   * @param type $filename
+   * @return BinaryFileResponse
+   */
+  protected function downloadFile($path, $filename)
+  {
+    global $container;
+    $session = $container->get('session');
+    $session->save();
+
+    $response = new BinaryFileResponse($path);
+    $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename);
+    if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx')
+    {
+      $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
+    }
+    return $response;
+  }
+}
+
 $NewPlugin = new ui_download;
 $NewPlugin->Initialize();
-?>
