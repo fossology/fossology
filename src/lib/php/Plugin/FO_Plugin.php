@@ -386,7 +386,8 @@ class FO_Plugin implements Plugin
 
     $output = $this->Output();
 
-    if ($output instanceof Response)
+    // if (is_subclass_of($output, '\Symfony\Component\HttpFoundation\Response'))
+    if($output instanceof Response)
     {
       $response = $output;
     } else
