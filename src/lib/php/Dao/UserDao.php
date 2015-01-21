@@ -264,9 +264,19 @@ class UserDao extends Object
   }
 
   public function getUserAndDefaultGroupByUserName($userName) {
-    return $this->dbManager->getSingleRow(
+    $userRow = $this->dbManager->getSingleRow(
         "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
         array($userName), __FUNCTION__);
+
+    if (!$userRow['group_fk']) {
+      $groupRow = $this->dbManager->getSingleRow(
+      "SELECT group_fk,group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1",
+      array($userRow['user_pk']), __FUNCTION__.".getGroup");
+      $userRow['group_fk'] = $groupRow['group_fk'];
+      $userRow['group_name'] = $groupRow['group_name'];
+    }
+
+    return $userRow;
   }
   
   public function isAdvisorOrAdmin($userId, $groupId)
