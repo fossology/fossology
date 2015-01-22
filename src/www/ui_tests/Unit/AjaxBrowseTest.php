@@ -24,10 +24,10 @@ $container->shouldReceive('get');
 $wwwPath = dirname(dirname(__DIR__));
 require_once(dirname($wwwPath).'/lib/php/Plugin/FO_Plugin.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
-require_once ($wwwPath.'/ui/browse-processPost.php');
+require_once ($wwwPath.'/ui/ajax-browse.php');
 
 
-class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
+class AjaxBrowseTest extends \PHPUnit_Framework_TestCase
 {
 
   public function testCreateSelect()
