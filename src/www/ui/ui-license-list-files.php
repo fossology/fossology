@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  * Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
  *
@@ -93,17 +95,14 @@ class LicenseListFiles extends FO_Plugin
     $Offset = ($Page < 0) ? 0 : $Page * $Max;
     $order = "";
     $PkgsOnly = false;
-    $CheckOnly = false;
-
 
     // Count is uploadtree recs, not pfiles
-
     $agentId = GetParm('agentId', PARM_INTEGER);
     if (empty($agentId))
     {
       $agentId = "any";
     }
-    $CountArray = CountFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
+    $CountArray = $this->countFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $tag_pk, $uploadtree_tablename);
 
     if (empty($CountArray))
     {
@@ -246,6 +245,66 @@ class LicenseListFiles extends FO_Plugin
     return $V;
   }
 
+  
+  
+  /**
+   * @brief Cloned from commen-license-file.php to refactor it
+   * 
+   * \param $agent_pk - agent id
+   * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
+   * \param $uploadtree_pk - sets scope of request
+   * \param $uploadtree_tablename
+   *
+   * \return Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
+   */
+  protected function countFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $tag_pk=0, $uploadtree_tablename)
+  {
+    global $container;
+    /** @var LicenseDao */
+    $licenseDao = $container->get('dao.license');
+    $license = $licenseDao->getLicenseByShortname($rf_shortname);
+    if (null == $license)
+    {
+      return array();
+    }
+    /** @var UploadDao */
+    $uploadDao = $container->get('dao.upload');
+    $itemBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtree_tablename);
+    $dbManager = $container->get('db.manager');
+            
+    $viewRelavantFiles = "SELECT pfile_fk as PF, uploadtree_pk, ufile_name FROM $uploadtree_tablename";
+    $params = array();
+    $stmt = __METHOD__;
+    if (!empty($tag_pk))
+    {
+      $params[] = $tag_pk;
+      $viewRelavantFiles .= " INNER JOIN tag_file ON PF=tag_file.pfile_fk and tag_fk=$".count($params);
+      $stmt .= '.tag';
+    }
+    $params[] = $itemBounds->getLeft();
+    $params[] = $itemBounds->getRight();
+    $viewRelavantFiles .= ' WHERE lft BETWEEN $'.(count($params)-1).' AND $'.count($params);
+    if ($uploadtree_tablename == "uploadtree_a" || $uploadtree_tablename == "uploadtree"){
+      $params[] = $itemBounds->getUploadId(); 
+      $viewRelavantFiles .= " AND upload_fk=$".count($params);
+      $stmt .= '.upload';
+    }
+    
+    $params[] = $license->getId();
+    $sql = "SELECT count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
+          FROM license_file, ($viewRelavantFiles) as SS
+          WHERE PF=license_file.pfile_fk AND rf_fk = $".count($params);
+    if($agent_pk != "any")
+    {
+      $params[] = $agent_pk;
+      $sql .= " AND agent_fk=$".count($params);
+      $stmt .= '.agent';
+    }
+
+    $RetArray = $dbManager->getSingleRow($sql,$params,$stmt);
+    return $RetArray;
+  }
+ 
 }
 
 
