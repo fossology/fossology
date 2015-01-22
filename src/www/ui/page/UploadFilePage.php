@@ -95,7 +95,7 @@ class UploadFilePage extends DefaultPlugin
       return $this->getUploadsInFolder($folderId);
     } else
     {
-      if ($request->isMethod('POST'))
+      if ($request->isMethod(Request::METHOD_POST))
       {
         $public = $request->get('public') == true;
         $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
