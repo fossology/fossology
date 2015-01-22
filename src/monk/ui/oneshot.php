@@ -46,8 +46,7 @@ class OneShot extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => "One-Shot Monk",
         self::MENU_LIST => "Upload::One-Shot Monk",
-        self::REQUIRES_LOGIN => false,
-        self::DEPENDENCIES => array(\ui_menu::NAME)
+        self::REQUIRES_LOGIN => false
     ));
 
     $this->highlightProcessor = $this->getObject('view.highlight_processor');
