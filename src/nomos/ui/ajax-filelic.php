@@ -20,7 +20,7 @@
  * \file ajax-filelic.php
  * \brief This plugin finds all the uploadtree_pk's in the first directory
  * level under a parent, that contain a given license. \n 
- * GET args: napk, lic, item, (optional debug) \n 
+ * GET args: napk, lic, item \n 
  * item   is the parent uploadtree_pk \n 
  * napk   is the nomosagent_pk whos results you are looking for \n 
  * lic    is the shortname of the license \n 
@@ -43,64 +43,20 @@ class ajax_filelic extends FO_Plugin
   var $LoginFlag = 0;
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
    */
   function Output()
   {
-    global $Plugins;
+    $nomosagent_pk = GetParm("napk", PARM_INTEGER);
+    $rf_shortname = GetParm("lic", PARM_RAW);
+    $uploadtree_pk = GetParm("item", PARM_INTEGER);
+    $uploadtree_tablename = GetParm("ut", PARM_RAW);
 
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    //$uTime = microtime(true);
+    $files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, false, $uploadtree_tablename);
+    $csv = (count($files) != 0) ? rawurlencode($rf_shortname) . implode(',', array_keys($files)) : '';
+    return $csv;
+  }
 
-    // make sure there is a db connection
-
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $nomosagent_pk = GetParm("napk",PARM_INTEGER);
-        $rf_shortname = GetParm("lic",PARM_RAW);
-        $uploadtree_pk = GetParm("item",PARM_INTEGER);
-        $uploadtree_tablename = GetParm("ut",PARM_RAW);
-        $debug = array_key_exists("debug", $_GET) ? true : false;
-
-        $Files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, false, $uploadtree_tablename);
-        $V = "";
-        if (count($Files) == 0)
-        $V .= "";  // no matches found
-        else
-        {
-          $V .= rawurlencode($rf_shortname);
-          foreach ($Files as $uppk => $fname) $V .= ",$uppk";
-        }
-        break;
-      case "Text":
-        break;
-      default:
-    }
-
-    /*
-     if ($debug)
-    {
-    $Time = microtime(true) - $uTime;  // convert usecs to secs
-    $text = _("Elapsed time: %.2f seconds");
-    printf( "<small>$text</small>", $Time);
-    }
-    */
-
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print("$V");
-    return;
-  } // Output()
-
-
-};
+}
 $NewPlugin = new ajax_filelic;
 $NewPlugin->Initialize();
-
-?>
