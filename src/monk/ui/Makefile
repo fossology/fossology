@@ -11,7 +11,7 @@ include $(VARS)
 
 MOD_SUBDIR = ui
 
-MONK_PHPS = agent-monk.php admin-monk-revision.php
+MONK_PHPS = agent-monk.php admin-monk-revision.php oneshot.php
 BULK_PHPS = agent-monk-bulk.php
 
 all:
