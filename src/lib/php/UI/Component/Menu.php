@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@ use Fossology\Lib\Util\Object;
 
 class Menu extends Object
 {
+  const FULL_MENU_DEBUG = 'fullmenudebug';
   var $MenuTarget = "treenav";
 
   public function __construct()
@@ -48,85 +49,86 @@ class Menu extends Object
     $output = "";
     $output .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $output .= "<ul id='menu-$indent'>\n";
-    /*** NOTE: http://www.cssplay.co.uk/menus/final_drop.html identifies
-     * why menus fail for IE6. IE6 needs the </a> to exist outside the
-     * submenus rather than before the submenus. ***/
-    /*** Since his menus work under IE6 (and mine don't), I should
-     * use one of his menus instead: http://www.cssplay.co.uk/menus/.
-     * I'll make this change TBD...
-     * This looks like a good one:
-     * http://www.cssplay.co.uk/menus/simple_vertical.html
-     ***/
-    $showFullName = array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
-
-    foreach ($menu as $menuEntry)
+    
+    foreach ($menu as $M)
     {
       $output .= '<li>';
 
-      if (!empty($menuEntry->HTML))
+      if (!empty($M->HTML))
       {
-        $output .= $menuEntry->HTML;
+        $output .= $M->HTML;
       } else /* create HTML */
       {
-        if (!empty($menuEntry->URI))
-        {
-          $output .= '<a href="' . Traceback_uri() . "?mod=" . $menuEntry->URI;
-          if (empty($menuEntry->Target) || ($menuEntry->Target == ""))
-          {
-            $output .= '">';
-          } else
-          {
-            $output .= '" target="' . $menuEntry->Target . '">';
-          }
-          if ($showFullName)
-          {
-            $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-          } else
-          {
-            $output .= $menuEntry->Name;
-          }
-        } else
-        {
-          $output .= '<a href="#">';
-          if (empty($menuEntry->SubMenu))
-          {
-            if ($showFullName)
-            {
-              $output .= "<span style=\"color: #C0C0C0; \">";
-              $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-              $output .= "</span>";
-            }
-          } else
-          {
-            if ($showFullName)
-            {
-              $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-            } else
-            {
-              $output .= $menuEntry->Name;
-            }
-          }
-        }
-
-        if (!empty($menuEntry->SubMenu) && ($indent > 0))
-        {
-          $output .= " <span>&raquo;</span>";
-        }
-        $output .= "</a>\n";
+        $output .= $this->createHtmlFromMenuEntry($M, $indent);
       }
 
-      if (!empty($menuEntry->SubMenu))
+      if (!empty($M->SubMenu))
       {
-        $output .= $this->menu_html($menuEntry->SubMenu, $indent + 1);
+        $output .= $this->menu_html($M->SubMenu, $indent + 1);
       }
     }
     $output .= "</ul>\n";
     $output .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
-    // Remove all empty menus of the form
-    // <li><a href=\"#\"><font color='#C0C0C0'></font></a>
     $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $output);
     return ($NewV);
-  } // menu_html()
+  }
+  
+  function createHtmlFromMenuEntry(\menu $M, $Indent)
+  {
+    $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
+    $V = "";
+    if (!empty($M->URI))
+    {
+      $V .= '<a  id="'. htmlentities($M->FullName) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
+      if (empty($M->Target) || ($M->Target == ""))
+      {
+        // $V .= '" target="basenav">';
+        $V .= '">';
+      } else
+      {
+        $V .= '" target="' . $M->Target . '">';
+      }
+      if ($isFullMenuDebug)
+      {
+        $V .= $M->FullName . "(" . $M->Order . ")";
+      } else
+      {
+        $V .= $M->Name;
+      }
+    } else
+    {
+      $V .= '<a id="'. htmlentities($M->FullName) .'" href="#">';
+      if (empty($M->SubMenu))
+      {
+        $V .= "<font color='#C0C0C0'>";
+        if ($isFullMenuDebug)
+        {
+          $V .= $M->FullName . "(" . $M->Order . ")";
+        } //else { $V .= $M->Name; }
+        else
+        {
+          $V .= '';
+        }
+        $V .= "</font>";
+      } else
+      {
+        if ($isFullMenuDebug)
+        {
+          $V .= $M->FullName . "(" . $M->Order . ")";
+        } else
+        {
+          $V .= $M->Name;
+        }
+      }
+    }
+
+    if (!empty($M->SubMenu) && ($Indent > 0))
+    {
+      $V .= " <span>&raquo;</span>";
+    }
+    $V .= "</a>\n";
+    return $V;
+  }
 
   /**
    * \brief Create the output CSS.
@@ -248,87 +250,71 @@ class Menu extends Object
   } // OutputCSS()
 
   /**
-   * \brief Create the output.
+   * @brief Create the output.
    */
   function Output($Title = NULL)
   {
     global $SysConf;
+    $sysConfig = $SysConf['SYSCONFIG'];
 
-    $output = "";
-    if (empty($Title))
-    {
-      $Title = _("Welcome to FOSSology");
-    }
+    $vars = array();
+    $vars['title'] = empty($Title) ? _("Welcome to FOSSology") : $Title;
+    $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
+    $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
+    $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 
-    /* Banner Message? */
-    if (@$SysConf['SYSCONFIG']['BannerMsg'])
-    {
-      $output .= "<h4 style='background-color:#ffbbbb'>" . $SysConf['SYSCONFIG']['BannerMsg'] . "</h4>";
-    }
-
-    if (!$this->_CSSdone)
-    {
-      $output .= $this->OutputCSS();
-    }
-    $menu = menu_find("Main", $MenuDepth);
-
-    /** Same height at FOSSology logo **/
-    $output .= "<table border=0 width='100%'>";
-    $output .= "<tr>";
-    /* custom or default logo? */
-    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-    {
-      $logoUrl = $SysConf['SYSCONFIG']['LogoLink'];
-      $logoImage = $SysConf['SYSCONFIG']['LogoImage'];
-    } else
-    {
-      $logoUrl = 'http://fossology.org';
-      //$LogoImg = Traceback_uri() ."images/fossology-logo.gif";
-      $logoImage = "images/fossology-logo.gif";
-    }
-
-    $output .= "<td width='150' rowspan='2'><a href='$logoUrl' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$logoImage' border=0></a></td>";
-
-    $output .= "<td colspan='2'>";
-    $output .= $this->menu_html($menu, 0);
-    $output .= "</td>";
-    $output .= "</tr><tr>";
-    $output .= "<td>";
-    $output .= "<font size='+2'><b>$Title</b></font>";
-    $output .= "</td>";
-
-    $output .= "<td align='right' valign='bottom'>";
+    if ( array_key_exists('SupportEmailLabel',$sysConfig) && !empty($sysConfig['SupportEmailLabel'])
+            && array_key_exists('SupportEmailAddr',$sysConfig) && !empty($sysConfig['SupportEmailAddr'])){
+      $menuItem = '<a href="mailto:'.$sysConfig['SupportEmailAddr'].'?subject='.@$sysConfig['SupportEmailSubject'].'">'.$sysConfig['SupportEmailLabel'].'</a>';
+      menu_insert("Main::Help::".$sysConfig['SupportEmailLabel'], 0, NULL, NULL, NULL, $menuItem);
+    }    
+    
+    $Menu = menu_find("Main", $MenuDepth);
+    $vars['mainMenu'] = $this->menu_html($Menu, 0);
+    $vars['uri'] = Traceback_uri();
+    
     /* Handle login information */
-    if (plugin_find_id("auth") >= 0 || plugin_find_id("smauth") >= 0)
+    $vars['isLoggedOut'] = ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"));
+    
+    if(!$vars['isLoggedOut'])
     {
-      if ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"))
-      {
-        $text = _("login");
-        $output .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
-      } else
-      {
-        $text = _("User");
-        $output .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
-        if (plugin_find_id("auth") >= 0)
-          $output .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
-        else
-          $output .= "<small><a href='" . Traceback_uri() . "?mod=smauth'><b>logout</b></a></small>";
-      }
-
-      /* Use global system SupportEmail variables, if addr and label are set */
-      if (@$SysConf['SYSCONFIG']['SupportEmailLabel'] and @$SysConf['SYSCONFIG']['SupportEmailAddr'])
-      {
-        $output .= " | ";
-        $output .= "<small><a href='mailto:" . $SysConf['SYSCONFIG']['SupportEmailAddr'] . "?subject=" . $SysConf['SYSCONFIG']['SupportEmailSubject'] . "'>" . $SysConf['SYSCONFIG']['SupportEmailLabel'] . "</a>";
-      }
+      $this->mergeUserLoginVars($vars);
     }
-    $output .= "</td>";
-    $output .= "</tr>";
-    $output .= "</table>";
-    $output .= "<hr />";
-
-    return $output;
+    
+    global $container;
+    $renderer = $container->get('twig.environment');
+    $out = $renderer->loadTemplate('menu.html.twig')->render($vars);
+    return $out;
   }
 
+  private function mergeUserLoginVars(&$vars)
+  {
+    global $container;
+    $dbManager = $container->get("db.manager");
+
+    $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
+    $vars['userName'] = $_SESSION['User'];
+    
+    $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
+    $stmt = __METHOD__ . '.availableGroups';
+    $dbManager->prepare($stmt, $sql);
+    $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
+    $allAssignedGroups = array();
+    while ($row = $dbManager->fetchArray($res))
+    {
+      $allAssignedGroups[$row['group_pk']] = $row['group_name'];
+    }
+    $dbManager->freeResult($res);
+    if (count($allAssignedGroups) > 1)
+    {
+      $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
+      $vars['groupId'] = $_SESSION['GroupId'];
+      $vars['allAssignedGroups'] = $allAssignedGroups;
+    }
+    else
+    {
+      $vars['singleGroup'] = @$_SESSION['GroupName'];
+    }
+  }
 }
 
