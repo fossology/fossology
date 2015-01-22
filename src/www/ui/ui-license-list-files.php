@@ -46,16 +46,12 @@ class LicenseListFiles extends FO_Plugin
 
     // micro-menu
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_RAW);
-    $Page = GetParm("page", PARM_INTEGER);
+    $rf_shortname = GetParm("lic", PARM_STRING);
     $Excl = GetParm("excl", PARM_RAW);
-
-    $rf_shortname = rawurlencode($rf_shortname);
     $URL = $this->Name . "&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     $text = _("Show All Files");
     menu_insert($this->Name . "::Show All", 0, $URL, $text);
-
   } // RegisterMenus()
 
 
@@ -64,23 +60,18 @@ class LicenseListFiles extends FO_Plugin
    */
   function Output()
   {
-    $V = "";
-    $Time = time();
-    $Max = 50;
-
-    /*  Input parameters */
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_RAW);
+    $rf_shortname = GetParm("lic", PARM_STRING);
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $Excl = GetParm("excl", PARM_RAW);
     $Exclic = GetParm("exclic", PARM_RAW);
-    $rf_shortname = rawurldecode($rf_shortname);
     if (empty($uploadtree_pk) || empty($rf_shortname))
     {
       $text = _("is missing required parameters.");
-      echo $this->Name . " $text";
-      return;
+      return $this->Name . " $text";
     }
+
+    $Max = 50;
     $Page = GetParm("page", PARM_INTEGER);
     if (empty($Page))
     {
@@ -89,11 +80,14 @@ class LicenseListFiles extends FO_Plugin
 
     // Get upload_pk and $uploadtree_tablename
     $UploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
-    $UploadRec = GetSingleRec("upload", "where upload_pk=$UploadtreeRec[upload_fk]");
-    $uploadtree_tablename = $UploadRec['uploadtree_tablename'];
+
+    global $container;
+    /** @var UploadDao */
+    $uploadDao = $container->get('dao.upload');
+    $uploadtree_tablename = $uploadDao->getUploadtreeTableName($UploadtreeRec['upload_fk']);
 
     // micro menus
-    $V .= menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
+    $V = menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
 
     /* Load licenses */
     $Offset = ($Page < 0) ? 0 : $Page * $Max;
@@ -101,15 +95,6 @@ class LicenseListFiles extends FO_Plugin
     $PkgsOnly = false;
     $CheckOnly = false;
 
-    /*
-    global $Plugins;
-    $latestNomos=LatestAgentpk($UploadtreeRec['upload_fk'], "nomos_ars");
-    $newestNomos=$Plugins[plugin_find('license') ]->getNewestAgent("nomos");
-    $latestMonk=LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk=$Plugins[plugin_find('license') ]->getNewestAgent("monk");
-    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
-    */
 
     // Count is uploadtree recs, not pfiles
 
@@ -123,9 +108,9 @@ class LicenseListFiles extends FO_Plugin
     if (empty($CountArray))
     {
       $V .= _("<b> No files found for license $rf_shortname !</b>\n");
-    } else
+    }
+    else
     {
-
       $Count = $CountArray['count'];
       $Unique = $CountArray['unique'];
 
@@ -167,7 +152,6 @@ class LicenseListFiles extends FO_Plugin
 
       $text2 = _("files with these licenses");
       if (!empty($Exclic)) $V .= "<br>$text <b>$text1</b> $text2: $Exclic";
-
 
       /* Get the page menu */
       if (($Max > 0) && ($Count >= $Max) && ($Page >= 0))
@@ -223,16 +207,10 @@ class LicenseListFiles extends FO_Plugin
         $text = _("Exclude files with license");
         $Header .= "<br><a href=$URL>$text: $licstring.</a>";
 
-        $ok = true;
-        /* exclude by type */
-        if ($Excl) if (in_array($FileExt, $ExclArray)) $ok = false;
+        $excludeByType = $Excl && in_array($FileExt, $ExclArray);
+        $excludeByLicense = $Exclic && in_array($licstring, $ExclicArray);
 
-        /* exclude by license */
-        if ($Exclic) if (in_array($licstring, $ExclicArray)) $ok = false;
-
-        if (empty($licstring)) $ok = false;
-
-        if ($ok)
+        if (!empty($licstring) && !$excludeByType && !$excludeByLicense)
         {
           $V .= "<tr><td>";
           /* Tack on pfile to url - information only */
@@ -250,12 +228,9 @@ class LicenseListFiles extends FO_Plugin
           $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header, '', $uploadtree_tablename);
           $V .= $outdent;
           $V .= "</td>";
-          $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
-
-          // show the entire license list as a single string with links to the files
-          // in this container with that license.
+          $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
           $V .= "<td>$row[agent_name]: $licstring</td></tr>";
-          $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
+          $V .= "<tr><td colspan=3><hr></td></tr>";
         }
         $LastPfilePk = $pfile_pk;
       }
@@ -266,19 +241,13 @@ class LicenseListFiles extends FO_Plugin
       {
         $V .= $VM . "\n";
       }
-      $V .= "<hr>\n";
-      $Time = time() - $Time;
-      $text = _("Elapsed time");
-      $text1 = _("seconds");
-      $V .= "<small>$text: $Time $text1</small>\n";
     }
 
-    return ($V);
+    return $V;
   }
 
 }
 
-;
 
 $NewPlugin = new LicenseListFiles;
 $NewPlugin->Initialize();
