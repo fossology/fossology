@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Run Functional tests for all modules</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jvnet.hudson.plugins.shelveproject.ShelveProjectProperty plugin="shelve-project-plugin@1.3"/>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.0.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>git@github.com:fossology/fossology.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <assignedNode>fotest</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>true</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>true</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cd src/testing/functional
+http_proxy=web-proxy.fc.hp.com:8088 ./runAgentFunc.php
+./genFuncTestsResult</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.logparser.LogParserPublisher plugin="log-parser@1.0.8">
+      <unstableOnWarning>false</unstableOnWarning>
+      <failBuildOnError>true</failBuildOnError>
+      <parsingRulesPath>/home/jenkins/MakeErrors</parsingRulesPath>
+    </hudson.plugins.logparser.LogParserPublisher>
+    <htmlpublisher.HtmlPublisher plugin="htmlpublisher@1.2">
+      <reportTargets>
+        <htmlpublisher.HtmlPublisherTarget>
+          <reportName>Agent Functional Test Results</reportName>
+          <reportDir>src/testing/reports/functional</reportDir>
+          <reportFiles>*.html</reportFiles>
+          <keepAll>false</keepAll>
+          <wrapperName>htmlpublisher-wrapper.html</wrapperName>
+        </htmlpublisher.HtmlPublisherTarget>
+      </reportTargets>
+    </htmlpublisher.HtmlPublisher>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.19">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.AbortedTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>&lt;h1 style=&quot;background-color:#FF0000;&quot;&gt;$BUILD_STATUS&lt;/h1&gt;
+$PROJECT_DEFAULT_CONTENT
+
+&lt;br /&gt;&lt;br /&gt;
+
+Excerpt of build status:
+&lt;br /&gt;
+${BUILD_LOG_REGEX, regex=&quot;error&quot;, linesBefore=5, linesAfter=5, maxMatches=5, showTruncatedLines=true, escapeHtml=true, matchedLineHtmlStyle=&quot;color:red&quot;}
+
+&lt;br /&gt;&lt;br /&gt;
+
+Failed Tests are:
+&lt;br /&gt;
+${FAILED_TESTS}
+&lt;br /&gt;
+</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.AbortedTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>&lt;h1 style=&quot;background-color:#FF0000;&quot;&gt;$BUILD_STATUS&lt;/h1&gt;
+$PROJECT_DEFAULT_CONTENT
+
+&lt;br /&gt;&lt;br /&gt;
+
+Excerpt of build errors:
+&lt;br /&gt;
+${BUILD_LOG_REGEX, regex=&quot;error&quot;, linesBefore=5, linesAfter=5, maxMatches=5, showTruncatedLines=true, escapeHtml=true, matchedLineHtmlStyle=&quot;color:red&quot;}
+
+&lt;br /&gt;&lt;br /&gt;
+
+Failed Tests are:
+&lt;br /&gt;
+${FAILED_TESTS}
+&lt;br /&gt;
+</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>paul.holland@hp.com bob.gobeille@hp.com mary.laser@hp.com alex.dav.norton@hp.com dan.stangel@hp.com</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>&lt;h1 style=&quot;background-color:#006600;&quot;&gt;$BUILD_STATUS&lt;/h1&gt;
+$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>&lt;h1 style=&quot;background-color:#006600;&quot;&gt;$BUILD_STATUS&lt;/h1&gt;
+$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+      </configuredTriggers>
+      <contentType>text/html</contentType>
+      <defaultSubject>$BUILD_STATUS for $PROJECT_NAME, commit # ${CHANGES, format=&quot;%r&quot;}</defaultSubject>
+      <defaultContent>...for $PROJECT_NAME, commit # ${CHANGES, format=&quot;%r&quot;}
+
+&lt;br /&gt;&lt;br /&gt;
+
+Console Output is &lt;a href=&quot;${BUILD_URL}console&quot;&gt;Here&lt;/a&gt;
+
+&lt;br /&gt;&lt;br /&gt;
+
+Changes for this commit:
+&lt;table border=1 cellpadding=0 cellspacing=5&gt;
+${CHANGES, format=&quot;&lt;tr&gt;&lt;td&gt;%r&lt;/td&gt;&lt;td&gt;%a&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=2&gt;%m&lt;/td&gt;&lt;/tr&gt;&quot; }
+&lt;/table&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;i&gt;The cause of this job was: &quot;${CAUSE}&quot;.&lt;/i&gt;</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>
