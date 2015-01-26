@@ -55,7 +55,7 @@ class LicenseDao extends Object
   function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . ".$uploadTreeTableName";
+    $statementName = __METHOD__ . ".$uploadTreeTableName.$usageId";
     $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     if($usageId==LicenseMap::TRIVIAL)
     {    

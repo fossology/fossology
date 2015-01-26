@@ -56,10 +56,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadDao;
   /** @var HighlightDao */
   private $highlightDao;
-  
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
-  
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
@@ -69,10 +67,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $logger = new Logger("SchedulerTest");
+    $logger = M::mock('Monolog\Logger');
     $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
-    $logger = M::mock('Monolog\Logger');
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
     $clearingEventProcessor = new ClearingEventProcessor();
@@ -90,6 +87,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->licenseDao = null;
     $this->highlightDao = null;
     $this->clearingDao = null;
+    M::close();
   }
 
   private function setUpRepo()
