@@ -233,9 +233,12 @@ function plugin_preinstall()
 
   plugin_sort();
 
-  foreach ($Plugins as $plugin)
+  foreach (array_keys($Plugins) as $pluginName)
   {
-    $plugin->preInstall();
+    if (array_key_exists($pluginName, $Plugins))
+    {
+      $Plugins[$pluginName]->preInstall();
+    }
   }
 }
 

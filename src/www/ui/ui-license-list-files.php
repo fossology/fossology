@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  * Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
  *
@@ -46,16 +48,12 @@ class LicenseListFiles extends FO_Plugin
 
     // micro-menu
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_RAW);
-    $Page = GetParm("page", PARM_INTEGER);
+    $rf_shortname = GetParm("lic", PARM_STRING);
     $Excl = GetParm("excl", PARM_RAW);
-
-    $rf_shortname = rawurlencode($rf_shortname);
     $URL = $this->Name . "&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     $text = _("Show All Files");
     menu_insert($this->Name . "::Show All", 0, $URL, $text);
-
   } // RegisterMenus()
 
 
@@ -64,23 +62,18 @@ class LicenseListFiles extends FO_Plugin
    */
   function Output()
   {
-    $V = "";
-    $Time = time();
-    $Max = 50;
-
-    /*  Input parameters */
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_RAW);
+    $rf_shortname = GetParm("lic", PARM_STRING);
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $Excl = GetParm("excl", PARM_RAW);
     $Exclic = GetParm("exclic", PARM_RAW);
-    $rf_shortname = rawurldecode($rf_shortname);
     if (empty($uploadtree_pk) || empty($rf_shortname))
     {
       $text = _("is missing required parameters.");
-      echo $this->Name . " $text";
-      return;
+      return $this->Name . " $text";
     }
+
+    $Max = 50;
     $Page = GetParm("page", PARM_INTEGER);
     if (empty($Page))
     {
@@ -89,43 +82,34 @@ class LicenseListFiles extends FO_Plugin
 
     // Get upload_pk and $uploadtree_tablename
     $UploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
-    $UploadRec = GetSingleRec("upload", "where upload_pk=$UploadtreeRec[upload_fk]");
-    $uploadtree_tablename = $UploadRec['uploadtree_tablename'];
+
+    global $container;
+    /** @var UploadDao */
+    $uploadDao = $container->get('dao.upload');
+    $uploadtree_tablename = $uploadDao->getUploadtreeTableName($UploadtreeRec['upload_fk']);
 
     // micro menus
-    $V .= menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
+    $V = menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
 
     /* Load licenses */
     $Offset = ($Page < 0) ? 0 : $Page * $Max;
     $order = "";
     $PkgsOnly = false;
-    $CheckOnly = false;
-
-    /*
-    global $Plugins;
-    $latestNomos=LatestAgentpk($UploadtreeRec['upload_fk'], "nomos_ars");
-    $newestNomos=$Plugins[plugin_find('license') ]->getNewestAgent("nomos");
-    $latestMonk=LatestAgentpk($uploadId, "monk_ars");
-    $newestMonk=$Plugins[plugin_find('license') ]->getNewestAgent("monk");
-    $goodAgents = array('nomos' => array('name' => 'N', 'latest' => $latestNomos, 'newest' =>$newestNomos, 'latestIsNewest' =>$latestNomos==$newestNomos['agent_pk']  ),
-        'monk' => array('name' => 'M', 'latest' => $latestMonk, 'newest' =>$newestMonk, 'latestIsNewest' =>$latestMonk==$newestMonk['agent_pk']  ));
-    */
 
     // Count is uploadtree recs, not pfiles
-
     $agentId = GetParm('agentId', PARM_INTEGER);
     if (empty($agentId))
     {
       $agentId = "any";
     }
-    $CountArray = CountFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $PkgsOnly, $CheckOnly, $tag_pk, $uploadtree_tablename);
+    $CountArray = $this->countFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $tag_pk, $uploadtree_tablename);
 
     if (empty($CountArray))
     {
       $V .= _("<b> No files found for license $rf_shortname !</b>\n");
-    } else
+    }
+    else
     {
-
       $Count = $CountArray['count'];
       $Unique = $CountArray['unique'];
 
@@ -167,7 +151,6 @@ class LicenseListFiles extends FO_Plugin
 
       $text2 = _("files with these licenses");
       if (!empty($Exclic)) $V .= "<br>$text <b>$text1</b> $text2: $Exclic";
-
 
       /* Get the page menu */
       if (($Max > 0) && ($Count >= $Max) && ($Page >= 0))
@@ -223,16 +206,10 @@ class LicenseListFiles extends FO_Plugin
         $text = _("Exclude files with license");
         $Header .= "<br><a href=$URL>$text: $licstring.</a>";
 
-        $ok = true;
-        /* exclude by type */
-        if ($Excl) if (in_array($FileExt, $ExclArray)) $ok = false;
+        $excludeByType = $Excl && in_array($FileExt, $ExclArray);
+        $excludeByLicense = $Exclic && in_array($licstring, $ExclicArray);
 
-        /* exclude by license */
-        if ($Exclic) if (in_array($licstring, $ExclicArray)) $ok = false;
-
-        if (empty($licstring)) $ok = false;
-
-        if ($ok)
+        if (!empty($licstring) && !$excludeByType && !$excludeByLicense)
         {
           $V .= "<tr><td>";
           /* Tack on pfile to url - information only */
@@ -250,12 +227,9 @@ class LicenseListFiles extends FO_Plugin
           $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header, '', $uploadtree_tablename);
           $V .= $outdent;
           $V .= "</td>";
-          $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
-
-          // show the entire license list as a single string with links to the files
-          // in this container with that license.
+          $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
           $V .= "<td>$row[agent_name]: $licstring</td></tr>";
-          $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
+          $V .= "<tr><td colspan=3><hr></td></tr>";
         }
         $LastPfilePk = $pfile_pk;
       }
@@ -266,19 +240,73 @@ class LicenseListFiles extends FO_Plugin
       {
         $V .= $VM . "\n";
       }
-      $V .= "<hr>\n";
-      $Time = time() - $Time;
-      $text = _("Elapsed time");
-      $text1 = _("seconds");
-      $V .= "<small>$text: $Time $text1</small>\n";
     }
 
-    return ($V);
+    return $V;
   }
 
+  
+  
+  /**
+   * @brief Cloned from commen-license-file.php to refactor it
+   * 
+   * \param $agent_pk - agent id
+   * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
+   * \param $uploadtree_pk - sets scope of request
+   * \param $uploadtree_tablename
+   *
+   * \return Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
+   */
+  protected function countFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $tag_pk=0, $uploadtree_tablename)
+  {
+    global $container;
+    /** @var LicenseDao */
+    $licenseDao = $container->get('dao.license');
+    $license = $licenseDao->getLicenseByShortname($rf_shortname);
+    if (null == $license)
+    {
+      return array();
+    }
+    /** @var UploadDao */
+    $uploadDao = $container->get('dao.upload');
+    $itemBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtree_tablename);
+    $dbManager = $container->get('db.manager');
+            
+    $viewRelavantFiles = "SELECT pfile_fk as PF, uploadtree_pk, ufile_name FROM $uploadtree_tablename";
+    $params = array();
+    $stmt = __METHOD__;
+    if (!empty($tag_pk))
+    {
+      $params[] = $tag_pk;
+      $viewRelavantFiles .= " INNER JOIN tag_file ON PF=tag_file.pfile_fk and tag_fk=$".count($params);
+      $stmt .= '.tag';
+    }
+    $params[] = $itemBounds->getLeft();
+    $params[] = $itemBounds->getRight();
+    $viewRelavantFiles .= ' WHERE lft BETWEEN $'.(count($params)-1).' AND $'.count($params);
+    if ($uploadtree_tablename == "uploadtree_a" || $uploadtree_tablename == "uploadtree"){
+      $params[] = $itemBounds->getUploadId(); 
+      $viewRelavantFiles .= " AND upload_fk=$".count($params);
+      $stmt .= '.upload';
+    }
+    
+    $params[] = $license->getId();
+    $sql = "SELECT count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
+          FROM license_file, ($viewRelavantFiles) as SS
+          WHERE PF=license_file.pfile_fk AND rf_fk = $".count($params);
+    if($agent_pk != "any")
+    {
+      $params[] = $agent_pk;
+      $sql .= " AND agent_fk=$".count($params);
+      $stmt .= '.agent';
+    }
+
+    $RetArray = $dbManager->getSingleRow($sql,$params,$stmt);
+    return $RetArray;
+  }
+ 
 }
 
-;
 
 $NewPlugin = new LicenseListFiles;
 $NewPlugin->Initialize();

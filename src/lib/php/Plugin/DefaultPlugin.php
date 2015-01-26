@@ -238,7 +238,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList) && (!$this->requiresLogin || !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
+    if (isset($this->MenuList) && (!$this->requiresLogin || $this->isLoggedIn()))
     {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }
@@ -321,9 +321,14 @@ abstract class DefaultPlugin implements Plugin
     );
   }
 
+  public function isLoggedIn()
+  {
+    return (!empty($_SESSION['User']) && $_SESSION['User']!='Default User');
+  }
+  
   private function checkPrerequisites()
   {
-    if ($this->requiresLogin && (empty($_SESSION['User']) || $_SESSION['User']=='Default User'))
+    if ($this->requiresLogin && !$this->isLoggedIn())
     {
       throw new \Exception("not allowed without login");
     }

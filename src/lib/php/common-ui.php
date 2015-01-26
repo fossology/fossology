@@ -260,4 +260,3 @@ function Get1stUploadtreeID($upload)
   pg_free_result($result);
   return $uploadtree_id;
 }
-
