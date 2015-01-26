@@ -57,6 +57,7 @@
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
+// TODO add $groupId as parameter (exactly as in JobAddJob)
 function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
 {
   global $container;
@@ -82,17 +83,7 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
   /****  Add user permission to perm_upload *****/
   /* First look up user's group_pk */
   $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($user_pk),__METHOD__.'.select.user');
-  $UserName = $usersRow['user_name'];
-  $GroupRow = $dbManager->getSingleRow('SELECT * FROM groups WHERE group_name=$1',array($UserName),__METHOD__.'.select.group');
-  if (empty($GroupRow))
-  {
-    $text = _("Error!");
-    $text1 = _("Group");
-    $text2 = _("is missing!");
-    echo "$text $text1 $UserName $text2<br>";
-    return NULL;
-  }
-  $group_pk = $GroupRow['group_pk'];
+  $group_pk = $usersRow['group_fk'];
   $perm_admin = PERM_ADMIN;
 
   // before inserting this new record, delete any record for the same upload and group since
