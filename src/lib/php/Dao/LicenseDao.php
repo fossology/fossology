@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -49,12 +49,24 @@ class LicenseDao extends Object
    * \brief get all the licenses for a single file or uploadtree
    *
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int
    * @return LicenseMatch[]
    */
-  function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds)
+  function getAgentFileLicenseMatches(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . ".$uploadTreeTableName";
+    $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    if($usageId==LicenseMap::TRIVIAL)
+    {    
+      $licenseJoin = "ONLY license_ref mlr ON license_file.rf_fk = mlr.rf_pk";
+    }
+    else
+    {
+      $params[] = $usageId;
+      $licenseMapCte = LicenseMap::getMappedLicenseRefView('$4');
+      $licenseJoin = "($licenseMapCte) AS mlr ON license_file.rf_fk = mlr.rf_origin";
+    }
 
     $this->dbManager->prepare($statementName,
         "SELECT   LFR.rf_shortname AS license_shortname,
@@ -66,20 +78,15 @@ class LicenseDao extends Object
                   AG.agent_name AS agent_name,
                   AG.agent_pk AS agent_id,
                   AG.agent_rev AS agent_revision
-          FROM ( SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
-               FROM license_file
-               JOIN ONLY license_ref ON license_file.rf_fk = license_ref.rf_pk) as LFR
+          FROM ( SELECT mlr.rf_fullname, mlr.rf_shortname, mlr.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk, license_file.rf_match_pct
+               FROM license_file JOIN $licenseJoin) as LFR
           INNER JOIN $uploadTreeTableName as UT ON UT.pfile_fk = LFR.pfile_fk
           INNER JOIN agent as AG ON AG.agent_pk = LFR.agent_fk
           WHERE AG.agent_enabled='true' and
            UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3
           ORDER BY license_shortname ASC, percent_match DESC");
-
-    $result = $this->dbManager->execute($statementName,
-        array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight()));
-
+    $result = $this->dbManager->execute($statementName, $params);
     $matches = array();
-
     while ($row = $this->dbManager->fetchArray($result))
     {
       $licenseRef = new LicenseRef(intval($row['license_id']), $row['license_shortname'], $row['license_fullname']);

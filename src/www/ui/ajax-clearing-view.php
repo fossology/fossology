@@ -18,6 +18,7 @@
  */
 
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
@@ -201,7 +202,7 @@ class AjaxClearingView extends FO_Plugin
     $uploadId = $itemTreeBounds->getUploadId();
     $uberUri = Traceback_uri() . "?mod=view-license" . Traceback_parm_keep(array('upload', 'folder'));
 
-    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
+    list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
     $licenseEventTypes = new ClearingEventTypes();
 
     $table = array();

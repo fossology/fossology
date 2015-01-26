@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -69,7 +69,8 @@ class ClearingDecisionProcessor extends Object
       throw new Exception('invalid license map');
     }
     $userEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
-    $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
+    $usageId = empty($licenseMap) ? LicenseMap::TRIVIAL : $licenseMap->getUsage();
+    $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds,$usageId);
     $eventLicenceIds = array();
     foreach (array_keys($userEvents) as $licenseId)
     {
@@ -187,9 +188,9 @@ class ClearingDecisionProcessor extends Object
    * @return array
    * @throws Exception
    */
-  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId)
+  public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId, $usageId=LicenseMap::TRIVIAL)
   {
-    $agentEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds);
+    $agentEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds, $usageId);
     $events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
     $addedResults = array();

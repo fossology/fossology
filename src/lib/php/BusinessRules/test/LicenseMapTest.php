@@ -89,4 +89,32 @@ class LicenseMapTest extends \PHPUnit_Framework_TestCase
     assertThat($topLevelLicenses, not(hasKeyInArray(2)));
   }
   
+  
+  public function testGetMappedLicenseRefView()
+  {
+    $this->testDb = new TestPgDb();
+    $this->testDb->createPlainTables(array('license_ref','license_map'));
+    $this->dbManager = $this->testDb->getDbManager();
+    $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+    $this->dbManager->insertTableRow('license_map',array('license_map_pk'=>0,'rf_fk'=>2,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'));
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>2,'rf_shortname'=>'Two','rf_fullname'=>'Two-2'));
+    $this->dbManager->insertTableRow('license_candidate',
+            array('rf_pk'=>3,'rf_shortname'=>'Three','rf_fullname'=>'Three-3','group_fk'=>$this->groupId));
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+    
+    $view = LicenseMap::getMappedLicenseRefView(LicenseMap::CONCLUSION);
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt,$view);
+    $res = $this->dbManager->execute($stmt);
+    $map = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    assertThat($map,is(arrayWithSize(2)));
+    $expected = array(
+        array('rf_origin'=>1, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'),
+        array('rf_origin'=>2, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1')
+    );
+    assertThat($map,containsInAnyOrder($expected));
+  }
+  
 }

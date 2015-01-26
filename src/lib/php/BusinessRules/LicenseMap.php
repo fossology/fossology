@@ -113,5 +113,16 @@ class LicenseMap extends Object
     }
     return $topLevel;
   }
+  
+  /**
+   * @param string $usageExpr
+   */
+  public static function getMappedLicenseRefView($usageExpr='$1')
+  {
+    $sql = "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM ONLY license_ref bot "
+          ."LEFT JOIN license_map ON bot.rf_pk=rf_fk AND usage=$usageExpr "
+          ."INNER JOIN license_ref top ON rf_parent=top.rf_pk OR rf_parent IS NULL AND bot.rf_pk=top.rf_pk";
+    return $sql;
+  }
 
 }

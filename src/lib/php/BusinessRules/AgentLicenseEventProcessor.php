@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -55,11 +55,11 @@ class AgentLicenseEventProcessor extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
+  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
     $agentDetectedLicenses = array();
 
-    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds, $usageId);
 
     foreach ($licenseFileMatches as $licenseMatch)
     {
@@ -139,24 +139,24 @@ class AgentLicenseEventProcessor extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int
    * @return AgentClearingEvent[][] indexed by LicenseId
    */
-  public function getScannerEvents(ItemTreeBounds $itemTreeBounds) {
-    $result = array();
+  public function getScannerEvents(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
+  {
+    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
     
-    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
-
-    foreach ($agentDetails as $licenseId => $properties) {
+    $result = array();
+    foreach ($agentDetails as $licenseId => $properties)
+    {
       $agentClearingEvents = array();
-      
-      foreach ($properties as $agentName => $licenseProperties)
+      foreach ($properties as $licenseProperties)
       {
         foreach ($licenseProperties as $licenseProperty)
         {
           $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
         }
       }
-      
       $result[$licenseId] = $agentClearingEvents;
     }
     

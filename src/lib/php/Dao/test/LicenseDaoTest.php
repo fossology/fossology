@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
@@ -83,6 +84,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     
     assertThat($matches, equalTo($expected));
     assertThat($matches[0], is(anInstanceOf(LicenseMatch::classname())) );
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
   
 
@@ -239,4 +241,45 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }  
+  
+  public function testGetAgentFileLicenseMatchesWithLicenseMapping()
+  {
+    $this->testDb->createPlainTables(array('license_ref','uploadtree','license_file','agent','license_map'));
+    $this->testDb->insertData_license_ref();
+
+    $lic0 = $this->dbManager->getSingleRow("Select * from license_ref limit 1");
+    $licRefId = $lic0['rf_pk'];
+    $licenseFileId= 1;
+    $pfileId= 42;
+    $agentId = 23;
+    $matchPercent = 50;
+    $uploadtreeId= 512;
+    $uploadID =123;
+    $left=2009;
+    $right=2014;
+    $agentName="fake";
+    $agentRev=1;
+    $lic1 = $this->dbManager->getSingleRow("SELECT * FROM license_ref WHERE rf_pk!=$1 LIMIT 1",array($licRefId));
+    $licVarId = $lic1['rf_pk'];
+    $mydate = "'2014-06-04 14:01:30.551093+02'";
+    $this->dbManager->insertTableRow('license_map', array('license_map_pk'=>0,'rf_fk'=>$licVarId,'rf_parent'=>$licRefId,'usage'=>LicenseMap::CONCLUSION));
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk)
+            VALUES ($licenseFileId, $licVarId, $agentId, $matchPercent, $mydate, $pfileId)");
+    $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, upload_fk, pfile_fk, lft, rgt)
+            VALUES ($uploadtreeId, $uploadID, $pfileId, $left, $right)");
+    $stmt = __METHOD__.'.insert.agent';
+    $this->dbManager->prepare($stmt,"INSERT INTO agent (agent_pk, agent_name, agent_rev, agent_enabled) VALUES ($1,$2,$3,$4)");
+    $this->dbManager->execute($stmt,array($agentId, $agentName, $agentRev, 'true'));
+
+    $licDao = new LicenseDao($this->dbManager);
+    $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadID,$left,$right);
+    $matches = $licDao->getAgentFileLicenseMatches($itemTreeBounds,LicenseMap::CONCLUSION);
+    
+    $licenseRef = new LicenseRef($licRefId, $lic0['rf_shortname'], $lic0['rf_fullname']);
+    $agentRef = new AgentRef($agentId, $agentName, $agentRev);
+    $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
+    
+    assertThat($matches, equalTo($expected));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
 }
