@@ -36,7 +36,7 @@ install:
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ecc.php
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ip.php
-	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/
+	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/ \;
 
 uninstall:
 	@for MOD_NAME in $(MOD_NAMES); do \
