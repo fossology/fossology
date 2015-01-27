@@ -34,7 +34,7 @@ TODO
 
 global $container;
 
-$opts = getopt("", array("username:", "uploadId:"));
+$opts = getopt("c:", array("username:", "groupname:", "uploadId:"));
 
 /** @var UploadDao */
 $uploadDao = $container->get("dao.upload");
@@ -48,17 +48,25 @@ if (!array_key_exists("uploadId", $opts)) {
 }
 $uploadId = $opts["uploadId"];
 
+$user = "";
+$group = "";
+
 if (array_key_exists("username", $opts)) {
   $user = $opts["username"];
 }
 
+if (array_key_exists("groupname", $opts)) {
+  $user = $opts["groupname"];
+}
+
 $passwd = null;
-account_check($user, $passwd);
+account_check($user, $passwd, $group);
 
 global $SysConf;
 $userId = $SysConf['auth']['UserId'];
+$groupId = $SysConf['auth']['GroupId'];
 
-$jobStatuses = $jobDao->getAllJobStatus($uploadId, $userId);
+$jobStatuses = $jobDao->getAllJobStatus($uploadId, $userId, $groupId);
 $runningJobs = false;
 foreach($jobStatuses as $jobStatus)
 {

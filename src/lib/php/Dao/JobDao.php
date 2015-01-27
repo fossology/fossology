@@ -35,15 +35,16 @@ class JobDao extends Object
     $this->logger = $logger;
   }
 
-  public function getAllJobStatus($uploadId, $userId) {
+  public function getAllJobStatus($uploadId, $userId, $groupId) {
     $result = array();
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,
       "SELECT jobqueue.jq_pk as jq_pk, jobqueue.jq_end_bits as end_bits
       FROM jobqueue INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
-      WHERE job.job_upload_fk = $1 AND job_user_fk = $2");
+      LEFT JOIN group_user_member gm ON gm.user_fk = job_user_fk
+      WHERE job.job_upload_fk = $1 AND (job_user_fk = $2 OR gm.group_fk = $3)");
 
-    $res = $this->dbManager->execute($stmt, array($uploadId, $userId));
+    $res = $this->dbManager->execute($stmt, array($uploadId, $userId, $groupId));
     while ($row = $this->dbManager->fetchArray($res))
     {
       $result[$row['jq_pk']] = $row['end_bits'];
