@@ -115,9 +115,7 @@ function bootstrap($sysconfdir="")
 
   //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
   require_once("$moddir/lib/php/common.php");
-  // this can be removed when FO_Plugin is moved to the correct namespace
   require_once("$moddir/lib/php/Plugin/FO_Plugin.php");
-  require_once("$moddir/www/ui/ui-menus.php");
 
   return $SysConf;
 }

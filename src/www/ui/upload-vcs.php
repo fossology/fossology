@@ -138,7 +138,7 @@ class upload_vcs extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function htmlContent() {
+  function Output() {
     /* If this is a POST, then process the request. */
     $Folder = GetParm('folder', PARM_INTEGER);
     $VCSType = GetParm('vcstype', PARM_TEXT);

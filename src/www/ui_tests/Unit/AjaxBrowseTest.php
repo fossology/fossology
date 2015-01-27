@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,25 +16,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+use Fossology\UI\Ajax\AjaxBrowse;
 use Mockery as M;
 
 global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
 $wwwPath = dirname(dirname(__DIR__));
-require_once(dirname($wwwPath).'/lib/php/Plugin/FO_Plugin.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
-require_once ($wwwPath.'/ui/browse-processPost.php');
+require_once ($wwwPath.'/ui/async/AjaxBrowse.php');
 
 
-class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
+class AjaxBrowseTest extends PHPUnit_Framework_TestCase
 {
 
   public function testCreateSelect()
   {
-    $browseProcessPost = new browseProcessPost();
+    $browseProcessPost = new AjaxBrowse();
 
-    $reflection = new \ReflectionClass( get_class($browseProcessPost) );
+    $reflection = new ReflectionClass( get_class($browseProcessPost) );
     $method = $reflection->getMethod('createSelect');
     $method->setAccessible(true);
     
@@ -42,6 +42,7 @@ class BrowseProcessPostTest extends \PHPUnit_Framework_TestCase
     $inner = '<option value="k1">v1</option><option value="k2" selected>v2</option>';
     $expected = "<select name=\"$id\" id=\"$id\" $actions>$inner</select>";
     assertThat($result, is($expected));
+    $this->addToAssertionCount(1);
   }
 
 }

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,21 +21,22 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 define("TITLE_core_auth", _("Login"));
 
 class core_auth extends FO_Plugin
 {
   public static $origReferer;
-
   /** @var DbManager */
   private $dbManager;
 
   /** @var UserDao */
   private $userDao;
 
-  /** @var Twig_Environment */
-  private $renderer;
+  /** @var Session */
+  private $session;
+
 
   function __construct()
   {
@@ -47,7 +49,7 @@ class core_auth extends FO_Plugin
     global $container;
     $this->dbManager = $container->get("db.manager");
     $this->userDao = $container->get('dao.user');
-    $this->renderer = $container->get('twig.environment');
+    $this->session = $container->get('session');
   }
 
   /**
@@ -76,13 +78,7 @@ class core_auth extends FO_Plugin
    */
   function PostInitialize()
   {
-    global $PG_CONN;
     global $SysConf;
-
-    if (empty($PG_CONN))
-    {
-      return (0);
-    }
 
     /* if Site Minder enabled core-auth will be disabled*/
     if (siteminder_check() != -1)
@@ -90,18 +86,18 @@ class core_auth extends FO_Plugin
       return (0);
     }
 
-    global $container;
-    /** @var Session $session */
-    $session = $container->get('session');
-    $session->setName('Login');
-    if (!$session->isStarted()) $session->start();
+    if (!$this->session->isStarted())
+    {
+      $this->session->setName('Login');
+      $this->session->start();
+    }
 
     if (array_key_exists('selectMemberGroup', $_POST))
     {
       $selectedGroupId = intval($_POST['selectMemberGroup']);
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
-      $session->set(Auth::GROUP_ID, $selectedGroupId);
+      $this->session->set(Auth::GROUP_ID, $selectedGroupId);
       $SysConf['auth']['GroupId'] = $selectedGroupId;
     }
 
@@ -119,8 +115,7 @@ class core_auth extends FO_Plugin
     if (empty($_SESSION['ip']))
     {
       $_SESSION['ip'] = $this->GetIP();
-    }
-    else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
     {
       /* Sessions are not transferable. */
       $this->updateSession("");
@@ -152,7 +147,7 @@ class core_auth extends FO_Plugin
     $this->State = PLUGIN_STATE_READY;
   } // GetIP()
 
-    /**
+  /**
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
@@ -168,12 +163,15 @@ class core_auth extends FO_Plugin
 
     $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
     $SysConf['auth']['UserId'] = $userRow['user_pk'];
+    $this->session->set(Auth::USER_ID, $userRow['user_pk']);
     $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
+    $this->session->set(Auth::USER_NAME, $userRow['user_name']);
     $_SESSION['Folder'] = $userRow['root_folder_fk'];
     $_SESSION['UserLevel'] = $userRow['user_perm'];
     $_SESSION['UserEmail'] = $userRow['user_email'];
     $_SESSION['UserEnote'] = $userRow['email_notify'];
     $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
+    $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $SysConf['auth']['GroupId'] = $userRow['group_fk'];
     $_SESSION['GroupName'] = $userRow['group_name'];
   }
@@ -201,7 +199,7 @@ class core_auth extends FO_Plugin
   /**
    * \brief This is only called when the user logs out.
    */
-  protected function htmlContent()
+  public function Output()
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
@@ -211,33 +209,29 @@ class core_auth extends FO_Plugin
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
 
-    $output = !empty($userName) ? $this->checkUsernameAndPassword($userName, $password, $referrer) : '';
-    if (!empty($output))
+    $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    if ($validLogin)
     {
-      return $output;
+      return new RedirectResponse($referrer);
     }
-    
-    $output = "";
+
     $initPluginId = plugin_find_id("init");
-    if ( $initPluginId>= 0)
+    if ($initPluginId >= 0)
     {
       global $Plugins;
-      $output .= $Plugins[$initPluginId]->infoFirstTimeUsage();
+      $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    $this->vars['referer'] = $referrer;
-
-    $output .= $this->renderer->loadTemplate('login-form.html.twig')->render($this->getVars());
-
-    return $output;
+    $this->vars['referrer'] = $referrer;
+    return $this->render('login.html.twig');
   }
-  
+
   /**
    * @brief perform logout
    */
   function OutputOpen()
   {
-    if (array_key_exists('User',$_SESSION) && $_SESSION['User'] != "Default User")
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
     {
       $this->updateSession("");
       $Uri = Traceback_uri();
@@ -246,25 +240,25 @@ class core_auth extends FO_Plugin
     }
     parent::OutputOpen();
   }
-  
-  
+
+
   /**
    * \brief See if a username/password is valid.
    *
-   * \return string on match, or null on no-match.
+   * @return boolean
    */
-  function checkUsernameAndPassword($userName, $password, $referrer)
+  function checkUsernameAndPassword($userName, $password)
   {
     if (empty($userName) || $userName == 'Default User')
     {
-      return;
+      return false;
     }
 
     $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
 
     if (empty($row['user_name']))
     {
-      return;
+      return false;
     }
 
     /* Check the password -- only if a password exists */
@@ -273,16 +267,16 @@ class core_auth extends FO_Plugin
       $passwordHash = sha1($row['user_seed'] . $password);
       if (strcmp($passwordHash, $row['user_pass']) != 0)
       {
-        return;
+        return false;
       }
     } else if (!empty($row['user_seed']))
     {
       /* Seed with no password hash = no login */
-      return;
+      return false;
     } else if (!empty($password))
     {
       /* empty password required */
-      return;
+      return false;
     }
 
     /* If you make it here, then username and password were good! */
@@ -306,9 +300,7 @@ class core_auth extends FO_Plugin
     {
       $_SESSION['NoPopup'] = 0;
     }
-
-    /* Redirect window */
-    header("Location: $referrer");
+    return true;
   }
 
 }

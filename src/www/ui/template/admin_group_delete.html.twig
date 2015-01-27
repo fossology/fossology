@@ -5,7 +5,7 @@
  <h1 style="font-size:large;">{{ 'Delete a group'| trans  }}</h1>
  <form name="formy" method="post" action="{{ uri }}">
     {{ "Select the group to delete"|trans }}:
-    {% import "include/macro.html.twig" as macro %}
+    {% import "include/macros.html.twig" as macro %}
     {{ macro.select('grouppk',groupMap,'grouppk') }}
     <input type="submit" value="{{ 'Delete'|trans }}"/>
   </form>

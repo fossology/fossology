@@ -86,7 +86,7 @@ class folder_move extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  protected function htmlContent() {
+  public function Output() {
     $V = "";
     global $PG_CONN;
     /* If this is a POST, then process the request. */

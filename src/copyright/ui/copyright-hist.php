@@ -133,8 +133,6 @@ class CopyrightHistogram  extends HistogramBase {
 
   }
 
-
-
 }
 
 $NewPlugin = new CopyrightHistogram;

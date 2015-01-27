@@ -26,6 +26,7 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
 
 
 class MonkScheduledTest extends PHPUnit_Framework_TestCase
@@ -49,7 +50,8 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = new Logger("SchedulerTest");
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }

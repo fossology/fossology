@@ -53,7 +53,7 @@ class core_debug_fileloc extends FO_Plugin
   /**
    * \brief Display the loaded menu and plugins.
    */
-  protected function htmlContent()
+  public function Output()
   {
     global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $LOGDIR,
     $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $SVN_REV;

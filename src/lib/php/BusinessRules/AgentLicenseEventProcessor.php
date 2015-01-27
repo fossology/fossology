@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -55,46 +55,11 @@ class AgentLicenseEventProcessor extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds)
-  {
-    $latestDetails = array();
-    $latestAgentDetectedLicenses = $this->getLatestScannerDetectedMatches($itemTreeBounds);
-
-    foreach ($latestAgentDetectedLicenses as $licenseId => $val)
-    {
-      foreach($val as $agentName => $val2)
-      {
-        foreach($val2 as $licenseMatch)
-        {
-          $licenseRef = $licenseMatch->getLicenseRef();
-          $licenseId = $licenseRef->getId();
-          if ($licenseRef->getShortName() === "No_license_found")
-          {
-            continue;
-          }
-          $agentRef = $licenseMatch->getAgentRef();
-          $agentName = $agentRef->getAgentName();
-          $agentId = $agentRef->getAgentId();
-
-          $latestDetails[$licenseId][$agentName][] = array(
-              'id' => $licenseId,
-              'licenseRef' => $licenseRef,
-              'agentRef' => $agentRef,
-              'matchId' => $licenseMatch->getLicenseFileId(),
-              'percentage' => $licenseMatch->getPercentage()
-          );
-        }
-      }
-    }
-
-    return $latestDetails;
-  }
-
-  public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
+  protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
     $agentDetectedLicenses = array();
 
-    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds, $usageId);
 
     foreach ($licenseFileMatches as $licenseMatch)
     {
@@ -108,7 +73,13 @@ class AgentLicenseEventProcessor extends Object
       $agentName = $agentRef->getAgentName();
       $agentId = $agentRef->getAgentId();
 
-      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = $licenseMatch;
+      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = array(
+          'id' => $licenseId,
+          'licenseRef' => $licenseRef,
+          'agentRef' => $agentRef,
+          'matchId' => $licenseMatch->getLicenseFileId(),
+          'percentage' => $licenseMatch->getPercentage()
+      );
     }
 
     $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
@@ -165,33 +136,33 @@ class AgentLicenseEventProcessor extends Object
 
     return $licenses;
   }
-
+  
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int
    * @return AgentClearingEvent[][] indexed by LicenseId
    */
-  public function getScannerEvents(ItemTreeBounds $itemTreeBounds) {
+  public function getScannerEvents(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
+  {
+    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
+    
     $result = array();
-
-    $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
-
-    foreach ($agentDetails as $licenseId => $properties) {
+    foreach ($agentDetails as $licenseId => $properties)
+    {
       $agentClearingEvents = array();
-
-      foreach ($properties as $agentName => $licenseProperties)
+      foreach ($properties as $licenseProperties)
       {
         foreach ($licenseProperties as $licenseProperty)
         {
           $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
         }
       }
-
+      
       $result[$licenseId] = $agentClearingEvents;
     }
-
     return $result;
   }
-
+  
   /**
    * @param $licenseProperty
    * @return AgentClearingEvent

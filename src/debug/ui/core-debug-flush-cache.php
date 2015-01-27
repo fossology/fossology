@@ -32,7 +32,7 @@ class debug_flush_cache extends FO_Plugin
   /**
    * \brief Generate output.
    */
-  protected function htmlContent()
+  public function Output()
   {
     ReportCachePurgeAll();
     return _("All cached pages have been removed.");

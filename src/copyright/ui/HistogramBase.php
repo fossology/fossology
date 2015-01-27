@@ -141,7 +141,7 @@ class HistogramBase extends FO_Plugin {
     return parent::OutputOpen();
   }
 
-  protected function htmlContent()
+  public function Output()
   {
     $OutBuf="";
     $Upload = GetParm("upload",PARM_INTEGER);

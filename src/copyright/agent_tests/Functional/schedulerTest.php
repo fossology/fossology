@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
 
 if (!function_exists('Traceback_uri'))
 {
@@ -47,8 +48,10 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestPgDb("copyrightSched".time());
     $this->dbManager = $this->testDb->getDbManager();
 
+    $logger = new Logger("CopyrightSchedulerTest");
+
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
   }
 

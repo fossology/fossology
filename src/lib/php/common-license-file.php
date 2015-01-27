@@ -188,6 +188,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $UploadClause = "upload_fk=$upload_pk and ";
   else
     $UploadClause = "";
+  $theLimit = ($limit=='ALL') ? '' : "LIMIT $limit";
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
           from license_file, agent, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
@@ -198,7 +199,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
               AND agent_pk=agent_fk
               $TagClause
           GROUP BY uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name
-          $order limit $limit offset $offset";
+          $order $theLimit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   return $result;

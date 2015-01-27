@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class WelcomePage extends DefaultPlugin
+class GettingStartedPage extends DefaultPlugin
 {
   const NAME = 'Getting Started';
   
@@ -35,7 +35,6 @@ class WelcomePage extends DefaultPlugin
         self::TITLE =>  _("Getting Started with FOSSology"),
         self::REQUIRES_LOGIN => false,
         self::MENU_LIST => "Help::Getting Started",
-        self::DEPENDENCIES => array(\ui_menu::NAME)
     ));
   }
 
@@ -58,7 +57,7 @@ class WelcomePage extends DefaultPlugin
   {
     $show = $request->get('show');
     if ($show=='licensebrowser'){
-      return $this->render("licensebrowser.html.twig");
+      return $this->render("getting_started_licensebrowser.html.twig");
     }
     $login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
@@ -67,8 +66,8 @@ class WelcomePage extends DefaultPlugin
     }
     $vars = array('login'=>$login, 'SiteURI'=> Traceback_uri());
 
-    return $this->render('welcome.html.twig', $this->mergeWithDefault($vars));
+    return $this->render('getting_started.html.twig', $this->mergeWithDefault($vars));
   }
 }
 
-register_plugin(new WelcomePage());
+register_plugin(new GettingStartedPage());

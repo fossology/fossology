@@ -4,7 +4,7 @@
   
     {% if authUrl %}
     <div style="float: right; border: 1px black dashed; max-width: 360px; padding: 5px;">
-      {% include 'login-form.html.twig' %}
+        {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
     </div>
   {% endif %}
   

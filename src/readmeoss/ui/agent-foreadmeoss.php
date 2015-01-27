@@ -96,7 +96,7 @@ class agent_foreadmeoss extends FO_Plugin
     return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
   }
 
-  function htmlContent()
+  function Output()
   {
     if ($this->State != PLUGIN_STATE_READY)
     {

@@ -29,7 +29,7 @@ class debug_user extends FO_Plugin
     parent::__construct();
   }
   
-  protected function htmlContent()
+  public function Output()
   {
     $V = "";
     global $PG_CONN;

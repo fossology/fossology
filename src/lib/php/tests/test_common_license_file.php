@@ -67,7 +67,10 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     print "*** path to test db creation command: " . $DB_COMMAND;
     exec($DB_COMMAND, $dbout, $rc);
-    print "output: " . $dbout;
+    if (!empty($rc))
+    {
+      throw new Exception(implode("\n", $dbout));
+    }
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];
     $db_conf = $dbout[0];

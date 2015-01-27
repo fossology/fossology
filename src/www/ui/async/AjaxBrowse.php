@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  * Author: J.Najjar, S. Weber
  *
  * This program is free software; you can redistribute it and/or
@@ -17,15 +17,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+namespace Fossology\UI\Ajax;
+
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Util\DataTablesUtility;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
-define("TITLE_browseProcessPost", _("Private: Browse post"));
-
-class browseProcessPost extends FO_Plugin
+class AjaxBrowse extends DefaultPlugin
 {
+  const PRIO_COLUMN = 'priority';
+  const NAME = "browse-processPost";
+
   /** @var  UploadDao $uploadDao */
   private $uploadDao;
   /** @var  UserDao $userDao */
@@ -43,17 +49,10 @@ class browseProcessPost extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "browse-processPost";
-    $this->Title = TITLE_browseProcessPost;
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->NoHTML = 1;
-    $this->LoginFlag = 0;
-    $this->NoMenu = 0;
-
-    parent::__construct();
-    $this->DBaccess = PLUGIN_DB_WRITE;
-
+    parent::__construct(self::NAME, array(
+        self::PERMISSION => self::PERM_WRITE
+      ));
+        
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->userDao = $container->get('dao.user');
@@ -62,31 +61,26 @@ class browseProcessPost extends FO_Plugin
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
    */
-  function Output()
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return;
-    }
-
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
-        array($_SESSION['UserId'], $_SESSION['GroupId']), $logNote = __METHOD__ . '.user_perm');
-    if ($gup === false)
+        array($_SESSION['UserId'], $_SESSION['GroupId']), __METHOD__ . '.user_perm');
+    if (!$gup)
     {
-      throw new Exception('You are assigned to wrong group.');
+      throw new \Exception('You are assigned to wrong group.');
     }
     $this->userPerm = $gup['group_perm'];
 
-    $columnName = GetParm('columnName', PARM_STRING);
-    $uploadId = GetParm('uploadId', PARM_INTEGER);
-    $statusId = GetParm('statusId', PARM_INTEGER);
-    $value = GetParm('value', PARM_INTEGER);
-    $moveUpload = GetParm("move", PARM_INTEGER);
-    $beyondUpload = GetParm("beyond", PARM_INTEGER);
-    $commentText = GetParm('commentText', PARM_STRING);
-    $direction = GetParm('direction', PARM_STRING);
+    $columnName = $request->get('columnName');
+    $uploadId = intval($request->get('uploadId'));
+    $statusId = intval($request->get('statusId'));
+    $value = intval($request->get('value'));
+    $moveUpload = intval($request->get("move"));
+    $beyondUpload = intval($request->get("beyond"));
+    $commentText = $request->get('commentText');
+    $direction = $request->get('direction');
 
     if (!empty($columnName) and !empty($uploadId) and !empty($value))
     {
@@ -102,17 +96,13 @@ class browseProcessPost extends FO_Plugin
       $this->setStatusAndComment($uploadId, $statusId, $commentText);
     } else
     {
-      $folder = GetParm('folder', PARM_STRING);
-      $show = GetParm('show', PARM_STRING);
-      header('Content-type: text/json');
-      list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->showFolderGetTableData($folder, $show);
-      return json_encode(array(
-              'sEcho' => intval($_GET['sEcho']),
+      list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->showFolderGetTableData($request);
+      return new JsonResponse(array(
+              'sEcho' => intval($request->get('sEcho')),
               'aaData' => $aaData,
               'iTotalRecords' => $iTotalRecords,
               'iTotalDisplayRecords' => $iTotalDisplayRecords
-          )
-      );
+          ));
     }
   }
 
@@ -128,7 +118,7 @@ class browseProcessPost extends FO_Plugin
       $this->dbManager->getSingleRow($sql, array($value, $uploadId), $sqlLog = __METHOD__);
     } else
     {
-      throw new Exception('invalid column');
+      throw new \Exception('invalid column');
     }
   }
 
@@ -139,7 +129,7 @@ class browseProcessPost extends FO_Plugin
       $this->setStatusAndComment($uploadId, $value, $commentText = '');
     } else if ($value == 4)
     {
-      throw new Exception('missing permission');
+      throw new \Exception('missing permission');
     } else if ($this->userPerm)
     {
       $sql = "update upload SET status_fk=$1 where upload_pk=$2";
@@ -155,42 +145,42 @@ class browseProcessPost extends FO_Plugin
   {
     $this->dbManager->begin();
     $this->dbManager->prepare($stmt = __METHOD__ . '.get.single.Upload',
-        $sql = 'SELECT upload_pk,priority FROM upload WHERE upload_pk=$1');
+        $sql='SELECT upload_pk,'.self::PRIO_COLUMN.' FROM upload WHERE upload_pk=$1');
     $movePoint = $this->dbManager->getSingleRow($sql, array($moveUpload), $stmt);
     $beyondPoint = $this->dbManager->getSingleRow($sql, array($beyondUpload), $stmt);
-    if ($movePoint['priority'] > $beyondPoint['priority'])
+    if ($movePoint[self::PRIO_COLUMN] > $beyondPoint[self::PRIO_COLUMN])
     {
-      $farPoint = $this->dbManager->getSingleRow("SELECT priority FROM upload WHERE priority<$1 ORDER BY priority DESC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.lower.priority');
+      $farPoint = $this->dbManager->getSingleRow("SELECT ".self::PRIO_COLUMN." FROM upload WHERE ".self::PRIO_COLUMN."<$1 ORDER BY ".self::PRIO_COLUMN." DESC LIMIT 1",
+              array($beyondPoint[self::PRIO_COLUMN]), 'get.upload.with.lower.priority');
     } else
     {
-      $farPoint = $this->dbManager->getSingleRow("SELECT priority FROM upload WHERE priority>$1 ORDER BY priority ASC LIMIT 1", array($beyondPoint['priority']), 'get.upload.with.higher.priority');
+      $farPoint = $this->dbManager->getSingleRow("SELECT ".self::PRIO_COLUMN." FROM upload WHERE ".self::PRIO_COLUMN.">$1 ORDER BY ".self::PRIO_COLUMN." ASC LIMIT 1",
+              array($beyondPoint[self::PRIO_COLUMN]), 'get.upload.with.higher.priority');
     }
     if (false !== $farPoint)
     {
-      $newPriority = ($farPoint['priority'] + $beyondPoint['priority']) / 2;
-    } else if ($movePoint['priority'] > $beyondPoint['priority'])
+      $newPriority = ($farPoint[self::PRIO_COLUMN] + $beyondPoint[self::PRIO_COLUMN]) / 2;
+    } else if ($movePoint[self::PRIO_COLUMN] > $beyondPoint[self::PRIO_COLUMN])
     {
-      $newPriority = $beyondPoint['priority'] - 0.5;
+      $newPriority = $beyondPoint[self::PRIO_COLUMN] - 0.5;
     } else
     {
-      $newPriority = $beyondPoint['priority'] + 0.5;
+      $newPriority = $beyondPoint[self::PRIO_COLUMN] + 0.5;
     }
-    $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2', array($newPriority, $moveUpload), 'update.priority');
+    $this->dbManager->getSingleRow('UPDATE upload SET '.self::PRIO_COLUMN.'=$1 WHERE upload_pk=$2', array($newPriority, $moveUpload), __METHOD__.'.update.priority');
     $this->dbManager->commit();
   }
 
-  private function showFolderGetTableData($Folder, $Show)
+  private function showFolderGetTableData(Request $request)
   {
     /* Get list of uploads in this folder */
-    list($result, $iTotalDisplayRecords, $iTotalRecords) = $this->getListOfUploadsOfFolder($Folder);
+    list($result, $iTotalDisplayRecords, $iTotalRecords) = $this->getListOfUploadsOfFolder($request);
 
-    $Uri = Traceback_uri() . "?mod=license";
-
+    $uri = Traceback_uri() . "?mod=license";
     /* Browse-Pfile menu */
-    $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
-
+    $menuPfile = menu_find("Browse-Pfile", $menuDepth);
     /* Browse-Pfile menu without the compare menu item */
-    $MenuPfileNoCompare = menu_remove($MenuPfile, "Compare");
+    $menuPfileNoCompare = menu_remove($menuPfile, "Compare");
 
     $this->statusTypes = $this->uploadDao->getStatusTypeMap();
     $users = $this->userDao->getUserChoices();
@@ -203,14 +193,14 @@ class browseProcessPost extends FO_Plugin
 
     $output = array();
     $rowCounter = 0;
-    while ($Row = $this->dbManager->fetchArray($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
-      if (empty($Row['upload_pk']) || (GetUploadPerm($Row['upload_pk']) < PERM_READ))
+      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < PERM_READ))
       {
         continue;
       }
       $rowCounter++;
-      $output[] = $this->showRow($Row, $Folder, $Show, $Uri, $MenuPfile, $MenuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter);
+      $output[] = $this->showRow($row, $request, $uri, $menuPfile, $menuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter);
     }
     $this->dbManager->freeResult($result);
     return array($output, $iTotalRecords, $iTotalDisplayRecords);
@@ -218,51 +208,51 @@ class browseProcessPost extends FO_Plugin
 
 
   /**
-   * @param array $Row fetched row
-   * @param $Folder
-   * @param $Show
-   * @param $Uri
-   * @param $MenuPfile
-   * @param $MenuPfileNoCompare
+   * @param array $row fetched row
+   * @param Request $request
+   * @param $uri
+   * @param $menuPfile
+   * @param $menuPfileNoCompare
    * @param array $statusTypesAvailable
    * @param array $users
    * @param string (unique)
    * @return array
    */
-  private function showRow($Row, $Folder, $Show, $Uri, $MenuPfile, $MenuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter)
+  private function showRow($row,Request $request, $uri, $menuPfile, $menuPfileNoCompare, $statusTypesAvailable, $users, $rowCounter)
   {
-    $uploadId = intval($Row['upload_pk']);
-    $description = htmlentities($Row['upload_desc']);
+    $show = $request->get('show');
+    $folder = $request->get('folder');
+    
+    $uploadId = intval($row['upload_pk']);
+    $description = htmlentities($row['upload_desc']);
 
-    $fileName = $Row['ufile_name'];
+    $fileName = $row['ufile_name'];
     if (empty($fileName))
     {
-      $fileName = $Row['upload_filename'];
+      $fileName = $row['upload_filename'];
     }
 
-    /* If UploadtreePk is not an artifact, then use it as the root.
-     Else get the first non artifact under it.
-     */
-    if (Isartifact($Row['ufile_mode']))
-      $itemId = DirGetNonArtifact($Row['uploadtree_pk']);
-    else
-      $itemId = $Row['uploadtree_pk'];
+    $itemId = Isartifact($row['ufile_mode']) ? DirGetNonArtifact($row['uploadtree_pk']) : $row['uploadtree_pk'];
 
     $nameColumn = "<b>$fileName</b>";
-    if (IsContainer($Row['ufile_mode']))
+    if (IsContainer($row['ufile_mode']))
     {
-      $nameColumn = "<a href='$Uri&upload=$uploadId&folder=$Folder&item=$itemId&show=$Show'>$nameColumn</a>";
+      $nameColumn = "<a href='$uri&upload=$uploadId&folder=$folder&item=$itemId&show=$show'>$nameColumn</a>";
     }
     $nameColumn .= "<br>";
     if (!empty($description))
     {
       $nameColumn .= "<i>$description</i><br>";
     }
-    $Parm = "upload=$uploadId&show=$Show&item=" . $Row['uploadtree_pk'];
-    if (Iscontainer($Row['ufile_mode']))
-      $nameColumn .= menu_to_1list($MenuPfile, $Parm, " ", " ", 1, $uploadId);
+    $Parm = "upload=$uploadId&show=$show&item=" . $row['uploadtree_pk'];
+    if (Iscontainer($row['ufile_mode']))
+    {
+      $nameColumn .= menu_to_1list($menuPfile, $Parm, " ", " ", 1, $uploadId);
+    }
     else
-      $nameColumn .= menu_to_1list($MenuPfileNoCompare, $Parm, " ", " ", 1, $uploadId);
+    {
+      $nameColumn .= menu_to_1list($menuPfileNoCompare, $Parm, " ", " ", 1, $uploadId);
+    }
 
     /* Job queue link */
     $text = _("History");
@@ -270,26 +260,28 @@ class browseProcessPost extends FO_Plugin
     {
       $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId'>$text</a>]";
     }
-    $dateCol = substr($Row['upload_ts'], 0, 19);
-    $pairIdPrio = array($uploadId, floatval($Row['priority']));
-    if (!$this->userPerm && 4 == $Row['status_fk'])
+    $dateCol = substr($row['upload_ts'], 0, 19);
+    $pairIdPrio = array($uploadId, floatval($row[self::PRIO_COLUMN]));
+    if (!$this->userPerm && 4 == $row['status_fk'])
     {
       $currentStatus = $this->statusTypes[4];
-    } else
+    }
+    else
     {
       $statusAction = " onchange =\"changeTableEntry(this, $uploadId,'status_fk' )\" ";
-      $currentStatus = $this->createSelect("Status" . $this->userPerm . "Of_$rowCounter", $statusTypesAvailable, $Row['status_fk'], $statusAction);
+      $currentStatus = $this->createSelect("Status" . $this->userPerm . "Of_$rowCounter", $statusTypesAvailable, $row['status_fk'], $statusAction);
     }
     if ($this->userPerm)
     {
       $action = " onchange =\"changeTableEntry(this, $uploadId, 'assignee')\"";
-      $currentAssignee = $this->createSelectUsers("AssignedTo_$rowCounter", $users, $Row['assignee'], $action );
-    } else
-    {
-      $currentAssignee = array_key_exists($Row['assignee'], $users) ? $users[$Row['assignee']] : _('Unassigned');
+      $currentAssignee = $this->createSelectUsers("AssignedTo_$rowCounter", $users, $row['assignee'], $action );
     }
-    $rejectableUploadId = ($this->userPerm || $Row['status_fk'] < 4) ? $uploadId : 0;
-    $tripleComment = array($rejectableUploadId, $Row['status_fk'], htmlspecialchars($Row['status_comment']));
+    else
+    {
+      $currentAssignee = array_key_exists($row['assignee'], $users) ? $users[$row['assignee']] : _('Unassigned');
+    }
+    $rejectableUploadId = ($this->userPerm || $row['status_fk'] < 4) ? $uploadId : 0;
+    $tripleComment = array($rejectableUploadId, $row['status_fk'], htmlspecialchars($row['status_comment']));
     $output = array($nameColumn, $currentStatus, $tripleComment, $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
@@ -330,20 +322,20 @@ class browseProcessPost extends FO_Plugin
   
 
   /**
-   * @param $Folder
+   * @param Request $request
    * @return array
    */
-  private function getListOfUploadsOfFolder($Folder)
+  private function getListOfUploadsOfFolder(Request $request)
   {
     $orderString = $this->getOrderString();
-    $this->filterParams = array($Folder);
-    $filter = $this->getSearchString();
-    $filter .= $this->getIntegerFilter('assigneeSelected', 'assignee');
-    $filter .= $this->getIntegerFilter('statusSelected', 'status_fk');
+    $this->filterParams = array($folder=$request->get('folder'));
+    $filter = $this->getSearchString($request->get('sSearch'));
+    $filter .= $this->getIntegerFilter(intval($request->get('assigneeSelected')), 'assignee');
+    $filter .= $this->getIntegerFilter(intval($request->get('statusSelected')), 'status_fk');
     $stmt = __METHOD__ . "getFolderContents" . $orderString . $filter;
 
-    $offset = GetParm('iDisplayStart', PARM_INTEGER);
-    $limit = GetParm('iDisplayLength', PARM_INTEGER);
+    $offset = intval($request->get('iDisplayStart'));
+    $limit = intval($request->get('iDisplayLength'));
     $unorderedQuery = "FROM upload
         INNER JOIN uploadtree ON upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
@@ -365,7 +357,7 @@ class browseProcessPost extends FO_Plugin
         $this->filterParams, __METHOD__ . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery", array($Folder), __METHOD__ . "count.all");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery", array($folder), __METHOD__ . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
     return array($result, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -380,9 +372,8 @@ class browseProcessPost extends FO_Plugin
     return $orderString;
   }
 
-  private function getSearchString()
+  private function getSearchString($searchPattern)
   {
-    $searchPattern = GetParm('sSearch', PARM_STRING);
     if (empty($searchPattern))
     {
       return '';
@@ -392,12 +383,11 @@ class browseProcessPost extends FO_Plugin
   }
 
   /**
-   * @param string $inputName in input
+   * @param int $var
    * @param string $columnName in database table
    */
-  private function getIntegerFilter($inputName, $columnName)
+  private function getIntegerFilter($var, $columnName)
   {
-    $var = GetParm($inputName, PARM_INTEGER);
     if (empty($var))
     {
       return '';
@@ -411,8 +401,8 @@ class browseProcessPost extends FO_Plugin
   {
     print_r("$statusId, $commentText, $uploadId");
     $sql = "UPDATE upload SET status_fk=$1, status_comment=$2 WHERE upload_pk=$3";
-    $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), $stmt = __METHOD__);
-    $sel = $this->dbManager->getSingleRow("select status_comment from upload where upload_pk=$1", array($uploadId), $stmt = __METHOD__ . '.question');
+    $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), __METHOD__);
+    $sel = $this->dbManager->getSingleRow("select status_comment from upload where upload_pk=$1", array($uploadId), __METHOD__ . '.question');
     print_r('#' . $sel['status_comment']);
 
     // do we need to log $_SESSION['UserId'] ?
@@ -422,13 +412,12 @@ class browseProcessPost extends FO_Plugin
   {
     $fun = $top ? 'MAX' : 'MIN';
     $this->dbManager->begin();
-    $prioRow = $this->dbManager->getSingleRow($sql = "SELECT $fun(priority) p FROM upload", array(), "priority.$fun");
+    $prioRow = $this->dbManager->getSingleRow($sql = "SELECT $fun(priority) p FROM upload", array(), ".priority.$fun");
     $newPriority = $top ? $prioRow['p'] + 1 : $prioRow['p'] - 1;
-    $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2', array($newPriority, $uploadId), 'update.priority' . "$newPriority,$uploadId");
+    $this->dbManager->getSingleRow('UPDATE upload SET priority=$1 WHERE upload_pk=$2', array($newPriority, $uploadId), '.update.priority' . "$newPriority,$uploadId");
     $this->dbManager->commit();
   }
 
 }
 
-$NewPlugin = new browseProcessPost;
-$NewPlugin->Initialize();
+register_plugin(new AjaxBrowse());

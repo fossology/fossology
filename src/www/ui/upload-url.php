@@ -154,7 +154,7 @@ class upload_url extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  function htmlContent() {
+  function Output() {
     $V = "";
     /* If this is a POST, then process the request. */
     $Folder = GetParm('folder', PARM_INTEGER);

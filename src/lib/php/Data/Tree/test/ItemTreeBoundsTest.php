@@ -20,7 +20,7 @@ namespace Fossology\Lib\Dao\Data;
 
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
-class FileTreeBoundsTest extends \PHPUnit_Framework_TestCase
+class ItemTreeBoundsTest extends \PHPUnit_Framework_TestCase
 {
 
   /**

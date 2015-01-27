@@ -39,7 +39,6 @@ class AdminLicenseFromCSV extends DefaultPlugin
         self::TITLE => "Admin License CSV Import",
         self::MENU_LIST => "Admin::License Admin::CSV Import",
         self::REQUIRES_LOGIN => true,
-        self::DEPENDENCIES => array(\ui_menu::NAME),
         self::PERMISSION => self::PERM_ADMIN
     ));
   }

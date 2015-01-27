@@ -39,10 +39,10 @@ class UploadDao extends Object
   /** @var Logger */
   private $logger;
 
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, Logger $logger)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = $logger;
   }
 
   /**
@@ -242,6 +242,7 @@ SELECT * FROM $uploadTreeTableName
    */
   public function getItemByDirection($uploadId, $itemId, $direction, $options)
   {
+    $this->logger->debug("getItemByDirection(" . $uploadId . ", " . $itemId . ", " . $direction . ", " . print_r($options, true) . ")");
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
@@ -270,15 +271,18 @@ SELECT * FROM $uploadTreeTableName
   }
 
   /**
-   * @param $item
+   * @param Item $item
    * @param $direction
-   * @param $uploadTreeView
+   * @param UploadTreeProxy $uploadTreeView
+   * @param bool $enterFolders
    * @return mixed
    */
   protected function findNextItem(Item $item, $direction, UploadTreeProxy $uploadTreeView, $enterFolders = true)
   {
+    $this->logger->debug("findNextItem(" . $item->getFileName() . " " . $item->getFileId() . ", " . $direction . ", enter=" . $enterFolders . ")");
     if ($item->getParentId() === null && $direction !== self::DIR_FWD)
     {
+      $this->logger->debug("findNextItem() not found ");
       return self::NOT_FOUND;
     }
 
@@ -290,6 +294,7 @@ SELECT * FROM $uploadTreeTableName
     $parentSize = $this->getParentSize($parent, $uploadTreeView);
     $targetIndex = $this->getItemIndex($item, $uploadTreeView);
 
+    /** @var null|Item $nextItem */
     $nextItem = null;
     $firstIteration = true;
     while (($targetIndex >= 0 && $targetIndex < $parentSize))
@@ -312,16 +317,19 @@ SELECT * FROM $uploadTreeTableName
 
       if ($nextItem !== null && $nextItem->isContainer())
       {
+        $this->logger->debug("findNextItem() enter container");
         $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
       }
 
       if ($nextItem !== null)
       {
+        $this->logger->debug("findNextItem() found " . $nextItem->getFileName() . " #" . $nextItem->getFileId());
         return $nextItem;
       }
 
       $targetIndex += $indexIncrement;
     }
+    $this->logger->debug("findNextItem() nothing found ");
     return null;
   }
 
@@ -381,6 +389,7 @@ SELECT * FROM $uploadTreeTableName
    */
   protected function getNewItemByIndex($parent, $targetOffset, UploadTreeProxy $uploadTreeView)
   {
+    $this->logger->debug("getNewItemByIndex(parent=" . $parent . ", offset=" . $targetOffset . ")");
     if ($targetOffset < 0)
     {
       return null;

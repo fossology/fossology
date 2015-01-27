@@ -229,7 +229,7 @@ class copyright_list extends FO_Plugin
   /**
    * \brief Display the loaded menu and plugins.
    */
-  function htmlContent()
+  function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return;

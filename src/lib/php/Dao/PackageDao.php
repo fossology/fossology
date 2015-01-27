@@ -34,10 +34,10 @@ class PackageDao extends Object
   /**
    * @param DbManager $dbManager
    */
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, Logger $logger)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = $logger;
   }
 
   /**

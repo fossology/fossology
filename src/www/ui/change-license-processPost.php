@@ -15,9 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
@@ -76,7 +78,8 @@ class changeLicenseProcessPost extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
+    if ($this->State != PLUGIN_STATE_READY)
+    {
       return;
     }
 
@@ -84,7 +87,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = $_SESSION['GroupId'];
     $itemId = $_POST['uploadTreeId'];
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
-    $removed = $_POST['removed'] === 't' ||  $_POST['removed'] === 'true';
+    $removed = $_POST['removed'] === 't' || $_POST['removed'] === 'true';
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId);
     $uploadId = $itemTreeBounds->getUploadId();
@@ -95,11 +98,14 @@ class changeLicenseProcessPost extends FO_Plugin
 
     if (isset($licenses))
     {
-      if (!is_array($licenses)) {
+      if (!is_array($licenses))
+      {
         return $this->errorJson("bad license array");
       }
-      foreach($licenses as $licenseId) {
-        if (intval($licenseId) <= 0) {
+      foreach ($licenses as $licenseId)
+      {
+        if (intval($licenseId) <= 0)
+        {
           return $this->errorJson("bad license");
         }
 
@@ -113,7 +119,7 @@ class changeLicenseProcessPost extends FO_Plugin
     $deciderPlugin = plugin_find("agent_deciderjob");
 
     $conflictStrategyId = null; // TODO add option in GUI
-    $ErrorMsg="";
+    $ErrorMsg = "";
     $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
@@ -122,19 +128,17 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
 
-
     if (empty($ErrorMsg) && ($jq_pk>0)) {
-      header('Content-type: text/json');
-      return json_encode(array("jqid" => $jq_pk));
-    } else {
+      return new JsonResponse(array("jqid" => $jq_pk));
+    }
+    else {
       return $this->errorJson($ErrorMsg, 500);
     }
   }
 
-  private function errorJson($msg, $code=404)
+  private function errorJson($msg, $code = 404)
   {
-    header('Content-type: text/json', true, $code);
-    return json_encode(array("error" => $msg));
+    return new JsonResponse(array("error" => $msg), $code);
   }
 
 }

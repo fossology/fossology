@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -55,6 +55,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     M::close();
   }
 
+  /**
+   * @group repairme
+   */
   public function testGetScannerDetectedLicenses()
   {
     $uploadId = 2;
@@ -64,7 +67,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatches = array($licenseMatch1, $licenseMatch2, $licenseMatch3);
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
-    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->andReturn($licenseMatches);
     $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'monk')))->andReturn(
         array(
             'nomos' => 23,
@@ -88,7 +93,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatches = array($licenseMatch1, $licenseMatch2);
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
-    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->andReturn($licenseMatches);
     $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'monk')))->andReturn(
         array(
             'nomos' => 23,
@@ -123,7 +130,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatches = array($licenseMatch1, $licenseMatch2);
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
-    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->andReturn($licenseMatches);
     $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'unknown')))->andReturn(
         array(
             'nomos' => 23
@@ -153,7 +162,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatches = array($licenseMatch1, $licenseMatch2);
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
-    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->andReturn($licenseMatches);
     $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array('nomos', 'monk')))->andReturn(
         array(
             'nomos' => 23,
@@ -177,7 +188,9 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $licenseMatches = array($licenseMatch1);
 
     $this->itemTreeBounds->shouldReceive('getUploadId')->withNoArgs()->andReturn($uploadId);
-    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()->withArgs(array($this->itemTreeBounds))->andReturn($licenseMatches);
+    $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
+            ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
+            ->andReturn($licenseMatches);
     $this->agentsDao->shouldReceive('getLatestAgentResultForUpload')->once()->withArgs(array($uploadId, array()))->andReturn(
         array(
             'nomos' => 23,

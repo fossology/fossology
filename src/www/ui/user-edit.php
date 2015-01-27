@@ -357,7 +357,7 @@ class user_edit extends FO_Plugin {
    *        2) User has chosen a user to edit from the 'userid' select list  \n
    *        3) User hit submit to update user data\n
    */
-  function htmlContent()
+  function Output()
   {
     if ($this->State != PLUGIN_STATE_READY)  return;
 

@@ -77,7 +77,7 @@ class upload_move extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  protected function htmlContent() {
+  public function Output() {
     global $PG_CONN;
 
     $V = "";

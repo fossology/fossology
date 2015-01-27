@@ -38,7 +38,7 @@ class upload_instructions extends FO_Plugin
   /**
    * \brief Generate the text for this plugin.
    */
-  function htmlContent()
+  function Output()
   {
     $Uri = Traceback_uri();
     $html = _("FOSSology has many options for importing and uploading files for analysis.\n");

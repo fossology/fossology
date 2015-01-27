@@ -794,7 +794,7 @@ if (!empty($Row["job_upload_fk"]))
   }  /* GetColor()  */
 
 
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     $Page = "";

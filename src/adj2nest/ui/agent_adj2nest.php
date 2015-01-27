@@ -91,4 +91,3 @@ class agent_adj2nest extends FO_Plugin {
 
 };
 $NewPlugin = new agent_adj2nest;
-?>

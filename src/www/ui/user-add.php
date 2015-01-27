@@ -124,7 +124,7 @@ class user_add extends FO_Plugin {
   } // Add()
 
 
-  protected function htmlContent() {
+  public function Output() {
     /* If this is a POST, then process the request. */
     $User = GetParm('username', PARM_TEXT);
     if (!empty($User)) {

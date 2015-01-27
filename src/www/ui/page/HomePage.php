@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * \brief about page on UI
+ * @brief about page on UI
  */
 class HomePage extends DefaultPlugin
 {
@@ -32,10 +32,9 @@ class HomePage extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Welcome to FOSSology",
-        self::MENU_LIST => "Home",
+        self::TITLE =>  _("Getting Started with FOSSology"),
         self::REQUIRES_LOGIN => false,
-        self::DEPENDENCIES => array(\ui_menu::NAME),
+        self::MENU_LIST => "Home",
         self::MENU_ORDER => 100
     ));
   }
@@ -50,7 +49,7 @@ class HomePage extends DefaultPlugin
     if ($_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
       $vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-      $vars['referer'] = "?mod=browse";
+      $vars['referrer'] = "?mod=browse";
       $vars['authUrl'] = "?mod=auth";
     }
     return $this->render("home.html.twig", $this->mergeWithDefault($vars));

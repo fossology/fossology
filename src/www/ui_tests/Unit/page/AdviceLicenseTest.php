@@ -22,7 +22,6 @@ global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
 $wwwPath = dirname(dirname(dirname(__DIR__)));
-require_once($wwwPath.'/ui/ui-menus.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
 require_once ( dirname(dirname(dirname(__DIR__))).'/ui/page/AdviceLicense.php' );
 

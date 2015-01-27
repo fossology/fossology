@@ -118,7 +118,7 @@ class maintagent extends FO_Plugin {
   }
 
 
-  protected function htmlContent() 
+  public function Output()
   {
     $V = "";
     /* If this is a POST, then process the request. */

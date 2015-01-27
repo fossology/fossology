@@ -194,7 +194,7 @@ class ui_browse extends FO_Plugin
     }
     return ($V);
   }
-  
+
   /**
    * @brief Given a upload_pk, list every item in it.
    * If it is an individual file, then list the file contents.
@@ -219,7 +219,7 @@ class ui_browse extends FO_Plugin
     $V .= FolderListDiv($Folder, 0, $Folder, 1);
     $V .= "</form>\n";
     $this->vars['folderNav'] = $V;
-    
+
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
@@ -250,7 +250,7 @@ class ui_browse extends FO_Plugin
       if ($UploadPerm < PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
-        return $this->renderTemplate('include/base.html.twig');
+        return $this->render('include/base.html.twig');
       }
     }
 
@@ -265,9 +265,9 @@ class ui_browse extends FO_Plugin
     }
 
     $this->vars['content'] = $this->outputItemHtml($Item, $folder_pk, $Upload);
-    return $this->renderTemplate('ui-browse.html.twig');
+    return $this->render('ui-browse.html.twig');
   }
-  
+
   /**
    * @brief kludge for plugins not supplying a folder parameter.
    * Find what folder this upload is in.  Error if in multiple folders.
@@ -318,7 +318,7 @@ class ui_browse extends FO_Plugin
       if ($UploadPerm < PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
-        echo $this->renderTemplate('include/base.html.twig');
+        echo $this->render('include/base.html.twig');
         exit;
       }
 
@@ -329,7 +329,7 @@ class ui_browse extends FO_Plugin
         if (!empty($View))
         {
           $this->vars['content'] = $View->ShowView(NULL, "browse");
-          echo $this->renderTemplate('include/base.html.twig');
+          echo $this->render('include/base.html.twig');
           exit;
         }
       }
@@ -358,13 +358,13 @@ class ui_browse extends FO_Plugin
         } else
         {
           $this->vars['message'] = _("Missing upload tree parent for upload");
-          echo $this->renderTemplate('include/base.html.twig');
+          echo $this->render('include/base.html.twig');
           exit;
         }
       }
       $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
       $this->vars['content'] = $html;
-      echo $this->renderTemplate('include/base.html.twig');
+      echo $this->render('include/base.html.twig');
       exit;
     }
     return $html;

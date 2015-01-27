@@ -22,6 +22,9 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
+
+use Mockery as M;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -53,7 +56,9 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
+    $logger->shouldReceive('debug');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
   }
 
   public function tearDown()

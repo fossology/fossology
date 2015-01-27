@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -46,28 +46,20 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   const PERCENTAGE = 315;
   /** @var int */
   private $uploadTreeId;
-
   /** @var int */
   private $userId;
-
   /** @var int */
   private $groupId;
-
   /** @var AgentLicenseEventProcessor|M\MockInterface */
   private $agentLicenseEventProcessor;
-
   /** @var DbManager|M\MockInterface */
   private $dbManager;
-
   /** @var ClearingDao|M\MockInterface */
   private $clearingDao;
-
   /** @var ItemTreeBounds|M\MockInterface */
   private $itemTreeBounds;
-
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionProcessor;
-
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
 
@@ -345,7 +337,9 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
 
   public function testGetCurrentClearingsWithoutDecisions()
   {
-    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
+            ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)
+            ->andReturn(array());
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")->with($this->itemTreeBounds, $this->groupId)->andReturn(array());
 
     list($licenseDecisions, $removedClearings) = $this->clearingDecisionProcessor->getCurrentClearings($this->itemTreeBounds, $this->groupId);
@@ -358,7 +352,9 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $addedEvent = $this->createClearingEvent(123, new DateTime(), $licenseId=13, "licA", "License A");
 
-    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")->with($this->itemTreeBounds)->andReturn(array());
+    $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
+            ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)
+            ->andReturn(array());
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn(array($licenseId => $addedEvent));
@@ -380,7 +376,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
 
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)
         ->andReturn($scannerResults);
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
@@ -404,7 +400,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     list($scannerResults, $licenseRef) = $this->createScannerDetectedLicenses();
 
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)
         ->andReturn($scannerResults);
 
     $licenseId = $licenseRef->getId();
@@ -433,7 +429,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $removedEvent = $this->createClearingEvent(123, new DateTime(), $licenseRef->getId(), $licenseRef->getShortName(), $licenseRef->getFullName(), ClearingEventTypes::USER, true);
 
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)->andReturn($scannerResults);
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
@@ -468,7 +464,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn(array());
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
     
@@ -485,7 +481,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
          ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")->once()
-        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
@@ -503,7 +499,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+        ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
 
@@ -521,10 +517,11 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId)
         ->andReturn(array($clearingEvent->getLicenseId()=>$clearingEvent));
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
-        ->with($this->itemTreeBounds)->andReturn($scannerResults);
+        ->with($this->itemTreeBounds,LicenseMap::CONCLUSION)->andReturn($scannerResults);
 
     $licenseMap = M::mock(LicenseMap::classname());
     $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {return $id;});
+    $licenseMap->shouldReceive('getUsage')->andReturn(LicenseMap::CONCLUSION);
     
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId, array(), $licenseMap);
 

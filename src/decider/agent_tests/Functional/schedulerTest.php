@@ -33,6 +33,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
 use Mockery as M;
+use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -56,10 +57,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadDao;
   /** @var HighlightDao */
   private $highlightDao;
-  
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
-  
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
@@ -69,9 +68,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
-    $this->highlightDao = new HighlightDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
     $clearingEventProcessor = new ClearingEventProcessor();
@@ -89,6 +88,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->licenseDao = null;
     $this->highlightDao = null;
     $this->clearingDao = null;
+    M::close();
   }
 
   private function setUpRepo()

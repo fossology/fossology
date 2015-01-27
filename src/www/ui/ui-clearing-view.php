@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -16,6 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentDao;
@@ -24,12 +25,15 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
-use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\View\HighlightRenderer;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_clearingView", _("Change concluded License "));
 
@@ -109,6 +113,16 @@ class ClearingView extends FO_Plugin
     return $highlightEntries;
   }
 
+  public function execute()
+  {
+    $openOutput = $this->OutputOpen();
+    if($openOutput instanceof RedirectResponse)
+    {
+      $openOutput->prepare($this->getRequest());
+      $openOutput->send();
+    }
+    $this->renderOutput();
+  }
 
   function OutputOpen()
   {
@@ -139,7 +153,7 @@ class ClearingView extends FO_Plugin
         return;
       }
       $uploadTreeId = $item->getId();
-      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
@@ -160,7 +174,7 @@ class ClearingView extends FO_Plugin
         return;
       }
       $uploadTreeId = $item->getId();
-      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
     return parent::OutputOpen();
@@ -175,25 +189,18 @@ class ClearingView extends FO_Plugin
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.html.twig");
+      return $this->render("include/base.html.twig");
     }
-    parent::Output();
-  }
 
-  /**
-   * \brief display the license changing page
-   */
-  protected function htmlContent()
-  {
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (empty($uploadId))
     {
-      return;
+      return new Response("", Response::HTTP_BAD_REQUEST);
     }
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {
-      return;
+      return new Response("", Response::HTTP_BAD_REQUEST);
     }
 
     global $SysConf;
@@ -286,6 +293,8 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
+
+    return $this->render("ui-clearing-view.html.twig");
   }
 
 
@@ -315,11 +324,6 @@ class ClearingView extends FO_Plugin
       $table[] = $row;
     }
     return $table;
-  }
-
-  public function getTemplateName()
-  {
-    return "ui-clearing-view.html.twig";
   }
 
   /*

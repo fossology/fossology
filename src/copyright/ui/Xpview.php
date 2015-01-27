@@ -134,22 +134,14 @@ class Xpview extends FO_Plugin
   }
 
 
-  /**
-   * @brief extends standard Output to handle empty uploads
-   */
-  function Output()
+  public function Output()
   {
     if ($this->invalidParm)
     {
       $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->renderTemplate("include/base.html.twig");
+      return $this->render("include/base.html.twig");
     }
-    parent::Output();
-  }
 
-
-  protected function htmlContent()
-  {
     $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {

@@ -1,0 +1,7 @@
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+
+{% endblock %}

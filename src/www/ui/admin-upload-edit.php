@@ -93,7 +93,7 @@ class upload_properties extends FO_Plugin
     return 1;
   }
 
-  protected function htmlContent() 
+  public function Output()
   {
     global $PG_CONN;
     $V = "";

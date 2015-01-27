@@ -32,7 +32,7 @@
               {% if singleGroup %}{{ singleGroup }}
               {%else%}       
                 <form action="{{ backtraceUri }}" method="post">
-                  {% import "include/macro.html.twig" as macro %}
+                  {% import "include/macros.html.twig" as macro %}
                   {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' onchange="this.form.submit()"') }}
               </form>
               {% endif %}

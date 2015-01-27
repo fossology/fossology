@@ -685,7 +685,7 @@ return;
   }
 
   
-  protected function htmlContent()
+  public function htmlContent()
   {
   
       $filter = GetParm("filter",PARM_STRING);

@@ -683,7 +683,7 @@ class ui_tag extends FO_Plugin
   }
 
 
-  protected function htmlContent()
+  public function Output()
   {
     $V="";
     $action = GetParm('action', PARM_TEXT);

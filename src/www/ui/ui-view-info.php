@@ -603,7 +603,7 @@ class ui_view_info extends FO_Plugin
     return $VT;
   }
 
-  protected function htmlContent()
+  public function Output()
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
     $UploadPerm = GetUploadPerm($uploadId);
