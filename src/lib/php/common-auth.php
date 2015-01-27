@@ -89,7 +89,7 @@ function account_check(&$user, &$passwd, &$group = "")
   if (!empty($user)) {
     $row = $dbManager->getSingleRow(
       "SELECT users.*, groups.group_name
-       FROM users INNER JOIN groups ON groups.group_pk = users.group_fk
+       FROM users LEFT JOIN groups ON groups.group_pk = users.group_fk
        WHERE user_name = $1",
       array($user),
       __METHOD__.".lookUpUser"
@@ -119,6 +119,10 @@ function account_check(&$user, &$passwd, &$group = "")
       $groupId = $rowGroup['group_pk'];
     }
     $SysConf['auth']['GroupId'] = $groupId;
+    if (empty($groupId)) {
+      echo "Group not found.\n";
+      exit(1);
+    }
 
     if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
       $passwd_hash = sha1($row['user_seed'] . $passwd);
