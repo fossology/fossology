@@ -37,6 +37,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -h       = this help message
     -v       = enable verbose debugging
     --username string = user name
+    --gourpname string = group name
     --password string = password
     -c string = Specify the directory for the system configuration
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
@@ -272,14 +273,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Create the upload for the file */
   if ($Verbose) {
-    print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
+    print "JobAddUpload($user_pk, $group_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($user_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
+    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
     print "  UploadPk is: '$UploadPk'\n";
   }
 
@@ -385,6 +386,7 @@ $public_flag = 0;
 $OptionS = "";
 
 $user = $passwd = "";
+$group = "";
 $vcsuser = $vcspass= "";
 
 for ($i = 1;$i < $argc;$i++) {
@@ -399,6 +401,10 @@ for ($i = 1;$i < $argc;$i++) {
     case '--username':
       $i++;
       $user = $argv[$i];
+      break;
+    case '--groupname':
+      $i++;
+      $group = $argv[$i];
       break;
     case '--password':
       $i++;
@@ -514,11 +520,11 @@ for ($i = 1;$i < $argc;$i++) {
   } /* switch */
 } /* for each parameter */
 
-account_check($user, $passwd); // check username/password
+account_check($user, $passwd, $group); // check username/password
 
 /** list all available processing agents */
 if (!$Test && $OptionQ) {
-  $Cmd = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -a";
+  $Cmd = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR -a";
   system($Cmd);
   exit(0);
 }
@@ -535,9 +541,9 @@ if ($stdin_flag)
 
 /** compose fossjobs command */
 if($Verbose) {
-  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -v "; 
+  $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR -v ";
 } else {
-  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR  ";
+  $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR  ";
 }
 
 //print "fossjobs_command is:$fossjobs_command\n";

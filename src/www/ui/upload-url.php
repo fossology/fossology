@@ -79,9 +79,9 @@ class upload_url extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
+    $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
+    $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
       return ($text);
@@ -98,7 +98,7 @@ class upload_url extends FO_Plugin {
     $Reject = preg_replace('/\s*,\s*/', ',', trim($Reject));
 
     /* Create the job: job "wget" */
-    $jobpk = JobAddJob($user_pk, $group_pk, "wget", $uploadpk);
+    $jobpk = JobAddJob($userId, $groupId, "wget", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       return ($text);

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -44,7 +45,8 @@
 /**
  * \brief Insert a new upload record, and update the foldercontents table.
  *
- * \param $user_pk
+ * \param $userId
+ * \param $groupId
  * \param $job_name   Job name
  * \param $filename   For upload from URL, this is the URL.\n
  *                    For upload from file, this is the filename.\n
@@ -57,42 +59,44 @@
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-// TODO add $groupId as parameter (exactly as in JobAddJob)
-function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE)
 {
   global $container;
 
   $dbManager = $container->get('db.manager');
   /* check all required inputs */
-  if (empty($user_pk) or empty($job_name) or empty($filename) or 
+  if (empty($userId) or empty($job_name) or empty($filename) or
       empty($UploadMode) or empty($folder_pk)) return;
 
   $fifo = $dbManager->getSingleRow("SELECT MIN(priority) old_prio FROM upload");
-  $prio = $fifo['old_prio']-1;  
-  
-  $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-      array($desc,$job_name,$user_pk,$UploadMode,$filename, $public_perm, $prio),'insert.upload');
+  $prio = $fifo['old_prio']-1;
 
-  /* get upload_pk of just added upload */
-  $upload_pk = GetLastSeq("upload_upload_pk_seq", "upload");
+  $row = $dbManager->getSingleRow("INSERT INTO upload
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm, $prio),__METHOD__.'.insert.upload');
+  $uploadId = $row['upload_pk'];
+
   /* Mode == 2 means child_id is upload_pk */
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
-               array($folder_pk,2,$upload_pk),'insert.foldercontents');
+               array($folder_pk,2,$uploadId),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
   /* First look up user's group_pk */
-  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($user_pk),__METHOD__.'.select.user');
-  $group_pk = $usersRow['group_fk'];
+  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
+  $UserName = $usersRow['user_name'];
+  if (empty($groupId))
+  {
+    $groupId = $usersRow['group_fk'];
+  }
   $perm_admin = PERM_ADMIN;
 
   // before inserting this new record, delete any record for the same upload and group since
   // that would be a duplicate.  This shouldn't happen except maybe in development testing
-  $dbManager->getSingleRow("delete from perm_upload where upload_fk=$1 and group_fk=$2",array($upload_pk,$group_pk),'except.maybe.in.development');
+  $dbManager->getSingleRow("delete from perm_upload where upload_fk=$1 and group_fk=$2",array($uploadId,$groupId),'except.maybe.in.development');
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
-               array($perm_admin, $upload_pk, $group_pk),'insert.perm_upload');
+               array($perm_admin, $uploadId, $groupId),__METHOD__.'.insert.perm_upload');
 
-  return ($upload_pk);
+  return ($uploadId);
 } // JobAddUpload()
 
 
@@ -107,7 +111,7 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
  *
  * @return int $job_pk the job primary key
  */
-function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
+function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 {
   global $container;
 
@@ -116,16 +120,16 @@ function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
 
   $upload_pk_val = empty($upload_pk) ? null : $upload_pk;
 
-  $params = array($user_pk, $priority, $job_name, $upload_pk_val);
+  $params = array($userId, $priority, $job_name, $upload_pk_val);
   $stmtName = __METHOD__;
-  if (empty($group_pk))
+  if (empty($groupId))
   {
     $stmtName .= "noGrp";
     $groupPkVal = "(SELECT group_fk FROM users WHERE user_pk = $1)";
   }
   else
   {
-    $params[] = $group_pk;
+    $params[] = $groupId;
     $groupPkVal = "$". count($params);
   }
 
