@@ -99,14 +99,13 @@ class test_common_menu extends PHPUnit_Framework_TestCase
     $Title = "TestTitle";
     $Target = "TestTarget";
     $HTML = "TestHTML";
+    $countMenuListBefore = count($MenuList);
     $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
-    //print_r($MenuList);
-    $this->assertEquals($Path,$MenuList[0]->FullName);
+    $this->assertEquals($Path,$MenuList[$countMenuListBefore]->FullName);
      
     print "test function menu_find)\n";
     $depth = 2;
     $result = menu_find("Test1", $depth);
-    //print "Result: $result\n";
 
     print "test function menu_to_1html)\n";
     $result = menu_to_1html($MenuList);
@@ -125,5 +124,3 @@ class test_common_menu extends PHPUnit_Framework_TestCase
   protected function tearDown() {
   }
 }
-
-?>
