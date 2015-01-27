@@ -24,11 +24,12 @@ use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 include_once(__DIR__ . "/version.php");
 
@@ -78,47 +79,46 @@ class DeciderAgent extends Agent
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
-    $userId = $this->userId;
 
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
       $itemTreeBounds = $item->getItemTreeBounds();
-
       $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
       $matches = $this->remapByProjectedId($matches);
+      
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
-      $this->processItem($item, $userId, $groupId, $matches, $lastDecision, $currentEvents);
+      $this->processItem($item, $matches, $lastDecision, $currentEvents);
     }
     return true;
   }
 
-  private function processItem(Item $item, $userId, $groupId, $matches, $lastDecision, $currentEvents)
+  private function processItem(Item $item, $matches, $lastDecision, $currentEvents)
   {
     $itemTreeBounds = $item->getItemTreeBounds();
 
     if ($this->activeRules & self::RULES_NOMOS_IN_MONK)
     {
-      $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents);
+      $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches, $lastDecision, $currentEvents);
     }
   }
 
-  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $matches, $lastDecision, $currentEvents)
+  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches, $lastDecision, $currentEvents)
   {
     $canDecide = (count($matches)>0);
     $canDecide &= null === $lastDecision;
     $canDecide &= 0 == count($currentEvents);
 
-    foreach($matches as $licenseId => $licenseMatches)
+    foreach($matches as $licenseMatches)
     {
       $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
     }
 
     if ($canDecide)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $global=true);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
       $this->heartbeat(1);
     }
     else
@@ -156,6 +156,10 @@ class DeciderAgent extends Agent
     return ($small[0] >= 0) && ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
   }
 
+  /**
+   * @param LicenseMatch[]
+   * @return boolean
+   */
   private function areNomosMatchesInsideAMonkMatch($licenseMatches)
   {
     if (!array_key_exists("nomos", $licenseMatches))

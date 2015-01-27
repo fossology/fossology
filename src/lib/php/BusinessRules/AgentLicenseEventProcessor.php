@@ -42,18 +42,19 @@ class AgentLicenseEventProcessor extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param int
    * @return LicenseRef[]
    */
-  public function getScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds)
+  public function getScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
-    $details = $this->getScannerDetectedLicenseDetails($itemTreeBounds);
+    $details = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
 
     return $this->getScannedLicenses($details);
   }
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @return array
+   * @return array[][]
    */
   protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
@@ -87,11 +88,37 @@ class AgentLicenseEventProcessor extends Object
     return $latestAgentDetectedLicenses;
   }
 
+  public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
+  {
+    $agentDetectedLicenses = array();
+
+    $licenseFileMatches = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+
+    foreach ($licenseFileMatches as $licenseMatch)
+    {
+      $licenseRef = $licenseMatch->getLicenseRef();
+      $licenseId = $licenseRef->getId();
+      if ($licenseRef->getShortName() === "No_license_found")
+      {
+        continue;
+      }
+      $agentRef = $licenseMatch->getAgentRef();
+      $agentName = $agentRef->getAgentName();
+      $agentId = $agentRef->getAgentId();
+
+      $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = $licenseMatch;
+    }
+
+    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
+    return $latestAgentDetectedLicenses;
+  }
+  
   /**
    * (A->B->C->X, A->B) => C->A->X
-   * @param array [][][]
+   * @param mixed[][][]
    * @param array $agentLatestMap
-   * @return array[][]
+   * @return mixed[][]
    */
   protected function filterDetectedLicenses($agentDetectedLicenses, $agentLatestMap)
   {

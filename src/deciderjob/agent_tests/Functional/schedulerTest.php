@@ -66,11 +66,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestPgDb("deciderSched".time());
     $this->dbManager = $this->testDb->getDbManager();
+    $logger = M::mock('Monolog\Logger');
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadDao = new UploadDao($this->dbManager);
+    $this->uploadDao = new UploadDao($this->dbManager,$logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
-    $logger = M::mock('Monolog\Logger');
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
     $clearingEventProcessor = new ClearingEventProcessor();
