@@ -96,7 +96,7 @@ abstract class Agent extends Object
     global $processed;
     global $alive;
 
-    echo "HEART: $processed ".($alive ? 'alive' : 'dead')."\n";
+    echo "HEART: $processed ".($alive ? '1' : '0')."\n";
     $alive = false;
     pcntl_alarm(ALARM_SECS);
   }
