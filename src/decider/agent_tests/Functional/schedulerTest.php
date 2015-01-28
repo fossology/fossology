@@ -77,6 +77,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
 
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
+    
     $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }

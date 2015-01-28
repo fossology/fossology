@@ -206,34 +206,10 @@ class AgentDao extends Object
 
   public function getLatestAgentResultForUpload($uploadId, $agentNames)
   {
-    $agentLatestMap = array();
-    foreach ($agentNames as $agentName)
-    {
-      $sql = "
-SELECT
-  agent_pk,
-  ars_success,
-  agent_name
-FROM " . $this->getArsTableName($agentName) . " ARS
-INNER JOIN agent A ON ARS.agent_fk = A.agent_pk
-WHERE upload_fk=$1
-  AND A.agent_name = $2
-ORDER BY agent_fk DESC";
+    $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
+    
+    $agentLatestMap = $latestScannerProxy->getNameToIdMap();
 
-      $statementName = __METHOD__ . ".$agentName";
-      $this->dbManager->prepare($statementName, $sql);
-      $res = $this->dbManager->execute($statementName, array($uploadId, $agentName));
-
-      while ($row = $this->dbManager->fetchArray($res))
-      {
-        if ($this->dbManager->booleanFromDb($row['ars_success']))
-        {
-          $agentLatestMap[$agentName] = intval($row['agent_pk']);
-          break;
-        }
-      }
-      $this->dbManager->freeResult($res);
-    }
     return $agentLatestMap;
   }
     

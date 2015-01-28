@@ -83,7 +83,11 @@ class AgentLicenseEventProcessor extends Object
       );
     }
 
-    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+//    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    $uploadId = $itemTreeBounds->getUploadId(); 
+    $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, array_keys($agentDetectedLicenses), "latest_scanner$uploadId");
+    $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
+    
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }

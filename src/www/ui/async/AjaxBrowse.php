@@ -26,6 +26,7 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Util\DataTablesUtility;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class AjaxBrowse extends DefaultPlugin
 {
@@ -104,6 +105,7 @@ class AjaxBrowse extends DefaultPlugin
               'iTotalDisplayRecords' => $iTotalDisplayRecords
           ));
     }
+    return new Response('');
   }
 
 

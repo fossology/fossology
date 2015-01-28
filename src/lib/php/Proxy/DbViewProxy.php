@@ -23,10 +23,11 @@ use Fossology\Lib\Util\Object;
 class DbViewProxy extends Object
 {
   /** @var string */
-  private $dbViewName;
+  protected $dbViewName;
   /** @var string */
-  private $dbViewQuery;
-  private $materialized = false;
+  protected $dbViewQuery;
+  /** @var boolean */
+  protected $materialized = false;
   
   /**
    * @param string $dbViewQuery
