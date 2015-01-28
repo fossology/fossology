@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -113,7 +113,12 @@ class DeciderAgent extends Agent
 
     foreach($matches as $licenseMatches)
     {
+      if (!$canDecide) // &= is not lazy
+      {
+        break;
+      }
       $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
+
     }
 
     if ($canDecide)
@@ -153,7 +158,7 @@ class DeciderAgent extends Agent
 
   private function isRegionIncluded($small, $big)
   {
-    return ($small[0] >= 0) && ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
+    return ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
   }
 
   /**
