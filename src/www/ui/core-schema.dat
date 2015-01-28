@@ -1610,7 +1610,11 @@
   $Schema["TABLE"]["users"]["new_upload_perm"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"new_upload_perm\" int4;";
   $Schema["TABLE"]["users"]["new_upload_perm"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"new_upload_perm\" DROP NOT NULL;";
   $Schema["TABLE"]["users"]["new_upload_perm"]["UPDATE"] = "";
-
+  
+  $Schema["TABLE"]["users"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["users"]["group_fk"]["UPDATE"] = "";
 
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
