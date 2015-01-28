@@ -72,7 +72,7 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
 
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
-
+    
     $this->agent = new AgentRef($this->agentId, $this->agentName, $this->agentRev);
     $this->olderAgent = new AgentRef($this->olderAgentId, $this->agentName, $this->olderAgentRev);
     $this->otherAgent = new AgentRef($this->otherAgentId, $this->otherAgentName, $this->otherAgentRev);
@@ -142,6 +142,19 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetLatestAgentResultForUpload()
   {
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $this->dbManagerMock = M::mock(DbManager::classname());
+    $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
+    
+    $this->dbManagerMock->shouldReceive('prepare')->once();
+    $this->dbManagerMock->shouldReceive('execute')->once();
+    $this->dbManagerMock->shouldReceive('fetchArray')
+            ->andReturn(array('agent_pk'=>$this->agentId,'agent_name'=>$this->agentName),
+                    array('agent_pk'=>$this->otherAgentId,'agent_name'=>$this->otherAgentName),
+                    false);
+    $this->dbManagerMock->shouldReceive('freeResult')->once();
+    
     $latestAgentResults = $this->agentsDao->getLatestAgentResultForUpload($this->uploadId, array($this->agentName, $this->otherAgentName));
     assertThat($latestAgentResults, is(array(
       $this->agentName => $this->agentId,
