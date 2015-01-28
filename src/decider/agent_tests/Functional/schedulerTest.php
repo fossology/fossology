@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,8 +27,6 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
@@ -204,7 +202,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
-  /** @group aFunctional */
+  /** @group Functional */
   public function testDeciderMockScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision()
   {
     $this->runnerDeciderScanWithNoEventsAndNomosContainedInMonkShouldMakeADecision($this->runnerMock);

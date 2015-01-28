@@ -83,13 +83,7 @@ class AgentLicenseEventProcessor extends Object
       );
     }
 
-//    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
-    $uploadId = $itemTreeBounds->getUploadId(); 
-    $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, array_keys($agentDetectedLicenses), "latest_scanner$uploadId");
-    $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
-    
-    $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
-    return $latestAgentDetectedLicenses;
+    return $this->filterLatestScannerDetectedMatches($agentDetectedLicenses, $itemTreeBounds->getUploadId());
   }
 
   public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
@@ -113,7 +107,23 @@ class AgentLicenseEventProcessor extends Object
       $agentDetectedLicenses[$agentName][$agentId][$licenseId][] = $licenseMatch;
     }
 
-    $latestAgentIdPerAgent = $this->agentDao->getLatestAgentResultForUpload($itemTreeBounds->getUploadId(), array_keys($agentDetectedLicenses));
+    return $this->filterLatestScannerDetectedMatches($agentDetectedLicenses, $itemTreeBounds->getUploadId());
+  }
+  
+  /**
+   * @brief (A->B->C->X) => C->A->X if B=latestScannerId(A)
+   */
+  protected function filterLatestScannerDetectedMatches($agentDetectedLicenses, $uploadId)
+  {
+    $agentNames = array_keys($agentDetectedLicenses);
+    if (empty($agentNames))
+    {
+      return array();
+    }
+
+    $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
+    $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
+    
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }
