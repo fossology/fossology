@@ -354,19 +354,23 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   global $OptionS; /* Should it run synchronously? */
   if ($OptionS) {
-    $working = True;
-    while ($working) {
+    $working = true;
+    $waitCount = 0;
+    while ($working && ($waitCount++ < 30)) {
       sleep(3);
-      $SQL = "SELECT * FROM jobqueue WHERE jq_endtext <> 'Completed' AND jq_job_fk in (SELECT job_pk from job where job_upload_fk = '$UploadPk');";
+      $SQL = "select * from jobqueue inner join job on job.job_pk = jobqueue.jq_job_fk where job_upload_fk = '$UploadPk' and jq_end_bits = 0 and jq_type = 'wget_agent'";
 
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
       $row_count = pg_num_rows($result);
       pg_free_result($result);
       if ($row_count == 0) {
-        $working = False;
+        $working = false;
       }
+    }
+    if ($working) {
+      echo "Gave up waiting for copy completion. Is the scheduler running?";
+      return 1;
     }
   }
 } /* UploadOne() */
@@ -590,4 +594,3 @@ print "Loading '$UploadArchive'\n";
 $res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
 if ($res) exit(1); // fail to upload
 exit(0);
-?>
