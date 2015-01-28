@@ -32,6 +32,10 @@ class AjaxBrowseTest extends PHPUnit_Framework_TestCase
 
   public function testCreateSelect()
   {
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $container->shouldReceive('get');
+
     $browseProcessPost = new AjaxBrowse();
 
     $reflection = new ReflectionClass( get_class($browseProcessPost) );
