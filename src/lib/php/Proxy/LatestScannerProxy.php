@@ -80,14 +80,18 @@ class LatestScannerProxy extends DbViewProxy
     {
       $sql = $this->dbViewQuery;
     }
-    $dbManager->prepare($stmt, $sql);
-    $res = $dbManager->execute($stmt,array());
     $map = array();
-    while($row = $dbManager->fetchArray($res))
+
+    if (!empty($sql))
     {
-      $map[$row['agent_name']] = $row['agent_pk'];
+      $dbManager->prepare($stmt, $sql);
+      $res = $dbManager->execute($stmt, array());
+      while ($row = $dbManager->fetchArray($res))
+      {
+        $map[$row['agent_name']] = $row['agent_pk'];
+      }
+      $dbManager->freeResult($res);
     }
-    $dbManager->freeResult($res);
     return $map;
   }
   
