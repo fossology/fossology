@@ -59,10 +59,13 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
     $logger->shouldReceive('debug');
     $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   public function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
   }
@@ -77,10 +80,10 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         __METHOD__ . '.insert.data');
     /** @var ItemTreeBounds $itemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-    $this->assertInstanceOf('Fossology\Lib\Data\Tree\ItemTreeBounds', $itemTreeBounds);
+    assertThat($itemTreeBounds, anInstanceOf('Fossology\Lib\Data\Tree\ItemTreeBounds'));
 
-    $this->assertEquals($expected = $uploadId, $itemTreeBounds->getUploadId());
-    $this->assertEquals($expected = $left, $itemTreeBounds->getLeft());
+    assertThat($expected = $uploadId, equalTo($itemTreeBounds->getUploadId()));
+    assertThat($expected = $left, equalTo($itemTreeBounds->getLeft()));
   }
 
   public function testGetNextItemWithEmptyArchive()
@@ -400,5 +403,22 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
     $previousItem = $this->uploadDao->getPreviousItem(32, $previousId);
     assertThat($previousItem, is(nullValue()));
+  }
+  
+  
+  public function testGetNonArtifactDescendants()
+  {
+    $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
+    $this->testDb->insertData(array('uploadtree_a'));
+    
+    $artifact = new ItemTreeBounds(2,'uploadtree_a', 1, 2, 3);
+    $artifactDescendants = $this->uploadDao->getNonArtifactDescendants($artifact);
+    assertThat($artifactDescendants, emptyArray());
+   
+    $zip = new ItemTreeBounds(1,'uploadtree_a', 1, 1, 24);
+    $zipDescendants = $this->uploadDao->getNonArtifactDescendants($zip);
+    $zipMatcher = array_map(function($id){ return hasKeyValuePair('uploadtree_pk',$id);}, array(6,7,8,10,11,12));
+    assertThat($zipDescendants, arrayContainingInAnyOrder( $zipMatcher ) );
+
   }
 }
