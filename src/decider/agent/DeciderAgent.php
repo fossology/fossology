@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,129 +20,183 @@
 namespace Fossology\Decider;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseMatch;
+use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-
-define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");
 
 class DeciderAgent extends Agent
 {
-  const FORCE_DECISION = 1;
+  const RULES_NOMOS_IN_MONK = 0x1;
+  const RULES_ALL = self::RULES_NOMOS_IN_MONK;
 
   /** @var int */
-  private $conflictStrategyId;
+  private $activeRules;
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionProcessor;
+  /** @var AgentLicenseEventProcessor */
+  private $agentLicenseEventProcessor;
   /** @var ClearingDao */
   private $clearingDao;
-  /** @var int */
-  private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
+  /** @var HighlightDao */
+  private $highlightDao;
   /** @var DecisionTypes */
   private $decisionTypes;
-  /** @var null|LicenseMap */
+  /** @var LicenseMap */
   private $licenseMap = null;
-  
+
   function __construct()
   {
-    parent::__construct(AGENT_NAME, AGENT_VERSION, AGENT_REV);
-
-    $args = getopt($this->schedulerHandledOpts."k:", $this->schedulerHandledLongOpts);
-    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
+    parent::__construct(AGENT_DECIDER_NAME, AGENT_DECIDER_VERSION, AGENT_DECIDER_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->highlightDao = $this->container->get('dao.highlight');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
+    $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
-  
+
   function scheduler_connect($licenseMapUsage=null)
   {
     parent::scheduler_connect();
+    $args = getopt($this->schedulerHandledOpts."r:", $this->schedulerHandledLongOpts);
+    $this->activeRules = array_key_exists('r', $args) ? $args['r'] : self::RULES_ALL;
+
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
-  }
-
-  function processClearingEventOfCurrentJob()
-  {
-    $userId = $this->userId;
-    $groupId = $this->groupId;
-    $jobId = $this->jobId;
-
-    $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
-    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob)
-    {
-      foreach($this->loopContainedItems($uploadTreeId) as $itemTreeBounds)
-      {
-        $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
-      }
-    }
-  }
-
-  private function loopContainedItems($uploadTreeId)
-  {
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-    if (!$itemTreeBounds->containsFiles())
-    {
-      return array($itemTreeBounds);
-    }
-    $result = array();
-    $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) = 0)";
-    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
-    {
-      $result[] = $item->getItemTreeBounds();
-    }
-    return $result;
   }
 
   function processUploadId($uploadId)
   {
-    $this->processClearingEventOfCurrentJob();
+    $groupId = $this->groupId;
 
+    $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
+    {
+      $itemTreeBounds = $item->getItemTreeBounds();
+      $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+      $matches = $this->remapByProjectedId($matches);
+      
+      $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+      $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
+
+      $this->processItem($item, $matches, $lastDecision, $currentEvents);
+    }
     return true;
   }
 
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int $userId
-   */
-  protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
+  private function processItem(Item $item, $matches, $lastDecision, $currentEvents)
   {
-    $this->dbManager->begin();
+    $itemTreeBounds = $item->getItemTreeBounds();
 
-    $itemId = $itemTreeBounds->getItemId();
-
-    switch ($this->conflictStrategyId)
+    if ($this->activeRules & self::RULES_NOMOS_IN_MONK)
     {
-      case DeciderAgent::FORCE_DECISION:
-        $createDecision = true;
-        break;
+      $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches, $lastDecision, $currentEvents);
+    }
+  }
 
-      default:
-        $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
+  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches, $lastDecision, $currentEvents)
+  {
+    $canDecide = (count($matches)>0);
+    $canDecide &= null === $lastDecision;
+    $canDecide &= 0 == count($currentEvents);
+
+    foreach($matches as $licenseMatches)
+    {
+      if (!$canDecide) // &= is not lazy
+      {
+        break;
+      }
+      $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
+
     }
 
-    if ($createDecision)
+    if ($canDecide)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+      $this->heartbeat(1);
     }
     else
     {
-      foreach ($additionalEventsFromThisJob as $eventId)
-      {
-        $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
-      }
-      $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
+      $this->heartbeat(0);
     }
-    $this->heartbeat(1);
+  }
 
-    $this->dbManager->commit();
+  protected function remapByProjectedId($matches)
+  {
+    $remapped = array();
+    foreach($matches as $licenseId => $licenseMatches)
+    {
+      $projectedId = $this->licenseMap->getProjectedId($licenseId);
+
+      foreach($licenseMatches as $agent => $agentMatches)
+      {
+        $haveId = array_key_exists($projectedId, $remapped);
+        $haveAgent = $haveId && array_key_exists($agent, $remapped[$projectedId]);
+        if ($haveAgent)
+        {
+          $remapped[$projectedId][$agent] = array_merge($remapped[$projectedId][$agent], $agentMatches);
+        }
+        else
+        {
+          $remapped[$projectedId][$agent] = $agentMatches;
+        }
+      }
+    }
+    return $remapped;
+  }
+
+  private function isRegionIncluded($small, $big)
+  {
+    return ($big[0] >= 0) && ($small[0] >= $big[0]) && ($small[1] <= $big[1]);
+  }
+
+  /**
+   * @param LicenseMatch[]
+   * @return boolean
+   */
+  private function areNomosMatchesInsideAMonkMatch($licenseMatches)
+  {
+    if (!array_key_exists("nomos", $licenseMatches))
+    {
+      return false;
+    }
+    if (!array_key_exists("monk", $licenseMatches))
+    {
+      return false;
+    }
+
+    foreach($licenseMatches["nomos"] as $licenseMatch)
+    {
+      $matchId = $licenseMatch->getLicenseFileId();
+      $nomosRegion = $this->highlightDao->getHighlightRegion($matchId);
+
+      $found = false;
+      foreach($licenseMatches["monk"] as $monkLicenseMatch)
+      {
+        $monkRegion = $this->highlightDao->getHighlightRegion($monkLicenseMatch->getLicenseFileId());
+        if ($this->isRegionIncluded($nomosRegion, $monkRegion))
+        {
+          $found = true;
+          break;
+        }
+      }
+      if (!$found)
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

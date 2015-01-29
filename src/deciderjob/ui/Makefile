@@ -9,21 +9,20 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = Functional Unit
-LOCALAGENTDIR = ../agent/
-
-DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+MOD_NAME = deciderjob
+MOD_SUBDIR = ui
 
 all:
-	$(call DIR_LOOP, )
+	@echo "nothing to do"
 
-test:
-	$(call DIR_LOOP,test)
+install:
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
-coverage:
-	$(call DIR_LOOP,coverage)
+uninstall:
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	$(call DIR_LOOP,clean)
+	@echo "nothing to do"
 
-.PHONY: all test coverage clean
+.PHONY: all install uninstall clean

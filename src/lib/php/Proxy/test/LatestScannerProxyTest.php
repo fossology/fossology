@@ -81,6 +81,16 @@ class LatestScannerProxyTest extends \PHPUnit_Framework_TestCase
     assertThat($scanners,arrayContainingInAnyOrder(array(array('agent_pk'=>6,'agent_name'=>'nomos'),array('agent_pk'=>5,'agent_name'=>'monk'))));
   }
   
+  /**
+   * @expectedException \Exception
+   */
+  public function testQueryNoScanners()
+  {
+    $uploadId = 2;
+    $agentNames = array();
+    new LatestScannerProxy($uploadId,$agentNames,'latest_scanner', "AND agent_enabled='true'");
+  }
+  
   public function testQueryPrepared()
   {
     $uploadId = 2;

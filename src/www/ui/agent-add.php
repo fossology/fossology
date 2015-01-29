@@ -61,11 +61,12 @@ class agent_add extends FO_Plugin
    */
   private function AgentsAdd($uploadpk, $agentlist)
   {
-    global $Plugins;
     global $PG_CONN;
     global $SysConf;
 
-    $rc="";
+    if (!is_array($agentlist)) {
+      return "bad parameters";
+    }
 
     /* Make sure the uploadpk is valid */
     if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
@@ -81,44 +82,26 @@ class agent_add extends FO_Plugin
     $ShortName = $UploadRow['upload_filename'];
     pg_free_result($result);
 
+    $agents = array();
+    $agentList = listAgents();
+    foreach($agentList as $agentName => &$agentPlugin) {
+      if (in_array($agentName, $agentlist))
+      {
+        $agents[$agentName] = &$agentPlugin;
+      }
+    }
+
+    if (count($agents)==0)
+    {
+      return _("no valid agent specified");
+    }
+
     /* Create Job */
     $user_pk = $SysConf['auth']['UserId'];
     $group_pk = $SysConf['auth']['GroupId'];
     $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadpk);
 
-    /* Validate the agent list and add agents as needed. */
-    /** Don't worry about order or duplicates -- it will do the right thing. **/
-    $depth=0;
-    $agent_list = menu_find("Agents", $depth);
-    for($al=0; !empty($agentlist[$al]); $al++)
-    {
-      /* check if the agent exists in the list of viable agents */
-      $Found = -1;
-      for($ac=0; ($Found < 0) && !empty($agent_list[$ac]->URI); $ac++)
-      {
-        if (!strcmp($agent_list[$ac]->URI,$agentlist[$al]))
-        {
-          $Found = $al;
-          break;
-        }
-      }
-      if ($Found >= 0)
-      {
-        //print "Adding to " . $agentlist[$Found] . "<br>\n";
-        $Dependencies = array();
-        $P = &$Plugins[plugin_find_id($agentlist[$Found])];
-        if ($this->jobAlreadyScheduled($P->AgentName,$uploadpk ) ) {
-          continue;
-        }
-        $rv = $P->AgentAdd($job_pk, $uploadpk, $ErrorMsg, $Dependencies);
-        if ($rv == -1) $rc .= $ErrorMsg;
-      }
-      else
-      {
-        $rc .= "Agent '" . htmlentities($agentlist[$al]) . "' not found.\n";
-      }
-    }
-    return($rc);
+    return AgentSchedule($job_pk, $uploadpk, $agents);
   } // AgentsAdd()
 
   /**

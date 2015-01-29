@@ -18,27 +18,27 @@
  ***********************************************************/
 
 /**
- * \file agent-fodecider.php
- * \brief run the decider license agent
+ * \file agent-fodeciderjob.php
+ * \brief run the deciderjob license agent
  */
 
-define("TITLE_agent_fodecider", _("Automatic Concluded License Decider, based on scanners Matches"));
+define("TITLE_agent_fodeciderjob", _("Automatic User License Decider"));
 
 include_once(__DIR__ . "/../agent/version.php");
 
-class agent_fodecider extends FO_Plugin
+class agent_fodeciderjob extends FO_Plugin
 {
   public $AgentName;
 
-  const RULES_FLAG = "-r";
+  const CONFLICT_STRATEGY_FLAG = "-k";
 
   function __construct() {
-    $this->Name = "agent_decider";
-    $this->Title = TITLE_agent_fodecider;
+    $this->Name = "agent_deciderjob";
+    $this->Title = TITLE_agent_fodeciderjob;
     $this->Version = "1.0";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = AGENT_DECIDER_NAME;
+    $this->AgentName = AGENT_DECIDER_JOB_NAME;
 
     parent::__construct();
   }
@@ -48,9 +48,6 @@ class agent_fodecider extends FO_Plugin
    */
   function RegisterMenus()
   {
-    if ($this->State == PLUGIN_STATE_READY) {
-      menu_insert("Agents::" . $this->Title, 0, $this->Name);
-    }
     return 0;
   }
 
@@ -86,12 +83,12 @@ class agent_fodecider extends FO_Plugin
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $activeRules=null)
+  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
   {
     $Dependencies[] = "agent_adj2nest";
-    if ($activeRules !== null)
+    if ($conflictStrategyId !== null)
     {
-      $args = self::RULES_FLAG . $activeRules;
+      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
     } else
     {
       $args = "";
@@ -100,4 +97,4 @@ class agent_fodecider extends FO_Plugin
   }
 }
 
-$NewPlugin = new agent_fodecider();
+$NewPlugin = new agent_fodeciderjob();
