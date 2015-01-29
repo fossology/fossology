@@ -57,17 +57,17 @@ class Menu extends Object
     {
       $output .= '<li>';
 
-      if (!empty($M->HTML))
+      if (!empty($menuEntry->HTML))
       {
-        $output .= $M->HTML;
+        $output .= $menuEntry->HTML;
       } else /* create HTML */
       {
         $output .= $this->createHtmlFromMenuEntry($menuEntry, $indent);
       }
 
-      if (!empty($M->SubMenu))
+      if (!empty($menuEntry->SubMenu))
       {
-        $output .= $this->menu_html($M->SubMenu, $indent + 1);
+        $output .= $this->menu_html($menuEntry->SubMenu, $indent + 1);
       }
     }
     $output .= "</ul>\n";
