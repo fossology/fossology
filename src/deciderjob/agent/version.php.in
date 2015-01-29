@@ -1,0 +1,4 @@
+<?php
+define("AGENT_DECIDER_JOB_NAME", "deciderjob");
+define("AGENT_DECIDER_JOB_VERSION", "{$VERSION}");
+define("AGENT_DECIDER_JOB_REV", "{$SVN_REV}");

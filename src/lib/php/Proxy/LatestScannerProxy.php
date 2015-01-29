@@ -34,6 +34,10 @@ class LatestScannerProxy extends DbViewProxy
    */
   public function __construct($uploadId, $agentNames=array('nomos','monk'), $dbViewName='latest_scanner', $andEnabled = "AND agent_enabled")
   {
+    if (empty($agentNames))
+    {
+      throw new \Exception('empty set of scanners');
+    }
     $this->uploadId = $uploadId;
     $subqueries = array();
     foreach($agentNames as $name)

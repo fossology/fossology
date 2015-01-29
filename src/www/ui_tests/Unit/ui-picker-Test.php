@@ -17,7 +17,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+use Mockery as M;
+
 $wwwPath = dirname(dirname(__DIR__));
+global $container;
+$container = M::mock('ContainerBuilder');
+$container->shouldReceive('get');
 require_once(dirname($wwwPath).'/lib/php/Plugin/FO_Plugin.php');
 if(!function_exists('register_plugin')){ function register_plugin(){}}
 require_once ($wwwPath.'/ui/ui-picker.php');
@@ -25,11 +30,13 @@ require_once ($wwwPath.'/ui/ui-picker.php');
 
 class ui_picker_Test extends \PHPUnit_Framework_TestCase
 {
-
   /**
    * \brief test for Uploadtree2PathStr
    */
   public function test_Uploadtree2PathStr (){
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $container->shouldReceive('get');
     $uiPicker = new ui_picker();
 
     $reflection = new \ReflectionClass( get_class($uiPicker) );

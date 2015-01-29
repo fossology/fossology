@@ -123,35 +123,65 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
 /**
  * \brief  Assume someone called AgentCheckBoxMake() and submitted the HTML form.
  *         Run AgentAdd() for each of the checked agents. 
- *         Because input comes from the user, validate that everything is legitimate.
  *
  * \param $job_pk
  * \param $upload_pk
  */
-function AgentCheckBoxDo($job_pk, $upload_pk)
+function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
 {
   global $Plugins;
-  $AgentList = menu_find("Agents",$Depth);
-  $V = "";
-  if (!empty($AgentList)) {
-    foreach($AgentList as $AgentItem) {
-      /*
-       The URI below contains the agent name e.g agent_license, this is
-       not be confused with the Name attribute in the class, for example,
-       the Name attribute for agent_license is: Schedule License Analysis
-       */
-      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-      if (empty($Agent)) continue;
-      $Name = htmlentities($Agent->Name);
-      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      $Dependencies = array();
-      $ErrorMsg="Bad thing";
-      if ($Parm == 1) $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+  $agents = checkedAgents();
+
+  foreach($additionalAgentNames as $agentName)
+  {
+    if (!array_search($agentName, $agents) && (-1 != plugin_find_id($agentName)))
+    {
+      $agents[$agentName] = &$Plugins[$agentName];
     }
   }
-  return($V);
+
+  return AgentSchedule($job_pk, $upload_pk, $agents);
 } // AgentCheckBoxDo()
 
+
+/**
+ * \brief  schedule all given agents
+ *
+ * \param int $jobId
+ * \param int $uploadId
+ * \param Plugin[] $agents array of agent plugin, mapped by name as in listAgents()
+ *
+ * \return null|string null on success or error message [sic]
+ */
+function AgentSchedule($jobId, $uploadId, $agents)
+{
+  $agentDeciderName = "agent_decider";
+
+  $errorMsg = "";
+  if (!array_key_exists($agentDeciderName, $agents))
+  {
+    foreach($agents as $agentName => &$agent)
+    {
+      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      if ($rv == -1) {
+        return $errorMsg;
+      }
+    }
+  }
+  else
+  {
+    $agentDecider = $agents[$agentDeciderName];
+    unset($agents[$agentDeciderName]);
+
+    $deciderRules = null;
+    $rv = $agentDecider->AgentAdd($jobId, $uploadId, $errorMsg, array_keys($agents), $deciderRules);
+    if ($rv == -1) {
+      return $errorMsg;
+    }
+  }
+
+  return null;
+}
 
 /**
  * \brief find the jobs in the job and jobqueue table to be dependent on
@@ -394,36 +424,58 @@ function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
  */
 function userAgents()
 {
-  global $Plugins;
+  return implode(',', array_keys(checkedAgents()));
+}
 
-  $agentsChecked = "";
+/**
+ * \brief read the UI form and return array of user selected agents
+ *        Because input comes from the user, validate that everything is legitimate.
+ *
+ * \return Plugin[] list of checked agent plugins, mapped by name
+ */
+function checkedAgents()
+{
+  $agentsChecked = array();
 
-  $AgentList = menu_find("Agents",$Depth);
-  if (!empty($AgentList)) {
-    foreach($AgentList as $AgentItem) {
+  foreach(listAgents() as $agentName => &$agentPlugin)
+  {
+    if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1)
+    {
+      $agentsChecked[$agentName] = &$agentPlugin;
+    }
+  }
+  unset($agentPlugin);
+
+  return $agentsChecked;
+}
+
+/**
+ * \brief search in available plugins and return all agents
+ *
+ * \return Plugin[] list of checked agent plugins, mapped by name
+ */
+function listAgents()
+{
+  $agents = array();
+
+  $agentList = menu_find("Agents",$Depth);
+  if (!empty($agentList)) {
+    foreach($agentList as $agentItem) {
       /*
        The URI below contains the agent name e.g agent_license, this is
        not be confused with the Name attribute in the class, for example,
        the Name attribute for agent_license is: Schedule License Analysis
        */
-      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-      if (empty($Agent)) {
+      $agentPlugin = &plugin_find($agentItem->URI);
+      if (empty($agentPlugin)) {
         continue;
       }
-      $Name = htmlentities($Agent->Name);
-      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      if ($Parm == 1) {
-        // save the name
-        $agentsChecked .= $Name . ',';
-      }
+      $name = htmlentities($agentPlugin->Name);
+      $agents[$name] = $agentPlugin;
     }
-    // remove , from last name
-    $agentsChecked = trim($agentsChecked, ',');
   }
-  return($agentsChecked);
+  return $agents;
 }
-
-
 /**
  * \brief Check the ARS table to see if an agent has successfully scanned an upload.
  *

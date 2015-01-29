@@ -21,6 +21,7 @@ use Mockery as M;
 global $container;
 $container = M::mock('ContainerBuilder');
 $container->shouldReceive('get');
+
 $wwwPath = dirname(dirname(dirname(__DIR__)));
 if(!function_exists('register_plugin')){ function register_plugin(){}}
 require_once ( dirname(dirname(dirname(__DIR__))).'/ui/page/AdviceLicense.php' );
@@ -29,6 +30,10 @@ class AdviceLicenseTest extends \PHPUnit_Framework_TestCase
 {
   public function testBool2checkbox()
   {
+    global $container;
+    $container = M::mock('ContainerBuilder');
+    $container->shouldReceive('get');
+
     $plugin = new Fossology\UI\Page\AdviceLicense();
 
     $reflection = new \ReflectionClass( get_class($plugin) );
