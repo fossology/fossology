@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Clean up the files left over from unit testing that the Jenkins subversion client cannot delete because they have special characters in their filenames&#xd;
+&#xd;
+rm -rf src/ununpack/agent_tests/Unit/test-result</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>7</daysToKeep>
+    <numToKeep>-1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jvnet.hudson.plugins.shelveproject.ShelveProjectProperty plugin="shelve-project-plugin@1.3"/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>fotest</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># clean up from Unit tests
+UNIT_TEST_WORKSPACE=/home/jenkins/jobs/Fossology_Unit_Tests/workspace
+if [ -d ${UNIT_TEST_WORKSPACE} ]; then
+    echo &quot;Clean up the workspace ${UNIT_TEST_WORKSPACE}&quot;
+    rm -rf ${UNIT_TEST_WORKSPACE}/src/ununpack/agent_tests/Unit/test-result
+    exit 0
+else
+    echo &quot;ERROR, Unit test workspace ${UNIT_TEST_WORKSPACE} does not exist! Maybe it has moved?&quot;
+    exit 1
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.BuildTrigger>
+      <childProjects>Fossology_Unit_Tests</childProjects>
+      <threshold>
+        <name>FAILURE</name>
+        <ordinal>2</ordinal>
+        <color>RED</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </hudson.tasks.BuildTrigger>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.19">
+      <recipientList>dong.ma@hp.com</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+      </configuredTriggers>
+      <contentType>default</contentType>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

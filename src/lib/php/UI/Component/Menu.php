@@ -19,15 +19,17 @@
 
 namespace Fossology\Lib\UI\Component;
 
-
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Util\Object;
+use Twig_Environment;
 
 class Menu extends Object
 {
   const FULL_MENU_DEBUG = 'fullmenudebug';
   var $MenuTarget = "treenav";
+  protected $renderer;
 
-  public function __construct()
+  public function __construct(Twig_Environment $renderer)
   {
     // Add default menus (with no actions linked to plugins)
     menu_insert("Main::Upload", 70);
@@ -35,6 +37,7 @@ class Menu extends Object
     menu_insert("Main::Organize", 50);
     menu_insert("Main::Help", -1);
     menu_insert("Main::Help::Documentation", 0, NULL, NULL, NULL, "<a href='http://www.fossology.org/projects/fossology/wiki/User_Documentation'>Documentation</a>");
+    $this->renderer = $renderer;
   }
 
   /**
@@ -50,84 +53,82 @@ class Menu extends Object
     $output .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $output .= "<ul id='menu-$indent'>\n";
     
-    foreach ($menu as $M)
+    foreach ($menu as $menuEntry)
     {
       $output .= '<li>';
 
-      if (!empty($M->HTML))
+      if (!empty($menuEntry->HTML))
       {
-        $output .= $M->HTML;
+        $output .= $menuEntry->HTML;
       } else /* create HTML */
       {
-        $output .= $this->createHtmlFromMenuEntry($M, $indent);
+        $output .= $this->createHtmlFromMenuEntry($menuEntry, $indent);
       }
 
-      if (!empty($M->SubMenu))
+      if (!empty($menuEntry->SubMenu))
       {
-        $output .= $this->menu_html($M->SubMenu, $indent + 1);
+        $output .= $this->menu_html($menuEntry->SubMenu, $indent + 1);
       }
     }
     $output .= "</ul>\n";
     $output .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
-    $NewV = preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $output);
-    return ($NewV);
+    return preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $output);
   }
   
-  function createHtmlFromMenuEntry(\menu $M, $Indent)
+  function createHtmlFromMenuEntry(\menu $menuEntry, $indent)
   {
     $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
-    $V = "";
-    if (!empty($M->URI))
+    $output = "";
+    if (!empty($menuEntry->URI))
     {
-      $V .= '<a  id="'. htmlentities($M->FullName) .'" href="' . Traceback_uri() . "?mod=" . $M->URI;
-      if (empty($M->Target) || ($M->Target == ""))
+      $output .= '<a  id="'. htmlentities($menuEntry->FullName) .'" href="' . Traceback_uri() . "?mod=" . $menuEntry->URI;
+      if (empty($menuEntry->Target) || ($menuEntry->Target == ""))
       {
-        // $V .= '" target="basenav">';
-        $V .= '">';
+        $output .= '">';
       } else
       {
-        $V .= '" target="' . $M->Target . '">';
+        $output .= '" target="' . $menuEntry->Target . '">';
       }
       if ($isFullMenuDebug)
       {
-        $V .= $M->FullName . "(" . $M->Order . ")";
+        $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
       } else
       {
-        $V .= $M->Name;
+        $output .= $menuEntry->Name;
       }
     } else
     {
-      $V .= '<a id="'. htmlentities($M->FullName) .'" href="#">';
-      if (empty($M->SubMenu))
+      $output .= '<a id="'. htmlentities($menuEntry->FullName) .'" href="#">';
+      if (empty($menuEntry->SubMenu))
       {
-        $V .= "<font color='#C0C0C0'>";
+        $output .= "<font color='#C0C0C0'>";
         if ($isFullMenuDebug)
         {
-          $V .= $M->FullName . "(" . $M->Order . ")";
-        } //else { $V .= $M->Name; }
+          $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
+        }
         else
         {
-          $V .= '';
+          $output .= '';
         }
-        $V .= "</font>";
+        $output .= "</font>";
       } else
       {
         if ($isFullMenuDebug)
         {
-          $V .= $M->FullName . "(" . $M->Order . ")";
+          $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
         } else
         {
-          $V .= $M->Name;
+          $output .= $menuEntry->Name;
         }
       }
     }
 
-    if (!empty($M->SubMenu) && ($Indent > 0))
+    if (!empty($menuEntry->SubMenu) && ($indent > 0))
     {
-      $V .= " <span>&raquo;</span>";
+      $output .= " <span>&raquo;</span>";
     }
-    $V .= "</a>\n";
-    return $V;
+    $output .= "</a>\n";
+    return $output;
   }
 
   /**
@@ -139,11 +140,11 @@ class Menu extends Object
 
     $output .= "<style type=\"text/css\">\n";
     /* Depth 0 is special: position is relative, colors are blue */
-    $Depth = 0;
-    $Label = "";
+    $depth = 0;
+    $label = "";
     $Menu = menu_find("Main", $MenuDepth);
-    $Border = "border-color:#CCC #CCC #CCC #CCC; border-width:1px 1px 1px 1px;";
-    $Padding = "padding:4px 0px 4px 4px;";
+    $cssBorder = "border-color:#CCC #CCC #CCC #CCC; border-width:1px 1px 1px 1px;";
+    $cssPadding = "padding:4px 0px 4px 4px;";
     $FOSScolor1 = "#c50830";
     $FOSScolor2 = "#808080";
     $FOSSbg = "white";
@@ -163,70 +164,70 @@ class Menu extends Object
     $FOSSfg3h = $FOSScolor1; // highlight colors
     $FOSSbg3h = "beige";
 
-    if ($Depth < $MenuDepth)
+    if ($depth < $MenuDepth)
     {
       /** The "float:left" is needed to fix IE **/
-      $output .= "\n/* CSS for Depth $Depth */\n";
-      $Label = "ul#menu-" . $Depth;
-      $output .= $Label . "\n";
+      $output .= "\n/* CSS for Depth $depth */\n";
+      $label = "ul#menu-" . $depth;
+      $output .= $label . "\n";
       $output .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg1; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica; font-weight: bold; }\n";
-      $Label .= " li";
-      $output .= $Label . "\n";
+      $label .= " li";
+      $output .= $label . "\n";
       $output .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
-      $output .= $Label . " a:link,\n";
-      $output .= $Label . " a:visited\n";
+      $output .= $label . " a:link,\n";
+      $output .= $label . " a:visited\n";
       $output .= "  { float:left; padding:4px 10px; text-decoration:none; color:$FOSSfg1; background:$FOSSbg1; width:auto; display:block; }\n";
-      $output .= $Label . ":hover a,\n";
-      $output .= $Label . " a:hover,\n";
-      $output .= $Label . " a:active\n";
-      $output .= "  { float:left; padding:4px 10px; color:$FOSSfg1h; background:$FOSSbg1h; $Border width:auto; display:block; }\n";
-      $output .= $Label . " a span\n";
+      $output .= $label . ":hover a,\n";
+      $output .= $label . " a:hover,\n";
+      $output .= $label . " a:active\n";
+      $output .= "  { float:left; padding:4px 10px; color:$FOSSfg1h; background:$FOSSbg1h; $cssBorder width:auto; display:block; }\n";
+      $output .= $label . " a span\n";
       $output .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; }\n";
-      $Depth++;
+      $depth++;
     }
 
     /* Depth 1 is special: position is absolute. Left is 0, top is 24 */
-    if ($Depth < $MenuDepth)
+    if ($depth < $MenuDepth)
     {
-      $output .= "\n/* CSS for Depth $Depth */\n";
-      $output .= $Label . " ul#menu-" . $Depth . "\n";
+      $output .= "\n/* CSS for Depth $depth */\n";
+      $output .= $label . " ul#menu-" . $depth . "\n";
       $output .= "  { margin:0; padding:0px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; font-weight: bold; }\n";
-      $output .= $Label . ":hover ul#menu-" . $Depth . "\n";
+      $output .= $label . ":hover ul#menu-" . $depth . "\n";
       $output .= "  { float:left; display:block; visibility:visible; }\n";
-      $Label .= " ul#menu-" . $Depth . " li";
-      $output .= $Label . "\n";
-      $output .= "  { z-index:$Depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
-      $output .= $Label . " a:link,\n";
-      $output .= $Label . " a:visited\n";
-      $output .= "  { z-index:$Depth; $Padding color:$FOSSfg2; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
-      $output .= $Label . ":hover a,\n";
-      $output .= $Label . " a:active,\n";
-      $output .= $Label . " a:hover\n";
-      $output .= "  { z-index:$Depth; $Padding color:$FOSSfg2h; background:$FOSSbg2h; width:150px; display:block; visibility:visible; }\n";
-      $output .= $Label . " a span\n";
+      $label .= " ul#menu-" . $depth . " li";
+      $output .= $label . "\n";
+      $output .= "  { z-index:$depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+      $output .= $label . " a:link,\n";
+      $output .= $label . " a:visited\n";
+      $output .= "  { z-index:$depth; $cssPadding color:$FOSSfg2; background:$FOSSbg2; border:1px solid #000; $cssBorder width:150px; display:block; visibility:visible; }\n";
+      $output .= $label . ":hover a,\n";
+      $output .= $label . " a:active,\n";
+      $output .= $label . " a:hover\n";
+      $output .= "  { z-index:$depth; $cssPadding color:$FOSSfg2h; background:$FOSSbg2h; width:150px; display:block; visibility:visible; }\n";
+      $output .= $label . " a span\n";
       $output .= "  { text-align:left; }\n";
-      $Depth++;
+      $depth++;
     }
 
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
-    for (; $Depth < $MenuDepth; $Depth++)
+    for (; $depth < $MenuDepth; $depth++)
     {
-      $output .= "\n/* CSS for Depth $Depth */\n";
-      $output .= $Label . " ul#menu-" . $Depth . "\n";
+      $output .= "\n/* CSS for Depth $depth */\n";
+      $output .= $label . " ul#menu-" . $depth . "\n";
       $output .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:156px; width:150px; position:absolute; top:-1px; font-weight: bold; }\n";
-      $output .= $Label . ":hover ul#menu-" . $Depth . "\n";
+      $output .= $label . ":hover ul#menu-" . $depth . "\n";
       $output .= "  { float:left; display:block; visibility:visible; }\n";
-      $Label .= " ul#menu-" . $Depth . " li";
-      $output .= $Label . "\n";
-      $output .= "  { z-index:$Depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
-      $output .= $Label . " a:link,\n";
-      $output .= $Label . " a:visited\n";
-      $output .= "  { z-index:$Depth; $Padding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $Border width:150px; display:block; }\n";
-      $output .= $Label . ":hover a,\n";
-      $output .= $Label . " a:active,\n";
-      $output .= $Label . " a:hover\n";
-      $output .= "  { z-index:$Depth; $Padding color:$FOSSfg3h; background:$FOSSbg3h; width:150px; display:block; visibility:visible; }\n";
-      $output .= $Label . " a span\n";
+      $label .= " ul#menu-" . $depth . " li";
+      $output .= $label . "\n";
+      $output .= "  { z-index:$depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+      $output .= $label . " a:link,\n";
+      $output .= $label . " a:visited\n";
+      $output .= "  { z-index:$depth; $cssPadding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $cssBorder width:150px; display:block; }\n";
+      $output .= $label . ":hover a,\n";
+      $output .= $label . " a:active,\n";
+      $output .= $label . " a:hover\n";
+      $output .= "  { z-index:$depth; $cssPadding color:$FOSSfg3h; background:$FOSSbg3h; width:150px; display:block; visibility:visible; }\n";
+      $output .= $label . " a span\n";
       $output .= "  { text-align:left; }\n";
     }
     $output .= "</style>\n";
@@ -252,13 +253,13 @@ class Menu extends Object
   /**
    * @brief Create the output.
    */
-  function Output($Title = NULL)
+  function Output($title = NULL)
   {
     global $SysConf;
     $sysConfig = $SysConf['SYSCONFIG'];
 
     $vars = array();
-    $vars['title'] = empty($Title) ? _("Welcome to FOSSology") : $Title;
+    $vars['title'] = empty($title) ? _("Welcome to FOSSology") : $title;
     $vars['bannerMsg'] = @$sysConfig['BannerMsg'];
     $vars['logoLink'] =  $sysConfig['LogoLink']?: 'http://fossology.org';
     $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
@@ -268,22 +269,20 @@ class Menu extends Object
       $menuItem = '<a href="mailto:'.$sysConfig['SupportEmailAddr'].'?subject='.@$sysConfig['SupportEmailSubject'].'">'.$sysConfig['SupportEmailLabel'].'</a>';
       menu_insert("Main::Help::".$sysConfig['SupportEmailLabel'], 0, NULL, NULL, NULL, $menuItem);
     }    
-    
-    $Menu = menu_find("Main", $MenuDepth);
-    $vars['mainMenu'] = $this->menu_html($Menu, 0);
+
+    $menu = menu_find("Main", $MenuDepth);
+    $vars['mainMenu'] = $this->menu_html($menu, 0);
     $vars['uri'] = Traceback_uri();
     
     /* Handle login information */
-    $vars['isLoggedOut'] = ((empty($_SESSION['User'])) or ($_SESSION['User'] == "Default User"));
+    $vars['isLoggedOut'] = ((empty($_SESSION[Auth::USER_NAME])) or ($_SESSION[Auth::USER_NAME] == "Default User"));
     
     if(!$vars['isLoggedOut'])
     {
       $this->mergeUserLoginVars($vars);
     }
     
-    global $container;
-    $renderer = $container->get('twig.environment');
-    $out = $renderer->loadTemplate('menu.html.twig')->render($vars);
+    $out = $this->renderer->loadTemplate('components/menu.html.twig')->render($vars);
     return $out;
   }
 
@@ -293,7 +292,7 @@ class Menu extends Object
     $dbManager = $container->get("db.manager");
 
     $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
-    $vars['userName'] = $_SESSION['User'];
+    $vars['userName'] = $_SESSION[Auth::USER_NAME];
     
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
     $stmt = __METHOD__ . '.availableGroups';
@@ -308,7 +307,7 @@ class Menu extends Object
     if (count($allAssignedGroups) > 1)
     {
       $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
-      $vars['groupId'] = $_SESSION['GroupId'];
+      $vars['groupId'] = $_SESSION[Auth::GROUP_ID];
       $vars['allAssignedGroups'] = $allAssignedGroups;
     }
     else

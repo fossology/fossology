@@ -315,7 +315,7 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
 $menu_to_1html_counter = 0;
 function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) 
 {
-  $showFullName = array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
+  $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
 
   $V = "";
   $Std = "";
@@ -409,7 +409,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  */
 function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
 {
-  $showFullName = array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
+  $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
 
   $V = "";
   if (!empty($Menu)) {
