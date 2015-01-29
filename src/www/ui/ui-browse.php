@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_ui_browse", _("Browse"));
 
@@ -264,7 +265,13 @@ class ui_browse extends FO_Plugin
       }
     }
 
-    $this->vars['content'] = $this->outputItemHtml($Item, $folder_pk, $Upload);
+    $output = $this->outputItemHtml($Item, $folder_pk, $Upload);
+    if ($output instanceof Response)
+    {
+      return $output;
+    }
+
+    $this->vars['content'] = $output;
     return $this->render('ui-browse.html.twig');
   }
 
@@ -279,12 +286,12 @@ class ui_browse extends FO_Plugin
       return GetUserRootFolder();
     }
     global $container;
-    /** @var Fossology\Lib\Db\DbManager */
+    /** @var DbManager */
     $dbManager = $container->get('db.manager');
     $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
     if ($uploadExists['cnt']< 1)
     {
-      throw new \Exception("This upload no longer exists on this system.");
+      throw new Exception("This upload no longer exists on this system.");
     }
     $dbManager->prepare($stmt=__METHOD__.'.parent',
            $sql = "select parent_fk from foldercontents where child_id=$1 and foldercontents_mode=$2");
@@ -318,8 +325,7 @@ class ui_browse extends FO_Plugin
       if ($UploadPerm < PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
-        echo $this->render('include/base.html.twig');
-        exit;
+        return $this->render('include/base.html.twig');
       }
 
       if (!Iscontainer($row['ufile_mode']))
@@ -329,8 +335,7 @@ class ui_browse extends FO_Plugin
         if (!empty($View))
         {
           $this->vars['content'] = $View->ShowView(NULL, "browse");
-          echo $this->render('include/base.html.twig');
-          exit;
+          return $this->render('include/base.html.twig');
         }
       }
       $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
@@ -358,14 +363,12 @@ class ui_browse extends FO_Plugin
         } else
         {
           $this->vars['message'] = _("Missing upload tree parent for upload");
-          echo $this->render('include/base.html.twig');
-          exit;
+          return $this->render('include/base.html.twig');
         }
       }
       $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
       $this->vars['content'] = $html;
-      echo $this->render('include/base.html.twig');
-      exit;
+      return $this->render('include/base.html.twig');
     }
     return $html;
   }
