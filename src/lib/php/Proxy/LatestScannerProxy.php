@@ -46,7 +46,7 @@ class LatestScannerProxy extends DbViewProxy
         WHERE agent_fk=agent_pk AND upload_fk=$uploadId $andEnabled ORDER BY agent_fk DESC limit 1) latest_$name";
     }
     $dbViewQuery = implode(' UNION ',$subqueries);
-    parent::__construct($dbViewQuery, $dbViewName.".".implode(".",$agentNames));
+    parent::__construct($dbViewQuery, $dbViewName."_".implode("_",$agentNames));
   }
 
   public function materialize()
