@@ -436,8 +436,8 @@ function userAgents()
 function checkedAgents()
 {
   $agentsChecked = array();
-
-  foreach(listAgents() as $agentName => &$agentPlugin)
+  $agentList = listAgents();
+  foreach($agentList as $agentName => &$agentPlugin)
   {
     if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1)
     {

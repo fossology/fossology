@@ -83,7 +83,8 @@ class agent_add extends FO_Plugin
     pg_free_result($result);
 
     $agents = array();
-    foreach(listAgents() as $agentName => &$agentPlugin) {
+    $agentList = listAgents();
+    foreach($agentList as $agentName => &$agentPlugin) {
       if (in_array($agentName, $agentlist))
       {
         $agents[$agentName] = &$agentPlugin;
