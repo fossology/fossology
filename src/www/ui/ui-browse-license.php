@@ -311,7 +311,14 @@ class ui_browse_license extends FO_Plugin
     $uploadTreeId = $itemTreeBounds->getItemId();
     
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
+    if (!isset($_GET['flatten']))
+    {
+      $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
+    }
+    else
+    {
+      $Children = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds);
+    }
 
     /* Filter out Children that don't have tag */
     if (!empty($tagId))
@@ -359,7 +366,14 @@ class ui_browse_license extends FO_Plugin
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
     $alreadyClearedUploadTreeView->materialize();
-    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    if (!isset($_GET['flatten']))
+    {
+      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    }
+    else
+    {
+      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
+    }
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
@@ -367,7 +381,14 @@ class ui_browse_license extends FO_Plugin
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    if (!isset($_GET['flatten']))
+    {
+      $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    }
+    else
+    {
+      $this->filesToBeCleared = $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
+    }
     $noLicenseUploadTreeView->unmaterialize();
 
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true);
