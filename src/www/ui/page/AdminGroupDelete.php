@@ -1,20 +1,20 @@
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2014, Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
 namespace Fossology\UI\Page;
@@ -32,16 +32,17 @@ class AdminGroupDelete extends DefaultPlugin
 {
 
   const NAME = 'group_delete';
-          
-  function __construct(){
-        parent::__construct(self::NAME, array(
-        self::TITLE =>  _("Delete Group"),
+
+  function __construct()
+  {
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Delete Group"),
         self::MENU_LIST => "Admin::Groups::Delete Group",
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => self::PERM_WRITE,
+        self::REQUIRES_LOGIN => TRUE
     ));
-    $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
   }
-  
+
   /**
    * @param Request $request
    * @return Response
@@ -57,15 +58,14 @@ class AdminGroupDelete extends DefaultPlugin
     $groupMap = $userDao->getDeletableAdminGroupMap($userId);
 
     $groupId = $request->get('grouppk');
-    if (!empty($groupId)) 
+    if (!empty($groupId))
     {
       try
       {
         $userDao->deleteGroup($groupId);
-        $vars['message'] = _("Group").' '.$groupMap[$groupId]. ' '. _("deleted").'.';
+        $vars['message'] = _("Group") . ' ' . $groupMap[$groupId] . ' ' . _("deleted") . '.';
         unset($groupMap[$groupId]);
-      }
-      catch (\Exception $e)
+      } catch (\Exception $e)
       {
         $vars['message'] = $e->getMessage();
       }
@@ -74,12 +74,12 @@ class AdminGroupDelete extends DefaultPlugin
     if (empty($groupMap))
     {
       $vars['content'] = _("You have no groups you can delete.");
-      return $this->render('include/base.html.twig',$this->mergeWithDefault($vars));
+      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
     }
     $vars['groupMap'] = $groupMap;
-    $vars['uri'] = Traceback_uri() ."?mod=group_delete";
+    $vars['uri'] = Traceback_uri() . "?mod=group_delete";
     $vars['groupMap'] = $groupMap;
-    return $this->render('admin_group_delete.html.twig',$this->mergeWithDefault($vars));
+    return $this->render('admin_group_delete.html.twig', $this->mergeWithDefault($vars));
   }
 }
 
