@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -27,13 +27,10 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestLiteDb */
   private $testDb;
-
   /** @var DbManager */
   private $dbManager;
-
   /** @var Logger */
   private $logger;
-
   /** @var UserDao */
   private $userDao;
 
@@ -84,14 +81,14 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->insertTableRow('groups', $deletable);
     $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>202,'user_fk'=>$userId,'group_perm'=>1));
 
-    $groups = $this->userDao->getDeletableAdminGroupMap($userId,$userLevel=PLUGIN_DB_ADMIN);
-    assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
+    $groupsAsAdmin = $this->userDao->getDeletableAdminGroupMap($userId,$userLevel=PLUGIN_DB_ADMIN);
+    assertThat($groupsAsAdmin, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
 
     $groups = $this->userDao->getDeletableAdminGroupMap($userId);
     assertThat($groups, equalTo(array($deletable['group_pk']=>$deletable['group_name'])));
     
-    $groups = $this->userDao->getDeletableAdminGroupMap($userId+1);
-    assertThat($groups, equalTo(array()));
+    $groupsAsForeign = $this->userDao->getDeletableAdminGroupMap($userId+1);
+    assertThat($groupsAsForeign, equalTo(array()));
   }  
 
 }

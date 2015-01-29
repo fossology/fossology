@@ -19,8 +19,6 @@ VERSION
 .vagrant/
 src/composer.lock
 testReport/*
-/nbproject/private/
-variable.list
 
 # compiled or derived files
 install/db/dbcreate
@@ -68,6 +66,7 @@ src/lib/c/tests/lib-c-Results.xml
 src/lib/c/tests/results/
 src/lib/c/tests/testlibs
 src/lib/php/bootstrap.php
+src/lib/php/services.xml
 src/lib/php/id.patch
 src/lib/php/tests/lib-php-Xunit-Results.xml
 src/lib/php/services.xml
@@ -133,6 +132,7 @@ src/ununpack/agent_tests/Unit/results/
 src/wget_agent/agent/wget_agent
 src/wget_agent/agent_tests/Unit/test_wget_agent
 src/wget_agent/agent_tests/Unit/results/
-src/www/ui/template/*.htm
 utils/freshmeat/FMDir
 utils/freshmeat/fm-paths.php
+variable.list
+nbproject/private/

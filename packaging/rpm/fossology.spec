@@ -208,6 +208,8 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/www
 %{_datadir}/PBPROJ/www/*
+%{_sysconfdir}/PBPROJ/mods-enabled/www-page
+%{_sysconfdir}/PBPROJ/mods-enabled/www-async
 
 %files scheduler
 %defattr(-,root,root)

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,13 +30,10 @@ class core_auth extends FO_Plugin
   public static $origReferer;
   /** @var DbManager */
   private $dbManager;
-
   /** @var UserDao */
   private $userDao;
-
   /** @var Session */
   private $session;
-
 
   function __construct()
   {
@@ -52,7 +50,7 @@ class core_auth extends FO_Plugin
   }
 
   /**
-   * \brief getter to retreive value of static var
+   * @brief getter to retreive value of static var
    */
   public function staticValue()
   {
@@ -113,12 +111,12 @@ class core_auth extends FO_Plugin
     $_SESSION['time'] = $Now;
     if (empty($_SESSION['ip']))
     {
-      $_SESSION['ip'] = $this->GetIP();
-    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP()))
+      $_SESSION['ip'] = $this->getIP();
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
     {
       /* Sessions are not transferable. */
       $this->updateSession("");
-      $_SESSION['ip'] = $this->GetIP();
+      $_SESSION['ip'] = $this->getIP();
     }
 
     if (@$_SESSION['User'])
@@ -171,7 +169,7 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEnote'] = $userRow['email_notify'];
     $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
-    $SysConf['auth']['GroupId'] = $userRow['group_fk'];
+    $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $_SESSION['GroupName'] = $userRow['group_name'];
   }
 
@@ -181,7 +179,7 @@ class core_auth extends FO_Plugin
    * This ensures that someone who steals the cookie won't
    * gain access unless they come from the same IP.
    */
-  function GetIP()
+  function getIP()
   {
     /* NOTE: This can be easily defeated wtih fake HTTP headers. */
     $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');

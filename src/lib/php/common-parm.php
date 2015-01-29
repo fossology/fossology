@@ -24,7 +24,7 @@
 define("PARM_INTEGER",1);
 define("PARM_NUMBER",2);
 define("PARM_STRING",3);
-@define("PARM_TEXT",4);
+define("PARM_TEXT",4);
 define("PARM_RAW",5);
 
 /**
@@ -48,23 +48,12 @@ define("PARM_RAW",5);
  */
 function GetParm($parameterName, $parameterType)
 {
-  $Var = array_key_exists($parameterName, $_GET) ? @$_GET[$parameterName] : null;
-  if (!isset($Var))
-  {
-    $Var = array_key_exists($parameterName, $_POST) ? @$_POST[$parameterName] : null;
-  }
-  if (!isset($Var))
-  {
-    $Var = array_key_exists($parameterName, $_SERVER) ? @$_SERVER[$parameterName] : null;
-  }
-  if (!isset($Var))
-  {
-    $Var = array_key_exists($parameterName, $_SESSION) ? @$_SESSION[$parameterName] : null;
-  }
-  if (!isset($Var))
-  {
-    $Var = array_key_exists($parameterName, $_COOKIE) ? @$_COOKIE[$parameterName] : null;
-  }
+  $Var = null;
+  if (array_key_exists($parameterName, $_GET)) {$Var = $_GET[$parameterName];}
+  if (!isset($Var) && isset($_POST) && array_key_exists($parameterName, $_POST)) { $Var = $_POST[$parameterName]; }
+  if (!isset($Var) && isset($_SERVER) && array_key_exists($parameterName, $_SERVER)) { $Var = $_SERVER[$parameterName]; }
+  if (!isset($Var) && isset($_SESSION) && array_key_exists($parameterName, $_SESSION)) { $Var = $_SESSION[$parameterName]; }
+  if (!isset($Var) && isset($_COOKIE) && array_key_exists($parameterName, $_COOKIE)) { $Var = $_COOKIE[$parameterName]; }
   if (!isset($Var)) {
     return null;
   }
@@ -158,5 +147,3 @@ function Traceback_dir()
   $V = substr($V,0,$i);
   return($V);
 } // Traceback_uri()
-
-?>
