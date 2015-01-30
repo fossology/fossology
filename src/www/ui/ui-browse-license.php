@@ -400,7 +400,7 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
     }
     
     $fileSwitch = $isFlat ?
@@ -424,9 +424,10 @@ class ui_browse_license extends FO_Plugin
    * @param string $Uri
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
+   * @param boolean $isFlat
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray, $isFlat)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -521,7 +522,7 @@ class ui_browse_license extends FO_Plugin
     $editedLicenseList = implode(', ', $concludedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
-    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
+    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
     $getTextEditUser = _("Edit");
     $getTextEditBulk = _("Bulk");

@@ -344,6 +344,9 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  * \param $Recurse true if links should propapagate recursion.  Currently,
  *        this means that the displayed tags will be displayed for directory contents.
  * \param $UniqueTagArray - cumulative array of unique tags
+ * \param $uploadtree_tablename
+ * \param $wantTags - if true add [Tag] ...
+ *
  *        For example:
  * \verbatim  Array
  *        (
@@ -358,7 +361,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  *
  * \returns String containing the links [View][Info][Download][Tag {tags}]
  */
-function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray, $uploadtree_tablename)
+function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray = array(), $uploadtree_tablename = "uploadtree", $wantTags=true)
 {
   $LinkStr = "";
 
@@ -373,10 +376,8 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
   }
 
-  /********  Tag ********/
-
-  $tag_status = TagStatus($upload_fk); // check if tagging on one upload is disabled or not. 1: enable, 0: disable
-  if ($tag_status)
+  /********  Tag  ********/
+  if ($wantTags && TagStatus($upload_fk))// check if tagging on one upload is disabled or not. 1: enable, 0: disable
   {
     $TagArray = GetAllTags($uploadtree_pk, $Recurse, $uploadtree_tablename);
     $TagStr = "";
