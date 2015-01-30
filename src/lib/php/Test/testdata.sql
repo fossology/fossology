@@ -98,7 +98,8 @@ INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_star
 ', '0x5c8f0370f2ab5d52', 'statement', 6363, 6421);
 INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (15, 8, 8, 'written permission.
 
-you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 698, 899);
+you agree to indemnify, hold harmless and defend adobe systems incorporated from and against any loss, damage, claims or lawsuits, including attorney''''s fees that arise or result ', '0x32c91329da4f38ae', 'statement', 100, 201);
+INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte) VALUES (16, 8, 9, 'copyright (c) 2048', '0x5c8f0370f2ab5d53', 'statement', 0, 18);
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (5, 8, 1, true, NULL, '2014-08-07 09:57:20.634464+00', '2014-08-07 09:57:20.642878+00');
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (11, 8, 2, true, NULL, '2014-08-07 09:57:27.86361+00', '2014-08-07 09:57:27.869927+00');
 INSERT INTO folder (folder_pk, folder_name, folder_desc, folder_perm) VALUES (1, 'Software Repository', 'Top Folder', NULL);

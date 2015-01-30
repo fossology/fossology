@@ -56,16 +56,24 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb->createPlainTables(array(),TRUE); //array('copyright'));
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
-    $uploadDao->shouldReceive('getUploadEntry')->andReturn(array('pfile_fk'=>8));
+    $uploadDao->shouldReceive('getUploadEntry')->with(1)->andReturn(array('pfile_fk'=>8));
+    $uploadDao->shouldReceive('getUploadEntry')->with(2)->andReturn(array('pfile_fk'=>9));
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
-    $highlights = $copyrightDao->getHighlights($uploadTreeId=1);
-    $this->assertSame(array(), $highlights);
+    $noHighlights = $copyrightDao->getHighlights($uploadTreeId=1);
+    assertThat($noHighlights,emptyArray());
     
     $this->testDb->insertData(array('copyright'));
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
-    $highlight0 = reset($highlights);
+    assertThat($highlights,arrayWithSize(1));
+    $highlight0 = $highlights[0];
+    assertThat($highlight0,anInstanceOf(\Fossology\Lib\Data\Highlight::classname()));
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
-    $this->assertEquals($expected=899, $highlight0->getEnd());
+    assertThat($highlight0->getEnd(),equalTo(201));
+    
+    $hilights = $copyrightDao->getHighlights($uploadTreeId=2);
+    assertThat($hilights,arrayWithSize(1));
+    $hilight0 = $hilights[0];
+    assertThat($hilight0->getStart(),equalTo(0));
   }
 
   private function runCopyright()

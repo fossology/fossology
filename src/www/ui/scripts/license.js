@@ -138,7 +138,7 @@ function scheduleScan(upload, agentName, resultEntityKey) {
 }
 function dressContents ( data, type, full ) {
     if (type === 'display')
-        return '<a onclick=\'filterLicense(\"'+data +'\")\'>'+data+'</a>';
+        return '<a href=\'#\' onclick=\'filterLicense(\"'+data +'\")\'>'+data+'</a>';
 
     return data;
 
