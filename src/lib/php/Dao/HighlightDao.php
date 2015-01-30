@@ -77,7 +77,7 @@ class HighlightDao extends Object
               WHERE uploadtree_pk = $1 AND (type LIKE 'M_' OR type = 'L')";
 
     $stmt = __METHOD__.$uploadTreeTableName;
-    if (!empty($licenseId))
+    if (!empty($licenseId) && empty($highlightId))
     {
       $params[] = $licenseId;
       $stmt .= '.License';
