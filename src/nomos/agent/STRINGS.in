@@ -1,5 +1,5 @@
 #####
-# (C) Copyright 2006-2014 Hewlett-Packard Development Company, L.P.
+# (C) Copyright 2006-2015 Hewlett-Packard Development Company, L.P.
 #####
 
 /* License footprints */
@@ -5298,11 +5298,11 @@ k
 #####
 %ENTRY% _LT_SEE_COPYING_LICENSE_1
 %KEY% =NULL=
-%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in|at) =FEW= (details|license|distribut|information|foder|directory|https?|ftp)"
 #
 %ENTRY% _LT_SEE_COPYING_LICENSE_2
 %KEY% =NULL=
-%STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in)"
+%STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in|at)"
 #
 %ENTRY% _LT_SEE_URL
 %KEY% =NULL=
