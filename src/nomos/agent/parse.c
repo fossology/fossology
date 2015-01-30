@@ -1606,6 +1606,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
       else
+      {
         if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && GPL_INFILE(_PHR_GPL3_OR_LATER)) {
           INTERESTING("GPL-3.0+-with-autoconf-exception");
           lmem[_mGPL] = 1;
@@ -1682,6 +1683,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
           INTERESTING("eCos-2.0");
         }
+      }
       /* checking for FSF */
       if (INFILE(_LT_FSF_1)) {
         INTERESTING(lDebug ? "FSF(1)" : "FSF");
