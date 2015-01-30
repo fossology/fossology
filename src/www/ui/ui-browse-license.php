@@ -309,9 +309,10 @@ class ui_browse_license extends FO_Plugin
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getItemId();
+    $isFlat = isset($_GET['flatten']);
     
     /* Get ALL the items under this Uploadtree_pk */
-    if (!isset($_GET['flatten']))
+    if (!$isFlat)
     {
       $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
     }
@@ -366,7 +367,7 @@ class ui_browse_license extends FO_Plugin
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
     $alreadyClearedUploadTreeView->materialize();
-    if (!isset($_GET['flatten']))
+    if (!$isFlat)
     {
       $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     }
@@ -401,8 +402,12 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
     }
-
-    $VF = '<script>' . $this->renderString('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
+    
+    $fileSwitch = $isFlat ?
+            Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')) :
+            Traceback()."&flatten=yes";
+    $vars = array('aaData' => json_encode($tableData), 'isFlat'=>$isFlat, 'fileSwitch'=>$fileSwitch);
+    $VF = '<script>' . $this->renderString('ui-browse-license_file-list.js.twig', $vars) . '</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
