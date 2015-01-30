@@ -5,25 +5,19 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-TOP = ../../..
+TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = Functional Unit
-LOCALAGENTDIR = ../agent/
-
-DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+LOCALAGENTDIR = ../../agent
 
 all:
-	$(call DIR_LOOP, )
 
 test:
-	$(call DIR_LOOP,test)
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) *.php
 
-coverage:
-	$(call DIR_LOOP,coverage)
+coverage: test
 
 clean:
-	$(call DIR_LOOP,clean)
 
 .PHONY: all test coverage clean

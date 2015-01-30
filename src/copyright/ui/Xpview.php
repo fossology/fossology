@@ -176,9 +176,8 @@ class Xpview extends FO_Plugin
       $this->vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
-    global $Plugins;
     /** @var ui_view $view */
-    $view = &$Plugins[plugin_find_id("view")];
+    $view = plugin_find("view");
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
 
@@ -255,11 +254,17 @@ class Xpview extends FO_Plugin
 
     menu_insert("Clearing::[BREAK]", 6);
 
+    /** @var ui_view $view */
+    $view = plugin_find("view");
+    $itemId = GetParm("item", PARM_INTEGER);
+    $textFormat = $view->getFormatParameter($itemId);
+    $pageNumber = GetParm("page", PARM_INTEGER);
+    $view->addFormatMenuEntries($textFormat, $pageNumber, "Clearing");
+
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
-    $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
+    if (!empty($itemId) && !empty($Upload))
     {
       if (GetParm("mod", PARM_STRING) == $this->Name)
       {

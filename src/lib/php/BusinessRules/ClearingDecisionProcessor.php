@@ -128,6 +128,7 @@ class ClearingDecisionProcessor extends Object
   /**
    * @param ItemTreeBounds $itemBounds
    * @param int $userId
+   * @param int $groupId
    * @param int $type
    * @param boolean $global
    * @param int[] $additionalEventIds additional event ids to include, indexed by licenseId

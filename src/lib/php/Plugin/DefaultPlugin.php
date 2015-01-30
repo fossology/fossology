@@ -99,7 +99,7 @@ abstract class DefaultPlugin implements Plugin
     $this->name = $name;
     foreach ($parameters as $key => $value)
     {
-      $this->setParameter($key,$value);
+      $this->setParameter($key, $value);
     }
 
     global $container;
@@ -308,6 +308,11 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function render($templateName, $vars = null, $headers = null)
   {
+    if ($this->requiresLogin && !$this->isLoggedIn())
+    {
+      new Response("permission denied", Response::HTTP_FORBIDDEN, array("contentType" => "text/plain"));
+    }
+
     $startTime = microtime(true);
 
     $content = $this->renderer->loadTemplate($templateName)
@@ -323,9 +328,9 @@ abstract class DefaultPlugin implements Plugin
 
   public function isLoggedIn()
   {
-    return (!empty($_SESSION['User']) && $_SESSION['User']!='Default User');
+    return (!empty($_SESSION['User']) && $_SESSION['User'] != 'Default User');
   }
-  
+
   private function checkPrerequisites()
   {
     if ($this->requiresLogin && !$this->isLoggedIn())

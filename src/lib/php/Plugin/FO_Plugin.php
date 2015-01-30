@@ -18,6 +18,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Plugin\Plugin;
+use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 

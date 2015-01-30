@@ -23,12 +23,13 @@ use Fossology\Lib\View\TextRenderer;
 use Monolog\Logger;
 
 define("VIEW_BLOCK_HEX", 8192);
-define("VIEW_BLOCK_TEXT", 1 * VIEW_BLOCK_HEX);
+define("VIEW_BLOCK_TEXT", 10 * VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR", 8);
 define("TITLE_ui_view", _("View File"));
 
 class ui_view extends FO_Plugin
 {
+  const NAME = "view";
   /**
    * @var Logger
    */
@@ -46,7 +47,7 @@ class ui_view extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "view";
+    $this->Name = self::NAME;
     $this->Title = TITLE_ui_view;
     $this->Version = "1.0";
     $this->Dependency = array("browse");
@@ -69,65 +70,11 @@ class ui_view extends FO_Plugin
     $text = _("View file contents");
     menu_insert("Browse-Pfile::View", 10, $this->Name, $text);
     // For the Browse menu, permit switching between detail and summary.
-    $Format = $this->getFormatParameter(null);
-    $Page = GetParm("page", PARM_INTEGER);
 
-    $URI = Traceback_parm();
-    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
-    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
-
-    $PageHex = NULL;
-    $PageText = NULL;
-
-    /***********************************
-     * If there is paging, compute page conversions.
-     ***********************************/
-    switch ($Format)
-    {
-      case 'hex':
-        $PageHex = $Page;
-        $PageText = intval($Page * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
-        break;
-      case 'text':
-      case 'flow':
-        $PageText = $Page;
-        $PageHex = intval($Page * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
-        break;
-    }
-
-    menu_insert("View::[BREAK]", -1);
-    switch ($Format)
-    {
-      case "hex":
-        $text = _("View as unformatted text");
-        menu_insert("View::Hex", -10);
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-      case "text":
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        menu_insert("View::Text", -11);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-      case "flow":
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        menu_insert("View::Formatted", -12);
-        break;
-      default:
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-    }
+    $itemId = GetParm("item", PARM_INTEGER);
+    $textFormat = $this->getFormatParameter($itemId);
+    $pageNumber = GetParm("page", PARM_INTEGER);
+    $this->addFormatMenuEntries($textFormat, $pageNumber);
 
     $URI = Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     if (GetParm("mod", PARM_STRING) == $this->Name)
@@ -498,40 +445,104 @@ class ui_view extends FO_Plugin
   }
 
   /**
-   * @param $Item
+   * @param $itemId
    * @return string
    */
-  protected function getFormatParameter($Item)
+  public function getFormatParameter($itemId=NULL)
   {
     switch (GetParm("format", PARM_STRING))
     {
       case 'hex':
-        $Format = 'hex';
+        $format = 'hex';
         break;
       case 'text':
-        $Format = 'text';
+        $format = 'text';
         break;
       case 'flow':
-        $Format = 'flow';
+        $format = 'flow';
         break;
       default:
         /* Determine default show based on mime type */
-        if (empty($Item))
-          $Format = 'flow';
+        if (empty($itemId))
+          $format = 'flow';
         else
         {
-          $Meta = GetMimeType($Item);
-          list($Type, $Junk) = explode("/", $Meta, 2);
-          if ($Type == 'text')
+          $Meta = GetMimeType($itemId);
+          list($type, $dummy) = explode("/", $Meta, 2);
+          if ($type == 'text')
           {
-            $Format = 'text';
+            $format = 'text';
           } else {
-            $Format = 'flow';
+            $format = 'flow';
           }
         }
         break;
     }
-    return $Format;
+    return $format;
+  }
+
+  /**
+   * @param $textFormat
+   * @return string
+   */
+  public function addFormatMenuEntries($textFormat, $pageNumber, $menuName="View")
+  {
+    $URI = Traceback_parm();
+    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
+    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
+
+    $pageNumberHex = NULL;
+    $pageNumberText = NULL;
+
+    /***********************************
+     * If there is paging, compute page conversions.
+     ***********************************/
+    switch ($textFormat)
+    {
+      case 'hex':
+        $pageNumberHex = $pageNumber;
+        $pageNumberText = intval($pageNumber * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
+        break;
+      case 'text':
+      case 'flow':
+        $pageNumberText = $pageNumber;
+        $pageNumberHex = intval($pageNumber * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
+        break;
+    }
+
+    menu_insert("$menuName::[BREAK]", -1);
+    switch ($textFormat)
+    {
+      case "hex":
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Hex", -10);
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+      case "text":
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        menu_insert("$menuName::Text", -11);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+      case "flow":
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        menu_insert("$menuName::Formatted", -12);
+        break;
+      default:
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+    }
   }
 
 }

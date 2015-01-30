@@ -34,6 +34,10 @@ class LatestScannerProxy extends DbViewProxy
    */
   public function __construct($uploadId, $agentNames=array('nomos','monk'), $dbViewName='latest_scanner', $andEnabled = "AND agent_enabled")
   {
+    if (empty($agentNames))
+    {
+      throw new \Exception('empty set of scanners');
+    }
     $this->uploadId = $uploadId;
     $subqueries = array();
     foreach($agentNames as $name)
@@ -42,9 +46,8 @@ class LatestScannerProxy extends DbViewProxy
         WHERE agent_fk=agent_pk AND upload_fk=$uploadId $andEnabled ORDER BY agent_fk DESC limit 1) latest_$name";
     }
     $dbViewQuery = implode(' UNION ',$subqueries);
-    parent::__construct($dbViewQuery, $dbViewName);
+    parent::__construct($dbViewQuery, $dbViewName."_".implode("_",$agentNames));
   }
-  
 
   public function materialize()
   {
@@ -54,8 +57,8 @@ class LatestScannerProxy extends DbViewProxy
     }
     parent::materialize();
   }
-  
-    /**
+
+  /**
    * @brief create temp table
    */
   public function getNameToIdMap()

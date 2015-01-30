@@ -10,22 +10,22 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-MODNAME = decider
+MODNAME = deciderjob
 
-EXE = decider.php version.php DeciderAgent.php
-WRAP = decider
+EXE = deciderjob.php version.php DeciderJobAgent.php
+WRAP = deciderjob
 
-all: version.php decider
+all: version.php deciderjob
 
 version.php: version-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
-decider: services.xml
-	@echo "making locally runnable decider (only for testing)"
+deciderjob: services.xml
+	@echo "making locally runnable deciderjob (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
-	ln -sf $(FOCLIDIR)/fo_wrapper.php decider
+	ln -sf $(FOCLIDIR)/fo_wrapper.php deciderjob
 
 services.xml:
 	$(MAKE) -C $(FOLIBPHPDIR) services.xml
