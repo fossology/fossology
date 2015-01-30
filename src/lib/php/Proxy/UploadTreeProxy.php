@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class UploadTreeProxy extends DbViewProxy
 {
@@ -159,7 +160,13 @@ class UploadTreeProxy extends DbViewProxy
         $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
             . $this->getDbViewName() ." v where u.upload_fk=$1"
             . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
-    $dbManager->prepare($stmt=__METHOD__.$this->getDbViewName() ,$sql);
+    $stmt = __METHOD__.'.'.$this->getDbViewName();
+    if(!$this->materialized)
+    {
+      $sql = $this->asCTE().' '.$sql;
+      $stmt .= '.cte';
+    }
+    $dbManager->prepare($stmt,$sql);
     $res = $dbManager->execute($stmt,array($this->uploadId,$parent));
     $children = array();
     $artifactContainers = array();
@@ -181,4 +188,33 @@ class UploadTreeProxy extends DbViewProxy
     }
     return $children;
   }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
+   */
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  {
+    global $container;
+    $dbManager = $container->get('db.manager');
+    $sql = "SELECT u.uploadtree_pk FROM ".$this->getDbViewName()." u "
+         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
+    $stmt = __METHOD__.'.'.$this->getDbViewName();
+    if(!$this->materialized)
+    {
+      $sql = $this->asCTE().' '.$sql;
+      $stmt .= '.cte';
+    }
+    $dbManager->prepare($stmt,$sql);
+    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $res = $dbManager->execute($stmt,$params);
+    $descendants = array();
+    while($row = $dbManager->fetchArray($res))
+    {
+      $descendants[$row['uploadtree_pk']] = 1;
+    }
+    $dbManager->freeResult($res);
+    return $descendants;
+  }
+  
 }

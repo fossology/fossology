@@ -309,9 +309,17 @@ class ui_browse_license extends FO_Plugin
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getItemId();
+    $isFlat = isset($_GET['flatten']);
     
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
+    if (!$isFlat)
+    {
+      $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
+    }
+    else
+    {
+      $Children = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds);
+    }
 
     /* Filter out Children that don't have tag */
     if (!empty($tagId))
@@ -359,7 +367,14 @@ class ui_browse_license extends FO_Plugin
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
     $alreadyClearedUploadTreeView->materialize();
-    $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    if (!$isFlat)
+    {
+      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    }
+    else
+    {
+      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
+    }
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
@@ -367,7 +382,14 @@ class ui_browse_license extends FO_Plugin
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    if (!isset($_GET['flatten']))
+    {
+      $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
+    }
+    else
+    {
+      $this->filesToBeCleared = $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
+    }
     $noLicenseUploadTreeView->unmaterialize();
 
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true);
@@ -378,10 +400,14 @@ class ui_browse_license extends FO_Plugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
     }
-
-    $VF = '<script>' . $this->renderString('ui-browse-license_file-list.js.twig', array('aaData' => json_encode($tableData))) . '</script>';
+    
+    $fileSwitch = $isFlat ?
+            Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')) :
+            Traceback()."&flatten=yes";
+    $vars = array('aaData' => json_encode($tableData), 'isFlat'=>$isFlat, 'fileSwitch'=>$fileSwitch);
+    $VF = '<script>' . $this->renderString('ui-browse-license_file-list.js.twig', $vars) . '</script>';
 
     $ChildCount = count($tableData);
     return array($ChildCount, $VF);
@@ -398,9 +424,10 @@ class ui_browse_license extends FO_Plugin
    * @param string $Uri
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
+   * @param boolean $isFlat
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray, $isFlat)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -495,7 +522,7 @@ class ui_browse_license extends FO_Plugin
     $editedLicenseList = implode(', ', $concludedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
-    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename);
+    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
     $getTextEditUser = _("Edit");
     $getTextEditBulk = _("Bulk");

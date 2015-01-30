@@ -544,4 +544,20 @@ SELECT * FROM $uploadTreeTableName
     }
     return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
   }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
+   */
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  {
+    $sql = "SELECT u.* FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
+         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
+    $this->dbManager->prepare($stmt=__METHOD__,$sql);
+    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $res = $this->dbManager->execute($stmt,$params);
+    $descendants = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $descendants;
+  }
 }
