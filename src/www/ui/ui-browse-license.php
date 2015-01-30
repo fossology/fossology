@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- *               2014 Siemens AG
+ *               2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -232,7 +232,7 @@ class ui_browse_license extends FO_Plugin
      * **************************************/
     if ($ChildCount == 0)
     {
-      header("Location: ?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
+      return new \Symfony\Component\HttpFoundation\RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
 
     /******  Filters  *******/
@@ -525,15 +525,17 @@ class ui_browse_license extends FO_Plugin
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
     $getTextEditUser = _("Edit");
-    $getTextEditBulk = _("Bulk");
-    $fileListLinks .= "[<a onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
-    $fileListLinks .= "[<a onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+    $fileListLinks .= "[<a href='#' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
 
-    // $filesThatShouldStillBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->alreadyClearedUploadTreeView);
+    if($isContainer)
+    {
+      $getTextEditBulk = _("Bulk");
+      $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+    }
+
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
 
-    // $filesToBeCleared = $this->uploadDao->getContainingFileCount($childItemTreeBounds, $this->noLicenseUploadTreeView);
     $filesToBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getItemId()] : 0;
 
