@@ -73,14 +73,11 @@ class CopyrightDao extends Object
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (!empty($row['copy_startbyte']))
-      {
-        $type = $row['type'];
-        $content = $row['content'];
-        $htmlElement =null;
-        $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
-        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
-      }
+      $type = $row['type'];
+      $content = $row['content'];
+      $htmlElement =null;
+      $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
+      $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
     }
     $this->dbManager->freeResult($result);
 
