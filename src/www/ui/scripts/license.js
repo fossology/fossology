@@ -67,6 +67,10 @@ $(document).ready(function () {
     $("form[data-autosubmit] select").change(function() {
         $(this).closest('form').submit();
     });
+    
+    var dirListFilter = getCookie('dirListFilter');
+    filterLicense(dirListFilter);
+    $('#dirlist_filter input').change(function() { setCookie('dirListFilter',$(this).val(),1);});
 });
 
 
