@@ -1872,26 +1872,37 @@
   $Schema["TABLE"]["upload_status"]["meaning"]["ALTER"] = "ALTER TABLE \"upload_status\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
   $Schema["TABLE"]["upload_status"]["meaning"]["UPDATE"] = "";
 
+  
+  
+  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["priority"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["priority"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"priority\" double precision;";
-  $Schema["TABLE"]["upload"]["priority"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"priority\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload"]["priority"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_clearing\".\"group_fk\" IS 'who is working at upload';";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["assignee"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["assignee"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"assignee\" int4;";
-  $Schema["TABLE"]["upload"]["assignee"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"assignee\" DROP NOT NULL, ALTER COLUMN \"assignee\" SET DEFAULT 1;";
-  $Schema["TABLE"]["upload"]["assignee"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_clearing"]["priority"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing"]["priority"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"priority\" double precision;";
+  $Schema["TABLE"]["upload_clearing"]["priority"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"priority\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["priority"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["status_fk"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["status_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_fk\" int4;";
-  $Schema["TABLE"]["upload"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_fk\" DROP NOT NULL, ALTER COLUMN \"status_fk\" SET DEFAULT 1;";
-  $Schema["TABLE"]["upload"]["status_fk"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_clearing"]["assignee"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing"]["assignee"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"assignee\" int4;";
+  $Schema["TABLE"]["upload_clearing"]["assignee"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"assignee\" DROP NOT NULL, ALTER COLUMN \"assignee\" SET DEFAULT 1;";
+  $Schema["TABLE"]["upload_clearing"]["assignee"]["UPDATE"] = "";
 
-  $Schema["TABLE"]["upload"]["status_comment"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["status_comment"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"status_comment\" text;";
-  $Schema["TABLE"]["upload"]["status_comment"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"status_comment\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload"]["status_comment"]["UPDATE"] = "";
+  $Schema["TABLE"]["upload_clearing"]["status_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing"]["status_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"status_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing"]["status_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"status_fk\" DROP NOT NULL, ALTER COLUMN \"status_fk\" SET DEFAULT 1;";
+  $Schema["TABLE"]["upload_clearing"]["status_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_clearing"]["status_comment"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing"]["status_comment"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"status_comment\" text;";
+  $Schema["TABLE"]["upload_clearing"]["status_comment"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"status_comment\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["status_comment"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["clearing_event"]["clearing_event_pk"]["DESC"] = "";

@@ -115,7 +115,9 @@ class AjaxBrowse extends DefaultPlugin
     return new Response('');
   }
 
-
+  /**
+   * @deprecated 
+   */
   private function updateTable($columnName, $uploadId, $value)
   {
     if ($columnName == 'status_fk')
@@ -131,6 +133,9 @@ class AjaxBrowse extends DefaultPlugin
     }
   }
 
+  /**
+   * @deprecated 
+   */
   private function changeStatus($uploadId, $value)
   {
     if ($value == 4 && $this->userPerm)
@@ -150,6 +155,9 @@ class AjaxBrowse extends DefaultPlugin
     }
   }
 
+  /**
+   * @deprecated 
+   */
   private function moveUploadBeyond($moveUpload, $beyondUpload)
   {
     $this->dbManager->begin();
@@ -407,7 +415,9 @@ class AjaxBrowse extends DefaultPlugin
     return " AND $columnName=$" . count($this->filterParams) . ' ';
   }
 
-
+  /**
+   * @deprecated 
+   */
   private function setStatusAndComment($uploadId, $statusId, $commentText)
   {
     print_r("$statusId, $commentText, $uploadId");
@@ -415,10 +425,11 @@ class AjaxBrowse extends DefaultPlugin
     $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), __METHOD__);
     $sel = $this->dbManager->getSingleRow("select status_comment from upload where upload_pk=$1", array($uploadId), __METHOD__ . '.question');
     print_r('#' . $sel['status_comment']);
-
-    // do we need to log $_SESSION['UserId'] ?
   }
 
+  /**
+   * @deprecated 
+   */
   public function moveUploadToInfinity($uploadId, $top)
   {
     $fun = $top ? 'MAX' : 'MIN';
