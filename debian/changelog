@@ -1,3 +1,19 @@
+fossology (2.3.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [SOSS-120] - Default folder for uploads = user default folder
+    * [SOSS-169] - File Clearing view start will all files
+    * [SOSS-132] - libboost-program-options dependency not installed by fo-installdeps
+    * [SOSS-102] - Line breaks in single file clearing
+    * [SOSS-129] - Package reuse does not work when "Software Repository" Folder is empty
+    * [SOSS-131] - (C) not detected as copyright
+
+  * new features
+    * [SOSS-15] - Decider decides if Monk and Nomos find same license and Nomos did not find anything else
+    * [SOSS-105] - Clearing Status: View elements in histogram view of license browser
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Mon, 1 Jan 2015 12:00:00 +0100
+
 fossology (2.2.0-ng) unstable; urgency=low
 
   * bugfixes
