@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -52,8 +52,11 @@ function account_check(&$user, &$passwd)
   if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
     $user_passwd_array = parse_ini_file($user_passwd_file, true);
 
+    /* get username and password from conf file */
     if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
       $user = $user_passwd_array['user'];
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
+      $user = $user_passwd_array['username'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
       $passwd = $user_passwd_array['password'];
   }
