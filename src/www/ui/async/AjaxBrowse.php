@@ -19,6 +19,7 @@
 
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
@@ -66,16 +67,22 @@ class AjaxBrowse extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    $groupId = $_SESSION['GroupId'];
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
-        array($_SESSION['UserId'], $_SESSION['GroupId']), __METHOD__ . '.user_perm');
+        array($_SESSION['UserId'], $groupId), __METHOD__ . '.user_perm');
     if (!$gup)
     {
       throw new \Exception('You are assigned to wrong group.');
     }
     $this->userPerm = $gup['group_perm'];
 
-    $columnName = $request->get('columnName');
     $uploadId = intval($request->get('uploadId'));
+    if ($uploadId && !$this->uploadDao->isAccessible($uploadId, $groupId))
+    {
+      throw new \Exception('You cannot access to this upload');
+    }
+
+    $columnName = $request->get('columnName');
     $statusId = intval($request->get('statusId'));
     $value = intval($request->get('value'));
     $moveUpload = intval($request->get("move"));
@@ -330,7 +337,8 @@ class AjaxBrowse extends DefaultPlugin
   private function getListOfUploadsOfFolder(Request $request)
   {
     $orderString = $this->getOrderString();
-    $this->filterParams = array($folder=$request->get('folder'));
+    $paramsUnordered = array($request->get('folder'),$_SESSION[Auth::GROUP_ID],PERM_READ);
+    $this->filterParams = $paramsUnordered;
     $filter = $this->getSearchString($request->get('sSearch'));
     $filter .= $this->getIntegerFilter(intval($request->get('assigneeSelected')), 'assignee');
     $filter .= $this->getIntegerFilter(intval($request->get('statusSelected')), 'status_fk');
@@ -338,16 +346,17 @@ class AjaxBrowse extends DefaultPlugin
 
     $offset = intval($request->get('iDisplayStart'));
     $limit = intval($request->get('iDisplayLength'));
+    $params = $this->filterParams;
     $unorderedQuery = "FROM upload
-        INNER JOIN uploadtree ON upload_fk = upload_pk
+        INNER JOIN uploadtree ON uploadtree.upload_fk = upload_pk
         AND upload.pfile_fk = uploadtree.pfile_fk
         AND parent IS NULL
         AND lft IS NOT NULL
         WHERE upload_pk IN
-        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) ";
+        (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) 
+        AND (public_perm>=$".count($params)." OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$".(count($params)-1)."))";
 
     $statementString = "SELECT upload.*,uploadtree.* $unorderedQuery $filter $orderString";
-    $params = $this->filterParams;
     $params[] = $offset;
     $statementString .= ' OFFSET $' . count($params);
     $params[] = $limit;
@@ -359,7 +368,7 @@ class AjaxBrowse extends DefaultPlugin
         $this->filterParams, __METHOD__ . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery", array($folder), __METHOD__ . "count.all");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow("SELECT count(*) $unorderedQuery", $paramsUnordered, __METHOD__ . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
     return array($result, $iTotalDisplayRecords, $iTotalRecords);
   }

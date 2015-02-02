@@ -20,6 +20,7 @@
 namespace Fossology\UI\Page;
 
 use agent_adj2nest;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -30,7 +31,6 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -46,6 +46,8 @@ class UploadFilePage extends DefaultPlugin
   const DESCRIPTION_INPUT_NAME = 'descriptionInputName';
   const DESCRIPTION_VALUE = 'descriptionValue';
   const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
+  const PUBLIC_ALL = 'public';
+  const PUBLIC_GROUPS = 'protected';
 
 
   /** @var FolderDao */
@@ -97,12 +99,11 @@ class UploadFilePage extends DefaultPlugin
     {
       if ($request->isMethod(Request::METHOD_POST))
       {
-        $public = $request->get('public') == true;
         $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
 
         if ($uploadFile !== null && !empty($folderId))
         {
-          list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ, $reuseUploadId);
+          list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, $reuseUploadId);
           $description = $successful ? null : $description;
 
         } else
@@ -178,14 +179,13 @@ class UploadFilePage extends DefaultPlugin
    * @brief Process the upload request.
    *
    * @param Request $request
-   * @param UploadedFile $uploadedFile
    * @param int $folderId
+   * @param UploadedFile $uploadedFile
    * @param string $description
-   * @param int $publicPermission
    * @param int $reuseUploadId
    * @return null|string
    */
-  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description, $publicPermission, $reuseUploadId)
+  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description, $reuseUploadId)
   {
     global $MODDIR;
     global $SysConf;
@@ -222,11 +222,14 @@ class UploadFilePage extends DefaultPlugin
       return array(false, $upload_errors[UPLOAD_ERR_INVALID_FOLDER_PK]);
 
     $originalFileName = $uploadedFile->getClientOriginalName();
+    
+    $public = $request->get('public');
+    $publicPermission = $public==self::PUBLIC_ALL ? PERM_READ : PERM_NONE;
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
     $uploadId = JobAddUpload($userId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
     if (empty($uploadId))
@@ -267,6 +270,10 @@ class UploadFilePage extends DefaultPlugin
       $message = empty($status) ? _("Is the scheduler running? ") : "";
       $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
       $message .= _("The file") . " " . $originalFileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
+      if ($public==self::PUBLIC_GROUPS)
+      {
+        $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
+      }
       return array(true, $message);
     } else
     {

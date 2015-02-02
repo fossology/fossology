@@ -50,13 +50,17 @@
           {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width: 150px;"', 5) }}
         </p>
       </li>
-      <li><input type="checkbox" name="public" value="public"/>
-        ({{ 'Optional'|trans }}) {{ 'Make Public'| trans }}
+      <li>
+        <input type="radio" name="public" value="private" checked="checked"/> {{ 'Visible only for active group'| trans }}<br/>
+        <input type="radio" name="public" value="protected"/> {{ 'Visible for all group'| trans }}<br/>
+        <input type="radio" name="public" value="public"/> {{ 'Make Public'| trans }}<br/>
+      </li>
         {% if agentCheckBoxMake %}
-        <li>
+       <li>
           {{ 'Select optional analysis'| trans }}
           <br/>
           {{ agentCheckBoxMake }}
+       </li>
         {% endif %}
     </ol>
     {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}

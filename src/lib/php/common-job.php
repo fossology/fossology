@@ -60,7 +60,6 @@
 function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
 {
   global $container;
-  global $SysConf;
 
   $dbManager = $container->get('db.manager');
   /* check all required inputs */
