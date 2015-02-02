@@ -52,7 +52,7 @@ class AjaxBrowse extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => self::PERM_READ
       ));
         
     global $container;
