@@ -80,26 +80,23 @@ function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folde
                array($folder_pk,2,$upload_pk),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
-  /* First look up user's group_pk */
   $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($user_pk),__METHOD__.'.select.user');
-  $UserName = $usersRow['user_name'];
-  $GroupRow = $dbManager->getSingleRow('SELECT * FROM groups WHERE group_name=$1',array($UserName),__METHOD__.'.select.group');
-  if (empty($GroupRow))
+  $groupId = $usersRow['group_fk'];
+  if (empty($groupId))
   {
-    $text = _("Error!");
-    $text1 = _("Group");
-    $text2 = _("is missing!");
-    echo "$text $text1 $UserName $text2<br>";
-    return NULL;
+    $userName = $usersRow['user_name'];
+    $groupRow = $dbManager->getSingleRow('SELECT * FROM groups WHERE group_name=$1',array($userName),__METHOD__.'.select.group');
+    if (empty($groupRow))
+    {
+      echo _("Error!") . ' ' . _("Group") . " $userName " . _("is missing!");
+      return;
+    }
+    $groupId = $groupRow['group_pk'];
   }
-  $group_pk = $GroupRow['group_pk'];
   $perm_admin = PERM_ADMIN;
 
-  // before inserting this new record, delete any record for the same upload and group since
-  // that would be a duplicate.  This shouldn't happen except maybe in development testing
-  $dbManager->getSingleRow("delete from perm_upload where upload_fk=$1 and group_fk=$2",array($upload_pk,$group_pk),'except.maybe.in.development');
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
-               array($perm_admin, $upload_pk, $group_pk),'insert.perm_upload');
+               array($perm_admin, $upload_pk, $groupId),'insert.perm_upload');
 
   return ($upload_pk);
 } // JobAddUpload()
