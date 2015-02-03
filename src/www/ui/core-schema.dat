@@ -1710,7 +1710,6 @@
   $Schema["SEQUENCE"]["clearing_decision_type_type_seq"] = "CREATE SEQUENCE \"clearing_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["upload_status_type_seq"] = "CREATE SEQUENCE \"upload_status_type_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_license_events_clearing_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_license_events_clearing_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_event_clearing_event_pk_seq"] = "CREATE SEQUENCE \"clearing_event_clearing_event_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_clearing_decision_pk_seq\" START 1;";
@@ -1861,22 +1860,11 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
 
 
-
-  $Schema["TABLE"]["upload_status"]["status_pk"]["DESC"] = "";
-  $Schema["TABLE"]["upload_status"]["status_pk"]["ADD"] = "ALTER TABLE \"upload_status\" ADD COLUMN \"status_pk\" int4;";
-  $Schema["TABLE"]["upload_status"]["status_pk"]["ALTER"] = "ALTER TABLE \"upload_status\" ALTER COLUMN \"status_pk\" SET NOT NULL, ALTER COLUMN \"status_pk\" SET DEFAULT nextval('upload_status_type_seq'::regclass);";
-  $Schema["TABLE"]["upload_status"]["status_pk"]["UPDATE"] = "UPDATE upload_status SET status_pk=nextval('upload_status_type_seq'::regclass)";
-
-  $Schema["TABLE"]["upload_status"]["meaning"]["DESC"] = "";
-  $Schema["TABLE"]["upload_status"]["meaning"]["ADD"] = "ALTER TABLE \"upload_status\" ADD COLUMN \"meaning\" varchar(30);";
-  $Schema["TABLE"]["upload_status"]["meaning"]["ALTER"] = "ALTER TABLE \"upload_status\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
-  $Schema["TABLE"]["upload_status"]["meaning"]["UPDATE"] = "";
-
-  
+ 
   
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4;";
-  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_clearing\".\"group_fk\" IS 'who is working at upload';";

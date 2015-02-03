@@ -290,9 +290,9 @@ FUNCTION void NormalizeUploadPriorities()
   PGresult* result; // the result of the database access
   long StartTime, EndTime;
   char *sql0="drop table if exists tmp_upload_prio";
-  char *sql1="create table tmp_upload_prio(ordprio serial,uploadid int)";
-  char *sql2="insert into tmp_upload_prio (uploadid) (   select upload_pk uploadid from upload order by priority asc  )";
-  char *sql3="UPDATE upload SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_pk; drop table tmp_upload_prio";
+  char *sql1="create table tmp_upload_prio(ordprio serial,uploadid int,groupid int)";
+  char *sql2="insert into tmp_upload_prio (uploadid, groupid) (   select upload_fk uploadid, group_fk groupid from upload_clearing order by priority asc  )";
+  char *sql3="UPDATE upload_clearing SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_fk AND group_fk=groupid; drop table tmp_upload_prio";
 
   StartTime = (long)time(0);
 
