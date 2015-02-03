@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -101,9 +102,8 @@ class upload_properties extends FO_Plugin
 
     $V = "";
     $folder_pk = GetParm('folder', PARM_TEXT);
-    $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
-    if (empty($FolderSelectId)) {
-      $FolderSelectId = GetUserRootFolder();
+    if (empty($folder_pk)) {
+      $folder_pk = GetUserRootFolder();
     }
 
     $NewName = GetArrayVal("newname", $_POST);
@@ -145,9 +145,9 @@ class upload_properties extends FO_Plugin
     $V.= "<li>$text";
 
     /*** Display folder select list, on change request new page with folder= in url ***/
-    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
+    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=";
     $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
-    $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
+    $V.= FolderListOption(-1, 0, 1, $folder_pk);
     $V.= "</select><P />\n";
 
     /*** Display upload select list, on change, request new page with new upload= in url ***/
@@ -155,7 +155,7 @@ class upload_properties extends FO_Plugin
     $V.= "<li>$text";
 
     // Get list of all upload records in this folder
-    $UploadList = FolderListUploads_perm($FolderSelectId, PERM_WRITE);
+    $UploadList = FolderListUploads_perm($folder_pk, PERM_WRITE);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.
