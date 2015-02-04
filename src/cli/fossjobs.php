@@ -28,6 +28,7 @@
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
  * @param (optional) string --username specify user name
+ * @param (optional) string --groupname specify group name
  * @param (optional) string --password specify password
  * @param (optional) string -c Specify the directory for the system configuration
  * @param (optional) string -D Delete upload
@@ -88,10 +89,11 @@ $usage = basename($argv[0]) . " [options]
                or an array of upload_pk's if multiple -D's were specified.
   --username string :: user name
   --password string :: password
+  --groupname string :: group name
   -c string :: Specify the directory for the system configuration
 ";
 //process parameters, see usage above
-$longopts = array("username:", "password:");
+$longopts = array("username:", "password:", "groupname:");
 $options = getopt("c:haA:P:uU:D:v", $longopts);
 //print_r($options);
 if (empty($options)) {
@@ -110,16 +112,20 @@ PROCESS COMMAND LINE SELECTION
 **********************************************************************/
 $user = "";
 $passwd = "";
+$group = "";
 if (array_key_exists("username", $options)) {
   $user = $options["username"];
+}
+
+if (array_key_exists("groupname", $options)) {
+  $group = $options["groupname"];
 }
 
 if (array_key_exists("password", $options)) {
   $passwd = $options["password"];
 }
 
-account_check($user, $passwd); // check username/password
-$user_pk = $SysConf['auth']['UserId'];
+account_check($user, $passwd, $group); // check username/password
 
 /* init plugins */
 cli_Init();

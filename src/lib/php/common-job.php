@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -44,7 +45,8 @@
 /**
  * \brief Insert a new upload record, and update the foldercontents table.
  *
- * \param $user_pk
+ * \param $userId
+ * \param $groupId
  * \param $job_name   Job name
  * \param $filename   For upload from URL, this is the URL.\n
  *                    For upload from file, this is the filename.\n
@@ -57,63 +59,54 @@
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-function JobAddUpload($user_pk, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE) 
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE)
 {
   global $container;
 
   $dbManager = $container->get('db.manager');
   /* check all required inputs */
-  if (empty($user_pk) or empty($job_name) or empty($filename) or 
+  if (empty($userId) or empty($job_name) or empty($filename) or
       empty($UploadMode) or empty($folder_pk)) return;
 
   $fifo = $dbManager->getSingleRow("SELECT MIN(priority) old_prio FROM upload");
-  $prio = $fifo['old_prio']-1;  
-  
-  $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-      array($desc,$job_name,$user_pk,$UploadMode,$filename, $public_perm, $prio),'insert.upload');
+  $prio = $fifo['old_prio']-1;
 
-  /* get upload_pk of just added upload */
-  $upload_pk = GetLastSeq("upload_upload_pk_seq", "upload");
+  $row = $dbManager->getSingleRow("INSERT INTO upload
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm, $prio),__METHOD__.'.insert.upload');
+  $uploadId = $row['upload_pk'];
+
   /* Mode == 2 means child_id is upload_pk */
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
-               array($folder_pk,2,$upload_pk),'insert.foldercontents');
+               array($folder_pk,2,$uploadId),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
-  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($user_pk),__METHOD__.'.select.user');
-  $groupId = $usersRow['group_fk'];
+  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
   if (empty($groupId))
   {
-    $userName = $usersRow['user_name'];
-    $groupRow = $dbManager->getSingleRow('SELECT * FROM groups WHERE group_name=$1',array($userName),__METHOD__.'.select.group');
-    if (empty($groupRow))
-    {
-      echo _("Error!") . ' ' . _("Group") . " $userName " . _("is missing!");
-      return;
-    }
-    $groupId = $groupRow['group_pk'];
+    $groupId = $usersRow['group_fk'];
   }
   $perm_admin = PERM_ADMIN;
 
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
-               array($perm_admin, $upload_pk, $groupId),'insert.perm_upload');
+               array($perm_admin, $uploadId, $groupId),'insert.perm_upload');
 
-  return ($upload_pk);
-} // JobAddUpload()
+  return ($uploadId);
+}
 
 
 /**
  * @brief Insert a new job record.
  *
- * @param $user_pk
- * @param $group_pk
+ * @param $userId
+ * @param $groupId
  * @param $job_name
  * @param $upload_pk (optional)
  * @param $priority  (optional default 0)
  *
  * @return int $job_pk the job primary key
  */
-function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
+function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 {
   global $container;
 
@@ -122,16 +115,16 @@ function JobAddJob($user_pk, $group_pk, $job_name, $upload_pk=0, $priority=0)
 
   $upload_pk_val = empty($upload_pk) ? null : $upload_pk;
 
-  $params = array($user_pk, $priority, $job_name, $upload_pk_val);
+  $params = array($userId, $priority, $job_name, $upload_pk_val);
   $stmtName = __METHOD__;
-  if (empty($group_pk))
+  if (empty($groupId))
   {
     $stmtName .= "noGrp";
     $groupPkVal = "(SELECT group_fk FROM users WHERE user_pk = $1)";
   }
   else
   {
-    $params[] = $group_pk;
+    $params[] = $groupId;
     $groupPkVal = "$". count($params);
   }
 
@@ -343,11 +336,9 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
  *
  * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
  * Or, use 'ALL' to specify all upload ids.
- * \param $Verbose - verbose output, not empty: output, empty: does not output
  */
-function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
+function QueueUploadsOnDelagents($upload_pk_list)
 {
-  global $PG_CONN;
   global $SysConf;
 
   /* Get the users.default_bucketpool_fk */
@@ -356,7 +347,6 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
 
   if (!empty($upload_pk_list))
   {
-    $results = array();
     foreach(explode(",", $upload_pk_list) as $upload_pk)
     {
       if (empty($upload_pk))  continue;
@@ -377,7 +367,7 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
   /* Tell the scheduler to check the queue. */
   $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
   if (!$success) echo $error_msg . "\n" . $output;
-} /* QueueUploadsOnDelagents() */
+}
 
 /**
  * \brief Check if an agent is already scheduled in a job.

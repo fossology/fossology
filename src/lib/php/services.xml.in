@@ -66,6 +66,10 @@ without any warranty.
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.job" class="Fossology\Lib\Dao\JobDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
         <service id="dao.user" class="Fossology\Lib\Dao\UserDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
@@ -84,12 +88,10 @@ without any warranty.
         </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes">
-            <argument type="service" id="db.manager"/>
         </service>
         <service id="decision.types" class="Fossology\Lib\Data\DecisionTypes">
         </service>
         <service id="upload_status.types" class="Fossology\Lib\Data\UploadStatus">
-            <argument type="service" id="db.manager"/>
         </service>
         <service id="view.highlight_processor" class="Fossology\Lib\View\HighlightProcessor">
             <argument type="service" id="dao.license"/>
