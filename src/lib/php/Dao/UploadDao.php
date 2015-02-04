@@ -184,6 +184,20 @@ SELECT * FROM $uploadTreeTableName
     return $uploadStatus->getMap();
   }
 
+  public function getStatus($uploadId, $userId)
+  {
+    // TODO migrate GetUploadPerm to a method here
+    if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
+      $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload WHERE upload_pk = $1", array($uploadId));
+      if (false === $row) {
+        throw new \Exception("cannot find uploadId=$uploadId");
+      }
+      return $row['status_fk'];
+    } else {
+      throw new \Exception("permission denied");
+    }
+  }
+
   /**
    * \brief Get the uploadtree table name for this upload_pk
    *        If upload_pk does not exist, return "uploadtree".

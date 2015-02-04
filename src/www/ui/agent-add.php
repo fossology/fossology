@@ -97,9 +97,9 @@ class agent_add extends FO_Plugin
     }
 
     /* Create Job */
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadpk);
+    $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
+    $job_pk = JobAddJob($userId, $groupId, $ShortName, $uploadpk);
 
     return AgentSchedule($job_pk, $uploadpk, $agents);
   } // AgentsAdd()

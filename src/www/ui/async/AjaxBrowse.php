@@ -296,6 +296,7 @@ class AjaxBrowse extends DefaultPlugin
     
     $orderString = $this->getOrderString();
     $stmt = __METHOD__ . "getFolderContents" . $orderString . $filter;
+
     $statementString = "SELECT upload.*,upload_clearing.*,uploadtree.ufile_name,uploadtree.ufile_mode,uploadtree.uploadtree_pk"
             . " FROM $partQuery $filter $orderString";
     $rangedFilterParams = $this->filterParams;
@@ -303,6 +304,7 @@ class AjaxBrowse extends DefaultPlugin
     $statementString .= ' OFFSET $' . count($rangedFilterParams);
     $rangedFilterParams[] = intval($request->get('iDisplayLength'));
     $statementString .= ' LIMIT $' . count($rangedFilterParams);
+
     $this->dbManager->prepare($stmt, $statementString);
     $result = $this->dbManager->execute($stmt, $rangedFilterParams);
 

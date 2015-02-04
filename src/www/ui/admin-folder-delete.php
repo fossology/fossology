@@ -48,9 +48,9 @@ class admin_folder_delete extends FO_Plugin {
     /* Get the folder's name */
     $FolderName = FolderGetName($folderpk);
     /* Prepare the job: job "Delete" */
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-    $jobpk = JobAddJob($user_pk, $group_pk, "Delete Folder: $FolderName");
+    $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
+    $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName");
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);

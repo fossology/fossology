@@ -140,12 +140,12 @@ class upload_srv_files extends FO_Plugin {
     // Create an upload record.
     $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-    $uploadpk = JobAddUpload($user_pk, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk, $public_perm);
+    $userId = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
+    $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk, $public_perm);
 
     /* Prepare the job: job "wget" */
-    $jobpk = JobAddJob($user_pk, $group_pk, "wget", $uploadpk);
+    $jobpk = JobAddJob($userId, $groupId, "wget", $uploadpk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       return ($text);

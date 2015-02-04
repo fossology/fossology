@@ -278,7 +278,7 @@ class UserDao extends Object
 
     return $userRow;
   }
-  
+
   public function isAdvisorOrAdmin($userId, $groupId)
   {
     $row = $this->dbManager->getSingleRow("SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2",

@@ -35,7 +35,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
   -x copyright        :: to match all that does not contain my copyright, (default): show all files
   -X copyright        :: to match my copyright, (default): show all files
   -h  help, this message
-  ";
+";
 
 $upload = $item = "";
 
@@ -51,7 +51,6 @@ if (($options === false) || empty($options) || !is_array($options))
 
 $user = $passwd = "";
 
-require_once dirname(__DIR__).'/lib/php/Util/CopyrightLister.php';
 use Fossology\Lib\Util\CopyrightLister;
 
 $cpLister = new CopyrightLister();
