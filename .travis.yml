@@ -1,9 +1,9 @@
-# Copyright Siemens AG, 2014
+# Copyright Siemens AG, 2014-2015
 # SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
 
-language: c
+language: php
 
 addons:
  - postgresql: "9.3"
@@ -20,7 +20,14 @@ install:
         libpq-dev
  - sudo apt-get install -qq cppcheck
 
+before_script:
+ - cd src/
+ - composer install --dev
+ - composer self-update
+ - cd ..
+
 script:
  - make
  - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
+ - phpunit -csrc/phpunit.xml
 

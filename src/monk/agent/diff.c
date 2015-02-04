@@ -175,8 +175,10 @@ DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
   result->matchedInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
   GArray* matchedInfo = result->matchedInfo;
 
-  if (!searchLength || !textLength)
+  if (!searchLength || !textLength) {
+    free(result);
     return 0;
+  }
 
   size_t iText = *textStartPosition;
   size_t iSearch = 0;
