@@ -89,17 +89,17 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   $perm_admin = PERM_ADMIN;
 
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
-               array($perm_admin, $upload_pk, $groupId),'insert.perm_upload');
+               array($perm_admin, $uploadId, $groupId),'insert.perm_upload');
 
   return ($uploadId);
-} // JobAddUpload()
+}
 
 
 /**
  * @brief Insert a new job record.
  *
- * @param $user_pk
- * @param $group_pk
+ * @param $userId
+ * @param $groupId
  * @param $job_name
  * @param $upload_pk (optional)
  * @param $priority  (optional default 0)
@@ -336,11 +336,9 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
  *
  * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
  * Or, use 'ALL' to specify all upload ids.
- * \param $Verbose - verbose output, not empty: output, empty: does not output
  */
-function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
+function QueueUploadsOnDelagents($upload_pk_list)
 {
-  global $PG_CONN;
   global $SysConf;
 
   /* Get the users.default_bucketpool_fk */
@@ -349,7 +347,6 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
 
   if (!empty($upload_pk_list))
   {
-    $results = array();
     foreach(explode(",", $upload_pk_list) as $upload_pk)
     {
       if (empty($upload_pk))  continue;
@@ -370,7 +367,7 @@ function QueueUploadsOnDelagents($upload_pk_list, $Verbose)
   /* Tell the scheduler to check the queue. */
   $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
   if (!$success) echo $error_msg . "\n" . $output;
-} /* QueueUploadsOnDelagents() */
+}
 
 /**
  * \brief Check if an agent is already scheduled in a job.
