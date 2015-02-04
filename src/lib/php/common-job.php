@@ -81,20 +81,15 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
                array($folder_pk,2,$uploadId),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
-  /* First look up user's group_pk */
   $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
-  $UserName = $usersRow['user_name'];
   if (empty($groupId))
   {
     $groupId = $usersRow['group_fk'];
   }
   $perm_admin = PERM_ADMIN;
 
-  // before inserting this new record, delete any record for the same upload and group since
-  // that would be a duplicate.  This shouldn't happen except maybe in development testing
-  $dbManager->getSingleRow("delete from perm_upload where upload_fk=$1 and group_fk=$2",array($uploadId,$groupId),'except.maybe.in.development');
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
-               array($perm_admin, $uploadId, $groupId),__METHOD__.'.insert.perm_upload');
+               array($perm_admin, $upload_pk, $groupId),'insert.perm_upload');
 
   return ($uploadId);
 } // JobAddUpload()

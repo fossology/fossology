@@ -52,7 +52,7 @@ class AjaxBrowse extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => self::PERM_READ
       ));
         
     global $container;
@@ -354,7 +354,7 @@ class AjaxBrowse extends DefaultPlugin
         AND lft IS NOT NULL
         WHERE upload_pk IN
         (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $1 ) 
-        AND (public_perm>=$".count($params)." OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$".(count($params)-1)."))";
+        AND (public_perm>=$".count($paramsUnordered)." OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$".(count($paramsUnordered)-1)."))";
 
     $statementString = "SELECT upload.*,uploadtree.* $unorderedQuery $filter $orderString";
     $params[] = $offset;
