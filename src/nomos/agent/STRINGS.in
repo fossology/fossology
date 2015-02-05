@@ -2188,6 +2188,10 @@
 # Have seen this predominantly with files containing _LT_GPLref1, but also
 # a few containing _LT_GPLref2
 #####
+%ENTRY%	_LT_GPL_EXCEPT_0
+%KEY%	=NULL=
+%STR%	"(exception =SOME= (gpl|GNU General Public licen[cs]e)|\<gplexception\>)"
+#
 %ENTRY%	_LT_GPL_EXCEPT_1
 %KEY%	"licen[cs]"
 %STR%	"as a special exception to the GNU (general p|p)ublic licen[cs]e if you distribute"
@@ -2219,6 +2223,10 @@
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF_2
 %KEY%	"configur"
 %STR%	"configur(e|ation) scripts? =FEW= Autoconf"
+#
+%ENTRY%	_LT_GPL_EXCEPT_Trolltech
+%KEY%	=NULL=
+%STR%	"(as a special exception =SOME= trolltech|trolltech =FEW= gplexception)"
 #
 %ENTRY%	_TEXT_CLASSPATH
 %KEY%	=NULL=
@@ -2302,7 +2310,7 @@
 #
 %ENTRY%	_LT_AGPL_NAMED
 %KEY%	"agpl"
-%STR%	"agpl"
+%STR%	"\<agpl\>"
 #
 %ENTRY%	_LT_RPSL_COMPATIBLE
 %KEY%	"licen[cs]"
@@ -7304,7 +7312,11 @@ k
 #
 %ENTRY%	_TITLE_POSTGRES
 %KEY%	"copyright"
-%STR%	"portions copyright =FEW= postgresql global development group"
+%STR%	"copyright =FEW= postgresql global development group"
+#
+%ENTRY%	_TITLE_POSTGRES_1
+%KEY%	"licen[cs]"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code) under =FEW= PostgreSQL licen[cs]e)"
 #
 %ENTRY%	_TITLE_MIT
 %KEY%	"licen[cs]"
@@ -8488,7 +8500,7 @@ k
 #
 %ENTRY%	_PHR_NOT_UNDER_LGPL
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"\<not\> =SOME= (free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|\<(and|or|by)\>) =SOME= (lgpl|lesser GNU general public licen[cs]e|(lesser|library) (general p|p)ublic licen[cs]e)"
+%STR% "\<not\> =FEW= (distribu|develop|released?|licen[cs]ed|available|subject) =FEW= (under|to) =SOME= (lgpl|lesser GNU general public licen[cs]e|(lesser|library) (general p|p)ublic licen[cs]e)"
 #
 %ENTRY%	_PHR_PATENT
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
