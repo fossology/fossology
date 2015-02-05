@@ -1160,7 +1160,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("GPL-1.0");
       lmem[_mGPL] = 1;
     }
-    else if (INFILE(_LT_GPL_1)) {
+    else if (INFILE(_LT_GPL_1) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
       if (INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("GPL-2.0+");
@@ -1184,7 +1184,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
-    else if (INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) {
+    else if ((INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
       if (INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("GPL-2.0+");
@@ -1284,6 +1284,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("LGPL-3.0");
         lmem[_mLGPL] = 1;
       }
+      else if (INFILE(_LT_LGPL3ref)) {
+      }
       else if (INFILE(_LT_LGPLref1)) {
         if (INFILE(_PHR_WXWINDOWS)) {
           INTERESTING("WXwindows");
@@ -1376,7 +1378,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     if (!lmem[_mGPL] && !HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)
       && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)
-      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && !HASTEXT(_LT_GPL_EXCEPT_Trolltech, REG_EXTENDED)) {
       if (GPL_INFILE(_LT_GPL_ALT) && !INFILE(_LT_LGPL_ALT)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
@@ -1625,6 +1627,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         }
         else if (HASTEXT(_TEXT_FONT, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
           INTERESTING("GPL-2.0-with-font-exception");
+          lmem[_mGPL] = 1;
+        }
+        else if (HASTEXT(_LT_GPL_EXCEPT_Trolltech, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+          INTERESTING("GPL-2.0-with-trolltech-exception");
           lmem[_mGPL] = 1;
         }
         else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && GPL_INFILE(_PHR_GPL3_OR_LATER) 
@@ -6030,7 +6036,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /** PostgreSQL License */
-  if (INFILE(_TITLE_POSTGRES)) {
+  if (INFILE(_TITLE_POSTGRES) || INFILE(_TITLE_POSTGRES_1)) {
     INTERESTING("PostgreSQL");
     lmem[_fBSD] = 1;
   }
