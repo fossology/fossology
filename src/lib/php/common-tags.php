@@ -31,7 +31,7 @@
  *
  * \return an array of: tag_pk and tag_name; return empty array: disable tagging on this upload
  */
-function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="")
+function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
 {
   if (empty($Item)) { return array(); }
 
@@ -39,7 +39,7 @@ function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="")
 
   $dbManager = $container->get('db.manager');
 
-  $stmt = __METHOD__;
+  $stmt = __METHOD__.".$uploadtree_tablename";
   $sql = "select true from tag_manage, $uploadtree_tablename u where is_disabled = true and tag_manage.upload_fk = u.upload_fk and u.uploadtree_pk = $1";
   $tagDisabled = $dbManager->getSingleRow($sql, array($Item), $stmt);
   if ($tagDisabled !== false)
