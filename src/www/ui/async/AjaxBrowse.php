@@ -313,7 +313,7 @@ class AjaxBrowse extends DefaultPlugin
 
   private function getOrderString()
   {
-    $columnNamesInDatabase = array('upload_filename', 'status_fk', 'UNUSED', 'assignee', 'upload_ts', 'priority');
+    $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
 
     $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
 

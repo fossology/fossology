@@ -48,8 +48,8 @@ class DataTablesUtility extends Object
         return null;
       }
       return $this->getSortingParametersFromArrayImpl($inputArray, $columNamesInDatabase, $defaultSearch);
-
-    } else
+    }
+    else
     {
       $this->logger->addWarning("did not find iSortingCols in inputArray");
       return null;
@@ -60,24 +60,24 @@ class DataTablesUtility extends Object
   /**
    * @param array $inputArray
    * @param string[] $columNamesInDatabase
+   * @param array $defaultSearch mapping colNumber -> order
    * @return string[]
    */
   private function getSortingParametersFromArrayImpl($inputArray, $columNamesInDatabase, $defaultSearch = array())
   {
-
     $orderArray = array();
     $sortedCols = array();
     for ($i = 0; $i < $inputArray['iSortingCols']; $i++)
     {
-
       $whichCol = 'iSortCol_' . $i;
       $colNumber = $inputArray[$whichCol];
       $sortedCols[] = intval($colNumber);
 
-
       $isSortable = $inputArray['bSortable_' . $i];
-      if ($isSortable !== "true") continue;
-
+      if ($isSortable !== "true")
+      {
+        continue;
+      }
       $name = $columNamesInDatabase[$colNumber];
 
       $whichDir = 'sSortDir_' . $i;
@@ -100,16 +100,16 @@ class DataTablesUtility extends Object
   }
 
 
+  /**
+   * @param array $inputArray
+   * @param string[] $columNamesInDatabase
+   * @param type $defaultSearch
+   * @return string
+   */
   public function getSortingString($inputArray, $columNamesInDatabase, $defaultSearch = array())
   {
-
     $orderArray = $this->getSortingParametersFromArray($inputArray, $columNamesInDatabase, $defaultSearch);
-    $orderString = "";
-    if (!empty($orderArray))
-    {
-      $orderString .= "ORDER BY ";
-      $orderString .= implode(", ", $orderArray);
-    }
+    $orderString = empty($orderArray) ? "" : "ORDER BY " . implode(", ", $orderArray);
     return $orderString;
   }
 
