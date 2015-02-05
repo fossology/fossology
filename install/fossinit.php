@@ -134,7 +134,6 @@ if ($FailMsg)
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
-// writeDataProperties($dbManager);
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
@@ -213,8 +212,6 @@ if(!array_key_exists('Release', $sysconfig)){
 }
 if($sysconfig['Release'] == '2.6')
 {
-  $writer = new dataPropertiesWriter($dbManager);
-  $writer->writeDataProperties();
   $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
   if(!$dbManager->existsTable('license_candidate'))
   {
@@ -239,72 +236,6 @@ exit($errors);
 
 
 
-
-class dataPropertiesWriter{
-  var $dbManager;
-  var $dataProperties;
-
-  function __construct(DbManager &$dbManager)
-  {
-    $this->dbManager = &$dbManager;
-    global $LIBEXECDIR;
-    $this->dataProperties = $this->readDataPropertiesFromFile("$LIBEXECDIR/dataProperties.dat");
-  }
-  
-  private function readDataPropertiesFromFile($filename){
-    if (!file_exists($filename))
-    {
-      throw new \Exception("FAILED: Schema data file ($filename) not found.");
-    }
-    $dataPropertiesStorage = array(); // filled in next line
-    eval( file_get_contents($filename) );
-    return $dataPropertiesStorage;
-  }
-  
-  function writeDataProperties(){
-    foreach($this->dataProperties as $tableColumn=>$columnContent)
-    {
-      $tableColumnList =  explode('.', $tableColumn);
-      if(count($tableColumnList)==2)
-      {
-        list($table,$column) = $tableColumnList;
-        $this->writeListedDataProperties($table,$column,$columnContent);
-      }
-      else if (count($tableColumnList) == 3)
-      {
-        list($table, $keyColumn, $valColumn) = $tableColumnList;
-        $this->writeMappedDataProperties($table, $keyColumn, $valColumn, $columnContent);
-      }
-    }
-  }
-
-  function writeMappedDataProperties($table, $keyColumn, $valColumn, $columnContent){
-    $this->dbManager->begin();
-    $this->dbManager->queryOnce($sqlStatement="TRUNCATE $table CASCADE");
-    foreach($columnContent as $key=>$val)
-    {
-      $this->dbManager->insertInto($table,"$keyColumn,$valColumn",array($key,$val));
-    }
-    $this->dbManager->commit();
-  }
-
-  function writeListedDataProperties($table,$column,$columnContent){
-    $stmt=__METHOD__.".$table.$column";
-    $this->dbManager->prepare($stmt,"SELECT $column FROM $table");
-    $result = $this->dbManager->execute($stmt);
-    $oldColumnContent = array();
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      $oldColumnContent[] = $row[$column];
-    }
-    $this->dbManager->freeResult($result);
-    $diffColumnContent = array_diff($columnContent,$oldColumnContent);
-    foreach($diffColumnContent as $val)
-    {
-      $this->dbManager->insertInto($table,$column,array($val));
-    }
-  }
-}
 
 /**
  * \brief Load the license_ref table with licenses.

@@ -60,7 +60,7 @@ class SanityChecker
   {
     $uploadStatus = new UploadStatus();
     $statusMap = $uploadStatus->getMap();
-    $this->errors += $this->checkDatabaseEnum($tablename = 'upload_status', 'status_pk', $statusMap);
+    $this->errors += $this->checkDatabaseEnum($tablename = 'upload_clearing', 'status_fk', $statusMap);
   }
 
   private function checkLicenseEventTypes()
