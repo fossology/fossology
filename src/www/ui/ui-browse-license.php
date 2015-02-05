@@ -19,6 +19,7 @@
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -193,7 +194,7 @@ class ui_browse_license extends FO_Plugin
   private function showUploadHist(ItemTreeBounds $itemTreeBounds)
   {
     global $SysConf;
-    $groupId = $SysConf['auth']['GroupId'];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $tag_pk = GetParm("tag", PARM_INTEGER);
 
@@ -378,7 +379,7 @@ class ui_browse_license extends FO_Plugin
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array('skipThese' => "noLicense"),
+        $options = array('skipThese' => "noLicense", 'groupId' => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
