@@ -201,5 +201,3 @@ class test_common_cached extends PHPUnit_Framework_TestCase
   }
 
 }
-
-?>

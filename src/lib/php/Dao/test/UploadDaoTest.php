@@ -58,7 +58,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals(0, $badFileTreeBounds->getLeft());  
     
     $this->dbManager->queryOnce("INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name)"
-            . " VALUES (103, NULL, 101, 1, 33792, 1, 2, 'WXwindows.txt');",
+            . " VALUES (103, NULL, 101, 1, 33792, 1, 2, 'WXwindows.txt')",
             __METHOD__.'.insert.data');
     $fileTreeBounds = $uploadDao->getFileTreeBounds($uploadTreeId=103);
     $this->assertInstanceOf('Fossology\Lib\Data\FileTreeBounds', $fileTreeBounds);

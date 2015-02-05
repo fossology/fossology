@@ -30,4 +30,4 @@ script:
  - make
  - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
  - phpunit -csrc/phpunit.xml
-
+ - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/

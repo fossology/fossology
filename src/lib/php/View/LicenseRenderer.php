@@ -140,38 +140,28 @@ class LicenseRenderer
         $noScannerLicenseFoundCount = $count;
         $editedNoLicenseFoundCount = $editedCount;
       }
-      //else
+
+      if ($count > 0)
       {
-
-        /*  Count  */
-        if ($count > 0)
+        $scannerCountLink = "<a href='";
+        $scannerCountLink .= Traceback_uri();
+        $tagClause = ($tagId) ? "&tag=$tagId" : "";
+        if ($agentId)
         {
-          $scannerCountLink = "<a href='";
-          $scannerCountLink .= Traceback_uri();
-          $tagClause = ($tagId) ? "&tag=$tagId" : "";
-          if ($agentId)
-          {
-            $tagClause .= "&agentId=$agentId";
-          }
-          $scannerCountLink .= "?mod=license_list_files&item=$uploadTreeId&lic=" . urlencode($licenseShortName) . $tagClause . "'>$count</a>";
-        } else
-        {
-          $scannerCountLink = "0";
+          $tagClause .= "&agentId=$agentId";
         }
-
-
-        if ($editedCount > 0)
-        {
-          $editedLink = $editedCount;
-        } else
-        {
-          $editedLink = "0";
-        }
-
-        $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
+        $scannerCountLink .= "?mod=license_list_files&item=$uploadTreeId&lic=" . urlencode($licenseShortName) . $tagClause . "'>$count</a>";
       }
-    }
+      else
+      {
+        $scannerCountLink = "0";
+      }
 
+      $editedLink = ($editedCount > 0) ?  $editedCount : "0";
+
+      $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
+    }
+    
     $tableColumns = '[
       {"sTitle" : "'._("Scanner Count").'", "sClass": "right", "sWidth": "5%", "bSearchable" : false, "sType" : "num-html"},
       {"sTitle" : "'._("Concluded License Count").'", "sClass" : "right", "sWidth" : "5%", "bSearchable" : false, "sType" : "num-html"},
@@ -239,7 +229,7 @@ class LicenseRenderer
     $rendered .= "<td align='right' class='even'>$editedLicenseCount</td><td class='even'>" . _("Licenses concluded") . "</td></tr>";
 
     $rendered .= "<tr><td class='even'>" . _("Files with no detected licenses") . "</td><td align='right' class='even'>$noScannerLicenseFoundCount</td>";
-    $rendered .= "<td align='right' class='odd'>$editedNoLicenseFoundCount</td><td class='odd'>" . _("Concluded files with no license information") . "</td></tr>"; //TODO find a better wording, I mean files where a human confirmed that there is no relevant license information contained
+    $rendered .= "<td align='right' class='odd'>$editedNoLicenseFoundCount</td><td class='odd'>" . _("Files concluded as license free") . "</td></tr>";
 
     $rendered .= "</table>";
     return $rendered;
