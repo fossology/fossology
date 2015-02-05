@@ -222,7 +222,7 @@ class UploadFilePage extends DefaultPlugin
       return array(false, $upload_errors[UPLOAD_ERR_INVALID_FOLDER_PK]);
 
     $originalFileName = $uploadedFile->getClientOriginalName();
-    
+
     $public = $request->get('public');
     $publicPermission = $public==self::PUBLIC_ALL ? PERM_READ : PERM_NONE;
 
@@ -230,7 +230,7 @@ class UploadFilePage extends DefaultPlugin
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = $SysConf['auth'][Auth::USER_ID];
     $groupId = $SysConf['auth'][Auth::GROUP_ID];
-    $uploadId = JobAddUpload($userId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
     if (empty($uploadId))
     {
