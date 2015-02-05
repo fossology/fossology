@@ -48,11 +48,10 @@ class NewestEditedLicenseSelector extends Object
     {
       $cd = null;
       if($extractTBD) {
-      $first = reset($editedLicensesArray);
-        if (!empty($first) and $first->getType() == 'To be determined')
+        $first = reset($editedLicensesArray);
+        if (!empty($first) && $first->getType() == 'To be determined')
         {
           $cd = $first;
-
         }
       }
 
@@ -105,7 +104,7 @@ class NewestEditedLicenseSelector extends Object
    */
   public function selectNewestEditedLicensePerFileID($sortedClearingDecArray)
   {
-// $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
+    // $sortedClearingDecArray needs to be sorted with the newest clearingDecision first.
     //! Note that this can not distinguish two files with the same pfileID (hash value) in the same folder, this can yield
     //! misleading folder content overviews in the license browser and in the count of license findings
     foreach ($sortedClearingDecArray as $clearingDecWithLicenses)

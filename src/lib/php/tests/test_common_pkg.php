@@ -104,8 +104,5 @@ class test_common_pkg extends PHPUnit_Framework_TestCase
 
     pg_close($PG_CONN);
     exec("$DB_COMMAND -d $DB_NAME");
-    print "Ending unit test for common-pkg.php\n";
   }
 }
-
-?>

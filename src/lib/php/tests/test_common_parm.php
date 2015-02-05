@@ -155,8 +155,5 @@ class test_common_parm extends PHPUnit_Framework_TestCase
    * \brief clean the env
    */
   protected function tearDown() {
-    //print "Ending unit test for common-parm.php\n";
   }
 }
-
-?>
