@@ -68,12 +68,9 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   if (empty($userId) or empty($job_name) or empty($filename) or
       empty($UploadMode) or empty($folder_pk)) return;
 
-  $fifo = $dbManager->getSingleRow("SELECT MIN(priority) old_prio FROM upload");
-  $prio = $fifo['old_prio']-1;
-
   $row = $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, priority) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING upload_pk",
-      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm, $prio),__METHOD__.'.insert.upload');
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
   /* Mode == 2 means child_id is upload_pk */
