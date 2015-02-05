@@ -41,53 +41,6 @@ class TreeDao extends Object
     $this->logger = new Logger(self::className());
   }
 
-  /**
-   * @todo check if method is dead
-   */
-  public function getNonArtifactChildren($itemId, $uploadId = null)
-  {
-    $statementName = __METHOD__ . ($itemId ? ".item" : ".noitem") . ($uploadId ? ".upload" : ".noupload");
-
-    $item = $itemId ? "=$1" : " IS NULL";
-    $upload = $uploadId ? "AND upload_fk=$2" : "";
-    $this->dbManager->prepare($statementName,
-        "
-        WITH RECURSIVE file_tree(uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name, is_artifact, is_container, path, file_path, cycle) AS (
-          SELECT ut.*, ut.ufile_mode & (1<<28) <> 0 as is_artifact, ut.ufile_mode & (1<<29) <> 0 as is_container,
-            ARRAY[ut.uploadtree_pk],
-            ut.ufile_name,
-            false
-          FROM uploadtree ut
-          WHERE parent $item
-	UNION ALL
-          SELECT ut.*, ut.ufile_mode & (1<<28) <> 0 as is_artifact, ut.ufile_mode & (1<<29) <> 0 as is_container,
-            path || ut.uploadtree_pk,
-            CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN file_path || '/' || ut.ufile_name ELSE file_path END,
-            ut.uploadtree_pk = ANY(path)
-          FROM uploadtree ut, file_tree ft
-          WHERE ut.parent = ft.uploadtree_pk AND NOT cycle
-        )
-        SELECT uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name, file_path from file_tree WHERE NOT is_artifact AND is_container $upload
-        ");
-
-    $params = array();
-
-    if ($itemId)
-    {
-      $params = array_merge($params, $itemId);
-    }
-
-    if ($uploadId)
-    {
-      $params = array_merge($params, $uploadId);
-    }
-
-    $res = $this->dbManager->execute($statementName, $params);
-    $result = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    return $result;
-  }
-
   public function getFullPath($itemId, $tableName, $parentId=0)
   {
     $statementName = __METHOD__.".".$tableName;

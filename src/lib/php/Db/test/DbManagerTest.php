@@ -70,7 +70,7 @@ abstract class DbManagerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->commit();
   }
   
-    function testBeginAndCommitTransaction()
+  function testBeginAndCommitTransaction()
   {
     $this->driver->shouldReceive("begin")->withNoArgs()->once();
     $this->dbManager->begin();

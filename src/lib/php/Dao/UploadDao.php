@@ -186,7 +186,6 @@ SELECT * FROM $uploadTreeTableName
 
   public function getStatus($uploadId, $userId)
   {
-    // TODO migrate GetUploadPerm to a method here
     if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload WHERE upload_pk = $1", array($uploadId));
       if (false === $row) {
@@ -576,20 +575,20 @@ SELECT * FROM $uploadTreeTableName
   }
   
   
- public function isAccessible($uploadId, $groupId) 
- {
+  public function isAccessible($uploadId, $groupId) 
+  {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
     return $perm['perm']>=PERM_NONE;
- }
+  }
  
- public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=PERM_ADMIN) 
- {
+  public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=PERM_ADMIN) 
+  {
     $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
             . "SELECT $1 perm, $2 upload_fk, gum.group_fk"
             . " FROM group_user_member gum LEFT JOIN perm_upload ON perm_upload.group_fk=gum.group_fk AND upload_fk=$2"
             . " WHERE perm_upload IS NULL AND gum.user_fk=$3",
                array($perm, $uploadId, $userId), __METHOD__.'.insert');   
- }
+  }
  
 }

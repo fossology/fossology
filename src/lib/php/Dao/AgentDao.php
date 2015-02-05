@@ -129,7 +129,6 @@ class AgentDao extends Object
    *  This is for _ars tables only, for example, nomos_ars and bucket_ars.
    *  The _ars tables have a standard format but the specific agent ars table
    *  may have additional fields.
-   * @todo make this function private
    * @param string $tableName - name of the ars table (e.g. nomos_ars)
    * @param int $uploadId
    * @param int $limit - limit number of rows returned.  0=No limit, default=1

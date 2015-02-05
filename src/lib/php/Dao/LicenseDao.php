@@ -368,27 +368,21 @@ class LicenseDao extends Object
   /**
    * @param string $condition
    * @param array $param
+   * @param $groupId
    * @return License|null
-   * @todo restrict to $groupId
    */
-  private function getLicenseByCondition($condition, $param)
+  private function getLicenseByCondition($condition, $param, $groupId=null)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM ONLY license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
-    /*
-    if (false === $row && isset($_SESSION) && array_key_exists('GroupId', $_SESSION))
+    if (false === $row && isset($groupId))
     {
-      $param[] = $_SESSION['GroupId'];
+      $param[] = $groupId;
       $row = $this->dbManager->getSingleRow(
-          "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$".count($param),
-          $param, __METHOD__ . ".$condition.candidate");
-      if (false !== $row)
-      {
-        $row['rf_shortname'] = $this->candidatePrefix . $row['rf_shortname'];
-      }
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group=$".count($param),
+        $param, __METHOD__ . ".$condition.group");
     }
-     */
     if (false === $row)
     {
       return null;
@@ -399,20 +393,22 @@ class LicenseDao extends Object
 
   /**
    * @param string $licenseId
+   * @param int|null $groupId
    * @return License|null
    */
-  public function getLicenseById($licenseId)
+  public function getLicenseById($licenseId, $groupId=null)
   {
-    return $this->getLicenseByCondition('rf_pk=$1', array($licenseId));
+    return $this->getLicenseByCondition('rf_pk=$1', array($licenseId), $groupId);
   }
 
   /**
    * @param string $licenseShortname
+   * @param int|null $groupId
    * @return License|null
    */
-  public function getLicenseByShortName($licenseShortname)
+  public function getLicenseByShortName($licenseShortname, $groupId=null)
   {
-    return $this->getLicenseByCondition('rf_shortname=$1', array($licenseShortname));
+    return $this->getLicenseByCondition('rf_shortname=$1', array($licenseShortname), $groupId);
   }
 
   /**
@@ -479,9 +475,9 @@ class LicenseDao extends Object
         array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone), __METHOD__);
   }
   
-  public function getLicenseParentById($licenseId)
+  public function getLicenseParentById($licenseId, $groupId=null)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
-            array(LicenseMap::CONCLUSION,$licenseId));
+            array(LicenseMap::CONCLUSION,$licenseId), $groupId);
   }
 }

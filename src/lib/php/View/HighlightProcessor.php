@@ -44,8 +44,9 @@ class HighlightProcessor extends Object
 
   /**
    * @param Highlight[] $highlights
+   * @param int|null $groupId
    */
-  public function addReferenceTexts(&$highlights)
+  public function addReferenceTexts(&$highlights, $groupId=null)
   {
     $licenses = array();
     foreach ($highlights as &$highlight)
@@ -56,7 +57,7 @@ class HighlightProcessor extends Object
 
         if (!array_key_exists($licenseId, $licenses))
         {
-          $licenses[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
+          $licenses[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
         }
         /**
          * @var License $license

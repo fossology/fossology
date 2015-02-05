@@ -31,6 +31,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
+use Fossology\Lib\Auth\Auth;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -102,11 +103,12 @@ class ClearingView extends FO_Plugin
   private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
   {
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
-
+    $groupId = $_SESSION[Auth::GROUP_ID];
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
-      $this->highlightProcessor->addReferenceTexts($highlightEntries);
-    } else
+      $this->highlightProcessor->addReferenceTexts($highlightEntries, $groupId);
+    }
+    else
     {
       $this->highlightProcessor->flattenHighlights($highlightEntries, array("K", "K "));
     }

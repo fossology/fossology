@@ -19,10 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Folder\Folder;
 use Fossology\Lib\Data\Upload\Upload;
-use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -81,10 +79,10 @@ class FolderDao extends Object
     $this->dbManager->freeResult($res);
   }
 
- /**
- * @param int $userId
- * @return Folder|null
- */
+  /**
+   * @param int $userId
+   * @return Folder|null
+   */
   public function getRootFolder($userId) {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
@@ -100,7 +98,7 @@ class FolderDao extends Object
    * @param int $userId
    * @return Folder|null
    */
-  public function getParentFolder($folder) {
+  public function getParentFolder($userId) {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");

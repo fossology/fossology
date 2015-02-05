@@ -126,7 +126,6 @@ abstract class ClearedGetterCommon
 
       if (!array_key_exists('text', $statement))
       {
-        /* TODO make the subclasses do this logic and never fall in this branch */
         $description = $statement['description'];
         $textfinding = $statement['textfinding'];
 
@@ -136,7 +135,6 @@ abstract class ClearedGetterCommon
           $content = $textfinding;
           $text = $description;
         }
-        // TODO
       }
       else
       {
@@ -182,7 +180,6 @@ abstract class ClearedGetterCommon
 
     $statements = $this->groupStatements($ungrupedStatements);
 
-//    error_log(json_encode($statements), 3, "/tmp/reportgenjson".time().".log");
     return array("statements" => array_values($statements));
   }
 }

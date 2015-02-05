@@ -43,7 +43,6 @@ class ScanJobProxy extends Object
    */
   function __construct(AgentDao $agentDao, $uploadId)
   {
-  //  $this->dbManager = $dbManager;
     $this->agentDao = $agentDao;
     $this->uploadId = $uploadId;
   }

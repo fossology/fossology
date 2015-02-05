@@ -15,7 +15,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Auth\Auth;
 
 define("TITLE_PopupLicense", _("Show Reference License"));
 
@@ -47,17 +49,18 @@ class PopupLicense extends FO_Plugin
     }
     $licenseShortname = GetParm("lic", PARM_TEXT);
     $licenseId = GetParm("rf", PARM_NUMBER);
+    $groupId = $_SESSION[Auth::GROUP_ID];
     if (empty($licenseShortname) && empty($licenseId))
     {
       return;
     }
     if ($licenseId)
     {
-      $license = $this->licenseDao->getLicenseById($licenseId);
+      $license = $this->licenseDao->getLicenseById($licenseId, $groupId);
     }
     else
     {
-      $license = $this->licenseDao->getLicenseByShortName($licenseShortname);
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortname, $groupId);
     }
     if ($license === null)
     {

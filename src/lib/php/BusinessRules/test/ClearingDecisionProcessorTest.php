@@ -281,7 +281,6 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   }
   /**
    * @brief user decides no license, then scanner finds licA, than user removes licA -> no new clearing event should be generated as nothing changes the state
-   * @todo unsure
    */
   public function testMakeDecisionFromLastEventsWithDelayedScanner()
   {

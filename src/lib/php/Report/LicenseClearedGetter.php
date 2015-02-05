@@ -69,7 +69,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $reportInfo = $clearingLicense->getReportInfo();
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
-        $text = $reportInfo ?: $this->getCachedLicenseText($licenseId);
+        $text = $reportInfo ?: $this->getCachedLicenseText($licenseId, $groupId);
         
         $ungroupedStatements[] = array(
           'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
@@ -86,10 +86,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
    * @param int $licenseId
    * @return License
    */
-  protected function getCachedLicenseText($licenseId)
+  protected function getCachedLicenseText($licenseId, $groupId)
   {
     if (!array_key_exists($licenseId, $this->licenseCache)) {
-      $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId);
+      $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
     }
     return $this->licenseCache[$licenseId]->getText();
   }
