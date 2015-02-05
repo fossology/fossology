@@ -7,7 +7,7 @@
     <tr>
       <td style="vertical-align:top;">
         <button type="submit" name="update" id="prev" disabled>&lt;</button>
-        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+        <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">{{ 'Submit'|trans }}</button>
         <button type="submit" name="update" id="next" disabled>&gt;</button>
       </td>
       <td>
@@ -50,11 +50,11 @@
     file.
     '| trans }}
   {% else %}
-    <button type=\"button\" onclick='openUserModal()'>
+    <button type="button" onclick="openUserModal();">
       {{ 'User Decision ...'| trans }}
     </button>
     &nbsp;
-    <button type=\"button\" onclick='openBulkModal()'>
+    <button type="button" onclick="openBulkModal();">
       {{ 'Bulk Recognition ...'| trans }}
     </button>
     &nbsp;
