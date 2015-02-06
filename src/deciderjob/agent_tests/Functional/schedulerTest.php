@@ -34,6 +34,7 @@ use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
+include_once(__DIR__.'/../../../lib/php/Plugin/FO_Plugin.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
