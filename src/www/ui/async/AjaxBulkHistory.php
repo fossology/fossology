@@ -23,8 +23,10 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class AjaxBulkHistory extends DefaultPlugin
 {
@@ -65,8 +67,10 @@ class AjaxBulkHistory extends DefaultPlugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     /** @var ItemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
-    //TODO pass group
-    $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $onlyTried);
+    /** @var Session */
+    $session = $this->getObject('session');
+    $groupId = $session->get(Auth::GROUP_ID);
+    $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId, $onlyTried);
     return $this->render("bulk-history.html.twig",$this->mergeWithDefault(array('bulkHistory'=>$bulkHistory)));
   }
 }

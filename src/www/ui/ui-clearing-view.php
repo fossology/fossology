@@ -280,7 +280,7 @@ class ClearingView extends FO_Plugin
     {
       $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
     }
-    $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds);
+    $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId);
 
     $ModBack = GetParm("modback", PARM_STRING) ?: "license";
     list($pageMenu, $textView) = $view->getView(NULL, $ModBack, 0, "", $highlights, false, true);

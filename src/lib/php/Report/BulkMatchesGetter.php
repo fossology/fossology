@@ -32,12 +32,12 @@ class BulkMatchesGetter extends ClearedGetterCommon
     parent::__construct($groupBy = "bulkId");
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null)
+  protected function getStatements($uploadId, $uploadTreeTableName, $groupId=0)
   {
     $result = array();
 
     $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-    $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, false);
+    $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
 
     foreach($bulkHistory as $bulk) {
       $bulkId = $bulk['bulkId'];

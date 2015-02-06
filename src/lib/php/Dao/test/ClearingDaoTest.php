@@ -45,6 +45,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $now;
   /** @var array */
   private $items;
+  private $groupId = 601;
 
 
   public function setUp()
@@ -127,18 +128,18 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->now = time();
 
     $bulkLicArray = array(
-        array(1, 401, 'TextFOO', false, 101, 299),
-        array(2, 402, 'TextBAR', false, 101, 299),
-        array(3, 403, 'TextBAZ', true,  101, 301),
-        array(4, 403, 'TextBAZ', false, 101, 299),
-        array(5, 404, 'TextQUX', true,  101, 299),
-        array(6, 401, 'TexxFOO', true,  101, 302),
-        array(7, 403, 'TextBAZ', false, 102, 300),
-        array(8, 403, 'TextBAZ', true,  102, 306)
+        array(1, 401, 'TextFOO', false, 101, 299, $this->groupId),
+        array(2, 402, 'TextBAR', false, 101, 299, $this->groupId),
+        array(3, 403, 'TextBAZ', true,  101, 301, $this->groupId),
+        array(4, 403, 'TextBAZ', false, 101, 299, $this->groupId),
+        array(5, 404, 'TextQUX', true,  101, 299, $this->groupId),
+        array(6, 401, 'TexxFOO', true,  101, 302, $this->groupId),
+        array(7, 403, 'TextBAZ', false, 102, 300, $this->groupId),
+        array(8, 403, 'TextBAZ', true,  102, 306, $this->groupId)
     );
     foreach ($bulkLicArray as $params)
     {
-      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk', $params, $logStmt = 'insert.bulkref');
+      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk, group_fk', $params, $logStmt = 'insert.bulkref');
     }
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -278,7 +279,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
-    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     $bulkText = array_map(function($bulk){ return $bulk['text']; }, $bulks);
@@ -295,7 +296,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(4);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
-    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     assertThat($bulkMatched, arrayContaining(false));
@@ -310,7 +311,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
-    $bulks = $this->clearingDao->getBulkHistory($treeBounds);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
@@ -334,7 +335,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
-    $bulks = $this->clearingDao->getBulkHistory($treeBounds, false);
+    $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId, false);
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);

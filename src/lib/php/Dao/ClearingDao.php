@@ -575,15 +575,20 @@ INSERT INTO clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
-  // TODO add group
-  public function getBulkHistory(ItemTreeBounds $itemTreeBound, $onlyTried = true)
+  /**
+   * @param ItemTreeBounds $itemTreeBound
+   * @param int $groupId
+   * @param boolean $onlyTried
+   * @return array[] where array has keys ("bulkId","id","text","lic","removing","matched","tried")
+   */
+  public function getBulkHistory(ItemTreeBounds $itemTreeBound, $groupId, $onlyTried = true)
   {
     $uploadTreeTableName = $itemTreeBound->getUploadTreeTableName();
     $itemId = $itemTreeBound->getItemId();
     $uploadId = $itemTreeBound->getUploadId();
     $left = $itemTreeBound->getLeft();
 
-    $params = array($uploadId, $itemId, $left);
+    $params = array($uploadId, $itemId, $left, $groupId);
     $stmt = __METHOD__ . "." . $uploadTreeTableName;
 
     $triedExpr = "$3 between ut2.lft and ut2.rgt";
@@ -605,7 +610,7 @@ INSERT INTO clearing_decision (
               left join $uploadTreeTableName ut on ut.uploadtree_pk = ce.uploadtree_fk
               inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
               inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
-              where ut2.upload_fk = $1
+              where ut2.upload_fk = $1 AND lr.group_fk = $4
               $triedFilter
               order by lr.lrb_pk
             )
