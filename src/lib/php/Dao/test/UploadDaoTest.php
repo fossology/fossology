@@ -419,6 +419,5 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $zipDescendants = $this->uploadDao->getNonArtifactDescendants($zip);
     $zipMatcher = array_map(function($id){ return hasKeyValuePair('uploadtree_pk',$id);}, array(6,7,8,10,11,12));
     assertThat($zipDescendants, arrayContainingInAnyOrder( $zipMatcher ) );
-
   }
 }

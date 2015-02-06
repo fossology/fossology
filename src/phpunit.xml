@@ -8,9 +8,8 @@
   </logging>
 
   <testsuites>
-    <testsuite name="Fossology PhpUnit Lib Test Suite">
+    <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
-      <directory suffix="Test.php">www/ui_tests/Unit</directory>
     </testsuite>
 
     <testsuite name="Fossology PhpUnit Agent Test Suite">
@@ -22,7 +21,6 @@
       <directory suffix="Test.php">reuser/agent_tests/Functional</directory>      
     </testsuite>
   
-
     <!--             
     <testsuite name="Fossology PhpUnit Slow Test Suite">
       <directory suffix=".php">lib/php/tests</directory>

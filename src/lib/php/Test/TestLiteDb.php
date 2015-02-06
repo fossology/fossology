@@ -60,10 +60,10 @@ class TestLiteDb
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
     global $container;
-    // $logger = $container->get('logger');
-    $logger = new Logger('default');
+    $logger = $container->get('logger');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
+    
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
     $container->get('db.manager')->setDriver(new SqliteE($sqlite3Connection));
@@ -103,7 +103,7 @@ class TestLiteDb
       }
       $columns = array();
       // $pattern = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;"";
-      foreach ($tableCols as $col => $attributes)
+      foreach ($tableCols as $attributes)
       {
         $sql = $attributes["ADD"];
         $alterSql = explode('"', $sql);
