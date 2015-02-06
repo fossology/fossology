@@ -82,10 +82,33 @@ class changeLicenseProcessPost extends FO_Plugin
     {
       return;
     }
-
+    $itemId = $_POST['uploadTreeId'];
+    if (empty($itemId))
+    {
+      return $this->errorJson("bad item id");
+    }
+    
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
-    $itemId = $_POST['uploadTreeId'];
+    $decisionMark = $_POST['decisionMark'];
+    if(!empty($decisionMark))
+    {
+      $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
+      /** @var ItemTreeBounds */
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
+      $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+      if (empty($errMsg))
+      {
+        return new JsonResponse(array('result'=>'success'));
+      }
+      return $this->errorJson($errMsg,$errMsg);
+    }
+    
+    return doEdit($userId,$groupId,$itemId);
+  }
+  
+  function doEdit($userId,$groupId,$itemId)
+  {
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
     $removed = $_POST['removed'] === 't' || $_POST['removed'] === 'true';
 
@@ -109,7 +132,6 @@ class changeLicenseProcessPost extends FO_Plugin
           return $this->errorJson("bad license");
         }
 
-        //,  $_POST['comment'], $_POST['remark']
         $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
             ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId);
       }

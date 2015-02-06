@@ -89,27 +89,27 @@ function selectNoLicenseFound(left, right) {
 
 
 function scheduledDeciderSuccess (data, resultEntity, callbackSuccess, callbackCloseModal) {
-    var jqPk = data.jqid;
-    if (jqPk) {
-        resultEntity.html("scan scheduled as " + linkToJob(jqPk));
-        if (callbackSuccess) {
-            queueUpdateCheck(jqPk, callbackSuccess);
-        }
-        callbackCloseModal();
-    } else {
-        resultEntity.html("bad response from server");
+  var jqPk = data.jqid;
+  if (jqPk) {
+    resultEntity.html("scan scheduled as " + linkToJob(jqPk));
+    if (callbackSuccess) {
+      queueUpdateCheck(jqPk, callbackSuccess);
     }
-    resultEntity.show();
+    callbackCloseModal();
+  } else {
+    resultEntity.html("bad response from server");
+  }
+  resultEntity.show();
 }
 
 function scheduledDeciderError (responseobject, resultEntity) {
-    var error = responseobject.responseJSON.error;
-    if (error) {
-        resultEntity.text("error: " + error);
-    } else {
-        resultEntity.text("error");
-    }
-    resultEntity.show();
+  var error = responseobject.responseJSON.error;
+  if (error) {
+    resultEntity.text("error: " + error);
+  } else {
+    resultEntity.text("error");
+  }
+  resultEntity.show();
 }
 
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
@@ -144,12 +144,7 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
   var data = {
     "licenseNumbersToBeSubmitted": txt,
     "uploadTreeId": $('#uploadTreeId').val(),
-    "type": $('[name="type"]:checked').val(),
-    "scope": $('[name="scope"]:checked').val(),
-    "comment": $('#comment').val(),
-    "remark": $('#remark').val(),
-    "removed": removed,
-    "force": $('#forceDecision').val()
+    "removed": removed
   };
 
   $.ajax({

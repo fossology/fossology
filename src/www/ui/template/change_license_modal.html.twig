@@ -25,11 +25,15 @@
       </tr>
     </table>
 
-    {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}<br/>
-    &nbsp; &nbsp; &nbsp;
-    <button type="button" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
-    &nbsp;
-    <button type="button" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
+    {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}
+    <div style="text-align: center;">
+      <button type="button" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
+      &nbsp;
+      <button type="button" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
+    </div>
+    <div style="text-align: center;">
+      <button type="button" autofocus onclick="markDecisions();">{{ 'Mark decisions as irrelevant'|trans }}</button>
+    </div>
     <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
   </form>

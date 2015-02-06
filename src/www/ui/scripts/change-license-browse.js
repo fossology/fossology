@@ -65,3 +65,19 @@ function performPostRequest(doRemove) {
       location.reload();
   });
 }
+
+function markDecisions() {
+  var data = {
+    "uploadTreeId": $('#uploadTreeId').val(),
+    "decisionMark": 'irrelevant'
+  };
+  resultEntity = $('bulkIdResult');
+  $.ajax({
+    type: "POST",
+    url: "?mod=change-license-processPost",
+    data: data,
+    success: function (data) { location.reload(); },
+    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
+  });
+
+}

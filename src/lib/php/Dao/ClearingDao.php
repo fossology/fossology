@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -29,6 +29,7 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -696,5 +697,39 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
 
     return $multiplicity;
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param int $userId
+   */
+  public function markDirectoryAsIrrelevant(ItemTreeBounds $itemTreeBounds,$groupId,$userId)
+  {
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight(), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM);
+    $options = array('skipThese'=>'noLicense','ut.filter'=>' AND (lft BETWEEN $1 AND $2)','groupId'=>'$4');
+    $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
+    $statementName = __METHOD__ . '.scannerDetected';
+    $sql = $uploadTreeProxy->asCte()
+        .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) 
+          SELECT uploadtree_pk itemid,pfile_fk pfile_id, $3, $4, $5, $6 FROM UploadTreeView';
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName,$params);
+    $this->dbManager->freeResult($res);
+    
+    $statementName = __METHOD__ . '.userEdited';
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $condition = "ut.lft BETWEEN $1 AND $2";
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
+    $params[] = $userId; 
+    $a = count($params);
+    $params[] = $groupId;
+    $params[] = DecisionTypes::IRRELEVANT;
+    $params[] = DecisionScopes::ITEM;
+    $this->dbManager->prepare($statementName, $decisionsCte
+        .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) 
+          SELECT itemid,pfile_id, $'.$a.', $'.($a+1).', $'.($a+2).', $'.($a+3).' FROM allDecs ad WHERE type_id!=$'.($a+2));
+    $res = $this->dbManager->execute($statementName,$params);
+    $this->dbManager->freeResult($res);
   }
 }
