@@ -84,8 +84,11 @@ class fo_libschema
     // first check to make sure we don't already have the plpgsql language installed
     $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
 
-    $result = pg_query($PG_CONN, $sql_statement)
-      or die("Could not check the database for plpgsql language\n");
+    $result = pg_query($PG_CONN, $sql_statement);
+    if(!$result)
+    {
+      throw new Exception("Could not check the database for plpgsql language");
+    }
 
     $plpgsql_already_installed = FALSE;
     if ($row = pg_fetch_row($result))
@@ -97,8 +100,11 @@ class fo_libschema
     if ($plpgsql_already_installed == FALSE)
     {
       $sql_statement = "CREATE LANGUAGE plpgsql";
-      $result = pg_query($PG_CONN, $sql_statement)
-        or die("Could not create plpgsql language in the database\n");
+      $result = pg_query($PG_CONN, $sql_statement);
+      if (!$result)
+      {
+        throw new Exception("Could not create plpgsql language in the database");
+      }
     }
 
 
@@ -109,7 +115,7 @@ class fo_libschema
       return $errMsg;
     }
     $Schema = array(); /* will be filled in next line */
-    require_once($filename); /* this will DIE if the file does not exist. */
+    require($filename); /* this cause Fatal Error if the file does not exist. */
     $this->schema = $Schema;
 
     /* Very basic sanity check (so we don't delete everything!) */

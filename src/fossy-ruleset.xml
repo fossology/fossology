@@ -8,12 +8,14 @@
   </rule>
   
   <rule ref="Zend.Files.ClosingTag"></rule>
-  
 
   <rule ref="Generic.Commenting.Todo"/>
   <rule ref="Generic.Commenting.Todo.CommentFound">
     <message>Please review this TODO comment: %s</message>
     <severity>3</severity>
   </rule>
+
+
+  <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
 
 </ruleset>
