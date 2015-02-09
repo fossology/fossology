@@ -363,7 +363,7 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array('skipThese' => "alreadyCleared",'groupId'=>$groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
@@ -379,7 +379,7 @@ class ui_browse_license extends FO_Plugin
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array('skipThese' => "noLicense", 'groupId' => $groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE=>"noLicense", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
@@ -443,7 +443,7 @@ class ui_browse_license extends FO_Plugin
       }
     } else
     {
-      $LinkUri = NULL;
+      $LinkUri = null;
     }
 
     /* Determine link for containers */
@@ -458,7 +458,7 @@ class ui_browse_license extends FO_Plugin
       }
     } else
     {
-      $LicUri = NULL;
+      $LicUri = null;
     }
 
     /* Populate the output ($VF) - file list */

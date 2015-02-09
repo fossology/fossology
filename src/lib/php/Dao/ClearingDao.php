@@ -706,18 +706,39 @@ INSERT INTO clearing_decision (
    */
   public function markDirectoryAsIrrelevant(ItemTreeBounds $itemTreeBounds,$groupId,$userId)
   {
+    $this->markDirectoryAsIrrelevantIfScannerDetected($itemTreeBounds, $groupId, $userId);
+    $this->markDirectoryAsIrrelevantIfUserEdited($itemTreeBounds, $groupId, $userId);
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param int $userId
+   */
+  protected function markDirectoryAsIrrelevantIfScannerDetected(ItemTreeBounds $itemTreeBounds,$groupId,$userId)
+  {
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight(), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM);
-    $options = array('skipThese'=>'noLicense','ut.filter'=>' AND (lft BETWEEN $1 AND $2)','groupId'=>'$4');
+    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
+                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
+                     UploadTreeProxy::OPT_GROUP_ID=>'$4');
     $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
-    $statementName = __METHOD__ . '.scannerDetected';
+    $statementName = __METHOD__ ;
     $sql = $uploadTreeProxy->asCte()
         .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) 
           SELECT uploadtree_pk itemid,pfile_fk pfile_id, $3, $4, $5, $6 FROM UploadTreeView';
     $this->dbManager->prepare($statementName, $sql);
     $res = $this->dbManager->execute($statementName,$params);
     $this->dbManager->freeResult($res);
+  }  
     
-    $statementName = __METHOD__ . '.userEdited';
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param int $userId
+   */
+  protected function markDirectoryAsIrrelevantIfUserEdited(ItemTreeBounds $itemTreeBounds,$groupId,$userId) 
+  {
+    $statementName = __METHOD__ ;
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);

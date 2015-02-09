@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Util\StringOperation;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -49,16 +50,12 @@ class UploadFilePage extends DefaultPlugin
   const PUBLIC_ALL = 'public';
   const PUBLIC_GROUPS = 'protected';
 
-
   /** @var FolderDao */
   private $folderDao;
-
   /** @var PackageDao */
   private $packageDao;
-
   /** @var UploadDao */
   private $uploadDao;
-
   /** @var Logger */
   private $logger;
 
@@ -95,21 +92,19 @@ class UploadFilePage extends DefaultPlugin
     if ($ajaxMethodName == "getUploads")
     {
       return $this->getUploadsInFolder($folderId);
-    } else
+    }
+    elseif ($request->isMethod(Request::METHOD_POST))
     {
-      if ($request->isMethod(Request::METHOD_POST))
+      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+
+      if ($uploadFile !== null && !empty($folderId))
       {
-        $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
-
-        if ($uploadFile !== null && !empty($folderId))
-        {
-          list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, $reuseUploadId);
-          $description = $successful ? null : $description;
-
-        } else
-        {
-          $vars['message'] = "Error: no file selected";
-        }
+        list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, $reuseUploadId);
+        $description = $successful ? null : $description;
+      }
+      else
+      {
+        $vars['message'] = "Error: no file selected";
       }
     }
 
@@ -138,10 +133,10 @@ class UploadFilePage extends DefaultPlugin
     $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
     $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+    if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
     {
-      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
+      $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
 
     return $this->render("upload_file.html.twig", $this->mergeWithDefault($vars));
@@ -296,10 +291,8 @@ class UploadFilePage extends DefaultPlugin
 
     if ($package === null)
     {
-      $packageName = $this->determinePackageName($uploadForReuse->getFilename(), $newUpload->getFilename());
-
-      $package = $this->packageDao->createPackage($packageName);
-
+      $packageName = StringOperation::getCommonHead($uploadForReuse->getFilename(), $newUpload->getFilename());
+      $package = $this->packageDao->createPackage($packageName ?: $uploadForReuse->getFilename());
       $this->packageDao->addUploadToPackage($reuseUploadId, $package);
     }
 
@@ -309,26 +302,6 @@ class UploadFilePage extends DefaultPlugin
 
   }
 
-  private function determinePackageName($firstName, $secondName)
-  {
-    $name = "";
-
-    $maxNumberOfCharsToCompare = min(strlen($firstName), strlen($secondName));
-    for ($i = 0; $i < $maxNumberOfCharsToCompare; $i++)
-    {
-      $character = substr($firstName, $i, 1);
-      $secondCharacter = substr($secondName, $i, 1);
-      if ($character === $secondCharacter)
-      {
-        $name .= $character;
-      } else
-      {
-        break;
-      }
-    }
-
-    return strlen($name) > 0 ? $name : $firstName;
-  }
 }
 
 register_plugin(new UploadFilePage());

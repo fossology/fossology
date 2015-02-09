@@ -24,6 +24,10 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class UploadTreeProxy extends DbViewProxy
 {
+  const OPT_SKIP_THESE = 'skipThese';
+  const OPT_ITEM_FILTER = 'ut.filter';
+  const OPT_GROUP_ID = 'groupId';
+  
   /** @vars string */
   private $uploadTreeTableName;
   /** @var int */
@@ -31,7 +35,7 @@ class UploadTreeProxy extends DbViewProxy
 
   /**
    * @param int $uploadId
-   * @param array $options (keys skipThese, ut.filter, groupId supported)
+   * @param array $options (keys , ut.filter, groupId supported)
    * @param string $uploadTreeTableName
    */
   public function __construct($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName=null)
@@ -92,9 +96,9 @@ class UploadTreeProxy extends DbViewProxy
    */
   private static function getUploadTreeView($uploadId, $options, $uploadTreeTableName)
   {
-    $additionalCondition = array_key_exists('ut.filter', $options) ? $options['ut.filter'] : '';
-    $skipThese = array_key_exists('skipThese',$options) ? $options['skipThese'] : 'none';
-    $groupId = array_key_exists('groupId', $options) ? $options['groupId'] : null;
+    $additionalCondition = array_key_exists(self::OPT_ITEM_FILTER, $options) ? $options[self::OPT_ITEM_FILTER] : '';
+    $skipThese = array_key_exists(self::OPT_SKIP_THESE,$options) ? $options[self::OPT_SKIP_THESE] : 'none';
+    $groupId = array_key_exists(self::OPT_GROUP_ID, $options) ? $options[self::OPT_GROUP_ID] : null;
     switch ($skipThese)
     {
       case "none":

@@ -6,6 +6,7 @@
       <property name="indent" value="2"/>
     </properties>
   </rule>
+  <rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
   
   <rule ref="Zend.Files.ClosingTag"></rule>
 
@@ -15,7 +16,7 @@
     <severity>3</severity>
   </rule>
 
-
+  <rule ref="Generic.PHP.LowerCaseKeyword"/>
   <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
 
 </ruleset>

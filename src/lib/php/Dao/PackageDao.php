@@ -49,15 +49,13 @@ class PackageDao extends Object
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName, "
-SELECT
-  p.*,
-  u.*
+SELECT p.*, u.*
 FROM package p
   INNER JOIN upload_packages up ON p.package_pk = up.package_fk
   INNER JOIN upload_packages up2 ON p.package_pk = up2.package_fk
   INNER JOIN upload u ON up2.upload_fk = u.upload_pk
 WHERE up.upload_fk = $1
-ORDER BY up2.upload_fk ASC;");
+ORDER BY up2.upload_fk ASC");
     $res = $this->dbManager->execute($statementName, array($uploadId));
     $packageId = 0;
     $packageName = "";
