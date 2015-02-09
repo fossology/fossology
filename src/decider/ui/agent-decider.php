@@ -75,28 +75,31 @@ class agent_fodecider extends FO_Plugin
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * @param int $job_pk
-   * @param int $upload_pk
-   * @param &string $ErrorMsg - error message on failure
-   * @param array $Dependencies - array of plugin names representing dependencies.
+   * @param int $jobId
+   * @param int $uploadId
+   * @param &string $errorMsg - error message on failure
+   * @param array $dependencies - array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
-   * @param int|null $conflictStrategyId
+   * @param int|null $activeRules
    * @returns
    * - jq_pk Successfully queued
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
    **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $activeRules=null)
+  function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $activeRules=1)
   {
-    $Dependencies[] = "agent_adj2nest";
+    $dependencies[] = "agent_adj2nest";
     if ($activeRules !== null)
     {
       $args = self::RULES_FLAG . $activeRules;
-    } else
+      $dependencies[] = 'agent_nomos';
+      $dependencies[] = 'agent_monk';
+    }
+    else
     {
       $args = "";
     }
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
+    return CommonAgentAdd($this, $jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
   }
 }
 
