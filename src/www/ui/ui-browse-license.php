@@ -177,7 +177,7 @@ class ui_browse_license extends FO_Plugin
 
 
 
-    list($V, $allScans) = $this->createHeader($scannerAgents, $uploadId);
+    list($V, $allScans, $latestAgentIds) = $this->createHeader($scannerAgents, $uploadId);
 
     if (empty($allScans))
     {
@@ -189,7 +189,7 @@ class ui_browse_license extends FO_Plugin
 
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $licenseCandidates = $this->clearingDao->getFileClearingsFolder($fileTreeBounds);
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId, $licenseCandidates);
+    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($Uploadtree_pk, $tag_pk, $fileTreeBounds, $selectedAgentId ?: $latestAgentIds, $licenseCandidates);
     list($ChildCount, $jsBlockDirlist, $AddInfoText) = $this->createFileListing($Uri, $tag_pk, $fileTreeBounds, $ModLicView, $UniqueTagArray, $selectedAgentId, $licenseCandidates);
 
     /***************************************
@@ -272,27 +272,17 @@ class ui_browse_license extends FO_Plugin
 
     if (empty($V)) // no cache exists
     {
-      switch ($this->OutputType)
+      /* Show the folder path */
+      $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+
+      if (!empty($Upload))
       {
-        case "XML":
-          break;
-        case "HTML":
-          /* Show the folder path */
-          $V .= Dir2Browse($this->Name, $Item, NULL, 1, "Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
-
-          if (!empty($Upload))
-          {
-            $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
-            $V .= js_url();
-            $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
-          }
-
-          $V .= $this->createJavaScriptBlock();
-          break;
-        case "Text":
-          break;
-        default:
+        $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+        $V .= js_url();
+        $V .= $this->ShowUploadHist($Item, $Uri, $tag_pk);
       }
+
+      $this->vars['scripts'] = $this->createJavaScriptBlock();
 
       $Cached = false;
     } else
@@ -323,9 +313,8 @@ class ui_browse_license extends FO_Plugin
 
   private function createJavaScriptBlock()
   {
-    $output = "\n<script src=\"scripts/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
-    $output .= "\n<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
+    $output = "<script src=\"scripts/jquery.dataTables-1.9.4.min.js\" type=\"text/javascript\"></script>\n";
+    $output .= "<script src=\"scripts/job-queue-poll.js\" type=\"text/javascript\"></script>\n";
     $output .= "<script src='scripts/license.js' type='text/javascript'  ></script>\n";
     return $output;
   }
@@ -591,7 +580,7 @@ class ui_browse_license extends FO_Plugin
       return "Only one revision of <b>$run[agent_name]</b> ran for this upload. <br/>";
     }
     $URI = Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1';
-    $V = "<form action='$URI' method='post'><select name='agentId' id='agentId'>";
+    $V = "<form action='$URI' method='post' data-autosubmit=\"\"><select name='agentId' id='agentId'>";
     $isSelected = (0 == $selectedAgentId) ? " selected='selected'" : '';
     $V .= "<option value='0' $isSelected>" . _('Latest run of all available agents') . "</option>\n";
     foreach ($allScans as $run)
@@ -605,7 +594,7 @@ class ui_browse_license extends FO_Plugin
       }
       $V .= "<option value='$run[agent_pk]'$isSelected>$run[agent_name] $run[agent_rev]</option>\n";
     }
-    $V .= "</select><input type='submit' name='' value='Show'/></form>";
+    $V .= "</select><noscript><input type='submit' name='' value='Show'/></noscript></form>";
     return $V;
   }
 
@@ -677,6 +666,7 @@ class ui_browse_license extends FO_Plugin
    */
   private function createHeader($scannerAgents, $uploadId)
   {
+    $latestAgentIds = array();
     $allScans = array();
     $V = ""; // total return value
     foreach ($scannerAgents as $agentName)
@@ -741,9 +731,11 @@ class ui_browse_license extends FO_Plugin
         }
         $V .= $this->scheduleScan($uploadId, $agentName, sprintf(_("Schedule %s scan"), $agentName));
       }
+
+      $latestAgentIds[$agentName] = intval($latestRun['agent_pk']);
       $V .= '<br/>';
     }
-    return array($V, $allScans);
+    return array($V, $allScans, $latestAgentIds);
   }
 
 }

@@ -1,5 +1,5 @@
 #####
-# (C) Copyright 2006-2014 Hewlett-Packard Development Company, L.P.
+# (C) Copyright 2006-2015 Hewlett-Packard Development Company, L.P.
 #####
 
 /* License footprints */
@@ -1353,6 +1353,10 @@
 %KEY%	"licen[cs]"
 %STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is r?e?-?distributed along with the work"
 #
+%ENTRY%	_LT_DUAL_LICENSE_0
+%KEY%	"licen[cs]"
+%STR%	"(\<dual\>)[ -]license =FEW= and"
+#
 %ENTRY%	_LT_DUAL_LICENSE_1
 %KEY%	"licen[cs]"
 %STR%	"(\<dual\>|multiple)[ -]licensed under"
@@ -2184,6 +2188,10 @@
 # Have seen this predominantly with files containing _LT_GPLref1, but also
 # a few containing _LT_GPLref2
 #####
+%ENTRY%	_LT_GPL_EXCEPT_0
+%KEY%	=NULL=
+%STR%	"(exception =SOME= (gpl|GNU General Public licen[cs]e)|\<gplexception\>)"
+#
 %ENTRY%	_LT_GPL_EXCEPT_1
 %KEY%	"licen[cs]"
 %STR%	"as a special exception to the GNU (general p|p)ublic licen[cs]e if you distribute"
@@ -2215,6 +2223,10 @@
 %ENTRY%	_LT_GPL_EXCEPT_AUTOCONF_2
 %KEY%	"configur"
 %STR%	"configur(e|ation) scripts? =FEW= Autoconf"
+#
+%ENTRY%	_LT_GPL_EXCEPT_Trolltech
+%KEY%	=NULL=
+%STR%	"(as a special exception =SOME= trolltech|trolltech =FEW= gplexception)"
 #
 %ENTRY%	_TEXT_CLASSPATH
 %KEY%	=NULL=
@@ -2298,7 +2310,7 @@
 #
 %ENTRY%	_LT_AGPL_NAMED
 %KEY%	"agpl"
-%STR%	"agpl"
+%STR%	"\<agpl\>"
 #
 %ENTRY%	_LT_RPSL_COMPATIBLE
 %KEY%	"licen[cs]"
@@ -3373,6 +3385,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MITref2
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is the MIT licen[cs]e"
+#
+%ENTRY%	_LT_MITref3
+%KEY%	"licen[cs]"
+%STR% "licen[cs]e(:?) =FEW= and MIT"
 #####
 # DELETED: ... =SOME= accompanied by this header"
 #####
@@ -4996,9 +5012,17 @@ e /* (INFILE(j)) */
 %KEY%	"\<under\>"
 %STR%	"(distributed|released) under the (x11|x-consortium) licen[cs]e"
 #
+%ENTRY%	_LT_X11_5
+%KEY%	"notice"
+%STR%	"except as contained in this notice =SOME= shall not be used in advertising or otherwise =SOME= dealings in this Software without prior written authorization from"
+#
 %ENTRY%	_LT_X11_STYLE
 %KEY%	"distribut"
 %STR%	"distributed under an x-consortium[ -]style licen[cs]e"
+#
+%ENTRY%	_LT_Xnet_STYLE
+%KEY%	"agreement"
+%STR%	"This agreement shall be governed in all respects by the laws of the State of California and by the laws of the United States of America"
 #####
 # DELETED: ... of derivative works based upon this software are permitted
 # any distribution of this software or derivative works must comply with
@@ -5282,11 +5306,11 @@ k
 #####
 %ENTRY% _LT_SEE_COPYING_LICENSE_1
 %KEY% =NULL=
-%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in|at) =FEW= (details|license|distribut|information|foder|directory|https?|ftp)"
 #
 %ENTRY% _LT_SEE_COPYING_LICENSE_2
 %KEY% =NULL=
-%STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in)"
+%STR% "for =FEW= (details|license|distribut|information|use|usage) =FEW= see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt) =FEW= (for|with|in|at)"
 #
 %ENTRY% _LT_SEE_URL
 %KEY% =NULL=
@@ -7288,7 +7312,11 @@ k
 #
 %ENTRY%	_TITLE_POSTGRES
 %KEY%	"copyright"
-%STR%	"portions copyright =FEW= postgresql global development group"
+%STR%	"copyright =FEW= postgresql global development group"
+#
+%ENTRY%	_TITLE_POSTGRES_1
+%KEY%	"licen[cs]"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code) under =FEW= PostgreSQL licen[cs]e)"
 #
 %ENTRY%	_TITLE_MIT
 %KEY%	"licen[cs]"
@@ -8472,7 +8500,7 @@ k
 #
 %ENTRY%	_PHR_NOT_UNDER_LGPL
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"\<not\> =SOME= (free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|\<(and|or|by)\>) =SOME= (lgpl|lesser GNU general public licen[cs]e|(lesser|library) (general p|p)ublic licen[cs]e)"
+%STR% "\<not\> =FEW= (distribu|develop|released?|licen[cs]ed|available|subject) =FEW= (under|to) =SOME= (lgpl|lesser GNU general public licen[cs]e|(lesser|library) (general p|p)ublic licen[cs]e)"
 #
 %ENTRY%	_PHR_PATENT
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"

@@ -3,14 +3,15 @@
 # This Makefile is included by other Makefiles in the tree that need
 # these targets in order to preprocess files with embedded references
 # to the variables in Makefile.conf
+
 ifdef TOP
 include $(TOP)/Makefile.conf
 else
-TOP=.
+TOP = .
 include Makefile.conf
 endif
 
-VARIABLES := PROJECT PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR MODDIR LOCALSTATEDIR LOGDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR 
+VARIABLES := PROJECT PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR MODDIR LOCALSTATEDIR LOGDIR PROJECTSTATEDIR CACHEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR VERSION SVN_REV TWIG_CACHE
 
 %-process: %.in
 	@echo "Regenerating variables list ..."
@@ -33,7 +34,7 @@ $(VARIABLES):
 	@if [ "$@" = "PROJECT" ]; then \
 	   echo "$@=\"$($@)\"" >$(TOP)/variable.list; \
 	else \
-	  echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
+	   echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
 	fi
 
 .PHONY: $(VARIABLES)

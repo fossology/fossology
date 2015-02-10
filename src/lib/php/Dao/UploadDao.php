@@ -68,9 +68,9 @@ class UploadDao extends Object
     $uploadEntry = $this->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if ($uploadEntry===FALSE)
     {
-     global $container;
-     $container->get('logger')->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
-     return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
+      global $container;
+      $container->get('logger')->addWarning("did not find uploadTreeId $uploadTreeId in $uploadTreeTableName");
+      return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, 0, 0, 0);
     }
     return new FileTreeBounds($uploadTreeId, $uploadTreeTableName, intval($uploadEntry['upload_fk']), intval($uploadEntry['lft']), intval($uploadEntry['rgt']));
   }

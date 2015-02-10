@@ -1160,7 +1160,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("GPL-1.0");
       lmem[_mGPL] = 1;
     }
-    else if (INFILE(_LT_GPL_1)) {
+    else if (INFILE(_LT_GPL_1) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
       if (INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("GPL-2.0+");
@@ -1184,7 +1184,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         lmem[_mGPL] = 1;
       }
     }
-    else if (INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) {
+    else if ((INFILE(_LT_GPL_V2) || INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1)) && !HASTEXT(_LT_GPL_EXCEPT_0, REG_EXTENDED)) {
       if (INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
         INTERESTING("GPL-2.0+");
@@ -1284,6 +1284,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("LGPL-3.0");
         lmem[_mLGPL] = 1;
       }
+      else if (INFILE(_LT_LGPL3ref)) {
+      }
       else if (INFILE(_LT_LGPLref1)) {
         if (INFILE(_PHR_WXWINDOWS)) {
           INTERESTING("WXwindows");
@@ -1376,7 +1378,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     if (!lmem[_mGPL] && !HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED)
       && !INFILE(_LT_GPL_EXCEPT_BISON_1) && !INFILE(_LT_GPL_EXCEPT_BISON_2)
-      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
+      && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && !INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && !HASTEXT(_LT_GPL_EXCEPT_Trolltech, REG_EXTENDED)) {
       if (GPL_INFILE(_LT_GPL_ALT) && !INFILE(_LT_LGPL_ALT)) {
         cp = GPLVERS();
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
@@ -1602,115 +1604,121 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mGPL] = 1;
     }
     else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-        INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-2.0-with-classpath-exception");
+      INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-2.0-with-classpath-exception");
+      lmem[_mGPL] = 1;
+    }
+    else
+    {
+      if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && GPL_INFILE(_PHR_GPL3_OR_LATER)) {
+        INTERESTING("GPL-3.0+-with-autoconf-exception");
         lmem[_mGPL] = 1;
       }
-      else
-        if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && GPL_INFILE(_PHR_GPL3_OR_LATER)) {
-          INTERESTING("GPL-3.0+-with-autoconf-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
-          INTERESTING("GPL-3.0-with-autoconf-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-          INTERESTING("GPL-2.0-with-autoconf-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (HASTEXT(_TEXT_CLASSPATH, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-          INTERESTING("GPL-2.0-with-classpath-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (HASTEXT(_TEXT_FONT, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-          INTERESTING("GPL-2.0-with-font-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && GPL_INFILE(_PHR_GPL3_OR_LATER) 
-            && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-          INTERESTING("GPL-3.0+-with-GCC-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
-          INTERESTING("GPL-3.0-with-GCC-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
-          INTERESTING("GPL-2.0-with-GCC-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
-            GPL_INFILE(_PHR_GPL3_OR_LATER)) {
-          INTERESTING(lDebug ? "GPL-except-Bison-3+" : "GPL-3.0+-with-bison-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
-            (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) || GPL_INFILE(_LT_GPL3ref2))) {
-          INTERESTING(lDebug ? "GPL-except-Bison-3" : "GPL-3.0-with-bison-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
-            INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-          INTERESTING("GPL-2.0+-with-bison-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
-            (INFILE(_LT_GPL_V2_NAMED) || INFILE(_LT_GPL_V2_NAMED_ref1)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
-          INTERESTING("GPL-2.0-with-bison-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_1)) {
-          INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_2) && HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)) {
-          INTERESTING("GPL-with-autoconf-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_2)) {
-          INTERESTING(lDebug ? "GPL-except-2" : "GPL-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_3)) {
-          INTERESTING(lDebug ? "GPL-except-3" : "GPL-exception");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_PHR_GPL_DESCRIPTIONS)) {
-          INTERESTING(lDebug ? "GPL-kinda" : "GPL");
-          lmem[_mGPL] = 1;
-        }
-        else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
-          INTERESTING("eCos-2.0");
-        }
-      /* checking for FSF */
-      if (INFILE(_LT_FSF_1)) {
-        INTERESTING(lDebug ? "FSF(1)" : "FSF");
-        lmem[_mLGPL] = 1;
+      else if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
+        INTERESTING("GPL-3.0-with-autoconf-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_FSF_2)) {
-        INTERESTING(lDebug ? "FSF(2)" : "FSF");
+      else if (INFILE(_LT_GPL_EXCEPT_AUTOCONF) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+        INTERESTING("GPL-2.0-with-autoconf-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_FSF_3)) {
-        INTERESTING(lDebug ? "FSF(3)" : "FSF");
+      else if (HASTEXT(_TEXT_CLASSPATH, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+        INTERESTING("GPL-2.0-with-classpath-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (mCR_FSF() && INFILE(_LT_FSF_4)) {
-        INTERESTING(lDebug ? "FSF(4)" : "FSF");
+      else if (HASTEXT(_TEXT_FONT, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+        INTERESTING("GPL-2.0-with-font-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (mCR_FSF() && INFILE(_LT_FSF_5) && !lmem[_mGPL]) {
-        INTERESTING(lDebug ? "FSF(5)" : "FSF");
+      else if (HASTEXT(_LT_GPL_EXCEPT_Trolltech, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+        INTERESTING("GPL-2.0-with-trolltech-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_FSFref1) && !lmem[_mGPL]) {
-        INTERESTING(lDebug ? "FSF(ref1)" : "FSF");
+      else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && GPL_INFILE(_PHR_GPL3_OR_LATER) 
+          && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+        INTERESTING("GPL-3.0+-with-GCC-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_FSFref2)) {
-        INTERESTING(lDebug ? "FSF(ref2)" : "FSF");
+      else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2))) {
+        INTERESTING("GPL-3.0-with-GCC-exception");
+        lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_LGPLrefFSF) &&
-          NOT_INFILE(_PHR_NOT_UNDER_LGPL)) {
-        INTERESTING(lDebug ? "LGPL(FSF)" : "LGPL");
-        lmem[_mLGPL] = 1;
+      else if (HASTEXT(_TEXT_GCC, REG_EXTENDED) && (INFILE(_TITLE_GPL2_ref1) || INFILE(_TITLE_GPL2_ref2))) {
+        INTERESTING("GPL-2.0-with-GCC-exception");
+        lmem[_mGPL] = 1;
       }
-      if (!lmem[_mGPL] && !lmem[_mLGPL] && !lmem[_mGFDL]) {
+      else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
+          GPL_INFILE(_PHR_GPL3_OR_LATER)) {
+        INTERESTING(lDebug ? "GPL-except-Bison-3+" : "GPL-3.0+-with-bison-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if ((INFILE(_LT_GPL_EXCEPT_BISON_1) || INFILE(_LT_GPL_EXCEPT_BISON_2)) && 
+          (INFILE(_TITLE_GPL3_ref1) || INFILE(_TITLE_GPL3_ref2) || GPL_INFILE(_LT_GPL3ref2))) {
+        INTERESTING(lDebug ? "GPL-except-Bison-3" : "GPL-3.0-with-bison-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
+          INFILE(_PHR_GPL2_OR_LATER) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+        INTERESTING("GPL-2.0+-with-bison-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if ((INFILE(_LT_GPL_EXCEPT_BISON_1)  || INFILE(_LT_GPL_EXCEPT_BISON_2)) &&
+          (INFILE(_LT_GPL_V2_NAMED) || INFILE(_LT_GPL_V2_NAMED_ref1)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+        INTERESTING("GPL-2.0-with-bison-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_LT_GPL_EXCEPT_1)) {
+        INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_LT_GPL_EXCEPT_2) && HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED)) {
+        INTERESTING("GPL-with-autoconf-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_LT_GPL_EXCEPT_2)) {
+        INTERESTING(lDebug ? "GPL-except-2" : "GPL-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_LT_GPL_EXCEPT_3)) {
+        INTERESTING(lDebug ? "GPL-except-3" : "GPL-exception");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_PHR_GPL_DESCRIPTIONS)) {
+        INTERESTING(lDebug ? "GPL-kinda" : "GPL");
+        lmem[_mGPL] = 1;
+      }
+      else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
+        INTERESTING("eCos-2.0");
+      }
+    }
+    /* checking for FSF */
+    if (INFILE(_LT_FSF_1)) {
+      INTERESTING(lDebug ? "FSF(1)" : "FSF");
+      lmem[_mLGPL] = 1;
+    }
+    else if (INFILE(_LT_FSF_2)) {
+      INTERESTING(lDebug ? "FSF(2)" : "FSF");
+    }
+    else if (INFILE(_LT_FSF_3)) {
+      INTERESTING(lDebug ? "FSF(3)" : "FSF");
+    }
+    else if (mCR_FSF() && INFILE(_LT_FSF_4)) {
+      INTERESTING(lDebug ? "FSF(4)" : "FSF");
+    }
+    else if (mCR_FSF() && INFILE(_LT_FSF_5) && !lmem[_mGPL]) {
+      INTERESTING(lDebug ? "FSF(5)" : "FSF");
+    }
+    else if (INFILE(_LT_FSFref1) && !lmem[_mGPL]) {
+      INTERESTING(lDebug ? "FSF(ref1)" : "FSF");
+    }
+    else if (INFILE(_LT_FSFref2)) {
+      INTERESTING(lDebug ? "FSF(ref2)" : "FSF");
+    }
+    else if (INFILE(_LT_LGPLrefFSF) &&
+        NOT_INFILE(_PHR_NOT_UNDER_LGPL)) {
+      INTERESTING(lDebug ? "LGPL(FSF)" : "LGPL");
+      lmem[_mLGPL] = 1;
+    }
+    if (!lmem[_mGPL] && !lmem[_mLGPL] && !lmem[_mGFDL]) {
       /*
        * Check these patterns AFTER checking for FSF and GFDL, and only if the
        * CUPS license isn't present.
@@ -1827,6 +1835,28 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_CR_XFREE86) || INFILE(_LT_XFREE86)) {
     INTERESTING("XFree86");
     lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
+        INFILE(_LT_MIT_5) || INFILE(_LT_MIT_6) || INFILE(_LT_MIT_7))) { 
+    if(INFILE(_LT_MIT_NO_EVIL)) {
+      INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
+      lmem[_mMIT] = 1;
+    } else if (INFILE(_LT_Imlib2)) {
+      INTERESTING("Imlib2");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_X11_5)) {
+      INTERESTING("X11");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_Xnet_STYLE)) {
+      INTERESTING("Xnet");
+      lmem[_mMIT] = 1;
+    } else if(INFILE(_LT_TAPJOY)) {
+      INTERESTING("Tapjoy");
+      lmem[_mMIT] = 1;
+    } else {
+      INTERESTING("MIT");
+      lmem[_mMIT] = 1;
+    }
   }
   else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
       NOT_INFILE(_TITLE_MIT_EXHIBIT) && NOT_INFILE(_TITLE_SGI) && !lmem[_fBSD] && !lmem[_mMIT]) {
@@ -1957,7 +1987,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   else if (INFILE(_LT_MITref2)) {
-    INTERESTING(lDebug ? "MIT(ref2)" : "MIT");
+    INTERESTING(lDebug ? "MIT(ref2)" : "MIT-style");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MITref3)) {
+    INTERESTING(lDebug ? "MIT(ref3)" : "MIT-style");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_OG_1)) {
@@ -5895,7 +5929,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* 
    * Dual licenses
    */
-  if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
+  if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
+    INTERESTING(lDebug ? "Dual-license(0)" : "Dual-license");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
     INTERESTING(lDebug ? "Dual-license(1)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_2)) { 
@@ -5999,7 +6036,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /** PostgreSQL License */
-  if (INFILE(_TITLE_POSTGRES)) {
+  if (INFILE(_TITLE_POSTGRES) || INFILE(_TITLE_POSTGRES_1)) {
     INTERESTING("PostgreSQL");
     lmem[_fBSD] = 1;
   }

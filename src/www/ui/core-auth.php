@@ -1,422 +1,305 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2015 Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 define("TITLE_core_auth", _("Login"));
 
-class core_auth extends FO_Plugin {
-	var $Name = "auth";
-	var $Title = TITLE_core_auth;
-	var $Version = "1.0";
-	var $PluginLevel = 1000; /* make this run first! */
-	var $Dependency = array();
-	var $LoginFlag = 0;
-	public static $origReferer;
+class core_auth extends FO_Plugin
+{
+  public static $origReferer;
+  /** @var DbManager */
+  private $dbManager;
+  /** @var UserDao */
+  private $userDao;
+  /** @var Session */
+  private $session;
 
-	/**
-	 * \brief getter to retreive value of static var
-	 */
-	public function staticValue()
-	{
-		return self::$origReferer;
-	}
+  function __construct()
+  {
+    $this->Name = "auth";
+    $this->Title = TITLE_core_auth;
+    $this->PluginLevel = 1000; /* make this run first! */
+    $this->LoginFlag = 0;
+    parent::__construct();
 
-	/**
-	 * \brief Only used during installation.
-	 * This may be called multiple times.
-	 * Used to ensure the DB has the right default columns.
-	 *
-	 * \return 0 on success, non-zero on failure.
-	 */
-	function Install() {
-		
-		global $PG_CONN;
+    global $container;
+    $this->dbManager = $container->get("db.manager");
+    $this->userDao = $container->get('dao.user');
+    $this->session = $container->get('session');
+  }
 
-		if (empty($PG_CONN)) {
-			return (1);
-		} /* No DB */
-		/* No users with no seed and no pass */
-		$sql = "UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		pg_free_result($result);
-		/* No users with no seed and no perm -- make them read-only */
-		$sql = "UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		pg_free_result($result);
+  /**
+   * @brief getter to retreive value of static var
+   */
+  public function staticValue()
+  {
+    return self::$origReferer;
+  }
 
-		/* There must always be at least one default user. */
-		$sql = "SELECT * FROM users WHERE user_name = 'Default User';";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		$row = pg_fetch_assoc($result);
-		pg_free_result($result);
-		if (empty($row['user_name'])) {
-			/* User "fossy" does not exist.  Create it. */
-			/* No valid username/password */
-			$Level = PLUGIN_DB_NONE;
-			$sql = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-        VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
-			$result = pg_query($PG_CONN, $sql);
-			DBCheckResult($result, $sql, __FILE__, __LINE__);
-			pg_free_result($result);
-			$text = _("*** Created default user: 'Default User'.");
-			//print "$text\n";
-		}
-		/* There must always be at least one user with user-admin access.
-		 If he does not exist, make it user "fossy".
-		 If user "fossy" does not exist, add him with the default password 'fossy'. */
-		$Perm = PLUGIN_DB_ADMIN;
-		$sql = "SELECT * FROM users WHERE user_perm = $Perm;";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		$row = pg_fetch_assoc($result);
-		pg_free_result($result);
-		if (empty($row['user_name'])) {
-			/* No user with PLUGIN_DB_ADMIN access. */
-			$Seed = rand() . rand();
-			$Hash = sha1($Seed . "fossy");
-			$sql = "SELECT * FROM users WHERE user_name = 'fossy';";
-			$result = pg_query($PG_CONN, $sql);
-			DBCheckResult($result, $sql, __FILE__, __LINE__);
-			$row0 = pg_fetch_assoc($result);
-			pg_free_result($result);
-			if (empty($row0['user_name'])) {
-				/* User "fossy" does not exist.  Create it. */
-				$SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
-               "user_perm,user_email,email_notify,root_folder_fk)
-      VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
-				$text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
-				//print "$text\n";
-			}
-			else {
-				/* User "fossy" exists!  Update it. */
-				$SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y'," .
-               " user_email= 'fossy' WHERE user_name = 'fossy';";
-				$text = _("*** Existing user 'fossy' promoted to default administrator.");
-				//print "$text\n";
-			}
-			$result = pg_query($PG_CONN, $SQL);
-			DBCheckResult($result, $SQL, __FILE__, __LINE__);
-			pg_free_result($result);
+  /**
+   * \brief Only used during installation.
+   * This may be called multiple times.
+   * Used to ensure the DB has the right default columns.
+   *
+   * \return 0 on success, non-zero on failure.
+   */
+  function Install()
+  {
+    return $this->userDao->updateUserTable();
+  }
 
-			$sql = "SELECT * FROM users WHERE user_perm = $Perm;";
-			$result = pg_query($PG_CONN, $sql);
-			DBCheckResult($result, $sql, __FILE__, __LINE__);
-			$row = pg_fetch_assoc($result);
-			pg_free_result($result);
-		}
-		if (empty($row['user_name'])) {
-			return (1);
-		} /* Failed to insert */
-		return (0);
-	} // Install()
+  /**
+   * \brief This is where the magic for
+   * Authentication happens.
+   */
+  function PostInitialize()
+  {
+    global $SysConf;
 
-	/**
-	 * \brief Retrieve the user's IP address.
-	 * Some proxy systems pass forwarded IP address info.
-	 * This ensures that someone who steals the cookie won't
-	 * gain access unless they come from the same IP.
-	 */
-	function GetIP() {
-		/* NOTE: This can be easily defeated wtih fake HTTP headers. */
-		$Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
-		foreach($Vars as $V) {
-			if (!empty($_SERVER[$V])) {
-				return ($_SERVER[$V]);
-			}
-		}
-		return (@$_SERVER['REMOTE_ADDR']);
-	} // GetIP()
-
-	/**
-	 * \brief This is where the magic for
-	 * Authentication happens.
-	 */
-	function PostInitialize() {
-		global $Plugins;
-		global $PG_CONN;
-		global $SysConf;
-		
-		if (empty($PG_CONN)) {
-			return (0);
-		}
-
-		/* if Site Minder enabled core-auth will be disabled*/
-		if (siteminder_check() != -1)
-		{
-			return(0);
-		}
-
-		session_name("Login");
-        $mysess = session_id();
-        if (empty($mysess)) session_start();
-        if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
-		$Now = time();
-		if (!empty($_SESSION['time'])) 
-        {
-			/* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-			if (@$_SESSION['time'] + (60 * 480) < $Now) $this->UpdateSess("");
-		}
-
-		$_SESSION['time'] = $Now;
-		if (empty($_SESSION['ip'])) 
-        {
-			$_SESSION['ip'] = $this->GetIP();
-		} 
-        else 
-        if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->GetIP())) 
-        {
-			/* Sessions are not transferable. */
-            $this->UpdateSess("");
-			$_SESSION['ip'] = $this->GetIP();
-		}
-
-		/* Enable or disable plugins based on login status */
-		$Level = PLUGIN_DB_NONE;
-		if (@$_SESSION['User']) 
-        {
-			/* If you are logged in, then the default level is "Download". */
-			if ("X" . $_SESSION['UserLevel'] == "X") {
-				$Level = PLUGIN_DB_WRITE;
-			} else {
-				$Level = @$_SESSION['UserLevel'];
-			}
-			/* Recheck the user in case he is suddenly blocked or changed. */
-			if (empty($_SESSION['time_check'])) {
-				$_SESSION['time_check'] = time() + (480 * 60);
-			}
-			if (time() >= @$_SESSION['time_check']) {
-				$sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
-				$result = pg_query($PG_CONN, $sql);
-				DBCheckResult($result, $sql, __FILE__, __LINE__);
-				$R = pg_fetch_assoc($result);
-				pg_free_result($result);
-                $this->UpdateSess($R);
-				/* Check for instant logouts */
-				if (empty($R['user_pass']))  $this->UpdateSess("");
-			}
-		} 
-        else 
-          $this->UpdateSess("");
-
-		/* Disable all plugins with >= level access */
-		plugin_disable($_SESSION['UserLevel']);
-		$this->State = PLUGIN_STATE_READY;
-	} // PostInitialize()
-
-    /**
-     * \brief Set $_SESSION and $SysConf user variables
-     * \param $UserRow users table row, if empty, use Default User
-     * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
-     */
-    function UpdateSess($UserRow)
+    /* if Site Minder enabled core-auth will be disabled*/
+    if (siteminder_check() != -1)
     {
-      global $SysConf;
-
-      if (empty($UserRow))
-        $UserRow = GetSingleRec("Users", "where user_name='Default User'");
-
-      $_SESSION['UserId'] = $UserRow['user_pk'];
-      $SysConf['auth']['UserId'] = $UserRow['user_pk'];
-      $_SESSION['User'] = $UserRow['user_name'];
-      $_SESSION['Folder'] = $UserRow['root_folder_fk'];
-      $_SESSION['UserLevel'] = $UserRow['user_perm'];
-      $_SESSION['UserEmail'] = $UserRow['user_email'];
-      $_SESSION['UserEnote'] = $UserRow['email_notify'];
+      return (0);
     }
 
-
-	/**
-	 * \brief See if a username/password is valid.
-	 *
-	 * \return string on match, or null on no-match.
-	 */
-	function CheckUser($User, $Pass, $Referer) 
+    if (!$this->session->isStarted())
     {
-		global $PG_CONN;
-		global $SysConf;
+      $this->session->setName('Login');
+      $this->session->start();
+    }
 
-		$V = "";
-		if (empty($User)) {
-			return;
-		}
-		if ($User == 'Default User') {
-			return;
-		}
-		$User = str_replace("'", "''", $User); /* protect DB */
-
-		/* See if the user exists */
-		$sql = "SELECT * FROM users WHERE user_name = '$User';";
-		$result = pg_query($PG_CONN, $sql);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		$R = pg_fetch_assoc($result);
-		pg_free_result($result);
-		if (empty($R['user_name'])) {
-			return;
-		} /* no user */
-		/* Check the password -- only if a password exists */
-		if (!empty($R['user_seed']) && !empty($R['user_pass'])) {
-			$Hash = sha1($R['user_seed'] . $Pass);
-			if (strcmp($Hash, $R['user_pass']) != 0) {
-				return;
-			}
-		} else if (!empty($R['user_seed'])) {
-			/* Seed with no password hash = no login */
-			return;
-		} else {
-			if (!empty($Pass)) {
-				return;
-			} /* empty password required */
-		}
-		/* If you make it here, then username and password were good! */
-        $this->UpdateSess($R);
-		$_SESSION['time_check'] = time() + (480 * 60);
-		/* No specified permission means ALL permission */
-		if ("X" . $R['user_perm'] == "X") {
-			$_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
-		} else {
-			$_SESSION['UserLevel'] = $R['user_perm'];
-		}
-		$_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
-		/* Check for the no-popup flag */
-		if (GetParm("nopopup", PARM_INTEGER) == 1) {
-			$_SESSION['NoPopup'] = 1;
-		} else {
-			$_SESSION['NoPopup'] = 0;
-		}
-		/* Need to refresh the screen */
-		$V .= "<script language='javascript'>\n";
-		/* Use the previous redirect, but only use it if it comes from this
-		 server's Traceback_uri().  (Ignore hostname.) */
-		$Redirect = preg_replace("@^[^/]*//[^/]*@", "", GetParm("redirect", PARM_TEXT));
-		$Uri = Traceback_uri();
-		if (preg_match("/[?&]mod=(Default|" . $this->Name . ")/", $Redirect)) {
-			$Redirect = ""; /* don't reference myself! */
-		}
-		if (empty($Redirect) || strncmp($Redirect, $Uri, strlen($Uri))) {
-			$Uri = Traceback_uri();
-		} else {
-			$Uri = $Redirect;
-		}
-		/* Redirect window */
-		$V .= "window.open('$Referer','_top');\n";
-		$V .= "</script>\n";
-		return ($V);
-	} // CheckUser()
-
-	/**
-	 * \brief This is only called when the user logs out.
-	 */
-	function Output() 
+    if (array_key_exists('selectMemberGroup', $_POST))
     {
-		global $SysConf;
+      $selectedGroupId = intval($_POST['selectMemberGroup']);
+      $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
+      $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
+      $this->session->set(Auth::GROUP_ID, $selectedGroupId);
+      $SysConf['auth']['GroupId'] = $selectedGroupId;
+    }
 
-		if ($this->State != PLUGIN_STATE_READY) {
-			return;
-		}
-		$V = "";
-		switch ($this->OutputType) {
-			case "XML":
-				break;
-			case "HTML":
-				if ($_SESSION['User'] == "Default User") {
-					$User = GetParm("username", PARM_TEXT);
-					$Pass = GetParm("password", PARM_TEXT);
-					$Referer = GetParm("HTTP_REFERER", PARM_TEXT);
-					if (empty($Referer)) $Referer = GetArrayVal('HTTP_REFERER', $_SERVER);
-					if (!empty($User)) {
-						$VP = $this->CheckUser($User, $Pass, $Referer);
-					} else {
-						$VP = "";
-					}
-					if (!empty($VP)) {
-						$V.= $VP;
-					} else {
-						/* Check for init and first-time use */
-						if (plugin_find_id("init") >= 0) {
-							$text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
-							$V.= "<b>$text</b>";
-							$V.= "<P />\n";
-							/* Check for a default user */
-							global $PG_CONN;
-							$Level = PLUGIN_DB_ADMIN;
-							$sql = "SELECT * FROM users WHERE user_perm = $Level LIMIT 1;";
-							$result = pg_query($PG_CONN, $sql);
-							DBCheckResult($result, $sql, __FILE__, __LINE__);
-							$R = pg_fetch_assoc($result);
-							pg_free_result($result);
-							if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R)) {
-								$sql = "SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;";
-								$result = pg_query($PG_CONN, $sql);
-								DBCheckResult($result, $sql, __FILE__, __LINE__);
-							} else {
-								$sql = "SELECT user_name FROM users;";
-								$result = pg_query($PG_CONN, $sql);
-								DBCheckResult($result, $sql, __FILE__, __LINE__);
-							}
-							$R = pg_fetch_assoc($result);
-							pg_free_result($result);
-							if (!empty($R['user_name'])) {
-								$V.= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
-								$V.= "<P />\n";
-							}
-						}
-						/* Inform about the protocol. */
-						$Protocol = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-						if (!ISSET($_SERVER['HTTPS'])) {
-							$V.= "This login uses $Protocol, so passwords are transmitted in plain text.  This is not a secure connection.<P />\n";
-						}
-						$V.= "<form method='post'>\n";
-						$V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
-						$V.= "<table border=0>";
-						$text = _("Username:");
-						$V.= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-						$text = _("Password:");
-						$V.= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
-						$V.= "</table>";
-						$V.= "<P/>";
-						$V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
-						$text = _("Login");
-						$V.= "<input type='submit' value='$text'>\n";
-						$V.= "</form>\n";
-					}
-				} else
-				/* It's a logout */ {
-                $this->UpdateSess("");
-				$Uri = Traceback_uri();
-				$V.= "<script language='javascript'>\n";
-				$V.= "window.open('$Uri','_top');\n";
-				$V.= "</script>\n";
-				}
-				break;
-			case "Text":
-				break;
-			default:
-				break;
-		}
-		if (!$this->OutputToStdout) {
-			return ($V);
-		}
-		print ($V);
-		return;
-	} // Output()
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION[Auth::USER_ID];
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth']['GroupId'] = $_SESSION[Auth::GROUP_ID];
 
-};
+    $Now = time();
+    if (!empty($_SESSION['time']))
+    {
+      /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
+      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+    }
+
+    $_SESSION['time'] = $Now;
+    if (empty($_SESSION['ip']))
+    {
+      $_SESSION['ip'] = $this->getIP();
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
+    {
+      /* Sessions are not transferable. */
+      $this->updateSession("");
+      $_SESSION['ip'] = $this->getIP();
+    }
+
+    if (@$_SESSION['User'])
+    {
+      /* Recheck the user in case he is suddenly blocked or changed. */
+      if (empty($_SESSION['time_check']))
+      {
+        $_SESSION['time_check'] = time() + (480 * 60);
+      }
+      if (time() >= @$_SESSION['time_check'])
+      {
+        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
+        /* Check for instant logouts */
+        if (empty($row['user_pass']))
+        {
+          $row = "";
+        }
+        $this->updateSession($row);
+      }
+    } else
+      $this->updateSession("");
+
+    /* Disable all plugins with >= level access */
+    plugin_disable($_SESSION[Auth::USER_LEVEL]);
+    $this->State = PLUGIN_STATE_READY;
+  } // GetIP()
+
+  /**
+   * \brief Set $_SESSION and $SysConf user variables
+   * \param $UserRow users table row, if empty, use Default User
+   * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
+   */
+  function updateSession($userRow)
+  {
+    global $SysConf;
+
+    if (empty($userRow))
+    {
+      $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
+    }
+
+    $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
+    $SysConf['auth']['UserId'] = $userRow['user_pk'];
+    $this->session->set(Auth::USER_ID, $userRow['user_pk']);
+    $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
+    $this->session->set(Auth::USER_NAME, $userRow['user_name']);
+    $_SESSION['Folder'] = $userRow['root_folder_fk'];
+    $_SESSION['UserLevel'] = $userRow['user_perm'];
+    $_SESSION['UserEmail'] = $userRow['user_email'];
+    $_SESSION['UserEnote'] = $userRow['email_notify'];
+    $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
+    $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
+    $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
+    $_SESSION['GroupName'] = $userRow['group_name'];
+  }
+
+  /**
+   * \brief Retrieve the user's IP address.
+   * Some proxy systems pass forwarded IP address info.
+   * This ensures that someone who steals the cookie won't
+   * gain access unless they come from the same IP.
+   */
+  function getIP()
+  {
+    /* NOTE: This can be easily defeated wtih fake HTTP headers. */
+    $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
+    foreach ($Vars as $V)
+    {
+      if (!empty($_SERVER[$V]))
+      {
+        return ($_SERVER[$V]);
+      }
+    }
+    return (@$_SERVER['REMOTE_ADDR']);
+  }
+
+  /**
+   * \brief This is only called when the user logs out.
+   */
+  public function Output()
+  {
+    $userName = GetParm("username", PARM_TEXT);
+    $password = GetParm("password", PARM_TEXT);
+    $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+    if (empty($referrer))
+    {
+      $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
+    }
+
+    $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    if ($validLogin)
+    {
+      return new RedirectResponse($referrer);
+    }
+
+    $initPluginId = plugin_find_id("init");
+    if ($initPluginId >= 0)
+    {
+      global $Plugins;
+      $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
+    }
+    $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+    $this->vars['referrer'] = $referrer;
+    return $this->render('login.html.twig');
+  }
+
+  /**
+   * @brief perform logout
+   */
+  function OutputOpen()
+  {
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
+    {
+      $this->updateSession("");
+      $Uri = Traceback_uri();
+      header("Location: $Uri");
+      exit;
+    }
+    parent::OutputOpen();
+  }
+
+
+  /**
+   * \brief See if a username/password is valid.
+   *
+   * @return boolean
+   */
+  function checkUsernameAndPassword($userName, $password)
+  {
+    if (empty($userName) || $userName == 'Default User')
+    {
+      return false;
+    }
+
+    $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+
+    if (empty($row['user_name']))
+    {
+      return false;
+    }
+
+    /* Check the password -- only if a password exists */
+    if (!empty($row['user_seed']) && !empty($row['user_pass']))
+    {
+      $passwordHash = sha1($row['user_seed'] . $password);
+      if (strcmp($passwordHash, $row['user_pass']) != 0)
+      {
+        return false;
+      }
+    } else if (!empty($row['user_seed']))
+    {
+      /* Seed with no password hash = no login */
+      return false;
+    } else if (!empty($password))
+    {
+      /* empty password required */
+      return false;
+    }
+
+    /* If you make it here, then username and password were good! */
+    $this->updateSession($row);
+
+    $_SESSION['time_check'] = time() + (480 * 60);
+    /* No specified permission means ALL permission */
+    if ("X" . $row['user_perm'] == "X")
+    {
+      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
+    } else
+    {
+      $_SESSION['UserLevel'] = $row['user_perm'];
+    }
+    $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
+    /* Check for the no-popup flag */
+    if (GetParm("nopopup", PARM_INTEGER) == 1)
+    {
+      $_SESSION['NoPopup'] = 1;
+    } else
+    {
+      $_SESSION['NoPopup'] = 0;
+    }
+    return true;
+  }
+
+}
+
 $NewPlugin = new core_auth;
-?>

@@ -1,0 +1,193 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<matrix-project>
+  <actions/>
+  <description></description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>20</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jvnet.hudson.plugins.shelveproject.ShelveProjectProperty plugin="shelve-project-plugin@1.3"/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <hudson.matrix.LabelAxis>
+      <name>Install-Test-VMs</name>
+      <values>
+        <string>fo-centos-6-32.fc.hp.com</string>
+        <string>fo-debian-squeeze32.fc.hp.com</string>
+        <string>fo-debian-squeeze64.fc.hp.com</string>
+        <string>fo-debian-wheezy32.fc.hp.com</string>
+        <string>fo-fedora-19-32.fc.hp.com</string>
+        <string>fo-fedora-19-64.fc.hp.com</string>
+        <string>fo-fedora-20-32.fc.hp.com</string>
+        <string>fo-fedora-20-64.fc.hp.com</string>
+        <string>fo-ubuntu-1204-64.fc.hp.com</string>
+        <string>fo-ubuntu-1310-32.fc.hp.com</string>
+        <string>fo-ubuntu-1310-64.fc.hp.com</string>
+        <string>fo-ubuntu-1404-32.fc.hp.com</string>
+        <string>fo-ubuntu-1404-64.fc.hp.com</string>
+      </values>
+    </hudson.matrix.LabelAxis>
+  </axes>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/sh
+ntpdate ntp.hp.net;
+cat /etc/issue |grep -iE &apos;debian|ubuntu&apos;;
+if [ $? -eq 0 ] ; then
+  n=`date |awk &apos;{print $3}&apos;`;
+  a=$(($n%2));
+  if [ $a -eq 0 ] ; then
+    sed &apos;s/fc/fc/&apos; /etc/apt/apt.conf &gt; /etc/apt/apt.conf.new;
+  else
+    sed &apos;s/fc/atl/&apos; /etc/apt/apt.conf &gt; /etc/apt/apt.conf.new;
+  fi
+  cp /etc/apt/apt.conf.new /etc/apt/apt.conf;
+  apt-get clean;
+  apt-get update;
+  apt-get -y install git php5 phpunit;
+else
+  cat /etc/issue |grep -iE &apos;fedora&apos;;
+  if [ $? -eq 0 ] ; then
+    sed &apos;s/#proxy=/proxy=/&apos; /etc/yum.conf &gt; /etc/yum.conf.new;
+    cp /etc/yum.conf.new /etc/yum.conf;
+    #echo &apos;proxy=http://web-proxy.fc.hp.com:8088/&apos; &gt;&gt; /etc/yum.conf;
+    #sed &apos;s/baseurl=/#baseurl=/&apos; /etc/yum.repos.d/fedora.repo &gt; /etc/yum.repos.d/fedora.repo.new
+    #sed &apos;s/##baseurl=/baseurl=/&apos; /etc/yum.repos.d/fedora.repo.new &gt; /etc/yum.repos.d/fedora.repo.new1
+    #cp /etc/yum.repos.d/fedora.repo.new1 /etc/yum.repos.d/fedora.repo;
+    #sed &apos;s/baseurl=/#baseurl=/&apos; /etc/yum.repos.d/fedora-updates.repo &gt; /etc/yum.repos.d/fedora-updates.repo.new
+    #sed &apos;s/##baseurl=/baseurl=/&apos; /etc/yum.repos.d/fedora-updates.repo.new &gt; /etc/yum.repos.d/fedora-updates.repo.new1
+    #cp /etc/yum.repos.d/fedora-updates.repo.new1 /etc/yum.repos.d/fedora-updates.repo;
+    sed &apos;s/fedora/debian/&apos; /etc/yum.repos.d/fedora.repo &gt; /etc/yum.repos.d/fedora.repo.new
+    cp /etc/yum.repos.d/fedora.repo.new /etc/yum.repos.d/fedora.repo;
+    sed &apos;s/fedora/debian/&apos; /etc/yum.repos.d/fedora-updates.repo &gt; /etc/yum.repos.d/fedora-updates.repo.new
+    cp /etc/yum.repos.d/fedora-updates.repo.new /etc/yum.repos.d/fedora-updates.repo;
+    yum clean all;
+    yum -y update;
+    yum -y install git php php-process php-phpunit-PHPUnit;
+    yum -y update;
+    yum -y update;
+    yum -y install git php php-process php-phpunit-PHPUnit;
+    setenforce 0;
+  else
+    sed &apos;s/fc/cce/&apos; /etc/yum.conf &gt; /etc/yum.conf.new;
+    cp /etc/yum.conf.new /etc/yum.conf;
+    sed &apos;s/centos/debian/&apos; /etc/yum.repos.d/CentOS-Base.repo &gt; /etc/yum.repos.d/CentOS-Base.repo.new;
+    cp /etc/yum.repos.d/CentOS-Base.repo.new /etc/yum.repos.d/CentOS-Base.repo
+    yum clean all;
+    yum -y install lsb wget git php php-process;
+    setenforce 0;
+    wget -e http_proxy=http://web-proxy.cce.hp.com:8088 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
+    rpm -ivh epel-release-6-8.noarch.rpm;
+    sed &apos;s/#baseurl=/baseurl=/&apos; /etc/yum.repos.d/epel.repo &gt; /etc/yum.repos.d/epel.repo.new
+    sed &apos;s/mirrorlist=/#mirrorlist=/&apos; /etc/yum.repos.d/epel.repo.new &gt; /etc/yum.repos.d/epel.repo.new1
+    cp /etc/yum.repos.d/epel.repo.new1 /etc/yum.repos.d/epel.repo
+    yum -y install php-phpunit-PHPUnit;
+    yum -y install php-phpunit-PHPUnit;
+    yum -y install php-phpunit-PHPUnit;
+  fi
+fi
+#svn info;
+#echo http-proxy-host = web-proxy.cce.hp.com &gt;&gt; ~/.subversion/servers;
+#echo http-proxy-port = 8088 &gt;&gt; ~/.subversion/servers;
+#svn co https://svn.code.sf.net/p/fossology/code/trunk/fossology;
+git config --global http.proxy &quot;http://web-proxy.cce.hp.com:8088&quot;;
+git config --global https.proxy &quot;http://web-proxy.cce.hp.com:8088&quot;;
+git clone --depth 1 https://github.com/fossology/fossology.git fossology;
+pwd;
+export FOSSOLOGY_TESTCONFIG=/etc/fossology/
+cd ./fossology/src/testing/install/;
+./pkgConfig.php;
+cp -r test4packageinstall/ /srv/fossology/;
+cat /etc/issue |grep -iE &apos;ubuntu 12.04&apos;;
+if [ $? -eq 0 ] ; then
+  export http_proxy=http://web-proxy.cce.hp.com:8088/
+  cp ../../composer.json /srv/fossology/test4packageinstall;
+  cd /srv/fossology/test4packageinstall;
+  curl -sS --proxy http://web-proxy.cce.hp.com:8088 https://getcomposer.org/installer | php &amp;&amp; sudo mv composer.phar /usr/local/bin/composer;
+  composer install;
+  ./vendor/phpunit/phpunit/phpunit.php test_cp2foss.php
+else
+  cd /srv/fossology/test4packageinstall;
+  phpunit test_cp2foss.php
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.logparser.LogParserPublisher plugin="log-parser@1.0.8">
+      <unstableOnWarning>false</unstableOnWarning>
+      <failBuildOnError>false</failBuildOnError>
+      <parsingRulesPath>/home/jenkins/MakeErrors</parsingRulesPath>
+    </hudson.plugins.logparser.LogParserPublisher>
+    <hudson.plugins.emailext.ExtendedEmailPublisher plugin="email-ext@2.19">
+      <recipientList>$DEFAULT_RECIPIENTS</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>true</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>true</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList></recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>true</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+      </configuredTriggers>
+      <contentType>text/html</contentType>
+      <defaultSubject>$BUILD_STATUS for $PROJECT_NAME, commit # ${SVN_REVISION}</defaultSubject>
+      <defaultContent>...for $PROJECT_NAME, commit # ${SVN_REVISION}
+
+&lt;br /&gt;&lt;br /&gt;
+
+Console Output is &lt;a href=&quot;${BUILD_URL}&quot;&gt;Here&lt;/a&gt;
+
+&lt;br /&gt;&lt;br /&gt;
+
+Changes for this commit:
+&lt;table border=1 cellpadding=0 cellspacing=5&gt;
+${CHANGES, format=&quot;&lt;tr&gt;&lt;td&gt;%r&lt;/td&gt;&lt;td&gt;%a&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=2&gt;%m&lt;/td&gt;&lt;/tr&gt;&quot; }
+&lt;/table&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;i&gt;The cause of this job was: &quot;${CAUSE}&quot;.&lt;/i&gt;</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <matrixTriggerMode>ONLY_PARENT</matrixTriggerMode>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers/>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>

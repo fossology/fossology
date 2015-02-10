@@ -74,6 +74,9 @@ LOCALSTATEDIR={$LOCALSTATEDIR}
 ; project local state
 PROJECTSTATEDIR=$LOCALSTATEDIR/lib/$PROJECT
 
+; cache folder
+CACHEDIR=$LOCALSTATEDIR/cache/$PROJECT
+
 ; project logdir
 LOGDIR=/var/log/$PROJECT
 

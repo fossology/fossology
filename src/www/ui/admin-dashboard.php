@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,7 +27,8 @@ class dashboard extends FO_Plugin
   var $MenuList   = "Admin::Dashboard";
   var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_ADMIN;
-
+  protected $pgVersion;
+  
   /**
    * \brief Return each html row for DatabaseContents()
    * \returns html table row
@@ -152,24 +154,12 @@ function GetLastAnalyzeTime($TableName)
     pg_free_result($result);
     $text = _("FOSSology database size");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>  $Size </td></tr>\n";;
+    $V .= "<td align='right'> $Size </td></tr>\n";
 
     /**** Version ****/
-    $sql = "SELECT * from version();";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $version = explode(' ', $row['version'], 3);
     $text = _("Postgresql version");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>  $version[1] </td></tr>\n";;
-
-    // Get the current query column name in pg_stat_activity
-    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
-      $current_query = "state";
-    else
-      $current_query = "current_query";
+    $V .= "<td align='right'> {$this->pgVersion[server]} </td></tr>\n";
 
     /**** Query stats ****/
     // count current queries
@@ -182,10 +172,11 @@ function GetLastAnalyzeTime($TableName)
     pg_free_result($result);
 
     /**** Active connection count ****/
+    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
     $text = _("Active database connections");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";;
-    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology';";
+    $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
+    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -222,12 +213,10 @@ function GetLastAnalyzeTime($TableName)
     $version = explode(' ', $row['version'], 3);
 
     // Get the current query column name in pg_stat_activity
-    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
-      $current_query = "state";
-    else
-      $current_query = "current_query";
+    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
+    $procpid = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "pid" : "procpid";
 
-    $sql = "SELECT procpid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY procpid;"; 
+    $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 1)
@@ -236,7 +225,7 @@ function GetLastAnalyzeTime($TableName)
       {
         if ($row[$current_query] == $sql) continue;  // Don't display this query
         $V .= "<tr>";
-        $V .= "<td>$row[procpid]</td>";
+        $V .= "<td>$row[processid]</td>";
         $V .= "<td>" . htmlspecialchars($row[$current_query]) . "</td>";
         $StartTime = substr($row['query_start'], 0, 19);
         $V .= "<td>$StartTime</td>";
@@ -347,37 +336,30 @@ function GetLastAnalyzeTime($TableName)
    */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) { return; }
+    global $PG_CONN;
+    $this->pgVersion = pg_version($PG_CONN);
+    
     $V="";
-
-    switch($this->OutputType)
+    if($this->OutputType == "HTML")
     {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= "<table border=0 width='100%'><tr>\n";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Contents");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseContents();
-        $V .= "</td>";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Metrics");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseMetrics();
-        $V .= "</td>";
-        $V .= "</tr></table>\n";
-        $text = _("Active FOSSology queries");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseQueries();
-        $text = _("Disk Space");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DiskFree();
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V .= "<table border=0 width='100%'><tr>\n";
+      $V .= "<td valign='top'>\n";
+      $text = _("Database Contents");
+      $V .= "<h2>$text</h2>\n";
+      $V .= $this->DatabaseContents();
+      $V .= "</td>";
+      $V .= "<td valign='top'>\n";
+      $text = _("Database Metrics");
+      $V .= "<h2>$text</h2>\n";
+      $V .= $this->DatabaseMetrics();
+      $V .= "</td>";
+      $V .= "</tr></table>\n";
+      $text = _("Active FOSSology queries");
+      $V .= "<h2>$text</h2>\n";
+      $V .= $this->DatabaseQueries();
+      $text = _("Disk Space");
+      $V .= "<h2>$text</h2>\n";
+      $V .= $this->DiskFree();
     }
 
     if (!$this->OutputToStdout) { return($V); }

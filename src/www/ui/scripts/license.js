@@ -63,6 +63,11 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 $(document).ready(function() {
     createLicHistTable();
     createDirlistTable();
+
+    $("form[data-autosubmit] select").change(function() {
+        $(this).closest('form').submit();
+    });
+
     /*
     $.fn.dataTableExt.afnFiltering.push(
         function( oSettings, aData, iDataIndex ) {
@@ -157,5 +162,4 @@ function dressContents ( data, type, full ) {
 
 
 }
-
 

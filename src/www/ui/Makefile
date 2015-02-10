@@ -25,11 +25,11 @@ CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 DIRS=css images locale scripts ajaxPHP
 
-UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js)$$" `
+UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html|twig)$$"`
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php \
                 group-manage-self.php group-manage.php ajax-perms.php
 
-OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png)$$" `
+OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm)$$" `
 
 RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
@@ -56,7 +56,11 @@ install: all
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
-	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
+	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; \
+	fi;
+
+	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
+	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
 
 uninstall:
 	@rm -rf $(DESTDIR)$(WEBDIR)

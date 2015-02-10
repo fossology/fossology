@@ -55,5 +55,3 @@ class test_common_auth extends PHPUnit_Framework_TestCase
     print "Ending unit test for common-auth.php\n";
   }
 }
-
-?>

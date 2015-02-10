@@ -1,10 +1,12 @@
-# Copyright Siemens AG, 2014
+# Copyright Siemens AG, 2014-2015
 # SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
 
-language: c
+language: php
 
+addons:
+ - postgresql: "9.3"
 cache:
  - apt
 
@@ -15,6 +17,16 @@ install:
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
         postgresql libpq-dev
+
+before_script:
+ - cd src/
+ - composer install --dev
+ - composer self-update
+ - cd ..
+
+script:
+ - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/
+
 
 env:
   global:
@@ -27,6 +39,14 @@ matrix:
       compiler: gcc
       script:
        - make
+
+    - env:
+        - TEST_NAME="make phpunit (gcc)"
+      compiler: gcc
+      script:
+       - make
+       - phpunit -csrc/phpunit.xml
+       - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/
 
     # TODO fix Makefile to use clang
     - env:
@@ -76,3 +96,4 @@ matrix:
        - uname -a
 
 # TODO make it perfect ;-r
+

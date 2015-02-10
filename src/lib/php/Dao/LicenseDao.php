@@ -121,7 +121,8 @@ class LicenseDao extends Object
   public function getTopLevelLicensesPerFileId(FileTreeBounds $fileTreeBounds, $selectedAgentId = null, $filterLicenses = array('VOID'))//'No_license_found',
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName.implode("",$filterLicenses);
+    $selectedAgentText = $selectedAgentId ?: '-';
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . '.' . $selectedAgentText . '.' . implode("",$filterLicenses);
     $param = array($fileTreeBounds->getUploadTreeId());
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
@@ -159,19 +160,39 @@ class LicenseDao extends Object
     return $licensesPerFileId;
   }
 
-
+  /**
+   * @param FileTreeBounds $fileTreeBounds
+   * @param string $orderStatement
+   * @param null|int|int[] $agentId
+   * @return array
+   */
   public function getLicenseHistogram(FileTreeBounds $fileTreeBounds, $orderStatement = "", $agentId=null)
   {
     $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentId";
+    $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentText";
     $param = array($fileTreeBounds->getUploadId(), $fileTreeBounds->getLeft(), $fileTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count
-         FROM license_file_ref RIGHT JOIN $uploadTreeTableName UT ON license_file_ref.pfile_fk = UT.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
+    $sql = "
+      SELECT LFR.rf_shortname AS license_shortname, count(*) AS count, count(distinct LFR.pfile_fk) AS unique
+        FROM license_file_ref LFR RIGHT JOIN $uploadTreeTableName UT ON LFR.pfile_fk = UT.pfile_fk ";
+    if (empty($agentId))
+    {
+      $sql .= "LEFT OUTER JOIN license_file_ref LFR2
+          ON(LFR.pfile_fk = LFR2.pfile_fk and LFR.rf_pk = LFR2.rf_pk and (LFR.agent_fk > LFR2.agent_fk)) ";
+    }
+    $sql .= "WHERE LFR.rf_shortname NOT IN ('Void') AND UT.upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
+
     if (!empty($agentId))
     {
-      $sql .= ' AND agent_fk=$4';
-      $param[] = $agentId;
+      if (is_array($agentId)) {
+        $sql .= ' AND LFR.agent_fk=ANY($4)';
+        $param[] = '{' . implode(',', $agentId) . '}';
+      } else {
+        $sql .= ' AND LFR.agent_fk=$4';
+        $param[] = $agentId;
+      }
+    } else {
+      $sql .= ' AND LFR2.agent_fk IS NOT NULL';
     }
     $sql .= " GROUP BY license_shortname";
     if ($orderStatement)
@@ -181,9 +202,9 @@ class LicenseDao extends Object
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName,$param);
     $assocLicenseHist = array();
-    while ($res = $this->dbManager->fetchArray($result))
+    while ($row = $this->dbManager->fetchArray($result))
     {
-      $assocLicenseHist[$res['license_shortname']] = $res['count'];
+      $assocLicenseHist[$row['license_shortname']] = array('count' => intval($row['count']), 'unique' => intval($row['unique']));
     }
     $this->dbManager->freeResult($result);
     return $assocLicenseHist;
@@ -253,6 +274,12 @@ class LicenseDao extends Object
     }
     $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_text'], $row['rf_url']);
     return $license;
+  }
+
+  public function getLicenseCount()
+  {
+    $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
+    return intval($licenseRefTable['cnt']);
   }
 
 }

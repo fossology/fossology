@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,69 +16,42 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
 
 define("TITLE_ui_browse", _("Browse"));
 
 class ui_browse extends FO_Plugin {
-  var $Name = "browse";
-  var $Title = TITLE_ui_browse;
-  var $Version = "1.0";
-  var $MenuList = "Browse";
-  var $MenuOrder = 80; // just to right of Home(100)
-  var $MenuTarget = "";
-  var $Dependency = array();
-  public $DBaccess = PLUGIN_DB_READ;
-  public $LoginFlag = 0;
 
+  /** @var UploadDao */
+  private $uploadDao;
+  /** @var FolderDao */
+  private $folderDao;
+
+  function __construct()
+  {
+    $this->Name = "browse";
+    $this->Title = TITLE_ui_browse;
+    $this->MenuList = "Browse";
+    $this->MenuOrder = 80; // just to right of Home(100)
+    $this->MenuTarget = "";
+    $this->DBaccess = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+    $this->folderDao = $container->get('dao.folder');
+
+    parent::__construct();
+  }
 
   /**
    * \brief Create and configure database tables
    */
   function Install() {
-    global $PG_CONN;
-    if (empty($PG_CONN)) {
-      return(1);
-    } /* No DB */
-
-    /****************
-     The top-level folder must exist.
-     ****************/
-    /* check if the table needs population */
-    $sql = "SELECT * FROM folder WHERE folder_pk=1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if ($row['folder_pk'] != "1") {
-      $sql = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-      /* Now fix the sequence number so the first insert does not fail */
-      $sql = "SELECT max(folder_pk) AS max FROM folder LIMIT 1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
-      pg_free_result($result);
-      $Max = intval($row['max']);
-      if ($Max < 1) {
-        $Max = 1;
-      }
-      else {
-        $Max++;
-      }
-      $sql = "SELECT setval('folder_folder_pk_seq',$Max);";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-    }
+    $this->folderDao->ensureTopLevelFolder();
     return (0);
-  } // Install()
+  }
 
 
   /**
