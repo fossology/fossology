@@ -158,7 +158,7 @@ function AgentSchedule($jobId, $uploadId, $agents)
   $errorMsg = "";
   foreach($agents as &$agent)
   {
-    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array(), array_keys($agents));
     if ($rv == -1) {
       return $errorMsg;
     }
