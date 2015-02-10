@@ -31,8 +31,7 @@ abstract class AgentPlugin implements Plugin
   function __construct(){}
   function execute(){}
   function postInstall(){}
-    
-    
+
   function preInstall()
   {
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
@@ -47,8 +46,7 @@ abstract class AgentPlugin implements Plugin
   {
     return $this->Name;
   }
-  
-  
+
   /**
    * @param int $uploadId
    * @return int
@@ -79,13 +77,13 @@ abstract class AgentPlugin implements Plugin
     {
       return 0;
     }
-    
+
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
     if ($jobQueueId != 0)
     {
       return $jobQueueId;
     }
-    
+
     $args = is_array($arguments) ? '' : $arguments;
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
   }
@@ -106,7 +104,7 @@ abstract class AgentPlugin implements Plugin
     $deps = array();
     foreach ($dependencies as $dependency)
     {
-      $dep = $this->implicitAgentAdd($jobId, $uploadId, &$errorMsg, $dependency);
+      $dep = $this->implicitAgentAdd($jobId, $uploadId, $errorMsg, $dependency);
       if ($dep == -1)
       {
         return -1;
@@ -132,7 +130,7 @@ abstract class AgentPlugin implements Plugin
 
     return $jobQueueId;
   }
-  
+
   /**
    * @param int $jobId
    * @param int $uploadId
@@ -160,5 +158,5 @@ abstract class AgentPlugin implements Plugin
     }
     return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
   }
-  
+
 }
