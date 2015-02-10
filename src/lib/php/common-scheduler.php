@@ -36,9 +36,8 @@
           with the scheduler.  However, it is highly discouraged to use it directly
           instead of through the functions in this file in case we need to keep
           track of other data associated with a connection.
-          NOTE that failures write and error message to stdout.
  **/
-function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg)
+function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
 { 
   if (empty($IPaddr)) $IPaddr = '127.0.0.1';
   if (empty($Port)) $Port = 5555;
