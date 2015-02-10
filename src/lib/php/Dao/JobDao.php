@@ -53,4 +53,43 @@ class JobDao extends Object
 
     return $result;
   }
+  
+  public function getJobQueue($jobType,$jobId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT jq_pk FROM jobqueue WHERE jq_type=$1 AND jq_job_fk=$2",
+            array($jobType,$jobId));
+    return $row['jq_pk'];
+  }
+  
+  /**
+   * @todo cycle detection
+   * @param int $jobqueueId
+   * @param int $jobId
+   * @param array $preAgents
+   * @return boolean 
+   */
+  public function requeueJob($jobqueueId, $jobId, $preAgents)
+  {
+    $arrayAgents = '{'.implode(',',$preAgents).'}';
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $sql="SELECT jobqueue.jq_pk FROM jobqueue
+ LEFT JOIN jobdepends ON jobdepends.jdep_jq_fk=$1 AND jobdepends.jdep_jq_depends_fk=jobqueue.jq_pk AND jq_end_bits!=$4
+ WHERE jobqueue.jq_job_fk=$2 AND jobqueue.jq_type=ANY($3) AND jobdepends.jdep_jq_fk IS NULL");
+    $res = $this->dbManager->execute($stmt,array($jobqueueId,$jobId,$arrayAgents,1));
+    $results = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    if (empty($results))
+    {
+      return false;
+    }
+    foreach($results as $jq)
+    {
+      if ($jq['jq_pk'] == $jobqueueId)
+      {
+        throw new \Exception('loop detected');
+    }
+      $this->dbManager->insertTableRow('jobdepends', array('jdep_jq_fk'=>$jobqueueId,'jdep_jq_depends_fk'=>$jq['jq_pk']));
+    }
+    return true;
+  }
 }

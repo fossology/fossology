@@ -155,31 +155,14 @@ function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
  */
 function AgentSchedule($jobId, $uploadId, $agents)
 {
-  $agentDeciderName = "agent_decider";
-
   $errorMsg = "";
-  if (!array_key_exists($agentDeciderName, $agents))
+  foreach($agents as &$agent)
   {
-    foreach($agents as $agentName => &$agent)
-    {
-      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
-      if ($rv == -1) {
-        return $errorMsg;
-      }
-    }
-  }
-  else
-  {
-    $agentDecider = $agents[$agentDeciderName];
-    unset($agents[$agentDeciderName]);
-
-    $deciderRules = null;
-    $rv = $agentDecider->AgentAdd($jobId, $uploadId, $errorMsg, array_keys($agents), $deciderRules);
+    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
     if ($rv == -1) {
       return $errorMsg;
     }
   }
-
   return null;
 }
 
