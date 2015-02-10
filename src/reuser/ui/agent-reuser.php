@@ -25,7 +25,6 @@ class ReuserAgentPlugin extends AgentPlugin
   public function __construct() {
     $this->Name = "agent_reuser";
     $this->Title =  _("Automatic Clearing Decision Reuser");
-    $this->DBaccess = PLUGIN_DB_WRITE;
     $this->AgentName = REUSER_AGENT_NAME;
 
     parent::__construct();

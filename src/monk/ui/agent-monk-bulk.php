@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,72 +17,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**
- * \file agent-monk-bulk.php
- * \brief run the monk license agent in bulk clearing mode
- */
+use Fossology\Lib\Plugin\AgentPlugin;
 
-define("TITLE_agent_fomonkbulk", _("Monk Bulk License Clearing"));
-
-class agent_fomonkbulk extends FO_Plugin
+class MonkBulkAgentPlugin extends AgentPlugin
 {
-  public $AgentName;
-
-  function __construct() {
+  public function __construct() {
     $this->Name = "agent_monk_bulk";
-    $this->Title = "TITLE_agent_fomonkbulk";
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->Title =  _("Monk Bulk License Clearing");
     $this->AgentName = "monkbulk";
 
     parent::__construct();
   }
 
-  /**
-   * \brief  Register additional menus.
-   */
-  function RegisterMenus()
+  function preInstall()
   {
-    return 0; /* bulk mode does not need a menu */
+    // no AgentCheckBox
   }
-
-  /**
-   * \brief Check if the upload has already been successfully scanned.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version
-   **/
-  function AgentHasResults($upload_pk)
+  
+  function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $bulkId)
   {
-    return 0; /* bulk mode can always be run */
-  }
-
-  /**
-   * \brief Queue the monk agent.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
-   *  - It is already queued
-   *  - It has already been run by the latest agent version
-   *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * \returns
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $bulkId)
-  {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $bulkId);
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $bulkId);
   }
 }
 
-$NewPlugin = new agent_fomonkbulk();
+register_plugin(new MonkBulkAgentPlugin());
