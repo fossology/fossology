@@ -1,4 +1,6 @@
 <?php
+
+use Symfony\Component\HttpFoundation\Response;
 /***********************************************************
  Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
@@ -94,11 +96,7 @@ class ajax_upload_agents extends FO_Plugin
         $V .= "</option>\n";
       }
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print($V);
-    return;
+    return new Response($V, Response::HTTP_OK);
   }
 
 }
