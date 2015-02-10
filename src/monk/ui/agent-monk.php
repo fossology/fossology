@@ -29,7 +29,7 @@ class MonkAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($uploadId)
+  function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "monk agent", "monk_ars");
   }

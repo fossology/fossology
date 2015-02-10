@@ -29,9 +29,9 @@ class CopyrightAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($uploadId=0)
   {
-    return CheckARS($upload_pk, $this->AgentName, "copyright scanner", "copyright_ars");
+    return CheckARS($uploadId, $this->AgentName, "copyright scanner", "copyright_ars");
   }
 }
 
