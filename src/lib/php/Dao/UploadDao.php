@@ -187,7 +187,7 @@ SELECT * FROM $uploadTreeTableName
   public function getStatus($uploadId, $userId)
   {
     if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
-      $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_pk = $1", array($uploadId));
+      $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
       }

@@ -451,8 +451,8 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
       $PluginName = $Dependency;
       $DepArgs = null;
     }
-    $DepPlugin = &$Plugins[plugin_find_id($PluginName)];
-    if (!$DepPlugin)
+    $DepPlugin = &plugin_find($PluginName);
+    if ($DepPlugin !== null)
     {
       $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
       return -1;
