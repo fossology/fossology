@@ -127,21 +127,11 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
  * \param $job_pk
  * \param $upload_pk
  */
-function AgentCheckBoxDo($job_pk, $upload_pk, $additionalAgentNames = array())
+function AgentCheckBoxDo($job_pk, $upload_pk)
 {
-  global $Plugins;
   $agents = checkedAgents();
-
-  foreach($additionalAgentNames as $agentName)
-  {
-    if (!array_search($agentName, $agents) && (-1 != plugin_find_id($agentName)))
-    {
-      $agents[$agentName] = &$Plugins[$agentName];
-    }
-  }
-
   return AgentSchedule($job_pk, $upload_pk, $agents);
-} // AgentCheckBoxDo()
+}
 
 
 /**
@@ -158,7 +148,7 @@ function AgentSchedule($jobId, $uploadId, $agents)
   $errorMsg = "";
   foreach($agents as &$agent)
   {
-    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array(), array_keys($agents));
+    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
     if ($rv == -1) {
       return $errorMsg;
     }

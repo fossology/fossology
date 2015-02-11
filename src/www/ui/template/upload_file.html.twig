@@ -43,25 +43,20 @@
         </p>
       </li>
       <li>
-        ({{ 'Optional'|trans }}) {{ 'Select an already uploaded package for reuse in folder ' | trans }}
-        {% include 'elements/select-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
-        <p>
-          {{ 'Upload to reuse'|trans }}:<br/>
-          {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width: 150px;"', 5) }}
-        </p>
-      </li>
-      <li>
         <input type="radio" name="public" value="private" checked="checked"/> {{ 'Visible only for active group'| trans }}<br/>
         <input type="radio" name="public" value="protected"/> {{ 'Visible for all group'| trans }}<br/>
         <input type="radio" name="public" value="public"/> {{ 'Make Public'| trans }}<br/>
       </li>
-        {% if agentCheckBoxMake %}
-       <li>
-          {{ 'Select optional analysis'| trans }}
-          <br/>
-          {{ agentCheckBoxMake }}
-       </li>
-        {% endif %}
+      {% if agentCheckBoxMake %}
+      <li>
+        {{ 'Select optional analysis'| trans }}
+        <br/>
+        {{ agentCheckBoxMake }}
+      </li>
+      {% endif %}
+      {% for aContent in parmAgentContents %}
+        {{ aContent }}  
+      {% endfor %}
     </ol>
     {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
     <br/>
@@ -75,22 +70,7 @@
 {% block foot %}
   {{ parent() }}
   <script src="scripts/tools.js" type="text/javascript"></script>
-  <script>
-    $('#{{ reuseFolderSelectorName }}').change(function () {
-      var folderId = parseInt(this.selectedOptions[0].value);
-
-      $.getJSON("?mod={{ moduleName }}&do=getUploads&{{ folderParameterName }}=" + folderId)
-          .done(function (data) {
-            var packageForReuse = $('#{{ uploadToReuseSelectorName }}');
-            packageForReuse.empty();
-            $.each(data, function (key, value) {
-              var option = document.createElement("option");
-              option.innerHTML = value;
-              option.value = key;
-              packageForReuse.append(option);
-            });
-          })
-          .fail(failed);
-    });
-  </script>
+  {% for aFoot in parmAgentFoots %}
+    {{ aFoot }}  
+  {% endfor %}
 {% endblock %}
