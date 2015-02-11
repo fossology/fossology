@@ -18,7 +18,9 @@
 
 namespace Fossology\Lib\Plugin;
 
-abstract class AgentPlugin implements Plugin
+use Fossology\Lib\Util\Object;
+
+abstract class AgentPlugin extends Object implements Plugin
 {
   public $AgentName;
   public $Name = "agent_abstract";
@@ -70,7 +72,7 @@ abstract class AgentPlugin implements Plugin
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
    **/
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments = '')
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
     $dependencies[] = "agent_adj2nest";
     if ($this->AgentHasResults($uploadId) == 1)
@@ -99,7 +101,7 @@ abstract class AgentPlugin implements Plugin
    * *   0   Not queued, latest version of agent has previously run successfully
    * *  -1   Not queued, error, error string in $ErrorMsg
    **/
-  protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = NULL)
+  protected function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
   {
     $deps = array();
     foreach ($dependencies as $dependency)

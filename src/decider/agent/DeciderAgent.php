@@ -99,7 +99,7 @@ class DeciderAgent extends Agent
   {
     $itemTreeBounds = $item->getItemTreeBounds();
 
-    if ($this->activeRules & self::RULES_NOMOS_IN_MONK)
+    if ($this->activeRules && self::RULES_NOMOS_IN_MONK)
     {
       $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches, $lastDecision, $currentEvents);
     }
