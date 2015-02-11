@@ -29,7 +29,7 @@ class MimetypeAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($uploadId)
+  function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "mimetype agent", "mimetype_ars");
   }
