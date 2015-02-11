@@ -112,15 +112,12 @@ class UploadFilePage extends DefaultPlugin
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
     
-    $parmAgentList = menu_find("ParmAgents", $maxDepth);
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
     $vars['parmAgentContents'] = array();
     $vars['parmAgentFoots'] = array();
     foreach($parmAgentList as $parmAgent) {
-      $agent = plugin_find($parmAgent->URI);
-      if (empty($agent)) {
-        continue;
-      }
-      $vars['parmAgentContents'][] =$agent->renderContent($request, $vars);
+      $agent = plugin_find($parmAgent);
+      $vars['parmAgentContents'][] = $agent->renderContent($request, $vars);
       $vars['parmAgentFoots'][] = $agent->renderFoot($request, $vars);
     }
     
@@ -232,13 +229,12 @@ class UploadFilePage extends DefaultPlugin
     AgentSchedule($jobId, $uploadId, $checkedAgents);
 
     $errorMsg = '';
-    $parmAgentList = menu_find("ParmAgents", $maxDepth);
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $agentList = array_merge($plainAgentList, $parmAgentList);
     foreach($parmAgentList as $parmAgent) {
-      $agent = plugin_find($parmAgent->URI);
-      if (empty($agent)) {
-        continue;
-      }
-      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
+      $agent = plugin_find($parmAgent);
+      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
     }
     
     $status = GetRunnableJobList();
@@ -250,6 +246,24 @@ class UploadFilePage extends DefaultPlugin
       $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
     }
     return array(true, $message);
+  }
+  
+  
+  /**
+   * @param string $hook 'ParmAgents'|'Agents'
+   * @return array
+   */
+  protected function getAgentPluginNames($hook='Agents')
+  {
+    $agentList = menu_find($hook, $maxDepth);
+    $agentPluginNames = array();
+    foreach($agentList as $parmAgent) {
+      $agent = plugin_find_id($parmAgent->URI);
+      if (!empty($agent)) {
+        $agentPluginNames[] = $agent;
+      }
+    }
+    return $agentPluginNames;
   }
 }
 

@@ -110,8 +110,6 @@ class ReuserAgentPlugin extends DefaultPlugin
     menu_insert("ParmAgents::" . $this->title, 0, $this->name);
   }
   
-  
-
   /**
    * @param int $folderId
    * @return Upload[]

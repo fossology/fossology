@@ -17,6 +17,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Plugin\AgentPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
 include_once(__DIR__ . "/../agent/version.php");
 
@@ -32,29 +33,62 @@ class DeciderAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-
-  function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $activeRules=array())
+  
+  /**
+   * @param Request $request
+   * @return string
+   */
+  public function renderContent(Request $request, &$vars)
   {
-    $args = "";
-    foreach($activeRules as $rule)
+    $renderer = $GLOBALS['container']->get('twig.environment');
+    return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
+  }
+  
+  /**
+   * @param Request $request
+   * @return string
+   */
+  public function renderFoot(Request $request, &$vars)
+  {
+    return "";
+  }
+  
+  
+  public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request, $agentList)
+  {
+    $dependencies[] = "agent_adj2nest";
+    
+    if(in_array('agent_reuser',$dependencies))
     {
-      switch($rule)
+      $resuserAgent = plugin_find('agent_reuser');
+      $reuserJobId = $resuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
+      $dependencies[] = $reuserJobId;
+    }
+   
+    $rules = $request->get('deciderRules');
+    $args = empty($rules) ? '' : self::RULES_FLAG;
+    
+    foreach($rules as $rule)
+    {
+      if($rule=='nomosInMonk')
       {
-        case 'agent_nomos':
-          $dependencies[] = 'agent_nomos';
-          $args = $args ?: self::RULES_FLAG;
-          break;
-        case 'agent_monk':
-          $dependencies[] = 'agent_monk';
-          $args = $args ?: self::RULES_FLAG;
-          break;
-        default:
-          break;
+        $dependencies[] = 'agent_nomos';
+        $dependencies[] = 'agent_monk';
       }
     }
 
     return parent::AgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $args);
   }
+  
+  
+  /**
+   * @overwrite
+   */
+  public function preInstall()
+  {
+    menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
+  }
+
 }
 
 register_plugin(new DeciderAgentPlugin());
