@@ -33,7 +33,7 @@ std::vector<CopyrightMatch> RegexMatcher::match(const std::string& content) cons
       what.length(regexIndex)
     );
 
-    if ((results.size()==0) || !(newMatch <= (results[results.size()-1])))
+    if (results.empty() || !(newMatch <= results.back()))
     {
       results.push_back(newMatch);
     }
