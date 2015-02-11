@@ -18,6 +18,8 @@
 
 define("TITLE_user_del", _("Delete A User"));
 
+use \Fossology\Lib\Auth\Auth;
+
 /**
  * \class user_del extends FO_Plugin
  * \brief delete a user
@@ -119,7 +121,9 @@ class user_del extends FO_Plugin
     }
 
     /* Get the user list */
-    $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name";
+    global $SysConf;
+    $currentUserId = $SysConf['auth'][Auth::USER_ID];
+    $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '$currentUserId' AND user_pk != '1' ORDER BY user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
