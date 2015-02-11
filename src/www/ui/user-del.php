@@ -18,6 +18,8 @@
 
 define("TITLE_user_del", _("Delete A User"));
 
+use \Fossology\Lib\Auth\Auth;
+
 /**
  * \class user_del extends FO_Plugin
  * \brief delete a user
@@ -62,8 +64,6 @@ class user_del extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $GroupRow = pg_fetch_assoc($result);
     pg_free_result($result);
-    /* Now delete their group */
-    DeleteGroup($GroupRow['group_pk']);
 
     /* Delete all the group user members for this user_pk */
     $sql = "DELETE FROM group_user_member WHERE user_fk = '$UserId'";
@@ -77,13 +77,16 @@ class user_del extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
+    /* Now delete their group */
+    DeleteGroup($GroupRow['group_pk']);
+
     /* Make sure it was deleted */
     $sql = "SELECT * FROM users WHERE user_name = '$UserId' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $rowCount = pg_num_rows($result);
     pg_free_result($result);
-    if (!empty($row['user_name']))
+    if ($rowCount != 0)
     {
       $text = _("Failed to delete user.");
       return($text);
@@ -119,11 +122,12 @@ class user_del extends FO_Plugin
     }
 
     /* Get the user list */
-    $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name";
+    global $SysConf;
+    $currentUserId = $SysConf['auth'][Auth::USER_ID];
+    $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '$currentUserId' AND user_pk != '1' ORDER BY user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if (empty($row['user_name']))
+    if (pg_num_rows($result) == 0)
     {
       $V .= _("No users to delete.");
     }

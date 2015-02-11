@@ -28,9 +28,9 @@ class IpAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($uploadId=0)
   {
-    return CheckARS($upload_pk, $this->AgentName, "ip scanner", "ip_ars");
+    return CheckARS($uploadId, $this->AgentName, "ip scanner", "ip_ars");
   }
 }
 

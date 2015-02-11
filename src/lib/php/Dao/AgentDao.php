@@ -206,12 +206,12 @@ class AgentDao extends Object
   public function getLatestAgentResultForUpload($uploadId, $agentNames)
   {
     $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
-    
+
     $agentLatestMap = $latestScannerProxy->getNameToIdMap();
 
     return $agentLatestMap;
   }
-    
+
   /**
    * @param string $agentName
    * @return AgentRef
@@ -244,7 +244,7 @@ class AgentDao extends Object
     $this->dbManager->freeResult($res);
     return $agents;
   }
-  
+
   /**
    * @param string $scannerName
    * @param int $uploadId
@@ -263,7 +263,6 @@ class AgentDao extends Object
     $this->dbManager->freeResult($res);
     return $agents;
   }
-  
 
   /**
    * @param string[] $row
@@ -299,7 +298,7 @@ class AgentDao extends Object
     $this->dbManager->commit();
     return true;
   }
-  
+
   /**
    * @param int $agentId
    * @return string

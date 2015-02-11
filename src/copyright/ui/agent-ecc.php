@@ -28,9 +28,9 @@ class EccAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($uploadId=0)
   {
-    return CheckARS($upload_pk, $this->AgentName, "ecc scanner", "ecc_ars");
+    return CheckARS($uploadId, $this->AgentName, "ecc scanner", "ecc_ars");
   }
 }
 
