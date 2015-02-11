@@ -126,8 +126,7 @@ class user_del extends FO_Plugin
     $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '$currentUserId' AND user_pk != '1' ORDER BY user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if (empty($row['user_name']))
+    if (pg_num_rows($result) == 0)
     {
       $V .= _("No users to delete.");
     }
