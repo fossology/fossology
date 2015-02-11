@@ -17,6 +17,9 @@
  ***********************************************************/
 
 use Fossology\Lib\Plugin\AgentPlugin;
+use Fossology\Lib\Dao\PackageDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Util\StringOperation;
 
 include_once(__DIR__ . "/../agent/version.php");
 
@@ -33,6 +36,34 @@ class ReuserAgentPlugin extends AgentPlugin
   function preInstall()
   {
     // no AgentCheckBox
+  }
+  
+  /**
+   * @param int $uploadId
+   * @param int $reuseUploadId
+   * @internal description
+   */
+  public function createPackageLink($uploadId, $reuseUploadId)
+  {
+    /** @var UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    /** @var PackageDao */
+    $packageDao = $GLOBALS['container']->get('dao.package');
+    $newUpload = $uploadDao->getUpload($uploadId);
+    $uploadForReuse = $uploadDao->getUpload($reuseUploadId);
+
+    $package = $packageDao->findPackageForUpload($reuseUploadId);
+
+    if ($package === null)
+    {
+      $packageName = StringOperation::getCommonHead($uploadForReuse->getFilename(), $newUpload->getFilename());
+      $package = $packageDao->createPackage($packageName ?: $uploadForReuse->getFilename());
+      $packageDao->addUploadToPackage($reuseUploadId, $package);
+    }
+
+    $packageDao->addUploadToPackage($uploadId, $package);
+
+    $uploadDao->addReusedUpload($uploadId, $reuseUploadId);
   }
 
 }

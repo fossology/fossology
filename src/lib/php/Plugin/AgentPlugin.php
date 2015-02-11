@@ -18,7 +18,9 @@
 
 namespace Fossology\Lib\Plugin;
 
-abstract class AgentPlugin implements Plugin
+use Fossology\Lib\Util\Object;
+
+abstract class AgentPlugin extends Object implements Plugin
 {
   public $AgentName;
   public $Name = "agent_abstract";

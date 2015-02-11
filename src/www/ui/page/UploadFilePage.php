@@ -22,11 +22,9 @@ namespace Fossology\UI\Page;
 use agent_adj2nest;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Util\StringOperation;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -52,8 +50,6 @@ class UploadFilePage extends DefaultPlugin
 
   /** @var FolderDao */
   private $folderDao;
-  /** @var PackageDao */
-  private $packageDao;
   /** @var UploadDao */
   private $uploadDao;
   /** @var Logger */
@@ -70,7 +66,6 @@ class UploadFilePage extends DefaultPlugin
 
     $this->folderDao = $this->getObject('dao.folder');
     $this->uploadDao = $this->getObject('dao.upload');
-    $this->packageDao = $this->getObject('dao.package');
     $this->logger = $this->getObject('logger');
   }
 
@@ -86,7 +81,6 @@ class UploadFilePage extends DefaultPlugin
     $vars = array();
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
-    $reuseUploadId = intval($request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME));
     $ajaxMethodName = $request->get('do');
 
     if ($ajaxMethodName == "getUploads")
@@ -99,7 +93,7 @@ class UploadFilePage extends DefaultPlugin
 
       if ($uploadFile !== null && !empty($folderId))
       {
-        list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, $reuseUploadId);
+        list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description);
         $description = $successful ? null : $description;
       }
       else
@@ -177,10 +171,9 @@ class UploadFilePage extends DefaultPlugin
    * @param int $folderId
    * @param UploadedFile $uploadedFile
    * @param string $description
-   * @param int $reuseUploadId
    * @return null|string
    */
-  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description, $reuseUploadId)
+  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description)
   {
     global $MODDIR;
     global $SysConf;
@@ -251,12 +244,13 @@ class UploadFilePage extends DefaultPlugin
       global $Plugins;
       /** @var agent_adj2nest $adj2nestplugin */
       $adj2nestplugin = &$Plugins['agent_adj2nest'];
-
       $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
 
+      $reuseUploadId = intval($request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME));
       if ($reuseUploadId > 0)
       {
-        $this->createPackageLink($uploadId, $reuseUploadId);
+        $reuserAgentPlugin = plugin_find("agent_reuser");
+        $reuserAgentPlugin->createPackageLink($uploadId, $reuseUploadId);
       }
 
       AgentCheckBoxDo($jobId, $uploadId, array("agent_reuser"));
@@ -277,31 +271,6 @@ class UploadFilePage extends DefaultPlugin
       return array(false, $message);
     }
   }
-
-  /**
-   * @param int $uploadId
-   * @param int $reuseUploadId
-   */
-  private function createPackageLink($uploadId, $reuseUploadId)
-  {
-    $newUpload = $this->uploadDao->getUpload($uploadId);
-    $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
-
-    $package = $this->packageDao->findPackageForUpload($reuseUploadId);
-
-    if ($package === null)
-    {
-      $packageName = StringOperation::getCommonHead($uploadForReuse->getFilename(), $newUpload->getFilename());
-      $package = $this->packageDao->createPackage($packageName ?: $uploadForReuse->getFilename());
-      $this->packageDao->addUploadToPackage($reuseUploadId, $package);
-    }
-
-    $this->packageDao->addUploadToPackage($uploadId, $package);
-
-    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId);
-
-  }
-
 }
 
 register_plugin(new UploadFilePage());
