@@ -869,6 +869,7 @@ int fo_RepImport(char* Source, char* Type, char* Filename, int Link)
           fclose(Fout);
           fo_RepFclose(Fout);
           fo_RepRemove(Type, Filename);
+          fclose(Fin);
           fprintf(stderr, "ERROR: Write failed -- type='%s' filename='%s'\n",
             Type, Filename);
           return (3);

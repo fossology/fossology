@@ -21,7 +21,7 @@ namespace fo
   {
   public:
     File(unsigned long id, const char* fileName);
-    File(unsigned long id, const std::string fileName);
+    File(unsigned long id, std::string const& fileName);
 
     unsigned long getId() const;
     std::string getContent(const unsigned long int maximumBytes = 1 << 20) const;
@@ -33,7 +33,7 @@ namespace fo
   };
 
   std::string getStringFromFile(const char* filename, const unsigned long int maximumBytes = 1 << 20);
-  std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes = 1 << 20);
+  std::string getStringFromFile(std::string const& filename, const unsigned long int maximumBytes = 1 << 20);
 }
 
 #endif /* FILES_HPP_ */
