@@ -851,7 +851,7 @@ addparaheading(createnumsection(body,"0","2"),NULL, "Other Licenses","0","2");
 rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
 table_addRow(tableOthers, "license", "text", "files");
 {
-  char* json = getClearedLicenses(uploadId, user_pk);
+  char* json = getClearedLicenses(uploadId, groupId);
   fillTableFromJson(tableOthers, json);
   g_free(json);
 }
