@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ class TestLiteDbTest extends \PHPUnit_Framework_TestCase
   
   public function testInsertData()
   {
-    $testDb = new TestPgDb();
+    $testDb = new TestLiteDb();
     $testDb->createPlainTables(array('perm_upload'));
     $testDb->insertData(array('perm_upload'));
     $tag1 = $testDb->getDbManager()->getSingleRow('select perm from perm_upload where perm_upload_pk=1');
