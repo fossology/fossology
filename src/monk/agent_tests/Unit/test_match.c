@@ -16,12 +16,15 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "license.h"
 
+static char* const testFileName = (char*) 0x34;
+
 File* getFileWithText(const char* text) {
   char* fileText = g_strdup(text);
 
   File* result = malloc(sizeof(File));
   result->id = 42;
   result->tokens = tokenize(fileText, "^");
+  result->fileName = testFileName;
   g_free(fileText);
 
   return result;
@@ -380,6 +383,137 @@ void test_filterMatchesWithBadGroupingAtFirstPass() {
   }
 }
 
+
+MonkState* testState = (MonkState*) 0x17;
+
+int expectOnAll;
+int onAll(MonkState* state, File* file, GArray* matches) {
+  CU_ASSERT_PTR_NOT_NULL(matches);
+  CU_ASSERT_EQUAL(state, testState);
+  CU_ASSERT_EQUAL(file->fileName, testFileName);
+  CU_ASSERT_TRUE(expectOnAll);
+  return 1;
+};
+
+int expectOnNo;
+int onNo(MonkState* state, File* file) {
+  CU_ASSERT_EQUAL(state, testState);
+  CU_ASSERT_EQUAL(file->fileName, testFileName);
+  CU_ASSERT_TRUE(expectOnNo);
+  return 1;
+};
+
+int expectOnFull;
+int onFull(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+  CU_ASSERT_PTR_NOT_NULL(license);
+  CU_ASSERT_PTR_NOT_NULL(matchInfo);
+  CU_ASSERT_EQUAL(state, testState);
+  CU_ASSERT_EQUAL(file->fileName, testFileName);
+  CU_ASSERT_TRUE(expectOnFull);
+  return 1;
+}
+
+int expectOnDiff;
+int onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+  CU_ASSERT_PTR_NOT_NULL(license);
+  CU_ASSERT_PTR_NOT_NULL(diffResult);
+  CU_ASSERT_EQUAL(state, testState);
+  CU_ASSERT_EQUAL(file->fileName, testFileName);
+  CU_ASSERT_TRUE(expectOnDiff);
+  return 1;
+}
+
+int doIgnore;
+
+int ignore(MonkState* state, File* file) {
+  CU_ASSERT_EQUAL(state, testState);
+  CU_ASSERT_EQUAL(file->fileName, testFileName);
+  return doIgnore;
+};
+
+
+void doProcessTest(MatchCallbacks* expectedCallbacks)
+{
+  File* file = getFileWithText("^e^a^b^c^d^e");
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "d");
+
+  GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
+
+  processMatches(testState, file, matches, expectedCallbacks);
+
+  matchesArray_free(matches);
+  file_free(file);
+  licenses_free(licenses);
+}
+
+void test_processMatchesIgnores() {
+  doIgnore = 1;
+  expectOnAll = 0;
+  expectOnDiff = 0;
+  expectOnFull = 0;
+  expectOnNo = 0;
+  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+
+  doProcessTest(&expectedCallbacks);
+}
+
+void test_processMatchesUsesOnAllIfDefined() {
+  doIgnore = 0;
+  expectOnAll = 1;
+  expectOnDiff = 0;
+  expectOnFull = 0;
+  expectOnNo = 0;
+  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+
+  doProcessTest(&expectedCallbacks);
+}
+
+void test_processMatchesUsesOnFullIfOnAllNotDefined() {
+  doIgnore = 0;
+  expectOnAll = 0;
+  expectOnDiff = 0;
+  expectOnFull = 1;
+  expectOnNo = 0;
+  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+
+  doProcessTest(&expectedCallbacks);
+}
+
+void test_processMatchesUsesOnNoOnNoMatches() {
+  doIgnore = 0;
+  expectOnAll = 0;
+  expectOnDiff = 0;
+  expectOnFull = 0;
+  expectOnNo = 1;
+  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+
+  GArray* matches = g_array_new(FALSE, FALSE, 1);
+
+  File* file = getFileWithText("^e^a^b^c^d^e");
+  processMatches(testState, file, matches, &expectedCallbacks);
+
+  file_free(file);
+  g_array_free(matches, TRUE);
+}
+
+void test_processMatchesUsesOnAllForNoMatches() {
+  doIgnore = 0;
+  expectOnAll = 1;
+  expectOnDiff = 0;
+  expectOnFull = 0;
+  expectOnNo = 0;
+  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+
+  GArray* matches = g_array_new(FALSE, FALSE, 1);
+
+  File* file = getFileWithText("^e^a^b^c^d^e");
+  processMatches(testState, file, matches, &expectedCallbacks);
+
+  file_free(file);
+  g_array_free(matches, TRUE);
+}
+
+
 CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with disjoint full matches:", test_findAllMatchesDisjoint},
   {"Testing match of all licenses with diff at beginning", test_findDiffsAtBeginning},
@@ -395,5 +529,10 @@ CU_TestInfo match_testcases[] = {
   {"Testing filtering matches with a full match:", test_filterMatches2},
   {"Testing filtering matches with two groups:", test_filterMatchesWithTwoGroups},
   {"Testing filtering matches with bad grouping at first pass:", test_filterMatchesWithBadGroupingAtFirstPass},
+  {"Testing matches processor does nothing if ignore callback is true:", test_processMatchesIgnores},
+  {"Testing matches processor uses on all if defined:", test_processMatchesUsesOnAllIfDefined},
+  {"Testing matches processor uses on full if on all not defined:", test_processMatchesUsesOnFullIfOnAllNotDefined},
+  {"Testing matches processor uses on no if no matches:", test_processMatchesUsesOnNoOnNoMatches},
+  {"Testing matches processor uses on all if defined and no matches:", test_processMatchesUsesOnAllForNoMatches},
   CU_TEST_INFO_NULL
 };
