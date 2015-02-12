@@ -86,7 +86,7 @@ class DeciderAgent extends Agent
       $itemTreeBounds = $item->getItemTreeBounds();
       $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
       $matches = $this->remapByProjectedId($matches);
-      
+
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 

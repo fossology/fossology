@@ -29,11 +29,11 @@ class PkgAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($uploadId)
+  function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "package meta data scanner", "pkgagent_ars");
   }
-  
+
   function preInstall()
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
@@ -44,7 +44,7 @@ class PkgAgentPlugin extends AgentPlugin
     }
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
   }
-  
+
 }
 
 register_plugin(new PkgAgentPlugin());

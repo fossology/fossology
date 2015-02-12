@@ -56,16 +56,16 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadDao;
   /** @var HighlightDao */
   private $highlightDao;
-  
+
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
-  
+
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("deciderSched".time());
+    $this->testDb = new TestPgDb("deciderJobSched".time());
     $this->dbManager = $this->testDb->getDbManager();
     $logger = M::mock('Monolog\Logger');
 

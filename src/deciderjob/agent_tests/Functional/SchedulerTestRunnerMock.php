@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\DeciderJob\Test;
 
-use Fossology\Decider\DeciderJobAgent;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
@@ -109,5 +108,5 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     return array(true, $output, $exitval);
   }
-  
+
 }
