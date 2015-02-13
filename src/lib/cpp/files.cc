@@ -49,7 +49,7 @@ namespace fo
   }
 
 
-  std::string getStringFromFile(std::string filename, const unsigned long int maximumBytes)
+  std::string getStringFromFile(std::string const& filename, const unsigned long int maximumBytes)
   {
     return getStringFromFile(filename.c_str(), maximumBytes);
   };
@@ -68,7 +68,7 @@ namespace fo
   {
   }
 
-  File::File(unsigned long id, const std::string fileName) : id(id), fileName(fileName)
+  File::File(unsigned long id, std::string const& fileName) : id(id), fileName(fileName)
   {
   }
 

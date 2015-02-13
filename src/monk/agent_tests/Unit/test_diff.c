@@ -417,8 +417,8 @@ void test_lookForReplacesNotOverflowing() {
   CU_ASSERT_FALSE(lookForDiff(textTokens, searchTokens,
                               0, 0, max, 1, &result));
 
-  g_free(testText);
-  g_free(testSearch);
+  free(testText);
+  free(testSearch);
 }
 
 int _test_lookForReplaces(char* text, char* search,

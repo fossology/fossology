@@ -39,7 +39,7 @@ void test_ignoreLicense_withGoodLicenseBranch2() {
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
 
   g_array_free(notIgnored.tokens, TRUE);
-  free(text_ptr);
+  g_free(text_ptr);
 }
 
 void test_ignoreLicense_withNomosLicense() {
