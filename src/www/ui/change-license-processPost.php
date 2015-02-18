@@ -87,7 +87,7 @@ class changeLicenseProcessPost extends FO_Plugin
     {
       return $this->errorJson("bad item id");
     }
-    
+
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
     $decisionMark = $_POST['decisionMark'];
@@ -103,10 +103,10 @@ class changeLicenseProcessPost extends FO_Plugin
       }
       return $this->errorJson($errMsg,$errMsg);
     }
-    
-    return doEdit($userId,$groupId,$itemId);
+
+    return $this->doEdit($userId,$groupId,$itemId);
   }
-  
+
   function doEdit($userId,$groupId,$itemId)
   {
     $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
