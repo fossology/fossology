@@ -28,7 +28,7 @@ typedef struct {
   unsigned int time;
 } point;
 
-int pointSorter(const gconstpointer a, gconstpointer b) {
+gint pointSorter(gconstpointer a, gconstpointer b) {
   unsigned int aTime = ((const point *) a)->time;
   unsigned int bTime = ((const point *) b)->time;
   if (aTime > bTime)
@@ -53,8 +53,8 @@ void circleVisit(unsigned int timeOfVisit[SIZE][SIZE]) {
 
 GArray* generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
   GArray* visitor = g_array_new(TRUE, FALSE, sizeof(point));
-  for (int i = 0; i < SIZE; i++)
-    for (int j = 0; j < SIZE; j++) {
+  for (unsigned  int i = 0; i < SIZE; i++)
+    for (unsigned int j = 0; j < SIZE; j++) {
       point p;
       p.x = i;
       p.y = j;
