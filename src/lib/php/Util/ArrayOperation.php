@@ -62,8 +62,7 @@ class ArrayOperation extends Object
     }
     return $result;
   }
-  
-  
+
   public static function multiSearch($needles,$haystack){
     foreach($needles as $needle){
       $index = array_search($needle, $haystack);
