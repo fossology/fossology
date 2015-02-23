@@ -36,7 +36,8 @@ include_once(__DIR__ . "/version.php");
 class DeciderAgent extends Agent
 {
   const RULES_NOMOS_IN_MONK = 0x1;
-  const RULES_ALL = self::RULES_NOMOS_IN_MONK;
+  const RULES_NOMOS_MONK_NINKA = 0x2;
+  const RULES_ALL = 0x3; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA -> feature not available in php5.3
 
   /** @var int */
   private $activeRules;
@@ -71,7 +72,7 @@ class DeciderAgent extends Agent
   {
     parent::scheduler_connect();
     $args = getopt($this->schedulerHandledOpts."r:", $this->schedulerHandledLongOpts);
-    $this->activeRules = array_key_exists('r', $args) ? $args['r'] : self::RULES_ALL;
+    $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
 
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
   }
@@ -90,26 +91,68 @@ class DeciderAgent extends Agent
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
 
-      $this->processItem($item, $matches, $lastDecision, $currentEvents);
+      if (null!==$lastDecision || 0<count($currentEvents))
+      {
+        $this->heartbeat(0);
+        continue;
+      }
+      $this->processItem($item, $matches);
     }
     return true;
   }
 
-  private function processItem(Item $item, $matches, $lastDecision, $currentEvents)
+  private function processItem(Item $item, $matches)
   {
     $itemTreeBounds = $item->getItemTreeBounds();
-
-    if ($this->activeRules && self::RULES_NOMOS_IN_MONK)
+    $heartbeat = 0;
+    
+    if ($this->activeRules&self::RULES_NOMOS_IN_MONK == self::RULES_NOMOS_IN_MONK)
     {
-      $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches, $lastDecision, $currentEvents);
+      $heartbeat = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
     }
+    
+    if (!$heartbeat && $this->activeRules&self::RULES_NOMOS_MONK_NINKA == self::RULES_NOMOS_MONK_NINKA)
+    {
+      $heartbeat = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
+    }
+    
+    $this->heartbeat($heartbeat);
   }
 
-  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches, $lastDecision, $currentEvents)
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param type $matches
+   * @return int $heatbeat (1=made decision)
+   */
+  private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches)
   {
     $canDecide = (count($matches)>0);
-    $canDecide &= null === $lastDecision;
-    $canDecide &= 0 == count($currentEvents);
+
+    foreach($matches as $licenseMatches)
+    {
+      if (!$canDecide) // &= is not lazy
+      {
+        break;
+      }
+      $canDecide &= $this->areNomosMonkNinkaAgreed($licenseMatches);
+    }
+
+    if ($canDecide)
+    {
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+    }
+    return $canDecide ? 1 : 0;
+  }
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param type $matches
+   * @return int $heatbeat (1=made decision)
+   */
+  private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches)
+  {
+    $canDecide = (count($matches)>0);
 
     foreach($matches as $licenseMatches)
     {
@@ -118,18 +161,13 @@ class DeciderAgent extends Agent
         break;
       }
       $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
-
     }
 
     if ($canDecide)
     {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
-      $this->heartbeat(1);
     }
-    else
-    {
-      $this->heartbeat(0);
-    }
+    return $canDecide ? 1 : 0;
   }
 
   protected function remapByProjectedId($matches)
@@ -199,4 +237,36 @@ class DeciderAgent extends Agent
 
     return true;
   }
+
+  /**
+   * @param LicenseMatch[][] $licenseMatches
+   * @return boolean
+   */
+  protected function areNomosMonkNinkaAgreed($licenseMatches)
+  {
+    $scanners = array('nomos','monk','ninka');
+    $vote = array();
+    foreach ($scanners as $scanner)
+    {
+      if (!array_key_exists($scanner, $licenseMatches))
+      {
+        return false;
+      }
+      foreach($licenseMatches[$scanner] as $licenseMatch)
+      {
+        $licId = $licenseMatch->getLicenseId();
+        $vote[$licId][$scanner] = true;
+      }
+    }
+    
+    foreach($vote as $licId=>$voters)
+    {
+      if (count($voters) != 3)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

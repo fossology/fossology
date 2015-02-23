@@ -20,6 +20,7 @@ namespace Fossology\Decider;
 
 use Fossology\Lib\Data\LicenseMatch;
 use Mockery as M;
+use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\AgentDao;
@@ -147,6 +148,50 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $licenseMatch->shouldReceive("getLicenseFileId")->withNoArgs()->andReturn($matchId);
     return $licenseMatch;
   }
+  
+  public function testAreNomosMonkNinkaAgreed_notIfOnlyTwoOfThem()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licId = 401;
+    $licenseMatches = array('monk'=>array($this->createLicenseMatchWithLicId($licId)),
+            'nomos'=>array($this->createLicenseMatchWithLicId($licId)));
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areNomosMonkNinkaAgreed', array($licenseMatches));
+    assertThat($agree, equalTo(false) );
+  }
+  
+  public function testAreNomosMonkNinkaAgreed_alsoMultiMatch()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licId = 401;
+    $licenseMatches = array('monk'=>array($this->createLicenseMatchWithLicId($licId)),
+            'nomos'=>array($this->createLicenseMatchWithLicId($licId),$this->createLicenseMatchWithLicId($licId)),
+            'ninka'=>array($this->createLicenseMatchWithLicId($licId)));
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areNomosMonkNinkaAgreed', array($licenseMatches));
+    assertThat($agree, equalTo(true) );
+  }
 
+  
+  public function testAreNomosMonkNinkaAgreed_notIfAnyOther()
+  {
+    $deciderAgent = new DeciderAgent();
+    $licId = 401;
+    $otherLicId = 402;
+    $licenseMatches = array('monk'=>array($this->createLicenseMatchWithLicId($licId)),
+            'nomos'=>array($this->createLicenseMatchWithLicId($licId),$this->createLicenseMatchWithLicId($otherLicId)),
+            'ninka'=>array($this->createLicenseMatchWithLicId($licId)));
+    $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areNomosMonkNinkaAgreed', array($licenseMatches));
+    assertThat($agree, equalTo(false) );
+  }
+  
+  /**
+   * @return M\MockInterface
+   */
+  protected function createLicenseMatchWithLicId($licId)
+  {
+    $licenseMatch = M::mock(LicenseMatch::classname());
+    $licenseMatch->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
+    return $licenseMatch;
+  }
+  
 }
  

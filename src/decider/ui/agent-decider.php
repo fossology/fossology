@@ -66,18 +66,27 @@ class DeciderAgentPlugin extends AgentPlugin
     }
    
     $rules = $request->get('deciderRules');
-    $args = empty($rules) ? '' : self::RULES_FLAG;
+    $rulebits = 0;
     
     foreach($rules as $rule)
     {
-      if($rule=='nomosInMonk')
-      {
-        $dependencies[] = 'agent_nomos';
-        $dependencies[] = 'agent_monk';
+      switch ($rule) {
+        case 'nomosInMonk':
+          $dependencies[] = 'agent_nomos';
+          $dependencies[] = 'agent_monk';
+          $rulebits |= 0x1;
+          break;
+        case 'nomosMonkNinka':
+          $dependencies[] = 'agent_nomos';
+          $dependencies[] = 'agent_monk';
+          $dependencies[] = 'agent_ninka';
+          $rulebits |= 0x2;
+          break;
       }
     }
-
-    return parent::AgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $args);
+    
+    $args = empty($rulebits) ? '' : self::RULES_FLAG.$rulebits;
+    return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies), $args);
   }
   
   
