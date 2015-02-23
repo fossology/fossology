@@ -90,7 +90,7 @@ class changeLicenseProcessPost extends FO_Plugin
 
     $userId = $_SESSION['UserId'];
     $groupId = $_SESSION['GroupId'];
-    $decisionMark = $_POST['decisionMark'];
+    $decisionMark = @$_POST['decisionMark'];
     if(!empty($decisionMark))
     {
       $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);

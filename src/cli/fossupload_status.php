@@ -56,7 +56,7 @@ if (array_key_exists("username", $opts)) {
 }
 
 if (array_key_exists("groupname", $opts)) {
-  $user = $opts["groupname"];
+  $group = $opts["groupname"];
 }
 
 $passwd = null;
