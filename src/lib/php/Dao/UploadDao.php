@@ -50,11 +50,11 @@ class UploadDao extends Object
    * @param UploadTreeProxy $uploadTreeView
    * @return Item
    */
-  public function getUploadEntryFromView($itemId, UploadTreeProxy $uploadTreeView)
+  protected function getUploadEntryFromView($itemId, UploadTreeProxy $uploadTreeView)
   {
-    $uploadTreeViewQuery = $uploadTreeView->asCTE();
-    $stmt = __METHOD__ . ".$uploadTreeViewQuery";
-    $uploadEntry = $this->dbManager->getSingleRow("$uploadTreeViewQuery SELECT * FROM UploadTreeView WHERE uploadtree_pk = $1",
+    $uploadTreeViewName = $uploadTreeView->getDbViewName();
+    $stmt = __METHOD__ . ".$uploadTreeViewName";
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeViewName WHERE uploadtree_pk = $1",
         array($itemId), $stmt);
 
     return $uploadEntry ? $this->createItem($uploadEntry, $uploadTreeView->getUploadTreeTableName()) : null;
@@ -129,8 +129,7 @@ class UploadDao extends Object
     $parameters = array();
     $uploadCondition = $this->handleUploadIdForTable($uploadTreeTableName, $uploadId, $parameters);
 
-    $uploadEntryData = $this->dbManager->getSingleRow("
-SELECT * FROM $uploadTreeTableName
+    $uploadEntryData = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName
         WHERE parent IS NULL
               $uploadCondition
           ",
@@ -259,7 +258,7 @@ SELECT * FROM $uploadTreeTableName
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
-
+    $uploadTreeView->materialize();
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
     $enterFolders = $direction == self::DIR_FWD;
@@ -269,6 +268,7 @@ SELECT * FROM $uploadTreeTableName
 
       if ($nextItem !== null)
       {
+        $uploadTreeView->unmaterialize();
         return $nextItem;
       }
 
@@ -276,8 +276,10 @@ SELECT * FROM $uploadTreeTableName
       {
         $item = $this->getUploadEntryFromView($item->getParentId(), $uploadTreeView);
         $enterFolders = false;
-      } else
+      }
+      else
       {
+        $uploadTreeView->unmaterialize();
         return self::NOT_FOUND;
       }
     }
@@ -356,22 +358,17 @@ SELECT * FROM $uploadTreeTableName
     if ($item->getParentId() === null)
     {
       return 0;
-    } else
-    {
-      $uploadTreeViewQuery = $uploadTreeView->asCTE();
-
-      $sql = "$uploadTreeViewQuery
-    select row_number from (
-      select
-        row_number() over (order by ufile_name),
-        uploadtree_pk
-      from uploadTreeView where parent=$1
-    ) as index where uploadtree_pk=$2";
-
-      $result = $this->dbManager->getSingleRow($sql, array($item->getParentId(), $item->getId()), __METHOD__ . "_current_offset" . $uploadTreeViewQuery);
-
-      return intval($result['row_number']) - 1;
     }
+    
+    $uploadTreeViewName = $uploadTreeView->getDbViewName();
+    $sql = "SELECT row_number FROM (
+    SELECT row_number() over (order by ufile_name), uploadtree_pk
+    FROM $uploadTreeViewName WHERE parent=$1
+  ) as index WHERE uploadtree_pk=$2";
+
+    $result = $this->dbManager->getSingleRow($sql, array($item->getParentId(), $item->getId()), __METHOD__ . "_current_offset" . $uploadTreeViewName);
+
+    return intval($result['row_number']) - 1;
   }
 
   /**
@@ -384,14 +381,12 @@ SELECT * FROM $uploadTreeTableName
     if ($parent === null)
     {
       return 1;
-    } else
-    {
-      $uploadTreeViewQuery = $uploadTreeView->asCTE();
-      $result = $this->dbManager->getSingleRow("$uploadTreeViewQuery
-                      select count(*) from uploadTreeView where parent=$1",
-          array($parent), __METHOD__ . "_current_count");
-      return intval($result['count']);
     }
+   
+    $uploadTreeViewName = $uploadTreeView->getDbViewName();
+    $result = $this->dbManager->getSingleRow("SELECT count(*) FROM $uploadTreeViewName WHERE parent=$1",
+        array($parent), __METHOD__ . "_current_count");
+    return intval($result['count']);
   }
 
   /**
@@ -407,17 +402,11 @@ SELECT * FROM $uploadTreeTableName
     {
       return null;
     }
-    $uploadTreeViewQuery = $uploadTreeView->asCTE();
-
+    
+    $uploadTreeViewName = $uploadTreeView->getDbViewName();
     $statementName = __METHOD__;
-    $theQuery = "$uploadTreeViewQuery
-      SELECT *
-        from uploadTreeView
-        where parent=$1
-        order by ufile_name offset $2 limit 1";
-
-    $newItemResult = $this->dbManager->getSingleRow($theQuery
-        , array($parent, $targetOffset), $statementName);
+    $theQuery = "SELECT * FROM $uploadTreeViewName WHERE parent=$1 ORDER BY ufile_name OFFSET $2 LIMIT 1";
+    $newItemResult = $this->dbManager->getSingleRow($theQuery, array($parent, $targetOffset), $statementName);
 
     return $newItemResult ? $this->createItem($newItemResult, $uploadTreeView->getUploadTreeTableName()) : null;
   }
