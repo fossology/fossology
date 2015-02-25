@@ -298,7 +298,7 @@ SELECT * FROM $uploadTreeTableName
       $this->logger->debug("findNextItem() not found ");
       return self::NOT_FOUND;
     }
-
+    
     $enterItem = $item->isContainer() && $enterFolders;
 
     $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;

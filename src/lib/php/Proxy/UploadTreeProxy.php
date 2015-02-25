@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -99,24 +99,36 @@ class UploadTreeProxy extends DbViewProxy
     $additionalCondition = array_key_exists(self::OPT_ITEM_FILTER, $options) ? $options[self::OPT_ITEM_FILTER] : '';
     $skipThese = array_key_exists(self::OPT_SKIP_THESE,$options) ? $options[self::OPT_SKIP_THESE] : 'none';
     $groupId = array_key_exists(self::OPT_GROUP_ID, $options) ? $options[self::OPT_GROUP_ID] : null;
+    $agentFilter = '';
     switch ($skipThese)
     {
       case "none":
         break;
+      
       case "noLicense":
       case "alreadyCleared":
+        
+        $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
+        $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+        $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+        $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
+     
       case "noCopyright":
       case "noIp":
       case "noEcc":
 
-        $queryCondition = self::getQueryCondition($skipThese, $groupId);
-        $sql_upload = ('uploadtree_a' == $uploadTreeTableName) ? "ut.upload_fk=$uploadId AND " : '';
-        $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut
-                           WHERE $sql_upload $queryCondition $additionalCondition";
-        return $uploadTreeView;
+        $queryCondition = self::getQueryCondition($skipThese, $groupId, $agentFilter)." ".$additionalCondition;
+        if ('uploadtree_a' == $uploadTreeTableName)
+        {
+          $queryCondition = "ut.upload_fk=$uploadId AND ($queryCondition)";
+        }
+        $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut WHERE $queryCondition";
+        break;
+        
+      default:
+        $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
     }
-    //default case, if cookie is not set or set to none
-    $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+
     return $uploadTreeView;
   }
 
@@ -124,9 +136,9 @@ class UploadTreeProxy extends DbViewProxy
    * @param $skipThese
    * @return string
    */
-  private static function getQueryCondition($skipThese, $groupId = null)
+  private static function getQueryCondition($skipThese, $groupId = null, $agentFilter='')
   {
-    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk)
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk $agentFilter)
         OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese)
