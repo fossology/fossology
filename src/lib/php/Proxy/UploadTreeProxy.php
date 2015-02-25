@@ -102,9 +102,6 @@ class UploadTreeProxy extends DbViewProxy
     $agentFilter = '';
     switch ($skipThese)
     {
-      case "none":
-        break;
-      
       case "noLicense":
       case "alreadyCleared":
         
@@ -124,7 +121,8 @@ class UploadTreeProxy extends DbViewProxy
         }
         $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut WHERE $queryCondition";
         break;
-        
+
+      case "none":
       default:
         $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
     }
