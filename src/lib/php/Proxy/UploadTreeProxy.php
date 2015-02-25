@@ -162,7 +162,7 @@ class UploadTreeProxy extends DbViewProxy
   {
     global $container;
     $dbManager = $container->get('db.manager');
-        $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
+    $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
             . $this->getDbViewName() ." v where u.upload_fk=$1"
             . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
     $stmt = __METHOD__.'.'.$this->getDbViewName();
@@ -220,6 +220,25 @@ class UploadTreeProxy extends DbViewProxy
     }
     $dbManager->freeResult($res);
     return $descendants;
+  }
+  
+  /**
+   * @return int
+   */
+  public function count()
+  {
+    global $container;
+    $dbManager = $container->get('db.manager');
+    if($this->materialized)
+    {
+      $sql = "SELECT count(*) FROM $this->dbViewName";
+    }
+    else
+    {
+      $sql = "SELECT count(*) FROM ($this->dbViewQuery) $this->dbViewName";
+    }
+    $summary = $dbManager->getSingleRow($sql,array(),$this->dbViewName);
+    return $summary['count'];
   }
   
 }

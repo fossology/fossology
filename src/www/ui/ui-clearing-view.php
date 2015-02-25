@@ -17,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentDao;
@@ -29,9 +30,9 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
-use Fossology\Lib\Auth\Auth;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -296,6 +297,21 @@ class ClearingView extends FO_Plugin
     $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
 
+    $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
+    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>"noLicense", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+    $uploadTreeTableName,
+    $viewName = 'no_license_uploadtree' . $uploadId);
+    $filesOfInterest = $noLicenseUploadTreeView->count();
+    
+    $nonClearedUploadTreeView = new UploadTreeProxy($uploadId,
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+        $uploadTreeTableName,
+        $viewName = 'already_cleared_uploadtree' . $uploadId);
+    $filesToBeCleared = $nonClearedUploadTreeView->count();
+    
+    $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
+    $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
+    
     return $this->render("ui-clearing-view.html.twig");
   }
 

@@ -28,6 +28,9 @@ function initializeOption(myvalue) {
 }
 
 function setOptionOnChange(name) {
+  $('#next').prop('disabled', true);
+  $('#prev').prop('disabled', true);
+  
   setOption(name, $('input[name=FileSelection]:radio:checked').val());
 
   var uploadId = $('#upload').val();
@@ -63,7 +66,6 @@ function setNextPrev(uploadId, uploadTreeId) {
             }
           })
           .fail(failed);
-
 }
 
 $(document).ready(function () {
