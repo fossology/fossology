@@ -386,9 +386,12 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 
   /* check if the upload_pk is currently in the job queue being processed when agent name is ununpack or adj2nest */
   /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
-  if ($AgentName == "ununpack" || $AgentName == "adj2nest") {
+  if ($AgentName == "ununpack")
+  {
     $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
-  } else {
+  }
+  else
+  {
     /* check if the upload_pk is currently in the job queue being processed */
     $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_pk=$job_pk";
   }

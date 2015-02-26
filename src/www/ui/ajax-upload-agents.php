@@ -79,7 +79,7 @@ class ajax_upload_agents extends FO_Plugin
       return;
     }
     $agent_list = menu_find("Agents", $depth=0);
-    $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+    $Skip = array("agent_unpack", "wget_agent");
     $V="";
     global $Plugins;
     for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
