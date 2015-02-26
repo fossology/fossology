@@ -45,20 +45,6 @@ class UploadDao extends Object
     $this->logger = $logger;
   }
 
-  /**
-   * @param int $itemId
-   * @param UploadTreeProxy $uploadTreeView
-   * @return Item
-   */
-  protected function getUploadEntryFromView($itemId, UploadTreeProxy $uploadTreeView)
-  {
-    $uploadTreeViewName = $uploadTreeView->getDbViewName();
-    $stmt = __METHOD__ . ".$uploadTreeViewName";
-    $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeViewName WHERE uploadtree_pk = $1",
-        array($itemId), $stmt);
-
-    return $uploadEntry ? $this->createItem($uploadEntry, $uploadTreeView->getUploadTreeTableName()) : null;
-  }
 
   /**
    * @param $uploadTreeId
@@ -252,7 +238,6 @@ class UploadDao extends Object
    * @param $itemId
    * @param $direction
    * @return Item|null
-   * @todo join both directions to avoid doubled queries 
    */
   public function getItemByDirection($uploadId, $itemId, $direction, $options)
   {
@@ -260,22 +245,25 @@ class UploadDao extends Object
     $originItem = $this->getUploadEntry($itemId, $uploadTreeTableName);
     $originLft = $originItem['lft'];
 
-    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (1<<29) = 0";  
-    $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
-    $uploadTreeViewName = $uploadTreeView->getDbViewName();
-    $statementName = __METHOD__ . ".$uploadTreeViewName.";
-    $query = $uploadTreeView->asCte()." SELECT * FROM $uploadTreeViewName WHERE lft";
+    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (1<<29) = 0";
+    $uploadTreeViewName = 'items2care';
     
     if($direction == self::DIR_FWD)
     {
-      $statementName .= 'fwd';
-      $query .= ">$1 ORDER BY lft ASC";
+      $uploadTreeViewName .= 'fwd';
+      $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft>$1";
+      $order = 'ASC';
     }
     else
     {
-      $statementName .= 'bwd';
-      $query .= "<$1 ORDER BY lft DESC";
+      $uploadTreeViewName .= 'bwd';
+      $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft<$1";
+      $order = 'DESC';
     }
+    
+    $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName);
+    $statementName = __METHOD__ . ".$uploadTreeViewName.";
+    $query = $uploadTreeView->getDbViewQuery()." ORDER BY lft $order";
 
     $newItemRow = $this->dbManager->getSingleRow("$query LIMIT 1", array($originLft), $statementName);
     if ($newItemRow)
@@ -288,176 +276,6 @@ class UploadDao extends Object
     }
   }
   
-  
-  
-  /**
-   * @param $uploadId
-   * @param $itemId
-   * @param $direction
-   * @return Item|null
-   * @deprecated
-   */
-  public function getItemByDirectionRecursive($uploadId, $itemId, $direction, $options)
-  {
-    $this->logger->debug("getItemByDirection(" . $uploadId . ", " . $itemId . ", " . $direction . ", " . print_r($options, true) . ")");
-    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
-    $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
-    $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
-    $uploadTreeView->materialize();
-    
-    
-    $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
-
-    $enterFolders = $direction == self::DIR_FWD;
-    while (true)
-    {
-      $nextItem = $this->findNextItem($item, $direction, $uploadTreeView, $enterFolders);
-
-      if ($nextItem !== null)
-      {
-        $uploadTreeView->unmaterialize();
-        return $nextItem;
-      }
-
-      if ($item->hasParent())
-      {
-        $item = $this->getUploadEntryFromView($item->getParentId(), $uploadTreeView);
-        $enterFolders = false;
-      }
-      else
-      {
-        $uploadTreeView->unmaterialize();
-        return self::NOT_FOUND;
-      }
-    }
-  }
-
-  /**
-   * @param Item $item
-   * @param $direction
-   * @param UploadTreeProxy $uploadTreeView
-   * @param bool $enterFolders
-   * @return Item|null
-   */
-  protected function findNextItem(Item $item, $direction, UploadTreeProxy $uploadTreeView, $enterFolders = true)
-  {
-    $this->logger->debug("findNextItem(" . $item->getFileName() . " " . $item->getFileId() . ", " . $direction . ", enter=" . $enterFolders . ")");
-    if ($item->getParentId() === null && $direction !== self::DIR_FWD)
-    {
-      $this->logger->debug("findNextItem() not found ");
-      return self::NOT_FOUND;
-    }
-    
-    $enterItem = $item->isContainer() && $enterFolders;
-
-    $indexIncrement = $direction == self::DIR_FWD ? 1 : -1;
-
-    $parent = $item->getParentId();
-    $parentSize = $this->getParentSize($parent, $uploadTreeView);
-    $targetIndex = $this->getItemIndex($item, $uploadTreeView);
-
-    /** @var null|Item $nextItem */
-    $nextItem = null;
-    $firstIteration = true;
-    while (($targetIndex >= 0 && $targetIndex < $parentSize))
-    {
-      if ($firstIteration)
-      {
-        $firstIteration = false;
-        if ($enterItem)
-        {
-          $nextItem = $this->getNewItemByIndex(
-              $item->getId(),
-              $direction == self::DIR_FWD ? 0 : $this->getParentSize($item->getId(), $uploadTreeView) - 1,
-              $uploadTreeView
-          );
-        }
-      } else
-      {
-        $nextItem = $this->getNewItemByIndex($parent, $targetIndex, $uploadTreeView);
-      }
-
-      if ($nextItem !== null && $nextItem->isContainer())
-      {
-        $this->logger->debug("findNextItem() enter container");
-        $nextItem = $this->findNextItem($nextItem, $direction, $uploadTreeView);
-      }
-
-      if ($nextItem !== null)
-      {
-        $this->logger->debug("findNextItem() found " . $nextItem->getFileName() . " #" . $nextItem->getFileId());
-        return $nextItem;
-      }
-
-      $targetIndex += $indexIncrement;
-    }
-    $this->logger->debug("findNextItem() nothing found ");
-    return null;
-  }
-
-  /**
-   * @param Item $item
-   * @param UploadTreeProxy $uploadTreeView
-   * @return int
-   */
-  protected function getItemIndex(Item $item, UploadTreeProxy $uploadTreeView)
-  {
-    if ($item->getParentId() === null)
-    {
-      return 0;
-    }
-    
-    $uploadTreeViewName = $uploadTreeView->getDbViewName();
-    $sql = "SELECT row_number FROM (
-    SELECT row_number() over (order by ufile_name), uploadtree_pk
-    FROM $uploadTreeViewName WHERE parent=$1
-  ) as index WHERE uploadtree_pk=$2";
-
-    $result = $this->dbManager->getSingleRow($sql, array($item->getParentId(), $item->getId()), __METHOD__ . "_current_offset" . $uploadTreeViewName);
-
-    return intval($result['row_number']) - 1;
-  }
-
-  /**
-   * @param int $parent
-   * @param UploadTreeProxy $uploadTreeView
-   * @return int
-   */
-  protected function getParentSize($parent, UploadTreeProxy $uploadTreeView)
-  {
-    if ($parent === null)
-    {
-      return 1;
-    }
-   
-    $uploadTreeViewName = $uploadTreeView->getDbViewName();
-    $result = $this->dbManager->getSingleRow("SELECT count(*) FROM $uploadTreeViewName WHERE parent=$1",
-        array($parent), __METHOD__ . "_current_count");
-    return intval($result['count']);
-  }
-
-  /**
-   * @param int $parent
-   * @param int $targetOffset
-   * @param UploadTreeProxy $uploadTreeView
-   * @return Item
-   */
-  protected function getNewItemByIndex($parent, $targetOffset, UploadTreeProxy $uploadTreeView)
-  {
-    $this->logger->debug("getNewItemByIndex(parent=" . $parent . ", offset=" . $targetOffset . ")");
-    if ($targetOffset < 0)
-    {
-      return null;
-    }
-    
-    $uploadTreeViewName = $uploadTreeView->getDbViewName();
-    $statementName = __METHOD__;
-    $theQuery = "SELECT * FROM $uploadTreeViewName WHERE parent=$1 ORDER BY ufile_name OFFSET $2 LIMIT 1";
-    $newItemResult = $this->dbManager->getSingleRow($theQuery, array($parent, $targetOffset), $statementName);
-
-    return $newItemResult ? $this->createItem($newItemResult, $uploadTreeView->getUploadTreeTableName()) : null;
-  }
-
 
   /**
    * @param $uploadId
