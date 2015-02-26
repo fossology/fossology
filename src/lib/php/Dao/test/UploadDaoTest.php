@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber, Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -19,11 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-use Monolog\Logger;
-
 use Mockery as M;
 
 class UploadDaoTest extends \PHPUnit_Framework_TestCase
@@ -45,9 +44,6 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
             'upload',
             'uploadtree',
         ));
-
-    $this->testDb->insertData(
-        array());
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
@@ -82,8 +78,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
     assertThat($itemTreeBounds, anInstanceOf('Fossology\Lib\Data\Tree\ItemTreeBounds'));
 
-    assertThat($expected = $uploadId, equalTo($itemTreeBounds->getUploadId()));
-    assertThat($expected = $left, equalTo($itemTreeBounds->getLeft()));
+    assertThat($uploadId, equalTo($itemTreeBounds->getUploadId()));
+    assertThat($left, equalTo($itemTreeBounds->getLeft()));
   }
 
   public function testGetNextItemWithEmptyArchive()
@@ -171,6 +167,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareModularTable($subentries);
 
     $nextItem = $this->uploadDao->getPreviousItem(1, 6);
+    assertThat($nextItem, anInstanceOf(Item::classname()));
     assertThat($nextItem->getId(), is(8));
   }
 
@@ -252,9 +249,9 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   protected function getSubentriesForMultipleFiles()
   {
     return array(
-        array(6, 5, 1, 3, 33188, 7, 8, 'INSTALL'),
-        array(7, 5, 1, 4, 33188, 8, 9, 'README'),
-        array(8, 5, 1, 5, 33188, 9, 10, 'COPYING')
+        array(6, 5, 1, 3, 33188, 9, 10, 'INSTALL'),
+        array(7, 5, 1, 4, 33188, 11, 12, 'README'),
+        array(8, 5, 1, 5, 33188, 7, 8, 'COPYING')
     );
   }
 
@@ -306,37 +303,49 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
 
   protected function getTestFileStructure()
   {
+    $isFile = 33188;
+    $isContainer = 536888320;
     return array(
-        array(3675, 3674, 32, 3299, 33188, 23, 24, 'N3'),
-        array(3674, 3652, 32, 0, 536888320, 22, 37, 'N'),
-        array(3673, 3652, 32, 3298, 33188, 38, 39, 'O'),
-        array(3671, 3669, 32, 3296, 33188, 9, 10, 'J'),
-        array(3669, 3652, 32, 0, 536888320, 4, 11, 'H'),
-        array(3668, 3652, 32, 3294, 33188, 42, 43, 'C'),
-        array(3662, 3661, 32, 0, 536888320, 45, 48, 'L3'),
-        array(3666, 3661, 32, 0, 536888320, 49, 52, 'L1'),
-        array(3665, 3664, 32, 3292, 33188, 54, 55, 'L2a'),
-        array(3664, 3661, 32, 0, 536888320, 53, 56, 'L2'),
-        array(3661, 3652, 32, 0, 536888320, 44, 57, 'L'),
-        array(3658, 3657, 32, 3288, 33188, 60, 61, 'P2a'),
-        array(3657, 3656, 32, 0, 536888320, 59, 62, 'P2'),
-        array(3660, 3656, 32, 3290, 33188, 65, 66, 'P3'),
-        array(3656, 3652, 32, 0, 536888320, 58, 67, 'P'),
-        array(3655, 3654, 32, 0, 536888320, 69, 70, 'M1'),
-        array(3654, 3652, 32, 0, 536888320, 68, 71, 'M'),
-        array(3653, 3652, 32, 3287, 33188, 72, 73, 'A'),
-        array(3652, 3651, 32, 0, 536888320, 3, 74, 'uploadDaoTest'),
-        array(3651, 3650, 32, 0, 805323776, 2, 75, 'artifact.dir'),
         array(3650, NULL, 32, 3286, 536904704, 1, 76, 'uploadDaoTest.tar'),
-        array(3686, 3652, 32, 3306, 33188, 12, 13, 'R'),
-        array(3683, 3682, 32, 3303, 33188, 15, 16, 'E'),
-        array(3685, 3682, 32, 3305, 33188, 17, 18, 'G'),
-        array(3682, 3652, 32, 0, 536888320, 14, 21, 'D'),
-        array(3677, 3674, 32, 3300, 33188, 25, 26, 'N5'),
-        array(3676, 3674, 32, 3293, 33188, 27, 28, 'N1'),
-        array(3678, 3674, 32, 0, 536888320, 29, 32, 'N2'),
-        array(3681, 3680, 32, 3302, 33188, 34, 35, 'N4a'),
-        array(3680, 3674, 32, 0, 536888320, 33, 36, 'N4'),
+        array(3651, 3650, 32, 0, 805323776, 2, 75, 'artifact.dir'),
+        array(3652, 3651, 32, 0, 536888320, 3, 74, 'uploadDaoTest'),
+
+        array(3653, 3652, 32, 3287, $isFile, 4, 5, 'A'),
+        // * B_NoLic 6:7
+        array(3668, 3652, 32, 3294, $isFile, 8, 9, 'C'),
+        array(3682, 3652, 32, 0, $isContainer, 10, 16, 'D'),
+        array(3683, 3682, 32, 3303, $isFile, 11, 12, 'E'),
+        // * D/F_NoLic 13:14
+        array(3685, 3682, 32, 3305, $isFile, 14, 15, 'G'),
+        array(3669, 3652, 32, 0, $isContainer, 16, 23, 'H'),
+        // * H/I_NoLic
+        array(3671, 3669, 32, 3296, $isFile, 19, 20, 'J'),
+        // * H/K_NoLic 21:22
+        array(3661, 3652, 32, 0, $isContainer, 24, 37, 'L'),
+        array(3666, 3661, 32, 0, $isContainer, 25, 28, 'L1'),
+        // * L/L1/L1a_NoLic 26:27
+        array(3664, 3661, 32, 0, $isContainer, 29, 32, 'L2'),
+        array(3665, 3664, 32, 3292, $isFile, 30, 31, 'L2a'),
+        array(3662, 3661, 32, 0, $isContainer, 33, 36, 'L3'),
+        // * L/L3/L3a_NoLic 34:35
+        array(3654, 3652, 32, 0, $isContainer, 38, 41, 'M'),
+        array(3655, 3654, 32, 0, $isContainer, 39, 40, 'M1'),
+        array(3674, 3652, 32, 0, $isContainer, 42, 57, 'N'),
+        array(3676, 3674, 32, 3293, $isFile, 43, 44, 'N1'),
+        array(3678, 3674, 32, 0, $isContainer, 45, 48, 'N2'),
+        // * N/N2/N2a_NoLic 46:47
+        array(3675, 3674, 32, 3299, $isFile, 49, 50, 'N3'),
+        array(3680, 3674, 32, 0, $isContainer, 51, 54, 'N4'),
+        array(3681, 3680, 32, 3302, $isFile, 52, 53, 'N4a'),
+        array(3677, 3674, 32, 3300, $isFile, 55, 56, 'N5'),
+        array(3673, 3652, 32, 3298, $isFile, 58, 59, 'O'),
+        array(3656, 3652, 32, 0, $isContainer, 60, 69, 'P'),
+        //   * P/P1_NoLic 61:62
+        array(3657, 3656, 32, 0, $isContainer, 63, 66, 'P2'),
+        array(3658, 3657, 32, 3288, $isFile, 64, 65, 'P2a'),
+        array(3660, 3656, 32, 3290, 33188, 67, 68, 'P3'),
+        array(3686, 3652, 32, 3306, 33188, 70, 71, 'R'),
+        //   * S_NoLic 72:73
     );
   }
 

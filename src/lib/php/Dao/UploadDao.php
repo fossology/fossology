@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -246,19 +246,66 @@ class UploadDao extends Object
   const DIR_BCK = -1;
   const NOT_FOUND = null;
 
+  
   /**
    * @param $uploadId
    * @param $itemId
    * @param $direction
-   * @return mixed
+   * @return Item|null
+   * @todo join both directions to avoid doubled queries 
    */
   public function getItemByDirection($uploadId, $itemId, $direction, $options)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    $originItem = $this->getUploadEntry($itemId, $uploadTreeTableName);
+    $originLft = $originItem['lft'];
+
+    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (1<<29) = 0";  
+    $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
+    $uploadTreeViewName = $uploadTreeView->getDbViewName();
+    $statementName = __METHOD__ . ".$uploadTreeViewName.";
+    $query = $uploadTreeView->asCte()." SELECT * FROM $uploadTreeViewName WHERE lft";
+    
+    if($direction == self::DIR_FWD)
+    {
+      $statementName .= 'fwd';
+      $query .= ">$1 ORDER BY lft ASC";
+    }
+    else
+    {
+      $statementName .= 'bwd';
+      $query .= "<$1 ORDER BY lft DESC";
+    }
+
+    $newItemRow = $this->dbManager->getSingleRow("$query LIMIT 1", array($originLft), $statementName);
+    if ($newItemRow)
+    {
+      return $this->createItem($newItemRow, $uploadTreeTableName);
+    }
+    else
+    {
+      return self::NOT_FOUND;
+    }
+  }
+  
+  
+  
+  /**
+   * @param $uploadId
+   * @param $itemId
+   * @param $direction
+   * @return Item|null
+   * @deprecated
+   */
+  public function getItemByDirectionRecursive($uploadId, $itemId, $direction, $options)
   {
     $this->logger->debug("getItemByDirection(" . $uploadId . ", " . $itemId . ", " . $direction . ", " . print_r($options, true) . ")");
     $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $options['ut.filter'] = " OR ut.ufile_mode & (1<<29) <> 0 OR ut.uploadtree_pk = $itemId";
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName);
     $uploadTreeView->materialize();
+    
+    
     $item = $this->getUploadEntryFromView($itemId, $uploadTreeView);
 
     $enterFolders = $direction == self::DIR_FWD;
@@ -290,7 +337,7 @@ class UploadDao extends Object
    * @param $direction
    * @param UploadTreeProxy $uploadTreeView
    * @param bool $enterFolders
-   * @return mixed
+   * @return Item|null
    */
   protected function findNextItem(Item $item, $direction, UploadTreeProxy $uploadTreeView, $enterFolders = true)
   {

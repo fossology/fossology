@@ -28,14 +28,14 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_ITEM_FILTER = 'ut.filter';
   const OPT_GROUP_ID = 'groupId';
   
-  /** @vars string */
+  /** @var string */
   private $uploadTreeTableName;
   /** @var int */
   private $uploadId;
 
   /**
    * @param int $uploadId
-   * @param array $options (keys , ut.filter, groupId supported)
+   * @param array $options (OPT_* supported)
    * @param string $uploadTreeTableName
    */
   public function __construct($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName=null)
@@ -73,18 +73,23 @@ class UploadTreeProxy extends DbViewProxy
   }
 
   /**
-   * @param $uploadId
-   * @param $uploadTreeTableName
+   * @param int $uploadId
+   * @param string $uploadTreeTableName
+   * @param string $additionalCondition
    * @return string
    */
-  private static function getDefaultUploadTreeView($uploadId, $uploadTreeTableName)
+  private static function getDefaultUploadTreeView($uploadId, $uploadTreeTableName, $additionalCondition='')
   {
-    $sql_upload = "";
+    $condition = "";
     if ('uploadtree_a' == $uploadTreeTableName)
     {
-      $sql_upload = " WHERE ut.upload_fk=$uploadId ";
+      $condition = " WHERE ut.upload_fk=$uploadId $additionalCondition";
     }
-    $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut $sql_upload";
+    elseif ($additionalCondition)
+    {
+      $condition = " WHERE 1=1 $additionalCondition";
+    }
+    $uploadTreeView = "SELECT * FROM $uploadTreeTableName ut $condition";
     return $uploadTreeView;
   }
 
@@ -124,7 +129,7 @@ class UploadTreeProxy extends DbViewProxy
 
       case "none":
       default:
-        $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName);
+        $uploadTreeView = self::getDefaultUploadTreeView($uploadId, $uploadTreeTableName, $additionalCondition);
     }
 
     return $uploadTreeView;
