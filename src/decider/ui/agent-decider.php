@@ -52,8 +52,15 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     return "";
   }
-  
-  
+
+    /**
+     * @param int $jobId
+     * @param int $uploadId
+     * @param string $errorMsg
+     * @param Request $request
+     * @param string[] $agentList  //check!
+     * @return string
+     */
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request, $agentList)
   {
     $dependencies[] = "agent_adj2nest";
