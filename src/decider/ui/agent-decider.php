@@ -65,7 +65,7 @@ class DeciderAgentPlugin extends AgentPlugin
       $dependencies[] = $reuserJobId;
     }
    
-    $rules = $request->get('deciderRules');
+    $rules = $request->get('deciderRules') ?: array();
     $rulebits = 0;
     
     foreach($rules as $rule)
