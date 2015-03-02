@@ -74,10 +74,7 @@ abstract class AgentPlugin extends Object implements Plugin
    **/
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    if ($this->Name != "agent_adj2nest")
-    {
-      $dependencies[] = "agent_adj2nest";
-    }
+    $dependencies[] = "agent_adj2nest";
     if ($this->AgentHasResults($uploadId) == 1)
     {
       return 0;

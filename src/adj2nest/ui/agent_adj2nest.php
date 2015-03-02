@@ -47,6 +47,35 @@ class Adj2nestAgentPlugin extends AgentPlugin
     $wrongOrdered = $dbManager->getSingleRow($sql,array($uploadId),__METHOD__.'.lftWrong');
     return $wrongOrdered['cnt'] ? 2 : 1;
   }
+  
+  /**
+   * @param int $jobId
+   * @param int $uploadId
+   * @param &string $errorMsg - error message on failure
+   * @param array $dependencies - array of plugin names representing dependencies.
+   * @param mixed $arguments (ignored if not a string)
+   * @returns int
+   * * jqId  Successfully queued
+   * *   0   Not queued, latest version of agent has previously run successfully
+   * *  -1   Not queued, error, error string in $ErrorMsg
+   **/
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  {
+    $dependencies[] = "agent_unpack";
+    if ($this->AgentHasResults($uploadId) == 1)
+    {
+      return 0;
+    }
+
+    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
+    if ($jobQueueId != 0)
+    {
+      return $jobQueueId;
+    }
+
+    $args = is_array($arguments) ? '' : $arguments;
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+  }
 }
 
 register_plugin(new Adj2nestAgentPlugin());
