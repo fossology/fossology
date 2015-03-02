@@ -1,5 +1,6 @@
 /* **************************************************************
 Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,8 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <logging.h>
-
-/* std library includes */
 
 /* other library includes */
 #include <libfossdb.h>
@@ -608,7 +607,7 @@ static void check_tables(scheduler_t* scheduler)
       if(i != curr->ncols - 1)
         g_string_append(sql, ", ");
     }
-    g_string_append(sql, ") ORDER BY column_name;");
+    g_string_append(sql, ") ORDER BY column_name");
 
     /* execute the sql */
     db_result = database_exec(scheduler, sql->str);
@@ -626,12 +625,16 @@ static void check_tables(scheduler_t* scheduler)
       passed = FALSE;
 
       /* print the columns that do not exist */
-      for(i = 0, curr_row = 0; i < min(PQntuples(db_result), curr->ncols); i++)
+      for(i = 0, curr_row = 0; i < curr->ncols; i++)
       {
-        if(strcmp(PQgetvalue(db_result, curr_row, 0), curr->columns[i]) != 0)
+        if(curr_row>=PQntuples(db_result) || strcmp(PQgetvalue(db_result, curr_row, 0), curr->columns[i]) != 0)
+        {
           ERROR("Column %s.%s does not exist", curr->table, curr->columns[i]);
+        }
         else
+        {
           curr_row++;
+        }
       }
     }
 
@@ -642,7 +645,7 @@ static void check_tables(scheduler_t* scheduler)
   if(!passed)
   {
     log_printf("FATAL %s.%d: Scheduler did not pass database check\n", __FILE__, __LINE__);
-    log_printf("FATAL %s.%d: Running fo_postinstall should fix these issues\n", __FILE__, __LINE__);
+    log_printf("FATAL %s.%d: Running fo_postinstall should fix the database schema\n", __FILE__, __LINE__);
     exit(230);
   }
 }
