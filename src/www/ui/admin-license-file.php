@@ -324,7 +324,7 @@ class admin_license_file extends FO_Plugin
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
     $allVars = array_merge($vars,$row);
-    return $this->render('admin_license-upload_form.html.twig', $allVars);
+    return $this->renderString('admin_license-upload_form.html.twig', $allVars);
   }
 
 
