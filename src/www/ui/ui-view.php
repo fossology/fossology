@@ -398,14 +398,14 @@ class ui_view extends FO_Plugin
       echo $ShowText, "<hr>";
     }
     $PageMenu = $this->GetFileJumpMenu($inputFile, $Page, $blockSize, $Uri);
-    $PageSize = VIEW_BLOCK_HEX * $Page;
+    $PageSize = $blockSize * $Page;
     if (!empty($PageMenu) and !$getPageMenuInline)
     {
       $output .= "<center>$PageMenu</center><br>\n";
     }
     
     $startAt = $PageSize;
-    $endAt = $PageSize+($Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT);
+    $endAt = $PageSize+$blockSize;
     $relevantHighlightEntries = array();
     foreach ($highlightEntries as $highlightEntry)
     {
