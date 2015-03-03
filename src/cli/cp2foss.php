@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,7 +38,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -h       = this help message
     -v       = enable verbose debugging
     --username string = user name
-    --gourpname string = group name
+    --groupname string = group name
     --password string = password
     -c string = Specify the directory for the system configuration
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
@@ -168,16 +169,16 @@ function GetFolder($FolderPath, $Parent = NULL) {
   if (empty($FolderPath)) {
     return ($Parent);
   }
-  list($Folder, $FolderPath) = explode('/', $FolderPath, 2);
-  if (empty($Folder)) {
-    return (GetFolder($FolderPath, $Parent));
+  list($folderHead, $folderTail) = explode('/', $FolderPath, 2);
+  if (empty($folderHead)) {
+    return (GetFolder($folderTail, $Parent));
   }
   /* See if it exists */
-  $SQLFolder = str_replace("'", "''", $Folder);
+  $SQLFolder = str_replace("'", "''", $folderHead);
   $SQL = "SELECT * FROM folder
   INNER JOIN foldercontents ON child_id = folder_pk
   AND foldercontents_mode = '1'
-  WHERE parent_fk = '$Parent' AND folder_name='$SQLFolder';";
+  WHERE foldercontents.parent_fk = '$Parent' AND folder_name='$SQLFolder'";
   if ($Verbose) {
     print "SQL=\n$SQL\n";
   }
@@ -186,7 +187,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   $row = pg_fetch_assoc($result);
   $row_count = pg_num_rows($result);
 
-  if (row_count <= 0) {
+  if ($row_count <= 0) {
     /* Need to create folder */
     global $Plugins;
     $P = & $Plugins[plugin_find_id("folder_create") ];
@@ -195,10 +196,10 @@ function GetFolder($FolderPath, $Parent = NULL) {
       exit(1);
     }
     if ($Verbose) {
-      print "Folder not found: Creating $Folder\n";
+      print "Folder not found: Creating $folderHead\n";
     }
     if (!$Test) {
-      $P->Create($Parent, $Folder, "");
+      $P->Create($Parent, $folderHead, "");
       pg_free_result($result);
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);
@@ -207,7 +208,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   }
   $Parent = $row['folder_pk'];
   pg_free_result($result);
-  return (GetFolder($FolderPath, $Parent));
+  return (GetFolder($folderTail, $Parent));
 } /* GetFolder() */
 
 /**
@@ -590,7 +591,7 @@ if ($vcsuser && $vcspass) {
 }
 
 print "Loading '$UploadArchive'\n";
-//print "  CAlling UploadOne in 'main': '$FolderPath'\n";
+print "  Calling UploadOne in 'main': '$FolderPath'\n";
 $res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
 if ($res) exit(1); // fail to upload
 exit(0);
