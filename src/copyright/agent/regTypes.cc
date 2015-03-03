@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  * Author: Johannes Najjar, Daniele Fognini
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -18,14 +18,15 @@ const  std::string regCopyright::getType(){
 
 
 #define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
+#define WEBSITE  "(http|https|ftp)\\://[a-zA-Z0-9\\-\\.]+\\.[a-zA-Z]{2,4}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\\-\\._\\?\\,\'/\\\\+&amp;%\\$#\\=~])*[^\\.\\,\\)\\(\\s]"
 
 const std::string regCopyright::getRegex() {
-#define NAME              "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
 #define SPACECLS          "[\\t ]"
 #define SPACES            SPACECLS "+"
 #define SPACESALL         "[[:space:]]*"
-#define PUNCTORSPACE      "[[:punct:][:space:]]"
-#define NAMESLIST         NAME "(([-, &]+)" NAME ")*"
+#define PUNCT_OR_SPACE    "[[:punct:][:space:]]"
+#define NAME_OR_COMPANY    "(([[:alpha:]]{1,3}\\.)|Co[or]p\\.|([[:alpha:]]+)|(" EMAILRGX ")|(" WEBSITE "))"
+#define NAMESLIST         NAME_OR_COMPANY "(([-, &]+)" NAME_OR_COMPANY ")*"          
 #define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
 #define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
 #define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
@@ -46,16 +47,16 @@ const std::string regCopyright::getRegex() {
       "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
     ")?"
     "("
-      PUNCTORSPACE "?"
+      PUNCT_OR_SPACE "?"
       SPACESALL
       DATESLIST
     ")?"
     "("
-      PUNCTORSPACE "?"
+      PUNCT_OR_SPACE "?"
       SPACESALL
       NAMESLIST
     ")"
-    "(" PUNCTORSPACE"*" "all" SPACES "rights" SPACES "reserved)?"
+    "(" PUNCT_OR_SPACE"*" "all" SPACES "rights" SPACES "reserved)?"
   ")|("
     "("
       "((author|contributor|maintainer)s?)"
