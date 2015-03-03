@@ -827,29 +827,26 @@ int	fo_RepImport	(char *Source, char *Type, char *Filename, int Link)
     return(2);
   }
 
-  LenIn=1;
+  LenIn = fread(Buf,1,sizeof(Buf),Fin);
   while(LenIn > 0)
   {
-    LenIn=fread(Buf,1,sizeof(Buf),Fin);
-    if (LenIn > 0)
+    LenOut=0;
+    while(LenOut < LenIn)
     {
-      LenOut=0;
-      while(LenOut < LenIn)
+      i = fwrite(Buf+LenOut,1,LenIn - LenOut,Fout);
+      LenOut += i;
+      if (i == 0)
       {
-        i = fwrite(Buf+LenOut,1,LenIn - LenOut,Fout);
-        LenOut += i;
-        if (i == 0)
-        {
-          /** Oh no!  Write failed! **/
-          fclose(Fout);
-          fo_RepFclose(Fout);
-          fo_RepRemove(Type,Filename);
-          fprintf(stderr,"ERROR: Write failed -- type='%s' filename='%s'\n",
-              Type,Filename);
-          return(3);
-        }
+        /** Oh no!  Write failed! **/
+        fclose(Fout);
+        fo_RepFclose(Fout);
+        fo_RepRemove(Type,Filename);
+        fprintf(stderr,"ERROR: Write failed -- type='%s' filename='%s'\n",Type,Filename);
+        fclose(Fin);
+        return(3);
       }
     }
+    LenIn = fread(Buf,1,sizeof(Buf),Fin);
   }
   fo_RepFclose(Fout);
   fclose(Fin);
