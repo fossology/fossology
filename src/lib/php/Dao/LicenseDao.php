@@ -380,7 +380,7 @@ class LicenseDao extends Object
     {
       $param[] = $groupId;
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group=$".count($param),
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$".count($param),
         $param, __METHOD__ . ".$condition.group");
     }
     if (false === $row)
