@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -20,26 +20,26 @@ use Fossology\Lib\Data\Highlight;
 
 require_once('Xpview.php');
 
-define("TITLE_ecc_view", _("View Export Control and Customs Analysis"));
-
-class Ecc_view extends Xpview
+class EccView extends Xpview
 {
+  const NAME = 'ecc-view';
+
   function __construct()
   {
-    $this->Name = "ecc-view";
-    $this->Title = TITLE_ecc_view;
+    $this->Name = self::NAME;
     $this->decisionTableName = "ecc_decision";
     $this->tableName = "ecc";
     $this->modBack = 'ecc-hist';
     $this->optionName = "skipFileEcc";
     $this->ajaxAction = "setNextPrevEcc";
     $this->skipOption = "noEcc";
-    $this->hightlightTypeToStringMap= array(Highlight::ECC => 'Export Restriction');
-    $this->typeToHighlightTypeMap =  array('ecc' => Highlight::ECC);
-    parent::__construct();
-
-    $this->vars['xptext'] = 'export restriction';
+    $this->hightlightTypeToStringMap = array(Highlight::ECC => 'Export Restriction');
+    $this->typeToHighlightTypeMap = array('ip' => Highlight::ECC);
+    $this->xptext = 'export restriction';
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("View Export Control and Customs Analysis")
+    ));
   }
 }
-$NewPlugin = new Ecc_view;
-$NewPlugin->Initialize();
+
+register_plugin(new EccView());

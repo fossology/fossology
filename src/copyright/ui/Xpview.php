@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -16,37 +16,23 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\View\HighlightRenderer;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
-/***********************************************************
- * Copyright (C) 2014 Siemens AG
- * Author: J.Najjar
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-
-class Xpview extends FO_Plugin
+class Xpview extends DefaultPlugin
 {
-  /** @var  string */
+  /** @var string */
   protected $optionName;
-  /** @var  string */
+  /** @var string */
   protected $ajaxAction;
-  /** @var  string */
+  /** @var string */
   protected $modBack;
   /** @var UploadDao */
   protected $uploadDao;
@@ -54,111 +40,84 @@ class Xpview extends FO_Plugin
   protected $copyrightDao;
   /** @var HighlightRenderer */
   protected $highlightRenderer;
-  /** bool */
-  protected $invalidParm = false;
-  /** array */
-  protected $uploadEntry;
   /** @var DecisionTypes */
   protected $decisionTypes;
-  /**  @var string */
+  /** @var string */
   protected $decisionTableName;
-  /**  @var string */
+  /** @var string */
   protected $tableName;
   /** @var  array */
   protected $hightlightTypeToStringMap;
   /** @var  array */
   protected $typeToHighlightTypeMap;
-  /**  @var string */
+  /** @var string */
   protected $skipOption;
-
-  function __construct()
+  /** @var string */
+  protected $xptext;
+  
+  function __construct($name, $params)
   {
-    $this->Dependency = array("browse", "view");
-    $this->DBaccess = PLUGIN_DB_READ;
-    $this->LoginFlag = 0;
-    $this->NoMenu = 0;
-    parent::__construct();
-
-    global $container;
-    $this->uploadDao = $container->get('dao.upload');
-    $this->copyrightDao = $container->get('dao.copyright');
-    $this->highlightRenderer = $container->get('view.highlight_renderer');
-    $this->decisionTypes = $container->get('decision.types');
+    $mergedParams = array_merge($params, array(self::DEPENDENCIES=>array("browse", "view"),
+                                       self::PERMISSION=> self::PERM_READ));
+    
+    parent::__construct($name,$mergedParams);
+    
+    $this->uploadDao = $this->getObject('dao.upload');
+    $this->copyrightDao = $this->getObject('dao.copyright');
+    $this->highlightRenderer = $this->getObject('view.highlight_renderer');
+    $this->decisionTypes = $this->getObject('decision.types');
+    
   }
+  
 
-  function OutputOpen()
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      $this->invalidParm = true;
-      return (0);
-    }
-    $uploadId = GetParm("upload", PARM_INTEGER);
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
+    $vars = array();
+    $uploadId = intval($request->get('upload'));
+    $uploadTreeId = intval($request->get('item'));
     if (empty($uploadTreeId) || empty($uploadId))
     {
-      $this->invalidParm = true;
-      return;
+      return $this->responseBad();
     }
 
     $permission = GetUploadPerm($uploadId);
     if($permission < PERM_READ ) {
       $text = _("Permission Denied");
-      $this->vars['message']= "<h2>$text<h2>";
-      $this->invalidParm =true;
-      return;
+      $vars['message']= "<h2>$text</h2>";
+      return $this->responseBad($vars);
     }
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
-    $this->uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if (Isdir($this->uploadEntry['ufile_mode']) || Iscontainer($this->uploadEntry['ufile_mode']))
+    $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
+    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
     {
-      $parent = $this->uploadDao->getUploadParent($this->uploadEntry['upload_fk']);
+      $parent = $this->uploadDao->getUploadParent($uploadEntry['upload_fk']);
       if (!isset($parent))
       {
-        $this->invalidParm = true;
-        return;
+        return $this->responseBad();
       }
 
-      $uploadTreeId = $this->uploadDao->getNextItem($this->uploadEntry['upload_fk'], $parent);
+      $uploadTreeId = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
       if ($uploadTreeId === UploadDao::NOT_FOUND)
       {
-        $this->invalidParm = true;
-        return;
+        return $this->responseBad();
       }
 
-      header('Location: ' . Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("show")) . "&item=$uploadTreeId");
     }
-
-    return parent::OutputOpen();
-  }
-
-
-  public function Output()
-  {
-    if ($this->invalidParm)
-    {
-      $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
-      return $this->render("include/base.html.twig");
-    }
-
-    $uploadTreeId = GetParm("item", PARM_INTEGER);
     if (empty($uploadTreeId))
     {
-      return;
+      return $this->responseBad('No item selected.');
     }
 
-    $uploadId = $this->uploadEntry['upload_fk'];
-    $uploadTreeTableName = $this->uploadEntry['tablename'];
-
     $copyrightDecisionMap = $this->decisionTypes->getMap();
-    $this->vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
+    $vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
     global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    if (!empty($lastItem) && $changed =="true"  )
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    if (!empty($lastItem) && $changed =="true")
     {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
       $clearingType = $_POST['clearingTypes'];
@@ -173,7 +132,7 @@ class Xpview extends FO_Plugin
 
     if (count($highlights) < 1)
     {
-      $this->vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
+      $vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
     /** @var ui_view $view */
@@ -181,45 +140,57 @@ class Xpview extends FO_Plugin
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
 
-    list($description,$textFinding,$comment, $decisionType)=$this->copyrightDao->getDecision($this->decisionTableName ,$this->uploadEntry['pfile_fk']);
-    $this->vars['description'] =$description;
-    $this->vars['textFinding'] =$textFinding;
-    $this->vars['comment'] =$comment;
+    list($description,$textFinding,$comment, $decisionType)=$this->copyrightDao->getDecision($this->decisionTableName ,$uploadEntry['pfile_fk']);
+    $vars['description'] = $description;
+    $vars['textFinding'] = $textFinding;
+    $vars['comment'] = $comment;
 
-    $this->vars['itemId'] = $uploadTreeId;
-    $this->vars['uploadId'] = $uploadId;
-    $this->vars['pageMenu'] = $pageMenu;
-    $this->vars['textView'] = $textView;
-    $this->vars['legendBox'] = $this->legendBox();
-    $this->vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
-    $this->vars['optionName'] = $this->optionName;
-    $this->vars['formName'] = "CopyRightForm";
-    $this->vars['ajaxAction'] = $this->ajaxAction;
-    $this->vars['skipOption'] =$this->skipOption;
-    $this->vars['selectedClearingType'] = $decisionType;
-    $this->vars['clearingTypes'] =$copyrightDecisionMap;
-    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    $vars['itemId'] = $uploadTreeId;
+    $vars['uploadId'] = $uploadId;
+    $vars['pageMenu'] = $pageMenu;
+    $vars['textView'] = $textView;
+    $vars['legendBox'] = $this->legendBox();
+    $vars['uri'] = Traceback_uri() . "?mod=" . $this->Name;
+    $vars['optionName'] = $this->optionName;
+    $vars['formName'] = "CopyRightForm";
+    $vars['ajaxAction'] = $this->ajaxAction;
+    $vars['skipOption'] =$this->skipOption;
+    $vars['selectedClearingType'] = $decisionType;
+    $vars['clearingTypes'] = $copyrightDecisionMap;
+    $vars['xptext'] = $this->xptext;
+    
+    return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
+  }
+  
+  /**
+   * @overwrite
+   */
+  protected function mergeWithDefault($vars)
+  {
+    $allVars = array_merge($this->getDefaultVars(), $vars);
+    $allVars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    return $allVars;
   }
 
+  
+  private function responseBad($vars)
+  {
+    $vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
+    return $this->render("include/base.html.twig",$vars);
+  }
+  
+  
   /**
    * @return string rendered legend box
    */
   function legendBox()
   {
-    $colorMapping = $this->highlightRenderer->getColorMapping();
-
     $output = _("file text");
-
     foreach ($this->hightlightTypeToStringMap as $colorKey => $txt)
     {
-      $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt, $colorMapping) . $txt . '</span>';
+      $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt) . $txt . '</span>';
     }
     return $output;
-  }
-
-  function getTemplateName()
-  {
-    return 'ui-cp-view.html.twig';
   }
 
   /**
@@ -227,7 +198,6 @@ class Xpview extends FO_Plugin
    */
   function RegisterMenus()
   {
-
     // For this menu, I prefer having this in one place
     $text = _("Set the concluded licenses for this upload");
     menu_insert("Clearing::Licenses", 36, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
@@ -281,5 +251,5 @@ class Xpview extends FO_Plugin
     {
       $this->NoMenu = 1;
     }
-  } // RegisterMenus()
+  }
 } 

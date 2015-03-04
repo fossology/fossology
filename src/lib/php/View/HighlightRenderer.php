@@ -30,29 +30,6 @@ use Fossology\Lib\Util\Object;
 class HighlightRenderer extends Object
 {
   const DEFAULT_PADDING = 0;
-
-  const DEFAULT_COLOR = 'lightgray';
-
-  /**
-   * @var array colorMapping
-   */
-  private $colorMapping = array(
-      Highlight::MATCH => 'lightgreen',
-      Highlight::CHANGED => 'yellow',
-      Highlight::ADDED => 'red',
-      Highlight::DELETED => 'fuchsia',
-      Highlight::SIGNATURE => 'lightskyblue',
-      Highlight::KEYWORD => 'black',
-      Highlight::COPYRIGHT => 'lightblue',
-      Highlight::EMAIL => 'yellow',
-      Highlight::URL => 'orange',
-      Highlight::BULK => '#EFBE76',
-      Highlight::IP => '#FF7F50', // Coral
-      Highlight::ECC => '#BA55D3', // MediumOrchid 
-
-      Highlight::UNDEFINED => self::DEFAULT_COLOR
-  );
-
   
   public $classMapping = array('' => '',
             Highlight::UNDEFINED=>'hi-undefined',
@@ -69,16 +46,9 @@ class HighlightRenderer extends Object
             Highlight::URL => 'hi-url',
             Highlight::BULK => 'hi-bulk',
             Highlight::IP => 'hi-ip',
-            Highlight::ECC => 'hi-mediumorchid');
+            Highlight::ECC => 'hi-mediumorchid'
+          );
   
-  /**
-   * @return array
-   */
-  public function getColorMapping()
-  {
-    return $this->colorMapping;
-  }
-
   /**
    * @param SplitPosition $entry
    * @return string
