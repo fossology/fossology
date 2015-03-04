@@ -197,7 +197,8 @@ class Xpview extends FO_Plugin
     $this->vars['ajaxAction'] = $this->ajaxAction;
     $this->vars['skipOption'] =$this->skipOption;
     $this->vars['selectedClearingType'] = $decisionType;
-    $this->vars['clearingTypes'] =$copyrightDecisionMap ;
+    $this->vars['clearingTypes'] =$copyrightDecisionMap;
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
   }
 
   /**
@@ -207,11 +208,9 @@ class Xpview extends FO_Plugin
   {
     $colorMapping = $this->highlightRenderer->getColorMapping();
 
-    $output = '';
-    $output .= _("file text");
+    $output = _("file text");
 
-    foreach ($this->hightlightTypeToStringMap
-             as $colorKey => $txt)
+    foreach ($this->hightlightTypeToStringMap as $colorKey => $txt)
     {
       $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt, $colorMapping) . $txt . '</span>';
     }

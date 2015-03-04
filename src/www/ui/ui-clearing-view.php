@@ -290,7 +290,7 @@ class ClearingView extends FO_Plugin
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
-    $this->vars['legendData'] = $this->highlightRenderer->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
+    $this->vars['legendData'] = $this->highlightRenderer->getLegendData($selectedAgentId || $clearingId);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
@@ -312,6 +312,7 @@ class ClearingView extends FO_Plugin
     $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
     $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
     
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
     return $this->render("ui-clearing-view.html.twig");
   }
 

@@ -69,8 +69,9 @@ class OneShot extends DefaultPlugin
     $fullpath = $uploadFile->getPath().'/'.$uploadFile->getFilename();
 
     list($licenseIds, $rendered) = $this->scanMonkFileRendered($fullpath);
-    $vars = array('content' => $this->renderLicenseList($licenseIds).$rendered);
-    return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+    $vars = $this->mergeWithDefault(array('content' => $this->renderLicenseList($licenseIds).$rendered));
+    $vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    return $this->render('include/base.html.twig', $vars);
   }
 
   public function scanMonkRendered($text)

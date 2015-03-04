@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Daniele Fognini
 
 This program is free software; you can redistribute it and/or
@@ -53,6 +53,24 @@ class HighlightRenderer extends Object
       Highlight::UNDEFINED => self::DEFAULT_COLOR
   );
 
+  
+  public $classMapping = array('' => '',
+            Highlight::UNDEFINED=>'hi-undefined',
+          
+            Highlight::MATCH => 'hi-match',
+            Highlight::CHANGED => 'hi-changed',
+            Highlight::ADDED => 'hi-added',
+            Highlight::DELETED => 'hi-deleted',
+            Highlight::SIGNATURE => 'hi-signature',
+            Highlight::KEYWORD => 'hi-keyword',
+            Highlight::BULK => 'hi-bulk',
+            Highlight::COPYRIGHT => 'hi-cp',
+            Highlight::EMAIL => 'hi-email',
+            Highlight::URL => 'hi-url',
+            Highlight::BULK => 'hi-bulk',
+            Highlight::IP => 'hi-ip',
+            Highlight::ECC => 'hi-mediumorchid');
+  
   /**
    * @return array
    */
@@ -146,61 +164,15 @@ class HighlightRenderer extends Object
   {
     if ($type == 'K ' || $type == 'K')
     {
-      return "<span style=\"font-weight: bold\">";
-    } else
-    {
-      $color = $this->determineColor($type);
-      return $this->createHighlightSpanStart($color, $title);
+      return "<span class=\"hi-keyword\">";
     }
-  }
-
-  /**
-   * @param string $type
-   * @return string
-   */
-  public function createStyle($type)
-  {
-    if ($type == 'K ' || $type == 'K')
+    if (!array_key_exists($type, $this->classMapping))
     {
-      return "font-weight: bold";
-    } else
-    {
-      $color = $this->determineColor($type);
-      return "background-color:$color;";
+      $type = Highlight::UNDEFINED;
     }
+    $class = $this->classMapping[$type];
+    return "<span class=\"$class\" title=\"$title\">";
   }
-
-  /**
-   * @param string $color
-   * @param string $title
-   * @return string
-   */
-  private function createHighlightSpanStart($color, $title)
-  {
-    return "<span style=\"background-color:$color;\" title=\"" . $title . "\">";
-  }
-
-  /**
-   * @param string $type
-   * @return string
-   */
-  protected function determineColor($type)
-  {
-    if (array_key_exists($type, $this->colorMapping))
-    {
-      return $this->colorMapping[$type];
-    } else
-    {
-      if (array_key_exists(Highlight::UNDEFINED, $this->colorMapping))
-      {
-        return $this->colorMapping[Highlight::UNDEFINED];
-      } else
-      {
-        return self::DEFAULT_COLOR;
-      }
-    }
-  }
-
 
   /**
    * @param boolean $containsDiff
@@ -224,7 +196,7 @@ class HighlightRenderer extends Object
             Highlight::UNDEFINED => _("license relevant text"));
     foreach ($colorDefinition as $colorKey => $txt)
     {
-      $data[] = array('style' => $colorKey ? $this->createStyle($colorKey) : '', 'text' => $txt);
+      $data[] = array('class'=>$this->classMapping[$colorKey], 'text' => $txt);
     }
     return $data;
   }
