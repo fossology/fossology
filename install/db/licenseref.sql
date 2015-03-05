@@ -42441,7 +42441,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Except as contained in this notice, the name of the X Consortium shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from the X Consortium.
 
 X Window System is a trademark of X Consortium, Inc.', 'http://www.xfree86.org/3.3.6/COPYRIGHT2.html#3', NULL, NULL, NULL, 'X11 License', NULL, NULL, NULL, '', NULL, false, false, false, '930071e9b64ff548ba87120d5fabe180', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (557, 'Info-Zip', 'Copyright (c) 1990-2009 Info-ZIP. All rights reserved.
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (557, 'info-zip', 'Copyright (c) 1990-2009 Info-ZIP. All rights reserved.
 
 For the purposes of this copyright and license, "Info-ZIP" is defined as the following set of individuals:
 
