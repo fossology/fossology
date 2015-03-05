@@ -84,7 +84,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int Nu
   /* check for malloc failures */
   if ((!pCopy->DataBuf) || (!pCopy->TableName))
   {
-    free(pCopy);
+    fo_sqlCopyDestroy(pCopy, 0);
     ERROR_RETURN("sqlCopyCreate")
   }
 

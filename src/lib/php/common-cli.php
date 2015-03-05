@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -53,7 +54,7 @@ function cli_Init()
   /* Initialize plugins */
   /** This registers plugins with the menu structure and start the DB
    connection. **/
-  plugin_preinstall(); /* this registers plugins with menus */
+  plugin_preinstall();
 
   return(true);
 } // cli_Init()
@@ -86,4 +87,3 @@ function cli_logger($handle, $message, $mode='a')
   fclose($FR);
   return(Null);
 }
-?>
