@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <files.hpp>
 
 #define TESTFILES_BEGIN 0
-#define TESTFILES_END 141
+#define TESTFILES_END 142
 
 //#define SHOWALLDIFFS
 

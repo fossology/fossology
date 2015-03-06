@@ -25,49 +25,54 @@ const std::string regCopyright::getRegex() {
 #define SPACES            SPACECLS "+"
 #define SPACESALL         "[[:space:]]*"
 #define PUNCT_OR_SPACE    "[[:punct:][:space:]]"
-#define NAME_OR_COMPANY    "(([[:alpha:]]{1,3}\\.)|Co[or]p\\.|([[:alpha:]]+)|(" EMAILRGX ")|(" WEBSITE "))"
-#define NAMESLIST         NAME_OR_COMPANY "(([-, &]+)" NAME_OR_COMPANY ")*"          
-#define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
-#define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
+#define NAME_OR_COMPANY    "(([[:alpha:]ÄäÖöÜüß]{1,3}\\.)|Co[or]p\\.|([[:alpha:]ÄäÖöÜüß]+)|(" EMAILRGX ")|(" WEBSITE "))"
+#define NAMESLIST         NAME_OR_COMPANY "(([-, &]+)" NAME_OR_COMPANY ")*"
+#define DATE              "((19|20)[[:digit:]]{2,2}|[[:digit:]]{1,2})"
+#define DATESLIST         DATE "(([[:punct:][:space:]-]+)" DATE ")*"
 #define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
 #define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
 #define COPYR_TXT         "copyright(s)?"
 
  return std::string(
   "("
-  "("
     "("
-      COPYR_SYM "(" SPACESALL COPYR_TXT "|" SPACES "(19|20)[[:digit:]]{2,2}" ")"
-      "|" COPYR_TXT ":?" SPACESALL COPYR_SYM
-      "|" COPYR_TXT
-      "|" COPYR_SYM_ALONE
-    ")"
-    "("
-      SPACES
-      "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
-    ")?"
-    "("
-      PUNCT_OR_SPACE "?"
-      SPACESALL
-      DATESLIST
-    ")?"
-    "("
-      PUNCT_OR_SPACE "?"
+      "("
+        COPYR_SYM "(" SPACESALL COPYR_TXT "|" SPACES DATESLIST ")"
+        "|" COPYR_TXT ":?" SPACESALL COPYR_SYM
+        "|" COPYR_TXT
+        "|" COPYR_SYM_ALONE
+      ")"
+      "("
+        SPACES
+        "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
+      ")?"
+      "("
+        PUNCT_OR_SPACE "?"
+        SPACESALL
+        DATESLIST
+      ")?"
+      "("
+        PUNCT_OR_SPACE "?"
+        SPACESALL
+        NAMESLIST
+      ")"
+      "("
+        PUNCT_OR_SPACE "?"
+        SPACESALL
+        DATESLIST
+      ")?"
+      "(" PUNCT_OR_SPACE"*" "all" SPACES "rights" SPACES "reserved)?"
+    ")|("
+      "("
+        "((author|contributor|maintainer)s?)"
+        "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put" SPACES "together)" SPACES "by)"
+      ")"
+      "[:]?"
       SPACESALL
       NAMESLIST
     ")"
-    "(" PUNCT_OR_SPACE"*" "all" SPACES "rights" SPACES "reserved)?"
-  ")|("
-    "("
-      "((author|contributor|maintainer)s?)"
-      "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put" SPACES "together)" SPACES "by)"
-    ")"
-    "[:]?"
-    SPACESALL
-    NAMESLIST
   ")"
-  ")"
-  "[.]?"
+  "\\.?"
  );
 };
 
