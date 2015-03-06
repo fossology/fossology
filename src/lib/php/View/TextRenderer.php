@@ -42,11 +42,11 @@ class TextRenderer
 
   /**
    * @param TextFragment $fragment
-   * @param SplitPosition[]|null $splitPositions
+   * @param SplitPosition[] $splitPositions
    * @param bool $insertBacklink
    * @return string
    */
-  public function renderText(TextFragment $fragment, $splitPositions = null, $insertBacklink = false)
+  public function renderText(TextFragment $fragment, $splitPositions = array(), $insertBacklink = false)
   {
     $state = new HighlightState($this->highlightRenderer, $insertBacklink);
     $result = $this->render($fragment, $state, new PagedTextResult($fragment->getStartOffset()), $splitPositions);
@@ -55,10 +55,10 @@ class TextRenderer
 
   /**
    * @param TextFragment $fragment
-   * @param SplitPosition[]|null $splitPositions
+   * @param SplitPosition[] $splitPositions
    * @return string
    */
-  public function renderHex(TextFragment $fragment, $splitPositions = null)
+  public function renderHex(TextFragment $fragment, $splitPositions = array())
   {
     $state = new HighlightState($this->highlightRenderer);
     $result = $this->render($fragment, $state, new PagedHexResult($fragment->getStartOffset(), $state), $splitPositions);
@@ -69,19 +69,13 @@ class TextRenderer
    * @param TextFragment $fragment
    * @param HighlightState $state
    * @param PagedResult $result
-   * @param SplitPosition[]|null $splitPositions
+   * @param SplitPosition[] $splitPositions
    * @return PagedTextResult
    */
-  public function render(TextFragment $fragment, HighlightState $state,
-                         PagedResult $result, $splitPositions = null)
+  public function render(TextFragment $fragment, HighlightState $state, PagedResult $result, $splitPositions = array())
   {
-    $splitPositions = $splitPositions ? : array();
-
     foreach ($splitPositions as $actionPosition => $entries)
     {
-      /**
-       * @var SplitPosition[] $entries
-       */
       $isBeforeVisibleRange = $actionPosition < $fragment->getStartOffset();
       $isAfterVisibleRange = $actionPosition >= $fragment->getEndOffset();
       if ($isBeforeVisibleRange || $isAfterVisibleRange)

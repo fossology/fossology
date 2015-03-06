@@ -1,23 +1,24 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014 Siemens AG
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2014 Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
 use Fossology\Lib\Plugin\Plugin;
+use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -110,7 +111,7 @@ class FO_Plugin implements Plugin
   private $menu;
 
   /** @var Twig_Environment */
-  private $renderer;
+  protected $renderer;
 
   /** @var Request|NULL */
   private $request;
@@ -386,12 +387,20 @@ class FO_Plugin implements Plugin
 
     $output = $this->Output();
 
-    if ($output instanceof Response) {
+    // if (is_subclass_of($output, '\Symfony\Component\HttpFoundation\Response'))
+    if($output instanceof Response)
+    {
       $response = $output;
     } else
     {
-      $this->vars['content'] = $output ?: ob_get_contents();
-      $response = $this->render($this->getTemplateName(), $this->vars);
+      if (empty($this->vars['content']) && $output)
+      {
+        $this->vars['content'] = $output;
+      } elseif (empty($this->vars['content']))
+      {
+        $this->vars['content'] = ob_get_contents();
+      }
+      $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
 
@@ -406,9 +415,8 @@ class FO_Plugin implements Plugin
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
    */
-  function Output()
-  {
-    return "";
+  function Output() {
+    return new Response("ERROR: Output() method of FO_Plugin not defined in class '" . get_class($this) . "'", Response::HTTP_INTERNAL_SERVER_ERROR);
   }
 
   public function getTemplateName()
@@ -419,12 +427,21 @@ class FO_Plugin implements Plugin
   /**
    * @param string $templateName
    * @param array $vars
+   * @return string
+   */
+  public function renderString($templateName, $vars = null)
+  {
+    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+  }  
+  
+  /**
+   * @param string $templateName
+   * @param array $vars
    * @return Response
    */
   protected function render($templateName, $vars = null)
   {
-    $content = $this->renderer->loadTemplate($templateName)
-        ->render($vars ?: $this->vars);
+    $content = $this->renderString($templateName, $vars);
 
     return new Response(
         $content,
@@ -436,8 +453,10 @@ class FO_Plugin implements Plugin
   /**
    * @return Request
    */
-  public function getRequest() {
-    if (!isset($this->request)) {
+  public function getRequest()
+  {
+    if (!isset($this->request))
+    {
       $this->request = Request::createFromGlobals();
     }
     return $this->request;

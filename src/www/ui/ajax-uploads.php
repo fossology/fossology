@@ -30,63 +30,44 @@ define("TITLE_core_uploads", _("List Uploads as Options"));
 
 class core_uploads extends FO_Plugin
 {
-  var $Name       = "upload_options";
-  var $Title      = TITLE_core_uploads;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $NoHTML     = 1; /* This plugin needs no HTML content help */
+  function __construct()
+  {
+    $this->Name       = "upload_options";
+    $this->Title      = TITLE_core_uploads;
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
+
+    parent::__construct();
+  }
 
   /**
    * \brief Display the loaded menu and plugins.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
+    $FolderId = GetParm("folder",PARM_INTEGER);
+    if (empty($FolderId)) {
+      $FolderId = FolderGetTop();
     }
-    $V="";
-    global $Plugins;
-    switch($this->OutputType)
+    $V = '';
+    $uploadList = FolderListUploads_perm($FolderId, PERM_WRITE);
+    foreach($uploadList as $upload)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $FolderId = GetParm("folder",PARM_INTEGER);
-        if (empty($FolderId)) {
-          $FolderId = FolderGetTop();
-        }
-        $List = FolderListUploads_perm($FolderId, PERM_WRITE);
-        foreach($List as $L)
-        {
-          $V .= "<option value='" . $L['upload_pk'] . "'>";
-          $V .= htmlentities($L['name']);
-          if (!empty($L['upload_desc']))
-          {
-            $V .= " (" . htmlentities($L['upload_desc']) . ")";
-          }
-          if (!empty($L['upload_ts']))
-          {
-            $V .= " :: " . htmlentities($L['upload_ts']);
-          }
-          $V .= "</option>\n";
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $V .= "<option value='" . $upload['upload_pk'] . "'>";
+      $V .= htmlentities($upload['name']);
+      if (!empty($upload['upload_desc']))
+      {
+        $V .= " (" . htmlentities($upload['upload_desc']) . ")";
+      }
+      if (!empty($upload['upload_ts']))
+      {
+        $V .= " :: " . htmlentities($upload['upload_ts']);
+      }
+      $V .= "</option>\n";
     }
-    if (!$this->OutputToStdout) {
-      return($V);
-    }
-    print("$V");
-    return;
-  } // Output()
+    return $V;
+  }
 
-
-};
+}
 $NewPlugin = new core_uploads;
 $NewPlugin->Initialize();
-
-?>

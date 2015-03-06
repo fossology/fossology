@@ -69,7 +69,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
     if(empty($uList))
     {
       $text = _("Fatal! Query Failed getting user_agent_list for user");
-      return("<h3 style='color:red'>$text $UserName</h3>");
+      return("<h3 style='color:red'>$text $userName</h3>");
     }
     $list = explode(',',$uList[0]['user_agent_list']);
     $default_bucketpool_fk = $uList[0]['default_bucketpool_fk'];
@@ -84,11 +84,13 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
       // ignore agents to skip from list
       $FoundSkip = false;
       foreach($SkipAgents as $SkipAgent)
+      {
         if ($Agent->Name == $SkipAgent)  
         {
           $FoundSkip = true;
           break;
         }
+      }
       if ($FoundSkip) continue;
  
       if ($upload_pk != -1) {
@@ -121,34 +123,38 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
 /**
  * \brief  Assume someone called AgentCheckBoxMake() and submitted the HTML form.
  *         Run AgentAdd() for each of the checked agents. 
- *         Because input comes from the user, validate that everything is legitimate.
  *
  * \param $job_pk
  * \param $upload_pk
  */
 function AgentCheckBoxDo($job_pk, $upload_pk)
 {
-  global $Plugins;
-  $AgentList = menu_find("Agents",$Depth);
-  $V = "";
-  if (!empty($AgentList)) {
-    foreach($AgentList as $AgentItem) {
-      /*
-       The URI below contains the agent name e.g agent_license, this is
-       not be confused with the Name attribute in the class, for example,
-       the Name attribute for agent_license is: Schedule License Analysis
-       */
-      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-      if (empty($Agent)) continue;
-      $Name = htmlentities($Agent->Name);
-      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      $Dependencies = array();
-      if ($Parm == 1) $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
+  $agents = checkedAgents();
+  return AgentSchedule($job_pk, $upload_pk, $agents);
+}
+
+
+/**
+ * \brief  schedule all given agents
+ *
+ * \param int $jobId
+ * \param int $uploadId
+ * \param Plugin[] $agents array of agent plugin, mapped by name as in listAgents()
+ *
+ * \return null|string null on success or error message [sic]
+ */
+function AgentSchedule($jobId, $uploadId, $agents)
+{
+  $errorMsg = "";
+  foreach($agents as &$agent)
+  {
+    $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+    if ($rv == -1) {
+      return $errorMsg;
     }
   }
-  return($V);
-} // AgentCheckBoxDo()
-
+  return null;
+}
 
 /**
  * \brief find the jobs in the job and jobqueue table to be dependent on
@@ -318,7 +324,7 @@ function LatestAgentpk($upload_pk, $arsTableName)
   if ($AgentRec === false)
     $Agent_pk = 0;
   else
-    $Agent_pk = $AgentRec[0]['agent_fk'];
+    $Agent_pk = intval($AgentRec[0]['agent_fk']);
   return $Agent_pk;
 }
 
@@ -334,56 +340,52 @@ function LatestAgentpk($upload_pk, $arsTableName)
  *
  * \param string  $TableName - name of the ars table (e.g. nomos_ars)
  * \param int     $upload_pk
- * \param boolean $DataOnly  - If false, return the latest agent AND agent revs
- *                             that have data for this agent.  Note the latest agent may have
- *                             no entries in $TableName.
- *                             If true (default), return only the agent_revs with ars data.
- *                             Note: not used
  * \param string  $SLName    - select list element name
- * \param string  $SLID      - select list element id
  * \param string  &$Agent_pk  - return which agent is selected
  * \param string  $extra     - Extra info for the select element, e.g. "onclick=..."
  *
  * \return agent select list, when only one data, return null
- *      
+ * @param $TableName
+ * @param $upload_pk
+ * @param $SLName
+ * @param $agent_pk
+ * @param string $extra
+ * @return string
  */
-function AgentSelect($TableName, $upload_pk, $DataOnly=true,
-$SLName, $SLID, &$agent_pk, $extra = "")
+function AgentSelect($TableName, $upload_pk, $SLName, &$agent_pk, $extra = "")
 {
-   global $PG_CONN;
-   /* get the agent recs */
-   $TableName .= '_ars';
-   $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC;";
-   $result = pg_query($PG_CONN, $sql);
-   DBCheckResult($result, $sql, __FILE__, __LINE__);
+  global $PG_CONN;
+  /* get the agent recs */
+  $TableName .= '_ars';
+  $sql = "select agent_pk, agent_name, agent_rev from agent, $TableName where agent.agent_pk = $TableName.agent_fk and upload_fk = $upload_pk order by agent_rev DESC";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-   $NumRows = pg_num_rows($result);
-   if ($NumRows == 1) // only one result
-   {
-     pg_free_result($result);
-     return ;  /* only one result*/
-   }
+  $NumRows = pg_num_rows($result);
+  if ($NumRows == 1) // only one result
+  {
+    pg_free_result($result);
+    return;  /* only one result */
+  }
 
-   $select = "<select name='$SLName' id='$SLName' $extra>";
-   while ($row = pg_fetch_assoc($result))
-   {
-     $select .= "<option value='$row[agent_pk]'";
+  $select = "<select name='$SLName' id='$SLName' $extra>";
+  while ($row = pg_fetch_assoc($result)) {
+    $select .= "<option value='$row[agent_pk]'";
 
-     if (empty($agent_pk))
-     {
-       $select .= " SELECTED ";
-       $agent_pk = $row["agent_pk"];
-     }
-     else if ($agent_pk == $row['agent_pk'])
-     {
-       $select .= " SELECTED ";
-     }
+    if (empty($agent_pk))
+    {
+      $select .= " SELECTED ";
+      $agent_pk = $row["agent_pk"];
+    } else if ($agent_pk == $row['agent_pk'])
+    {
+      $select .= " SELECTED ";
+    }
 
-     $select .= ">$row[agent_name], v $row[agent_rev]\n";
-   }
-   $select .= "</select>";
-   pg_free_result($result);
-   return $select;
+    $select .= ">$row[agent_name], v $row[agent_rev]\n";
+  }
+  $select .= "</select>";
+  pg_free_result($result);
+  return $select;
 }
 
 
@@ -395,37 +397,58 @@ $SLName, $SLID, &$agent_pk, $extra = "")
  */
 function userAgents()
 {
-  global $Plugins;
-  global $PG_CONN;
+  return implode(',', array_keys(checkedAgents()));
+}
 
-  $agentsChecked = "";
+/**
+ * \brief read the UI form and return array of user selected agents
+ *        Because input comes from the user, validate that everything is legitimate.
+ *
+ * \return Plugin[] list of checked agent plugins, mapped by name
+ */
+function checkedAgents()
+{
+  $agentsChecked = array();
+  $agentList = listAgents();
+  foreach($agentList as $agentName => &$agentPlugin)
+  {
+    if (GetParm("Check_" . $agentName, PARM_INTEGER) == 1)
+    {
+      $agentsChecked[$agentName] = &$agentPlugin;
+    }
+  }
+  unset($agentPlugin);
 
-  $AgentList = menu_find("Agents",$Depth);
-  if (!empty($AgentList)) {
-    foreach($AgentList as $AgentItem) {
+  return $agentsChecked;
+}
+
+/**
+ * \brief search in available plugins and return all agents
+ *
+ * \return Plugin[] list of checked agent plugins, mapped by name
+ */
+function listAgents()
+{
+  $agents = array();
+
+  $agentList = menu_find("Agents",$Depth);
+  if (!empty($agentList)) {
+    foreach($agentList as $agentItem) {
       /*
        The URI below contains the agent name e.g agent_license, this is
        not be confused with the Name attribute in the class, for example,
        the Name attribute for agent_license is: Schedule License Analysis
        */
-      $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
-      if (empty($Agent)) {
+      $agentPlugin = &plugin_find($agentItem->URI);
+      if (empty($agentPlugin)) {
         continue;
       }
-      $Name = htmlentities($Agent->Name);
-      $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-      if ($Parm == 1) {
-        // save the name
-        $agentsChecked .= $Name . ',';
-      }
+      $name = htmlentities($agentPlugin->Name);
+      $agents[$name] = $agentPlugin;
     }
-    // remove , from last name
-    $agentsChecked = trim($agentsChecked, ',');
   }
-  return($agentsChecked);
+  return $agents;
 }
-
-
 /**
  * \brief Check the ARS table to see if an agent has successfully scanned an upload.
  *
@@ -441,8 +464,6 @@ function userAgents()
  */
 function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
 {
-  global $PG_CONN;
-
   /* get the latest agent_pk */
   $Latest_agent_pk = GetAgentKey($AgentName, $AgentDesc);
 
@@ -455,4 +476,3 @@ function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
 
   return 0;
 } // CheckARS()
-?>

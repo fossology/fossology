@@ -2,6 +2,7 @@
  adj2nest: Convert adjacency list to nested sets.
 
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -199,7 +200,7 @@ void	LoadAdj	(long UploadPk)
   PGresult* pgNonRootResult;
   PGresult* pgRootResult;
 
-  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent;",UploadPk);
+  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",UploadPk);
   pgNonRootResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgNonRootResult, SQL, __FILE__, __LINE__);
 
@@ -207,7 +208,7 @@ void	LoadAdj	(long UploadPk)
   TreeSize = NonRootRows;
   LOG_VERBOSE("# Upload %ld: %ld items\n",UploadPk,TreeSize);
 
-  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NULL;",UploadPk);
+  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NULL",UploadPk);
   pgRootResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgRootResult, SQL, __FILE__, __LINE__);
 
@@ -267,7 +268,7 @@ void	RunAllNew	()
   long UploadPk;
   PGresult *pgResult;
 
-  snprintf(SQL,sizeof(SQL), "SELECT DISTINCT upload_pk,upload_desc,upload_filename FROM upload WHERE upload_pk IN ( SELECT DISTINCT upload_fk FROM uploadtree WHERE lft IS NULL );");
+  snprintf(SQL,sizeof(SQL), "SELECT DISTINCT upload_pk,upload_desc,upload_filename FROM upload WHERE upload_pk IN ( SELECT DISTINCT upload_fk FROM uploadtree WHERE lft IS NULL )");
   pgResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgResult, SQL, __FILE__, __LINE__);
 
@@ -302,7 +303,7 @@ void    ListUploads     ()
   PGresult *pgResult;
 
   printf("# Uploads\n");
-  snprintf(SQL,sizeof(SQL), "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
+  snprintf(SQL,sizeof(SQL), "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk");
   pgResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgResult, SQL, __FILE__, __LINE__);
 
@@ -341,11 +342,11 @@ int	MatchField	(char *Field, char *S)
   while(isspace(S[0])) S++;
   Len = strlen(Field);
   if (!strncmp(Field,S,Len))
-	{
-	/* Matched string, now make sure it is a real match */
-	while(isspace(S[Len])) Len++;
-	if (S[Len]=='=') return(1);
-	}
+  {
+    /* Matched string, now make sure it is a real match */
+    while (isspace(S[Len])) Len++;
+    if (S[Len] == '=') return (1);
+  }
   return(0);
 } /* MatchField() */
 
@@ -380,10 +381,12 @@ char *	SkipFieldValue	(char *S)
 	break;
     }
   while((S[0]!='\0') && (S[0]!=Quote))
-	{
-	if (S[0]=='\\') { S+=2; }
-	else S++;
-	}
+  {
+    if (S[0] == '\\') {
+      S += 2;
+    }
+    else S++;
+  }
   if (S[0]==Quote) S++;
   while(isspace(S[0])) S++; /* Skip any spaces */
   return(S);
@@ -421,24 +424,30 @@ char *	UntaintValue	(char *Sin, char *Sout)
 
   /* Now we're ready to untaint the value */
   while((Sin[0]!='\0') && (Sin[0]!=Quote))
-	{
-	if (Sin[0]=='\\')
-	  {
-	  Sin++; /* skip quote char */
-	  if (Sin[0]=='n') { Sout[0]='\n'; }
-	  else if (Sin[0]=='r') { Sout[0]='\r'; }
-	  else if (Sin[0]=='a') { Sout[0]='\a'; }
-	  else { Sout[0]=Sin[0]; }
-	  Sout++;
-	  Sin++; /* skip processed char */
-	  }
-	else
-	  {
-	  Sout[0] = Sin[0];
-	  Sin++;
-	  Sout++;
-	  };
-	}
+  {
+    if (Sin[0] == '\\') {
+      Sin++; /* skip quote char */
+      if (Sin[0] == 'n') {
+        Sout[0] = '\n';
+      }
+      else if (Sin[0] == 'r') {
+        Sout[0] = '\r';
+      }
+      else if (Sin[0] == 'a') {
+        Sout[0] = '\a';
+      }
+      else {
+        Sout[0] = Sin[0];
+      }
+      Sout++;
+      Sin++; /* skip processed char */
+    }
+    else {
+      Sout[0] = Sin[0];
+      Sin++;
+      Sout++;
+    };
+  }
   Sout[0]='\0'; /* terminate string */
   return(Sout);
 } /* UntaintValue() */
@@ -459,9 +468,9 @@ int	SetParm	(char *ParmName, char *Parm)
 
   /* Find the parameter */
   while(!(rc=MatchField(ParmName,Parm)))
-    {
+  {
     Parm = SkipFieldValue(Parm);
-    }
+  }
   if (rc != 1) return(0); /* no match */
 
   /* Found it!  Set the value */

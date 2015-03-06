@@ -29,12 +29,16 @@ define("TITLE_ui_download", _("Download File"));
  */
 class ui_download extends FO_Plugin
 {
-  var $Name       = "download";
-  var $Title      = TITLE_ui_download;
-  var $Version    = "1.0";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_WRITE;
   var $NoHTML     = 1;
+
+  function __construct()
+  {
+    $this->Name       = "download";
+    $this->Title      = TITLE_ui_download;
+    $this->Dependency = array();
+    $this->DBaccess   = PLUGIN_DB_WRITE;
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.

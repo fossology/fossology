@@ -34,7 +34,7 @@ $PG_CONN = 0;   // Database connection
 $SysConf = bootstrap();
 
 global $container;
-/** @var TimingLogger $timingLogger */
+/** @var TimingLogger $logger */
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 

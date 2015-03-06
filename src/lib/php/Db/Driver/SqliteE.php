@@ -28,20 +28,11 @@ use SQLite3Stmt;
  */
 class SqliteE implements Driver
 {
-  /**
-   * @var Sqlite3
-   */
+  /** @var Sqlite3 */
   private $dbConnection = false;
-
-  /**
-   * @var SQLite3Stmt[] $preparedStmt
-   */
+  /** @var SQLite3Stmt[] $preparedStmt */
   private $preparedStmt = array();
-
-  /**
-   *
-   * @var string
-   */
+  /** @var string */
   private $varPrefix = ':var';
 
   public function __construct($dbConnection)
@@ -65,6 +56,7 @@ class SqliteE implements Driver
       $pgStyleVar = '$' . ($paramCnt + 1);
       if ($paramCnt == 9) break; // limited number of replaced place holders
     }
+    $sqlStatement = str_replace(' ONLY ',' ',$sqlStatement);
     $stmt = $this->dbConnection->prepare($sqlStatement);
     $this->preparedStmt[$statementName] = & $stmt;
     return $stmt;
@@ -82,9 +74,7 @@ class SqliteE implements Driver
       return false;
     }
     $params = array_values($parameters);
-    /**
-     * @var SQLite3Stmt
-     */
+    /** @var SQLite3Stmt */
     $stmt = $this->preparedStmt[$statementName];
     for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
     {
@@ -168,6 +158,14 @@ class SqliteE implements Driver
   }
 
   /**
+   * @return void
+   */
+  public function rollback(){
+    $this->dbConnection->query("ROLLBACK");
+    return;
+  }
+
+  /**
    * @param $booleanValue
    * @return boolean
    */
@@ -192,5 +190,24 @@ class SqliteE implements Driver
   public function escapeString($string)
   {
     return SQLite3::escapeString($string);
+  }
+  
+  /**
+   * @param string $tableName
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    $sql = "SELECT count(*) cnt FROM sqlite_master WHERE type='table' AND name='$tableName'";
+    $row = SQLite3::querySingle($sql);
+    if (!$row && $this->isConnected())
+    {
+      throw new \Exception($this->getLastError());
+    }
+    else if(!$res)
+    {
+      throw new \Exception('DB connection lost');
+    }
+    return($row['cnt']>0);
   }
 }

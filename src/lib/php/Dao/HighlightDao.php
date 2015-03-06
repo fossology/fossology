@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\FileTreeBounds;
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -59,16 +59,16 @@ class HighlightDao extends Object
   }
 
   /**
-   * @param FileTreeBounds $fileTreeBounds
+   * @param ItemTreeBounds $itemTreeBounds
    * @param int $licenseId
    * @param int $agentId
    * @param null $highlightId
-   * @return array
+   * @return Highlight[]
    */
-  private function getHighlightDiffs(FileTreeBounds $fileTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
+  public function getHighlightDiffs(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null)
   {
-    $params =array($fileTreeBounds->getUploadTreeId());
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $params =array($itemTreeBounds->getItemId());
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
     $sql = "SELECT start,len,type,rf_fk,rf_start,rf_len
             FROM license_file
@@ -77,7 +77,7 @@ class HighlightDao extends Object
               WHERE uploadtree_pk = $1 AND (type LIKE 'M_' OR type = 'L')";
 
     $stmt = __METHOD__.$uploadTreeTableName;
-    if (!empty($licenseId))
+    if (!empty($licenseId) && empty($highlightId))
     {
       $params[] = $licenseId;
       $stmt .= '.License';
@@ -105,10 +105,10 @@ class HighlightDao extends Object
           $this->typeMap[$row['type']],
           intval($row['rf_start']), intval($row['rf_start'] + $row['rf_len']));
 
-      $licenseFileId = $row['rf_fk'];
-      if ($licenseFileId)
+      $licenseId = $row['rf_fk'];
+      if ($licenseId)
       {
-        $newHiglight->setLicenseId($licenseFileId);
+        $newHiglight->setLicenseId($licenseId);
       }
       $highlightEntries[] = $newHiglight;
     }
@@ -116,42 +116,87 @@ class HighlightDao extends Object
     return $highlightEntries;
   }
 
-  /**
-   * @param FileTreeBounds $fileTreeBounds
-   * @return array
-   */
-  private function getHighlightKeywords(FileTreeBounds $fileTreeBounds)
+  public function getHighlightRegion($licenseMatchId)
   {
-    $uploadTreeTableName = $fileTreeBounds->getUploadTreeTableName();
+    $row = $this->dbManager->getSingleRow(
+      "SELECT MIN(start) AS start, MAX(start+len) AS end FROM highlight WHERE fl_fk = $1",
+      array($licenseMatchId)
+    );
+    return false !== $row ? array($row['start'], $row['end']) : array(-1, -1);
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return Highlight[]
+   */
+  public function getHighlightKeywords(ItemTreeBounds $itemTreeBounds)
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__.$uploadTreeTableName;
     $sql = "SELECT start,len
              FROM highlight_keyword
              WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
     $this->dbManager->prepare($stmt, $sql);
-    $result = $this->dbManager->execute($stmt, array($fileTreeBounds->getUploadTreeId()));
+    $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getItemId()));
     $highlightEntries = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
       $highlightEntries[] = new Highlight(
           intval($row['start']), intval($row['start'] + $row['len']),
-          'K', 0, 0);
+          Highlight::KEYWORD, 0, 0);
     }
     $this->dbManager->freeResult($result);
     return $highlightEntries;
   }
-  
-  
+
   /**
-   * @param FileTreeBounds $fileTreeBounds
-   * @param int $licenseId
-   * @param int $agentId
-   * @param null $highlightId
-   * @return array
-   */ 
-  public function getHighlightEntries(FileTreeBounds $fileTreeBounds, $licenseId = null, $agentId = null, $highlightId = null){
-    $highlightDiffs = $this->getHighlightDiffs($fileTreeBounds, $licenseId, $agentId, $highlightId);
-    $highlightKeywords = $this->getHighlightKeywords($fileTreeBounds);
-    $highlightEntries = array_merge($highlightDiffs,$highlightKeywords);
+   * @param int $uploadTreeId
+   * @param int|null $clearingId
+   * @return Highlight[]
+   */
+  public function getHighlightBulk($uploadTreeId, $clearingId = null)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT h.clearing_event_fk, h.start, h.len, ce.rf_fk, rf_text
+            FROM clearing_event ce
+              INNER JOIN highlight_bulk h ON ce.clearing_event_pk = h.clearing_event_fk
+              INNER JOIN license_ref_bulk lrb ON lrb.lrb_pk = h.lrb_fk
+            WHERE ce.uploadtree_fk = $1";
+    $params = array($uploadTreeId);
+    if (!empty($clearingId))
+    {
+      $stmt .= ".clearingId";
+      $params[] = $clearingId;
+      $sql .= " AND h.clearing_event_fk = $" . count($params);
+    }
+    $this->dbManager->prepare($stmt, $sql);
+    $result = $this->dbManager->execute($stmt, $params);
+    $highlightEntries = array();
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      $newHighlight = new Highlight(
+          intval($row['start']), intval($row['start'] + $row['len']),
+          Highlight::BULK, 0, 0);
+      $newHighlight->setLicenseId($row['rf_fk']);
+      $highlightEntries[] = $newHighlight;
+    }
+    $this->dbManager->freeResult($result);
+    return $highlightEntries;
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int|null $licenseId
+   * @param int|null $agentId
+   * @param int|null $highlightId
+   * @param int|null $clearingId
+   * @return Highlight[]
+   */
+  public function getHighlightEntries(ItemTreeBounds $itemTreeBounds, $licenseId = null, $agentId = null, $highlightId = null, $clearingId = null){
+    $highlightDiffs = $this->getHighlightDiffs($itemTreeBounds, $licenseId, $agentId, $highlightId);
+    $highlightKeywords = $this->getHighlightKeywords($itemTreeBounds);
+    $highlightBulk = $this->getHighlightBulk($itemTreeBounds->getItemId(), $clearingId);
+    $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
     return $highlightEntries;
   }
 }

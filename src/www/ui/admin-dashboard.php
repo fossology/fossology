@@ -21,14 +21,15 @@ define("TITLE_dashboard", _("Dashboard"));
 
 class dashboard extends FO_Plugin
 {
-  var $Name       = "dashboard";
-  var $Version    = "1.0";
-  var $Title      = TITLE_dashboard;
-  var $MenuList   = "Admin::Dashboard";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
-  protected $pgVersion;
-  
+  function __construct()
+  {
+    $this->Name       = "dashboard";
+    $this->Title      = TITLE_dashboard;
+    $this->MenuList   = "Admin::Dashboard";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
+
   /**
    * \brief Return each html row for DatabaseContents()
    * \returns html table row
@@ -252,7 +253,7 @@ function GetLastAnalyzeTime($TableName)
     global $SysConf;
 
     $Cmd = "df -hP";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
 
     /* Separate lines */
     $Lines = explode("\n",$Buf);
@@ -316,7 +317,7 @@ function GetLastAnalyzeTime($TableName)
     // just query the database with "show data_directory", but we are not.
     // So try to get it from a ps and parse the -D argument
     $Cmd = "ps -eo cmd | grep postgres | grep -- -D";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
     // Find the -D
     $DargToEndOfStr = trim(substr($Buf, strpos($Buf, "-D") + 2 ));
     $DargArray = explode(' ', $DargToEndOfStr);
@@ -329,44 +330,48 @@ function GetLastAnalyzeTime($TableName)
     $V .= $Indent . _("FOSSology config") . ": " . $SYSCONFDIR . "<br>";
 
     return($V);
-  } // DiskFree()
-
-  /**
-   * \brief Generate output.
-   */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    global $PG_CONN;
-    $this->pgVersion = pg_version($PG_CONN);
-    
+  }
+  
+  public function Output() {
     $V="";
-    if($this->OutputType == "HTML")
-    {
-      $V .= "<table border=0 width='100%'><tr>\n";
-      $V .= "<td valign='top'>\n";
-      $text = _("Database Contents");
-      $V .= "<h2>$text</h2>\n";
-      $V .= $this->DatabaseContents();
-      $V .= "</td>";
-      $V .= "<td valign='top'>\n";
-      $text = _("Database Metrics");
-      $V .= "<h2>$text</h2>\n";
-      $V .= $this->DatabaseMetrics();
-      $V .= "</td>";
-      $V .= "</tr></table>\n";
-      $text = _("Active FOSSology queries");
-      $V .= "<h2>$text</h2>\n";
-      $V .= $this->DatabaseQueries();
-      $text = _("Disk Space");
-      $V .= "<h2>$text</h2>\n";
-      $V .= $this->DiskFree();
+    $V .= "<table border=0 width='100%'><tr>\n";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Contents");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseContents();
+    $V .= "</td>";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Metrics");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseMetrics();
+    $V .= "</td>";
+    $V .= "</tr></table>\n";
+    $text = _("Active FOSSology queries");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseQueries();
+    $text = _("Disk Space");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DiskFree();
+
+    return $V;
+  }
+  
+  /**
+   * \brief execute a shell command
+   * \param $cmd - command to execute
+   * \return command results
+   */
+  protected function DoCmd($cmd)
+  {
+    $fin = popen($cmd,"r");
+    $buffer = "";
+    while (!feof($fin)) {
+      $buffer .= fread($fin, 8192);
     }
-
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    return;
-  } // Output()
-
+    pclose($fin);
+    return $buffer;
+  }
 }
+
 $NewPlugin = new dashboard;
 $NewPlugin->Initialize();

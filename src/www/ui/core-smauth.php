@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Symfony\Component\HttpFoundation\Session\Session;
+
 define("TITLE_core_smauth", _("SiteMinder_Login"));
 
 class core_smauth extends FO_Plugin {
@@ -54,8 +56,12 @@ class core_smauth extends FO_Plugin {
 
     $UID = siteminder_check();
 
-    session_name("Login");
-    session_start();
+    global $container;
+    /** @var Session $session */
+    $session = $container->get('session');
+    $session->setName('Login');
+    $session->start();
+
     if (array_key_exists('UserId', $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION['UserId'];
     $Now = time();
     if (!empty($_SESSION['time'])) {

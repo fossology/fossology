@@ -19,7 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class AgentRef
+use Fossology\Lib\Util\Object;
+
+class AgentRef extends Object
 {
   /**
    * @var int
@@ -36,7 +38,7 @@ class AgentRef
 
   public function __construct($agentId, $agentName, $agentRevision)
   {
-    $this->agentId = $agentId;
+    $this->agentId = intval($agentId);
     $this->agentName = $agentName;
     $this->agentRevision = $agentRevision;
   }
@@ -67,7 +69,7 @@ class AgentRef
   
   public function __toString()
   {
-    return 'AgentRef('.$this->agentId.','.$this->agentName.','.$this->agentRevision.')';
+    return 'AgentRef(' . $this->agentId . ', ' . $this->agentName . ', ' . $this->agentRevision . ')';
   }
 
 } 

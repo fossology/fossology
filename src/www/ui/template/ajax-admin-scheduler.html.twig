@@ -1,0 +1,23 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% import "include/macros.html.twig" as macro %}
+
+{% if jobOptions|length %}
+  {% if (operation == 'pause') or (operation == 'restart') or (operation == 'priority') %}
+  {{ "Select a job"|trans }}:
+  {% elseif (operation == 'status') or (operation == 'verbose') %}
+  {{ "Select the scheduler or a job"|trans }}:
+  {% endif %}
+ {{ macro.select('job_list',jobOptions,'job_list',0) }}
+{% else %} 
+  {{ 'No job available'|trans }}
+{% endif %}
+
+{% if operation == 'priority' %}
+<br/>{{ "Select a priority level"|trans }}: 
+{{ macro.select('priority_list',priorityList,'priority_list',0) }}      
+{% endif %}

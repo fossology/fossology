@@ -50,6 +50,11 @@ class HighlightTest extends \PHPUnit_Framework_TestCase
     $this->highlight->setLicenseId($this->licenseId);
   }
 
+  function tearDown()
+  {
+    M::close();
+  }
+
   public function testGetStart()
   {
     assertThat($this->highlight->getStart(), is($this->start));

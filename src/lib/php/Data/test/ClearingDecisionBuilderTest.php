@@ -19,197 +19,175 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 use DateTime;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
+use Mockery as M;
 
-class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase {
+class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
+{
 
-  /**
-   * @var bool
-   */
-  private $sameUpload=true;
+  /** @var bool */
+  private $sameUpload = true;
 
-  /**
-   * @var bool
-   */
-  private $sameFolder=true;
+  /** @var bool */
+  private $sameFolder = true;
 
-  /**
-   * @var LicenseRef[]
-   */
-  private $licenses ;
+  /** @var ClearingEvent */
+  private $clearingEvent;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $clearingId;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $uploadTreeId;
 
-  /**
-   * @var int
-   */
+  /** @var int */
   private $pfileId;
-  /**
-   * @var string
-   */
+  
+  /** @var string */
   private $userName;
-  /**
-   * @var int
-   */
+  
+  /** @var int */
   private $userId;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $type;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $comment;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $reportinfo;
 
-  /**
-   * @var string
-   */
+  /** @var string */
   private $scope;
 
-  /**
-   * @var DateTime
-   */
+  /** @var DateTime */
   private $date_added;
+
+  /** @var ClearingDecisionBuilder */
+  private $clearingDecisionBuilder;
 
   public function setUp()
   {
-    $this->sameUpload=true;
-    $this->sameFolder=true;
-    $this->licenses = array (new LicenseRef(8,"testSN", "testFN") ,new LicenseRef(100,"test2SN", "test2FN"), new LicenseRef(1007,"test3SN", "test3FN")  );
-    $this->clearingId=8;
-    $this->uploadTreeId=9;
-    $this->pfileId=10;
-    $this->userName="tester";
-    $this->userId=11;
-    $this->type="To be determined";
-    $this->comment="Test comment";
-    $this->reportinfo ="Test reportinfo";
-    $this->scope="upload";
-    $this->date_added = "2012-07-08 11:14:15.638276";
+    $this->sameUpload = true;
+    $this->sameFolder = true;
+    $this->clearingEvent = M::mock(ClearingEvent::classname());
+    $this->clearingId = 8;
+    $this->uploadTreeId = 9;
+    $this->pfileId = 10;
+    $this->userName = "tester";
+    $this->userId = 11;
+    $this->type = DecisionTypes::TO_BE_DISCUSSED;
+    $this->comment = "Test comment";
+    $this->reportinfo = "Test reportinfo";
+    $this->scope = DecisionScopes::ITEM;
+    $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
+
+    $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);
   }
 
-  public function testSameUpload()
+  public function tearDown()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setSameUpload ($this->sameUpload)
-      -> build();
-    assertThat($clearingDec->getSameUpload(), is($this->sameUpload));
+    M::close();
   }
 
   public function testSameFolder()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setSameFolder ($this->sameFolder)
-      -> build();
+    $clearingDec =$this->clearingDecisionBuilder 
+        ->setSameFolder($this->sameFolder)
+        ->build();
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
   }
 
-  public function testLicenses()
+  public function testClearingLicenses()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setLicenses ($this->licenses)
-      -> build();
-    assertThat($clearingDec->getLicenses(), is($this->licenses));
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setClearingEvents(array($this->clearingEvent))
+        ->build();
+    assertThat($clearingDec->getClearingEvents(), is(arrayContaining($this->clearingEvent)));
+  }
+
+  public function testPositiveLicenses()
+  {
+    $addedLic = M::mock(LicenseRef::classname());
+    
+    $addedClearingLic = M::mock(ClearingLicense::classname());
+    $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
+    $addedClearingLic->shouldReceive('getLicenseRef')->withNoArgs()->andReturn($addedLic);
+    
+    $removedClearingLic = M::mock(ClearingLicense::classname());
+    $removedClearingLic->shouldReceive('isRemoved')->andReturn(true);
+
+    $removedClearingEvent = M::mock(ClearingEvent::classname());
+    
+    $this->clearingEvent->shouldReceive('getClearingLicense')->andReturn($addedClearingLic);
+    $removedClearingEvent->shouldReceive('getClearingLicense')->andReturn($removedClearingLic);
+
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setClearingEvents(array($this->clearingEvent, $removedClearingEvent))
+        ->build();
+    assertThat($clearingDec->getPositiveLicenses(), is(arrayContaining($addedLic)));
   }
 
   public function testClearingId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setClearingId ($this->clearingId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setClearingId($this->clearingId)
+        ->build();
     assertThat($clearingDec->getClearingId(), is($this->clearingId));
   }
 
   public function testUploadTreeId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUploadTreeId ($this->uploadTreeId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUploadTreeId($this->uploadTreeId)
+        ->build();
     assertThat($clearingDec->getUploadTreeId(), is($this->uploadTreeId));
   }
 
   public function testPfileId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setPfileId ($this->pfileId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setPfileId($this->pfileId)
+        ->build();
     assertThat($clearingDec->getPfileId(), is($this->pfileId));
   }
 
   public function testUserName()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUserName ($this->userName)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUserName($this->userName)
+        ->build();
     assertThat($clearingDec->getUserName(), is($this->userName));
   }
 
   public function testUserId()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setUserId ($this->userId)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setUserId($this->userId)
+        ->build();
     assertThat($clearingDec->getUserId(), is($this->userId));
   }
 
   public function testType()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setType ($this->type)
-      -> build();
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setType($this->type)
+        ->build();
     assertThat($clearingDec->getType(), is($this->type));
-  }
-
-  public function testComment()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setComment ($this->comment)
-      -> build();
-    assertThat($clearingDec->getComment(), is($this->comment));
-  }
-
-  public function testReportinfo()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setReportinfo ($this->reportinfo)
-      -> build();
-    assertThat($clearingDec->getReportinfo(), is($this->reportinfo));
-  }
-
-  public function testScope()
-  {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setScope ($this->scope)
-      -> build();
-    assertThat($clearingDec->getScope(), is($this->scope));
   }
 
   public function testDateAdded()
   {
-    $clearingDec = ClearingDecisionBuilder::create()
-      -> setDateAdded ($this->date_added)
-      -> build();
-    assertThat($clearingDec->getDateAdded(), is(new DateTime($this->date_added)));
+    $clearingDec = $this->clearingDecisionBuilder
+        ->setDateAdded($this->date_added->getTimestamp())
+        ->build();
+    assertThat($clearingDec->getDateAdded(), is($this->date_added));
   }
-
-
-
 
 }
  

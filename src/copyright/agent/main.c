@@ -686,7 +686,6 @@ int check_copyright_table(PGconn* pgConn)
     str = PQresultErrorMessage(pgResult);
     if(longest_common(buffer, str, "does not exist") == 14)
     {
-      fprintf(cerr, "WARNING %s.%d: Could not find copyright table.", __FILE__, __LINE__);
       ret = setup_database(pgConn);
     }
     else

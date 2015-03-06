@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +20,8 @@
 namespace Fossology\UI\Page;
 
 use agent_adj2nest;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Monolog\Logger;
@@ -29,7 +29,6 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * \brief Upload a file from the users computer using the UI.
@@ -37,19 +36,19 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class UploadFilePage extends DefaultPlugin
 {
   const FILE_INPUT_NAME = 'fileInput';
-
   const NAME = "upload_file";
   const FOLDER_PARAMETER_NAME = 'folder';
+
   const DESCRIPTION_INPUT_NAME = 'descriptionInputName';
   const DESCRIPTION_VALUE = 'descriptionValue';
   const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
+  const PUBLIC_ALL = 'public';
+  const PUBLIC_GROUPS = 'protected';
 
   /** @var FolderDao */
   private $folderDao;
-
   /** @var UploadDao */
   private $uploadDao;
-
   /** @var Logger */
   private $logger;
 
@@ -75,25 +74,24 @@ class UploadFilePage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $this->folderDao->ensureTopLevelFolder();
-
+    
     $vars = array();
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
 
-      if ($request->isMethod('POST'))
+    if ($request->isMethod(Request::METHOD_POST))
+    {
+      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
+
+      if ($uploadFile !== null && !empty($folderId))
       {
-        $public = $request->get('public') == true;
-        $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
-
-        if ($uploadFile !== null && !empty($folderId))
-        {
-          list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description, empty($public) ? PERM_NONE : PERM_READ);
-          $description = $successful ? null : $description;
-
-        } else
-        {
-          $vars['message'] = "Error: no file selected";
-        }
+        list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description);
+        $description = $successful ? null : $description;
+      }
+      else
+      {
+        $vars['message'] = "Error: no file selected";
+      }
     }
 
     $vars['descriptionInputValue'] = $description ?: "";
@@ -102,20 +100,36 @@ class UploadFilePage extends DefaultPlugin
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
-    $folderStructure = $this->folderDao->getFolderStructure();
+
+    global $SysConf;
+    $rootFolder = $this->folderDao->getRootFolder($SysConf['auth'][Auth::USER_ID]);
+    $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
+    if (empty($folderId) && !empty($folderStructure))
+    {
+      $folderId = $folderStructure[0][FolderDao::FOLDER_KEY]->getId();
+    }
     $vars['folderStructure'] = $folderStructure;
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
-
+    
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $vars['parmAgentContents'] = array();
+    $vars['parmAgentFoots'] = array();
+    foreach($parmAgentList as $parmAgent) {
+      $agent = plugin_find($parmAgent);
+      $vars['parmAgentContents'][] = $agent->renderContent($request, $vars);
+      $vars['parmAgentFoots'][] = $agent->renderFoot($request, $vars);
+    }
+    
     $session = $request->getSession();
     $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time().':'.$_SERVER['REMOTE_ADDR']);
     $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
     $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+    if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
     {
-      $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $Skip);
+      $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
+      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
 
     return $this->render("upload_file.html.twig", $this->mergeWithDefault($vars));
@@ -125,13 +139,12 @@ class UploadFilePage extends DefaultPlugin
    * @brief Process the upload request.
    *
    * @param Request $request
-   * @param UploadedFile $uploadedFile
    * @param int $folderId
+   * @param UploadedFile $uploadedFile
    * @param string $description
-   * @param int $publicPermission
    * @return null|string
    */
-  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description, $publicPermission)
+  function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description)
   {
     global $MODDIR;
     global $SysConf;
@@ -169,10 +182,14 @@ class UploadFilePage extends DefaultPlugin
 
     $originalFileName = $uploadedFile->getClientOriginalName();
 
+    $public = $request->get('public');
+    $publicPermission = $public==self::PUBLIC_ALL ? PERM_READ : PERM_NONE;
+
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth']['UserId'];
-    $uploadId = JobAddUpload($userId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
     if (empty($uploadId))
     {
@@ -192,29 +209,62 @@ class UploadFilePage extends DefaultPlugin
     exec($wgetAgentCall, $wgetOutput, $wgetReturnValue);
     unlink($uploadedTempFile);
 
-    $jobId = JobAddJob($userId, $originalFileName, $uploadId);
+    if ($wgetReturnValue != 0)
+    {
+      $message = implode(' ', $wgetOutput);
+      if (empty($message))
+      {
+        $message = _("File upload failed.  Error:") . $wgetReturnValue;
+      }
+      return array(false, $message);
+    }
+        
+    $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
     global $Plugins;
     /** @var agent_adj2nest $adj2nestplugin */
     $adj2nestplugin = &$Plugins['agent_adj2nest'];
-
     $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
-    AgentCheckBoxDo($jobId, $uploadId);
 
-    if ($wgetReturnValue == 0)
-    {
-      $status = GetRunnableJobList();
-      $message = empty($status) ? _("Is the scheduler running? ") : "";
-      $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-      $message .= _("The file") . " " . $originalFileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
-      return array(true, $message);
-    } else
-    {
-      $message = implode(' ', $wgetOutput);
-      if (empty($message)) $message = _("File upload failed.  Error:") . $wgetReturnValue;
-      return array(false, $message);
+    $checkedAgents = checkedAgents();
+    AgentSchedule($jobId, $uploadId, $checkedAgents);
+
+    $errorMsg = '';
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $agentList = array_merge($plainAgentList, $parmAgentList);
+    foreach($parmAgentList as $parmAgent) {
+      $agent = plugin_find($parmAgent);
+      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
     }
+    
+    $status = GetRunnableJobList();
+    $message = empty($status) ? _("Is the scheduler running? ") : "";
+    $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+    $message .= _("The file") . " " . $originalFileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
+    if ($public==self::PUBLIC_GROUPS)
+    {
+      $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
+    }
+    return array(true, $message);
   }
-
+  
+  
+  /**
+   * @param string $hook 'ParmAgents'|'Agents'
+   * @return array
+   */
+  protected function getAgentPluginNames($hook='Agents')
+  {
+    $agentList = menu_find($hook, $maxDepth);
+    $agentPluginNames = array();
+    foreach($agentList as $parmAgent) {
+      $agent = plugin_find_id($parmAgent->URI);
+      if (!empty($agent)) {
+        $agentPluginNames[] = $agent;
+      }
+    }
+    return $agentPluginNames;
+  }
 }
 
 register_plugin(new UploadFilePage());
