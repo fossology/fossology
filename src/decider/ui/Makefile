@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014-2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -18,7 +18,7 @@ all:
 install:
 	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/reuser/$(MOD_SUBDIR)/{} \;
+	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/{} \;
 
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
