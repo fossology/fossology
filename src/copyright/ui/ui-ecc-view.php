@@ -34,7 +34,7 @@ class EccView extends Xpview
     $this->ajaxAction = "setNextPrevEcc";
     $this->skipOption = "noEcc";
     $this->hightlightTypeToStringMap = array(Highlight::ECC => 'Export Restriction');
-    $this->typeToHighlightTypeMap = array('ip' => Highlight::ECC);
+    $this->typeToHighlightTypeMap = array('ecc' => Highlight::ECC);
     $this->xptext = 'export restriction';
     parent::__construct(self::NAME, array(
         self::TITLE => _("View Export Control and Customs Analysis")
