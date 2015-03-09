@@ -1,8 +1,26 @@
+/*
+ Copyright (C) 2014-2015, Siemens AG
+ Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+ 
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 function addArsGo(formid, selectid)
 {
   var selectobj = document.getElementById(selectid);
-  var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
-  document.getElementById(formid).action = '$action' + '&agent=' + Agent_pk;
+  var agentId = selectobj.options[selectobj.selectedIndex].value;
+  document.getElementById(formid).action = '$action' + '&agent=' + agentId;
   document.getElementById(formid).submit();
   return;
 }
@@ -58,19 +76,21 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 });
 
 $(document).ready(function () {
-    if(typeof createLicHistTable==='function') {
-      createLicHistTable();
-    }
-    if(typeof createDirlistTable==='function') {
-      createDirlistTable();
-    }
-    $("form[data-autosubmit] select").change(function() {
-        $(this).closest('form').submit();
-    });
-    
-    var dirListFilter = getCookie('dirListFilter');
-    filterLicense(dirListFilter);
-    $('#dirlist_filter input').change(function() { setCookie('dirListFilter',$(this).val(),1);});
+  if (typeof createLicHistTable === 'function') {
+    createLicHistTable();
+  }
+  if (typeof createDirlistTable === 'function') {
+    createDirlistTable();
+  }
+  $("form[data-autosubmit] select").change(function () {
+    $(this).closest('form').submit();
+  });
+
+  var dirListFilter = getCookie('dirListFilter');
+  filterLicense(dirListFilter);
+  $('#dirlist_filter input').keyup(function () {
+    setCookie('dirListFilter', $(this).val(), 1);
+  });
 });
 
 
@@ -87,10 +107,10 @@ function clearSearchLicense() {
 }
 
 function clearSearchFiles() {
-    $('#dirlist_filter_license').val('');
-    var searchField =  $('#dirlist_filter input');
-    searchField.val('');
-    searchField.trigger('keyup');
+  $('#dirlist_filter_license').val('');
+  var searchField = $('#dirlist_filter input');
+  searchField.val('');
+  searchField.trigger('keyup');
 }
 
 
@@ -113,35 +133,28 @@ function scheduleScan(upload, agentName, resultEntityKey) {
         resultEntity.html("scan scheduled as " + linkToJob(jqPk) + "<br/>");
         $('#' + agentName.replace("agent_", "") + "_span").hide();
         queueUpdateCheck(jqPk, function () {
-          resultEntity.html(agentName.replace("agent_", "") + " done.<br/>");
-        }, function () {
-          resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
-        }
-
+            resultEntity.html(agentName.replace("agent_", "") + " done.<br/>");
+          }, function () {
+            resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
+          }
         );
-      } else {
+      }
+      else {
         resultEntity.html("Bad response from server. <br/>");
       }
       resultEntity.show();
     },
     error: function (responseobject) {
       var error = responseobject.responseJSON.error;
-      if (error) {
-        resultEntity.html("error: " + error + "<br/>");
-      } else {
-        resultEntity.html("error" + "<br/>");
-      }
+      resultEntity.html((error ? "error: " + error : "error") + "<br/>");
       resultEntity.show();
     }
   });
-
 }
-function dressContents ( data, type, full ) {
-    if (type === 'display')
-        return '<a href=\'#\' onclick=\'filterLicense(\"'+data +'\")\'>'+data+'</a>';
 
-    return data;
-
-
+function dressContents(data, type, full) {
+  if (type === 'display')
+    return '<a href=\'#\' onclick=\'filterLicense(\"' + data + '\")\'>' + data + '</a>';
+  return data;
 }
 
