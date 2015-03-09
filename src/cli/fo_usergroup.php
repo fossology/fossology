@@ -1,0 +1,125 @@
+<?php
+/***********************************************************
+ Copyright (C) 2015 Siemens AG
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+***********************************************************/
+
+
+use Fossology\Lib\Dao\UserDao;
+
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
+require_once("$MODDIR/lib/php/common-users.php");
+
+error_reporting(E_ALL); //E_NOTICE & E_STRICT);
+
+$usage = "Usage: " . basename($argv[0]) . " [options]
+  --username  = user/admin who want to interact
+  --password  = password of interacting user
+  --uname     = username to create if not exists
+  --gname     = groupname to create if not exists
+  --upasswd   = password of created user
+  --permlvl   = permission level (-1: None, ".UserDao::USER.": User, ".UserDao::ADMIN.": Admin, ".UserDao::ADVISOR.": Advisor)
+  --folderid  = root folder
+  ";
+$opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:'));
+
+if(array_key_exists('h',$opts))
+{
+  print "$usage\n";
+  return 0;
+}
+
+$adminName = array_key_exists("username", $opts) ? $opts["username"] : null;
+$passwd = array_key_exists("password", $opts) ? $opts["password"] : null;
+if(!account_check($adminName, $passwd, $group))
+{
+  print "Fossology login failure\n";
+  return 2;
+}
+else
+{
+  print "Logged in as user $adminName\n";
+}
+
+/** @var UploadDao */
+$userDao = $GLOBALS['container']->get("dao.user");
+$adminRow = $userDao->getUserByName($adminName);
+if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
+{
+  print "You have no permission to admin the user group thingy\n";
+  return 1;
+}
+
+$uName = array_key_exists("uname", $opts) ? $opts["uname"] : '';
+$user = $uName ? $userDao->getUserByName($uName) : false;
+
+if($uName && !$user)
+{
+  $pass = array_key_exists('upasswd', $opts) ? $opts['upasswd'] : '';
+  $seed = rand() . rand();
+  $hash = sha1($seed . $pass);
+  $desc = 'created via cli';
+  $perm = array_key_exists('permlvl', $opts) ? intval($opts['permlvl']) : 0;
+  $folder = array_key_exists('folderid', $opts) ? intval($opts['folderid']) : 1;
+  $agentList = userAgents();
+  $email = $emailNotify = '';
+  add_user($uName, $desc, $seed, $hash, $perm, $email, $emailNotify, $agentList, $folder);
+  $user = $userDao->getUserByName($uName);
+  print "added user $uName\n";
+}
+
+$gName = array_key_exists("gname", $opts) ? $opts["gname"] : '';
+if ($gName)
+{
+  $sql = "SELECT group_pk FROM groups WHERE group_name=$1";
+  $groupRow = $dbManager->getSingleRow($sql, array($gName), __FILE__ . __LINE__);
+  $groupId = $groupRow ? $groupRow['group_pk'] : $userDao->addGroup($gName);
+}
+else
+{
+  $groupId = false;
+}
+
+$permLvl = array_key_exists("permlvl", $opts) ? intval($opts["permlvl"]) : 0;
+if($user && $groupId)
+{
+  $sql = "SELECT group_user_member_pk id FROM group_user_member WHERE user_fk=$1 AND group_fk=$2";
+  $gumRow = $dbManager->getSingleRow($sql,array($user['user_pk'],$groupId),__FILE__.__LINE__);
+}
+
+if($user && $groupId && $permLvl<0 && $gumRow)
+{
+  $dbManager->prepare($stmt = __FILE__.__LINE__,
+      "delete from group_user_member where group_user_member_pk=$1");
+  $dbManager->freeResult($dbManager->execute($stmt, array($gumRow['id'])));
+  print "deleted membership of $uName in $gName\n";
+}
+else if($user && $groupId && $permLvl>=0 && $gumRow)
+{
+  $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
+      array($permLvl, $gumRow['id']), __FILE__.__LINE__);
+  print "update membership of $uName in $gName\n";
+}
+else if($user && $groupId && $permLvl>=0)
+{
+  $dbManager->insertTableRow('group_user_member',
+          array('group_perm'=>$permLvl,'user_fk'=>$user['user_pk'],'group_fk'=>$groupId));
+  print "inserted membership of $uName in $gName\n";
+}
+else
+{
+  print ".\n";
+}

@@ -44,13 +44,8 @@ function siteminder_check() {
  */
 function account_check(&$user, &$passwd, &$group = "")
 {
-  global $PG_CONN;
   global $SysConf;
-
-  global $container;
-
-  $dbManager = $container->get('db.manager');
-
+  $dbManager = $GLOBALS['container']->get('db.manager');
   /** get username/passwd from ~/.fossology.rc */
   $user_passwd_file = getenv("HOME") . "/.fossology.rc";
   if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
@@ -66,7 +61,6 @@ function account_check(&$user, &$passwd, &$group = "")
     if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
       $passwd = $user_passwd_array['password'];
   }
-
   /* check if the user name/passwd is valid */
   if (empty($user)) {
     /*
@@ -132,6 +126,7 @@ function account_check(&$user, &$passwd, &$group = "")
       }
     }
   }
+  return $userId;
 }
 
 /**
