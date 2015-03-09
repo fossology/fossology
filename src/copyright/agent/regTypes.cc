@@ -25,7 +25,9 @@ const std::string regCopyright::getRegex() {
 #define SPACES            SPACECLS "+"
 #define SPACESALL         "[[:space:]]*"
 #define PUNCT_OR_SPACE    "[[:punct:][:space:]]"
-#define NAME_OR_COMPANY    "(([[:alpha:]ÄäÖöÜüß]{1,3}\\.)|Co[or]p\\.|([[:alpha:]ÄäÖöÜüß]+)|(" EMAILRGX ")|(" WEBSITE "))"
+#define ABBR_AND_BRACED   "[A-Z]{2,7}\\([^)]+\\)"
+#define ALPHA             "[:alpha:]\u00c0-\u00d6\u00d9-\u00f6\u00f8-\u00ff"
+#define NAME_OR_COMPANY   "((" ABBR_AND_BRACED ")|([" ALPHA "]{1,3}\\.)|Co[or]p\\.|([" ALPHA "]+)|(" EMAILRGX ")|(" WEBSITE "))"
 #define NAMESLIST         NAME_OR_COMPANY "(([-, &]+)" NAME_OR_COMPANY ")*"
 #define DATE              "((19|20)[[:digit:]]{2,2}|[[:digit:]]{1,2})"
 #define DATESLIST         DATE "(([[:punct:][:space:]-]+)" DATE ")*"
@@ -147,10 +149,6 @@ const std::string regEcc::getRegex() {
     "|(space" SPACES "vehicle(s)?)"
     "|(dual" SPACES "use)"
    ")"
-   "[[:space:][:punct:]]+" // TODO what's the purpose of this???
-   "[[:alpha:]]*"
-   "[[:punct:]]*"
-   "[[:alpha:]]*"
-   "[[:print:]]{0,60}"     // \TODO
+   "[^)\n]{0,60}"     // \TODO
  );
 };
