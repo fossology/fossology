@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 205 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -34,88 +35,30 @@ class group_add extends FO_Plugin {
   }
 
 
-  /**
-   * \brief Add a group.
-   * \param $GroupName raw group name as entered by the user
-   * Returns NULL on success, string on failure.
-   */
-  function Add($GroupName) 
-  {
-    global $PG_CONN;
-    global $SysConf;
-
-    $user_pk = $SysConf['auth']['UserId'];
-
-    /* Get the parameters */
-    $Group = str_replace("'", "''", $GroupName);
-
-    /* Make sure groupname looks valid */
-    if (empty($Group)) 
-    {
-      $text = _("Error: Group name must be specified.");
-      return ($text);
-    }
-
-    /* See if the group already exists */
-    $sql = "SELECT * FROM groups WHERE group_name = '$Group'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
-      pg_free_result($result);
-      $sql = "INSERT INTO groups (group_name) VALUES ('$Group')";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-    }
-    else
-    {
-      pg_free_result($result);
-      $text = _("Group already exists.  Not added.");
-      return ($text);
-    }
-
-    /* Make sure it was added and get the group_pk */
-    $sql = "SELECT group_pk FROM groups WHERE group_name = '$Group'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
-      pg_free_result($result);
-      $text = _("Failed to create group");
-      return ($text . " $Group");
-    }
-    $row = pg_fetch_assoc($result);
-    $Group_pk = $row['group_pk'];
-    pg_free_result($result);
-
-    /* Add group admin to table group_user_member */
-    $sql = "INSERT INTO group_user_member (group_fk,user_fk,group_perm) VALUES ($Group_pk, $user_pk, 1)";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    return (NULL);
-  }
-
-
   public function Output()
   {
     $V = "";
     /* If this is a POST, then process the request. */
-    $Group = GetParm('groupname', PARM_TEXT);
-    if (!empty($Group)) 
+    $groupname = GetParm('groupname', PARM_TEXT);
+    if (!empty($groupname)) 
     {
-      $rc = $this->Add($Group);
-      if (empty($rc)) 
+      try
       {
+        $groupId = $GLOBALS['container']->get('dao.user')->addGroup($groupname);
+        /* Add group admin to table group_user_member */
+        $userId = $GLOBALS['SysConf']['auth']['UserId'];
+        $sql = "INSERT INTO group_user_member (group_fk,user_fk,group_perm) VALUES ($groupId, $userId, 1)";
+        $result = pg_query($GLOBALS['PG_CONN'], $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        pg_free_result($result);
+        
         $text = _("Group");
         $text1 = _("added");
-        $this->vars['message'] = "$text $Group $text1.";
-      } 
-      else 
+        $this->vars['message'] = "$text $groupname $text1.";
+      }
+      catch(\Exception $e)
       {
-        $this->vars['message'] = $rc;
+        $this->vars['message'] = $e->getMessage();
       }
     }
 
