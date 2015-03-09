@@ -1,3 +1,11 @@
+fossology (2.4.1-ng) unstable; urgency=low
+  * bugfix
+    * correct UserLevel for AdminDeleteGroup 
+  *improvements
+    * [SOSS-194] copyright agents works with umlauts
+  * new feature
+    * [SOSS-200] cli to create user, group and membership
+
 fossology (2.4.0-ng) unstable; urgency=low
 
   * bugfixes
