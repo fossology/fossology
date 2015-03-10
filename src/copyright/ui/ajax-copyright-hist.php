@@ -195,13 +195,13 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $grouping = " GROUP BY content, hash ";
 
-    $countQuery = "select count(*) from (SELECT substring(CP.content FROM 1 for 150) AS content, hash, count(*) $unorderedQuery  $totalFilter $grouping ) as K";
+    $countQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery $totalFilter $grouping) as K";
 
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
         $filterParms, __METHOD__.$tableName . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $countAllQuery = "select count(*) from (SELECT substring(CP.content FROM 1 for 150) AS content, hash, count(*) $unorderedQuery$grouping ) as K";
+    $countAllQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery$grouping) as K";
 
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
@@ -213,7 +213,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $filterParms[] = $limit;
     $range .= ' LIMIT $' . count($filterParms);
 
-    $sql = "SELECT substring(CP.content FROM 1 for 150) AS content, hash,  count(*)  as copyright_count  " .
+    $sql = "SELECT content, hash, count(*) as copyright_count  " .
         $unorderedQuery . $totalFilter . $grouping . $orderString . $range;
 
     $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName;

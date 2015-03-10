@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -20,25 +20,26 @@ use Fossology\Lib\Data\Highlight;
 
 require_once('Xpview.php');
 
-define("TITLE_ip_view", _("View patent Analysis"));
-
-class Ip_view extends Xpview
+class IpView extends Xpview
 {
+  const NAME = 'ip-view';
+
   function __construct()
   {
-    $this->Name = "ip-view";
-    $this->Title = TITLE_ip_view;
+    $this->Name = self::NAME;
     $this->decisionTableName = "ip_decision";
     $this->tableName = "ip";
     $this->modBack = 'ip-hist';
     $this->optionName = "skipFileIp";
     $this->ajaxAction = "setNextPrevIp";
     $this->skipOption = "noIp";
-    $this->hightlightTypeToStringMap= array(Highlight::IP => 'Patent');
-    $this->typeToHighlightTypeMap =  array('ip' => Highlight::IP);
-    parent::__construct();
-    $this->vars['xptext'] = 'patent';
+    $this->hightlightTypeToStringMap = array(Highlight::IP => 'Patent');
+    $this->typeToHighlightTypeMap = array('ip' => Highlight::IP);
+    $this->xptext = 'patent';
+    parent::__construct(self::NAME,array(
+        self::TITLE => _("View patent Analysis")
+    ));
   }
 }
-$NewPlugin = new Ip_view;
-$NewPlugin->Initialize();
+
+register_plugin(new IpView());

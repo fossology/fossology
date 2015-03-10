@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +25,9 @@ use Fossology\Lib\Data\Highlight;
 
 define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
 
-class agent_nomos_once extends FO_Plugin {
+class agent_nomos_once extends FO_Plugin
+{
+  const FILE_INPUT = 'file_input';
   public $HighlightInfoKeywords = array();
   public $HighlightInfoLicenses = array();
 
@@ -157,9 +160,9 @@ class agent_nomos_once extends FO_Plugin {
     }
 
     $tmp_name = '';
-    if (array_key_exists('file_input', $_FILES) && array_key_exists('tmp_name', $_FILES['file_input']))
+    if (array_key_exists(self::FILE_INPUT, $_FILES) && array_key_exists('tmp_name', $_FILES[self::FILE_INPUT]))
     {
-      $tmp_name = $_FILES['file_input']['tmp_name'];
+      $tmp_name = $_FILES[self::FILE_INPUT]['tmp_name'];
     }
 
     /* For REST API:
@@ -172,15 +175,17 @@ class agent_nomos_once extends FO_Plugin {
       return;
     }
     if (file_exists($tmp_name)) {
-      $this->vars['content'] = $this->htmlAnalyzedContent($tmp_name, $_FILES['file_input']['name']);
+      $this->vars['content'] = $this->htmlAnalyzedContent($tmp_name, $_FILES[self::FILE_INPUT]['name']);
     }
     else if ($this->OutputType=='HTML') {
-      return $this->renderTemplate('oneshot-upload.html.twig');
+      return $this->render('oneshot-upload.html.twig',$this->vars);
     }
     if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
       unlink($tmp_name);
     }
-    $_FILES['file_input'] = NULL;
+    unset($_FILES[self::FILE_INPUT]);
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    return $this->render($this->getTemplateName(),$this->vars);
   }
   
   private function htmlAnalyzedContent($tmp_name, $filename){

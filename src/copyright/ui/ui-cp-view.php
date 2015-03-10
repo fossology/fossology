@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -20,40 +20,30 @@ use Fossology\Lib\Data\Highlight;
 
 require_once('Xpview.php');
 
-/**
- * \file ui-cp-view.php
- * \brief View Copyright/Email/Url Analysis on an Analyzed file
- */
-
-define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
-
-class Copyright_view extends Xpview
+class CopyrightView extends Xpview
 {
+  const NAME = 'copyright-view';
 
   function __construct()
   {
-    $this->Name = "copyright-view";
-    $this->Title = TITLE_copyright_view;
+    $this->Name = self::NAME;
     $this->decisionTableName = "copyright_decision";
     $this->tableName = "copyright";
     $this->modBack = 'copyright-hist';
     $this->optionName = "skipFileCopyRight";
     $this->ajaxAction = "setNextPrevCopyRight";
     $this->skipOption = "noCopyright";
-    $this->hightlightTypeToStringMap= array(Highlight::COPYRIGHT => 'copyright remark',
+    $this->hightlightTypeToStringMap = array(Highlight::COPYRIGHT => 'copyright remark',
         Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address');
+    $this->xptext = 'copyright/e-mail/URL';
     $this->typeToHighlightTypeMap = array(
         'statement' => Highlight::COPYRIGHT,
         'email' => Highlight::EMAIL,
         'url' => Highlight::URL);
-    parent::__construct();
-
-    $this->vars['xptext'] = 'copyright/e-mail/URL';
+    parent::__construct(self::NAME,array(
+        self::TITLE => _("View Copyright/Email/Url Analysis")
+    ));
   }
-
-
-
 }
 
-$NewPlugin = new Copyright_view;
-$NewPlugin->Initialize();
+register_plugin(new CopyrightView());

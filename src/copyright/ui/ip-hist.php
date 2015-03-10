@@ -53,14 +53,13 @@ class IpHistogram  extends HistogramBase {
    * @param $upload_pk
    * @param $Uploadtree_pk
    * @param $filter
-   * @param $Agent_pk
+   * @param $agentId
    * @param $VF
    * @return string
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VPatent, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-
+    list($VPatent, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $V = "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' width='50%'>$VPatent</td><td valign='top'>$VF</td></tr>\n";

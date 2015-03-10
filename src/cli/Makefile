@@ -1,13 +1,14 @@
 # FOSSology Makefile - cli/
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2015 Siemens AG
 
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE = cp2foss.php fossjobs.php schema-export.php fo_nomos_license_list.php fo_copyright_list.php fo_bucket_list.php fossupload_status.php
-WRAP = cp2foss fossjobs schema-export fo_nomos_license_list fo_copyright_list fo_bucket_list fossupload_status
+EXE = cp2foss.php fossjobs.php schema-export.php fo_nomos_license_list.php fo_copyright_list.php fo_bucket_list.php fossupload_status.php fo_usergroup.php
+WRAP = cp2foss fossjobs schema-export fo_nomos_license_list fo_copyright_list fo_bucket_list fossupload_status fo_usergroup
 DOCS = cp2foss.pod fossjobs.pod
 MAN1FILES = $(DOCS:%.pod=%.1)
 HTMLFILES = $(DOCS:%.pod=%.html)

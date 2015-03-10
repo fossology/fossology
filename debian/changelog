@@ -1,3 +1,38 @@
+fossology (2.4.1-ng) unstable; urgency=low
+
+  * bugfix
+    * correct UserLevel for AdminDeleteGroup 
+  *improvements
+    * [SOSS-194] copyright agents works with umlauts
+  * new feature
+    * [SOSS-200] cli to create user, group and membership
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 9 Mar 2015 11:31:45 +0100
+
+fossology (2.4.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [issue #384] - fix Dashboard failure for Postgres>=9.2
+    * [issue #392] - fix cp2foss with option
+    * [...] - queryCondition did not fully restrict group permission
+    * [...] - 'Edit Uploaded File Properties' did not work correctly with subfolders
+
+  * improvements
+    * [SOSS-150] - File navigation performance issues
+    * [SOSS-171] - group base upload browse view
+    * [...] - codesniffer to check code style in Fossology\Lib
+    * [SOSS-197] - Highlight the Nomos Catchwords (aka seedwords, single word phrases)
+    * [SOSS-37] - common agent plugin
+    * [SOSS-111] - LATEST run of all available agents
+    * [SOSS-122] - allow browse-license even without scanner results
+
+  * new features
+    * [SOSS-115] - Set whole folder as "irrelevant"
+    * [SOSS-118] - Add new license UI: Add "License full text for report" field
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 5 Mar 2015 14:30:00 +0100
+
+
 fossology (2.3.0-ng) unstable; urgency=low
 
   * bugfixes

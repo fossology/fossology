@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -58,7 +58,10 @@ public:
                 "visit http://mysite.org/FAQ or write to info@mysite.org\n"
                 "maintained by benjamin drieu <benj@debian.org>\n"
                 "* Copyright (c) 1989, 1993\n"
-                "* The Regents of the University of California. All rights reserved."
+                "* The Regents of the University of California. All rights reserved.\n"
+                "Copyright (c) 2007 KISA(Korea Information Security Agency). All rights reserved."
+                "© 2007 HÜgh Jackman\n"
+                "© 2007 Hégh Jackman\n"
             );
 
     content = raw_content;
@@ -83,6 +86,9 @@ protected:
     expected.push_back(CopyrightMatch("Authors all the people at ABC", type, 238));
     expected.push_back(CopyrightMatch("maintained by benjamin drieu <benj@debian.org>", type, 456));
     expected.push_back(CopyrightMatch("Copyright (c) 1989, 1993\n  The Regents of the University of California. All rights reserved.", type, 505));
+    expected.push_back(CopyrightMatch("Copyright (c) 2007 KISA(Korea Information Security Agency). All rights reserved.", type, 598));
+    expected.push_back(CopyrightMatch("© 2007 HÜgh Jackman", type, 678));
+    expected.push_back(CopyrightMatch("© 2007 Hégh Jackman", type, 700));
 
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
@@ -109,7 +115,8 @@ protected:
 
     vector<CopyrightMatch> expected;
     expected.push_back(CopyrightMatch("space vehicle designed by NASA", type, 369));
-
+    expected.push_back(CopyrightMatch("Information Security Agency", type, 628));
+    
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   };
 

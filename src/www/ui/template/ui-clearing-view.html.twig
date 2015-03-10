@@ -18,7 +18,7 @@
           <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
             <u><b>{{ 'Legend:'| trans }}</b></u><br/>
               {% for entry in legendData %}
-                  <span style="{{ entry.style }}">{{ entry.text }}</span><br/>
+                <span style="{{ entry.style }}" class="{{ entry.class }}">{{ entry.text }}</span><br/>
               {% endfor %}
           </div>
         </td>

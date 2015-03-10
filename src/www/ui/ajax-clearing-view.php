@@ -181,6 +181,7 @@ class AjaxClearingView extends FO_Plugin
           list ($uploadTreeId, $licenseId) = explode(',', $id);
           $what = GetParm("columnName", PARM_STRING);
           $changeTo = GetParm("value", PARM_STRING);
+          // $changeTo = utf8_encode( GetParm("value", PARM_STRING) );
           $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
         return $this->createPlainResponse("success");
@@ -224,10 +225,10 @@ class AjaxClearingView extends FO_Plugin
       }
 
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
-      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='delete'></div></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class=\"delete\"></div></a>";
 
-      $reportInfoField = $reportInfo;
-      $commentField = $comment;
+      $reportInfoField = utf8_encode($reportInfo);
+      $commentField = utf8_encode($comment);
 
       $id = "$uploadTreeId,$licenseId";
       $table[$licenseShortName] = array('DT_RowId' => $id,
@@ -245,7 +246,7 @@ class AjaxClearingView extends FO_Plugin
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
         $licenseId = $clearingResult->getLicenseId();
-        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
+        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class=\"add\"></div></a>";
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);

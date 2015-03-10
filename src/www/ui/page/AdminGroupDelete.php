@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,12 +51,12 @@ class AdminGroupDelete extends DefaultPlugin
   protected function handle(Request $request)
   {
     global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
+    $userId = $SysConf['auth'][Auth::USER_ID];
     $vars = array();
 
     /** @var UserDao $userDao */
     $userDao = $this->getObject('dao.user');
-    $groupMap = $userDao->getDeletableAdminGroupMap($userId);
+    $groupMap = $userDao->getDeletableAdminGroupMap($userId,$_SESSION[Auth::USER_LEVEL]);
 
     $groupId = $request->get('grouppk');
     if (!empty($groupId))

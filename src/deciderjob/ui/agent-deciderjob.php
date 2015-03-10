@@ -1,7 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,84 +16,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**
- * \file agent-fodeciderjob.php
- * \brief run the deciderjob license agent
- */
-
-define("TITLE_agent_fodeciderjob", _("Automatic User License Decider"));
+use Fossology\Lib\Plugin\AgentPlugin;
 
 include_once(__DIR__ . "/../agent/version.php");
 
-class agent_fodeciderjob extends FO_Plugin
+class DeciderJobAgentPlugin extends AgentPlugin
 {
-  public $AgentName;
-
   const CONFLICT_STRATEGY_FLAG = "-k";
-
+    
   function __construct() {
     $this->Name = "agent_deciderjob";
-    $this->Title = TITLE_agent_fodeciderjob;
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->Title = _("Automatic User License Decider");
     $this->AgentName = AGENT_DECIDER_JOB_NAME;
 
     parent::__construct();
   }
 
   /**
-   * \brief  Register additional menus.
+   * @overwrite
    */
-  function RegisterMenus()
+  function preInstall()
   {
-    return 0;
+    // no menue entry
   }
-
+  
   /**
-   * \brief Check if the upload has already been successfully scanned.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version
-   **/
-  function AgentHasResults($upload_pk)
+   * @overwrite
+   * @param int $jobId
+   * @param int $uploadId
+   * @param string $errorMsg
+   * @param array $dependencies
+   * @param type $conflictStrategyId
+   */
+  
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $conflictStrategyId=null)
   {
-    return 0; /* this agent can be re run multiple times */
-  }
-
-  /**
-   * \brief Queue the decider agent.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
-   *  - It is already queued
-   *  - It has already been run by the latest agent version
-   *
-   * @param int $job_pk
-   * @param int $upload_pk
-   * @param &string $ErrorMsg - error message on failure
-   * @param array $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   * @param int|null $conflictStrategyId
-   * @returns
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $conflictStrategyId=null)
-  {
-    $Dependencies[] = "agent_adj2nest";
-    if ($conflictStrategyId !== null)
+    $dependencies[] = "agent_adj2nest";
+ 
+    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
+    if ($jobQueueId != 0)
     {
-      $args = $this::CONFLICT_STRATEGY_FLAG . $conflictStrategyId;
-    } else
-    {
-      $args = "";
+      return $jobQueueId;
     }
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk, $args);
+
+    $args = ($conflictStrategyId !== null) ? $this::CONFLICT_STRATEGY_FLAG.$conflictStrategyId : '';
+
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
   }
 }
 
-$NewPlugin = new agent_fodeciderjob();
+register_plugin(new DeciderJobAgentPlugin());
