@@ -138,3 +138,4 @@ utils/freshmeat/fm-paths.php
 variable.list
 nbproject/private/
 /src/cli/fossupload_status
+/src/cli/fo_usergroup
