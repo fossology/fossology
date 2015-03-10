@@ -7,7 +7,7 @@ fossology (2.4.1-ng) unstable; urgency=low
   * new feature
     * [SOSS-200] cli to create user, group and membership
 
- -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 9 Mar 2015 14:30:00 +0100
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 9 Mar 2015 11:31:45 +0100
 
 fossology (2.4.0-ng) unstable; urgency=low
 
