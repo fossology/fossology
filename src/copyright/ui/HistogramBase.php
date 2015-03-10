@@ -1,8 +1,6 @@
 <?php
-use Fossology\Lib\Dao\CopyrightDao;
-
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  * Author: J.Najjar
  *
  * This program is free software; you can redistribute it and/or
@@ -19,22 +17,19 @@ use Fossology\Lib\Dao\CopyrightDao;
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-class HistogramBase extends FO_Plugin {
+use Fossology\Lib\Dao\CopyrightDao;
+
+abstract class HistogramBase extends FO_Plugin {
   protected $agentName;
   /** @var  string */
   protected $viewName;
-
   /**  @var string */
   private $uploadtree_tablename;
-
   /**  @var CopyrightDao */
-
   private  $copyrightDao;
 
   function __construct()
   {
-    $this->Version = "1.0";
-    $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -46,7 +41,6 @@ class HistogramBase extends FO_Plugin {
     $this->renderer = $container->get('twig.environment');
 
     $this->vars['name']=$this->Name;
-
   }
 
   /**
@@ -62,8 +56,8 @@ class HistogramBase extends FO_Plugin {
 
     $sorting = json_encode($this->returnSortOrder());
 
-    $out=array("type"=> $type,  "sorting" =>$sorting, "uploadId" => $uploadId,
-        "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" =>$filter, "description" => $description);
+    $out = array("type" => $type, "sorting" => $sorting, "uploadId" => $uploadId,
+        "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" => $filter, "description" => $description);
 
     //TODO template this! For now I just template the js
     $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/>";
@@ -76,13 +70,11 @@ class HistogramBase extends FO_Plugin {
    * @param $upload_pk
    * @param $Uploadtree_pk
    * @param $filter
-   * @param $Agent_pk
+   * @param $agentId
    * @param $VF
    * @return string
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
-  {
-  }
+  abstract protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF);
 
   /**
    * \brief Given an $Uploadtree_pk, display: \n
@@ -97,8 +89,6 @@ class HistogramBase extends FO_Plugin {
    */
   protected function ShowUploadHist($upload_pk, $Uploadtree_pk, $Uri, $filter, $uploadtree_tablename, $Agent_pk)
   {
-    $V=""; // total return value
-
     list($ChildCount, $VF) = $this->getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk);
     $this->vars['childcount'] = $ChildCount;
     $this->vars['fileListing'] = $VF;
@@ -121,23 +111,17 @@ class HistogramBase extends FO_Plugin {
       }
       global $Plugins;
       $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
-      return($ModLicView->Output() );
+      return $ModLicView->Output();
     }
-
-    $V = $this->fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF);
-
-    return($V);
-  } // ShowUploadHist()
-
+    return $this->fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF);
+  }
 
 
   function OutputOpen()
   {
-
     if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
+      return 0;
     }
-
     return parent::OutputOpen();
   }
 
@@ -160,8 +144,6 @@ class HistogramBase extends FO_Plugin {
     /* Get uploadtree_tablename */
     $uploadtree_tablename = GetUploadtreeTableName($Upload);
     $this->uploadtree_tablename = $uploadtree_tablename;
-
-//     $OutBuf .= "<font class='text'>\n";
 
     /************************/
     /* Show the folder path */
@@ -201,9 +183,7 @@ class HistogramBase extends FO_Plugin {
         $OutBuf .= "</input>";
         $OutBuf .= "</div> \n";
         $OutBuf .= "</form>\n";
-
       }
-
       else
       {
         $AgentSelect = AgentSelect($Agent_name, $Upload, $dataset, $Agent_pk, "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
@@ -256,14 +236,11 @@ class HistogramBase extends FO_Plugin {
     }
     $OutBuf .= "</font>\n";
 
-
     $this->vars['scriptBlock'] = $this->createScriptBlock();
     $this->vars['pageContent'] = $OutBuf;
 
     return;
   }
-
-
 
   /**
    * @param $Uploadtree_pk
@@ -282,9 +259,9 @@ class HistogramBase extends FO_Plugin {
     $ChildCount = 0;
     $ChildLicCount = 0;
     $ChildDirCount = 0; /* total number of directory or containers */
-    foreach ($Children as $C)
+    foreach ($Children as $c)
     {
-      if (Iscontainer($C['ufile_mode']))
+      if (Iscontainer($c['ufile_mode']))
       {
         $ChildDirCount++;
       }
@@ -297,7 +274,7 @@ class HistogramBase extends FO_Plugin {
       {
         continue;
       }
-
+      global $Plugins;
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
       $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
@@ -378,7 +355,7 @@ class HistogramBase extends FO_Plugin {
   protected function isADirectory($Uploadtree_pk)
   {
     global $PG_CONN;
-    $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk';";
+    $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -397,16 +374,11 @@ class HistogramBase extends FO_Plugin {
   }
 
 
-
-
   public function getTemplateName()
   {
     return "copyrighthist.html.twig";
   }
 
-  protected  function createScriptBlock()
-  {
-  }
-
+  abstract protected function createScriptBlock();
 
 }

@@ -69,13 +69,13 @@ class CopyrightHistogram  extends HistogramBase {
    * @param $upload_pk
    * @param $Uploadtree_pk
    * @param $filter
-   * @param $Agent_pk
+   * @param $agentId
    * @param $VF
    * @return string
    */
-  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF)
+  protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     /* Combine VF and VLic */
     $text = _("Jump to");
