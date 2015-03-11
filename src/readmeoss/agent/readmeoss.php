@@ -72,7 +72,7 @@ class ReadmeOssAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
-    umask(0033);
+    umask(0133);
     $message = $this->generateReport($contents, $packageName);
 
     file_put_contents($fileName, $message);
