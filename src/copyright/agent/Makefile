@@ -10,7 +10,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -Weffc++ -fopenmp
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS)
@@ -25,8 +25,8 @@ EXE_ECC = ecc
 EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
 EXE_COV = $(EXE_COP)_cov
 
-OBJECTS = copyright.o matcher.o regexMatcher.o copyrightMatch.o regTypes.o cleanEntries.o
-OBJECTS_COP = copyrightUtils_cop.o copyrightState_cop.o database_cop.o
+OBJECTS = copyright.o regscan.o scanners.o regTypes.o cleanEntries.o
+OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
 OBJECTS_IP = copyrightUtils_ip.o copyrightState_ip.o database_ip.o
 OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
 

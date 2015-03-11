@@ -41,11 +41,11 @@ int main(int argc, char** argv)
   CopyrightState state = getState(dbManager, cliOptions);
   CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
-  fillMatchers(state);
+  fillScanners(state);
 
   if (!fileNames.empty())
   {
-    const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+    const list<const scanner*>& scanners = state.getScanners();
 
     const unsigned long fileNamesCount = fileNames.size();
 #pragma omp parallel
@@ -54,12 +54,25 @@ int main(int argc, char** argv)
       for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
       {
         const string fileName = fileNames[argn];
-        fo::File file(argn, fileName);
-        vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
+        // Read file into one string
+        string s;
+        ReadFileToString(fileName, s);
+        
+        list<match> l;
+        for (const scanner* sc : scanners)
+        {
+          sc->ScanString(s, l);
+        }
+        //findAllMatches(file, regexMatchers);
 
-        stringstream ss;
-        ss << fileName << " ::" << endl << matches << endl;
-        cout << ss.str();
+        cout << fileName << " ::" << endl;
+        // Output matches
+        for (match& m : l)
+        {
+          cout << '[' << m.start << ':' << m.end << ':' << m.type << "] '"
+            << s.substr(m.start, m.end - m.start)
+            << "'" << endl;
+        }
       }
     }
   }

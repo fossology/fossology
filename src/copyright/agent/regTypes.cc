@@ -12,15 +12,15 @@
 #include "regTypes.hpp"
 
 
-const  std::string regCopyright::getType(){
-  return std::string("statement");
+const char* regCopyright::getType(){
+  return "statement";
 };
 
 
 #define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
 #define WEBSITE  "(http|https|ftp)\\://[a-zA-Z0-9\\-\\.]+\\.[a-zA-Z]{2,4}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\\-\\._\\?\\,\'/\\\\+&amp;%\\$#\\=~])*[^\\.\\,\\)\\(\\s]"
 
-const std::string regCopyright::getRegex() {
+const char* regCopyright::getRegex() {
 #define SPACECLS          "[\\t ]"
 #define SPACES            SPACECLS "+"
 #define SPACESALL         "[[:space:]]*"
@@ -35,7 +35,7 @@ const std::string regCopyright::getRegex() {
 #define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
 #define COPYR_TXT         "copyright(s)?"
 
- return std::string(
+ return 
   "("
     "("
       "("
@@ -74,38 +74,34 @@ const std::string regCopyright::getRegex() {
       NAMESLIST
     ")"
   ")"
-  "\\.?"
- );
+  "\\.?";
 };
 
-const  std::string regURL::getType(){
-  return std::string("url");
+const char* regURL::getType(){
+  return "url";
 };
 
-const std::string regURL::getRegex() {
- return std::string(
-             "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])"
- );
+const char* regURL::getRegex() {
+ return    "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])";
 };
 
 
-const  std::string regEmail::getType(){
-  return std::string("email");
+const char* regEmail::getType(){
+  return "email";
 };
 
-const std::string regEmail::getRegex() {
- return std::string(EMAILRGX);
+const char* regEmail::getRegex() {
+ return EMAILRGX;
 };
 
 
 
-const  std::string regIp::getType(){
-  return std::string("ip");
+const char* regIp::getType(){
+  return "ip";
 };
 
-const std::string regIp::getRegex() {
- return std::string(
-   "("
+const char* regIp::getRegex() {
+ return "("
     "(patent(ability|ed|ee|ing))"
     "|((US|EU)" SPACES "(PAT|patents))"
     "|(USPTO|PCT)"
@@ -123,17 +119,16 @@ const std::string regIp::getRegex() {
    "[[:alpha:]]*"
    "[[:space:]]*"
    "[[:print:]]{0,60}"     // \TODO
- );
+ ;
 };
 
 
-const  std::string regEcc::getType(){
-  return std::string("ecc");
+const  char* regEcc::getType(){
+  return "ecc";
 };
 
-const std::string regEcc::getRegex() {
- return std::string(
-   "("
+const char* regEcc::getRegex() {
+ return "("
     "eccn|tsu|ecc|ccl|wco"
     "|(export" SPACES "control)"
     "|(customs)"
@@ -149,6 +144,6 @@ const std::string regEcc::getRegex() {
     "|(space" SPACES "vehicle(s)?)"
     "|(dual" SPACES "use)"
    ")"
-   "[^)\n]{0,60}"     // \TODO
- );
+   "[^)\n]{0,60}";     // \TODO
 };
+

@@ -140,58 +140,39 @@ CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
   return CopyrightState(agentID, cliOptions);
 }
 
-void fillMatchers(CopyrightState& state)
+void fillScanners(CopyrightState& state)
 {
   const CliOptions& cliOptions = state.getCliOptions();
 
-  state.addMatcher(cliOptions.getExtraRegexes());
+  const std::list<regexScanner>& extraRegexes =cliOptions.getExtraRegexes();
+  for (const regexScanner& sc : extraRegexes)
+    state.addScanner(&sc);
 
 #ifdef IDENTITY_COPYRIGHT
   unsigned types = cliOptions.getOptType();
 
   if (types & 1<<0)
-    state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+    //state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
+    state.addScanner(new hCopyrightScanner());
+    // TODO Memory in these pointers are never deleted
 
   if (types & 1<<1)
-    state.addMatcher(RegexMatcher(regURL::getType(), regURL::getRegex()));
+    state.addScanner(new regexScanner(regURL::getRegex(), regURL::getType()));
 
   if (types & 1<<2)
-    state.addMatcher(RegexMatcher(regEmail::getType(), regEmail::getRegex(), 1)); // TODO move 1 to getRegexId
+    state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType()));
 #endif
 
 #ifdef IDENTITY_IP
-  state.addMatcher(RegexMatcher(regIp::getType(), regIp::getRegex()));
+  state.addScanner(new regexScanner(regIp::getRegex(), regIp::getType()));
 #endif
 
 #ifdef IDENTITY_ECC
-  state.addMatcher(RegexMatcher(regEcc::getType(), regEcc::getRegex()));
+  state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
 #endif
-
-  if (cliOptions.isVerbosityDebug())
-  {
-    const vector<RegexMatcher>& matchers = state.getRegexMatchers();
-
-    for (auto it = matchers.begin(); it != matchers.end(); ++it) {
-      std::cout << *it << std::endl;
-    }
-  }
 }
 
-vector<CopyrightMatch> matchStringToRegexes(const string& content, vector<RegexMatcher> matchers)
-{
-  vector<CopyrightMatch> result;
-
-  typedef std::vector<RegexMatcher>::const_iterator rgm;
-  for (rgm item = matchers.begin(); item != matchers.end(); ++item)
-  {
-    vector<CopyrightMatch> newMatch = item->match(content);
-    result.insert(result.end(), newMatch.begin(), newMatch.end());
-  }
-
-  return result;
-}
-
-bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
+bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
   {
@@ -199,18 +180,16 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId
   }
 
   size_t count = 0;
-  typedef vector<CopyrightMatch>::const_iterator cpm;
-  for (cpm it = matches.begin(); it != matches.end(); ++it)
+  for (const match& m : matches)
   {
-    const CopyrightMatch& match = *it;
 
     DatabaseEntry entry;
     entry.agent_fk = agentId;
-    entry.content = match.getContent();
-    entry.copy_endbyte = match.getStart() + match.getLength();
-    entry.copy_startbyte = match.getStart();
+    entry.content = s.substr(m.start, m.end - m.start);
+    entry.copy_endbyte = m.end;
+    entry.copy_startbyte = m.start;
     entry.pfile_fk = pFileId;
-    entry.type = match.getType();
+    entry.type = m.type;
 
     if (normalizeDatabaseEntry(entry))
     {
@@ -229,9 +208,9 @@ bool saveToDatabase(const vector<CopyrightMatch>& matches, unsigned long pFileId
   }
 
   return copyrightDatabaseHandler.commit();
-};
+}
 
-vector<CopyrightMatch> findAllMatches(const fo::File& file, vector<RegexMatcher> const regexMatchers)
+/*vector<CopyrightMatch> findAllMatches(const fo::File& file, list<RegexMatcher> const& regexMatchers)
 {
   if (!file.isReadable())
   {
@@ -257,11 +236,17 @@ void normalizeContent(string& content)
       charachter = ' ';
   }
 }
+*/
 
-void matchFileWithLicenses(const fo::File& file, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
+void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
 {
-  vector<CopyrightMatch> matches = findAllMatches(file, state.getRegexMatchers());
-  saveToDatabase(matches, file.getId(), state.getAgentId(), databaseHandler);
+  list<match> l;
+  const list<const scanner*>& scanners = state.getScanners();
+  for (const scanner* sc : scanners)
+  {
+    sc->ScanString(sContent, l);
+  }
+  saveToDatabase(sContent, l, pFileId, state.getAgentId(), databaseHandler);
 }
 
 void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
@@ -281,9 +266,10 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   }
   if (fileName)
   {
-    fo::File file(pFileId, fileName);
-
-    matchFileWithLicenses(file, state, databaseHandler);
+    string s;
+    ReadFileToString(fileName, s);
+    
+    matchFileWithLicenses(s, pFileId, state, databaseHandler);
 
     free(fileName);
     free(pFile);
@@ -322,3 +308,4 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
 
   return true;
 }
+

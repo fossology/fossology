@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014-2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -18,7 +18,7 @@ CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm  -lst
 
 EXE = test_copyright
 
-OBJECTS = test_regex.o test_RegMatcher.o
+OBJECTS = test_regex.o test_scanners.o
 OBJECTS_ACC = test_accuracy.o
 COVERAGE =
 
