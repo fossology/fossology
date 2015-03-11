@@ -142,3 +142,4 @@ nbproject/private/
 /src/cli/fossupload_status
 /src/cli/fo_usergroup
 /src/cli/fo_import_licenses
+src/copyright/agent_tests/Unit/results.html
