@@ -310,7 +310,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   protected function doUpdate($upload, $item, $hash,$type)
   {
-    $content = GetParm("value", PARM_STRING);
+    $content = GetParm("value", PARM_RAW);
     if (!$content)
     {
       header('Content-type: text/plain');
