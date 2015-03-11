@@ -138,6 +138,17 @@ int zipdir(char* name)
             }
             exit(5);
           }
+          cmd[0] = g_strdup("chmod");
+          cmd[1] = g_strdup("0644");
+          cmd[2] = g_strdup_printf("%s/%s", targetdir, zipname);
+          cmd[3] = NULL;
+          cmd[4] = NULL;
+          char* chmodcmd = "/bin/chmod";
+          if( execv(chmodcmd,cmd) )
+          {
+            printf("cannot chmod");
+            exit(7);
+          }
         }
         else
         {
