@@ -238,7 +238,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   private function getOrderString()
   {
-
     $columnNamesInDatabase = array('copyright_count', 'content');
 
     $defaultOrder = CopyrightHistogram::returnSortOrder();

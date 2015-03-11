@@ -128,116 +128,112 @@ abstract class HistogramBase extends FO_Plugin {
   public function Output()
   {
     $OutBuf="";
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
+    $uploadId = GetParm("upload",PARM_INTEGER);
+    $item = GetParm("item",PARM_INTEGER);
     $filter = GetParm("filter",PARM_STRING);
 
     /* check upload permissions */
-    $UploadPerm = GetUploadPerm($Upload);
+    $UploadPerm = GetUploadPerm($uploadId);
     if ($UploadPerm < PERM_READ)
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
-      return;
+      return "<h2>$text</h2>";
     }
 
     /* Get uploadtree_tablename */
-    $uploadtree_tablename = GetUploadtreeTableName($Upload);
+    $uploadtree_tablename = GetUploadtreeTableName($uploadId);
     $this->uploadtree_tablename = $uploadtree_tablename;
 
     /************************/
     /* Show the folder path */
     /************************/
 
-    $this->vars['dir2browse'] =  Dir2Browse($this->Name,$Item,NULL,1,"Browse",-1,'','',$uploadtree_tablename);
-    if (!empty($Upload))
+    $this->vars['dir2browse'] =  Dir2Browse($this->Name,$item,NULL,1,"Browse",-1,'','',$uploadtree_tablename);
+    if (empty($uploadId))
     {
-      /** advanced interface allowing user to select dataset (agent version) */
-      $Agent_name = $this->agentName;
-      $dataset = $this->agentName."_dataset";
-      $arstable = $this->agentName."_ars";
-      /** get proper agent_id */
-      $Agent_pk = GetParm("agent", PARM_INTEGER);
-      if (empty($Agent_pk))
-      {
-        $Agent_pk = LatestAgentpk($Upload, $arstable);
-      }
-
-      if ($Agent_pk == 0)
-      {
-        /** schedule copyright */
-        $OutBuf .= ActiveHTTPscript("Schedule");
-        $OutBuf .= "<script language='javascript'>\n";
-        $OutBuf .= "function Schedule_Reply()\n";
-        $OutBuf .= "  {\n";
-        $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
-        $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
-        $OutBuf .= "  }\n";
-        $OutBuf .= "</script>\n";
-
-        $OutBuf .= "<form name='formy' method='post'>\n";
-        $OutBuf .= "<div id='msgdiv'>\n";
-        $OutBuf .= _("No data available.");
-        $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
-        $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_copyright \")'>\n";
-        $OutBuf .= "</input>";
-        $OutBuf .= "</div> \n";
-        $OutBuf .= "</form>\n";
-      }
-      else
-      {
-        $AgentSelect = AgentSelect($Agent_name, $Upload, $dataset, $Agent_pk, "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
-
-        /** change the copyright  result when selecting one version of copyright */
-        if (!empty($AgentSelect))
-        {
-          $action = Traceback_uri() . "?mod=copyrighthist&upload=$Upload&item=$Item";
-
-          $OutBuf .= "<script type='text/javascript'>
-            function addArsGo(formid, selectid)
-            {
-              var selectobj = document.getElementById(selectid);
-              var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
-              document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
-              document.getElementById(formid).submit();
-              return;
-            }
-          </script>";
-
-          /* form to select new dataset, show dataset */
-          $OutBuf .= "<form action='$action' id='newds' method='POST'>\n";
-          $OutBuf .= $AgentSelect;
-          $OutBuf .= "</form>";
-        }
-
-        $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
-
-        /* Select list for filters */
-        $SelectFilter = "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$Upload, $Item)'>";
-
-        $Selected = ($filter == 'legal') ? "selected" : "";
-        $text = _("Show all");
-        $SelectFilter .= "<option $Selected value='all'>$text";
-
-        $text = _("Show all legal copyrights");
-        $SelectFilter .= "<option $Selected value='legal'>$text";
-
-        $text = _("Show files without licenses");
-        $Selected = ($filter == 'nolics') ? "selected" : "";
-        $SelectFilter .= "<option $Selected value='nolics'>$text";
-
-        $SelectFilter .= "</select>";
-        $OutBuf .= $SelectFilter;
-
-        list($tables, $tableVars) = $this->ShowUploadHist($Upload, $Item, $Uri, $filter, $uploadtree_tablename, $Agent_pk);
-        $this->vars['tables'] = $tableVars;
-        $OutBuf .= $tables;
-      }
+      return 'no item selected';  
     }
-    $OutBuf .= "</font>\n";
+    
+    /** advanced interface allowing user to select dataset (agent version) */
+    $dataset = $this->agentName."_dataset";
+    $arstable = $this->agentName."_ars";
+    /** get proper agent_id */
+    $agentId = GetParm("agent", PARM_INTEGER);
+    if (empty($agentId))
+    {
+      $agentId = LatestAgentpk($uploadId, $arstable);
+    }
 
+    if ($agentId == 0)
+    {
+      /** schedule copyright */
+      $OutBuf .= ActiveHTTPscript("Schedule");
+      $OutBuf .= "<script language='javascript'>\n";
+      $OutBuf .= "function Schedule_Reply()\n";
+      $OutBuf .= "  {\n";
+      $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200 || Schedule.status==400))\n";
+      $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
+      $OutBuf .= "  }\n";
+      $OutBuf .= "</script>\n";
+
+      $OutBuf .= "<form name='formy' method='post'>\n";
+      $OutBuf .= "<div id='msgdiv'>\n";
+      $OutBuf .= _("No data available.");
+      $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+      $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_copyright \")'>\n";
+      $OutBuf .= "</input>";
+      $OutBuf .= "</div> \n";
+      $OutBuf .= "</form>\n";
+
+      $this->vars['pageContent'] = $OutBuf;
+      return;
+    }
+
+    $AgentSelect = AgentSelect($this->agentName, $uploadId, $dataset, $agentId, "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
+
+    /** change the copyright  result when selecting one version of copyright */
+    if (!empty($AgentSelect))
+    {
+      $action = Traceback_uri() . "?mod=copyright-hist&upload=$uploadId&item=$item";
+
+      $OutBuf .= "<script type='text/javascript'>
+        function addArsGo(formid, selectid)
+        {
+          var selectobj = document.getElementById(selectid);
+          var Agent_pk = selectobj.options[selectobj.selectedIndex].value;
+          document.getElementById(formid).action='$action'+'&agent='+Agent_pk;
+          document.getElementById(formid).submit();
+          return;
+        }
+      </script>";
+
+      $OutBuf .= "<form action=\"$action\" id=\"newds\" method=\"POST\">$AgentSelect</form>";
+    }
+
+    switch($filter)
+    {
+      case 'all':
+        $selectKey = 'all';
+        break;
+      case 'nolic':
+        $selectKey = 'nolic';
+        break;
+      default:
+        $selectKey = 'legal';
+    }
+    $OutBuf .= "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
+    foreach(array('all'=>_("Show all"), 'legal'=>_("Show all legal copyrights"), 'nolic'=> _("Show files without licenses")) as $key=>$text)
+    {
+      $selected = ($selectKey == $key) ? "selected" : "";
+      $OutBuf .= "<option $selected value=\"$key\">$text</option>";
+    }
+    $OutBuf .= "</select>";
+
+    $uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
+    list($tables, $tableVars) = $this->ShowUploadHist($uploadId, $item, $uri, $selectKey, $uploadtree_tablename, $agentId);
+    $this->vars['tables'] = $tableVars;
+    $this->vars['pageContent'] = $OutBuf . $tables;
     $this->vars['scriptBlock'] = $this->createScriptBlock();
-    $this->vars['pageContent'] = $OutBuf;
 
     return;
   }
