@@ -1,5 +1,5 @@
 function createTable{{ table.type }}() {
-  var oTable = $('#copyright{{ table.type }}').dataTable({
+  var otable = $('#copyright{{ table.type }}').dataTable({
     "bServerSide": true,
     "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
     "fnServerData": function (sSource, aoData, fnCallback) {
@@ -24,32 +24,16 @@ function createTable{{ table.type }}() {
     "bStateSave": true,
     "sCookiePrefix": "fossology_",
     "bRetrieve": true
-  });
-  oTable.makeEditable({
+  }).makeEditable({
     "sReadOnlyCellClass": "read_only",
     "sSelectedRowClass": "selectedRow",
-    "sUpdateURL": function(value, settings) {
-      var sentObject = {};
-      var rowId = oTable.fnGetPosition(this)[0];
-      var columnPosition = oTable.fnGetPosition(this)[1];
-      var columnId = oTable.fnGetPosition(this)[2];
-      var id = $(this).parents("tr:first")[0].id;
-      sentObject["rowid"]= rowId;
-      sentObject["columnpos"]= columnPosition;
-      sentObject["id"]= id;
-      sentObject["value"]=value;
-      $.ajax({
-        type: "POST",
-        url: "?mod=ajax-copyright-hist&action=update&type={{ table.type }}",
-        data: sentObject
-      })
-      return value;
-    },
+    "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ table.type }}",
     "fnOnEditing": function(aInput, oSettings, sOriginal, nGetCellID) {
-      var value = aInput[0].value;
+      var value = input[0].value;
       var isValid = (value) && !(/^\s*$/.test(value));
+      alert(oSettings);
       if (isValid) {
-        var id = aInput.parents("tr:first")[0].id;
+        var id = input.parents("tr:first")[0].id;
         var hash = id.split(",")[2];
         $("#delete{{ table.type }}" + hash).hide();
         var updateElement = $("#update{{ table.type }}" + hash);
@@ -58,9 +42,9 @@ function createTable{{ table.type }}() {
       }
       return isValid;
     },
-    "sSuccessResponse": "success" 
+    "sSuccessResponse": "success"
   });
-  return oTable;
+  return otable;
 }
 
 function delete{{ table.type }}(upload, item, hash, kind) {
