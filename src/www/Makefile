@@ -14,31 +14,32 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = ui ui_tests
+DIRS = ui
 TESTDIR = ui_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
 
 uninstall:
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage install uninstall clean

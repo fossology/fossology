@@ -1,7 +1,7 @@
 <?php
 /*
 Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
+Author: Johannes Najjar, Steffen Weber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,14 +20,56 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecision extends ClearingDecisionData
+class ClearingDecision extends Object
 {
+  /** @var bool */
+  private $sameFolder;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
+  /** @var int */
+  private $clearingId;
+  /** @var int */
+  private $uploadTreeId;
+  /** @var int */
+  private $pfileId;
+  /** @var string */
+  private $userName;
+  /** @var int */
+  private $userId;
+  /** @var int */
+  private $type;
+  /** @var string */
+  private $comment;
+  /** @var string */
+  private $reportinfo;
+  /** @var int */
+  private $scope;
+  /** @var DateTime */
+  private $dateAdded;
 
-  public function __construct($sameFolder, $sameUpload, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type, $scope, $date_added, $licenses, $comment = "", $reportinfo = "")
+  /**
+   * @param $sameFolder
+   * @param int $clearingId
+   * @param $uploadTreeId
+   * @param $pfileId
+   * @param $userName
+   * @param $userId
+   * @param int $type
+   * @param int $scope
+   * @param $date_added
+   * @param ClearingEvent[] $clearingEvents
+   * @param string $comment
+   * @param string $reportinfo
+   * @internal param $licenses
+   */
+  public function __construct($sameFolder, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
+          $scope, $date_added, $clearingEvents, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
-    $this->sameUpload = $sameUpload;
     $this->clearingId = $clearingId;
     $this->uploadTreeId = $uploadTreeId;
     $this->pfileId = $pfileId;
@@ -35,10 +77,10 @@ class ClearingDecision extends ClearingDecisionData
     $this->userId = $userId;
     $this->type = $type;
     $this->scope = $scope;
-    $this->date_added = $date_added;
+    $this->dateAdded = $date_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
-    $this->licenses = $licenses;
+    $this->clearingEvents = $clearingEvents;
   }
 
   /**
@@ -62,15 +104,45 @@ class ClearingDecision extends ClearingDecisionData
    */
   public function getDateAdded()
   {
-    return $this->date_added;
+    return $this->dateAdded;
   }
 
   /**
-   * @return \Fossology\Lib\Data\LicenseRef[]
+   * @return ClearingLicense[]
    */
-  public function getLicenses()
+  public function getClearingLicenses()
   {
-    return $this->licenses;
+    $clearingLicenses = array();
+    foreach($this->clearingEvents as $clearingEvent) {
+      $clearingLicenses[] = $clearingEvent->getClearingLicense();
+    }
+    return $clearingLicenses;
+  }
+
+  /**
+   * @return LicenseRef[]
+   */
+  public function getPositiveLicenses()
+  {
+    $result = array();
+    foreach($this->clearingEvents as $clearingEvent)
+    {
+      $clearingLicense = $clearingEvent->getClearingLicense();
+      if (!$clearingLicense->isRemoved())
+      {
+        $result[] = $clearingLicense->getLicenseRef();
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * @return ClearingEvent[]
+   */
+  public function getClearingEvents()
+  {
+    return $this->clearingEvents;
   }
 
   /**
@@ -98,15 +170,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return boolean
-   */
-  public function getSameUpload()
-  {
-    return $this->sameUpload;
-  }
-
-  /**
-   * @return string
+   * @return int
    */
   public function getScope()
   {
@@ -114,7 +178,7 @@ class ClearingDecision extends ClearingDecisionData
   }
 
   /**
-   * @return string
+   * @return int
    */
   public function getType()
   {
@@ -143,6 +207,38 @@ class ClearingDecision extends ClearingDecisionData
   public function getUserName()
   {
     return $this->userName;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isInScope()
+  {
+    switch ($this->getScope())
+    {
+      case 'global': return true;
+      case 'upload': return $this->sameFolder;
+    }
+    return false;
+  }
+  
+  /**
+   * @return int
+   */
+  public function getTimeStamp()
+  {
+    return $this->dateAdded->getTimestamp();
+  }
+
+  function __toString()
+  {
+    $output = "ClearingDecision(#" . $this->clearingId . ", ";
+
+    foreach ($this->clearingLicenses as $clearingLicense) {
+      $output .= ($clearingLicense->isRemoved() ? "-": "" ). $clearingLicense->getShortName() . ", ";
+    }
+
+    return $output . $this->getUserName() . ")";
   }
 
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Daniele Fognini
 
 This program is free software; you can redistribute it and/or
@@ -46,9 +46,18 @@ class HighlightRenderer extends Object
       Highlight::COPYRIGHT => 'lightblue',
       Highlight::EMAIL => 'yellow',
       Highlight::URL => 'orange',
+      Highlight::BULK => '#EFBE76',
 
       Highlight::UNDEFINED => self::DEFAULT_COLOR
   );
+
+  /**
+   * @return array
+   */
+  public function getColorMapping()
+  {
+    return $this->colorMapping;
+  }
 
   /**
    * @param SplitPosition $entry
@@ -104,7 +113,7 @@ class HighlightRenderer extends Object
    */
   public function createStyleWithPadding($type, $title, $depth = 0)
   {
-    $style = $this->createStyle($type, $title);
+    $style = $this->createStartSpan($type, $title);
     if ($depth < self::DEFAULT_PADDING)
     {
       $padd = (2 * (self::DEFAULT_PADDING - $depth - 2)) . 'px';
@@ -131,7 +140,7 @@ class HighlightRenderer extends Object
    * @param string $title
    * @return string
    */
-  public function createStyle($type, $title)
+  public function createStartSpan($type, $title)
   {
     if ($type == 'K ' || $type == 'K')
     {
@@ -140,6 +149,22 @@ class HighlightRenderer extends Object
     {
       $color = $this->determineColor($type);
       return $this->createHighlightSpanStart($color, $title);
+    }
+  }
+
+  /**
+   * @param string $type
+   * @return string
+   */
+  public function createStyle($type)
+  {
+    if ($type == 'K ' || $type == 'K')
+    {
+      return "font-weight: bold";
+    } else
+    {
+      $color = $this->determineColor($type);
+      return "background-color:$color;";
     }
   }
 
@@ -174,5 +199,32 @@ class HighlightRenderer extends Object
     }
   }
 
+
+  /**
+   * @param boolean $containsDiff
+   * @return array
+   */
+  public function getLegendData($containsDiff)
+  {
+    $data = array();
+
+    $colorDefinition = $containsDiff
+        ? array(
+            '' => _('license text:'),
+            Highlight::MATCH => _('&nbsp;- identical'),
+            Highlight::CHANGED => _('&nbsp;- modified'),
+            Highlight::ADDED => _('&nbsp;- added'),
+            Highlight::DELETED => _('&nbsp;- removed'),
+            Highlight::SIGNATURE => _('license relevant text'),
+            Highlight::KEYWORD => _('keyword'),
+            Highlight::BULK => _('bulk'))
+        : array(
+            Highlight::UNDEFINED => _("license relevant text"));
+    foreach ($colorDefinition as $colorKey => $txt)
+    {
+      $data[] = array('style' => $colorKey ? $this->createStyle($colorKey) : '', 'text' => $txt);
+    }
+    return $data;
+  }
 
 } 

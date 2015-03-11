@@ -1,0 +1,11 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<a id="{{ fullName|e() }}" href="{{ actionUri }}"
+   {% if target %} target="{{ target }}"{% endif %}
+   {% if (uri is empty) and (subMenu is empty) %} style="color:#C0C0C0;"{% endif %}
+   >{{ name }}{% if (subMenu is not empty) and (indent > 0) %}<span>&raquo;</span>{% endif %}
+</a>

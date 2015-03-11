@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -21,7 +21,6 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Html\LinkElement;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -48,14 +47,21 @@ class CopyrightDao extends Object
     $this->uploadDao = $uploadDao;
     $this->logger = new Logger(self::className());
   }
-
+  
+  
   /**
    * @param int $uploadTreeId
+   * @param string $tableName
+   * @param array $typeToHighlightTypeMap
+   * @throws \Exception
    * @return Highlight[]
    */
-  public function getCopyrightHighlights($uploadTreeId)
+  public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
+                                                                        'statement' => Highlight::COPYRIGHT,
+                                                                        'email' => Highlight::EMAIL,
+                                                                        'url' => Highlight::URL)
+   )
   {
-
     $pFileId = 0;
     $row = $this->uploadDao->getUploadEntry($uploadTreeId);
 
@@ -68,31 +74,27 @@ class CopyrightDao extends Object
       print $text;
     }
 
-    $statementName = __METHOD__;
-
+    $statementName = __METHOD__.$tableName;
     $this->dbManager->prepare($statementName,
-        "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
+        "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
     $result = $this->dbManager->execute($statementName, array($pFileId));
-
-    $typeToHighlightTypeMap = array(
-        'statement' => Highlight::COPYRIGHT,
-        'email' => Highlight::EMAIL,
-        'url' => Highlight::URL);
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (!empty($row['copy_startbyte']))
-      {
-        $type = $row['type'];
-        $content = $row['content'];
-        $linkUrl = Traceback_uri() . "?mod=copyrightlist&agent=" . $row['agent_fk'] . "&item=$uploadTreeId&hash=" . $row['hash'] . "&type=" . $type;
-        $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
-        $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, new LinkElement($linkUrl));
-      }
+      $type = $row['type'];
+      $content = $row['content'];
+      $htmlElement =null;
+      $highlightType = array_key_exists($type, $typeToHighlightTypeMap) ? $typeToHighlightTypeMap[$type] : Highlight::UNDEFINED;
+      $highlights[] = new Highlight($row['copy_startbyte'], $row['copy_endbyte'], $highlightType, -1, -1, $content, $htmlElement);
     }
     $this->dbManager->freeResult($result);
 
     return $highlights;
   }
+
+  
+  
+  
+  
 }

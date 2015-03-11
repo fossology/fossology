@@ -145,6 +145,14 @@ class Postgres implements Driver
   }
 
   /**
+   * @return void
+   */
+  public function rollback(){
+    pg_query($this->dbConnection, "ROLLBACK");
+    return;
+  }
+
+  /**
    * @param $booleanValue
    * @return boolean
    */
@@ -169,5 +177,28 @@ class Postgres implements Driver
   public function escapeString($string)
   {
     return pg_escape_string($string);
+  }
+
+  /**
+   * @param string $tableName
+   * @throws \Exception
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    $dbName = pg_dbname($this->dbConnection);
+    $sql = "SELECT count(*) cnt FROM information_schema.tables WHERE table_catalog='$dbName' AND table_name='". strtolower($tableName) . "'";
+    $res = pg_query($this->dbConnection, $sql);
+    if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
+    {
+      throw new \Exception(pg_last_error($this->dbConnection));
+    }
+    else if(!$res)
+    {
+      throw new \Exception('DB connection lost');
+    }
+    $row = pg_fetch_assoc($res);
+    pg_free_result($res);
+    return($row['cnt']>0);
   }
 }

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -34,6 +35,8 @@ abstract class DbManager extends Object
   protected $cumulatedTime = array();
   /** @var array */
   protected $queryCount = array();
+  /** @var int */
+  private $transactionDepth = 0;
 
   function __construct(Logger $logger)
   {
@@ -54,11 +57,23 @@ abstract class DbManager extends Object
   }
 
   public function begin() {
-    $this->dbDriver->begin();
-  }
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->begin();
+    }
+    $this->transactionDepth++;
+   }
 
   public function commit() {
-    $this->dbDriver->commit();
+    $this->transactionDepth--;
+    if ($this->transactionDepth==0)
+    {
+      $this->dbDriver->commit();
+    }
+    else if ($this->transactionDepth < 0)
+    {
+      throw new \Exception('too much transaction commits');
+    }
   }
 
   /**
@@ -81,7 +96,7 @@ abstract class DbManager extends Object
    * @param resource $result command result object
    * @param string $sqlStatement SQL command (optional)
    */
-  private function checkResult($result, $sqlStatement = "")
+  protected function checkResult($result, $sqlStatement = "")
   {
     if ($result !== false)
     {
@@ -92,15 +107,17 @@ abstract class DbManager extends Object
     {
       $lastError = $this->dbDriver->getLastError();
       $this->logger->addCritical($lastError);
+      if ($this->transactionDepth>0)
+      {
+        $this->dbDriver->rollback();
+      }
     } else
     {
       $this->logger->addCritical("DB connection lost.");
     }
-    echo "<br/><pre>$sqlStatement</pre><pre>";
-    debug_print_backtrace();
-    print "\n" . $lastError;
-    echo "</pre><hr>";
-    exit(1);
+
+    $message = "error executing: $sqlStatement\n\n$lastError";
+    throw new Exception($message);
   }
 
   /**
@@ -205,6 +222,11 @@ abstract class DbManager extends Object
           . $this->formatMilliseconds($seconds)
           . " ($queryCount queries" . ($queryCount > 0 ? ", avg " . $this->formatMilliseconds($seconds / $queryCount) : "") . ")");
     }
+
+    if ($this->transactionDepth != 0)
+    {
+      throw new \Fossology\Lib\Exception("you have not committed enough");
+    }
   }
 
   /**
@@ -242,7 +264,7 @@ abstract class DbManager extends Object
    * @param array
    * @param string
    */
-  public function insertInto($tableName,$keys,$params,$sqlLog='')
+  public function insertInto($tableName, $keys,$params,$sqlLog='')
   {
     if (empty($sqlLog))
     {
@@ -281,5 +303,18 @@ abstract class DbManager extends Object
     }
     $this->insertInto($tableName, $keys, $params, $sqlLog);
   }
-  
+
+  /**
+   * @param string $tableName
+   * @throws \Exception
+   * @return bool
+   */
+  public function existsTable($tableName)
+  {
+    if(!preg_match('/^[a-z0-9_]+$/i',$tableName))
+    {
+      throw new \Exception("invalid table name '$tableName'");
+    }
+    return $this->dbDriver->existsTable($tableName);
+  }
 }

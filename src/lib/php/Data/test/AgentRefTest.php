@@ -46,4 +46,9 @@ class AgentRefTest extends \PHPUnit_Framework_TestCase
     assertThat($this->agentRef->getAgentRevision(), is($this->agentRevision));
   }
 
+  public function testToString()
+  {
+    assertThat(strval($this->agentRef), is("AgentRef(1243, <agentName>, <agentRevision)"));
+  }
+
 }

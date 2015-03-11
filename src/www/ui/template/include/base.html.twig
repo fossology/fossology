@@ -1,3 +1,9 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
 <!DOCTYPE html>
 <html>
   <head lang="en">
@@ -24,7 +30,7 @@
     {% block message %}
       <div id="dmessage" style="border-bottom: 1px dashed gray;">
         <button name="eraseme" value="close" onclick="rmMsg();">{{ 'Close'| trans }}</button>
-        {% if message %}  {{ message }} {% endif %}
+        {% if message %}  {{ message|raw|nl2br }} {% endif %}
       </div>
       <script type="text/javascript">
         function rmMsg() {

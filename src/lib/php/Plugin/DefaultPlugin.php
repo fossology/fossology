@@ -99,7 +99,7 @@ abstract class DefaultPlugin implements Plugin
     $this->name = $name;
     foreach ($parameters as $key => $value)
     {
-      $this->setParameter($key,$value);
+      $this->setParameter($key, $value);
     }
 
     global $container;
@@ -238,7 +238,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList) && (!$this->requiresLogin || !empty($_SESSION['User']) && $_SESSION['User']!='Default User'))
+    if (isset($this->MenuList) && (!$this->requiresLogin || $this->isLoggedIn()))
     {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }
@@ -308,6 +308,11 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function render($templateName, $vars = null, $headers = null)
   {
+    if ($this->requiresLogin && !$this->isLoggedIn())
+    {
+      new Response("permission denied", Response::HTTP_FORBIDDEN, array("contentType" => "text/plain"));
+    }
+
     $startTime = microtime(true);
 
     $content = $this->renderer->loadTemplate($templateName)
@@ -321,9 +326,14 @@ abstract class DefaultPlugin implements Plugin
     );
   }
 
+  public function isLoggedIn()
+  {
+    return (!empty($_SESSION['User']) && $_SESSION['User'] != 'Default User');
+  }
+
   private function checkPrerequisites()
   {
-    if ($this->requiresLogin && (empty($_SESSION['User']) || $_SESSION['User']=='Default User'))
+    if ($this->requiresLogin && !$this->isLoggedIn())
     {
       throw new \Exception("not allowed without login");
     }
@@ -357,8 +367,6 @@ abstract class DefaultPlugin implements Plugin
   protected function getDefaultVars()
   {
     $vars = array();
-
-    global $Plugins;
 
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";

@@ -1,0 +1,67 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+
+{% block content %}
+
+<table class="semibordered" id="licenseCandidateTbl" width="100%" cellpadding="0">
+  <thead>
+    <tr> {% if canEdit %}<th width="5%"></th>{% endif %}
+      <th width="10%"></th>
+      <th width="10%"></th>
+      <th width="{% if canEdit %}65{% else %}60{% endif %}%"></th>
+      <th width="10%"></th>
+      <th width="5%"></th></tr>
+  </thead>
+</table>
+{% if canEdit %} 
+  <br/><br/>
+  <div style="text-align:center;">
+    <a href="?mod=advice_license&amp;rf=-1" class="buttonLink">{{ 'New License'|trans }}</a>
+  </div>
+{% endif %}  
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    function createBrowseTable() {
+      
+    tableColumns = [
+      {% if canEdit %}
+        {"sTitle": "{{ "Edit"|trans }}", "sClass": "center", "bSearchable": false},
+      {% endif %}
+      {"sTitle": "{{ "Shortname"|trans }}", "sClass": "center", "bSearchable": true},
+      {"sTitle": "{{ "Fullname"|trans }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Text"|trans }}", "sClass": "left", "bSearchable": false},
+      {"sTitle": "{{ "URL"|trans }}", "sClass": "center", "bSearchable": false},
+      {"sTitle": "{{ "Merge Request"|trans }}", "sClass": "center", "bSearchable": false}
+    ];
+
+    tableSorting = [ [1, "asc"] ];
+
+    dataTableConfig =
+        {
+          "aoColumns": tableColumns,
+          "aaSorting": tableSorting,
+          "iDisplayLength": 20,
+          "aaData": {{ aaData }},
+          "bStateSave": true
+        };
+
+      var otable = $('#licenseCandidateTbl').dataTable(dataTableConfig);
+      return otable;
+    }
+    
+    $(document).ready(function () {
+      createBrowseTable();
+    });
+    
+  </script>
+{% endblock %}

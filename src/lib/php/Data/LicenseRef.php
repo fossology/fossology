@@ -20,21 +20,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-class LicenseRef
+use Fossology\Lib\Util\Object;
+
+class LicenseRef extends Object
 {
-  /**
-   * @var int
-   */
+  /** @var int */
   private $id;
-  /**
-   * @var string
-   */
+
+  /** @var string */
   private $shortName;
-  /**
-   * @var string
-   */
+
+  /** @var string */
   private $fullName;
 
+  /**
+   * @param $licenseId
+   * @param $licenseShortName
+   * @param $licenseName
+   */
   function __construct($licenseId, $licenseShortName, $licenseName)
   {
     $this->id = $licenseId;
@@ -65,10 +68,14 @@ class LicenseRef
   {
     return $this->shortName;
   }
-  
+
   public function __toString()
   {
-    return 'LicenseRef('.$this->id.')';
+    return 'LicenseRef('
+      .$this->id
+      .", ".$this->shortName
+      .", ".$this->fullName
+    .')';
   }
 
 }

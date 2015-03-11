@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Daniele Fognini
 
 This program is free software; you can redistribute it and/or
@@ -44,6 +44,13 @@ class LicenseMatch extends Object
    */
   private $licenseFileId;
 
+  /**
+   * @param int $fileId
+   * @param LicenseRef $licenseRef
+   * @param AgentRef $agentRef
+   * @param int$licenseFileId
+   * @param null|int $percent
+   */
   public function __construct($fileId, LicenseRef $licenseRef, AgentRef $agentRef, $licenseFileId, $percent = null)
   {
     $this->fileId = $fileId;
@@ -88,9 +95,16 @@ class LicenseMatch extends Object
   /**
    * @return int|null
    */
-  public function getPercent()
+  public function getPercentage()
   {
     return $this->percent;
   }
 
+  /**
+   * @return int
+   */
+  public function getLicenseId()
+  {
+    return $this->licenseRef->getId();
+  }
 }

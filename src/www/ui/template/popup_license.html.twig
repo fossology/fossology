@@ -1,0 +1,47 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    {% block head %}
+      {% include "include/head.html.twig" %}
+      <title>{% block title %}License Info{% endblock %}</title>
+      {{ metadata }}
+      {{ styles }}
+    {% endblock %}
+  </head>
+  <body>
+
+    {% block content %}
+      <div class="text">
+        <h1>{{ shortName|e }}</h1>
+        {% if fullName %}
+          <h2>License Fullname</h2>
+          {{ fullName|e }}
+        {% endif %}
+        {% if parentId %}
+          <h2>{{ 'Concluded license'|trans }}</h2>
+          <a href="?mod=popup-license&rf={{ parentId }}">{{ parentShortName|e }}</a>
+        {% endif %}
+        {% if url %}
+          <h2>Reference UR:</h2>
+          <a href="{{ url }}" target="_blank">{{ url|e }}</a>
+        {% endif %}
+        {% if text %}
+          <h2>License Text</h2>
+          {{ text|e|nl2br }}
+        {% else %}
+          {{ 'Original license text is not in the FOSSology database.'| trans }}
+        {% endif %}
+      </div>
+    {% endblock %}
+
+    {% block foot %}
+      {% include "include/foot.html.twig" %}
+    {% endblock %}
+  </body>
+</html>

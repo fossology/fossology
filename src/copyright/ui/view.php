@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,20 +30,11 @@ define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
 
 class copyright_view extends FO_Plugin
 {
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var CopyrightDao
-   */
+  /** @var CopyrightDao */
   private $copyrightDao;
-
-  /**
-   * @var HighlightRenderer
-   */
+  /** @var HighlightRenderer */
   private $highlightRenderer;
 
   function __construct()
@@ -101,7 +93,6 @@ class copyright_view extends FO_Plugin
    */
   function Output()
   {
-    global $PG_CONN;
     if ($this->State != PLUGIN_STATE_READY)
     {
       return;
@@ -110,7 +101,6 @@ class copyright_view extends FO_Plugin
     /** @var ui_view $view */
     $view = & $Plugins[plugin_find_id("view")];
     $uploadTreeId = GetParm("item", PARM_INTEGER);
-    $Upload = GetParm("upload", PARM_INTEGER);
 
     $ModBack = GetParm("modback", PARM_STRING);
     if (empty($ModBack))
@@ -118,7 +108,7 @@ class copyright_view extends FO_Plugin
       $ModBack = 'copyrighthist';
     }
 
-    $highlights = $this->copyrightDao->getCopyrightHighlights($uploadTreeId);
+    $highlights = $this->copyrightDao->getHighlights($uploadTreeId,'copyright');
 
     if (count($highlights) < 1)
     {
@@ -127,8 +117,7 @@ class copyright_view extends FO_Plugin
       return;
     }
 
-    $view->ShowView(NULL, $ModBack, 1, 1, $this->legendBox(false), true, true, $highlights);
-    return;
+    return $view->ShowView(NULL, $ModBack, 1, 1, $this->legendBox(false), true, true, $highlights);
   }
 
   /**
@@ -143,7 +132,7 @@ class copyright_view extends FO_Plugin
     foreach (array(Highlight::COPYRIGHT => 'copyright remark', Highlight::URL => 'URL', Highlight::EMAIL => 'eMail address')
              as $colorKey => $txt)
     {
-      $output .= '<br/>' . $this->highlightRenderer->createStyle($colorKey, $txt, $colorMapping) . $txt . '</span>';
+      $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt, $colorMapping) . $txt . '</span>';
     }
     return '<div style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:fixed; right:5px; bottom:5px;">' . $output . '</div>';
   }

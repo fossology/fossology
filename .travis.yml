@@ -25,6 +25,9 @@ before_script:
  - composer install --dev
  - composer self-update
  - cd ..
+ - psql -c "CREATE USER fossy WITH PASSWORD 'fossy';" -U postgres
+ - psql -c "create database fossology;" -U postgres
+ - psql -c "create database fosstestone;" -U postgres
 
 script:
  - make
