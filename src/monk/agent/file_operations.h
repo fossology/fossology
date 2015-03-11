@@ -13,8 +13,10 @@ You should have received a copy of the GNU General Public License along with thi
 #define MONK_AGENT_FILE_OPERATIONS_H
 
 #include <glib.h>
+#include <iconv.h>
 
-char* readFile(char* pFileName);
 int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimiters);
+iconv_t guessConverter(char* buffer, size_t n);
+gchar* guessEncoding(const char* buffer, size_t len);
 
 #endif // MONK_AGENT_FILE_OPERATIONS_H

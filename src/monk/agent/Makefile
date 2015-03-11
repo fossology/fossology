@@ -11,7 +11,7 @@ include $(VARS)
 
 CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
+CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp -lmagic
 
 EXE = monk monkbulk
 OBJECTS = string_operations.o file_operations.o database.o \
