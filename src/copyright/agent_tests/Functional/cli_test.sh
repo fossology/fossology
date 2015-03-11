@@ -33,7 +33,7 @@ _checkFound()
 $2
 EO2
 
-    assertEquals "$found" "yes"
+    assertEquals "yes" "$found"
   done <<EO1
 $1
 EO1

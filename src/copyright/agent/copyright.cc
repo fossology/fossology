@@ -69,7 +69,7 @@ int main(int argc, char** argv)
         // Output matches
         for (match& m : l)
         {
-          cout << '[' << m.start << ':' << m.end << ':' << m.type << "] '"
+          cout << "\t[" << m.start << ':' << m.end << ':' << m.type << "] '"
             << s.substr(m.start, m.end - m.start)
             << "'" << endl;
         }
