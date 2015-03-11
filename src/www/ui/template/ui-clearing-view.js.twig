@@ -1,9 +1,9 @@
 selectedLicensesTableColumns = [
-  {"sTitle": "{{ 'License'| trans }}", "sClass": "left read_only"},
-  {"sTitle": "{{ 'Source'| trans }}", "sClass": "left read_only", "bSortable": false},
-  {"sTitle": "{{ 'Text'| trans }}", "sClass": "center", "bSortable": false},
-  {"sTitle": "{{ 'Comment'| trans }}", "sClass": "center", "bSortable": false},
-  {"sTitle": "{{ 'Action'| trans }}", "sClass": "center read_only", "bSortable": false}
+  {"sTitle": "{{ 'License'| trans }}", "sClass": "left"},
+  {"sTitle": "{{ 'Source'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Text'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Comment'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Action'| trans }}", "sClass": "center", "bSortable": false, "sWidth":"1%"}
 ];
 
 uploadId = {{ uploadId }};
@@ -33,13 +33,15 @@ selectedLicensesTableConfig = {
   "bFilter": false
 };
 
-editableConfiguration  = {
-  "sReadOnlyCellClass": "read_only",
-  "sUpdateURL": "?mod=conclude-license&do=updateClearings" ,
+editableConfiguration = {
+  "sUpdateURL": "?mod=conclude-license&do=updateClearings",
   "fnOnEditing": function(input) {return input[0].value;},
   "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').css('border-color','red');} } ,
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
-  "sSuccessResponse": "success"
+  "sSuccessResponse": "success",
+  "aoColumns": [null, null,
+            {"type": "textarea", onblur: "cancel", "submit": "OK", "cancel": "{{'Cancel'|trans}}"},
+            {}, null]
 };
 
 function createClearingTable() {
@@ -76,6 +78,6 @@ function createLicenseSelectionTable() {
 }
 
 $(document).ready(function () {
-  createClearingTable();
+  createClearingTable().fnDraw(false);
   createLicenseSelectionTable();
 });

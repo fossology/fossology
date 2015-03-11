@@ -227,8 +227,8 @@ class AjaxClearingView extends FO_Plugin
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
       $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class=\"delete\"></div></a>";
 
-      $reportInfoField = utf8_encode($reportInfo);
-      $commentField = utf8_encode($comment);
+      $reportInfoField = utf8_encode(nl2br(htmlspecialchars($reportInfo)));
+      $commentField = utf8_encode(nl2br(htmlspecialchars($comment)));
 
       $id = "$uploadTreeId,$licenseId";
       $table[$licenseShortName] = array('DT_RowId' => $id,
