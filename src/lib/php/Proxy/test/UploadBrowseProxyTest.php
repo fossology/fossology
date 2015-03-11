@@ -214,5 +214,24 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     $uploadBrowseProxy->getFolderPartialQuery($params);
   }
   
+  public function testGetStatus()
+  {
+    $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
+    $uploadId = 1;
+    assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo(UploadStatus::OPEN));
+    $uploadBrowseProxy->updateTable('status_fk', $uploadId, $newStatus=UploadStatus::IN_PROGRESS);
+    assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo($newStatus));
+  }
+    
+  /**
+   * @expectedException \Exception
+   */
+
+  public function testGetStatusException()
+  {
+    $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), false);
+    $uploadBrowseProxy->getStatus(-1);
+  }
+  
 }
  

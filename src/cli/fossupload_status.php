@@ -17,7 +17,7 @@
 ***********************************************************/
 
 use Fossology\Lib\Dao\JobDao;
-use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Data\JobStatus;
 use Fossology\Lib\Data\UploadStatus;
 
@@ -27,20 +27,14 @@ cli_Init();
 global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
 
-$Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
-TODO
-
+$Usage = "Usage: " . basename($argv[0]) . " [options]
+  --username  = user name
+  --password  = password
+  --groupname = a group the user belongs to (default active group)
+  --uploadId  = id of upload
   ";
 
-global $container;
-
-$opts = getopt("c:", array("username:", "groupname:", "uploadId:"));
-
-/** @var UploadDao */
-$uploadDao = $container->get("dao.upload");
-
-/** @var JobDao */
-$jobDao = $container->get("dao.job");
+$opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:"));
 
 if (!array_key_exists("uploadId", $opts)) {
   echo "no uploadId supplied";
@@ -48,24 +42,17 @@ if (!array_key_exists("uploadId", $opts)) {
 }
 $uploadId = $opts["uploadId"];
 
-$user = "";
-$group = "";
-
-if (array_key_exists("username", $opts)) {
-  $user = $opts["username"];
-}
-
-if (array_key_exists("groupname", $opts)) {
-  $group = $opts["groupname"];
-}
-
-$passwd = null;
+$user = array_key_exists("username", $opts) ? $opts["username"] : '';
+$group = array_key_exists("groupname", $opts) ? $opts["groupname"] : '';
+$passwd = array_key_exists("password", $opts) ? $opts["password"] : null;
 account_check($user, $passwd, $group);
 
 global $SysConf;
 $userId = $SysConf['auth']['UserId'];
 $groupId = $SysConf['auth']['GroupId'];
 
+/** @var JobDao */
+$jobDao = $GLOBALS['container']->get("dao.job");
 $jobStatuses = $jobDao->getAllJobStatus($uploadId, $userId, $groupId);
 $runningJobs = false;
 foreach($jobStatuses as $jobStatus)
@@ -87,20 +74,31 @@ if ($runningJobs) {
   exit(0);
 }
 
-$status="ERROR";
+/** @var DbManager */
+$dbManager = $GLOBALS['container']->get("db.manager");
+$userPerm = 0;
+$uploadBrowseProxy = new Fossology\Lib\Proxy\UploadBrowseProxy($groupId, $userPerm, $dbManager);
 
-switch($uploadDao->getStatus($uploadId, $userId)) {
-  case UploadStatus::OPEN:
-    $status = "OPEN";
-    break;
-  case UploadStatus::IN_PROGRESS:
-    $status = "IN_PROGRESS";
-    break;
-  case UploadStatus::CLOSED:
-    $status = "CLOSED";
-    break;
-  case UploadStatus::REJECTED:
-    $status = "REJECTED";
-    break;
+try {
+  switch($uploadBrowseProxy->getStatus($uploadId)) {
+    case UploadStatus::OPEN:
+      $status = "OPEN";
+      break;
+    case UploadStatus::IN_PROGRESS:
+      $status = "IN_PROGRESS";
+      break;
+    case UploadStatus::CLOSED:
+      $status = "CLOSED";
+      break;
+    case UploadStatus::REJECTED:
+      $status = "REJECTED";
+      break;
+    default:
+      $status = "ERROR: invalid status";
+  }
+}
+catch(Exception $e)
+{
+    $status = "ERROR: ".$e->getMessage();
 }
 print "status=$status\n";

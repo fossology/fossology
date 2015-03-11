@@ -100,9 +100,6 @@ class UploadBrowseProxy extends Object
   {
     $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE upload_fk=$3";
     $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), __METHOD__);
-    // $sel = $this->dbManager->getSingleRow("SELECT status_comment FROM upload_clearing WHERE group_fk=$1 AND upload_pk=$2", array($this->groupId,$uploadId), __METHOD__ . '.question');
-    // print_r("$statusId, $commentText, $uploadId");
-    // print_r('#' . $sel['status_comment']);
   }
   
   public function moveUploadToInfinity($uploadId, $top)
@@ -163,6 +160,22 @@ class UploadBrowseProxy extends Object
          AND parent IS NULL
          AND lft IS NOT NULL';
     return $partQuery;
+  }
+  
+  /**
+   * @param type $uploadId
+   * @param type $userId
+   * @return type
+   * @throws \Exception
+   */
+  public function getStatus($uploadId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2",
+            array($uploadId, $this->groupId));
+    if (false === $row) {
+      throw new \Exception("cannot find uploadId=$uploadId");
+    }
+    return $row['status_fk'];
   }
   
 } 
