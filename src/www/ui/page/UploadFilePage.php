@@ -81,7 +81,6 @@ class UploadFilePage extends DefaultPlugin
 
     if ($request->isMethod(Request::METHOD_POST))
     {
-
       $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
 
       if ($uploadFile !== null && !empty($folderId))

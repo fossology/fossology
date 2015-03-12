@@ -180,8 +180,7 @@ class AjaxClearingView extends FO_Plugin
         {
           list ($uploadTreeId, $licenseId) = explode(',', $id);
           $what = GetParm("columnName", PARM_STRING);
-          $changeTo = GetParm("value", PARM_RAW);
-          // $changeTo = utf8_encode( GetParm("value", PARM_STRING) );
+          $changeTo = utf8_encode( GetParm("value", PARM_RAW) );
           $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
         return $this->createPlainResponse("success");

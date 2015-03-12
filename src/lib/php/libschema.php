@@ -248,7 +248,7 @@ class fo_libschema
           if ($this->debug)
           {
             print "$sql\n";
-          } else
+          } else if (!empty ($sql))
           {
             $this->dbman->queryOnce($sql);
             if (!empty($modification['UPDATE']))

@@ -356,7 +356,7 @@
 
   $Schema["TABLE"]["clearing_decision"]["group_fk"]["DESC"] = "";
   $Schema["TABLE"]["clearing_decision"]["group_fk"]["ADD"] = "ALTER TABLE \"clearing_decision\" ADD COLUMN \"group_fk\" int4;";
-  $Schema["TABLE"]["clearing_decision"]["group_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["clearing_decision"]["group_fk"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
   $Schema["TABLE"]["clearing_decision"]["group_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["clearing_decision"]["decision_type"]["DESC"] = "COMMENT ON COLUMN \"clearing_decision\".\"decision_type\" IS 'see Fossology/Lib/Data/DecisionTypes';";
