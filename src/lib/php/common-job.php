@@ -1,4 +1,7 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG

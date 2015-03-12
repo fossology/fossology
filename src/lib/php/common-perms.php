@@ -345,5 +345,4 @@ use Fossology\Lib\Auth\Auth;
     pg_free_result($result);
 
     return (NULL);
-  } // DeleteGroup()
-?>
+  }

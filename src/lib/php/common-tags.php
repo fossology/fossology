@@ -200,7 +200,5 @@ function TagStatus($upload_id)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $count = pg_num_rows($result);
   pg_free_result($result);
-  if ($count > 0) return 0;
-  else return 1;
+  return ($count > 0) ? 0 : 1;
 }
-?>
