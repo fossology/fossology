@@ -58,10 +58,6 @@ void match_array_free(GArray* matches) {
     g_array_free(matches, TRUE);
 }
 
-Match* match_array_get(GArray* matches, guint i) {
-  return g_array_index(matches, Match*, i);
-}
-
 int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses, MatchCallbacks* callbacks) {
   GArray* matches = findAllMatchesBetween(file, licenses,
                                           MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
@@ -201,27 +197,17 @@ size_t match_getEnd(const Match* match) {
   }
 }
 
-gint compareMatchIncluded (gconstpointer a, gconstpointer b) {
-  const Match* matchA = *(Match**)a;
-  const Match* matchB = *(Match**)b;
-
+static int matchIncludes(const Match* matchA, const Match* matchB) {
   size_t matchAStart = match_getStart(matchA);
   size_t matchBStart = match_getStart(matchB);
-
-  if (matchAStart > matchBStart)
-    return 1;
-  if (matchAStart < matchBStart)
-    return -1;
 
   size_t matchAEnd = match_getEnd(matchA);
   size_t matchBEnd = match_getEnd(matchB);
 
-  if (matchAEnd > matchBEnd)
-    return -1;
-  if (matchAEnd < matchBEnd)
-    return 1;
-
-  return 0;
+  if (matchAStart >= matchBStart)
+    return (matchAEnd <= matchBEnd) ? 1 : 0;
+  else
+    return (matchAEnd >= matchBEnd) ? 1 : 0;
 }
 
 // make sure to call it after a match_rank or the result will be junk
@@ -247,52 +233,12 @@ gint compareMatchByRank (gconstpointer a, gconstpointer b) {
   return 0;
 }
 
-/* divide an array of Match* in groups
- * each first element of a group contains all the successive elements in the same group
- *
- * a match m1 is contained in another m2 if the set [m1.start, m1.end] is contained in [m2.start, m2.end]
- * in this case compareMatchIncluded(&m1, &m2) == 1
- *
- * input: [GArray of Match*]
- * output: [GArray of GArray of Match*]
- */
-GArray* groupOverlapping(GArray* matches) {
-  g_array_sort(matches, compareMatchIncluded);
-
-  GArray* result = g_array_new(TRUE, FALSE, sizeof(GArray*));
-
-  if (matches->len == 0)
-    return result;
-
-  Match* firstMatch = match_array_get(matches, 0);
-  size_t currentGroupEnd = match_getEnd(firstMatch);
-
-  GArray* currentGroup = g_array_new(TRUE, FALSE, sizeof(GArray*));
-
-  g_array_append_val(currentGroup, firstMatch);
-
-  for (guint i = 1; i < matches->len; ++i) {
-    Match* currentMatch = match_array_get(matches, i);
-    size_t currentMatchEnd = match_getEnd(currentMatch);
-
-    if (currentMatchEnd > currentGroupEnd) {
-      g_array_append_val(result, currentGroup);
-      currentGroup = g_array_new(TRUE, FALSE, sizeof(GArray*));
-      currentGroupEnd = currentMatchEnd;
-    }
-    g_array_append_val(currentGroup, currentMatch);
-  }
-  g_array_append_val(result, currentGroup);
-
-  return result;
-}
-
 // match must not be empty
 Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare) {
-  Match* result = match_array_get(matches, 0);
+  Match* result = match_array_index(matches, 0);
 
   for (guint j = 0; j < matches->len; j++) {
-    Match* match = match_array_get(matches, j);
+    Match* match = match_array_index(matches, j);
     if ((*compare)(&match, &result) == 1) {
       result = match;
     }
@@ -301,52 +247,79 @@ Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare) {
   return result;
 }
 
-// destructively filter overlapping licenses to contain only best match
-// discarded matches and the array are freed
+int licenseIncludes(const License* big, const License* small)
+{
+  GArray* tokensBig = big->tokens;
+  GArray* tokensSmall = small->tokens;
+
+  if (tokensSmall->len == 0)
+  {
+    return 1;
+  }
+
+  for (guint i=0; i<tokensBig->len; i++) {
+     if (matchNTokens(tokensBig, i, tokensBig->len, tokensSmall, 0, tokensSmall->len, tokensSmall->len))
+       return 1;
+  }
+
+  return 0;
+}
+
+static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense)
+{
+  return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
+}
+
 GArray* filterNonOverlappingMatches(GArray* matches) {
   GArray* result = g_array_new(TRUE, FALSE, sizeof(Match*));
 
-  GArray* overlappingGroups = groupOverlapping(matches);
+  for(guint i=0; i<matches->len; i++) {
+    Match* thisMatch = match_array_index(matches, i);
+    if (thisMatch == NULL)
+    {
+      continue;
+    }
 
-  for (guint i = 0; i < overlappingGroups->len; i++) {
-    GArray* currentGroup = g_array_index(overlappingGroups, GArray*, i);
+    const License* thisLicense = thisMatch->license;
 
-    Match* biggestInGroup = match_array_get(currentGroup, 0);
-    Match* bestInGroup = greatestMatchInGroup(currentGroup, compareMatchByRank);
+    for(guint j=i+1; j<matches->len; j++)
+    {
+      Match* otherMatch = match_array_index(matches, j);
+      if (otherMatch == NULL)
+      {
+        continue;
+      }
+      
+      const License* otherLicense = otherMatch->license;
 
-    if (bestInGroup != biggestInGroup) {
-      // the biggest match in this group was not the one with the best match
-      // let's split the group and find the best matches by recursively calling ourselves
-      match_free(biggestInGroup);
-      g_array_remove_index_fast(currentGroup, 0);
-
-      GArray* subGroupFiltered = filterNonOverlappingMatches(currentGroup);
-
-      g_array_append_vals(result, subGroupFiltered->data, subGroupFiltered->len);
-      g_array_free(subGroupFiltered, TRUE);
-    } else {
-      g_array_append_val(result, bestInGroup);
-
-      // keep this (exclude from freeing)
-      g_array_remove_index_fast(currentGroup, 0);
-      // and free memory used by discarded matches
-      match_array_free(currentGroup);
+      if (matchIncludes(thisMatch, otherMatch) || matchIncludes(otherMatch, thisMatch))
+      {
+        if (thisLicense->refId == otherLicense->refId ||
+          !(oneLicenseIncludesTheOther(thisLicense, otherLicense)))
+        {
+          const gint rankComparison = compareMatchByRank(&thisMatch, &otherMatch);
+          if (rankComparison > 0)
+          {
+            match_free(otherMatch);
+            match_array_index(matches, j) = NULL;
+          }
+          else
+          {
+            match_free(thisMatch);
+            match_array_index(matches, i) = NULL;
+            break;
+          }
+        }
+      }
     }
   }
 
-  g_array_free(matches, TRUE);
-  g_array_free(overlappingGroups, TRUE);
-
-  // some discarded matches could have distorted grouping
-  // if grouping again would put some matches together redo all filtering
-  GArray* regroupResult = groupOverlapping(result);
-  guint regroupCount = regroupResult->len;
-  for (guint i = 0; i<regroupResult->len; i++) {
-    g_array_free(g_array_index(regroupResult, GArray*, i), TRUE);
-  }
-  g_array_free(regroupResult, TRUE);
-  if (result->len != regroupCount) {
-    result = filterNonOverlappingMatches(result);
+  for(guint i=0; i<matches->len; i++) {
+    Match* thisMatch = match_array_index(matches, i);
+    if (thisMatch)
+    {
+      g_array_append_val(result, thisMatch);
+    }
   }
 
   return result;
@@ -388,7 +361,7 @@ int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks
   int result = 1;
   for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++)
   {
-    Match* match = match_array_get(matches, matchIndex);
+    Match* match = match_array_index(matches, matchIndex);
     result &= processMatch(state, file, match, callbacks);
   }
 

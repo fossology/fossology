@@ -39,7 +39,7 @@ typedef struct {
 } MatchCallbacks;
 
 void match_array_free(GArray* matches);
-Match* match_array_get(GArray* matches, guint i);
+#define match_array_index(matches, i) g_array_index(matches, Match*, i)
 
 void match_free(Match* match);
 
@@ -51,7 +51,6 @@ size_t match_getStart(const Match* match);
 size_t match_getEnd(const Match* match);
 
 gint compareMatchByRank(gconstpointer a, gconstpointer b);
-gint compareMatchIncluded(gconstpointer a, gconstpointer b);
 Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare);
 
 GArray* findAllMatchesBetween(File* file, Licenses* licenses, unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
