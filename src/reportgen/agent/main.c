@@ -89,6 +89,7 @@ char* gettargetdir(char* pckgname)
 
 int zipdir(char* name)
 {
+        umask(S_IWGRP | S_IWOTH);
         pid_t child_pid;
         int status;
         char* cmd[6];
@@ -137,17 +138,6 @@ int zipdir(char* name)
               cmdI++;
             }
             exit(5);
-          }
-          cmd[0] = g_strdup("chmod");
-          cmd[1] = g_strdup("0644");
-          cmd[2] = g_strdup_printf("%s/%s", targetdir, zipname);
-          cmd[3] = NULL;
-          cmd[4] = NULL;
-          char* chmodcmd = "/bin/chmod";
-          if( execv(chmodcmd,cmd) )
-          {
-            printf("cannot chmod");
-            exit(7);
           }
         }
         else
