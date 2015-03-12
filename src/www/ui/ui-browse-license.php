@@ -130,7 +130,7 @@ class ui_browse_license extends FO_Plugin
     }
     $upload = GetParm("upload", PARM_INTEGER);
     $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       $this->vars['content'] = "<h2>$text<h2>";

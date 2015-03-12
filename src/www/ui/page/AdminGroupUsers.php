@@ -19,6 +19,7 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +39,7 @@ class AdminGroupUsers extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Manage Group Users"),
         self::MENU_LIST => "Admin::Groups::Manage Group Users",
-        self::PERMISSION => self::PERM_WRITE,
+        self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
   }

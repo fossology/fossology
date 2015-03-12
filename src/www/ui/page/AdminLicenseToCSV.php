@@ -18,6 +18,7 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +33,7 @@ class AdminLicenseToCSV extends DefaultPlugin
         self::TITLE => "Admin License CSV Export",
         self::MENU_LIST => "Admin::License Admin::CSV Export",
         self::REQUIRES_LOGIN => true,
-        self::PERMISSION => self::PERM_ADMIN
+        self::PERMISSION => Auth::PERM_ADMIN
     ));
   }
 

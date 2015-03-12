@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_agent_add", _("Schedule an Analysis"));
 
 /**
@@ -190,7 +192,7 @@ class agent_add extends FO_Plugin
     $V .= "<li>$text<br>";
     $V .= "<div id='uploaddiv'>\n";
     $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
-    $List = FolderListUploads_perm($Folder, PERM_WRITE);
+    $List = FolderListUploads_perm($Folder, Auth::PERM_WRITE);
     foreach($List as $L)
     {
       $isSelected = (!empty($uploadpk) && $L['upload_pk']==$uploadpk) ? " selected='selected'" : '';

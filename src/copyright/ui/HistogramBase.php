@@ -134,7 +134,7 @@ abstract class HistogramBase extends FO_Plugin {
 
     /* check upload permissions */
     $UploadPerm = GetUploadPerm($uploadId);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       return "<h2>$text</h2>";

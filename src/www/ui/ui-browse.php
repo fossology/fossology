@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
@@ -248,7 +249,7 @@ class ui_browse extends FO_Plugin
     if (!empty($Upload))
     {
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ)
+      if ($UploadPerm < Auth::PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
@@ -322,7 +323,7 @@ class ui_browse extends FO_Plugin
       $row = $dbManager->getSingleRow($sql, array($uploadTreeId));
       $Upload = $row['upload_fk'];
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ)
+      if ($UploadPerm < Auth::PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');

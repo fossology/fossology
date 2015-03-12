@@ -17,6 +17,7 @@
 ***********************************************************/
 
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 
 require_once("$MODDIR/lib/php/common-cli.php");
@@ -26,15 +27,16 @@ require_once("$MODDIR/lib/php/common-users.php");
 error_reporting(E_ALL); //E_NOTICE & E_STRICT);
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
-  --username  = user/admin who want to interact
-  --password  = password of interacting user
+  --username  = admin/user with user-creation permissions
+  --password  = admin/user password
   --uname     = username to create if not exists
   --gname     = groupname to create if not exists
   --upasswd   = password of created user
-  --permlvl   = permission level (-1: None, ".UserDao::USER.": User, ".UserDao::ADMIN.": Admin, ".UserDao::ADVISOR.": Advisor)
+  --permlvl   = group permission level (-1: None, ".UserDao::USER.": User, ".UserDao::ADMIN.": Admin, ".UserDao::ADVISOR.": Advisor)
+  --accesslvl   = user database permission level (".Auth::PERM_NONE.": None, ".Auth::PERM_READ.": Read, ".Auth::PERM_WRITE.": Write, ".Auth::PERM_ADMIN.": Admin)
   --folderid  = root folder
   ";
-$opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:'));
+$opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:', 'accesslvl:'));
 
 if(array_key_exists('h',$opts))
 {
@@ -54,7 +56,7 @@ else
   print "Logged in as user $adminName\n";
 }
 
-/** @var UploadDao */
+/** @var UserDao */
 $userDao = $GLOBALS['container']->get("dao.user");
 $adminRow = $userDao->getUserByName($adminName);
 if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
@@ -65,6 +67,9 @@ if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
 
 $uName = array_key_exists("uname", $opts) ? $opts["uname"] : '';
 $user = $uName ? $userDao->getUserByName($uName) : false;
+if ($user !== false) {
+    print "The user already exists, and updates in permissions not done from the commandline, we will only add group rights\n";
+}
 
 if($uName && !$user)
 {
@@ -72,7 +77,7 @@ if($uName && !$user)
   $seed = rand() . rand();
   $hash = sha1($seed . $pass);
   $desc = 'created via cli';
-  $perm = array_key_exists('permlvl', $opts) ? intval($opts['permlvl']) : 0;
+  $perm = array_key_exists('accesslvl', $opts) ? intval($opts['accesslvl']) : 0;
   $folder = array_key_exists('folderid', $opts) ? intval($opts['folderid']) : 1;
   $agentList = userAgents();
   $email = $emailNotify = '';

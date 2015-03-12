@@ -177,7 +177,7 @@ class ui_download extends FO_Plugin
     }
 
     $uploadPerm = GetUploadPerm($uploadId);
-    if ($uploadPerm < PERM_WRITE)
+    if ($uploadPerm < Auth::PERM_WRITE)
     {
       throw new Exception("No Permission: $uploadId");
     }

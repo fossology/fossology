@@ -263,7 +263,7 @@ class copyright_list extends FO_Plugin
     /* Check item1 and item2 upload permissions */
     $Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
     $UploadPerm = GetUploadPerm($Row['upload_fk']);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $this->vars['pageContent'] = "<h2>" . _("Permission Denied") . "</h2>";
       return;

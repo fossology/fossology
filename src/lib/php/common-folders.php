@@ -563,7 +563,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
  *
  * \return array of {upload_pk, upload_desc, name, folder}
  */
-function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=PERM_READ)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth::PERM_READ)
 {
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }

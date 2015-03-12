@@ -19,6 +19,7 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +40,7 @@ class AdminLicenseFromCSV extends DefaultPlugin
         self::TITLE => "Admin License CSV Import",
         self::MENU_LIST => "Admin::License Admin::CSV Import",
         self::REQUIRES_LOGIN => true,
-        self::PERMISSION => self::PERM_ADMIN
+        self::PERMISSION => Auth::PERM_ADMIN
     ));
   }
 
