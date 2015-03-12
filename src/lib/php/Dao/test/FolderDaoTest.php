@@ -36,6 +36,11 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
     $this->folderDao = new FolderDao($this->dbManager);
+    
+    $this->testDb->createPlainTables(array('folder'));
+    $this->testDb->createSequences(array('folder_folder_pk_seq'));
+    $this->testDb->createConstraints(array('folder_pkey'));
+    $this->testDb->alterTables(array('folder'));
   }
 
   public function tearDown()
@@ -47,7 +52,6 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testHasTopLevelFolder_yes()
   {
-    $this->testDb->createPlainTables(array('folder'));
     $this->testDb->insertData(array('folder'));
     $htlf = $this->folderDao->hasTopLevelFolder();
     assertThat($htlf, is(TRUE));
@@ -55,18 +59,22 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testHasTopLevelFolder_no()
   {
-    $this->testDb->createPlainTables(array('folder'));
     $htlf = $this->folderDao->hasTopLevelFolder();
     assertThat($htlf, is(FALSE));
   }
 
+  
   public function testInsertFolder()
   {
-    $this->testDb->createPlainTables(array('folder'));
     $folderId = $this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)');
+    assertThat($folderId, equalTo(FolderDao::TOP_LEVEL));
     $folderInfo = $this->dbManager->getSingleRow('SELECT folder_name,folder_desc FROM folder WHERE folder_pk=$1',
       array($folderId), __METHOD__);
     assertThat($folderInfo, is(array('folder_name' => $folderName, 'folder_desc' => $folderDescription)));
+    
+    $folderIdPlusOne = $this->folderDao->insertFolder($folderName = 'four', $folderDescription = 'ceil(PI)');
+    assertThat($folderIdPlusOne, equalTo(FolderDao::TOP_LEVEL+1));
+
   }
 
   public function testInsertFolderContents()
@@ -81,7 +89,6 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetFolderPK()
   {
-    $this->testDb->createPlainTables(array('folder'));
     $folderId = $this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)');
 
     assertThat($this->folderDao->getFolderId('three'), is($folderId));
@@ -89,21 +96,13 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetFolderPK_Null()
   {
-    $this->testDb->createPlainTables(array('folder'));
-
     assertThat($this->folderDao->getFolderId('three'), is(null));
   }
 
-  /**
-   * @expectedException \Exception
-   */
-  public function testGetFolderPKAmbiguousName()
+  public function testGetFolderWithWrongParent()
   {
-    $this->testDb->createPlainTables(array('folder'));
-    $folderId = $this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)');
-    $folderId2 =$this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
-
-    $this->folderDao->getFolderId('three');
+    $folderId =$this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
+    assertThat($this->folderDao->getFolderId('three'), is(null));
   }
 
 }

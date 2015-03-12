@@ -153,7 +153,7 @@ class LicenseCsvImport {
     {
       $statementName = __METHOD__ .'.updSource';
       $dbManager->prepare($statementName, 'UPDATE license_ref SET rf_source=$1 WHERE rf_pk=$2');
-      $res = $dbManager->execute($statementName,array($row['rf_source'],$sameText['rf_pk']));
+      $res = $dbManager->execute($statementName,array($row['source'],$sameText['rf_pk']));
       $dbManager->freeResult($res);
       return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]', updated the source";
     }  

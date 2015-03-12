@@ -65,31 +65,27 @@ class FolderDao extends Object
 
     $statementName = __METHOD__;
 
-      $this->dbManager->prepare($statementName,
-        "INSERT INTO folder (folder_name, folder_desc, parent_fk ) VALUES ($1, $2, $3) returning folder_pk");
-      $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription, $parentFolderId));
-      $folderId=$this->dbManager->fetchArray($res)["folder_pk"];
-      $this->dbManager->freeResult($res);
+    $this->dbManager->prepare($statementName,
+      "INSERT INTO folder (folder_name, folder_desc, parent_fk ) VALUES ($1, $2, $3) returning folder_pk");
+    $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription, $parentFolderId));
+    $folderRow=$this->dbManager->fetchArray($res);
+    $folderId=$folderRow["folder_pk"];
+    $this->dbManager->freeResult($res);
 
-      return $folderId;
+    return $folderId;
   }
 
-  public function getFolderId($folderName){
-      $statementName = __METHOD__;
-      $this->dbManager->prepare($statementName,
-          "SELECT folder_pk FROM folder WHERE folder_name=$1 LIMIT 2");
-      $res = $this->dbManager->execute($statementName, array( $folderName));
-      $rows= $this->dbManager->fetchAll($res);
+  public function getFolderId($folderName, $parentFolderId=self::TOP_LEVEL) {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName,
+        "SELECT folder_pk FROM folder WHERE folder_name=$1 AND parent_fk=$2");
+    $res = $this->dbManager->execute($statementName, array( $folderName, $parentFolderId));
+    $rows= $this->dbManager->fetchAll($res);
 
+    $rootFolder = !empty($rows) ? intval($rows[0]['folder_pk']) : null;
+    $this->dbManager->freeResult($res);
 
-
-      $rootFolder = !empty($rows) ? intval($rows[0]['folder_pk']) : null;
-
-      if(count($rows) > 1) throw new Exception("Non unique folder name");
-
-      $this->dbManager->freeResult($res);
-
-      return $rootFolder;
+    return $rootFolder;
   }
 
   public function insertFolderContents($parentId, $foldercontentsMode, $childId) {

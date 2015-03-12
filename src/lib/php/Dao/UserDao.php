@@ -285,12 +285,12 @@ class UserDao extends Object
     return $row!==false && ($row['group_perm']==self::ADVISOR || $row['group_perm']==self::ADMIN);
   }
 
-    /**
-     * @param string $groupName raw group name as entered by the user
-     * @return int $groupId | mixed
-     * @throws \Exception
-     */
-    public function addGroup($groupName)
+  /**
+   * @param string $groupName raw group name as entered by the user
+   * @return int $groupId | mixed
+   * @throws \Exception
+   */
+  public function addGroup($groupName)
   {
     if (empty($groupName))
     {
