@@ -11,7 +11,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "cli.h"
 
-#include "monk.h"
 #include "file_operations.h"
 #include "database.h"
 #include "match.h"
@@ -19,7 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 MatchCallbacks cliCallbacks = { .onNo = cli_onNoMatch, .onFull = cli_onFullMatch, .onDiff = cli_onDiff};
 
-int matchCliFileWithLicenses(MonkState* state, Licenses* licenses, int argi, char** argv) {
+int matchCliFileWithLicenses(MonkState* state, const Licenses* licenses, int argi, char** argv) {
   File file;
   file.id = argi;
   file.fileName = argv[argi];
@@ -65,7 +64,7 @@ int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd)
   return 1;
 }
 
-int handleCliMode(MonkState* state, Licenses* licenses, int argc, char** argv) {
+int handleCliMode(MonkState* state, const Licenses* licenses, int argc, char** argv) {
   int fileOptInd;
   if (!parseArguments(state, argc, argv, &fileOptInd))
     return 0;
@@ -97,14 +96,14 @@ int handleCliMode(MonkState* state, Licenses* licenses, int argc, char** argv) {
   return !threadError;
 }
 
-int cli_onNoMatch(MonkState* state, File* file) {
+int cli_onNoMatch(MonkState* state, const File* file) {
   if (state->verbosity >= 1) {
     printf("File %s contains license(s) No_license_found\n", file->fileName);
   }
   return 1;
 }
 
-int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+int cli_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo) {
   if (state->scanMode != MODE_CLI)
     return 0;
 
@@ -114,7 +113,7 @@ int cli_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInf
   return 1;
 }
 
-int cli_onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+int cli_onDiff(MonkState* state, const File* file, const License* license, const DiffResult* diffResult) {
   if (state->scanMode != MODE_CLI)
     return 0;
 

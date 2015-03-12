@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "common.h"
 #include "monk.h"
 
-int bulk_onAllMatches(MonkState* state, File* file, GArray* matches);
+int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches);
 
 MatchCallbacks bulkCallbacks = {.onAll = bulk_onAllMatches};
 
@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-int bulk_onAllMatches(MonkState* state, File* file, GArray* matches) {
+int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches) {
   int haveAFullMatch = 0;
   for (guint j=0; j<matches->len; j++) {
     Match* match = match_array_index(matches, j);

@@ -266,53 +266,6 @@ Match* _matchWithARankStartAndEnd(int type, double rank, size_t start, size_t en
   return result;
 }
 
-void test_greatestMatchInGroup() {
-  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
-  Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 80.0);
-  Match* match2 = _matchWithARank(MATCH_TYPE_FULL, 0.0);
-  Match* match3 = _matchWithARank(MATCH_TYPE_FULL, 0.0);
-
-  g_array_append_val(matches, match1);
-  g_array_append_val(matches, match2);
-  g_array_append_val(matches, match3);
-
-  Match* greatest = greatestMatchInGroup(matches, compareMatchByRank);
-
-  CU_ASSERT_EQUAL(greatest, match2);
-
-  matchesArray_free(matches);
-}
-
-void test_greatestMatchInGroup2() {
-  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
-  Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 80.0);
-  Match* match2 = _matchWithARank(MATCH_TYPE_DIFF, 60.0);
-
-  g_array_append_val(matches, match1);
-  g_array_append_val(matches, match2);
-
-  Match* greatest = greatestMatchInGroup(matches, compareMatchByRank);
-
-  CU_ASSERT_EQUAL(greatest, match1);
-
-  matchesArray_free(matches);
-}
-
-void test_greatestMatchInGroup3() {
-  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
-  Match* match1 = _matchWithARank(MATCH_TYPE_DIFF, 50.0);
-  Match* match2 = _matchWithARank(MATCH_TYPE_DIFF, 60.0);
-
-  g_array_append_val(matches, match1);
-  g_array_append_val(matches, match2);
-
-  Match* greatest = greatestMatchInGroup(matches, compareMatchByRank);
-
-  CU_ASSERT_EQUAL(greatest, match2);
-
-  matchesArray_free(matches);
-}
-
 void test_filterMatches() {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
@@ -419,7 +372,7 @@ void test_filterMatchesWithBadGroupingAtFirstPass() {
 MonkState* testState = (MonkState*) 0x17;
 
 int expectOnAll;
-int onAll(MonkState* state, File* file, GArray* matches) {
+int onAll(MonkState* state, const File* file, const GArray* matches) {
   FO_ASSERT_PTR_NOT_NULL(matches);
   CU_ASSERT_EQUAL(state, testState);
   CU_ASSERT_EQUAL(file->fileName, testFileName);
@@ -428,7 +381,7 @@ int onAll(MonkState* state, File* file, GArray* matches) {
 };
 
 int expectOnNo;
-int onNo(MonkState* state, File* file) {
+int onNo(MonkState* state, const File* file) {
   CU_ASSERT_EQUAL(state, testState);
   CU_ASSERT_EQUAL(file->fileName, testFileName);
   FO_ASSERT_TRUE(expectOnNo);
@@ -436,7 +389,7 @@ int onNo(MonkState* state, File* file) {
 };
 
 int expectOnFull;
-int onFull(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+int onFull(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo) {
   FO_ASSERT_PTR_NOT_NULL(license);
   FO_ASSERT_PTR_NOT_NULL(matchInfo);
   CU_ASSERT_EQUAL(state, testState);
@@ -446,7 +399,7 @@ int onFull(MonkState* state, File* file, License* license, DiffMatchInfo* matchI
 }
 
 int expectOnDiff;
-int onDiff(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+int onDiff(MonkState* state, const File* file, const License* license, const DiffResult* diffResult) {
   FO_ASSERT_PTR_NOT_NULL(license);
   FO_ASSERT_PTR_NOT_NULL(diffResult);
   CU_ASSERT_EQUAL(state, testState);
@@ -457,7 +410,7 @@ int onDiff(MonkState* state, File* file, License* license, DiffResult* diffResul
 
 int doIgnore;
 
-int ignore(MonkState* state, File* file) {
+int ignore(MonkState* state, const File* file) {
   CU_ASSERT_EQUAL(state, testState);
   CU_ASSERT_EQUAL(file->fileName, testFileName);
   return doIgnore;
@@ -554,9 +507,6 @@ CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with two included group:", test_findAllMatchesTwoGroups},
   {"Testing match of all licenses with two included group and diffs:", test_findAllMatchesTwoGroupsWithDiff},
   {"Testing formatting the diff information output:", test_formatMatchArray},
-  {"Testing finding best match in a group:", test_greatestMatchInGroup},
-  {"Testing finding best match in a group, 2:", test_greatestMatchInGroup2},
-  {"Testing finding best match in a group, 3:", test_greatestMatchInGroup3},
   {"Testing filtering matches:", test_filterMatches},
   {"Testing filtering matches empty:", test_filterMatchesEmpty},
   {"Testing filtering matches with a full match:", test_filterMatches2},

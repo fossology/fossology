@@ -10,14 +10,12 @@ You should have received a copy of the GNU General Public License along with thi
 */
 
 #include "diff.h"
-#include "monk.h"
 
-#include "string_operations.h"
 #include "_squareVisitor.h"
 #include <stdlib.h>
 
-int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
-                        GArray* searchTokens, size_t searchStart, size_t searchLength,
+int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
+                        const GArray* searchTokens, size_t searchStart, size_t searchLength,
                         unsigned int numberOfWantedMatches) {
 
   if (tokenEquals(
@@ -39,7 +37,7 @@ int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
   return 0;
 }
 
-int lookForDiff(GArray* textTokens, GArray* searchTokens,
+int lookForDiff(const GArray* textTokens, const GArray* searchTokens,
                        size_t iText, size_t iSearch,
                        unsigned int maxAllowedDiff, unsigned int minAdjacentMatches,
                        DiffMatchInfo* result) {
@@ -119,7 +117,7 @@ void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSearch) {
 
  @return pointer to the result, or NULL on negative match. To be freed with diffResult_free
  ****************************************************/
-DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
+DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchTokens,
                              size_t textStartPosition, size_t searchStartPosition,
                              unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
   size_t textLength = textTokens->len;

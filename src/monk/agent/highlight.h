@@ -19,6 +19,6 @@ void convertToAbsolutePositions(GArray* diffMatchInfo,
                                 GArray* textTokens,
                                 GArray* searchTokens);
 
-DiffPoint getFullHighlightFor(GArray* tokens, size_t firstMatchedIndex, size_t matchedCount);
+DiffPoint getFullHighlightFor(const GArray* tokens, size_t firstMatchedIndex, size_t matchedCount);
 
 #endif // MONK_AGENT_HIGHLIGHT_H

@@ -13,8 +13,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdio.h>
 
 #include "database.h"
-#include "libfossdb.h"
-#include "libfossdbmanager.h"
+
 #define LICENSE_REF_TABLE "ONLY license_ref"
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right) {
@@ -28,7 +27,6 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
   );
 }
 
-//TODO use correct parameters to filter only "good" licenses
 PGresult* queryAllLicenses(fo_dbManager* dbManager) {
   return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
@@ -121,7 +119,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
   return licenseFilePk;
 }
 
-int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {
+int saveDiffHighlightToDb(fo_dbManager* dbManager, const DiffMatchInfo* diffInfo, long licenseFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
@@ -142,7 +140,7 @@ int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long
   return 1;
 }
 
-int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId) {
+int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, long licenseFileId) {
   size_t matchedInfoLen = matchedInfo->len ;
   for (size_t i = 0; i < matchedInfoLen; i++) {
     DiffMatchInfo* diffMatchInfo = &g_array_index(matchedInfo, DiffMatchInfo, i);

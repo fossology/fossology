@@ -20,7 +20,7 @@ char* ignoredLicenseNames[] = {"Void", "No_license_found"};
 int ignoredLicenseTextsCount = 2;
 char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
 
-int isIgnoredLicense(License* license) {
+int isIgnoredLicense(const License* license) {
   int ignored = 0;
   for (int i = 0; (i < ignoredLicenseNamesCount) && (!ignored); i++) {
     if (strcmp(license->shortname, ignoredLicenseNames[i]) == 0)
@@ -101,7 +101,7 @@ static void g_array_free_true(void* ptr) {
   g_array_free(ptr, TRUE);
 }
 
-uint32_t getKey(GArray* tokens, unsigned minAdjacentMatches, unsigned searchedStart) {
+uint32_t getKey(const GArray* tokens, unsigned minAdjacentMatches, unsigned searchedStart) {
   uint32_t result = 1;
   for (guint i = 0; (i < minAdjacentMatches) && (i+searchedStart < tokens->len); i++)
   {
@@ -148,7 +148,7 @@ Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, uns
 }
 
 
-const GArray* getLicenseArrayFor(Licenses* licenses, unsigned searchPos, GArray* searchedTokens, unsigned searchedStart) {
+const GArray* getLicenseArrayFor(const Licenses* licenses, unsigned searchPos, const GArray* searchedTokens, unsigned searchedStart) {
   const GArray* indexes = licenses->indexes;
 
   guint minAdjacentMatches = licenses->minAdjacentMatches;

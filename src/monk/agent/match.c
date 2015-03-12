@@ -13,23 +13,20 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "license.h"
 #include "math.h"
-#include "monk.h"
-#include "diff.h"
 #include "file_operations.h"
 
-GArray* findAllMatchesBetween(File* file, Licenses* licenses,
-                                     unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
+GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
+        unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
   GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
 
-  GArray* textTokens = file->tokens;
-  guint textLength = textTokens->len;
+  const GArray* textTokens = file->tokens;
+  const guint textLength = textTokens->len;
 
-  for (guint tPos=0; tPos<textLength; tPos++) {
+  for (guint tPos = 0; tPos < textLength; tPos++) {
     for (guint sPos = 0; sPos <= maxLeadingDiff; sPos++) {
-      const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, file->tokens, tPos);
+      const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, textTokens, tPos);
 
-      if (!availableLicenses)
-      {
+      if (!availableLicenses) {
         /* we hope to get here very often */
         continue;
       }
@@ -41,13 +38,11 @@ GArray* findAllMatchesBetween(File* file, Licenses* licenses,
     }
   }
 
-  GArray* filteredMatches = filterNonOverlappingMatches(matches);
-
-  return filteredMatches;
+  return filterNonOverlappingMatches(matches);
 }
 
 void match_array_free(GArray* matches) {
-#if GLIB_CHECK_VERSION(2,32,0)
+#if GLIB_CHECK_VERSION(2, 32, 0)
   g_array_set_clear_func(matches, match_destroyNotify);
 #else
   for (unsigned int i=0; i< matches->len; ++i) {
@@ -55,12 +50,12 @@ void match_array_free(GArray* matches) {
     match_free(tmp);
   }
 #endif
-    g_array_free(matches, TRUE);
+  g_array_free(matches, TRUE);
 }
 
-int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses, MatchCallbacks* callbacks) {
+int matchFileWithLicenses(MonkState* state, const File* file, const Licenses* licenses, const MatchCallbacks* callbacks) {
   GArray* matches = findAllMatchesBetween(file, licenses,
-                                          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
   int result = processMatches(state, file, matches, callbacks);
 
   // we are done: free memory
@@ -79,21 +74,22 @@ static char* getFileName(MonkState* state, long pFileId) {
   char* pFileName;
 
 #ifdef MONK_MULTI_THREAD
-  #pragma omp critical(getFileName)
+#pragma omp critical(getFileName)
 #endif
   {
     pFileName = fo_RepMkPath("files", pFile);
   }
 
-  if (!pFileName)
+  if (!pFileName) {
     printf("file '%s' not found\n", pFile);
+  }
 
   free(pFile);
 
   return pFileName;
 }
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, MatchCallbacks* callbacks) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks) {
   File file;
   file.id = pFileId;
 
@@ -103,8 +99,7 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, M
   if (file.fileName != NULL) {
     result = readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS);
 
-    if (result)
-    {
+    if (result) {
       result = matchFileWithLicenses(state, &file, licenses, callbacks);
 
       g_array_free(file.tokens, TRUE);
@@ -116,32 +111,36 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, M
   return result;
 }
 
-char* formatMatchArray(GArray * matchInfo) {
+char* formatMatchArray(GArray* matchInfo) {
   GString* stringBuilder = g_string_new("");
 
   size_t len = matchInfo->len;
   for (size_t i = 0; i < len; i++) {
     DiffMatchInfo* current = &g_array_index(matchInfo, DiffMatchInfo, i);
 
-    if (current->text.length > 0)
+    if (current->text.length > 0) {
       g_string_append_printf(stringBuilder,
-                             "t[%zu+%zu] %s ",
-                             current->text.start, current->text.length, current->diffType);
-    else
+              "t[%zu+%zu] %s ",
+              current->text.start, current->text.length, current->diffType);
+    }
+    else {
       g_string_append_printf(stringBuilder,
-                             "t[%zu] %s ",
-                             current->text.start, current->diffType);
+              "t[%zu] %s ",
+              current->text.start, current->diffType);
+    }
 
-    if (current->search.length > 0)
+    if (current->search.length > 0) {
       g_string_append_printf(stringBuilder,
-                             "s[%zu+%zu]",
-                             current->search.start, current->search.length);
-    else
+              "s[%zu+%zu]",
+              current->search.start, current->search.length);
+    }
+    else {
       g_string_append_printf(stringBuilder,
-                             "s[%zu]",
-                             current->search.start);
+              "s[%zu]",
+              current->search.start);
+    }
 
-    if (i < len-1) {
+    if (i < len - 1) {
       g_string_append_printf(stringBuilder, ", ");
     }
   }
@@ -152,9 +151,10 @@ char* formatMatchArray(GArray * matchInfo) {
 static unsigned short match_rank(Match* match) {
   if (match->type == MATCH_TYPE_FULL) {
     return 100;
-  } else {
+  }
+  else {
     DiffResult* diffResult = match->ptr.diff;
-    License* license = match->license;
+    const License* license = match->license;
     unsigned int licenseLength = license->tokens->len;
     unsigned int numberOfMatches = diffResult->matched;
     unsigned int numberOfAdditions = diffResult->added;
@@ -173,10 +173,15 @@ static unsigned short match_rank(Match* match) {
   }
 }
 
+static int match_isFull(const Match* match) {
+  return match->type == MATCH_TYPE_FULL;
+}
+
 size_t match_getStart(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL) {
+  if (match_isFull(match)) {
     return match->ptr.full->start;
-  } else {
+  }
+  else {
     GArray* matchedInfo = match->ptr.diff->matchedInfo;
 
     DiffPoint firstDiff = g_array_index(matchedInfo, DiffMatchInfo, 0).text;
@@ -186,12 +191,13 @@ size_t match_getStart(const Match* match) {
 }
 
 size_t match_getEnd(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL) {
+  if (match_isFull(match)) {
     return match->ptr.full->length + match->ptr.full->start;
-  } else {
+  }
+  else {
     GArray* matchedInfo = match->ptr.diff->matchedInfo;
 
-    DiffPoint lastDiff = g_array_index(matchedInfo, DiffMatchInfo, matchedInfo->len-1).text;
+    DiffPoint lastDiff = g_array_index(matchedInfo, DiffMatchInfo, matchedInfo->len - 1).text;
 
     return lastDiff.start + lastDiff.length;
   }
@@ -204,135 +210,144 @@ static int matchIncludes(const Match* matchA, const Match* matchB) {
   size_t matchAEnd = match_getEnd(matchA);
   size_t matchBEnd = match_getEnd(matchB);
 
-  if (matchAStart >= matchBStart)
+  if (matchAStart >= matchBStart) {
     return (matchAEnd <= matchBEnd) ? 1 : 0;
-  else
+  }
+  else {
     return (matchAEnd >= matchBEnd) ? 1 : 0;
+  }
 }
 
 // make sure to call it after a match_rank or the result will be junk
 double match_getRank(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL)
+  if (match_isFull(match)) {
     return 100.0;
-  else
+  }
+  else {
     return match->ptr.diff->rank;
+  }
 }
 
-gint compareMatchByRank (gconstpointer a, gconstpointer b) {
-  const Match* matchA = *(Match**)a;
-  const Match* matchB = *(Match**)b;
+gint compareMatchByRank(gconstpointer a, gconstpointer b) {
+  const Match* matchA = *(Match**) a;
+  const Match* matchB = *(Match**) b;
 
   double matchARank = match_getRank(matchA);
   double matchBRank = match_getRank(matchB);
 
-  if (matchARank > matchBRank)
+  if (matchARank > matchBRank) {
     return 1;
-  if (matchARank < matchBRank)
+  }
+  if (matchARank < matchBRank) {
     return -1;
+  }
 
   return 0;
 }
 
-// match must not be empty
-Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare) {
-  Match* result = match_array_index(matches, 0);
+//TODO profile this and see if it makes sense to cache the comparison
+int licenseIncludes(const License* big, const License* small) {
+  const GArray* tokensBig = big->tokens;
+  const GArray* tokensSmall = small->tokens;
 
-  for (guint j = 0; j < matches->len; j++) {
-    Match* match = match_array_index(matches, j);
-    if ((*compare)(&match, &result) == 1) {
-      result = match;
+  const guint bigLen = tokensBig->len;
+  const guint smallLen = tokensSmall->len;
+
+  if (smallLen == 0) {
+    return 1;
+  }
+
+  if (smallLen > bigLen) {
+    return 0;
+  }
+
+  for (guint i = 0; i < bigLen; i++) {
+    unsigned n = smallLen;
+    if (matchNTokens(tokensBig, i, bigLen, tokensSmall, 0, smallLen, n)) {
+      return 1;
     }
   }
 
-  return result;
-}
-
-int licenseIncludes(const License* big, const License* small)
-{
-  GArray* tokensBig = big->tokens;
-  GArray* tokensSmall = small->tokens;
-
-  if (tokensSmall->len == 0)
-  {
-    return 1;
-  }
-
-  for (guint i=0; i<tokensBig->len; i++) {
-     if (matchNTokens(tokensBig, i, tokensBig->len, tokensSmall, 0, tokensSmall->len, tokensSmall->len))
-       return 1;
-  }
-
   return 0;
 }
 
-static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense)
-{
+static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense) {
   return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
 }
 
-GArray* filterNonOverlappingMatches(GArray* matches) {
-  GArray* result = g_array_new(TRUE, FALSE, sizeof(Match*));
+static int oneMatchIncludesTheOther(const Match* thisMatch, const Match* otherMatch) {
+  return matchIncludes(thisMatch, otherMatch) || matchIncludes(otherMatch, thisMatch);
+}
 
-  for(guint i=0; i<matches->len; i++) {
+static int licensesCanNotOverlap(const License* thisLicense, const License* otherLicense) {
+  return thisLicense->refId == otherLicense->refId || !(oneLicenseIncludesTheOther(thisLicense, otherLicense));
+}
+
+/*
+ * destructively filter matches array: array and discarded matches are automatically freed
+ **/
+GArray* filterNonOverlappingMatches(GArray* matches) {
+  const guint len = matches->len;
+
+  /* instead of removing elements from the array set them to NULL and create a new array at the end
+   * profiling says this is not time critical */
+  for (guint i = 0; i < len; i++) {
     Match* thisMatch = match_array_index(matches, i);
-    if (thisMatch == NULL)
-    {
+    if (thisMatch == NULL) {
       continue;
     }
 
     const License* thisLicense = thisMatch->license;
 
-    for(guint j=i+1; j<matches->len; j++)
-    {
+    for (guint j = i + 1; j < len; j++) {
       Match* otherMatch = match_array_index(matches, j);
-      if (otherMatch == NULL)
-      {
+      if (otherMatch == NULL) {
         continue;
       }
-      
+
       const License* otherLicense = otherMatch->license;
 
-      if (matchIncludes(thisMatch, otherMatch) || matchIncludes(otherMatch, thisMatch))
-      {
-        if (thisLicense->refId == otherLicense->refId ||
-          !(oneLicenseIncludesTheOther(thisLicense, otherLicense)))
-        {
-          const gint rankComparison = compareMatchByRank(&thisMatch, &otherMatch);
-          if (rankComparison > 0)
-          {
-            match_free(otherMatch);
-            match_array_index(matches, j) = NULL;
-          }
-          else
-          {
-            match_free(thisMatch);
-            match_array_index(matches, i) = NULL;
-            break;
-          }
+      if (oneMatchIncludesTheOther(thisMatch, otherMatch) &&
+              (
+                      (match_isFull(thisMatch) && match_isFull(otherMatch))
+                              || licensesCanNotOverlap(thisLicense, otherLicense))
+              ) {
+        const gint rankComparison = compareMatchByRank(&thisMatch, &otherMatch);
+        if (rankComparison > 0) {
+          match_free(otherMatch);
+          match_array_index(matches, j) = NULL;
+        }
+        else {
+          match_free(thisMatch);
+          match_array_index(matches, i) = NULL;
+          break;
         }
       }
     }
   }
 
-  for(guint i=0; i<matches->len; i++) {
+  GArray* result = g_array_new(FALSE, FALSE, sizeof(Match*));
+  for (guint i = 0; i < len; i++) {
     Match* thisMatch = match_array_index(matches, i);
-    if (thisMatch)
-    {
+    if (thisMatch) {
       g_array_append_val(result, thisMatch);
     }
   }
 
+  g_array_free(matches, TRUE);
+
   return result;
 }
 
-int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* callbacks) {
-  License* license = match->license;
+int processMatch(MonkState* state, const File* file, const Match* match, const MatchCallbacks* callbacks) {
+  const License* license = match->license;
   if (match->type == MATCH_TYPE_DIFF) {
     DiffResult* diffResult = match->ptr.diff;
 
     convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
     return callbacks->onDiff(state, file, license, diffResult);
-  } else {
+  }
+  else {
     DiffMatchInfo matchInfo;
     matchInfo.text = getFullHighlightFor(file->tokens, match->ptr.full->start, match->ptr.full->length);
     matchInfo.search = getFullHighlightFor(license->tokens, 0, license->tokens->len);
@@ -342,7 +357,7 @@ int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* cal
   }
 }
 
-int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks* callbacks) {
+int processMatches(MonkState* state, const File* file, const GArray* matches, const MatchCallbacks* callbacks) {
   if (callbacks->ignore && callbacks->ignore(state, file)) {
     return 1;
   }
@@ -353,22 +368,20 @@ int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks
 
   const guint matchCount = matches->len;
 
-  if (matchCount == 0)
-  {
+  if (matchCount == 0) {
     return callbacks->onNo(state, file);
   }
 
   int result = 1;
-  for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++)
-  {
-    Match* match = match_array_index(matches, matchIndex);
+  for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++) {
+    const Match* match = match_array_index(matches, matchIndex);
     result &= processMatch(state, file, match, callbacks);
   }
 
   return result;
 }
 
-Match* diffResult2Match(DiffResult* diffResult, License* license){
+Match* diffResult2Match(DiffResult* diffResult, const License* license) {
   Match* newMatch = malloc(sizeof(Match));
   newMatch->license = license;
 
@@ -378,7 +391,8 @@ Match* diffResult2Match(DiffResult* diffResult, License* license){
     newMatch->ptr.full = malloc(sizeof(DiffPoint));
     *(newMatch->ptr.full) = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
     diffResult_free(diffResult);
-  } else {
+  }
+  else {
     newMatch->type = MATCH_TYPE_DIFF;
     newMatch->ptr.diff = diffResult;
 
@@ -386,41 +400,46 @@ Match* diffResult2Match(DiffResult* diffResult, License* license){
   return newMatch;
 }
 
-void findDiffMatches(File* file, License* license,
-  size_t textStartPosition, size_t searchStartPosition,
-  GArray* matches,
-  unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
+void findDiffMatches(const File* file, const License* license,
+        size_t textStartPosition, size_t searchStartPosition,
+        GArray* matches,
+        unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
 
   if (!matchNTokens(file->tokens, textStartPosition, file->tokens->len,
-                    license->tokens, searchStartPosition, license->tokens->len,
-    minAdjacentMatches)) {
+          license->tokens, searchStartPosition, license->tokens->len,
+          minAdjacentMatches)) {
     return;
   }
 
   DiffResult* diffResult = findMatchAsDiffs(file->tokens, license->tokens,
-                                            textStartPosition, searchStartPosition,
-                                            maxAllowedDiff, minAdjacentMatches);
+          textStartPosition, searchStartPosition,
+          maxAllowedDiff, minAdjacentMatches);
 
   if (diffResult) {
     Match* newMatch = diffResult2Match(diffResult, license);
 
     if (match_rank(newMatch) > MIN_ALLOWED_RANK)
       g_array_append_val(matches, newMatch);
-    else
+    else {
       match_free(newMatch);
+    }
   }
 }
 
-#if GLIB_CHECK_VERSION(2,32,0)
+#if GLIB_CHECK_VERSION(2, 32, 0)
+
 void match_destroyNotify(gpointer matchP) {
   match_free(*((Match**) matchP));
 }
+
 #endif
 
 void match_free(Match* match) {
-  if (match->type == MATCH_TYPE_DIFF)
+  if (match->type == MATCH_TYPE_DIFF) {
     diffResult_free(match->ptr.diff);
-  else
+  }
+  else {
     free(match->ptr.full);
+  }
   free(match);
 }

@@ -82,6 +82,7 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
       }
     }
 
+    // TODO this does not keep the correct offsets (we need "byte inside the file" units in Token.*)
     int addedTokens = streamTokenize(chunk, len, delimiters, tokens, &remainder);
     if (addedTokens < 0)
     {
