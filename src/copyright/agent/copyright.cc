@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         for (match& m : l)
         {
           cout << "\t[" << m.start << ':' << m.end << ':' << m.type << "] '"
-            << s.substr(m.start, m.end - m.start)
+            << cleanMatch(s, m)
             << "'" << endl;
         }
       }

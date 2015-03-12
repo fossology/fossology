@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  * Author: Johannes Najjar, Daniele Fognini
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -21,6 +21,10 @@ CopyrightState::CopyrightState(int _agentId, const CliOptions& cliOptions) :
 
 CopyrightState::~CopyrightState()
 {
+  // TODO: Scanners with pointers contained in scanners list have been allocated
+  // with new and therefore have to be deleted here (but not those from extraRegexes)
+  /*for (const scanner* p : scanners)
+    delete p;*/
 }
 
 int CopyrightState::getAgentId() const
@@ -32,16 +36,6 @@ void CopyrightState::addScanner(const scanner* sc)
 {
   scanners.push_back(sc);
 }
-
-/*
-void CopyrightState::addMatcher(const std::vector<RegexMatcher>& regexMatchers)
-{
-  for (auto it = regexMatchers.begin(); it != regexMatchers.end(); ++it) {
-    addMatcher(*it);
-  }
-}
-*/
-
 
 const std::list<const scanner*>& CopyrightState::getScanners() const
 {
@@ -96,7 +90,7 @@ bool CliOptions::addExtraRegex(const std::string& regexDesc)
   {
     std::string type(match.length(1) > 0 ? match.str(1) : "cli");
     
-    //int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
+    int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
 
     if (match.length(3) == 0)
       return false;
@@ -107,7 +101,7 @@ bool CliOptions::addExtraRegex(const std::string& regexDesc)
     // TODO: delete this pointer somewhere?
     strcpy(ptype, type.c_str());
 
-    extraRegex.push_back(regexScanner(regexPattern, ptype));
+    extraRegex.push_back(regexScanner(regexPattern, ptype, regId));
     return true;
   }
   return false;

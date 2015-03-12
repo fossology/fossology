@@ -28,14 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace std;
 
-bool operator==(const match& m1, const match& m2)
-{
-  return m1.start == m2.start && m1.end == m2.end && strcmp(m1.type, m2.type) == 0;
-}
-bool operator!=(const match& m1, const match& m2)
-{
-  return !(m1 == m2);
-}
 ostream& operator<<(ostream& out, const list<match>& l)
 {
   for (const match& m : l)
@@ -43,21 +35,21 @@ ostream& operator<<(ostream& out, const list<match>& l)
   return out;
 }
 
-const char testContent[] = "© 2007 Hugh Jackman\n"
-  "Copyright 2004 my company\n"
-  "Copyrights by any strange people\n"
-  "(C) copyright 2007-2011, 2013 my favourite company Google\n"
-  "(C) 2007-2011, 2013 my favourite company Google\n"
-  "if (c) return -1 \n"
-  "Written by: me, myself and Irene.\n"
-  "Authors all the people at ABC\n"
-  "Apache\n"
-  "This file is protected unter US patents 1 , 2 ,3\n"
-  "Do not modify this document\n"
-  "the shuttle is a space vehicle designed by NASA\n"
-  "visit http://mysite.org/FAQ or write to info@mysite.org\n"
-  "maintained by benjamin drieu <benj@debian.org>\n"
-  "* Copyright (c) 1989, 1993\n"
+const char testContent[] = "© 2007 Hugh Jackman\n\n"
+  "Copyright 2004 my company\n\n"
+  "Copyrights by any strange people\n\n"
+  "(C) copyright 2007-2011, 2013 my favourite company Google\n\n"
+  "(C) 2007-2011, 2013 my favourite company Google\n\n"
+  "if (c) { return -1 } \n\n"
+  "Written by: me, myself and Irene.\n\n"
+  "Authors all the people at ABC\n\n"
+  "Apache\n\n"
+  "This file is protected unter US patents 1 , 2 ,3\n\n"
+  "Do not modify this document\n\n"
+  "the shuttle is a space vehicle designed by NASA\n\n"
+  "visit http://mysite.org/FAQ or write to info@mysite.org\n\n"
+  "maintained by benjamin drieu <benj@debian.org>\n\n"
+  "* Copyright (c) 1989, 1993\n" // Really just one newline here!
   "* The Regents of the University of California. All rights reserved.";
   
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
@@ -79,8 +71,13 @@ private:
     
     for (const char * s : expectedStrings)
     {
-      int pos = strstr(content, s) - content;
-      expected.push_back(match(pos, pos+strlen(s), type));
+      const char * p = strstr(content, s);
+      if (p)
+      {
+        int pos = p - content;
+        expected.push_back(match(pos, pos+strlen(s), type));
+      }
+      // else: expected string is not contained in original string
     }
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   }
@@ -96,9 +93,9 @@ protected:
       "Copyrights by any strange people",
       "(C) copyright 2007-2011, 2013 my favourite company Google",
       "(C) 2007-2011, 2013 my favourite company Google",
-      "Written by: me, myself and Irene.",
-      "Authors all the people at ABC",
-      "maintained by benjamin drieu <benj@debian.org>",
+      //"Written by: me, myself and Irene.",
+      //"Authors all the people at ABC",
+      //"maintained by benjamin drieu <benj@debian.org>",
       "Copyright (c) 1989, 1993\n* The Regents of the University of California. All rights reserved."
     });
   }
@@ -119,8 +116,8 @@ protected:
   }
 
   void regEmailTest () {
-    regexScanner sc(regEmail::getRegex(), regEmail::getType());
-    scannerTest(&sc, testContent, regEmail::getType(), { "info@mysite.org", "<benj@debian.org>" });
+    regexScanner sc(regEmail::getRegex(), regEmail::getType(), 1);
+    scannerTest(&sc, testContent, regEmail::getType(), { "info@mysite.org", "benj@debian.org" });
   }
 };
 

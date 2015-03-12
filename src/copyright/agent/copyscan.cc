@@ -1,94 +1,94 @@
 /*
- * Heuristic copyright scanner
+ * Copyright (C) 2015, Siemens AG
+ * Author: Florian Krügel
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #include "copyscan.hpp"
 #include "regex.hpp"
 #include <cctype>
+#include <algorithm>
 
 const char copyrightType[] = "statement";
-
-void AppendToList(list<match>& out, const string& s, int lineStart, int resultsStartInLine);
 
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {
   // Find copyright statements in stream str
+  // TODO: also find author statements
 #define COPYSYM "(?:\\(c\\)|&copy;|\xA9|\xC2\xA9" "|\\$\xB8|\xE2\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E)"
 
-  rx::regex reg("\\bcopyright[[:space:]]+" COPYSYM
-    "|\\bcopyright:"
-    "|\\bcopyright[[:space:]]+[[:digit:]]{1,4}"
-    "|\\bcopyright(?:ed)[[:space:]]+(?:by|of)"
-    "|" COPYSYM "[[:space:]]+(?:[[:digit:]]{1,4}|[[:alpha:]]+)[[:space:],\\.-]"
-    "|\\bcopyright[[:space:]]+[[:alpha:]]+:",
+  rx::regex regCopyright(
+    "\\bcopyright(?:ed|s)?[[:space:]:]|"
+    COPYSYM "[[:space:]]+[[:alnum:]]",
+    rx::regex_constants::icase);
+    
+  rx::regex regException(
+    "\\bcopyrights?(?:[[:space:]/\\\\\\*\\+#\"\\.-]+)(?:licen[cs]es?|notices?|holders?|and|statements?|owners?)[[:space:]\\.,][^\\0]*",
       rx::regex_constants::icase);
-  rx::regex regWithExceptions("\\bcopyright[[:space:]]([[:alpha:]]+)[[:space:],\\.-]",
-      rx::regex_constants::icase);
-
+  // [^\0] is a hack: is supposed to mean "any character"
+  rx::regex regNonBlank(
+    ".*(?:[[:alpha:]][[:alpha:]]|[[:digit:]][[:digit:]]).*"
+    );
+    
+  rx::regex regSimpleCopyright(
+    "\\bcopyright\\b|" COPYSYM,
+    rx::regex_constants::icase);
   
-  rx::regex regExceptions(
-    "licen[cs]es?|notices?|holders?|and|statements?",
-      rx::regex_constants::icase);
-  
-  unsigned int filePos = 0;
-  while (filePos < s.length())
+  string::const_iterator begin = s.begin();
+  string::const_iterator pos = begin;
+  string::const_iterator end = s.end();
+  while (pos != end)
   {
-    // Read line
-    string sLine; // TODO inefficient
-    string::size_type newlinePos = s.find('\n', filePos);
-    if (newlinePos == string::npos)
-      // Last line
-      newlinePos = s.length();
-    sLine = s.substr(filePos, newlinePos - filePos);
-    string::const_iterator begin = sLine.begin();
-    string::const_iterator end = sLine.end();
+    // Find potential copyright statement
     rx::smatch results;
-    while (begin != end)
+    if (!rx::regex_search(pos, end, results, regCopyright))
+      // No further copyright statement found
+      break;
+    string::const_iterator foundPos = results[0].first;
+    
+    if (!rx::regex_match(foundPos, end, regException))
     {
-      if (rx::regex_search(begin, end, results, reg))
+      // Not an exception, this means that at foundPos there is a copyright statement
+      // Try to find the proper beginning and end before adding it to the out list
+      
+      // Copyright statements should extend over the following lines until
+      // a blank line or a line with a new copyright statement is found
+      // A blank line may consist of
+      // - spaces and punctuation
+      // - no word of two letters, no two consecutive digits
+                  
+      string::const_iterator j = find(foundPos, end, '\n');
+      while (j != end)
       {
-        AppendToList(out, sLine, filePos, results.position());
-        break;
-      }
-      else if (rx::regex_search(begin, end, results, regWithExceptions))
-      {
-        // Check results[1] for exceptions
-        if (results.size() > 1 && !rx::regex_match(results[1].first, results[1].second, regExceptions))
+        string::const_iterator beginOfLine = j;
+        ++beginOfLine;
+        string::const_iterator endOfLine = find(beginOfLine, end, '\n');
+        if (rx::regex_search(beginOfLine, endOfLine, regSimpleCopyright)
+          || !rx::regex_match(beginOfLine, endOfLine, regNonBlank))
         {
-          // No exceptions found
-          AppendToList(out, sLine, filePos, results.position());
+          // Found end
           break;
         }
-        else
-        {
-          begin = results[0].second;
-        }
+        j = endOfLine;
       }
+      if (j - foundPos >= 999)
+        // Truncate
+        out.push_back(match(foundPos - begin, (foundPos - begin) + 998, copyrightType));
+        // TODO: Better idea: the view performs the truncation
       else
-        break;
+        out.push_back(match(foundPos - begin, j - begin, copyrightType));
+      pos = j;
     }
-    filePos = newlinePos + 1;
-  }
-}
-
-void AppendToList(list<match>& out, const string& s, int lineStart, int resultsStartInLine)
-{
-  // Append complete line, except if it is too long
-  int lineLength = s.length();
-  if (lineLength < 400)
-  {
-    // Find first alpha character
-    int i = 0;
-    for ( ; i < resultsStartInLine; i++)
+    else
     {
-      if (isalpha(s[i]))
-        break;
+      // An exception: this is not a copyright statement: continue at the end of this statement
+      pos = results[0].second;
     }
-    out.push_back(match(lineStart + i, lineStart + lineLength, copyrightType));
   }
-  else if (lineLength - resultsStartInLine >= 400)
-    out.push_back(match(lineStart + resultsStartInLine, lineStart + resultsStartInLine + 400, copyrightType));
-  else
-    out.push_back(match(lineStart + lineLength - 400, lineStart + lineLength, copyrightType));
 }
 

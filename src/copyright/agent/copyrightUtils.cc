@@ -151,16 +151,16 @@ void fillScanners(CopyrightState& state)
 #ifdef IDENTITY_COPYRIGHT
   unsigned types = cliOptions.getOptType();
 
+  // Note: Scanners are deleted in the CopyrightState destructor
   if (types & 1<<0)
     //state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
     state.addScanner(new hCopyrightScanner());
-    // TODO Memory in these pointers are never deleted
 
   if (types & 1<<1)
     state.addScanner(new regexScanner(regURL::getRegex(), regURL::getType()));
 
   if (types & 1<<2)
-    state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType()));
+    state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType(), 1));
 #endif
 
 #ifdef IDENTITY_IP
@@ -185,13 +185,13 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
 
     DatabaseEntry entry;
     entry.agent_fk = agentId;
-    entry.content = s.substr(m.start, m.end - m.start);
+    entry.content = cleanMatch(s, m);
     entry.copy_endbyte = m.end;
     entry.copy_startbyte = m.start;
     entry.pfile_fk = pFileId;
     entry.type = m.type;
 
-    if (normalizeDatabaseEntry(entry))
+    if (entry.content.length() != 0)
     {
       ++count;
       if (!copyrightDatabaseHandler.insertInDatabase(entry))
@@ -209,34 +209,6 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
 
   return copyrightDatabaseHandler.commit();
 }
-
-/*vector<CopyrightMatch> findAllMatches(const fo::File& file, list<RegexMatcher> const& regexMatchers)
-{
-  if (!file.isReadable())
-  {
-    cout << "File not readable: " << file.getFileName() << endl;
-    bail(9);
-  }
-
-  string fileContent = file.getContent(0);
-
-  normalizeContent(fileContent);
-
-  return matchStringToRegexes(fileContent, regexMatchers);
-}
-
-//TODO normalize the content
-void normalizeContent(string& content)
-{
-  for (std::string::iterator it = content.begin(); it != content.end(); ++it)
-  {
-    char& charachter = *it;
-
-    if (charachter == '*')
-      charachter = ' ';
-  }
-}
-*/
 
 void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
 {
