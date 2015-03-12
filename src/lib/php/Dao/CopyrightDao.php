@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -39,7 +39,7 @@ class CopyrightDao extends Object
     $this->uploadDao = $uploadDao;
     $this->logger = new Logger(self::className());
   }
-
+  
   /**
    * @param int $uploadTreeId
    * @param string $tableName
@@ -188,4 +188,5 @@ class CopyrightDao extends Object
     $decisionType = $res['clearing_decision_type_fk'];
     return array($description,$textFinding,$comment, $decisionType);
   }
+
 }

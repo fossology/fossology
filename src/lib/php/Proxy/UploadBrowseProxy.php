@@ -176,5 +176,4 @@ class UploadBrowseProxy extends Object
     }
     return $row['status_fk'];
   }
-  
 } 

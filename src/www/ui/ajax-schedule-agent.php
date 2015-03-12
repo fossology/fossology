@@ -67,6 +67,7 @@ class ajax_schedule_agent extends FO_Plugin
     $ShortName = $UploadRow['upload_filename'];
     pg_free_result($result);
 
+
     /* Create Job */
     $user_pk = $SysConf['auth']['UserId'];
     $group_pk = $SysConf['auth']['GroupId'];

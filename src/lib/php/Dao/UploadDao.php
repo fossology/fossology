@@ -19,15 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\Upload\Upload;
-use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Fossology\Lib\Util\Object;
-use Fossology\Lib\Proxy\UploadTreeProxy;
 use Monolog\Logger;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");

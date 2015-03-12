@@ -544,9 +544,3 @@ function get_time() {
     return ((float)$usec + (float)$sec);
 
 }
-
-
-
-
-
-?>

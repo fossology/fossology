@@ -230,6 +230,5 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), false);
     $uploadBrowseProxy->getStatus(-1);
   }
-  
 }
  
