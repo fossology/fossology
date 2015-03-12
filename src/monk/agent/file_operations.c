@@ -15,11 +15,11 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <magic.h>
 #include <fcntl.h>
 
 #include "hash.h"
 #include "string_operations.h"
+#include "encoding.h"
 
 #define BUFFSIZE 4096
 
@@ -34,7 +34,7 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
     return 0;
   }
 
-  int guessedConverter = 0;
+  int needConverter = 1;
   iconv_t converter = NULL;
 
   Token* remainder = NULL;
@@ -46,27 +46,26 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
   size_t leftFromLast = 0;
   while ((n = read(fd, buffer + leftFromLast, sizeof(buffer) - leftFromLast)) > 0)
   {
-    size_t len = (size_t) n;
+    size_t len = (size_t) n + leftFromLast;
     char* chunk = buffer;
     leftFromLast = 0;
 
-    if (!guessedConverter)
+    if (needConverter)
     {
-      guessedConverter = 1;
+      needConverter = 0;
       converter = guessConverter(buffer, len);
     }
 
     if (converter)
     {
       char* input = buffer;
-      size_t inputLeft = (size_t) n;
+      size_t inputLeft = len;
 
       char* output = convertedBuffer;
       size_t outputLength = sizeof(convertedBuffer);
       iconv(converter, &input, &inputLeft, &output, &outputLength);
 
-      if (outputLength != sizeof(convertedBuffer))
-      {
+      if (outputLength != sizeof(convertedBuffer)) {
         chunk = convertedBuffer;
         len = sizeof(convertedBuffer) - outputLength;
 
@@ -75,6 +74,11 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
         {
           buffer[i] = *input++;
         }
+      } else {
+        // the raw buffer is full and we could not write to the converted buffer
+        printf("WARNING: cannot re-encode '%s', going binary from now on\n", fileName);
+        iconv_close(converter);
+        converter = NULL;
       }
     }
 
@@ -97,52 +101,4 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
   }
 
   return 1;
-}
-
-
-iconv_t guessConverter(char* buffer, size_t n)
-{
-  char* const target = "utf-8";
-
-  iconv_t iconvCookie = NULL;
-
-  gchar* encoding = guessEncoding(buffer, n);
-  if (encoding && (strcmp(encoding, target) != 0))
-  {
-    iconvCookie = iconv_open(target, encoding);
-    g_free(encoding);
-  }
-
-  return iconvCookie;
-}
-
-gchar* guessEncoding(const char* buffer, size_t len)
-{
-  gchar* result = NULL;
-
-  magic_t cookie = magic_open(MAGIC_MIME);
-  magic_load(cookie, NULL);
-
-  const char* resp = magic_buffer(cookie, buffer, len);
-
-  if (!resp)
-  {
-    printf("magic error: %s\n", magic_error(cookie));
-    goto done;
-  }
-
-  char* charset = strstr(resp, "charset=");
-
-  if (!charset)
-  {
-    goto done;
-  }
-
-  charset += 8; // len of "charset="
-
-  result = g_strdup(charset);
-
-  done:
-  magic_close(cookie);
-  return result;
 }

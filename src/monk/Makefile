@@ -55,6 +55,7 @@ $(MOD_NAME:%=uninstall-%):
 
 clean:
 	$(call DIR_LOOP,clean)
+	$(MAKE) -C $(TESTDIR) clean
 	rm -f $(MOD_NAME:%=VERSION-%)
 
 .PHONY: all test coverage $(MOD_NAME:%=VERSION-%) install uninstall clean

@@ -32,6 +32,7 @@ extern CU_TestInfo hash_testcases[];
 extern CU_TestInfo diff_testcases[];
 extern CU_TestInfo match_testcases[];
 extern CU_TestInfo database_testcases[];
+extern CU_TestInfo encoding_testcases[];
 
 /* ************************************************************************** */
 /* **** create test suite *************************************************** */
@@ -46,6 +47,7 @@ CU_SuiteInfo suites[] = {
     {"Testing diff:", NULL, NULL, diff_testcases},
     {"Testing match:", NULL, NULL, match_testcases},
     {"Testing database:", NULL, NULL, database_testcases},
+    {"Testing database:", NULL, NULL, encoding_testcases},
     CU_SUITE_INFO_NULL
 };
 

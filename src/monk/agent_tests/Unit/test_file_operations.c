@@ -44,6 +44,8 @@ void test_read_file_tokens() {
   CU_ASSERT_EQUAL(token0.hashedContent, hash("a"));
   CU_ASSERT_EQUAL(token1.hashedContent, hash("b"));
   CU_ASSERT_EQUAL(token2.hashedContent, hash("c"));
+
+  g_array_free(tokens, TRUE);
 }
 
 void test_read_file_tokens2() {
@@ -67,6 +69,8 @@ void test_read_file_tokens2() {
   CU_ASSERT_EQUAL(token1.length, 1);
   CU_ASSERT_EQUAL(token0.removedBefore, 3);
   CU_ASSERT_EQUAL(token1.removedBefore, 7);
+
+  g_array_free(tokens, TRUE);
 }
 
 void test_read_file_tokens_error() {
@@ -100,29 +104,30 @@ void test_read_file_tokens_binaries() {
   CU_ASSERT_EQUAL(token0.hashedContent, hash("a"));
   CU_ASSERT_EQUAL(token1.hashedContent, hash("b"));
   CU_ASSERT_EQUAL(token2.hashedContent, hash("c"));
+
+  g_array_free(tokens, TRUE);
+}
+
+void binaryWrite(const char* testfile, const char* teststring)
+{
+  FILE* file = fopen(testfile, "w");
+  CU_ASSERT_PTR_NOT_NULL(file);
+  fwrite(teststring, 1, strlen(teststring), file);
+  fclose(file);
 }
 
 void test_read_file_tokens_encodingConversion() {
-  char* teststring = "a\n^bß c";
   char* testfile = "/tmp/monkftest";
 
-  FILE* file = fopen(testfile, "w");
-  CU_ASSERT_PTR_NOT_NULL(file);
-  fprintf(file, "%s", teststring);
-  fclose(file);
-
   GArray* tokens;
+  binaryWrite(testfile, "a\n ß é c");
   CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens, "\n\t\r^ "));
-  FO_ASSERT_EQUAL_FATAL(tokens->len, 3);
-
-  char* teststring1 = "a\n^b\xdf\x0a c";
-  file = fopen(testfile, "w");
-  CU_ASSERT_PTR_NOT_NULL(file);
-  fprintf(file, "%s", teststring1);
-  fclose(file);
 
   GArray* tokens1;
+  binaryWrite(testfile, "a\n \xdf\x0a \xe9\x0a c");
   CU_ASSERT_TRUE_FATAL(readTokensFromFile(testfile, &tokens1, "\n\t\r^ "));
+
+  FO_ASSERT_FATAL(tokens->len > 0);
 
   FO_ASSERT_EQUAL_FATAL(tokens->len, tokens1->len);
 
@@ -139,51 +144,9 @@ void test_read_file_tokens_encodingConversion() {
     g_array_index(tokens1, Token, 2).hashedContent
   );
 
+  g_array_free(tokens, TRUE);
+  g_array_free(tokens1, TRUE);
 
-}
-
-void test_guess_encoding() {
-  char* buffer = "an ascii text";
-  gchar* guessedEncoding = guessEncoding(buffer, strlen(buffer));
-
-  CU_ASSERT_STRING_EQUAL(guessedEncoding, "us-ascii");
-
-  if (guessedEncoding) {
-    g_free(guessedEncoding);
-  }
-}
-
-void test_guess_encodingUtf8() {
-  char* buffer = "an utf8 ß";
-  gchar* guessedEncoding = guessEncoding(buffer, strlen(buffer));
-
-  FO_ASSERT_STRING_EQUAL(guessedEncoding, "utf-8");
-
-  if (guessedEncoding) {
-    g_free(guessedEncoding);
-  }
-}
-
-void test_guess_encodingLatin1() {
-  char* buffer = "a latin1 \xdf\x0a";
-  gchar* guessedEncoding = guessEncoding(buffer, strlen(buffer));
-
-  FO_ASSERT_STRING_EQUAL(guessedEncoding, "iso-8859-1");
-
-  if (guessedEncoding) {
-    g_free(guessedEncoding);
-  }
-}
-
-void test_guess_encodingMixedIsBinary() {
-  char* buffer = "a latin1 \xdf\x0a and then an utf8 ß";
-  gchar* guessedEncoding = guessEncoding(buffer, strlen(buffer));
-
-  FO_ASSERT_STRING_EQUAL(guessedEncoding, "unknown-8bit");
-
-  if (guessedEncoding) {
-    g_free(guessedEncoding);
-  }
 }
 
 CU_TestInfo file_operations_testcases[] = {
@@ -192,9 +155,5 @@ CU_TestInfo file_operations_testcases[] = {
   {"Testing reading file tokens with a binary file:", test_read_file_tokens_binaries},
   {"Testing reading file tokens with two different encodings return same token contents:", test_read_file_tokens_encodingConversion},
   {"Testing reading file tokens from wrong file:", test_read_file_tokens_error},
-  {"Testing guessing encoding of buffer:", test_guess_encoding},
-  {"Testing guessing encoding of buffer utf8:", test_guess_encodingUtf8},
-  {"Testing guessing encoding of buffer Latin1:", test_guess_encodingLatin1},
-  {"Testing guessing encoding of buffer with mixed encoding:", test_guess_encodingMixedIsBinary},
   CU_TEST_INFO_NULL
 };

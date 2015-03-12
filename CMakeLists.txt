@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(fossology)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB_PKG glib-2.0)
+pkg_check_modules(CHARDET_PKG uchardet)
+
+execute_process(COMMAND pg_config --includedir OUTPUT_VARIABLE PG_TMP)
+set(POSTGRES_INCLUDE_DIR ${PG_TMP} CACHE STRING INTERNAL)
+
 include_directories(
     ${fossology_SOURCE_DIR}/src/lib/c
     ${fossology_SOURCE_DIR}/src/lib/cpp
     ${fossology_SOURCE_DIR}/src/monk/agent
     ${fossology_SOURCE_DIR}/src/testing/lib/c
+    ${GLIB_PKG_INCLUDE_DIRS}
+    ${POSTGRES_INCLUDE_DIR}
+    ${CHARDET_PKG}
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Weffc++")
@@ -126,6 +136,8 @@ set(SOURCE_FILES
     src/monk/agent/database.h
     src/monk/agent/diff.c
     src/monk/agent/diff.h
+    src/monk/agent/encoding.c
+    src/monk/agent/encoding.h
     src/monk/agent/common.c
     src/monk/agent/common.h
     src/monk/agent/file_operations.c
@@ -147,6 +159,7 @@ set(SOURCE_FILES
     src/monk/agent_tests/Unit/run_tests.c
     src/monk/agent_tests/Unit/test_database.c
     src/monk/agent_tests/Unit/test_diff.c
+    src/monk/agent_tests/Unit/test_encoding.c
     src/monk/agent_tests/Unit/test_file_operations.c
     src/monk/agent_tests/Unit/test_hash.c
     src/monk/agent_tests/Unit/test_highlight.c
@@ -309,13 +322,7 @@ set(SOURCE_FILES
     src/wget_agent/agent_tests/Unit/utility.h
     src/dox.c)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLIB_PKG glib-2.0)
 
-execute_process(COMMAND pg_config --includedir OUTPUT_VARIABLE PG_TMP)
-set(POSTGRES_INCLUDE_DIR ${PG_TMP} CACHE STRING INTERNAL)
-
-include_directories(${GLIB_PKG_INCLUDE_DIRS} ${POSTGRES_INCLUDE_DIR})
 
 
 add_executable(others ${SOURCE_FILES})
