@@ -82,13 +82,17 @@ if($uName && !$user)
   $hash = sha1($seed . $pass);
   $desc = 'created via cli';
   $perm = array_key_exists('accesslvl', $opts) ? intval($opts['accesslvl']) : 0;
-  $folder = array_key_exists('folder', $opts) ? intval($opts['folder']) : 1;
-  $folderid= $folderDao->getFolderId($folder);
+  if (array_key_exists('folder', $opts)) {
+    $folder =  $opts['folder'];
+    $folderid = $folderDao->getFolderId($folder);
 
-  if($folderid==null) {
-    $folderid=$folderDao->insertFolder($folder, 'Cli generated folder');
+    if ($folderid == null) {
+      $folderid = $folderDao->insertFolder($folder, 'Cli generated folder');
+    }
+
+  } else {
+    $folderid=1;
   }
-
   $agentList = userAgents();
   $email = $emailNotify = '';
   add_user($uName, $desc, $seed, $hash, $perm, $email, $emailNotify, $agentList, $folderid);
