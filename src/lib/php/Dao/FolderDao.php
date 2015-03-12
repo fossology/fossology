@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Folder\Folder;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -29,6 +30,9 @@ class FolderDao extends Object
 {
   const FOLDER_KEY = "folder" ;
   const DEPTH_KEY = "depth" ;
+  const TOP_LEVEL = 1;
+
+
   /**
    * @var DbManager
    */
@@ -38,6 +42,8 @@ class FolderDao extends Object
    * @var Logger
    */
   private $logger;
+
+
 
   public function __construct(DbManager $dbManager)
   {
@@ -50,17 +56,40 @@ class FolderDao extends Object
    */
   public function hasTopLevelFolder()
   {
-    $folderInfo = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM folder WHERE folder_pk=$1",array(1),__METHOD__);
+    $folderInfo = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM folder WHERE folder_pk=$1",array(self::TOP_LEVEL),__METHOD__);
     $hasFolder = $folderInfo['cnt']>0;
     return $hasFolder;
   }
 
-  public function insertFolder($folderId, $folderName, $folderDescription) {
+  public function insertFolder($folderName, $folderDescription, $parentFolderId=self::TOP_LEVEL) {
+
     $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName,
-        "INSERT INTO folder (folder_pk, folder_name, folder_desc) VALUES ($1, $2, $3)");
-    $res = $this->dbManager->execute($statementName, array($folderId, $folderName, $folderDescription));
-    $this->dbManager->freeResult($res);
+
+      $this->dbManager->prepare($statementName,
+        "INSERT INTO folder (folder_name, folder_desc, parent_fk ) VALUES ($1, $2, $3) returning folder_pk");
+      $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription, $parentFolderId));
+      $folderId=$this->dbManager->fetchArray($res)["folder_pk"];
+      $this->dbManager->freeResult($res);
+
+      return $folderId;
+  }
+
+  public function getFolderId($folderName){
+      $statementName = __METHOD__;
+      $this->dbManager->prepare($statementName,
+          "SELECT folder_pk FROM folder WHERE folder_name=$1 LIMIT 2");
+      $res = $this->dbManager->execute($statementName, array( $folderName));
+      $rows= $this->dbManager->fetchAll($res);
+
+
+
+      $rootFolder = !empty($rows) ? intval($rows[0]['folder_pk']) : null;
+
+      if(count($rows) > 1) throw new Exception("Non unique folder name");
+
+      $this->dbManager->freeResult($res);
+
+      return $rootFolder;
   }
 
   public function insertFolderContents($parentId, $foldercontentsMode, $childId) {
@@ -189,7 +218,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104;
   public function ensureTopLevelFolder() {
     if (!$this->hasTopLevelFolder())
     {
-      $this->insertFolder(1, 'Software Repository', 'Top Folder');
+      $this->dbManager->insertTableRow("folder", array("folder_pk"=>self::TOP_LEVEL, "folder_name"=>"Software Repository", "folder_desc"=>"Top Folder"));
       $this->insertFolderContents(1,0,0);
       $this->fixFolderSequence();
     }

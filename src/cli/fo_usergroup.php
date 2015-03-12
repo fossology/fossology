@@ -18,6 +18,7 @@
 
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
 
 require_once("$MODDIR/lib/php/common-cli.php");
@@ -34,9 +35,9 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
   --upasswd   = password of created user
   --permlvl   = group permission level (-1: None, ".UserDao::USER.": User, ".UserDao::ADMIN.": Admin, ".UserDao::ADVISOR.": Advisor)
   --accesslvl   = user database permission level (".Auth::PERM_NONE.": None, ".Auth::PERM_READ.": Read, ".Auth::PERM_WRITE.": Write, ".Auth::PERM_ADMIN.": Admin)
-  --folderid  = root folder
+  --folder  = root folder
   ";
-$opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:', 'accesslvl:'));
+$opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:', 'accesslvl:', 'folder:'));
 
 if(array_key_exists('h',$opts))
 {
@@ -58,6 +59,9 @@ else
 
 /** @var UserDao */
 $userDao = $GLOBALS['container']->get("dao.user");
+/** @var FolderDao */
+$folderDao = $GLOBALS['container']->get("dao.folder");
+
 $adminRow = $userDao->getUserByName($adminName);
 if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
 {
@@ -78,10 +82,20 @@ if($uName && !$user)
   $hash = sha1($seed . $pass);
   $desc = 'created via cli';
   $perm = array_key_exists('accesslvl', $opts) ? intval($opts['accesslvl']) : 0;
-  $folder = array_key_exists('folderid', $opts) ? intval($opts['folderid']) : 1;
+  if (array_key_exists('folder', $opts)) {
+    $folder =  $opts['folder'];
+    $folderid = $folderDao->getFolderId($folder);
+
+    if ($folderid == null) {
+      $folderid = $folderDao->insertFolder($folder, 'Cli generated folder');
+    }
+
+  } else {
+    $folderid=1;
+  }
   $agentList = userAgents();
   $email = $emailNotify = '';
-  add_user($uName, $desc, $seed, $hash, $perm, $email, $emailNotify, $agentList, $folder);
+  add_user($uName, $desc, $seed, $hash, $perm, $email, $emailNotify, $agentList, $folderid);
   $user = $userDao->getUserByName($uName);
   print "added user $uName\n";
 }
