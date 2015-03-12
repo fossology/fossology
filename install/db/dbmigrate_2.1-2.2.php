@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * @file dbmigrate_2.1-2.2.php
@@ -135,7 +136,7 @@ function Migrate_21_22($Verbose)
       DBCheckResult($PermUploadResult, $sql, __FILE__, __LINE__);
       if (pg_num_rows($PermUploadResult) == 0)
       {
-        $perm_admin = PERM_ADMIN;
+        $perm_admin = Auth::PERM_ADMIN;
         $sql = "insert into perm_upload(perm, upload_fk, group_fk) values($perm_admin, $upload_pk, $group_pk)";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);

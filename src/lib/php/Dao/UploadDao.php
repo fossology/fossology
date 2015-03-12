@@ -171,7 +171,7 @@ class UploadDao extends Object
 
   public function getStatus($uploadId, $userId)
   {
-    if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
+    if (GetUploadPerm($uploadId, $userId) >= Auth::PERM_READ) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
@@ -433,13 +433,13 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=PERM_NONE;
+    return $perm['perm']>=Auth::PERM_NONE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
     if (null === $perm) {
-      $perm = PERM_ADMIN;
+      $perm = Auth::PERM_ADMIN;
     }
     $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
             . "SELECT $1 perm, $2 upload_fk, gum.group_fk"

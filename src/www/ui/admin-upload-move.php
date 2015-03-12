@@ -91,7 +91,7 @@ class upload_move extends FO_Plugin {
     {
       /* check upload permission */
       $UploadPerm = GetUploadPerm($UploadId);
-      if ($UploadPerm < PERM_WRITE)
+      if ($UploadPerm < Auth::PERM_WRITE)
       {
         $text = _("Permission Denied");
         echo "<h2>$text<h2>";
@@ -163,7 +163,7 @@ class upload_move extends FO_Plugin {
     $V.= "<li>$text";
     $V.= "<div id='uploaddiv'>\n";
     $V.= "<select name='uploadid'>\n";
-    $List = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
+    $List = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach($List as $L) {
       $V.= "<option value='" . $L['upload_pk'] . "'>";
       $V.= htmlentities($L['name']);

@@ -251,7 +251,7 @@ class ClearingView extends FO_Plugin
     $permission = GetUploadPerm($uploadId);
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
-    $hasWritePermission = $permission >= PERM_WRITE;
+    $hasWritePermission = $permission >= Auth::PERM_WRITE;
 
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
@@ -261,7 +261,7 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile)
     {
-      if ($permission >= PERM_WRITE)
+      if ($permission >= Auth::PERM_WRITE)
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
         $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray($groupId);

@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file ajax-uploads.php
@@ -50,7 +51,7 @@ class core_uploads extends FO_Plugin
       $FolderId = FolderGetTop();
     }
     $V = '';
-    $uploadList = FolderListUploads_perm($FolderId, PERM_WRITE);
+    $uploadList = FolderListUploads_perm($FolderId, Auth::PERM_WRITE);
     foreach($uploadList as $upload)
     {
       $V .= "<option value='" . $upload['upload_pk'] . "'>";

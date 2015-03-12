@@ -709,7 +709,7 @@ return;
     /* Check item1 upload permission */
     $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
     $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text item 1<h2>";
@@ -719,7 +719,7 @@ return;
     /* Check item2 upload permission */
     $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk2");
     $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text item 2<h2>";

@@ -39,7 +39,7 @@ class AdminGroupDelete extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Delete Group"),
         self::MENU_LIST => "Admin::Groups::Delete Group",
-        self::PERMISSION => self::PERM_WRITE,
+        self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
   }

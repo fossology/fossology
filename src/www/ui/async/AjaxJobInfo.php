@@ -18,6 +18,7 @@
 
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +33,7 @@ class AjaxJobInfo extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_READ
+        self::PERMISSION => Auth::PERM_READ
         // , 'outputtype' => 'JSON'
     ));
 

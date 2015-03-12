@@ -58,7 +58,7 @@ class UploadFilePage extends DefaultPlugin
         self::TITLE => _("Upload a New File"),
         self::MENU_LIST => "Upload::From File",
         self::DEPENDENCIES => array("agent_unpack", "showjobs"),
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => Auth::PERM_WRITE
     ));
 
     $this->folderDao = $this->getObject('dao.folder');
@@ -191,7 +191,11 @@ class UploadFilePage extends DefaultPlugin
     $originalFileName = $uploadedFile->getClientOriginalName();
 
     $public = $request->get('public');
-    $publicPermission = $public==self::PUBLIC_ALL ? PERM_READ : PERM_NONE;
+      if ($public == self::PUBLIC_ALL) {
+          $publicPermission = Auth::PERM_READ;
+      } else {
+          $publicPermission = Auth::PERM_NONE;
+      }
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"

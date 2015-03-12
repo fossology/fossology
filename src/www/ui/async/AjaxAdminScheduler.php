@@ -19,6 +19,7 @@
 
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +35,7 @@ class AjaxAdminScheduler extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("URL"),
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => Auth::PERM_WRITE
     ));
 
     $this->dbManager = $this->getObject('db.manager');

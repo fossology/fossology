@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_url", _("Upload from URL"));
 
 /**
@@ -165,7 +167,7 @@ class upload_url extends FO_Plugin {
     $Reject = GetParm('reject', PARM_TEXT); // may be null
     $Level = GetParm('level', PARM_TEXT); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
 
     if (!empty($GetURL) && !empty($Folder)) {
       $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm);

@@ -52,7 +52,7 @@ class AjaxBrowse extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_READ
+        self::PERMISSION => Auth::PERM_READ
       ));
         
     global $container;
@@ -141,7 +141,7 @@ class AjaxBrowse extends DefaultPlugin
     $rowCounter = 0;
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < PERM_READ))
+      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < Auth::PERM_READ))
       {
         continue;
       }

@@ -317,3 +317,9 @@ div.deleted {
 .inactive {
     color: gray;
 }
+
+.activeEditText textarea{
+    min-width: 30em;
+    min-height: 7em;
+}
+

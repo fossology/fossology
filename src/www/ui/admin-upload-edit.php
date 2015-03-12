@@ -112,7 +112,7 @@ class upload_properties extends FO_Plugin
     if (!empty($upload_pk))
     {
       $UploadPerm = GetUploadPerm($upload_pk);
-      if ($UploadPerm < PERM_WRITE)
+      if ($UploadPerm < Auth::PERM_WRITE)
       {
         $text = _("Permission Denied");
         return "<h2>$text<h2>";
@@ -151,7 +151,7 @@ class upload_properties extends FO_Plugin
     $V.= "<li>$text";
 
     // Get list of all upload records in this folder
-    $UploadList = FolderListUploads_perm($folder_pk, PERM_WRITE);
+    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.

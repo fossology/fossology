@@ -15,6 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file fossjobs.php
  * 
@@ -188,7 +190,7 @@ if (array_key_exists("u", $options))
 {
   $root_folder_pk = GetUserRootFolder();
   $FolderPath = NULL;
-  $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, PERM_WRITE);
+  $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, Auth::PERM_WRITE);
 
   print "# The following uploads are available (upload id: name)\n";
   foreach($FolderList as $Folder)
@@ -231,7 +233,7 @@ if (array_key_exists("U", $options))
   foreach($upload_pk_array as $upload_pk)
   {
     $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < PERM_WRITE)
+    if ($UploadPerm < Auth::PERM_WRITE)
     {
       print "You have no permission to queue agents for upload " . $upload_pk . "\n";
       continue;
@@ -275,7 +277,7 @@ if (array_key_exists("D", $options))
   foreach($upload_pk_array as $upload_pk)
   {
     $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < PERM_WRITE)
+    if ($UploadPerm < Auth::PERM_WRITE)
     {
       print "You have no permission to delete upload " . $upload_pk . "\n";
       continue;

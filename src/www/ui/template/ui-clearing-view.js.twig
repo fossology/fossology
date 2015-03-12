@@ -36,7 +36,8 @@ selectedLicensesTableConfig = {
   "sCookiePrefix" : "fossology_",
   "bRetrieve": true,
   "bPaginate": false,
-  "bFilter": false
+  "bFilter": false,
+  "bAutoWidth": false
 };
 
 editableConfiguration = {
@@ -46,7 +47,7 @@ editableConfiguration = {
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
   "sSuccessResponse": "success",
   "aoColumns": [null, null,
-            {"type": "textarea", onblur: "cancel", "submit": "OK", "cancel": "{{'Cancel'|trans}}"},
+            {"type": "textarea", cssclass:"activeEditText", onblur: "cancel", "submit": "OK", "cancel": "{{'Cancel'|trans}}"},
             {}, null]
 };
 

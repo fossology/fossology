@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 
 define("TITLE_agent_foreadmeoss", _("ReadME_OSS generation"));
@@ -111,7 +112,7 @@ class agent_foreadmeoss extends FO_Plugin
     if ($uploadId <=0)
       return _("parameter error");
 
-    if (GetUploadPerm($uploadId) < PERM_WRITE)
+    if (GetUploadPerm($uploadId) < Auth::PERM_WRITE)
       return _("permission denied");
 
     $row = $this->dbManager->getSingleRow(

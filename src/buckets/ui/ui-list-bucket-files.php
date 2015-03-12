@@ -107,7 +107,7 @@ class list_bucket_files extends FO_Plugin
     /* Check upload permission */
     $Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
     $UploadPerm = GetUploadPerm($Row['upload_fk']);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text item 1<h2>";

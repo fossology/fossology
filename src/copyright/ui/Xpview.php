@@ -58,7 +58,7 @@ class Xpview extends DefaultPlugin
   function __construct($name, $params)
   {
     $mergedParams = array_merge($params, array(self::DEPENDENCIES=>array("browse", "view"),
-                                       self::PERMISSION=> self::PERM_READ));
+                                       self::PERMISSION=> Auth::PERM_READ));
     
     parent::__construct($name,$mergedParams);
     
@@ -77,14 +77,16 @@ class Xpview extends DefaultPlugin
     $uploadTreeId = intval($request->get('item'));
     if (empty($uploadTreeId) || empty($uploadId))
     {
-      return $this->responseBad();
+      $text = _("Empty Input");
+      $vars['message']= "<h2>$text</h2>";
+      return $this->responseBad($vars);
     }
 
     $permission = GetUploadPerm($uploadId);
-    if($permission < PERM_READ ) {
+    if($permission < Auth::PERM_READ ) {
       $text = _("Permission Denied");
       $vars['message']= "<h2>$text</h2>";
-      return $this->responseBad($vars);
+      return $this->responseBad();
     }
 
     $uploadTreeTableName = GetUploadtreeTableName($uploadId);
@@ -173,7 +175,7 @@ class Xpview extends DefaultPlugin
   }
 
   
-  private function responseBad($vars)
+  private function responseBad($vars=array())
   {
     $vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
     return $this->render("include/base.html.twig",$vars);

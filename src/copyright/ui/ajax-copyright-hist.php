@@ -82,7 +82,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     
     /* check upload permissions */
     $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text</h2>";

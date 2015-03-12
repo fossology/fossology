@@ -15,6 +15,7 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file common-tags.php
@@ -191,7 +192,7 @@ function TagStatus($upload_id)
   global $PG_CONN;
 
   $UploadPerm = GetUploadPerm($upload_id);
-  if ($UploadPerm < PERM_WRITE) return 0;
+  if ($UploadPerm < Auth::PERM_WRITE) return 0;
 
   /** check if this upload has been disabled */
   $sql = "select tag_manage_pk from tag_manage where upload_fk = $upload_id and is_disabled = true;";

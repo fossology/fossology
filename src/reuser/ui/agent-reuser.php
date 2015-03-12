@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -46,7 +47,7 @@ class ReuserAgentPlugin extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Automatic Clearing Decision Reuser"),
-        self::PERMISSION => self::PERM_WRITE
+        self::PERMISSION => Auth::PERM_WRITE
     ));
 
     $this->folderDao = $this->getObject('dao.folder');

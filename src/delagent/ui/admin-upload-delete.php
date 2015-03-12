@@ -15,6 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file admin_upload_delete.php
  * \brief delete a upload
@@ -147,7 +149,7 @@ class admin_upload_delete extends FO_Plugin {
     $V.= "<li>$text";
     $V.= "<div id='uploaddiv'>\n";
     $V.= "<BR><select name='upload' size='10'>\n";
-    $List = FolderListUploads_perm($root_folder_pk, PERM_WRITE);
+    $List = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach($List as $L) {
       $V.= "<option value='" . $L['upload_pk'] . "'>";
       $V.= htmlentities($L['name']);

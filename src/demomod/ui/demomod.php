@@ -141,7 +141,7 @@ class ui_demomod extends FO_Plugin
 
     $Upload = GetParm("upload",PARM_INTEGER);
     $UploadPerm = GetUploadPerm($Upload);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text<h2>";

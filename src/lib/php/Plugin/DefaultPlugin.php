@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Plugin;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -39,16 +40,7 @@ abstract class DefaultPlugin implements Plugin
   const MENU_ORDER = "menuOrder";
   const MENU_TARGET = "menuTarget";
   const TITLE = "title";
-
-  /**
-   * Permissions
-   * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
-   */
-  const PERM_NONE = 0;
-  const PERM_READ = 1;
-  const PERM_WRITE = 3;        /* DB writes permitted */
-  const PERM_ADMIN = 10;
-
+    
   /** @var ContainerBuilder */
   protected $container;
 
@@ -74,7 +66,7 @@ abstract class DefaultPlugin implements Plugin
   private $title;
 
   /** @var int */
-  private $permission = self::PERM_NONE;
+  private $permission = Auth::PERM_NONE;
 
   /** @var int */
   private $requiresLogin = true;
