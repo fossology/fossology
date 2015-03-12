@@ -148,7 +148,15 @@ class LicenseCsvImport {
     {
       return "Shortname '$row[shortname]' already in DB (id=".$this->getKeyFromShortname($row['shortname']).")";
     }
-    $sameText = $dbManager->getSingleRow('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
+    $sameText = $dbManager->getSingleRow('SELECT rf_shortname,rf_source,rf_pk FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
+    if ($sameText!==false && !empty($row['source']) && empty($sameText['rf_source']))
+    {
+      $statementName = __METHOD__ .'.updSource';
+      $dbManager->prepare($statementName, 'UPDATE license_ref SET rf_source=$1 WHERE rf_pk=$2');
+      $res = $dbManager->execute($statementName,array($row['rf_source'],$sameText['rf_pk']));
+      $dbManager->freeResult($res);
+      return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]', updated the source";
+    }  
     if ($sameText!==false)
     {
       return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
