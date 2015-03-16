@@ -15,54 +15,53 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# www/ui makefile
-#
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
+
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
-DIRS=css images locale scripts ajaxPHP
+DIRS = css images locale scripts ajaxPHP
 
-UIFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js)$$" `
+UIFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html|twig)$$"`
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php \
                 group-manage-self.php group-manage.php ajax-perms.php
 
-OTHERFILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png)$$" `
+OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm)$$"`
 
-RMFILES=FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
+RMFILES = FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
 all:
+#	php5 fo-render.php m
 
-install: all
-
-	mkdir -p $(DESTDIR)$(WEBDIR)/ui; \
-	for dir in $(DIRS); do \
+install:
+	@mkdir -p $(DESTDIR)$(WEBDIR)/ui
+	@for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
 	done
-
-	for file in $(OBSOLETEFILES); do \
-	  rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
-	  rm -f $$file; \
+	@for file in $(OBSOLETEFILES); do \
+		rm -f $(DESTDIR)$(WEBDIR)/ui/$$file; \
+		rm -f $$file; \
 	done
-	for file in $(UIFILES); do \
+	@for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-	for file in $(OTHERFILES); do \
+	@for file in $(OTHERFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/ui/$$file; \
 	done
-
 	@echo $(SYSCONFDIR) > $(DESTDIR)$(WEBDIR)/ui/fossology.rc
 	@mkdir -p $(CONFDIR)/mods-enabled
 	@if test ! -e $(CONFDIR)/mods-enabled/www; then \
-	  ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled/ ; fi;
+		ln -s $(MODDIR)/www $(CONFDIR)/mods-enabled; \
+	fi
+	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
+	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
 
 uninstall:
-	@rm -rf $(DESTDIR)$(WEBDIR)
-	@rm -f $(CONFDIR)/mods-enabled/www
+	rm -rf $(DESTDIR)$(WEBDIR)
+	rm -f $(CONFDIR)/mods-enabled/www
 
 clean:
 	rm -f *.o core $(iPATHFILE)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

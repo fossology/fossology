@@ -24,7 +24,7 @@ fi
 su postgres -c 'echo \\q|psql'
 if [ $? != 0 ]; then
    echo "ERROR: postgresql isn't running"
-   exit 1
+   exit 2
 fi
 
 # then check to see if the db already exists
@@ -69,7 +69,7 @@ else
    su postgres -c "psql < $TESTROOT/$fossSql"
    if [ $? != 0 ] ; then
       echo "ERROR: Database failed during configuration."
-      exit 1
+      exit 3
    fi
    #clean up
    if [ -n "$didSed" ]

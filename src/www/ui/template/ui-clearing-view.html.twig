@@ -1,0 +1,58 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <div id="leftrightalignment" name="leftrightalignment">
+    <table border="0" style="padding:0px; height:100%; width:100%">
+      <tr>
+        <td style="padding:0px; position:relative; height: 100%; width:50%">
+          <div class="centered">
+            {{ pageMenu }}
+            <button class="legendHider">
+              {{ 'Hide Legend'| trans }}
+            </button>
+            <button class="legendShower">
+              {{ 'Show Legend'| trans }}
+            </button>
+          </div>
+          <div class="boxnew">{{ textView }}</div>
+          <div id="legendBox" name="legendBox" style="background-color:white; padding:2px; border:1px outset #222222; width:150px; position:absolute; right:17px; bottom:17px; ">
+            <u><b>{{ 'Legend:'| trans }}</b></u><br/>
+              {% for entry in legendData %}
+                  <span style="{{ entry.style }}">{{ entry.text }}</span><br/>
+              {% endfor %}
+          </div>
+        </td>
+        <td class="headerBox">
+          {% block rhs %}
+            {% include 'ui-clearing-view_rhs.html.twig' %}
+          {% endblock %}
+        </td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
+
+
+{% block foot %}
+  {{ parent() }}
+
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script src="scripts/jquery.dataTables.editable.js" type="text/javascript"></script>
+  <script src="scripts/jquery.jeditable.js" type="text/javascript"></script>
+  <script src="scripts/jquery.validate.js" type="text/javascript"></script>
+  <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+  <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+  <script src="scripts/change-license-common.js" type="text/javascript"></script>
+  <script src="scripts/change-license-view.js" type="text/javascript"></script>
+  <script src="scripts/legend.js" type="text/javascript"></script>
+  <script src="scripts/tools.js" type="text/javascript"></script>
+  <script type="text/javascript">{% include "ui-clearing-view.js.twig" %}</script>
+  <script type="text/javascript">{% include "bulk-history.js.twig" %}</script>
+  <script type="text/javascript">{% include "next-options.js.twig" %}</script>
+{% endblock %}

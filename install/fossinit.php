@@ -128,13 +128,13 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
-$FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName);
+$migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
+$FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
-clearingProperties($dbManager);
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
@@ -197,54 +197,52 @@ if (array_key_exists('r', $Options))
 }
 
 /* migration */
+$sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
-require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
-Migrate_20_21($Verbose);
-require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
-print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
-Migrate_21_22($Verbose);
-require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
-migrate_25_26($Verbose);
-
-exit(0);
-
-
-/**
- * \brief Adding the predefined constants for clearingDecisions to the database.
- * deletes the old ones
- */
-function clearingProperties(DbManager &$dbManager)
-{
-  global $LIBEXECDIR;
-  $filename = "$LIBEXECDIR/clearingProperties.dat";
-  if (!file_exists($filename))
+if(!array_key_exists('Release', $sysconfig)){
+  require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
+  Migrate_20_21($Verbose);
+  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+  print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
+  Migrate_21_22($Verbose);
+  if($dbManager->existsTable('license_file_audit'))
   {
-    print "FAILED: Schema data file ($filename) not found.\n";
-    return;
+    require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
+    migrate_25_26($Verbose);
   }
-  $dbManager->queryOnce("COMMIT");
-  $clearingStorage = array(); // filled in next line
-  eval( file_get_contents($filename) );
-  foreach($clearingStorage as $tableColumn=>$columnContent)
-  {
-    list($table,$column) = explode('.', $tableColumn);
-    $stmt = __METHOD__.".$table.$column";
-    $dbManager->prepare($stmt,"SELECT $column FROM $table");
-    $result = $dbManager->execute($stmt);
-    $oldColumnContent = array();
-    while ($row = pg_fetch_assoc($result))
-    {
-      $oldColumnContent[] = $row[$column];
-    }
-    pg_free_result($result);
-    $diffColumnContent = array_diff($columnContent,$oldColumnContent);
-    if(!empty($diffColumnContent)){
-      $sql = "INSERT INTO $table ($column) values ('".implode("'),('",$diffColumnContent)."')";
-      echo "$sql\n";
-      $dbManager->getSingleRow($sql,array(),$stmt.".insert");
-    }
-  }
+  $dbManager->insertTableRow('sysconfig',
+          array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
+  $sysconfig['Release'] = '2.6';
 }
+if($sysconfig['Release'] == '2.6')
+{
+  $verbose = $Verbose;
+  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
+  if(!$dbManager->existsTable('license_candidate'))
+  {
+    $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+  }
+  require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
+  $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
+}
+
+/* sanity check */
+require_once ("$LIBEXECDIR/sanity_check.php");
+$checker = new SanityChecker($dbManager,$Verbose);
+$errors = $checker->check();
+
+if($errors>0)
+{
+  echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
+}
+exit($errors);
+
+
+
+
+
+
+
 
 /**
  * \brief Load the license_ref table with licenses.
@@ -346,6 +344,34 @@ function initLicenseRefTable($Verbose)
   return (0);
 } // initLicenseRefTable()
 
+
+function guessSysconfdir()
+{
+  $rcfile = "fossology.rc";
+  $varfile = dirname(__DIR__).'/variable.list';
+  $sysconfdir = getenv('SYSCONFDIR');
+  if ((false===$sysconfdir) && file_exists($rcfile))
+  {
+    $sysconfdir = file_get_contents($rcfile);
+  }
+  if ((false===$sysconfdir) && file_exists($varfile))
+  {
+    $ini_array = parse_ini_file($varfile);
+    if($ini_array!==false && array_key_exists('SYSCONFDIR', $ini_array))
+    {
+      $sysconfdir = $ini_array['SYSCONFDIR'];
+    }
+  }
+  if (false===$sysconfdir)
+  {
+    $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
+    echo "$text\n";
+    exit(1);
+  }
+  return $sysconfdir;
+}
+
+
 /**
  * \brief Determine SYSCONFDIR, parse fossology.conf
  *
@@ -364,21 +390,10 @@ function initLicenseRefTable($Verbose)
  */
 function bootstrap($sysconfdir="")
 {
-  $rcfile = "fossology.rc";
-
   if (empty($sysconfdir))
   {
-    $sysconfdir = getenv('SYSCONFDIR');
-    if ((false===$sysconfdir) && file_exists($rcfile))
-    {
-      $sysconfdir = file_get_contents($rcfile);
-    }
-    if ($sysconfdir === false)
-    {
-      $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
-      echo "$text\n";
-      exit(1);
-    }
+    $sysconfdir = guessSysconfdir();
+    echo "assuming SYSCONFDIR=$sysconfdir\n";
   }
 
   $sysconfdir = trim($sysconfdir);
@@ -422,7 +437,7 @@ function bootstrap($sysconfdir="")
   }
 
   //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   require_once("$MODDIR/lib/php/common.php");
+  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
   return $SysConf;
 }

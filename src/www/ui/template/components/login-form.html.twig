@@ -1,0 +1,29 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% if protocol != 'HTTPS' %}
+  {{ 'This login uses '|trans }}{{ protocol }}{{', so passwords are transmitted in plain text.'|trans }}
+  {{ 'This is not a secure connection.'|trans }} <br/> <br/> 
+{% endif %}  
+{{ info }}
+<form method="post" action="{{ authUrl }}">
+  <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
+  <table border="0">
+    <tr>
+      <td>{{ 'Username'|trans }}:</td>
+      <td><input type="text" size=20 name="username" id="unamein" autofocus="autofocus"/></td>
+    </tr>
+    <tr>
+      <td>{{ 'Password'|trans }}:</td>
+      <td><input type="password" size="20" name="password"/></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" value="{{ 'Login'|trans }}"/></td>
+    </tr>
+  </table>
+  <script type="text/javascript">document.getElementById("unamein").focus();</script>
+</form>

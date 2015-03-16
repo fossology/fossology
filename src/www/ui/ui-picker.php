@@ -44,14 +44,18 @@ define("TITLE_ui_picker", _("File Picker"));
 
 class ui_picker extends FO_Plugin
 {
-  var $Name       = "picker";
-  var $Title      = TITLE_ui_picker;
-  var $Version    = "1.0";
-  // var $MenuList= "Jobs::License";
-  var $Dependency = array("browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
   var $HighlightColor = '#4bfe78';
+
+  function __construct()
+  {
+    $this->Name       = "picker";
+    $this->Title      = TITLE_ui_picker;
+    $this->Dependency = array("browse","view");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
+
 
   /**
    * \brief Create and configure database tables
@@ -91,8 +95,6 @@ class ui_picker extends FO_Plugin
    */
   function Initialize()
   {
-    global $_GET;
-
     if ($this->State != PLUGIN_STATE_INVALID) {
       return(1);
     } // don't re-run
@@ -369,7 +371,7 @@ class ui_picker extends FO_Plugin
       else
       $item2 = $PickRec["uploadtree_fk1"];
       $PathArray = Dir2Path($item2, 'uploadtree');
-      $Path = Uploadtree2PathStr($PathArray);
+      $Path = $this->Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
     }
     $Options = "id=HistoryPick onchange='AppJump(this.value)')";
@@ -414,7 +416,7 @@ class ui_picker extends FO_Plugin
     while ($row = pg_fetch_assoc($result))
     {
       $PathArray = Dir2Path($row['uploadtree_pk'], 'uploadtree');
-      $SuggestionsArray[$row['uploadtree_pk']] = Uploadtree2PathStr($PathArray);
+      $SuggestionsArray[$row['uploadtree_pk']] = $this->Uploadtree2PathStr($PathArray);
     }
     pg_free_result($result);
 
@@ -600,14 +602,14 @@ class ui_picker extends FO_Plugin
     $OutBuf .= "<div style=background-color:lavender>";
     $OutBuf .= "<center><table style='border:5px groove red'>";
     $OutBuf .= "<tr><td><b>File 1: </b></td><td>&nbsp;&nbsp;</td><td>";
-    $PathStr = Uploadtree2PathStr($PathArray);
+    $PathStr = $this->Uploadtree2PathStr($PathArray);
     $OutBuf .= "$PathStr";
     $OutBuf .= "</td></tr>";
     $OutBuf .= "</table></center>";
 
     $text = _("Choose the program to run after you select the second file.");
     $OutBuf .= "<b>$text</b><br>";
-    $OutBuf .= ApplicationPick("PickRtnApp", $RtnMod, "will run after chosing a file");
+    $OutBuf .= $this->ApplicationPick("PickRtnApp", $RtnMod, "will run after chosing a file");
     $OutBuf .= "</div>";
     $OutBuf .= "<br>";
 
@@ -627,12 +629,6 @@ class ui_picker extends FO_Plugin
      * So if they want to compare a .bz2 with a .gz, they will have to
      * use the Browse Window.
      */
-/* too slow
-    $SuggestionsHTML = $this->SuggestionsPick($PathStr, $uploadtree_pk, $rtncount);
-    $text = "Suggestions";
-    $OutBuf .= "<hr><h3>$text ($rtncount):</h3>";
-    $OutBuf .= $SuggestionsHTML;
-*/
 
     /* Browse window */
     $text = _("Browse");
@@ -661,9 +657,13 @@ class ui_picker extends FO_Plugin
      */
     $this->Create_file_picker();
 
-
     $RtnMod = GetParm("rtnmod",PARM_TEXT);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
+    if (!$uploadtree_pk)
+    {
+      echo "<h2>Unidentified item 1<h2>";
+      return;
+    }
     $uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
     $folder_pk = GetParm("folder",PARM_INTEGER);
     $user_pk = $_SESSION['UserId'];
@@ -700,7 +700,6 @@ class ui_picker extends FO_Plugin
      */
     if (!empty($user_pk) && !empty($RtnMod) && !empty($uploadtree_pk) && !empty($uploadtree_pk2))
     {
-      // Record pick
       $sql = "insert into file_picker (user_fk, uploadtree_fk1, uploadtree_fk2, last_access_date)
              values($user_pk, $uploadtree_pk, $uploadtree_pk2, now())";
       // ignore errors (most probably a duplicate key)
@@ -714,37 +713,74 @@ class ui_picker extends FO_Plugin
 
     $OutBuf = "";
 
-    switch($this->OutputType)
+    if ($this->OutputType=='HTML')
     {
-      case "XML":
-        break;
-      case "HTML":
-        if (empty($uploadtree_pk))
+      if (empty($uploadtree_pk))
         $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
-        else
-        {
-          $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
-          $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk,
-          $PathArray);
-        }
-        break;
-      case "Text":
-        break;
-      default:
+      else
+      {
+        $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
+        $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);
+      }
     }
 
-
-    if (!$this->OutputToStdout) {
-      return($OutBuf);
+    if ($this->OutputToStdout) {
+      print $OutBuf;
+      return;
     }
-    print "$OutBuf";
-
-    return;
+    $this->vars['content'] = $OutBuf;
   }
-
+  
+  /**
+   * \brief Get string representation of uploadtree path.
+   *  Use Dir2Path to get $PathArray.
+   *
+   * \param $PathArry an array containing the path
+   *
+   * \return string representation of uploadtree path
+   */
+  private function Uploadtree2PathStr ($PathArray)
+  {
+    $Path = "";
+    if (count($PathArray))
+    {
+      foreach ($PathArray as $PathRow)
+      {
+        $Path .= "/" . $PathRow['ufile_name'];
+      }
+    }
+    return $Path;
+  }
+  
+  /**
+   * \brief Generate html to pick the application that will be called after
+   * the items are identified.
+   *
+   * Select list element ID is "apick"
+   *
+   * \param $SLName - select list name
+   * \param $SelectedVal - selected value
+   * \param $label - label of select list
+   *
+   * \return string containing html to pick the application that will be called after
+   * the items are identified
+   */
+  protected function ApplicationPick($SLName, $SelectedVal, $label)
+  {
+    /* select the apps that are registered to accept item1, item2 pairs.
+     * At this time (pre 2.x) we don't know enough about the plugins
+     * to know if they can take a pair.  Till then, the list is
+     * hardcoded.
+     */
+    $AppList = array("nomosdiff" => "License Difference",
+                     "bucketsdiff" => "Bucket Difference");
+    $Options = "id=apick";
+    $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal,
+                                     false, true, $Options);
+    $StrOut = "$SelectList $label";
+    return $StrOut;
+  }
 }
 
 $NewPlugin = new ui_picker;
 $NewPlugin->Initialize();
-
-?>

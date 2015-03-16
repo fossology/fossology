@@ -21,23 +21,48 @@ namespace Fossology\Lib\Data;
 
 
 use DateTime;
-use DateTimeZone;
+use Fossology\Lib\Exception;
+use Fossology\Lib\Util\Object;
 
-class ClearingDecisionBuilder extends  ClearingDecisionData
+class ClearingDecisionBuilder extends Object
 {
+  /** @var bool */
+  private $sameFolder;
+  /** @var ClearingEvent[] */
+  private $clearingEvents;
+  /** @var int */
+  private $clearingId;
+  /** @var int */
+  private $uploadTreeId;
+  /** @var int */
+  private $pfileId;
+  /** @var string */
+  private $userName;
+  /** @var int */
+  private $userId;
+  /** @var string */
+  private $type;
+  /** @var string */
+  private $comment;
+  /** @var string */
+  private $reportinfo;
+  /** @var int */
+  private $scope;
+  /** @var DateTime */
+  private $dateAdded;
+
   function __construct()
   {
-    $this->sameUpload = false;
     $this->sameFolder = false;
-    $this->licenses = array();
+    $this->clearingEvents = array();
     $this->clearingId = -1;
     $this->uploadTreeId = -1;
     $this->pfileId = -1;
     $this->userName = "fossy";
     $this->userId = -1;
-    $this->type = "User decision";
-    $this->scope = "global";
-    $this->date_added = new DateTime("now", new DateTimeZone("Europe/Amsterdam"));
+    $this->type = null;
+    $this->scope = DecisionScopes::ITEM;
+    $this->dateAdded = new DateTime();
   }
 
   /**
@@ -46,17 +71,7 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setClearingId($clearingId)
   {
-    $this->clearingId = $clearingId;
-    return $this;
-  }
-
-  /**
-   * @param string $comment
-   * @return ClearingDecisionBuilder
-   */
-  public function setComment($comment)
-  {
-    $this->comment = $comment;
+    $this->clearingId = intval($clearingId);
     return $this;
   }
 
@@ -66,50 +81,29 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
    */
   public function setDateAdded($date_added)
   {
-    $this->date_added = new DateTime($date_added);
+    $this->dateAdded->setTimestamp($date_added);
     return $this;
   }
 
   /**
-   * @param LicenseRef[] $licenses
+   * @param ClearingEvent[] $events
    * @return ClearingDecisionBuilder
    */
-  public function setLicenses($licenses)
+  public function setClearingEvents($events)
   {
-    $this->licenses = $licenses;
+    $this->clearingEvents = $events;
     return $this;
   }
-
+ 
   /**
    * @param int $pfileId
    * @return ClearingDecisionBuilder
    */
   public function setPfileId($pfileId)
   {
-    $this->pfileId = $pfileId;
+    $this->pfileId = intval($pfileId);
     return $this;
   }
-
-  /**
-   * @param string $reportinfo
-   * @return ClearingDecisionBuilder
-   */
-  public function setReportinfo($reportinfo)
-  {
-    $this->reportinfo = $reportinfo;
-    return $this;
-  }
-
-  /**
-   * @param boolean $sameUpload
-   * @return ClearingDecisionBuilder
-   */
-  public function setSameUpload($sameUpload)
-  {
-    $this->sameUpload = $sameUpload;
-    return $this;
-  }
-
 
   /**
    * @param boolean $sameFolder
@@ -122,22 +116,22 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
   }
 
   /**
-   * @param string $scope
-   * @return ClearingDecisionBuilder
-   */
-  public function setScope($scope)
-  {
-    $this->scope = $scope;
-    return $this;
-  }
-
-  /**
-   * @param string $type
+   * @param int $type
    * @return ClearingDecisionBuilder
    */
   public function setType($type)
   {
     $this->type = $type;
+    return $this;
+  }
+
+  /**
+   * @param int $scope
+   * @return $this
+   */
+  public function setScope($scope)
+  {
+    $this->scope = $scope;
     return $this;
   }
 
@@ -179,15 +173,36 @@ class ClearingDecisionBuilder extends  ClearingDecisionData
     return new ClearingDecisionBuilder();
   }
 
+  public function copy(ClearingDecision $clearingDecision)
+  {
+    $this->sameFolder = $clearingDecision->getSameFolder();
+    $this->clearingEvents = $clearingDecision->getClearingEvents();
+    $this->clearingId = $clearingDecision->getClearingId();
+    $this->uploadTreeId = $clearingDecision->getUploadTreeId();
+    $this->pfileId = $clearingDecision->getPfileId();
+    $this->userName = $clearingDecision->getUserName();
+    $this->userId = $clearingDecision->getUserId();
+    $this->type = $clearingDecision->getType();
+    $this->comment = $clearingDecision->getComment();
+    $this->reportinfo = $clearingDecision->getReportinfo();
+    $this->scope = $clearingDecision->getScope();
+    $this->dateAdded = $clearingDecision->getDateAdded();
+  }
 
   /**
+   * @throws Exception
    * @return ClearingDecision
    */
   public function build()
   {
-    return new ClearingDecision($this->sameFolder, $this->sameUpload, $this->clearingId,
+    if ($this->type === null)
+    {
+      throw new Exception("decision type should be set");
+    }
+
+    return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->date_added, $this->licenses, $this->comment, $this->reportinfo);
+        $this->dateAdded, $this->clearingEvents, $this->reportinfo, $this->comment);
   }
 
 }

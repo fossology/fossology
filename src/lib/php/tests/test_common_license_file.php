@@ -64,6 +64,10 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
 
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     exec($DB_COMMAND, $dbout, $rc);
+    if (!empty($rc))
+    {
+      throw new Exception(implode("\n", $dbout));
+    }
     preg_match("/(\d+)/", $dbout[0], $matches);
     $test_name = $matches[1];
     $db_conf = $dbout[0];
@@ -71,9 +75,6 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
 
     $PG_CONN = DBconnect($db_conf);
 
-//    $this->testDb = new TestLiteDb();
-//    $this->dbManager = $this->testDb->getDbManager();
-    
     $logger = new Monolog\Logger('default');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
     $logger->pushHandler(new Monolog\Handler\StreamHandler($this->logFileName, Monolog\Logger::ERROR));

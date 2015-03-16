@@ -15,67 +15,36 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Data\ClearingDecWithLicenses;
-use Fossology\Lib\View\HighlightRenderer;
-use Fossology\Lib\Util\ChangeLicenseUtility;
-use Fossology\Lib\Util\LicenseOverviewPrinter;
 
-define("TITLE_changeLicensProcessPost", _("Private: Change license file post"));
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+define("TITLE_changeLicProcPost", _("Private: Change license file post"));
 
 class changeLicenseProcessPost extends FO_Plugin
 {
-
-  /**
-   * @var UploadDao
-   */
-  private $uploadDao;
-
-  /**
-   * @var LicenseDao
-   */
-  private $licenseDao;
-
-  /**
-   * @var ClearingDao;
-   */
+  /** @var ClearingDao */
   private $clearingDao;
-
-  /**
-   * @var ChangeLicenseUtility
-   */
-  private $changeLicenseUtility;
-
-  /**
-   * @var LicenseOverviewPrinter
-   */
-  private $licenseOverviewPrinter;
-
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
     $this->Name = "change-license-processPost";
-    $this->Title = TITLE_changeLicensProcessPost;
-    $this->Version = "1.0";
-    $this->Dependency = array();
+    $this->Title = TITLE_changeLicProcPost;
     $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->NoHTML = 1;
+    $this->OutputType = 'JSON';
+    $this->OutputToStdout = 1;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
 
     parent::__construct();
 
     global $container;
-    $this->licenseDao = $container->get('dao.license');
-    $this->uploadDao = $container->get('dao.upload');
     $this->clearingDao = $container->get('dao.clearing');
-    $this->changeLicenseUtility = new ChangeLicenseUtility();
-    $highlightRenderer = new HighlightRenderer();
-    $this->licenseOverviewPrinter = new LicenseOverviewPrinter($this->licenseDao,  $this->uploadDao ,  $this->clearingDao, $highlightRenderer);
+    $this->uploadDao = $container->get('dao.upload');
   }
 
   /**
@@ -100,38 +69,99 @@ class changeLicenseProcessPost extends FO_Plugin
     foreach ($bucketpool_array as $bucketpool)
     {
       $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadTreeId -p $bucketpool";
-      exec($command, $output, $return_var);
+      exec($command);
     }
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
+    if ($this->State != PLUGIN_STATE_READY)
+    {
       return;
     }
+    $itemId = $_POST['uploadTreeId'];
+    if (empty($itemId))
+    {
+      return $this->errorJson("bad item id");
+    }
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $uploadTreeId = $_POST['uploadTreeId'];
-    $this->clearingDao->insertClearingDecision($_POST['licenseNumbersToBeSubmitted'], $uploadTreeId, $userId, $_POST['type'], $_POST['scope'], $_POST['comment'], $_POST['remark']);
-    $clearingDecWithLicences = $this->clearingDao->getFileClearings($uploadTreeId);
+    $userId = $_SESSION['UserId'];
+    $groupId = $_SESSION['GroupId'];
+    $decisionMark = @$_POST['decisionMark'];
+    if(!empty($decisionMark))
+    {
+      $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
+      /** @var ItemTreeBounds */
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
+      $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+      if (empty($errMsg))
+      {
+        return new JsonResponse(array('result'=>'success'));
+      }
+      return $this->errorJson($errMsg,$errMsg);
+    }
+
+    return $this->doEdit($userId,$groupId,$itemId);
+  }
+
+  function doEdit($userId,$groupId,$itemId)
+  {
+    $licenses = GetParm("licenseNumbersToBeSubmitted", PARM_RAW);
+    $removed = $_POST['removed'] === 't' || $_POST['removed'] === 'true';
+
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId);
+    $uploadId = $itemTreeBounds->getUploadId();
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $uploadName = $upload->getFilename();
+
+    $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+
+    if (isset($licenses))
+    {
+      if (!is_array($licenses))
+      {
+        return $this->errorJson("bad license array");
+      }
+      foreach ($licenses as $licenseId)
+      {
+        if (intval($licenseId) <= 0)
+        {
+          return $this->errorJson("bad license");
+        }
+
+        $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
+            ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId);
+      }
+    }
+
+    /** @var agent_fodecider $deciderPlugin */
+    $deciderPlugin = plugin_find("agent_deciderjob");
+
+    $conflictStrategyId = null; // TODO add option in GUI
+    $ErrorMsg = "";
+    $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
 
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
-   // $this->ChangeBuckets(); // change bucket accordingly
+    // $this->ChangeBuckets(); // change bucket accordingly
 
-    header('Content-type: text/json');
+    if (empty($ErrorMsg) && ($jq_pk>0)) {
+      return new JsonResponse(array("jqid" => $jq_pk));
+    }
+    else {
+      return $this->errorJson($ErrorMsg, 500);
+    }
+  }
 
-    print(json_encode(array(
-      'tableClearing' => $this->changeLicenseUtility->printClearingTableInnerHtml($clearingDecWithLicences, $userId),
-      'recentLicenseClearing' => $this->licenseOverviewPrinter->createRecentLicenseClearing($clearingDecWithLicences))));
-  } // Output()
-
+  private function errorJson($msg, $code = 404)
+  {
+    return new JsonResponse(array("error" => $msg), $code);
+  }
 
 }
 

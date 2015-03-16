@@ -77,7 +77,7 @@ cmdlist CMD[] =
 /* 7 */ { "application/pdf","pdftotext","-htmlmeta","'%s' >/dev/null 2>&1","",CMD_PACK,1,0100000,0100000, },
 /* 8 */ { "application/x-pdf","pdftotext","-htmlmeta","'%s' >/dev/null 2>&1","",CMD_PACK,1,0100000,0100000, },
 /* 9 */ { "application/x-zip","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
-/* 10 */ { "application/zip","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
+/* 10 */{ "application/zip","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
 /* 11 */{ "application/x-tar","tar","-xSf","2>&1 ; echo ''","",CMD_ARC,1,0177000,0177777, },
 /* 12 */{ "application/x-gtar","tar","-xSf","2>&1 ; echo ''","",CMD_ARC,1,0177000,0177777, },
 /* 13 */{ "application/x-cpio","cpio","--no-absolute-filenames -i -d <",">/dev/null 2>&1","",CMD_ARC,1,0177777,0177777, },
@@ -97,7 +97,8 @@ cmdlist CMD[] =
 /* 27 */{ "application/x-x86_boot","departition","","> /dev/null 2>&1","",CMD_PARTITION,1,0177000,0177000, },
 /* 28 */{ "application/x-debian-source","dpkg-source","-x","'%s' >/dev/null 2>&1","",CMD_DEB,1,0177000,0177000, },
 /* 29 */{ "application/x-xz","tar","-JxSf",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177777, },
-/* 30 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 30 */{ "application/jar","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
+/* 31 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

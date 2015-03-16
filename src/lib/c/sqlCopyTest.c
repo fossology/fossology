@@ -105,6 +105,7 @@ int main(int argc, char **argv)
     snprintf(DataBuf, datasize, "%d\t%s\t%s\n", RowNum, col_text, col_vc);
     fo_sqlCopyAdd(pCopy, DataBuf);
   }
+  free(col_text);
 
   /* Destroy - flushes remaining data and frees */
   fo_sqlCopyDestroy(pCopy, 1);

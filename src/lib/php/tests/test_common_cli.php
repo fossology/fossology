@@ -65,5 +65,3 @@ class test_common_cli extends PHPUnit_Framework_TestCase
     }
   }
 }
-
-?>

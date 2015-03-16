@@ -1,10 +1,12 @@
-# Copyright Siemens AG, 2014
+# Copyright Siemens AG, 2014-2015
 # SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
 
-language: c
+language: php
 
+addons:
+ - postgresql: "9.3"
 cache:
  - apt
 
@@ -15,10 +17,20 @@ install:
         apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
-        postgresql libpq-dev
+        libpq-dev
  - sudo apt-get install -qq cppcheck
+
+before_script:
+ - cd src/
+ - composer install --dev
+ - composer self-update
+ - cd ..
+ - psql -c "CREATE USER fossy WITH PASSWORD 'fossy';" -U postgres
+ - psql -c "create database fossology;" -U postgres
+ - psql -c "create database fosstestone;" -U postgres
 
 script:
  - make
  - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
-
+ - phpunit -csrc/phpunit.xml
+ - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/

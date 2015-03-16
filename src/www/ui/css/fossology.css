@@ -158,7 +158,7 @@ a.treetext:active, a.treetext:hover
 	background: -webkit-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Chrome10+,Safari5.1+ */
 	background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
 	background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
-	background: linear-gradient(top, #ffffff 0%,#efefef 100%); /* W3C */
+	background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
 }
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes
@@ -166,7 +166,9 @@ a.treetext:active, a.treetext:hover
 html, body
   {
   margin:0;
-  padding:.25em;
+  padding-right: .25em;
+  padding-left: .25em;
+  /*padding:.25em;*/
   height:100%;
   background-color:white;
   }
@@ -196,7 +198,122 @@ html, body
 .simpleTable .odd  { background-color: #E2E4FF; }
 .simpleTable .even { background-color: white; }
 
+table.dataTable tr.odd.removed td.sorting_1 {
+    background-color: #ef9e9c;
+}
+table.dataTable tr.odd.removed {
+    background-color: #faa6a4;
+}
+table.dataTable tr.even.removed td.sorting_1 {
+    background-color: #ffb9b9;
+}
+table.dataTable tr.even.removed {
+    background-color: #ffc9c9;
+}
+
+table.dataTable tr.odd.match {
+    background-color: #cea15f;
+}
+
+table.dataTable tr.even.match {
+    background-color: #efbe76;
+}
+
 .inactiveClearing
     {
       background-color: #bebebe;
     }
+
+.modal {
+  padding: 20px 40px;
+  color: #000000;
+  background-color: #E6E6E6;
+  border-radius: 10px;
+  display: none;
+}
+
+.icon-small {
+    width: 16px;
+    height: 16px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.boxnew {
+    background-color: #ffffff;
+    border: 5px solid #f2f2f2;
+    display: inline-block;
+    float: left;
+    height: 700px;
+    overflow: auto;
+    padding: 0px;
+    position: relative;
+    text-align: left;
+    width: 99%;
+}
+
+.groupBox {
+    clear: both;
+    margin-top: 20px;
+    position: relative;
+    top: -20px;
+    padding: 10px;
+}
+
+.headerNew {
+   vertical-align: top;
+   overflow: auto;
+}
+
+.scrollable {
+    /*overflow: auto;*/
+    /*max-height: 20%;*/
+}
+
+.scrollable2 {
+    /*overflow: auto;*/
+    /*max-height: 30%;*/
+}
+
+.headerBox {
+    width: 99%;
+    background-color: #ffffff;
+    display: inline-block;
+    float: right;
+    height: 700px;
+    overflow: auto;
+    padding-left: 1px;
+    text-align: left;
+}
+
+.selectedRow {
+    font-weight: bold;
+}
+
+div.delete, div.deleted, div.add, div.added {
+    background-size: 100% 100%;
+    height: 16px;
+    width: 16px;
+    margin: 0 auto;
+}
+
+div.add {
+    background-image: url('../images/icons/add_16.png');
+}
+
+div.added {
+    background-image: url('../images/icons/added_16.png');
+}
+
+div.delete {
+    background-image: url('../images/icons/close_16.png');
+}
+div.deleted {
+    background-image: url('../images/icons/closed_16.png');
+}
+
+.inactive {
+    color: gray;
+}

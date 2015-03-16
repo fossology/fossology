@@ -1,0 +1,64 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  
+    {% if authUrl %}
+    <div style="float: right; border: 1px black dashed; max-width: 360px; padding: 5px;">
+        {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+    </div>
+  {% endif %}
+  
+  <b>
+    {{ 'FOSSology'| trans }}
+  </b>
+  {{ 'is a framework for software analysis tools.'| trans }}
+  {{ 'With it, you can:'| trans }}
+  <ul>
+    <li>
+      {{ 'Upload files into the fossology repository.'| trans }}
+    </li>
+    <li>
+      {{ "Unpack files (zip, tar, bz2, iso's, and many others) into its component files."| trans }}
+    </li>
+    <li>
+        {{ 'Browse upload file trees.'| trans }}
+    </li>
+    <li>
+        {{ 'View file contents and meta data.'| trans }}
+    </li>
+    <li>
+        {{ 'Scan for software licenses.'| trans }}
+    </li>
+    <li>
+        {{ 'Scan for copyrights and other author information.'| trans }}
+    </li>
+    <li>
+        {{ 'View side-by-side license and bucket differences between file trees.'| trans }}
+    </li>
+    <li>
+        {{ 'Tag and attach notes to files.'| trans }}
+    </li>
+    <li>
+        {{ 'Report files based on your own custom classification scheme.'| trans }}
+    </li>
+</ul>
+<p></p>
+<b>
+    {{ 'Where to Begin...'| trans }}
+</b><br/>
+
+<ul>
+  <li>{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}</li>
+  <li>
+    <b>{% if authUrl %}<a href="{{ authUrl }}">{{ 'Login'| trans }}</a>{% else %}{{ 'Login'| trans }}{% endif %}</b>:
+    {{ "Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
+        even add new users."| trans }}
+  </li>
+</ul>
+{% endblock %}

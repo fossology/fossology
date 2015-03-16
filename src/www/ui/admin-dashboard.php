@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,12 +21,14 @@ define("TITLE_dashboard", _("Dashboard"));
 
 class dashboard extends FO_Plugin
 {
-  var $Name       = "dashboard";
-  var $Version    = "1.0";
-  var $Title      = TITLE_dashboard;
-  var $MenuList   = "Admin::Dashboard";
-  var $Dependency = array();
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "dashboard";
+    $this->Title      = TITLE_dashboard;
+    $this->MenuList   = "Admin::Dashboard";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief Return each html row for DatabaseContents()
@@ -152,24 +155,12 @@ function GetLastAnalyzeTime($TableName)
     pg_free_result($result);
     $text = _("FOSSology database size");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>  $Size </td></tr>\n";;
+    $V .= "<td align='right'> $Size </td></tr>\n";
 
     /**** Version ****/
-    $sql = "SELECT * from version();";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $version = explode(' ', $row['version'], 3);
     $text = _("Postgresql version");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>  $version[1] </td></tr>\n";;
-
-    // Get the current query column name in pg_stat_activity
-    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
-      $current_query = "state";
-    else
-      $current_query = "current_query";
+    $V .= "<td align='right'> {$this->pgVersion[server]} </td></tr>\n";
 
     /**** Query stats ****/
     // count current queries
@@ -182,10 +173,11 @@ function GetLastAnalyzeTime($TableName)
     pg_free_result($result);
 
     /**** Active connection count ****/
+    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
     $text = _("Active database connections");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";;
-    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology';";
+    $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
+    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -222,12 +214,10 @@ function GetLastAnalyzeTime($TableName)
     $version = explode(' ', $row['version'], 3);
 
     // Get the current query column name in pg_stat_activity
-    if (strcmp($version[1], "9.2") >= 0) // when greater than PostgreSQL 9.2 replace "current_query" with "state"
-      $current_query = "state";
-    else
-      $current_query = "current_query";
+    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
+    $procpid = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "pid" : "procpid";
 
-    $sql = "SELECT procpid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY procpid;"; 
+    $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 1)
@@ -236,7 +226,7 @@ function GetLastAnalyzeTime($TableName)
       {
         if ($row[$current_query] == $sql) continue;  // Don't display this query
         $V .= "<tr>";
-        $V .= "<td>$row[procpid]</td>";
+        $V .= "<td>$row[processid]</td>";
         $V .= "<td>" . htmlspecialchars($row[$current_query]) . "</td>";
         $StartTime = substr($row['query_start'], 0, 19);
         $V .= "<td>$StartTime</td>";
@@ -263,7 +253,7 @@ function GetLastAnalyzeTime($TableName)
     global $SysConf;
 
     $Cmd = "df -hP";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
 
     /* Separate lines */
     $Lines = explode("\n",$Buf);
@@ -327,7 +317,7 @@ function GetLastAnalyzeTime($TableName)
     // just query the database with "show data_directory", but we are not.
     // So try to get it from a ps and parse the -D argument
     $Cmd = "ps -eo cmd | grep postgres | grep -- -D";
-    $Buf = DoCmd($Cmd);
+    $Buf = $this->DoCmd($Cmd);
     // Find the -D
     $DargToEndOfStr = trim(substr($Buf, strpos($Buf, "-D") + 2 ));
     $DargArray = explode(' ', $DargToEndOfStr);
@@ -340,51 +330,48 @@ function GetLastAnalyzeTime($TableName)
     $V .= $Indent . _("FOSSology config") . ": " . $SYSCONFDIR . "<br>";
 
     return($V);
-  } // DiskFree()
-
-  /**
-   * \brief Generate output.
-   */
-  function Output() {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+  }
+  
+  public function Output() {
     $V="";
+    $V .= "<table border=0 width='100%'><tr>\n";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Contents");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseContents();
+    $V .= "</td>";
+    $V .= "<td valign='top'>\n";
+    $text = _("Database Metrics");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseMetrics();
+    $V .= "</td>";
+    $V .= "</tr></table>\n";
+    $text = _("Active FOSSology queries");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DatabaseQueries();
+    $text = _("Disk Space");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->DiskFree();
 
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $V .= "<table border=0 width='100%'><tr>\n";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Contents");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseContents();
-        $V .= "</td>";
-        $V .= "<td valign='top'>\n";
-        $text = _("Database Metrics");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseMetrics();
-        $V .= "</td>";
-        $V .= "</tr></table>\n";
-        $text = _("Active FOSSology queries");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DatabaseQueries();
-        $text = _("Disk Space");
-        $V .= "<h2>$text</h2>\n";
-        $V .= $this->DiskFree();
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+    return $V;
+  }
+  
+  /**
+   * \brief execute a shell command
+   * \param $cmd - command to execute
+   * \return command results
+   */
+  protected function DoCmd($cmd)
+  {
+    $fin = popen($cmd,"r");
+    $buffer = "";
+    while (!feof($fin)) {
+      $buffer .= fread($fin, 8192);
     }
-
-    if (!$this->OutputToStdout) { return($V); }
-    print($V);
-    return;
-  } // Output()
-
+    pclose($fin);
+    return $buffer;
+  }
 }
+
 $NewPlugin = new dashboard;
 $NewPlugin->Initialize();

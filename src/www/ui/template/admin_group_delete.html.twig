@@ -1,0 +1,22 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  
+ <h1 style="font-size:large;">{{ 'Delete a group'| trans  }}</h1>
+ <form name="formy" method="post" action="{{ uri }}">
+    {{ "Select the group to delete"|trans }}:
+    {% import "include/macros.html.twig" as macro %}
+    {{ macro.select('grouppk',groupMap,'grouppk') }}
+    <input type="submit" value="{{ 'Delete'|trans }}"/>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+{% endblock %}

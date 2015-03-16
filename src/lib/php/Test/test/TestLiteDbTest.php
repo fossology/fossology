@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,8 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Test;
 
-use Fossology\Lib\Test\TestLiteDb;
-
 class TestLiteDbTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -28,7 +26,7 @@ class TestLiteDbTest extends \PHPUnit_Framework_TestCase
     $this->assertInstanceOf('Fossology\Lib\Db\DbManager', $testDb->getDbManager());
   }
   
-  public function createPlainTables()
+  public function testCreatePlainTables()
   {
     $testDb = new TestLiteDb();
     $testDb->createPlainTables(array('tag'));
@@ -36,7 +34,19 @@ class TestLiteDbTest extends \PHPUnit_Framework_TestCase
     
     $dbManager->queryOnce("insert into tag (tag_pk,tag,tag_desc) values (1,'hello','world')");
     $tag1 = $dbManager->getSingleRow('select * from tag where tag_pk=1');
-    $this->assertArrayHasKey('tag_desc',$tag1);
-    $this->assertEquals('world', $tag1);
+    assertThat($tag1,hasKey('tag_desc'));
+    assertThat($tag1['tag_desc'],is('world'));
   }
+  
+  public function testInsertData()
+  {
+    $testDb = new TestLiteDb();
+    $testDb->createPlainTables(array('perm_upload'));
+    $testDb->insertData(array('perm_upload'));
+    $tag1 = $testDb->getDbManager()->getSingleRow('select perm from perm_upload where perm_upload_pk=1');
+    assertThat($tag1,hasKey('perm'));
+    assertThat($tag1['perm'],is(10));
+  }
+  
+  
 }

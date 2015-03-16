@@ -17,19 +17,31 @@
 #parameter: $1 agent name
 agent=$1
 DIR="/var/lib/jenkins/workspace/Fossology_Performance/result/"
+ALLDIR="/var/lib/jenkins/workspace/Fossology_Performance/all/"
 labelsstart="labels : ["
 labels=$labelsstart
+rm -rf $DIR/*-result*
+cp $ALLDIR/2* $DIR
+for j in $(ls $ALLDIR|tail -n 20)
+do
+  cp $ALLDIR/$j $DIR
+done
 for k in $(ls $DIR)
 do
 if [ "$k" != "chartresult.html" ];then
   labels=$labels\"`echo $k |cut -c1-17`\",
   sed -i 's|<\/tr><tr|<\/tr>\n<tr|g' $k
-  items=`cat $k|grep $agent|awk -F items '{print $1}'|awk -F ">" '{print $13}'|awk -F "," '{print $1,$2}'`
-  items=`echo $items|tr -d ' '`
-  st=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $1}'|awk -F "items<\/td><td>" '{print $2}')" +%s`
-  et=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $2}'|awk -F " " '{print $1,$2}'|awk -F "<" '{print $1}')" +%s`
-  time=$(($et-$st))  
-  sectime=$(($items/$time))
+  tmp=`cat $k|grep $agent|wc -l`
+  if [ $tmp != "0" ];then
+    items=`cat $k|grep $agent|awk -F items '{print $1}'|awk -F ">" '{print $13}'|awk -F "," '{print $1,$2}'`
+    items=`echo $items|tr -d ' '`
+    st=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $1}'|awk -F "items<\/td><td>" '{print $2}')" +%s`
+    et=`date -d "$(cat $k|grep $agent|awk -F " - " '{print $2}'|awk -F " " '{print $1,$2}'|awk -F "<" '{print $1}')" +%s`
+    time=$(($et-$st))  
+    sectime=$(($items/$time))
+  else
+    sectime=0
+  fi
   sectimes=$sectimes$sectime,
 fi
 done

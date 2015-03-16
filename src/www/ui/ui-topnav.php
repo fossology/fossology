@@ -33,26 +33,7 @@ class ui_topnav extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
-    switch($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        $V = $this->outputHtml();
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
-    return;
-  }
-  
-  function outputHtml()
-  {
+    
     global $SysConf;
     global $Plugins;
 

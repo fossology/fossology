@@ -73,7 +73,7 @@ fi
 echo "The FOSSology version is: $version"
 if [ "$version" = "latest" ];then
 	cp /etc/apt/sources.list.bak /etc/apt/source.list.new
-        echo "deb http://fobuild.fc.hp.com/fossology/2.6.0/testing/current/debian/ 6.0 contrib" >> /etc/apt/source.list.new
+        echo "deb http://fobuild.fc.hp.com/fossology/2.6.2/testing/current/debian/ 6.0 contrib" >> /etc/apt/source.list.new
 	cp /etc/apt/source.list.new /etc/apt/sources.list
 else
 	cp /etc/apt/sources.list.bak /etc/apt/source.list.new

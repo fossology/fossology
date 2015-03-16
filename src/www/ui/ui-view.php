@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,12 +24,13 @@ use Fossology\Lib\View\TextRenderer;
 use Monolog\Logger;
 
 define("VIEW_BLOCK_HEX", 8192);
-define("VIEW_BLOCK_TEXT", 1 * VIEW_BLOCK_HEX);
+define("VIEW_BLOCK_TEXT", 10 * VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR", 8);
 define("TITLE_ui_view", _("View File"));
 
 class ui_view extends FO_Plugin
 {
+  const NAME = "view";
   /**
    * @var Logger
    */
@@ -46,7 +48,7 @@ class ui_view extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "view";
+    $this->Name = self::NAME;
     $this->Title = TITLE_ui_view;
     $this->Version = "1.0";
     $this->Dependency = array("browse");
@@ -69,65 +71,11 @@ class ui_view extends FO_Plugin
     $text = _("View file contents");
     menu_insert("Browse-Pfile::View", 10, $this->Name, $text);
     // For the Browse menu, permit switching between detail and summary.
-    $Format = $this->getFormatParameter(null);
-    $Page = GetParm("page", PARM_INTEGER);
 
-    $URI = Traceback_parm();
-    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
-    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
-
-    $PageHex = NULL;
-    $PageText = NULL;
-
-    /***********************************
-     * If there is paging, compute page conversions.
-     ***********************************/
-    switch ($Format)
-    {
-      case 'hex':
-        $PageHex = $Page;
-        $PageText = intval($Page * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
-        break;
-      case 'text':
-      case 'flow':
-        $PageText = $Page;
-        $PageHex = intval($Page * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
-        break;
-    }
-
-    menu_insert("View::[BREAK]", -1);
-    switch ($Format)
-    {
-      case "hex":
-        $text = _("View as unformatted text");
-        menu_insert("View::Hex", -10);
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-      case "text":
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        menu_insert("View::Text", -11);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-      case "flow":
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        menu_insert("View::Formatted", -12);
-        break;
-      default:
-        $text = _("View as a hex dump");
-        menu_insert("View::Hex", -10, "$URI&format=hex&page=$PageHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("View::Text", -11, "$URI&format=text&page=$PageText", $text);
-        $text = _("View as formatted text");
-        menu_insert("View::Formatted", -12, "$URI&format=flow&page=$PageText", $text);
-        break;
-    }
+    $itemId = GetParm("item", PARM_INTEGER);
+    $textFormat = $this->getFormatParameter($itemId);
+    $pageNumber = GetParm("page", PARM_INTEGER);
+    $this->addFormatMenuEntries($textFormat, $pageNumber);
 
     $URI = Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     if (GetParm("mod", PARM_STRING) == $this->Name)
@@ -212,19 +160,29 @@ class ui_view extends FO_Plugin
    */
   function ShowText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
   {
+    print $this->getText($inputFile,$startOffset,$Flowed,$outputLength,$splitPositions,$insertBacklink);
+  }
+  /**
+   * \brief Given a file handle, display "strings" of the file.
+   */
+  function getText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
+  {
     if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
     {
-      return;
+      return "";
     }
 
-    print($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
+    $output ="";
+    $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
 
     fseek($inputFile, $startOffset, SEEK_SET);
     $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
 
     $renderedText = $this->textRenderer->renderText($textFragment, $splitPositions, $insertBacklink);
 
-    print ($Flowed ? nl2br($renderedText) : $renderedText) . (!$Flowed ? "</pre>" : "") . "</div>\n";
+    $output .=($Flowed ? nl2br($renderedText) : $renderedText) . (!$Flowed ? "</pre>" : "") . "</div>\n";
+
+    return $output;
   } // ShowText()
 
 
@@ -232,22 +190,34 @@ class ui_view extends FO_Plugin
    * \brief Given a file handle, display a "hex dump" of the file.
    * Output goes to stdout!
    */
-  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions)
+  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = array())
+  {
+    print $this->getHex($inputFile,$startOffset,$outputLength,$splitPositions);
+  }
+
+  /**
+   * \brief Given a file handle, display a "hex dump" of the file.
+   * Output goes to stdout!
+   */
+  function getHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = array())
   {
     if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
     {
-      return;
+      return "";
     }
 
+    $output = "";
     fseek($inputFile, $startOffset, SEEK_SET);
     $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
 
-    print "<div class='mono'>";
+    $output .= "<div class='mono'>";
 
     $renderedText = $this->textRenderer->renderHex($textFragment, $splitPositions);
-    print $renderedText;
+    $output .=  $renderedText;
 
-    print "</div>\n";
+    $output .=  "</div>\n";
+
+    return $output;
   } // ShowHex()
 
   private function checkAndPrepare($inputFile, $startOffset, $outputLength)
@@ -275,6 +245,7 @@ class ui_view extends FO_Plugin
     return $outputLength;
   }
 
+
   /**
    * \brief Generate the view contents in HTML and sends it
    *  to stdout.
@@ -294,9 +265,31 @@ class ui_view extends FO_Plugin
   function ShowView($inputFile = NULL, $BackMod = "browse",
                     $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = array(), $insertBacklink = false)
   {
+    return $this->getView($inputFile , $BackMod,
+         $ShowHeader , $ShowText, $highlightEntries , $insertBacklink);
+  }
+
+  /**
+   * \brief Generate the view contents in HTML
+   *
+   * @param resource $inputFile
+   * @param string $BackMod
+   * @param int $ShowMenu
+   * @param int $ShowHeader
+   * @param null $ShowText
+   * @param bool $ViewOnly
+   * @param bool $DispView
+   * @param Highlight[] $highlightEntries
+   * @param bool $insertBacklink
+   *
+   * \note This function is intended to be called from other plugins.
+   */
+  function getView($inputFile = NULL, $BackMod = "browse",
+                     $ShowHeader = 1, $ShowText = NULL,  $highlightEntries = array(), $insertBacklink = false, $getPageMenuInline = false)
+  {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return;
+      return "s";
     }
     global $Plugins;
 
@@ -304,56 +297,31 @@ class ui_view extends FO_Plugin
     if (!empty($Upload))
     {
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ) return;
+      if ($UploadPerm < PERM_READ) return "p";
     }
 
-    $Folder = GetParm("folder", PARM_INTEGER);
-    $Show = GetParm("show", PARM_STRING);
     $Item = GetParm("item", PARM_INTEGER);
     $Page = GetParm("page", PARM_INTEGER);
     $licenseId = GetParm("licenseId", PARM_INTEGER);
-    if (!$inputFile && (empty($Item) || empty($Upload)))
+    if (!$inputFile && empty($Item))
     {
-      return;
+      return "i";
     }
 
     $uploadtree_tablename = GetUploadtreeTablename($Upload);
 
-    $Format = $this->getFormatParameter($Item);
-
-    /**********************************
-     * Display micro header
-     **********************************/
     if ($ShowHeader)
     {
-      $Uri = Traceback_uri() . "?mod=browse";
-      $Opt = "";
-      if (!empty($Item))
-      {
-        $Opt .= "&item=$Item";
-      }
-      if (!empty($Upload))
-      {
-        $Opt .= "&upload=$Upload";
-      }
-      if (!empty($Folder))
-      {
-        $Opt .= "&folder=$Folder";
-      }
-      if (!empty($Show))
-      {
-        $Opt .= "&show=$Show";
-      }
+      $Uri = Traceback_uri() . "?mod=browse" .  Traceback_parm_keep(array('item','show','folder','upload')) ;
       /* No item */
-      $header = Dir2Browse($BackMod, $Item, NULL, 1, "View", -1, '', '', $uploadtree_tablename) . "<P />\n";
-      print($header);
-    } // if ShowHeader
+      $header = Dir2Browse($BackMod, $Item, NULL, $showBox=0, "View", -1, '', '', $uploadtree_tablename);
+      $this->vars['micromenu'] = $header;
+    }
 
-    /***********************************
-     * Display file contents
-     ***********************************/
-    $V = "";
+    /* Display file contents */
+    $output="";
     $openedFin = False;
+    $Format = $this->getFormatParameter($Item);
     if (empty($inputFile))
     {
       $inputFile = @fopen(RepPathItem($Item), "rb");
@@ -379,7 +347,7 @@ class ui_view extends FO_Plugin
             {
               /* Need to refresh the screen */
               $text = _("Unpack added to job queue");
-              $V .= displayMessage($text);
+              $this->vars['message'] = $text;
               $flag = 1;
               $text = _("Reunpack job is running: you can see it in");
               $text1 = _("jobqueue");
@@ -387,22 +355,21 @@ class ui_view extends FO_Plugin
             } else
             {
               $text = _("Unpack of Upload failed");
-              $V .= displayMessage("$text: $rc");
+              $this->vars['message'] = "$text: $rc";
             }
-            print $V;
           }
         } else
         {
           $flag = 1;
           $text = _("Reunpack job is running: you can see it in");
           $text1 = _("jobqueue");
-          print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+          $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
         }
         $text = _("File contents are not available in the repository.");
-        print "$text\n";
+        $output .=  "$text\n";
         $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        print $P->ShowReunpackView($Item, $flag);
-        return;
+        $output .=  $P->ShowReunpackView($Item, $flag);
+        return $output;
       }
       /** END **/
     }
@@ -410,24 +377,22 @@ class ui_view extends FO_Plugin
     $Uri = preg_replace('/&page=[0-9]*/', '', Traceback());
 
     $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
-
-    $this->highlightProcessor->sortHighlights($highlightEntries);
-
-    if (!isset($Page))
+    
+    if(!isset($Page) && !empty($licenseId))
     {
-      $Page = 0;
-      if (!empty($licenseId))
+      $startPos = -1;
+      foreach ($highlightEntries as $highlightEntry)
       {
-        foreach ($highlightEntries as $highlightEntry)
+        if ($highlightEntry->getLicenseId()==$licenseId && ($startPos==-1 || $startPos>$highlightEntry->getStart()))
         {
-          if ($highlightEntry->getLicenseId() == $licenseId)
-          {
-            $Page = intval($highlightEntry->getStart() / $blockSize);
-            break;
-          }
+          $startPos = $highlightEntry->getStart();
         }
       }
-    };
+      if ($startPos != -1)
+      {
+        $Page = floor($startPos / $blockSize);
+      }
+    }
 
     if (!empty($ShowText))
     {
@@ -435,129 +400,150 @@ class ui_view extends FO_Plugin
     }
     $PageMenu = $this->GetFileJumpMenu($inputFile, $Page, $blockSize, $Uri);
     $PageSize = VIEW_BLOCK_HEX * $Page;
-    if (!empty($PageMenu))
+    if (!empty($PageMenu) and !$getPageMenuInline)
     {
-      print "<center>$PageMenu</center><br>\n";
+      $output .= "<center>$PageMenu</center><br>\n";
     }
-
-    $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlightEntries);
+    
+    $startAt = $PageSize;
+    $endAt = $PageSize+($Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT);
+    $relevantHighlightEntries = array();
+    foreach ($highlightEntries as $highlightEntry)
+    {
+      if ($highlightEntry->getStart()<$endAt && $highlightEntry->getEnd()>=$startAt)
+      {
+        $relevantHighlightEntries[] = $highlightEntry;
+      }
+    }
+    
+    $this->highlightProcessor->sortHighlights($relevantHighlightEntries);
+    
+    $splitPositions = $this->highlightProcessor->calculateSplitPositions($relevantHighlightEntries);
 
     if ($Format == 'hex')
     {
-      $this->ShowHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
+       $output .= $this->getHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
     } else
     {
-      $this->ShowText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
+      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
     }
-
-    if (!empty($PageMenu))
+    
+    if (!empty($PageMenu) and !$getPageMenuInline)
     {
-      print "<P /><center>$PageMenu</center><br>\n";
+      $output .= "<P /><center>$PageMenu</center><br>\n";
     }
 
     if ($openedFin) fclose($inputFile);
-    return;
-  } // ShowView()
+    if($getPageMenuInline)
+      return array($PageMenu, $output);
+    else
+      return $output;
+  }
 
-  /**
-   * \brief This function is called when user output is
-   * requested.  This function is responsible for content.
-   * (OutputOpen and Output are separated so one plugin
-   * can call another plugin's Output.)
-   * This uses $OutputType.
-   * The $ToStdout flag is "1" if output should go to stdout, and
-   * 0 if it should be returned as a string.  (Strings may be parsed
-   * and used by other plugins.)
-   */
-  function Output()
+  public function Output()
   {
-    global $PG_CONN;
-
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return "";
-    }
-    if (!$PG_CONN)
-    {
-      DBconnect();
-      if (!$PG_CONN)
-      {
-        echo "NO DB connection";
-      }
-    }
-
-    $V = "";
-    switch ($this->OutputType)
-    {
-      case "XML":
-        break;
-      case "HTML":
-        if ($this->OutputToStdout)
-        {
-          $this->ShowView(NULL, "browse");
-        }
-        break;
-      case "Text":
-        break;
-      default:
-        break;
-    }
-    if (!$this->OutputToStdout)
-    {
-      return ($V);
-    }
-    print($V);
-    return "";
+    return $this->ShowView(NULL, "browse");
   }
 
   /**
-   * @param $Item
+   * @param $itemId
    * @return string
    */
-  protected function getFormatParameter($Item)
+  public function getFormatParameter($itemId=NULL)
   {
     switch (GetParm("format", PARM_STRING))
     {
       case 'hex':
-        $Format = 'hex';
+        $format = 'hex';
         break;
       case 'text':
-        $Format = 'text';
+        $format = 'text';
         break;
       case 'flow':
-        $Format = 'flow';
+        $format = 'flow';
         break;
       default:
         /* Determine default show based on mime type */
-        if (empty($Item))
-          $Format = 'flow';
+        if (empty($itemId))
+          $format = 'flow';
         else
         {
-          $Meta = GetMimeType($Item);
-          list($Type, $Junk) = explode("/", $Meta, 2);
-          if ($Type == 'text')
+          $Meta = GetMimeType($itemId);
+          list($type, $dummy) = explode("/", $Meta, 2);
+          if ($type == 'text')
           {
-            $Format = 'flow';
-          } else switch ($Meta)
-          {
-            case "application/octet-string":
-            case "application/x-awk":
-            case "application/x-csh":
-            case "application/x-javascript":
-            case "application/x-perl":
-            case "application/x-shellscript":
-            case "application/x-rpm-spec":
-            case "application/xml":
-            case "message/rfc822":
-              $Format = 'flow';
-              break;
-            default:
-              $Format = 'flow';
+            $format = 'text';
+          } else {
+            $format = 'flow';
           }
         }
         break;
     }
-    return $Format;
+    return $format;
+  }
+
+  /**
+   * @param $textFormat
+   * @return string
+   */
+  public function addFormatMenuEntries($textFormat, $pageNumber, $menuName="View")
+  {
+    $URI = Traceback_parm();
+    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
+    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
+
+    $pageNumberHex = NULL;
+    $pageNumberText = NULL;
+
+    /***********************************
+     * If there is paging, compute page conversions.
+     ***********************************/
+    switch ($textFormat)
+    {
+      case 'hex':
+        $pageNumberHex = $pageNumber;
+        $pageNumberText = intval($pageNumber * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
+        break;
+      case 'text':
+      case 'flow':
+        $pageNumberText = $pageNumber;
+        $pageNumberHex = intval($pageNumber * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
+        break;
+    }
+
+    menu_insert("$menuName::[BREAK]", -1);
+    switch ($textFormat)
+    {
+      case "hex":
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Hex", -10);
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+      case "text":
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        menu_insert("$menuName::Text", -11);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+      case "flow":
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        menu_insert("$menuName::Formatted", -12);
+        break;
+      default:
+        $text = _("View as a hex dump");
+        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
+        $text = _("View as unformatted text");
+        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
+        $text = _("View as formatted text");
+        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
+        break;
+    }
   }
 
 }

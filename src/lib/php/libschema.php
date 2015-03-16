@@ -71,12 +71,13 @@ class fo_libschema
 
   /**
    * @brief Make schema match $Filename.  This is a single transaction.
-   * @param $filename Schema file written by schema-export.php
-   * @param $debug Turn on debugging (echo sql as it is being executed)
-   * @param $catalog Optional database name
+   * @param string $filename Schema file written by schema-export.php
+   * @param bool $debug Turn on debugging (echo sql as it is being executed)
+   * @param string $catalog Optional database name
+   * @param array[] $migrateColumns array('tablename'=>array('col1','col2'),...) of columns which should not be deleted
    * @return false=success, on error return string with error message.
    **/
-  function applySchema($filename = NULL, $debug = false, $catalog = 'fossology')
+  function applySchema($filename = NULL, $debug = false, $catalog = 'fossology', $migrateColumns = array())
   {
     global $PG_CONN;
     $this->dbman->setDriver(new Postgres($PG_CONN));
@@ -145,7 +146,9 @@ class fo_libschema
     $this->dropViews($catalog);
     foreach ($this->currSchema['TABLE'] as $table => $columns)
     {
-      $this->dropColumnsFromTable($columns, $table);
+      $skipColumns = array_key_exists($table, $migrateColumns) ? $migrateColumns[$table] : array();
+      $dropColumns = array_diff(array_keys($columns), $skipColumns);
+      $this->dropColumnsFromTable($dropColumns, $table);
     }
     $this->applyOrEchoOnce('COMMIT');
     flush();
@@ -215,7 +218,7 @@ class fo_libschema
           }
 
           $sql = $modification['ADD'];
-          if ($debug)
+          if ($this->debug)
           {
             print "$sql\n";
           } else
@@ -237,10 +240,10 @@ class fo_libschema
         if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
         {
           $sql = $modification['ALTER'];
-          if ($debug)
+          if ($this->debug)
           {
             print "$sql\n";
-          } else
+          } else if (!empty ($sql))
           {
             $this->dbman->queryOnce($sql);
             if (!empty($modification['UPDATE']))
@@ -461,7 +464,7 @@ class fo_libschema
     {
       return;
     }
-    foreach ($columns as $column => $modification)
+    foreach ($columns as $column)
     {
       if (empty($column))
       {

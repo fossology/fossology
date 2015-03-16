@@ -1,0 +1,43 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+<form method="post">
+  <input type="hidden" name="mod" value="advice_license"/>
+  <input type="hidden" name="rf" value="{{ rf_pk }}"/>
+  <table>
+    <tr>
+      <td>{{ 'Shortname'|trans }}:</td>
+      <td><input type="input" name="shortname" value="{{ rf_shortname|e }}"/></td>
+    </tr>
+    <tr>
+      <td>{{ 'Fullname'|trans }}:</td>
+      <td><input type="input" name="fullname" value="{{ rf_fullname|e }}"/></td>
+    </tr>
+    <tr>
+      <td valign="top">{{ 'Reference text'|trans }}:</td>
+      <td><textarea name="rf_text" cols="120" rows="10">{{ rf_text|e }}</textarea></td>
+    </tr>
+    <tr>
+      <td>{{ 'URL'|trans }}:</td>
+      <td><input type="input" name="url" value="{{ rf_url|e }}"/></td>
+    </tr>
+    <tr>
+      <td valign="top">{{ 'Public notes'|trans }}:</td>
+      <td><textarea name="note" cols="120" rows="10">{{ rf_notes|e }}</textarea></td>
+    </tr>
+    <tr>
+      <td>{{ 'Merge request'|trans }}:</td>
+      <td><input type="checkbox" name="marydone"{%if marydone %} checked="checked"{% endif %}/></td>
+    </tr>
+  </table>
+  <input type="submit" name="save" value="{{ 'Save'|trans }}"/>
+</form>  
+  
+{% endblock %}

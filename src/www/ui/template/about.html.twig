@@ -1,0 +1,26 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+    <p>
+        <b> {{ "FOSSology version" | trans }} {{ versionInfo.version }} ({{ 'code revision' | trans }} {{ versionInfo.commitHash }})</b>
+        {{ "with" | trans }} {{ licenseCount }} {{ "known licenses in database" |trans }}
+    </p>
+
+    <p>
+        {{ copyright }}
+    </p>
+
+    <p>
+        This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.<br/>
+        This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<br/>
+        You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+    </p>
+{% endblock %}
+
