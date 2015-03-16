@@ -41,7 +41,7 @@ function Migrate_20_21($DryRun)
   foreach ($row as $exist_key => $exist_value) {
   }
 
-  if ($exist_value == 't') 
+  if (@$exist_value == 't') 
   {
     echo "Data previously migrated.\n";
     return 0;  // migration has already happened

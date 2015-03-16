@@ -128,7 +128,8 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
-$FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName);
+$migrateColumns = array('clearing_decision'=>array('reportinfo'));
+$FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
   print "ApplySchema failed: $FailMsg\n";
@@ -217,6 +218,8 @@ if($sysconfig['Release'] == '2.6')
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
   }
+  require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
+  $libschema->dropColumnsFromTable(array('reportinfo'), 'clearing_decision');
 }
 
 /* sanity check */
