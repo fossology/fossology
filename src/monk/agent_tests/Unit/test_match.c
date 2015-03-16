@@ -67,9 +67,9 @@ void matchesArray_free(GArray* matches) {
 }
 
 int _matchEquals(Match* match, long refId, size_t start, size_t end) {
-  CU_ASSERT_EQUAL(match_getStart(match), start);
-  CU_ASSERT_EQUAL(match_getEnd(match), end);
-  CU_ASSERT_EQUAL(match->license->refId, refId);
+  FO_ASSERT_EQUAL((int) match->license->refId, (int) refId);
+  FO_ASSERT_EQUAL((int) match_getStart(match), (int) start);
+  FO_ASSERT_EQUAL((int) match_getEnd(match), (int) end);
 
   return ( (match_getStart(match) == start) &&
            (match_getEnd(match) == end) &&
@@ -131,9 +131,6 @@ void test_findAllMatchesWithDiff() {
 }
 
 void test_findAllMatchesTwoGroups() {
-  /*
-  TODO
-
   File* file = getFileWithText("a^b^c^d^e^f^g");
   Licenses* licenses = getNLicensesWithText(6, "a^b", "a^b^c^d", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
@@ -147,7 +144,6 @@ void test_findAllMatchesTwoGroups() {
   matchesArray_free(matches);
   file_free(file);
   licenses_free(licenses);
-  */
 }
 
 void test_findAllMatchesTwoGroupsWithDiff() {
@@ -155,13 +151,12 @@ void test_findAllMatchesTwoGroupsWithDiff() {
   Licenses* licenses = getNLicensesWithText(6, "a^b", "a^b^c^e", "d", "e", "f", "e^f^g");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
 
-  FO_ASSERT_EQUAL(matches->len, 5);
-  if (matches->len == 5) {
+
+  FO_ASSERT_EQUAL(matches->len, 3);
+  if (matches->len == 3) {
     FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 0, 2))
     FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 1), 2, 3, 4))
-    FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 3, 4, 5))
-    FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 3), 5, 4, 7))
-    FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 4), 4, 5, 6))
+    FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 2), 5, 4, 7))
   }
 
   matchesArray_free(matches);
@@ -170,8 +165,6 @@ void test_findAllMatchesTwoGroupsWithDiff() {
 }
 
 void test_findAllMatchesAllIncluded() {
-  /*
-  TODO decide if we want it
   File* file = getFileWithText("a^b^c^d");
   Licenses* licenses = getNLicensesWithText(3, "a^b^c^d", "b^c", "d");
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 0);
@@ -184,7 +177,6 @@ void test_findAllMatchesAllIncluded() {
   matchesArray_free(matches);
   file_free(file);
   licenses_free(licenses);
-  */
 }
 
 void test_formatMatchArray() {
@@ -498,7 +490,95 @@ void test_processMatchesUsesOnAllForNoMatches() {
   g_array_free(matches, TRUE);
 }
 
+void test_matchComparatorSameLicenseFullVsDiff() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 100.0, 1, 2, licensePtr);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 1, 2, licensePtr);
 
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) > 0); // full > diff
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) < 0); // diff < full
+
+  match_free(match1);
+  match_free(match2);
+  licenses_free(licenses);
+}
+
+void test_matchComparatorDifferentLicensesNonIncluded() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 100.0, 1, 2, licensePtr+1);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 100.0, 1, 2, licensePtr+2);
+
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) > 0); // match1 >= match2
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) > 0); // match2 >= match1
+
+  match_free(match1);
+  match_free(match2);
+  licenses_free(licenses);
+}
+
+void test_matchComparatorDifferentLicensesIncludedAreNotComparable() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 1, 2, licensePtr);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 1, 2, licensePtr+2);
+
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) == 0); // match1.license <= match2.license
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) == 0); // match2.license <= match1.license
+
+  match_free(match1);
+  match_free(match2);
+  licenses_free(licenses);
+}
+
+void test_matchComparatorDistinctMatchesAreNotComparable() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 1, 2, licensePtr);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 4, 8, licensePtr+2);
+
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) == 0); // start(match2) > end(match1)
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) == 0); // start(match2) > end(match1)
+
+  match_free(match1);
+  match_free(match2);
+  licenses_free(licenses);
+}
+
+void test_matchComparatorOneFullIncludedIsNotComparableToBiggerDiffIfLicensesAreIncluded() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 100.0, 1, 2, licensePtr);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 100.0, 1, 8, licensePtr+2);
+
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) == 0);
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) == 0);
+
+  match_free(match1);
+  match_free(match2);
+  licenses_free(licenses);
+}
+
+void test_matchComparatorIncludedSameLicensesComparedByRank() {
+  Licenses* licenses = getNLicensesWithText(3, "a", "b^c", "a^b");
+  License* licensePtr = (License*) licenses->licenses->data;
+  Match* match1 = _matchWithARankStartAndEnd(MATCH_TYPE_FULL, 100.0, 1, 2, licensePtr);
+  Match* match2 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 90.0, 1, 8, licensePtr);
+  Match* match3 = _matchWithARankStartAndEnd(MATCH_TYPE_DIFF, 99.0, 1, 8, licensePtr);
+
+  CU_ASSERT_TRUE(match_partialComparator(match1, match2) > 0);
+  CU_ASSERT_TRUE(match_partialComparator(match2, match1) < 0);
+  CU_ASSERT_TRUE(match_partialComparator(match3, match1) < 0);
+  CU_ASSERT_TRUE(match_partialComparator(match3, match2) > 0);
+  CU_ASSERT_TRUE(match_partialComparator(match2, match3) < 0);
+  CU_ASSERT_TRUE(match_partialComparator(match2, match2) > 0);
+
+  match_free(match1);
+  match_free(match2);
+  match_free(match3);
+  licenses_free(licenses);
+}
 CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with disjoint full matches:", test_findAllMatchesDisjoint},
   {"Testing match of all licenses with diff at beginning", test_findDiffsAtBeginning},
@@ -517,5 +597,11 @@ CU_TestInfo match_testcases[] = {
   {"Testing matches processor uses on full if on all not defined:", test_processMatchesUsesOnFullIfOnAllNotDefined},
   {"Testing matches processor uses on no if no matches:", test_processMatchesUsesOnNoOnNoMatches},
   {"Testing matches processor uses on all if defined and no matches:", test_processMatchesUsesOnAllForNoMatches},
+  {"Testing matches comparator:", test_matchComparatorSameLicenseFullVsDiff},
+  {"Testing matches comparator different licenses not included one in the other:", test_matchComparatorDifferentLicensesNonIncluded},
+  {"Testing matches comparator different licenses included one in the other are not comparable:", test_matchComparatorDifferentLicensesIncludedAreNotComparable},
+  {"Testing matches comparator distinct matches are not comparable:", test_matchComparatorDistinctMatchesAreNotComparable},
+  {"Testing matches comparator full included in diff:", test_matchComparatorOneFullIncludedIsNotComparableToBiggerDiffIfLicensesAreIncluded},
+  {"Testing matches comparator included same licenses compared by rank:", test_matchComparatorIncludedSameLicensesComparedByRank},
   CU_TEST_INFO_NULL
 };

@@ -203,19 +203,8 @@ size_t match_getEnd(const Match* match) {
   }
 }
 
-static int matchIncludes(const Match* matchA, const Match* matchB) {
-  size_t matchAStart = match_getStart(matchA);
-  size_t matchBStart = match_getStart(matchB);
-
-  size_t matchAEnd = match_getEnd(matchA);
-  size_t matchBEnd = match_getEnd(matchB);
-
-  if (matchAStart >= matchBStart) {
-    return (matchAEnd <= matchBEnd) ? 1 : 0;
-  }
-  else {
-    return (matchAEnd >= matchBEnd) ? 1 : 0;
-  }
+static int match_includes(const Match* big, const Match* small) {
+  return (match_getStart(big) <= match_getStart(small)) && (match_getEnd(big) >= match_getEnd(small));
 }
 
 // make sure to call it after a match_rank or the result will be junk
@@ -228,10 +217,7 @@ double match_getRank(const Match* match) {
   }
 }
 
-gint compareMatchByRank(gconstpointer a, gconstpointer b) {
-  const Match* matchA = *(Match**) a;
-  const Match* matchB = *(Match**) b;
-
+static int compareMatchByRank(const Match* matchA, const Match* matchB) {
   double matchARank = match_getRank(matchA);
   double matchBRank = match_getRank(matchB);
 
@@ -245,8 +231,8 @@ gint compareMatchByRank(gconstpointer a, gconstpointer b) {
   return 0;
 }
 
-//TODO profile this and see if it makes sense to cache the comparison
-int licenseIncludes(const License* big, const License* small) {
+/* profiling says there is no need to cache the comparison */
+static int licenseIncludes(const License* big, const License* small) {
   const GArray* tokensBig = big->tokens;
   const GArray* tokensSmall = small->tokens;
 
@@ -275,29 +261,50 @@ static int oneLicenseIncludesTheOther(const License* thisLicense, const License*
   return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
 }
 
-static int oneMatchIncludesTheOther(const Match* thisMatch, const Match* otherMatch) {
-  return matchIncludes(thisMatch, otherMatch) || matchIncludes(otherMatch, thisMatch);
-}
-
 static int licensesCanNotOverlap(const License* thisLicense, const License* otherLicense) {
   return thisLicense->refId == otherLicense->refId || !(oneLicenseIncludesTheOther(thisLicense, otherLicense));
 }
 
+/* N.B. this is only a partial order of matches
+ *
+ * =0   not comparable
+ * >0   thisMatch >= otherMatch
+ * <0   thisMatch < otherMatch
+ *
+ **/
+int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
+  const int thisIncludesOther = match_includes(thisMatch, otherMatch);
+  const int otherIncludesThis = match_includes(otherMatch, thisMatch);
+
+  if (thisIncludesOther || otherIncludesThis) {
+    if (match_isFull(thisMatch) && thisIncludesOther) {
+      return 1;
+    }
+    if (match_isFull(otherMatch) && otherIncludesThis) {
+      return -1;
+    }
+
+    if (licensesCanNotOverlap(thisMatch->license, otherMatch->license)) {
+      return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
+    }
+  }
+  return 0;
+}
+
 /*
- * destructively filter matches array: array and discarded matches are automatically freed
+ * finds the maximal matches according to match_partialComparator
+ * destructively filter matches array: input array and discarded matches are automatically freed
  **/
 GArray* filterNonOverlappingMatches(GArray* matches) {
   const guint len = matches->len;
 
-  /* instead of removing elements from the array set them to NULL and create a new array at the end
-   * profiling says this is not time critical */
+  /* profiling says this is not time critical and worst case is O(n^2) with any algorithm */
+  /* instead of removing elements from the array set them to NULL and create a new array at the end */
   for (guint i = 0; i < len; i++) {
     Match* thisMatch = match_array_index(matches, i);
     if (thisMatch == NULL) {
       continue;
     }
-
-    const License* thisLicense = thisMatch->license;
 
     for (guint j = i + 1; j < len; j++) {
       Match* otherMatch = match_array_index(matches, j);
@@ -305,23 +312,16 @@ GArray* filterNonOverlappingMatches(GArray* matches) {
         continue;
       }
 
-      const License* otherLicense = otherMatch->license;
+      gint comparison = match_partialComparator(thisMatch, otherMatch);
 
-      if (oneMatchIncludesTheOther(thisMatch, otherMatch) &&
-              (
-                      (match_isFull(thisMatch) && match_isFull(otherMatch))
-                              || licensesCanNotOverlap(thisLicense, otherLicense))
-              ) {
-        const gint rankComparison = compareMatchByRank(&thisMatch, &otherMatch);
-        if (rankComparison > 0) {
-          match_free(otherMatch);
-          match_array_index(matches, j) = NULL;
-        }
-        else {
-          match_free(thisMatch);
-          match_array_index(matches, i) = NULL;
-          break;
-        }
+      if (comparison > 0) {
+        match_free(otherMatch);
+        match_array_index(matches, j) = NULL;
+      }
+      else if (comparison < 0) {
+        match_free(thisMatch);
+        match_array_index(matches, i) = NULL;
+        break;
       }
     }
   }

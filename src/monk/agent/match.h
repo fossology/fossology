@@ -50,8 +50,6 @@ void match_destroyNotify(gpointer matchP);
 size_t match_getStart(const Match* match);
 size_t match_getEnd(const Match* match);
 
-gint compareMatchByRank(gconstpointer a, gconstpointer b);
-
 GArray* findAllMatchesBetween(const File* file, const Licenses* licenses, unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 
 int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks);
@@ -63,6 +61,8 @@ void findDiffMatches(const File* file, const License* license,
                      unsigned maxAllowedDiff, unsigned minAdjacentMatches);
 
 GArray* filterNonOverlappingMatches(GArray* matches);
+int match_partialComparator(const Match* thisMatch, const Match* otherMatch);
+
 int processMatches(MonkState* state, const File* file, const GArray* matches, const MatchCallbacks* callbacks);
 
 char* formatMatchArray(GArray* matchInfo);
