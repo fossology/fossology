@@ -128,7 +128,7 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
-$migrateColumns = array('clearing_decision'=>array('reportinfo'));
+$migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
@@ -205,21 +205,25 @@ if(!array_key_exists('Release', $sysconfig)){
   require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
   print "Migrate data from 2.1 to 2.2 in $LIBEXECDIR\n";
   Migrate_21_22($Verbose);
-  require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
-  migrate_25_26($Verbose);
+  if($dbManager->existsTable('license_file_audit'))
+  {
+    require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
+    migrate_25_26($Verbose);
+  }
   $dbManager->insertTableRow('sysconfig',
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
   $sysconfig['Release'] = '2.6';
 }
 if($sysconfig['Release'] == '2.6')
 {
+  $verbose = $Verbose;
   $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
   if(!$dbManager->existsTable('license_candidate'))
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
   }
   require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
-  $libschema->dropColumnsFromTable(array('reportinfo'), 'clearing_decision');
+  $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
 }
 
 /* sanity check */
