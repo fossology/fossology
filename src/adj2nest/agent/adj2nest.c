@@ -1,7 +1,7 @@
 /***************************************************************
  adj2nest: Convert adjacency list to nested sets.
 
- Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2007-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
  
  This program is free software; you can redistribute it and/or
@@ -78,6 +78,7 @@ struct uploadtree
   };
 typedef struct uploadtree uploadtree;
 uploadtree *Tree=NULL;
+char *uploadtree_tablename;
 long TreeSize=0;
 long TreeSet=0; /* index for inserting the next child */
 long SetNum=0; /* index for tracking set numbers */
@@ -110,8 +111,8 @@ void	WalkTree	(long Index, long Depth)
     SetNum++;
     }
 
-  snprintf(SQL,sizeof(SQL),"UPDATE uploadtree SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld';",
-	LeftSet,SetNum,Tree[Index].UploadtreePk);
+  snprintf(SQL,sizeof(SQL),"UPDATE %s SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld';",
+	uploadtree_tablename,LeftSet,SetNum,Tree[Index].UploadtreePk);
   pgResult = PQexec(pgConn, SQL);
   fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__, __LINE__);
   PQclear(pgResult);
@@ -200,7 +201,9 @@ void	LoadAdj	(long UploadPk)
   PGresult* pgNonRootResult;
   PGresult* pgRootResult;
 
-  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",UploadPk);
+  uploadtree_tablename = GetUploadtreeTableName(pgConn, UploadPk);
+
+  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM %s WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",uploadtree_tablename,UploadPk);
   pgNonRootResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgNonRootResult, SQL, __FILE__, __LINE__);
 
@@ -208,7 +211,7 @@ void	LoadAdj	(long UploadPk)
   TreeSize = NonRootRows;
   LOG_VERBOSE("# Upload %ld: %ld items\n",UploadPk,TreeSize);
 
-  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM uploadtree WHERE upload_fk = %ld AND parent IS NULL",UploadPk);
+  snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM %s WHERE upload_fk = %ld AND parent IS NULL",uploadtree_tablename,UploadPk);
   pgRootResult = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, pgRootResult, SQL, __FILE__, __LINE__);
 
