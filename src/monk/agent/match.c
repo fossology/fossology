@@ -12,12 +12,11 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 
 #include "license.h"
-#include "math.h"
 #include "file_operations.h"
 
 GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
         unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
-  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
+  GArray* matches = g_array_new(FALSE, FALSE, sizeof(Match*));
 
   const GArray* textTokens = file->tokens;
   const guint textLength = textTokens->len;
@@ -156,18 +155,18 @@ static unsigned short match_rank(Match* match) {
     DiffResult* diffResult = match->ptr.diff;
     const License* license = match->license;
     unsigned int licenseLength = license->tokens->len;
-    unsigned int numberOfMatches = diffResult->matched;
-    unsigned int numberOfAdditions = diffResult->added;
+    size_t numberOfMatches = diffResult->matched;
+    size_t numberOfAdditions = diffResult->added;
 
     // calculate result percentage as jaccard index
     double rank = (100.0 * numberOfMatches) / (licenseLength + numberOfAdditions);
-    int result = floor(rank);
+    int result = (int) rank;
 
     result = MIN(result, 99);
     result = MAX(result, 1);
 
     diffResult->rank = rank;
-    diffResult->percentual = result;
+    diffResult->percentual = (unsigned short) result;
 
     return (unsigned short) result;
   }
