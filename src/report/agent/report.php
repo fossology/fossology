@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini, Shaheem Azmal, Anupam Ghosh
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
 
@@ -10,15 +10,13 @@
  You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-		
-
 define("REPORT_AGENT_NAME", "report");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
-use \PhpOffice\PhpWord ;
+use PhpOffice\PhpWord ;
 
 include_once(__DIR__ . "/version.php");
 
@@ -27,9 +25,6 @@ class ReportAgent extends Agent
 
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
-
-  /** @var XpClearedGetter */
-  private $XpClearedGetter;
   
   /** @var cpClearedGetter */
   private $cpClearedGetter;
@@ -42,6 +37,9 @@ class ReportAgent extends Agent
   
   /** @var UploadDao */
   private $uploadDao;
+
+  /** @var fontFamily */
+  private $fontFamily = "Arial";
 
   function __construct()
   {
@@ -69,9 +67,9 @@ class ReportAgent extends Agent
     $ip = $this->ipClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($ip["statements"]));
     $contents = array("licenses" => $licenses,
-                                    "copyrights" => $copyrights,
-                                    "ecc" => $ecc,
-			            "ip" => $ip
+                      "copyrights" => $copyrights,
+                      "ecc" => $ecc,
+			          "ip" => $ip
     );
 
     $this->writeReport($contents, $uploadId);
@@ -79,46 +77,52 @@ class ReportAgent extends Agent
     return true;
   }
 
-//header
-  private function headerGeneration($section)
+  /**
+   * 
+   */
+  private function reportHeader($section)
   {
+    $headerStyle = array("color" => "48CCCD", "size" => 20, "bold" => true, "name" => $this->fontFamily);
     $header = $section->createHeader();
-    $header->addText(htmlspecialchars("SIEMENS" ), array("name" => "Tahoma", "size" => 10));
+    $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
 
-  //footer
-  private function footerGeneration($section)
+  /**
+   * 
+   */
+  private function reportFooter($section)
   {
-    $footer = $section->createFooter();
-    $footer->addText(array("underline"=> single));
-    $footer->addPreserveText(htmlspecialchars("Copyright © 2014 Siemens AG - Restricted         Template version: 31.10.2013        Page {PAGE} of {NUMPAGES}." ), array("size" => 10 , "bold" => true));
+    $footerStyle = array("color" => "000000", "size" => 10, "bold" => true, "name" => $this->fontFamily);
+    $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
+    $footerSpace = str_repeat("  ", 70);
+    $footerPageNo = "Page {PAGE} of {NUMPAGES}";
+    $footer = $section->createFooter(); 
+    $footer->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerPageNo"), $footerStyle);
   }
 
-  //heading 
-  private function headingOne($section)
+  /**
+   * 
+   */
+  private function reportTitle($section)
   {
-    $headerStyle = array("name" => Arial, "size" => 22, "bold" => true, "underline" => single);
-			 
-    $heading1= "License Clearing Report – V1";
-    $section->addText(htmlspecialchars($heading1), $headerStyle);
+    $titleStyle = array("name" => $this->fontFamily, "size" => 22, "bold" => true, "underline" => "single");
+    $title = "License Clearing Report - V1";
+    $section->addText(htmlspecialchars($title), $titleStyle);
+    $section->addTextBreak(); 
   }
 
-//report generation
-  private function bodyClearingReport($contents,$uploadId,$section)
-  {
-    $message = $this->generateReport($contents, $packageName);
-    $section->addText(htmlspecialchars($message ));
-  }
-        
-  private function summeryTable($section)
+  /**
+   * 
+   */        
+  private function summaryTable($section)
   {
     
     $paragraphStyle = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
     $cellRowContinue = array("vMerge" => "continue");
-    $firstRowStyle = array("name" => Arial, "size" => 14, "bold" => true);
-    $firstRowStyle1 = array("name" => Arial, "size" => 12, "bold" => true);
-    $firstRowStyle2 = array("name" => Arial, "size" => 12, "bold" => false);
-    $checkBoxStyle = array("name" => Arial,"size" => 10); 								         
+    $firstRowStyle = array("name" => $this->fontFamily, "size" => 14, "bold" => true);
+    $firstRowStyle1 = array("name" => $this->fontFamily, "size" => 12, "bold" => true);
+    $firstRowStyle2 = array("name" => $this->fontFamily, "size" => 12, "bold" => false);
+    $checkBoxStyle = array("name" => $this->fontFamily,"size" => 10); 								         
 		
     $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
     $cellColSpan = array("gridSpan" => 3, "valign" => "center");
@@ -198,11 +202,14 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
+  /**
+   * 
+   */ 
   private function clearingProtocolChangeLogTable($section)
   {
-    $headerStyle = array("name" => Arial,"size" => 18,"bold" => true);
+    $headerStyle = array("name" => $this->fontFamily, "size" => 18, "bold" => true);
     $firstRowStyle = array("bgColor" => "C0C0C0");
-    $firstRowTextStyle = array("name" => Arial, "size" => 12, "bold" => true);
+    $firstRowTextStyle = array("name" => $this->fontFamily, "size" => 12, "bold" => true);
 
     $heading = "1. Clearing Protocol Change Log";
 
@@ -228,11 +235,13 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-
+  /**
+   * 
+   */ 
   private function functionalityTable($section)
   {
-   $headerStyle = array("name" => Arial,"size" => 18,"bold" => true);
-   $infoTextStyle = array("name" => Arial,"size" => 11, "color" => "0000FF");
+   $headerStyle = array("name" => $this->fontFamily, "size" => 18, "bold" => true);
+   $infoTextStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF");
 		
    $heading1 = "2. Functionality";
    $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
@@ -243,19 +252,21 @@ class ReportAgent extends Agent
    $section->addTextBreak();
   }
 
-
-  private function assessmentSummeryTable($section)
+  /**
+   * 
+   */ 
+  private function assessmentSummaryTable($section)
   { 
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
     $heading = "3. Assessment Summary:";
     $infoText = "The following table only contains significant obligations, restrictions & risks for a quick overview – all obligations, restrictions & risks according to Section 3 must be considered.";
       
-    $headerStyle = array("name" => Arial,"size" => 18,"bold" => true);
-    $infoTextStyle = array("name" => Arial,"size" => 10, "color" => "000000");
-    $leftColStyle = array("name" => Arial,"size" => 11, "color" => "000000","bold" =>true);
-    $rightColStyleBlue = array("name" => Arial,"size" => 11, "color" => "0000A0","italic"=>true);
-    $rightColStyleBlack = array("name" => Arial,"size" => 11, "color" => "000000");
-    $rightColStyleBlackWithItalic = array("name" => Arial,"size" => 11, "color" => "000000","italic"=>true);
+    $headerStyle = array("name" => $this->fontFamily, "size" => 18, "bold" => true);
+    $infoTextStyle = array("name" => $this->fontFamily, "size" => 10, "color" => "000000");
+    $leftColStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "000000","bold" => true);
+    $rightColStyleBlue = array("name" => $this->fontFamily, "size" => 11, "color" => "0000A0","italic" => true);
+    $rightColStyleBlack = array("name" => $this->fontFamily, "size" => 11, "color" => "000000");
+    $rightColStyleBlackWithItalic = array("name" => $this->fontFamily, "size" => 11, "color" => "000000","italic" => true);
 
     $rowWidth = 200;
     $cellFirstLen = 5000;
@@ -309,16 +320,19 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-
+  /**
+   * 
+   */ 
   private function todoTable($section)
   {   	  
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
-    $headerStyle = array("name" => Arial,"size" => 18,"bold" => true);
-    $rowStyle = array("bgColor" => "C0C0C0","spaceBefore" => 0,"spaceAfter" => 0,"spacing" => 0);
-    $rowTextStyleLeft = array("name" => Arial, "size" => 10, "bold" => true);
-    $rowTextStyleRight = array("name" => Arial, "size" => 10, "bold" => false);
-    $rowTextStyleRightBold = array("name" => Arial, "size" => 10, "bold" => true);
-    $subHeadingStyle = array(name => Arial, size => 14, "italic"=>true);   
+    $headerStyle = array("name" => $this->fontFamily, "size" => 18,"bold" => true);
+    $rowStyle = array("bgColor" => "C0C0C0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
+    $rowTextStyleLeft = array("name" => $this->fontFamily, "size" => 10, "bold" => true);
+    $rowTextStyleRight = array("name" => $this->fontFamily, "size" => 10, "bold" => false);
+    $rowTextStyleRightBold = array("name" => $this->fontFamily, "size" => 10, "bold" => true);
+    $subHeadingStyle = array("name" => $this->fontFamily, "size "=> 14, "italic" => true);  
+ 
     $heading = "4. When using this component, you need to fulfill the following “ToDos”";
     $subHeading = " 4.1. Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined to simplify the To-Dos for development and distribution. The following list contains rules for development, and      distribution which must always be followed!";
@@ -443,18 +457,20 @@ class ReportAgent extends Agent
    $section->addTextBreak();
   }
 	
-
+  /**
+   * 
+   */ 
   private function todoObliTable($section)
   {
 
     $firstRowStyle = array("bgColor" => "C0C0C0");
-    $firstRowTextStyle = array("name" => Arial, "size" => 11, "bold" => true);
-    $secondRowTextStyle1 = array("name" => Arial, "size" => 11, "bold" => false);
-    $secondRowTextStyle2 = array("name" => Arial, "size" => 10, "bold" => false);
-    $secondRowTextStyle2Bold = array("name" => Arial, "size" => 10, "bold" => true);
-    $firstColStyle = array ("name" => Arial, "size" => 11 , "bold"=> true, "bgcolor"=> "FFFF00");
-    $secondColStyle = array ("name" => Arial, "size" => 11 , "bold"=> true, "bgcolor"=> "00E1E1");
-    $subHeadingStyle = array("name" => Arial, size => 14, "italic"=>true);
+    $firstRowTextStyle = array("name" => $this->fontFamily, "size" => 11, "bold" => true);
+    $secondRowTextStyle1 = array("name" => $this->fontFamily, "size" => 11, "bold" => false);
+    $secondRowTextStyle2 = array("name" => $this->fontFamily, "size" => 10, "bold" => false);
+    $secondRowTextStyle2Bold = array("name" => $this->fontFamily, "size" => 10, "bold" => true);
+    $firstColStyle = array ("name" => $this->fontFamily, "size" => 11 , "bold"=> true, "bgcolor"=> "FFFF00");
+    $secondColStyle = array ("name" => $this->fontFamily, "size" => 11 , "bold"=> true, "bgcolor"=> "00E1E1");
+    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic"=>true);
     $subHeading = " 4.2.  Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
@@ -557,14 +573,16 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-
+  /**
+   * 
+   */ 
   private function todoObliList($section)
   {
     
     $firstRowStyle = array("bgColor" => "C0C0C0");
-    $firstRowTextStyle = array("name" => Arial, "size" => 10, "bold" => true);
+    $firstRowTextStyle = array("name" => $this->fontFamily, "size" => 10, "bold" => true);
     
-    $subHeadingStyle = array(name => Arial, size => 14, "italic"=>true);
+    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic"=>true);
     $subHeading = "4.3.	File list with specific obligations "; 
 
     $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
@@ -598,13 +616,16 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }    
 
+  /**
+   * 
+   */ 
   private function forOtherTodos($section)
   {
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 2);          
-    $subHeadingStyle = array("name" => Arial, "size" => 14, "italic"=>true);
-    $subSubHeadingStyle = array("name" => Arial, "size" => 16, "bold"=>true);
-    $subSubHeadingInfoTextStyle = array("name" => Arial, "size" => 10, "bold"=>false);
-    $subSubHeadingInfoTextStyle1 = array("name" => Arial, "size" => 10, "bold"=>true);
+    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
+    $subSubHeadingStyle = array("name" => $this->fontFamily, "size" => 16, "bold" => true);
+    $subSubHeadingInfoTextStyle = array("name" => $this->fontFamily, "size" => 10, "bold"=>false);
+    $subSubHeadingInfoTextStyle1 = array("name" => $this->fontFamily, "size" => 10, "bold"=>true);
 
     $subHeading = "4.4.	Further general obligations, restrictions & risks"; 
     $subSubHeading = "   4.4.1	 Export Restrictions";
@@ -642,21 +663,22 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-
-
+  /**
+   * 
+   */ 
   private function basicForClearingReport($section)
   {
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
-    $headerStyle = array("name" => Arial,"size" => 18,"bold" => true);
+    $headerStyle = array("name" => $this->fontFamily,"size" => 18,"bold" => true);
     $heading1 = "5. Basis for Clearing Report";
     $section->addText(htmlspecialchars($heading1), $headerStyle);
     
     $table = $section->addTable("Report Table");
 
     $cellRowContinue = array("vMerge" => "continue");
-    $firstRowStyle = array("name" => Arial, "size" => 12, "bold" => true);
-    $rowTextStyle = array("name" => Arial, "size" => 11, "bold" => false);
-    $checkBoxStyle = array("name" => Arial,"size" => 10); 								         
+    $firstRowStyle = array("name" => $this->fontFamily, "size" => 12, "bold" => true);
+    $rowTextStyle = array("name" => $this->fontFamily, "size" => 11, "bold" => false);
+    $checkBoxStyle = array("name" => $this->fontFamily, "size" => 10); 								         
 		
     $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
     $cellColSpan = array("gridSpan" => 2, "valign" => "center");
@@ -680,7 +702,6 @@ class ReportAgent extends Agent
     $cell = $table->addCell($secondColLen+$thirdColLen,$cellColSpan);
     $cell->addCheckBox("chkBox1", htmlspecialchars("According to “Common Principles for Open Source License Interpretation” "),$rowTextStyle);
     $cell->addCheckBox("chkBox2", htmlspecialchars("no"),$rowTextStyle,$paragraphStyle);
-   // $cell = $table->addCell($thirdColLen);
     $cell = $table->addCell($fourthColLen);
 
 
@@ -688,7 +709,6 @@ class ReportAgent extends Agent
     $cell = $table->addCell($firstColLen,$cellRowSpan)->addText(htmlspecialchars("OSS Source Code"),$firstRowStyle,$paragraphStyle);
     $cell = $table->addCell($secondColLen)->addText(htmlspecialchars("Link to Upload page of component;"),$rowTextStyle,$paragraphStyle);
     $cell = $table->addCell($thirdColLen+$fourthColLen,$cellColSpan);
-//    $cell = $table->addCell($fourthColLen);
  
     $table->addRow($rowWidth,$paragraphStyle);
     $cell = $table->addCell($firstColLen, $cellRowContinue);
@@ -703,17 +723,19 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-
+  /**
+   * 
+   */ 
   private function globalLicenseTable($section)
   {
    
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
-    $rowHeight = 500;
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
+    $row = 500;
     $firstColLen = 2000;
     $secondColLen = 7500;
     $thirdColLen = 4000;
     
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
+    $tablestyle = array("name" => $this->fontFamily, "cellSpacing" => 5, "borderSize" => 2);
     $section->addText(htmlspecialchars("6. Global Licenses"), $tableHeading);
 
     $table = $section->addTable($tablestyle);
@@ -728,17 +750,19 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
 
-
+  /**
+   * 
+   */ 
   private function redOSSLicenseTable($section)
   {
   
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 7500;
     $thirdColLen = 4000;
     
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
+    $tablestyle = array("name" => $this->fontFamily, "cellSpacing" => 5, "borderSize" => 2);
     $section->addText(htmlspecialchars("7. Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses"), $tableHeading);
 
     $table = $section->addTable($tablestyle);
@@ -753,17 +777,19 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
 
-
+  /**
+   * 
+   */ 
   private function yellowOSSLicenseTable($section)
   {
   
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 7500;
     $thirdColLen = 4000;
     
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
+    $tablestyle = array("name" => $this->fontFamily, "cellSpacing" => 5, "borderSize" => 2);
     $section->addText(htmlspecialchars("8. Other OSS Licenses (yellow) - additional obligations to common rules"), $tableHeading);
 
     $table = $section->addTable($tablestyle);
@@ -777,19 +803,21 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
   
-  
-  private function whiteOSSLicenseTable($section,$contents)
+  /**
+   * 
+   */ 
+  private function whiteOSSLicenseTable($section, $licenses)
   {
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 7500;
     $thirdColLen = 4000;
     
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
+    $tablestyle = array("name" => $this->fontFamily, "cellSpacing" => 5, "borderSize" => 2);
     $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $tableHeading);
     $table = $section->addTable($tablestyle);
-    foreach($contents["licenses"]["statements"] as $licenseStatement){
+    foreach($licenses as $licenseStatement){
       $table->addRow($rowHeight);
       $cell1 = $table->addCell($firstColLen); 
       $cell1->addText(htmlspecialchars($licenseStatement["content"]));
@@ -804,16 +832,18 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
   
-  
+  /**
+   * 
+   */ 
   private function acknowledgementTable($section,$contents)
   {
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 7500;
     $thirdColLen = 4000;
     
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
+    $tablestyle = array("name" => $this->fontFamily, "cellSpacing" => 5, "borderSize" => 2);
     $section->addText(htmlspecialchars("10. Acknowledgements"), $tableHeading);
     $table = $section->addTable($tablestyle);
     $table->addRow($rowHeight);
@@ -826,121 +856,112 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
 
-  
-  private function copyrightTable($section,$contents)
+  /**
+   * @brief returns the table with copyright or ecc or ip.
+   * @param $section, $tablestyle, $headingStyle, $title, $statementsCEI
+   * @$statementsCEI is array of contents.
+   */
+  private function getRowsAndColumnsForCEI($section, $tablestyle, $headingStyle, $title, $statementsCEI)
   {
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
-    $rowHeight = 500;
-    $firstColLen = 2000;
-    $secondColLen = 7500;
-    $thirdColLen = 4000;
-    
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
-    $section->addText(htmlspecialchars("11. Copyrights"), $tableHeading);
+    $section->addText(htmlspecialchars($title), $headingStyle);
+
     $table = $section->addTable($tablestyle);
-    foreach($contents["copyrights"]["statements"] as $copyrightStatement){
-      $table->addRow($rowHeight);
+    foreach($statementsCEI as $statements){
+      $table->addRow(500);
       $cell1 = $table->addCell(9500); 
-      $cell1->addText(htmlspecialchars($copyrightStatement["content"]));
+      $cell1->addText(htmlspecialchars($statements['content']));
       $cell2 = $table->addCell(4000);
-      foreach($copyrightStatement["files"] as $fileName){ 
+      foreach($statements['files'] as $fileName){ 
         $cell2->addText(htmlspecialchars($fileName));
       }
     }
     $section->addTextBreak(); 
-  }
-  
-  
-  private function eccTable($section,$contents)
-  {
-  
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
-    $rowHeight = 500;
-    $firstColLen = 2000;
-    $secondColLen = 7500;
-    $thirdColLen = 4000;
-    
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
-    $section->addText(htmlspecialchars("12. Export restrictions"), $tableHeading);
-    $table = $section->addTable($tablestyle);
-    foreach($contents["ecc"]["statements"] as $eccStatement){
-      $table->addRow($rowHeight);
-      $cell1 = $table->addCell(9500); 
-      $cell1->addText(htmlspecialchars($eccStatement["content"]));
-      $cell2 = $table->addCell(4000);
-      foreach($eccStatement["files"] as $fileName){ 
-        $cell2->addText(htmlspecialchars($fileName));
-      }
-    }
-    $section->addTextBreak(); 
-  }
-  
-  
-  private function ipTable($section,$contents)
-  {
-  
-    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => "Arial");
-    $rowHeight = 500;
-    $firstColLen = 2000;
-    $secondColLen = 7500;
-    $thirdColLen = 4000;
-    
-    $tablestyle = array("name" => "Arial", "cellSpacing" => 5, "borderSize" => 2);
-    $section->addText(htmlspecialchars("13. Intellectual property"), $tableHeading);
-    $table = $section->addTable($tablestyle);
-    foreach($contents["ip"]["statements"] as $ipStatement){
-      $table->addRow($rowHeight);
-      $cell1 = $table->addCell(9500); 
-      $cell1->addText(htmlspecialchars($ipStatement["content"]));
-      $cell2 = $table->addCell(4000);
-      foreach($ipStatement["files"] as $fileName){ 
-       $cell2->addText(htmlspecialchars($fileName));
-      }
-    }
-    $section->addTextBreak(); 
+    return ;
   }
 
-
+  /**
+   * @brief save the docx file into repository.
+   * @param $contents, $uploadId
+   * @returns true.
+   */
   private function writeReport($contents, $uploadId)
   {
     global $SysConf;
+
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
+
+    $tablestyle = array("borderSize" => 2, "borderColor" => "000000", "cellSpacing" => 5, "cellMargin" => 0, "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
+
+    /* Creating the new DOCX */
+    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+    $phpWord->addTableStyle("Report Table", $tablestyle);
+    $section = $phpWord->createSection(array("orientation"=>"landscape"));
+
+    /* Header starts */
+    //$this->reportHeader($section);
+
+    /* Main heading starts*/
+    $this->reportTitle($section);
+	
+    /* Summery table */
+    $this->summaryTable($section);
+
+    /* clearing protocol change log table */
+    $this->clearingProtocolChangeLogTable($section);
+
+    /* Functionality table */	 
+    $this->functionalityTable($section);
+
+    /* Assessment summery table */
+    $this->assessmentSummaryTable($section);
+
+    /* Todo table */
+    $this->todoTable($section);
+
+    /* Todo obligation table */
+    $this->todoObliTable($section);	 
+
+    /* Todo obligation list */
+    $this->todoObliList($section);	
+ 
+    /* For other todo list */
+    $this->forOtherTodos($section);
+
+    /* Basic for clearing report */
+    $this->basicForClearingReport($section);
+
+    /* Display global licenses */
+    $this->globalLicenseTable($section);
+
+    /* Display licenses(red) name,text and files */
+    $this->redOSSLicenseTable($section);
+
+    /* Display licenses(yellow) name,text and files */
+    $this->yellowOSSLicenseTable($section);
+
+    /* Display licenses(white) name,text and files */
+    $this->whiteOSSLicenseTable($section, $contents["licenses"]["statements"]);
+
+    /* Display acknowledgement */
+    $this->acknowledgementTable($section);
+
+    /* Display copyright statements and files */
+    $tableHeading = array("color" => "#000000", "size" => 18, "bold" => true, "name" => $this->fontFamily);
+    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, "11. Copyrights", $contents['copyrights']['statements']);
+
+    /* Display Ecc statements and files */
+    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, "12. Export restrictions", $contents['ecc']['statements']);
+
+    /* Display IP statements and files */
+    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, "13. Intellectual property", $contents['ip']['statements']);
+
+    /* Footer starts */
+    $this->reportFooter($section);
 
     $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
     if(!is_dir($fileBase)) {
      mkdir($fileBase, 0777, true);
     }
-    //$styleTable = array("borderSize" => 6, "borderColor" => "000000", "cellMargin" => 80,"spaceBefore" => 0,"spaceAfter" => 0,"spacing" => 0);
-    $styleTable = array("borderSize"=>0,"borderColor"=>"000000", "cellMargin"=>0, "spaceBefore" => 0, "spaceAfter" => 0,"spacing" => 0);
-    //$paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
-		 	
-    $phpWord = new \PhpOffice\PhpWord\PhpWord();
-    $phpWord->addTableStyle("Report Table", $styleTable);
-    //$phpWord->addParagraphStyle("paragraph_default",$paragraphStyle);
-    $section = $phpWord->createSection(array("orientation"=>"landscape"));
-
-    $this->headerGeneration($section);
-    $this->headingOne($section);
-	
-    $this->summeryTable($section);
-    $this->clearingProtocolChangeLogTable($section);	 
-    $this->functionalityTable($section);
-    $this->assessmentSummeryTable($section);
-    $this->todoTable($section);
-    $this->todoObliTable($section);	 
-    $this->todoObliList($section);	 
-    $this->forOtherTodos($section);
-    $this->basicForClearingReport($section);
-    $this->globalLicenseTable($section);
-    $this->redOSSLicenseTable($section);
-    $this->yellowOSSLicenseTable($section);
-    $this->whiteOSSLicenseTable($section,$contents);
-    $this->acknowledgementTable($section);
-    $this->copyrightTable($section,$contents);
-    $this->eccTable($section,$contents);
-    $this->ipTable($section,$contents);
-    $this->footerGeneration($section);
-
     $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
@@ -949,8 +970,13 @@ class ReportAgent extends Agent
     return true;
   }
 
-   private function updateReportTable($uploadId, $jobId, $filename){
-   $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
+  /**
+   * @brief update database with generated report path.
+   * @param $uploadId, $jobId, $filename
+   */ 
+  private function updateReportTable($uploadId, $jobId, $filename)
+  {
+    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
   }
 
 }
