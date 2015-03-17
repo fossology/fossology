@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
