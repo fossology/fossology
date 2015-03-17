@@ -200,8 +200,20 @@ void	LoadAdj	(long UploadPk)
   long RootRows, NonRootRows;
   PGresult* pgNonRootResult;
   PGresult* pgRootResult;
+  PGresult* pgResult;
+  char LastChar;
 
   uploadtree_tablename = GetUploadtreeTableName(pgConn, UploadPk);
+  
+  /* If the last character of the uploadtree_tablename is a digit, run analyze */
+  LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
+  if (LastChar >= '0' && LastChar <= '9')
+  {
+    snprintf(SQL,sizeof(SQL),"ANALYZE %s",uploadtree_tablename);
+    pgResult =  PQexec(pgConn, SQL);
+    fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__);
+    PQclear(pgResult);  
+  }
 
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM %s WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",uploadtree_tablename,UploadPk);
   pgNonRootResult = PQexec(pgConn, SQL);
@@ -492,6 +504,7 @@ int	SetParm	(char *ParmName, char *Parm)
 int UpdateUpload(long UploadPk)
 {
   PGresult *pgResult;
+  char LastChar;  
 
   /* update upload.upload_mode to say that adj2nest was successful */
   snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
@@ -500,6 +513,15 @@ int UpdateUpload(long UploadPk)
   if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
   PQclear(pgResult);
 
+    /* If the last character of the uploadtree_tablename is a digit, run vacuum analyze */
+  LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
+  if (LastChar >= '0' && LastChar <= '9')
+  {
+    snprintf(SQL,sizeof(SQL),"VACUUM ANALYZE %s",uploadtree_tablename);
+    pgResult =  PQexec(pgConn, SQL);
+    if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
+    PQclear(pgResult);
+  }
   return(0);
 }
 
