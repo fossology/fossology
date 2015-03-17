@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2014-2015 Siemens AG
- * Author: Daniele Fognini, Steffen Weber, Johannes Najjar
+ * Author: Daniele Fognini, Johannes Najjar, Steffen Weber
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -82,7 +82,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     
     /* check upload permissions */
     $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text</h2>";
@@ -114,7 +114,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $listPage = "copyright-list";
 
     header('Content-type: text/json');
-    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
+    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->getTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
     return new JsonResponse(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $aaData,
@@ -124,7 +124,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     );
   }
 
-  private function GetTableData($upload, $item, $agent_pk, $type,$listPage, $filter)
+  private function getTableData($upload, $item, $agent_pk, $type,$listPage, $filter)
   {
     list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter);
     $aaData = array();
@@ -140,19 +140,20 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   }
 
-  public function getCopyrights($upload_pk, $Uploadtree_pk, $uploadTreeTableName, $Agent_pk, $type, $filter)
+  public function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter)
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
 
-    list($tableName, $filter) = $this->getTableNameAndFilter($type, $filter);
-
+    $tableName = $this->getTableName($type);
     $orderString = $this->getOrderString();
 
-    list($left, $right) = $this->uploadDao->getLeftAndRight($Uploadtree_pk, $uploadTreeTableName);
+    list($left, $right) = $this->uploadDao->getLeftAndRight($item, $uploadTreeTableName);
 
-    //! Set the default to none
-    if ($filter == "") $filter = "none";
+    if ($filter == "")
+    {
+      $filter = "none";
+    }
 
     $sql_upload = "";
     if ('uploadtree_a' == $uploadTreeTableName)
@@ -166,48 +167,44 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     {
       if ($filter == "legal")
       {
-        $Copyright = "Copyright";
-        $filterQuery = " AND CP.content ILIKE ('$Copyright%') ";
+        $filterQuery = " AND (cp.content ILIKE ('copyright%') OR cp.content ILIKE ('(c)%') OR cp.content LIKE ('©%'))";
       } else if ($filter == "nolics")
       {
-        $NoLicStr = "No_license_found";
-        $VoidLicStr = "Void";
-        $join = " INNER JOIN license_file AS LF on  CP.pfile_fk =LF.pfile_fk ";
-        $filterQuery = " AND LF.rf_fk IN (select rf_pk from license_ref where rf_shortname IN ('$NoLicStr', '$VoidLicStr')) ";
-      } else if ($filter == "all")
+        $noLicStr = "No_license_found";
+        $voidLicStr = "Void";
+        $join = " INNER JOIN license_file AS LF on cp.pfile_fk=LF.pfile_fk ";
+        $filterQuery = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
+      } else
       {  /* Not needed, but here to show that there is a filter all */
         $filterQuery = "";
       }
     }
-    $params = array($left, $right, $type, $Agent_pk);
+    $params = array($left, $right, $type, $agentId);
 
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
-    $unorderedQuery = "FROM $tableName AS CP " .
-        "INNER JOIN $uploadTreeTableName AS UT ON CP.pfile_fk = UT.pfile_fk " .
+    $unorderedQuery = "FROM $tableName AS cp " .
+        "INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk " .
         $join .
         "WHERE " .
         " ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND CP.type = $3 " .
-        " AND CP.agent_fk= $4 " .
+        " AND cp.agent_fk= $4 " .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
     $grouping = " GROUP BY content, hash ";
 
     $countQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery $totalFilter $grouping) as K";
-
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
         $filterParms, __METHOD__.$tableName . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
     $countAllQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery$grouping) as K";
-
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
 
     $range = "";
-
     $filterParms[] = $offset;
     $range .= ' OFFSET $' . count($filterParms);
     $filterParms[] = $limit;
@@ -215,12 +212,8 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $sql = "SELECT content, hash, count(*) as copyright_count  " .
         $unorderedQuery . $totalFilter . $grouping . $orderString . $range;
-
     $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName;
-
-
     $this->dbManager->prepare($statement, $sql);
-
     $result = $this->dbManager->execute($statement, $filterParms);
     $rows = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
@@ -228,26 +221,23 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
   }
 
-  private function getTableNameAndFilter($type, $filter)
+  private function getTableName($type)
   {
     switch ($type) {
       case "ip" :
         $tableName = "ip";
-        $filter="none";
         break;
       case "ecc" :
         $tableName = "ecc";
-        $filter="none";
         break;
       default:
         $tableName = "copyright";
     }
-    return array($tableName, $filter);
+    return $tableName;
   }
 
   private function getOrderString()
   {
-
     $columnNamesInDatabase = array('copyright_count', 'content');
 
     $defaultOrder = CopyrightHistogram::returnSortOrder();
@@ -280,23 +270,17 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "")
   {
-    $output = array();
-
-    $output['DT_RowId'] = $upload . "," . $uploadTreeId . "," . $row['hash']. "," . $type;
-
     $hash = $row['hash'];
+    $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type" );
 
     $link = "<a href='";
     $link .= Traceback_uri();
-    $URLargs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
-    if (!empty($filter)) $URLargs .= "&filter=$filter";
-    $link .= $URLargs . "'>" . $row['copyright_count'] . "</a>";
+    $urlArgs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
+    if (!empty($filter)) $urlArgs .= "&filter=$filter";
+    $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
-
-
-    $output ['1'] = convertToUTF8($row['content']);
-
-    $output ['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><div class='delete'></div></a><span hidden='true' id='update$type$hash'></span>";
+    $output['1'] = convertToUTF8($row['content']);
+    $output['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><div class='delete'></div></a><span hidden='true' id='update$type$hash'></span>";
     return $output;
   }
 
@@ -310,15 +294,14 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   protected function doUpdate($upload, $item, $hash,$type)
   {
-    $content = GetParm("value", PARM_STRING);
+    $content = GetParm("value", PARM_RAW);
     if (!$content)
     {
-      header('Content-type: text/plain');
-      return 'empty content not allowed';
+      return new Response('empty content not allowed', Response::HTTP_BAD_REQUEST ,array('Content-type'=>'text/plain'));
     }
     
     list($left, $right) = $this->uploadDao->getLeftAndRight($item, $this->uploadtree_tablename);
-    list($tableName, $filter)=$this->getTableNameAndFilter($type, "");
+    $tableName = $this->getTableName($type);
 
     global $SysConf;
     $userId = $SysConf['auth']['UserId'];
@@ -344,7 +327,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     if($type== "copyright") //no audit for other agents ?!
     {
       $insertQuerry = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
-      while ($row = pg_fetch_assoc($oldData))
+      while ($row = $this->dbManager->fetchArray($oldData))
       {
         $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload, $item, $row['pfile_fk']), __METHOD__ . "writeHist");
       }
@@ -355,7 +338,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   protected function doDelete($uploadId, $item, $hash, $type)
   {
-    list($tableName, $filter)=$this->getTableNameAndFilter($type, "");
+    $tableName = $this->getTableName($type);
     list($left, $right) = $this->uploadDao->getLeftAndRight($item, $this->uploadtree_tablename);
 
     $deleteQuerry = " DELETE FROM $tableName as CPR
@@ -369,8 +352,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     }
     $this->dbManager->getSingleRow($deleteQuerry, array($hash, $left, $right), __METHOD__."deleteCopyright".$tableName);
 
-    header('Content-type: text/json');
-    return 'Successfully deleted';
+    return new Response('Successfully deleted', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
 }

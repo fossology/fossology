@@ -18,15 +18,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Test\TestPgDb;
 
 class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
 {
-  const PERM_READ = 1;
-  const PERM_NONE = 0;
-  
  
   private $testDb;
   private $groupId = 401;
@@ -35,10 +33,10 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestPgDb();
     $this->testDb->createPlainTables( array('upload','upload_clearing','perm_upload') );
-    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>1,'upload_filename'=>'for.all','user_fk'=>1,'upload_mode'=>1,'public_perm'=>self::PERM_READ,'pfile_fk'=>31415));
-    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>2,'upload_filename'=>'for.this','user_fk'=>1,'upload_mode'=>1,'public_perm'=>self::PERM_NONE));
-    $this->testDb->getDbManager()->insertTableRow('perm_upload', array('perm_upload_pk'=>1, 'upload_fk'=>2,'group_fk'=>$this->groupId,'perm'=>self::PERM_READ));
-    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>3,'upload_filename'=>'for.noone','user_fk'=>1,'upload_mode'=>1,'public_perm'=>self::PERM_NONE));
+    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>1,'upload_filename'=>'for.all','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ,'pfile_fk'=>31415));
+    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>2,'upload_filename'=>'for.this','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_NONE));
+    $this->testDb->getDbManager()->insertTableRow('perm_upload', array('perm_upload_pk'=>1, 'upload_fk'=>2,'group_fk'=>$this->groupId,'perm'=>Auth::PERM_READ));
+    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>3,'upload_filename'=>'for.noone','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_NONE));
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -152,8 +150,8 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
   
   private function wrapperTestMoveUploadBeyond($moveUpload=4, $beyondUpload=2, $expectedPrio = 1.5)
   {
-    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>4,'upload_filename'=>'for.all4','user_fk'=>1,'upload_mode'=>1,'public_perm'=>self::PERM_READ));
-    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>5,'upload_filename'=>'for.all5','user_fk'=>1,'upload_mode'=>1,'public_perm'=>self::PERM_READ));
+    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>4,'upload_filename'=>'for.all4','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ));
+    $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>5,'upload_filename'=>'for.all5','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ));
     
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>1));
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>2,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>2));
@@ -214,5 +212,23 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     $uploadBrowseProxy->getFolderPartialQuery($params);
   }
   
+  public function testGetStatus()
+  {
+    $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
+    $uploadId = 1;
+    assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo(UploadStatus::OPEN));
+    $uploadBrowseProxy->updateTable('status_fk', $uploadId, $newStatus=UploadStatus::IN_PROGRESS);
+    assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo($newStatus));
+  }
+    
+  /**
+   * @expectedException \Exception
+   */
+
+  public function testGetStatusException()
+  {
+    $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), false);
+    $uploadBrowseProxy->getStatus(-1);
+  }
 }
  

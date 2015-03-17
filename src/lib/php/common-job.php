@@ -1,4 +1,7 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
@@ -59,7 +62,7 @@
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
 {
   global $container;
 
@@ -83,7 +86,7 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   {
     $groupId = $usersRow['group_fk'];
   }
-  $perm_admin = PERM_ADMIN;
+  $perm_admin = Auth::PERM_ADMIN;
 
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
                array($perm_admin, $uploadId, $groupId),'insert.perm_upload');

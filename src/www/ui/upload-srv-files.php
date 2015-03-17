@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_srv_files", _("Upload from Server"));
 
 /**
@@ -195,7 +197,7 @@ class upload_srv_files extends FO_Plugin {
     $Desc = GetParm('description', PARM_STRING); // may be null
     $Name = GetParm('name', PARM_STRING); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
     $V = "";
     if (!empty($SourceFiles) && !empty($FolderPk)) {
       if (empty($HostName)) $HostName = "localhost";

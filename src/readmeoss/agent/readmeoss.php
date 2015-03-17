@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
 
@@ -72,7 +72,7 @@ class ReadmeOssAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
-
+    umask(0133);
     $message = $this->generateReport($contents, $packageName);
 
     file_put_contents($fileName, $message);

@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_ui_view_info", _("View File Information"));
 
 class ui_view_info extends FO_Plugin
@@ -589,7 +591,7 @@ class ui_view_info extends FO_Plugin
       {
         $VT .= "<tr><td align='center'>" . $row['ufile_name'] . "</td><td align='center'>" . $row['tag'] . "</td>";
         $perm = GetUploadPerm($upload_pk);
-        if ($perm >= PERM_READ)
+        if ($perm >= Auth::PERM_READ)
         {
           $VT .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=" . $row['uploadtree_pk'] . "&tag_file_pk=" . $row['tag_file_pk'] . "'>View</a></td></tr>\n";
         }else{
@@ -607,7 +609,7 @@ class ui_view_info extends FO_Plugin
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
     $UploadPerm = GetUploadPerm($uploadId);
-    if ($UploadPerm < PERM_READ) return;
+    if ($UploadPerm < Auth::PERM_READ) return;
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");

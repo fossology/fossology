@@ -18,6 +18,7 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\TextFragment;
@@ -46,7 +47,7 @@ class AdminLicenseCandidate extends DefaultPlugin
         self::TITLE => "Admin License Candidates",
         self::MENU_LIST => "Admin::License Admin::Candidates",
         self::REQUIRES_LOGIN => true,
-        self::PERMISSION => self::PERM_ADMIN
+        self::PERMISSION => Auth::PERM_ADMIN
     ));
 
     $this->highlightProcessor = $this->getObject('view.highlight_processor');

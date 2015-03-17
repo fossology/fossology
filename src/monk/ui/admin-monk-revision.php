@@ -18,6 +18,7 @@
 
 namespace Fossology\Monk;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -32,7 +33,7 @@ class AdminMonkRevision extends DefaultPlugin {
         parent::__construct(self::NAME, array(
         self::TITLE => _("Manage Monk Revision"),
         self::MENU_LIST => "Admin::Agent::Monk",
-        self::PERMISSION => self::PERM_ADMIN
+        self::PERMISSION => Auth::PERM_ADMIN
     ));
   }
   

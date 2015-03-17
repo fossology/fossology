@@ -439,7 +439,7 @@ function listAgents()
        not be confused with the Name attribute in the class, for example,
        the Name attribute for agent_license is: Schedule License Analysis
        */
-      $agentPlugin = &plugin_find($agentItem->URI);
+      $agentPlugin = plugin_find($agentItem->URI);
       if (empty($agentPlugin)) {
         continue;
       }

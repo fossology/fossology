@@ -18,6 +18,7 @@
 
 namespace Fossology\UI\Ajax;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +35,7 @@ class ScheduleAgent extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Private: schedule a agent scan from post"),
-        self::PERMISSION => self::PERM_WRITE,
+        self::PERMISSION => Auth::PERM_WRITE,
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');

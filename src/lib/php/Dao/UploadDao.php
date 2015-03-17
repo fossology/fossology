@@ -19,15 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\Upload\Upload;
-use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Fossology\Lib\Util\Object;
-use Fossology\Lib\Proxy\UploadTreeProxy;
 use Monolog\Logger;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
@@ -171,7 +172,7 @@ class UploadDao extends Object
 
   public function getStatus($uploadId, $userId)
   {
-    if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
+    if (GetUploadPerm($uploadId, $userId) >= Auth::PERM_READ) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
@@ -433,13 +434,13 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=PERM_NONE;
+    return $perm['perm']>=Auth::PERM_NONE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
     if (null === $perm) {
-      $perm = PERM_ADMIN;
+      $perm = Auth::PERM_ADMIN;
     }
     $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
             . "SELECT $1 perm, $2 upload_fk, gum.group_fk"

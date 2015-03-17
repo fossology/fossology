@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_vcs", _("Upload from Version Control System"));
 
 /**
@@ -148,7 +150,7 @@ class upload_vcs extends FO_Plugin {
     $Username = GetParm('username', PARM_TEXT);
     $Passwd = GetParm('passwd', PARM_TEXT);
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
     $V = '';
     if (!empty($GetURL) && !empty($Folder)) {
       $rc = $this->Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm);

@@ -287,9 +287,10 @@ class UserDao extends Object
 
   /**
    * @param string $groupName raw group name as entered by the user
-   * @return int $groupId
+   * @return int $groupId | mixed
+   * @throws \Exception
    */
-  public function addGroup($groupName) 
+  public function addGroup($groupName)
   {
     if (empty($groupName))
     {

@@ -39,7 +39,7 @@ class AjaxBulkHistory extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_READ
+        self::PERMISSION => Auth::PERM_READ
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');

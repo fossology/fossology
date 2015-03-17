@@ -89,6 +89,7 @@ char* gettargetdir(char* pckgname)
 
 int zipdir(char* name)
 {
+        umask(S_IWGRP | S_IWOTH);
         pid_t child_pid;
         int status;
         char* cmd[6];

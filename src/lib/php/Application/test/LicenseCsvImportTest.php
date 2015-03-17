@@ -56,12 +56,14 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   {
     $dbManager = M::mock(DbManager::classname());
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licZ'=>100));
+    $nkMap = array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licG'=>false,'licZ'=>100);
+    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', $nkMap);
 
+    $singleRowD = array('rf_shortname'=>'licD','rf_source'=>'','rf_pk'=>101+3);
     $dbManager->shouldReceive('getSingleRow')
-            ->with('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',anything())
-            ->times(4)
-            ->andReturn(false,false,false,array('rf_shortname'=>'licD'));
+            ->with('SELECT rf_shortname,rf_source,rf_pk FROM license_ref WHERE rf_md5=md5($1)',anything())
+            ->times(5)
+            ->andReturn(false,false,false,$singleRowD,$singleRowD);
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
@@ -95,6 +97,11 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
             array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'',
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
+    
+    $returnG = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
+            array('shortname'=>'licG','fullname'=>'liceG','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
+                'parent_shortname'=>null,'report_shortname'=>null)));
+    assertThat($returnG, is("Text of 'licG' already used for 'licD', updated the source"));
   }
   
   public function testHandleHeadCsv()
@@ -151,7 +158,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('shortname','foo','text','fullname','notes')));
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'headrow'),is(notNullValue()));
 
-    $dbManager->shouldReceive('getSingleRow')->with('SELECT rf_shortname FROM license_ref WHERE rf_md5=md5($1)',anything())->andReturn(false);
+    $dbManager->shouldReceive('getSingleRow')->with('SELECT rf_shortname,rf_source,rf_pk FROM license_ref WHERE rf_md5=md5($1)',anything())->andReturn(false);
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');

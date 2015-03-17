@@ -17,6 +17,8 @@
 ***********************************************************/
 
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_showjobs", _("Show Jobs"));
 
   /**
@@ -320,7 +322,7 @@ if (!empty($Row["job_upload_fk"]))
       if (!empty($Row['job_upload_fk']))
       {
         $UploadPerm = GetUploadPerm($Row['job_upload_fk']);
-        if ($UploadPerm < PERM_WRITE) continue;
+        if ($UploadPerm < Auth::PERM_WRITE) continue;
       }
       $JobArray[] = $Row['job_pk'];
     }
@@ -812,7 +814,7 @@ if (!empty($Row["job_upload_fk"]))
     else
     {
       $UploadPerm = GetUploadPerm($UploadPk);
-      if ($UploadPerm < PERM_WRITE) 
+      if ($UploadPerm < Auth::PERM_WRITE) 
       {
         $text = _("Permission Denied");
         return "<h2>$text<h2>";
@@ -832,7 +834,7 @@ if (!empty($Row["job_upload_fk"]))
       if (!empty($UploadPk))
       {
         $UploadPerm = GetUploadPerm($UploadPk);
-        if ($UploadPerm < PERM_WRITE) 
+        if ($UploadPerm < Auth::PERM_WRITE) 
         {
           $text = _("Permission Denied");
           echo "<h2>$text<h2>";

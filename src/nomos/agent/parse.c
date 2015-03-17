@@ -3434,7 +3434,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Electronic Book Technologies
    */
   if (INFILE(_LT_EBT)) {
-    INTERESTING(INFILE(_CR_EBT) ? "EBT" : "EBT-style");
+    if(INFILE(_CR_EBT)) {
+      INTERESTING(  "EBT" );
+    }    else {
+      INTERESTING(   "EBT-style" );
+    }
   }
   cleanLicenceBuffer();
   /*

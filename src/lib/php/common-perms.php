@@ -15,6 +15,7 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /*************************************************
  Library of common functions for permissions and groups.
@@ -222,17 +223,17 @@
 
     if ($user_pk == 0) $user_pk = $SysConf['auth']['UserId'];
 
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
+    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
     //for the command line didn't have session info
     $UserRow = GetSingleRec("Users", "where user_pk='$user_pk'");
-    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
+    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
     $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1) 
-      $perm = PERM_NONE;
+      $perm = Auth::PERM_NONE;
     else
     {
       $row = pg_fetch_assoc($result);
@@ -246,7 +247,7 @@
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     if (pg_num_rows($result) < 1) 
-      $perm2 = PERM_NONE;
+      $perm2 = Auth::PERM_NONE;
     else
     {
       $row = pg_fetch_assoc($result);
@@ -344,5 +345,4 @@
     pg_free_result($result);
 
     return (NULL);
-  } // DeleteGroup()
-?>
+  }

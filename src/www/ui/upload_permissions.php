@@ -15,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * @file upload_permissions.php
@@ -154,8 +155,8 @@ class upload_permissions extends FO_Plugin
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     
-      // Don't insert a PERM_NONE.  NONE is the default 
-      if ($newperm != PERM_NONE)
+      // Don't insert a Auth::PERM_NONE.  NONE is the default
+      if ($newperm != Auth::PERM_NONE)
       {
         $sql = "insert into perm_upload (perm, upload_fk, group_fk) values ($newperm, $upload_pk, $newgroup)";
         $result = pg_query($PG_CONN, $sql);
@@ -195,7 +196,7 @@ class upload_permissions extends FO_Plugin
     $V.= "<br>$text";
 
     // Get list of all upload records in this folder that the user has PERM_ADMIN
-    $UploadList = FolderListUploads_perm($folder_pk, PERM_ADMIN);
+    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_ADMIN);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.
