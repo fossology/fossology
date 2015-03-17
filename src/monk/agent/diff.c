@@ -71,10 +71,10 @@ int lookForDiff(const GArray* textTokens, const GArray* searchTokens,
   return 0;
 }
 
-int applyDiff(const DiffMatchInfo* diff,
-                     GArray* matchedInfo,
-                     size_t* additionsCounter, size_t* removedCounter,
-                     size_t* iText, size_t* iSearch) {
+static int applyDiff(const DiffMatchInfo* diff,
+              GArray* matchedInfo,
+              size_t* additionsCounter, size_t* removedCounter,
+              size_t* iText, size_t* iSearch) {
 
   DiffMatchInfo diffCopy = *diff;
   diffCopy.text.start = *iText;
@@ -98,7 +98,27 @@ int applyDiff(const DiffMatchInfo* diff,
   return 1;
 }
 
-void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSearch) {
+static void applyTailDiff(GArray* matchedInfo,
+        size_t searchLength,
+        size_t* removedCounter, size_t* additionsCounter,
+        size_t* iText, size_t* iSearch) {
+
+  DiffMatchInfo tailDiff = (DiffMatchInfo) {
+          .search = (DiffPoint) {
+                  .start = (*iSearch),
+                  .length = searchLength - (*iSearch)
+          },
+          .text = (DiffPoint) {
+                  .start = (*iText),
+                  .length = 0
+          },
+          .diffType = NULL
+  };
+
+  applyDiff(&tailDiff, matchedInfo, additionsCounter, removedCounter, iText, iSearch);
+}
+
+static void initSimpleMatch(DiffMatchInfo* simpleMatch, size_t iText, size_t iSearch) {
   simpleMatch->text.start = iText;
   simpleMatch->text.length = 0;
   simpleMatch->search.start = iSearch;
@@ -123,12 +143,12 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
   size_t textLength = textTokens->len;
   size_t searchLength = searchTokens->len;
 
-  if ((searchLength<=searchStartPosition ) || (textLength<=textStartPosition)) {
+  if ((searchLength<=searchStartPosition) || (textLength<=textStartPosition)) {
     return NULL;
   }
 
   DiffResult* result = malloc(sizeof(DiffResult));
-  result->matchedInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
+  result->matchedInfo = g_array_new(FALSE, FALSE, sizeof(DiffMatchInfo));
   GArray* matchedInfo = result->matchedInfo;
 
   size_t iText = textStartPosition;
@@ -205,13 +225,17 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
     }
   }
 
+  if ((iSearch < searchLength) && (searchLength < maxAllowedDiff + iSearch)) {
+    applyTailDiff(matchedInfo, searchLength, &removedCounter, &additionsCounter, &iText, &iSearch);
+  }
+
   if (matchedCounter + removedCounter != searchLength) {
     g_array_free(matchedInfo, TRUE);
     free(result);
 
     return NULL;
   } else {
-#ifdef DEBUG_MATCH
+#ifdef DEBUG_DIFF
     for (size_t i=0; i<matchedInfo->len; i++) {
       DiffMatchInfo current = g_array_index(matchedInfo, DiffMatchInfo, i);
       printf("info[%zu]: t[%zu+%zu] %s s[%zu+%zu]}\n",
