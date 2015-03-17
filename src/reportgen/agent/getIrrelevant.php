@@ -1,3 +1,4 @@
+<?php
 /*
  Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
@@ -15,24 +16,24 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef JSON_DATA_RETRIVER_H
-#define JSON_DATA_RETRIVER_H
 
+
+namespace Fossology\Reportgen;
+
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
+
+$clearedGetter = new \Fossology\Lib\Report\LicenseIrrelevantGetter();
+$clearedGetter->getCliArgs();
+$uploadId = $clearedGetter->getUploadId();
+$groupId = $clearedGetter->getGroupId();
+print json_encode($clearedGetter->getCleared($uploadId, $groupId));
 /*
- *
- * should return a json in this format:
- *
- * { "licenses" : [
- *                  { "name": "Apache-2.0", "text" : "licText", "files" : [ "/a.txt", "/b.txt" ]},
- *                  { "name": "Apache-1.0", "text" : "lic3Text", "files" : [ "/c.txt" ]},
- *                ]
- * }
+print json_encode(array('paths'=>array(
+
+array("content"=>'path/one/',"files"=>array("one.txt")),
+    array("content"=>'path/two/',"files"=>array("two.txt","two.php","two.cpp"))
+        
+        ) )  );
+ * 
  */
-char* getClearedLicenses(int uploadId, int groupId);
-char* getClearedCopyright(int uploadId);
-char* getClearedIp(int uploadId);
-char* getClearedEcc(int uploadId);
-char* getMatches(int uploadId, int groupId);
-char* getKeywords(int uploadId);
-char* getIrrelevant(int uploadId, int groupId);
-#endif

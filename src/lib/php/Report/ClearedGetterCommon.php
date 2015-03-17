@@ -110,9 +110,7 @@ abstract class ClearedGetterCommon
         $this->fileNameCache[$uploadTreeId] = $this->treeDao->getFullPath($uploadTreeId, $uploadTreeTableName, $parentId);
       }
 
-      $fileName = $this->fileNameCache[$uploadTreeId];
-
-      $statement['fileName'] = $fileName;
+      $statement['fileName'] = $this->fileNameCache[$uploadTreeId];
     }
     unset($statement);
   }
@@ -173,13 +171,9 @@ abstract class ClearedGetterCommon
   public function getCleared($uploadId, $groupId=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
-
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
-
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-
     $statements = $this->groupStatements($ungrupedStatements);
-
     return array("statements" => array_values($statements));
   }
 }
