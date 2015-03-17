@@ -53,13 +53,11 @@ int lookForDiff(const GArray* textTokens, const GArray* searchTokens,
     textPos = iText + squareVisitorX[i];
     searchPos = iSearch + squareVisitorY[i];
 
-    if ((textPos > textStopAt) || (searchPos > searchStopAt))
-      return 0;
-
     if ((textPos < textStopAt) && (searchPos < searchStopAt))
       if (matchNTokens(textTokens, textPos, textLength,
                        searchTokens, searchPos, searchLength,
-                       minAdjacentMatches)) {
+                       minAdjacentMatches))
+      {
         result->search.start = searchPos;
         result->search.length = searchPos - iSearch;
         result->text.start = textPos;
@@ -236,6 +234,7 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
     return NULL;
   } else {
 #ifdef DEBUG_DIFF
+    printf("diff: (=%zu +%zu -%zu)/%zu\n", matchedCounter, additionsCounter, removedCounter, searchLength);
     for (size_t i=0; i<matchedInfo->len; i++) {
       DiffMatchInfo current = g_array_index(matchedInfo, DiffMatchInfo, i);
       printf("info[%zu]: t[%zu+%zu] %s s[%zu+%zu]}\n",
@@ -247,6 +246,7 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
              current.search.length
       );
     }
+    printf("\n");
 #endif
     result->removed = removedCounter;
     result->added = additionsCounter;
