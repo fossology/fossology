@@ -28,12 +28,11 @@ function createTable{{ table.type }}() {
     "sReadOnlyCellClass": "read_only",
     "sSelectedRowClass": "selectedRow",
     "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ table.type }}",
-    "fnOnEditing": function(aInput, oSettings, sOriginal, nGetCellID) {
-      var value = input[0].value;
+    "fnOnEditing": function(aInput) {
+      var value = aInput[0].value;
       var isValid = (value) && !(/^\s*$/.test(value));
-      alert(oSettings);
       if (isValid) {
-        var id = input.parents("tr:first")[0].id;
+        var id = aInput.parents("tr:first")[0].id;
         var hash = id.split(",")[2];
         $("#delete{{ table.type }}" + hash).hide();
         var updateElement = $("#update{{ table.type }}" + hash);
