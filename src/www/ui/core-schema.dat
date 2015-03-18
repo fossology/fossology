@@ -374,17 +374,6 @@
   $Schema["TABLE"]["clearing_decision"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
   $Schema["TABLE"]["clearing_decision"]["date_added"]["UPDATE"] = "UPDATE clearing_decision SET date_added=now()";
 
-
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_type\" ADD COLUMN \"type_pk\" int4;";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_type\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('clearing_decision_type_type_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["UPDATE"] = "UPDATE clearing_decision_type SET type_pk=nextval('clearing_decision_type_type_seq'::regclass)";
-
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_type\" ADD COLUMN \"meaning\" varchar(30);";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_type\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["UPDATE"] = "";
-
   
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";
@@ -1707,7 +1696,6 @@
   $Schema["SEQUENCE"]["tag_ns_group_tag_ns_group_pk_seq"] = "CREATE SEQUENCE \"tag_ns_group_tag_ns_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["clearing_decision_type_type_seq"] = "CREATE SEQUENCE \"clearing_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_license_events_clearing_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_license_events_clearing_pk_seq\" START 1;";
@@ -1728,7 +1716,6 @@
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
-  $Schema["CONSTRAINT"]["clearing_decision_type_pkey"] = "ALTER TABLE \"clearing_decision_type\" ADD CONSTRAINT \"clearing_decision_type_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
