@@ -33,4 +33,6 @@ class IpClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
 $clearedGetter = new IpClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
-print json_encode($clearedGetter->getCleared($uploadId));
+$json = json_encode($clearedGetter->getCleared($uploadId));
+$json = str_replace('\\f','',$json);
+print $json;
