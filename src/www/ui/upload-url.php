@@ -55,15 +55,13 @@ class upload_url extends FO_Plugin {
     /* See if the URL looks valid */
     if (empty($Folder)) 
     {
-      $text = _("Invalid folder");
-      return ($text);
+      return _("Invalid folder");
     }
 
     $GetURL = trim($GetURL);
     if (empty($GetURL)) 
     {
-      $text = _("Invalid URL");
-      return ($text);
+      return _("Invalid URL");
     }
     if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) 
     {
@@ -81,8 +79,8 @@ class upload_url extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -137,21 +135,16 @@ class upload_url extends FO_Plugin {
 
     AgentCheckBoxDo($jobpk, $uploadpk);
 
-    $msg = "";
     /** check if the scheudler is running */
     $status = GetRunnableJobList();
-    if (empty($status))
-    {
-      $msg .= _("Is the scheduler running? ");
-    }
+    $msg = empty($status) ? _("Is the scheduler running? ") : '';
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $text = _("The upload");
     $text1 = _("has been queued. It is");
-    $msg .= "$text $Name $text1 ";
-    $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print displayMessage($msg,$keep);
+    $msg .= "$text $Name $text1 <a href='$Url'>upload #$uploadpk</a>.\n";
+    $this->vars['message'] = $msg;
     return (NULL);
-  } // Upload()
+  }
 
   /**
    * \brief Generate the text for this plugin.
