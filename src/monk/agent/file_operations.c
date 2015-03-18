@@ -82,7 +82,9 @@ int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimi
       }
     }
 
-    // TODO this does not keep the correct offsets (we need "byte inside the file" units in Token.*)
+    /* N.B. this tokenizes inside the re-encoded buffer:
+     * the offsets found are byte positions in the UTF-8 stream, not file positions
+     **/
     int addedTokens = streamTokenize(chunk, len, delimiters, tokens, &remainder);
     if (addedTokens < 0)
     {
