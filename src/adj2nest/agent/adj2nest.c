@@ -82,7 +82,7 @@ char *uploadtree_tablename;
 long TreeSize=0;
 long TreeSet=0; /* index for inserting the next child */
 long SetNum=0; /* index for tracking set numbers */
-
+int isBigUpload=0;
 /************************************************************/
 /************************************************************/
 /************************************************************/
@@ -209,6 +209,7 @@ void	LoadAdj	(long UploadPk)
   LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
   if (LastChar >= '0' && LastChar <= '9')
   {
+    isBigUpload=1;
     snprintf(SQL,sizeof(SQL),"ANALYZE %s",uploadtree_tablename);
     pgResult =  PQexec(pgConn, SQL);
     fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__);
@@ -504,7 +505,6 @@ int	SetParm	(char *ParmName, char *Parm)
 int UpdateUpload(long UploadPk)
 {
   PGresult *pgResult;
-  char LastChar;  
 
   /* update upload.upload_mode to say that adj2nest was successful */
   snprintf(SQL, sizeof(SQL), "UPDATE upload SET upload_mode = upload_mode | (1<<6) WHERE upload_pk='%ld'",
@@ -513,9 +513,7 @@ int UpdateUpload(long UploadPk)
   if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
   PQclear(pgResult);
 
-    /* If the last character of the uploadtree_tablename is a digit, run vacuum analyze */
-  LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
-  if (LastChar >= '0' && LastChar <= '9')
+  if(isBigUpload)
   {
     snprintf(SQL,sizeof(SQL),"VACUUM ANALYZE %s",uploadtree_tablename);
     pgResult =  PQexec(pgConn, SQL);
