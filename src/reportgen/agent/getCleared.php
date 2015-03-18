@@ -27,4 +27,6 @@ $clearedGetter = new \Fossology\Lib\Report\LicenseClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
 $groupId = $clearedGetter->getGroupId();
-print json_encode($clearedGetter->getCleared($uploadId, $groupId));
+$json = json_encode($clearedGetter->getCleared($uploadId, $groupId));
+$json = str_replace('\\f','',$json);
+print $json;
