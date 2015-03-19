@@ -67,6 +67,7 @@ class ReportAgent extends Agent
     $this->uploadDao = $this->container->get("dao.upload");
   }
 
+
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
@@ -91,8 +92,11 @@ class ReportAgent extends Agent
     return true;
   }
 
+
   /**
-   * 
+   * @brief Design the header section of report
+   * @param section as a param 
+   *
    */
   private function reportHeader($section)
   {
@@ -101,21 +105,30 @@ class ReportAgent extends Agent
     $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
 
+
   /**
-   * 
+   * @brief Design the footer section of report
+   * @param section as a param 
    */
-  private function reportFooter($section)
+  private function reportFooter($phpWord, $section)
   {
+    $styleTable = array('borderSize'=>10, 'borderColor'=>'FFFFFF' );
+    $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
+    $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
     $footerStyle = array("color" => "000000", "size" => 10, "bold" => true, "name" => $this->fontFamily);
     $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
     $footerSpace = str_repeat("  ", 80);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";
     $footer = $section->createFooter(); 
-    $footer->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerPageNo"), $footerStyle);
+    $table = $footer->addTable('footerTableStyle');
+    $table->addRow(200, $styleFirstRow);
+    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars(" $footerCopyright $footerSpace $footerPageNo"), $footerStyle); 
   }
 
+
   /**
-   * 
+   * @brief Design the header section of report
+   * @param section as a param 
    */
   private function reportTitle($section)
   {
@@ -125,8 +138,11 @@ class ReportAgent extends Agent
     $section->addTextBreak(); 
   }
 
+
   /**
-   * 
+   * @brief Design the summaryTable of the report
+   * @param1 section
+   * @param2 tablestyle 
    */        
   private function summaryTable($section)
   {
@@ -217,7 +233,10 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design the clearingProtocolChangeLogTable of the report
+   * @param1 section 
+   * @param2 tablestyle 
+   * @param3 tableHeading
    */ 
   private function clearingProtocolChangeLogTable($section)
   {
@@ -248,7 +267,9 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design the functionalityTable of the report
+   * @param1 section 
+   * @param2 tableHeading 
    */ 
   private function functionalityTable($section)
   {
@@ -263,8 +284,12 @@ class ReportAgent extends Agent
    $section->addTextBreak();
   }
 
+
   /**
-   * 
+   * @brief Design the assessmentSummaryTable of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading 
    */ 
   private function assessmentSummaryTable($section)
   { 
@@ -288,50 +313,53 @@ class ReportAgent extends Agent
     $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("General assessment"), $leftColStyle, $paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars("<e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("Mainline Portal Status for component"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("chkBox1", htmlspecialchars("Mainline"), $rightColStyleBlack, $paragraphStyle);
-    $cell->addCheckBox("chkBox2", htmlspecialchars("Specific"), $rightColStyleBlack, $paragraphStyle);
-    $cell->addCheckBox("chkBox3", htmlspecialchars("Denied"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox(" chkBox1", htmlspecialchars(" Mainline"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox(" chkBox2", htmlspecialchars(" Specific"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox(" chkBox3", htmlspecialchars(" Denied"), $rightColStyleBlack, $paragraphStyle);
  
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("License Incompatibility found"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("chkBox1", htmlspecialchars("no"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox("chkBox2", htmlspecialchars("yes"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox(" chkBox2", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("Source / binary integration notes"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("chkBox1", htmlspecialchars("no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox("chkBox2", htmlspecialchars("critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addText(htmlspecialchars("<if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
+    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox(" chkBox2", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("Dependency notes"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("chkBox1", htmlspecialchars("no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox("chkBox2", htmlspecialchars("dependencies found in source code"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox("chkBox3", htmlspecialchars("dependencies found in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addText(htmlspecialchars("<if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
+    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox(" chkBox2", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox(" chkBox3", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addText(htmlspecialchars(" <if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("Additional notes"), $leftColStyle, $paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars("<e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("General Risks (optional)"), $leftColStyle, $paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars("<e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, $paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, $paragraphStyle);
+    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, $paragraphStyle);
 		
     $section->addTextBreak();
   }
 
   /**
-   * 
+   * @brief Design the todosection of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function todoTable($section)
   {   	  
@@ -395,33 +423,33 @@ class ReportAgent extends Agent
    $table = $section->addTable($this->tablestyle);
     
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars("1"), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars("Documentation of license conditions and copyright notices in product documentation (ReadMe_OSS)"), $rowTextStyleRightBold, $paragraphStyle);
+   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, $paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars("1.a"), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, $paragraphStyle);
    $cell = $table->addCell($secondColLen);
-   $cell->addText(htmlspecialchars("All relevant licenses (global and others - see below) must be added to the legal approved Readme_OSS template."), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars("Remark:"), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars("“Do Not Use” licenses must not be added to the ReadMe_OSS"),$rowTextStyleRight,$paragraphStyle);
+   $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, $paragraphStyle);
+   $cell->addText(htmlspecialchars($r2c22), $rowTextStyleRightBold, $paragraphStyle);
+   $cell->addText(htmlspecialchars($r2c23),$rowTextStyleRight,$paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars("1.b"), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars("Add all copyrights to README_OSS"), $rowTextStyleRight, $paragraphStyle);
+   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r3c2), $rowTextStyleRight, $paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars("1.c"), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars("Add all relevant acknowledgements to Readme_OSS"), $rowTextStyleRight, $paragraphStyle);
+   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r4c1), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r4c2), $rowTextStyleRight, $paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars("2"), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r5c1), $rowTextStyleLeft, $paragraphStyle);
    $cell = $table->addCell($secondColLen, $rowStyle);
-   $cell->addText(htmlspecialchars("Modifications in Source Code"), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars("If modifications are permitted:"), $rowTextStyleRight, $paragraphStyle);
+   $cell->addText(htmlspecialchars($r5c21), $rowTextStyleRightBold, $paragraphStyle);
+   $cell->addText(htmlspecialchars($r5c22), $rowTextStyleRight, $paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars("2.a"), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars("Do not change or delete Copyright, patent, trademark, attribution notices or any further legal notices or license texts in any files - i.e. neither within any source file of the component package nor in any of its documentation files."), $rowTextStyleRight, $paragraphStyle);
+   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r6c1), $rowTextStyleLeft, $paragraphStyle);
+   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r6c2), $rowTextStyleRight, $paragraphStyle);
 
    $table->addRow($rowWidth, $paragraphStyle);
    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r7c1), $rowTextStyleLeft, $paragraphStyle);
@@ -467,7 +495,9 @@ class ReportAgent extends Agent
   }
 	
   /**
-   * 
+   * @brief Design the todosection of the report
+   * @param1 section 
+   * @param2 tablestyle
    */ 
   private function todoObliTable($section)
   {
@@ -582,7 +612,9 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design the todosection of the report
+   * @param1 section 
+   * @param2 tablestyle
    */ 
   private function todoObliList($section)
   {
@@ -637,7 +669,8 @@ class ReportAgent extends Agent
   }    
 
   /**
-   * 
+   * @brief Design the todosection of the report
+   * @param1 section 
    */ 
   private function forOtherTodos($section)
   {
@@ -684,7 +717,10 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design basicForClearingReport section of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function basicForClearingReport($section)
   {
@@ -740,7 +776,10 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design globalLicesnetable section of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function globalLicenseTable($section)
   {
@@ -764,7 +803,10 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design redOSSLicenseTable section of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function redOSSLicenseTable($section)
   {
@@ -788,7 +830,10 @@ class ReportAgent extends Agent
   }
 
   /**
-   * 
+   * @brief Design yellowOSSLicenseTable section of the report
+   * @param1 section 
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function yellowOSSLicenseTable($section)
   {
@@ -811,7 +856,11 @@ class ReportAgent extends Agent
   }
   
   /**
-   * 
+   * @brief Design yellowOSSLicenseTable section of the report
+   * @param1 section
+   * @param2 licesnes 
+   * @param3 tablestyle
+   * @param4 tableHeading
    */ 
   private function whiteOSSLicenseTable($section, $licenses)
   {
@@ -827,7 +876,8 @@ class ReportAgent extends Agent
       $cell1 = $table->addCell($firstColLen); 
       $cell1->addText(htmlspecialchars($licenseStatement["content"]));
       $cell2 = $table->addCell($secondColLen); 
-      $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"])); // replace new line character 
+      // replace new line character
+      $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"]));
       $cell2->addText($licenseText);
       $cell3 = $table->addCell($thirdColLen);
       foreach($licenseStatement["files"] as $fileName){ 
@@ -838,7 +888,10 @@ class ReportAgent extends Agent
   }
   
   /**
-   * 
+   * @brief Design ycknowledgementTable section of the report
+   * @param1 section
+   * @param2 tablestyle
+   * @param3 tableHeading
    */ 
   private function acknowledgementTable($section)
   {
@@ -859,6 +912,7 @@ class ReportAgent extends Agent
 
     $section->addTextBreak(); 
   }
+
 
   /**
    * @brief returns the table with copyright or ecc or ip.
@@ -884,7 +938,7 @@ class ReportAgent extends Agent
       }
     }
     $section->addTextBreak(); 
-    return ;
+    return true;
   }
 
   /**
@@ -970,7 +1024,7 @@ class ReportAgent extends Agent
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
     /* Footer starts */
-    $this->reportFooter($section);
+    $this->reportFooter($phpWord, $section);
 
     $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
     if(!is_dir($fileBase)) {
