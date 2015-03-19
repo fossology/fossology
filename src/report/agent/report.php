@@ -16,7 +16,7 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
-use PhpOffice\PhpWord ;
+use PhpOffice\PhpWord;
 
 include_once(__DIR__ . "/version.php");
 
@@ -142,9 +142,8 @@ class ReportAgent extends Agent
   /**
    * @brief Design the summaryTable of the report
    * @param1 section
-   * @param2 tablestyle 
    */        
-  private function summaryTable($section)
+  private function summaryTable($section, $packageName)
   {
     
     $paragraphStyle = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
@@ -196,8 +195,8 @@ class ReportAgent extends Agent
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Clearing Status"), $firstRowStyle1, $paragraphStyle);
     $cell = $table->addCell($cellThirdLen);
-    $cell->addCheckBox(" chkBox1", htmlspecialchars(" in progress"), $checkBoxStyle, $paragraphStyle);
-    $cell->addCheckBox(" chkBox2", htmlspecialchars(" release"), $checkBoxStyle, $paragraphStyle);
+    $cell->addCheckBox("inprogress", htmlspecialchars(" in progress"), $checkBoxStyle, $paragraphStyle);
+    $cell->addCheckBox("release", htmlspecialchars(" release"), $checkBoxStyle, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $firstRowStyle, $paragraphStyle);
@@ -207,7 +206,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, $paragraphStyle);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(""), $paragraphStyle);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars($packageName), $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -235,8 +234,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the clearingProtocolChangeLogTable of the report
    * @param1 section 
-   * @param2 tablestyle 
-   * @param3 tableHeading
    */ 
   private function clearingProtocolChangeLogTable($section)
   {
@@ -269,7 +266,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the functionalityTable of the report
    * @param1 section 
-   * @param2 tableHeading 
    */ 
   private function functionalityTable($section)
   {
@@ -288,8 +284,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the assessmentSummaryTable of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading 
    */ 
   private function assessmentSummaryTable($section)
   { 
@@ -319,29 +313,29 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox(" chkBox1", htmlspecialchars(" Mainline"), $rightColStyleBlack, $paragraphStyle);
-    $cell->addCheckBox(" chkBox2", htmlspecialchars(" Specific"), $rightColStyleBlack, $paragraphStyle);
-    $cell->addCheckBox(" chkBox3", htmlspecialchars(" Denied"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox("mainline", htmlspecialchars(" Mainline"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox("specific", htmlspecialchars(" Specific"), $rightColStyleBlack, $paragraphStyle);
+    $cell->addCheckBox("denied", htmlspecialchars(" Denied"), $rightColStyleBlack, $paragraphStyle);
  
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox(" chkBox2", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("no", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("yes", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox(" chkBox2", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("nocriticalfiles", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("criticalfiles", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, $paragraphStyle);
     $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox(" chkBox1", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox(" chkBox2", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, $paragraphStyle);
-    $cell->addCheckBox(" chkBox3", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("nodependenciesfound", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("dependenciesfoundinsourcecode", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, $paragraphStyle);
+    $cell->addCheckBox("dependenciesfoundinbinaries", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, $paragraphStyle);
     $cell->addText(htmlspecialchars(" <if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
@@ -358,8 +352,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the todosection of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function todoTable($section)
   {   	  
@@ -497,7 +489,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the todosection of the report
    * @param1 section 
-   * @param2 tablestyle
    */ 
   private function todoObliTable($section)
   {
@@ -614,7 +605,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design the todosection of the report
    * @param1 section 
-   * @param2 tablestyle
    */ 
   private function todoObliList($section)
   {
@@ -719,8 +709,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design basicForClearingReport section of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function basicForClearingReport($section)
   {
@@ -753,8 +741,8 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($firstColLen, $cellRowContinue);
     $cell = $table->addCell($secondColLen, $cellColSpan);
-    $cell->addCheckBox("chkBox1", htmlspecialchars("According to “Common Principles for Open Source License Interpretation” "), $rowTextStyle);
-    $cell->addCheckBox("chkBox2", htmlspecialchars("no"), $rowTextStyle, $paragraphStyle);
+    $cell->addCheckBox("checkBox1", htmlspecialchars("According to “Common Principles for Open Source License Interpretation” "), $rowTextStyle);
+    $cell->addCheckBox("checkBox2", htmlspecialchars("no"), $rowTextStyle, $paragraphStyle);
     $cell = $table->addCell($thirdColLen);
 
     $table->addRow($rowWidth, $paragraphStyle);
@@ -778,8 +766,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design globalLicesnetable section of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function globalLicenseTable($section)
   {
@@ -805,8 +791,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design redOSSLicenseTable section of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function redOSSLicenseTable($section)
   {
@@ -832,8 +816,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design yellowOSSLicenseTable section of the report
    * @param1 section 
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function yellowOSSLicenseTable($section)
   {
@@ -857,10 +839,8 @@ class ReportAgent extends Agent
   
   /**
    * @brief Design yellowOSSLicenseTable section of the report
-   * @param1 section
+   * @param1 sectionsrc/report/agent/report.php
    * @param2 licesnes 
-   * @param3 tablestyle
-   * @param4 tableHeading
    */ 
   private function whiteOSSLicenseTable($section, $licenses)
   {
@@ -890,8 +870,6 @@ class ReportAgent extends Agent
   /**
    * @brief Design ycknowledgementTable section of the report
    * @param1 section
-   * @param2 tablestyle
-   * @param3 tableHeading
    */ 
   private function acknowledgementTable($section)
   {
@@ -952,7 +930,7 @@ class ReportAgent extends Agent
 
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
-    $tableLayout = array("orientation" => "landscape", 
+    $docLayout = array("orientation" => "landscape", 
                          "marginLeft" => "950", 
                          "marginRight" => "950", 
                          "marginTop" => "950", 
@@ -961,7 +939,17 @@ class ReportAgent extends Agent
 
     /* Creating the new DOCX */
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
-    $section = $phpWord->createSection($tableLayout);
+
+    /* Setting document properties*/
+    $properties = $phpWord->getDocInfo();
+    $properties->setCreator("User-name will come here");
+    $properties->setCompany("Siemens AG");
+    $properties->setTitle("Clearing Report");
+    $properties->setDescription("OSS clearing report by FOSSologyNG tool");
+    $properties->setSubject("Copyright (C) 2014-2015, Siemens AG");
+
+    /* Creating document layout */
+    $section = $phpWord->createSection($docLayout);
 
     /* Header starts */
     $this->reportHeader($section);
@@ -970,7 +958,7 @@ class ReportAgent extends Agent
     $this->reportTitle($section);
 	
     /* Summery table */
-    $this->summaryTable($section);
+    $this->summaryTable($section, $packageName);
 
     /* clearing protocol change log table */
     $this->clearingProtocolChangeLogTable($section);
