@@ -42,15 +42,15 @@ class ReportAgent extends Agent
   private $fontFamily = "Arial";
 
   /** @var tablestyle */
-  private $tablestyle = array("borderSize" => 2, 
-                              "name" => "Arial", 
-                              "borderColor" => "000000", 
+  private $tablestyle = array("borderSize" => 2,
+                              "name" => "Arial",
+                              "borderColor" => "000000",
                               "cellSpacing" => 5
                              );
   /** @var tableHeading */
-  private $tableHeading = array("color" => "000000", 
-                                "size" => 18, 
-                                "bold" => true, 
+  private $tableHeading = array("color" => "000000",
+                                "size" => 18,
+                                "bold" => true,
                                 "name" => "Arial"
                                );
 
@@ -84,7 +84,7 @@ class ReportAgent extends Agent
     $contents = array("licenses" => $licenses,
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
-			          "ip" => $ip
+                      "ip" => $ip
     );
 
     $this->writeReport($contents, $uploadId);
@@ -151,26 +151,26 @@ class ReportAgent extends Agent
     $firstRowStyle = array("size" => 14, "bold" => true);
     $firstRowStyle1 = array("size" => 12, "bold" => true);
     $firstRowStyle2 = array("size" => 12, "bold" => false);
-    $checkBoxStyle = array("size" => 10); 								         
-		
+    $checkBoxStyle = array("size" => 10);
+
     $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
     $cellColSpan = array("gridSpan" => 3, "valign" => "center");
 
     $rowWidth = 200;
-    $cellFirstLen = 2500;	 
-    $cellSecondLen = 3800;	 
-    $cellThirdLen = 5500;	 
+    $cellFirstLen = 2500;
+    $cellSecondLen = 3800;
+    $cellThirdLen = 5500; 
 
     $table = $section->addTable($this->tablestyle);
     
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellColSpan)->addText(htmlspecialchars(" Clearing report for OSS component"), $firstRowStyle, $paragraphStyle);
-		 
+    
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Clearing Information"), $firstRowStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Department"), $firstRowStyle1, $paragraphStyle);
     $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" IC SG EA SOL/PRO"), $firstRowStyle2, $paragraphStyle);
-		 
+    
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Type"), $firstRowStyle1, $paragraphStyle);
@@ -202,7 +202,7 @@ class ReportAgent extends Agent
     $cell = $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $firstRowStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Community"), $firstRowStyle1, $paragraphStyle);
     $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" <URL>"), $firstRowStyle2, $paragraphStyle);
-		 
+
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, $paragraphStyle);
@@ -241,9 +241,9 @@ class ReportAgent extends Agent
     $thText = array("size" => 12, "bold" => true);
     $rowWidth = 600;
     $rowWidth1 = 200;
-    $cellFirstLen = 2000;	 
-    $cellSecondLen = 4500;	 
-    $cellThirdLen = 9000;	 
+    $cellFirstLen = 2000;
+    $cellSecondLen = 4500;
+    $cellThirdLen = 9000;
 
     $heading = "1. Clearing Protocol Change Log";
     $section->addText(htmlspecialchars($heading), $this->tableHeading);
@@ -259,7 +259,7 @@ class ReportAgent extends Agent
     $cell = $table->addCell($cellFirstLen);
     $cell = $table->addCell($cellSecondLen);
     $cell = $table->addCell($cellThirdLen);
-		
+
     $section->addTextBreak();
   }
 
@@ -269,15 +269,14 @@ class ReportAgent extends Agent
    */ 
   private function functionalityTable($section)
   {
-   $infoTextStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF");
-		
-   $heading = "2. Functionality";
-   $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
-			
-   $section->addText(htmlspecialchars($heading), $this->tableHeading);
-   $section->addText(htmlspecialchars($infoText), $infoTextStyle);
-		
-   $section->addTextBreak();
+    $infoTextStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF");
+    $heading = "2. Functionality";
+    $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
+ 
+    $section->addText(htmlspecialchars($heading), $this->tableHeading);
+    $section->addText(htmlspecialchars($infoText), $infoTextStyle);
+
+    $section->addTextBreak();
   }
 
 
@@ -345,7 +344,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, $paragraphStyle);
-		
+    
     $section->addTextBreak();
   }
 
@@ -354,7 +353,7 @@ class ReportAgent extends Agent
    * @param1 section 
    */ 
   private function todoTable($section)
-  {   	  
+  {
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
     $rowStyle = array("bgColor" => "C0C0C0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $rowTextStyleLeft = array("size" => 10, "bold" => true);
@@ -367,8 +366,8 @@ class ReportAgent extends Agent
     $subHeadingInfoText = "  There is a list of common rules which was defined to simplify the To-Dos for development and distribution. The following list contains rules for development, and      distribution which must always be followed!";
     $rowWidth = 5;
     $firstColLen = 500;
-    $secondColLen = 15000;  	 	
-    	  
+    $secondColLen = 15000;
+    
     $section->addText(htmlspecialchars($heading), $this->tableHeading);
     $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
     $section->addText(htmlspecialchars($subHeadingInfoText), $rowTextStyleRight);
@@ -411,81 +410,81 @@ class ReportAgent extends Agent
     $r13c21 = "The following statement must be added to any manual. The language of the statement is equal to the manual language. Check translation with documentation department.";
     $r13c22 = "English:";
     $r13c23 = "	The product contains, among other things, Open Source Software developed by third parties. The Open Source Software used in the product and the license agreements concerning this software can be found in the Readme_OSS. These Open Source Software files are protected by copyright. Your compliance with those license conditions will entitle you to use the Open Source Software as foreseen in the relevant license. In the event of conflicts between Siemens license conditions and the Open Source Software license conditions, the Open Source Software conditions shall prevail with respect to the Open Source Software portions of the software. The Open Source Software is licensed royalty-free. Insofar as the applicable Open Source Software License Conditions provide for it you can order the source code of the Open Source Software from your Siemens sales contact - against payment of the shipping and handling charges - for a period of at least 3 years since purchase of the Product. We are liable for the Product including the Open Source Software contained in it pursuant to the license conditions applicable to the Product. Any liability for the Open Source Software beyond the program flow intended for the Product is explicitly excluded. Furthermore any liability for defects resulting from modifications to the Open Source Software by you or third parties is excluded. We do not provide any technical support for the Product if it has been modified.";
-		
-   $table = $section->addTable($this->tablestyle);
-    
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen);
-   $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r2c22), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r2c23),$rowTextStyleRight,$paragraphStyle);
+    $table = $section->addTable($this->tablestyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r3c2), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r4c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r4c2), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen);
+    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r2c22), $rowTextStyleRightBold, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r2c23),$rowTextStyleRight,$paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r5c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen, $rowStyle);
-   $cell->addText(htmlspecialchars($r5c21), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r5c22), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r3c2), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r6c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r6c2), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r4c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r4c2), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r7c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen);
-   $cell->addText(htmlspecialchars($r7c21), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r7c22), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r7c23), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r7c24), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r7c25), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r5c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen, $rowStyle);
+    $cell->addText(htmlspecialchars($r5c21), $rowTextStyleRightBold, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r5c22), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r8c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r8c2), $rowTextStyleRightBold, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r6c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r6c2), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r9c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r9c2), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r7c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen);
+    $cell->addText(htmlspecialchars($r7c21), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r7c22), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r7c23), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r7c24), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r7c25), $rowTextStyleRight, $paragraphStyle);
+ 
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r8c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r8c2), $rowTextStyleRightBold, $paragraphStyle);
 
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r9c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r9c2), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r10c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r10c2), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r10c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r10c2), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r11c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen);
-   $cell->addText(htmlspecialchars($r11c2), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r11c21), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r11c22), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r11c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen);
+    $cell->addText(htmlspecialchars($r11c2), $rowTextStyleRightBold, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r11c21), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r11c22), $rowTextStyleRight, $paragraphStyle);
 
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r12c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r12c2), $rowTextStyleRightBold, $paragraphStyle);
-		
-   $table->addRow($rowWidth, $paragraphStyle);
-   $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r13c1), $rowTextStyleLeft, $paragraphStyle);
-   $cell = $table->addCell($secondColLen);
-   $cell->addText(htmlspecialchars($r13c21), $rowTextStyleRightBold, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r13c22), $rowTextStyleRight, $paragraphStyle);
-   $cell->addText(htmlspecialchars($r13c23), $rowTextStyleRight, $paragraphStyle);
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r12c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r12c2), $rowTextStyleRightBold, $paragraphStyle);
 
-   $section->addTextBreak();
+    $table->addRow($rowWidth, $paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r13c1), $rowTextStyleLeft, $paragraphStyle);
+    $cell = $table->addCell($secondColLen);
+    $cell->addText(htmlspecialchars($r13c21), $rowTextStyleRightBold, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r13c22), $rowTextStyleRight, $paragraphStyle);
+    $cell->addText(htmlspecialchars($r13c23), $rowTextStyleRight, $paragraphStyle);
+
+    $section->addTextBreak();
   }
-	
+
+
   /**
    * @brief Design the todosection of the report
    * @param1 section 
@@ -503,16 +502,16 @@ class ReportAgent extends Agent
     $subHeading = " 4.2. Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
-        	  
+
     $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
     $section->addText(htmlspecialchars($subHeadingInfoText1));
     $section->addText(htmlspecialchars($subHeadingInfoText2));
 
     $rowWidth = 200;
     $firstColLen = 2000;
-    $secondColLen = 1500;  	 	
+    $secondColLen = 1500;
     $thirdColLen = 9000;
-    $fourthColLen = 1500 ;
+    $fourthColLen = 1500;
     $fifthColLen = 1500; 
    
     $table = $section->addTable($this->tablestyle);
@@ -532,7 +531,6 @@ class ReportAgent extends Agent
     $cell->addText(htmlspecialchars("If you want to use the binaries distributed with the source/binaries ((where no corresponding source code is part of the distribution of this component) you must do a clearing also for those components (add them to the Mainline Portal). The license conditions of the additional binaries are NOT part of this clearing protocol."), $secondRowTextStyle1);
     $cell = $table->addCell($fourthColLen);
     $cell = $table->addCell($fifthColLen);
-
     
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Dual Licensing (optional obligation, check with license)"), $firstRowTextStyle);
@@ -631,8 +629,8 @@ class ReportAgent extends Agent
     
     $rowWidth = 500;
     $firstColLen = 4000;
-    $secondColLen = 5000;  	 	
-
+    $secondColLen = 5000;
+    
     $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
@@ -720,15 +718,15 @@ class ReportAgent extends Agent
 
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 12, "bold" => true);
-    $rowTextStyle = array("size" => 11, "bold" => false);							         
-		
+    $rowTextStyle = array("size" => 11, "bold" => false);
+    
     $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
     $cellColSpan = array("gridSpan" => 2, "valign" => "center");
 
     $rowWidth = 200;
 
-    $firstColLen = 3500;	 
-    $secondColLen = 7500;	 
+    $firstColLen = 3500;
+    $secondColLen = 7500;
     $thirdColLen = 4500;
 
     $table->addRow($rowWidth, $paragraphStyle);
@@ -956,29 +954,29 @@ class ReportAgent extends Agent
 
     /* Main heading starts*/
     $this->reportTitle($section);
-	
+
     /* Summery table */
     $this->summaryTable($section, $packageName);
 
     /* clearing protocol change log table */
     $this->clearingProtocolChangeLogTable($section);
-
-    /* Functionality table */	 
+    
+    /* Functionality table */
     $this->functionalityTable($section);
 
     /* Assessment summery table */
     $this->assessmentSummaryTable($section);
 
-    /* Todo table */
+    /* Todoinfo table */
     $this->todoTable($section);
 
-    /* Todo obligation table */
-    $this->todoObliTable($section);	 
+    /* Todoobligation table */
+    $this->todoObliTable($section);
 
-    /* Todo obligation list */
-    $this->todoObliList($section);	
+    /* Todoobligation list */
+    $this->todoObliList($section);
  
-    /* For other todo list */
+    /* For other todolist */
     $this->forOtherTodos($section);
 
     /* Basic for clearing report */
@@ -1016,7 +1014,7 @@ class ReportAgent extends Agent
 
     $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
     if(!is_dir($fileBase)) {
-     mkdir($fileBase, 0777, true);
+      mkdir($fileBase, 0777, true);
     }
     $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, "Word2007");
