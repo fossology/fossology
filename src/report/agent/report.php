@@ -41,6 +41,20 @@ class ReportAgent extends Agent
   /** @var fontFamily */
   private $fontFamily = "Arial";
 
+  /** @var tablestyle */
+  private $tablestyle = array("borderSize" => 2, 
+                              "name" => "Arial", 
+                              "borderColor" => "000000", 
+                              "cellSpacing" => 5
+                             );
+  /** @var tableHeading */
+  private $tableHeading = array("color" => "000000", 
+                                "size" => 18, 
+                                "bold" => true, 
+                                "name" => "Arial"
+                               );
+
+
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
@@ -114,7 +128,7 @@ class ReportAgent extends Agent
   /**
    * 
    */        
-  private function summaryTable($section, $tablestyle)
+  private function summaryTable($section)
   {
     
     $paragraphStyle = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
@@ -132,7 +146,7 @@ class ReportAgent extends Agent
     $cellSecondLen = 3800;	 
     $cellThirdLen = 5500;	 
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellColSpan)->addText(htmlspecialchars(" Clearing report for OSS component"), $firstRowStyle, $paragraphStyle);
@@ -205,7 +219,7 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function clearingProtocolChangeLogTable($section, $tablestyle, $tableHeading)
+  private function clearingProtocolChangeLogTable($section)
   {
     $thColor = array("bgColor" => "D2D0CE");
     $thText = array("size" => 12, "bold" => true);
@@ -216,9 +230,9 @@ class ReportAgent extends Agent
     $cellThirdLen = 9000;	 
 
     $heading = "1. Clearing Protocol Change Log";
-    $section->addText(htmlspecialchars($heading), $tableHeading);
+    $section->addText(htmlspecialchars($heading), $this->tableHeading);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $thColor)->addText(htmlspecialchars("Last Update"), $thText);
@@ -236,14 +250,14 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function functionalityTable($section, $tableHeading)
+  private function functionalityTable($section)
   {
    $infoTextStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF");
 		
    $heading = "2. Functionality";
    $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
 			
-   $section->addText(htmlspecialchars($heading), $tableHeading);
+   $section->addText(htmlspecialchars($heading), $this->tableHeading);
    $section->addText(htmlspecialchars($infoText), $infoTextStyle);
 		
    $section->addTextBreak();
@@ -252,7 +266,7 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function assessmentSummaryTable($section, $tablestyle, $tableHeading)
+  private function assessmentSummaryTable($section)
   { 
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
     $heading = "3. Assessment Summary:";
@@ -268,10 +282,10 @@ class ReportAgent extends Agent
     $cellFirstLen = 5000;
     $cellSecondLen = 10500;
 
-    $section->addText(htmlspecialchars($heading), $tableHeading);
+    $section->addText(htmlspecialchars($heading), $this->tableHeading);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars("General assessment"), $leftColStyle, $paragraphStyle);
@@ -319,7 +333,7 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function todoTable($section, $tablestyle, $tableHeading)
+  private function todoTable($section)
   {   	  
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0);          
     $rowStyle = array("bgColor" => "C0C0C0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
@@ -335,7 +349,7 @@ class ReportAgent extends Agent
     $firstColLen = 500;
     $secondColLen = 15000;  	 	
     	  
-    $section->addText(htmlspecialchars($heading), $tableHeading);
+    $section->addText(htmlspecialchars($heading), $this->tableHeading);
     $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
     $section->addText(htmlspecialchars($subHeadingInfoText), $rowTextStyleRight);
 
@@ -378,7 +392,7 @@ class ReportAgent extends Agent
     $r13c22 = "English:";
     $r13c23 = "	The product contains, among other things, Open Source Software developed by third parties. The Open Source Software used in the product and the license agreements concerning this software can be found in the Readme_OSS. These Open Source Software files are protected by copyright. Your compliance with those license conditions will entitle you to use the Open Source Software as foreseen in the relevant license. In the event of conflicts between Siemens license conditions and the Open Source Software license conditions, the Open Source Software conditions shall prevail with respect to the Open Source Software portions of the software. The Open Source Software is licensed royalty-free. Insofar as the applicable Open Source Software License Conditions provide for it you can order the source code of the Open Source Software from your Siemens sales contact - against payment of the shipping and handling charges - for a period of at least 3 years since purchase of the Product. We are liable for the Product including the Open Source Software contained in it pursuant to the license conditions applicable to the Product. Any liability for the Open Source Software beyond the program flow intended for the Product is explicitly excluded. Furthermore any liability for defects resulting from modifications to the Open Source Software by you or third parties is excluded. We do not provide any technical support for the Product if it has been modified.";
 		
-   $table = $section->addTable($tablestyle);
+   $table = $section->addTable($this->tablestyle);
     
    $table->addRow($rowWidth, $paragraphStyle);
    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars("1"), $rowTextStyleLeft, $paragraphStyle);
@@ -455,7 +469,7 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function todoObliTable($section, $tablestyle)
+  private function todoObliTable($section)
   {
     $firstRowStyle = array("bgColor" => "D2D0CE");
     $firstRowTextStyle = array("size" => 11, "bold" => true);
@@ -480,7 +494,7 @@ class ReportAgent extends Agent
     $fourthColLen = 1500 ;
     $fifthColLen = 1500; 
    
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $firstRowStyle)->addText(htmlspecialchars("Obligation"), $firstRowTextStyle);
@@ -570,7 +584,7 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function todoObliList($section, $tablestyle)
+  private function todoObliList($section)
   {
     
     $firstRowStyle = array("bgColor" => "C0C0C0");
@@ -597,7 +611,7 @@ class ReportAgent extends Agent
     $firstColLen = 4000;
     $secondColLen = 5000;  	 	
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $firstRowStyle)->addText(htmlspecialchars("Issues obligations (licenses, patent …) see chapter 4.2"), $firstRowTextStyle);
@@ -672,13 +686,13 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function basicForClearingReport($section, $tablestyle, $tableHeading)
+  private function basicForClearingReport($section)
   {
     $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 0, "valign" => "center");          
     $heading = "5. Basis for Clearing Report";
-    $section->addText(htmlspecialchars($heading), $tableHeading);
+    $section->addText(htmlspecialchars($heading), $this->tableHeading);
     
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
 
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 12, "bold" => true);
@@ -728,16 +742,16 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function globalLicenseTable($section, $tablestyle, $tableHeading)
+  private function globalLicenseTable($section)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addText(htmlspecialchars("6. Global Licenses"), $tableHeading);
+    $section->addText(htmlspecialchars("6. Global Licenses"), $this->tableHeading);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -752,16 +766,16 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function redOSSLicenseTable($section, $tablestyle, $tableHeading)
+  private function redOSSLicenseTable($section)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addText(htmlspecialchars("7. Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses"), $tableHeading);
+    $section->addText(htmlspecialchars("7. Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses"), $this->tableHeading);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -776,16 +790,16 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function yellowOSSLicenseTable($section, $tablestyle, $tableHeading)
+  private function yellowOSSLicenseTable($section)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addText(htmlspecialchars("8. Other OSS Licenses (yellow) - additional obligations to common rules"), $tableHeading);
+    $section->addText(htmlspecialchars("8. Other OSS Licenses (yellow) - additional obligations to common rules"), $this->tableHeading);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -799,15 +813,15 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function whiteOSSLicenseTable($section, $licenses, $tablestyle, $tableHeading)
+  private function whiteOSSLicenseTable($section, $licenses)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $tableHeading);
-    $table = $section->addTable($tablestyle);
+    $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $this->tableHeading);
+    $table = $section->addTable($this->tablestyle);
     foreach($licenses as $licenseStatement){
       $table->addRow($rowHeight);
       $cell1 = $table->addCell($firstColLen); 
@@ -826,15 +840,15 @@ class ReportAgent extends Agent
   /**
    * 
    */ 
-  private function acknowledgementTable($section, $tablestyle, $tableHeading)
+  private function acknowledgementTable($section)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addText(htmlspecialchars("10. Acknowledgements"), $tableHeading);
-    $table = $section->addTable($tablestyle);
+    $section->addText(htmlspecialchars("10. Acknowledgements"), $this->tableHeading);
+    $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText(htmlspecialchars("ID of acknowledgements"));
@@ -848,18 +862,18 @@ class ReportAgent extends Agent
 
   /**
    * @brief returns the table with copyright or ecc or ip.
-   * @param $section, $tablestyle, $headingStyle, $title, $statementsCEI
+   * @param $section, $title, $statementsCEI
    * @$statementsCEI is array of contents.
    */
-  private function getRowsAndColumnsForCEI($section, $tablestyle, $headingStyle, $title, $statementsCEI)
+  private function getRowsAndColumnsForCEI($section, $title, $statementsCEI)
   {
     $rowHeight = 500;
     $firstColLen = 12000;
     $secondColLen = 3500;
 
-    $section->addText(htmlspecialchars($title), $headingStyle);
+    $section->addText(htmlspecialchars($title), $this->tableHeading);
 
-    $table = $section->addTable($tablestyle);
+    $table = $section->addTable($this->tablestyle);
     foreach($statementsCEI as $statements){
       $table->addRow($rowHeight);
       $cell1 = $table->addCell($firstColLen); 
@@ -891,18 +905,6 @@ class ReportAgent extends Agent
                          "marginBottom" => "950"
                         );
 
-    $tablestyle = array("borderSize" => 2, 
-                        "name" => $this->fontFamily, 
-                        "borderColor" => "000000", 
-                        "cellSpacing" => 5
-                       );
-
-    $tableHeading = array("color" => "000000", 
-                          "size" => 18, 
-                          "bold" => true, 
-                          "name" => $this->fontFamily
-                         );
-
     /* Creating the new DOCX */
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $section = $phpWord->createSection($tableLayout);
@@ -914,58 +916,58 @@ class ReportAgent extends Agent
     $this->reportTitle($section);
 	
     /* Summery table */
-    $this->summaryTable($section, $tablestyle);
+    $this->summaryTable($section);
 
     /* clearing protocol change log table */
-    $this->clearingProtocolChangeLogTable($section, $tablestyle, $tableHeading);
+    $this->clearingProtocolChangeLogTable($section);
 
     /* Functionality table */	 
-    $this->functionalityTable($section, $tableHeading);
+    $this->functionalityTable($section);
 
     /* Assessment summery table */
-    $this->assessmentSummaryTable($section, $tablestyle, $tableHeading);
+    $this->assessmentSummaryTable($section);
 
     /* Todo table */
-    $this->todoTable($section, $tablestyle, $tableHeading);
+    $this->todoTable($section);
 
     /* Todo obligation table */
-    $this->todoObliTable($section, $tablestyle);	 
+    $this->todoObliTable($section);	 
 
     /* Todo obligation list */
-    $this->todoObliList($section, $tablestyle, $tableHeading);	
+    $this->todoObliList($section);	
  
     /* For other todo list */
     $this->forOtherTodos($section);
 
     /* Basic for clearing report */
-    $this->basicForClearingReport($section, $tablestyle, $tableHeading);
+    $this->basicForClearingReport($section);
 
     /* Display global licenses */
-    $this->globalLicenseTable($section, $tablestyle, $tableHeading);
+    $this->globalLicenseTable($section);
 
     /* Display licenses(red) name,text and files */
-    $this->redOSSLicenseTable($section, $tablestyle, $tableHeading);
+    $this->redOSSLicenseTable($section);
 
     /* Display licenses(yellow) name,text and files */
-    $this->yellowOSSLicenseTable($section, $tablestyle, $tableHeading);
+    $this->yellowOSSLicenseTable($section);
 
     /* Display licenses(white) name,text and files */
-    $this->whiteOSSLicenseTable($section, $contents['licenses']['statements'], $tablestyle, $tableHeading);
+    $this->whiteOSSLicenseTable($section, $contents['licenses']['statements']);
 
     /* Display acknowledgement */
-    $this->acknowledgementTable($section, $tablestyle);
+    $this->acknowledgementTable($section);
 
     /* Display copyright statements and files */
     $heading = "11. Copyrights";
-    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, $heading, $contents['copyrights']['statements']);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements']);
 
     /* Display Ecc statements and files */
     $heading = "12. Export restrictions";
-    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, $heading, $contents['ecc']['statements']);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements']);
 
     /* Display IP statements and files */
     $heading = "13. Intellectual property";
-    $this->getRowsAndColumnsForCEI($section, $tablestyle, $tableHeading, $heading, $contents['ip']['statements']);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
     /* Footer starts */
     $this->reportFooter($section);
