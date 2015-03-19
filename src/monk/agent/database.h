@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "highlight.h"
 #include "libfossagent.h"
 
-PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right);
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right, long groupId);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);

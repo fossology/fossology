@@ -1,14 +1,21 @@
 <?php
 /*
- Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+Author: Daniele Fognini
+Copyright (C) 2014-2015, Siemens AG
 
- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 namespace Fossology\Lib\Agent;
 
@@ -165,35 +172,34 @@ abstract class Agent extends Object
   {
     while (false !== ($line = $this->scheduler_current()))
     {
+      $this->heartbeat(0);
       $uploadId = intval($line);
-
-      if ($uploadId > 0)
+      if ($uploadId <= 0)
       {
-        $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
-
-        if ($arsId<0) {
-          print "cannot insert ars record";
-          $this->bail(2);
-        }
-
-        try {
-          $success = $this->processUploadId($uploadId);
-        } catch(\Exception $e) {
-          print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
-          print "";
-          print $e->getTraceAsString();
-          $success = false;
-        }
-
-        $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
-
-        if (!$success) {
-          print "agent failed on uploadId=$uploadId";
-          $this->bail(1);
-        }
+        continue;
+      }
+      
+      $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
+      if ($arsId<0) {
+        print "cannot insert ars record";
+        $this->bail(2);
       }
 
-      $this->heartbeat(0);
+      try {
+        $success = $this->processUploadId($uploadId);
+      }
+      catch(\Exception $e) {
+        print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
+        print $e->getTraceAsString();
+        $success = false;
+      }
+
+      $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
+
+      if (!$success) {
+        print "agent failed on uploadId=$uploadId";
+        $this->bail(1);
+      }
     }
   }
 }

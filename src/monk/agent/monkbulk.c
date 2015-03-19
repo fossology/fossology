@@ -137,7 +137,8 @@ int bulk_identification(MonkState* state) {
     state->dbManager,
     bulkArguments->uploadId,
     bulkArguments->uploadTreeLeft,
-    bulkArguments->uploadTreeRight
+    bulkArguments->uploadTreeRight,
+    bulkArguments->groupId
   );
 
   int haveError = 1;
