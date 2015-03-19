@@ -92,7 +92,12 @@ class DeciderAgentPlugin extends AgentPlugin
       }
     }
     
-    $args = empty($rulebits) ? '' : self::RULES_FLAG.$rulebits;
+    if (empty($rulebits))
+    {
+      return 0;
+    }
+
+    $args = self::RULES_FLAG.$rulebits;
     return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies), $args);
   }
   
