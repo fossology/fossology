@@ -235,15 +235,6 @@ bool CopyrightDatabaseHandler::createTableClearing() const
         " REFERENCES pfile(pfile_pk) ON DELETE CASCADE",
       CLEARING_TABLE
     ));
-
-
-    RETURN_IF_FALSE(dbManager.queryPrintf(
-      "ALTER TABLE ONLY %s"
-        " ADD CONSTRAINT clearing_decision_type_fk"
-        " FOREIGN KEY (clearing_decision_type_fk)"
-        " REFERENCES clearing_decision_type(type_pk) ON DELETE CASCADE",
-      CLEARING_TABLE
-    ));
   }
 
   return true;

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -32,6 +32,7 @@
 #define GETCLEAREDCOPY  INSTALLDIR "/getClearedCopy -u %d"
 #define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
 #define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
+#define GETIRRELEVANTCMD   INSTALLDIR "/getIrrelevant -u %d --gId=%d"
 
 static char* pipeRun(const char* cmdLineFmt, ...)
 {
@@ -59,7 +60,7 @@ static char* pipeRun(const char* cmdLineFmt, ...)
   return g_string_free(stringBuffer, FALSE);
 }
 
-char* getClearedLicenses(int uploadId,int groupId)
+char* getClearedLicenses(int uploadId, int groupId)
 {
   return pipeRun(GETCLEAREDCMD, uploadId, groupId);
 }
@@ -79,7 +80,7 @@ char* getClearedEcc(int uploadId)
   return pipeRun(GETCLEAREDECC, uploadId);
 }
 
-char* getMatches(int uploadId,int groupId)
+char* getMatches(int uploadId, int groupId)
 {
   return pipeRun(GETBULKMATCHECMD, uploadId, groupId);
 }
@@ -87,4 +88,9 @@ char* getMatches(int uploadId,int groupId)
 char* getKeywords(int uploadId)
 {
   return pipeRun(GETKEYWORDSCMD, uploadId);
+}
+
+char* getIrrelevant(int uploadId, int groupId)
+{
+  return pipeRun(GETIRRELEVANTCMD, uploadId, groupId);
 }

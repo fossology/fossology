@@ -61,7 +61,7 @@ class HighlightDao extends Object
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $licenseId
-   * @param int $agentId
+   * @param int|array $agentId 
    * @param null $highlightId
    * @return Highlight[]
    */
@@ -83,12 +83,19 @@ class HighlightDao extends Object
       $stmt .= '.License';
       $sql .= " AND license_file.rf_fk=$" . count($params);
     }
-    if (!empty($agentId))
+    if (!empty($agentId) && is_array($agentId))
+    {
+      $params[] = '{' . implode(',', $agentId) . '}';
+      $stmt .= '.AnyAgent';
+      $sql .= " AND license_file.agent_fk=ANY($" . count($params).")";
+    }
+    else if (!empty($agentId))
     {
       $params[] = $agentId;
       $stmt .= '.Agent';
       $sql .= " AND license_file.agent_fk=$" . count($params);
     }
+    
     if (!empty($highlightId))
     {
       $params[] = $highlightId;

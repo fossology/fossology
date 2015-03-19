@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -34,4 +34,5 @@ char* getClearedIp(int uploadId);
 char* getClearedEcc(int uploadId);
 char* getMatches(int uploadId, int groupId);
 char* getKeywords(int uploadId);
+char* getIrrelevant(int uploadId, int groupId);
 #endif

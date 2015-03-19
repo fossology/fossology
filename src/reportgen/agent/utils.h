@@ -43,12 +43,12 @@ void createsectionptr(mxml_node_t* body);
 mxml_node_t* createbodyheader(mxml_node_t* xml);
 void addheading(mxml_node_t* body, char* Headingname);
 mxml_node_t* createtable(mxml_node_t* body, char* totalwidth);
-void createtablegrid(mxml_node_t* tbl,char** gridwidth,  int cols);
+void createtablegrid(mxml_node_t* tbl,char** gridwidth, int cols);
 void createcelldataproperty(mxml_node_t* tc, char* width);
 void createrowdata(mxml_node_t* tr, char* cellwidth, char* celldata);
-void addparaheading(mxml_node_t* p, char* italics, char* heading,  char* lvl, char* numid);
-mxml_node_t*  createnumsection(mxml_node_t* body, char* lvl, char* numid);
-void addparagraph(mxml_node_t* body,char* italics, char* text);
+void addparaheading(mxml_node_t* p, char* italics, char* heading, char* lvl, char* numid);
+mxml_node_t* createnumsection(mxml_node_t* body, char* lvl, char* numid);
+void addparagraph(mxml_node_t* body, char* italics, char* text);
 mxml_node_t* createrowproperty(mxml_node_t* tbl);
 
 #endif

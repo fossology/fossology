@@ -99,11 +99,20 @@ class ClearingView extends FO_Plugin
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
+   * @param int $clearingId
+   * @param int $uploadId
    * @return Highlight[]
    */
-  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
+  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    $unmaskAgents = $selectedAgentId;
+    if(empty($selectedAgentId))
+    {  
+      $scanJobProxy = new \Fossology\Lib\Proxy\ScanJobProxy($this->agentsDao,$uploadId);
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+      $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
+    }
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $unmaskAgents, $highlightId, $clearingId);
     $groupId = $_SESSION[Auth::GROUP_ID];
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
@@ -207,8 +216,8 @@ class ClearingView extends FO_Plugin
     }
 
     global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
@@ -246,7 +255,7 @@ class ClearingView extends FO_Plugin
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId);
 
     $permission = GetUploadPerm($uploadId);
 

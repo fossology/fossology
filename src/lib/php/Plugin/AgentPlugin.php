@@ -161,4 +161,8 @@ abstract class AgentPlugin extends Object implements Plugin
     return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
   }
 
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
 }
