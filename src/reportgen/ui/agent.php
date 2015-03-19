@@ -1,7 +1,7 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
- Author: Daniele Fognini
+ Copyright (C) 2014-2015, Siemens AG
+ Author: Daniele Fognini, Steffen Weber
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,135 +17,72 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
-define("TITLE_agent_reportgen", _("Report Generator"));
-
-class agent_reportgen extends FO_Plugin
+class ReportGenerator extends DefaultPlugin
 {
-
-  /** @var DbManager */
-  private $dbManager;
-
+  const NAME = 'ui_reportgen';
+  
   function __construct()
   {
-    $this->Name = "agent_reportgen";
-    $this->Title = TITLE_agent_reportgen;
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "reportgen"; // agent.agent_name
-    parent::__construct();
-
-    $this->vars['jqPk'] = -1;
-    $this->vars['downloadLink'] = "";
-    $this->vars['reportType'] = "report";
-
-    global $container;
-    $this->dbManager = $container->get('db.manager');
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Report Generator"),
+        self::PERMISSION => Auth::PERM_WRITE,
+        self::REQUIRES_LOGIN => TRUE
+    ));
   }
 
-  /**
-   * \brief Register additional menus.
-   */
-  function RegisterMenus()
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY) return (0);
-    //do not advertise this agent: it can be scheduled only from directly
-    //menu_insert("Agents::" . $this->Title, 0, $this->Name);
+    global $SysConf;
+    $user_pk = $SysConf['auth'][Auth::USER_ID];
+    $group_pk = $SysConf['auth'][Auth::GROUP_ID];
 
-    $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Generate&nbsp;Word&nbsp;Report", 0, $this->Name, $text);
-  }
-
-  /**
-   * \brief Check if the upload has already been successfully scanned.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version
-   **/
-  function AgentHasResults($upload_pk)
-  {
-    return 0; /* this agent can be re run multiple times */
-  }
-
-  /**
-   * @brief Queue the agent.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
-   *  - It is already queued
-   *  - It has already been run by the latest agent version
-   *
-   * @param $job_pk
-   * @param $upload_pk
-   * @param $ErrorMsg - error message on failure
-   * @param $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * @return int|null
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   */
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
-  {
-    $Dependencies[] = "agent_adj2nest";
-
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-  }
-
-  function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY)
+    $uploadId = intval($request->get('upload'));
+    if ($uploadId <=0)
     {
-      return 0;
+      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("parameter error"))));
     }
 
-    global $SysConf;
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-
-    $uploadId = GetParm('upload', PARM_INTEGER);
-    if ($uploadId <=0)
-      return _("parameter error");
-
     if (GetUploadPerm($uploadId) < Auth::PERM_WRITE)
-      return _("permission denied");
+    {
+      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("permission denied"))));
+    }
 
-    $row = $this->dbManager->getSingleRow(
-      "SELECT upload_filename FROM upload WHERE upload_pk = $1",
-      array($uploadId), "getUploadName"
-    );
+    $dbManager = $this->getObject('db.manager');
+    $row = $dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk=$1", array($uploadId), "getUploadName");
 
     if ($row === false)
-      return _("cannot find uploadId");
-
-    $ShortName = $row['upload_filename'];
-
-    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadId);
+    {
+      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("cannot find uploadId"))));
+    }
+    
+    $shortName = $row['upload_filename'];
+    $reportGenAgent = plugin_find('agent_reportgen');
+    $job_pk = JobAddJob($user_pk, $group_pk, $shortName, $uploadId);
     $error = "";
-    $jq_pk = $this->AgentAdd($job_pk, $uploadId, $error, array());
+    $jq_pk = $reportGenAgent->AgentAdd($job_pk, $uploadId, $error, array());
 
     if ($jq_pk<0)
     {
-      return _("Cannot schedule").": ".$error;
+      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("Cannot schedule").": ".$error)));
     }
 
-    $this->vars['jqPk'] = $jq_pk;
-    $this->vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
-
-    $text = sprintf(_("Generating new report for '%s'"), $ShortName);
-    return "<h2>".$text."</h2>";
+    $vars['jqPk'] = $jq_pk;
+    $vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
+    $vars['reportType'] = "report";
+    $text = sprintf(_("Generating new report for '%s'"), $shortName);
+    $vars['content'] = "<h2>".$text."</h2>";
+            
+    return $this->render("report.html.twig", $this->mergeWithDefault($vars));
   }
 
-  public function getTemplateName()
+  function preInstall()
   {
-    return "report.html.twig";
+    $text = _("Generate Report");
+    menu_insert("Browse-Pfile::Generate&nbsp;Word&nbsp;Report", 0, self::NAME, $text);
   }
-
 }
 
-$NewPlugin = new agent_reportgen;
+register_plugin(new ReportGenerator());
