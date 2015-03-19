@@ -29,7 +29,7 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
         " LEFT JOIN clearing_decision cd ON cd.group_fk=$5 AND (ut.uploadtree_pk=cd.uploadtree_fk AND scope=0 or ut.pfile_fk=cd.pfile_fk AND scope=1) "
         " where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and ut.pfile_fk != 0"
         " ORDER BY ut.uploadtree_pk, ut.pfile_fk, date_added DESC"
-      ") itemView WHERE decision_type!=$4 OR decision_type=$4"
+      ") itemView WHERE decision_type!=$4 OR decision_type IS NULL"
       ,
       int, long, long, int, long),
     uploadId, left, right, DECISION_TYPE_FOR_IRRELEVANT, groupId

@@ -148,14 +148,13 @@ class MonkBulkTest extends PHPUnit_Framework_TestCase
     $removing = false;
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
-    $jobId = 64;
-
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
+    $jobId = 64;
     list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkId);
-var_dump($output);
+
     $this->rmRepo();
 
     $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
@@ -164,7 +163,7 @@ var_dump($output);
     $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
     $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
 
-    //assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
+    assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
     assertThat(count($relevantDecisionsItem7),is(equalTo(1)));
     $rfForACE = 225;
     assertThat($relevantDecisionsItem6,hasKeyInArray($rfForACE));
