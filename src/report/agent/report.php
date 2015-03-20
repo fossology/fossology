@@ -54,9 +54,10 @@ class ReportAgent extends Agent
                                 "name" => "Arial"
                                );
 
-  private $paragraphStyle = array("spaceAfter" => 0, 
+  private $paragraphStyle = array("spaceAfter" => 0,
                                   "spaceBefore" => 0,
-				  "spacing" => 0);
+                                  "spacing" => 0
+                                 );
   
   function __construct()
   {
