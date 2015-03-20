@@ -54,7 +54,10 @@ class ReportAgent extends Agent
                                 "name" => "Arial"
                                );
 
-
+  private $paragraphStyle = array("spaceAfter" => 0, 
+                                  "spaceBefore" => 0,
+				  "spacing" => 0);
+  
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
@@ -111,18 +114,25 @@ class ReportAgent extends Agent
    * @param section as a param 
    */
   private function reportFooter($phpWord, $section)
-  {
+  { 
+    global $SysConf;
+    $commitId = $SysConf['BUILD']['COMMIT_HASH'];
+    $commitDate = $SysConf['BUILD']['COMMIT_DATE'];
+    print_r($commitId);
+    print_r($commitDate);
     $styleTable = array('borderSize'=>10, 'borderColor'=>'FFFFFF' );
     $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
     $footerStyle = array("color" => "000000", "size" => 10, "bold" => true, "name" => $this->fontFamily);
+    $footerTime = date("D M j G:i:s T Y");
+    $footerTime = date("Y/m/d H:i:s T");
     $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
-    $footerSpace = str_repeat("  ", 80);
+    $footerSpace = str_repeat("  ", 11);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";
     $footer = $section->createFooter(); 
-    $table = $footer->addTable('footerTableStyle');
+    $table = $footer->addTable("footerTableStyle");
     $table->addRow(200, $styleFirstRow);
-    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars(" $footerCopyright $footerSpace $footerPageNo"), $footerStyle); 
+    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace #$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
   }
 
 
@@ -850,16 +860,16 @@ class ReportAgent extends Agent
     $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $this->tableHeading);
     $table = $section->addTable($this->tablestyle);
     foreach($licenses as $licenseStatement){
-      $table->addRow($rowHeight);
-      $cell1 = $table->addCell($firstColLen); 
-      $cell1->addText(htmlspecialchars($licenseStatement["content"]));
-      $cell2 = $table->addCell($secondColLen); 
+      $table->addRow($rowHeight,$this->paragraphStyle);
+      $cell1 = $table->addCell($firstColLen,$paragraphStyle); 
+      $cell1->addText(htmlspecialchars($licenseStatement["content"]),null,$this->paragraphStyle);
+      $cell2 = $table->addCell($secondColLen,$paragraphStyle); 
       // replace new line character
       $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"]));
-      $cell2->addText($licenseText);
-      $cell3 = $table->addCell($thirdColLen);
+      $cell2->addText($licenseText,null,$this->paragraphStyle);
+      $cell3 = $table->addCell($thirdColLen,$this->paragraphStyle);
       foreach($licenseStatement["files"] as $fileName){ 
-         $cell3->addText(htmlspecialchars($fileName));
+         $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
       }
     }
     $section->addTextBreak(); 
@@ -897,7 +907,7 @@ class ReportAgent extends Agent
    */
   private function getRowsAndColumnsForCEI($section, $title, $statementsCEI)
   {
-    $rowHeight = 500;
+    $rowHeight = 50;
     $firstColLen = 12000;
     $secondColLen = 3500;
 
@@ -905,12 +915,12 @@ class ReportAgent extends Agent
 
     $table = $section->addTable($this->tablestyle);
     foreach($statementsCEI as $statements){
-      $table->addRow($rowHeight);
+      $table->addRow($rowHeight,$this->paragraphStyle);
       $cell1 = $table->addCell($firstColLen); 
-      $cell1->addText(htmlspecialchars($statements['content']));
+      $cell1->addText(htmlspecialchars($statements['content']),null,$this->paragraphStyle);
       $cell2 = $table->addCell($secondColLen);
       foreach($statements['files'] as $fileName){ 
-        $cell2->addText(htmlspecialchars($fileName));
+        $cell2->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
       }
     }
     $section->addTextBreak(); 
