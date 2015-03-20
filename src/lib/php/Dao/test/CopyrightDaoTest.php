@@ -99,15 +99,15 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype','clearing_decision_type'));
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','clearing_decision_type_type_seq'));
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey','clearing_decision_type_pkey'));
+    $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype'));
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq'));
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','users'));
 
     $this->testDb->insertData(array('agent'), false);
     $this->runCopyright();
 
-    $this->testDb->insertData(array('mimetype','pfile','uploadtree_a','clearing_decision_type','bucketpool','users','copyright'), false);
+    $this->testDb->insertData(array('mimetype','pfile','uploadtree_a','bucketpool','users','copyright'), false);
   }
 
   private function searchContent($array, $content)

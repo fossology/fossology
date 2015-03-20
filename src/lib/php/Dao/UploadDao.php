@@ -246,7 +246,7 @@ class UploadDao extends Object
     $originItem = $this->getUploadEntry($itemId, $uploadTreeTableName);
     $originLft = $originItem['lft'];
 
-    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (1<<29) = 0";
+    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (3<<28) = 0";
     $uploadTreeViewName = 'items2care';
     
     if($direction == self::DIR_FWD)

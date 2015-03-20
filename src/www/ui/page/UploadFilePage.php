@@ -269,10 +269,12 @@ class UploadFilePage extends DefaultPlugin
   {
     $agentList = menu_find($hook, $maxDepth) ?: array();
     $agentPluginNames = array();
-    foreach($agentList as $parmAgent) {
-      $agent = plugin_find_id($parmAgent->URI);
-      if (!empty($agent)) {
-        $agentPluginNames[] = $agent;
+    if(is_array($agentList)) {
+      foreach ($agentList as $parmAgent) {
+        $agent = plugin_find_id($parmAgent->URI);
+        if (!empty($agent)) {
+          $agentPluginNames[] = $agent;
+        }
       }
     }
     return $agentPluginNames;
