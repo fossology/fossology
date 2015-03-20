@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -190,6 +190,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $uploadId =123;
     $left=2009;
     $containerMode = 1<<29;
+    $nonArtifactChildId = $uploadtreeId+2;
     $this->dbManager->insertTableRow('uploadtree',
             array('uploadtree_pk'=>$uploadtreeId, 'upload_fk'=>$uploadId, 'pfile_fk'=>0,
                 'lft'=>$left, 'rgt'=>$left+5, 'parent'=>NULL, 'ufile_mode'=>$containerMode));
@@ -203,14 +204,19 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $licDao = new LicenseDao($this->dbManager);
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,$uploadtreetable_name,$uploadId,$left,$left+5);
 
-    $row = array('pfile_id'=>$pfileId,'license_shortname'=>$licAll[$rf_pk],'license_id'=>$rf_pk,'match_percentage'=>$matchPercent,'agent_id'=>$agentId);
+    $row = array('pfile_id'=>$pfileId,'license_id'=>$rf_pk,'match_percentage'=>$matchPercent,'agent_id'=>$agentId,'uploadtree_pk'=>$nonArtifactChildId);
     $expected = array($pfileId=>array($rf_pk=>$row));
+    $itemRestriction = array($nonArtifactChildId, $nonArtifactChildId+7);
     
-    $licensesForGoodAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = $agentId);
+    $licensesForGoodAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = $agentId, $itemRestriction);
     assertThat($licensesForGoodAgent, is(equalTo($expected)));
 
-    $licensesForBadAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = 1+$agentId);
+    $licensesForBadAgent = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = 1+$agentId, $itemRestriction);
     assertThat($licensesForBadAgent, is(equalTo(array())));
+
+    $licensesOutside = $licDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $selectedAgentId = $agentId, array());
+    assertThat($licensesOutside, is(equalTo(array())));
+
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 

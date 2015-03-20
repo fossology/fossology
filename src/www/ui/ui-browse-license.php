@@ -342,11 +342,17 @@ class ui_browse_license extends FO_Plugin
     {
       $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
+    
+    $childrenList = array();
+    foreach($Children as $child)
+    {
+      $childrenList[] = $child['uploadtree_pk'];
+    }
 
     $pfileLicenses = array();
     foreach($selectedScanners as $agentName=>$agentId)
     {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $childrenList);
       foreach ($licensePerPfile as $pfile => $licenseRow)
       {
         foreach ($licenseRow as $licId => $row)
