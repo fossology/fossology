@@ -11,7 +11,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -148,7 +147,7 @@ GArray* tokenize(const char* inputString, const char* delimiters) {
   return tokenArray;
 }
 
-int tokensEquals(GArray* a, GArray* b) {
+int tokensEquals(const GArray* a, const GArray* b) {
   if (b->len != a->len)
     return 0;
 
@@ -163,7 +162,7 @@ int tokensEquals(GArray* a, GArray* b) {
   return 1;
 }
 
-size_t token_position_of(size_t index, GArray* tokens) {
+size_t token_position_of(size_t index, const GArray* tokens) {
   size_t result = 0;
   size_t previousLength = 0;
 

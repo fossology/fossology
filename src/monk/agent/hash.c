@@ -12,11 +12,11 @@ You should have received a copy of the GNU General Public License along with thi
 #include "hash.h"
 #include <stdio.h>
 
-uint32_t hash(char* string) {
+uint32_t hash(const char* string) {
 
   uint32_t result = hash_init();
 
-  char* ptr = string;
+  const char* ptr = string;
 
   while (*ptr) {
     hash_add(ptr, &result);
