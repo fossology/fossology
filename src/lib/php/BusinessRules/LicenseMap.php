@@ -44,20 +44,42 @@ class LicenseMap extends Object
    * @param int $groupId
    * @param int $usageId
    */
-  public function __construct(DbManager $dbManager, $groupId, $usageId=null)
+  public function __construct(DbManager $dbManager, $groupId, $usageId=null, $full=false)
   {
     $this->usageId = $usageId?:self::CONCLUSION;
     $this->groupId = $groupId;
     $this->dbManager = $dbManager;
-    if ($this->usageId == self::TRIVIAL)
+    if ($this->usageId == self::TRIVIAL && !$full)
     {
       return;
     }
     $licenseView = new LicenseViewProxy($groupId);
-    $query = $licenseView->asCTE()
+    if($full)
+    {
+      $query = $licenseView->asCTE()
+            .' SELECT r1.rf_pk rf_fk, r2.rf_shortname parent_shortname, r2.rf_pk rf_parent FROM '.$licenseView->getDbViewName()
+            .' r1 left join license_map on usage=$1 and rf_fk=r1.rf_pk
+         left join '.$licenseView->getDbViewName()
+            .' r2 on rf_parent=r2.rf_pk or usage is null and r1.rf_pk=r2.rf_pk';
+      /*      
+      $licenseView->asCTE()
+            .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_parent FROM (
+                SELECT r1.rf_pk, r2.rf_shortname, usage, rf_parent FROM '.$licenseView->getDbViewName()
+            .' r1 inner join license_map on usage=$1 and rf_fk=r1.rf_pk
+             left join license_ref r2 on rf_parent=r2.rf_pk
+            UNION
+            SELECT rf_pk, rf_shortname, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
+            .') full_map ORDER BY usage DESC';
+      */
+      $stmt = __METHOD__.".$this->usageId,$groupId,full";
+    }
+    else
+    {
+      $query = $licenseView->asCTE()
             .' SELECT rf_fk, rf_shortname parent_shortname, rf_parent FROM license_map, '.$licenseView->getDbViewName()
             .' WHERE rf_pk=rf_parent AND rf_fk!=rf_parent AND usage=$1';
-    $stmt = __METHOD__.".$this->usageId,$groupId";
+      $stmt = __METHOD__.".$this->usageId,$groupId";
+    }
     $dbManager->prepare($stmt,$query);
     $res = $dbManager->execute($stmt,array($this->usageId));
     while($row = $dbManager->fetchArray($res))

@@ -250,20 +250,21 @@ class LicenseDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $selectedAgentId
+   * @param int $selectedAgentId
+   * @param array $mask
    * @return array
    */
-  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId)
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $mask)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
     $param = array($selectedAgentId, $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
 
     $sql = "SELECT utree.pfile_fk as pfile_id,
-           rf_shortname as license_shortname,
            license_ref.rf_pk as license_id,
            rf_match_pct as match_percentage,
-           CAST($1 AS INT) AS agent_id
+           CAST($1 AS INT) AS agent_id,
+           uploadtree_pk
          FROM license_file, license_ref, $uploadTreeTableName utree
          WHERE agent_fk = $1
            AND license_file.rf_fk = license_ref.rf_pk
@@ -281,7 +282,10 @@ class LicenseDao extends Object
     $licensesPerFileId = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
+      if (in_array($row['uploadtree_pk'], $mask))
+      {
+        $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
+      }
     }
 
     $this->dbManager->freeResult($result);
@@ -380,7 +384,7 @@ class LicenseDao extends Object
     {
       $param[] = $groupId;
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group=$".count($param),
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url FROM license_candidate WHERE $condition AND group_fk=$".count($param),
         $param, __METHOD__ . ".$condition.group");
     }
     if (false === $row)

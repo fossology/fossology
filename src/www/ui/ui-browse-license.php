@@ -130,7 +130,7 @@ class ui_browse_license extends FO_Plugin
     }
     $upload = GetParm("upload", PARM_INTEGER);
     $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       $this->vars['content'] = "<h2>$text<h2>";
@@ -219,7 +219,7 @@ class ui_browse_license extends FO_Plugin
     
     $UniqueTagArray = array();
     global $container;
-    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
+    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
 
     /***************************************
@@ -342,16 +342,22 @@ class ui_browse_license extends FO_Plugin
     {
       $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
+    
+    $childrenList = array();
+    foreach($Children as $child)
+    {
+      $childrenList[] = $child['uploadtree_pk'];
+    }
 
     $pfileLicenses = array();
     foreach($selectedScanners as $agentName=>$agentId)
     {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $childrenList);
       foreach ($licensePerPfile as $pfile => $licenseRow)
       {
         foreach ($licenseRow as $licId => $row)
         {
-          $lic = $this->licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
+          $lic = $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
