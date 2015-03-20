@@ -260,7 +260,6 @@ class LicenseDao extends Object
     $param = array($selectedAgentId, $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
 
     $sql = "SELECT utree.pfile_fk as pfile_id,
-           rf_shortname as license_shortname,
            license_ref.rf_pk as license_id,
            rf_match_pct as match_percentage,
            CAST($1 AS INT) AS agent_id

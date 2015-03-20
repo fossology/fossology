@@ -219,7 +219,7 @@ class ui_browse_license extends FO_Plugin
     
     $UniqueTagArray = array();
     global $container;
-    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
+    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
 
     /***************************************
@@ -351,7 +351,7 @@ class ui_browse_license extends FO_Plugin
       {
         foreach ($licenseRow as $licId => $row)
         {
-          $lic = $this->licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
+          $lic = $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
