@@ -89,7 +89,7 @@ class ClearingDao extends Object
                 cd.user_fk AS user_id,
                 cd.decision_type AS type_id,
                 cd.scope AS scope,
-                EXTRACT(EPOCH FROM cd.date_added) AS date_added,
+                EXTRACT(EPOCH FROM cd.date_added) AS ts_added,
                 CASE cd.scope WHEN $globalScope THEN 1 ELSE 0 END AS scopesort
               FROM clearing_decision cd
                 INNER JOIN $uploadTreeTable ut
@@ -277,7 +277,7 @@ class ClearingDao extends Object
             ->setUserId($row['user_id'])
             ->setType(intval($row['type_id']))
             ->setScope(intval($row['scope']))
-            ->setDateAdded($row['date_added']);
+            ->setTimeStamp($row['ts_added']);
       }
 
       if ($licenseId !== null)
@@ -381,7 +381,7 @@ INSERT INTO clearing_decision (
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @return ClearingEvent[] sorted by date_added
+   * @return ClearingEvent[] sorted by ts_added
    */
   public function getRelevantClearingEvents($itemTreeBounds, $groupId)
   {
@@ -401,7 +401,7 @@ INSERT INTO clearing_decision (
     $stmt = __METHOD__;
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo, EXTRACT(EPOCH FROM date_added) AS ts_added
              FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
-             WHERE uploadtree_fk=$1 AND group_fk=$2 AND EXTRACT(EPOCH FROM date_added)>$3
+             WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3)
              ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getItemId(),$groupId,$date));
@@ -411,7 +411,7 @@ INSERT INTO clearing_decision (
       $events[$row['rf_fk']] = ClearingEventBuilder::create()
               ->setEventId($row['clearing_event_pk'])
               ->setComment($row['comment'])
-              ->setDateFromTimeStamp($row['ts_added'])
+              ->setTimeStamp($row['ts_added'])
               ->setEventType($row['type_fk'])
               ->setLicenseRef($licenseRef)
               ->setRemoved($this->dbManager->booleanFromDb($row['removed']))

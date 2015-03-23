@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl, Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
@@ -206,16 +205,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
-  private function getMyDate($in)
+  private function getMyDate($ts)
   {
-    $date = new DateTime();
-    return $date->setTimestamp($in)->format('Y-m-d H:i:s T');
-  }
-
-  private function getMyDate2($in)
-  {
-    $date = new DateTime();
-    return $date->setTimestamp($in);
+    return date('Y-m-d H:i:s T',$ts);
   }
 
   public function testRelevantClearingEvents()

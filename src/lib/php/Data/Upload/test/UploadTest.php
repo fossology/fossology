@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,29 +19,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Upload;
 
 
-use DateTime;
-
 class UploadTest extends \PHPUnit_Framework_TestCase
 {
+  /** @var int */
   private $id = 132;
-
+  /** @var string */
   private $fileName = "<fileName>";
-
+  /** @var string */
   private $description = "<description>";
-
+  /** @var string */
   private $treeTableName = "<treeTableName>";
-
-  /** @var DateTime */
+  /** @var int */
   private $timestamp;
-
   /** @var Upload */
   private $upload;
 
   public function setUp()
   {
-    $this->timestamp = new DateTime();
-
+    $this->timestamp = time();
     $this->upload = new Upload($this->id, $this->fileName, $this->description, $this->treeTableName, $this->timestamp);
+    
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+  }
+
+  function tearDown()
+  {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
   public function testGetId()
@@ -76,7 +79,7 @@ class UploadTest extends \PHPUnit_Framework_TestCase
         'upload_filename' => $this->fileName,
         'upload_desc' => $this->description,
         'uploadtree_tablename' => $this->treeTableName,
-        'upload_ts' => $this->timestamp->format('Y-m-d H:i:s')
+        'upload_ts' => date('Y-m-d H:i:s',$this->timestamp)
     );
 
     $upload = Upload::createFromTable($row);

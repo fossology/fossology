@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Clearing;
 
-use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Util\Object;
 
@@ -28,8 +27,8 @@ class ClearingEvent extends Object implements LicenseClearing
   private $eventId;
   /** @var int */
   private $uploadTreeId;
-  /** @var DateTime */
-  private $dateTime;
+  /** @var int */
+  private $timeStamp;
   /** @var int */
   private $userId;
   /** @var int */
@@ -42,7 +41,7 @@ class ClearingEvent extends Object implements LicenseClearing
   /**
    * @param int $eventId
    * @param int $uploadTreeId
-   * @param DateTime $dateTime
+   * @param int $timestamp
    * @param int $userId
    * @param int $groupId
    * @param int $eventType
@@ -51,11 +50,11 @@ class ClearingEvent extends Object implements LicenseClearing
    * @param string $reportinfo
    * @param string $comment
    */
-  public function __construct($eventId, $uploadTreeId, $dateTime, $userId, $groupId, $eventType, ClearingLicense $clearingLicense)
+  public function __construct($eventId, $uploadTreeId, $timestamp, $userId, $groupId, $eventType, ClearingLicense $clearingLicense)
   {
     $this->eventId = $eventId;
     $this->uploadTreeId = $uploadTreeId;
-    $this->dateTime = $dateTime;
+    $this->timeStamp = $timestamp;
     $this->userId = $userId;
     $this->groupId = $groupId;
     $this->eventType = $eventType;
@@ -71,11 +70,11 @@ class ClearingEvent extends Object implements LicenseClearing
   }
 
   /**
-   * @return DateTime
+   * @return int
    */
-  public function getDateTime()
+  public function getTimeStamp()
   {
-    return $this->dateTime;
+    return $this->timeStamp;
   }
 
   /**
