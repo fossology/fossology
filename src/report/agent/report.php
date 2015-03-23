@@ -15,6 +15,7 @@ define("REPORT_AGENT_NAME", "report");
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
+use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use PhpOffice\PhpWord;
 
@@ -34,7 +35,10 @@ class ReportAgent extends Agent
 
   /** @var eccClearedGetter */
   private $eccClearedGetter;
-  
+
+  /** @var  LicenseIrrelevantGetter*/
+  private $LicenseIrrelevantGetter;
+
   /** @var UploadDao */
   private $uploadDao;
 
@@ -65,6 +69,7 @@ class ReportAgent extends Agent
     $this->ipClearedGetter = new XpClearedGetter("ip", "ip", false);
     $this->eccClearedGetter = new XpClearedGetter("ecc", "ecc", false);
     $this->licenseClearedGetter = new LicenseClearedGetter();
+    $this->LicenseIrrelevantGetter = new LicenseIrrelevantGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -79,6 +84,8 @@ class ReportAgent extends Agent
     $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licenses["statements"]));
+    $licensesIrre = $this->LicenseIrrelevantGetter->getCleared($uploadId, $groupId);
+    $this->heartbeat(count($licensesIrre["statements"]));
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($copyrights["statements"]));
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId);
@@ -88,9 +95,10 @@ class ReportAgent extends Agent
     $contents = array("licenses" => $licenses,
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
-                      "ip" => $ip
+		      "ip" => $ip,
+		      "licensesIrre" => $licensesIrre
     );
-
+    print_r($contents);
     $this->writeReport($contents, $uploadId);
 
     return true;
@@ -180,7 +188,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Clearing Information"), $firstRowStyle, $paragraphStyle);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Department"), $firstRowStyle1, $paragraphStyle);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" IC SG EA SOL/PRO"), $firstRowStyle2, $paragraphStyle);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" FOSSologyNG Generation"), $firstRowStyle2, $paragraphStyle);
     
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -928,6 +936,38 @@ class ReportAgent extends Agent
     return true;
   }
 
+
+  private function getRowsAndColumnsForIrre($section, $title, $licensesIrre)
+  {
+
+    $thColor = array("bgColor" => "D2D0CE");
+    $thText = array("size" => 12, "bold" => true);
+    $rowWidth = 50;
+    $firstColLen = 3500;
+    $secondColLen = 3500;
+
+    $section->addText(htmlspecialchars($title), $this->tableHeading);
+
+    $table = $section->addTable($this->tablestyle);
+    $table->addRow($rowWidth,$this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars(" Path"), $thText,$this->paragraphStyle);
+    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars(" Files"), $thText,$this->paragraphStyle);
+    
+    foreach($licensesIrre as $statements){
+      $table->addRow($rowWidth,$this->paragraphStyle);
+      $cell1 = $table->addCell($firstColLen); 
+      $cell1->addText(htmlspecialchars($statements['content']),null,$this->paragraphStyle);
+      $cell2 = $table->addCell($secondColLen);
+      foreach($statements['files'] as $fileName){ 
+        $cell2->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
+      }
+    }
+    $section->addTextBreak(); 
+    return true;
+  }
+
+
+
   /**
    * @brief save the docx file into repository.
    * @param $contents, $uploadId
@@ -1020,6 +1060,9 @@ class ReportAgent extends Agent
     $heading = "13. Intellectual property";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
+    $heading = "14. Irrelevant Files";
+    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements']);
+    
     /* Footer starts */
     $this->reportFooter($phpWord, $section);
 
