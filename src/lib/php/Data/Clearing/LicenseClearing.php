@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -21,38 +21,18 @@ use Fossology\Lib\Data\LicenseRef;
 
 interface LicenseClearing
 {
-  /**
-   * @return string
-   */
+  /** @return string */
   public function getEventType();
-
-  /**
-   * @return boolean
-   */
+  /** @return boolean */
   public function isRemoved();
-
-  /**
-   * @return LicenseRef
-   */
+  /** @return LicenseRef */
   public function getLicenseRef();
-
-  /**
-   * @return int
-   */
+  /** @return int */
   public function getLicenseId();
-
-  /**
-   * @return string
-   */
+  /** @return string */
   public function getLicenseShortName();
-
-  /**
-   * @return string
-   */
+  /** @return string */
   public function getLicenseFullName();
-  
-  /**
-   * @return DateTime
-   */
-  public function getDateTime();
+  /** @return int */
+  public function getTimeStamp();
 }

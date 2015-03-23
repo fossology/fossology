@@ -1,8 +1,23 @@
 <?php
+/*
+Copyright (C) 2015, Siemens AG
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Fossology\Lib\Util\TimingLogger;
 use Symfony\Component\Config\FileLocator;
@@ -21,7 +36,8 @@ $cached = $cacheDir && file_exists($cacheFile);
 if ($cached) {
   require_once($cacheFile);
   $container = new $containerClassName();
-} else {
+}
+else {
   $container = new ContainerBuilder();
 
   $container->setParameter('application_root', dirname(dirname(__DIR__)));
@@ -45,7 +61,14 @@ $GLOBALS['container'] = $container;
 $logger = $container->get('logger');
 $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logger::INFO));
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
-//$logger->pushHandler(new StreamHandler('/tmp/fossology.log', Logger::DEBUG));
+
+$timeZone = $container->getParameter('time.zone');
+if(!empty($timeZone))
+{
+  $twig = $container->get('twig.environment');
+  $twig->getExtension('core')->setTimezone($timeZone);
+}
+
 /** @var TimingLogger */
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime);
