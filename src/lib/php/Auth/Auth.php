@@ -24,13 +24,12 @@ class Auth {
   const GROUP_ID = 'GroupId';
   const USER_LEVEL = 'UserLevel';
 
-    /**
-     * Permissions
-     * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
-     */
+  /**
+   * Permissions
+   * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
+   */
   const PERM_NONE = 0;
   const PERM_READ = 1;
-  const PERM_WRITE=3;
+  const PERM_WRITE= 3;
   const PERM_ADMIN=10;
-}
-
+} 

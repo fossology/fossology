@@ -32,14 +32,18 @@ class Adj2nestAgentPlugin extends AgentPlugin
   function AgentHasResults($uploadId=0)
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
+
+    $uploadtree_tablename = GetUploadtreeTableName($uploadId);
+    if (NULL == $uploadtree_tablename) strcpy($uploadtree_tablename, "uploadtree");
+
     /* see if the latest nomos and bucket agents have scaned this upload for this bucketpool */
-    $uploadtreeRec = $dbManager->getSingleRow("SELECT * FROM uploadtree where upload_fk=$1 and lft is not null",
+    $uploadtreeRec = $dbManager->getSingleRow("SELECT * FROM $uploadtree_tablename where upload_fk=$1 and lft is not null",
             array($uploadId),__METHOD__.'.lftNotSet');
     if (empty($uploadtreeRec))
     {
       return 0;
     }
-    $sql = "SELECT count(*) cnt FROM uploadtree a, uploadtree b
+    $sql = "SELECT count(*) cnt FROM $uploadtree_tablename a, $uploadtree_tablename b
             WHERE a.upload_fk=$1 AND b.upload_fk=$1
               AND a.parent=b.parent and a.lft<b.lft
               AND (a.ufile_name>b.ufile_name AND a.ufile_mode&(1<<29)=b.ufile_mode&(1<<29)

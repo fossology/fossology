@@ -152,7 +152,7 @@ class UploadBrowseProxy extends Object
     $params[] = $this->groupId;
     $params[] = Auth::PERM_READ;
     $partQuery = 'upload
-        INNER JOIN upload_clearing ON upload_pk = upload_clearing.upload_fk
+        INNER JOIN upload_clearing ON upload_pk = upload_clearing.upload_fk AND group_fk=$2
         INNER JOIN uploadtree ON upload_pk = uploadtree.upload_fk AND upload.pfile_fk = uploadtree.pfile_fk
         WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode&2 != 0 AND parent_fk = $1 ) 
          AND (public_perm>=$3

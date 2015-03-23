@@ -74,9 +74,10 @@ class fo_libschema
    * @param string $filename Schema file written by schema-export.php
    * @param bool $debug Turn on debugging (echo sql as it is being executed)
    * @param string $catalog Optional database name
+   * @param array[] $migrateColumns array('tablename'=>array('col1','col2'),...) of columns which should not be deleted
    * @return false=success, on error return string with error message.
    **/
-  function applySchema($filename = NULL, $debug = false, $catalog = 'fossology')
+  function applySchema($filename = NULL, $debug = false, $catalog = 'fossology', $migrateColumns = array())
   {
     global $PG_CONN;
     $this->dbman->setDriver(new Postgres($PG_CONN));
@@ -153,7 +154,9 @@ class fo_libschema
     $this->dropViews($catalog);
     foreach ($this->currSchema['TABLE'] as $table => $columns)
     {
-      $this->dropColumnsFromTable($columns, $table);
+      $skipColumns = array_key_exists($table, $migrateColumns) ? $migrateColumns[$table] : array();
+      $dropColumns = array_diff(array_keys($columns), $skipColumns);
+      $this->dropColumnsFromTable($dropColumns, $table);
     }
     $this->applyOrEchoOnce('COMMIT');
     flush();
@@ -469,7 +472,7 @@ class fo_libschema
     {
       return;
     }
-    foreach ($columns as $column => $modification)
+    foreach ($columns as $column)
     {
       if (empty($column))
       {
