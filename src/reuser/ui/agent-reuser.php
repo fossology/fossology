@@ -122,7 +122,7 @@ class ReuserAgentPlugin extends DefaultPlugin
     $uploadsById = array();
     foreach ($folderUploads as $upload)
     {
-      $uploadsById[$upload->getId()] = $upload->getFilename() . _(" from ") . $upload->getTimestamp()->format("Y-m-d H:i");
+      $uploadsById[$upload->getId()] = $upload->getFilename() . _(" from ") . date("Y-m-d H:i",$upload->getTimestamp());
     }
     return $uploadsById;
   }
