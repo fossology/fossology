@@ -977,6 +977,38 @@ class fo_libschema
     LANGUAGE plpgsql;
       ';
     $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.create');
+
+    /*
+     * getItemParent is a DB function that returns the non-artifact parent of an uploadtree_pk.
+     * drop and recreate to change the return type.
+     */
+    $sql = 'drop function if exists getItemParent(integer);';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop');
+
+    $sql = '
+    CREATE OR REPLACE FUNCTION getItemParent(itemId Integer) RETURNS Integer AS $$
+    WITH RECURSIVE file_tree(uploadtree_pk, parent, jump, path, cycle) AS (
+        SELECT ut.uploadtree_pk, ut.parent,
+          true,
+          ARRAY[ut.uploadtree_pk],
+          false
+        FROM uploadtree ut
+        WHERE ut.uploadtree_pk = $1
+      UNION ALL
+        SELECT ut.uploadtree_pk, ut.parent,
+          ut.ufile_mode & (1<<28) != 0,
+          path || ut.uploadtree_pk,
+        ut.uploadtree_pk = ANY(path)
+        FROM uploadtree ut, file_tree ft
+        WHERE ut.uploadtree_pk = ft.parent AND jump AND NOT cycle
+      )
+   SELECT uploadtree_pk from file_tree ft WHERE NOT jump
+   $$
+   LANGUAGE SQL
+   STABLE
+   RETURNS NULL ON NULL INPUT
+      ';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.create');
     return;
   } // MakeFunctions()
 }

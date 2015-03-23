@@ -189,7 +189,7 @@ class ClearingDao extends Object
     if (!$includeSubFolders)
     {
       $params = array($itemTreeBounds->getItemId());
-      $condition = "ut.parent = $1";
+      $condition = "ut.realparent = $1";
     }
     else {
       $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());

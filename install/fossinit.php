@@ -221,10 +221,9 @@ if(!array_key_exists('Release', $sysconfig)){
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
   $sysconfig['Release'] = '2.6';
 }
+
 if($sysconfig['Release'] == '2.6')
 {
-  $verbose = $Verbose;
-  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
   if(!$dbManager->existsTable('license_candidate'))
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
@@ -234,6 +233,14 @@ if($sysconfig['Release'] == '2.6')
     require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
   }
+  $sysconfig['Release'] = '2.6.3';
+}
+
+if($sysconfig['Release'] == '2.6.3')
+{
+  require_once("$LIBEXECDIR/dbmigrate_real-parent.php");
+  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3.1'),$sqlLog='update.sysconfig.release');
+  $sysconfig['Release'] = '2.6.3.1';
 }
 
 /* sanity check */

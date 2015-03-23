@@ -22,6 +22,7 @@ install: all
 	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	$(INSTALL_DATA) dbmigrate_clearing-event.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
+	$(INSTALL_DATA) dbmigrate_real-parent.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	$(INSTALL_DATA) sanity_check.php $(DESTDIR)$(LIBEXECDIR)/sanity_check.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 
@@ -44,7 +45,10 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_1.4-2.0.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.1.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 

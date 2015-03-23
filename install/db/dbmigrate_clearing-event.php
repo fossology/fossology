@@ -16,16 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-if ($verbose)
-{
-  echo "Link decisions with groups\n";
-}
+echo "Link decisions with groups\n";
 $dbManager->queryOnce('UPDATE clearing_decision cd SET group_fk=u.group_fk FROM users u WHERE cd.user_fk=u.user_pk');
 
-if ($verbose)
-{
-  echo "Fill clearing event table with old decisions";
-}
+echo "Fill clearing event table with old decisions...";
 $dbManager->queryOnce('
 INSERT INTO clearing_event (  uploadtree_fk,
 rf_fk,
@@ -50,10 +44,8 @@ cd.reportinfo,
 cd.date_added
 FROM clearing_decision cd, clearing_licenses cl
 WHERE cd.clearing_pk=cl.clearing_fk');
-if ($verbose)
-{
-  echo " and link them with decisions\n";
-}
+
+echo " and link them with decisions\n";
 $dbManager->queryOnce('
 INSERT INTO clearing_decision_event
 SELECT cd.clearing_pk clearing_fk,ce.clearing_event_pk clearing_event_fk
