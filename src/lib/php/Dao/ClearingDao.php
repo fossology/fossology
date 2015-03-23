@@ -127,7 +127,7 @@ class ClearingDao extends Object
               INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
             WHERE NOT ce.removed
-            GROUP BY license_id";
+            GROUP BY license_id,shortname,fullname";
 
     $this->dbManager->prepare($statementName, $sql);
 
