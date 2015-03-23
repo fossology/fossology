@@ -71,7 +71,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->comment = "Test comment";
     $this->reportinfo = "Test reportinfo";
     $this->scope = DecisionScopes::ITEM;
-    $this->timeStamp = mktime(11, 14, 15, 7, 28, 2012, 0);
+    $this->timeStamp = mktime(11, 14, 15, 7, 28, 2012);
 
     $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
