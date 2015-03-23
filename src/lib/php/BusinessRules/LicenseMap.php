@@ -57,20 +57,14 @@ class LicenseMap extends Object
     if($full)
     {
       $query = $licenseView->asCTE()
-            .' SELECT r1.rf_pk rf_fk, r2.rf_shortname parent_shortname, r2.rf_pk rf_parent FROM '.$licenseView->getDbViewName()
-            .' r1 left join license_map on usage=$1 and rf_fk=r1.rf_pk
-         left join '.$licenseView->getDbViewName()
-            .' r2 on rf_parent=r2.rf_pk or usage is null and r1.rf_pk=r2.rf_pk';
-      /*      
-      $licenseView->asCTE()
             .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_parent FROM (
                 SELECT r1.rf_pk, r2.rf_shortname, usage, rf_parent FROM '.$licenseView->getDbViewName()
             .' r1 inner join license_map on usage=$1 and rf_fk=r1.rf_pk
              left join license_ref r2 on rf_parent=r2.rf_pk
             UNION
             SELECT rf_pk, rf_shortname, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
-            .') full_map ORDER BY usage DESC';
-      */
+            .') full_map ORDER BY rf_pk,usage DESC';
+      
       $stmt = __METHOD__.".$this->usageId,$groupId,full";
     }
     else
