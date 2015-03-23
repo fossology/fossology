@@ -212,10 +212,16 @@ if(!array_key_exists('Release', $sysconfig)){
     require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
     migrate_25_26($Verbose);
   }
-  if(array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
   {
     echo "Missing column clearing_decision.clearing_pk, you should update to version 2.6.2 before migration\n";
-    exit(26);
+    echo "Type 'i' to ignore this warning and run the risk of losing clearing decisions: ";
+    $handle = fopen ("php://stdin","r");
+    $line = fgets($handle);
+    if(trim($line) != 'i'){
+     echo "ABORTING!\n";
+     exit(26);
+    }
   }
   $dbManager->insertTableRow('sysconfig',
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
