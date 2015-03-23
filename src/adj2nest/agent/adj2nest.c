@@ -111,7 +111,7 @@ void	WalkTree	(long Index, long Depth)
     SetNum++;
     }
 
-  snprintf(SQL,sizeof(SQL),"UPDATE %s SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld';",
+  snprintf(SQL,sizeof(SQL),"UPDATE %s SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld'",
 	uploadtree_tablename,LeftSet,SetNum,Tree[Index].UploadtreePk);
   pgResult = PQexec(pgConn, SQL);
   fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__, __LINE__);
