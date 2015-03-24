@@ -61,6 +61,9 @@ matrix:
         - TEST_NAME="make install"
       compiler: gcc
       script:
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
+       - cd src && composer install && composer update && cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
 
@@ -77,7 +80,7 @@ matrix:
        - curl -sS https://getcomposer.org/installer | php
        - sudo mv composer.phar /usr/local/bin/composer
        - cd src && composer install && composer update && cd ..
-       - make install
+       - sudo make install
        - make test
 
     # QA jobs for code analytics and metrics
