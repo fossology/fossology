@@ -58,7 +58,7 @@ class DbViewProxy extends Object
     }
     global $container;
     $dbManager = $container->get('db.manager');
-    $dbManager->queryOnce("CREATE TEMPORARY TABLE $this->dbViewName AS $this->dbViewQuery");
+    $dbManager->queryOnce("CREATE TEMPORARY TABLE $this->dbViewName AS $this->dbViewQuery", "CREATE DbView ".$this->dbViewName);
     $this->materialized = true;
   }
 
@@ -73,7 +73,7 @@ class DbViewProxy extends Object
     }
     global $container;
     $dbManager = $container->get('db.manager');
-    $dbManager->queryOnce("DROP TABLE $this->dbViewName");
+    $dbManager->queryOnce("DROP TABLE $this->dbViewName", "DROP DbView ".$this->dbViewName);
     $this->materialized = false;
   }
 

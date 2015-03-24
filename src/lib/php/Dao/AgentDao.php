@@ -56,7 +56,7 @@ class AgentDao extends Object
 
     $this->dbManager->queryOnce("CREATE TABLE ".$tableName."() INHERITS(ars_master);
     ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_agent_fk_fkc FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);
-    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE");
+    ALTER TABLE ONLY ".$tableName." ADD CONSTRAINT ".$tableName."_upload_fk_fkc FOREIGN KEY (upload_fk) REFERENCES upload(upload_pk) ON DELETE CASCADE", __METHOD__);
   }
 
   public function writeArsRecord($agentName,$agentId,$uploadId,$arsId=0,$success=false,$status="")
