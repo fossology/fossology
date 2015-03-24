@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl, Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -19,10 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
@@ -76,8 +76,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     
     $this->testDb->createInheritedTables();
 
-    $this->testDb->insertData(array('clearing_decision_type'));
-
     $userArray = array(
         array('myself', 1),
         array('in_same_group', 2),
@@ -88,14 +86,14 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     }
 
     $refArray = array(
-        array(401, 'FOO', 'foo text'),
-        array(402, 'BAR', 'bar text'),
-        array(403, 'BAZ', 'baz text'),
-        array(404, 'QUX', 'qux text')
+        array(401, 'FOO', 'foo full', 'foo text'),
+        array(402, 'BAR', 'bar full', 'bar text'),
+        array(403, 'BAZ', 'baz full', 'baz text'),
+        array(404, 'QUX', 'qux full', 'qux text')
     );
     foreach ($refArray as $params)
     {
-      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_text', $params, $logStmt = 'insert.ref');
+      $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_fullname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
     $modd = 536888320;
@@ -206,16 +204,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
-  private function getMyDate($in)
+  private function getMyDate($ts)
   {
-    $date = new DateTime();
-    return $date->setTimestamp($in)->format('Y-m-d H:i:s T');
-  }
-
-  private function getMyDate2($in)
-  {
-    $date = new DateTime();
-    return $date->setTimestamp($in);
+    return date('Y-m-d H:i:s T',$ts);
   }
 
   public function testRelevantClearingEvents()
@@ -372,6 +363,30 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             
     $map = $this->clearingDao->getClearedLicenseMultiplicities($treeBounds, $groupId);
     assertThat($map, is(array('FOO'=>2)));
+  }
+  
+  public function testGetClearedLicenses()
+  {
+    $user = 1;
+    $groupId = 601;
+    $rf = 401;
+    $isRm = false;
+    $t = -10815;
+    $item = 303;
+    $this->buildProposals(array(array($item,$user,$groupId,$rf,$isRm,$t),
+        array($item,$user,$groupId,$rf+1,!$isRm,$t+1)),$eventId=0);
+    $type = DecisionTypes::IDENTIFIED;
+    $scope = DecisionScopes::ITEM;
+    $this->buildDecisions(array(  array( $item,$user,$groupId,$type,$t,$scope,array($eventId,$eventId+1) )  ));
+    $treeBounds = M::mock(ItemTreeBounds::classname());
+
+    $treeBounds->shouldReceive('getLeft')->andReturn(1);
+    $treeBounds->shouldReceive('getRight')->andReturn(8);
+    $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
+    $treeBounds->shouldReceive('getUploadId')->andReturn(102);
+            
+    $map = $this->clearingDao->getClearedLicenses($treeBounds, $groupId);
+    assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full'))));
   }
   
 }

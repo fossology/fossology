@@ -344,7 +344,7 @@ class ClearingView extends FO_Plugin
       }
       ksort($licenseOutputs, SORT_STRING);
       $row = array(
-          'date' => $clearingDecision->getDateAdded(),
+          'date' => $clearingDecision->getTimeStamp(),
           'username' => $clearingDecision->getUserName(),
           'scope' => $scope->getTypeName($clearingDecision->getScope()),
           'type' => $this->decisionTypes->getTypeName($clearingDecision->getType()),

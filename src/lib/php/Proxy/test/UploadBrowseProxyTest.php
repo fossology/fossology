@@ -201,6 +201,23 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     assertThat($row['count'],equalTo(1));
   }
   
+  public function testGetFolderPartialQueryWithUserInTwoGoodGroups()
+  {
+    $this->testDb->createPlainTables(array('foldercontents','uploadtree'));
+    $folderId = 701;
+    $uploadId = 1;
+    $otherGroupId = $this->groupId+1;
+    $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>1));
+    $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$otherGroupId, UploadBrowseProxy::PRIO_COLUMN=>1));
+    $this->testDb->getDbManager()->insertTableRow('uploadtree',array('uploadtree_pk'=>201, 'upload_fk'=>$uploadId, 'lft'=>1, 'ufile_name'=>'A.zip','pfile_fk'=>31415));
+    $this->testDb->getDbManager()->insertTableRow('foldercontents',array('foldercontents_pk'=>1, 'parent_fk'=>$folderId, 'foldercontents_mode'=>2, 'child_id'=>$uploadId));
+    $params = array($folderId);
+    $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
+    $view = $uploadBrowseProxy->getFolderPartialQuery($params);
+    $row = $this->testDb->getDbManager()->getSingleRow("SELECT count(*) FROM $view", $params);
+    assertThat($row['count'],equalTo(1));
+  }
+  
   
   /**
    * @expectedException \Exception

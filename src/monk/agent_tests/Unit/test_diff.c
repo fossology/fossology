@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 #include "monk.h"
 
-int token_search_diff(char * text, char* search,
+int token_search_diff(char* text, char* search, unsigned int maxAllowedDiff,
         size_t expectedMatchCount, size_t expectedAdditionsCount, size_t expectedRemovalsCount, ...) {
 
   int result;
@@ -37,7 +37,7 @@ int token_search_diff(char * text, char* search,
   GArray* removals = g_array_new(TRUE, FALSE, sizeof (size_t));
 
   size_t textStartPosition = 0;
-  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 50, 1); //TODO test searchStartPosition
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, maxAllowedDiff, 1);
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
     return diffResult != NULL;
@@ -164,30 +164,39 @@ end:
 void test_token_search_diffs() {
   // simple matches
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "one",
+          5,
           1, 0, 0,
           0));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "bar",
+          5,
           1, 0, 0,
           4));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "two",
+          5,
           1, 0, 0,
           1));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "3^foo",
+          5,
           2, 0, 0,
           2, 3));
   CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^foo^^bar^", "",
+          5,
           0, 0, 0));
 
   // not matches
   CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^foo^^bar^", "one^^foo^^bar^^3",
+          2,
           0, 0, 0));
-  CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z",
+  CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z^d^5",
+          2,
           0, 0, 0));
   CU_ASSERT_FALSE(token_search_diff("one^two^^three^^bas", "one^^3^3^^bar^^z",
+          2,
           0, 0, 0));
 
   // simple additions
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "one^^foo^^bar",
+          5,
           3, 2, 0,
           0, 3, 4, // matched
           1, 2 // additions
@@ -195,6 +204,7 @@ void test_token_search_diffs() {
 
   // simple removals
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^z", "one^^3^3^^5^^bar^^y^^z",
+          5,
           4, 0, 2,
           0, 1, 2, 3, // matched
           2, 3 // removals
@@ -202,6 +212,7 @@ void test_token_search_diffs() {
 
   // mixed additions and removals
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^bar^z", "one^^3^3^^bar^^z",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, // additions
@@ -209,6 +220,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^1^2^3^4^5^z", "one^^1^2^3^4^5^4^z",
+          5,
           7, 1, 1,
           0, 2, 3, 4, 5, 6, 7, // matched
           1, // additions
@@ -216,6 +228,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^e", "one^^3^bar^^4^e",
+          5,
           4, 1, 1,
           0, 1, 2, 4, // matched
           3, // additions
@@ -223,6 +236,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^z", "one^^3^bar^^4^a^^z",
+          5,
           4, 1, 1,
           0, 1, 2, 4, // matched
           3, // additions
@@ -230,14 +244,24 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^6^z", "one^^3^bar^^4^^z",
+          5,
           4, 2, 1,
           0, 1, 2, 5, // matched
           3, 4, // additions
           3 // removals
           ));
 
+  CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z",
+          2,
+          3, 1, 2,
+          0, 2, 3, // matched
+          1, // additions
+          3, 4 // removals
+          ));
+
   // simple replace
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^two^three^^bar", "foo^1^two^three^bar",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, 1, // additions
@@ -245,6 +269,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^bar^two^three^^bar", "foo^1^two^three^bar",
+          5,
           4, 2, 1,
           0, 3, 4, 5, // matched
           1, 2, // additions
@@ -252,6 +277,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^two^three^^bar", "foo^1^2^two^three^bar",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, // additions
@@ -614,6 +640,7 @@ void test_lookForReplaces2() {
   CU_ASSERT_FALSE(token_search_diff(
           "0^a^a^a^1^2^3^4^1^5",
           "0^b^b^b^4^1^5",
+          3,
           0, 0, 0));
 }
 

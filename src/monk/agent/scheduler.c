@@ -12,13 +12,12 @@ You should have received a copy of the GNU General Public License along with thi
 #include "scheduler.h"
 
 #include "database.h"
-#include "monk.h"
 
-int sched_onNoMatch(MonkState* state, File* file) {
+int sched_onNoMatch(MonkState* state, const File* file) {
   return saveNoResultToDb(state->dbManager, state->agentId, file->id);
 }
 
-int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo) {
+int sched_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo) {
   fo_dbManager* dbManager = state->dbManager;
   const int agentId = state->agentId;
   const long fileId = file->id;
@@ -43,7 +42,7 @@ int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchI
   return success;
 }
 
-int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult) {
+int sched_onDiffMatch(MonkState* state, const File* file, const License* license, const DiffResult* diffResult) {
   fo_dbManager* dbManager = state->dbManager;
   const int agentId = state->agentId;
   const long fileId = file->id;
@@ -80,7 +79,7 @@ int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult
  * We do it now to minimize races with a concurrent scan of this file:
  * the same file could be inside more than upload
  */
-int sched_ignore(MonkState* state, File* file)
+int sched_ignore(MonkState* state, const File* file)
 {
   return hasAlreadyResultsFor(state->dbManager, state->agentId, file->id);
 }

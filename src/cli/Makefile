@@ -7,8 +7,12 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-EXE = cp2foss.php fossjobs.php schema-export.php fo_nomos_license_list.php fo_copyright_list.php fo_bucket_list.php fossupload_status.php fo_usergroup.php
-WRAP = cp2foss fossjobs schema-export fo_nomos_license_list fo_copyright_list fo_bucket_list fossupload_status fo_usergroup
+WRAP = cp2foss \
+       fossjobs schema-export \
+       fo_nomos_license_list fo_copyright_list fo_bucket_list \
+       fossupload_status fo_usergroup fo_import_licenses
+COPY = $(WRAP:=.php)
+
 DOCS = cp2foss.pod fossjobs.pod
 MAN1FILES = $(DOCS:%.pod=%.1)
 HTMLFILES = $(DOCS:%.pod=%.html)
@@ -52,7 +56,7 @@ fo_wrapper: fo_wrapper-process_php
 	pod2text $< $*.txt
 
 install: all
-	for file in $(EXE); do \
+	for file in $(COPY); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done
 	$(INSTALL_PROGRAM) fo_wrapper.php $(DESTDIR)$(LIBEXECDIR)/fo_wrapper
@@ -73,7 +77,7 @@ install: all
 	done
 
 uninstall:
-	for file in $(EXE); do \
+	for file in $(COPY); do \
 		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 		rm -f $(DESTDIR)$(LIBEXECDIR)/$$file; \
 	done

@@ -35,16 +35,16 @@ typedef struct {
   unsigned short percentual;
 } DiffResult;
 
-int lookForDiff(GArray* textTokens, GArray* searchTokens,
+int lookForDiff(const GArray* textTokens, const GArray* searchTokens,
                 size_t iText, size_t iSearch,
                 unsigned int maxAllowedDiff, unsigned int minAdjacentMatches,
                 DiffMatchInfo* result);
 
-int matchNTokens(GArray* textTokens, size_t textStart, size_t textLength,
-                 GArray* searchTokens, size_t searchStart, size_t searchLength,
+int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
+                 const GArray* searchTokens, size_t searchStart, size_t searchLength,
                  unsigned int numberOfWantedMatches);
 
-DiffResult* findMatchAsDiffs(GArray* textTokens, GArray* searchTokens,
+DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchTokens,
                              size_t textStartPosition, size_t searchStartPosition,
                              unsigned int maxAllowedDiff, unsigned int minAdjacentMatches);
 

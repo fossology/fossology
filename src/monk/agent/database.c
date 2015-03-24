@@ -13,22 +13,28 @@ You should have received a copy of the GNU General Public License along with thi
 #include <stdio.h>
 
 #include "database.h"
-#include "libfossdb.h"
-#include "libfossdbmanager.h"
-#define LICENSE_REF_TABLE "ONLY license_ref"
 
-PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right) {
+#define LICENSE_REF_TABLE "ONLY license_ref"
+#define DECISION_TYPE_FOR_IRRELEVANT 4
+
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right, long groupId) {
   return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
-      "queryFileIdsForUploadAndLimits",
-      "select distinct(pfile_fk) from uploadtree where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and pfile_fk != 0",
-      int, long, long),
-    uploadId, left, right
+      "queryFileIdsForUploadAndLimits"
+      ,
+      "SELECT distinct (pfile_fk) FROM ("  
+        "select distinct ON(ut.uploadtree_pk, ut.pfile_fk) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type FROM uploadtree ut "
+        " LEFT JOIN clearing_decision cd ON cd.group_fk=$5 AND (ut.uploadtree_pk=cd.uploadtree_fk AND scope=0 or ut.pfile_fk=cd.pfile_fk AND scope=1) "
+        " where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and ut.pfile_fk != 0"
+        " ORDER BY ut.uploadtree_pk, ut.pfile_fk, date_added DESC"
+      ") itemView WHERE decision_type!=$4 OR decision_type IS NULL"
+      ,
+      int, long, long, int, long),
+    uploadId, left, right, DECISION_TYPE_FOR_IRRELEVANT, groupId
   );
 }
 
-//TODO use correct parameters to filter only "good" licenses
 PGresult* queryAllLicenses(fo_dbManager* dbManager) {
   return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
@@ -121,7 +127,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
   return licenseFilePk;
 }
 
-int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {
+int saveDiffHighlightToDb(fo_dbManager* dbManager, const DiffMatchInfo* diffInfo, long licenseFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
@@ -142,7 +148,7 @@ int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long
   return 1;
 }
 
-int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId) {
+int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, long licenseFileId) {
   size_t matchedInfoLen = matchedInfo->len ;
   for (size_t i = 0; i < matchedInfoLen; i++) {
     DiffMatchInfo* diffMatchInfo = &g_array_index(matchedInfo, DiffMatchInfo, i);

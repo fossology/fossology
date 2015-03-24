@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -19,8 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-use DateTime;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Util\Object;
 
@@ -48,8 +47,8 @@ class ClearingDecisionBuilder extends Object
   private $reportinfo;
   /** @var int */
   private $scope;
-  /** @var DateTime */
-  private $dateAdded;
+  /** @var int */
+  private $timeStamp;
 
   function __construct()
   {
@@ -62,7 +61,7 @@ class ClearingDecisionBuilder extends Object
     $this->userId = -1;
     $this->type = null;
     $this->scope = DecisionScopes::ITEM;
-    $this->dateAdded = new DateTime();
+    $this->timeStamp = time();
   }
 
   /**
@@ -76,12 +75,12 @@ class ClearingDecisionBuilder extends Object
   }
 
   /**
-   * @param string $date_added
+   * @param int $timestamp
    * @return ClearingDecisionBuilder
    */
-  public function setDateAdded($date_added)
+  public function setTimeStamp($timestamp)
   {
-    $this->dateAdded->setTimestamp($date_added);
+    $this->timeStamp = $timestamp;
     return $this;
   }
 
@@ -173,6 +172,9 @@ class ClearingDecisionBuilder extends Object
     return new ClearingDecisionBuilder();
   }
 
+  /**
+   * @param ClearingDecision $clearingDecision
+   */
   public function copy(ClearingDecision $clearingDecision)
   {
     $this->sameFolder = $clearingDecision->getSameFolder();
@@ -186,7 +188,7 @@ class ClearingDecisionBuilder extends Object
     $this->comment = $clearingDecision->getComment();
     $this->reportinfo = $clearingDecision->getReportinfo();
     $this->scope = $clearingDecision->getScope();
-    $this->dateAdded = $clearingDecision->getDateAdded();
+    $this->timeStamp = $clearingDecision->getTimeStamp();
   }
 
   /**
@@ -202,7 +204,7 @@ class ClearingDecisionBuilder extends Object
 
     return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->dateAdded, $this->clearingEvents, $this->reportinfo, $this->comment);
+        $this->timeStamp, $this->clearingEvents, $this->reportinfo, $this->comment);
   }
 
 }

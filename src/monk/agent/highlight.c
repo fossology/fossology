@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "highlight.h"
 #include "string_operations.h"
 
-void convertToAbsoluteHighlight(GArray* tokens, DiffPoint* indexHighlight) {
+void convertToAbsoluteHighlight(const GArray* tokens, DiffPoint* indexHighlight) {
   Token* firstToken = &g_array_index(tokens, Token, indexHighlight->start);
 
   size_t start = token_position_of(indexHighlight->start, tokens);
@@ -44,7 +44,7 @@ void convertToAbsolutePositions(GArray* diffMatchInfo,
   }
 }
 
-DiffPoint getFullHighlightFor(GArray* tokens, size_t firstMatchedIndex, size_t matchedCount) {
+DiffPoint getFullHighlightFor(const GArray* tokens, size_t firstMatchedIndex, size_t matchedCount) {
   size_t matchStart = token_position_of(firstMatchedIndex, tokens);
   if (matchedCount < 1)
     return (DiffPoint){matchStart, 0};

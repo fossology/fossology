@@ -148,12 +148,11 @@ class MonkBulkTest extends PHPUnit_Framework_TestCase
     $removing = false;
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
-    $jobId = 64;
-
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
+    $jobId = 64;
     list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkId);
 
     $this->rmRepo();
