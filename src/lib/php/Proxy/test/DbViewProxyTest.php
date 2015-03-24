@@ -50,7 +50,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
   
   public function testMaterialize()
   {
-    $this->dbManagerMock->shouldReceive('queryOnce')->with("CREATE TEMPORARY TABLE $this->dbViewName AS $this->dbViewQuery");
+    $this->dbManagerMock->shouldReceive('queryOnce')->with("CREATE TEMPORARY TABLE $this->dbViewName AS $this->dbViewQuery", M::any());
     $this->dbViewDao->materialize();
   }
 
