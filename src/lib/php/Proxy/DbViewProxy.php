@@ -28,7 +28,7 @@ class DbViewProxy extends Object
   protected $dbViewQuery;
   /** @var boolean */
   protected $materialized = false;
-  
+
   /**
    * @param string $dbViewQuery
    * @param string $dbViewName
@@ -38,7 +38,7 @@ class DbViewProxy extends Object
     $this->dbViewQuery = $dbViewQuery;
     $this->dbViewName = $dbViewName;
   }
-  
+
   /**
    * @return string
    */
@@ -75,8 +75,8 @@ class DbViewProxy extends Object
     $dbManager = $container->get('db.manager');
     $dbManager->queryOnce("DROP TABLE $this->dbViewName");
     $this->materialized = false;
-  }    
-    
+  }
+
   /**
    * @brief Common Table Expressions
    * @return string
@@ -85,7 +85,7 @@ class DbViewProxy extends Object
   {
     return "WITH $this->dbViewName AS (".$this->dbViewQuery.")";
   }
-  
+
   public function getDbViewQuery()
   {
     return $this->dbViewQuery;
