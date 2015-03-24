@@ -27,7 +27,7 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SKIP_THESE = 'skipThese';
   const OPT_ITEM_FILTER = 'ut.filter';
   const OPT_GROUP_ID = 'groupId';
-  
+
   /** @var string */
   private $uploadTreeTableName;
   /** @var int */
@@ -109,12 +109,12 @@ class UploadTreeProxy extends DbViewProxy
     {
       case "noLicense":
       case "alreadyCleared":
-        
+
         $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
         $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
         $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
         $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
-     
+
       case "noCopyright":
       case "noIp":
       case "noEcc":

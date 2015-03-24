@@ -363,7 +363,9 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
+                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
@@ -379,7 +381,9 @@ class ui_browse_license extends FO_Plugin
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE=>"noLicense", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
+                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
