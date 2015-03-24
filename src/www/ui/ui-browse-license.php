@@ -383,7 +383,7 @@ class ui_browse_license extends FO_Plugin
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    if (!isset($_GET['flatten']))
+    if (!$isFlat)
     {
       $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     }
