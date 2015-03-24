@@ -517,7 +517,7 @@ class ui_browse_license extends FO_Plugin
     foreach($editedLicenses as $licenseRef){
       $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
       $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
-      $concludedLicenses[$projectedId] = "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $projectedName . "</a>";
+      $concludedLicenses[$projectedId] = $projectedName;
     }
 
     $editedLicenseList = implode(', ', $concludedLicenses);
