@@ -563,7 +563,7 @@ class ui_browse_license extends FO_Plugin
       return array('','');
     }
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentIds);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
 
     /* Write license histogram to $VLic  */
