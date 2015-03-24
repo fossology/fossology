@@ -95,10 +95,9 @@ class ReportAgent extends Agent
     $contents = array("licenses" => $licenses,
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
-		      "ip" => $ip,
-		      "licensesIrre" => $licensesIrre
+                      "ip" => $ip,
+                      "licensesIrre" => $licensesIrre
     );
-    print_r($contents);
     $this->writeReport($contents, $uploadId);
 
     return true;
@@ -939,7 +938,6 @@ class ReportAgent extends Agent
 
   private function getRowsAndColumnsForIrre($section, $title, $licensesIrre)
   {
-
     $thColor = array("bgColor" => "D2D0CE");
     $thText = array("size" => 12, "bold" => true);
     $rowWidth = 50;
@@ -955,18 +953,16 @@ class ReportAgent extends Agent
     
     foreach($licensesIrre as $statements){
       $table->addRow($rowWidth,$this->paragraphStyle);
-      $cell1 = $table->addCell($firstColLen); 
+      $cell1 = $table->addCell($firstColLen);
       $cell1->addText(htmlspecialchars($statements['content']),null,$this->paragraphStyle);
       $cell2 = $table->addCell($secondColLen);
-      foreach($statements['files'] as $fileName){ 
+      foreach($statements['files'] as $fileName){
         $cell2->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
       }
     }
-    $section->addTextBreak(); 
+    $section->addTextBreak();
     return true;
   }
-
-
 
   /**
    * @brief save the docx file into repository.
