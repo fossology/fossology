@@ -23,8 +23,8 @@ use Fossology\Lib\Db\DbManager;
 
 class DbViewProxyTest extends \PHPUnit_Framework_TestCase
 {
-  private $dbViewName;
-  private $dbViewQuery;
+  private $dbViewName = "foo";
+  private $dbViewQuery = "select 3.14";
   /** @var DbViewProxy */
   private $dbViewDao;
   private $dbManagerMock;
