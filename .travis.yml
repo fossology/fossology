@@ -29,9 +29,6 @@ before_script:
  - psql -c "create database fossology;" -U postgres
  - psql -c "create database fosstestone;" -U postgres
 
-script:
- - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/
-
 env:
   global:
     - TEST_NAME=""
@@ -47,6 +44,7 @@ matrix:
     - env:
         - TEST_NAME="make phpunit (gcc)"
       compiler: gcc
+      
       script:
        - make
        - phpunit -csrc/phpunit.xml
@@ -58,6 +56,13 @@ matrix:
       compiler: clang
       script:
        - make
+
+    - env:
+        - TEST_NAME="make install"
+      compiler: gcc
+      script:
+       - sudo make install
+       - sudo /usr/local/lib/fossology/fo-postinstall
 
     - env:
         - TEST_NAME="make test (gcc)"
