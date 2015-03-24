@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,24 +18,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Upload;
 
-
-use DateTime;
 use Fossology\Lib\Util\Object;
 
-class Upload extends Object{
+class Upload extends Object
+{
   /** @var int */
   private $id;
-
   /** @var string */
   private $filename;
-
   /** @var string */
   private $description;
-
   /** @var string */
   private $treeTableName;
-
-  /** @var DateTime */
+  /** @var int */
   private $timestamp;
 
   /**
@@ -43,7 +38,7 @@ class Upload extends Object{
    * @return Upload
    */
   public static function createFromTable($row) {
-    return new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], new DateTime($row['upload_ts']));
+    return new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], strtotime($row['upload_ts']));
   }
 
   /**
@@ -51,9 +46,10 @@ class Upload extends Object{
    * @param string $filename
    * @param string $description
    * @param string $treeTableName
+   * @param int $timestamp
    */
-  public function __construct($id, $filename, $description, $treeTableName, $timestamp){
-
+  public function __construct($id, $filename, $description, $treeTableName, $timestamp)
+  {
     $this->id = $id;
     $this->filename = $filename;
     $this->description = $description;
@@ -94,7 +90,7 @@ class Upload extends Object{
   }
 
   /**
-   * @return DateTime
+   * @return int
    */
   public function getTimestamp()
   {

@@ -19,6 +19,7 @@ without any warranty.
             <parameter key="autoescape" type="constant">false</parameter>
         </parameter>
         <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
+        <parameter key="time.zone" type="string"></parameter>
     </parameters>
 
     <services>

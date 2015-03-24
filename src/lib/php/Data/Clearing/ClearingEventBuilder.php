@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  * Author: J.Najjar
  *
  * This program is free software; you can redistribute it and/or
@@ -19,12 +19,9 @@
 
 namespace Fossology\Lib\Data\Clearing;
 
-
-use DateTime;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Util\Object;
-
 
 class ClearingEventBuilder extends Object
 {
@@ -32,8 +29,8 @@ class ClearingEventBuilder extends Object
   private $eventId;
   /** @var int */
   private $uploadTreeId;
-  /** @var DateTime */
-  private $dateTime;
+  /** @var int */
+  private $timeStamp;
   /** @var int */
   private $userId;
   /** @var int */
@@ -53,7 +50,7 @@ class ClearingEventBuilder extends Object
   {
     $this->eventId = 0;
     $this->uploadTreeId = 0;
-    $this->dateTime = null;
+    $this->timeStamp = null;
     $this->userId = 1;
     $this->groupId = 1;
     $this->eventType = ClearingEventTypes::USER;
@@ -74,7 +71,7 @@ class ClearingEventBuilder extends Object
   public function build()
   {
     $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->eventType, $this->reportinfo, $this->comment );
-    return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId,
+    return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->timeStamp?: time(), $this->userId,
         $this->groupId, $this->eventType, $clearingLicense);
   }
 
@@ -89,15 +86,12 @@ class ClearingEventBuilder extends Object
   }
 
   /**
-   * @param string $dateTime
+   * @param int $timestamp
    * @return $this
    */
-  public function setDateFromTimeStamp($dateTime)
+  public function setTimeStamp($timestamp)
   {
-    if ($this->dateTime === null) {
-      $this->dateTime = new DateTime();
-    }
-    $this->dateTime->setTimestamp($dateTime);
+    $this->timeStamp = $timestamp;
     return $this;
   }
 
@@ -180,5 +174,4 @@ class ClearingEventBuilder extends Object
     $this->userId = intval($userId);
     return $this;
   }
-
 }

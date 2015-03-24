@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-use DateTime;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
@@ -28,45 +27,32 @@ use Mockery as M;
 
 class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 {
-
   /** @var bool */
   private $sameUpload = true;
-
   /** @var bool */
   private $sameFolder = true;
-
   /** @var ClearingEvent */
   private $clearingEvent;
-
   /** @var int */
   private $clearingId;
-
   /** @var int */
   private $uploadTreeId;
-
   /** @var int */
   private $pfileId;
-  
   /** @var string */
   private $userName;
-  
   /** @var int */
   private $userId;
-
   /** @var string */
   private $type;
-
   /** @var string */
   private $comment;
-
   /** @var string */
   private $reportinfo;
-
   /** @var string */
   private $scope;
-
-  /** @var DateTime */
-  private $date_added;
+  /** @var int */
+  private $timeStamp;
 
   /** @var ClearingDecisionBuilder */
   private $clearingDecisionBuilder;
@@ -85,13 +71,15 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->comment = "Test comment";
     $this->reportinfo = "Test reportinfo";
     $this->scope = DecisionScopes::ITEM;
-    $this->date_added = DateTime::createFromFormat('Y-m-d h:i:s', "2012-07-08 11:14:15");
+    $this->timeStamp = mktime(11, 14, 15, 7, 28, 2012, 0);
 
     $this->clearingDecisionBuilder = ClearingDecisionBuilder::create()->setType(DecisionTypes::IDENTIFIED);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
@@ -184,9 +172,9 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   public function testDateAdded()
   {
     $clearingDec = $this->clearingDecisionBuilder
-        ->setDateAdded($this->date_added->getTimestamp())
+        ->setTimeStamp($this->timeStamp)
         ->build();
-    assertThat($clearingDec->getDateAdded(), is($this->date_added));
+    assertThat($clearingDec->getTimeStamp(), is($this->timeStamp));
   }
 
 }

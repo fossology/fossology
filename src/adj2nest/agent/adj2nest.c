@@ -82,7 +82,7 @@ char *uploadtree_tablename;
 long TreeSize=0;
 long TreeSet=0; /* index for inserting the next child */
 long SetNum=0; /* index for tracking set numbers */
-
+int isBigUpload=0;
 /************************************************************/
 /************************************************************/
 /************************************************************/
@@ -200,8 +200,21 @@ void	LoadAdj	(long UploadPk)
   long RootRows, NonRootRows;
   PGresult* pgNonRootResult;
   PGresult* pgRootResult;
+  PGresult* pgResult;
+  char LastChar;
 
   uploadtree_tablename = GetUploadtreeTableName(pgConn, UploadPk);
+  
+  /* If the last character of the uploadtree_tablename is a digit, run analyze */
+  LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
+  if (LastChar >= '0' && LastChar <= '9')
+  {
+    isBigUpload=1;
+    snprintf(SQL,sizeof(SQL),"ANALYZE %s",uploadtree_tablename);
+    pgResult =  PQexec(pgConn, SQL);
+    fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__);
+    PQclear(pgResult);  
+  }
 
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM %s WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",uploadtree_tablename,UploadPk);
   pgNonRootResult = PQexec(pgConn, SQL);
@@ -500,6 +513,13 @@ int UpdateUpload(long UploadPk)
   if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
   PQclear(pgResult);
 
+  if(isBigUpload)
+  {
+    snprintf(SQL,sizeof(SQL),"VACUUM ANALYZE %s",uploadtree_tablename);
+    pgResult =  PQexec(pgConn, SQL);
+    if (fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__)) return -1;
+    PQclear(pgResult);
+  }
   return(0);
 }
 
