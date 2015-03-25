@@ -42,39 +42,37 @@ class ReportGenerator extends DefaultPlugin
     $uploadId = intval($request->get('upload'));
     if ($uploadId <=0)
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("parameter error"))));
+      return $this->flushContent(_("parameter error"));
+    }
+    /** @var UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if (!$uploadDao->isAccessible($uploadId, $groupId))
+    {
+      return $this->flushContent(_("permission denied"));
     }
 
-    if (GetUploadPerm($uploadId) < Auth::PERM_WRITE)
+    /** @var Upload */
+    $upload = $uploadDao->getUpload($uploadId);
+    if ($upload === null)
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("permission denied"))));
-    }
-
-    $dbManager = $this->getObject('db.manager');
-    $row = $dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk=$1", array($uploadId), "getUploadName");
-
-    if ($row === false)
-    {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("cannot find uploadId"))));
+      return $this->flushContent(_('cannot find uploadId'));
     }
     
-    $shortName = $row['upload_filename'];
     $reportGenAgent = plugin_find('agent_reportgen');
-    $jobId = JobAddJob($userId, $groupId, $shortName, $uploadId);
+    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
     $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
 
     if ($jobQueueId<0)
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("Cannot schedule").": ".$error)));
+      return $this->flushContent(_('Cannot schedule').": $error");
     }
 
-    $vars['jqPk'] = $jobQueueId;
-    $vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$jobId;
-    $vars['reportType'] = "report";
-    $text = sprintf(_("Generating new report for '%s'"), $shortName);
+    $vars = array('jqPk' => $jobQueueId,
+                  'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'reportType' => "report");
+    $text = sprintf(_("Generating new report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
-            
     return $this->render("report.html.twig", $this->mergeWithDefault($vars));
   }
 

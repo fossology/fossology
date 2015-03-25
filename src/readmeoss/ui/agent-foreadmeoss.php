@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ReadmeossGenerator extends DefaultPlugin
 {
-  const NAME = 'agent_foreadmeoss';
+  const NAME = 'ui_readmeoss';
   
   function __construct()
   {
@@ -51,34 +51,29 @@ class ReadmeossGenerator extends DefaultPlugin
     $uploadId = intval($request->get('upload'));
     if ($uploadId <=0)
     {
-      $vars = array("content"=>_("parameter error"));
-      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+      return $this->flushContent(_("parameter error"));
     }
     /** @var UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
     if (!$uploadDao->isAccessible($uploadId, $groupId))
     {
-      $vars = array("content"=>_("permission denied"));
-      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+      return $this->flushContent(_("permission denied"));
     }
 
     /** @var Upload */
     $upload = $uploadDao->getUpload($uploadId);
     if ($upload === null)
     {
-      $vars = array("content"=>_("cannot find upload"));
-      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+      return $this->flushContent(_("cannot find upload"));
     }
     
     $readMeOssAgent = plugin_find('agent_readmeoss');
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
     $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array());
-
     if ($jobQueueId<0)
     {
-      $vars = array("content"=>_("Cannot schedule").": ".$error);
-      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+      return $this->flushContent(_("Cannot schedule").": ".$error);
     }
 
     $vars = array('jqPk' => $jobQueueId,

@@ -43,37 +43,26 @@ abstract class DefaultPlugin implements Plugin
     
   /** @var ContainerBuilder */
   protected $container;
-
   /** @var Twig_Environment */
   protected $renderer;
-
   /** @var Session */
   private $session;
-
   /** @var Logger */
   private $logger;
-
   /** @var Menu */
   private $menu;
-
   /** @var string */
   private $name;
-
   /** @var string */
   private $version = "1.0";
-
   /** @var string */
   private $title;
-
   /** @var int */
   private $permission = Auth::PERM_NONE;
-
   /** @var int */
   private $requiresLogin = true;
-
   /** @var int */
   private $PluginLevel = 10;
-
   /** @var array */
   private $dependencies = array();
   private $InitOrder = 0;
@@ -320,7 +309,7 @@ abstract class DefaultPlugin implements Plugin
 
   public function isLoggedIn()
   {
-    return (!empty($_SESSION['User']) && $_SESSION['User'] != 'Default User');
+    return (!empty($_SESSION[Auth::USER_NAME]) && $_SESSION[Auth::USER_NAME] != 'Default User');
   }
 
   private function checkPrerequisites()
@@ -397,6 +386,11 @@ abstract class DefaultPlugin implements Plugin
     return array_merge($this->getDefaultVars(), $vars);
   }
 
+  protected function flushContent($content)
+  {
+    return $this->render("include/base.html.twig",$this->mergeWithDefault(array("content"=>$content)));
+  }
+      
   /**
    * @param string $name
    * @throws \Exception
