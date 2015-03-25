@@ -304,15 +304,14 @@ class LicenseDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param string $orderStatement
    * @param null|int|int[] $agentId
    * @return array
    */
-  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId=null)
+  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $agentId=null)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentText";
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.rf_pk) as unique
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
@@ -320,21 +319,17 @@ class LicenseDao extends Object
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
          RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
          WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
-    if (!empty($agentId))
+    if (is_array($agentId))
     {
-      if (is_array($agentId)) {
-        $sql .= ' AND agent_fk=ANY($4)';
-        $param[] = '{' . implode(',', $agentId) . '}';
-      } else {
-        $sql .= ' AND agent_fk=$4';
-        $param[] = $agentId;
-      }
+      $sql .= ' AND agent_fk=ANY($4)';
+      $param[] = '{' . implode(',', $agentId) . '}';
+    }
+    elseif (!empty($agentId))
+    {
+      $sql .= ' AND agent_fk=$4';
+      $param[] = $agentId;
     }
     $sql .= " GROUP BY license_shortname";
-    if ($orderStatement)
-    {
-      $sql .= $orderStatement;
-    }
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();

@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -33,6 +33,4 @@ class EccClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
 $clearedGetter = new EccClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
-$json = json_encode($clearedGetter->getCleared($uploadId));
-$json = str_replace('\\f','',$json);
-print $json;
+print $clearedGetter->cJson($uploadId);

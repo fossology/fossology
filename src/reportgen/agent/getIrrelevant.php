@@ -27,13 +27,4 @@ $clearedGetter = new \Fossology\Lib\Report\LicenseIrrelevantGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
 $groupId = $clearedGetter->getGroupId();
-print json_encode($clearedGetter->getCleared($uploadId, $groupId));
-/*
-print json_encode(array('paths'=>array(
-
-array("content"=>'path/one/',"files"=>array("one.txt")),
-    array("content"=>'path/two/',"files"=>array("two.txt","two.php","two.cpp"))
-        
-        ) )  );
- * 
- */
+print $clearedGetter->cJson($uploadId, $groupId);

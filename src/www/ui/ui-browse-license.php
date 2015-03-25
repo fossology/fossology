@@ -55,7 +55,7 @@ class ui_browse_license extends FO_Plugin
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
-  
+
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
 
   function __construct()
@@ -181,11 +181,11 @@ class ui_browse_license extends FO_Plugin
         ReportCachePut($CacheKey, $V);
     }
     $this->vars['content'] .= js_url();
-    
+
     return;
   }
 
-  
+
   /**
    * \brief Given an $Uploadtree_pk, display:
    *   - The histogram for the directory BY LICENSE.
@@ -216,7 +216,7 @@ class ui_browse_license extends FO_Plugin
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
     list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
     $VLic .= "\n" . $agentStatus;
-    
+
     $UniqueTagArray = array();
     global $container;
     $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
@@ -265,13 +265,13 @@ class ui_browse_license extends FO_Plugin
 
     $V .= $jsBlockDirlist;
     $V .= $jsBlockLicenseHist;
-    
+
     $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
     $V .= "<br/><span id='bulkIdResult' hidden></span>";
-    
+
     return $V;
   }
-  
+
   /**
    * @param $updcache
    * @return array
@@ -282,7 +282,7 @@ class ui_browse_license extends FO_Plugin
          * This way all the url's based on the input args won't be
          * polluted with updcache
          * Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item", "tag", "agent", "orderBy", "orderl", "orderc"));
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item", "tag", "agent", "orderBy", "orderl", "orderc", "flatten"));
     if ($updcache)
     {
       $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/", "", $_SERVER['REQUEST_URI']);
@@ -311,7 +311,7 @@ class ui_browse_license extends FO_Plugin
     $uploadId = $itemTreeBounds->getUploadId();
     $uploadTreeId = $itemTreeBounds->getItemId();
     $isFlat = isset($_GET['flatten']);
-    
+
     /* Get ALL the items under this Uploadtree_pk */
     if (!$isFlat)
     {
@@ -331,7 +331,7 @@ class ui_browse_license extends FO_Plugin
     {
       return array($ChildCount = 0, "");
     }
-    
+
     /*******    File Listing     ************/
     if (!empty($selectedAgentId))
     {
@@ -363,7 +363,9 @@ class ui_browse_license extends FO_Plugin
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
+                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
@@ -379,11 +381,13 @@ class ui_browse_license extends FO_Plugin
     $alreadyClearedUploadTreeView->unmaterialize();
 
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE=>"noLicense", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
+                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    if (!isset($_GET['flatten']))
+    if (!$isFlat)
     {
       $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
     }
@@ -403,7 +407,7 @@ class ui_browse_license extends FO_Plugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
     }
-    
+
     $fileSwitch = $isFlat ?
             Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')) :
             Traceback()."&flatten=yes";
@@ -517,7 +521,7 @@ class ui_browse_license extends FO_Plugin
     foreach($editedLicenses as $licenseRef){
       $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
       $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
-      $concludedLicenses[$projectedId] = "<a href='?mod=view-license&upload=$uploadId&item=$childUploadTreeId&format=text'>" . $projectedName . "</a>";
+      $concludedLicenses[$projectedId] = $projectedName;
     }
 
     $editedLicenseList = implode(', ', $concludedLicenses);
@@ -563,7 +567,7 @@ class ui_browse_license extends FO_Plugin
       return array('','');
     }
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $orderStmt = "", $agentIds);
+    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
 
     /* Write license histogram to $VLic  */
@@ -576,7 +580,7 @@ class ui_browse_license extends FO_Plugin
 
     $rendered .= "<br/><br/>";
     $rendered .= _("Hint: Click on the license name to search for where the license is found in the file listing.") . "<br/><br/>\n";
-    
+
     $vars = array('uniqueLicenseCount'=>$uniqueLicenseCount,
         'fileCount'=>$fileCount,
         'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
@@ -586,16 +590,15 @@ class ui_browse_license extends FO_Plugin
         'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
         'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
     $rendered .= $this->renderString('browse_license-summary.html.twig', $vars);
-    
+
     return array($jsBlockLicenseHist, $rendered);
   }
 
-  
   public function getTemplateName()
   {
     return "browse_license.html.twig";
   }
-  
+
   /**
    * @param array $scannerLics
    * @param array $editedLics

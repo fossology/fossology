@@ -441,7 +441,7 @@ int	main(int argc, char *argv[])
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(113);
       PQclear(result);
 
-      snprintf(SQL,MAXSQL,"UPDATE %s SET realparent = getItemParent(uploadtree_pk) WHERE upload_pk = '%s'",uploadtree_tablename, Upload_Pk);
+      snprintf(SQL,MAXSQL,"UPDATE %s SET realparent = getItemParent(uploadtree_pk) WHERE upload_fk = '%s'",uploadtree_tablename, Upload_Pk);
       result =  PQexec(pgConn, SQL); /* UPDATE uploadtree */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(114);
       PQclear(result);

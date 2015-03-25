@@ -25,7 +25,7 @@ use Mockery\MockInterface;
 
 include_once(dirname(dirname(__DIR__))."/common-string.php");
 
-class ClearedGetterTest extends ClearedGetterCommon
+class TestClearedGetter extends ClearedGetterCommon
 {
   public function __construct($groupBy = "content")
   {
@@ -42,15 +42,29 @@ class ClearedGetterTest extends ClearedGetterCommon
   }
 }
 
+class WeirdCharClearedGetter extends ClearedGetterCommon
+{
+  public function __construct($groupBy = "content")
+  {
+    parent::__construct($groupBy);
+  }
+
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null){}
+  
+  public function getCleared($uploadId, $groupId=null)
+  {
+    return array(
+      array("good" => "漢", "esc" => "escape", "uml" => ' ü ')
+    );
+  }
+}
+
 class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
 {
   /** @var UploadDao|MockInterface */
   private $uploadDao;
   /** @var TreeDao|MockInterface */
   private $treeDao;
-
-  /** @var ClearedGetterTest */
-  private $clearedGetterTest;
 
   public function setUp()
   {
@@ -62,12 +76,18 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
 
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('dao.tree')->andReturn($this->treeDao);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+  }
 
-    $this->clearedGetterTest = new ClearedGetterTest();
+  function tearDown()
+  {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
   public function testGetFileNames()
   {
+    $this->clearedGetterTest = new TestClearedGetter();
+        
     $uploadId = 1;
     $parentId = 112;
     $uploadTreeTableName = "ut";
@@ -112,11 +132,12 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         )
       )
     );
-    $this->assertEquals($expected, $statements);
+    assertThat($expected, equalTo($statements));
   }
 
   public function testGetFileNamesGroupByText()
   {
+    $this->clearedGetterTest = new TestClearedGetter();
     $uploadId = 1;
     $parentId = 112;
     $uploadTreeTableName = "ut";
@@ -146,7 +167,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
-    $tester = new ClearedGetterTest("text");
+    $tester = new TestClearedGetter("text");
     $statements = $tester->getCleared($uploadId);
     $expected = array(
       "statements" => array(
@@ -167,8 +188,15 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         )
       )
     );
-    $this->assertEquals($expected, $statements);
+    assertThat($expected, equalTo($statements));
   }
-
-
+  
+  function testWeirdChars()
+  {
+    $weirdCharclearedGetter = new WeirdCharclearedGetter();
+    $json = $weirdCharclearedGetter->cJson(0);
+    assertThat($json, containsString('"good":"\\u6f22"'));
+    assertThat($json, containsString('"esc":"escape"'));
+    assertThat($json, containsString('"uml":" \\u00fc "'));
+  }
 }

@@ -34,6 +34,4 @@ class CopyClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
 $clearedGetter = new CopyClearedGetter();
 $clearedGetter->getCliArgs();
 $uploadId = $clearedGetter->getUploadId();
-$json = json_encode($clearedGetter->getCleared($uploadId));
-$json = str_replace('\\f','',$json);
-print $json;
+print $clearedGetter->cJson($uploadId);
