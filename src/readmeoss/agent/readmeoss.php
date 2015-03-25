@@ -81,7 +81,7 @@ class ReadmeOssAgent extends Agent
   }
 
   private function updateReportTable($uploadId, $jobId, $filename){
-   $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
+    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
   }
 
   private function generateReport($contents, $Package_Name)

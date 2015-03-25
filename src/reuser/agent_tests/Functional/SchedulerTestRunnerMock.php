@@ -61,7 +61,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->clearingDecisionFilter = $clearingDecisionFilter;
   }
 
-    public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
+  public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $GLOBALS['userId'] = $userId;
     $GLOBALS['jobId'] = $jobId;

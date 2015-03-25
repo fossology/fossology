@@ -103,7 +103,7 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
     sort($lines, SORT_STRING);
     foreach($lines as $key => $val) {
-    if (empty($val))
+      if (empty($val))
       {
         unset($lines[$key]);
       }
@@ -178,8 +178,7 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals(3, $retCode, 'monk failed: '.$output);
 
-    $expectedOutputRgx =
-"/Usage: .*\/monk \[options\] -- \[file \[file \[\.\.\.\]\]
+    $expectedOutputRgx = "/Usage: .*\/monk \[options\] -- \[file \[file \[\.\.\.\]\]
   -h   :: help \(print this message\), then exit\.
   -c   :: specify the directory for the system configuration\.
   -v   :: verbose output\.
