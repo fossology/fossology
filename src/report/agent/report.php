@@ -62,8 +62,8 @@ class ReportAgent extends Agent
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
-    $this->ipClearedGetter = new XpClearedGetter("ip", "ip", false);
-    $this->eccClearedGetter = new XpClearedGetter("ecc", "ecc", false);
+    $this->ipClearedGetter = new XpClearedGetter("ip", null, true);
+    $this->eccClearedGetter = new XpClearedGetter("ecc", null, true);
     $this->licenseClearedGetter = new LicenseClearedGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
@@ -117,10 +117,9 @@ class ReportAgent extends Agent
   private function reportFooter($phpWord, $section)
   { 
     global $SysConf;
+
     $commitId = $SysConf['BUILD']['COMMIT_HASH'];
     $commitDate = $SysConf['BUILD']['COMMIT_DATE'];
-    print_r($commitId);
-    print_r($commitDate);
     $styleTable = array('borderSize'=>10, 'borderColor'=>'FFFFFF' );
     $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
@@ -782,10 +781,16 @@ class ReportAgent extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("6. Global Licenses"), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
+    $table->addRow("500");
+    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -807,10 +812,16 @@ class ReportAgent extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("7. Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses"), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
+    $table->addRow("500");
+    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -832,10 +843,16 @@ class ReportAgent extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("8. Other OSS Licenses (yellow) - additional obligations to common rules"), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
+    $table->addRow("500");
+    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
     $table->addRow($rowHeight);
     $cell1 = $table->addCell($firstColLen); 
     $cell1->addText("");
@@ -857,9 +874,15 @@ class ReportAgent extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $this->tableHeading);
     $table = $section->addTable($this->tablestyle);
+    $table->addRow("500");
+    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
     foreach($licenses as $licenseStatement){
       $table->addRow($rowHeight,$this->paragraphStyle);
       $cell1 = $table->addCell($firstColLen,$paragraphStyle); 
@@ -909,19 +932,30 @@ class ReportAgent extends Agent
   private function getRowsAndColumnsForCEI($section, $title, $statementsCEI)
   {
     $rowHeight = 50;
-    $firstColLen = 12000;
-    $secondColLen = 3500;
+    $firstColLen = 6500;
+    $secondColLen = 5000;
+    $thirdColLen = 4000;
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars($title), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
+
+    $table->addRow("500");
+    $table->addCell($firstColLen, $firstRowStyle)->addText("Statements", $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText("Comments", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
+
     foreach($statementsCEI as $statements){
       $table->addRow($rowHeight,$this->paragraphStyle);
       $cell1 = $table->addCell($firstColLen); 
       $cell1->addText(htmlspecialchars($statements['content']),null,$this->paragraphStyle);
       $cell2 = $table->addCell($secondColLen);
+      $cell2->addText(htmlspecialchars($statements['comments']), null, $this->paragraphStyle);
+      $cell3 = $table->addCell($thirdColLen);
       foreach($statements['files'] as $fileName){ 
-        $cell2->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
+        $cell3->addText(htmlspecialchars($fileName), null, $this->paragraphStyle);
       }
     }
     $section->addTextBreak(); 

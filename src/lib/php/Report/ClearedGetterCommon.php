@@ -118,8 +118,10 @@ abstract class ClearedGetterCommon
   protected function groupStatements($ungrupedStatements)
   {
     $statements = array();
+    $newStatements = array();
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
+      $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
 
       if (!array_key_exists('text', $statement))
@@ -130,7 +132,8 @@ abstract class ClearedGetterCommon
         if ($description === null) {
           $text = "";
         } else {
-          $content = $textfinding;
+          if(!empty($textfinding))
+            $content = $textfinding;
           $text = $description;
         }
       }
@@ -141,22 +144,31 @@ abstract class ClearedGetterCommon
 
       $groupBy = $statement[$this->groupBy];
 
-      if (array_key_exists($groupBy, $statements))
+      if(empty($comments))
       {
-        $currentFiles = &$statements[$groupBy]['files'];
-        if (!in_array($fileName, $currentFiles))
-          $currentFiles[] = $fileName;
-      }
-      else
-      {
-        $statements[$groupBy] = array(
-          "content" => convertToUTF8($content, false),
-          "text" => convertToUTF8($text, false),
-          "files" => array($fileName)
-        );
-      }
+        if (array_key_exists($groupBy, $statements))
+        {
+          $currentFiles = &$statements[$groupBy]['files'];
+          if (!in_array($fileName, $currentFiles))
+            $currentFiles[] = $fileName;
+        }else{
+          $statements[$groupBy] = array(
+            "content" => convertToUTF8($content, false),
+            "text" => convertToUTF8($text, false),
+            "comments" => convertToUTF8($comments, false),
+            "files" => array($fileName)
+          );
+        }
+     }else{
+          $statements[] = array(
+            "content" => convertToUTF8($content, false),
+            "text" => convertToUTF8($text, false),
+            "comments" => convertToUTF8($comments, false),
+            "files" => array($fileName)
+          );
+     } 
     }
-
+    arsort($statements);
     return $statements;
   }
 
