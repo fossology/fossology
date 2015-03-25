@@ -407,6 +407,9 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
           else if (((strcmp(key2, "text")) == 0) && json_object_is_type(val2, json_type_string)) {
             text = json_object_get_string(val2);
           }
+          else if (((strcmp(key2, "comments")) == 0) && json_object_is_type(val2, json_type_string)) {
+            text = json_object_get_string(val2);
+          }
           else if (((strcmp(key2, "files")) == 0) && json_object_is_type(val2, json_type_array)) {
             fileNames = implodeJsonArray(val2, ",\n");
           }

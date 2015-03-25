@@ -118,7 +118,6 @@ abstract class ClearedGetterCommon
   protected function groupStatements($ungrupedStatements)
   {
     $statements = array();
-    $newStatements = array();
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
       $comments = convertToUTF8($statement['comments'], false);
