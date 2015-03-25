@@ -36,8 +36,8 @@ class ReportGenerator extends DefaultPlugin
   protected function handle(Request $request)
   {
     global $SysConf;
-    $user_pk = $SysConf['auth'][Auth::USER_ID];
-    $group_pk = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = $SysConf['auth'][Auth::USER_ID];
+    $groupId = $SysConf['auth'][Auth::GROUP_ID];
 
     $uploadId = intval($request->get('upload'));
     if ($uploadId <=0)
@@ -60,17 +60,17 @@ class ReportGenerator extends DefaultPlugin
     
     $shortName = $row['upload_filename'];
     $reportGenAgent = plugin_find('agent_reportgen');
-    $job_pk = JobAddJob($user_pk, $group_pk, $shortName, $uploadId);
+    $jobId = JobAddJob($userId, $groupId, $shortName, $uploadId);
     $error = "";
-    $jq_pk = $reportGenAgent->AgentAdd($job_pk, $uploadId, $error, array());
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
 
-    if ($jq_pk<0)
+    if ($jobQueueId<0)
     {
       return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("Cannot schedule").": ".$error)));
     }
 
-    $vars['jqPk'] = $jq_pk;
-    $vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
+    $vars['jqPk'] = $jobQueueId;
+    $vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$jobId;
     $vars['reportType'] = "report";
     $text = sprintf(_("Generating new report for '%s'"), $shortName);
     $vars['content'] = "<h2>".$text."</h2>";
