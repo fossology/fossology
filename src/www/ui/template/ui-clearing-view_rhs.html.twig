@@ -109,7 +109,7 @@
         </tr>
         {% for row in clearingHistory %}
           <tr>
-            <td>{{ row.date|date('Y-m-d') }}</td>
+            <td>{{ row.date|round(0)|date('Y-m-d') }}</td>
             <td>{{ row.username }}</td>
             <td>{{ row.scope }}</td>
             <td>{{ row.type }}</td>

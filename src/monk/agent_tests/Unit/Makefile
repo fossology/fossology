@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014, 2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -18,6 +18,14 @@ CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -fopenmp -lm $(
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
 
+ifeq (,$(shell pkg-config --exists uchardet || echo no))
+CFLAGS_LOCAL += $(shell pkg-config --libs uchardet)
+CFLAGS_LOCAL += $(shell pkg-config --cflags uchardet)
+CFLAGS_LOCAL += -DHAVE_CHARDET
+else
+CFLAGS_LOCAL += -lmagic
+endif
+
 OBJECTS = test_string_operations.o \
           test_file_operations.o \
           test_license.o \
@@ -26,6 +34,7 @@ OBJECTS = test_string_operations.o \
           test_match.o \
           test_diff.o \
           test_database.o \
+          test_encoding.o \
           utils.o
 
 all: $(EXE)

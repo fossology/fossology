@@ -219,7 +219,7 @@ class ui_browse_license extends FO_Plugin
     
     $UniqueTagArray = array();
     global $container;
-    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId);
+    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
 
     /***************************************
@@ -346,12 +346,12 @@ class ui_browse_license extends FO_Plugin
     $pfileLicenses = array();
     foreach($selectedScanners as $agentName=>$agentId)
     {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat);
       foreach ($licensePerPfile as $pfile => $licenseRow)
       {
         foreach ($licenseRow as $licId => $row)
         {
-          $lic = $this->licenseProjector->getProjectedShortname($licId,$row['license_shortname']);
+          $lic = $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
       }
@@ -393,7 +393,7 @@ class ui_browse_license extends FO_Plugin
     }
     $noLicenseUploadTreeView->unmaterialize();
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, true);
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     foreach ($Children as $child)
     {

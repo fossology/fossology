@@ -29,7 +29,7 @@ You should have received a copy of the GNU General Public License along with thi
 #define DELIMITERS " \t\n\r\f#"
 
 #define MONK_CASE_INSENSITIVE
-#define MAX_ALLOWED_DIFF_LENGTH 100
+#define MAX_ALLOWED_DIFF_LENGTH 256
 #define MIN_ADJACENT_MATCHES 3
 #define MAX_LEADING_DIFF 10
 #define MIN_ALLOWED_RANK 66

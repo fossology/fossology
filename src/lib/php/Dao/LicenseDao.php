@@ -250,31 +250,45 @@ class LicenseDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $selectedAgentId
+   * @param int $selectedAgentId
+   * @param array $mask
    * @return array
    */
-  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId)
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
-    $param = array($selectedAgentId, $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $param = array($selectedAgentId);
+
+    if ($includeSubfolders)
+    {
+      $param[] = $itemTreeBounds->getLeft();
+      $param[] = $itemTreeBounds->getRight();
+      $condition = "lft BETWEEN $2 AND $3";
+      $statementName .= ".subfolders";
+    } else
+    {
+      $param[] = $itemTreeBounds->getItemId();
+      $condition = "realparent = $2";
+    }
+
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND utree.upload_fk=$".count($param);
+    }
 
     $sql = "SELECT utree.pfile_fk as pfile_id,
-           rf_shortname as license_shortname,
            license_ref.rf_pk as license_id,
            rf_match_pct as match_percentage,
-           CAST($1 AS INT) AS agent_id
+           CAST($1 AS INT) AS agent_id,
+           uploadtree_pk
          FROM license_file, license_ref, $uploadTreeTableName utree
          WHERE agent_fk = $1
            AND license_file.rf_fk = license_ref.rf_pk
            AND license_file.pfile_fk = utree.pfile_fk
-           AND (lft BETWEEN $2 AND $3)";
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
-      $sql .= " AND utree.upload_fk=$4";
-      $param[] = $itemTreeBounds->getUploadId();
-    }
-    $sql .= " ORDER BY match_percentage ASC";
+           AND $condition
+         ORDER BY match_percentage ASC";
 
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);

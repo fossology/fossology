@@ -14,7 +14,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include <libfossology.h>
 #include "highlight.h"
-#include "libfossagent.h"
 
 PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right, long groupId);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
@@ -22,7 +21,7 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);
 long saveToDb(fo_dbManager* dbManager, int agentId, long int refId, long int pFileId, unsigned int percent);
 int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId);
-int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long int licenseFileId);
-int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId);
+int saveDiffHighlightToDb(fo_dbManager* dbManager, const DiffMatchInfo* diffInfo, long licenseFileId);
+int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, long licenseFileId);
 
 #endif // MONK_AGENT_DATABASE_H

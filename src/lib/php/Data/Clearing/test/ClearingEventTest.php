@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,51 +18,39 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Clearing;
 
-use DateTime;
-use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
 
 class ClearingEventTest extends \PHPUnit_Framework_TestCase
 {
   /** @var int */
   private $eventId = 12;
-
-  /** @var int */
-  private $pfileId = 65;
-
   /** @var int */
   private $uploadTreeId = 5;
-
-  /** @var DateTime */
-  private $dateTime;
-
   /** @var int */
   private $userId = 93;
-
   /** @var int */
   private $groupId = 123;
-
   /** @var string */
   private $eventType = ClearingEventTypes::USER;
-
-  /** @var string */
-  private $reportinfo = "<reportinfo>";
-
-  /** @var string */
-  private $comment = "<comment>";
-
   /** @var ClearingLicense|M/MockInterface */
   private $clearingLicense;
-
   /** @var ClearingEvent */
   private $licenseDecisionEvent;
+  /** @var int */
+  private $timestamp;
 
   public function setUp()
   {
-    $this->dateTime = new DateTime();
+    $this->timestamp = time();
     $this->clearingLicense = M::mock(ClearingLicense::classname());
 
-    $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->dateTime, $this->userId, $this->groupId, $this->eventType, $this->clearingLicense);
+    $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->timestamp, $this->userId, $this->groupId, $this->eventType, $this->clearingLicense);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+  }
+
+  function tearDown()
+  {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
   public function testGetEventId() {
@@ -73,8 +61,8 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionEvent->getEventType(), is($this->eventType));
   }
 
-  public function testGetDateTime() {
-    assertThat($this->licenseDecisionEvent->getDateTime(), is($this->dateTime));
+  public function testGetTimeStamp() {
+    assertThat($this->licenseDecisionEvent->getTimeStamp(), is($this->timestamp));
   }
 
   public function testGetClearingLicense() {

@@ -12,24 +12,20 @@ You should have received a copy of the GNU General Public License along with thi
 #include "match.h"
 
 #include "license.h"
-#include "math.h"
-#include "monk.h"
-#include "diff.h"
 #include "file_operations.h"
 
-GArray* findAllMatchesBetween(File* file, Licenses* licenses,
-                                     unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
-  GArray* matches = g_array_new(TRUE, FALSE, sizeof(Match*));
+GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
+        unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
+  GArray* matches = g_array_new(FALSE, FALSE, sizeof(Match*));
 
-  GArray* textTokens = file->tokens;
-  guint textLength = textTokens->len;
+  const GArray* textTokens = file->tokens;
+  const guint textLength = textTokens->len;
 
-  for (guint tPos=0; tPos<textLength; tPos++) {
+  for (guint tPos = 0; tPos < textLength; tPos++) {
     for (guint sPos = 0; sPos <= maxLeadingDiff; sPos++) {
-      const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, file->tokens, tPos);
+      const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, textTokens, tPos);
 
-      if (!availableLicenses)
-      {
+      if (!availableLicenses) {
         /* we hope to get here very often */
         continue;
       }
@@ -41,13 +37,11 @@ GArray* findAllMatchesBetween(File* file, Licenses* licenses,
     }
   }
 
-  GArray* filteredMatches = filterNonOverlappingMatches(matches);
-
-  return filteredMatches;
+  return filterNonOverlappingMatches(matches);
 }
 
 void match_array_free(GArray* matches) {
-#if GLIB_CHECK_VERSION(2,32,0)
+#if GLIB_CHECK_VERSION(2, 32, 0)
   g_array_set_clear_func(matches, match_destroyNotify);
 #else
   for (unsigned int i=0; i< matches->len; ++i) {
@@ -55,16 +49,12 @@ void match_array_free(GArray* matches) {
     match_free(tmp);
   }
 #endif
-    g_array_free(matches, TRUE);
+  g_array_free(matches, TRUE);
 }
 
-Match* match_array_get(GArray* matches, guint i) {
-  return g_array_index(matches, Match*, i);
-}
-
-int matchFileWithLicenses(MonkState* state, File* file, Licenses* licenses, MatchCallbacks* callbacks) {
+int matchFileWithLicenses(MonkState* state, const File* file, const Licenses* licenses, const MatchCallbacks* callbacks) {
   GArray* matches = findAllMatchesBetween(file, licenses,
-                                          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+          MAX_ALLOWED_DIFF_LENGTH, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
   int result = processMatches(state, file, matches, callbacks);
 
   // we are done: free memory
@@ -83,21 +73,22 @@ static char* getFileName(MonkState* state, long pFileId) {
   char* pFileName;
 
 #ifdef MONK_MULTI_THREAD
-  #pragma omp critical(getFileName)
+#pragma omp critical(getFileName)
 #endif
   {
     pFileName = fo_RepMkPath("files", pFile);
   }
 
-  if (!pFileName)
+  if (!pFileName) {
     printf("file '%s' not found\n", pFile);
+  }
 
   free(pFile);
 
   return pFileName;
 }
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, MatchCallbacks* callbacks) {
+int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks) {
   File file;
   file.id = pFileId;
 
@@ -107,8 +98,7 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, M
   if (file.fileName != NULL) {
     result = readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS);
 
-    if (result)
-    {
+    if (result) {
       result = matchFileWithLicenses(state, &file, licenses, callbacks);
 
       g_array_free(file.tokens, TRUE);
@@ -120,32 +110,36 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, Licenses* licenses, M
   return result;
 }
 
-char* formatMatchArray(GArray * matchInfo) {
+char* formatMatchArray(GArray* matchInfo) {
   GString* stringBuilder = g_string_new("");
 
   size_t len = matchInfo->len;
   for (size_t i = 0; i < len; i++) {
     DiffMatchInfo* current = &g_array_index(matchInfo, DiffMatchInfo, i);
 
-    if (current->text.length > 0)
+    if (current->text.length > 0) {
       g_string_append_printf(stringBuilder,
-                             "t[%zu+%zu] %s ",
-                             current->text.start, current->text.length, current->diffType);
-    else
+              "t[%zu+%zu] %s ",
+              current->text.start, current->text.length, current->diffType);
+    }
+    else {
       g_string_append_printf(stringBuilder,
-                             "t[%zu] %s ",
-                             current->text.start, current->diffType);
+              "t[%zu] %s ",
+              current->text.start, current->diffType);
+    }
 
-    if (current->search.length > 0)
+    if (current->search.length > 0) {
       g_string_append_printf(stringBuilder,
-                             "s[%zu+%zu]",
-                             current->search.start, current->search.length);
-    else
+              "s[%zu+%zu]",
+              current->search.start, current->search.length);
+    }
+    else {
       g_string_append_printf(stringBuilder,
-                             "s[%zu]",
-                             current->search.start);
+              "s[%zu]",
+              current->search.start);
+    }
 
-    if (i < len-1) {
+    if (i < len - 1) {
       g_string_append_printf(stringBuilder, ", ");
     }
   }
@@ -156,31 +150,37 @@ char* formatMatchArray(GArray * matchInfo) {
 static unsigned short match_rank(Match* match) {
   if (match->type == MATCH_TYPE_FULL) {
     return 100;
-  } else {
+  }
+  else {
     DiffResult* diffResult = match->ptr.diff;
-    License* license = match->license;
+    const License* license = match->license;
     unsigned int licenseLength = license->tokens->len;
-    unsigned int numberOfMatches = diffResult->matched;
-    unsigned int numberOfAdditions = diffResult->added;
+    size_t numberOfMatches = diffResult->matched;
+    size_t numberOfAdditions = diffResult->added;
 
     // calculate result percentage as jaccard index
     double rank = (100.0 * numberOfMatches) / (licenseLength + numberOfAdditions);
-    int result = floor(rank);
+    int result = (int) rank;
 
     result = MIN(result, 99);
     result = MAX(result, 1);
 
     diffResult->rank = rank;
-    diffResult->percentual = result;
+    diffResult->percentual = (unsigned short) result;
 
     return (unsigned short) result;
   }
 }
 
+static int match_isFull(const Match* match) {
+  return match->type == MATCH_TYPE_FULL;
+}
+
 size_t match_getStart(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL) {
+  if (match_isFull(match)) {
     return match->ptr.full->start;
-  } else {
+  }
+  else {
     GArray* matchedInfo = match->ptr.diff->matchedInfo;
 
     DiffPoint firstDiff = g_array_index(matchedInfo, DiffMatchInfo, 0).text;
@@ -190,176 +190,163 @@ size_t match_getStart(const Match* match) {
 }
 
 size_t match_getEnd(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL) {
+  if (match_isFull(match)) {
     return match->ptr.full->length + match->ptr.full->start;
-  } else {
+  }
+  else {
     GArray* matchedInfo = match->ptr.diff->matchedInfo;
 
-    DiffPoint lastDiff = g_array_index(matchedInfo, DiffMatchInfo, matchedInfo->len-1).text;
+    DiffPoint lastDiff = g_array_index(matchedInfo, DiffMatchInfo, matchedInfo->len - 1).text;
 
     return lastDiff.start + lastDiff.length;
   }
 }
 
-gint compareMatchIncluded (gconstpointer a, gconstpointer b) {
-  const Match* matchA = *(Match**)a;
-  const Match* matchB = *(Match**)b;
-
-  size_t matchAStart = match_getStart(matchA);
-  size_t matchBStart = match_getStart(matchB);
-
-  if (matchAStart > matchBStart)
-    return 1;
-  if (matchAStart < matchBStart)
-    return -1;
-
-  size_t matchAEnd = match_getEnd(matchA);
-  size_t matchBEnd = match_getEnd(matchB);
-
-  if (matchAEnd > matchBEnd)
-    return -1;
-  if (matchAEnd < matchBEnd)
-    return 1;
-
-  return 0;
+static int match_includes(const Match* big, const Match* small) {
+  return (match_getStart(big) <= match_getStart(small)) && (match_getEnd(big) >= match_getEnd(small));
 }
 
 // make sure to call it after a match_rank or the result will be junk
 double match_getRank(const Match* match) {
-  if (match->type == MATCH_TYPE_FULL)
+  if (match_isFull(match)) {
     return 100.0;
-  else
+  }
+  else {
     return match->ptr.diff->rank;
+  }
 }
 
-gint compareMatchByRank (gconstpointer a, gconstpointer b) {
-  const Match* matchA = *(Match**)a;
-  const Match* matchB = *(Match**)b;
-
+static int compareMatchByRank(const Match* matchA, const Match* matchB) {
   double matchARank = match_getRank(matchA);
   double matchBRank = match_getRank(matchB);
 
-  if (matchARank > matchBRank)
+  if (matchARank > matchBRank) {
     return 1;
-  if (matchARank < matchBRank)
+  }
+  if (matchARank < matchBRank) {
     return -1;
+  }
 
   return 0;
 }
 
-/* divide an array of Match* in groups
- * each first element of a group contains all the successive elements in the same group
- *
- * a match m1 is contained in another m2 if the set [m1.start, m1.end] is contained in [m2.start, m2.end]
- * in this case compareMatchIncluded(&m1, &m2) == 1
- *
- * input: [GArray of Match*]
- * output: [GArray of GArray of Match*]
- */
-GArray* groupOverlapping(GArray* matches) {
-  g_array_sort(matches, compareMatchIncluded);
+/* profiling says there is no need to cache the comparison */
+static int licenseIncludes(const License* big, const License* small) {
+  const GArray* tokensBig = big->tokens;
+  const GArray* tokensSmall = small->tokens;
 
-  GArray* result = g_array_new(TRUE, FALSE, sizeof(GArray*));
+  const guint bigLen = tokensBig->len;
+  const guint smallLen = tokensSmall->len;
 
-  if (matches->len == 0)
-    return result;
-
-  Match* firstMatch = match_array_get(matches, 0);
-  size_t currentGroupEnd = match_getEnd(firstMatch);
-
-  GArray* currentGroup = g_array_new(TRUE, FALSE, sizeof(GArray*));
-
-  g_array_append_val(currentGroup, firstMatch);
-
-  for (guint i = 1; i < matches->len; ++i) {
-    Match* currentMatch = match_array_get(matches, i);
-    size_t currentMatchEnd = match_getEnd(currentMatch);
-
-    if (currentMatchEnd > currentGroupEnd) {
-      g_array_append_val(result, currentGroup);
-      currentGroup = g_array_new(TRUE, FALSE, sizeof(GArray*));
-      currentGroupEnd = currentMatchEnd;
-    }
-    g_array_append_val(currentGroup, currentMatch);
+  if (smallLen == 0) {
+    return 1;
   }
-  g_array_append_val(result, currentGroup);
 
-  return result;
-}
+  if (smallLen > bigLen) {
+    return 0;
+  }
 
-// match must not be empty
-Match* greatestMatchInGroup(GArray* matches, GCompareFunc compare) {
-  Match* result = match_array_get(matches, 0);
-
-  for (guint j = 0; j < matches->len; j++) {
-    Match* match = match_array_get(matches, j);
-    if ((*compare)(&match, &result) == 1) {
-      result = match;
+  for (guint i = 0; i < bigLen; i++) {
+    unsigned n = smallLen;
+    if (matchNTokens(tokensBig, i, bigLen, tokensSmall, 0, smallLen, n)) {
+      return 1;
     }
   }
 
-  return result;
+  return 0;
 }
 
-// destructively filter overlapping licenses to contain only best match
-// discarded matches and the array are freed
+static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense) {
+  return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
+}
+
+static int licensesCanNotOverlap(const License* thisLicense, const License* otherLicense) {
+  return thisLicense->refId == otherLicense->refId || !(oneLicenseIncludesTheOther(thisLicense, otherLicense));
+}
+
+/* N.B. this is only a partial order of matches
+ *
+ * =0   not comparable
+ * >0   thisMatch >= otherMatch
+ * <0   thisMatch < otherMatch
+ *
+ **/
+int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
+  const int thisIncludesOther = match_includes(thisMatch, otherMatch);
+  const int otherIncludesThis = match_includes(otherMatch, thisMatch);
+
+  if (thisIncludesOther || otherIncludesThis) {
+    if (match_isFull(thisMatch) && thisIncludesOther) {
+      return 1;
+    }
+    if (match_isFull(otherMatch) && otherIncludesThis) {
+      return -1;
+    }
+
+    if (licensesCanNotOverlap(thisMatch->license, otherMatch->license)) {
+      return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
+    }
+  }
+  return 0;
+}
+
+/*
+ * finds the maximal matches according to match_partialComparator
+ * destructively filter matches array: input array and discarded matches are automatically freed
+ **/
 GArray* filterNonOverlappingMatches(GArray* matches) {
-  GArray* result = g_array_new(TRUE, FALSE, sizeof(Match*));
+  const guint len = matches->len;
 
-  GArray* overlappingGroups = groupOverlapping(matches);
+  /* profiling says this is not time critical and worst case is O(n^2) with any algorithm */
+  /* instead of removing elements from the array set them to NULL and create a new array at the end */
+  for (guint i = 0; i < len; i++) {
+    Match* thisMatch = match_array_index(matches, i);
+    if (thisMatch == NULL) {
+      continue;
+    }
 
-  for (guint i = 0; i < overlappingGroups->len; i++) {
-    GArray* currentGroup = g_array_index(overlappingGroups, GArray*, i);
+    for (guint j = i + 1; j < len; j++) {
+      Match* otherMatch = match_array_index(matches, j);
+      if (otherMatch == NULL) {
+        continue;
+      }
 
-    Match* biggestInGroup = match_array_get(currentGroup, 0);
-    Match* bestInGroup = greatestMatchInGroup(currentGroup, compareMatchByRank);
+      gint comparison = match_partialComparator(thisMatch, otherMatch);
 
-    if (bestInGroup != biggestInGroup) {
-      // the biggest match in this group was not the one with the best match
-      // let's split the group and find the best matches by recursively calling ourselves
-      match_free(biggestInGroup);
-      g_array_remove_index_fast(currentGroup, 0);
+      if (comparison > 0) {
+        match_free(otherMatch);
+        match_array_index(matches, j) = NULL;
+      }
+      else if (comparison < 0) {
+        match_free(thisMatch);
+        match_array_index(matches, i) = NULL;
+        break;
+      }
+    }
+  }
 
-      GArray* subGroupFiltered = filterNonOverlappingMatches(currentGroup);
-
-      g_array_append_vals(result, subGroupFiltered->data, subGroupFiltered->len);
-      g_array_free(subGroupFiltered, TRUE);
-    } else {
-      g_array_append_val(result, bestInGroup);
-
-      // keep this (exclude from freeing)
-      g_array_remove_index_fast(currentGroup, 0);
-      // and free memory used by discarded matches
-      match_array_free(currentGroup);
+  GArray* result = g_array_new(FALSE, FALSE, sizeof(Match*));
+  for (guint i = 0; i < len; i++) {
+    Match* thisMatch = match_array_index(matches, i);
+    if (thisMatch) {
+      g_array_append_val(result, thisMatch);
     }
   }
 
   g_array_free(matches, TRUE);
-  g_array_free(overlappingGroups, TRUE);
-
-  // some discarded matches could have distorted grouping
-  // if grouping again would put some matches together redo all filtering
-  GArray* regroupResult = groupOverlapping(result);
-  guint regroupCount = regroupResult->len;
-  for (guint i = 0; i<regroupResult->len; i++) {
-    g_array_free(g_array_index(regroupResult, GArray*, i), TRUE);
-  }
-  g_array_free(regroupResult, TRUE);
-  if (result->len != regroupCount) {
-    result = filterNonOverlappingMatches(result);
-  }
 
   return result;
 }
 
-int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* callbacks) {
-  License* license = match->license;
+int processMatch(MonkState* state, const File* file, const Match* match, const MatchCallbacks* callbacks) {
+  const License* license = match->license;
   if (match->type == MATCH_TYPE_DIFF) {
     DiffResult* diffResult = match->ptr.diff;
 
     convertToAbsolutePositions(diffResult->matchedInfo, file->tokens, license->tokens);
     return callbacks->onDiff(state, file, license, diffResult);
-  } else {
+  }
+  else {
     DiffMatchInfo matchInfo;
     matchInfo.text = getFullHighlightFor(file->tokens, match->ptr.full->start, match->ptr.full->length);
     matchInfo.search = getFullHighlightFor(license->tokens, 0, license->tokens->len);
@@ -369,7 +356,7 @@ int processMatch(MonkState* state, File* file, Match* match, MatchCallbacks* cal
   }
 }
 
-int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks* callbacks) {
+int processMatches(MonkState* state, const File* file, const GArray* matches, const MatchCallbacks* callbacks) {
   if (callbacks->ignore && callbacks->ignore(state, file)) {
     return 1;
   }
@@ -380,22 +367,20 @@ int processMatches(MonkState* state, File* file, GArray* matches, MatchCallbacks
 
   const guint matchCount = matches->len;
 
-  if (matchCount == 0)
-  {
+  if (matchCount == 0) {
     return callbacks->onNo(state, file);
   }
 
   int result = 1;
-  for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++)
-  {
-    Match* match = match_array_get(matches, matchIndex);
+  for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++) {
+    const Match* match = match_array_index(matches, matchIndex);
     result &= processMatch(state, file, match, callbacks);
   }
 
   return result;
 }
 
-Match* diffResult2Match(DiffResult* diffResult, License* license){
+Match* diffResult2Match(DiffResult* diffResult, const License* license) {
   Match* newMatch = malloc(sizeof(Match));
   newMatch->license = license;
 
@@ -405,7 +390,8 @@ Match* diffResult2Match(DiffResult* diffResult, License* license){
     newMatch->ptr.full = malloc(sizeof(DiffPoint));
     *(newMatch->ptr.full) = g_array_index(diffResult->matchedInfo, DiffMatchInfo, 0).text;
     diffResult_free(diffResult);
-  } else {
+  }
+  else {
     newMatch->type = MATCH_TYPE_DIFF;
     newMatch->ptr.diff = diffResult;
 
@@ -413,41 +399,46 @@ Match* diffResult2Match(DiffResult* diffResult, License* license){
   return newMatch;
 }
 
-void findDiffMatches(File* file, License* license,
-  size_t textStartPosition, size_t searchStartPosition,
-  GArray* matches,
-  unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
+void findDiffMatches(const File* file, const License* license,
+        size_t textStartPosition, size_t searchStartPosition,
+        GArray* matches,
+        unsigned int maxAllowedDiff, unsigned int minAdjacentMatches) {
 
   if (!matchNTokens(file->tokens, textStartPosition, file->tokens->len,
-                    license->tokens, searchStartPosition, license->tokens->len,
-    minAdjacentMatches)) {
+          license->tokens, searchStartPosition, license->tokens->len,
+          minAdjacentMatches)) {
     return;
   }
 
   DiffResult* diffResult = findMatchAsDiffs(file->tokens, license->tokens,
-                                            textStartPosition, searchStartPosition,
-                                            maxAllowedDiff, minAdjacentMatches);
+          textStartPosition, searchStartPosition,
+          maxAllowedDiff, minAdjacentMatches);
 
   if (diffResult) {
     Match* newMatch = diffResult2Match(diffResult, license);
 
     if (match_rank(newMatch) > MIN_ALLOWED_RANK)
       g_array_append_val(matches, newMatch);
-    else
+    else {
       match_free(newMatch);
+    }
   }
 }
 
-#if GLIB_CHECK_VERSION(2,32,0)
+#if GLIB_CHECK_VERSION(2, 32, 0)
+
 void match_destroyNotify(gpointer matchP) {
   match_free(*((Match**) matchP));
 }
+
 #endif
 
 void match_free(Match* match) {
-  if (match->type == MATCH_TYPE_DIFF)
+  if (match->type == MATCH_TYPE_DIFF) {
     diffResult_free(match->ptr.diff);
-  else
+  }
+  else {
     free(match->ptr.full);
+  }
   free(match);
 }

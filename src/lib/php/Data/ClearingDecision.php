@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Johannes Najjar, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-use DateTime;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Util\Object;
@@ -48,8 +47,8 @@ class ClearingDecision extends Object
   private $reportinfo;
   /** @var int */
   private $scope;
-  /** @var DateTime */
-  private $dateAdded;
+  /** @var int */
+  private $timeStamp;
 
   /**
    * @param $sameFolder
@@ -60,14 +59,14 @@ class ClearingDecision extends Object
    * @param $userId
    * @param int $type
    * @param int $scope
-   * @param $date_added
+   * @param $ts_added
    * @param ClearingEvent[] $clearingEvents
    * @param string $comment
    * @param string $reportinfo
    * @internal param $licenses
    */
   public function __construct($sameFolder, $clearingId, $uploadTreeId, $pfileId, $userName, $userId, $type,
-          $scope, $date_added, $clearingEvents, $comment = "", $reportinfo = "")
+          $scope, $ts_added, $clearingEvents, $comment = "", $reportinfo = "")
   {
     $this->sameFolder = $sameFolder;
     $this->clearingId = $clearingId;
@@ -77,7 +76,7 @@ class ClearingDecision extends Object
     $this->userId = $userId;
     $this->type = $type;
     $this->scope = $scope;
-    $this->dateAdded = $date_added;
+    $this->timeStamp = $ts_added;
     $this->comment = $comment;
     $this->reportinfo = $reportinfo;
     $this->clearingEvents = $clearingEvents;
@@ -100,11 +99,11 @@ class ClearingDecision extends Object
   }
 
   /**
-   * @return DateTime
+   * @return int
    */
-  public function getDateAdded()
+  public function getTimeStamp()
   {
-    return $this->dateAdded;
+    return $this->timeStamp;
   }
 
   /**
@@ -221,14 +220,6 @@ class ClearingDecision extends Object
     }
     return false;
   }
-  
-  /**
-   * @return int
-   */
-  public function getTimeStamp()
-  {
-    return $this->dateAdded->getTimestamp();
-  }
 
   function __toString()
   {
@@ -240,6 +231,5 @@ class ClearingDecision extends Object
 
     return $output . $this->getUserName() . ")";
   }
-
 
 }

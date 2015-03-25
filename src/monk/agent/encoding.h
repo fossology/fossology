@@ -1,6 +1,6 @@
 /*
-Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Author: Daniele Fognini
+Copyright (C) 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
 
@@ -9,16 +9,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef MONK_AGENT_HIGHLIGHT_H
-#define MONK_AGENT_HIGHLIGHT_H
+#ifndef MONK_AGENT_ENCODING_H
+#define MONK_AGENT_ENCODING_H
 
+#include <iconv.h>
 #include <glib.h>
-#include "diff.h"
 
-void convertToAbsolutePositions(GArray* diffMatchInfo,
-                                GArray* textTokens,
-                                GArray* searchTokens);
+iconv_t guessConverter(const char* buffer, size_t len);
+gchar* guessEncoding(const char* buffer, size_t len);
 
-DiffPoint getFullHighlightFor(const GArray* tokens, size_t firstMatchedIndex, size_t matchedCount);
-
-#endif // MONK_AGENT_HIGHLIGHT_H
+#endif

@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License along with thi
 #include "database.h"
 #include "monk.h"
 
-int isIgnoredLicense(License* license);
+int isIgnoredLicense(const License* license);
 Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 void licenses_free(Licenses* licenses);
-const GArray* getLicenseArrayFor(Licenses* licenses, unsigned searchPos, GArray* searchedTokens, unsigned searchedStart);
+const GArray* getLicenseArrayFor(const Licenses* licenses, unsigned searchPos, const GArray* searchedTokens, unsigned searchedStart);
 
 #endif // MONK_AGENT_LICENSE_H

@@ -14,9 +14,9 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "match.h"
 
-int sched_onNoMatch(MonkState* state, File* file);
-int sched_onFullMatch(MonkState* state, File* file, License* license, DiffMatchInfo* matchInfo);
-int sched_onDiffMatch(MonkState* state, File* file, License* license, DiffResult* diffResult);
-int sched_ignore(MonkState* state, File* file);
+int sched_onNoMatch(MonkState* state, const File* file);
+int sched_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo);
+int sched_onDiffMatch(MonkState* state, const File* file, const License* license, const DiffResult* diffResult);
+int sched_ignore(MonkState* state, const File* file);
 
 #endif // MONK_AGENT_SCHEDULER_H

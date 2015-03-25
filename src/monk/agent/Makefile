@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014-2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -13,12 +13,19 @@ CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
+ifeq (,$(shell pkg-config --exists uchardet || echo no))
+CFLAGS_LOCAL += $(shell pkg-config --cflags uchardet) -DHAVE_CHARDET
+CFLAGS_LINK += $(shell pkg-config --libs uchardet)
+else
+CFLAGS_LINK += -lmagic
+endif
+
 EXE = monk monkbulk
-OBJECTS = string_operations.o file_operations.o database.o \
+OBJECTS = string_operations.o file_operations.o database.o encoding.o \
           license.o highlight.o match.o hash.o diff.o common.o \
           cli.o scheduler.o \
           _squareVisitor.o
-COVERAGE = string_operations_cov.o file_operations_cov.o \
+COVERAGE = string_operations_cov.o file_operations_cov.o encoding_cov.o \
            database_cov.o license_cov.o highlight_cov.o match_cov.o \
            hash_cov.o diff_cov.o common_cov.o \
            cli_cov.o scheduler_cov.o \
