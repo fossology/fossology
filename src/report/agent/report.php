@@ -130,16 +130,15 @@ class ReportAgent extends Agent
     $styleTable = array('borderSize'=>10, 'borderColor'=>'FFFFFF' );
     $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
-    $footerStyle = array("color" => "000000", "size" => 10, "bold" => true, "name" => $this->fontFamily);
-    $footerTime = date("D M j G:i:s T Y");
-    $footerTime = date("Y/m/d H:i:s T");
+    $footerStyle = array("color" => "000000", "size" => 9, "bold" => true, "name" => $this->fontFamily);
+    $footerTime = "Gen Date: ".date("Y/m/d H:i:s T");
     $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
-    $footerSpace = str_repeat("  ", 11);
+    $footerSpace = str_repeat("  ", 7);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";
     $footer = $section->createFooter(); 
     $table = $footer->addTable("footerTableStyle");
     $table->addRow(200, $styleFirstRow);
-    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace #$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
+    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace FOSSologyNG Ver:#$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
   }
 
 
@@ -206,7 +205,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Released by"), $firstRowStyle1, $paragraphStyle);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" IC SG EA SOL/PRO"), $firstRowStyle2, $paragraphStyle);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" FOSSologyNG Generation"), $firstRowStyle2, $paragraphStyle);
 
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -972,9 +971,9 @@ class ReportAgent extends Agent
 
   private function getRowsAndColumnsForIrre($section, $title, $licensesIrre)
   {
-    $thColor = array("bgColor" => "D2D0CE");
+    $thColor = array("bgColor" => "C0C0C0");
     $thText = array("size" => 12, "bold" => true);
-    $rowWidth = 50;
+    $rowWidth = 500;
     $firstColLen = 3500;
     $secondColLen = 3500;
 
@@ -982,8 +981,8 @@ class ReportAgent extends Agent
 
     $table = $section->addTable($this->tablestyle);
     $table->addRow($rowWidth,$this->paragraphStyle);
-    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars(" Path"), $thText,$this->paragraphStyle);
-    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars(" Files"), $thText,$this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars(" Path"));
+    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars(" Files"));
     
     foreach($licensesIrre as $statements){
       $table->addRow($rowWidth,$this->paragraphStyle);
@@ -1083,11 +1082,11 @@ class ReportAgent extends Agent
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements']);
 
     /* Display Ecc statements and files */
-    $heading = "12. Export restrictions";
+    $heading = "12. Export Restrictions";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements']);
 
     /* Display IP statements and files */
-    $heading = "13. Intellectual property";
+    $heading = "13. Intellectual Property";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
     $heading = "14. Irrelevant Files";
