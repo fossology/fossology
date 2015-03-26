@@ -253,7 +253,7 @@ class ReportAgent extends Agent
    */ 
   private function clearingProtocolChangeLogTable($section)
   {
-    $thColor = array("bgColor" => "D2D0CE");
+    $thColor = array("bgColor" => "C0C0C0");
     $thText = array("size" => 12, "bold" => true);
     $rowWidth = 600;
     $rowWidth1 = 200;
@@ -788,7 +788,7 @@ class ReportAgent extends Agent
     $secondColLen = 9500;
     $thirdColLen = 4000;
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("6. Global Licenses"), $this->tableHeading);
 
@@ -819,7 +819,7 @@ class ReportAgent extends Agent
     $secondColLen = 9500;
     $thirdColLen = 4000;
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("7. Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses"), $this->tableHeading);
 
@@ -850,7 +850,7 @@ class ReportAgent extends Agent
     $secondColLen = 9500;
     $thirdColLen = 4000;
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("8. Other OSS Licenses (yellow) - additional obligations to common rules"), $this->tableHeading);
 
@@ -881,7 +881,7 @@ class ReportAgent extends Agent
     $secondColLen = 9500;
     $thirdColLen = 4000;
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars("9. Other OSS Licenses (white) - only common rules"), $this->tableHeading);
     $table = $section->addTable($this->tablestyle);
@@ -912,19 +912,22 @@ class ReportAgent extends Agent
   private function acknowledgementTable($section)
   {
     $rowHeight = 500;
-    $firstColLen = 2000;
-    $secondColLen = 9500;
+    $firstColLen = 3000;
+    $secondColLen = 8500;
     $thirdColLen = 4000;
 
+    $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
+    
     $section->addText(htmlspecialchars("10. Acknowledgements"), $this->tableHeading);
     $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
-    $cell1 = $table->addCell($firstColLen); 
-    $cell1->addText(htmlspecialchars("ID of acknowledgements"));
-    $cell2 = $table->addCell($secondColLen); 
-    $cell2->addText(htmlspecialchars("Text of acknowledgements"));
-    $cell3 = $table->addCell($thirdColLen);
-    $cell3->addText(htmlspecialchars("Reference to the license"));
+    $cell1 = $table->addCell($firstColLen,$firstRowStyle); 
+    $cell1->addText(htmlspecialchars("ID of acknowledgements"),$firstRowTextStyle);
+    $cell2 = $table->addCell($secondColLen,$firstRowStyle); 
+    $cell2->addText(htmlspecialchars("Text of acknowledgements"),$firstRowTextStyle);
+    $cell3 = $table->addCell($thirdColLen,$firstRowStyle);
+    $cell3->addText(htmlspecialchars("Reference to the license"),$firstRowTextStyle);
 
     $section->addTextBreak(); 
   }
@@ -942,7 +945,7 @@ class ReportAgent extends Agent
     $secondColLen = 5000;
     $thirdColLen = 4000;
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 10, "align" => "center", "bold" => true);
+    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addText(htmlspecialchars($title), $this->tableHeading);
 
@@ -981,8 +984,8 @@ class ReportAgent extends Agent
 
     $table = $section->addTable($this->tablestyle);
     $table->addRow($rowWidth,$this->paragraphStyle);
-    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars(" Path"));
-    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars(" Files"));
+    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars(" Path"), $thText);
+    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars(" Files"), $thText);
     
     foreach($licensesIrre as $statements){
       $table->addRow($rowWidth,$this->paragraphStyle);
