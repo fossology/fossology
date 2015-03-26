@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -37,6 +38,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -h       = this help message
     -v       = enable verbose debugging
     --username string = user name
+    --groupname string = group name
     --password string = password
     -c string = Specify the directory for the system configuration
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
@@ -167,16 +169,16 @@ function GetFolder($FolderPath, $Parent = NULL) {
   if (empty($FolderPath)) {
     return ($Parent);
   }
-  list($Folder, $FolderPath) = explode('/', $FolderPath, 2);
-  if (empty($Folder)) {
-    return (GetFolder($FolderPath, $Parent));
+  list($folderHead, $folderTail) = explode('/', $FolderPath, 2);
+  if (empty($folderHead)) {
+    return (GetFolder($folderTail, $Parent));
   }
   /* See if it exists */
-  $SQLFolder = str_replace("'", "''", $Folder);
+  $SQLFolder = str_replace("'", "''", $folderHead);
   $SQL = "SELECT * FROM folder
   INNER JOIN foldercontents ON child_id = folder_pk
   AND foldercontents_mode = '1'
-  WHERE parent_fk = '$Parent' AND folder_name='$SQLFolder';";
+  WHERE foldercontents.parent_fk = '$Parent' AND folder_name='$SQLFolder'";
   if ($Verbose) {
     print "SQL=\n$SQL\n";
   }
@@ -185,7 +187,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   $row = pg_fetch_assoc($result);
   $row_count = pg_num_rows($result);
 
-  if (row_count <= 0) {
+  if ($row_count <= 0) {
     /* Need to create folder */
     global $Plugins;
     $P = & $Plugins[plugin_find_id("folder_create") ];
@@ -194,10 +196,10 @@ function GetFolder($FolderPath, $Parent = NULL) {
       exit(1);
     }
     if ($Verbose) {
-      print "Folder not found: Creating $Folder\n";
+      print "Folder not found: Creating $folderHead\n";
     }
     if (!$Test) {
-      $P->Create($Parent, $Folder, "");
+      $P->Create($Parent, $folderHead, "");
       pg_free_result($result);
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);
@@ -206,7 +208,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
   }
   $Parent = $row['folder_pk'];
   pg_free_result($result);
-  return (GetFolder($FolderPath, $Parent));
+  return (GetFolder($folderTail, $Parent));
 } /* GetFolder() */
 
 /**
@@ -240,6 +242,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $user_pk = $SysConf['auth']['UserId'];
+  $group_pk = $SysConf['auth']['GroupId'];
   /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
   $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
   if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
@@ -271,23 +274,23 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Create the upload for the file */
   if ($Verbose) {
-    print "JobAddUpload($user_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
+    print "JobAddUpload($user_pk, $group_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($user_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
+    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
     print "  UploadPk is: '$UploadPk'\n";
   }
 
   /* Prepare the job: job "wget" */
   if ($Verbose) {
-    print "JobAddJob($user_pk, wget, $UploadPk);\n";
+    print "JobAddJob($user_pk, $group_pk, wget, $UploadPk);\n";
   }
   if (!$Test) {
-    $jobpk = JobAddJob($user_pk, "wget", $UploadPk);
+    $jobpk = JobAddJob($user_pk, $group_pk, "wget", $UploadPk);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       echo $text;
@@ -352,19 +355,23 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   global $OptionS; /* Should it run synchronously? */
   if ($OptionS) {
-    $working = True;
-    while ($working) {
+    $working = true;
+    $waitCount = 0;
+    while ($working && ($waitCount++ < 30)) {
       sleep(3);
-      $SQL = "SELECT * FROM jobqueue WHERE jq_endtext <> 'Completed' AND jq_job_fk in (SELECT job_pk from job where job_upload_fk = '$UploadPk');";
+      $SQL = "select * from jobqueue inner join job on job.job_pk = jobqueue.jq_job_fk where job_upload_fk = '$UploadPk' and jq_end_bits = 0 and jq_type = 'wget_agent'";
 
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
       $row_count = pg_num_rows($result);
       pg_free_result($result);
       if ($row_count == 0) {
-        $working = False;
+        $working = false;
       }
+    }
+    if ($working) {
+      echo "Gave up waiting for copy completion. Is the scheduler running?";
+      return 1;
     }
   }
 } /* UploadOne() */
@@ -384,6 +391,7 @@ $public_flag = 0;
 $OptionS = "";
 
 $user = $passwd = "";
+$group = "";
 $vcsuser = $vcspass= "";
 
 for ($i = 1;$i < $argc;$i++) {
@@ -398,6 +406,10 @@ for ($i = 1;$i < $argc;$i++) {
     case '--username':
       $i++;
       $user = $argv[$i];
+      break;
+    case '--groupname':
+      $i++;
+      $group = $argv[$i];
       break;
     case '--password':
       $i++;
@@ -513,11 +525,11 @@ for ($i = 1;$i < $argc;$i++) {
   } /* switch */
 } /* for each parameter */
 
-account_check($user, $passwd); // check username/password
+account_check($user, $passwd, $group); // check username/password
 
 /** list all available processing agents */
 if (!$Test && $OptionQ) {
-  $Cmd = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -a";
+  $Cmd = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR -a";
   system($Cmd);
   exit(0);
 }
@@ -534,9 +546,9 @@ if ($stdin_flag)
 
 /** compose fossjobs command */
 if($Verbose) {
-  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR -v "; 
+  $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR -v ";
 } else {
-  $fossjobs_command = "fossjobs --username $user --password $passwd -c $SYSCONFDIR  ";
+  $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR  ";
 }
 
 //print "fossjobs_command is:$fossjobs_command\n";
@@ -579,8 +591,7 @@ if ($vcsuser && $vcspass) {
 }
 
 print "Loading '$UploadArchive'\n";
-//print "  CAlling UploadOne in 'main': '$FolderPath'\n";
+print "  Calling UploadOne in 'main': '$FolderPath'\n";
 $res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
 if ($res) exit(1); // fail to upload
 exit(0);
-?>
