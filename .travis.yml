@@ -78,7 +78,6 @@ matrix:
        - sudo mv composer.phar /usr/local/bin/composer
        - cd src && composer install && composer update && cd ..
        - sudo make install
-       - cd -
        - cd src/testing/unit
        - ./runAgentUnit.php
 
