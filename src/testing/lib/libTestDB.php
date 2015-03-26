@@ -179,7 +179,7 @@ function TestDBInit($path=NULL, $dbName)
   $last = exec($cmd, $upOut, $upRtn);
   //echo "DB: schema up output is:\n" . implode("\n",$upOut) . "\n";
 
-  if($upRtn != 0)
+  if($upRtn != 0 && $upRtn != 26)
   {
     return(implode("\n", $upOut) . "\n");
   }

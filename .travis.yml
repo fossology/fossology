@@ -68,20 +68,19 @@ matrix:
        - sudo /usr/local/lib/fossology/fo-postinstall
 
     - env:
-        - TEST_NAME="make test (gcc)"
+        - TEST_NAME="Unit Test (gcc)"
       compiler: gcc
       before_script:
-       - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
-       - echo "localhost:*:*:fossologytest:fossologytest" > ~/.pgpass
-       - chmod 0600 ~/.pgpass
-       - cat ~/.pgpass
+       - sudo apt-get install libcunit1-dev 
       script:
        - make
        - curl -sS https://getcomposer.org/installer | php
        - sudo mv composer.phar /usr/local/bin/composer
        - cd src && composer install && composer update && cd ..
        - sudo make install
-       - make test
+       - cd -
+       - cd src/testing/unit
+       - ./runAgentUnit.php
 
     # QA jobs for code analytics and metrics
     # static code analysis with cppcheck (we can add --enable=all later)
