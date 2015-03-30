@@ -61,9 +61,6 @@ matrix:
         - TEST_NAME="make install"
       compiler: gcc
       script:
-       - curl -sS https://getcomposer.org/installer | php
-       - sudo mv composer.phar /usr/local/bin/composer
-       - cd src && composer install && composer update && cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
 
@@ -72,11 +69,12 @@ matrix:
       compiler: gcc
       before_script:
        - sudo apt-get install libcunit1-dev 
+       - cd src/
+       - composer install --dev
+       - composer self-update
+       - cd ..
       script:
        - make
-       - curl -sS https://getcomposer.org/installer | php
-       - sudo mv composer.phar /usr/local/bin/composer
-       - cd src && composer install && composer update && cd ..
        - sudo make install
        - cd src/testing/unit
        - ./runAgentUnit.php
