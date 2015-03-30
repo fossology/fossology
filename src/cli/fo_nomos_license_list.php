@@ -20,19 +20,19 @@
  * @file fo_nomos_license_list.php
  *
  * @brief get a list of filepaths and nomos license information for those
- * files. 
+ * files.
  */
 
 $Usage = "Usage: " . basename($argv[0]) . "
   -u upload id        :: upload id
   -t uploadtree id    :: uploadtree id
   -c sysconfdir       :: Specify the directory for the system configuration
-  --user username     :: user name
+  --username username :: username
   --password password :: password
   --container         :: include container or not, 1: yes, 0: no (default)
   -x                  :: do not show files which have unuseful license 'No_license_found' or no license
   -X excluding        :: Exclude files containing [free text] in the path.
-                         'mac/' should exclude all files in the mac directory. 
+                         'mac/' should exclude all files in the mac directory.
                          'mac' and it should exclude all files in any directory containing the substring 'mac'
                          '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
@@ -40,13 +40,13 @@ $Usage = "Usage: " . basename($argv[0]) . "
 $upload = ""; // upload id
 $item = ""; // uploadtree id
 $container = 0; // include container or not, 1: yes, 0: no (default)
-$ignore = 0; // do not show files which have no license, 1: yes, 0: no (default) 
+$ignore = 0; // do not show files which have no license, 1: yes, 0: no (default)
 $excluding = '';
 
-$longopts = array("user:", "password:", "container:");
+$longopts = array("username:", "password:", "container:");
 $options = getopt("c:u:t:hxX:", $longopts);
-if (empty($options) || !is_array($options)) 
-{ 
+if (empty($options) || !is_array($options))
+{
   print $Usage;
   return 1;
 }
@@ -67,7 +67,7 @@ foreach($options as $option => $value)
     case 'h':
       print $Usage;
       return 1;
-    case 'user':
+    case 'username':
       $user = $value;
       break;
     case 'password':
@@ -123,7 +123,7 @@ return 0;
  * \param $upload_pk - upload id
  * \param $container - include container or not, 1: yes, 0: no (default)
  */
-function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0) 
+function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
 {
   global $ignore;
   global $excluding;
@@ -151,13 +151,13 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $toprow = pg_fetch_assoc($result);
-  pg_free_result($result); 
-  
+  pg_free_result($result);
+
   $uploadtree_tablename = GetUploadtreeTableName($toprow['upload_fk']);
 
   /* loop through all the records in this tree */
-  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename 
-              where upload_fk='$toprow[upload_fk]' 
+  $sql = "select uploadtree_pk, ufile_name, lft, rgt from $uploadtree_tablename
+              where upload_fk='$toprow[upload_fk]'
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
                     and ((ufile_mode & (1<<28)) = 0)";
   $container_sql = " and ((ufile_mode & (1<<29)) = 0)";
@@ -175,7 +175,7 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
    */
   $excluding_flag = 0; // 1: exclude 0: not exclude
   while ($row = pg_fetch_assoc($outerresult))
-  { 
+  {
     $filepatharray = array();
     $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
     $filepath = "";
@@ -198,7 +198,7 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
     #$V = $filepath;
     print "$V";
     print "\n";
-  } 
+  }
     pg_free_result($outerresult);
 }
 

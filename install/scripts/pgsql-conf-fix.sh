@@ -1,8 +1,20 @@
 #!/bin/bash
 #
-clear
+# Accept/require postgresql version as an argument to adjust config file directory to suit
 #
-# Simple shell script to adjust ppostgresql.conf to recommended Fossology settings as of 2013
+if [ $# -ne 1 ]
+   then
+   echo 'Usage:  pgsql-conf-fix.sh <version>'
+   echo
+   echo 'Where: <version> is simply major.minor'
+   echo
+   echo 'Examples: pgsql-conf-fix.sh 9.1 *OR* pgsql-conf-fix.sh 9.3'
+   echo
+   echo '   This is used to establish the path to postgresql.conf!'
+   exit 1
+fi
+#
+# Simple shell script to adjust postgresql.conf to recommended Fossology settings as of 2013
 #
 # Experimental investigation into automagically adjusting based upon memory size
 #
@@ -50,12 +62,18 @@ adjustParam()   {
     sed -i 's/^#\{,1\}\('"$1"'\s*=\s*\)\(\S*\)\(.*\)$/\1'"$2"'\3/' "$3"
 }
 #
-echo 'Automated postgresql.conf configuration adjustments. - V9.1 - Variable System Memory'
+# Use argument to script as postgresql version number
+#
+echo "Automated postgresql.conf configuration adjustments. - V$1 - Variable System Memory"
 echo
 #
 # uses pgConf to store file path - change if required
 #
-pgConf=/etc/postgresql/9.1/main/postgresql.conf
+pgConf=/etc/postgresql/$1/main/postgresql.conf
+#
+echo "Expecting postgresql.conf to be located at: $pgConf !"
+echo
+#
 if [ -e $pgConf ]
     then
     echo 'Copies postgresql.conf to current directory and creates a backup file'
@@ -124,8 +142,28 @@ if [ -e $pgConf ]
     echo
     echo 'Display the changes made'
     diff pgsql_conf.orig postgresql.conf
-    echo 'If these are OK you should copy postgresql.conf back and restart apache'
+    echo
+    echo -n "Update original postgresql.conf with these changes? (y/n) >"
+    read response
+    if [ $response != "y" ]
+        then
+        echo 'If these are OK you should copy postgresql.conf back and restart apache!'
+        echo
+        exit 3
+    fi
+
+    echo
+    cp postgresql.conf $pgConf
+    echo "Updated postgresql.conf copied to $pgConf"
+    echo
+    echo 'Attempting to restart Apache server...'
+    service apache2 restart
+    exit 0
+
     else
+
     echo 'postgresql.conf was not located as expected. Please adjust pgConf to suit.'
+    exit 2
+
 fi
 
