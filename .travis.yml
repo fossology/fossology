@@ -63,7 +63,10 @@ matrix:
       script:
        - curl -sS https://getcomposer.org/installer | php
        - sudo mv composer.phar /usr/local/bin/composer
-       - sudo cd src && composer install && composer update && cd ..
+       - cd src 
+       - sudo composer install
+       - sudo composer update
+       - cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
 
@@ -80,7 +83,10 @@ matrix:
        - make
        - curl -sS https://getcomposer.org/installer | php
        - sudo mv composer.phar /usr/local/bin/composer
-       - sudo cd src && composer install && composer update && cd ..
+       - cd src
+       - sudo composer install 
+       - sudo composer update 
+       - cd ..
        - sudo make install
        - cd src/testing/unit
        - ./runAgentUnit.php
