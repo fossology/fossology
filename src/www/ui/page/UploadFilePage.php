@@ -101,8 +101,7 @@ class UploadFilePage extends DefaultPlugin
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
 
-    global $SysConf;
-    $rootFolder = $this->folderDao->getRootFolder($SysConf['auth'][Auth::USER_ID]);
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
     if (empty($folderId) && !empty($folderStructure))
     {
@@ -147,7 +146,6 @@ class UploadFilePage extends DefaultPlugin
   function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description)
   {
     global $MODDIR;
-    global $SysConf;
     global $SYSCONFDIR;
 
     define("UPLOAD_ERR_EMPTY", 5);
@@ -199,8 +197,8 @@ class UploadFilePage extends DefaultPlugin
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth'][Auth::USER_ID];
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
     if (empty($uploadId))

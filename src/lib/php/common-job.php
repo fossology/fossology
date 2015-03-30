@@ -271,11 +271,10 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 {
   global $Plugins;
   global $PG_CONN;
-  global $SysConf;
 
   /* Get the users.default_bucketpool_fk */
-  $user_pk = $SysConf['auth']['UserId'];
-  $group_pk = $SysConf['auth']['GroupId'];
+  $user_pk = Auth::getUserId();
+  $group_pk = Auth::getGroupId();
 
   if (empty($upload_pk_list)) 
   {
@@ -339,11 +338,9 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
  */
 function QueueUploadsOnDelagents($upload_pk_list)
 {
-  global $SysConf;
-
   /* Get the users.default_bucketpool_fk */
-  $user_pk = $SysConf['auth']['UserId'];
-  $group_pk = $SysConf['auth']['GroupId'];
+  $user_pk = Auth::getUserId();
+  $group_pk = Auth::getGroupId();
 
   if (!empty($upload_pk_list))
   {

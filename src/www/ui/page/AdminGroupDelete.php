@@ -50,8 +50,7 @@ class AdminGroupDelete extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    global $SysConf;
-    $userId = $SysConf['auth'][Auth::USER_ID];
+    $userId = Auth::getUserId();
     $vars = array();
 
     /** @var UserDao $userDao */

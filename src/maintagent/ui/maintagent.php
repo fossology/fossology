@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
@@ -47,14 +49,16 @@ class maintagent extends FO_Plugin {
      * They look like _REQUEST["a"] = "a", _REQUEST["b"]="b", ...
      */
     $options = "-";
-    foreach($_REQUEST as $key=>$value) if ($key == $value) $options .= $value;
+    foreach ($_REQUEST as $key => $value) {
+      if ($key == $value)
+        $options .= $value;
+    }
 
     /* Create the maintenance job */
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-    $upload_pk = 0;  // dummy
+    $user_pk = Auth::getUserId();
+    $group_pk = Auth::getGroupId();
 
-    $job_pk = JobAddJob($user_pk, $group_pk, "Maintenance", $upload_pk);
+    $job_pk = JobAddJob($user_pk, $group_pk, "Maintenance");
     if (empty($job_pk) || ($job_pk < 0)) return _("Failed to insert job record");
     
     $jq_pk = JobQueueAdd($job_pk, "maintagent", NULL, NULL, NULL, NULL, $options);

@@ -44,9 +44,8 @@ class ReadmeossGenerator extends DefaultPlugin
 
   protected function handle(Request $request)
   {
-    global $SysConf;
-    $userId = $SysConf['auth'][Auth::USER_ID];
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
 
     $uploadId = intval($request->get('upload'));
     if ($uploadId <=0)

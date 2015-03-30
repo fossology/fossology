@@ -64,7 +64,6 @@ class agent_add extends FO_Plugin
   private function AgentsAdd($uploadpk, $agentlist)
   {
     global $PG_CONN;
-    global $SysConf;
 
     if (!is_array($agentlist)) {
       return "bad parameters";
@@ -99,8 +98,8 @@ class agent_add extends FO_Plugin
     }
 
     /* Create Job */
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $job_pk = JobAddJob($userId, $groupId, $ShortName, $uploadpk);
 
     return AgentSchedule($job_pk, $uploadpk, $agents);

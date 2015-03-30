@@ -88,7 +88,6 @@ class upload_srv_files extends FO_Plugin {
    */
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm) {
     global $Plugins;
-    global $SysConf;
 
     $FolderPath = FolderGetName($FolderPk);
     $SourceFiles = trim($SourceFiles);
@@ -140,10 +139,9 @@ class upload_srv_files extends FO_Plugin {
     }
 
     // Create an upload record.
-    $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk, $public_perm);
 
     /* Prepare the job: job "wget" */

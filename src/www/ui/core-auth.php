@@ -95,11 +95,11 @@ class core_auth extends FO_Plugin
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
       $this->session->set(Auth::GROUP_ID, $selectedGroupId);
-      $SysConf['auth']['GroupId'] = $selectedGroupId;
+      $SysConf['auth'][Auth::GROUP_ID] = $selectedGroupId;
     }
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth']['UserId'] = $_SESSION[Auth::USER_ID];
-    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth']['GroupId'] = $_SESSION[Auth::GROUP_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
 
     $Now = time();
     if (!empty($_SESSION['time']))
@@ -159,7 +159,7 @@ class core_auth extends FO_Plugin
     }
 
     $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
-    $SysConf['auth']['UserId'] = $userRow['user_pk'];
+    $SysConf['auth'][Auth::USER_ID] = $userRow['user_pk'];
     $this->session->set(Auth::USER_ID, $userRow['user_pk']);
     $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
     $this->session->set(Auth::USER_NAME, $userRow['user_name']);
@@ -168,8 +168,8 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEmail'] = $userRow['user_email'];
     $_SESSION['UserEnote'] = $userRow['email_notify'];
     $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
-    $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
+    $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $_SESSION['GroupName'] = $userRow['group_name'];
   }
 

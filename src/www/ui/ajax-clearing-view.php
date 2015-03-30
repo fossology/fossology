@@ -17,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
@@ -141,9 +142,8 @@ class AjaxClearingView extends FO_Plugin
    */
   function Output()
   {
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $action = GetParm("do", PARM_STRING);
     $uploadId = GetParm("upload", PARM_INTEGER);
     $uploadTreeId = GetParm("item", PARM_INTEGER);

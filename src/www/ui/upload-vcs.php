@@ -49,9 +49,6 @@ class upload_vcs extends FO_Plugin {
    */
   function Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm) 
   {
-    global $SysConf;
-
-    /* See if the URL looks valid */
     if (empty($Folder)) 
     {
       $text = _("Invalid folder");
@@ -80,8 +77,8 @@ class upload_vcs extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");

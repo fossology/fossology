@@ -193,8 +193,7 @@ class ui_browse_license extends FO_Plugin
    */
   private function showUploadHist(ItemTreeBounds $itemTreeBounds)
   {
-    global $SysConf;
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $groupId = Auth::getGroupId();
     $selectedAgentId = GetParm('agentId', PARM_INTEGER);
     $tag_pk = GetParm("tag", PARM_INTEGER);
 

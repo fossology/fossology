@@ -43,11 +43,10 @@ class upload_permissions extends FO_Plugin
    **/
   function DisplayGroupMembership()
   {
-    global $SysConf;
     global $PG_CONN;
 
     $group_pk = GetParm('group_pk', PARM_INTEGER);
-    $user_pk = $SysConf['auth']['UserId'];
+    $user_pk = Auth::getUserId();
     $V = "";
 
     $text = _("To edit group memberships ");

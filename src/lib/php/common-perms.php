@@ -219,9 +219,8 @@ use Fossology\Lib\Auth\Auth;
   function GetUploadPerm($upload_pk, $user_pk=0)
   {
     global $PG_CONN;
-    global $SysConf;
 
-    if ($user_pk == 0) $user_pk = $SysConf['auth']['UserId'];
+    if ($user_pk == 0) $user_pk = Auth::getUserId ();
 
     if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
@@ -267,9 +266,8 @@ use Fossology\Lib\Auth\Auth;
   function DeleteGroup($group_pk) 
   {
     global $PG_CONN;
-    global $SysConf;
 
-    $user_pk = $SysConf['auth']['UserId'];
+    $user_pk = Auth::getUserId();
 
     /* Make sure groupname looks valid */
     if (empty($group_pk)) 

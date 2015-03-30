@@ -304,8 +304,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     list($left, $right) = $this->uploadDao->getLeftAndRight($item, $this->uploadtree_tablename);
     $tableName = $this->getTableName($type);
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
+    $userId = Auth::getUserId();
 
     $sql_upload = "";
     if ('uploadtree_a' == $this->uploadtree_tablename)

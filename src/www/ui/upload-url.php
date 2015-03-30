@@ -50,9 +50,6 @@ class upload_url extends FO_Plugin {
    */
   function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm) 
   {
-    global $SysConf;
-
-    /* See if the URL looks valid */
     if (empty($Folder)) 
     {
       return _("Invalid folder");
@@ -79,8 +76,8 @@ class upload_url extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $userId = $SysConf['auth'][Auth::USER_ID];
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");

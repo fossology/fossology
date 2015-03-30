@@ -122,8 +122,7 @@ class user_del extends FO_Plugin
     }
 
     /* Get the user list */
-    global $SysConf;
-    $currentUserId = $SysConf['auth'][Auth::USER_ID];
+    $currentUserId = Auth::getUserId();
     $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '$currentUserId' AND user_pk != '1' ORDER BY user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);

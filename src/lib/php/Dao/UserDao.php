@@ -159,8 +159,7 @@ class UserDao extends Object
     }
     if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
     {
-      global $SysConf;
-      $userId = $SysConf['auth']['UserId'];
+      $userId = Auth::getUserId();
       $adminLevel = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk=$1 and user_fk=$2 and group_perm=1",
               array($groupId,$userId),__METHOD__.'.admin_lvl');
       if ($adminLevel['cnt']< 1)
