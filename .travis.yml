@@ -79,6 +79,10 @@ matrix:
        - composer install --dev
        - composer self-update
        - cd ..
+       - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
+       - echo "localhost:*:*:fossologytest:fossologytest" > ~/.pgpass
+       - chmod 0600 ~/.pgpass
+       - cat ~/.pgpass
       script:
        - make
        - curl -sS https://getcomposer.org/installer | php

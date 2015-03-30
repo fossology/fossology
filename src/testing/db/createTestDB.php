@@ -51,7 +51,7 @@ $usage = $argv[0] . ": [-h] -c path [-d name] [-s]\n" .
   "  Create test DB, start scheduler: 'createTestDb.php -s'\n" .
   "  Create empty DB, sysconf and repo: 'createTestDb.php -e'\n";
 
-$pathPrefix = '/srv/fossology';
+$pathPrefix = '/home/travis/build/larainema/';
 $dbPrefix = 'fosstest';
 
 // check if the user is in the fossy group
