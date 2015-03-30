@@ -2,7 +2,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014 Siemens AG
+ Copyright (C) 2014-2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -214,11 +214,19 @@ if(!array_key_exists('Release', $sysconfig)){
   }
   if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
   {
+    $timeoutSec = 20;
     echo "Missing column clearing_decision.clearing_pk, you should update to version 2.6.2 before migration\n";
-    echo "Type 'i' to ignore this warning and run the risk of losing clearing decisions: ";
+    echo "Enter 'i' within $timeoutSec seconds to ignore this warning and run the risk of losing clearing decisions: ";
     $handle = fopen ("php://stdin","r");
-    $line = fgets($handle);
-    if(trim($line) != 'i'){
+    stream_set_blocking($handle,0);
+    for($s=0;$s<$timeoutSec;$s++)
+    {
+      sleep(1);
+      $line = fread($handle,1);
+      if($line) break;
+    }
+    if(trim($line) != 'i')
+    {
      echo "ABORTING!\n";
      exit(26);
     }
