@@ -74,7 +74,7 @@ matrix:
         - TEST_NAME="Unit Test (gcc)"
       compiler: gcc
       before_script:
-       - sudo apt-get install libcunit1-dev 
+       - sudo apt-get install libcunit1-dev php5-xsl 
        - cd src/
        - composer install --dev
        - composer self-update
