@@ -74,7 +74,7 @@ matrix:
         - TEST_NAME="Unit Test (gcc)"
       compiler: gcc
       before_script:
-       - sudo apt-get install libcunit1-dev php5-xsl 
+       - sudo apt-get install libcunit1-dev libcunit1-doc php5-xsl 
        - cd src/
        - composer install --dev
        - composer self-update
@@ -92,6 +92,7 @@ matrix:
        - sudo composer update 
        - cd ..
        - sudo make install
+       - sudo /usr/local/lib/fossology/fo-postinstall
        - cd src/testing/unit
        - ./runAgentUnit.php
 
