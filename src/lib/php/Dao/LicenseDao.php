@@ -313,7 +313,7 @@ class LicenseDao extends Object
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.rf_pk) as unique
+    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.pfile_fk) as unique
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref

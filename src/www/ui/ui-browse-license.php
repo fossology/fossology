@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ * Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  *               2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
@@ -640,7 +640,7 @@ class ui_browse_license extends FO_Plugin
       $count = 0;
       if (array_key_exists($licenseShortName, $scannerLics))
       {
-        $count = $scannerLics[$licenseShortName]['count'];
+        $count = $scannerLics[$licenseShortName]['unique'];
       }
       $editedCount = 0;
       if (array_key_exists($licenseShortName, $editedLics))

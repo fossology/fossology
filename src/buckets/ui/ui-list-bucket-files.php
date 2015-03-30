@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010-2015 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -193,6 +193,7 @@ class list_bucket_files extends FO_Plugin
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
                  and bucket_pk=bucket_fk 
+                 and nomosagent_fk=$nomosagent_pk
                  order by uploadtree.ufile_name
                  limit $limit offset $Offset";
           $fileresult = pg_query($PG_CONN, $sql);
