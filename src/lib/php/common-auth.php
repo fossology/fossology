@@ -57,8 +57,8 @@ function account_check(&$user, &$passwd, &$group = "")
       $user = $user_passwd_array['user'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
       $user = $user_passwd_array['username'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['group']))
-      $group = $user_passwd_array['group'];
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname']))
+      $group = $user_passwd_array['groupname'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
       $passwd = $user_passwd_array['password'];
   }
@@ -68,7 +68,7 @@ function account_check(&$user, &$passwd, &$group = "")
        $uid_arr = posix_getpwuid(posix_getuid());
        $user = $uid_arr['name'];
      */
-    echo "FATAL: You should add '--username USERNAME' when running OR add 'user=USERNAME' in ~/.fossology.rc before running.\n";
+    echo "FATAL: You should add '--username USERNAME' when running OR add 'username=USERNAME' in ~/.fossology.rc before running.\n";
     exit(1);
   }
   if (empty($passwd)) {
