@@ -17,9 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -27,17 +27,22 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Proxy\UploadTreeProxy;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * \file ui-browse-license.php
  * \brief browse a directory to display all licenses in this directory
  */
-define("TITLE_ui_license", _("License Browser"));
 
-class ui_browse_license extends FO_Plugin
+class ui_browse_license extends DefaultPlugin
 {
+  const NAME = "license";
+  
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
@@ -55,17 +60,18 @@ class ui_browse_license extends FO_Plugin
   private $filesThatShouldStillBeCleared;
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
-
+  /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  
+  protected $vars = array();
 
-  function __construct()
-  {
-    $this->Name = "license";
-    $this->Title = TITLE_ui_license;
-    $this->Dependency = array("browse", "view");
-    $this->DBaccess = PLUGIN_DB_READ;
-    $this->LoginFlag = 0;
-    parent::__construct();
+  
+  public function __construct() {
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("License Browser"),
+        self::DEPENDENCIES => array("browse", "view"),
+        self::PERMISSION => Auth::PERM_READ
+    ));
 
     global $container;
     $this->uploadDao = $container->get('dao.upload');
@@ -89,10 +95,11 @@ class ui_browse_license extends FO_Plugin
       return;
     $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
-    if (GetParm("mod", PARM_STRING) == $this->Name)
+    if (GetParm("mod", PARM_STRING) == self::NAME)
     {
       menu_insert("Browse::$menuName", 100);
-    } else
+    }
+    else
     {
       $text = _("license histogram");
       menu_insert("Browse::$menuName", 100, $URI, $text);
@@ -101,54 +108,29 @@ class ui_browse_license extends FO_Plugin
   }
 
   /**
-   * \brief This is called before the plugin is used.
-   * \return true on success, false on failure.
+   * @param Request $request
+   * @return Response
    */
-  function Initialize()
-  {
-    if ($this->State != PLUGIN_STATE_INVALID)
-    {
-      return (1);
-    } // don't re-run
-
-    if ($this->Name !== "") // Name must be defined
-    {
-      global $Plugins;
-      $this->State = PLUGIN_STATE_VALID;
-      array_push($Plugins, $this);
+  protected function handle(Request $request) {
+    $upload = intval($request->get("upload"));
+    $groupId = Auth::getGroupId();
+    if (!$this->uploadDao->isAccessible($upload, $groupId)) {
+      return $this->flushContent(_("Permission Denied"));
     }
-
-    return ($this->State == PLUGIN_STATE_VALID);
-  }
-
-  function Output()
-  {
     $uTime = microtime(true);
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      return 0;
-    }
-    $upload = GetParm("upload", PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < Auth::PERM_READ)
-    {
-      $text = _("Permission Denied");
-      $this->vars['content'] = "<h2>$text<h2>";
-      return;
-    }
 
-    $item = GetParm("item", PARM_INTEGER);
+    $item = intval($request->get("item"));
     $updateCache = GetParm("updcache", PARM_INTEGER);
 
-    $this->vars['baseuri'] = Traceback_uri();
-    $this->vars['uploadId'] = $upload;
-    $this->vars['itemId'] = $item;
+    $vars['baseuri'] = Traceback_uri();
+    $vars['uploadId'] = $upload;
+    $vars['itemId'] = $item;
 
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
 
     $this->uploadtree_tablename = GetUploadtreeTableName($upload);
-    $this->vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
-    $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray();
+    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
+    $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $Cached = !empty($V);
     if (!$Cached && !empty($upload))
@@ -157,32 +139,30 @@ class ui_browse_license extends FO_Plugin
       $left = $itemTreeBounds->getLeft();
       if (empty($left))
       {
-        $text = _("Job unpack/adj2nest hasn't completed.");
-        $this->vars['content'] = "<b>$text</b><p>";
-        return;
+        return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
       }
       $V .= $this->showUploadHist($itemTreeBounds);
     }
 
-    $this->vars['content'] = $V;
+    $vars['content'] = $V;
     $Time = microtime(true) - $uTime;
 
     if ($Cached)
     {
       $text = _("This is cached view.");
       $text1 = _("Update now.");
-      $this->vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+      $vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     }
     else
     {
       $text = _("Elapsed time: %.3f seconds");
-      $this->vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
+      $vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
       if ($Time > 3.0)
         ReportCachePut($CacheKey, $V);
     }
-    $this->vars['content'] .= js_url();
+    $vars['content'] .= js_url();
 
-    return;
+    return $this->render("browse_license.html.twig",$this->mergeWithDefault($vars));
   }
 
 
@@ -232,7 +212,7 @@ class ui_browse_license extends FO_Plugin
      * **************************************/
     if ($ChildCount == 0)
     {
-      return new \Symfony\Component\HttpFoundation\RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
+      return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
 
     /******  Filters  *******/
@@ -593,11 +573,6 @@ class ui_browse_license extends FO_Plugin
     return array($jsBlockLicenseHist, $rendered);
   }
 
-  public function getTemplateName()
-  {
-    return "browse_license.html.twig";
-  }
-
   /**
    * @param array $scannerLics
    * @param array $editedLics
@@ -663,7 +638,15 @@ class ui_browse_license extends FO_Plugin
     return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $editedTotalLicenseCount, $editedUniqueLicenseCount);
   }
 
+  /**
+   * @param string $templateName
+   * @param array $vars
+   * @return string
+   */
+  public function renderString($templateName, $vars = null)
+  {
+    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+  }  
 }
 
-$NewPlugin = new ui_browse_license;
-$NewPlugin->Initialize();
+register_plugin(new ui_browse_license());
