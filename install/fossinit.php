@@ -237,7 +237,6 @@ if(!array_key_exists('Release', $sysconfig)){
 }
 if($sysconfig['Release'] == '2.6')
 {
-  $verbose = $Verbose;
   $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
   if(!$dbManager->existsTable('license_candidate'))
   {
@@ -249,6 +248,24 @@ if($sysconfig['Release'] == '2.6')
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
   }
 }
+
+/* sanity check */
+require_once ("$LIBEXECDIR/sanity_check.php");
+$checker = new SanityChecker($dbManager,$Verbose);
+$errors = $checker->check();
+
+if($errors>0)
+{
+  echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
+}
+exit($errors);
+
+
+
+
+
+
+
 
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");

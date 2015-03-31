@@ -2,113 +2,52 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #define _GNU_SOURCE
 #include <stdio.h>
 
 #include "database.h"
-#include "libfossdb.h"
-#include "libfossdbmanager.h"
 
-char* getUploadTreeTableName (fo_dbManager* dbManager, int uploadId) {
-char* result;
-PGresult* resTableName= fo_dbManager_ExecPrepared(
-                            fo_dbManager_PrepareStamement(
-                              dbManager,
-                              "getUploadTreeTableName",
-                              "SELECT uploadtree_tablename from upload where upload_pk=$1 limit 1",
-                              int),
-                            uploadId
-                          );
-  if (!resTableName) {
-    result = g_strdup("uploadtree");
-    return result;
-    }
+#define LICENSE_REF_TABLE "ONLY license_ref"
+#define DECISION_TYPE_FOR_IRRELEVANT 4
 
-  if (PQntuples(resTableName) == 0) {
-    PQclear(resTableName);
-     result = g_strdup("uploadtree");
-     return result;
-  }
-
-
-  result = strdup(PQgetvalue(resTableName, 0, 0));
-  PQclear(resTableName);
-  return result;
-
-}
-
-
-PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId) {
-
-  PGresult* result;
-
-  char* uploadtreeTableName = getUploadTreeTableName(dbManager, uploadId);
-
-  if(strcmp (uploadtreeTableName, "uploadtree_a") == 0){
-    char* queryName = g_strdup_printf ("queryFileIdsForUpload.%s",uploadtreeTableName);
-    char* sql ;
-    sql = g_strdup_printf ("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
-                uploadtreeTableName);
-
-    result = fo_dbManager_ExecPrepared(
-              fo_dbManager_PrepareStamement(
-                dbManager,
-                queryName,
-                sql,
-                int),
-              uploadId
-            );
-
-    g_free(sql);
-    g_free(queryName);
-  }
-  else {
-
-    result = fo_dbManager_Exec_printf(dbManager,
-                "select distinct(pfile_fk) from %s where (ufile_mode&x'3C000000'::int)=0",
-                              uploadtreeTableName
-                );
-  }
-
-  g_free(uploadtreeTableName);
-
-  return result;
-}
-
-char* queryPFileForFileId(fo_dbManager* dbManager, long fileId) {
-  PGresult* fileNameResult = fo_dbManager_ExecPrepared(
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right, long groupId) {
+  return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
-      "queryPFileForFileId",
-      "select pfile_sha1 || '.' || pfile_md5 ||'.'|| pfile_size AS pfilename from pfile where pfile_pk=$1",
-      long),
-    fileId
+      "queryFileIdsForUploadAndLimits"
+      ,
+      "SELECT distinct (pfile_fk) FROM ("  
+        "select distinct ON(ut.uploadtree_pk, ut.pfile_fk) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type FROM uploadtree ut "
+        " LEFT JOIN clearing_decision cd ON cd.group_fk=$5 AND (ut.uploadtree_pk=cd.uploadtree_fk AND scope=0 or ut.pfile_fk=cd.pfile_fk AND scope=1) "
+        " where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and ut.pfile_fk != 0"
+        " ORDER BY ut.uploadtree_pk, ut.pfile_fk, date_added DESC"
+      ") itemView WHERE decision_type!=$4 OR decision_type IS NULL"
+      ,
+      int, long, long, int, long),
+    uploadId, left, right, DECISION_TYPE_FOR_IRRELEVANT, groupId
   );
-
-  if (PQntuples(fileNameResult) == 0) {
-    PQclear(fileNameResult);
-    return NULL;
-  }
-
-  char* pFile = strdup(PQgetvalue(fileNameResult, 0, 0));
-  PQclear(fileNameResult);
-  return pFile;
 }
 
-//TODO use correct parameters to filter only "good" licenses
 PGresult* queryAllLicenses(fo_dbManager* dbManager) {
   return fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
       "queryAllLicenses",
-      "select rf_pk, rf_shortname from license_ref where rf_detector_type != 2"
+      "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1"
     )
   );
 }
@@ -118,7 +57,7 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
     fo_dbManager_PrepareStamement(
       dbManager,
       "getLicenseTextForLicenseRefId",
-      "select rf_text from license_ref where rf_pk = $1",
+      "select rf_text from " LICENSE_REF_TABLE " where rf_pk = $1",
       long),
     refId
   );
@@ -134,34 +73,8 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
   return result;
 }
 
-char* getFileNameForFileId(fo_dbManager* dbManager, long pFileId) {
-  //TODO discuss TODO with Daniele
-//! TODO eliminate the use of uploadtree => getUploadTreeTableName, also this might be buggy if there is more than one filename per pfile_fk(if you only read the file to scan it, it is OK)
-  char* result;
-  PGresult* resultUploadFilename = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "getFileNameForFileId",
-      "select ufile_name from uploadtree where pfile_fk = $1",
-      long),
-    pFileId
-  );
-
-  if (!resultUploadFilename)
-    return NULL;
-
-  if (PQntuples(resultUploadFilename) == 0) {
-    PQclear(resultUploadFilename);
-    return NULL;
-  }
-
-  result = strdup(PQgetvalue(resultUploadFilename, 0, 0));
-  PQclear(resultUploadFilename);
-  return result;
-}
-
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
-  PGresult * insertResult = fo_dbManager_ExecPrepared(
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
       "hasAlreadyResultsFor",
@@ -174,15 +87,34 @@ int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId) {
 
   int exists = 0;
   if (insertResult) {
-    exists = (PQntuples(insertResult)==1);
+    exists = (PQntuples(insertResult) == 1);
     PQclear(insertResult);
   }
 
   return exists;
 }
 
+int saveNoResultToDb(fo_dbManager* dbManager, int agentId, long pFileId) {
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      dbManager,
+      "saveNoResultToDb",
+      "insert into license_file(agent_fk, pfile_fk) values($1,$2)",
+      int, long),
+    agentId, pFileId
+  );
+
+  int result = 0;
+  if (insertResult) {
+    result = 1;
+    PQclear(insertResult);
+  }
+
+  return result;
+}
+
 long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, unsigned percent) {
-  PGresult * insertResult = fo_dbManager_ExecPrepared(
+  PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
       "saveToDb",
@@ -193,7 +125,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
 
   long licenseFilePk = -1;
   if (insertResult) {
-    if (PQntuples(insertResult)==1) {
+    if (PQntuples(insertResult) == 1) {
       licenseFilePk = atol(PQgetvalue(insertResult, 0, 0));
     }
     PQclear(insertResult);
@@ -202,25 +134,7 @@ long saveToDb(fo_dbManager* dbManager, int agentId, long refId, long pFileId, un
   return licenseFilePk;
 }
 
-int saveHighlightToDb(fo_dbManager* dbManager, char* type, DiffPoint* highlight, long licenseFileId){
-  PGresult* insertResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "saveHighlightToDb",
-      "insert into highlight(fl_fk, type, start, len) values($1,$2,$3,$4)",
-      long, char*, size_t, size_t),
-    licenseFileId, type, highlight->start, highlight->length
-  );
-
-  if (!insertResult)
-    return 0;
-
-  PQclear(insertResult);
-
-  return 1;
-}
-
-inline int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInfo, long licenseFileId) {
+int saveDiffHighlightToDb(fo_dbManager* dbManager, const DiffMatchInfo* diffInfo, long licenseFileId) {
   PGresult* insertResult = fo_dbManager_ExecPrepared(
     fo_dbManager_PrepareStamement(
       dbManager,
@@ -241,9 +155,9 @@ inline int saveDiffHighlightToDb(fo_dbManager* dbManager, DiffMatchInfo* diffInf
   return 1;
 }
 
-int saveDiffHighlightsToDb(fo_dbManager* dbManager, GArray* matchedInfo, long licenseFileId) {
+int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, long licenseFileId) {
   size_t matchedInfoLen = matchedInfo->len ;
-  for (size_t i = 0; i < matchedInfoLen; i++){
+  for (size_t i = 0; i < matchedInfoLen; i++) {
     DiffMatchInfo* diffMatchInfo = &g_array_index(matchedInfo, DiffMatchInfo, i);
     if (!saveDiffHighlightToDb(dbManager, diffMatchInfo, licenseFileId))
       return 0;

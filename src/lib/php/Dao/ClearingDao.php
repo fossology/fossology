@@ -189,7 +189,7 @@ class ClearingDao extends Object
     if (!$includeSubFolders)
     {
       $params = array($itemTreeBounds->getItemId());
-      $condition = "ut.parent = $1";
+      $condition = "ut.realparent = $1";
     }
     else {
       $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
@@ -753,4 +753,27 @@ INSERT INTO clearing_decision (
     $res = $this->dbManager->execute($statementName,$params);
     $this->dbManager->freeResult($res);
   }
+  
+  
+  
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param bool $onlyCurrent
+   * @return ClearingDecision[]
+   */
+  function getIrrelevantFilesFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
+  {
+    $statementName = __METHOD__;
+    $params = array();
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params);
+    $params[] = DecisionTypes::IRRELEVANT;
+    $sql = "$decisionsCte SELECT itemid uploadtree_pk FROM decision WHERE type_id=$".count($params);
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName, $params);
+    $irrelevantFiles = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $irrelevantFiles;
+  }
+  
 }

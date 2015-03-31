@@ -5,24 +5,34 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-#
-# Makefile for monk/ui
-TOP=../../..
-include $(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+MOD_SUBDIR = ui
+
+MONK_PHPS = agent-monk.php admin-monk-revision.php oneshot.php
+BULK_PHPS = agent-monk-bulk.php
 
 all:
-	@echo "make monk ui"
+	@echo "nothing to do"
 
-install:
-	@echo "make monk ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/monk/ui
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/monk/ui/
+install: install-monk install-monkbulk
+
+install-monk: MOD_NAME = monk
+install-monk:
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) $(MONK_PHPS) $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+
+install-monkbulk: MOD_NAME = monkbulk
+install-monkbulk:
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) $(BULK_PHPS) $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make monk ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/monk/ui
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make monk ui clean"
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean

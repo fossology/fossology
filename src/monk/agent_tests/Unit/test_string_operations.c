@@ -2,11 +2,18 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,21 +38,43 @@ void test_tokenize() {
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 2);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
+}
+
+void test_tokenizeWithSpecialDelims() {
+  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo");
+
+  GArray* token = tokenize(test, " \n");
+
+  CU_ASSERT_EQUAL(token->len, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 2);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).hashedContent, hash("bar"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 5);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("baz"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).hashedContent, hash("booo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).length, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 3).removedBefore, 6);
+  g_array_free(token, TRUE);
+  g_free(test);
 }
 
 void test_streamTokenize() {
   char* test = g_strdup("^foo^^ba");
-  const char * delimiters = "^";
+  const char* delimiters = "^";
 
   GArray* token = tokens_new();
 
-  Token * remainder = NULL;
+  Token* remainder = NULL;
 
-  char * endPtr = test + strlen(test);
+  char* endPtr = test + strlen(test);
 
   int chunkSize = 2;
-  char * ptr = test;
+  char* ptr = test;
   while (*ptr && ptr <= endPtr) {
     unsigned int tokenCount = token->len;
     int thisChunkSize = MIN(chunkSize, endPtr - ptr);
@@ -71,22 +100,22 @@ void test_streamTokenize() {
     free(remainder);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
 }
 
 void test_streamTokenizeEventuallyGivesUp() {
   char* test = g_strdup("^foo^^ba");
-  const char * delimiters = "^";
+  const char* delimiters = "^";
 
   GArray* token = tokens_new();
 
-  Token * remainder = NULL;
+  Token* remainder = NULL;
 
-  char * endPtr = test + strlen(test);
+  char* endPtr = test + strlen(test);
 
   printf("test: expecting a warning: ");
   int chunkSize = 5;
-  char * ptr = test;
+  char* ptr = test;
   int addedTokens = 0;
   uint32_t i = 0;
   while ((i < 1 << 27) && (*ptr) && (ptr <= endPtr)) {
@@ -112,10 +141,10 @@ void test_streamTokenizeEventuallyGivesUp() {
     free(remainder);
 
   g_array_free(token, TRUE);
-  free(test);
+  g_free(test);
 }
 
-void assertTokenPosition(char * string, int count, ...) {
+void assertTokenPosition(char* string, int count, ...) {
   char* test = g_strdup(string);
 
   GArray* tokens = tokenize(test, "^");
@@ -141,7 +170,7 @@ void assertTokenPosition(char * string, int count, ...) {
   }
 
   g_array_free(tokens, TRUE);
-  free(test);
+  g_free(test);
 }
 
 void test_tokenPosition() {
@@ -173,30 +202,16 @@ void test_token_equal() {
 
   g_array_free(tokenizedText, TRUE);
   g_array_free(tokenizedSearch, TRUE);
-  free(text);
-  free(search);
-}
-
-void test_stringBuilder(){
-  StringBuilder* stringBuilder = stringBuilder_new();
-
-  stringBuilder_printf(stringBuilder, "test null, ");
-  stringBuilder_printf(stringBuilder, "test int '%d', ", 5);
-  stringBuilder_printf(stringBuilder, "test string '%s'", "a string");
-
-  char* result = stringBuilder_build(stringBuilder);
-  stringBuilder_free(stringBuilder);
-
-  CU_ASSERT_STRING_EQUAL(result, "test null, test int '5', test string 'a string'");
-  free(result);
+  g_free(text);
+  g_free(search);
 }
 
 CU_TestInfo string_operations_testcases[] = {
   {"Testing tokenize:", test_tokenize},
+  {"Testing tokenize with special delimiters:", test_tokenizeWithSpecialDelims},
   {"Testing stream tokenize:", test_streamTokenize},
   {"Testing stream tokenize with too long stream:",test_streamTokenizeEventuallyGivesUp},
   {"Testing find token position in string:", test_tokenPosition},
   {"Testing token equals:", test_token_equal},
-  {"Testing string builder:", test_stringBuilder},
   CU_TEST_INFO_NULL
 };

@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -10,26 +10,22 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = Unit Functional
+LOCALAGENTDIR = ../agent/
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop, test)
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(call dirloop, coverage)
+	$(call DIR_LOOP,coverage)
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 clean:
-	$(call dirloop, clean)
+	$(call DIR_LOOP,clean)
+	rm -rf results/ cov.txt
 
-install:
-	echo "no make copyright ui install"
-
-uninstall:
-	echo "no make copyright ui uninstall"
-
-PHONY: all test coverage clean install uninstall
-
+.PHONY: all test coverage clean

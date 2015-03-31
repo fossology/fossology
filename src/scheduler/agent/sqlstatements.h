@@ -1,5 +1,6 @@
 /* **************************************************************
 Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -48,7 +49,7 @@ const char* upload_common =
 
 const char* folder_name =
     " SELECT folder_name FROM folder "
-    "   LEFT JOIN foldercontents ON folder_pk = parent_fk "
+    "   LEFT JOIN foldercontents ON folder_pk = foldercontents.parent_fk "
     "   LEFT JOIN job ON child_id = job_upload_fk "
     "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
     "   WHERE jq_pk = %d;";
@@ -82,7 +83,7 @@ const char* basic_checkout =
     "   LIMIT 10;";
 
 const char* jobsql_information =
-    " SELECT user_pk, job_priority FROM users "
+    " SELECT user_pk, job_priority, job_group_fk as group_pk FROM users "
     "   LEFT JOIN job ON job_user_fk = user_pk "
     "   WHERE job_pk = '%s';";
 

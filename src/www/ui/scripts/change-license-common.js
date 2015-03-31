@@ -54,19 +54,16 @@ function compareText(opt1, opt2) {
 }
 
 function moveLicense(theSelFrom, theSelTo) {
-    var selLength = theSelFrom.length;
-    var i;
-    for (i = selLength - 1; i >= 0; i--) {
-        if (theSelFrom.options[i].selected) {
-            //var selToLength = theSelTo.options.length;
-            //theSelTo.options[selToLength] = theSelFrom.options[i];
-            theSelTo.appendChild(theSelFrom.options[i].cloneNode(true));
-            //(new Option(theSelFrom.options[i].text, theSelFrom.options[i].value));
-            theSelFrom[i] = null;
-        }
+  var selLength = theSelFrom.length;
+  var i;
+  for (i = selLength - 1; i >= 0; i--) {
+    if (theSelFrom.options[i].selected) {
+      theSelTo.appendChild(theSelFrom.options[i].cloneNode(true));
+      theSelFrom[i] = null;
     }
-    sortList(theSelFrom);
-    sortList(theSelTo);
+  }
+  sortList(theSelFrom);
+  sortList(theSelTo);
 }
 
 

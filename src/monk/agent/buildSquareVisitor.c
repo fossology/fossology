@@ -2,12 +2,20 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+
 #include <math.h>
 #include <stdio.h>
 #include <glib.h>
@@ -27,7 +35,7 @@ typedef struct {
   unsigned int time;
 } point;
 
-int pointSorter(const gconstpointer a, gconstpointer b) {
+gint pointSorter(gconstpointer a, gconstpointer b) {
   unsigned int aTime = ((const point *) a)->time;
   unsigned int bTime = ((const point *) b)->time;
   if (aTime > bTime)
@@ -50,10 +58,10 @@ void circleVisit(unsigned int timeOfVisit[SIZE][SIZE]) {
     }
 }
 
-GArray * generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
-  GArray * visitor = g_array_new(TRUE, FALSE, sizeof (point));
-  for (int i = 0; i < SIZE; i++)
-    for (int j = 0; j < SIZE; j++) {
+GArray* generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
+  GArray* visitor = g_array_new(TRUE, FALSE, sizeof(point));
+  for (unsigned  int i = 0; i < SIZE; i++)
+    for (unsigned int j = 0; j < SIZE; j++) {
       point p;
       p.x = i;
       p.y = j;
@@ -66,8 +74,8 @@ GArray * generateTimeOrderedVisitor(unsigned int timeOfVisit[SIZE][SIZE]) {
   return visitor;
 }
 
-int writeVisitorToSourceFiles(GArray * visitor) {
-  FILE * fc = fopen("_squareVisitor.c", "w");
+int writeVisitorToSourceFiles(GArray* visitor) {
+  FILE* fc = fopen("_squareVisitor.c", "w");
 
   if (!fc) {
     return 2;
@@ -92,7 +100,7 @@ int writeVisitorToSourceFiles(GArray * visitor) {
 
   fclose(fc);
 
-  FILE * fh = fopen("_squareVisitor.h.gen", "w");
+  FILE* fh = fopen("_squareVisitor.h.gen", "w");
 
   if (!fh) {
     return 2;
@@ -132,7 +140,7 @@ int main() {
   }
 #endif //SQUARE_BUILDER_DEBUG
 
-  GArray * visitor = generateTimeOrderedVisitor (timeOfVisit);
+  GArray* visitor = generateTimeOrderedVisitor(timeOfVisit);
 
   if (visitor->len == 0)
     return 1;

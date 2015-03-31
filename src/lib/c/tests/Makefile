@@ -14,38 +14,40 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP = ../../../..
-include $(TOP)/Makefile.conf
-SRCDIR = ..
 
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
+
+SRCDIR = ..
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-LOCAL_CFLAGS = $(DB_CFLAGS) $(REPO_CFLAGS) $(ALL_CFLAGS) \
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
                $(TESTLIB) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
-OBJS = test_fossconfig.o    \
+OBJS = test_fossconfig.o \
        test_fossscheduler.o \
-       test_libfossdb.o     \
-       test_libfossdbmanager.o \
+       test_libfossdb.o \
+       test_libfossdbmanager.o
 
 all: test
 test: $(EXE)
-	@echo "make library tests"
-	./$(EXE)
+	@echo "running library tests"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
-	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(LOCAL_CFLAGS) $(COV_CFLAGS)
-	./$(EXE)
-	lcov --directory $(SRCDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
+	$(call coverage-report-html,$(SRCDIR))
 
 $(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
-	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(LOCAL_CFLAGS)
+	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)
 
 $(OBJS): %.o: %.c
-	$(CC) -c $(LOCAL_CFLAGS) $<
+	$(CC) -c $(CFLAGS_LOCAL) $<
 
 libfossology.a:
 	$(MAKE) -C $(SRCDIR) $@
@@ -68,4 +70,5 @@ uninstall:
 	@echo "make library tests nothing to uninstall"
 
 .PHONY: all install uninstall clean test
-include $(TOP)/Makefile.deps
+
+include $(DEPS)

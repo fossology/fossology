@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -122,6 +122,7 @@ void fo_dbManager_finish(fo_dbManager* dbManager);
  *
  */
 int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName);
+void fo_dbManager_ignoreWarnings(fo_dbManager* dbManager, int ignoreWarns);
 
 /*!
  * fo_dbManager_StringEscape()
@@ -137,7 +138,40 @@ int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName);
  * \sa for example see fo_dbManager_Exec_printf()
  *
  */
-char* fo_dbManager_StringEscape(fo_dbManager* dbManager, char* string);
+char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string);
+
+/*!
+ * fo_dbManager_begin()
+ *
+ * \brief begins a transaction
+ *
+ * \param dbManager  an instance of DB manager to be used
+ *
+ * \return boolean indicating success
+ */
+int fo_dbManager_begin(fo_dbManager* dbManager);
+
+/*!
+ * fo_dbManager_commit()
+ *
+ * \brief commits the transaction
+ *
+ * \param dbManager  an instance of DB manager to be used
+ *
+ * \return boolean indicating success
+ */
+int fo_dbManager_commit(fo_dbManager* dbManager);
+
+/*!
+ * fo_dbManager_rollback()
+ *
+ * \brief rolls back the transaction
+ *
+ * \param dbManager  an instance of DB manager to be used
+ *
+ * \return boolean indicating success
+ */
+int fo_dbManager_rollback(fo_dbManager* dbManager);
 
 /*!
  * fo_dbManager_Exec_printf()
@@ -224,6 +258,10 @@ fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* 
  * \return query result or NULL on failure
  */
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
+PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args);
+
+int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName);
+int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name);
 
 // visible for testing
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params);

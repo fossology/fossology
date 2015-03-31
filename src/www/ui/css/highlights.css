@@ -1,0 +1,88 @@
+/***********************************************************
+ Copyright (C) 2015 Siemens AG
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+***********************************************************/
+
+.hi-keyword {
+  font-weight: bold;
+  background-color: #BEA7A7;
+}
+
+.hi-undefined {
+  background-color: lightgray;
+}
+.hi-match .hi-keyword {
+  background-color: gray;
+}
+
+
+.hi-match {
+  background-color: lightgreen;
+}
+.hi-match .hi-keyword {
+  background-color: green;
+}
+
+.hi-changed {
+  background-color: yellow;
+}
+.hi-changed .hi-keyword {
+  background-color: #999900;
+}
+
+.hi-added {
+  background-color: red;
+}
+.hi-added .hi-keyword {
+  background-color: #770000;
+}
+
+.hi-deleted {
+  background-color: fuchsia
+}
+.hi-deleted .hi-keyword {
+  background-color: #aa1155;
+}
+
+.hi-signature {
+  background-color: lightskyblue;
+}
+.hi-signature .hi-keyword {
+  background-color: #0099CC;
+}
+
+.hi-bulk {
+  background-color: #EFBE76;
+}
+
+.hi-cp {
+  background-color: lightblue;
+}
+
+.hi-email {
+  background-color: yellow;
+}
+
+.hi-url {
+  background-color: orange;
+}
+
+.hi-ip {
+  background-color: #FF7F50;
+}
+
+.hi-mediumorchid {
+  background-color: #BA55D3;
+}

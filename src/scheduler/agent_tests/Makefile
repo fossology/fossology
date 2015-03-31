@@ -14,35 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-#
-# scheduler/agent_tests makefile
-#
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = Functional Unit agents
-COVDIR = Unit
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop, test)
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(MAKE) -C $(COVDIR) coverage
+	$(call DIR_LOOP,coverage)
 
 clean:
-	$(call dirloop,clean)
-
-install:
-	@echo "No mimetype agent_tests install"
-
-uninstall:
-	@echo "No mimetype agent_tests uninstall"
-
+	$(call DIR_LOOP,clean)
 
 .PHONY: all test coverage clean

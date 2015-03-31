@@ -14,41 +14,41 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = agent
+MOD_NAME = scheduler
 
+DIRS = agent
 TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	@echo "make scheduler"
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"scheduler")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make scheduler install"
-	$(call dirloop,install)
+	$(call DIR_LOOP,install)
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
+	$(INSTALL_PROGRAM) mod_deps $(DESTDIR)$(MODDIR)/$(MOD_NAME)/mod_deps
 
 uninstall:
-	@echo "make scheduler uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 
 clean:
-	@echo "make scheduler clean"
-	$(call dirloop,clean)
-	rm -rf VERSION
+	$(call DIR_LOOP,clean)
+	rm -f VERSION
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage VERSIONFILE install uninstall clean

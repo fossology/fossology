@@ -1,0 +1,4 @@
+<?php
+define("AGENT_DECIDER_NAME", "decider");
+define("AGENT_DECIDER_VERSION", "{$VERSION}");
+define("AGENT_DECIDER_REV", "{$SVN_REV}");

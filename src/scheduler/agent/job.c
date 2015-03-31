@@ -1,5 +1,6 @@
 /* **************************************************************
 Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -160,7 +161,7 @@ static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
  * @return the new job
  */
 job_t* job_init(GTree* job_list, GSequence* job_queue,
-    char* type, char* host, int id, int user_id, int priority, char *jq_cmd_args)
+    char* type, char* host, int id, int parent_id, int user_id, int group_id, int priority, char *jq_cmd_args)
 {
   job_t* job = g_new0(job_t, 1);
 
@@ -178,8 +179,10 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
   job->message         = NULL;
   job->priority        = priority;
   job->verbose         = 0;
+  job->parent_id       = parent_id;
   job->id              = id;
   job->user_id         = user_id;
+  job->group_id        = group_id;
   job->jq_cmd_args     = g_strdup(jq_cmd_args);
 
   g_tree_insert(job_list, &job->id, job);
