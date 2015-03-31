@@ -15,6 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file fossjobs.php
  * 
@@ -28,6 +30,7 @@
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
  * @param (optional) string --username specify user name
+ * @param (optional) string --groupname specify group name
  * @param (optional) string --password specify password
  * @param (optional) string -c Specify the directory for the system configuration
  * @param (optional) string -D Delete upload
@@ -88,10 +91,11 @@ $usage = basename($argv[0]) . " [options]
                or an array of upload_pk's if multiple -D's were specified.
   --username string :: user name
   --password string :: password
+  --groupname string :: group name
   -c string :: Specify the directory for the system configuration
 ";
 //process parameters, see usage above
-$longopts = array("username:", "password:");
+$longopts = array("username:", "password:", "groupname:");
 $options = getopt("c:haA:P:uU:D:v", $longopts);
 //print_r($options);
 if (empty($options)) {
@@ -110,16 +114,20 @@ PROCESS COMMAND LINE SELECTION
 **********************************************************************/
 $user = "";
 $passwd = "";
+$group = "";
 if (array_key_exists("username", $options)) {
   $user = $options["username"];
+}
+
+if (array_key_exists("groupname", $options)) {
+  $group = $options["groupname"];
 }
 
 if (array_key_exists("password", $options)) {
   $passwd = $options["password"];
 }
 
-account_check($user, $passwd); // check username/password
-$user_pk = $SysConf['auth']['UserId'];
+account_check($user, $passwd, $group); // check username/password
 
 /* init plugins */
 cli_Init();
@@ -182,7 +190,7 @@ if (array_key_exists("u", $options))
 {
   $root_folder_pk = GetUserRootFolder();
   $FolderPath = NULL;
-  $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, PERM_WRITE);
+  $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, Auth::PERM_WRITE);
 
   print "# The following uploads are available (upload id: name)\n";
   foreach($FolderList as $Folder)
@@ -225,7 +233,7 @@ if (array_key_exists("U", $options))
   foreach($upload_pk_array as $upload_pk)
   {
     $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < PERM_WRITE)
+    if ($UploadPerm < Auth::PERM_WRITE)
     {
       print "You have no permission to queue agents for upload " . $upload_pk . "\n";
       continue;
@@ -269,7 +277,7 @@ if (array_key_exists("D", $options))
   foreach($upload_pk_array as $upload_pk)
   {
     $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < PERM_WRITE)
+    if ($UploadPerm < Auth::PERM_WRITE)
     {
       print "You have no permission to delete upload " . $upload_pk . "\n";
       continue;

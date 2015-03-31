@@ -82,13 +82,8 @@ function account_check(&$user, &$passwd, &$group = "")
   }
 
   if (!empty($user)) {
-    $row = $dbManager->getSingleRow(
-      "SELECT users.*, groups.group_name
-       FROM users LEFT JOIN groups ON groups.group_pk = users.group_fk
-       WHERE user_name = $1",
-      array($user),
-      __METHOD__.".lookUpUser"
-    );
+    $userDao = $GLOBALS['container']->get('dao.user');
+    $row = $userDao->getUserAndDefaultGroupByUserName($user);
     if(false === $row) {
       echo "User name is invalid.\n";
       exit(1);
@@ -99,7 +94,8 @@ function account_check(&$user, &$passwd, &$group = "")
     if (empty($group)) {
       $group = $row['group_name'];
       $groupId = $row['group_fk'];
-    } else {
+    }
+    else {
       $rowGroup = $dbManager->getSingleRow(
         "SELECT group_pk
         FROM group_user_member INNER JOIN groups ON groups.group_pk = group_user_member.group_fk
@@ -115,7 +111,7 @@ function account_check(&$user, &$passwd, &$group = "")
     }
     $SysConf['auth']['GroupId'] = $groupId;
     if (empty($groupId)) {
-      echo "Group not found.\n";
+      echo "Group '$group' not found.\n";
       exit(1);
     }
 
