@@ -23,6 +23,9 @@
  * files.
  */
 
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
+
 $Usage = "Usage: " . basename($argv[0]) . "
   -u upload id        :: upload id
   -t uploadtree id    :: uploadtree id
@@ -39,7 +42,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
   ";
 $upload = ""; // upload id
 $item = ""; // uploadtree id
-$container = 0; // include container or not, 1: yes, 0: no (default)
+$showContainer = 0; // include container or not, 1: yes, 0: no (default)
 $ignore = 0; // do not show files which have no license, 1: yes, 0: no (default)
 $excluding = '';
 
@@ -74,7 +77,7 @@ foreach($options as $option => $value)
       $passwd = $value;
       break;
     case 'container':
-      $container = $value;
+      $showContainer = $value;
       break;
     case 'x':
       $ignore = 1;
@@ -109,11 +112,10 @@ if (empty($return_value))
   return 1;
 }
 
-require_once("$MODDIR/lib/php/common.php");
 global $PG_CONN;
 
 /** get license information for this uploadtree */
-GetLicenseList($item, $upload, $container);
+GetLicenseList($item, $upload, $showContainer);
 return 0;
 
 /**
@@ -201,6 +203,3 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
   }
     pg_free_result($outerresult);
 }
-
-
-?>
