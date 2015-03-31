@@ -28,10 +28,9 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
-
 use Mockery as M;
-use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
@@ -43,6 +42,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var TestInstaller */
+  private $testInstaller;
+  
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -96,37 +98,13 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
-
-    $confFile = $sysConf."/fossology.conf";
-    $fakeInstallationDir = "$sysConf/inst";
-    $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
-
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n[DIRECTORIES]\nMODDIR = $fakeInstallationDir";
-    file_put_contents($confFile, $config);
-    if (!is_dir($fakeInstallationDir))
-    {
-      mkdir($fakeInstallationDir, 0777, true);
-      system("ln -sf $libDir $fakeInstallationDir/lib");
-      if (!is_dir("$fakeInstallationDir/www/ui")) {
-        mkdir("$fakeInstallationDir/www/ui/", 0777, true);
-        touch("$fakeInstallationDir/www/ui/ui-menus.php");
-      }
-    }
-
-    $topDir = dirname(dirname(dirname(dirname(__DIR__))));
-    system("install -D $topDir/VERSION $sysConf");
-
-    $testRepoDir = "$libDir/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
-    $sysConf = $this->testDb->getFossSysConf();
-    system("rm $sysConf/repo -rf");
-    system("rm $sysConf/inst -rf");
-    unlink($sysConf."/VERSION");
-    unlink($sysConf."/fossology.conf");
+    $this->testInstaller->rmRepo();
   }
 
   private function setUpTables()
