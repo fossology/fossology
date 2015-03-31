@@ -158,9 +158,12 @@ function GetLastAnalyzeTime($TableName)
     $V .= "<td align='right'> $Size </td></tr>\n";
 
     /**** Version ****/
+    $versinfo = pg_version($PG_CONN);
+    $version = $versinfo['server'];
+
     $text = _("Postgresql version");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'> {$this->pgVersion[server]} </td></tr>\n";
+    $V .= "<td align='right'> {$version} </td></tr>\n";
 
     /**** Query stats ****/
     // count current queries
@@ -173,7 +176,7 @@ function GetLastAnalyzeTime($TableName)
     pg_free_result($result);
 
     /**** Active connection count ****/
-    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
+    $current_query = (strcmp($version, "9.2") >= 0) ? "state" : "current_query";
     $text = _("Active database connections");
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
@@ -206,16 +209,12 @@ function GetLastAnalyzeTime($TableName)
     $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
 
     /**** Version ****/
-    $sql = "SELECT * from version();";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $version = explode(' ', $row['version'], 3);
+    $versinfo = pg_version($PG_CONN);
+    $version = $versinfo['server'];
 
     // Get the current query column name in pg_stat_activity
-    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
-    $procpid = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "pid" : "procpid";
+    $current_query = (strcmp($version, "9.2") >= 0) ? "state" : "current_query";
+    $procpid = (strcmp($version, "9.2") >= 0) ? "pid" : "procpid";
 
     $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
     $result = pg_query($PG_CONN, $sql);
