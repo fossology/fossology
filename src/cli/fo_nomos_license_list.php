@@ -23,6 +23,9 @@
  * files.
  */
 
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
+
 $Usage = "Usage: " . basename($argv[0]) . "
   -u upload id        :: upload id
   -t uploadtree id    :: uploadtree id
@@ -109,7 +112,6 @@ if (empty($return_value))
   return 1;
 }
 
-require_once("$MODDIR/lib/php/common.php");
 global $PG_CONN;
 
 /** get license information for this uploadtree */
