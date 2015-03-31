@@ -2,6 +2,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,18 +25,7 @@
  * @return 0 for success, 1 for failure.
  **/
 
-/* User must be in group fossy! */
-$GID = posix_getgrnam("fossy");
-posix_setgid($GID['gid']);
-$Group = `groups`;
-if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
-{
-  print "FATAL: You must be in group 'fossy' to update the FOSSology database.\n";
-  exit(1);
-}
-
 /* Initialize the program configuration variables */
-$SysConf = array();  // fo system configuration variables
 $PG_CONN = 0;   // Database connection
 $Plugins = array();
 
@@ -47,9 +37,18 @@ $sysconfdir = '/usr/local/etc/fossology';
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
+$gInfo = posix_getgrnam($projectGroup);
+posix_setgid($gInfo['gid']);
+$groups = `groups`;
+if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid']))
+{
+  print "FATAL: You must be in group '$projectGroup' to update the FOSSology database.\n";
+  exit(1);
+}
+
 // don't think we want all the other common libs
 require_once("$MODDIR/lib/php/common.php");
-
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
@@ -159,4 +158,3 @@ function bootstrap($sysconfdir="")
   require_once("$MODDIR/lib/php/common.php");
   return $SysConf;
 }
-?>

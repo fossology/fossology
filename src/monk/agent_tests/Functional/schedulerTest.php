@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
@@ -35,6 +36,9 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var TestInstaller */
+  private $testInstaller;
+  
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -96,21 +100,13 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
-
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
-    file_put_contents($confFile, $config);
-
-    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
-    $sysConf = $this->testDb->getFossSysConf();
-    system("rm $sysConf/repo -rf");
-    unlink($sysConf."/fossology.conf");
+    $this->testInstaller->rmRepo();
   }
 
   private function setUpTables()

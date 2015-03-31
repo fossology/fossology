@@ -46,17 +46,6 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
-use Fossology\Lib\Db\DbManager;
-
-$groupInfo = posix_getgrnam("fossy");
-posix_setgid($groupInfo['gid']);
-$group = `groups`;
-if (!preg_match("/\sfossy\s/",$group) && (posix_getgid()!=$groupInfo['gid']))
-{
-  print "FATAL: You must be in group 'fossy' to update the FOSSology database.\n";
-  exit(1);
-}
-
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
  */
@@ -103,6 +92,16 @@ foreach($Options as $optKey => $optVal)
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
+$gInfo = posix_getgrnam($projectGroup);
+posix_setgid($gInfo['gid']);
+$groups = `groups`;
+if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid']))
+{
+  print "FATAL: You must be in group '$projectGroup'.\n";
+  exit(1);
+}
+
 require_once("$MODDIR/vendor/autoload.php");
 require_once("$MODDIR/lib/php/common-db.php");
 require_once("$MODDIR/lib/php/common-container.php");
@@ -259,30 +258,6 @@ if($errors>0)
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
 }
 exit($errors);
-
-
-
-
-
-
-
-
-/* sanity check */
-require_once ("$LIBEXECDIR/sanity_check.php");
-$checker = new SanityChecker($dbManager,$Verbose);
-$errors = $checker->check();
-
-if($errors>0)
-{
-  echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
-}
-exit($errors);
-
-
-
-
-
-
 
 
 /**
