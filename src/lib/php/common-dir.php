@@ -490,7 +490,7 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
   /* Find all the children */
   $sql = "select {$uploadtree_tablename}.*, pfile_size, pfile_mimetypefk from $uploadtree_tablename
           left outer join pfile on (pfile_pk=pfile_fk)
-          where parent=$1";
+          where parent=$1 ORDER BY lft";
   $dbManager->prepare($stmt=__METHOD__."$uploadtree_tablename",$sql);
   $result = $dbManager->execute($stmt,array($uploadtree_pk));
   $children = $dbManager->fetchAll($result);
@@ -521,6 +521,6 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
     else
     $foundChildren[$key] = $child;
   }
-  uasort($foundChildren, '_DirCmp');
+  // uasort($foundChildren, '_DirCmp');
   return $foundChildren;
 }

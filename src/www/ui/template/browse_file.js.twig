@@ -1,0 +1,61 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+function createDirlistTable() {
+  var dirlistTableConfig = {
+    "bServerSide": true,
+    "sAjaxSource": "?mod=license&rtn=files",
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      aoData.push({"name": "upload", "value": {{ uploadId }} });
+      aoData.push({"name": "item", "value": {{ itemId }} });
+      aoData.push({"name": "agentId", "value": {{ agentId|default(0) }} });
+      $.getJSON(sSource, aoData, fnCallback)
+        .fail(failed)
+    },
+    "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+        if (nRow.className.match(/(^| )removed($| )/g)  ) {
+            $('td', nRow).addClass('read_only');
+        }
+    },
+    "aoColumns": [{"sTitle":"Files","sClass":"left"},
+        {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka)","sClass":"left"},
+        {"sTitle":"Edited Results","sClass":"left"},
+        {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
+            if(type!='display') return data;
+            if (data==='green'){
+              return '<img alt="done" src="images/green.png" class="icon-small"/>';
+            }
+            return '<img alt="not done" src="images/red.png" class="icon-small"/>';
+          }
+        },
+        {"sTitle":"Files Cleared","sClass":"center","bSearchable":false},
+        {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
+    "iDisplayLength": 25,
+    "bProcessing": true,
+    "bStateSave": true,
+    "sCookiePrefix" : "fossology_",
+    "bRetrieve": true,
+    "bPaginate": true,
+    "bFilter": true,
+    "bAutoWidth": false,
+    {# "aaSorting":[[0,"asc"],[2,"desc"],[1,"desc"]], #}
+    "iDisplayLength":50,
+    "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
+      "sSearch":'_INPUT_<button onclick="clearSearchFiles();" >Clear<\/button>',
+      "sLengthMenu":'Display <select><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
+       #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} {{ 'flat'|trans }}{#
+       #} {% else %}{{ 'tree view'|trans }} {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})' 
+      }
+  };
+
+  otable = $('#dirlist').dataTable(dirlistTableConfig);
+}
+
+$(document).ready(function () {
+  createDirlistTable();
+});
+

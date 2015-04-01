@@ -127,12 +127,12 @@ class ui_browse_license extends DefaultPlugin
     $vars['itemId'] = $item;
 
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
-
+    /** empty cache */
     $this->uploadtree_tablename = GetUploadtreeTableName($upload);
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
-    $Cached = !empty($V);
+    $Cached = false; //!empty($V);
     if (!$Cached && !empty($upload))
     {
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
@@ -141,10 +141,25 @@ class ui_browse_license extends DefaultPlugin
       {
         return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
       }
-      $V .= $this->showUploadHist($itemTreeBounds);
+      $histVars = $this->showUploadHist($itemTreeBounds);
+      $vars = array_merge($vars, $histVars);
     }
+    
+    
+    if($request->get('rtn')==='files')
+    {
+      return new Symfony\Component\HttpFoundation\JsonResponse(array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $vars['fileData'],
+            'iTotalRecords' => $vars['fileCount'],
+            'iTotalDisplayRecords' => count($vars['fileData'])
+          ) );
+
+    }
+    
 
     $vars['content'] = $V;
+/*
     $Time = microtime(true) - $uTime;
 
     if ($Cached)
@@ -156,13 +171,15 @@ class ui_browse_license extends DefaultPlugin
     else
     {
       $text = _("Elapsed time: %.3f seconds");
-      $vars['content'] .= sprintf("<hr/><small>$text</small>", $Time);
+      $vars['message'] = sprintf($text, $Time);
       if ($Time > 3.0)
         ReportCachePut($CacheKey, $V);
     }
+ * 
+ */
     $vars['content'] .= js_url();
 
-    return $this->render("browse_license.html.twig",$this->mergeWithDefault($vars));
+    return $this->render("browse.html.twig",$this->mergeWithDefault($vars));
   }
 
 
@@ -182,25 +199,25 @@ class ui_browse_license extends DefaultPlugin
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
     $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
     $agentMap = $scanJobProxy->getAgentMap();
-    if (empty($agentMap))
-    {
-      $this->vars['noUploadHist'] = TRUE;
-    }
+    
     $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
                   'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
-    $agentStatus = $this->renderString('browse_license-agent_selector.html.twig', $vars);
 
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
-    list($jsBlockLicenseHist, $VLic) = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
-    $VLic .= "\n" . $agentStatus;
+    
+    if(!empty($agentMap))
+    {
+      $licVars = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
+      $vars = array_merge($vars, $licVars);
+    }
 
     $UniqueTagArray = array();
     global $container;
     $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
-    list($ChildCount, $jsBlockDirlist) = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
-
+    $dirVars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
+    $ChildCount = $dirVars['ChildCount'];
     /***************************************
      * Problem: $ChildCount can be zero if you have a container that does not
      * unpack to a directory.  For example:
@@ -221,7 +238,7 @@ class ui_browse_license extends DefaultPlugin
      */
     /** @todo qualify with tag namespace to avoid tag name collisions.  * */
     /* turn $UniqueTagArray into key value pairs ($SelectData) for select list */
-    $V = "";
+    $V = '';
     $SelectData = array();
     if (count($UniqueTagArray))
     {
@@ -233,22 +250,13 @@ class ui_browse_license extends DefaultPlugin
       $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk", $tag_pk, true, false, $Options);
     }
 
-    $dirlistPlaceHolder = "<table border=0 id='dirlist' style=\"margin-left: 9px;\" class='semibordered'></table>\n";
-    /****** Combine VF and VLic ********/
-    $V .= "<table border=0 cellpadding=2 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='25%'>$VLic</td><td valign='top' width='75%'>$dirlistPlaceHolder</td></tr>\n";
-    $V .= "</table>\n";
+    $vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
+    $vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
 
-    $this->vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
-    $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+    $vars = array_merge($vars, $dirVars);
 
-    $V .= $jsBlockDirlist;
-    $V .= $jsBlockLicenseHist;
-
-    $V .= "<button onclick='loadBulkHistoryModal();'>" . _("Show bulk history") . "</button>";
-    $V .= "<br/><span id='bulkIdResult' hidden></span>";
-
-    return $V;
+    $vars['content'] = $V;
+    return $vars;
   }
 
   /**
@@ -308,7 +316,7 @@ class ui_browse_license extends DefaultPlugin
     }
     if (empty($Children))
     {
-      return array($ChildCount = 0, "");
+      return array('ChildCount' => 0);
     }
 
     /*******    File Listing     ************/
@@ -338,7 +346,6 @@ class ui_browse_license extends DefaultPlugin
 
     global $Plugins;
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
-    $Uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
     $tableData = array();
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
@@ -378,6 +385,9 @@ class ui_browse_license extends DefaultPlugin
 
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
+    $Uri = Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')); //  preg_replace("/&item=([0-9]*)/", "", Traceback());
+            
+    $fileSwitch = $isFlat ? $Uri : $Uri."&flatten=yes";
     foreach ($Children as $child)
     {
       if (empty($child))
@@ -387,14 +397,9 @@ class ui_browse_license extends DefaultPlugin
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
     }
 
-    $fileSwitch = $isFlat ?
-            Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')) :
-            Traceback()."&flatten=yes";
-    $vars = array('aaData' => json_encode($tableData), 'isFlat'=>$isFlat, 'fileSwitch'=>$fileSwitch);
-    $VF = '<script>' . $this->renderString('ui-browse-license_file-list.js.twig', $vars) . '</script>';
-
-    $ChildCount = count($tableData);
-    return array($ChildCount, $VF);
+    $vars = array('isFlat'=>$isFlat, 'fileSwitch'=>$fileSwitch, 'fileData'=>$tableData);
+    $vars['ChildCount'] = count($tableData);
+    return $vars;
   }
 
 
@@ -537,67 +542,15 @@ class ui_browse_license extends DefaultPlugin
    * @param ItemTreeBounds $itemTreeBounds
    * @param int|int[] $agentIds
    * @param ClearingDecision []
-   * @return string
+   * @return array
    */
   private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentIds, $groupId)
   {
-    if(array_key_exists('noUploadHist',$this->vars))
-    {
-      return array('','');
-    }
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
 
-    /* Write license histogram to $VLic  */
-    $rendered = "<table border=0 class='semibordered' id='lichistogram'></table>\n";
-    list($jsBlockLicenseHist, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount,
-        $editedTotalLicenseCount, $editedUniqueLicenseCount)
-        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $uploadTreeId, $tagId);
-    $noScannerLicenseFoundCount = array_key_exists("No_license_found", $licenseHistogram) ? $licenseHistogram["No_license_found"]['count'] : 0;
-    $editedNoLicenseFoundCount = array_key_exists("No_license_found", $editedLicensesHist) ? $editedLicensesHist["No_license_found"]['count'] : 0;
-
-    $rendered .= "<br/><br/>";
-    $rendered .= _("Hint: Click on the license name to search for where the license is found in the file listing.") . "<br/><br/>\n";
-
-    $vars = array('uniqueLicenseCount'=>$uniqueLicenseCount,
-        'fileCount'=>$fileCount,
-        'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
-        'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
-        'scannerLicenseCount'=> $totalScannerLicenseCount-$noScannerLicenseFoundCount,
-        'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
-        'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
-        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
-    $rendered .= $this->renderString('browse_license-summary.html.twig', $vars);
-
-    return array($jsBlockLicenseHist, $rendered);
-  }
-
-  /**
-   * @param array $scannerLics
-   * @param array $editedLics
-   * @param $uploadTreeId
-   * @param $tagId
-   * @return array
-   * @todo convert to template
-   */
-  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $uploadTreeId, $tagId)
-  {
     $agentId = GetParm('agentId', PARM_INTEGER);
-
-    $allScannerLicenseNames = array_keys($scannerLics);
-    $allEditedLicenseNames = array_keys($editedLics);
-
-    $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
-
-    $uniqueLicenseCount = count($allLicNames);
-
-    $totalScannerLicenseCount = 0;
-    $scannerUniqueLicenseCount = count( array_keys($scannerLics) );
-
-    $editedTotalLicenseCount = 0;
-    $editedUniqueLicenseCount = 0;
-
     $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
     if ($tagId)
     {
@@ -607,6 +560,46 @@ class ui_browse_license extends DefaultPlugin
     {
       $licListUri .= "&agentId=$agentId";
     }
+    
+    /* Write license histogram to $VLic  */
+    list($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount)
+        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri);
+    
+    $uniqueLicenseCount = count($tableData);
+    $scannerUniqueLicenseCount = count( $licenseHistogram );
+    $editedUniqueLicenseCount = count($editedLicensesHist);
+    $noScannerLicenseFoundCount = array_key_exists("No_license_found", $licenseHistogram) ? $licenseHistogram["No_license_found"]['count'] : 0;
+    $editedNoLicenseFoundCount = array_key_exists("No_license_found", $editedLicensesHist) ? $editedLicensesHist["No_license_found"]['count'] : 0;
+
+    $vars = array('tableDataJson'=>json_encode($tableData),
+        'uniqueLicenseCount'=>$uniqueLicenseCount,
+        'fileCount'=>$fileCount,
+        'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
+        'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
+        'scannerLicenseCount'=> $totalScannerLicenseCount-$noScannerLicenseFoundCount,
+        'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
+        'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
+        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
+
+    return $vars;
+  }
+
+  /**
+   * @param array $scannerLics
+   * @param array $editedLics
+   * @param string
+   * @return array
+   * @todo convert to template
+   */
+  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $licListUri)
+  {
+    $allScannerLicenseNames = array_keys($scannerLics);
+    $allEditedLicenseNames = array_keys($editedLics);
+
+    $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
+
+    $totalScannerLicenseCount = 0;
+    $editedTotalLicenseCount = 0;
 
     $tableData = array();
     foreach ($allLicNames as $licenseShortName)
@@ -616,12 +609,7 @@ class ui_browse_license extends DefaultPlugin
       {
         $count = $scannerLics[$licenseShortName]['unique'];
       }
-      $editedCount = 0;
-      if (array_key_exists($licenseShortName, $editedLics))
-      {
-        $editedCount = $editedLics[$licenseShortName];
-        $editedUniqueLicenseCount++;
-      }
+      $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName] : 0;
 
       $totalScannerLicenseCount += $count;
       $editedTotalLicenseCount += $editedCount;
@@ -632,10 +620,7 @@ class ui_browse_license extends DefaultPlugin
       $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
     }
 
-    $js = $this->renderString('browse_license-lic_hist.js.twig', array('tableDataJson'=>json_encode($tableData)));
-    $rendered = "<script>$js</script>";
-
-    return array($rendered, $uniqueLicenseCount, $totalScannerLicenseCount, $scannerUniqueLicenseCount, $editedTotalLicenseCount, $editedUniqueLicenseCount);
+    return array($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount);
   }
 
   /**
