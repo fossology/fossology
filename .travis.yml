@@ -71,7 +71,7 @@ matrix:
        - sudo /usr/local/lib/fossology/fo-postinstall
 
     - env:
-        - TEST_NAME="Unit Test (gcc)"
+       - TEST_NAME="Unit Test (gcc)"
       compiler: gcc
       before_script:
        - sudo apt-get install libcunit1-dev libcunit1-doc php5-xsl 
@@ -93,8 +93,8 @@ matrix:
        - cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
-       - cd src/testing/unit
-       - ./runAgentUnit.php
+       - cd src/
+       - make test
 
     # QA jobs for code analytics and metrics
     # static code analysis with cppcheck (we can add --enable=all later)
