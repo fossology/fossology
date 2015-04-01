@@ -104,6 +104,8 @@ if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
   return 1;
 }
 
+require_once("$MODDIR/lib/php/common-cli.php");
+cli_Init();
 account_check($user, $passwd); // check username/password
 
 $return_value = read_permission($upload, $user); // check if the user has the permission to read this upload
@@ -113,8 +115,6 @@ if (empty($return_value))
   echo $text;
   return 1;
 }
-
-require_once("$MODDIR/lib/php/common.php");
 
 /** get copyright information for this uploadtree */
 GetCopyrightList($item, $upload, $type, $container);

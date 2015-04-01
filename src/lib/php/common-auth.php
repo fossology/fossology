@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -42,11 +43,10 @@ function siteminder_check() {
  * 
  * \return error: exit (1)
  */
-function account_check(&$user, &$passwd)
+function account_check(&$user, &$passwd, &$group = "")
 {
-  global $PG_CONN;
   global $SysConf;
-
+  $dbManager = $GLOBALS['container']->get('db.manager');
   /** get username/passwd from ~/.fossology.rc */
   $user_passwd_file = getenv("HOME") . "/.fossology.rc";
   if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
@@ -57,10 +57,11 @@ function account_check(&$user, &$passwd)
       $user = $user_passwd_array['user'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
       $user = $user_passwd_array['username'];
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname']))
+      $group = $user_passwd_array['groupname'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
       $passwd = $user_passwd_array['password'];
   }
-
   /* check if the user name/passwd is valid */
   if (empty($user)) {
     /*
@@ -81,17 +82,39 @@ function account_check(&$user, &$passwd)
   }
 
   if (!empty($user)) {
-    $SQL = "SELECT * from users where user_name = '$user';";
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    if(empty($row)) {
-      echo "User name or password is invalid.\n";
-      pg_free_result($result);
+    $userDao = $GLOBALS['container']->get('dao.user');
+    $row = $userDao->getUserAndDefaultGroupByUserName($user);
+    if(false === $row) {
+      echo "User name is invalid.\n";
       exit(1);
     }
-    $SysConf['auth']['UserId'] = $row['user_pk'];
-    pg_free_result($result);
+    $userId = $row['user_pk'];
+    $SysConf['auth']['UserId'] = $userId;
+
+    if (empty($group)) {
+      $group = $row['group_name'];
+      $groupId = $row['group_fk'];
+    }
+    else {
+      $rowGroup = $dbManager->getSingleRow(
+        "SELECT group_pk
+        FROM group_user_member INNER JOIN groups ON groups.group_pk = group_user_member.group_fk
+        WHERE user_fk = $1 AND group_name = $2",
+        array($userId, $group),
+        __METHOD__.".lookUpGroup"
+      );
+      if (false === $rowGroup) {
+        echo "User is not in group.\n";
+        exit(1);
+      }
+      $groupId = $rowGroup['group_pk'];
+    }
+    $SysConf['auth']['GroupId'] = $groupId;
+    if (empty($groupId)) {
+      echo "Group '$group' not found.\n";
+      exit(1);
+    }
+
     if (!empty($row['user_seed']) && !empty($row['user_pass'])) {
       $passwd_hash = sha1($row['user_seed'] . $passwd);
       if (strcmp($passwd_hash, $row['user_pass']) != 0) {
@@ -100,6 +123,7 @@ function account_check(&$user, &$passwd)
       }
     }
   }
+  return $userId;
 }
 
 /**

@@ -47,11 +47,12 @@ class maintagent extends FO_Plugin {
 
     /* Create the maintenance job */
     $user_pk = $SysConf['auth']['UserId'];
+    $groupId = $SysConf['auth']['GroupId'];
     $upload_pk = 0;  // dummy
 
-    $job_pk = JobAddJob($user_pk, "Maintenance", $upload_pk);
+    $job_pk = JobAddJob($user_pk, $groupId, "Maintenance", $upload_pk);
     if (empty($job_pk) || ($job_pk < 0)) return _("Failed to insert job record");
-    
+
     $jq_pk = JobQueueAdd($job_pk, "maintagent", NULL, NULL, NULL, NULL, $options);
     if (empty($jq_pk)) return _("Failed to insert task 'Maintenance' into job queue");
 
