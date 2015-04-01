@@ -128,7 +128,7 @@ class ui_browse_license extends DefaultPlugin
 
     list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
     /** empty cache */
-    $this->uploadtree_tablename = GetUploadtreeTableName($upload);
+    $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
@@ -198,10 +198,8 @@ class ui_browse_license extends DefaultPlugin
       $vars = array_merge($vars, $licVars);
     }
 
-    $UniqueTagArray = array();
-    global $container;
-    $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
-    $dirVars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
+    $this->licenseProjector = new LicenseMap($this->getObject('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
+    $dirVars = $this->countFileListing($itemTreeBounds);
     $childCount = $dirVars['iTotalRecords'];
     /***************************************
      * Problem: $ChildCount can be zero if you have a container that does not
@@ -217,30 +215,11 @@ class ui_browse_license extends DefaultPlugin
       return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
 
-    /******  Filters  *******/
-    /* Only display the filter pulldown if there are filters available
-     * Currently, this is only tags.
-     */
-    /** @todo qualify with tag namespace to avoid tag name collisions.  * */
-    /* turn $UniqueTagArray into key value pairs ($SelectData) for select list */
-    $V = '';
-    $SelectData = array();
-    if (count($UniqueTagArray))
-    {
-      foreach ($UniqueTagArray as $UTA_row)
-        $SelectData[$UTA_row['tag_pk']] = $UTA_row['tag_name'];
-      $V .= "Tag filter";
-      $myurl = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item"));
-      $Options = " id='filterselect' onchange=\"js_url(this.value, '$myurl&tag=')\"";
-      $V .= Array2SingleSelectTag($SelectData, "tag_ns_pk", $tag_pk, true, false, $Options);
-    }
-
     $vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
     $vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
 
     $vars = array_merge($vars, $dirVars);
 
-    $vars['content'] = $V;
     return $vars;
   }
 
@@ -269,153 +248,17 @@ class ui_browse_license extends DefaultPlugin
   }
 
   /**
-   * @param $tagId
    * @param ItemTreeBounds $itemTreeBounds
-   * @param $UniqueTagArray
-   * @param $selectedAgentId
-   * @param int $groupId
-   * @param ScanJobProxy $scanJobProxy
    * @return array
    */
-  private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy)
+  private function countFileListing(ItemTreeBounds $itemTreeBounds)
   {
-    /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $isFlat = isset($_GET['flatten']);
-    
     $vars['isFlat'] = $isFlat;
-    
-    $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
-    $defaultOrder = array(array(0, "asc"));
-    $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
-    
     $vars['iTotalRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat));
-
-    $searchMap = array();
-    foreach(explode(' ',GetParm('sSearch', PARM_RAW)) as $pair)
-    {
-      $a = explode(':',$pair);
-      if(count($a)==1)
-        $searchMap['any'] = $pair;
-      else
-        $searchMap[$a[0]] = $a[1];
-    }
-    
-    if(array_key_exists('ext', $searchMap) and strlen($searchMap['ext'])>=1)
-    {
-      $dbM = $this->getObject('db.manager');
-      $dbD = $dbM->getDriver();
-      $ext = $dbD->escapeString($searchMap['ext']);
-      $orderString = " AND ufile_name ilike '%.$ext' $orderString";
-    }
-
-    $vars['iTotalDisplayRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $orderString));
-    
-    
-    
-    $offset = GetParm('iDisplayStart', PARM_INTEGER);
-    $limit = GetParm('iDisplayLength', PARM_INTEGER);
-    if($offset)
-      $orderString .= " OFFSET $offset";
-    if($limit)
-      $orderString .= " LIMIT $limit";
-    
-
-    /* Get ALL the items under this Uploadtree_pk */
-    $Children = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $orderString);
-    
-    /* Filter out Children that don't have tag */
-    if (!empty($tagId))
-    {
-      TagFilter($Children, $tagId, $itemTreeBounds->getUploadTreeTableName());
-    }
-    if (empty($Children))
-    {
-      $vars['fileData'] = array();
-      return $vars;
-    }
-
-    /*******    File Listing     ************/
-    if (!empty($selectedAgentId))
-    {
-      $agentName = $this->agentDao->getAgentName($selectedAgentId);
-      $selectedScanners = array($agentName=>$selectedAgentId);
-    }
-    else
-    {
-      $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    }
-
-    $pfileLicenses = array();
-    foreach($selectedScanners as $agentName=>$agentId)
-    {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat);
-      foreach ($licensePerPfile as $pfile => $licenseRow)
-      {
-        foreach ($licenseRow as $licId => $row)
-        {
-          $lic = $this->licenseProjector->getProjectedShortname($licId);
-          $pfileLicenses[$pfile][$lic][$agentName] = $row;
-        }
-      }
-    }
-
-    global $Plugins;
-    $ModLicView = &$Plugins[plugin_find_id("view-license")];
-    $tableData = array();
-
-    $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
-
-    $alreadyClearedUploadTreeView->materialize();
-    if (!$isFlat)
-    {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    }
-    else
-    {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
-    $alreadyClearedUploadTreeView->unmaterialize();
-
-    $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
-    $noLicenseUploadTreeView->materialize();
-    if (!$isFlat)
-    {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    }
-    else
-    {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
-    $noLicenseUploadTreeView->unmaterialize();
-
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
-    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
-    $Uri = Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item')); //  preg_replace("/&item=([0-9]*)/", "", Traceback());
-            
-    $fileSwitch = $isFlat ? $Uri : $Uri."&flatten=yes";
-    foreach ($Children as $child)
-    {
-      if (empty($child))
-      {
-        continue;
-      }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
-    }
-    
-    $vars['fileSwitch'] = $fileSwitch;
-    $vars['fileData'] = $tableData;
-
+    $uri = Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item'));
+    $vars['fileSwitch'] = $isFlat ? $uri : $uri."&flatten=yes";
     return $vars;
   }
 
