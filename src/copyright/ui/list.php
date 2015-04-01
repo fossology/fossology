@@ -18,6 +18,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file list.php
