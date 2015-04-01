@@ -417,12 +417,28 @@ class UploadDao extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $includeSubFolders=true, $orderString='')
   {
+    $stmt=__METHOD__;
     $sql = "SELECT u.* FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
-    $this->dbManager->prepare($stmt=__METHOD__,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+         . "WHERE u.upload_fk=$1";
+    $params = array($itemTreeBounds->getUploadId());
+    if (!$includeSubFolders)
+    {
+      $stmt = __METHOD__.'.parent';
+      $params[] = $itemTreeBounds->getItemId();
+      $sql .= " AND u.ufile_mode & (1<<28) = 0 AND u.realparent = $2";
+    }
+    else
+    {
+      $params[] = $itemTreeBounds->getLeft();
+      $params[] = $itemTreeBounds->getRight();
+      $sql .= " AND u.ufile_mode & (3<<28) = 0 AND (u.lft BETWEEN $2 AND $3)";
+    }
+    $stmt .= $orderString;
+    $sql .= $orderString;
+    
+    $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,$params);
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

@@ -13,6 +13,7 @@ function createDirlistTable() {
       aoData.push({"name": "upload", "value": {{ uploadId }} });
       aoData.push({"name": "item", "value": {{ itemId }} });
       aoData.push({"name": "agentId", "value": {{ agentId|default(0) }} });
+      {% if isFlat %}aoData.push({"name": "flatten", "value": "yes" });{% endif %}
       $.getJSON(sSource, aoData, fnCallback)
         .fail(failed)
     },
@@ -22,9 +23,9 @@ function createDirlistTable() {
         }
     },
     "aoColumns": [{"sTitle":"Files","sClass":"left"},
-        {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka)","sClass":"left"},
-        {"sTitle":"Edited Results","sClass":"left"},
-        {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
+        {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka)","sClass":"left","bSortable":false},
+        {"sTitle":"Edited Results","sClass":"left","bSortable":false},
+        {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSortable":false,"bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
             if(type!='display') return data;
             if (data==='green'){
               return '<img alt="done" src="images/green.png" class="icon-small"/>';
@@ -32,7 +33,7 @@ function createDirlistTable() {
             return '<img alt="not done" src="images/red.png" class="icon-small"/>';
           }
         },
-        {"sTitle":"Files Cleared","sClass":"center","bSearchable":false},
+        {"sTitle":"Files Cleared","sClass":"center","bSortable":false,"bSearchable":false},
         {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
     "iDisplayLength": 25,
     "bProcessing": true,

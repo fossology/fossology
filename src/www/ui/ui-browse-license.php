@@ -132,7 +132,7 @@ class ui_browse_license extends DefaultPlugin
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
-    $Cached = false; //!empty($V);
+    $Cached = false;
     if (!$Cached && !empty($upload))
     {
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
@@ -142,6 +142,10 @@ class ui_browse_license extends DefaultPlugin
         return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
       }
       $histVars = $this->showUploadHist($itemTreeBounds);
+      if(is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse'))
+      {
+        return 0;//$histVars;
+      }
       $vars = array_merge($vars, $histVars);
     }
     
@@ -151,32 +155,13 @@ class ui_browse_license extends DefaultPlugin
       return new Symfony\Component\HttpFoundation\JsonResponse(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $vars['fileData'],
-            'iTotalRecords' => $vars['fileCount'],
-            'iTotalDisplayRecords' => count($vars['fileData'])
+            'iTotalRecords' => $vars['iTotalRecords'],
+            'iTotalDisplayRecords' => $vars['iTotalDisplayRecords']
           ) );
 
     }
     
-
     $vars['content'] = $V;
-/*
-    $Time = microtime(true) - $uTime;
-
-    if ($Cached)
-    {
-      $text = _("This is cached view.");
-      $text1 = _("Update now.");
-      $vars['message'] = " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
-    }
-    else
-    {
-      $text = _("Elapsed time: %.3f seconds");
-      $vars['message'] = sprintf($text, $Time);
-      if ($Time > 3.0)
-        ReportCachePut($CacheKey, $V);
-    }
- * 
- */
     $vars['content'] .= js_url();
 
     return $this->render("browse.html.twig",$this->mergeWithDefault($vars));
@@ -217,7 +202,7 @@ class ui_browse_license extends DefaultPlugin
     global $container;
     $this->licenseProjector = new LicenseMap($container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     $dirVars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
-    $ChildCount = $dirVars['ChildCount'];
+    $childCount = $dirVars['iTotalRecords'];
     /***************************************
      * Problem: $ChildCount can be zero if you have a container that does not
      * unpack to a directory.  For example:
@@ -227,7 +212,7 @@ class ui_browse_license extends DefaultPlugin
      *
      * $ChildCount can also be zero if the directory is empty.
      * **************************************/
-    if ($ChildCount == 0)
+    if ($childCount == 0)
     {
       return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
@@ -296,19 +281,49 @@ class ui_browse_license extends DefaultPlugin
   {
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
-    $uploadTreeId = $itemTreeBounds->getItemId();
     $isFlat = isset($_GET['flatten']);
+    
+    $vars['isFlat'] = $isFlat;
+    
+    $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
+    $defaultOrder = array(array(0, "asc"));
+    $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
+    
+    $vars['iTotalRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat));
+
+    $searchMap = array();
+    foreach(explode(' ',GetParm('sSearch', PARM_RAW)) as $pair)
+    {
+      $a = explode(':',$pair);
+      if(count($a)==1)
+        $searchMap['any'] = $pair;
+      else
+        $searchMap[$a[0]] = $a[1];
+    }
+    
+    if(array_key_exists('ext', $searchMap) and strlen($searchMap['ext'])>=1)
+    {
+      $dbM = $this->getObject('db.manager');
+      $dbD = $dbM->getDriver();
+      $ext = $dbD->escapeString($searchMap['ext']);
+      $orderString = " AND ufile_name ilike '%.$ext' $orderString";
+    }
+
+    $vars['iTotalDisplayRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $orderString));
+    
+    
+    
+    $offset = GetParm('iDisplayStart', PARM_INTEGER);
+    $limit = GetParm('iDisplayLength', PARM_INTEGER);
+    if($offset)
+      $orderString .= " OFFSET $offset";
+    if($limit)
+      $orderString .= " LIMIT $limit";
+    
 
     /* Get ALL the items under this Uploadtree_pk */
-    if (!$isFlat)
-    {
-      $Children = GetNonArtifactChildren($uploadTreeId, $itemTreeBounds->getUploadTreeTableName());
-    }
-    else
-    {
-      $Children = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds);
-    }
-
+    $Children = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $orderString);
+    
     /* Filter out Children that don't have tag */
     if (!empty($tagId))
     {
@@ -316,7 +331,8 @@ class ui_browse_license extends DefaultPlugin
     }
     if (empty($Children))
     {
-      return array('ChildCount' => 0);
+      $vars['fileData'] = array();
+      return $vars;
     }
 
     /*******    File Listing     ************/
@@ -396,9 +412,10 @@ class ui_browse_license extends DefaultPlugin
       }
       $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, $UniqueTagArray, $isFlat);
     }
+    
+    $vars['fileSwitch'] = $fileSwitch;
+    $vars['fileData'] = $tableData;
 
-    $vars = array('isFlat'=>$isFlat, 'fileSwitch'=>$fileSwitch, 'fileData'=>$tableData);
-    $vars['ChildCount'] = count($tableData);
     return $vars;
   }
 
