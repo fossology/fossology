@@ -25,11 +25,9 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
-use Fossology\Lib\Proxy\UploadTreeProxy;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,15 +54,8 @@ class ui_browse_license extends DefaultPlugin
   private $clearingFilter;
   /** @var LicenseMap */
   private $licenseProjector;
-  /** @var array [uploadtree_id]=>cnt */
-  private $filesThatShouldStillBeCleared;
-  /** @var array [uploadtree_id]=>cnt */
-  private $filesToBeCleared;
   /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
-  
-  protected $vars = array();
-
   
   public function __construct() {
     parent::__construct(self::NAME, array(
@@ -117,52 +108,32 @@ class ui_browse_license extends DefaultPlugin
     if (!$this->uploadDao->isAccessible($upload, $groupId)) {
       return $this->flushContent(_("Permission Denied"));
     }
-    $uTime = microtime(true);
 
     $item = intval($request->get("item"));
-    $updateCache = GetParm("updcache", PARM_INTEGER);
 
     $vars['baseuri'] = Traceback_uri();
     $vars['uploadId'] = $upload;
     $vars['itemId'] = $item;
 
-    list($CacheKey, $V) = $this->cleanGetArgs($updateCache);
-    /** empty cache */
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
-    $Cached = false;
-    if (!$Cached && !empty($upload))
-    {
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
-      $left = $itemTreeBounds->getLeft();
-      if (empty($left))
-      {
-        return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
-      }
-      $histVars = $this->showUploadHist($itemTreeBounds);
-      if(is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse'))
-      {
-        return 0;//$histVars;
-      }
-      $vars = array_merge($vars, $histVars);
-    }
-    
-    
-    if($request->get('rtn')==='files')
-    {
-      return new Symfony\Component\HttpFoundation\JsonResponse(array(
-            'sEcho' => intval($_GET['sEcho']),
-            'aaData' => $vars['fileData'],
-            'iTotalRecords' => $vars['iTotalRecords'],
-            'iTotalDisplayRecords' => $vars['iTotalDisplayRecords']
-          ) );
 
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
+    $left = $itemTreeBounds->getLeft();
+    if (empty($left))
+    {
+      return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
     }
-    
-    $vars['content'] = $V;
-    $vars['content'] .= js_url();
+    $histVars = $this->showUploadHist($itemTreeBounds);
+    if(is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse'))
+    {
+      return $histVars;
+    }
+    $vars = array_merge($vars, $histVars);
+
+    $vars['content'] = js_url();
 
     return $this->render("browse.html.twig",$this->mergeWithDefault($vars));
   }
@@ -186,7 +157,7 @@ class ui_browse_license extends DefaultPlugin
     $agentMap = $scanJobProxy->getAgentMap();
     
     $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
-                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm() . '&updcache=1',
+                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm(),
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
 
@@ -219,180 +190,21 @@ class ui_browse_license extends DefaultPlugin
     $vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
 
     $vars = array_merge($vars, $dirVars);
-
     return $vars;
   }
 
   /**
-   * @param $updcache
-   * @return array
-   */
-  protected function cleanGetArgs($updcache)
-  {
-    /* Remove "updcache" from the GET args.
-         * This way all the url's based on the input args won't be
-         * polluted with updcache
-         * Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload", "item", "tag", "agent", "orderBy", "orderl", "orderc", "flatten"));
-    if ($updcache)
-    {
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/", "", $_SERVER['REQUEST_URI']);
-      unset($_GET['updcache']);
-      $V = ReportCachePurgeByKey($CacheKey);
-    }
-    else
-    {
-      $V = ReportCacheGet($CacheKey);
-    }
-    return array($CacheKey, $V);
-  }
-
-  /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @return array
+   * @return array with keys 'isFlat','iTotalRecords','fileSwitch'
    */
   private function countFileListing(ItemTreeBounds $itemTreeBounds)
   {
-    $uploadId = $itemTreeBounds->getUploadId();
     $isFlat = isset($_GET['flatten']);
     $vars['isFlat'] = $isFlat;
     $vars['iTotalRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat));
     $uri = Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item'));
     $vars['fileSwitch'] = $isFlat ? $uri : $uri."&flatten=yes";
     return $vars;
-  }
-
-
-  /**
-   * @param array $child
-   * @param int $uploadId
-   * @param int $selectedAgentId
-   * @param array $pfileLicenses
-   * @param int $groupId
-   * @param ClearingDecision[][] $editedMappedLicenses
-   * @param string $Uri
-   * @param null|ClearingView $ModLicView
-   * @param array $UniqueTagArray
-   * @param boolean $isFlat
-   * @return array
-   */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $Uri, $ModLicView, &$UniqueTagArray, $isFlat)
-  {
-    $fileId = $child['pfile_fk'];
-    $childUploadTreeId = $child['uploadtree_pk'];
-
-    if (!empty($fileId) && !empty($ModLicView))
-    {
-      $LinkUri = Traceback_uri();
-      $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
-      if ($selectedAgentId)
-      {
-        $LinkUri .= "&agentId=$selectedAgentId";
-      }
-    } else
-    {
-      $LinkUri = null;
-    }
-
-    /* Determine link for containers */
-    $isContainer = Iscontainer($child['ufile_mode']);
-    if ($isContainer)
-    {
-      $uploadtree_pk = DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename);
-      $LicUri = "$Uri&item=" . $uploadtree_pk;
-      if ($selectedAgentId)
-      {
-        $LicUri .= "&agentId=$selectedAgentId";
-      }
-    } else
-    {
-      $LicUri = null;
-    }
-
-    /* Populate the output ($VF) - file list */
-    /* id of each element is its uploadtree_pk */
-    $fileName = $child['ufile_name'];
-    if ($isContainer)
-    {
-      $fileName = "<a href='$LicUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
-    } else if (!empty($LinkUri))
-    {
-      $fileName = "<a href='$LinkUri'>$fileName</a>";
-    }
-    /* show licenses under file name */
-    $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
-        new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
-    if ($isContainer)
-    {
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
-      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
-    } else
-    {
-      $licenseEntries = array();
-      if (array_key_exists($fileId, $pfileLicenses))
-      {
-        foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
-        {
-          $agentEntries = array();
-          foreach ($rfInfo as $agent => $match)
-          {
-            $agentName = $this->agentNames[$agent];
-            $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentName . "</a>";
-
-            if ($match['match_percentage'] > 0)
-            {
-              $agentEntry .= ": $match[match_percentage]%";
-            }
-            $agentEntries[] = $agentEntry;
-          }
-          $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
-        }
-      }
-
-      /** @var ClearingDecision $decision */
-      if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
-      {
-        $editedLicenses = $decision->getPositiveLicenses();
-      }
-      else
-      {
-        $editedLicenses = array();
-      }
-    }
-    
-    $concludedLicenses = array();
-    /** @var LicenseRef $licenseRef */
-    foreach($editedLicenses as $licenseRef){
-      $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
-      $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
-      $concludedLicenses[$projectedId] = $projectedName;
-    }
-
-    $editedLicenseList = implode(', ', $concludedLicenses);
-    $licenseList = implode(', ', $licenseEntries);
-
-    $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
-
-    $getTextEditUser = _("Edit");
-    $fileListLinks .= "[<a href='#' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
-
-    if($isContainer)
-    {
-      $getTextEditBulk = _("Bulk");
-      $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
-    }
-
-    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
-        , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
-
-    $filesToBeCleared = array_key_exists($childItemTreeBounds->getItemId()
-        , $this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getItemId()] : 0;
-
-    $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;
-
-    $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
-
-    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   }
 
 
@@ -488,9 +300,9 @@ class ui_browse_license extends DefaultPlugin
    * @param array $vars
    * @return string
    */
-  public function renderString($templateName, $vars = null)
+  public function renderString($templateName, $vars)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+    return $this->renderer->loadTemplate($templateName)->render($vars);
   }  
 }
 
