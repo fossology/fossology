@@ -150,18 +150,24 @@ class AjaxExplorer extends DefaultPlugin
     foreach(explode(' ',GetParm('sSearch', PARM_RAW)) as $pair)
     {
       $a = explode(':',$pair);
-      if(count($a)==1)
-        $searchMap['any'] = $pair;
-      else
+      if (count($a) == 1) {
+        $searchMap['head'] = $pair;
+      }
+      else {
         $searchMap[$a[0]] = $a[1];
+      }
     }
     
     if(array_key_exists('ext', $searchMap) && strlen($searchMap['ext'])>=1)
     {
-      $dbM = $this->getObject('db.manager');
-      $dbD = $dbM->getDriver();
-      $ext = $dbD->escapeString($searchMap['ext']);
+      $ext = $this->getObject('db.manager')->getDriver()->escapeString($searchMap['ext']);
       $conditionalAdd .= " AND ufile_name ilike '%.$ext'";
+    }
+    
+    if(array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1)
+    {
+      $fany = $this->getObject('db.manager')->getDriver()->escapeString($searchMap['head']);
+      $conditionalAdd .= " AND ufile_name ilike '$fany%'";
     }
     
     if(array_key_exists('scan', $searchMap) && ($rfId=intval($searchMap['scan']))>0)
