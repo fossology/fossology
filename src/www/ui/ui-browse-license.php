@@ -286,7 +286,7 @@ class ui_browse_license extends DefaultPlugin
       {
         $rfId = $editedLics[$licenseShortName]['rf_pk'];
       }
-      $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName] : 0;
+      $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName]['count'] : 0;
 
       $totalScannerLicenseCount += $count;
       $editedTotalLicenseCount += $editedCount;

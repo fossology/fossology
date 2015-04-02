@@ -28,6 +28,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -108,10 +109,10 @@ class AjaxExplorer extends DefaultPlugin
 
     $UniqueTagArray = array();
     $this->licenseProjector = new LicenseMap($this->getObject('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
-    $vars =  $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
+    $vars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
     
     return new JsonResponse(array(
-            'sEcho' => intval($_GET['sEcho']),
+            'sEcho' => intval($request->get('sEcho')),
             'aaData' => $vars['fileData'],
             'iTotalRecords' => intval($request->get('totalRecords')),
             'iTotalDisplayRecords' => $vars['iTotalDisplayRecords']
@@ -181,9 +182,36 @@ class AjaxExplorer extends DefaultPlugin
       else
       {
         $conditionalAdd .= " AND EXISTS(SELECT * FROM license_file,".$itemTreeBounds->getUploadTreeTableName()." usub"
-                . " WHERE agent_fk=ANY('$agentIdSet') AND rf_fk=$rfId AND usub.pfile_fk=license_file.pfile_fk AND (usub.lft BETWEEN u.lft AND u.rgt))";
+                . " WHERE agent_fk=ANY('$agentIdSet') AND rf_fk=$rfId AND usub.pfile_fk=license_file.pfile_fk"
+                . " AND (usub.lft BETWEEN u.lft AND u.rgt) AND upload_fk=".$itemTreeBounds->getUploadId().")";
       }
     }
+    
+    
+    
+    if(array_key_exists('con', $searchMap) && ($rfId=intval($searchMap['con']))>0)
+    {
+      $groupId = Auth::getGroupId();
+      $wip = DecisionTypes::WIP;
+      if($isFlat)
+      {
+        $conditionalAdd .= " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
+                . " WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=u.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+                . " AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
+                . " AND cd.decision_type!=$wip ORDER BY cd.date_added DESC)";
+      }
+      else
+      {
+        $conditionalAdd .= " AND EXISTS(SELECT * FROM ".$itemTreeBounds->getUploadTreeTableName()." usub"
+                . " WHERE (usub.lft BETWEEN u.lft AND u.rgt) AND upload_fk=".$itemTreeBounds->getUploadId()
+                . " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
+                . "   WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+                . "   AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
+                . "   AND cd.decision_type!=$wip ORDER BY cd.date_added DESC)"
+                . ")";
+      }
+    }
+    
 
     $nonArtifactDescantants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd,'count(*)');
     $vars['iTotalDisplayRecords'] = $nonArtifactDescantants[0]['count'];
@@ -194,11 +222,13 @@ class AjaxExplorer extends DefaultPlugin
     
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
-    if($offset)
+    if ($offset) {
       $orderString .= " OFFSET $offset";
-    if($limit)
+    }
+    if ($limit) {
       $orderString .= " LIMIT $limit";
-    
+    }
+
     /* Get ALL the items under this Uploadtree_pk */
     $descendants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, "$conditionalAdd $orderString");
     
@@ -342,7 +372,7 @@ class AjaxExplorer extends DefaultPlugin
       $fileName = "<a href='$LinkUri'>$fileName</a>";
     }
     /* show licenses under file name */
-    $childItemTreeBounds = // $this->uploadDao->getFileTreeBounds($childUploadTreeId, $this->uploadtree_tablename);
+    $childItemTreeBounds = 
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
