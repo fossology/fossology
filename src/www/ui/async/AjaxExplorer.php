@@ -66,9 +66,6 @@ class AjaxExplorer extends DefaultPlugin
   /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
   
-  protected $vars = array();
-
-  
   public function __construct() {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: License Browser"),
@@ -403,9 +400,9 @@ class AjaxExplorer extends DefaultPlugin
    * @param array $vars
    * @return string
    */
-  public function renderString($templateName, $vars = null)
+  public function renderString($templateName, $vars)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+    return $this->renderer->loadTemplate($templateName)->render($vars);
   }  
 }
 
