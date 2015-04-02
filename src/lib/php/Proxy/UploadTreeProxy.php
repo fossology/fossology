@@ -27,11 +27,15 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SKIP_THESE = 'skipThese';
   const OPT_ITEM_FILTER = 'ut.filter';
   const OPT_GROUP_ID = 'groupId';
+  const OPT_REALPARENT = 'realParent';
+  const OPT_RANGE = 'lft,rgt';
 
   /** @var string */
   private $uploadTreeTableName;
   /** @var int */
   private $uploadId;
+  /** @var array */
+  private $params = array();
 
   /**
    * @param int $uploadId
@@ -66,10 +70,26 @@ class UploadTreeProxy extends DbViewProxy
     {
       return self::getDefaultUploadTreeView($this->uploadId, $uploadTreeTableName);
     }
-    else
+
+    $filter = ''; // 'ut.upload_fk='.$this->addParamAndGetExpr('uploadId',$this->uploadId);
+    
+    if (array_key_exists(self::OPT_REALPARENT, $options))
     {
-      return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
+      $filter .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent=".$this->addParamAndGetExpr('realParent',$options[self::OPT_REALPARENT]);
+    } 
+    elseif (array_key_exists(self::OPT_RANGE,$options))
+    {
+      $itemBounds = $options[self::OPT_RANGE];
+      $filter .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN ".$this->addParamAndGetExpr('lft',$itemBounds->getLeft()).
+             " AND ".$this->addParamAndGetExpr('rgt',$itemBounds->getRight()).")";
     }
+    
+  
+    if (array_key_exists(self::OPT_ITEM_FILTER, $options)) {
+      $filter .= ' '.$options[self::OPT_ITEM_FILTER];
+    }
+    $options[self::OPT_ITEM_FILTER] = $filter;
+    return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
   }
 
   /**
@@ -171,15 +191,28 @@ class UploadTreeProxy extends DbViewProxy
   /**
    * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
    * @param int $parent
+   * @deprecated
    * @return array
    */
   public function countMaskedNonArtifactChildren($parent)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $params = $this->params;
+    if(array_key_exists('uploadId', $params))
+    {
+      $uploadExpr = '$'.(1+array_search('uploadId', array_keys($params)));
+    }
+    else
+    {
+      $params[] = $this->uploadId;
+      $uploadExpr = '$'.count($params);
+    }
+    $params[] = $parent;
+    $parentExpr = '$'.count($params);
+
     $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
-            . $this->getDbViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
+            . $this->getDbViewName() ." v where u.upload_fk=$uploadExpr"
+            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent=$parentExpr GROUP BY u.uploadtree_pk, u.ufile_mode";
     $stmt = __METHOD__.'.'.$this->getDbViewName();
     if(!$this->materialized)
     {
@@ -187,7 +220,7 @@ class UploadTreeProxy extends DbViewProxy
       $stmt .= '.cte';
     }
     $dbManager->prepare($stmt,$sql);
-    $res = $dbManager->execute($stmt,array($this->uploadId,$parent));
+    $res = $dbManager->execute($stmt,$params);
     $children = array();
     $artifactContainers = array();
     while($row=$dbManager->fetchArray($res))
@@ -215,10 +248,12 @@ class UploadTreeProxy extends DbViewProxy
    */
   public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
+    $uploadExpr = '$'.(count($this->params)+1);
+    $lftExpr = '$'.(count($this->params)+2);
+    $rgtExpr = '$'.(count($this->params)+3);
+    $dbManager = $GLOBALS['container']->get('db.manager');
     $sql = "SELECT u.uploadtree_pk FROM ".$this->getDbViewName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
+         . "WHERE u.upload_fk=$uploadExpr AND (u.lft BETWEEN $lftExpr AND $rgtExpr) AND u.ufile_mode & (3<<28) = 0";
     $stmt = __METHOD__.'.'.$this->getDbViewName();
     if(!$this->materialized)
     {
@@ -226,7 +261,8 @@ class UploadTreeProxy extends DbViewProxy
       $stmt .= '.cte';
     }
     $dbManager->prepare($stmt,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $params = array_merge($this->params,
+            array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight()));
     $res = $dbManager->execute($stmt,$params);
     $descendants = array();
     while($row = $dbManager->fetchArray($res))
@@ -252,8 +288,18 @@ class UploadTreeProxy extends DbViewProxy
     {
       $sql = "SELECT count(*) FROM ($this->dbViewQuery) $this->dbViewName";
     }
-    $summary = $dbManager->getSingleRow($sql,array(),$this->dbViewName);
+    $summary = $dbManager->getSingleRow($sql,$this->params,$this->dbViewName);
     return $summary['count'];
+  }
+  
+  private function addParamAndGetExpr($key,$value)
+  {
+    if (array_key_exists($key, $this->params)) {
+      return '$' . (1 + array_search($key, array_keys($this->params)));
+    }
+
+    $this->params[] = $value;
+    return '$'.count($this->params);
   }
   
 }

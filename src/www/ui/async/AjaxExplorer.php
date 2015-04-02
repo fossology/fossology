@@ -144,7 +144,17 @@ class AjaxExplorer extends DefaultPlugin
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $isFlat = isset($_GET['flatten']);
-    
+
+    if ($isFlat)
+    {
+      $options = array(UploadTreeProxy::OPT_RANGE => $itemTreeBounds);
+    }
+    else
+    {
+      $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getUploadId());
+    }
+
+
     $conditionalAdd = '';
     
     $searchMap = array();
@@ -178,7 +188,7 @@ class AjaxExplorer extends DefaultPlugin
       {
         $conditionalAdd .= " AND EXISTS(SELECT * FROM license_file"
                 . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
-                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND u.pfile_fk=license_file.pfile_fk)";
+                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND ut.pfile_fk=license_file.pfile_fk)";
       }
       else
       {
@@ -186,7 +196,7 @@ class AjaxExplorer extends DefaultPlugin
                 . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
                 . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) "
                 . " AND usub.pfile_fk=license_file.pfile_fk"
-                . " AND (usub.lft BETWEEN u.lft AND u.rgt) AND upload_fk=".$itemTreeBounds->getUploadId().")";
+                . " AND (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$itemTreeBounds->getUploadId().")";
       }
     }
     
@@ -199,14 +209,14 @@ class AjaxExplorer extends DefaultPlugin
       if($isFlat)
       {
         $conditionalAdd .= " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
-                . " WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=u.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+                . " WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=ut.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
                 . " AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
                 . " AND cd.decision_type!=$wip ORDER BY cd.date_added DESC)";
       }
       else
       {
         $conditionalAdd .= " AND EXISTS(SELECT * FROM ".$itemTreeBounds->getUploadTreeTableName()." usub"
-                . " WHERE (usub.lft BETWEEN u.lft AND u.rgt) AND upload_fk=".$itemTreeBounds->getUploadId()
+                . " WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$itemTreeBounds->getUploadId()
                 . " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
                 . "   WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
                 . "   AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
@@ -215,9 +225,14 @@ class AjaxExplorer extends DefaultPlugin
       }
     }
     
-
-    $nonArtifactDescantants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd,'count(*)');
-    $vars['iTotalDisplayRecords'] = $nonArtifactDescantants[0]['count'];
+    $options[UploadTreeProxy::OPT_ITEM_FILTER] = $conditionalAdd;
+    
+    $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
+    
+    
+    //$nonArtifactDescantants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd,'count(*)');
+    //$vars['iTotalDisplayRecords'] = $nonArtifactDescantants[0]['count'];
+    $vars['iTotalDisplayRecords'] = $descendantView->count();
     
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
     $defaultOrder = array(array(0, "asc"));

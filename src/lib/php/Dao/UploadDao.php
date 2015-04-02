@@ -417,23 +417,23 @@ class UploadDao extends Object
    * @param ItemTreeBounds $itemTreeBounds
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $includeSubFolders=true, $queryInjection='', $selection='u.*')
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $includeSubFolders=true, $queryInjection='')
   {
     $stmt=__METHOD__;
-    $sql = "SELECT $selection FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
-         . "WHERE u.upload_fk=$1";
+    $sql = "SELECT ut.* FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
+         . "WHERE ut.upload_fk=$1";
     $params = array($itemTreeBounds->getUploadId());
     if (!$includeSubFolders)
     {
       $stmt = __METHOD__.'.parent';
       $params[] = $itemTreeBounds->getItemId();
-      $sql .= " AND u.ufile_mode & (1<<28) = 0 AND u.realparent = $2";
+      $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
     }
     else
     {
       $params[] = $itemTreeBounds->getLeft();
       $params[] = $itemTreeBounds->getRight();
-      $sql .= " AND u.ufile_mode & (3<<28) = 0 AND (u.lft BETWEEN $2 AND $3)";
+      $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
     }
     $stmt .= $queryInjection;
     $sql .= $queryInjection;
