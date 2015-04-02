@@ -361,8 +361,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
             
-    $map = $this->clearingDao->getClearedLicenseMultiplicities($treeBounds, $groupId);
-    assertThat($map, is(array('FOO'=>2)));
+    $map = $this->clearingDao->getClearedLicenseIdAndMultiplicities($treeBounds, $groupId);
+    assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','rf_pk'=>401))));
   }
   
   public function testGetClearedLicenses()

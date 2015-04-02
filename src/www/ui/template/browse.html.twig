@@ -13,29 +13,25 @@
   {% include 'bulk-history.html.twig' %}
   </div>
 
-  <table border="1" style="padding:2px; width:100%">
+  <table border="0" style="padding:2px; width:100%">
     <tr>
       <td style="vertical-align:top; height:100%; width:25%">
   
-  {% if not(agentMap is empty) %}
-    <table border="0" class="semibordered" id="lichistogram"></table>
-    <br/><br/>
-    {{ "Hint"|trans }}:
-    {{ 'Click on the license name to search for where the license is found in the file listing.'|trans}}
-    <br/><br/>
-    {% include 'browse_license-summary.html.twig' %}
-  {% endif %}
-  {% include 'browse_license-agent_selector.html.twig' %}
-  
-  
-  <button onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
-  <br/>
-  <span id="bulkIdResult" hidden></span>
-  
-  
+      {% if not(agentMap is empty) %}
+        <table border="0" class="semibordered" id="lichistogram"></table>
+        <br/><br/>
+        {{ "Hint"|trans }}:
+        {{ 'Click on the license name to search for where the license is found in the file listing.'|trans}}
+        <br/><br/>
+        {% include 'browse_license-summary.html.twig' %}
+      {% endif %}
+      {% include 'browse_license-agent_selector.html.twig' %}
+
+        <button onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
+        <br/>
+        <span id="bulkIdResult" hidden></span>
       </td>
       <td style="vertical-align:top; height:100%; width:75%">
-
         <table border="0" id="dirlist" style="margin-left:9px;" class="semibordered"></table>
   
         {{ parent() }}

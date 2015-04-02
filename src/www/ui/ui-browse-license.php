@@ -220,7 +220,7 @@ class ui_browse_license extends DefaultPlugin
   {
     $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
     $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
-    $editedLicensesHist = $this->clearingDao->getClearedLicenseMultiplicities($itemTreeBounds, $groupId);
+    $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
 
     $agentId = GetParm('agentId', PARM_INTEGER);
     $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
@@ -280,6 +280,11 @@ class ui_browse_license extends DefaultPlugin
       if (array_key_exists($licenseShortName, $scannerLics))
       {
         $count = $scannerLics[$licenseShortName]['unique'];
+        $rfId = $scannerLics[$licenseShortName]['rf_pk'];
+      }
+      else
+      {
+        $rfId = $editedLics[$licenseShortName]['rf_pk'];
       }
       $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName] : 0;
 
@@ -289,7 +294,7 @@ class ui_browse_license extends DefaultPlugin
       $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" . urlencode($licenseShortName) . "'>$count</a>": "0";
       $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
-      $tableData[] = array($scannerCountLink, $editedLink, $licenseShortName);
+      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId));
     }
 
     return array($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount);
