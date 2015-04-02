@@ -140,8 +140,6 @@ class AjaxExplorer extends DefaultPlugin
       $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
     
-    
-    
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $isFlat = isset($_GET['flatten']);
@@ -181,7 +179,8 @@ class AjaxExplorer extends DefaultPlugin
       }
     }
 
-    $vars['iTotalDisplayRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd));
+    $nonArtifactDescantants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd,'count(*)');
+    $vars['iTotalDisplayRecords'] = $nonArtifactDescantants[0]['count'];
     
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
     $defaultOrder = array(array(0, "asc"));
