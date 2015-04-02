@@ -177,12 +177,15 @@ class AjaxExplorer extends DefaultPlugin
       if($isFlat)
       {
         $conditionalAdd .= " AND EXISTS(SELECT * FROM license_file"
-                . " WHERE agent_fk=ANY('$agentIdSet') AND rf_fk=$rfId AND u.pfile_fk=license_file.pfile_fk)";
+                . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
+                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND u.pfile_fk=license_file.pfile_fk)";
       }
       else
       {
-        $conditionalAdd .= " AND EXISTS(SELECT * FROM license_file,".$itemTreeBounds->getUploadTreeTableName()." usub"
-                . " WHERE agent_fk=ANY('$agentIdSet') AND rf_fk=$rfId AND usub.pfile_fk=license_file.pfile_fk"
+        $conditionalAdd .= " AND EXISTS(SELECT * FROM ".$itemTreeBounds->getUploadTreeTableName()." usub, license_file"
+                . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
+                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) "
+                . " AND usub.pfile_fk=license_file.pfile_fk"
                 . " AND (usub.lft BETWEEN u.lft AND u.rgt) AND upload_fk=".$itemTreeBounds->getUploadId().")";
       }
     }
