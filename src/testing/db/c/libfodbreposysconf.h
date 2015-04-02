@@ -1,5 +1,6 @@
 /* **************************************************************
  Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,15 +19,17 @@
 #define LIBFOCUNIT_H
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <libfossdbmanager.h>
 
 #define ARRAY_LENGTH 256
 
 int create_db_repo_sysconf(int type, char *agent_name);
 
 void drop_db_repo_sysconf(char *DBName);
+
+fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent);
+
+void dropTestEnvironment(fo_dbManager* dbManager, char* srcDir);
 
 char *get_sysconfdir();
 

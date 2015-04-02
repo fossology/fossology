@@ -38,7 +38,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   private $dbManager;
   /** @var TestInstaller */
   private $testInstaller;
-  
+
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -58,6 +58,8 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+
+    $this->agentDir = dirname(dirname(__DIR__));
   }
 
   public function tearDown()
@@ -74,12 +76,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $sysConf = $this->testDb->getFossSysConf();
 
     $agentName = "monk";
-
-    $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
-    $instRet = 0;
-    system($install="install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION", $instRet);
-    $this->assertEquals(0, $instRet, 'copying version file failed '.$install);
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
@@ -90,10 +87,6 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     }
     $retCode = pclose($pipeFd);
 
-    unlink("$sysConf/mods-enabled/$agentName/VERSION");
-    rmdir("$sysConf/mods-enabled/$agentName");
-    rmdir("$sysConf/mods-enabled");
-
     return array($output,$retCode);
   }
 
@@ -101,11 +94,15 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
+    $this->testInstaller->install($this->agentDir);
   }
 
   private function rmRepo()
   {
+    $this->testInstaller->uninstall($this->agentDir);
+    $this->testInstaller->clear();
     $this->testInstaller->rmRepo();
   }
 

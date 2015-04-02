@@ -80,7 +80,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     global $container;
     $container = M::mock('ContainerBuilder');
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
-    
+
     $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
@@ -99,12 +99,14 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()

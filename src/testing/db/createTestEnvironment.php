@@ -18,9 +18,22 @@
  */
 
 require_once(__DIR__ . "/TestDbFactory.php");
+require_once(dirname(dirname(__DIR__)) . "/lib/php/Test/TestInstaller.php");
+
 $testDbFactory = new TestDbFactory();
 
 $sysConfDir = $testDbFactory->setupTestDb("fosstest" . time());
+
+$testInstaller = new Fossology\Lib\Test\TestInstaller($sysConfDir);
+$testInstaller->init();
+
+$opts = getopt("d:", array());
+if (array_key_exists("d", $opts)) {
+  $srcDir = $opts["d"];
+  foreach (explode(",", $srcDir) as $dir) {
+    $testInstaller->install($dir);
+  }
+}
 
 print $sysConfDir;
 

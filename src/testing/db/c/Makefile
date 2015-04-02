@@ -15,7 +15,7 @@ $(LIB): $(OBJS) $(VARS)
 
 
 $(OBJS): %.o: %.c %.h
-	$(CC) -c $<
+	$(CC) -D'TESTDBDIR="$(shell pwd)/../"' $(ALL_CFLAGS) -c $<
 
 clean:
 	@echo "make $(LIB) clean"

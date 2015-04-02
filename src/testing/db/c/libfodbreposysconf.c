@@ -1,5 +1,6 @@
 /* **************************************************************
  Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,31 +21,101 @@
  *        you can create/drop a DB/sysconfig/repo
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <libfossscheduler.h>
+#include <libfossdb.h>
 #include "libfodbreposysconf.h"
 
-static char *Sysconf = NULL;
+#ifndef TESTDBDIR
+// this is only to make IDEs happy
+#define TESTDBDIR "../../../testing/db/"
+#error
+#endif
+
+static char* Sysconf = NULL;
 static char DBName[ARRAY_LENGTH];
 static char DBConf[ARRAY_LENGTH];
 static char RepoDir[ARRAY_LENGTH];
+
+fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent) {
+  char buffer[ARRAY_LENGTH + 1];
+  snprintf(buffer, ARRAY_LENGTH, TESTDBDIR "/createTestEnvironment.php -d '%s'", srcDirs);
+  FILE* pipe = popen(buffer, "r");
+
+  if (!pipe) {
+    printf("cannot run create test environment script: %s\n", buffer);
+    return NULL;
+  }
+
+  Sysconf = calloc(1, ARRAY_LENGTH + 1);
+  size_t count = fread(Sysconf, 1, ARRAY_LENGTH, pipe);
+
+  int rv = fclose(pipe);
+
+  if (rv != 0 || count == 0) {
+    printf("command %s failed with output:\n%s\n", buffer, Sysconf);
+    return NULL;
+  }
+
+  fo_dbManager* result = NULL;
+  if (doConnectAsAgent) {
+    char* argv[] = {doConnectAsAgent, "-c", Sysconf};
+    int argc = 3;
+    
+    fo_scheduler_connect_dbMan(&argc, argv, &result);
+  } else {
+    snprintf(buffer, ARRAY_LENGTH, "%s/Db.conf", Sysconf);
+    char* errorMsg = NULL;
+    PGconn* conn = fo_dbconnect(buffer, &errorMsg);
+
+    if (!errorMsg) {
+      result = fo_dbManager_new_withConf(conn, buffer);
+    } else {
+      printf("error connecting: %s\n", errorMsg);
+    }
+  }
+  return result;
+}
+
+void dropTestEnvironment(fo_dbManager* dbManager, char* srcDir) {
+  if (dbManager) {
+    fo_dbManager_finish(dbManager);
+  }
+
+  if (Sysconf) {
+    char buffer[ARRAY_LENGTH];
+    snprintf(buffer, ARRAY_LENGTH, TESTDBDIR "/purgeTestEnvironment.php -d '%s' -c '%s'", srcDir, Sysconf);
+    FILE* pipe = popen(buffer, "r");
+
+    if (!pipe) {
+      printf("cannot run purge test environment script: %s\n", buffer);
+      return;
+    }
+
+    fclose(pipe);
+    free(Sysconf);
+  }
+}
 
 /**
  * \brief get command output
  * 
  * \param char *command - the command will be executed
  */
-static void command_output(char *command)
-{
-  FILE *stream;
+static void command_output(char* command) {
+  FILE* stream;
   char tmp[ARRAY_LENGTH];
-  int i=0;
+  int i = 0;
   int status = 0;
 
   stream = popen(command, "r");
   if (!stream) status = 1;
   memset(tmp, '\0', sizeof(tmp));
-  if (fgets(tmp, ARRAY_LENGTH, stream) != NULL)
-  {
-    while((tmp[i] != '\n') && (tmp[i] != ' ') && (tmp[i] != EOF))
+  if (fgets(tmp, ARRAY_LENGTH, stream) != NULL) {
+    while ((tmp[i] != '\n') && (tmp[i] != ' ') && (tmp[i] != EOF))
       i++;
     Sysconf = malloc(i);
     memcpy(Sysconf, tmp, i);
@@ -52,12 +123,11 @@ static void command_output(char *command)
   }
   int rc = pclose(stream);
   if (rc != 0) status = 1;
-  if (status == 1) 
-  {
-    printf("Failed to run %s, exit code is:%d .\n", command, rc>>8);
+  if (status == 1) {
+    printf("Failed to run %s, exit code is:%d .\n", command, rc >> 8);
     exit(1);
   }
-  return ;
+  return;
 }
 
 /** 
@@ -68,8 +138,7 @@ static void command_output(char *command)
  *
  * \return 0 on sucess, other on failure
  */
-int create_db_repo_sysconf(int type, char *agent_name)
-{
+int create_db_repo_sysconf(int type, char* agent_name) {
 #if 0
   char *sysconfdir;
   /** get sysconfig dir from ENV */
@@ -81,19 +150,18 @@ int create_db_repo_sysconf(int type, char *agent_name)
   }
 #endif
   char CMD[ARRAY_LENGTH] = "../../../testing/db/createTestDB.php";
-  if (1 == type)
-  {
+  if (1 == type) {
     command_output(CMD);
   }
-  else if (0 == type)
-  {
+  else if (0 == type) {
     sprintf(CMD, "%s -e", CMD);
     command_output(CMD);
   }
   int argc = 3;
   char* argv[] = {agent_name, "-c", Sysconf};
-  
-  fo_scheduler_connect(&argc, argv);
+
+  PGconn* unused;
+  fo_scheduler_connect(&argc, argv, &unused);
 
 #ifdef TEST
   printf("create_db_repo_sysconf sucessfully\n");
@@ -106,8 +174,7 @@ int create_db_repo_sysconf(int type, char *agent_name)
  * 
  * \param char *DBName - the db name, looks like fosstestxxxx
  */
-void drop_db_repo_sysconf(char *DBName)
-{
+void drop_db_repo_sysconf(char* DBName) {
   char CMD[ARRAY_LENGTH];
   memset(CMD, '\0', sizeof(CMD));
   sprintf(CMD, "../../../testing/db/createTestDB.php -d %s", DBName);
@@ -128,9 +195,8 @@ void drop_db_repo_sysconf(char *DBName)
  *
  * \return the test name
  */
-char *get_test_name()
-{
-  char *TestName = strstr(Sysconf, "Conf") + 4;
+char* get_test_name() {
+  char* TestName = strstr(Sysconf, "Conf") + 4;
 #ifdef TEST
   printf("TestName is:%s\n", TestName);
 #endif
@@ -142,10 +208,9 @@ char *get_test_name()
  *
  * \return the DB name
  */
-char *get_db_name()
-{
+char* get_db_name() {
   memset(DBName, '\0', sizeof(DBName));
-  char *TestName = get_test_name();
+  char* TestName = get_test_name();
   sprintf(DBName, "fosstest%s", TestName);
 #ifdef TEST
   printf("DBName is:%s\n", DBName);
@@ -158,8 +223,7 @@ char *get_db_name()
  *
  * \return the sysconfig dir path 
  */
-char *get_sysconfdir()
-{
+char* get_sysconfdir() {
 #ifdef TEST
   printf("Sysconf is:%s\n", Sysconf);
 #endif
@@ -171,8 +235,7 @@ char *get_sysconfdir()
  *
  * \return Db.conf path
  */
-char *get_dbconf()
-{
+char* get_dbconf() {
   memset(DBConf, '\0', sizeof(DBConf));
   sprintf(DBConf, "%s/Db.conf", Sysconf);
   return DBConf;
@@ -183,13 +246,12 @@ char *get_dbconf()
  *
  * \return repo path
  */
-char *get_repodir()
-{
+char* get_repodir() {
   memset(RepoDir, '\0', sizeof(RepoDir));
   strcpy(RepoDir, Sysconf);
-  char *test_name_tmp = strstr(RepoDir, "testDbConf");
+  char* test_name_tmp = strstr(RepoDir, "testDbConf");
   *test_name_tmp = 0;
-  sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name()); 
+  sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name());
 #ifdef TEST
   printf("RepoDir is:%s\n", RepoDir);
 #endif

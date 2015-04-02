@@ -98,12 +98,14 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()
