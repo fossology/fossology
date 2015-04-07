@@ -71,7 +71,7 @@ class TestInstaller
 
   public function install($srcDir) {
     $sysConfDir = $this->sysConf;
-    exec("make MODDIR= DESTDIR=$sysConfDir SYSCONFDIR= -C $srcDir install", $unused, $rt);
+    exec("make MODDIR=$sysConfDir DESTDIR= SYSCONFDIR=$sysConfDir -C $srcDir install", $unused, $rt);
     return ($rt != 0);
   }
 

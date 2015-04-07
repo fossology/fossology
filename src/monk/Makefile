@@ -42,7 +42,7 @@ $(MOD_NAME:%=install-%):
 	$(INSTALL_DATA) $(NAME).conf $(DESTDIR)$(MODDIR)/$(NAME)/$(NAME).conf
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
 	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME); then \
-		ln -s $(DESTDIR)$(MODDIR)/$(NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+		ln -s $(MODDIR)/$(NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
 	fi
 
 uninstall: $(MOD_NAME:%=uninstall-%)
