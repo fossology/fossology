@@ -201,7 +201,7 @@ class ui_browse_license extends DefaultPlugin
   {
     $isFlat = isset($_GET['flatten']);
     $vars['isFlat'] = $isFlat;
-    $vars['iTotalRecords'] = count($this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat));
+    $vars['iTotalRecords'] = $this->uploadDao->countNonArtifactDescendants($itemTreeBounds, $isFlat);
     $uri = Traceback_uri().'?mod='.$this->Name.Traceback_parm_keep(array('upload','folder','show','item'));
     $vars['fileSwitch'] = $isFlat ? $uri : $uri."&flatten=yes";
     return $vars;

@@ -418,10 +418,10 @@ class UploadDao extends Object
    * @param bool $isFlat plain files from sub*folders instead of folders
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
+  public function countNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
   {
     $stmt=__METHOD__;
-    $sql = "SELECT ut.* FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
+    $sql = "SELECT count(*) FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
          . "WHERE ut.upload_fk=$1";
     $params = array($itemTreeBounds->getUploadId());
     if (!$isFlat)
@@ -437,11 +437,8 @@ class UploadDao extends Object
       $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
     }
     
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,$params);
-    $descendants = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    return $descendants;
+    $descendants = $this->dbManager->getSingleRow($sql,$params);
+    return $descendants['count'];
   }
   
   
