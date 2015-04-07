@@ -415,15 +415,16 @@ class UploadDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param bool $isFlat plain files from sub*folders instead of folders
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $includeSubFolders=true, $queryInjection='')
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
   {
     $stmt=__METHOD__;
     $sql = "SELECT ut.* FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
          . "WHERE ut.upload_fk=$1";
     $params = array($itemTreeBounds->getUploadId());
-    if (!$includeSubFolders)
+    if (!$isFlat)
     {
       $stmt = __METHOD__.'.parent';
       $params[] = $itemTreeBounds->getItemId();
@@ -435,8 +436,6 @@ class UploadDao extends Object
       $params[] = $itemTreeBounds->getRight();
       $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
     }
-    $stmt .= $queryInjection;
-    $sql .= $queryInjection;
     
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,$params);

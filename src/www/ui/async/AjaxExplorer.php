@@ -151,11 +151,8 @@ class AjaxExplorer extends DefaultPlugin
     }
     else
     {
-      $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getUploadId());
+      $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getItemId());
     }
-
-
-    $conditionalAdd = '';
     
     $searchMap = array();
     foreach(explode(' ',GetParm('sSearch', PARM_RAW)) as $pair)
@@ -171,67 +168,31 @@ class AjaxExplorer extends DefaultPlugin
     
     if(array_key_exists('ext', $searchMap) && strlen($searchMap['ext'])>=1)
     {
-      $ext = $this->getObject('db.manager')->getDriver()->escapeString($searchMap['ext']);
-      $conditionalAdd .= " AND ufile_name ilike '%.$ext'";
+      $options[UploadTreeProxy::OPT_EXT] = $searchMap['ext'];
     }
-    
     if(array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1)
     {
-      $fany = $this->getObject('db.manager')->getDriver()->escapeString($searchMap['head']);
-      $conditionalAdd .= " AND ufile_name ilike '$fany%'";
+      $options[UploadTreeProxy::OPT_HEAD] = $searchMap['head'];
     }
-    
     if(array_key_exists('scan', $searchMap) && ($rfId=intval($searchMap['scan']))>0)
     {
-      $agentIdSet = '{'.implode(',', array_values($selectedScanners)).'}';
-      if($isFlat)
-      {
-        $conditionalAdd .= " AND EXISTS(SELECT * FROM license_file"
-                . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
-                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND ut.pfile_fk=license_file.pfile_fk)";
-      }
-      else
-      {
-        $conditionalAdd .= " AND EXISTS(SELECT * FROM ".$itemTreeBounds->getUploadTreeTableName()." usub, license_file"
-                . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
-                . " WHERE agent_fk=ANY('$agentIdSet') AND (license_file.rf_fk=$rfId OR rf_parent=$rfId) "
-                . " AND usub.pfile_fk=license_file.pfile_fk"
-                . " AND (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$itemTreeBounds->getUploadId().")";
-      }
+      $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
+      $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
     }
-    
-    
-    
     if(array_key_exists('con', $searchMap) && ($rfId=intval($searchMap['con']))>0)
     {
-      $groupId = Auth::getGroupId();
-      $wip = DecisionTypes::WIP;
-      if($isFlat)
-      {
-        $conditionalAdd .= " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
-                . " WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=ut.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
-                . " AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
-                . " AND cd.decision_type!=$wip ORDER BY cd.date_added DESC)";
-      }
-      else
-      {
-        $conditionalAdd .= " AND EXISTS(SELECT * FROM ".$itemTreeBounds->getUploadTreeTableName()." usub"
-                . " WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$itemTreeBounds->getUploadId()
-                . " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
-                . "   WHERE cd.group_fk=$groupId AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
-                . "   AND clearing_event_fk=clearing_event_pk AND rf_fk=$rfId "
-                . "   AND cd.decision_type!=$wip ORDER BY cd.date_added DESC)"
-                . ")";
-      }
+      $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
+      $options[UploadTreeProxy::OPT_CONCLUDE_REF] = $rfId;
+    }
+    if(array_key_exists('open', $searchMap))
+    {
+      $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
+      $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
+      $options[UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED] = true;
     }
     
-    $options[UploadTreeProxy::OPT_ITEM_FILTER] = $conditionalAdd;
-    
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
-    
-    
-    //$nonArtifactDescantants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, $conditionalAdd,'count(*)');
-    //$vars['iTotalDisplayRecords'] = $nonArtifactDescantants[0]['count'];
+
     $vars['iTotalDisplayRecords'] = $descendantView->count();
     
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
@@ -247,8 +208,14 @@ class AjaxExplorer extends DefaultPlugin
       $orderString .= " LIMIT $limit";
     }
 
-    /* Get ALL the items under this Uploadtree_pk */
-    $descendants = $this->uploadDao->getNonArtifactDescendants($itemTreeBounds, $isFlat, "$conditionalAdd $orderString");
+    /* Get ALL the items under this Uploadtree_pk */ 
+    $sql = $descendantView->getDbViewQuery()." $orderString";
+    $dbManager = $GLOBALS['container']->get('db.manager');
+            
+    $dbManager->prepare($stmt=__METHOD__.$orderString,$sql);
+    $res = $dbManager->execute($stmt,$descendantView->getParams());
+    $descendants = $dbManager->fetchAll($res);
+    $dbManager->freeResult($res);
     
     /* Filter out Children that don't have tag */
     if (!empty($tagId))
@@ -277,7 +244,7 @@ class AjaxExplorer extends DefaultPlugin
     }
 
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+        $options = array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
                          UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
                          UploadTreeProxy::OPT_GROUP_ID => $groupId),
         $itemTreeBounds->getUploadTreeTableName(),
