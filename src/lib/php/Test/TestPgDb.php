@@ -41,10 +41,14 @@ class TestPgDb
   /** @var array */
   private $sys_conf;
 
-  function __construct($dbName = null)
+  function __construct($dbName = null, $sysConf = null)
   {
     $testDbFactory = new \TestDbFactory();
-    $this->sys_conf = getenv('TSYSCONFDIR');
+    if (!empty($sysConf)) {
+      $this->sys_conf = getenv('TSYSCONFDIR');
+    } else {
+      $this->sys_conf = $sysConf;
+    }
     if(empty($this->sys_conf))
     {
       $this->sys_conf = $testDbFactory->setupTestDb($dbName);

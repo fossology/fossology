@@ -68,7 +68,7 @@ CU_SuiteInfo suites[] = {
 /* ************************************************************************** */
 
 int main(int argc, char** argv) {
-    dbManager = createTestEnvironment(AGENT_DIR, "monk");
+    dbManager = createTestEnvironment(AGENT_DIR, "monk", 0);
     const int returnValue = focunit_main(argc, argv, "monk_agent_Tests", suites);
     if (returnValue == 0) {
         dropTestEnvironment(dbManager, AGENT_DIR);

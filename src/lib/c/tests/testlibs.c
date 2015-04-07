@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   if (argc > 1) {
     dbConf = argv[1];
   } else {
-    dbManager = createTestEnvironment("..", NULL);
+    dbManager = createTestEnvironment("..", NULL, 0);
     dbConf = get_dbconf();
   }
 

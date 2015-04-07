@@ -39,15 +39,21 @@ static char* Sysconf = NULL;
 static char DBName[ARRAY_LENGTH];
 static char DBConf[ARRAY_LENGTH];
 static char RepoDir[ARRAY_LENGTH];
+static char confFile[ARRAY_LENGTH];
 
-fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent) {
-  char buffer[ARRAY_LENGTH + 1];
-  snprintf(buffer, ARRAY_LENGTH, TESTDBDIR "/createTestEnvironment.php -d '%s'", srcDirs);
-  FILE* pipe = popen(buffer, "r");
+fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent, int initDbTables) {
+  GString* gString = g_string_new(TESTDBDIR "/createTestEnvironment.php");
+  g_string_append_printf(gString, " -d '%s'", srcDirs);
+  if (initDbTables) {
+    g_string_append_printf(gString," -f");
+  }
+  gchar* cmd = g_string_free(gString, FALSE);
+
+  FILE* pipe = popen(cmd, "r");
 
   if (!pipe) {
-    printf("cannot run create test environment script: %s\n", buffer);
-    return NULL;
+    printf("cannot run create test environment script: %s\n", cmd);
+    goto createError;
   }
 
   Sysconf = calloc(1, ARRAY_LENGTH + 1);
@@ -56,9 +62,11 @@ fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent) {
   int rv = fclose(pipe);
 
   if (rv != 0 || count == 0) {
-    printf("command %s failed with output:\n%s\n", buffer, Sysconf);
-    return NULL;
+    printf("command %s failed with output:\n%s\n", cmd, Sysconf);
+    goto createError;
   }
+
+  g_free(cmd);
 
   fo_dbManager* result = NULL;
   if (doConnectAsAgent) {
@@ -67,6 +75,7 @@ fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent) {
     
     fo_scheduler_connect_dbMan(&argc, argv, &result);
   } else {
+    char buffer[ARRAY_LENGTH + 1];
     snprintf(buffer, ARRAY_LENGTH, "%s/Db.conf", Sysconf);
     char* errorMsg = NULL;
     PGconn* conn = fo_dbconnect(buffer, &errorMsg);
@@ -78,6 +87,12 @@ fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent) {
     }
   }
   return result;
+
+createError:
+  if (cmd) {
+    g_free(cmd);
+  }
+  return NULL;
 }
 
 void dropTestEnvironment(fo_dbManager* dbManager, char* srcDir) {
@@ -241,6 +256,11 @@ char* get_dbconf() {
   return DBConf;
 }
 
+char* get_confFile() {
+  memset(confFile, '\0', sizeof(confFile));
+  sprintf(confFile, "%s/fossology.conf", Sysconf);
+  return confFile;
+}
 /**
  * \brief get repo path just created by  create_db_repo_sysconf()
  *
