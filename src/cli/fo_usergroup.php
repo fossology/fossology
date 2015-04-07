@@ -25,7 +25,7 @@ require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 require_once("$MODDIR/lib/php/common-users.php");
 
-error_reporting(E_ALL); //E_NOTICE & E_STRICT);
+error_reporting(E_ALL);
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   --username  = admin/user with user-creation permissions

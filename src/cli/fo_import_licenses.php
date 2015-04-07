@@ -16,16 +16,13 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
 
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
 require_once("$MODDIR/lib/php/common-users.php");
 
-error_reporting(E_ALL); //E_NOTICE & E_STRICT);
+error_reporting(E_ALL);
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   --username  = admin/user with license-admin permissions

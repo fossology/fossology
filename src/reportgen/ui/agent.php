@@ -35,29 +35,19 @@ class ReportGenerator extends DefaultPlugin
 
   protected function handle(Request $request)
   {
-    $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-
     $uploadId = intval($request->get('upload'));
-    if ($uploadId <=0)
+    try
     {
-      return $this->flushContent(_("parameter error"));
+      $upload = $this->getUpload($uploadId, $groupId);
     }
-    /** @var UploadDao */
-    $uploadDao = $GLOBALS['container']->get('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, $groupId))
+    catch(Exception $e)
     {
-      return $this->flushContent(_("permission denied"));
-    }
-
-    /** @var Upload */
-    $upload = $uploadDao->getUpload($uploadId);
-    if ($upload === null)
-    {
-      return $this->flushContent(_('cannot find uploadId'));
+      return $this->flushContent($e->getMessage());
     }
     
     $reportGenAgent = plugin_find('agent_reportgen');
+    $userId = Auth::getUserId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
     $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
@@ -73,6 +63,27 @@ class ReportGenerator extends DefaultPlugin
     $text = sprintf(_("Generating new report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
     return $this->render("report.html.twig", $this->mergeWithDefault($vars));
+  }
+  
+  protected function getUpload($uploadId, $groupId)
+  {  
+    if ($uploadId <=0)
+    {
+      throw new Exception(_("parameter error"));
+    }
+    /** @var UploadDao */
+    $uploadDao = $this->getObject('dao.upload');
+    if (!$uploadDao->isAccessible($uploadId, $groupId))
+    {
+      throw new Exception(_("permission denied"));
+    }
+    /** @var Upload */
+    $upload = $uploadDao->getUpload($uploadId);
+    if ($upload === null)
+    {
+      throw new Exception(_('cannot find uploadId'));
+    }
+    return $upload;
   }
 
   function preInstall()

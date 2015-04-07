@@ -91,7 +91,7 @@ class ReuserAgentPlugin extends DefaultPlugin
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId);
     
-    $renderer = $GLOBALS['container']->get('twig.environment');
+    $renderer = $this->getObject('twig.environment');
     return $renderer->loadTemplate('agent_reuser.html.twig')->render($vars);
   }
   
@@ -101,7 +101,7 @@ class ReuserAgentPlugin extends DefaultPlugin
    */
   public function renderFoot(Request $request, &$vars)
   {
-    $renderer = $GLOBALS['container']->get('twig.environment');
+    $renderer = $this->getObject('twig.environment');
     $script = $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
     return "<script>$script</script>";
   }
@@ -209,8 +209,6 @@ class ReuserAgentPlugin extends DefaultPlugin
     }
     return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array());
   }
-
-
   
   /**
    * @param int $uploadId
@@ -220,7 +218,7 @@ class ReuserAgentPlugin extends DefaultPlugin
   protected function createPackageLink($uploadId, $reuseUploadId)
   {
     /** @var PackageDao */
-    $packageDao = $GLOBALS['container']->get('dao.package');
+    $packageDao = $this->getObject('dao.package');
     $newUpload = $this->uploadDao->getUpload($uploadId);
     $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
 
