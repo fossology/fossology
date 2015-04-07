@@ -33,7 +33,9 @@ $opts = getopt("d:f", array());
 if (array_key_exists("d", $opts)) {
   $srcDir = $opts["d"];
   foreach (explode(",", $srcDir) as $dir) {
-    $testInstaller->install($dir);
+    if (!empty($dir)) {
+      $testInstaller->install($dir);
+    }
   }
 }
 if (array_key_exists("f", $opts)) {
