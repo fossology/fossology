@@ -28,8 +28,19 @@ AGENTDIR = ../../agent/
 # UNLIKE MOST OTHER TESTS, these will be found in ../
 TEST_FILES = unpack-test-data.tar.bz2
 
-all:
-	$(MAKE) -C $(AGENTDIR) $@
+test: agent test-run
+
+coverage: agent-coverage test-run
+
+test-run: testdata fossology_testconfig
+	cd ..; tar -xf unpack-test-data.tar.bz2
+	phpunit --log-junit ununpack-Xunit.xml --configuration tests.xml
+
+agent:
+	$(MAKE) -C $(AGENTDIR)
+
+agent-coverage:
+	$(MAKE) -C $(AGENTDIR) coverage
 
 # target to retrieve remote test data if it doesn't already exist
 # make sure your /etc/wgetrc file is configured correctly!
@@ -50,13 +61,6 @@ testdata:
 			wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
 		fi; \
 	)
-
-test: all testdata fossology_testconfig
-	cd ..; tar -xf unpack-test-data.tar.bz2
-	phpunit --log-junit ununpack-Xunit.xml --configuration tests.xml
-
-coverage:
-	@echo "nothing to do"
 
 clean:
 	rm -rf ununpack-Xunit.xml ../unpack-test-data.tar.bz2 ../test-data
