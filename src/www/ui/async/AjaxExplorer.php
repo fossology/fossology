@@ -210,7 +210,7 @@ class AjaxExplorer extends DefaultPlugin
 
     /* Get ALL the items under this Uploadtree_pk */ 
     $sql = $descendantView->getDbViewQuery()." $orderString";
-    $dbManager = $GLOBALS['container']->get('db.manager');
+    $dbManager = $this->getObject('db.manager');
             
     $dbManager->prepare($stmt=__METHOD__.$orderString,$sql);
     $res = $dbManager->execute($stmt,$descendantView->getParams());
@@ -227,12 +227,21 @@ class AjaxExplorer extends DefaultPlugin
       $vars['fileData'] = array();
       return $vars;
     }
+    
+    if ($isFlat) {
+      $firstChild = reset($descendants);
+      $lastChild = end($descendants);
+      $nameRange = array($firstChild['ufile_name'],$lastChild['ufile_name']);
+    }
+    else {
+      $nameRange = array();
+    }
 
     /*******    File Listing     ************/
     $pfileLicenses = array();
     foreach($selectedScanners as $agentName=>$agentId)
     {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat);
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange);
       foreach ($licensePerPfile as $pfile => $licenseRow)
       {
         foreach ($licenseRow as $licId => $row)

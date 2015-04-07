@@ -254,7 +254,7 @@ class LicenseDao extends Object
    * @param array $mask
    * @return array
    */
-  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true)
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true, $nameRange=array())
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -266,7 +266,14 @@ class LicenseDao extends Object
       $param[] = $itemTreeBounds->getRight();
       $condition = "lft BETWEEN $2 AND $3";
       $statementName .= ".subfolders";
-    } else
+      if(!empty($nameRange))
+      {
+        $condition .= " AND ufile_name BETWEEN $4 and $5";
+        $param[] = $nameRange[0];
+        $param[] = $nameRange[1];
+      }
+    }
+    else
     {
       $param[] = $itemTreeBounds->getItemId();
       $condition = "realparent = $2";
