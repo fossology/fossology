@@ -415,14 +415,29 @@ class UploadDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param bool $isFlat plain files from sub*folders instead of folders
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
   {
-    $sql = "SELECT u.* FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
-    $this->dbManager->prepare($stmt=__METHOD__,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $stmt=__METHOD__;
+    $sql = "SELECT ut.* FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
+         . "WHERE ut.upload_fk=$1";
+    $params = array($itemTreeBounds->getUploadId());
+    if (!$isFlat)
+    {
+      $stmt = __METHOD__.'.parent';
+      $params[] = $itemTreeBounds->getItemId();
+      $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
+    }
+    else
+    {
+      $params[] = $itemTreeBounds->getLeft();
+      $params[] = $itemTreeBounds->getRight();
+      $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
+    }
+    
+    $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt,$params);
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);

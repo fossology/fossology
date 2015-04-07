@@ -668,7 +668,7 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @return array mapping 'shortname'=>'count'
    */
-  function getClearedLicenseMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
+  function getClearedLicenseIdAndMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
   {
     $statementName = __METHOD__;
 
@@ -680,19 +680,20 @@ INSERT INTO clearing_decision (
     $sql = "$decisionsCte
             SELECT
               COUNT(*) AS count,
-              lr.rf_shortname AS shortname
+              lr.rf_shortname AS shortname,
+              rf_pk
             FROM decision
               INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
             WHERE NOT ce.removed
-            GROUP BY shortname";
+            GROUP BY shortname,rf_pk";
 
     $this->dbManager->prepare($statementName, $sql);
     $res = $this->dbManager->execute($statementName, $params);
     $multiplicity = array();
     while($row = $this->dbManager->fetchArray($res)){
-      $multiplicity[$row['shortname']] = $row['count'];
+      $multiplicity[$row['shortname']] = $row;
     }
     $this->dbManager->freeResult($res);
 

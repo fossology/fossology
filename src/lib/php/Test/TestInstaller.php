@@ -95,5 +95,4 @@ class TestInstaller
   {
     system("rm $this->sysConf/repo -rf");
   }
-
 }
