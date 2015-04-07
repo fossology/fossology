@@ -154,13 +154,21 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
     FailRec = 1;
     for (FailureList = CU_get_failure_list(); FailureList; FailureList = FailureList->pNext)
     {
-      printf("%d. File: %s  Line: %u   Test: %s\n",
+      printf("%d. File: %s  Line: %u",
              FailRec,
              FailureList->strFileName,
-             FailureList->uiLineNumber,
-             (FailureList->pTest)->pName);
-      printf("  %s\n",
+             FailureList->uiLineNumber);
+
+      if (FailureList->pTest) {
+        printf("  Test: %s", (FailureList->pTest)->pName);
+      }
+      if (FailureList->pSuite) {
+        printf("  Suite: %s", (FailureList->pSuite)->pName);
+      }
+
+      printf("\n  %s\n",
              FailureList->strCondition);
+
       FailRec++;
     }
     printf("\n");

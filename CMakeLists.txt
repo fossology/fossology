@@ -12,6 +12,7 @@ include_directories(
     ${fossology_SOURCE_DIR}/src/lib/c
     ${fossology_SOURCE_DIR}/src/lib/cpp
     ${fossology_SOURCE_DIR}/src/monk/agent
+    ${fossology_SOURCE_DIR}/src/wget_agent/agent
     ${fossology_SOURCE_DIR}/src/testing/lib/c
     ${fossology_SOURCE_DIR}/src/testing/db/c
     ${GLIB_PKG_INCLUDE_DIRS}
