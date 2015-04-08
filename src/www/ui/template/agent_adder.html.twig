@@ -1,0 +1,70 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <form name="formy" method="post">
+    {{ "Select an uploaded file for additional analysis."|trans }}
+    <ol>
+      <li>{{"Select the folder containing the upload you wish to analyze"|trans}}:<br/>
+        <select name="folder" onLoad="Uploads_Get('{{ baseUri }}?mod=upload_options&folder={{ folderId }}');"
+                onChange="Uploads_Get('{{ baseUri }}?mod=upload_options&folder=' + this.value);">
+          {{ folderListOptions }}
+        </select>
+      </li>
+      <li>
+        {{"Select the upload to analyze"|trans}}:<br/>
+        <div id="uploaddiv">
+          <select size="10" name="upload" onChange="Agents_Get('{{ baseUri }}?mod=upload_agent_options&upload=' + this.value);">
+            {% for foliup in folderListUploads %}
+              <option value="{{ foliup.upload_pk }}" {% if uploadId==foliup.upload_pk %}selected="selected"{% endif %}>
+               {{ foliup.name|e }} {% if foliup.upload_desc is not empty %}({{ foliup.upload_desc|e }}){% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </li>
+      <li> {{ "Select additional analysis."|trans }}<br/>
+        <div id="agentsdiv">
+          <select multiple size="10" id="agents" name="agents[]"></select>
+        </div>
+      </li> 
+    </ol>
+    <input type="submit" value="{{ 'Analyze'|trans}}!"/>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  {% if uploadId %}
+    <script language="javascript">
+      Agents_Get("{{ baseUri }}?mod=upload_agent_options&upload={{ uploadId }}");
+    </script>
+  {% endif %}
+  {{ uploadScript }}
+  <script language="javascript">
+    function Uploads_Reply()
+    {
+      if ((Uploads.readyState==4) && (Uploads.status==200))
+      {
+        document.getElementById('uploaddiv').innerHTML = '<select size="10" name="upload" onChange="Agents_Get(\'{{ baseUri }}?mod=upload_agent_options&upload=\' + this.value)">' + Uploads.responseText + '</select><p/>';
+        document.getElementById('agentsdiv').innerHTML = '';
+      }
+    }
+  </script>
+
+  {{ agentScript }}
+  <script language="javascript">
+    function Agents_Reply()
+    {
+      if ((Agents.readyState==4) && (Agents.status==200))
+      {
+        document.getElementById('agentsdiv').innerHTML = '<select multiple size="10" id="agents" name="agents[]">' + Agents.responseText + '</select>';
+      }
+    }
+  </script>
+{% endblock %}
