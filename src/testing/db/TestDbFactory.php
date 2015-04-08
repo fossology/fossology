@@ -122,7 +122,16 @@ class TestDbFactory
     if (empty($sys_conf)) {
       $sys_conf = getenv('SYSCONFDIR');
     }
+    if (empty($sys_conf)) {
+      echo "refusing to purge from /\n";
+      exit(4);
+    }
+
     $dbName = $this->getDbName($sys_conf);
+    if (empty($dbName)) {
+      echo "cannot determine db to empty\n";
+      exit(6);
+    }
 
     $existCmd = "psql -Ufossy -h localhost -l | grep -q " . $dbName;
     exec($existCmd, $existkOut, $existRtn);
