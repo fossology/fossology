@@ -37,8 +37,9 @@ class AgentAdder extends DefaultPlugin
 
   /**
    * @param Request $request
+   * @return Response
    */
-  public function handle(Request $request) {
+  protected function handle(Request $request) {
     $folderId = intval($request->get('folder'));
     if (empty($folderId)) {
       $folderId = FolderGetTop();
@@ -48,15 +49,15 @@ class AgentAdder extends DefaultPlugin
 
     if (!empty($uploadId) && !empty($agents) && is_array($agents))
     {
-      $rc = $this->AgentsAdd($uploadId,$agents);
+      $rc = $this->agentsAdd($uploadId,$agents);
       if (empty($rc))
       {
         $status = GetRunnableJobList();
         $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
-        $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+        $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
         $text = _("Your jobs have been added to job queue.");
         $linkText = _("View Jobs");
-        $msg = "$scheduler_msg"."$text <a href=\"$URL\">$linkText</a>";
+        $msg = "$scheduler_msg"."$text <a href=\"$url\">$linkText</a>";
         $vars['message'] = $msg;
       }
       else
@@ -78,13 +79,12 @@ class AgentAdder extends DefaultPlugin
   }
   
   /**
-   * \brief Add an upload to multiple agents.
-   *
-   * \param $uploadpk 
-   * \param $agentlist - list of agents
-   * \return NULL on success, error message string on failure
+   * @brief Add an upload to multiple agents.
+   * @param int $uploadId
+   * @param string[] $agentlist - list of agents
+   * @return NULL on success, error message string on failure
    */
-  private function AgentsAdd($uploadId, $agentlist)
+  private function agentsAdd($uploadId, $agentlist)
   {
     if (!is_array($agentlist)) {
       return "bad parameters";
