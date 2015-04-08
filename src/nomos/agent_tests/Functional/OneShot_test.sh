@@ -30,7 +30,7 @@ testOneShotaffero()
     fail "ERROR: test file not found...aborting test"
   fi
 
-  out=`/usr/local/etc/fossology/mods-enabled/nomos/agent/nomos ../../../testing/dataFiles/TestData/licenses/Affero-v1.0`
+  out=`../../agent/nomos ../../../testing/dataFiles/TestData/licenses/Affero-v1.0`
   assertEquals "File Affero-v1.0 contains license(s) AGPL-1.0" "${out}"
 }
 
