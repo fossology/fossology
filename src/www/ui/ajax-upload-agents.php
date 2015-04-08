@@ -1,8 +1,7 @@
 <?php
-
-use Symfony\Component\HttpFoundation\Response;
 /***********************************************************
  Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,6 +17,11 @@ use Symfony\Component\HttpFoundation\Response;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 /**
  * \file ajax_upload_agents.php
  * \brief  This plugin is used to list all agents that can
@@ -27,79 +31,70 @@ use Symfony\Component\HttpFoundation\Response;
  * data to the UI.
  */
 
-define("TITLE_ajax_upload_agents", _("List Agents for an Upload as Options"));
-
-/**
- * \class ajax_upload_agents extends from FO_Plugin
- * \brief list all agents that can be scheduled for a given upload.
- */
-class ajax_upload_agents extends FO_Plugin
+class AjaxUploadAgents extends DefaultPlugin
 {
-  function __construct()
-  {
-    $this->Name       = "upload_agent_options";
-    $this->Title      = TITLE_ajax_upload_agents;
-    $this->DBaccess   = PLUGIN_DB_READ;
-    parent::__construct();
-  }
+  const NAME = "upload_agent_options";
 
-  /**
-   * \brief This function checks if the current job was not already scheduled, or did already fail (You can reschedule failed jobs)
-   * 
-   * \param $agentName   Name of the agent as specified in the agents table
-   * \param $upload_pk   Upload identifier
-   * \return true if the agent is not currently scheduled for this upload, else false
-   */
-  function jobNotYetScheduled( $agentName ,  $upload_pk )
+  public function __construct()
   {
-    global $PG_CONN;
-    $sql = "select * from job inner join jobqueue on job_pk=jq_job_fk where job_upload_fk=$upload_pk and jq_endtext is null and jq_type='$agentName'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $nrows=pg_num_rows($result);
-    pg_free_result($result);
-    return $nrows<1;
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("List Agents for an Upload as Options"),
+        self::PERMISSION => Auth::PERM_READ
+    ));
   }
   
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief This function checks if the current job was not already scheduled, or did already fail (You can reschedule failed jobs)
+   * @param $agentName   Name of the agent as specified in the agents table
+   * @param $uploadId   Upload identifier
+   * @return true if the agent is not currently scheduled for this upload, else false
    */
-  function Output()
+  function jobNotYetScheduled($agentName, $uploadId)
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    if($this->OutputType!='HTML')
-    {
-      return (!$this->OutputToStdout) ? "" : NULL;
-    }
-      
-    $UploadPk = GetParm("upload",PARM_INTEGER);
+    $sql = "select count(*) from job inner join jobqueue on job_pk=jq_job_fk "
+            . "where job_upload_fk=$1 and jq_endtext is null and jq_type=$2";
+    $queued = $GLOBALS['container']->get('db.manager')->getSingleRow($sql,array($uploadId,$agentName));
+    return $queued['count']==0;
+  }
+  
+  protected function handle(Request $request)
+  {
+    $UploadPk = intval($request->get("upload"));
     if (empty($UploadPk)) {
-      return;
+      throw new Exception('missing upload id');
     }
     $agent_list = menu_find("Agents", $depth=0);
-    $Skip = array("agent_unpack", "wget_agent");
-    $V="";
-    global $Plugins;
+    $skipAgents = array("agent_unpack", "wget_agent");
+    $out="";
     for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
     {
-      if (array_search($agent_list[$ac]->URI, $Skip) !== false)
+      if (array_search($agent_list[$ac]->URI, $skipAgents) !== false)
       {
         continue;
       }
-      $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
-      if ( ($P->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($P->AgentName, $UploadPk)  )
+      $plugin = plugin_find($agent_list[$ac]->URI);
+      if ( ($plugin->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($plugin->AgentName, $UploadPk)  )
       {
-        $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
-        $V .= htmlentities($agent_list[$ac]->Name);
-        $V .= "</option>\n";
+        $out .= "<option value='" . $agent_list[$ac]->URI . "'>";
+        $out .= htmlentities($agent_list[$ac]->Name);
+        $out .= "</option>\n";
       }
     }
-    return new Response($V, Response::HTTP_OK);
+    
+    /*
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $vars['parmAgentContents'] = array();
+    $vars['parmAgentFoots'] = array();
+    foreach($parmAgentList as $parmAgent) {
+      $agent = plugin_find($parmAgent);
+      $vars['parmAgentContents'][] = $agent->renderContent($request, $vars);
+      $vars['parmAgentFoots'][] = $agent->renderFoot($request, $vars);
+    }
+     */
+    
+    return new Response($out, Response::HTTP_OK, array('Content-Type'=>'text/plain'));
   }
 
 }
-$NewPlugin = new ajax_upload_agents;
-$NewPlugin->Initialize();
 
+register_plugin(new AjaxUploadAgents());

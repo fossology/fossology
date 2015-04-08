@@ -23,15 +23,15 @@ use Fossology\Lib\Util\Object;
 class Upload extends Object
 {
   /** @var int */
-  private $id;
+  protected $id;
   /** @var string */
-  private $filename;
+  protected $filename;
   /** @var string */
-  private $description;
+  protected $description;
   /** @var string */
-  private $treeTableName;
+  protected $treeTableName;
   /** @var int */
-  private $timestamp;
+  protected $timestamp;
 
   /**
    * @param $row

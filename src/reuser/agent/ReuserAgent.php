@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini, Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -62,22 +62,29 @@ class ReuserAgent extends Agent
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
-
   function processUploadId($uploadId)
+  {
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    foreach($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reusePair)
+    {
+      $reusedUploadId = $reusePair['reused_upload_fk'];
+      $reusedGroupId = $reusePair['reused_group_fk'];
+      $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
+      if (false === $itemTreeBoundsReused)
+      {
+        continue;
+      }
+      $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+    }
+    return true;
+  }  
+
+  protected function processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId)
   {
     $groupId = $this->groupId;
     $userId = $this->userId;
 
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
-    $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-
-    if (false === $itemTreeBoundsReused)
-    {
-      return true;
-    }
-
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $groupId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $reusedGroupId);
     $currenlyVisibleClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
 
     $currenlyVisibleClearingDecisionsById = $this->mapByClearingId($currenlyVisibleClearingDecisions);
