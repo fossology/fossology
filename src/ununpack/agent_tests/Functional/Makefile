@@ -34,7 +34,7 @@ coverage: agent-coverage test-run
 
 test-run: testdata fossology_testconfig
 	cd ..; tar -xf unpack-test-data.tar.bz2
-	phpunit --log-junit ununpack-Xunit.xml --configuration tests.xml
+	$(PHPUNIT) --log-junit ununpack-Xunit.xml --configuration tests.xml
 
 agent:
 	$(MAKE) -C $(AGENTDIR)

@@ -33,7 +33,7 @@ test: all test-run
 coverage: all-coverage test-run
 
 test-run:
-	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
+	$(PHPUNIT) --log-junit nomos-Xunit.xml --configuration tests.xml
 #	./shunit2 --plugin example OneShot_test.sh
 
 # note DO NOT put *.xml in the clean rule; it will remove the tests.xml file
