@@ -1420,7 +1420,18 @@
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reused_upload_fk\" int4;";
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reused_upload_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["UPDATE"] = "";
+  
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reused_group_fk\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reused_group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["UPDATE"] = "";
+  
+  
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
   $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_pk\" SET NOT NULL, ALTER COLUMN \"upload_pk\" SET DEFAULT nextval('upload_upload_pk_seq'::regclass);";

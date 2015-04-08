@@ -1,7 +1,7 @@
 $('#{{ reuseFolderSelectorName }}').change(function () {
-  var folderId = parseInt(this.selectedOptions[0].value);
+  var folderGroupPair = this.selectedOptions[0].value;
 
-  $.getJSON("?mod=agent_reuser&do=getUploads&{{ folderParameterName }}=" + folderId)
+  $.getJSON("?mod=plugin_reuser&do=getUploads&{{ folderParameterName }}=" + folderGroupPair)
       .done(function (data) {
         var packageForReuse = $('#{{ uploadToReuseSelectorName }}');
         packageForReuse.empty();
