@@ -28,6 +28,10 @@ class ReuserAgentPlugin extends AgentPlugin
     parent::__construct();
   } 
   
+  public function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
+  {
+    parent::doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs, $jq_cmd_args);
+  }
 }
 
 register_plugin(new ReuserAgentPlugin());
