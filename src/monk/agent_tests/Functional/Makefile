@@ -26,15 +26,15 @@ version:
 
 test-cli:
 	@echo "make functional tests for cli mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) cliTest.php
+	$(PHPUNIT) --log-junit monk-Xunit1.xml --bootstrap $(PHPUNIT_BOOT) cliTest.php
 
 test-sched:
 	@echo "make functional tests for scheduler mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
+	$(PHPUNIT) --log-junit monk-Xunit2.xml --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 test-bulk:
 	@echo "make functional tests for bulk mode"
-	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) bulkTest.php
+	$(PHPUNIT) --log-junit monk-Xunit3.xml --bootstrap $(PHPUNIT_BOOT) bulkTest.php
 
 test: all test-cli test-sched test-bulk
 
