@@ -46,6 +46,9 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
+
+use Fossology\Lib\Db\Driver\Postgres;
+
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
  */
@@ -118,7 +121,9 @@ require_once("$LIBEXECDIR/dbmigrate_2.0-2.5-pre.php");
 Migrate_20_25($Verbose);
 */
 
-if (empty($SchemaFilePath)) $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+if (empty($SchemaFilePath)) {
+  $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+}
 
 if (!file_exists($SchemaFilePath))
 {
@@ -127,6 +132,10 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
+$libschema->setDriver(new Postgres($PG_CONN));
+$previousSchema = $libschema->getCurrSchema();
+$isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
+
 $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
@@ -196,7 +205,6 @@ if (array_key_exists('r', $Options))
 }
 
 /* migration */
-global $libschema;
 $currSchema = $libschema->getCurrSchema();
 $sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
@@ -211,7 +219,7 @@ if(!array_key_exists('Release', $sysconfig)){
     require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
     migrate_25_26($Verbose);
   }
-  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']) && $isUpdating)
   {
     $timeoutSec = 20;
     echo "Missing column clearing_decision.clearing_pk, you should update to version 2.6.2 before migration\n";
