@@ -37,7 +37,7 @@ namespace fo {
     QueryResult(PGresult* ptr);
 
   public:
-    QueryResult(QueryResult &&queryResult) = default;
+    QueryResult(QueryResult&&) = default;
 
     bool isFailed() const;
 
