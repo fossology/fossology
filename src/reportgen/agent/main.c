@@ -375,7 +375,7 @@ char* implodeJsonArray(json_object* jsonArray, const char* delimiter) {
 int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const char* keyName) {
   if ((jobj == NULL) || is_error(jobj))
   {
-    printf("json object %d is ill-formatted\n",jobj);
+    printf("json object is ill-formatted\n");
     return 0;
   }
 
