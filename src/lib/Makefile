@@ -20,7 +20,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = c php cpp
-TESTDIR = c
+TESTDIR = c cpp
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
