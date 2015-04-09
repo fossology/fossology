@@ -32,7 +32,7 @@ test: agent test-run
 
 coverage: agent-coverage test-run
 
-test-run: testdata fossology_testconfig
+test-run: testdata
 	cd ..; tar -xf unpack-test-data.tar.bz2
 	$(PHPUNIT) --log-junit ununpack-Xunit.xml --configuration tests.xml
 
