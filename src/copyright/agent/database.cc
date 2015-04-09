@@ -242,7 +242,7 @@ bool CopyrightDatabaseHandler::createTableClearing() const
 
 std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId)
 {
-  std::string uploadTreeTableName = dbManager.queryUploadTreeTableName(uploadId);
+  std::string uploadTreeTableName = queryUploadTreeTableName(uploadId);
 
   QueryResult queryResult = dbManager.queryPrintf(
     "SELECT pfile_pk"

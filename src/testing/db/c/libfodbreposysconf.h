@@ -27,9 +27,9 @@ int create_db_repo_sysconf(int type, char *agent_name);
 
 void drop_db_repo_sysconf(char *DBName);
 
-fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent, int initDbTables);
+fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAsAgent, int initDbTables);
 
-void dropTestEnvironment(fo_dbManager* dbManager, char* srcDir);
+void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir);
 
 char *get_sysconfdir();
 

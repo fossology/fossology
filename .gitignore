@@ -66,6 +66,7 @@ src/lib/c/tests/lib-c-Listing.xml
 src/lib/c/tests/lib-c-Results.xml
 src/lib/c/tests/results/
 src/lib/c/tests/testlibs
+src/lib/cpp/tests/test_libcpp
 src/lib/php/bootstrap.php
 src/lib/php/services.xml
 src/lib/php/id.patch

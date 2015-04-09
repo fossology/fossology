@@ -31,21 +31,9 @@ DbManager::DbManager(fo_dbManager* dbManager)
 {
 }
 
-DbManager::DbManager(DbManager&& other) : dbManager(other.dbManager)
-{
-}
-
-DbManager::DbManager(const DbManager& other) : dbManager(other.dbManager)
-{
-}
-
 PGconn* DbManager::getConnection() const
 {
   return fo_dbManager_getWrappedConnection(getStruct_dbManager());
-}
-
-DbManager::~DbManager()
-{
 }
 
 DbManager DbManager::spawn() const
@@ -109,11 +97,6 @@ QueryResult DbManager::execPrepared(fo_dbManager_PreparedStatement* stmt, ...) c
 void DbManager::ignoreWarnings(bool b) const
 {
   fo_dbManager_ignoreWarnings(getStruct_dbManager(), b);
-}
-
-std::string DbManager::queryUploadTreeTableName(int uploadId)
-{
-  return std::string(getUploadTreeTableName(getStruct_dbManager(), uploadId));
 }
 
 

@@ -55,3 +55,8 @@ std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload
   QueryResult queryResult(queryFileIdsForUpload(dbManager.getStruct_dbManager(), uploadId));
   return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }
+
+std::string fo::AgentDatabaseHandler::queryUploadTreeTableName(int uploadId)
+{
+  return std::string(getUploadTreeTableName(dbManager.getStruct_dbManager(), uploadId));
+}

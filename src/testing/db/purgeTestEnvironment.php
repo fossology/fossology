@@ -36,7 +36,9 @@ $testInstaller->clear();
 if (array_key_exists("d", $opts)) {
   $srcDir = $opts["d"];
   foreach (explode(",", $srcDir) as $dir) {
-    $testInstaller->uninstall($dir);
+    if (!empty($dir)) {
+      $testInstaller->uninstall($dir);
+    }
   }
 }
 

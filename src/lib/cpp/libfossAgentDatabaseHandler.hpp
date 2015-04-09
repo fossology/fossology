@@ -34,6 +34,7 @@ namespace fo
     bool rollback() const;
 
     char* getPFileNameForFileId(unsigned long pfileId) const;
+    std::string queryUploadTreeTableName(int uploadId);
     std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId) const;
   };
 }
