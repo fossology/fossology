@@ -36,7 +36,14 @@ $(EXE): %: %.cc $(LIB) $(VARS)
 	$(CXX) $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(LIB) -o $@
 
 $(OBJS): %.o: %.cc %.hpp
-	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL)
+	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL) -o $@
+
+libfossologyCPP_cov.a: $(COVERAGE) $(VARS) $(DEPENDENCY)
+	$(AR) -x $(DEPENDENCY)
+	$(AR) cr $@ $(COVERAGE) $$( $(AR) -t $(DEPENDENCY) )
+
+$(COVERAGE): %_cov.o: %.cc %.hpp
+	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 install: install-dev install-lib install-exe
 	@echo "make $(LIB) install"
@@ -70,7 +77,10 @@ uninstall-exe:
 uninstall-lib:
 
 test: all
-	$(MAKE) -C tests
+	$(MAKE) -C tests test
+
+coverage: $(COVERAGE)
+	$(MAKE) -C tests coverage
 
 clean:
 	@echo "make $(LIB) clean "

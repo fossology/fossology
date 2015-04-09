@@ -41,11 +41,13 @@ static char DBConf[ARRAY_LENGTH];
 static char RepoDir[ARRAY_LENGTH];
 static char confFile[ARRAY_LENGTH];
 
-fo_dbManager* createTestEnvironment(char* srcDirs, char* doConnectAsAgent, int initDbTables) {
+fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAsAgent, int initDbTables) {
   GString* gString = g_string_new(TESTDBDIR "/createTestEnvironment.php");
-  g_string_append_printf(gString, " -d '%s'", srcDirs);
+  if (srcDirs) {
+    g_string_append_printf(gString, " -d '%s'", srcDirs);
+  }
   if (initDbTables) {
-    g_string_append_printf(gString," -f");
+    g_string_append_printf(gString, " -f");
   }
   gchar* cmd = g_string_free(gString, FALSE);
 
@@ -95,7 +97,7 @@ createError:
   return NULL;
 }
 
-void dropTestEnvironment(fo_dbManager* dbManager, char* srcDir) {
+void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir) {
   if (dbManager) {
     fo_dbManager_finish(dbManager);
   }

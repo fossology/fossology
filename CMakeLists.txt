@@ -115,6 +115,8 @@ set(SOURCE_FILES
     src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
     src/lib/cpp/uniquePtr.hpp
+    src/lib/cpp/tests/run_tests.cc
+    src/lib/cpp/tests/test_fossdbmanagerclass.cc
     src/maintagent/agent/maintagent.c
     src/maintagent/agent/maintagent.h
     src/maintagent/agent/process.c
