@@ -37,6 +37,7 @@ class ReuserPlugin extends DefaultPlugin
   const UPLOAD_TO_REUSE_SELECTOR_NAME = 'uploadToReuse';
   const FOLDER_PARAMETER_NAME = 'folder';
 
+  public $AgentName = 'agent_reuser';
   /** @var FolderDao */
   private $folderDao;
   /** @var UploadDao */
@@ -61,7 +62,7 @@ class ReuserPlugin extends DefaultPlugin
   protected function handle(Request $request)
   {
     $this->folderDao->ensureTopLevelFolder();
-    list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request);
+    list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request->get(self::FOLDER_PARAMETER_NAME));
     $ajaxMethodName = $request->get('do');
 
     if ($ajaxMethodName == "getUploads")
@@ -73,9 +74,9 @@ class ReuserPlugin extends DefaultPlugin
     return new Response('called without valid method', Response::HTTP_METHOD_NOT_ALLOWED);
   }
   
-  protected function getFolderIdAndTrustGroup($request)
+  protected function getFolderIdAndTrustGroup($folderGroup)
   {
-    $folderGroupPair = explode(',', $request->get(self::FOLDER_PARAMETER_NAME),2);
+    $folderGroupPair = explode(',', $folderGroup,2);
     if (count($folderGroupPair) == 2) {
       list($folder, $trustGroup) = $folderGroupPair;
       $folderId = intval($folder);
@@ -90,18 +91,26 @@ class ReuserPlugin extends DefaultPlugin
   }
   
   /**
-   * @param Request $request
+   * @param array $vars
    * @return string
    */
-  public function renderContent(Request $request, &$vars)
+  public function renderContent(&$vars)
   {
-    list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request);
+    if (!array_key_exists('folderStructure', $vars))
+    {
+      $rootFolderId = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
+      $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
+    }
+    $pair = array_key_exists(self::FOLDER_PARAMETER_NAME, $vars) ? $vars[self::FOLDER_PARAMETER_NAME] : '';
+
+    list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($pair);
     if (empty($folderId) && !empty($vars['folderStructure']))
     {
       $folderId = $vars['folderStructure'][0][FolderDao::FOLDER_KEY]->getId();
     }
     
     $vars['reuseFolderSelectorName'] = self::REUSE_FOLDER_SELECTOR_NAME;
+    $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId, $trustGroupId);
     
@@ -110,14 +119,16 @@ class ReuserPlugin extends DefaultPlugin
   }
   
   /**
-   * @param Request $request
+   * @param array $vars
    * @return string
    */
-  public function renderFoot(Request $request, &$vars)
+  public function renderFoot(&$vars)
   {
+    $vars['reuseFolderSelectorName'] = self::REUSE_FOLDER_SELECTOR_NAME;
+    $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
+    $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $renderer = $this->getObject('twig.environment');
-    $script = $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
-    return "<script>$script</script>";
+    return $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
   }
   
   public function preInstall()
@@ -162,10 +173,16 @@ class ReuserPlugin extends DefaultPlugin
     
     $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId);
     
-    $agent = plugin_find('agent_reuser');
+    $agent = plugin_find($this->AgentName);
     return $agent->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
   }
 
+  public function AgentHasResults($uploadId)
+  {
+    $agent = plugin_find($this->AgentName);
+    return $agent->AgentHasResults($uploadId);
+  }
+  
   /**
    * @param int $uploadId
    * @param int $reuseUploadId
