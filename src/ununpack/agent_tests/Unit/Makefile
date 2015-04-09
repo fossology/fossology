@@ -78,9 +78,7 @@ test: all testdata
 coverage: testdata $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
 	cd ..; tar -xf unpack-test-data.tar.bz2
 	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
-	./$(EXE); \
-	lcov --directory $(AGENTDIR) --capture --output-file cov.txt; \
-	genhtml -o results cov.txt
+	./$(EXE)
 
 libununpack_cov.a:
 	$(MAKE) -C $(AGENTDIR) $@

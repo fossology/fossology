@@ -34,7 +34,7 @@ class NomosFunTest extends PHPUnit_Framework_TestCase
 
   function setUp()
   {
-    $this->testDb = new TestPgDb();
+    $this->testDb = new TestPgDb("nomosfun".time());
     $this->agentDir = dirname(dirname(__DIR__))."/";
     $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
 
