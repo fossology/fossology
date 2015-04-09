@@ -112,7 +112,7 @@ class TestPgDb
   function fullDestruct()
   {
     pg_close($this->connection);
-
+    $GLOBALS['PG_CONN'] = false;
     $testDbFactory = new \TestDbFactory();
     $testDbFactory->purgeTestDb($this->sys_conf);
   }
