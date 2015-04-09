@@ -59,42 +59,57 @@ class AjaxUploadAgents extends DefaultPlugin
   
   protected function handle(Request $request)
   {
-    $UploadPk = intval($request->get("upload"));
-    if (empty($UploadPk)) {
+    $uploadId = intval($request->get("upload"));
+    if (empty($uploadId)) {
       throw new Exception('missing upload id');
     }
-    $agent_list = menu_find("Agents", $depth=0);
+   
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $agentList = array_merge($plainAgentList, $parmAgentList);
     $skipAgents = array("agent_unpack", "wget_agent");
-    $out="";
-    for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
+    $out = "";
+    $relevantAgents = array();
+    foreach($agentList as $agent)
     {
-      if (array_search($agent_list[$ac]->URI, $skipAgents) !== false)
+      if (array_search($agent, $skipAgents) !== false)
       {
         continue;
       }
-      $plugin = plugin_find($agent_list[$ac]->URI);
-      if ( ($plugin->AgentHasResults($UploadPk) != 1 ) &&  $this->jobNotYetScheduled($plugin->AgentName, $UploadPk)  )
+      $plugin = plugin_find($agent);
+      if ( ($plugin->AgentHasResults($uploadId) != 1 ) && $this->jobNotYetScheduled($plugin->AgentName, $uploadId)  )
       {
-        $out .= "<option value='" . $agent_list[$ac]->URI . "'>";
-        $out .= htmlentities($agent_list[$ac]->Name);
+        $out .= "<option value='" . $agent . "'>";
+        $out .= htmlentities($plugin->Title);
         $out .= "</option>\n";
+        $relevantAgents[$agent] = $plugin->Title;
       }
     }
     
-    /*
-    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
-    $vars['parmAgentContents'] = array();
-    $vars['parmAgentFoots'] = array();
-    foreach($parmAgentList as $parmAgent) {
-      $agent = plugin_find($parmAgent);
-      $vars['parmAgentContents'][] = $agent->renderContent($request, $vars);
-      $vars['parmAgentFoots'][] = $agent->renderFoot($request, $vars);
-    }
-     */
-    
+    $out = '<select multiple size="10" id="agents" name="agents[]">' .$out. '</select>';
     return new Response($out, Response::HTTP_OK, array('Content-Type'=>'text/plain'));
   }
-
+  
+  /**
+   * @todo move to common class since it is same as in Fossology\UI\Page\UploadFilePage
+   * @param string $hook 'ParmAgents'|'Agents'
+   * @return array
+   */
+  protected function getAgentPluginNames($hook='Agents')
+  {
+    $agentList = menu_find($hook, $maxDepth) ?: array();
+    $agentPluginNames = array();
+    if(is_array($agentList)) {
+      foreach ($agentList as $parmAgent) {
+        $agent = plugin_find_id($parmAgent->URI);
+        if (!empty($agent)) {
+          $agentPluginNames[] = $agent;
+        }
+      }
+    }
+    return $agentPluginNames;
+  }
+  
 }
 
 register_plugin(new AjaxUploadAgents());

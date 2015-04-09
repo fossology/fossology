@@ -32,6 +32,7 @@
         <div id="agentsdiv">
           <select multiple size="10" id="agents" name="agents[]"></select>
         </div>
+        {{ out }}
       </li> 
     </ol>
     <input type="submit" value="{{ 'Analyze'|trans}}!"/>
@@ -63,8 +64,10 @@
     {
       if ((Agents.readyState==4) && (Agents.status==200))
       {
-        document.getElementById('agentsdiv').innerHTML = '<select multiple size="10" id="agents" name="agents[]">' + Agents.responseText + '</select>';
+        document.getElementById('agentsdiv').innerHTML = Agents.responseText;
       }
     }
   </script>
+  
+  {{ outFoot }}
 {% endblock %}

@@ -49,7 +49,7 @@ class AgentAdder extends DefaultPlugin
 
     if (!empty($uploadId) && !empty($agents) && is_array($agents))
     {
-      $rc = $this->agentsAdd($uploadId,$agents);
+      $rc = $this->agentsAdd($uploadId,$agents,$request);
       if (empty($rc))
       {
         $status = GetRunnableJobList();
@@ -74,19 +74,34 @@ class AgentAdder extends DefaultPlugin
     $vars['folderListUploads'] = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
     $vars['baseUri'] = Traceback_uri();
     $vars['uploadId'] = $uploadId;
-   
+    
+ 
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $out =  '<ol>';
+    $parmAgentFoots = '';
+    foreach($parmAgentList as $parmAgent)
+    {
+      $agent = plugin_find($parmAgent);
+      $out .= "<br/><b>".$agent->AgentName.":</b><br/>";
+      $out .= $agent->renderContent($vars);
+      $parmAgentFoots .= $agent->renderFoot($vars);
+    }
+    $out .= '</ol>';
+    $vars['out'] = $out;
+    $vars['outFoot'] = '<script language="javascript"> '.$parmAgentFoots.'</script>';
+    
     return $this->render('agent_adder.html.twig', $this->mergeWithDefault($vars));
   }
   
   /**
    * @brief Add an upload to multiple agents.
    * @param int $uploadId
-   * @param string[] $agentlist - list of agents
+   * @param string[] $agentsToStart - list of agents
    * @return NULL on success, error message string on failure
    */
-  private function agentsAdd($uploadId, $agentlist)
+  private function agentsAdd($uploadId, $agentsToStart, Request $request)
   {
-    if (!is_array($agentlist)) {
+    if (!is_array($agentsToStart)) {
       return "bad parameters";
     }
     if (!$uploadId) {
@@ -101,11 +116,13 @@ class AgentAdder extends DefaultPlugin
     }
 
     $agents = array();
-    $agentList = listAgents();
-    foreach($agentList as $agentName => &$agentPlugin) {
-      if (in_array($agentName, $agentlist))
+    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $agentList = array_merge($plainAgentList, $parmAgentList);
+    foreach($agentList as $agentName) {
+      if (in_array($agentName, $agentsToStart))
       {
-        $agents[$agentName] = &$agentPlugin;
+        $agents[$agentName] = plugin_find($agentName);
       }
     }
     if (count($agents)==0)
@@ -114,7 +131,41 @@ class AgentAdder extends DefaultPlugin
     }
 
     $jobId = JobAddJob(Auth::getUserId(), Auth::getGroupId(), $upload->getFilename(), $uploadId);
-    return AgentSchedule($jobId, $uploadId, $agents);
+    $errorMsg = '';
+    foreach($parmAgentList as $parmAgent) {
+      $agent = plugin_find($parmAgent);
+      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
+    }
+
+    foreach($agents as &$agent)
+    {
+      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      if ($rv == -1) {
+        return $errorMsg;
+      }
+    }
+    return null;
+  }
+  
+  
+    /**
+   * @todo move to common class since it is same as in Fossology\UI\Page\UploadFilePage
+   * @param string $hook 'ParmAgents'|'Agents'
+   * @return array
+   */
+  protected function getAgentPluginNames($hook='Agents')
+  {
+    $agentList = menu_find($hook, $maxDepth) ?: array();
+    $agentPluginNames = array();
+    if(is_array($agentList)) {
+      foreach ($agentList as $parmAgent) {
+        $agent = plugin_find_id($parmAgent->URI);
+        if (!empty($agent)) {
+          $agentPluginNames[] = $agent;
+        }
+      }
+    }
+    return $agentPluginNames;
   }
   
 }
