@@ -97,6 +97,7 @@ void DBLoadGold()
   long PfileKey;
   char *Path;
   FILE *Fin;
+  int errChOwn;
   int rc;
   PGresult *result;
 
@@ -110,7 +111,14 @@ void DBLoadGold()
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
-  if (ForceGroup > 0) { chown(GlobalTempFile,-1,ForceGroup); }
+  errChOwn = 0;
+  if (ForceGroup > 0) {
+    errChOwn = chown(GlobalTempFile, -1, ForceGroup);
+  }
+  if(errChOwn!=0)
+  {
+    LOG_VERBOSE0("could not change owner of %s",GlobalTempFile);
+  }
 
   if (!Sum)
   {
@@ -139,7 +147,13 @@ void DBLoadGold()
     }
     /* Put the file in the "files" repository too */
     Path = fo_RepMkPath("gold",Unique);
-    if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+    if (ForceGroup >= 0) {
+      errChOwn = chown(Path, -1, ForceGroup);
+    }
+    if(errChOwn!=0)
+    {
+      LOG_VERBOSE0("could not change owner of %s",GlobalTempFile);
+    }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
   {
@@ -160,7 +174,13 @@ void DBLoadGold()
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
-  if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+  if (ForceGroup >= 0) {
+    errChOwn = chown(Path, -1, ForceGroup);
+  }
+  if(errChOwn!=0)
+  {
+    LOG_VERBOSE0("could not change owner of %s",GlobalTempFile);
+  }
   if (Path != GlobalTempFile) 
   {
     if(Path)
@@ -372,7 +392,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
     unlink(GlobalTempFile);
-    system(DeleteTempDirCmd);
+    rc=system(DeleteTempDirCmd);
+    if(rc!=0)
+    {
+      LOG_FATAL("...and temporary directory could not be deleted");
+    }
     SafeExit(12);
   }
 
@@ -387,7 +411,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     {
       LOG_FATAL("path %s is not http://, https://, or ftp://", TaintedURL);
       unlink(GlobalTempFile);
-      system(DeleteTempDirCmd);
+      rc=system(DeleteTempDirCmd);
+      if(rc!=0)
+      {
+        LOG_FATAL("...and temporary directory could not be deleted");
+      }
       SafeExit(26);
     }
     snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
@@ -398,7 +426,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       if (S_ISDIR(sb.st_mode))
       {
         snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
-        system(CMD); // delete all empty directories downloaded
+        rc_system=system(CMD); // delete all empty directories downloaded
+        if(rc_system!=0)
+        {
+          LOG_VERBOSE0("command '%s' failed",CMD);
+        }
         memset(CMD,'\0',MAXCMD);
         snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
       }
@@ -410,7 +442,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       if (rc_system != 0)
       {
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc=system(DeleteTempDirCmd);
+        if(rc!=0)
+        {
+          LOG_FATAL("...and temporary directory could not be deleted");
+        }
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -422,7 +458,11 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       if (rc_system != 0)
       {
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc=system(DeleteTempDirCmd);
+        if(rc!=0)
+        {
+          LOG_FATAL("...and temporary directory could not be deleted");
+        }
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -432,12 +472,20 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
     unlink(GlobalTempFile);
-    system(DeleteTempDirCmd);
+    rc=system(DeleteTempDirCmd);
+    if(rc!=0)
+    {
+      LOG_FATAL("...and temporary directory could not be deleted");
+    }
     SafeExit(15);
   }
 
   /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  system(DeleteTempDirCmd);
+  rc=system(DeleteTempDirCmd);
+  if(rc!=0)
+  {
+    LOG_VERBOSE0("...and temporary directory could not be deleted");
+  }
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
@@ -498,7 +546,11 @@ int GetVersionControl()
     /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
     /** svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ **/
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
-    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    rc=system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    if(rc!=0)
+    {
+      LOG_VERBOSE0("...and temporary directory could not be deleted");
+    }
     return 1;
   }
 
@@ -507,13 +559,20 @@ int GetVersionControl()
   if (rc != 0)
   {
     LOG_FATAL("command is:%s\n", command);
-    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    rc=system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    if(rc!=0)
+    {
+      LOG_FATAL("...and temporary directory could not be deleted");
+    }
     LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
     return 1;
   }
 
-  system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-
+  rc=system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  if(rc!=0)
+  {
+    LOG_VERBOSE0("...and temporary directory could not be deleted");
+  }
   return 0; // succeed to retrieve source
 }
 
@@ -661,7 +720,12 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   int rc_system = 0;
 
   snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
-  system(CMD);
+  rc_system=system(CMD);
+  if(rc_system!=0)
+  {
+    LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
+    return 0;
+  }
 
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
