@@ -18,7 +18,7 @@ TESTDBDIR = $(TOP)/src/testing/db/c
 TEST_CXXFLAGS = -I$(TESTDBDIR)
 TEST_LDFLAGS = -L$(TESTDBDIR) -l fodbreposysconf
 
-CXXFLAGS_LOCAL = $(TEST_CXXFLAGS) $(CXXFLAGS) -std=c++0x $(FO_CFLAGS) -Wall -I. -I$(SRCDIR)
+CXXFLAGS_LOCAL = $(TEST_CXXFLAGS) $(CXXFLAGS) $(FO_CFLAGS) -Wall -I. -I$(SRCDIR)
 CXXFLAGS_LINK  = $(TEST_LDFLAGS) $(LDFLAGS) -lcppunit -lstdc++ $(FO_LDFLAGS)
 
 EXE = test_libcpp
