@@ -25,13 +25,13 @@ MatchCallbacks bulkCallbacks = {.onAll = bulk_onAllMatches};
 int setLeftAndRight(MonkState* state) {
   BulkArguments* bulkArguments = state->ptr;
 
-  char* tableName = getUploadTreeTableName(state->dbManager, bulkArguments->uploadId);
+  gchar* tableName = getUploadTreeTableName(state->dbManager, bulkArguments->uploadId);
 
   if (!tableName)
     return 0;
 
-  char* sql = g_strdup_printf( "SELECT lft, rgt FROM %s WHERE uploadtree_pk = $1", tableName);
-  char* stmt = g_strdup_printf("setLeftAndRight.%s", tableName);
+  gchar* sql = g_strdup_printf("SELECT lft, rgt FROM %s WHERE uploadtree_pk = $1", tableName);
+  gchar* stmt = g_strdup_printf("setLeftAndRight.%s", tableName);
 
   if ((!sql) || (!stmt))
     return 0;
