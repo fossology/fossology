@@ -20,27 +20,28 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = c php cpp
-TESTDIR = c cpp
+TESTDIRS = c cpp
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+TESTDIR_LOOP = @set -e; for dir in $(TESTDIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
 	$(call DIR_LOOP, )
 
 test: all
-	$(MAKE) -C $(TESTDIR) test
+	$(call TESTDIR_LOOP,$@)
 
 coverage: all
-	$(MAKE) -C $(TESTDIR) coverage
+	$(call TESTDIR_LOOP,$@)
 
 install: all
-	$(call DIR_LOOP,install)
+	$(call DIR_LOOP,$@)
 
 uninstall:
-	$(call DIR_LOOP,uninstall)
+	$(call DIR_LOOP,$@)
 	rm -rf $(DESTDIR)$(MODDIR)/lib
 
 clean:
-	$(call DIR_LOOP,clean)
+	$(call DIR_LOOP,$@)
 
 .PHONY: all test coverage install uninstall clean

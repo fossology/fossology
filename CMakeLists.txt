@@ -117,6 +117,7 @@ set(SOURCE_FILES
     src/lib/cpp/uniquePtr.hpp
     src/lib/cpp/tests/run_tests.cc
     src/lib/cpp/tests/test_fossdbmanagerclass.cc
+    src/lib/cpp/tests/testUtils.hpp
     src/maintagent/agent/maintagent.c
     src/maintagent/agent/maintagent.h
     src/maintagent/agent/process.c

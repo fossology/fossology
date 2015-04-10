@@ -47,6 +47,7 @@ test: $(EXE)
 coverage: run_tests.cc $(COVERAGE) libfossologyCPP_cov.a
 	$(CXX) run_tests.cc -o $(EXE) $(COVERAGE) $(SRCDIR)/libfossologyCPP_cov.a $(CXXFLAGS_LINK) $(FLAG_COV)
 	./$(EXE)
+	$(call coverage-report-html,$(SRCDIR))
 
 clean:
 	rm -rf $(EXE) *.o *.a *.gcno *.gcda *Tests-Results.xml cov.txt results
