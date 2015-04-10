@@ -114,7 +114,7 @@ char* queryPFileForFileId(fo_dbManager* dbManager, long fileId)
     return NULL;
   }
 
-  char* pFile = strdup(PQgetvalue(fileNameResult, 0, 0));
+  char* pFile = g_strdup(PQgetvalue(fileNameResult, 0, 0));
   PQclear(fileNameResult);
   return pFile;
 }
@@ -314,7 +314,7 @@ FUNCTION char* GetUploadtreeTableName(PGconn* pgConn, int upload_pk)
   snprintf(SQL, sizeof(SQL), "select uploadtree_tablename from upload where upload_pk='%d'", upload_pk);
   result = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__);
-  if (PQntuples(result) == 1) uploadtree_tablename = strdup(PQgetvalue(result, 0, 0));
+  if (PQntuples(result) == 1) uploadtree_tablename = g_strdup(PQgetvalue(result, 0, 0));
   PQclear(result);
 
   return (uploadtree_tablename);

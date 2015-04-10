@@ -15,6 +15,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "testUtils.hpp"
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -24,7 +26,6 @@ extern "C" {
 #include <libfodbreposysconf.h>
 }
 
-#include "testUtils.hpp"
 #include <iostream>
 
 #include "libfossdbmanagerclass.hpp"

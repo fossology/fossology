@@ -11,10 +11,10 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp $(FO_LDFLAGS)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE = test_copyright
 
@@ -53,7 +53,7 @@ coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a
 	./$(EXE)
 
 accuracy: agent run_tests.cc $(OBJECTS_ACC) libcopyright.a
-	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK); \
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK); \
 	./$(EXE)
 
 clean:

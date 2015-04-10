@@ -10,10 +10,10 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(CFLAGS) $(CXXFLAGS_FO) -I. -Wall -Wextra -Weffc++ -fopenmp
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -Weffc++ -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_LDFLAGS)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS)
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
