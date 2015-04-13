@@ -34,11 +34,11 @@ class AjaxBrowse extends DefaultPlugin
 {
   const NAME = "browse-processPost";
 
-  /** @var  UploadDao $uploadDao */
+  /** @var UploadDao $uploadDao */
   private $uploadDao;
-  /** @var  UserDao $userDao */
+  /** @var UserDao $userDao */
   private $userDao;
-  /** @var  DbManager dbManager */
+  /** @var DbManager dbManager */
   private $dbManager;
   /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
@@ -233,7 +233,22 @@ class AjaxBrowse extends DefaultPlugin
     }
     $rejectableUploadId = ($this->userPerm || $row['status_fk'] < 4) ? $uploadId : 0;
     $tripleComment = array($rejectableUploadId, $row['status_fk'], htmlspecialchars($row['status_comment']));
-    $output = array($nameColumn, $currentStatus, $tripleComment, $currentAssignee, $dateCol, $pairIdPrio);
+    
+    $sql = "SELECT rf_pk, rf_shortname FROM upload_clearing_license ucl, license_ref"
+            . " WHERE ucl.group_fk=$1 AND upload_fk=$2 AND ucl.rf_fk=rf_pk";
+    $stmt = __METHOD__.'.collectMainLicenses';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array(Auth::getGroupId(),$uploadId));
+    $mainLicenses = array();
+    while($lic=$this->dbManager->fetchArray($res)){
+      $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
+              ."?mod=popup-license&rf=$lic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
+              .'" href="javascript:;">'.$lic['rf_shortname'].'</a> <a href="javascript:;" '
+              ." onclick=\"removeMainLicense($uploadId,$lic[rf_pk]);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
+    }
+    $this->dbManager->freeResult($res);
+    
+    $output = array($nameColumn, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
   
@@ -313,7 +328,7 @@ class AjaxBrowse extends DefaultPlugin
 
   private function getOrderString()
   {
-    $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
+    $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
 
     $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
 

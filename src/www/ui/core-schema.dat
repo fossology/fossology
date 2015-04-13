@@ -1401,6 +1401,23 @@
   $Schema["TABLE"]["package"]["package_name"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_name\" SET NOT NULL;";
   $Schema["TABLE"]["package"]["package_name"]["UPDATE"] = "";
 
+  
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"rf_fk\" int8;";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["UPDATE"] = "";
+  
+  
   $Schema["TABLE"]["upload_packages"]["package_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_packages"]["package_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"package_fk\" int4;";
   $Schema["TABLE"]["upload_packages"]["package_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"package_fk\" SET NOT NULL;";
@@ -1764,6 +1781,7 @@
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
   $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
+  $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";

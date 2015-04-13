@@ -350,28 +350,27 @@ class ui_browse extends FO_Plugin
 
     if (empty($Upload))
     {
-      $html .= $this->ShowFolder($Folder, $show);
+      return $html . $this->ShowFolder($Folder, $show);
     }
-    else {
-      if (empty($uploadTreeId))
+
+    if (empty($uploadTreeId))
+    {
+      $row = $dbManager->getSingleRow(
+          $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
+          $sqlLog=__METHOD__.".getTreeRoot");
+      if ($row)
       {
-        $row = $dbManager->getSingleRow(
-            $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
-            $sqlLog=__METHOD__.".getTreeRoot");
-        if ($row)
-        {
-          $uploadTreeId = $row['uploadtree_pk'];
-        } else
-        {
-          $this->vars['message'] = _("Missing upload tree parent for upload");
-          return $this->render('include/base.html.twig');
-        }
+        $uploadTreeId = $row['uploadtree_pk'];
       }
-      $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
-      $this->vars['content'] = $html;
-      return $this->render('include/base.html.twig');
+      else
+      {
+        $this->vars['message'] = _("Missing upload tree parent for upload");
+        return $this->render('include/base.html.twig');
+      }
     }
-    return $html;
+    $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
+    $this->vars['content'] = $html;
+    return $this->render('include/base.html.twig');
   }
 
   /**

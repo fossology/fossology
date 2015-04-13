@@ -755,7 +755,31 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
   }
   
+  public function getMainLicenseIds($uploadId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT rf_fk FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($uploadId,$groupId));
+    $ids = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $ids[] = $row['rf_fk'];
+    }
+    $this->dbManager->freeResult($res);
+    return $ids;
+  }
   
+  public function makeMainLicense($uploadId, $groupId, $licenseId)
+  {
+    $this->dbManager->insertTableRow('upload_clearing_license',
+            array('upload_fk'=>$uploadId,'group_fk'=>$groupId,'rf_fk'=>$licenseId));
+  }
+  
+  public function removeMainLicense($uploadId, $groupId, $licenseId)
+  {
+    $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
+            array($uploadId,$groupId,$licenseId));
+  }
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
