@@ -118,8 +118,7 @@ class CopyrightHistogram  extends HistogramBase {
   } // RegisterMenus()
 
 
-
-  protected  function createScriptBlock()
+  protected function createScriptBlock()
   {
     return "
 
@@ -130,10 +129,8 @@ class CopyrightHistogram  extends HistogramBase {
     } );
 
     ";
-
   }
 
 }
 
 $NewPlugin = new CopyrightHistogram;
-//$NewPlugin->Initialize();

@@ -15,6 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 
 /**
@@ -234,7 +236,6 @@ class copyright_list extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $Plugins;
     global $PG_CONN;
 
     // make sure there is a db connection
@@ -288,8 +289,6 @@ class copyright_list extends FO_Plugin
     $NumInstances = 0;
     $rows = $this->GetRequestedRows($rows, $excl, $NumInstances, $filter);
 
-    //debugprint($rows, "rows");
-
     // micro menus
     $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
@@ -341,13 +340,10 @@ class copyright_list extends FO_Plugin
       }
 
       /* Offset is +1 to start numbering from 1 instead of zero */
-
       $LinkLast = "$viewName&agent=$agent_pk";
       $ShowBox = 1;
       $ShowMicro=NULL;
 
-      // base url
-      $ucontent = rawurlencode($Content);
       $baseURL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
 
       // display rows
@@ -377,7 +373,6 @@ class copyright_list extends FO_Plugin
 
         if ($ok)
         {
-
           $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
         }
       }
@@ -399,10 +394,9 @@ class copyright_list extends FO_Plugin
 
     $this->vars['pageContent'] = $OutBuf;
     return;
+  }
 
-  } // Output()
-
-    function getTemplateName()
+  function getTemplateName()
   {
     return 'copyrightlist.html.twig';
   }
@@ -428,7 +422,7 @@ class copyright_list extends FO_Plugin
     }
     return array($tableName, $modBack,$viewName);
   }
+}
 
-};
 $NewPlugin = new copyright_list;
 $NewPlugin->Initialize();
