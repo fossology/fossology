@@ -33,6 +33,8 @@
 #define GETCLEAREDIP  INSTALLDIR "/getClearedIp -u %d"
 #define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
 #define GETIRRELEVANTCMD   INSTALLDIR "/getIrrelevant -u %d --gId=%d"
+#define GETMAINLICENSECMD   INSTALLDIR "/getMainLicense -u %d --gId=%d"
+#define GETCLEAREDCOMMENTCMD   INSTALLDIR "/getClearedComment -u %d --gId=%d"
 
 static char* pipeRun(const char* cmdLineFmt, ...)
 {
@@ -93,4 +95,14 @@ char* getKeywords(int uploadId)
 char* getIrrelevant(int uploadId, int groupId)
 {
   return pipeRun(GETIRRELEVANTCMD, uploadId, groupId);
+}
+
+char* getMainLicense(int uploadId, int groupId)
+{
+  return pipeRun(GETMAINLICENSECMD, uploadId, groupId);
+}
+
+char* getClearedComment(int uploadId, int groupId)
+{
+  return pipeRun(GETCLEAREDCOMMENTCMD, uploadId, groupId);
 }

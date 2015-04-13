@@ -416,14 +416,14 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
           }
         }
 
-        if (fileNames == NULL) {
-          return 0;
-        }
         if (content && text && fileNames) {
           table_addRow(table, content, text, fileNames);
         }
         else if (content && fileNames) { // TODO use a count argument in addRowsFromJson_ContentTextFiles
           table_addRow(table, content, fileNames);
+        }
+        else if (content && text) {
+          table_addRow(table, content, text);
         }
 
         if (fileNames) g_free(fileNames);
@@ -898,75 +898,53 @@ int main(int argc, char** argv) {
     mxml_node_t* p11b = (mxml_node_t*) createnumsection(body, "2", "2");
     addparaheading(p11b, NULL, "Add all copyrights to README_OSS", "2", "2");
     mxml_node_t* p11b1 = (mxml_node_t*) createnumsection(body, "2", "2");
-    addparaheading(p11b1, NULL, "All license(global and others - see above)including copyright notice and disclaimer of warranty must be added to the README_OSS file", "2", "2");
+    addparaheading(p11b1, NULL, "All license (global and others - see above) including copyright notice and disclaimer of warranty must be added to the README_OSS file", "2", "2");
 
     mxml_node_t* p112 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p112, NULL, "Obligations", "1", "2");
 
     mxml_node_t* p113 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p113, NULL, "Technical or other obligations", "1", "2");
+    
 
+    mxml_node_t* p114 = (mxml_node_t*) createnumsection(body, "1", "2");
+    addparaheading(p114, NULL, "Global licenses", "1", "2");
+
+    rg_table* tableMainLicense = table_new(body, 2, "2000", "4000");
+    table_addRow(tableMainLicense, "License", "Note");
+    {
+      char* jsonMainLicense = getMainLicense(uploadId, groupId);
+      json_object * jobj = json_tokener_parse(jsonMainLicense);
+
+      if (!addRowsFromJson_ContentTextFiles(tableMainLicense, jobj, "statements")) {
+        printf("cannot parse json string: %s\n", jsonMainLicense);
+        fo_scheduler_disconnect(1);
+        exit(1);
+      }
+
+      json_object_put(jobj);
+      g_free(jsonMainLicense);
+    }
+
+    
     mxml_node_t* p12 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p12, NULL, "Notes", "0", "2");
-    mxml_node_t* tbl_notes = (mxml_node_t*) createtable(body, "9638");
-    createtablegrid(tbl_notes, tbcol3, 3);
-    mxml_node_t* tr_notes = (mxml_node_t*) createrowproperty(tbl_notes);
-    createrowdata(tr_notes, tbcol3[0], "File With Path");
-    createrowdata(tr_notes, tbcol3[1], "Identified Licesne");
-    createrowdata(tr_notes, tbcol3[2], "Comment Entered");
-    char* sql_notesComment = (char*) malloc(4 * DECLEN);
+    
+    rg_table* tableNotes = table_new(body, 3, "2000", "3000", "2000");
+    table_addRow(tableNotes, "Identified License", "Comment Entered", "File with Path");
+    {
+      char* jsonCommentLicense = getClearedComment(uploadId, groupId);
+      json_object * jobj = json_tokener_parse(jsonCommentLicense);
 
-    sprintf(sql_notesComment, "SELECT license_ref_users.upload_pk_id,license_ref_users.license_names,license_ref_users.comments,uploadtree_a.ufile_name FROM license_ref_users INNER JOIN uploadtree_a ON license_ref_users.upload_pk_id = uploadtree_a.uploadtree_pk AND license_ref_users.comments IS NOT NULL WHERE uploadtree_a.upload_fk = %d;", uploadId);
-
-    PGresult* pgres_notes = PQexec(pgConn, sql_notesComment);
-    int sql_notesCommentCount = PQntuples(pgres_notes);
-    if (sql_notesComment) {
-      free(sql_notesComment);
-    }
-
-
-    mxml_node_t** tr_notesTable = NULL;
-
-    int k_notes = 0;
-    if (sql_notesCommentCount) {
-      for (int i = 0; i < sql_notesCommentCount; i++) {
-        tr_notesTable = (mxml_node_t**) realloc(tr_notesTable, sizeof ( mxml_node_t*)*(k_notes + 1));
-        tr_notesTable[k_notes] = (mxml_node_t*) createrowproperty(tbl_notes);
-
-        char * fullPath = NULL;
-        fullPath = (char*) malloc(sizeof (getFullFilePath(atoi(PQgetvalue(pgres_notes, i, 0)))));
-        fullPath = getFullFilePath(atoi(PQgetvalue(pgres_notes, i, 0)));
-        createrowdata(tr_notesTable[k_notes], "1638", fullPath);
-        if (fullpath) {
-          free(fullPath);
-        }
-        char* rfNotes = NULL;
-        rfNotes = (char*) malloc(sizeof (char) * (strlen(PQgetvalue(pgres_notes, i, 1)) + 1));
-        strcpy(rfNotes, PQgetvalue(pgres_notes, i, 1));
-        rfNotes[strlen(PQgetvalue(pgres_notes, i, 1))] = '\0';
-        if (rfNotes) {
-          int i = 0;
-          while (rfNotes[i] != '\0') {
-            if (rfNotes[i] == '>') {
-              rfNotes[i] = ',';
-            }
-            i++;
-          }
-        }
-        createrowdata(tr_notesTable[k_notes], "3000", rfNotes);
-
-        char* rfNotes1 = NULL;
-        rfNotes1 = (char*) malloc(sizeof (char)*(strlen(PQgetvalue(pgres_notes, i, 2)) + 1));
-        strcpy(rfNotes1, PQgetvalue(pgres_notes, i, 2));
-        rfNotes1[strlen(PQgetvalue(pgres_notes, i, 2))] = '\0';
-        createrowdata(tr_notesTable[k_notes], "5000", rfNotes1);
-
-        free(rfNotes);
-        free(rfNotes1);
-        k_notes++;
+      if (!addRowsFromJson_ContentTextFiles(tableNotes, jobj, "statements")) {
+        printf("cannot parse json string: %s\n", jsonCommentLicense);
+        fo_scheduler_disconnect(1);
+        exit(1);
       }
+
+      json_object_put(jobj);
+      g_free(jsonCommentLicense);
     }
-    PQclear(pgres_notes);
     //finish adding comments
 
     mxml_node_t* p13 = (mxml_node_t*) createnumsection(body, "0", "2");
