@@ -171,7 +171,8 @@ class ReuserPlugin extends DefaultPlugin
       return -1;
     }
     
-    $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId);
+    $reuseMode = intval($request->get('reuseMode'));
+    $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode);
     
     $agent = plugin_find($this->AgentName);
     return $agent->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
@@ -187,9 +188,10 @@ class ReuserPlugin extends DefaultPlugin
    * @param int $uploadId
    * @param int $reuseUploadId
    * @param int $reuseGroupId
+   * @param int $reuseMode
    * @internal description
    */
-  protected function createPackageLink($uploadId, $reuseUploadId, $reuseGroupId)
+  protected function createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode=0)
   {
     /** @var PackageDao */
     $packageDao = $this->getObject('dao.package');
@@ -207,7 +209,7 @@ class ReuserPlugin extends DefaultPlugin
 
     $packageDao->addUploadToPackage($uploadId, $package);
 
-    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, Auth::getGroupId(), $reuseGroupId);
+    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, Auth::getGroupId(), $reuseGroupId, $reuseMode);
   }
 
 }

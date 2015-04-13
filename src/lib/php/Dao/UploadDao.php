@@ -351,11 +351,12 @@ class UploadDao extends Object
    * @param int $reusedUploadId
    * @param int $groupId
    * @param int $reusedGroupId
+   * @param int $reuseMode
    */
-  public function addReusedUpload($uploadId, $reusedUploadId, $groupId, $reusedGroupId)
+  public function addReusedUpload($uploadId, $reusedUploadId, $groupId, $reusedGroupId, $reuseMode=0)
   {
     $this->dbManager->insertTableRow('upload_reuse',
-            array('upload_fk'=>$uploadId, 'group_fk'=> $groupId, 'reused_upload_fk'=>$reusedUploadId, 'reused_group_fk'=>$reusedGroupId));
+            array('upload_fk'=>$uploadId, 'group_fk'=> $groupId, 'reused_upload_fk'=>$reusedUploadId, 'reused_group_fk'=>$reusedGroupId,'reuse_mode'=>$reuseMode));
   }
 
   /**
@@ -368,7 +369,7 @@ class UploadDao extends Object
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-        "SELECT reused_upload_fk, reused_group_fk FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
+        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
     $res = $this->dbManager->execute($statementName, array($uploadId, $groupId));
     $reusedPairs = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
