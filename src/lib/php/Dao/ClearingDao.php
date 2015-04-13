@@ -167,12 +167,6 @@ class ClearingDao extends Object
     return $clearingsWithLicensesArray;
   }
 
-  function booleanFromPG($in)
-  {
-    return $in == 't';
-  }
-
-
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -763,7 +757,7 @@ INSERT INTO clearing_decision (
     $res = $this->dbManager->execute($stmt,array($uploadId,$groupId));
     $ids = array();
     while ($row = $this->dbManager->fetchArray($res)) {
-      $ids[] = $row['rf_fk'];
+      $ids[$row['rf_fk']] = $row['rf_fk'];
     }
     $this->dbManager->freeResult($res);
     return $ids;
