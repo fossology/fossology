@@ -41,10 +41,14 @@ class TestPgDb
   /** @var array */
   private $sys_conf;
 
-  function __construct($dbName = null)
+  function __construct($dbName = null, $sysConf = null)
   {
     $testDbFactory = new \TestDbFactory();
-    $this->sys_conf = getenv('TSYSCONFDIR');
+    if (!empty($sysConf)) {
+      $this->sys_conf = getenv('TSYSCONFDIR');
+    } else {
+      $this->sys_conf = $sysConf;
+    }
     if(empty($this->sys_conf))
     {
       $this->sys_conf = $testDbFactory->setupTestDb($dbName);
@@ -55,7 +59,7 @@ class TestPgDb
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
     $this->connection = DBconnect($this->sys_conf);
-    
+
     require (dirname(dirname(__FILE__)).'/common-container.php');
     global $container;
     $logger = new Logger('default'); // $container->get('logger');
@@ -68,7 +72,7 @@ class TestPgDb
     $this->dropAllTables();
     $this->dropAllSequences();
   }
-  
+
   public function getFossSysConf()
   {
     return $this->sys_conf;
@@ -98,17 +102,19 @@ class TestPgDb
       $this->dbManager->queryOnce("DROP SEQUENCE $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
-  
+
   function __destruct()
   {
     $this->dbManager = null;
     $this->connection = null;
   }
-  
+
   function fullDestruct()
   {
+    pg_close($this->connection);
+    $GLOBALS['PG_CONN'] = false;
     $testDbFactory = new \TestDbFactory();
-    $testDbFactory->purgeTestDb();
+    $testDbFactory->purgeTestDb($this->sys_conf);
   }
 
   private function dirnameRec($path, $depth = 1)

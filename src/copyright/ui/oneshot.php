@@ -214,6 +214,7 @@ class agent_copyright_once extends FO_Plugin {
       $tmp_name = $_FILES['licfile']['tmp_name'];
     }
 
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
     if ($this->OutputType!='HTML' && file_exists($tmp_name))
     {
       $copyright_res = $this->AnalyzeOne();
@@ -230,8 +231,10 @@ class agent_copyright_once extends FO_Plugin {
       /* If this is a POST, then process the request. */
       if ($tmp_name) {
         if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
-          /* Size is not too big.  */
           $this->vars['content'] = $this->AnalyzeOne();
+        }
+        else {
+          $this->vars['message'] =  _('file is to large for one-shot copyright analyze');
         }
         return;
       }
@@ -240,7 +243,7 @@ class agent_copyright_once extends FO_Plugin {
     if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
       unlink($tmp_name);
     }
-    $_FILES['licfile'] = NULL;
+    // $_FILES['licfile'] = NULL;
   }
 
   protected function htmlContent()

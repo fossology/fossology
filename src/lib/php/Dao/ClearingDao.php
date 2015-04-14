@@ -167,12 +167,6 @@ class ClearingDao extends Object
     return $clearingsWithLicensesArray;
   }
 
-  function booleanFromPG($in)
-  {
-    return $in == 't';
-  }
-
-
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -668,7 +662,7 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @return array mapping 'shortname'=>'count'
    */
-  function getClearedLicenseMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
+  function getClearedLicenseIdAndMultiplicities(ItemTreeBounds $itemTreeBounds, $groupId)
   {
     $statementName = __METHOD__;
 
@@ -680,19 +674,20 @@ INSERT INTO clearing_decision (
     $sql = "$decisionsCte
             SELECT
               COUNT(*) AS count,
-              lr.rf_shortname AS shortname
+              lr.rf_shortname AS shortname,
+              rf_pk
             FROM decision
               INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
             WHERE NOT ce.removed
-            GROUP BY shortname";
+            GROUP BY shortname,rf_pk";
 
     $this->dbManager->prepare($statementName, $sql);
     $res = $this->dbManager->execute($statementName, $params);
     $multiplicity = array();
     while($row = $this->dbManager->fetchArray($res)){
-      $multiplicity[$row['shortname']] = $row['count'];
+      $multiplicity[$row['shortname']] = $row;
     }
     $this->dbManager->freeResult($res);
 
@@ -754,7 +749,31 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
   }
   
+  public function getMainLicenseIds($uploadId, $groupId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT rf_fk FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($uploadId,$groupId));
+    $ids = array();
+    while ($row = $this->dbManager->fetchArray($res)) {
+      $ids[$row['rf_fk']] = $row['rf_fk'];
+    }
+    $this->dbManager->freeResult($res);
+    return $ids;
+  }
   
+  public function makeMainLicense($uploadId, $groupId, $licenseId)
+  {
+    $this->dbManager->insertTableRow('upload_clearing_license',
+            array('upload_fk'=>$uploadId,'group_fk'=>$groupId,'rf_fk'=>$licenseId));
+  }
+  
+  public function removeMainLicense($uploadId, $groupId, $licenseId)
+  {
+    $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
+            array($uploadId,$groupId,$licenseId));
+  }
   
   /**
    * @param ItemTreeBounds $itemTreeBounds

@@ -35,20 +35,20 @@ class DeciderAgentPlugin extends AgentPlugin
 
   
   /**
-   * @param Request $request
+   * @param array $vars
    * @return string
    */
-  public function renderContent(Request $request, &$vars)
+  public function renderContent(&$vars)
   {
     $renderer = $GLOBALS['container']->get('twig.environment');
     return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
   }
   
   /**
-   * @param Request $request
+   * @param array $vars
    * @return string
    */
-  public function renderFoot(Request $request, &$vars)
+  public function renderFoot(&$vars)
   {
     return "";
   }

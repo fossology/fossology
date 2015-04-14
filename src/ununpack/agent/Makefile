@@ -33,11 +33,19 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE)
 
+coverage: $(FOLIB) $(EXE:%=%-coverage)
+
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
+departition-coverage: departition.c $(VARS)
+	$(CC) $< $(ALL_CFLAGS) $(FLAG_COV) -o $(@:%-coverage=%)
+
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+
+ununpack-coverage: ununpack.c libununpack_cov.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
+	$(CC) ununpack.c libununpack_cov.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $(@:%-coverage=%)
 
 install: all $(VARS)
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition

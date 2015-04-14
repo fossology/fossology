@@ -2,7 +2,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014 Siemens AG
+ Copyright (C) 2014-2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -46,16 +46,8 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
-use Fossology\Lib\Db\DbManager;
 
-$groupInfo = posix_getgrnam("fossy");
-posix_setgid($groupInfo['gid']);
-$group = `groups`;
-if (!preg_match("/\sfossy\s/",$group) && (posix_getgid()!=$groupInfo['gid']))
-{
-  print "FATAL: You must be in group 'fossy' to update the FOSSology database.\n";
-  exit(1);
-}
+use Fossology\Lib\Db\Driver\Postgres;
 
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
@@ -103,6 +95,16 @@ foreach($Options as $optKey => $optVal)
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
+$gInfo = posix_getgrnam($projectGroup);
+posix_setgid($gInfo['gid']);
+$groups = `groups`;
+if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid']))
+{
+  print "FATAL: You must be in group '$projectGroup'.\n";
+  exit(1);
+}
+
 require_once("$MODDIR/vendor/autoload.php");
 require_once("$MODDIR/lib/php/common-db.php");
 require_once("$MODDIR/lib/php/common-container.php");
@@ -119,7 +121,9 @@ require_once("$LIBEXECDIR/dbmigrate_2.0-2.5-pre.php");
 Migrate_20_25($Verbose);
 */
 
-if (empty($SchemaFilePath)) $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+if (empty($SchemaFilePath)) {
+  $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+}
 
 if (!file_exists($SchemaFilePath))
 {
@@ -128,6 +132,10 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
+$libschema->setDriver(new Postgres($PG_CONN));
+$previousSchema = $libschema->getCurrSchema();
+$isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
+
 $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
@@ -197,7 +205,6 @@ if (array_key_exists('r', $Options))
 }
 
 /* migration */
-global $libschema;
 $currSchema = $libschema->getCurrSchema();
 $sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
@@ -212,10 +219,24 @@ if(!array_key_exists('Release', $sysconfig)){
     require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
     migrate_25_26($Verbose);
   }
-  if(array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']) && $isUpdating)
   {
+    $timeoutSec = 20;
     echo "Missing column clearing_decision.clearing_pk, you should update to version 2.6.2 before migration\n";
-    exit(26);
+    echo "Enter 'i' within $timeoutSec seconds to ignore this warning and run the risk of losing clearing decisions: ";
+    $handle = fopen ("php://stdin","r");
+    stream_set_blocking($handle,0);
+    for($s=0;$s<$timeoutSec;$s++)
+    {
+      sleep(1);
+      $line = fread($handle,1);
+      if($line) break;
+    }
+    if(trim($line) != 'i')
+    {
+     echo "ABORTING!\n";
+     exit(26);
+    }
   }
   $dbManager->insertTableRow('sysconfig',
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
@@ -253,13 +274,6 @@ if($errors>0)
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
 }
 exit($errors);
-
-
-
-
-
-
-
 
 /**
  * \brief Load the license_ref table with licenses.

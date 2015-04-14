@@ -252,7 +252,7 @@ if [ $RUNTIME ]; then
    which composer
     if [ $? -eq 0  ]; then
         if [ $OFFLINE -eq 0 ]; then
-            composer selfupdate
+            composer selfupdate -q
         else
            echo "WARNING: composer is not updated due to the offline switch"
         fi

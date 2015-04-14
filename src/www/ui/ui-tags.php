@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_ui_tag", _("Tag"));
 
 class ui_tag extends FO_Plugin

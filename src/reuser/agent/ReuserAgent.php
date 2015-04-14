@@ -1,14 +1,21 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini, Andreas Würl
 
- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 namespace Fossology\Reuser;
 
@@ -28,25 +35,18 @@ include_once(__DIR__ . "/version.php");
 
 class ReuserAgent extends Agent
 {
-
   /** @var UploadDao */
   private $uploadDao;
-
   /** @var ClearingEventProcessor */
   private $clearingEventProcessor;
-
   /** @var AgentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
-
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
-
   /** @var ClearingDecisionProcessor */
   private $clearingDecisionProcessor;
-
   /** @var ClearingDao */
   private $clearingDao;
-
   /** @var DecisionTypes */
   private $decisionTypes;
 
@@ -62,26 +62,29 @@ class ReuserAgent extends Agent
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
   }
 
-
   function processUploadId($uploadId)
   {
-    /* TODO here it feels like we need a transaction
-     * but it also feels like it would have too big a scope
-     */
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    foreach($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reusePair)
+    {
+      $reusedUploadId = $reusePair['reused_upload_fk'];
+      $reusedGroupId = $reusePair['reused_group_fk'];
+      $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
+      if (false === $itemTreeBoundsReused)
+      {
+        continue;
+      }
+      $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+    }
+    return true;
+  }  
 
+  protected function processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId)
+  {
     $groupId = $this->groupId;
     $userId = $this->userId;
 
-    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    $reusedUploadId = $this->uploadDao->getReusedUpload($uploadId);
-    $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-
-    if (false === $itemTreeBoundsReused)
-    {
-      return true;
-    }
-
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $groupId);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $reusedGroupId);
     $currenlyVisibleClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
 
     $currenlyVisibleClearingDecisionsById = $this->mapByClearingId($currenlyVisibleClearingDecisions);

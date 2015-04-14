@@ -202,11 +202,7 @@ class Highlight extends Object
    */
   public function getHtmlElement()
   {
-    /**
-     * @var HtmlElement
-     */
-    $htmlElement = $this->htmlElement;
-    return $htmlElement;
+    return $this->htmlElement;
   }
 
 

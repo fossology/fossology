@@ -101,8 +101,7 @@ class UploadFilePage extends DefaultPlugin
     $vars['agentCheckBoxMake'] = '';
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
 
-    global $SysConf;
-    $rootFolder = $this->folderDao->getRootFolder($SysConf['auth'][Auth::USER_ID]);
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
     if (empty($folderId) && !empty($folderStructure))
     {
@@ -111,14 +110,15 @@ class UploadFilePage extends DefaultPlugin
     $vars['folderStructure'] = $folderStructure;
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
+    $vars[self::FOLDER_PARAMETER_NAME] = $request->get(self::FOLDER_PARAMETER_NAME);
     
     $parmAgentList = $this->getAgentPluginNames("ParmAgents");
     $vars['parmAgentContents'] = array();
     $vars['parmAgentFoots'] = array();
     foreach($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
-      $vars['parmAgentContents'][] = $agent->renderContent($request, $vars);
-      $vars['parmAgentFoots'][] = $agent->renderFoot($request, $vars);
+      $vars['parmAgentContents'][] = $agent->renderContent($vars);
+      $vars['parmAgentFoots'][] = $agent->renderFoot($vars);
     }
     
     $session = $request->getSession();
@@ -147,7 +147,6 @@ class UploadFilePage extends DefaultPlugin
   function handleFileUpload(Request $request, $folderId, UploadedFile $uploadedFile, $description)
   {
     global $MODDIR;
-    global $SysConf;
     global $SYSCONFDIR;
 
     define("UPLOAD_ERR_EMPTY", 5);
@@ -175,14 +174,15 @@ class UploadFilePage extends DefaultPlugin
     }
 
     $errorMessage = null;
-    if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
+    if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       return array(false, $upload_errors[UPLOAD_ERR_EMPTY]);
-    else if ($uploadedFile->getSize() >=  UploadedFile::getMaxFilesize() )  {
-        return array(false, $upload_errors[UPLOAD_ERR_INI_SIZE] . _(" is  really "). $uploadedFile->getSize() . " bytes.");
+    } else if ($uploadedFile->getSize() >= UploadedFile::getMaxFilesize()) {
+      return array(false, $upload_errors[UPLOAD_ERR_INI_SIZE] . _(" is  really ") . $uploadedFile->getSize() . " bytes.");
     }
 
-    if (empty($folderId))
+    if (empty($folderId)) {
       return array(false, $upload_errors[UPLOAD_ERR_INVALID_FOLDER_PK]);
+    }
 
     if(!$uploadedFile->isValid()) {
         return array(false,  $uploadedFile->getErrorMessage());
@@ -199,8 +199,8 @@ class UploadFilePage extends DefaultPlugin
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth'][Auth::USER_ID];
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
     if (empty($uploadId))

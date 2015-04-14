@@ -12,7 +12,9 @@ include_directories(
     ${fossology_SOURCE_DIR}/src/lib/c
     ${fossology_SOURCE_DIR}/src/lib/cpp
     ${fossology_SOURCE_DIR}/src/monk/agent
+    ${fossology_SOURCE_DIR}/src/wget_agent/agent
     ${fossology_SOURCE_DIR}/src/testing/lib/c
+    ${fossology_SOURCE_DIR}/src/testing/db/c
     ${GLIB_PKG_INCLUDE_DIRS}
     ${POSTGRES_INCLUDE_DIR}
     ${CHARDET_PKG}
@@ -113,6 +115,9 @@ set(SOURCE_FILES
     src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
     src/lib/cpp/uniquePtr.hpp
+    src/lib/cpp/tests/run_tests.cc
+    src/lib/cpp/tests/test_fossdbmanagerclass.cc
+    src/lib/cpp/tests/testUtils.hpp
     src/maintagent/agent/maintagent.c
     src/maintagent/agent/maintagent.h
     src/maintagent/agent/process.c
@@ -166,8 +171,6 @@ set(SOURCE_FILES
     src/monk/agent_tests/Unit/test_license.c
     src/monk/agent_tests/Unit/test_match.c
     src/monk/agent_tests/Unit/test_string_operations.c
-    src/monk/agent_tests/Unit/utils.c
-    src/monk/agent_tests/Unit/utils.h
     src/ninka/agent/databasehandler.cc
     src/ninka/agent/databasehandler.hpp
     src/ninka/agent/licensematch.cc

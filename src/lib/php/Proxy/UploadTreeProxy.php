@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -27,11 +28,21 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SKIP_THESE = 'skipThese';
   const OPT_ITEM_FILTER = 'ut.filter';
   const OPT_GROUP_ID = 'groupId';
+  const OPT_REALPARENT = 'realParent';
+  const OPT_RANGE = 'lft,rgt';
+  const OPT_EXT = 'ext';
+  const OPT_HEAD = 'head';
+  const OPT_AGENT_SET = 'agentArray';
+  const OPT_SCAN_REF = 'scanRef';
+  const OPT_CONCLUDE_REF = 'conRef';
+  const OPT_SKIP_ALREADY_CLEARED = 'alreadyCleared';
 
   /** @var string */
   private $uploadTreeTableName;
   /** @var int */
   private $uploadId;
+  /** @var array */
+  private $params = array();
 
   /**
    * @param int $uploadId
@@ -42,7 +53,7 @@ class UploadTreeProxy extends DbViewProxy
   {
     $this->uploadId = $uploadId;
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView';
+    $dbViewName = $uploadTreeViewName ?: 'UploadTreeView'.(isset($this->dbViewName) ?: '');
     $dbViewQuery = $this->createUploadTreeViewQuery($options, $uploadTreeTableName);
     parent::__construct($dbViewQuery, $dbViewName);
   }
@@ -66,10 +77,110 @@ class UploadTreeProxy extends DbViewProxy
     {
       return self::getDefaultUploadTreeView($this->uploadId, $uploadTreeTableName);
     }
-    else
+
+    $filter = '';
+    $unifier = '';
+    
+    if (array_key_exists(self::OPT_REALPARENT, $options))
     {
-      return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
+      $filter .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent=".$this->addParamAndGetExpr('realParent',$options[self::OPT_REALPARENT]);
+      $unifier .= "_".self::OPT_REALPARENT;
+    } 
+    elseif (array_key_exists(self::OPT_RANGE,$options))
+    {
+      $itemBounds = $options[self::OPT_RANGE];
+      $filter .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN ".$this->addParamAndGetExpr('lft',$itemBounds->getLeft()).
+             " AND ".$this->addParamAndGetExpr('rgt',$itemBounds->getRight()).")";
+      $unifier .= "_".self::OPT_RANGE;
     }
+    
+    if (array_key_exists(self::OPT_EXT, $options))
+    {
+      $filter .= " AND ufile_name ILIKE ".$this->addParamAndGetExpr('patternExt','%.'.$options[self::OPT_EXT]);
+      $unifier .= "_".self::OPT_EXT;
+    }
+    
+    if (array_key_exists(self::OPT_HEAD, $options))
+    {
+      $filter .= " AND ufile_name ILIKE ".$this->addParamAndGetExpr('patternHead',$options[self::OPT_HEAD].'%');
+      $unifier .= "_".self::OPT_HEAD;
+    }
+    
+    if(array_key_exists(self::OPT_SCAN_REF,$options) && array_key_exists(self::OPT_REALPARENT, $options))
+    {
+      $filter .= " AND EXISTS(SELECT * FROM ".$this->uploadTreeTableName." usub, license_file"
+              . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
+              . " WHERE";
+      $unifier .= "_".self::OPT_SCAN_REF;
+      if (array_key_exists(self::OPT_AGENT_SET, $options))
+      {
+        $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
+        $filter .= " agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).") AND";
+        $unifier .= "_".self::OPT_AGENT_SET;
+      }
+      $rfId = $this->addParamAndGetExpr('scanRef', $options[self::OPT_SCAN_REF]);
+      $filter .= " (license_file.rf_fk=$rfId OR rf_parent=$rfId) "
+              . " AND usub.pfile_fk=license_file.pfile_fk"
+              . " AND (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$this->uploadId.")";
+    }
+    elseif(array_key_exists(self::OPT_SCAN_REF,$options) && array_key_exists(self::OPT_RANGE, $options))
+    {
+      $filter .= " AND EXISTS(SELECT * FROM license_file"
+                . " LEFT JOIN license_map ON license_file.rf_fk=license_map.rf_fk AND usage=".LicenseMap::CONCLUSION
+                . " WHERE";
+      $unifier .= "_".self::OPT_EXT;
+      if (array_key_exists(self::OPT_AGENT_SET, $options))
+      {
+        $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
+        $filter .= " agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).") AND";
+        $unifier .= "_".self::OPT_AGENT_SET;
+      }
+      $rfId = $this->addParamAndGetExpr('scanRef', $options[self::OPT_SCAN_REF]);
+      $filter .= " (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND ut.pfile_fk=license_file.pfile_fk)";
+    }
+   
+    if(array_key_exists(self::OPT_CONCLUDE_REF, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
+            && array_key_exists(self::OPT_REALPARENT, $options))
+    {
+      $filter .=" AND EXISTS(SELECT * FROM ".$this->uploadTreeTableName." usub"
+              . " WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$this->uploadId
+              . " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
+              . "   WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
+              . "   AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+              . "   AND clearing_event_fk=clearing_event_pk"
+              . "   AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
+              . "   AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC)"
+              . ")";
+      $unifier .= "_".self::OPT_CONCLUDE_REF;
+    }
+    elseif(array_key_exists(self::OPT_CONCLUDE_REF, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
+            && array_key_exists(self::OPT_RANGE, $options))
+    {
+      $filter.= " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
+              . " WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
+              . " AND cd.uploadtree_fk=ut.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+              . " AND clearing_event_fk=clearing_event_pk"
+              . " AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
+              . " AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC)";
+      $unifier .= "_".self::OPT_CONCLUDE_REF;
+    }
+  
+    if(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
+            && array_key_exists(self::OPT_AGENT_SET, $options))
+    {
+      $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
+      $agentFilter = " AND agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).")";
+      $filter .= ' AND '.self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $options[self::OPT_GROUP_ID], $agentFilter);
+      $unifier .= "_".self::OPT_SKIP_ALREADY_CLEARED;
+    }
+    
+    if (array_key_exists(self::OPT_ITEM_FILTER, $options)) {
+      $filter .= ' '.$options[self::OPT_ITEM_FILTER];
+      $unifier .= "_".md5($options[self::OPT_ITEM_FILTER]);
+    }
+    $options[self::OPT_ITEM_FILTER] = $filter;
+    $this->dbViewName = $unifier;
+    return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
   }
 
   /**
@@ -108,13 +219,19 @@ class UploadTreeProxy extends DbViewProxy
     switch ($skipThese)
     {
       case "noLicense":
-      case "alreadyCleared":
-
-        $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
-        $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
-        $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
-        $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
-
+      case self::OPT_SKIP_ALREADY_CLEARED:
+        if(array_key_exists(self::OPT_AGENT_SET, $options))
+        {        
+          $agentIds = 'array[' . implode(',',$options[self::OPT_AGENT_SET]) . ']';
+          $agentFilter = " AND lr.agent_fk=ANY($agentIds)";
+        }
+        else
+        {
+          $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
+          $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+          $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+          $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
+        }
       case "noCopyright":
       case "noIp":
       case "noEcc":
@@ -171,15 +288,28 @@ class UploadTreeProxy extends DbViewProxy
   /**
    * @brief count elements childrenwise (or grandchildrenwise if child is artifact)
    * @param int $parent
+   * @deprecated
    * @return array
    */
   public function countMaskedNonArtifactChildren($parent)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $params = $this->params;
+    if(array_key_exists('uploadId', $params))
+    {
+      $uploadExpr = '$'.(1+array_search('uploadId', array_keys($params)));
+    }
+    else
+    {
+      $params[] = $this->uploadId;
+      $uploadExpr = '$'.count($params);
+    }
+    $params[] = $parent;
+    $parentExpr = '$'.count($params);
+
     $sql = "SELECT count(*) cnt, u.uploadtree_pk, u.ufile_mode FROM ".$this->uploadTreeTableName." u, "
-            . $this->getDbViewName() ." v where u.upload_fk=$1"
-            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent = $2 GROUP BY u.uploadtree_pk, u.ufile_mode";
+            . $this->getDbViewName() ." v where u.upload_fk=$uploadExpr"
+            . " AND v.lft BETWEEN u.lft and u.rgt and u.parent=$parentExpr GROUP BY u.uploadtree_pk, u.ufile_mode";
     $stmt = __METHOD__.'.'.$this->getDbViewName();
     if(!$this->materialized)
     {
@@ -187,7 +317,7 @@ class UploadTreeProxy extends DbViewProxy
       $stmt .= '.cte';
     }
     $dbManager->prepare($stmt,$sql);
-    $res = $dbManager->execute($stmt,array($this->uploadId,$parent));
+    $res = $dbManager->execute($stmt,$params);
     $children = array();
     $artifactContainers = array();
     while($row=$dbManager->fetchArray($res))
@@ -215,10 +345,12 @@ class UploadTreeProxy extends DbViewProxy
    */
   public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
   {
-    global $container;
-    $dbManager = $container->get('db.manager');
+    $uploadExpr = '$'.(count($this->params)+1);
+    $lftExpr = '$'.(count($this->params)+2);
+    $rgtExpr = '$'.(count($this->params)+3);
+    $dbManager = $GLOBALS['container']->get('db.manager');
     $sql = "SELECT u.uploadtree_pk FROM ".$this->getDbViewName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
+         . "WHERE u.upload_fk=$uploadExpr AND (u.lft BETWEEN $lftExpr AND $rgtExpr) AND u.ufile_mode & (3<<28) = 0";
     $stmt = __METHOD__.'.'.$this->getDbViewName();
     if(!$this->materialized)
     {
@@ -226,7 +358,8 @@ class UploadTreeProxy extends DbViewProxy
       $stmt .= '.cte';
     }
     $dbManager->prepare($stmt,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
+    $params = array_merge($this->params,
+            array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight()));
     $res = $dbManager->execute($stmt,$params);
     $descendants = array();
     while($row = $dbManager->fetchArray($res))
@@ -252,8 +385,23 @@ class UploadTreeProxy extends DbViewProxy
     {
       $sql = "SELECT count(*) FROM ($this->dbViewQuery) $this->dbViewName";
     }
-    $summary = $dbManager->getSingleRow($sql,array(),$this->dbViewName);
+    $summary = $dbManager->getSingleRow($sql,$this->params,$this->dbViewName);
     return $summary['count'];
+  }
+  
+  private function addParamAndGetExpr($key,$value)
+  {
+    if (array_key_exists($key, $this->params)) {
+      return '$' . (1 + array_search($key, array_keys($this->params)));
+    }
+
+    $this->params[] = $value;
+    return '$'.count($this->params);
+  }
+  
+  public function getParams()
+  {
+    return $this->params;
   }
   
 }

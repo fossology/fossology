@@ -24,13 +24,21 @@ CFLAGS_LOCALO = $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 all: encode nomos libnomos.a
 
+coverage: encode nomos_cov libnomos_cov.a
+
 debug: nomos-gl
 
 nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
+nomos_cov: nomos_cov.o $(COVERAGE) $(GENOBJS_COV)
+	$(CC) nomos_cov.o $(COVERAGE) $(GENOBJS_COV) $(CFLAGS_LOCAL) $(FLAG_COV) -o nomos
+
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
+
+nomos_cov.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -c $< $(CFLAGS_LOCALO) $(FLAG_COV) $(DEFS) -o $@
 
 nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
@@ -74,7 +82,7 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
-	rm -f encode nomos core *.a *.gc* \
+	rm -f encode nomos core *.a *.gc* *.o \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK

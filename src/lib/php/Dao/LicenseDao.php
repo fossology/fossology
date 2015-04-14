@@ -254,7 +254,7 @@ class LicenseDao extends Object
    * @param array $mask
    * @return array
    */
-  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true)
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true, $nameRange=array())
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -266,7 +266,14 @@ class LicenseDao extends Object
       $param[] = $itemTreeBounds->getRight();
       $condition = "lft BETWEEN $2 AND $3";
       $statementName .= ".subfolders";
-    } else
+      if(!empty($nameRange))
+      {
+        $condition .= " AND ufile_name BETWEEN $4 and $5";
+        $param[] = $nameRange[0];
+        $param[] = $nameRange[1];
+      }
+    }
+    else
     {
       $param[] = $itemTreeBounds->getItemId();
       $condition = "realparent = $2";
@@ -313,7 +320,7 @@ class LicenseDao extends Object
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
     $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.rf_pk) as unique
+    $sql = "SELECT rf_shortname AS license_shortname, rf_pk, count(*) AS count, count(distinct pfile_ref.pfile_fk) as unique
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
@@ -329,13 +336,16 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= " GROUP BY license_shortname";
+    $sql .= " GROUP BY license_shortname, rf_pk";
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $assocLicenseHist[$row['license_shortname']] = array('count' => intval($row['count']), 'unique' => intval($row['unique']));
+      $assocLicenseHist[$row['license_shortname']] = array(
+          'count' => intval($row['count']),
+          'unique' => intval($row['unique']),
+          'rf_pk' => intval($row['rf_pk']));
     }
     $this->dbManager->freeResult($result);
     return $assocLicenseHist;

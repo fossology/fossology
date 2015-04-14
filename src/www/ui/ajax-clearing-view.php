@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -17,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
@@ -141,9 +142,8 @@ class AjaxClearingView extends FO_Plugin
    */
   function Output()
   {
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $action = GetParm("do", PARM_STRING);
     $uploadId = GetParm("upload", PARM_INTEGER);
     $uploadTreeId = GetParm("item", PARM_INTEGER);
@@ -167,7 +167,15 @@ class AjaxClearingView extends FO_Plugin
       case "removeLicense":
         $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, true, ClearingEventTypes::USER);
         return new JsonResponse();
+        
+      case "makeMainLicense":
+        $this->clearingDao->makeMainLicense($uploadId, $groupId, $licenseId);
+        return new JsonResponse();
 
+      case "removeMainLicense":
+        $this->clearingDao->removeMainLicense($uploadId, $groupId, $licenseId);
+        return new JsonResponse();
+        
       case "setNextPrev":
       case "setNextPrevCopyRight":
       case "setNextPrevIp":
@@ -205,6 +213,8 @@ class AjaxClearingView extends FO_Plugin
     list($addedClearingResults, $removedLicenses) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
     $licenseEventTypes = new ClearingEventTypes();
 
+    $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
+
     $table = array();
     /** @var ClearingResult $clearingResult */
     foreach ($addedClearingResults as $licenseShortName => $clearingResult)
@@ -224,7 +234,13 @@ class AjaxClearingView extends FO_Plugin
       }
 
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
-      $actionLink = "<a href=\"javascript:;\" onClick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><div class=\"delete\"></div></a>";
+      $actionLink = "<a href=\"javascript:;\" onclick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
+      if (in_array($clearingResult->getLicenseId(), $mainLicIds)) {
+        $actionLink .= ' <img src="images/icons/star_filled_16.png" alt="mainLicense"/>';
+      }
+      else {
+        $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" border=\"0\"/></a>";
+      }
 
       $reportInfoField = nl2br(htmlspecialchars($reportInfo));
       $commentField = nl2br(htmlspecialchars($comment));
@@ -245,7 +261,9 @@ class AjaxClearingView extends FO_Plugin
         $agents = $this->getAgentInfo($clearingResult, $uberUri, $uploadTreeId);
         $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
         $licenseId = $clearingResult->getLicenseId();
-        $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class=\"add\"></div></a>";
+        $actionLink = "<a href=\"javascript:;\" onclick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"add\" src=\"images/space_16.png\" alt=\"\"/></a>";
+        $filled = in_array($clearingResult->getLicenseId(), $mainLicIds) ? 'filled_' : '';
+        $actionLink .= ' <img src="images/icons/star_'.$filled.'16.png" alt="mainLicense"/>';
 
         $idArray = array($uploadTreeId, $licenseId);
         $id = implode(',', $idArray);

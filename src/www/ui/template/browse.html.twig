@@ -1,0 +1,62 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  {% include 'change_license_modal.html.twig' %}
+  {% include 'ui-clearing-view_bulk.html.twig' %}
+  <div class="modal" id="bulkHistoryModal" hidden>
+  {% include 'bulk-history.html.twig' %}
+  </div>
+
+  <table border="0" style="padding:2px; width:100%">
+    <tr>
+      <td style="vertical-align:top; height:100%; width:25%">
+  
+      {% if not(agentMap is empty) %}
+        <table border="0" class="semibordered" id="lichistogram"></table>
+        <br/><br/>
+        {{ "Hint"|trans }}:
+        {{ 'Click on the license name to search for where the license is found in the file listing.'|trans}}
+        <br/><br/>
+        {% include 'browse_license-summary.html.twig' %}
+      {% endif %}
+      {% include 'browse_license-agent_selector.html.twig' %}
+
+        <button onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
+        <br/>
+        <span id="bulkIdResult" hidden></span>
+      </td>
+      <td style="vertical-align:top; height:100%; width:75%">
+        <table border="0" id="dirlist" style="margin-left:9px;" class="semibordered"></table>
+  
+        {{ parent() }}
+      </td>
+    </tr>
+  </table>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
+  <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
+  <script src="scripts/change-license-common.js" type="text/javascript"></script>
+  <script src="scripts/change-license-browse.js" type="text/javascript"></script>
+  <script src="scripts/license.js" type="text/javascript"></script>
+  <script src="scripts/tools.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    {% set bulkHistoryOptions = '&all=1' %}
+    {% include 'bulk-history.js.twig' %}
+  </script>
+  <script type="text/javascript">
+    {% include 'browse_license-lic_hist.js.twig' %}
+  </script>
+  <script type="text/javascript">
+    {% include 'browse_file.js.twig' %}
+  </script>
+{% endblock %}

@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Reuser\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
-use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\AgentDao;
@@ -34,7 +33,6 @@ use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-use Mockery as M;
 use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
@@ -53,8 +51,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $clearingDao;
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
-  /** @var ClearingDecisionProcessor */
-  private $clearingDecisionProcessor;
   /** @var UploadDao */
   private $uploadDao;
   /** @var HighlightDao */
@@ -86,6 +82,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -256,7 +253,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
+    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$groupId=3,$groupId);
     
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
@@ -332,8 +329,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2);
-
+    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$groupId=3,$groupId);
     
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();

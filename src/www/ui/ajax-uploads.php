@@ -15,7 +15,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
 use Fossology\Lib\Auth\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * \file ajax-uploads.php
@@ -66,7 +68,7 @@ class core_uploads extends FO_Plugin
       }
       $V .= "</option>\n";
     }
-    return $V;
+    return new Response($V, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
 }

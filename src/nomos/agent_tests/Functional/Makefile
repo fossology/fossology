@@ -25,12 +25,16 @@ EXE_DIR = ../../agent/
 all: $(FOLIB)
 	$(MAKE) -C $(EXE_DIR)
 
-test: all
-	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
-#	./shunit2 --plugin example OneShot_test.sh
+all-coverage: $(FOLIB)
+	$(MAKE) -C $(EXE_DIR) coverage
 
-coverage:
-	@echo "nothing to do"
+test: all test-run
+
+coverage: all-coverage test-run
+
+test-run:
+	$(PHPUNIT) --log-junit nomos-Xunit.xml --configuration tests.xml
+#	./shunit2 --plugin example OneShot_test.sh
 
 # note DO NOT put *.xml in the clean rule; it will remove the tests.xml file
 # which is needed to run the tests!

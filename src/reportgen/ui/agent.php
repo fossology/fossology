@@ -35,47 +35,55 @@ class ReportGenerator extends DefaultPlugin
 
   protected function handle(Request $request)
   {
-    global $SysConf;
-    $user_pk = $SysConf['auth'][Auth::USER_ID];
-    $group_pk = $SysConf['auth'][Auth::GROUP_ID];
-
+    $groupId = Auth::getGroupId();
     $uploadId = intval($request->get('upload'));
-    if ($uploadId <=0)
+    try
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("parameter error"))));
+      $upload = $this->getUpload($uploadId, $groupId);
     }
-
-    if (GetUploadPerm($uploadId) < Auth::PERM_WRITE)
+    catch(Exception $e)
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("permission denied"))));
-    }
-
-    $dbManager = $this->getObject('db.manager');
-    $row = $dbManager->getSingleRow("SELECT upload_filename FROM upload WHERE upload_pk=$1", array($uploadId), "getUploadName");
-
-    if ($row === false)
-    {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("cannot find uploadId"))));
+      return $this->flushContent($e->getMessage());
     }
     
-    $shortName = $row['upload_filename'];
     $reportGenAgent = plugin_find('agent_reportgen');
-    $job_pk = JobAddJob($user_pk, $group_pk, $shortName, $uploadId);
+    $userId = Auth::getUserId();
+    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jq_pk = $reportGenAgent->AgentAdd($job_pk, $uploadId, $error, array());
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
 
-    if ($jq_pk<0)
+    if ($jobQueueId<0)
     {
-      return $this->render('include/base.html.twig', $this->mergeWithDefault(array('content'=>_("Cannot schedule").": ".$error)));
+      return $this->flushContent(_('Cannot schedule').": $error");
     }
 
-    $vars['jqPk'] = $jq_pk;
-    $vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
-    $vars['reportType'] = "report";
-    $text = sprintf(_("Generating new report for '%s'"), $shortName);
+    $vars = array('jqPk' => $jobQueueId,
+                  'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'reportType' => "report");
+    $text = sprintf(_("Generating new report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
-            
     return $this->render("report.html.twig", $this->mergeWithDefault($vars));
+  }
+  
+  protected function getUpload($uploadId, $groupId)
+  {  
+    if ($uploadId <=0)
+    {
+      throw new Exception(_("parameter error"));
+    }
+    /** @var UploadDao */
+    $uploadDao = $this->getObject('dao.upload');
+    if (!$uploadDao->isAccessible($uploadId, $groupId))
+    {
+      throw new Exception(_("permission denied"));
+    }
+    /** @var Upload */
+    $upload = $uploadDao->getUpload($uploadId);
+    if ($upload === null)
+    {
+      throw new Exception(_('cannot find uploadId'));
+    }
+    return $upload;
   }
 
   function preInstall()

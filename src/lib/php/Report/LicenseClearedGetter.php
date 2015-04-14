@@ -29,6 +29,7 @@ use Fossology\Lib\Db\DbManager;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
+  private $onlyComments = false;
   /** @var ClearingDao */
   private $clearingDao;
   /** @var LicenseDao */
@@ -66,11 +67,24 @@ class LicenseClearedGetter extends ClearedGetterCommon
         {
           continue;
         }
-        $reportInfo = $clearingLicense->getReportInfo();
+        
+        if ($this->onlyComments && !($comment = $clearingLicense->getComment())) {
+          continue;
+        }
+
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
-        $text = $reportInfo ?: $this->getCachedLicenseText($licenseId, $groupId);
         
+        if ($this->onlyComments)
+        {
+          $text = $comment;
+        }
+        else
+        {
+          $reportInfo = $clearingLicense->getReportInfo();
+          $text = $reportInfo ? : $this->getCachedLicenseText($licenseId, $groupId);
+        }
+
         $ungroupedStatements[] = array(
           'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
@@ -80,6 +94,14 @@ class LicenseClearedGetter extends ClearedGetterCommon
     }
 
     return $ungroupedStatements;
+  }
+  
+  /**
+   * @param boolean $displayOnlyCommentedLicenseClearings
+   */
+  public function setOnlyComments($displayOnlyCommentedLicenseClearings)
+  {
+    $this->onlyComments = $displayOnlyCommentedLicenseClearings;
   }
 
   /**

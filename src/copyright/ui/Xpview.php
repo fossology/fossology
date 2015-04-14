@@ -117,8 +117,7 @@ class Xpview extends DefaultPlugin
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
-    global $SysConf;
-    $userId = $SysConf['auth'][Auth::USER_ID];
+    $userId = Auth::getUserId();
     if (!empty($lastItem) && $changed =="true")
     {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);

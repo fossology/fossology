@@ -19,27 +19,49 @@
  * \brief Perform nomos functional test
  */
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
-
+use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Test\TestInstaller;
 
 class NomosFunTest extends PHPUnit_Framework_TestCase
 {
-  public $nomos;
-  public $testdir;
+  private $testdir;
+  private $agentDir;
+
+  /** @var TestPgDb */
+  private $testDb;
+  /** @var TestInstaller */
+  private $testInstaller;
 
   function setUp()
   {
-    $this->testdir = dirname(dirname(__FILE__)).'/testdata/NomosTestfiles';
-    $this->assertFileExists($this->testdir,"NomoFunTest FAILURE! $this->testdir not found\n");
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
+    $this->testDb = new TestPgDb("nomosfun".time());
+    $this->agentDir = dirname(dirname(__DIR__))."/";
+    $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
+
+    $sysConf = $this->testDb->getFossSysConf();
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->install($this->agentDir);
+
+    $this->testDb->createSequences(array(), true);
+    $this->testDb->createPlainTables(array(), true);
+    $this->testDb->alterTables(array(), true);
+  }
+
+  public function tearDown()
+  {
+    $this->testInstaller->uninstall($this->agentDir);
+    $this->testInstaller->clear();
+    $this->testInstaller->rmRepo();
+    $this->testDb = null;
   }
 
   function testDiffNomos()
   {
-    print "starting NomosFunTest\n";
-    $last = exec("find $this->testdir -type f -not \( -wholename \"*svn*\" \) -exec $this->nomos -l '{}' + > scan.out", $out, $rtn);
+    $sysConf = $this->testDb->getFossSysConf();
+    $nomos = $this->agentDir . "/agent/nomos";
+
+    $last = exec("find $this->testdir -type f -not \( -wholename \"*svn*\" \) -exec $nomos -c $sysConf -l '{}' + > scan.out", $out, $rtn);
 
     $file_correct = dirname(dirname(__FILE__))."/testdata/LastGoodNomosTestfilesScan";
     $last = exec("wc -l < $file_correct");

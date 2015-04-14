@@ -15,7 +15,7 @@ $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
 
 $(OBJS): %.o: %.c %.h
-	$(CC) -c $<
+	$(CC) -c $(ALL_CFLAGS) $<
 
 clean:
 	@echo "make $(LIB) clean"

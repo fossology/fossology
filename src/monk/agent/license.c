@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "license.h"
 #include "string_operations.h"
+#include "monk.h"
 
 int ignoredLicenseNamesCount = 2;
 char* ignoredLicenseNames[] = {"Void", "No_license_found"};
@@ -47,7 +48,7 @@ Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, uns
 
     License license;
     license.refId = refId;
-    license.shortname = licShortName;
+    license.shortname = g_strdup(licShortName);
 
     char* licenseText = getLicenseTextForLicenseRefId(dbManager, refId);
     GArray* licenseTokens = tokenize(licenseText, DELIMITERS);
@@ -70,6 +71,7 @@ void licenses_free(Licenses* licenses) {
     for (guint i = 0; i < licenseArray->len; i++) {
       License license = g_array_index(licenseArray, License, i);
       g_array_free(license.tokens, TRUE);
+      g_free(license.shortname);
     }
 
     g_array_free(licenseArray, TRUE);

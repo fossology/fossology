@@ -50,8 +50,7 @@ class AdminGroupUsers extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
+    $userId = Auth::getUserId();
     /** @var UserDao */
     $userDao = $this->getObject('dao.user');
     $groupMap = $userDao->getAdminGroupMap($userId, @$_SESSION['UserLevel']);

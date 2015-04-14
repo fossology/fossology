@@ -64,7 +64,8 @@ $(TESTDIRS):
 coverage-report-html:
 	$(call coverage-report-html,.)
 
-coverage: $(COVDIRS)
+coverage:
+	$(MAKE) -k $(COVDIRS)
 	$(MAKE) coverage-report-html
 $(COVDIRS):
 	$(MAKE) -s -C $(@:cov-%=%) coverage
@@ -74,12 +75,12 @@ $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
 phpvendors:
-	composer install
+	composer install -q
 
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); composer install --no-dev)
+	(cd $(DESTDIR)$(MODDIR); composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

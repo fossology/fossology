@@ -17,6 +17,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file common-folders.php
  * \brief
@@ -53,10 +55,9 @@ function FolderGetTop()
 function GetUserRootFolder()
 {
   global $PG_CONN;
-  global $SysConf;
 
   /* validate inputs */
-  $user_pk = $SysConf['auth']['UserId'];
+  $user_pk = Auth::getUserId();
 
   /* everyone has a user_pk, even if not logged in.  But verify. */
   if (empty($user_pk)) return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";

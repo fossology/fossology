@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -26,11 +26,12 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
-
 use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
@@ -44,6 +45,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var TestInstaller */
+  private $testInstaller;
+  
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -59,7 +63,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
-
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
@@ -84,6 +87,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -94,37 +98,15 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
-
-    $confFile = $sysConf."/fossology.conf";
-    $fakeInstallationDir = "$sysConf/inst";
-    $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
-
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n[DIRECTORIES]\nMODDIR = $fakeInstallationDir";
-    file_put_contents($confFile, $config);
-    if (!is_dir($fakeInstallationDir))
-    {
-      mkdir($fakeInstallationDir, 0777, true);
-      system("ln -sf $libDir $fakeInstallationDir/lib");
-      if (!is_dir("$fakeInstallationDir/www/ui")) {
-        mkdir("$fakeInstallationDir/www/ui/", 0777, true);
-        touch("$fakeInstallationDir/www/ui/ui-menus.php");
-      }
-    }
-
-    $topDir = dirname(dirname(dirname(dirname(__DIR__))));
-    system("install -D $topDir/VERSION $sysConf");
-
-    $testRepoDir = "$libDir/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
-    $sysConf = $this->testDb->getFossSysConf();
-    system("rm $sysConf/repo -rf");
-    system("rm $sysConf/inst -rf");
-    unlink($sysConf."/VERSION");
-    unlink($sysConf."/fossology.conf");
+    $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()
@@ -142,7 +124,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData_license_ref();
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
-    //$this->testDb->resetSequenceAsMaxOf('FileLicense_pkey', 'license_file', 'fl_pk');
   }
 
   private function getHeartCount($output)

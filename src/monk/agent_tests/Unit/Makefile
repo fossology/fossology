@@ -13,8 +13,9 @@ include $(VARS)
 LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -fopenmp -lm $(TESTLIB) -Werror
+TESTDBDIR = $(TOP)/src/testing/db/c
+TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit -I $(TESTDIR) -I $(TESTDBDIR)
+CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
 
@@ -34,20 +35,23 @@ OBJECTS = test_string_operations.o \
           test_match.o \
           test_diff.o \
           test_database.o \
-          test_encoding.o \
-          utils.o
+          test_encoding.o
 
 all: $(EXE)
 
 test: all
 	./$(EXE)
 
-coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
+testlib:
+	$(MAKE) -C $(TESTDBDIR)
+	$(MAKE) -C $(TESTDIR)
+
+coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB} testlib
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 
-$(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB}
+$(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB} testlib
 	${MAKE} -C ${TESTDIR}
 	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(CFLAGS_LOCAL)
 

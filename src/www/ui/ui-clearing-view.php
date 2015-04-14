@@ -215,9 +215,8 @@ class ClearingView extends FO_Plugin
       return new Response("", Response::HTTP_BAD_REQUEST);
     }
 
-    global $SysConf;
-    $userId = $SysConf['auth'][Auth::USER_ID];
-    $groupId = $SysConf['auth'][Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 

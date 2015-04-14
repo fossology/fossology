@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
@@ -35,6 +36,9 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var TestInstaller */
+  private $testInstaller;
+
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -54,10 +58,13 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+
+    $this->agentDir = dirname(dirname(__DIR__));
   }
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -70,12 +77,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $sysConf = $this->testDb->getFossSysConf();
 
     $agentName = "monk";
-
-    $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
-    $instRet = 0;
-    system($install="install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION", $instRet);
-    $this->assertEquals(0, $instRet, 'copying version file failed '.$install);
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
@@ -86,31 +88,23 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     }
     $retCode = pclose($pipeFd);
 
-    unlink("$sysConf/mods-enabled/$agentName/VERSION");
-    rmdir("$sysConf/mods-enabled/$agentName");
-    rmdir("$sysConf/mods-enabled");
-
     return array($output,$retCode);
   }
 
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
-
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
-    file_put_contents($confFile, $config);
-
-    $testRepoDir = dirname(dirname(dirname(__DIR__)))."/lib/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
+    $this->testInstaller->install($this->agentDir);
   }
 
   private function rmRepo()
   {
-    $sysConf = $this->testDb->getFossSysConf();
-    system("rm $sysConf/repo -rf");
-    unlink($sysConf."/fossology.conf");
+    $this->testInstaller->uninstall($this->agentDir);
+    $this->testInstaller->clear();
+    $this->testInstaller->rmRepo();
   }
 
   private function setUpTables()

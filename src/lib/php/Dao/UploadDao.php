@@ -294,7 +294,6 @@ class UploadDao extends Object
     return $parent['uploadtree_pk'];
   }
 
-
   public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
     $statementName = __METHOD__ . $uploadTreeTableName;
@@ -350,32 +349,30 @@ class UploadDao extends Object
   /**
    * @param int $uploadId
    * @param int $reusedUploadId
+   * @param int $groupId
+   * @param int $reusedGroupId
    */
-  public function addReusedUpload($uploadId, $reusedUploadId)
+  public function addReusedUpload($uploadId, $reusedUploadId, $groupId, $reusedGroupId)
   {
-    $statementName = __METHOD__;
-
-    $this->dbManager->prepare($statementName,
-        "INSERT INTO upload_reuse (upload_fk, reused_upload_fk) VALUES($1, $2)");
-    $res = $this->dbManager->execute($statementName, array($uploadId, $reusedUploadId));
-    $this->dbManager->freeResult($res);
+    $this->dbManager->insertTableRow('upload_reuse',
+            array('upload_fk'=>$uploadId, 'group_fk'=> $groupId, 'reused_upload_fk'=>$reusedUploadId, 'reused_group_fk'=>$reusedGroupId));
   }
 
   /**
    * @param int $uploadId
+   * @param int $groupId
    * @return int
    */
-  public function getReusedUpload($uploadId)
+  public function getReusedUpload($uploadId, $groupId)
   {
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-        "SELECT reused_upload_fk FROM upload_reuse WHERE upload_fk = $1");
-    $res = $this->dbManager->execute($statementName, array($uploadId));
-    $row = $this->dbManager->fetchArray($res);
-    $reusedUploadId = intval($row['reused_upload_fk']);
+        "SELECT reused_upload_fk, reused_group_fk FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
+    $res = $this->dbManager->execute($statementName, array($uploadId, $groupId));
+    $reusedPairs = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    return $reusedUploadId;
+    return $reusedPairs;
   }
 
   /**
@@ -415,18 +412,30 @@ class UploadDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param bool $isFlat plain files from sub*folders instead of folders
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  public function countNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
   {
-    $sql = "SELECT u.* FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
-    $this->dbManager->prepare($stmt=__METHOD__,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
-    $res = $this->dbManager->execute($stmt,$params);
-    $descendants = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    return $descendants;
+    $stmt=__METHOD__;
+    $sql = "SELECT count(*) FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
+         . "WHERE ut.upload_fk=$1";
+    $params = array($itemTreeBounds->getUploadId());
+    if (!$isFlat)
+    {
+      $stmt = __METHOD__.'.parent';
+      $params[] = $itemTreeBounds->getItemId();
+      $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
+    }
+    else
+    {
+      $params[] = $itemTreeBounds->getLeft();
+      $params[] = $itemTreeBounds->getRight();
+      $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
+    }
+    
+    $descendants = $this->dbManager->getSingleRow($sql,$params);
+    return $descendants['count'];
   }
   
   

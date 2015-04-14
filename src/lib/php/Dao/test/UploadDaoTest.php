@@ -415,18 +415,17 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   }
   
   
-  public function testGetNonArtifactDescendants()
+  public function testCountNonArtifactDescendants()
   {
     $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
     $this->testDb->insertData(array('uploadtree_a'));
     
     $artifact = new ItemTreeBounds(2,'uploadtree_a', 1, 2, 3);
-    $artifactDescendants = $this->uploadDao->getNonArtifactDescendants($artifact);
-    assertThat($artifactDescendants, emptyArray());
+    $artifactDescendants = $this->uploadDao->countNonArtifactDescendants($artifact);
+    assertThat($artifactDescendants, is(0));
    
     $zip = new ItemTreeBounds(1,'uploadtree_a', 1, 1, 24);
-    $zipDescendants = $this->uploadDao->getNonArtifactDescendants($zip);
-    $zipMatcher = array_map(function($id){ return hasKeyValuePair('uploadtree_pk',$id);}, array(6,7,8,10,11,12));
-    assertThat($zipDescendants, arrayContainingInAnyOrder( $zipMatcher ) );
+    $zipDescendants = $this->uploadDao->countNonArtifactDescendants($zip);
+    assertThat($zipDescendants, is(count(array(6,7,8,10,11,12)) ) );
   }
 }

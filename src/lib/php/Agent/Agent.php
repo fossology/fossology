@@ -126,7 +126,7 @@ abstract class Agent extends Object
   {
     debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     $this->scheduler_disconnect($exitvalue);
-    exit($exitvalue);
+    throw new \Exception('agent fail in '.__FILE__.':'.__LINE__,$exitvalue);
   }
 
   function scheduler_disconnect($exitvalue)

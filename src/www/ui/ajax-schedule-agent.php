@@ -1,5 +1,6 @@
 <?php
 
+use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Response;
 /***********************************************************
  Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
@@ -49,7 +50,6 @@ class ajax_schedule_agent extends FO_Plugin
   {
     global $Plugins;
     global $PG_CONN;
-    global $SysConf;
     $UploadPk = GetParm("upload",PARM_INTEGER);
     $Agent = GetParm("agent",PARM_STRING);
     if (empty($UploadPk) || empty($Agent)) {
@@ -67,10 +67,8 @@ class ajax_schedule_agent extends FO_Plugin
     $ShortName = $UploadRow['upload_filename'];
     pg_free_result($result);
 
-
-    /* Create Job */
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
+    $user_pk = Auth::getUserId();
+    $group_pk = Auth::getGroupId();
     $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $UploadPk);
 
     $Dependencies = array();

@@ -18,7 +18,9 @@
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,8 +47,8 @@ class AdviceLicense extends DefaultPlugin
   protected function handle(Request $request)
   {
     $rf = intval($request->get('rf'));
-    $userId = $_SESSION['UserId'];
-    $groupId = $_SESSION['GroupId'];
+    $userId = $_SESSION[Auth::USER_ID];
+    $groupId = $_SESSION[Auth::GROUP_ID];
     /** @var UserDao */
     $userDao = $this->getObject('dao.user');
     $canEdit = $userDao->isAdvisorOrAdmin($userId,$groupId);
@@ -59,10 +61,10 @@ class AdviceLicense extends DefaultPlugin
       return $this->render('advice_license.html.twig', $this->mergeWithDefault($vars));
     }
 
-    $vars = $this->getDataRow($_SESSION['GroupId'], $rf);
+    $vars = $this->getDataRow($groupId, $rf);
     if ($vars === false)
     {
-      throw new \Exception('invalid license candidate');
+      return $this->flushContent( _('invalid license candidate'));
     }
 
     if ($request->get('save'))

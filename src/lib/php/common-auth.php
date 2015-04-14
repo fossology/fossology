@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -56,8 +57,8 @@ function account_check(&$user, &$passwd, &$group = "")
       $user = $user_passwd_array['user'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
       $user = $user_passwd_array['username'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['group']))
-      $group = $user_passwd_array['group'];
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname']))
+      $group = $user_passwd_array['groupname'];
     if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
       $passwd = $user_passwd_array['password'];
   }
@@ -67,7 +68,7 @@ function account_check(&$user, &$passwd, &$group = "")
        $uid_arr = posix_getpwuid(posix_getuid());
        $user = $uid_arr['name'];
      */
-    echo "FATAL: You should add '--username USERNAME' when running OR add 'user=USERNAME' in ~/.fossology.rc before running.\n";
+    echo "FATAL: You should add '--username USERNAME' when running OR add 'username=USERNAME' in ~/.fossology.rc before running.\n";
     exit(1);
   }
   if (empty($passwd)) {
@@ -81,13 +82,8 @@ function account_check(&$user, &$passwd, &$group = "")
   }
 
   if (!empty($user)) {
-    $row = $dbManager->getSingleRow(
-      "SELECT users.*, groups.group_name
-       FROM users LEFT JOIN groups ON groups.group_pk = users.group_fk
-       WHERE user_name = $1",
-      array($user),
-      __METHOD__.".lookUpUser"
-    );
+    $userDao = $GLOBALS['container']->get('dao.user');
+    $row = $userDao->getUserAndDefaultGroupByUserName($user);
     if(false === $row) {
       echo "User name is invalid.\n";
       exit(1);
@@ -98,7 +94,8 @@ function account_check(&$user, &$passwd, &$group = "")
     if (empty($group)) {
       $group = $row['group_name'];
       $groupId = $row['group_fk'];
-    } else {
+    }
+    else {
       $rowGroup = $dbManager->getSingleRow(
         "SELECT group_pk
         FROM group_user_member INNER JOIN groups ON groups.group_pk = group_user_member.group_fk
@@ -114,7 +111,7 @@ function account_check(&$user, &$passwd, &$group = "")
     }
     $SysConf['auth']['GroupId'] = $groupId;
     if (empty($groupId)) {
-      echo "Group not found.\n";
+      echo "Group '$group' not found.\n";
       exit(1);
     }
 

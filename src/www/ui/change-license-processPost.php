@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,9 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 define("TITLE_changeLicProcPost", _("Private: Change license file post"));
@@ -88,8 +90,8 @@ class changeLicenseProcessPost extends FO_Plugin
       return $this->errorJson("bad item id");
     }
 
-    $userId = $_SESSION['UserId'];
-    $groupId = $_SESSION['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
     if(!empty($decisionMark))
     {
@@ -140,9 +142,9 @@ class changeLicenseProcessPost extends FO_Plugin
     /** @var agent_fodecider $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
 
-    $conflictStrategyId = null; // TODO add option in GUI
-    $ErrorMsg = "";
-    $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $ErrorMsg, array(), $conflictStrategyId);
+    $conflictStrategyId = null;
+    $errorMsg = "";
+    $jq_pk = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $conflictStrategyId);
 
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
@@ -150,11 +152,11 @@ class changeLicenseProcessPost extends FO_Plugin
     //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
 
-    if (empty($ErrorMsg) && ($jq_pk>0)) {
+    if (empty($errorMsg) && ($jq_pk>0)) {
       return new JsonResponse(array("jqid" => $jq_pk));
     }
     else {
-      return $this->errorJson($ErrorMsg, 500);
+      return $this->errorJson($errorMsg, 500);
     }
   }
 
