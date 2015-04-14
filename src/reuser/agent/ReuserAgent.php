@@ -129,8 +129,6 @@ class ReuserAgent extends Agent
     return true;
   }
 
-  
-  
   protected function processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId)
   {
     $groupId = $this->groupId;
@@ -144,7 +142,7 @@ class ReuserAgent extends Agent
 
     $clearingDecisionsToImport = array_diff_key($clearingDecisionsById,$currenlyVisibleClearingDecisionsById);
 
-    $sql = "SELECT * FROM uploadtree WHERE upload_pk=$1 AND ufile_name=$2";
+    $sql = "SELECT ut.* FROM uploadtree ur, uploadtree ut WHERE ur.upload_fk=$2 AND ur.pfile_fk=$3 AND ut.upload_fk=$1 AND ut.ufile_name=ur.ufile_name";
     $stmt = __METHOD__.'.reuseByName';
     $this->dbManager->prepare($stmt, $sql);
     $treeDao = $GLOBALS['container']->get('dao.tree');
@@ -152,19 +150,18 @@ class ReuserAgent extends Agent
     foreach($clearingDecisionsToImport as $clearingDecision)
     {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
-      $reusedFile = basename($reusedPath);
-      
-      $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),$reusedFile));
+    
+      $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),$itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       
       while($row = $this->dbManager->fetchArray($res))
       {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
-        $diffLevel = system("diff $reusedPath $newPath | wc -l");
+        $diffLevel = system($cmd="diff $reusedPath $newPath | wc -l");
         if($diffLevel===false)
         {
           throw new \Exception('cannot use diff tool');
         }
-        if($diffLevel<3)
+        if($diffLevel<5)
         {
           $this->createCopyOfClearingDecision($row['uploadtree_pk'], $userId, $groupId, $clearingDecision);
           $this->heartbeat(1);

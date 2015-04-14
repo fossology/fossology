@@ -171,7 +171,8 @@ class ReuserPlugin extends DefaultPlugin
       return -1;
     }
     
-    $reuseMode = intval($request->get('reuseMode'));
+    $reuseModeVal = $request->get('reuseMode');
+    $reuseMode = empty($reuseModeVal) ? 0 : 1;
     $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode);
     
     $agent = plugin_find($this->AgentName);
