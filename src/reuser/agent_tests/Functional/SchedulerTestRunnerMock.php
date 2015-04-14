@@ -20,13 +20,13 @@ namespace Fossology\Reuser\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
-
 use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
@@ -49,9 +49,11 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $uploadDao;
   /** @var AgentDao */
   private $agentDao;
+  /** @var TreeDao */
+  private $treeDao;
 
 
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter, TreeDao $treeDao)
   {
     $this->clearingDao = $clearingDao;
     $this->uploadDao = $uploadDao;
@@ -59,6 +61,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionFilter = $clearingDecisionFilter;
+    $this->treeDao = $treeDao;
   }
 
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
@@ -83,6 +86,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('businessrules.clearing_decision_filter')->andReturn($this->clearingDecisionFilter);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
+    $container->shouldReceive('get')->with('dao.tree')->andReturn($this->treeDao);
     $GLOBALS['container'] = $container;
 
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
