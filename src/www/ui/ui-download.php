@@ -19,6 +19,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -216,9 +217,7 @@ class ui_download extends FO_Plugin
 
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));
-    foreach($logger->getHandlers() as &$handler){
-      $handler->setLevel(Logger::ERROR);
-    }
+    BrowserConsoleHandler::reset();
     
     return $response;
   }
