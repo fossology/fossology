@@ -20,16 +20,19 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
@@ -108,7 +111,7 @@ class ClearingView extends FO_Plugin
     $unmaskAgents = $selectedAgentId;
     if(empty($selectedAgentId))
     {  
-      $scanJobProxy = new \Fossology\Lib\Proxy\ScanJobProxy($this->agentsDao,$uploadId);
+      $scanJobProxy = new ScanJobProxy($this->agentsDao,$uploadId);
       $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
       $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
@@ -267,16 +270,31 @@ class ClearingView extends FO_Plugin
       $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false);
     }
 
-    if ($isSingleFile)
+    if ($isSingleFile && $permission >= Auth::PERM_WRITE)
     {
-      if ($permission >= Auth::PERM_WRITE)
+      $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
+      $licenseArray = $this->licenseDao->getLicenseArray($groupId);
+      // $clearingDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+      list($addedResults, $removedResults) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+      if(count($addedResults)+count($removedResults)>0)
       {
-        $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
-        $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray($groupId);
-      } else
-      {
-        $this->vars['auditDenied'] = true;
+        array_unshift($licenseArray, array('id'=>0,'fullname'=>'','shortname'=>'------'));
       }
+      /** @var ClearingResult $result */
+      foreach ($removedResults as $result)
+      {
+        array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
+      }
+      /** @var ClearingResult $result */
+      foreach ($addedResults as $result)
+      {
+        array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
+      }
+      $this->vars['licenseArray'] = $licenseArray;
+    }
+    elseif($isSingleFile)
+    {
+      $this->vars['auditDenied'] = true;
     }
 
     $clearingHistory = array();
