@@ -22,9 +22,6 @@ namespace Fossology\Lib\Report;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\License;
-use Fossology\Lib\Db\DbManager;
 
 class LicenseMainGetter extends ClearedGetterCommon
 {
@@ -33,30 +30,27 @@ class LicenseMainGetter extends ClearedGetterCommon
   /** @var LicenseDao */
   private $licenseDao;
   /** @var DbManager */
-  private $dbManager;
-  /** @var string[] */
-  private $licenseCache = array();
 
   public function __construct() {
     global $container;
 
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
-    $this->dbManager = $container->get('db.manager');
 
     parent::__construct($groupBy = 'text');
   }
 
   protected function getStatements($uploadId, $uploadTreeTableName, $groupId = null)
   {
-    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT, true);
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT, true);
     $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
     $allStatements = array();
     foreach ($mainLicIds as $originLicenseId) {
       $allStatements[] = array(
         'content' => $licenseMap->getProjectedShortname($originLicenseId),
-        'text' => ''
+        'text' => $this->licenseDao->getLicenseById($originLicenseId, $groupId)->getText()
       );
       
     }
