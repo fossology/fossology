@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -27,17 +27,11 @@ use Mockery as M;
 
 class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
 {
-  /**
-   * @var License
-   */
+  /** @var License */
   private $license1;
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao */
   private $licenseDao;
-  /**
-   * @var HighlightProcessor
-   */
+  /** @var HighlightProcessor */
   var $highlight;
 
   function setUp()
@@ -286,6 +280,20 @@ class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
         array(
             new Highlight(5, 10, Highlight::UNDEFINED, 'ref1', 0, 0),
             new Highlight(7, 9, Highlight::KEYWORD, 'ref2', 0, 0)
+        )));
+  }
+  
+  function testFlattenHighlightWithOverlappingEntriesThatHaveEqualEnd()
+  {
+    $highlight1 = new Highlight(5, 10, Highlight::MATCH, 'ref1', 0, 0);
+    $highlight2 = new Highlight(7, 10, Highlight::ADDED, 'ref2', 0, 0);
+    $highlights = array($highlight1, $highlight2);
+
+    $this->highlight->flattenHighlights($highlights);
+
+    assertThat($highlights, anArray(
+        array(
+            new Highlight(5, 10, Highlight::UNDEFINED, 'ref1', 0, 0),
         )));
   }
 }
