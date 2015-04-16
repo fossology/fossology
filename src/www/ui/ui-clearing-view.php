@@ -116,7 +116,7 @@ class ClearingView extends FO_Plugin
       $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $unmaskAgents, $highlightId, $clearingId);
-    $groupId = $_SESSION[Auth::GROUP_ID];
+    $groupId = Auth::getGroupId();
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
       $this->highlightProcessor->addReferenceTexts($highlightEntries, $groupId);
