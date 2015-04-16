@@ -1448,6 +1448,10 @@
   $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reused_group_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["UPDATE"] = "";
   
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reuse_mode\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reuse_mode\" SET NOT NULL, ALTER COLUMN \"reuse_mode\" SET DEFAULT 0;";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["UPDATE"] = "";
   
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
@@ -1895,7 +1899,7 @@
 
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_clearing\".\"group_fk\" IS 'who is working at upload';";
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"group_fk\" int4;";
-  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload_clearing"]["priority"]["DESC"] = "";

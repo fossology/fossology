@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -25,7 +25,6 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\License;
-use Fossology\Lib\Db\DbManager;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
@@ -34,8 +33,6 @@ class LicenseClearedGetter extends ClearedGetterCommon
   private $clearingDao;
   /** @var LicenseDao */
   private $licenseDao;
-  /** @var DbManager */
-  private $dbManager;
   /** @var string[] */
   private $licenseCache = array();
 
@@ -44,7 +41,6 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
-    $this->dbManager = $container->get('db.manager');
 
     parent::__construct($groupBy = 'text');
   }
@@ -53,7 +49,9 @@ class LicenseClearedGetter extends ClearedGetterCommon
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
-    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
+    $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
@@ -75,6 +73,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
         
+        if (!$this->onlyComments && in_array($licenseId, $mainLicIds)) {
+          continue;
+        }
+
         if ($this->onlyComments)
         {
           $text = $comment;

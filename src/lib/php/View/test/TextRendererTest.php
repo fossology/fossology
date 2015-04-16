@@ -30,24 +30,21 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
   const START_OFFSET = 10;
   const FRAGMENT_TEXT = "foo bar baz quux";
 
-  /**
-   * private TextFragment|MockInterface
-   */
+  /** @var TextFragment|MockInterface  */
   private $textFragment;
-
-  /**
-   * @var TextRenderer
-   */
+  /** @var TextRenderer */
   private $textRenderer;
 
   function setUp()
   {
     $this->textFragment = new TextFragment(self::START_OFFSET, self::FRAGMENT_TEXT);
     $this->textRenderer = new TextRenderer(new HighlightRenderer());
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
@@ -183,6 +180,19 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
 
     assertThat($renderedText, is("fo<a id=\"highlight\"></a><span class=\"hi-url\" title=\"0\">o <span class=\"hi-match\" title=\"0\">bar </span>ba</span>z quux"));
   }
+  
+  function testRenderHighlightThatIsIgnorableByBulk()
+  {
+    $highlight1 = new Highlight(14, 14, Highlight::DELETED, 0, 0, 'ref1');
 
+    $splitPositions = array(
+        14 => array(new SplitPosition(1, SplitPosition::ATOM, $highlight1)));
+    $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
+    $pastedText = strip_tags($renderedText);
+    $bulkText = preg_replace('/[!#]/',' ',$pastedText);
+    $cleanText = preg_replace('/\s\s+/',' ',$bulkText);
+
+    assertThat($cleanText, is("foo bar baz quux"));
+  }
+  
 }
-

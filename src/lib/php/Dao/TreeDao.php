@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -25,14 +25,9 @@ use Monolog\Logger;
 
 class TreeDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   public function __construct(DbManager $dbManager)
@@ -111,5 +106,18 @@ class TreeDao extends Object
      );
 
      return $row ? $row['uploadtree_pk'] : 0;
+  }
+  
+  public function getRepoPathOfPfile($pfileId, $repo="files")
+  {
+    $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));
+    global $LIBEXECDIR;
+    if (empty($pfileRow['pfile_sha1'])) {
+      return null;
+    }
+    $hash = $pfileRow['pfile_sha1'] . "." . $pfileRow['pfile_md5'] . "." . $pfileRow['pfile_size'];
+    $path = '';
+    exec("$LIBEXECDIR/reppath $repo $hash", $path);
+    return($path[0]);
   }
 }

@@ -731,52 +731,26 @@ int main(int argc, char** argv) {
     }
     table_free(tableHistog);
 
-    //TODO Global licenses
-#if 0
+    
+    
+    addparaheading(createnumsection(body, "0", "2"), NULL, "Main Licenses", "0", "2");
 
-    mxml_node_t* p6 = (mxml_node_t*) createnumsection(body, "0", "2");
-    addparaheading(p6, NULL, "Global Licenses", "0", "2");
+    rg_table* tableMainLicense = table_new(body, 2, "2000", "7638");
+    table_addRow(tableMainLicense, "License", "Text");
+    {
+      char* jsonMainLicense = getMainLicense(uploadId, groupId);
+      json_object * jobj = json_tokener_parse(jsonMainLicense);
 
-    //table 2 for actual license data
-    mxml_node_t* tbl2 = (mxml_node_t*) createtable(body, "9638");
-    createtablegrid(tbl2, tbcol3, 3);
-    mxml_node_t* tr22 = (mxml_node_t*) createrowproperty(tbl2);
-    createrowdata(tr22, tbcol3[0], "Package Name");
-    createrowdata(tr22, tbcol3[1], "Added Global Licenses");
-    createrowdata(tr22, tbcol3[2], "Comment");
-
-    mxml_node_t* tr_gl = (mxml_node_t*) createrowproperty(tbl2);
-    char* sql_global = (char*) malloc(sizeof (char)*1024);
-    sprintf(sql_global, "select * from priority_upload where upload_pk=%d", uploadId);
-    PGresult* pgres_gl = PQexec(pgConn, sql_global);
-
-    if (sql_global) {
-      free(sql_global);
-    }
-
-    if (pgres_gl) {
-
-      char* rfText = NULL;
-      createrowdata(tr_gl, "2000", PQgetvalue(ResQ1, 0, 0));
-      rfText = (char*) malloc(sizeof (char)*(strlen(PQgetvalue(pgres_gl, 0, 3)) + 1));
-      strcpy(rfText, PQgetvalue(pgres_gl, 0, 3));
-      rfText[strlen(PQgetvalue(pgres_gl, 0, 3))] = '\0';
-      int i = 0;
-      while (rfText[i] != '\0') {
-        if (rfText[i] == '>') {
-          rfText[i] = ',';
-        }
-        i++;
+      if (!addRowsFromJson_ContentTextFiles(tableMainLicense, jobj, "statements")) {
+        printf("cannot parse json string: %s\n", jsonMainLicense);
+        fo_scheduler_disconnect(1);
+        exit(1);
       }
 
-      createrowdata(tr_gl, "6000", rfText);
-      createrowdata(tr_gl, "1633", "");
-      free(rfText);
+      json_object_put(jobj);
+      g_free(jsonMainLicense);
     }
-    PQclear(pgres_gl);
-    PQclear(ResQ1);
-#endif
-    //end of global licenses
+    
 
 
     addparaheading(createnumsection(body, "0", "2"), NULL, "Other Licenses - DO NOT USE", "0", "2");
@@ -889,10 +863,7 @@ int main(int argc, char** argv) {
       g_free(jsonIrrelevant);
     }
     
-    
-    
-    
-    
+
     
     mxml_node_t* p11 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p11, NULL, "ToDos", "0", "2");
@@ -908,26 +879,6 @@ int main(int argc, char** argv) {
 
     mxml_node_t* p113 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p113, NULL, "Technical or other obligations", "1", "2");
-    
-
-    mxml_node_t* p114 = (mxml_node_t*) createnumsection(body, "1", "2");
-    addparaheading(p114, NULL, "Global licenses", "1", "2");
-
-    rg_table* tableMainLicense = table_new(body, 2, "2000", "4000");
-    table_addRow(tableMainLicense, "License", "Note");
-    {
-      char* jsonMainLicense = getMainLicense(uploadId, groupId);
-      json_object * jobj = json_tokener_parse(jsonMainLicense);
-
-      if (!addRowsFromJson_ContentTextFiles(tableMainLicense, jobj, "statements")) {
-        printf("cannot parse json string: %s\n", jsonMainLicense);
-        fo_scheduler_disconnect(1);
-        exit(1);
-      }
-
-      json_object_put(jobj);
-      g_free(jsonMainLicense);
-    }
 
     
     mxml_node_t* p12 = (mxml_node_t*) createnumsection(body, "0", "2");
