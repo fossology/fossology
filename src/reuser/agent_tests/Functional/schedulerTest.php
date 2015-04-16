@@ -41,6 +41,8 @@ include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
 class SchedulerTest extends \PHPUnit_Framework_TestCase
 {
+  private $groupId = 3;
+  private $userId = 2;
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */
@@ -55,7 +57,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadDao;
   /** @var HighlightDao */
   private $highlightDao;
-
+  /** @var Mock|TreeDao */
+  private $treeDao;
+  
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
 
@@ -73,10 +77,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+    $this->treeDao = \Mockery::mock(\Fossology\Lib\Dao\TreeDao::classname());
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter, $this->treeDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -179,7 +184,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    list($success, $output,$retCode) = $runner->run($uploadId=1, $userId=2);
+    list($success, $output,$retCode) = $runner->run($uploadId=1, $this->userId);
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
@@ -192,6 +197,34 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
+  
+  protected function insertDecisionFromTwoEvents($scope=DecisionScopes::ITEM,$originallyClearedItemId=23)
+  {
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+    
+    $addedLicenses = array($licenseRef1, $licenseRef2);
+    assertThat($addedLicenses, not(arrayContaining(null)));
+    
+    $clearingLicense1 = new ClearingLicense($licenseRef1, false, ClearingEventTypes::USER, "42", "44");
+    $clearingLicense2 = new ClearingLicense($licenseRef2, true, ClearingEventTypes::USER, "-42", "-44");
+
+    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId, $this->userId, $this->groupId,
+            $licenseRef1->getId(), $clearingLicense1->isRemoved(), 
+            $clearingLicense1->getType(), $clearingLicense1->getReportinfo(), $clearingLicense1->getComment());
+    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId, 5, $this->groupId,
+            $licenseRef2->getId(), $clearingLicense2->isRemoved(), 
+            $clearingLicense2->getType(), $clearingLicense2->getReportinfo(), $clearingLicense2->getComment());
+    
+    $addedEventIds = array($eventId1, $eventId2);
+    
+    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $scope, $addedEventIds);
+    
+    return array($clearingLicense1, $clearingLicense2, $addedEventIds);
+  }
+  
+  
+  
   /** @group Functional */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndAClearing()
   {
@@ -209,20 +242,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+    $this->insertDecisionFromTwoEvents();
     
-    $addedLicenses = array($licenseRef1, $licenseRef2);
-
-    assertThat($addedLicenses, not(arrayContaining(null)));
-
-    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3, $licenseRef1->getId(), false);
-    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId, 5, $groupId, $licenseRef2->getId(), true);
-    
-    $addedEventIds = array($eventId1, $eventId2);
-
-    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedEventIds);
-
     list($success,$output,$retCode) = $runner->run($uploadId=3);
 
     $this->assertTrue($success, 'cannot run runner');
@@ -230,7 +251,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     assertThat($this->getHeartCount($output), equalTo(0));
 
-    $decisions = $this->getFilteredClearings($uploadId, $groupId);
+    $decisions = $this->getFilteredClearings($uploadId, $this->groupId);
     assertThat($decisions, is(emptyArray()));
 
     $this->rmRepo();
@@ -253,43 +274,23 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$groupId=3,$groupId);
+    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId);
     
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
-    
-    $addedLicenses = array($licenseRef1, $licenseRef2);
-
-    assertThat($addedLicenses, not(arrayContaining(null)));
-
-    $clearingLicense1 = new ClearingLicense($licenseRef1, false, ClearingEventTypes::USER, "42", "44");
-    $clearingLicense2 = new ClearingLicense($licenseRef2, true, ClearingEventTypes::USER, "-42", "-44");
-    
-    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3,
-            $clearingLicense1->getLicenseId(), $clearingLicense1->isRemoved(), 
-            $clearingLicense1->getType(), $clearingLicense1->getReportinfo(), $clearingLicense1->getComment());
-    
-    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3,
-            $clearingLicense2->getLicenseId(), $clearingLicense2->isRemoved(), 
-            $clearingLicense2->getType(), $clearingLicense2->getReportinfo(), $clearingLicense2->getComment());
-      
-    $addedEventIds = array($eventId1, $eventId2);
-
-    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM, $addedEventIds);
+    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents();
     
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
 
-    list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId);
+    list($success,$output,$retCode) = $runner->run($uploadId, $this->userId, $this->groupId);
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
 
     assertThat($this->getHeartCount($output), equalTo(1));
 
-    $newUploadClearings = $this->getFilteredClearings($uploadId, $groupId);
-    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $groupId);
+    $newUploadClearings = $this->getFilteredClearings($uploadId, $this->groupId);
+    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $this->groupId);
 
     assertThat($newUploadClearings, is(arrayWithSize(1)));
 
@@ -329,45 +330,24 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$groupId=3,$groupId);
+    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId);
     
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
-    
-    $addedLicenses = array($licenseRef1, $licenseRef2);
-
-    assertThat($addedLicenses, not(arrayContaining(null)));
-
-    $clearingLicense1 = new ClearingLicense($licenseRef1, false, ClearingEventTypes::USER, "42", "44");
-    $clearingLicense2 = new ClearingLicense($licenseRef2, true, ClearingEventTypes::USER, "-42", "-44");
-    
+    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(DecisionScopes::REPO,$originallyClearedItemId=23);
     $clearingLicenses = array($clearingLicense1, $clearingLicense2);
-    
-    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3,
-            $clearingLicense1->getLicenseId(), $clearingLicense1->isRemoved(), 
-            $clearingLicense1->getType(), $clearingLicense1->getReportinfo(), $clearingLicense1->getComment());
-    
-    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3,
-            $clearingLicense2->getLicenseId(), $clearingLicense2->isRemoved(), 
-            $clearingLicense2->getType(), $clearingLicense2->getReportinfo(), $clearingLicense2->getComment());
-      
-    $addedEventIds = array($eventId1, $eventId2);
-
-    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $userId, $groupId, DecisionTypes::IDENTIFIED, DecisionScopes::REPO, $addedEventIds);
 
     /* upload 3 in the test db is the same as upload 2
      * items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
 
-    list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId);
+    list($success,$output,$retCode) = $runner->run($uploadId, $this->userId, $this->groupId);
     
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
 
     assertThat($this->getHeartCount($output), equalTo(0));
 
-    $newUploadClearings = $this->getFilteredClearings($uploadId, $groupId);
-    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $groupId);
+    $newUploadClearings = $this->getFilteredClearings($uploadId, $this->groupId);
+    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $this->groupId);
 
     assertThat($newUploadClearings, is(arrayWithSize(1)));
 
@@ -394,7 +374,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     /* reuser should have not created a correct local event history */
     $bounds = $this->uploadDao->getItemTreeBounds($originallyClearedItemId + $reusingUploadItemShift);
-    $newEvents = $this->clearingDao->getRelevantClearingEvents($bounds, $groupId);
+    $newEvents = $this->clearingDao->getRelevantClearingEvents($bounds, $this->groupId);
 
     assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
@@ -407,4 +387,78 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->rmRepo();
   }
+  
+  
+  
+  /** @group Functional */
+  public function testReuserRealScanWithARepoClearingEnhanced()
+  {
+    $this->runnerReuserScanWithARepoClearingEnhanced($this->runnerMock);
+  }
+  
+  private function runnerReuserScanWithARepoClearingEnhanced($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+    
+    $originallyClearedItemId = 23;
+    /* upload 3 in the test db is the same as upload 2 -> items 13-24 in upload 2 correspond to 33-44 */
+    $reusingUploadItemShift = 20;
+    
+    $this->dbManager->queryOnce("UPDATE uploadtree_a SET pfile_fk=351 WHERE uploadtree_pk=$originallyClearedItemId+$reusingUploadItemShift",
+            __METHOD__.'.minorChange');
+
+    $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId,$reuseMode=1);
+
+    $repoPath = $this->testDb->getFossSysConf().'/repo/files/';
+    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(4)->andReturn($repoPath.'04621571bcbabce75c4dd1c6445b87dec0995734.59cacdfce5051cd8a1d8a1f2dcce40a5.12320');
+    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(351)->andReturn($repoPath.'c518ce1658140b65fa0132ad1130cb91512416bf.8e913e594d24ff3aeabe350107d97815.35829');
+    
+    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(DecisionScopes::REPO,$originallyClearedItemId);
+    $clearingLicenses = array($clearingLicense1, $clearingLicense2);
+
+    list($success,$output,$retCode) = $runner->run($uploadId, $this->userId, $this->groupId);
+    
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
+
+    $newUploadClearings = $this->getFilteredClearings($uploadId, $this->groupId);
+    $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $this->groupId);
+
+    assertThat($newUploadClearings, is(arrayWithSize(1)));
+
+    assertThat($potentiallyReusableClearings, is(arrayWithSize(1)));
+    /** @var ClearingDecision */
+    $potentiallyReusableClearing = $potentiallyReusableClearings[0];
+    /** @var ClearingDecision */
+    $newClearing = $newUploadClearings[0];
+
+    /* they are actually the same ClearingDecision
+     * only sameFolder and sameUpload are different */
+    assertThat($newClearing, not(equalTo($potentiallyReusableClearing)));
+
+    assertThat($newClearing->getClearingLicenses(), arrayContainingInAnyOrder($clearingLicenses));
+
+    assertThat($newClearing->getType(), equalTo($potentiallyReusableClearing->getType()));
+    assertThat($newClearing->getScope(), equalTo($potentiallyReusableClearing->getScope()));
+
+    assertThat($newClearing->getUploadTreeId(),
+            equalTo($potentiallyReusableClearing->getUploadTreeId() + $reusingUploadItemShift));
+
+    /* reuser should have not created a correct local event history */
+    $bounds = $this->uploadDao->getItemTreeBounds($originallyClearedItemId + $reusingUploadItemShift);
+    $newEvents = $this->clearingDao->getRelevantClearingEvents($bounds, $this->groupId);
+
+    assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
+
+    /** @var ClearingEvent $newEvent */
+    foreach($newEvents as $newEvent)
+    {
+      assertThat($newEvent->getEventId(), anyOf($addedEventIds));
+      assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
+    }
+
+    $this->rmRepo();
+  }
+  
 }

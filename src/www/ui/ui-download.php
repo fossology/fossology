@@ -19,6 +19,9 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Monolog\Handler\BrowserConsoleHandler;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -211,6 +214,11 @@ class ui_download extends FO_Plugin
     {
       $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
     }
+
+    $logger = $container->get("logger");
+    $logger->pushHandler(new NullHandler(Logger::DEBUG));
+    BrowserConsoleHandler::reset();
+    
     return $response;
   }
 }

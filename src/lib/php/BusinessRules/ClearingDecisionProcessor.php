@@ -186,7 +186,7 @@ class ClearingDecisionProcessor extends Object
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @return array
+   * @return array(ClearingResult[],ClearingResult[])
    * @throws Exception
    */
   public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId, $usageId=LicenseMap::TRIVIAL)

@@ -26,8 +26,8 @@
     {{ 'Reference text'| trans }}:<br/>
     <textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
     <select name="bulkScope" id="bulkScope">
-      <option value="f">{{ 'scan only current Folder'| trans }}</option>
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
+      <option value="f">{{ 'scan only current Folder'| trans }}</option>
     </select>
     <input type="checkbox" id="forceDecision"/>{{ 'ignoreConflicts'|trans }}
     <br><button type="button" onclick='scheduleBulkScan();'>Schedule Bulk scan</button>

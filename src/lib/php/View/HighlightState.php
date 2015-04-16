@@ -1,7 +1,6 @@
 <?php
-
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -27,25 +26,15 @@ use Fossology\Lib\Util\Object;
 
 class HighlightState extends Object
 {
+  const PLACEHOLDER = " # ";
 
-  /**
-   * @var SplitPosition[]
-   */
+  /** @var SplitPosition[]  */
   private $elementStack;
-
-  /**
-   * @var HighlightRenderer
-   */
+  /** @var HighlightRenderer */
   private $highlightRenderer;
-
-  /**
-   * @param boolean
-   */
+  /** @param boolean */
   private $anchorDrawn;
-
-  /**
-   * @var boolean
-   */
+  /** @var boolean */
   private $insertBacklink;
 
   public function __construct(HighlightRenderer $highlightRenderer, $insertBacklink = false)
@@ -115,7 +104,7 @@ class HighlightState extends Object
           $result->appendMetaText($this->startSpan($entry));
           if ($entry->getAction() == SplitPosition::ATOM)
           {
-            $result->appendMetaText(" + " . $this->highlightRenderer->createSpanEnd($entry));
+            $result->appendMetaText(self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
           }
           break;
 

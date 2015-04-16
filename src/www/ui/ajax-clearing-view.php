@@ -106,7 +106,7 @@ class AjaxClearingView extends FO_Plugin
     {
       $licenseId = $licenseRef->getId();
       $shortNameWithFullTextLink = $this->urlBuilder->getLicenseTextUrl($licenseRef);
-      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><div class='add'></div></a>";
+      $actionLink = "<a href=\"javascript:;\" onClick=\"addLicense($uploadId, $uploadTreeId, $licenseId);\"><img src=\"images/space_16.png\" class=\"add\"/></a>";
 
       $licenses[] = array($shortNameWithFullTextLink, $actionLink);
     }
