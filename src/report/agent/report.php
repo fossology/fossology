@@ -16,6 +16,7 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
@@ -58,6 +59,9 @@ class ReportAgent extends Agent
   /** @var ClearingDao */
   private $clearingDao;
 
+  /** @var UserDao */
+  private $userDao;
+
   /** @var fontFamily */
   private $fontFamily = "Arial";
 
@@ -93,12 +97,14 @@ class ReportAgent extends Agent
     $this->uploadDao = $this->container->get("dao.upload");
     $this->licenseDao = $this->container->get("dao.license");
     $this->clearingDao = $this->container->get("dao.clearing");
+    $this->userDao = $this->container->get("dao.user");
   }
 
 
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
+    $userId = $this->userId; 
 
     $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
@@ -124,7 +130,7 @@ class ReportAgent extends Agent
                       "ip" => $ip,
                       "licensesIrre" => $licensesIrre
     );
-    $this->writeReport($contents, $uploadId, $groupId);
+    $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
   }
 
@@ -184,7 +190,7 @@ class ReportAgent extends Agent
    * @brief Design the summaryTable of the report
    * @param1 section
    */        
-  private function summaryTable($section, $packageName)
+  private function summaryTable($section, $packageName, $groupId, $userId)
   {
     
     $paragraphStyle = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
@@ -202,6 +208,7 @@ class ReportAgent extends Agent
     $cellSecondLen = 3800;
     $cellThirdLen = 5500; 
 
+    $userAndGroupName = $this->userDao->getUserNameAndGroupName($userId, $groupId);
     $table = $section->addTable($this->tablestyle);
     
     $table->addRow($rowWidth, $paragraphStyle);
@@ -220,7 +227,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, $paragraphStyle);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" <date> <last name, first name> <department>"), $firstRowStyle2, $paragraphStyle);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userAndGroupName['user_name']."  ".$userAndGroupName['group_name'].""), $firstRowStyle2, $paragraphStyle);
       
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -747,7 +754,7 @@ class ReportAgent extends Agent
    * @brief Design basicForClearingReport section of the report
    * @param1 section 
    */ 
-  private function basicForClearingReport($section)
+  private function basicForClearingReport($section, $uploadId, $packageName)
   {
     $heading = "5. Basis for Clearing Report";
     $section->addText(htmlspecialchars($heading), $this->tableHeading);
@@ -783,18 +790,18 @@ class ReportAgent extends Agent
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $cellRowSpan)->addText(htmlspecialchars("OSS Source Code"), $firstRowStyle);
-    $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("Link to Upload page of component;"), $rowTextStyle);
-    $cell = $table->addCell($secondColLen, $cellColSpan);
- 
+    $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("Link to Upload page of component:"), $rowTextStyle); 
+    $cell = $table->addCell($secondColLen, $cellColSpan)->addLink(Traceback_uri()."?mod=showjobs&upload=$uploadId", htmlspecialchars($packageName));
+
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $cellRowContinue);
-    $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("MD5 hash value of source code"), $rowTextStyle);
-    $cell = $table->addCell($secondColLen, $cellColSpan);
+    $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("MD5 hash value of source code:"), $rowTextStyle);
+    $cell = $table->addCell($secondColLen, $cellColSpan)->addText(htmlspecialchars("n/a"), $rowTextStyle);
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen)->addText(htmlspecialchars("Result of LCR editor" ), $firstRowStyle);
     $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("Embedded .xml file which can be checked by the LCR Editor is embedded here:"), $rowTextStyle);
-    $cell = $table->addCell($secondColLen, $cellColSpan);
+    $cell = $table->addCell($secondColLen, $cellColSpan)->addText(htmlspecialchars("n/a"), $rowTextStyle);
   
     $section->addTextBreak();
   }
@@ -1090,7 +1097,7 @@ class ReportAgent extends Agent
    * @param $contents, $uploadId
    * @returns true.
    */
-  private function writeReport($contents, $uploadId, $groupId)
+  private function writeReport($contents, $uploadId, $groupId, $userId)
   {
     global $SysConf;
 
@@ -1125,7 +1132,7 @@ class ReportAgent extends Agent
     $this->reportTitle($section);
 
     /* Summery table */
-    $this->summaryTable($section, $packageName);
+    $this->summaryTable($section, $packageName, $groupId, $userId);
 
     /* clearing protocol change log table */
     $this->clearingProtocolChangeLogTable($section);
@@ -1149,7 +1156,7 @@ class ReportAgent extends Agent
     $this->forOtherTodos($section);
 
     /* Basic for clearing report */
-    $this->basicForClearingReport($section);
+    $this->basicForClearingReport($section, $uploadId, $packageName);
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
