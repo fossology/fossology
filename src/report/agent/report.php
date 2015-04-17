@@ -21,6 +21,7 @@ use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
 use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\LicenseMainGetter;
 use PhpOffice\PhpWord;
 
 include_once(__DIR__ . "/version.php");
@@ -31,6 +32,8 @@ class ReportAgent extends Agent
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
 
+  /** @var LicenseMainGetter  */
+  private $licenseMainGetter;
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetterComment;
   
@@ -85,6 +88,7 @@ class ReportAgent extends Agent
     $this->ipClearedGetter = new XpClearedGetter("ip", null, true);
     $this->eccClearedGetter = new XpClearedGetter("ecc", null, true);
     $this->licenseClearedGetter = new LicenseClearedGetter();
+    $this->licenseMainGetter = new LicenseMainGetter();
     $this->bulkMatchesGetter = new BulkMatchesGetter();
     $this->LicenseIrrelevantGetter = new LicenseIrrelevantGetter();
 
@@ -103,6 +107,8 @@ class ReportAgent extends Agent
     $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licenses["statements"]));
+    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
+    $this->heartbeat(count($licensesMain["statements"]));
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($bulkLicenses["statements"]));
     $this->licenseClearedGetter->setOnlyComments(true);
@@ -122,7 +128,8 @@ class ReportAgent extends Agent
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
                       "ip" => $ip,
-                      "licensesIrre" => $licensesIrre
+		      "licensesIrre" => $licensesIrre,
+		      "licensesMain" => $licensesMain
     );
     $this->writeReport($contents, $uploadId, $groupId);
     return true;
@@ -803,7 +810,7 @@ class ReportAgent extends Agent
    * @brief Design globalLicesnetable section of the report
    * @param1 section 
    */ 
-  private function globalLicenseTable($section)
+  private function globalLicenseTable($section, $heading, $mainLicenses)
   {
     $rowHeight = 500;
     $firstColLen = 2000;
@@ -812,18 +819,31 @@ class ReportAgent extends Agent
     $firstRowStyle = array("bgColor" => "C0C0C0", "textAlign" => "center");
     $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
-    $section->addText(htmlspecialchars("7. Global Licenses"), $this->tableHeading);
+    $section->addText(htmlspecialchars("7. Main Licenses"), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
     $table->addRow($rowHeight);
     $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
     $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
     $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
-    $table->addRow($rowHeight);
+/*    $table->addRow($rowHeight);
     $table->addCell($firstColLen)->addText("");
     $table->addCell($secondColLen)->addText("");
-    $table->addCell($thirdColLen)->addText("");
-    
+    $table->addCell($thirdColLen)->addText("");*/
+    if(!empty($mainLicenses)){
+      foreach($mainLicenses as $licenseMain){
+        $table->addRow($rowHeight);
+        $cell1 = $table->addCell($firstColLen, $this->paragraphStyle); 
+        $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED),null,$this->paragraphStyle);
+        $cell2 = $table->addCell($secondColLen, $this->paragraphStyle); 
+        // replace new line character
+        $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
+        $cell2->addText($licenseText,null, $this->paragraphStyle);
+        $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle)->addText("");
+//        foreach($licenseStatement["files"] as $fileName){ 
+//          $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
+        }
+      }
     $section->addTextBreak(); 
   }
 
@@ -913,7 +933,7 @@ class ReportAgent extends Agent
         $cell2 = $table->addCell($secondColLen, $this->paragraphStyle); 
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-        $cell2->addText($licenseText,null, $this->paragraphStyle);
+        $cell2->addText($licenseText, null, $this->paragraphStyle);
         $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
         foreach($licenseStatement["files"] as $fileName){ 
           $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
@@ -1153,9 +1173,9 @@ class ReportAgent extends Agent
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
-
+print_r($contents);
     /* Display global licenses */
-    $this->globalLicenseTable($section);
+    $this->globalLicenseTable($section, $heading, $contents['licensesMain']['statements']);
 
     /* Display licenses(red) name,text and files */
     $this->redOSSLicenseTable($section);
