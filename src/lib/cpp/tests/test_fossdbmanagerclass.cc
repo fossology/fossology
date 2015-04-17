@@ -196,6 +196,9 @@ public:
     fo::QueryResult result = manager.queryPrintf("CREATE TABLE tbl()");
 
     CPPUNIT_ASSERT(result);
+
+    // TODO make this correctly
+    CPPUNIT_ASSERT(system((std::string("rm -rf '") + sysConf + "/mods-enabled'").c_str()) >= 0);
   }
 
 };
