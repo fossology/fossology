@@ -134,8 +134,8 @@ class ReportAgent extends Agent
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
                       "ip" => $ip,
-		      "licensesIrre" => $licensesIrre,
-		      "licensesMain" => $licensesMain
+                      "licensesIrre" => $licensesIrre,
+                      "licensesMain" => $licensesMain
     );
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
@@ -234,7 +234,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, $paragraphStyle);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userAndGroupName['user_name']."  ".$userAndGroupName['group_name'].""), $firstRowStyle2, $paragraphStyle);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userAndGroupName['user_name']."  <department>"), $firstRowStyle2, $paragraphStyle);
       
     $table->addRow($rowWidth, $paragraphStyle);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -798,7 +798,9 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $cellRowSpan)->addText(htmlspecialchars("OSS Source Code"), $firstRowStyle);
     $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("Link to Upload page of component:"), $rowTextStyle); 
-    $cell = $table->addCell($secondColLen, $cellColSpan)->addLink(Traceback_uri()."?mod=showjobs&upload=$uploadId", htmlspecialchars($packageName));
+    $cell = $table->addCell($secondColLen, $cellColSpan)->addText(""); 
+    /* TODO : add a package link to this column*/
+    //addLink(Traceback_uri()."?mod=showjobs&upload=$uploadId", htmlspecialchars($packageName));
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $cellRowContinue);
