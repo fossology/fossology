@@ -243,15 +243,14 @@ class AjaxBrowse extends DefaultPlugin
     while($lic=$this->dbManager->fetchArray($res)){
       $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
               ."?mod=popup-license&rf=$lic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
-              .'" href="javascript:;">'.$lic['rf_shortname'].'</a> <a href="javascript:;" '
-              ." onclick=\"removeMainLicense($uploadId,$lic[rf_pk]);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
+              .'" href="javascript:;">'.$lic['rf_shortname'].'</a>'
+              ."<img onclick=\"removeMainLicense($uploadId,$lic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
     }
     $this->dbManager->freeResult($res);
-    
+
     $output = array($nameColumn, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
-  
 
   /**
    * @param string $selectElementName
