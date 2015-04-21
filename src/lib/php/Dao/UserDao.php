@@ -53,7 +53,7 @@ class UserDao extends Object
     $sql = "SELECT user_pk, user_name FROM users LEFT JOIN group_user_member AS gum ON users.user_pk = gum.user_fk"
             . " WHERE gum.group_fk = $1";
     $this->dbManager->prepare($statementN, $sql);
-    $res = $this->dbManager->execute($statementN, array($_SESSION['GroupId']));
+    $res = $this->dbManager->execute($statementN, array(Auth::getGroupId()));
     while ($rw = $this->dbManager->fetchArray($res))
     {
       $userChoices[$rw['user_pk']] = $rw['user_name'];
