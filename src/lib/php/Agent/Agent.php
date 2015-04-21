@@ -53,7 +53,7 @@ abstract class Agent extends Object
   /** @var ContainerBuilder */
   protected $container;
 
-  private $schedulerMode;
+  protected $schedulerMode;
 
   function __construct($agentName, $version, $revision) {
     $this->agentName = $agentName;

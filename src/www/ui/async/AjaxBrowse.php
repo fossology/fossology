@@ -211,6 +211,13 @@ class AjaxBrowse extends DefaultPlugin
     {
       $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId'>$text</a>]";
     }
+    
+    if (plugin_find_id('ui_readmeoss') >= 0)
+    {
+      $text = _('mark');
+      $nameColumn .= ' [<input type="checkbox" name="uploads[]" style="vertical-align:bottom;margin:0px;" value="'.$uploadId.'"/>'.$text.']';
+    }
+    
     $dateCol = substr($row['upload_ts'], 0, 19);
     $pairIdPrio = array($uploadId, floatval($row[UploadBrowseProxy::PRIO_COLUMN]));
     if (!$this->userPerm && 4 == $row['status_fk'])

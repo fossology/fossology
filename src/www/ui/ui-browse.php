@@ -273,6 +273,11 @@ class ui_browse extends FO_Plugin
     }
 
     $this->vars['content'] = $output;
+    if (plugin_find_id('ui_readmeoss') >= 0)
+    {
+      $this->vars['uploadMultiSelectHook'] = '<br/><input type="hidden" name="mod" value="ui_readmeoss"/><input type="submit" value="Generate ReadMe_OSS"/>';
+    }
+
     return $this->render('ui-browse.html.twig');
   }
 
