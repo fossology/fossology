@@ -3,11 +3,18 @@
  Author: Daniele Fognini, Shaheem Azmal, Anupam Ghosh
  Copyright (C) 2014-2015, Siemens AG
 
- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 define("REPORT_AGENT_NAME", "report");
@@ -165,7 +172,7 @@ class ReportAgent extends Agent
   private function reportHeader($section)
   {
     $headerStyle = array("color" => "48CCCD", "size" => 20, "bold" => true, "name" => $this->fontFamily);
-    $header = $section->createHeader();
+    $header = $section->addHeader();
     $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
 
@@ -188,10 +195,10 @@ class ReportAgent extends Agent
     $footerCopyright = "Copyright © ".date("Y")." Siemens AG - Restricted"; 
     $footerSpace = str_repeat("  ", 7);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";
-    $footer = $section->createFooter(); 
+    $footer = $section->addFooter(); 
     $table = $footer->addTable("footerTableStyle");
     $table->addRow(200, $styleFirstRow);
-    $cell = $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace FOSSologyNG Ver:#$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
+    $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace FOSSologyNG Ver:#$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
   }
 
 
@@ -1134,7 +1141,6 @@ class ReportAgent extends Agent
     $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
 
     foreach($totalLicenses as $licenseShortName){
-      $count = 0;
       $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
       $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
 
@@ -1178,7 +1184,7 @@ class ReportAgent extends Agent
     $properties->setSubject("Copyright (C) 2014-2015, Siemens AG");
 
     /* Creating document layout */
-    $section = $phpWord->createSection($docLayout);
+    $section = $phpWord->addSection($docLayout);
 
     /* Header starts */
     $this->reportHeader($section);
