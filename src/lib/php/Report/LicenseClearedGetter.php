@@ -51,7 +51,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
-    //$mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
+//    $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
@@ -72,11 +72,11 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
-        
+/*        
         if (!$this->onlyComments && in_array($licenseId, $mainLicIds)) {
           continue;
         }
-
+ */
         if ($this->onlyComments)
         {
           $text = $comment;

@@ -131,7 +131,6 @@ class ReportAgent extends Agent
 
     $lenLicenses = count($licenses["statements"]) ;
     $lenLicensesMain = count($licensesMain["statements"]) ;
-
     for($i=0; $i<$lenLicenses; $i++){
       for($j=0; $j<$lenLicensesMain; $j++){
 	if(!strcmp($licenses["statements"][$i]["content"],$licensesMain["statements"][$j]["content"]))
@@ -141,6 +140,7 @@ class ReportAgent extends Agent
 	  }
       }
     }
+    
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
                       "licenseComments" => $licenseComments,
@@ -153,6 +153,7 @@ class ReportAgent extends Agent
 
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
+  
   }
 
 
@@ -211,7 +212,7 @@ class ReportAgent extends Agent
    * @brief Design the summaryTable of the report
    * @param1 section
    */        
-  private function summaryTable($section, $packageName, $groupId, $userId)
+  private function summaryTable($section, $packageName, $groupId, $userId, $mainLicenses)
   {
     
     $paragraphStyle = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
@@ -228,7 +229,14 @@ class ReportAgent extends Agent
     $cellFirstLen = 2500;
     $cellSecondLen = 3800;
     $cellThirdLen = 5500; 
-
+    if(!empty($mainLicenses))
+    {
+      foreach($mainLicenses as $mainLicense){
+	$allMainLicenses .= $mainLicense["content"].", ";
+        	
+      }
+     $allMainLicenses = rtrim($allMainLicenses, ", ");
+    }
     $userAndGroupName = $this->userDao->getUserNameAndGroupName($userId, $groupId);
     $table = $section->addTable($this->tablestyle);
     
@@ -295,7 +303,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Main license(s)"), $firstRowStyle1);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" <list here the name(s) of the global license(s)>"), $firstRowStyle2);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allMainLicenses."), $firstRowStyle2);
 
     $section->addTextBreak();
   }
@@ -859,10 +867,16 @@ class ReportAgent extends Agent
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText,null, $this->paragraphStyle);
-        $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
+	if(!empty($licenseMain["files"])){
+	$cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
         foreach($licenseMain["files"] as $fileName){
           $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
           }
+	}
+       else 
+       {
+	  $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle)->addText("");
+       }
        }
     }
     else
@@ -1173,7 +1187,7 @@ class ReportAgent extends Agent
     $this->reportTitle($section);
 
     /* Summery table */
-    $this->summaryTable($section, $packageName, $groupId, $userId);
+    $this->summaryTable($section, $packageName, $groupId, $userId, $contents['licensesMain']['statements']);
 
     /* clearing protocol change log table */
     $this->clearingProtocolChangeLogTable($section);
