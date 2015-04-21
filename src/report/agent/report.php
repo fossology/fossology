@@ -128,6 +128,19 @@ class ReportAgent extends Agent
     $this->heartbeat(count($ecc["statements"]));
     $ip = $this->ipClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($ip["statements"]));
+
+    $lenLicenses = count($licenses["statements"]) ;
+    $lenLicensesMain = count($licensesMain["statements"]) ;
+
+    for($i=0; $i<$lenLicenses; $i++){
+      for($j=0; $j<$lenLicensesMain; $j++){
+	if(!strcmp($licenses["statements"][$i]["content"],$licensesMain["statements"][$j]["content"]))
+          {
+            $licensesMain["statements"][$j]["files"] = $licenses["statements"][$i]["files"];
+	    unset($licenses["statements"][$i]);
+	  }
+      }
+    }
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
                       "licenseComments" => $licenseComments,
@@ -136,7 +149,8 @@ class ReportAgent extends Agent
                       "ip" => $ip,
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
-    );
+		    );
+
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
   }
@@ -835,24 +849,29 @@ class ReportAgent extends Agent
     $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
     $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
     $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
-/*    $table->addRow($rowHeight);
-    $table->addCell($firstColLen)->addText("");
-    $table->addCell($secondColLen)->addText("");
-    $table->addCell($thirdColLen)->addText("");*/
+    
     if(!empty($mainLicenses)){
       foreach($mainLicenses as $licenseMain){
         $table->addRow($rowHeight);
-        $cell1 = $table->addCell($firstColLen, $this->paragraphStyle); 
+        $cell1 = $table->addCell($firstColLen, $this->paragraphStyle);
         $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED),null,$this->paragraphStyle);
-        $cell2 = $table->addCell($secondColLen, $this->paragraphStyle); 
+        $cell2 = $table->addCell($secondColLen, $this->paragraphStyle);
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText,null, $this->paragraphStyle);
-        $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle)->addText("");
-//        foreach($licenseStatement["files"] as $fileName){ 
-//          $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
-        }
-      }
+        $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
+        foreach($licenseMain["files"] as $fileName){
+          $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
+          }
+       }
+    }
+    else
+    {
+      $table->addRow($rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
+    }	
     $section->addTextBreak(); 
   }
 
@@ -1182,7 +1201,6 @@ class ReportAgent extends Agent
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
-print_r($contents);
     /* Display global licenses */
     $this->globalLicenseTable($section, $heading, $contents['licensesMain']['statements']);
 
