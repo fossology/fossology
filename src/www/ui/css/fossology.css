@@ -293,12 +293,16 @@ table.dataTable tr.even.match {
   font-weight: bold;
 }
 
-img.delete, img.add {
+img.delete, img.add, img.deleted, img.added {
   background-size: 100% 100%;
   height: 16px;
   width: 16px;
   margin: 0 auto;
   padding: 0 auto;
+}
+
+img.add, img.delete {
+  cursor: pointer;
 }
 
 img.add {
@@ -309,6 +313,13 @@ img.delete {
   background-image: url('../images/icons/close_16.png');
 }
 
+img.added {
+  background-image: url('../images/icons/added_16.png');
+}
+
+img.deleted {
+  background-image: url('../images/icons/closed_16.png');
+}
 
 .inactive {
   color: gray;
