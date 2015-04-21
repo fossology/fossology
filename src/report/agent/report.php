@@ -131,13 +131,14 @@ class ReportAgent extends Agent
 
     $lenLicenses = count($licenses["statements"]) ;
     $lenLicensesMain = count($licensesMain["statements"]) ;
-    for($i=0; $i<$lenLicenses; $i++){
-      for($j=0; $j<$lenLicensesMain; $j++){
-	if(!strcmp($licenses["statements"][$i]["content"],$licensesMain["statements"][$j]["content"]))
-          {
-            $licensesMain["statements"][$j]["files"] = $licenses["statements"][$i]["files"];
-	    unset($licenses["statements"][$i]);
-	  }
+    
+    for($j=0; $j<$lenLicensesMain; $j++){
+      for($i=0; $i<$lenLicenses; $i++){
+        if(!strcmp($licenses["statements"][$i]["content"],$licensesMain["statements"][$j]["content"]))
+        {
+          $licensesMain["statements"][$j]["files"] = $licenses["statements"][$i]["files"];
+          unset($licenses["statements"][$i]);
+        }
       }
     }
     
@@ -149,11 +150,10 @@ class ReportAgent extends Agent
                       "ip" => $ip,
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
-		    );
+    );
 
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
-  
   }
 
 
@@ -232,10 +232,9 @@ class ReportAgent extends Agent
     if(!empty($mainLicenses))
     {
       foreach($mainLicenses as $mainLicense){
-	$allMainLicenses .= $mainLicense["content"].", ";
-        	
+        $allMainLicenses .= $mainLicense["content"].", ";
       }
-     $allMainLicenses = rtrim($allMainLicenses, ", ");
+      $allMainLicenses = rtrim($allMainLicenses, ", ");
     }
     $userAndGroupName = $this->userDao->getUserNameAndGroupName($userId, $groupId);
     $table = $section->addTable($this->tablestyle);
@@ -821,8 +820,6 @@ class ReportAgent extends Agent
     $cell = $table->addCell($firstColLen, $cellRowSpan)->addText(htmlspecialchars("OSS Source Code"), $firstRowStyle);
     $cell = $table->addCell($thirdColLen)->addText(htmlspecialchars("Link to Upload page of component:"), $rowTextStyle); 
     $cell = $table->addCell($secondColLen, $cellColSpan)->addText(""); 
-    /* TODO : add a package link to this column*/
-    //addLink(Traceback_uri()."?mod=showjobs&upload=$uploadId", htmlspecialchars($packageName));
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $cellRowContinue);
@@ -867,17 +864,17 @@ class ReportAgent extends Agent
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText,null, $this->paragraphStyle);
-	if(!empty($licenseMain["files"])){
-	$cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
-        foreach($licenseMain["files"] as $fileName){
-          $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
+        if(!empty($licenseMain["files"])){
+          $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle);
+          foreach($licenseMain["files"] as $fileName){
+            $cell3->addText(htmlspecialchars($fileName),null,$this->paragraphStyle);
           }
-	}
-       else 
-       {
-	  $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle)->addText("");
-       }
-       }
+        }
+        else 
+        {
+          $cell3 = $table->addCell($thirdColLen, $this->paragraphStyle)->addText("");
+        }
+      }
     }
     else
     {
@@ -885,7 +882,7 @@ class ReportAgent extends Agent
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
       $table->addCell($thirdColLen)->addText("");
-    }	
+    }
     $section->addTextBreak(); 
   }
 
