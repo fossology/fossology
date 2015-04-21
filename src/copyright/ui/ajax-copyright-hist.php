@@ -281,7 +281,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = "<a id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' href='javascript:;'><div class='delete'></div></a><span hidden='true' id='update$type$hash'></span>";
+    $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class='delete' src=\"images/space_16.png\"</div><span hidden='true' id='update$type$hash'></span>";
     return $output;
   }
 
