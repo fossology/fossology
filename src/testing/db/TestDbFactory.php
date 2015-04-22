@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -85,8 +85,8 @@ class TestDbFactory
   {
     $userHome = getenv('HOME');
     $ipv4 = gethostbyname(gethostname());
-    $fullHostName = gethostbyaddr(gethostbyname($ipv4));
-    $contents = "$fullHostName:*:*:fossy:fossy\n";
+
+    $contents = "localhost:*:*:fossy:fossy\n";
     $pgpass = "$userHome/.pgpass";
     putenv("PGPASSFILE=$pgpass");
     $pg_pass_contents = file_exists($pgpass) ? file_get_contents($pgpass) : '';

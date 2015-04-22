@@ -16,13 +16,15 @@
 
 // Utility: read file to string from scanners.h
 
-void ReadFileToString(const string& fileName, string& out)
+bool ReadFileToString(const string& fileName, string& out)
 {
   // TODO: there should be a maximum string size
+  // Returns true if there were no errors
   ifstream stream(fileName);
   std::stringstream sstr;
   sstr << stream.rdbuf();
   out = sstr.str();
+  return !stream.fail();
 }
 
 

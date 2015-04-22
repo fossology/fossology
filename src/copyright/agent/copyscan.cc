@@ -79,7 +79,6 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
       if (j - foundPos >= 999)
         // Truncate
         out.push_back(match(foundPos - begin, (foundPos - begin) + 998, copyrightType));
-        // TODO: Better idea: the view performs the truncation
       else
         out.push_back(match(foundPos - begin, j - begin, copyrightType));
       pos = j;

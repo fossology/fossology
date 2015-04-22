@@ -132,7 +132,7 @@ void TestDataCheck::testDataCheck()
   {
     string fileName = fileNameBase + to_string(i);
     ifstream tstream(fileName);
-    list<match> lcomm, lng, lrefs;
+    list<match> lng, lrefs;
     hsc.ScanFile(fileName, lng);
     GetReferenceResults(fileName + "_raw", lrefs);
     

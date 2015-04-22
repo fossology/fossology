@@ -20,7 +20,7 @@ using std::string;
 #include <list>
 using std::list;
 
-void ReadFileToString(const string& fileName, string& out);
+bool ReadFileToString(const string& fileName, string& out);
 
 struct match {
   // A pair of start/end positions and types
