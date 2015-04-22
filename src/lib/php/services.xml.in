@@ -87,6 +87,10 @@ without any warranty.
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
         </service>
+        <service id="dao.showJobs" class="Fossology\Lib\Dao\ShowJobsDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes">
         </service>

@@ -1,0 +1,39 @@
+  showJobTableColumns = [
+  {"sTitle": "{{ 'Field'| trans }}", "sClass": "left read_only","bSortable": false,"sWidth": '20%'},
+  {"sTitle": "{{ 'Value'| trans }}", "sClass": "left", "bSortable": false,"sWidth": '80%'} ];
+
+  uploadId = {{ uploadId }};
+  jobId = {{ jobId }};
+
+  showJobTableConfig = {
+  "bServerSide": true,
+  "sAjaxSource": "?mod=ajaxShowJobs&do=showSingleJob",
+  "fnServerData": function (sSource, aoData, fnCallback) {
+    aoData.push({"name": "jobId", "value": jobId});
+    $.getJSON(sSource, aoData, fnCallback).fail(failed)
+    },
+  "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+
+      if (nRow.className.match(/(^| )removed($| )/g)  ) {
+          $('td', nRow).addClass('read_only');
+      }
+  },
+  "aoColumns": showJobTableColumns,
+  "iDisplayLength": 25,
+  "bProcessing": true,
+  "bStateSave": true,
+  "sCookiePrefix" : "fossology_",
+  "bRetrieve": true,
+  "bPaginate": false,
+  "bFilter": false,
+  };
+
+  function createShowJobTable() 
+  {
+    otable = $('#showJobTable').dataTable(showJobTableConfig);
+    return otable;
+  }
+
+  $(document).ready(function () {
+    createShowJobTable();
+  });
