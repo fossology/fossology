@@ -41,8 +41,10 @@ abstract class Agent extends Object
   protected $groupId;
   protected $jobId;
 
-  protected $schedulerHandledOpts = "c:";
-  protected $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
+  protected $agentSpecifOptions = "";
+  protected $agentSpecifLongOptions = array();
+
+  protected $args = array();
 
   /** @var DbManager dbManager */
   protected $dbManager;
@@ -77,15 +79,26 @@ abstract class Agent extends Object
     $this->agentId = $this->agentDao->getCurrentAgentId($this->agentName, $this->agentDesc, $this->agentRev);
   }
 
+
   function scheduler_connect()
   {
-    $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
+    $schedulerHandledOpts = "c:";
+    $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
+
+    $longOpts = array_merge($schedulerHandledLongOpts, $this->agentSpecifLongOptions);
+    $shortOpts = $schedulerHandledOpts . $this->agentSpecifOptions;
+
+    $args = getopt($shortOpts, $longOpts);
 
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = $args['userID'];
     $this->groupId = $args['groupID'];
     $this->jobId = $args['jobId'];
+
+    unset ($args['jobId']);
+    unset ($args['userID']);
+    unset ($args['groupID']);
 
     $this->initArsTable();
 
@@ -96,6 +109,8 @@ abstract class Agent extends Object
       pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
       pcntl_alarm(ALARM_SECS);
     }
+
+    $this->args = $args;
   }
 
   static function heartbeat_handler($signo)
@@ -173,12 +188,13 @@ abstract class Agent extends Object
     while (false !== ($line = $this->scheduler_current()))
     {
       $this->heartbeat(0);
+
       $uploadId = intval($line);
       if ($uploadId <= 0)
       {
         continue;
       }
-      
+
       $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
       if ($arsId<0) {
         print "cannot insert ars record";

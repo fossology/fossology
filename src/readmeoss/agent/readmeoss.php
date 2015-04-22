@@ -37,42 +37,18 @@ class ReadmeOssAgent extends Agent
   private $uploadDao;
   /** @var int[] */ 
   protected $additionalUploadIds = array();
-  
+
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
     $this->licenseClearedGetter = new LicenseClearedGetter();
-    
-    $this->schedulerHandledLongOpts[] = self::UPLOAD_ADDS.':';
+
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
-    
+
     $this->uploadDao = $this->container->get('dao.upload');
+
+    $this->agentSpecifOptions = self::UPLOAD_ADDS.':';
   }
-  
-  /**
-   * @overwrite
-   */
-  function scheduler_connect()
-  {
-    $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
-
-    $this->schedulerMode = array_key_exists("scheduler_start", $args);
-    $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
-    $this->userId = $args['userID'];
-    $this->groupId = $args['groupID'];
-    $this->jobId = $args['jobId'];
-
-    $this->initArsTable();
-
-    if ($this->schedulerMode)
-    {
-      $this->scheduler_greet();
-
-      pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
-      pcntl_alarm(ALARM_SECS);
-    }
-  }
-  
 
   /**
    * @todo without wrapper
@@ -80,6 +56,9 @@ class ReadmeOssAgent extends Agent
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
+
+    $args = $this->args;
+    $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
 
     $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
@@ -114,13 +93,11 @@ class ReadmeOssAgent extends Agent
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
     $fileName = $fileBase. "ReadMe_OSS_".$packageName.'_'.time().".txt" ;
 
-    
     foreach($this->additionalUploadIds as $addUploadId)
     {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
     }
-    
-    
+
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
