@@ -69,7 +69,7 @@ class core_smauth extends FO_Plugin {
       if (@$_SESSION['time'] + (60 * 480) < $Now) {
         $_SESSION['User'] = NULL;
         $_SESSION[Auth::USER_ID] = NULL;
-        $_SESSION['UserLevel'] = NULL;
+        $_SESSION[Auth::USER_LEVEL] = NULL;
         $SysConf['auth'][Auth::USER_ID] = NULL;
         $_SESSION['UserEmail'] = NULL;
         $_SESSION['Folder'] = NULL;
@@ -89,10 +89,10 @@ class core_smauth extends FO_Plugin {
     $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User']) {  //TODO: also need to check SiteMinder session
     /* If you are logged in, then the default level is "Download". */
-    if ("X" . $_SESSION['UserLevel'] == "X") {
+    if ("X" . $_SESSION[Auth::USER_LEVEL] == "X") {
       $Level = PLUGIN_DB_WRITE;
     } else {
-      $Level = @$_SESSION['UserLevel'];
+      $Level = $_SESSION[Auth::USER_LEVEL];
     }
     /* Recheck the user in case he is suddenly blocked or changed. */
     if (empty($_SESSION['time_check'])) {
@@ -106,7 +106,7 @@ class core_smauth extends FO_Plugin {
       pg_free_result($result);
       $_SESSION['User'] = $R['user_name'];
       $_SESSION['Folder'] = $R['root_folder_fk'];
-      $_SESSION['UserLevel'] = $R['user_perm'];
+      $_SESSION[Auth::USER_LEVEL] = $R['user_perm'];
       $_SESSION['UserEmail'] = $R['user_email'];
       $_SESSION['UserEnote'] = $R['email_notify'];
       if(empty($R['ui_preference']))
@@ -117,11 +117,11 @@ class core_smauth extends FO_Plugin {
       {
         $_SESSION['UiPref'] = $R['ui_preference'];
       }
-      $Level = @$_SESSION['UserLevel'];
+      $Level = $_SESSION[Auth::USER_LEVEL];
     }
     } else {
       $this->CheckUser($UID);
-      $Level = @$_SESSION['UserLevel'];
+      $Level = $_SESSION[Auth::USER_LEVEL];
     }
 
     /* Disable all plugins with >= $Level access */
@@ -281,9 +281,9 @@ class core_smauth extends FO_Plugin {
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
     if ("X" . $R['user_perm'] == "X") {
-      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
+      $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_ADMIN;
     } else {
-      $_SESSION['UserLevel'] = $R['user_perm'];
+      $_SESSION[Auth::USER_LEVEL] = $R['user_perm'];
     }
     /* Check for the no-popup flag */
     if (GetParm("nopopup", PARM_INTEGER) == 1) {
@@ -312,7 +312,7 @@ class core_smauth extends FO_Plugin {
       $_SESSION['User'] = NULL;
       $_SESSION[Auth::USER_ID] = NULL;
       $SysConf['auth'][Auth::USER_ID] = NULL;
-      $_SESSION['UserLevel'] = NULL;
+      $_SESSION[Auth::USER_LEVEL] = NULL;
       $_SESSION['UserEmail'] = NULL;
       $_SESSION['Folder'] = NULL;
       $_SESSION['UiPref'] = NULL;

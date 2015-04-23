@@ -17,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -416,8 +417,8 @@ class AjaxShowJobs extends FO_Plugin
           $outBuf .= "<td align='center'>$text</td>";  
         /* actions, must be admin or own the upload  */
         if (($jobqueueRec['jq_end_bits'] == 0) 
-             && (($_SESSION["UserLevel"] == PLUGIN_DB_ADMIN)
-                 || ($_SESSION["UserId"] == $job['job']['job_user_fk'])))
+             && (($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
+                 || ($_SESSION[Auth::USER_ID] == $job['job']['job_user_fk'])))
         {
           $outBuf .= "<th $jobStyle>";
           if ($isPaused){
@@ -435,8 +436,8 @@ class AjaxShowJobs extends FO_Plugin
         } 
 
         if (($jobqueueRec['jq_end_bits'] == 1) && ($jobqueueRec['jq_type'] === 'reportgen' || $jobqueueRec['jq_type'] === 'readmeoss')
-             && (($_SESSION["UserLevel"] > PLUGIN_DB_ADMIN)
-                 || ($_SESSION["UserId"] == $job['job']['job_user_fk']))){
+             && (($_SESSION[Auth::USER_LEVEL] > PLUGIN_DB_ADMIN)
+                 || ($_SESSION[Auth::USER_ID] == $job['job']['job_user_fk']))){
           if($jobqueueRec['jq_type'] === 'reportgen')
             $text = _("Download Report");
           else
