@@ -207,9 +207,10 @@ class AjaxBrowse extends DefaultPlugin
 
     /* Job queue link */
     $text = _("History");
+    $textTitle = _("Scan History");
     if (plugin_find_id('showjobs') >= 0)
     {
-      $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId'>$text</a>]";
+      $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId' title='" . htmlentities($textTitle) . "' >$text</a>]";
     }
     
     if (plugin_find_id('ui_readmeoss') >= 0)
