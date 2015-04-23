@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini, Shaheem Azmal, Anupam Ghosh
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -189,7 +189,7 @@ class ReportAgent extends Agent
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
     $footerStyle = array("color" => "000000", "size" => 9, "bold" => true, "name" => $this->fontFamily);
     $footerTime = "Gen Date: ".date("Y/m/d H:i:s T");
-    $footerCopyright = "Copyright © ".date("Y")." Siemens AG - Restricted"; 
+    $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
     $footerSpace = str_repeat("  ", 7);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";
     $footer = $section->addFooter(); 
