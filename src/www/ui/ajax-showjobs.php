@@ -53,7 +53,7 @@ class AjaxShowJobs extends FO_Plugin
     $this->OutputToStdout = true;
 
     global $container;
-    $this->showJobsDao = $container->get('dao.showJobs');
+    $this->showJobsDao = $container->get('dao.show_jobs');
 
     parent::__construct();
   }

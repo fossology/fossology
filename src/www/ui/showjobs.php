@@ -38,7 +38,7 @@ class showjobs extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_WRITE;
 
     global $container;
-    $this->showJobsDao = $container->get('dao.showJobs');
+    $this->showJobsDao = $container->get('dao.show_jobs');
 
     parent::__construct();
   }
