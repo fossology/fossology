@@ -166,11 +166,22 @@ class UploadTreeProxy extends DbViewProxy
     }
   
     if(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
-            && array_key_exists(self::OPT_AGENT_SET, $options))
+            && array_key_exists(self::OPT_AGENT_SET, $options)  && array_key_exists(self::OPT_RANGE, $options))
     {
       $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
       $agentFilter = " AND agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).")";
       $filter .= ' AND '.self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $options[self::OPT_GROUP_ID], $agentFilter);
+      $unifier .= "_".self::OPT_SKIP_ALREADY_CLEARED;
+    }
+    elseif(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
+            && array_key_exists(self::OPT_AGENT_SET, $options)  && array_key_exists(self::OPT_REALPARENT, $options))
+    {
+      $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
+      $agentFilter = " AND agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).")";
+      $childFilter = self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $options[self::OPT_GROUP_ID], $agentFilter);
+      $filter .= ' AND EXISTS(SELECT * FROM '.$this->uploadTreeTableName.' utc WHERE utc.upload_fk='.$this->uploadId
+              . ' AND (utc.lft BETWEEN ut.lft AND ut.rgt) AND utc.ufile_mode&(3<<28)=0 AND '
+                 .str_replace(' ut.', ' utc.', $childFilter).')';
       $unifier .= "_".self::OPT_SKIP_ALREADY_CLEARED;
     }
     
@@ -258,14 +269,14 @@ class UploadTreeProxy extends DbViewProxy
    */
   private static function getQueryCondition($skipThese, $groupId = null, $agentFilter='')
   {
-    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk $agentFilter)
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk= ut.pfile_fk $agentFilter)
         OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese)
     {
       case "noLicense":
         return $conditionQueryHasLicense;
-      case "alreadyCleared":
+      case self::OPT_SKIP_ALREADY_CLEARED:
         $decisionQuery = "SELECT decision_type FROM clearing_decision AS cd
                         WHERE cd.group_fk = $groupId
                           AND (ut.uploadtree_pk = cd.uploadtree_fk OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO.")
