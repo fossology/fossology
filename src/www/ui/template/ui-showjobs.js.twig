@@ -1,0 +1,85 @@
+{#
+Copyright (C) 2015 Siemens AG
+Author: Shaheem Azmal<shaheem.azmal@siemens.com>, 
+        Anupam Ghosh <anupam.ghosh@siemens.com>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#}
+
+var prev = "0";
+function checkJobQueue()
+{
+    $.ajax({
+    type: "POST",
+    data:null,
+    url: "?mod=jobstatus",
+    success: function (data) {
+      if(data.status=="1" || prev =="1") { 
+        
+        if(prev == "0" )
+          prev = "1";
+        else
+          prev = "0"; 
+
+          getTableBody(); 
+      }else{
+        prev ="0";    
+      }
+    },
+    error: function(responseobject) { }
+	
+  });
+}
+
+function autoRefreshTable()
+{
+    checkJobQueue();
+}
+
+clockTime = {{ clockTime }};
+if(clockTime != "0"){ 
+  setInterval('autoRefreshTable()', clockTime*1000); 
+}
+
+function createShowJobsTable(data)
+{
+    $("#paginationup").empty();
+    $("#showjobstable tbody").empty();
+    $("#paginationdown").empty();
+    $("#paginationup").append(data.pagination);
+    $("#showjobstable tbody").append(data.showJobsData);
+    $("#paginationdown").append(data.pagination);     
+}
+
+function getTableBody() {
+  var post_data = {
+    "upload"  :{{ uploadId }},
+    "allusers":{{ allusersval }},
+    "page"    :{{ page }}
+  };
+  
+  $.ajax({
+     type: "POST",
+      url: "?mod=ajaxShowJobs&do=showjb",
+     data: post_data,
+  success: function (data) { 
+  createShowJobsTable(data);
+  },
+    error: function(responseobject) { }
+  });
+}
+
+$(document).ready(function (){
+  getTableBody();
+});

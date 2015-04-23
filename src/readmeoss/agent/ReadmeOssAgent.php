@@ -1,13 +1,20 @@
 <?php
 /*
- Author: Daniele Fognini
- Copyright (C) 2014-2015, Siemens AG
-
- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * Author: Daniele Fognini
+ * Copyright (C) 2014-2015, Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 define("README_AGENT_NAME", "readmeoss");
@@ -21,15 +28,15 @@ include_once(__DIR__ . "/version.php");
 
 class ReadmeOssAgent extends Agent
 {
-
+  const UPLOAD_ADDS = "uploadsAdd";
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
-
   /** @var XpClearedGetter */
   private $cpClearedGetter;
-
   /** @var UploadDao */
   private $uploadDao;
+  /** @var int[] */ 
+  protected $additionalUploadIds = array();
 
   function __construct()
   {
@@ -39,22 +46,36 @@ class ReadmeOssAgent extends Agent
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
+
+    $this->agentSpecifLongOptions = array(self::UPLOAD_ADDS.':');
   }
 
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
 
+    $args = $this->args;
+    $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+
     $this->heartbeat(0);
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenses['statements']));
+    $licenseStmts = $licenses['statements'];
+    $this->heartbeat(count($licenseStmts));
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($copyrights['statements']));
+    $copyrightStmts = $copyrights['statements'];
+    $this->heartbeat(count($copyrightStmts));
 
-    $contents = array('licenses' => $licenses,
-                      'copyrights' => $copyrights
-    );
+    foreach($this->additionalUploadIds as $addUploadId)
+    {
+      $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $groupId);
+      $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
+      $this->heartbeat(count($moreLicenses['statements']));
+      $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId);
+      $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
+      $this->heartbeat(count($moreCopyrights['statements']));
+    }
 
+    $contents = array('licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts );
     $this->writeReport($contents, $uploadId);
 
     return true;
@@ -67,7 +88,12 @@ class ReadmeOssAgent extends Agent
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "ReadMe_OSS_".$packageName.".txt" ;
+    $fileName = $fileBase. "ReadMe_OSS_".$packageName.'_'.time().".txt" ;
+
+    foreach($this->additionalUploadIds as $addUploadId)
+    {
+      $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
+    }
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
@@ -84,39 +110,32 @@ class ReadmeOssAgent extends Agent
     $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
   }
 
-  private function generateReport($contents, $Package_Name)
+  private function generateReport($contents, $packageName)
   {
     $separator1 = "=======================================================================================================================";
     $separator2 = "-----------------------------------------------------------------------------------------------------------------------";
-    $Break = "\r\n\r\n";
+    $break = "\r\n\r\n";
 
-    $output  = "";
-    $output .= $separator1;
-    $output .= $Break;
-    $output .= $Package_Name;
-    $output .= $Break;
-    foreach($contents['licenses']['statements'] as $licenseStatement){
-      $output .= $licenseStatement['text'];
-      $output .= $Break;
-      $output .= $separator2;
-      $output .= $Break;
+    $output = $separator1 . $break . $packageName . $break;
+    foreach($contents['licenses'] as $licenseStatement){
+      $output .= $licenseStatement['text'] . $break;
+      $output .= $separator2 . $break;
     }
     $copyrights = "";
-    foreach($contents['copyrights']['statements'] as $copyrightStatement){
+    foreach($contents['copyrights'] as $copyrightStatement){
       $copyrights .= $copyrightStatement['content']."\r\n";
     }
     if(empty($copyrights)){
       $output .= "<Copyright notices>";
-      $output .= $Break;
+      $output .= $break;
       $output .= "<notices>";
     }else{
        $output .= "Copyright notices";
-       $output .= $Break; 
+       $output .= $break; 
        $output .= $copyrights;
     }
     return $output;
   }
-
 
 }
 

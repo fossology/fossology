@@ -45,21 +45,30 @@ class ReadmeossGenerator extends DefaultPlugin
   protected function handle(Request $request)
   {
     $groupId = Auth::getGroupId();
-    $uploadId = intval($request->get('upload'));
-    try
+    $uploadIds = $request->get('uploads') ?: array();
+    $uploadIds[] = intval($request->get('upload'));
+    $addUploads = array();
+    foreach($uploadIds as $uploadId)
     {
-      $upload = $this->getUpload($uploadId, $groupId);
+      if (empty($uploadId)) {
+        continue;
+      }
+      try
+      {
+        $addUploads[$uploadId] = $this->getUpload($uploadId, $groupId);
+      }
+      catch(Exception $e)
+      {
+        return $this->flushContent($e->getMessage());
+      }
     }
-    catch(Exception $e)
-    {
-      return $this->flushContent($e->getMessage());
-    }
-    
+    $upload = array_pop($addUploads);
+    $uploadId = $upload->getId();
     $readMeOssAgent = plugin_find('agent_readmeoss');
     $userId = Auth::getUserId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array());
+    $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array(), $readMeOssAgent->uploadsAdd($addUploads));
     if ($jobQueueId<0)
     {
       return $this->flushContent(_("Cannot schedule").": ".$error);
@@ -77,9 +86,9 @@ class ReadmeossGenerator extends DefaultPlugin
   {  
     if ($uploadId <=0)
     {
-      throw new Exception(_("parameter error"));
+      throw new Exception(_("parameter error: $uploadId"));
     }
-    /** @var UploadDao */
+    /* @var $uploadDao UploadDao */
     $uploadDao = $this->getObject('dao.upload');
     if (!$uploadDao->isAccessible($uploadId, $groupId))
     {

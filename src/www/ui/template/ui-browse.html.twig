@@ -29,38 +29,40 @@
       </td>
       <td valign="top">
         <div style="text-align:center;font-size: large;">{{ 'Uploads'|trans }}</div>
-
-      <table class="semibordered" id="browsetbl" width="100%" cellpadding="0">
-      <thead>
-       <tr>
-         <th id="insert_browsetbl_filter"></th>
-         <th> 
-           <select id="statusSelector" onchange="filterStatus();">
-             <option value="0" selected> </option>
-          {% for key,disp in statusOptions %}
-            <option value="{{ key }}">{{ disp }}</option>
-          {% endfor %}
-           </select>
-         </th>
-         <th></th>
-         <th></th>
-         <th>
-            <select id="assigneeSelector" onchange="filterAssignee();">
-            {% for key,disp in assigneeOptions %}
-              <option value="{{ key }}" {%if key == 0 %} selected{% endif %}>{{ disp }}</option>
+        <form name="uploadMultiSelect">
+        <table class="semibordered" id="browsetbl" width="100%" cellpadding="0">
+        <thead>
+         <tr>
+           <th id="insert_browsetbl_filter"></th>
+           <th> 
+             <select id="statusSelector" onchange="filterStatus();">
+               <option value="0" selected> </option>
+            {% for key,disp in statusOptions %}
+              <option value="{{ key }}">{{ disp }}</option>
             {% endfor %}
-            </select>
-         </th>
-         <th></th>
-         <th></th>
-       </tr>
-       <tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th></tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot></tfoot>
-      </table>
-
-    </td></tr>
+             </select>
+           </th>
+           <th></th>
+           <th></th>
+           <th>
+              <select id="assigneeSelector" onchange="filterAssignee();">
+              {% for key,disp in assigneeOptions %}
+                <option value="{{ key }}" {%if key == 0 %} selected{% endif %}>{{ disp }}</option>
+              {% endfor %}
+              </select>
+           </th>
+           <th></th>
+           <th></th>
+         </tr>
+         <tr><th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+        </table>
+        {{ uploadMultiSelectHook|default('') }}
+        </form>
+      </td>
+    </tr>
   </table>
 {% endblock %}
 

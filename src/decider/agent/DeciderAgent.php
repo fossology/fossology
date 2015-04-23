@@ -55,8 +55,10 @@ class DeciderAgent extends Agent
   private $decisionTypes;
   /** @var LicenseMap */
   private $licenseMap = null;
+  /** @var int */
+  private $licenseMapUsage = null;
 
-  function __construct()
+  function __construct($licenseMapUsage=null)
   {
     parent::__construct(AGENT_DECIDER_NAME, AGENT_DECIDER_VERSION, AGENT_DECIDER_REV);
 
@@ -66,19 +68,17 @@ class DeciderAgent extends Agent
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
-  }
 
-  function scheduler_connect($licenseMapUsage=null)
-  {
-    parent::scheduler_connect();
-    $args = getopt($this->schedulerHandledOpts."r:", $this->schedulerHandledLongOpts);
-    $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
-
-    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
+    $this->licenseMapUsage = $licenseMapUsage;
+    $this->agentSpecifOptions = "r:";
   }
 
   function processUploadId($uploadId)
   {
+    $args = $this->args;
+    $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
+    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
+
     $groupId = $this->groupId;
 
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);

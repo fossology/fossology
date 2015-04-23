@@ -32,6 +32,14 @@ class ReadMeOssAgentPlugin extends AgentPlugin
   {
     // no AgentCheckBox
   }
+  
+  public function uploadsAdd($uploads)
+  {
+    if (count($uploads) == 0) {
+      return '';
+    }
+    return '--uploadsAdd='. implode(',', array_keys($uploads));
+  }
 }
 
 register_plugin(new ReadMeOssAgentPlugin());

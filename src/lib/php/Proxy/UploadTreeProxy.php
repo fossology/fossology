@@ -149,7 +149,7 @@ class UploadTreeProxy extends DbViewProxy
               . "   AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
               . "   AND clearing_event_fk=clearing_event_pk"
               . "   AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
-              . "   AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC)"
+              . "   AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC LIMIT 1)"
               . ")";
       $unifier .= "_".self::OPT_CONCLUDE_REF;
     }

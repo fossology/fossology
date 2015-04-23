@@ -97,12 +97,14 @@ $(document).ready(function () {
 function filterLicense(licenseShortName) {
   var searchField = $('#dirlist_filter input');
   searchField.val(licenseShortName);
+  resetFilters();
   searchField.trigger('keyup');
 }
 
 function clearSearchLicense() {
   var searchField =  $('#lichistogram_filter input');
   searchField.val('');
+  resetFilters();
   searchField.trigger('keyup.DT');
 }
 
@@ -110,6 +112,7 @@ function clearSearchFiles() {
   $('#dirlist_filter_license').val('');
   var searchField = $('#dirlist_filter input');
   searchField.val('');
+  resetFilters();
   searchField.trigger('keyup');
 }
 
@@ -158,3 +161,31 @@ function dressContents(data, type, full) {
   return data;
 }
 
+$(document).ready(function () {
+  $('#filterCBoxOpen').change(function(){
+    var searchField = $('#dirlist_filter input');
+    var searchString = searchField.val();
+    if($(this).is(':checked')){
+      searchString += ' open:1';
+    }
+    else{
+      searchString = searchString.replace(/open:[^\s]*/g,''); 
+    }
+    searchField.val(searchString);
+    searchField.trigger('keyup');
+  });
+});
+
+function filterScan(id,keyword) {
+  var searchField = $('#dirlist_filter input');
+  var searchString = searchField.val().replace(new RegExp(keyword+':[^\s]*','g'),''); 
+  searchField.val(searchString+' '+keyword+':'+id);
+  searchField.trigger('keyup');
+}
+
+function resetFilters()
+{
+  $('#scanFilter').val(0);
+  $('#conFilter').val(0);
+  $('#filterCBoxOpen').attr('checked',false);
+}

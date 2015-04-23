@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 use Fossology\Lib\Data\Highlight;
-
+use Fossology\Lib\Auth\Auth;
 /**
  * \file oneshot.php
  * \brief One-Shot Copyright/Email/URL Analysis
@@ -180,10 +180,10 @@ class agent_copyright_once extends FO_Plugin {
       /* default header is plain text */
     }
     /* Only register with the menu system if the user is logged in. */
-    if (!empty($_SESSION['User']))
+    if (!empty($_SESSION[Auth::USER_NAME]))
     {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
       {
         menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
 

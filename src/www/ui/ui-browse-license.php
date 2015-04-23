@@ -251,7 +251,10 @@ class ui_browse_license extends DefaultPlugin
         'scannerLicenseCount'=> $totalScannerLicenseCount-$noScannerLicenseFoundCount,
         'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
         'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
-        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount);
+        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount,
+        'scannerLicenses'=>$licenseHistogram,
+        'editedLicenses'=>$editedLicensesHist
+        );
 
     return $vars;
   }
