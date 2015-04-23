@@ -233,27 +233,20 @@ class ShowJobsDao extends Object
 
   /**
    * @brief Returns Number of files/items processed per sec
-   * @param $itemsprocessed, $NumSecs
-   * @return Returns number of items. 
+   * @param int $itemsprocessed
+   * @param int $numSecs
+   * @return double
    **/
   public function getNumItemsPerSec($itemsprocessed, $numSecs)
   {
-    $filesPerSec = 0; 
-    if ( $numSecs > 0){
-      $itemsPerSec = round($itemsprocessed/$numSecs);
-
-      if ($itemsPerSec < 1)
-        $filesPerSec = sprintf("%01.2f", $itemsprocessed/$numSecs); 
-      else
-        $filesPerSec = sprintf("%d", $itemsPerSec);
-    }
+    $filesPerSec = ($numSecs > 0) ? $itemsprocessed/$numSecs : 0;
     return $filesPerSec;
-  }/* getNumItemsPerSec() */
+  }
 
   /**
    * @brief Returns Estimated time using jobid
    * @param $job_pk $jq_Type
-   * @return Returns empty if esitmated time is 0 else returns time. 
+   * @return Returns empty if estimated time is 0 else returns time. 
    **/
   public function getEstimatedTime($job_pk, $jq_Type, $filesPerSec)
   {
@@ -293,12 +286,12 @@ class ShowJobsDao extends Object
           array_push($estimatedArray, $timeOfCompletion);
         }
       }
-      
       if(empty($estimatedArray)) {
         return "";
-      } else {
-        $estimatedTime = max($estimatedArray); // collecting max agent time in seconds
-        return gmdate("H:i:s", $estimatedTime);  // convert seconds to time and return     
+      }
+      else {
+        $estimatedTime = round(max($estimatedArray)); // collecting max agent time in seconds
+        return intval($estimatedTime/3600).gmdate(":i:s", $estimatedTime);  // convert seconds to time and return     
       } 
     } 
   }/* getEstimatedTime() */

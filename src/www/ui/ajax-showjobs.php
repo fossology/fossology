@@ -407,7 +407,8 @@ class AjaxShowJobs extends FO_Plugin
         if ($jobqueueRec['jq_starttime']){
           $text = _(" items/sec");
           $itemsPerSec = $this->showJobsDao->getNumItemsPerSec($jobqueueRec['jq_itemsprocessed'], $numSecs);
-          $outBuf .= $itemsPerSec.$text;
+          $itemsPerSecFmt = ($itemsPerSec < 2) ? sprintf("%01.2f", $itemsPerSec) : round($itemsPerSec);
+          $outBuf .= $itemsPerSecFmt.$text;
         }
         $outBuf .= "</span></td>";
         /* Get ETA for each agent */

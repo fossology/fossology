@@ -214,11 +214,11 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
             is(closeTo(($itemCount-$itemNomos)/$itemNomos*$diffTime,$delta)));
     
-    $fewFilesPerSec = 0.01;
+    $fewFilesPerSec = 0.003;
     $formattedLongTime = $this->showJobsDao->getEstimatedTime($job_pk=1, $jq_Type="nomos", $fewFilesPerSec);
     assertThat($formattedLongTime, matchesPattern ('/\\d+:\\d{2}:\\d{2}/'));
-    $hourMinSec = explode(':', $formattedEstimatedTime);
+    $hourMinSec = explode(':', $formattedLongTime);
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
-            is(closeTo(($itemCount-$itemNomos)/$testFilesPerSec,$delta)));
+            is(closeTo(($itemCount-$itemNomos)/$fewFilesPerSec,$delta)));
   }
 }
