@@ -47,12 +47,9 @@ class ReadmeOssAgent extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
 
-    $this->agentSpecifOptions = self::UPLOAD_ADDS.':';
+    $this->agentSpecifLongOptions = array(self::UPLOAD_ADDS.':');
   }
 
-  /**
-   * @todo without wrapper
-   */
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
