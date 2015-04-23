@@ -164,6 +164,8 @@ class core_auth extends FO_Plugin
     $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
     $this->session->set(Auth::USER_NAME, $userRow['user_name']);
     $_SESSION['Folder'] = $userRow['root_folder_fk'];
+    $_SESSION[Auth::USER_LEVEL] = $userRow['user_perm'];
+    $this->session->set(Auth::USER_LEVEL, $userRow['user_perm']);
     $_SESSION['UserLevel'] = $userRow['user_perm'];
     $_SESSION['UserEmail'] = $userRow['user_email'];
     $_SESSION['UserEnote'] = $userRow['email_notify'];

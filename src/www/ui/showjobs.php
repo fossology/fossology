@@ -20,6 +20,7 @@
 
 define("TITLE_showjobs", _("Show Jobs"));
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ShowJobsDao;
 
@@ -47,7 +48,7 @@ class showjobs extends FO_Plugin
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
 
-    if (@$_SESSION['UserLevel'] != PLUGIN_DB_ADMIN) return;
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN) return;
 
     if (GetParm("mod", PARM_STRING) == $this->Name){
       /* Set micro menu to select either all users or this user */
@@ -135,7 +136,7 @@ class showjobs extends FO_Plugin
       $uploadPk = -1; 
     }else{
       $uploadPerm = GetUploadPerm($uploadPk);
-      if ($uploadPerm < PERM_WRITE){
+      if ($uploadPerm < Auth::PERM_WRITE){
         $text = _("Permission Denied");
         return "<h2>$text<h2>";
       }
@@ -146,14 +147,14 @@ class showjobs extends FO_Plugin
     $v .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
     /* Process any actions */
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE){
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
 
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
       if (!empty($uploadPk)){
         $uploadPerm = GetUploadPerm($uploadPk);
-        if ($uploadPerm < PERM_WRITE){
+        if ($uploadPerm < Auth::PERM_WRITE){
           $text = _("Permission Denied");
           echo "<h2>$text<h2>";
           return;
@@ -184,7 +185,7 @@ class showjobs extends FO_Plugin
 
         case 'cancel':
           if (empty($jq_pk)) break;
-          $Msg = "\"" . _("Killed by") . " " . @$_SESSION['User'] . "\"";
+          $Msg = "\"" . _("Killed by") . " " . $_SESSION[Auth::USER_NAME] . "\"";
           $command = "kill $jq_pk $Msg";
           $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
           if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
