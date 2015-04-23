@@ -288,8 +288,8 @@ class ShowJobsDao extends Object
             $burnTime = time() - strtotime($row['jq_starttime']);
             $filesPerSec = $this->getNumItemsPerSec($row['jq_itemsprocessed'], $burnTime);
           }
-            $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
-            array_push($estimatedArray, $timeOfCompletion);
+          $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
+          array_push($estimatedArray, $timeOfCompletion);
         }
       }
       
