@@ -26,7 +26,7 @@ use Fossology\Lib\Dao\ShowJobsDao;
 
 class showjobs extends FO_Plugin
 {
-  /** @var showJobsDao */
+  /** @var ShowJobsDao */
   private $showJobsDao;
 
   function __construct()

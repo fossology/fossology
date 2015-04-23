@@ -120,4 +120,24 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData(array('groups','user'));
     $this->userDao->addGroup('');
   }
+  
+  public function testGetUserName()
+  {
+    $username = 'testi';
+    $userId = 101;
+    $this->testDb->createPlainTables(array('users'));
+    $this->dbManager->insertTableRow('users',array('user_pk'=>$userId,'user_name'=>$username));
+    $uName = $this->userDao->getUserName($userId);
+    assertThat($uName,equalTo($username));
+  }
+  
+  /**
+   * @expectedException \Exception
+   * @expectedExceptionMessage unknown user with id=101
+   */
+  public function testGetUserNameFail()
+  {
+    $this->testDb->createPlainTables(array('users'));
+    $this->userDao->getUserName(101);
+  }
 }
