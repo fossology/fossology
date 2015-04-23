@@ -157,7 +157,7 @@ class UserDao extends Object
     {
       throw new \Exception( _("Group must not be deleted due to name constraint.") );
     }
-    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
     {
       $userId = Auth::getUserId();
       $adminLevel = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk=$1 and user_fk=$2 and group_perm=1",

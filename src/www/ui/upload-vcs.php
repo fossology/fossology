@@ -214,7 +214,7 @@ class upload_vcs extends FO_Plugin {
     $V.= "<li>";
     $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
       $text = _("Select optional analysis");
       $V.= "<li>$text<br />\n";
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

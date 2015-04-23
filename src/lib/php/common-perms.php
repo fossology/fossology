@@ -185,7 +185,7 @@ use Fossology\Lib\Auth\Auth;
 
     $GroupArray = array();
 
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
     {
       $sql = "select group_pk, group_name from groups";
     }
@@ -222,7 +222,7 @@ use Fossology\Lib\Auth\Auth;
 
     if ($user_pk == 0) $user_pk = Auth::getUserId ();
 
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
     //for the command line didn't have session info
     $UserRow = GetSingleRec("Users", "where user_pk='$user_pk'");
@@ -292,7 +292,7 @@ use Fossology\Lib\Auth\Auth;
      * Look through all the group users (table group_user_member)
      * and make sure the user has admin access.
      */
-    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
     {
       $sql = "SELECT *  FROM group_user_member WHERE group_fk = '$group_pk' and user_fk='$user_pk' and group_perm=1";
       $result = pg_query($PG_CONN, $sql);

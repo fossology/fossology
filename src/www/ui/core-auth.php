@@ -164,7 +164,8 @@ class core_auth extends FO_Plugin
     $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
     $this->session->set(Auth::USER_NAME, $userRow['user_name']);
     $_SESSION['Folder'] = $userRow['root_folder_fk'];
-    $_SESSION['UserLevel'] = $userRow['user_perm'];
+    $_SESSION[Auth::USER_LEVEL] = $userRow['user_perm'];
+    $this->session->set(Auth::USER_LEVEL, $userRow['user_perm']);
     $_SESSION['UserEmail'] = $userRow['user_email'];
     $_SESSION['UserEnote'] = $userRow['email_notify'];
     $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
@@ -283,10 +284,10 @@ class core_auth extends FO_Plugin
     /* No specified permission means ALL permission */
     if ("X" . $row['user_perm'] == "X")
     {
-      $_SESSION['UserLevel'] = PLUGIN_DB_ADMIN;
+      $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_ADMIN;
     } else
     {
-      $_SESSION['UserLevel'] = $row['user_perm'];
+      $_SESSION[Auth::USER_LEVEL] = $row['user_perm'];
     }
     $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
     /* Check for the no-popup flag */
