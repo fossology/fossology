@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,136 +15,87 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
-define("TITLE_agent_foreport", _("Report generation"));
-
-class agent_foreport extends FO_Plugin
+class FoReportGenerator extends DefaultPlugin
 {
-
-  /** @var DbManager */
-  private $dbManager;
-
-
-  function __construct() {
-    $this->Name = "agent_foreport";
-    $this->Title = TITLE_agent_foreport;
-    $this->Version = "1.0";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "report";
-
-    parent::__construct();
-
-    $this->vars['jqPk'] = -1;
-    $this->vars['downloadLink'] = "";
-    $this->vars['reportType'] = "report";
-
-    global $container;
-    $this->dbManager = $container->get('db.manager');
+  const NAME = 'agent_foreport';
+  
+  function __construct()
+  {
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Report generation"),
+        self::PERMISSION => Auth::PERM_WRITE,
+        self::REQUIRES_LOGIN => TRUE
+    ));
   }
 
-  /**
-   * \brief Register additional menus.
-   */
-  function RegisterMenus()
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY) return (0);
-    //do not advertise this agent: it can be scheduled only from directly
-    //menu_insert("Agents::" . $this->Title, 0, $this->Name);
-
-    $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Generate&nbsp;Report", 0, $this->Name, $text);
-  }
-
-  /**
-   * \brief Check if the upload has already been successfully scanned.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version
-   **/
-  function AgentHasResults($upload_pk)
-  {
-    return 0; /* this agent can be re run multiple times */
-  }
-
-  /**
-   * @brief Queue the agent.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
-   *  - It is already queued
-   *  - It has already been run by the latest agent version
-   *
-   * @param $job_pk
-   * @param $upload_pk
-   * @param $ErrorMsg - error message on failure
-   * @param $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * @return int|null
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   */
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
-  {
-    $Dependencies[] = "agent_adj2nest";
-
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $upload_pk);
-  }
-
-  function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY)
+    $groupId = Auth::getGroupId();
+    $uploadId = intval($request->get('upload'));
+    try
     {
-      return 0;
+      $upload = $this->getUpload($uploadId, $groupId);
     }
-
-    global $SysConf;
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
-
-    $uploadId = GetParm('upload', PARM_INTEGER);
-    if ($uploadId <=0)
-      return _("parameter error");
-
-    if (GetUploadPerm($uploadId) < PERM_WRITE)
-      return _("permission denied");
-
-    $row = $this->dbManager->getSingleRow(
-        "SELECT upload_filename FROM upload WHERE upload_pk = $1",
-        array($uploadId), "getUploadName"
-    );
-
-    if ($row === false)
-      return _("cannot find uploadId");
-
-    $ShortName = $row['upload_filename'];
-
-    $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $uploadId);
+    catch(Exception $e)
+    {
+      return $this->flushContent($e->getMessage());
+    }
+    
+    $reportGenAgent = plugin_find('agent_report');
+    $userId = Auth::getUserId();
+    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jq_pk = $this->AgentAdd($job_pk, $uploadId, $error, array());
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
 
-    if ($jq_pk<0)
+    if ($jobQueueId<0)
     {
-      return _("Cannot schedule").": ".$error;
+      return $this->flushContent(_('Cannot schedule').": $error");
     }
 
-    $this->vars['jqPk'] = $jq_pk;
-    $this->vars['downloadLink'] = Traceback_uri(). "?mod=download&report=".$job_pk;
-
-    $text = sprintf(_("Generating Report for '%s'"), $ShortName);
-    return "<h2>".$text."</h2>";
+    $vars = array('jqPk' => $jobQueueId,
+                  'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
+                  'reportType' => "report");
+    $text = sprintf(_("Generating new report for '%s'"), $upload->getFilename());
+    $vars['content'] = "<h2>".$text."</h2>";
+    return $this->render("report.html.twig", $this->mergeWithDefault($vars));
+  }
+  
+  protected function getUpload($uploadId, $groupId)
+  {  
+    if ($uploadId <=0)
+    {
+      throw new Exception(_("parameter error"));
+    }
+    /** @var UploadDao */
+    $uploadDao = $this->getObject('dao.upload');
+    if (!$uploadDao->isAccessible($uploadId, $groupId))
+    {
+      throw new Exception(_("permission denied"));
+    }
+    /** @var Upload */
+    $upload = $uploadDao->getUpload($uploadId);
+    if ($upload === null)
+    {
+      throw new Exception(_('cannot find uploadId'));
+    }
+    return $upload;
   }
 
-  public function getTemplateName()
+  function preInstall()
   {
-    return "report.html.twig";
-  }
+    $text = _("Generate Report");
+    menu_insert("Browse-Pfile::Generate&nbsp;Report", 0, self::NAME, $text);
+    /*
+    $parm = Traceback_parm_keep(array("upload"));
+    $uri = $this->Name . $parm;
 
+    menu_insert("Browse::Word&nbsp;Report",1,$uri,$text);
+    */
+  }
 }
 
-$NewPlugin = new agent_foreport();
+register_plugin(new FoReportGenerator());
