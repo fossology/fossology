@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -1762,7 +1762,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   {
     INTERESTING(lDebug ? "GPLV2+(named)" : "GPL-2.0+");
   }
-  else if (INFILE(_LT_TAPJOY)) {
+  else if (INFILE(_LT_TAPJOY) || INFILE(_LT_TAPJOY_ref1)) {
     INTERESTING("Tapjoy");
     lmem[_fGPL] = 1;
     lmem[_mMIT] = 1;
@@ -1834,6 +1834,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_CR_XFREE86) || INFILE(_LT_XFREE86)) {
     INTERESTING("XFree86");
+    lmem[_mMIT] = 1;
+  }
+  else if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED)) {
+    INTERESTING("MIT/BSD");
+    lmem[_mMIT] = 1;
+  }
+  else if (HASTEXT(_LT_BSD_AND_MIT, REG_EXTENDED)) {
+    INTERESTING("MIT&BSD");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
@@ -1992,6 +2000,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_MITref3)) {
     INTERESTING(lDebug ? "MIT(ref3)" : "MIT-style");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MITref4)) {
+    INTERESTING(lDebug ? "MIT(ref4)" : "MIT-style");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_OG_1)) {
@@ -5825,6 +5837,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_ZEND_1) || URL_INFILE(_URL_ZEND)) {
     INTERESTING("Zend-2.0");
   }
+  else if (INFILE(_LT_ZEND_2)) {
+    INTERESTING("Zend-1.0");
+  }
   cleanLicenceBuffer();
   /* WebM */
   if (URL_INFILE(_URL_WEBM)) {
@@ -6230,8 +6245,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if(INFILE(_LT_Sendmail_title) ) {
      INTERESTING("Sendmail");
   }
-  cleanLicenceBuffer();
-  /** Giftware */
+  cleanLicenceBuffer(); /** Giftware */
   if(INFILE(_LT_GIFTWARE)) {
     INTERESTING("Giftware");
   } 
@@ -6251,6 +6265,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TCL");
   }
   cleanLicenceBuffer();
+  /** BSD/MIT and BSD*MIT
+  if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED) {
+    INTERESTING("BSD/MIT");
+  } else if if (HASTEXT(_LT_BSD_AND_MIT, REG_EXTENDED) {
+    INTERESTING("BSD&MIT");
+  }
+  cleanLicenceBuffer();
+
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
@@ -6412,6 +6434,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_COMMERCIAL_2)) {
       MEDINTEREST(lDebug ? "COMM(2)" : "COMMERCIAL");
+    }
+    else if (INFILE(_LT_COMMERCIAL_3)) {
+      MEDINTEREST(lDebug ? "COMM(3)" : "COMMERCIAL");
+    }
+    else if (INFILE(_LT_COMMERCIAL_4)) {
+      MEDINTEREST(lDebug ? "COMM(4)" : "COMMERCIAL");
     }
     else if (HASTEXT(_TEXT_BOOK, 0) && INFILE(_LT_BOOKPURCHASE)) {
       MEDINTEREST(lDebug ? "PurchBook" : "COMMERCIAL");
@@ -7201,6 +7229,10 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_PHR_GPL2_OR_LATER)) {
     if (INFILE(_TITLE_GPL_KDE)) {
       lstr = "GPL-2.0+KDEupgradeClause";
+    }
+    else if (GPL_INFILE(_PHR_GPL3_OR_LATER_ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref3)
+      || GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
+      lstr = "GPL-2.0+&GPL-3.0+";
     }
     else if (!HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       lstr = "GPL-2.0+";
@@ -8618,7 +8650,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
     INTERESTING("See-file");
   }
-  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED)) {
+  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED)) {
     INTERESTING("See-URL");
   }
   return;

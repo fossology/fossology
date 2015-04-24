@@ -988,6 +988,14 @@
 %KEY% "software"	
 %STR%	"this software is provided by =FEW= freebsd project"
 #
+%ENTRY%	_LT_BSD_AND_MIT
+%KEY% =NULL=
+%STR%	"MIT(license)? (and|\&) =FEW= BSD"
+#
+%ENTRY%	_LT_BSD_OR_MIT
+%KEY% =NULL=
+%STR%	"available via the MIT (or|\/) =FEW= BSD licenses?"
+#
 %ENTRY%	_LT_UC
 %KEY% "copyright"	
 %STR%	"copyright =SOME= (university of california|UC)"
@@ -1155,6 +1163,14 @@
 %ENTRY%	_LT_COMMERCIAL_2
 %KEY%	"distribut"
 %STR%	"source (code|code =SOME= librar =SOME= (created|derived) =SOME= ) may not be =SOME= distribute"
+#####
+%ENTRY%	_LT_COMMERCIAL_3
+%KEY%	"source"
+%STR%	"source code =ANY= of =FEW= (files?|materials?) =ANY= disclosed? =ANY= without =FEW= prior =FEW= written permission"
+#####
+%ENTRY%	_LT_COMMERCIAL_4
+%KEY%	"license"
+%STR%	"software license for =SOME= code"
 #####
 # DELETED: permission to use copy and modify this software and its
 # documentation is hereby granted ... the above copyright notice and
@@ -3386,6 +3402,10 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is the MIT licen[cs]e"
 #
+%ENTRY%	_LT_MITref4
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under =FEW= MIT"
+#
 %ENTRY%	_LT_MITref3
 %KEY%	"licen[cs]"
 %STR% "licen[cs]e(:?) =FEW= and MIT"
@@ -5084,7 +5104,11 @@ e /* (INFILE(j)) */
 # Zend license information
 %ENTRY% _LT_ZEND_1
 %KEY%   "zend"
-%STR% "source file is subject to version 2\.?00 of the Zend license"
+%STR% "source file is subject to version 2\.?0 of the Zend (framework)? license"
+#
+%ENTRY% _LT_ZEND_2
+%KEY%   "zend"
+%STR% "source file is subject to version 1\.?0 of the Zend (Framework)? license"
 #
 %ENTRY%	_LT_ZEUS
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5315,6 +5339,10 @@ k
 %ENTRY% _LT_SEE_URL
 %KEY% =NULL=
 %STR% "see (https?|ftp) =SOME= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+#
+%ENTRY% _LT_SEE_URL_ref1
+%KEY% =NULL=
+%STR% "(org|com|net|cn|de)\.?\/licenses?"
 #
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
@@ -5682,6 +5710,10 @@ k
 %ENTRY% _LT_TAPJOY
 %KEY% "licen[cs]e"
 %STR% "you and the company or entity that you represent =FEW= are agreeing to be bound by and are becoming a party to this tapjoy sdk licen[cs]e agreement"
+#
+%ENTRY% _LT_TAPJOY_ref1
+%KEY% "agreement"
+%STR% "the tapjoy =SOME= you agree that you have =SOME= agree to be bound by =FEW= and are authorized to bind the entity on whose behalf you are entering into this agreement"
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -7416,7 +7448,7 @@ k
 #
 %ENTRY%	_TITLE_NCSA
 %KEY%	"licen[cs]"
-%STR%	"university of illinois/ncsa open source licen[cs]e"
+%STR%	"university of illinois(/ncsa)? open source licen[cs]e"
 #
 %ENTRY%	_TITLE_NCSA_EXHIBIT
 %KEY%	"licen[cs]"
