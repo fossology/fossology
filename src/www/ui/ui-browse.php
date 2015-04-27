@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_ui_browse", _("Browse"));
@@ -273,9 +274,16 @@ class ui_browse extends FO_Plugin
     }
 
     $this->vars['content'] = $output;
-    if (plugin_find_id('ui_readmeoss') >= 0)
+    $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
+    if (!empty($modsUploadMulti))
     {
-      $this->vars['uploadMultiSelectHook'] = '<br/><input type="hidden" name="mod" value="ui_readmeoss"/><input type="submit" value="Generate ReadMe_OSS"/>';
+      $hook = '';
+      foreach($modsUploadMulti as $mod)
+      {
+        $text = $GLOBALS['Plugins'][$mod]->title;
+        $hook .= '<br/><input type="hidden" name="mod" value="'.$mod.'"/><input type="submit" value="'.$text.'"/>';
+      }
+      $this->vars['uploadMultiSelectHook'] = $hook;
     }
 
     return $this->render('ui-browse.html.twig');

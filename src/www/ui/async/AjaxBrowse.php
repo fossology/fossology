@@ -25,6 +25,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\Lib\UI\MenuHook;
 use Fossology\Lib\Util\DataTablesUtility;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -213,9 +214,10 @@ class AjaxBrowse extends DefaultPlugin
       $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId' title='" . htmlentities($textTitle) . "' >$text</a>]";
     }
     
-    if (plugin_find_id('ui_readmeoss') >= 0)
+    $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
+    if (!empty($modsUploadMulti))
     {
-      $text = _('mark');
+      $text = _('mark for action below');
       $nameColumn .= ' [<input type="checkbox" name="uploads[]" style="vertical-align:bottom;margin:0px;" value="'.$uploadId.'"/>'.$text.']';
     }
     

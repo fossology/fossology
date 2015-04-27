@@ -24,6 +24,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\UI\MenuHook;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -112,7 +113,7 @@ class UploadFilePage extends DefaultPlugin
     $vars['moduleName'] = $this->getName();
     $vars[self::FOLDER_PARAMETER_NAME] = $request->get(self::FOLDER_PARAMETER_NAME);
     
-    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $vars['parmAgentContents'] = array();
     $vars['parmAgentFoots'] = array();
     foreach($parmAgentList as $parmAgent) {
@@ -241,8 +242,8 @@ class UploadFilePage extends DefaultPlugin
     AgentSchedule($jobId, $uploadId, $checkedAgents);
 
     $errorMsg = '';
-    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
-    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
+    $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
     foreach($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
@@ -258,26 +259,6 @@ class UploadFilePage extends DefaultPlugin
       $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
     }
     return array(true, $message);
-  }
-  
-  
-  /**
-   * @param string $hook 'ParmAgents'|'Agents'
-   * @return array
-   */
-  protected function getAgentPluginNames($hook='Agents')
-  {
-    $agentList = menu_find($hook, $maxDepth) ?: array();
-    $agentPluginNames = array();
-    if(is_array($agentList)) {
-      foreach ($agentList as $parmAgent) {
-        $agent = plugin_find_id($parmAgent->URI);
-        if (!empty($agent)) {
-          $agentPluginNames[] = $agent;
-        }
-      }
-    }
-    return $agentPluginNames;
   }
 }
 

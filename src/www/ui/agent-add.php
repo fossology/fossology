@@ -20,6 +20,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Request;
 
 class AgentAdder extends DefaultPlugin
@@ -75,8 +76,7 @@ class AgentAdder extends DefaultPlugin
     $vars['baseUri'] = Traceback_uri();
     $vars['uploadId'] = $uploadId;
     
- 
-    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $out =  '<ol>';
     $parmAgentFoots = '';
     foreach($parmAgentList as $parmAgent)
@@ -116,8 +116,8 @@ class AgentAdder extends DefaultPlugin
     }
 
     $agents = array();
-    $parmAgentList = $this->getAgentPluginNames("ParmAgents");
-    $plainAgentList = $this->getAgentPluginNames("Agents");
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
+    $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
     foreach($agentList as $agentName) {
       if (in_array($agentName, $agentsToStart))
@@ -146,28 +146,6 @@ class AgentAdder extends DefaultPlugin
     }
     return null;
   }
-  
-  
-    /**
-   * @todo move to common class since it is same as in Fossology\UI\Page\UploadFilePage
-   * @param string $hook 'ParmAgents'|'Agents'
-   * @return array
-   */
-  protected function getAgentPluginNames($hook='Agents')
-  {
-    $agentList = menu_find($hook, $maxDepth) ?: array();
-    $agentPluginNames = array();
-    if(is_array($agentList)) {
-      foreach ($agentList as $parmAgent) {
-        $agent = plugin_find_id($parmAgent->URI);
-        if (!empty($agent)) {
-          $agentPluginNames[] = $agent;
-        }
-      }
-    }
-    return $agentPluginNames;
-  }
-  
 }
 
 register_plugin(new AgentAdder());
