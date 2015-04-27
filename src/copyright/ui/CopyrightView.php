@@ -26,7 +26,6 @@ class CopyrightView extends Xpview
 
   function __construct()
   {
-    $this->Name = self::NAME;
     $this->decisionTableName = "copyright_decision";
     $this->tableName = "copyright";
     $this->modBack = 'copyright-hist';

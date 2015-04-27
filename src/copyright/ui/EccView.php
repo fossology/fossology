@@ -20,26 +20,25 @@ use Fossology\Lib\Data\Highlight;
 
 require_once('Xpview.php');
 
-class IpView extends Xpview
+class EccView extends Xpview
 {
-  const NAME = 'ip-view';
+  const NAME = 'ecc-view';
 
   function __construct()
   {
-    $this->Name = self::NAME;
-    $this->decisionTableName = "ip_decision";
-    $this->tableName = "ip";
-    $this->modBack = 'ip-hist';
-    $this->optionName = "skipFileIp";
-    $this->ajaxAction = "setNextPrevIp";
-    $this->skipOption = "noIp";
-    $this->hightlightTypeToStringMap = array(Highlight::IP => 'Patent');
-    $this->typeToHighlightTypeMap = array('ip' => Highlight::IP);
-    $this->xptext = 'patent';
-    parent::__construct(self::NAME,array(
-        self::TITLE => _("View patent Analysis")
+    $this->decisionTableName = "ecc_decision";
+    $this->tableName = "ecc";
+    $this->modBack = 'ecc-hist';
+    $this->optionName = "skipFileEcc";
+    $this->ajaxAction = "setNextPrevEcc";
+    $this->skipOption = "noEcc";
+    $this->hightlightTypeToStringMap = array(Highlight::ECC => 'Export Restriction');
+    $this->typeToHighlightTypeMap = array('ecc' => Highlight::ECC);
+    $this->xptext = 'export restriction';
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("View Export Control and Customs Analysis")
     ));
   }
 }
 
-register_plugin(new IpView());
+register_plugin(new EccView());
