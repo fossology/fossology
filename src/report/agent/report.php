@@ -741,11 +741,10 @@ class ReportAgent extends Agent
    */ 
   private function forOtherTodos($section)
   {
-    $paragraphStyle = array("spaceAfter" => 0, "spaceBefore" => 0,"spacing" => 2);          
     $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
     $subSubHeadingStyle = array("name" => $this->fontFamily, "size" => 16, "bold" => true);
     $subSubHeadingInfoTextStyle = array("name" => $this->fontFamily, "size" => 10, "bold"=>false);
-    $subSubHeadingInfoTextStyle1 = array("name" => $this->fontFamily, "size" => 10, "bold"=>true);
+    $subSubHeadingInfoTextStyle1 = array("name" => $this->fontFamily, "size" => 12, "bold"=>true);
 
     $subHeading = "4.4.	Further general obligations, restrictions & risks"; 
     $subSubHeading = "   4.4.1	 Export Restrictions";
@@ -763,24 +762,24 @@ class ReportAgent extends Agent
     $subSubHeadingInfoText7 = "Patent Notices found in Source Code:";
     $subSubHeadingInfoText8 = "No patent notices found in source scan – patent clearing is responsibility of Siemens projects";
     $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
-    $section->addText(htmlspecialchars($subSubHeading), $subHeadingStyle);
+    $section->addText(htmlspecialchars($subSubHeading), $subSubHeadingStyle);
     $section->addText(htmlspecialchars($subSubHeadingInfoText), $subSubHeadingInfoTextStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1);
-    $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle, $paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, $this->paragraphStyle);
+    $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle);
     
     $section->addTextBreak();
 
-    $section->addText(htmlspecialchars($subSubHeading1), $subHeadingStyle);
-    $section->addText(htmlspecialChars($subSubHeadingInfoText3), $subSubHeadingInfoTextStyle, $paragraphStyle);
-    $section->addText(htmlspecialChars($subSubHeadingInfoText4), $subSubHeadingInfoTextStyle, $paragraphStyle);
-    $section->addText(htmlspecialChars($subSubHeadingInfoText5), $subSubHeadingInfoTextStyle, $paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeading1), $subSubHeadingStyle);
+    $section->addText(htmlspecialChars($subSubHeadingInfoText3), $subSubHeadingInfoTextStyle);
+    $section->addText(htmlspecialChars($subSubHeadingInfoText4), $subSubHeadingInfoTextStyle);
+    $section->addText(htmlspecialChars($subSubHeadingInfoText5), $subSubHeadingInfoTextStyle);
     
     $section->addTextBreak();
 
-    $section->addText(htmlspecialchars($subSubHeading2), $subHeadingStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText6), $subSubHeadingInfoTextStyle, $paragraphStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText7), $subSubHeadingInfoTextStyle1, $paragraphStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText8), $subSubHeadingInfoTextStyle, $paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeading2), $subSubHeadingStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText6), $subSubHeadingInfoTextStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText7), $subSubHeadingInfoTextStyle1,$this->paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText8), $subSubHeadingInfoTextStyle);
 
     $section->addTextBreak();
   }
@@ -1086,7 +1085,7 @@ class ReportAgent extends Agent
     $firstColLen = 6500;
     $secondColLen = 9000;
 
-    $section->addText(htmlspecialchars("16. Irrelevant Files"), $this->tableHeading);
+    $section->addText(htmlspecialchars($title), $this->tableHeading);
 
     $table = $section->addTable($this->tablestyle);
     $table->addRow($rowWidth,$this->paragraphStyle);
@@ -1253,6 +1252,7 @@ class ReportAgent extends Agent
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
     /* Display irrelavant license files */
+    $heading = "16. Irrelevant Files";
     $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements']);
 
     $heading = "17. Notes";  
