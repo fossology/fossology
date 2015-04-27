@@ -39,7 +39,7 @@ class CopyrightHistogram  extends HistogramBase {
    * @param $Agent_pk
    * @return array
    */
-  protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
+  protected function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
   $type = 'statement';
   $decription = _("Copyright");

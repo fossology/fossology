@@ -18,27 +18,26 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\UploadDao;
 
 abstract class HistogramBase extends FO_Plugin {
   protected $agentName;
   /** @var  string */
   protected $viewName;
-  /**  @var string */
+  /** @var string */
   private $uploadtree_tablename;
-  /**  @var CopyrightDao */
-  private  $copyrightDao;
-
+  /** @var UploadDao */
+  private $uploadDao;
+  
   function __construct()
   {
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
-    $this->NoMenu = 0;
 
     parent::__construct();
 
     global $container;
-    $this->copyrightDao = $container->get('dao.copyright');
+    $this->uploadDao = $container->get('dao.upload');
     $this->renderer = $container->get('twig.environment');
 
     $this->vars['name']=$this->Name;
@@ -53,8 +52,8 @@ abstract class HistogramBase extends FO_Plugin {
    * @param $agentId
    * @return string
    */
-  protected function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId){
-
+  protected function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId)
+  {
     $sorting = json_encode($this->returnSortOrder());
 
     $out = array("type" => $type, "sorting" => $sorting, "uploadId" => $uploadId,
@@ -110,9 +109,8 @@ abstract class HistogramBase extends FO_Plugin {
       if ($isADirectory) {
         return;
       }
-      global $Plugins;
-      $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
-      return $ModLicView->Output();
+      $ModLicView = plugin_find($this->viewName);
+      return $ModLicView->execute();
     }
     return $this->fillTables($upload_pk, $Uploadtree_pk, $filter, $Agent_pk, $VF);
   }
@@ -134,8 +132,7 @@ abstract class HistogramBase extends FO_Plugin {
     $filter = GetParm("filter",PARM_STRING);
 
     /* check upload permissions */
-    $UploadPerm = GetUploadPerm($uploadId);
-    if ($UploadPerm < Auth::PERM_READ)
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()))
     {
       $text = _("Permission Denied");
       return "<h2>$text</h2>";
@@ -265,30 +262,30 @@ abstract class HistogramBase extends FO_Plugin {
     }
 
     $VF .= "<table border=0>";
-    foreach ($Children as $C)
+    foreach ($Children as $child)
     {
-      if (empty($C))
+      if (empty($child))
       {
         continue;
       }
+      $ChildCount++;
+      
       global $Plugins;
-      $IsDir = Isdir($C['ufile_mode']);
-      $IsContainer = Iscontainer($C['ufile_mode']);
       $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
       /* Determine the hyperlink for non-containers to view-license  */
-      if (!empty($C['pfile_fk']) && !empty($ModLicView))
+      if (!empty($child['pfile_fk']) && !empty($ModLicView))
       {
         $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+        $LinkUri .= "?mod=".$this->viewName."&agent=$Agent_pk&upload=$upload_pk&item=$child[uploadtree_pk]";
       } else
       {
         $LinkUri = NULL;
       }
 
       /* Determine link for containers */
-      if (Iscontainer($C['ufile_mode']))
+      if (Iscontainer($child['ufile_mode']))
       {
-        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk'], $uploadtree_tablename);
+        $uploadtree_pk = DirGetNonArtifact($child['uploadtree_pk'], $uploadtree_tablename);
         $LicUri = "$Uri&item=" . $uploadtree_pk;
       } else
       {
@@ -299,34 +296,16 @@ abstract class HistogramBase extends FO_Plugin {
       /* id of each element is its uploadtree_pk */
       $LicCount = 0;
 
-      $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
-      $HasHref = 0;
-      $HasBold = 0;
-      if ($IsContainer)
+      $cellContent = Isdir($child['ufile_mode']) ? $child['ufile_name'].'/' : $child['ufile_name'];
+      if (Iscontainer($child['ufile_mode']))
       {
-        $VF .= "<a href='$LicUri'>";
-        $HasHref = 1;
-        $VF .= "<b>";
-        $HasBold = 1;
-      } else if (!empty($LinkUri)) //  && ($LicCount > 0))
-      {
-        $VF .= "<a href='$LinkUri'>";
-        $HasHref = 1;
+        $cellContent = "<a href='$LicUri'><b>$cellContent</b></a>";
       }
-      $VF .= $C['ufile_name'];
-      if ($IsDir)
+      else if (!empty($LinkUri)) //  && ($LicCount > 0))
       {
-        $VF .= "/";
-      };
-      if ($HasBold)
-      {
-        $VF .= "</b>";
+        $cellContent = "<a href='$LinkUri'>$cellContent</a>";
       }
-      if ($HasHref)
-      {
-        $VF .= "</a>";
-      }
-      $VF .= "</td><td>";
+      $VF .= "<tr><td id='$child[uploadtree_pk]' align='left'>$cellContent</td><td>";
 
       if ($LicCount)
       {
@@ -336,10 +315,7 @@ abstract class HistogramBase extends FO_Plugin {
         $VF .= "]";
         $ChildLicCount += $LicCount;
       }
-      $VF .= "</td>";
-      $VF .= "</tr>\n";
-
-      $ChildCount++;
+      $VF .= "</td></tr>\n";
     }
     $VF .= "</table>\n";
     return array($ChildCount, $VF);
@@ -351,12 +327,7 @@ abstract class HistogramBase extends FO_Plugin {
    */
   protected function isADirectory($Uploadtree_pk)
   {
-    global $PG_CONN;
-    $sql = "SELECT * FROM $this->uploadtree_tablename WHERE uploadtree_pk = '$Uploadtree_pk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $row =  $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
     $isADirectory = IsDir($row['ufile_mode']);
     return $isADirectory;
   }

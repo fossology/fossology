@@ -81,15 +81,14 @@ class Xpview extends DefaultPlugin
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad($vars);
     }
-
-    $permission = GetUploadPerm($uploadId);
-    if($permission < Auth::PERM_READ ) {
+    
+    if( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
       $text = _("Permission Denied");
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad();
     }
 
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
     {
@@ -233,8 +232,8 @@ class Xpview extends DefaultPlugin
 
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
-    $Upload = GetParm("upload", PARM_INTEGER);
-    if (!empty($itemId) && !empty($Upload))
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    if (!empty($itemId) && !empty($uploadId))
     {
       if (GetParm("mod", PARM_STRING) == $this->Name)
       {
@@ -247,8 +246,8 @@ class Xpview extends DefaultPlugin
         menu_insert("View-Meta::Copyright/Email/Url", 1, $URI, $text);
       }
     }
-    $Lic = GetParm("lic", PARM_INTEGER);
-    if (!empty($Lic))
+    $licId = GetParm("lic", PARM_INTEGER);
+    if (!empty($licId))
     {
       $this->NoMenu = 1;
     }
