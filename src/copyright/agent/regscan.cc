@@ -14,11 +14,11 @@
 
 
 regexScanner::regexScanner(const string& sReg, const char* t)
-  : reg(rx::regex(sReg)), type(t), index(0)
+  : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(0)
 { }
 
 regexScanner::regexScanner(const string& sReg, const char* t, int idx)
-  : reg(rx::regex(sReg)), type(t), index(idx)
+  : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(idx)
 { }
 
 void regexScanner::ScanString(const string& s, list<match>& results) const
