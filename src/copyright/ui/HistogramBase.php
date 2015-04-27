@@ -52,7 +52,7 @@ abstract class HistogramBase extends FO_Plugin {
    * @param $agentId
    * @return string
    */
-  protected function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId)
+  public function getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId)
   {
     $sorting = json_encode($this->returnSortOrder());
 
@@ -62,7 +62,7 @@ abstract class HistogramBase extends FO_Plugin {
     //TODO template this! For now I just template the js
     $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/>";
 
-    return array($output,$out );
+    return array($output, $out);
   }
 
 

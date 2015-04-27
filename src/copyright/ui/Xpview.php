@@ -159,7 +159,15 @@ class Xpview extends DefaultPlugin
     $vars['clearingTypes'] = $copyrightDecisionMap;
     $vars['xptext'] = $this->xptext;
     
+    $agentId = intval($request->get("agent"));
+    $vars = array_merge($vars,$this->additionalVars($uploadId, $uploadTreeId, $agentId));
+    
     return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
+  }
+  
+  protected function additionalVars($uploadId, $uploadTreeId, $agentId)
+  {
+    return array();
   }
   
   /**

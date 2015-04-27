@@ -1,3 +1,9 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
 {% extends "include/base.html.twig" %}
 
 {% block content %}
@@ -24,6 +30,7 @@
           {% block rhs %}
             {% include 'ui-xp-view_rhs.html.twig' %}
           {% endblock %}
+          {{ content }}
         </td>
       </tr>
     </table>
@@ -46,5 +53,11 @@
   <script type="text/javascript">{% include "next-options.js.twig" %}</script>
 
   {{ script }}
+  
+  {% include "copyrighthist_scripts.html.twig" %}
+  <script language="javascript">
+  {% set table=statement %}
+  {% include "histTable.js.twig" with table %}
+  </script>
 {% endblock %}
 

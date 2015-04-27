@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -34,34 +34,31 @@ class CopyrightHistogram  extends HistogramBase {
 
   /**
    * @param $upload_pk
-   * @param $Uploadtree_pk
+   * @param $uploadtreeId
    * @param $filter
-   * @param $Agent_pk
+   * @param $agentId
    * @return array
    */
-  protected function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
+  protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
-  $type = 'statement';
-  $decription = _("Copyright");
+    $tableVars=array();
+    
+    $type = 'statement';
+    $description = _("Copyright");
+    list($VCopyright, $varsCopyright) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars['statement']=$varsCopyright;
 
-  $tableVars=array();
+    $type = 'email';
+    $description = _("Email");
+    list($VEmail, $varsEmail) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars['email']=$varsEmail;
 
-  list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['statement']=$varsCopyright;
+    $type = 'url';
+    $description = _("URL");
+    list($VUrl, $varsURL) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars['url']=$varsURL;
 
-  $type = 'email';
-  $decription = _("Email");
-
-  list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['email']=$varsEmail;
-
-  $type = 'url';
-  $decription = _("URL");
-
-  list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['url']=$varsURL;
-
-  return array( $VCopyright, $VEmail, $VUrl, $tableVars);
+    return array( $VCopyright, $VEmail, $VUrl, $tableVars);
   }
 
 
