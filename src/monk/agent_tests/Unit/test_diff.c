@@ -2,11 +2,18 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,9 +24,10 @@ You should have received a copy of the GNU General Public License along with thi
 #include "hash.h"
 #include "string_operations.h"
 #include "diff.h"
+#include "match.h"
 #include "monk.h"
 
-int token_search_diff(char * text, char* search,
+int token_search_diff(char* text, char* search, unsigned int maxAllowedDiff,
         size_t expectedMatchCount, size_t expectedAdditionsCount, size_t expectedRemovalsCount, ...) {
 
   int result;
@@ -31,12 +39,12 @@ int token_search_diff(char * text, char* search,
   GArray* tokenizedText = tokenize(textCopy, "^");
   GArray* tokenizedSearch = tokenize(searchCopy, "^");
 
-  GArray * matched = g_array_new(TRUE, FALSE, sizeof (size_t));
-  GArray * additions = g_array_new(TRUE, FALSE, sizeof (size_t));
-  GArray * removals = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* matched = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* additions = g_array_new(TRUE, FALSE, sizeof (size_t));
+  GArray* removals = g_array_new(TRUE, FALSE, sizeof (size_t));
 
   size_t textStartPosition = 0;
-  DiffResult * diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, &textStartPosition, 50, 1);
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, maxAllowedDiff, 1);
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
     return diffResult != NULL;
@@ -54,29 +62,31 @@ int token_search_diff(char * text, char* search,
   size_t additionCount = 0;
   size_t removalCount = 0;
 
-  for(size_t i=0; i<matchedInfo->len; i++){
+  for (size_t i=0; i<matchedInfo->len; i++) {
     DiffMatchInfo diffInfo = g_array_index(matchedInfo, DiffMatchInfo, i);
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_ADDITION)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_ADDITION) == 0) {
       additionCount += diffInfo.text.length;
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length;
-      j++)
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(additions, j);
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_MATCH)==0) {
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length; j++)
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_MATCH) == 0) {
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(matched, j);
        matchedCount += diffInfo.text.length;
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_REMOVAL)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_REMOVAL) == 0) {
       g_array_append_val(removals, diffInfo.text.start);
       removalCount ++;
     }
-    if (strcmp(diffInfo.diffType, DIFF_TYPE_REPLACE)==0) {
+    if (strcmp(diffInfo.diffType, DIFF_TYPE_REPLACE) == 0) {
       additionCount += diffInfo.text.length;
-      for(size_t j=diffInfo.text.start;
-          j<diffInfo.text.start + diffInfo.text.length; j++)
+      for (size_t j=diffInfo.text.start;
+           j<diffInfo.text.start + diffInfo.text.length;
+           j++)
         g_array_append_val(additions, j);
       removalCount++;
       g_array_append_val(removals, diffInfo.text.start);
@@ -143,7 +153,7 @@ end:
 
   va_end(argptr);
 
-  if(diffResult)
+  if (diffResult)
     diffResult_free(diffResult);
   g_array_free(matched, TRUE);
   g_array_free(additions, TRUE);
@@ -152,8 +162,8 @@ end:
   g_array_free(tokenizedText, TRUE);
   g_array_free(tokenizedSearch, TRUE);
 
-  free(textCopy);
-  free(searchCopy);
+  g_free(textCopy);
+  g_free(searchCopy);
 
   return result;
 }
@@ -161,30 +171,39 @@ end:
 void test_token_search_diffs() {
   // simple matches
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "one",
+          5,
           1, 0, 0,
           0));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "bar",
+          5,
           1, 0, 0,
           4));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "two",
+          5,
           1, 0, 0,
           1));
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "3^foo",
+          5,
           2, 0, 0,
           2, 3));
   CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^foo^^bar^", "",
+          5,
           0, 0, 0));
 
   // not matches
   CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^foo^^bar^", "one^^foo^^bar^^3",
+          2,
           0, 0, 0));
-  CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z",
+  CU_ASSERT_FALSE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z^d^5",
+          2,
           0, 0, 0));
   CU_ASSERT_FALSE(token_search_diff("one^two^^three^^bas", "one^^3^3^^bar^^z",
+          2,
           0, 0, 0));
 
   // simple additions
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^foo^^bar^", "one^^foo^^bar",
+          5,
           3, 2, 0,
           0, 3, 4, // matched
           1, 2 // additions
@@ -192,6 +211,7 @@ void test_token_search_diffs() {
 
   // simple removals
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^z", "one^^3^3^^5^^bar^^y^^z",
+          5,
           4, 0, 2,
           0, 1, 2, 3, // matched
           2, 3 // removals
@@ -199,6 +219,7 @@ void test_token_search_diffs() {
 
   // mixed additions and removals
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^bar^z", "one^^3^3^^bar^^z",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, // additions
@@ -206,6 +227,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^two^^1^2^3^4^5^z", "one^^1^2^3^4^5^4^z",
+          5,
           7, 1, 1,
           0, 2, 3, 4, 5, 6, 7, // matched
           1, // additions
@@ -213,6 +235,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^e", "one^^3^bar^^4^e",
+          5,
           4, 1, 1,
           0, 1, 2, 4, // matched
           3, // additions
@@ -220,6 +243,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^z", "one^^3^bar^^4^a^^z",
+          5,
           4, 1, 1,
           0, 1, 2, 4, // matched
           3, // additions
@@ -227,14 +251,24 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^one^^3^^bar^5^6^z", "one^^3^bar^^4^^z",
+          5,
           4, 2, 1,
           0, 1, 2, 5, // matched
           3, 4, // additions
           3 // removals
           ));
 
+  CU_ASSERT_TRUE(token_search_diff("^one^^two^^3^^bar", "one^^3^3^^bar^^z",
+          2,
+          3, 1, 2,
+          0, 2, 3, // matched
+          1, // additions
+          3, 4 // removals
+          ));
+
   // simple replace
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^two^three^^bar", "foo^1^two^three^bar",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, 1, // additions
@@ -242,6 +276,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^bar^two^three^^bar", "foo^1^two^three^bar",
+          5,
           4, 2, 1,
           0, 3, 4, 5, // matched
           1, 2, // additions
@@ -249,6 +284,7 @@ void test_token_search_diffs() {
           ));
 
   CU_ASSERT_TRUE(token_search_diff("^foo^^one^two^three^^bar", "foo^1^2^two^three^bar",
+          5,
           4, 1, 1,
           0, 2, 3, 4, // matched
           1, // additions
@@ -256,8 +292,7 @@ void test_token_search_diffs() {
           ));
 }
 
-int token_search(char * text, char* search, size_t expectedStart) {
-  int result;
+int token_search(char* text, char* search, size_t expectedStart) {
   char* textCopy = g_strdup(text);
   char* searchCopy = g_strdup(search);
 
@@ -265,16 +300,20 @@ int token_search(char * text, char* search, size_t expectedStart) {
   GArray* tokenizedSearch = tokenize(searchCopy, "^");
 
   size_t matchStart = 0;
-  result = findMatchFull(tokenizedText, tokenizedSearch, &matchStart);
+  size_t textStartPosition = 0;
+  DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 0, 1);
 
+  if (diffResult) {
+    matchStart = g_array_index(diffResult->matchedInfo, DiffPoint, 0).start;
+  }
   CU_ASSERT_EQUAL(expectedStart, matchStart);
 
   g_array_free(tokenizedText, TRUE);
   g_array_free(tokenizedSearch, TRUE);
-  free(textCopy);
-  free(searchCopy);
+  g_free(textCopy);
+  g_free(searchCopy);
 
-  return result;
+  return (diffResult != NULL) && (diffResult->matchedInfo->len == 1);
 }
 
 void test_token_search() {
@@ -288,7 +327,8 @@ void test_token_search() {
 
   CU_ASSERT_FALSE(token_search("^one^^two^^3^^foo^^bar^", "3^^foo^two", 0));
 
-  CU_ASSERT_TRUE(token_search("^3^one^^two^^3^^foo^^bar^", "3^^foo", 3));
+  CU_ASSERT_FALSE(token_search("^3^one^^two^^3^^foo^^bar^", "3^^foo", 0));
+  CU_ASSERT_TRUE(token_search("one^^two^^3^^foo^^bar^", "3^^foo", 2));
 }
 
 void test_matchNTokens(){
@@ -311,87 +351,85 @@ void test_matchNTokens(){
                               7));
 }
 
-void _test_lookForAdditions(char * text, char * search,
+int _test_lookForAdditions(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedDiff, int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+        int expectedTextPosition, int expectedSearchPosition) {
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
-  DiffMatchInfo result = lookForDiff(textTokens, searchTokens,
-          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches);
+  DiffMatchInfo result;
+  int ret = lookForDiff(textTokens, searchTokens,
+          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches,
+          &result);
 
-  if (result.diffSize != expectedDiff) {
-    printf("adds(%s,%s): result.diffSize == %ld != %d\n",
-            text, search, result.diffSize, expectedDiff);
+  if (ret) {
+    if (result.search.start != expectedSearchPosition) {
+      printf("adds(%s,%s): result.search.start == %zu != %d\n", text, search,
+             result.search.start, expectedSearchPosition);
+    }
+    if (result.text.start != expectedTextPosition) {
+      printf("adds(%s,%s): result.text.start == %zu != %d\n", text, search,
+             result.text.start, expectedTextPosition);
+    }
+
+    CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
+    CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
-  if (result.search.start != expectedSearchPosition) {
-    printf("adds(%s,%s): result.search.start == %zu != %d\n", text, search,
-            result.search.start, expectedSearchPosition);
-  }
-  if (result.text.start != expectedTextPosition) {
-    printf("adds(%s,%s): result.text.start == %zu != %d\n", text, search,
-            result.text.start, expectedTextPosition);
-  }
 
-  CU_ASSERT_TRUE(result.diffSize == expectedDiff);
-  CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
-  CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
+  g_free(testText);
+  g_free(testSearch);
 
-  free(testText);
-  free(testSearch);
-
+  return ret;
 }
 
-void _test_lookForRemovals(char * text, char * search,
+int _test_lookForRemovals(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedDiff, int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+        int expectedTextPosition, int expectedSearchPosition) {
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
-  DiffMatchInfo result = lookForDiff(textTokens, searchTokens,
-          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches);
+  DiffMatchInfo result;
+  int ret = lookForDiff(textTokens, searchTokens,
+          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches,
+          &result);
 
-  if (result.diffSize != expectedDiff) {
-    printf("rems(%s,%s): result.diffSize == %ld != %d\n",
-            text, search, result.diffSize, expectedDiff);
+  if (ret) {
+    if (result.search.start != expectedSearchPosition) {
+      printf("rems(%s,%s): result.search.start == %zu != %d\n", text, search,
+             result.search.start, expectedSearchPosition);
+    }
+    if (result.text.start != expectedTextPosition) {
+      printf("rems(%s,%s): result.text.start == %zu != %d\n", text, search,
+             result.text.start, expectedTextPosition);
+    }
+
+    CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
+    CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
-  if (result.search.start != expectedSearchPosition) {
-    printf("rems(%s,%s): result.search.start == %zu != %d\n", text, search,
-            result.search.start, expectedSearchPosition);
-  }
-  if (result.text.start != expectedTextPosition) {
-    printf("rems(%s,%s): result.text.start == %zu != %d\n", text, search,
-            result.text.start, expectedTextPosition);
-  }
 
-  CU_ASSERT_TRUE(result.diffSize == expectedDiff);
-  CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
-  CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
+  g_free(testText);
+  g_free(testSearch);
 
-  free(testText);
-  free(testSearch);
+  return ret;
 }
 
 void test_lookForReplacesNotOverflowing() {
   int max = MAX_ALLOWED_DIFF_LENGTH+1;
-  char * testText = malloc((max)*3+1);
-  char * testSearch = malloc((max)*3+1);
+  int length = max + 1;
+  char* testText = malloc((length)*2+1);
+  char* testSearch = malloc((length)*2+1);
 
-  char * ptr1 =testSearch;
-  char * ptr2 =testText;
-  for(int i = 0; i<max; i++) {
-    *ptr1='A'+(i%26);
-    *ptr2='a'+(i%26);
-    ptr1++;
-    ptr2++;
-    *ptr1='a'+((i/26)%26);
-    *ptr2='A'+((i/26)%26);
+  char* ptr1 =testSearch;
+  char* ptr2 =testText;
+  for (int i = 0; i<length; i++) {
+    *ptr1='a';
+    *ptr2='b';
     ptr1++;
     ptr2++;
     *ptr1='^';
@@ -399,246 +437,217 @@ void test_lookForReplacesNotOverflowing() {
     ptr1++;
     ptr2++;
   }
-  int matchPosition = max+1;
-  *(testSearch + 3*(matchPosition-1))='m';
-  *(testSearch + 3*(matchPosition-1)+1)='m';
-  *(testText + 3)='m';
-  *(testText+ 3+1)='m';
+  int matchPosition = length;
+  *(testSearch + 2*(matchPosition-1))='m';
+  *(testText + 2)='m';
   *ptr1 = '\0';
   *ptr2 = '\0';
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
-  DiffMatchInfo result = lookForDiff(textTokens, searchTokens,
-                                           0, 0, max, 1);
-
-  CU_ASSERT_TRUE(result.diffSize == -1);
-  CU_ASSERT_TRUE(result.search.start == 0);
-  CU_ASSERT_TRUE(result.text.start == 0);
+  DiffMatchInfo result;
+  CU_ASSERT_FALSE(lookForDiff(textTokens, searchTokens,
+                              0, 0, max, 1, &result));
 
   free(testText);
   free(testSearch);
 }
 
-void _test_lookForReplaces(char * text, char * search,
+int _test_lookForReplaces(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedDiff, int expectedTextPosition, int expectedSearchPosition) {
-  char * testText = g_strdup(text);
-  char * testSearch = g_strdup(search);
+        int expectedTextPosition, int expectedSearchPosition) {
+  char* testText = g_strdup(text);
+  char* testSearch = g_strdup(search);
 
-  GArray * textTokens = tokenize(testText, "^");
-  GArray * searchTokens = tokenize(testSearch, "^");
+  GArray* textTokens = tokenize(testText, "^");
+  GArray* searchTokens = tokenize(testSearch, "^");
 
-  DiffMatchInfo result = lookForDiff(textTokens, searchTokens,
-          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches);
+  DiffMatchInfo result;
+  int ret = lookForDiff(textTokens, searchTokens,
+          textPosition, searchPosition, maxAllowedDiff, minTrailingMatches, &result);
 
-  if (result.diffSize != expectedDiff) {
-    printf("replS(%s,%s): result.diffSize == %ld != %d\n",
-            text, search, result.diffSize, expectedDiff);
+  if (ret) {
+    if (result.search.start != expectedSearchPosition) {
+      printf("replS(%s,%s): result.search.start == %zu != %d\n", text, search,
+             result.search.start, expectedSearchPosition);
+    }
+    if (result.text.start != expectedTextPosition) {
+      printf("replS(%s,%s): result.text.start == %zu != %d\n", text, search,
+             result.text.start, expectedTextPosition);
+    }
+
+    CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
+    CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
-  if (result.search.start != expectedSearchPosition) {
-    printf("replS(%s,%s): result.search.start == %zu != %d\n", text, search,
-            result.search.start, expectedSearchPosition);
-  }
-  if (result.text.start != expectedTextPosition) {
-    printf("replS(%s,%s): result.text.start == %zu != %d\n", text, search,
-            result.text.start, expectedTextPosition);
-  }
 
-  CU_ASSERT_TRUE(result.diffSize == expectedDiff);
-  CU_ASSERT_TRUE(result.search.start == expectedSearchPosition);
-  CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
+  g_free(testText);
+  g_free(testSearch);
 
-  free(testText);
-  free(testSearch);
+  return ret;
 }
 
 void test_lookForAdditions() {
-  _test_lookForAdditions(
+  CU_ASSERT_TRUE(_test_lookForAdditions(
           "one^two",
           "two",
           0, 0, 5, 1,
-          1,
-          1, 0);
+          1, 0));
 
-  _test_lookForAdditions(
+  CU_ASSERT_FALSE(_test_lookForAdditions(
           "one^two^three^four^five",
           "five",
           0, 0, 2, 1,
-          -1,
-          0, 0);
+          0, 0));
 
-  _test_lookForAdditions(
+  CU_ASSERT_FALSE(_test_lookForAdditions(
           "one^two^three^four",
           "one",
           1, 0, 6, 1,
-          -1,
-          1, 0);
+          1, 0));
 
-  _test_lookForAdditions(
+  CU_ASSERT_TRUE(_test_lookForAdditions(
           "1^d^a^test_starts_here^two^three",
           "v^test_starts_here^^three",
           4, 2, 5, 1,
-          1,
-          5, 2);
+          5, 2));
 
-  _test_lookForAdditions(
+  CU_ASSERT_FALSE(_test_lookForAdditions(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^eight",
           4, 2, 10, 1,
-          -1,
-          4, 2);
+          4, 2));
 
-  _test_lookForAdditions(
+  CU_ASSERT_FALSE(_test_lookForAdditions(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^seven",
           4, 2, 2, 1,
-          -1,
-          4, 2);
+          4, 2));
 }
 
 void test_lookForRemovals() {
-  _test_lookForRemovals(
+  CU_ASSERT_TRUE(_test_lookForRemovals(
           "two",
           "one^two",
           0, 0, 5, 1,
-          1,
-          0, 1);
+          0, 1));
 
-  _test_lookForRemovals(
+  CU_ASSERT_FALSE(_test_lookForRemovals(
           "five",
           "one^two^three^four^five",
           0, 0, 2, 1,
-          -1,
-          0, 0);
+          0, 0));
 
-  _test_lookForRemovals(
+  CU_ASSERT_FALSE(_test_lookForRemovals(
           "five",
           "five^two^three^four^five",
           0, 1, 2, 1,
-          -1,
-          0, 1);
+          0, 1));
 
-  _test_lookForRemovals(
+  CU_ASSERT_TRUE(_test_lookForRemovals(
           "1^d^a^test_starts_here^three",
           "v^test_starts_here^two^three",
           4, 2, 5, 1,
-          1,
-          4, 3);
+          4, 3));
 
-  _test_lookForRemovals(
+  CU_ASSERT_FALSE(_test_lookForRemovals(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^eight",
           4, 2, 10, 1,
-          -1,
-          4, 2);
+          4, 2));
 
-  _test_lookForRemovals(
+  CU_ASSERT_FALSE(_test_lookForRemovals(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^seven",
           4, 2, 2, 1,
-          -1,
-          4, 2);
+          4, 2));
 }
 
 void test_lookForReplaces1() {
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "one^two",
           "eins^two",
           0, 0, 5, 1,
-          1,
-          1, 1);
+          1, 1));
 
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "one^two^three",
           "eins^three",
           0, 0, 5, 1,
-          2,
-          2, 1);
+          2, 1));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "one^two^three^four^five",
           "eins^five",
           0, 0, 2, 1,
-          -1,
-          0, 0);
+          0, 0));
 
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "1^d^a^test_starts_here^one^three",
           "v^test_starts_here^two^three",
           4, 2, 5, 1,
-          1,
-          5, 3);
+          5, 3));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^eight",
           4, 2, 10, 1,
-          -1,
-          4, 2);
+          4, 2));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^seven",
           4, 2, 2, 1,
-          -1,
-          4, 2);
+          4, 2));
 
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "one^two",
           "eins^two",
           0, 0, 5, 1,
-          1,
-          1, 1);
+          1, 1));
 
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "one^three",
           "eins^zwei^three",
           0, 0, 5, 1,
-          2,
-          1, 2);
+          1, 2));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "one^five",
           "eins^zwei^drei^vier^five",
           0, 0, 2, 1,
-          -1,
-          0, 0);
+          0, 0));
 
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "1^d^a^test_starts_here^one^three",
           "v^test_starts_here^two^three",
           4, 2, 5, 1,
-          1,
-          5, 3);
+          5, 3));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^eight",
           4, 2, 10, 1,
-          -1,
-          4, 2);
+          4, 2));
 
-  _test_lookForReplaces(
+  CU_ASSERT_FALSE(_test_lookForReplaces(
           "1^d^a^test_starts_here^two^three^four^five^six^seven^",
           "v^test_starts_here^^seven",
           4, 2, 2, 1,
-          -1,
-          4, 2);
+          4, 2));
 }
 
 void test_lookForReplaces2() {
   //some tests in which replace search order is important
-  _test_lookForReplaces(
+  CU_ASSERT_TRUE(_test_lookForReplaces(
           "0^a^a^a^1^2^3^4^1^5",
           "0^b^b^b^4^1^5",
           3, 3, 5, 1,
-          2,
-          4, 5); // match token is "1"
+          4, 5)); // match token is "1"
   CU_ASSERT_FALSE(token_search_diff(
           "0^a^a^a^1^2^3^4^1^5",
           "0^b^b^b^4^1^5",
+          3,
           0, 0, 0));
 }
 

@@ -55,10 +55,10 @@ class ItemTreeBounds extends Object
   public function __construct($itemId, $uploadTreeTableName, $uploadId, $left, $right)
   {
     $this->uploadTreeTableName = $uploadTreeTableName;
-    $this->uploadId = $uploadId;
-    $this->left = $left;
-    $this->right = $right;
-    $this->itemId = $itemId;
+    $this->uploadId = (int) $uploadId;
+    $this->left = (int) $left;
+    $this->right = (int) $right;
+    $this->itemId = (int) $itemId;
   }
 
   /**

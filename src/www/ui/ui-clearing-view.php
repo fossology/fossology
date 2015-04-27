@@ -99,11 +99,20 @@ class ClearingView extends FO_Plugin
    * @param $licenseId
    * @param $selectedAgentId
    * @param $highlightId
+   * @param int $clearingId
+   * @param int $uploadId
    * @return Highlight[]
    */
-  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId)
+  private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId)
   {
-    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    $unmaskAgents = $selectedAgentId;
+    if(empty($selectedAgentId))
+    {  
+      $scanJobProxy = new \Fossology\Lib\Proxy\ScanJobProxy($this->agentsDao,$uploadId);
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+      $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
+    }
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $unmaskAgents, $highlightId, $clearingId);
     $groupId = $_SESSION[Auth::GROUP_ID];
     if (($selectedAgentId > 0) || ($clearingId > 0))
     {
@@ -206,9 +215,8 @@ class ClearingView extends FO_Plugin
       return new Response("", Response::HTTP_BAD_REQUEST);
     }
 
-    global $SysConf;
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
@@ -246,12 +254,12 @@ class ClearingView extends FO_Plugin
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId);
 
     $permission = GetUploadPerm($uploadId);
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
-    $hasWritePermission = $permission >= PERM_WRITE;
+    $hasWritePermission = $permission >= Auth::PERM_WRITE;
 
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
@@ -261,7 +269,7 @@ class ClearingView extends FO_Plugin
 
     if ($isSingleFile)
     {
-      if ($permission >= PERM_WRITE)
+      if ($permission >= Auth::PERM_WRITE)
       {
         $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
         $this->vars['licenseArray'] = $this->licenseDao->getLicenseArray($groupId);
@@ -290,7 +298,7 @@ class ClearingView extends FO_Plugin
     $this->vars['itemId'] = $uploadTreeId;
     $this->vars['pageMenu'] = $pageMenu;
     $this->vars['textView'] = $textView;
-    $this->vars['legendData'] = $this->highlightRenderer->getLegendData(($selectedAgentId > 0 && $licenseId > 0) || ($clearingId > 0));
+    $this->vars['legendData'] = $this->highlightRenderer->getLegendData($selectedAgentId || $clearingId);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
@@ -312,6 +320,7 @@ class ClearingView extends FO_Plugin
     $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
     $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
     
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
     return $this->render("ui-clearing-view.html.twig");
   }
 

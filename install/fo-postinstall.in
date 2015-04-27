@@ -1,6 +1,7 @@
 #!/bin/bash
 # FOSSology postinstall script
 # Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2015 Siemens AG
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be
@@ -128,11 +129,11 @@ if [ $COMMON ]; then
          exit 1
       fi
       USERHOME=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 6`
-      if [ "$USERHOME" != "/home/fossy" ]; then
-         echo "NOTE: change user 'fossy' homedir from $USERHOME to /home/fossy."
-         mkdir -p /home/fossy
-         chown {$PROJECTUSER}:{$PROJECTUSER} /home/fossy
-         usermod -d /home/fossy {$PROJECTUSER}
+      if [ "$USERHOME" != "/home/{$PROJECTUSER}" ]; then
+         echo "NOTE: change user '{$PROJECTUSER}' homedir from $USERHOME to /home/{$PROJECTUSER}."
+         mkdir -p /home/{$PROJECTUSER}
+         chown {$PROJECTUSER}:{$PROJECTUSER} /home/{$PROJECTUSER}
+         usermod -d /home/{$PROJECTUSER} {$PROJECTUSER}
       fi
    else
       # ensure that the full parent path of the HOME exists first
@@ -216,7 +217,7 @@ fi # end of license reference
 ########################################################################
 
 if [ $AGENT ]; then
-   # change all files ownership to fossy:fossy
+   # change all files ownership to {$PROJECTUSER}:{$PROJECTGROUP}
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
    #chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
    #chmod g+s {$MODDIR}/scheduler/agent/fo_scheduler

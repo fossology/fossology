@@ -23,7 +23,7 @@ class Auth {
   const USER_ID = 'UserId';
   const GROUP_ID = 'GroupId';
   const USER_LEVEL = 'UserLevel';
-  
+
   /**
    * Permissions
    * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
@@ -32,4 +32,14 @@ class Auth {
   const PERM_READ = 1;
   const PERM_WRITE= 3;
   const PERM_ADMIN=10;
+
+  public static function getUserId()
+  {
+    return $GLOBALS['SysConf']['auth'][self::USER_ID];
+  }
+  
+  public static function getGroupId()
+  {
+    return $GLOBALS['SysConf']['auth'][self::GROUP_ID];
+  }
 } 

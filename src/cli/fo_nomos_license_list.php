@@ -201,5 +201,5 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $container = 0)
     print "$V";
     print "\n";
   }
-    pg_free_result($outerresult);
+  pg_free_result($outerresult);
 }

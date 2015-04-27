@@ -1,7 +1,6 @@
 <?php
-
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -23,6 +22,8 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\SplitPosition;
 use Fossology\Lib\Data\TextFragment;
 use Mockery as M;
+
+require_once __DIR__.'/../../common-string.php';
 
 class TextRendererTest extends \PHPUnit_Framework_TestCase
 {
@@ -77,7 +78,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         self::START_OFFSET + 5 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">foo b</span>ar baz quux"));
+    assertThat($renderedText, is("<a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\">foo b</span>ar baz quux"));
   }
 
   function testRenderHighlightAtEndOfFragment()
@@ -93,7 +94,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         $end_offset => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("foo bar baz<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\"> quux</span>"));
+    assertThat($renderedText, is("foo bar baz<a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\"> quux</span>"));
   }
 
   function testRenderHighlightWithinFragment()
@@ -105,7 +106,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         18 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("foo b<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">ar </span>baz quux"));
+    assertThat($renderedText, is("foo b<a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\">ar </span>baz quux"));
   }
 
   function testRenderHexHighlightWithinFragment()
@@ -117,7 +118,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         18 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderHex($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("0x0000000A |66 6f 6f 20 62 <a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">61 72 20 </span>62 61 7a 20 71 75 75 78| |foo&nbsp;b<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">ar&nbsp;</span>baz&nbsp;quux|<br/>\n"));
+    assertThat($renderedText, is("0x0000000A |66 6f 6f 20 62 <a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\">61 72 20 </span>62 61 7a 20 71 75 75 78| |foo&nbsp;b<a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\">ar&nbsp;</span>baz&nbsp;quux|<br/>\n"));
   }
 
   function testRenderHighlightWithBacklinkWithinFragment()
@@ -129,7 +130,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         18 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions, true);
 
-    assertThat($renderedText, is("foo b<a id=\"highlight\" href=\"#top\">&nbsp;&#8593;&nbsp;</a><span style=\"background-color:lightgreen;\" title=\"ref1\">ar </span>baz quux"));
+    assertThat($renderedText, is("foo b<a id=\"highlight\" href=\"#top\">&nbsp;&#8593;&nbsp;</a><span class=\"hi-match\" title=\"ref1\">ar </span>baz quux"));
   }
 
   function testRenderHighlightedOverlapsStartOfFragment()
@@ -141,7 +142,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         18 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("<span style=\"background-color:lightgreen;\" title=\"ref1\">foo bar </span>baz quux"));
+    assertThat($renderedText, is("<span class=\"hi-match\" title=\"ref1\">foo bar </span>baz quux"));
   }
 
   function testRenderHighlightedOverlapsEndOfFragment()
@@ -153,7 +154,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         28 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("foo b<a id=\"highlight\"></a><span style=\"background-color:lightgreen;\" title=\"ref1\">ar baz quux</span>"));
+    assertThat($renderedText, is("foo b<a id=\"highlight\"></a><span class=\"hi-match\" title=\"ref1\">ar baz quux</span>"));
   }
 
   function testRenderFragmentFullInsideHighlight()
@@ -165,13 +166,13 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         50 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("<span style=\"background-color:lightgreen;\" title=\"ref1\">foo bar baz quux</span>"));
+    assertThat($renderedText, is("<span class=\"hi-match\" title=\"ref1\">foo bar baz quux</span>"));
   }
 
   function testRenderHighlightedTextWithFourSplitPositions()
   {
-    $highlight1 = new Highlight(12, 18, 'type1', 'ref1', 0, 0);
-    $highlight2 = new Highlight(14, 18, 'type2', 'ref2', 0, 0);
+    $highlight1 = new Highlight(12, 18, Highlight::URL, 'ref1', 0, 0);
+    $highlight2 = new Highlight(14, 18, Highlight::MATCH, 'ref2', 0, 0);
 
     $splitPositions = array(
         12 => array(new SplitPosition(1, SplitPosition::START, $highlight1)),
@@ -180,7 +181,7 @@ class TextRendererTest extends \PHPUnit_Framework_TestCase
         20 => array(new SplitPosition(1, SplitPosition::END, $highlight1)));
     $renderedText = $this->textRenderer->renderText($this->textFragment, $splitPositions);
 
-    assertThat($renderedText, is("fo<a id=\"highlight\"></a><span style=\"background-color:lightgray;\" title=\"0\">o <span style=\"background-color:lightgray;\" title=\"0\">bar </span>ba</span>z quux"));
+    assertThat($renderedText, is("fo<a id=\"highlight\"></a><span class=\"hi-url\" title=\"0\">o <span class=\"hi-match\" title=\"0\">bar </span>ba</span>z quux"));
   }
 
 }

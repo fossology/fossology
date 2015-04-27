@@ -16,9 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 /**
- * @file test_fossconfig.c
- * @brief unit tests for the fossconfig library section of libfossology.
- */
+* @file test_fossconfig.c
+* @brief unit tests for the fossconfig library section of libfossology.
+*/
 
 /* includes for files that will be tested */
 #include <fossconfig.h>
@@ -101,15 +101,15 @@ fo_conf* test_data;
 /* ************************************************************************** */
 
 /**
- * @brief test the fo_config_load function. This should check all of the error
- *        conditions using different configuration files as will as a successful
- *        load. It is important to note that if the fo_config_load of the valid
- *        configuration file fails, all following test cases will fail as a
- *        result. Because of this, a failure here will cause a fatal abort of
- *        testing.
- *
- * @return void
- */
+* @brief test the fo_config_load function. This should check all of the error
+*        conditions using different configuration files as will as a successful
+*        load. It is important to note that if the fo_config_load of the valid
+*        configuration file fails, all following test cases will fail as a
+*        result. Because of this, a failure here will cause a fatal abort of
+*        testing.
+*
+* @return void
+*/
 void test_fo_config_load()
 {
   GError* error = NULL;
@@ -118,35 +118,35 @@ void test_fo_config_load()
   FO_ASSERT_PTR_NULL(test_data);
   FO_ASSERT_PTR_NOT_NULL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_missing_file);
+  FO_ASSERT_EQUAL(error->code, fo_missing_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/invalid_group.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
   FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/no_group.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
   FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_key);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_value.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
   FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/bad_key.conf", &error);
   FO_ASSERT_PTR_NULL(test_data);
   FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, PARSE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_file);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_file);
   g_clear_error(&error);
 
   test_data = fo_config_load("confdata/key_name.conf", &error);
@@ -157,19 +157,19 @@ void test_fo_config_load()
   g_clear_error(&error);
 
   test_data = fo_config_load(CONF_FILE, &error);
-  if(error)
+  if (error)
   {
     FO_FAIL_FATAL("can't load test configuration, aborting");
   }
 }
 
 /**
- * @brief Test the group set function. Note that the order the groups are in the
- *        names array is different from the order they are declared in the file.
- *        This is because the names are stored internally in alphabetical order
- *
- * @return void
- */
+* @brief Test the group set function. Note that the order the groups are in the
+*        names array is different from the order they are declared in the file.
+*        This is because the names are stored internally in alphabetical order
+*
+* @return void
+*/
 void test_fo_config_group_set()
 {
   int length;
@@ -183,22 +183,22 @@ void test_fo_config_group_set()
 }
 
 /**
- * @brief Test the key set function. Again, keys are stored in alphabetical
- *        order, so the comparison order may be wonky.
- *
- * @return void
- */
+* @brief Test the key set function. Again, keys are stored in alphabetical
+*        order, so the comparison order may be wonky.
+*
+* @return void
+*/
 void test_fo_config_key_set()
 {
   int length;
   char** names;
 
-  names = fo_config_key_set(test_data, GROUP(0),   &length);
+  names = fo_config_key_set(test_data, GROUP(0), &length);
   FO_ASSERT_EQUAL(length, 2);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(0, 0));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(0, 1));
 
-  names = fo_config_key_set(test_data, GROUP(1),   &length);
+  names = fo_config_key_set(test_data, GROUP(1), &length);
   FO_ASSERT_EQUAL(length, 2);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(1, 0));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(1, 1));
@@ -219,101 +219,101 @@ void test_fo_config_key_set()
 }
 
 /**
- * @brief Tests the has group function
- * @return void
- */
+* @brief Tests the has group function
+* @return void
+*/
 void test_fo_config_has_group()
 {
-  FO_ASSERT_TRUE (fo_config_has_group(test_data, GROUP(0)));
+  FO_ASSERT_TRUE(fo_config_has_group(test_data, GROUP(0)));
   FO_ASSERT_FALSE(fo_config_has_group(test_data, NONE));
 }
 
 /**
- * @brief Test the has key function. There are three cases here because there
- *        are two ways that a config can not have a key. If the key isn't in the
- *        group or the group doesn't exist
- *
- * @return void
- */
+* @brief Test the has key function. There are three cases here because there
+*        are two ways that a config can not have a key. If the key isn't in the
+*        group or the group doesn't exist
+*
+* @return void
+*/
 void test_fo_config_has_key()
 {
-  FO_ASSERT_TRUE (fo_config_has_key(test_data, GROUP(0), KEY(0, 0)));
+  FO_ASSERT_TRUE(fo_config_has_key(test_data, GROUP(0), KEY(0, 0)));
   FO_ASSERT_FALSE(fo_config_has_key(test_data, NONE, KEY(0, 0)));
   FO_ASSERT_FALSE(fo_config_has_key(test_data, GROUP(0), NONE));
 }
 
 /**
- * @brief Test the get function. This will also test the error cases of invalid
- *        key and invalid group names.
- *
- * @return
- */
+* @brief Test the get function. This will also test the error cases of invalid
+*        key and invalid group names.
+*
+* @return
+*/
 void test_fo_config_get()
 {
   GError* error = NULL;
 
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(0), KEY(0, 0), &error),
-      VAL(0, 0));
+    fo_config_get(test_data, GROUP(0), KEY(0, 0), &error),
+    VAL(0, 0));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(0), KEY(0, 1), &error),
-      VAL(0, 1));
+    fo_config_get(test_data, GROUP(0), KEY(0, 1), &error),
+    VAL(0, 1));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(1), KEY(1, 0), &error),
-      VAL(1, 0));
+    fo_config_get(test_data, GROUP(1), KEY(1, 0), &error),
+    VAL(1, 0));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(1), KEY(1, 1), &error),
-      VAL(1, 1));
+    fo_config_get(test_data, GROUP(1), KEY(1, 1), &error),
+    VAL(1, 1));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(2), KEY(2, 0), &error),
-      VAL(2, 0));
+    fo_config_get(test_data, GROUP(2), KEY(2, 0), &error),
+    VAL(2, 0));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(2), KEY(2, 1), &error),
-      VAL(2, 1));
+    fo_config_get(test_data, GROUP(2), KEY(2, 1), &error),
+    VAL(2, 1));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(2), KEY(2, 2), &error),
-      VAL(2, 2));
+    fo_config_get(test_data, GROUP(2), KEY(2, 2), &error),
+    VAL(2, 2));
   FO_ASSERT_STRING_EQUAL(
-      fo_config_get(test_data, GROUP(3), KEY(3, 2), &error),
-      VAL(3, 2));
+    fo_config_get(test_data, GROUP(3), KEY(3, 2), &error),
+    VAL(3, 2));
 
   FO_ASSERT_PTR_NULL(fo_config_get(test_data, GROUP(0), NONE, &error));
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_missing_key);
+  FO_ASSERT_EQUAL(error->code, fo_missing_key);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: unknown key=\"none\" for group=\"one\"");
+    "ERROR: unknown key=\"none\" for group=\"one\"");
   g_clear_error(&error);
 
   FO_ASSERT_PTR_NULL(fo_config_get(test_data, NONE, KEY(0, 0), &error));
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_missing_group);
+  FO_ASSERT_EQUAL(error->code, fo_missing_group);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: unknown group \"none\"");
+    "ERROR: unknown group \"none\"");
   g_clear_error(&error);
 }
 
 /**
- * @brief Tests the is list function. Tests groups that has both and a group
- *        that doesn't have a list. Error cases are tested elsewhere.
- *
- * @return void
- */
+* @brief Tests the is list function. Tests groups that has both and a group
+*        that doesn't have a list. Error cases are tested elsewhere.
+*
+* @return void
+*/
 void test_fo_config_is_list()
 {
   GError* error = NULL;
 
   FO_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(0, 0), &error));
-  FO_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 0), &error));
-  FO_ASSERT_TRUE (fo_config_is_list(test_data, GROUP(3), KEY(3, 1), &error));
+  FO_ASSERT_TRUE(fo_config_is_list(test_data, GROUP(3), KEY(3, 0), &error));
+  FO_ASSERT_TRUE(fo_config_is_list(test_data, GROUP(3), KEY(3, 1), &error));
   FO_ASSERT_FALSE(fo_config_is_list(test_data, GROUP(3), KEY(3, 2), &error));
 }
 
 /**
- * @brief Tests the list length function. Checks both lists in the test file and
- *        tests a none-list key error
- *
- * @return void
- */
+* @brief Tests the list length function. Checks both lists in the test file and
+*        tests a none-list key error
+*
+* @return void
+*/
 void test_fo_config_list_length()
 {
   GError* error = NULL;
@@ -322,30 +322,30 @@ void test_fo_config_list_length()
   len = fo_config_list_length(test_data, GROUP(3), KEY(3, 0), &error);
   FO_ASSERT_EQUAL(len, 4);
   FO_ASSERT_PTR_NULL(error);
-  if(error) g_clear_error(&error);
+  if (error) g_clear_error(&error);
 
   len = fo_config_list_length(test_data, GROUP(3), KEY(3, 1), &error);
-  FO_ASSERT_EQUAL(len,  7);
+  FO_ASSERT_EQUAL(len, 7);
   FO_ASSERT_PTR_NULL(error);
-  if(error) g_clear_error(&error);
+  if (error) g_clear_error(&error);
 
   len = fo_config_list_length(test_data, GROUP(3), KEY(3, 2), &error);
-  FO_ASSERT_EQUAL(len,  0);
+  FO_ASSERT_EQUAL(len, 0);
 
   FO_ASSERT_PTR_NOT_NULL_FATAL(error);
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_group);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_group);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: four[not] must be of type list to get length");
+    "ERROR: four[not] must be of type list to get length");
   g_clear_error(&error);
 }
 
 /**
- * @brief Tests the get list function. Tests a none list key, and the index
- *        being out of the valid range.
- *
- * @return void
- */
+* @brief Tests the get list function. Tests a none list key, and the index
+*        being out of the valid range.
+*
+* @return void
+*/
 void test_fo_config_get_list()
 {
   GError* error = NULL;
@@ -373,36 +373,36 @@ void test_fo_config_get_list()
 #undef CONFIG_GET_LIST_ASSERT
 
   FO_ASSERT_PTR_NULL(
-      fo_config_get_list(test_data, GROUP(3), KEY(3, 2), 0, &error));
+    fo_config_get_list(test_data, GROUP(3), KEY(3, 2), 0, &error));
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_key);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: four[not] must be of type list to get list element")
+    "ERROR: four[not] must be of type list to get list element")
   g_clear_error(&error);
 
   FO_ASSERT_PTR_NULL(
-      fo_config_get_list(test_data, GROUP(3), KEY(3, 0), 4, &error));
+    fo_config_get_list(test_data, GROUP(3), KEY(3, 0), 4, &error));
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_key);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: four[is] 4 is out of range");
+    "ERROR: four[is] 4 is out of range");
   g_clear_error(&error);
 
   FO_ASSERT_PTR_NULL(
-      fo_config_get_list(test_data, GROUP(3), KEY(3, 0), -1, &error));
+    fo_config_get_list(test_data, GROUP(3), KEY(3, 0), -1, &error));
   FO_ASSERT_EQUAL(error->domain, RETRIEVE_ERROR);
-  FO_ASSERT_EQUAL(error->code,   fo_invalid_key);
+  FO_ASSERT_EQUAL(error->code, fo_invalid_key);
   FO_ASSERT_STRING_EQUAL(error->message,
-      "ERROR: four[is] -1 is out of range");
+    "ERROR: four[is] -1 is out of range");
   g_clear_error(&error);
 }
 
 /**
- * @brief Tests the config free function. This makes sure that everything is
- *        correctly set to NULL after a free.
- *
- * @return void
- */
+* @brief Tests the config free function. This makes sure that everything is
+*        correctly set to NULL after a free.
+*
+* @return void
+*/
 void test_fo_config_free()
 {
   fo_config_free(test_data);
@@ -413,16 +413,16 @@ void test_fo_config_free()
 /* ************************************************************************** */
 
 CU_TestInfo fossconfig_testcases[] =
-{
-    { "fo_config_load()",         test_fo_config_load         },
-    { "fo_config_group_set()",    test_fo_config_group_set    },
-    { "fo_config_key_set()",      test_fo_config_key_set      },
-    { "fo_config_has_group()",    test_fo_config_has_group    },
-    { "fo_config_has_key()",      test_fo_config_has_key      },
-    { "fo_config_get()",          test_fo_config_get          },
-    { "fo_config_is_list()",      test_fo_config_is_list      },
-    { "fo_config_list_length()",  test_fo_config_list_length  },
-    { "fo_config_get_list()",     test_fo_config_get_list     },
-    { "fo_config_free()",         test_fo_config_free         },
+  {
+    {"fo_config_load()", test_fo_config_load},
+    {"fo_config_group_set()", test_fo_config_group_set},
+    {"fo_config_key_set()", test_fo_config_key_set},
+    {"fo_config_has_group()", test_fo_config_has_group},
+    {"fo_config_has_key()", test_fo_config_has_key},
+    {"fo_config_get()", test_fo_config_get},
+    {"fo_config_is_list()", test_fo_config_is_list},
+    {"fo_config_list_length()", test_fo_config_list_length},
+    {"fo_config_get_list()", test_fo_config_get_list},
+    {"fo_config_free()", test_fo_config_free},
     CU_TEST_INFO_NULL
-};
+  };

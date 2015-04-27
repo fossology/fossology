@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\TextFragment;
 use Fossology\Lib\View\HighlightProcessor;
@@ -297,7 +298,7 @@ class ui_view extends FO_Plugin
     if (!empty($Upload))
     {
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ) return "p";
+      if ($UploadPerm < Auth::PERM_READ) return "p";
     }
 
     $Item = GetParm("item", PARM_INTEGER);
@@ -399,14 +400,14 @@ class ui_view extends FO_Plugin
       echo $ShowText, "<hr>";
     }
     $PageMenu = $this->GetFileJumpMenu($inputFile, $Page, $blockSize, $Uri);
-    $PageSize = VIEW_BLOCK_HEX * $Page;
+    $PageSize = $blockSize * $Page;
     if (!empty($PageMenu) and !$getPageMenuInline)
     {
       $output .= "<center>$PageMenu</center><br>\n";
     }
     
     $startAt = $PageSize;
-    $endAt = $PageSize+($Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT);
+    $endAt = $PageSize+$blockSize;
     $relevantHighlightEntries = array();
     foreach ($highlightEntries as $highlightEntry)
     {
