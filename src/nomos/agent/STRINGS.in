@@ -576,6 +576,10 @@
 %ENTRY%	_LT_ASL20ref_2
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"(distributed|modified) =FEW= under =FEW= apache 2\.?0 licen[cs]e"
+#
+%ENTRY%	_LT_GOOGLE_SDK
+%KEY%	"legal"
+%STR%	"you agree that Google or third parties own all legal right =FEW=  title and interest in and to the SDK =FEW= any Intellectual Property Rights that subsist in the SDK =SOME= means any and all rights under patent law =FEW= trade secret law =FEW= and any and all other proprietary rights =FEW= Google reserves all rights not expressly granted to you"
 #####
 # DELETED: subject to the terms and conditions of this ... =ANY= patent
 # licen[cs]e to make have made use offer to sell sell import and otherwise
@@ -698,7 +702,7 @@
 #####
 %ENTRY%	_LT_BEERWARE
 %KEY%	"licen[cs]"
-%STR%	"the beer-ware licen[cs]e =SOME= as long as you retain this notice you (can|may) do whatever you want with this stuff"
+%STR%	"the beer-ware licen[cs]e =ANY= as long as you retain this notice you (can|may) do whatever you want with this stuff =ANY= you can buy me a beer in return"
 #####
 # DELETED: ... for any purpose and without fee is hereby granted provided
 # that the above copyright notice and this permission notice appear in all
@@ -2259,6 +2263,10 @@
 %ENTRY%	_LT_GPL_EXCEPT_ECOS
 %KEY%	"licen[cs]"
 %STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file or you compile this file and link it =SOME= this file does not by itself cause the resulting work to be covered by the GNU General Public License"
+#
+%ENTRY%	_LT_GPL_UPX_EXCEPT
+%KEY%	"distribut"
+%STR%	"you must compress your program with a completely unmodified UPX version =FEW= either with our precompiled version =SOME= with a self compiled version of the unmodified UPX sources as distributed by us"
 #
 %ENTRY%	_LT_GPL_FONT1
 %KEY%	"permi[st]"

@@ -508,9 +508,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(cp);
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora)) {
-    INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
+  else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora))
+  {
+    if (INFILE(_LT_GOOGLE_SDK)) {
+      INTERESTING(lDebug ? "Apache(google)" : "Apache-2.0-Proprietary");
+      lmem[_mAPACHE] = 1;
+    }
+    else {
+      INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
+      lmem[_mAPACHE] = 1;
+    }
   }
   else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
     INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache-2.0");
@@ -1424,7 +1431,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && NOT_INFILE(_LT_GPL_EXCEPT_BISON_1) && NOT_INFILE(_LT_GPL_EXCEPT_BISON_2)
             && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)
-            && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && NOT_INFILE(_TITLE_D_FSL_10)){
+            && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && NOT_INFILE(_LT_GPL_UPX_EXCEPT) && NOT_INFILE(_TITLE_D_FSL_10)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1587,6 +1594,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_GNU_JAVAMAIL_EXCEPT) && GPL_INFILE(_PHR_GPL2_OR_LATER)
         && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       INTERESTING("GNU-javamail-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_UPX_EXCEPT) && GPL_INFILE(_PHR_GPL2_OR_LATER)
+        && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+      INTERESTING("GPL-2.0+-with-UPX-exception");
       lmem[_mGPL] = 1;
     }
     else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && GPL_INFILE(_PHR_GPL2_OR_LATER)
@@ -5991,8 +6003,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * The Beer-ware license(!)
    */
-  if (*licStr == NULL_CHAR && INFILE(_LT_BEERWARE)) {
-    LOWINTEREST("Beerware");
+  if (INFILE(_LT_BEERWARE)) {
+    INTERESTING("Beerware");
   }
   cleanLicenceBuffer();
   /* 
