@@ -161,6 +161,9 @@ void fillScanners(CopyrightState& state)
 
   if (types & 1<<2)
     state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType(), 1));
+    
+  if (types & 1<<3)
+    state.addScanner(new regexScanner(regAuthor::getRegex(), regAuthor::getType()));
 #endif
 
 #ifdef IDENTITY_IP

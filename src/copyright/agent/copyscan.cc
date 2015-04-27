@@ -19,7 +19,6 @@ const char copyrightType[] = "statement";
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {
   // Find copyright statements in stream str
-  // TODO: also find author statements
 #define COPYSYM "(?:\\(c\\)|&copy;|\xA9|\xC2\xA9" "|\\$\xB8|\xE2\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E)"
 
   rx::regex regCopyright(

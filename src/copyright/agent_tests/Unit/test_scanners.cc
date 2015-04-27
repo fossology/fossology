@@ -55,6 +55,7 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
+  CPPUNIT_TEST (regAuthorTest);
   CPPUNIT_TEST (regIPTest);
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
@@ -93,10 +94,17 @@ protected:
       "Copyrights by any strange people",
       "(C) copyright 2007-2011, 2013 my favourite company Google",
       "(C) 2007-2011, 2013 my favourite company Google",
-      //"Written by: me, myself and Irene.",
-      //"Authors all the people at ABC",
-      //"maintained by benjamin drieu <benj@debian.org>",
       "Copyright (c) 1989, 1993\n* The Regents of the University of California. All rights reserved."
+    });
+  }
+  
+  void regAuthorTest()
+  {
+    regexScanner sc(regAuthor::getRegex(), regAuthor::getType());
+    scannerTest(&sc, testContent, regAuthor::getType(), {
+      "Written by: me, myself and Irene.",
+      "Authors all the people at ABC",
+      "maintained by benjamin drieu <benj@debian.org>"
     });
   }
 

@@ -12,12 +12,6 @@
 #ifndef REGCOPYRIGHT_H_
 #define REGCOPYRIGHT_H_
 
-namespace regCopyright
-{
-  const char* getRegex();
-  const char* getType();
-}
-
 
 namespace regURL
 {
@@ -27,6 +21,12 @@ namespace regURL
 
 
 namespace regEmail
+{
+  const char* getRegex();
+  const char* getType();
+}
+
+namespace regAuthor
 {
   const char* getRegex();
   const char* getType();

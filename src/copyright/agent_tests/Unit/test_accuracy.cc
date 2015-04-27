@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string>
 
 #include "copyscan.hpp"
+#include "regTypes.hpp"
+#include "regscan.hpp"
 
 // Number of test cases (numbered from 0 to NUMTESTS-1)
 #define NUMTESTS 142
@@ -114,12 +116,24 @@ void Display(ostream& out, ifstream& data, list<match>& l, list<match>& lcmp, co
   }
 }
 
+bool cmpMatches(const match &a, const match &b)
+{
+  // Compare matches, return true if a<b
+  if (a.start < b.start)
+    return true;
+  if (a.start == b.start && a.end < b.end)
+    return true;
+  // Otherwise, false
+  return false;
+}
+
 void TestDataCheck::testDataCheck()
 {
   // Test all instances
   string fileNameBase = "../testdata/testdata";
-  // Create a community copyright scanner and an internal copyright scanner
+  // Create a copyright scanner and an author scanner
   hCopyrightScanner hsc;
+  regexScanner hauth(regAuthor::getRegex(), regAuthor::getType());
   
   ofstream out("results.html");
   
@@ -132,8 +146,11 @@ void TestDataCheck::testDataCheck()
   {
     string fileName = fileNameBase + to_string(i);
     ifstream tstream(fileName);
-    list<match> lng, lrefs;
+    list<match> lng, lauth, lrefs;
     hsc.ScanFile(fileName, lng);
+    hauth.ScanFile(fileName, lauth);
+    // Merge lists lng and lauth
+    lng.merge(lauth, cmpMatches);
     GetReferenceResults(fileName + "_raw", lrefs);
     
     out << "<h1>testdata" << i << "</h1>" << endl;
