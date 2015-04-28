@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,8 +21,6 @@ namespace Fossology\UI\Page;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Data\TextFragment;
-use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -96,11 +94,6 @@ class AdminLicenseCandidate extends DefaultPlugin
         $vars['rf_text'] = $rendered;
       }
     }
-    /* TODO not working yet
-    if (false !== $suggestLicense) {
-      list($suggestIds, $rendered) = $this->renderLicense($suggest, $rfText);
-      $suggestLicense['rf_text'] = $rendered;
-    }*/
     if($suggestLicense!==false){
       $vars['suggest_rf'] = $suggest;
       $vars['suggest_shortname'] = $suggestLicense['rf_shortname'];
@@ -147,7 +140,16 @@ class AdminLicenseCandidate extends DefaultPlugin
       
     return $this->render('admin_license_candidate-merge.html.twig', $this->mergeWithDefault($vars));
   }
-
+  
+  /**
+   * @overwrite
+   */
+  protected function mergeWithDefault($vars)
+  {
+    $allVars = array_merge($this->getDefaultVars(), $vars);
+    $allVars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    return $allVars;
+  }
 
   private function getArrayArrayData()
   {
@@ -202,48 +204,6 @@ class AdminLicenseCandidate extends DefaultPlugin
     } else
     {
       return array(array(), $str);
-    }
-  }
-
-  private function renderLicense($licenseId, $str){
-    /** @var \Fossology\Monk\UI\Oneshot */
-    $monkOneShotPlugin = plugin_find("oneshot-monk");
-
-    if (null !== $monkOneShotPlugin)
-    {
-      list($licenseIds, $highlights) = $monkOneShotPlugin->scanMonk($str);
-      if (!empty($licenseIds) && ($licenseId == $licenseIds[0]))
-      {
-        $suggestedLicense = $this->licenseDao->getLicenseById($licenseId);
-        $licenseText = $suggestedLicense->getText();
-        $textFragment = new TextFragment(0, $licenseText);
-
-        $this->flipHighlights($highlights);
-        $splitPositions = $this->highlightProcessor->calculateSplitPositions($highlights);
-
-        $rendered = $this->textRenderer->renderText($textFragment, $splitPositions);
-
-        return array($licenseIds, $rendered);
-      }
-    }
-    return array(array($licenseId), htmlentities($str));
-  }
-
-  function flipHighlights(&$highlights) {
-    foreach($highlights as &$highlight) {
-      switch ($type = $highlight->getType())
-      {
-        case Highlight::ADDED:
-          $newType = Highlight::DELETED;
-          break;
-        case Highlight::DELETED:
-          $newType = Highlight::ADDED;
-          break;
-        default:
-          $newType = $type;
-          break;
-      }
-      $highlight = new Highlight($highlight->getRefStart(), $highlight->getRefEnd(), $newType);
     }
   }
 
@@ -305,7 +265,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     }
     $dbManager->prepare($stmt=__METHOD__.'.delete','DELETE FROM license_candidate WHERE rf_pk=$1');
     $dbManager->freeResult( $dbManager->execute($stmt,array($candidate)) );
-    return TRUE;
+    return true;
   }
 
 }
