@@ -164,21 +164,15 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $join = "";
     $filterQuery = "";
-    if ($type == "statement")
+    if ($type == 'statement' && $filter == "nolics")
     {
-      if ($filter == "legal")
-      {
-        $filterQuery = " AND (cp.content ILIKE ('copyright%') OR cp.content ILIKE ('(c)%') OR cp.content LIKE ('©%'))";
-      } else if ($filter == "nolics")
-      {
-        $noLicStr = "No_license_found";
-        $voidLicStr = "Void";
-        $join = " INNER JOIN license_file AS LF on cp.pfile_fk=LF.pfile_fk ";
-        $filterQuery = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
-      } else
-      {  /* Not needed, but here to show that there is a filter all */
-        $filterQuery = "";
-      }
+      $noLicStr = "No_license_found";
+      $voidLicStr = "Void";
+      $join = " INNER JOIN license_file AS LF on cp.pfile_fk=LF.pfile_fk ";
+      $filterQuery = " AND LF.rf_fk IN (SELECT rf_pk FROM license_ref WHERE rf_shortname IN ('$noLicStr','$voidLicStr')) ";
+    } else
+    {
+      // No filter, nothing to do
     }
     $params = array($left, $right, $type, $agentId);
 

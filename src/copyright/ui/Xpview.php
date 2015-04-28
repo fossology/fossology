@@ -47,7 +47,7 @@ class Xpview extends DefaultPlugin
   /** @var string */
   protected $tableName;
   /** @var  array */
-  protected $hightlightTypeToStringMap;
+  protected $highlightTypeToStringMap;
   /** @var  array */
   protected $typeToHighlightTypeMap;
   /** @var string */
@@ -187,7 +187,7 @@ class Xpview extends DefaultPlugin
   function legendBox()
   {
     $output = _("file text");
-    foreach ($this->hightlightTypeToStringMap as $colorKey => $txt)
+    foreach ($this->highlightTypeToStringMap as $colorKey => $txt)
     {
       $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt) . $txt . '</span>';
     }

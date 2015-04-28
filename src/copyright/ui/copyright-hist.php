@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_copyrightHistogram", _("Copyright/Email/URL Browser NEW"));
+define("TITLE_copyrightHistogram", _("Copyright/Email/URL/Author Browser"));
 
 class CopyrightHistogram  extends HistogramBase {
   function __construct()
@@ -41,27 +41,33 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected  function getTableContent($upload_pk, $Uploadtree_pk, $filter, $Agent_pk)
   {
-  $type = 'statement';
-  $decription = _("Copyright");
+    $type = 'statement';
+    $description = _("Copyright");
 
-  $tableVars=array();
+    $tableVars=array();
 
-  list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['statement']=$varsCopyright;
+    list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars[$type]=$varsCopyright;
 
-  $type = 'email';
-  $decription = _("Email");
+    $type = 'email';
+    $description = _("Email");
 
-  list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['email']=$varsEmail;
+    list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars[$type]=$varsEmail;
 
-  $type = 'url';
-  $decription = _("URL");
+    $type = 'url';
+    $description = _("URL");
 
-  list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $decription, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
-  $tableVars['url']=$varsURL;
+    list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars[$type]=$varsURL;
 
-  return array( $VCopyright, $VEmail, $VUrl, $tableVars);
+    $type = 'author';
+    $description = _("Author");
+
+    list($VAuthor, $varsAuthor) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    $tableVars[$type]=$varsAuthor;
+
+    return array( $VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars);
   }
 
 
@@ -75,20 +81,23 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
+    list($VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     /* Combine VF and VLic */
     $text = _("Jump to");
-    $text1 = _("Emails");
-    $text2 = _("Copyright Statements");
+    $text1 = _("Copyright Statements");
+    $text2 = _("Emails");
     $text3 = _("URLs");
+    $text4 = _("Authors or Maintainers");
     $V = "<table border=0 width='100%'>\n";
-    $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text1</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text2</a> | <a href=\"#urls\">$text3</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "<tr><td><a name=\"emails\"></a>Jump to: <a href=\"#statements\">$text2</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"emails\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#urls\">$text3</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td><a name=\"urls\"></a>Jump To: <a href=\"#statements\">$text2</a> | <a href=\"#emails\">$text1</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"urls\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#emails\">$text2</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
+    $V .= "<tr><td><a name=\"authors\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#emails\">$text2</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VAuthor</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     return array($V, $tableVars);
@@ -125,7 +134,8 @@ class CopyrightHistogram  extends HistogramBase {
     $(document).ready(function() {
       tableCopyright =  createTablestatement();
       tableEmail = createTableemail();
-      tableUrl =createTableurl();
+      tableUrl = createTableurl();
+      tableAuthor = createTableauthor();
     } );
 
     ";
