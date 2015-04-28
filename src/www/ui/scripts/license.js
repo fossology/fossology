@@ -178,8 +178,11 @@ $(document).ready(function () {
 
 function filterScan(id,keyword) {
   var searchField = $('#dirlist_filter input');
-  var searchString = searchField.val().replace(new RegExp(keyword+':[^\s]*','g'),''); 
-  searchField.val(searchString+' '+keyword+':'+id);
+  var searchString = searchField.val().replace(new RegExp(keyword+':[^\s]*','g'),'');
+  if(id>0) {
+    searchString = searchString+' '+keyword+':'+id;
+  }
+  searchField.val(searchString.trim());
   searchField.trigger('keyup');
 }
 

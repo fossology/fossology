@@ -284,8 +284,8 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
   if (empty($Name)) {
     return ($Menu);
   }
-  $PathParts = explode(PATH_SEPARATOR, $Name, 2);
-  foreach($Menu as $Key => $Val) {
+  $PathParts = explode('::', $Name, 2);
+  foreach($Menu as $Val) {
     if ($Val->Name == $PathParts[0]) {
       if (empty($PathParts[1])) {
         $MaxDepth = $Val->MaxDepth;

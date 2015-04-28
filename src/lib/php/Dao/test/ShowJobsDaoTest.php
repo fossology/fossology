@@ -206,19 +206,20 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($formattedEstimatedTime, matchesPattern ('/\\d+:\\d{2}:\\d{2}/'));
     $hourMinSec = explode(':', $formattedEstimatedTime);
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
-            is(closeTo(($itemCount-$itemNomos)/$testFilesPerSec,$delta=0.5)));
+            is(closeTo(($itemCount-$itemNomos)/$testFilesPerSec,0.5+$testFilesPerSec)));
     
     $testGetEstimatedTime = $this->showJobsDao->getEstimatedTime($job_pk=1, $jq_Type, 0);
     assertThat($testGetEstimatedTime, matchesPattern ('/\\d+:\\d{2}:\\d{2}/'));
     $hourMinSec = explode(':', $testGetEstimatedTime);
+    $tolerance = 0.5+($itemCount-$itemNomos)/$itemNomos+(time()-$nowTime);
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
-            is(closeTo(($itemCount-$itemNomos)/$itemNomos*$diffTime,$delta)));
-    
+            is(closeTo(($itemCount-$itemNomos)/$itemNomos*$diffTime,$tolerance)));
+  
     $fewFilesPerSec = 0.003;
     $formattedLongTime = $this->showJobsDao->getEstimatedTime($job_pk=1, $jq_Type="nomos", $fewFilesPerSec);
     assertThat($formattedLongTime, matchesPattern ('/\\d+:\\d{2}:\\d{2}/'));
     $hourMinSec = explode(':', $formattedLongTime);
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
-            is(closeTo(($itemCount-$itemNomos)/$fewFilesPerSec,$delta)));
+            is(closeTo(($itemCount-$itemNomos)/$fewFilesPerSec,0.5+$fewFilesPerSec)));
   }
 }

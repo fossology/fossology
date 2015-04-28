@@ -16,6 +16,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\Highlight;
 
 require_once('Xpview.php');
@@ -26,7 +28,6 @@ class CopyrightView extends Xpview
 
   function __construct()
   {
-    $this->Name = self::NAME;
     $this->decisionTableName = "copyright_decision";
     $this->tableName = "copyright";
     $this->modBack = 'copyright-hist';
@@ -44,6 +45,34 @@ class CopyrightView extends Xpview
         self::TITLE => _("View Copyright/Email/Url Analysis")
     ));
   }
+  
+  /**
+   * @overwrite
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @param int $agentId
+   * @return array
+   */
+  protected function additionalVars($uploadId, $uploadTreeId, $agentId)
+  {
+    if (empty($agentId))
+    {
+      /** @var AgentDao $agentDao */
+      $agentDao = $GLOBALS['container']->get('dao.agent');
+      $agentMap = $agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
+      $agentId = $agentMap['copyright'];
+    }
+    
+    $modCopyrightHist = plugin_find('copyright-hist');
+    $filter = '';
+    list($output, $tableVars) = $modCopyrightHist->getTableForSingleType('statement', _("Copyright"), $uploadId, $uploadTreeId, $filter, $agentId);
+
+    $vars = array('statement'=>$tableVars,
+        'content' => "$output\n",
+        'script' => '<script>$(document).ready(function() { tableCopyright = createTablestatement(); } );</script>');
+    return $vars;
+  }
+  
 }
 
 register_plugin(new CopyrightView());

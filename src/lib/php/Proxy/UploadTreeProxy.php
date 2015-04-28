@@ -166,11 +166,22 @@ class UploadTreeProxy extends DbViewProxy
     }
   
     if(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
-            && array_key_exists(self::OPT_AGENT_SET, $options))
+            && array_key_exists(self::OPT_AGENT_SET, $options)  && array_key_exists(self::OPT_RANGE, $options))
     {
       $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
       $agentFilter = " AND agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).")";
       $filter .= ' AND '.self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $options[self::OPT_GROUP_ID], $agentFilter);
+      $unifier .= "_".self::OPT_SKIP_ALREADY_CLEARED;
+    }
+    elseif(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
+            && array_key_exists(self::OPT_AGENT_SET, $options)  && array_key_exists(self::OPT_REALPARENT, $options))
+    {
+      $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
+      $agentFilter = " AND agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).")";
+      $childFilter = self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $options[self::OPT_GROUP_ID], $agentFilter);
+      $filter .= ' AND EXISTS(SELECT * FROM '.$this->uploadTreeTableName.' utc WHERE utc.upload_fk='.$this->uploadId
+              . ' AND (utc.lft BETWEEN ut.lft AND ut.rgt) AND utc.ufile_mode&(3<<28)=0 AND '
+                 .str_replace(' ut.', ' utc.', $childFilter).')';
       $unifier .= "_".self::OPT_SKIP_ALREADY_CLEARED;
     }
     
@@ -215,23 +226,12 @@ class UploadTreeProxy extends DbViewProxy
     $additionalCondition = array_key_exists(self::OPT_ITEM_FILTER, $options) ? $options[self::OPT_ITEM_FILTER] : '';
     $skipThese = array_key_exists(self::OPT_SKIP_THESE,$options) ? $options[self::OPT_SKIP_THESE] : 'none';
     $groupId = array_key_exists(self::OPT_GROUP_ID, $options) ? $options[self::OPT_GROUP_ID] : null;
-    $agentFilter = '';
+    $agentFilter = self::getAgentFilter($options, $uploadId);
+    
     switch ($skipThese)
     {
       case "noLicense":
       case self::OPT_SKIP_ALREADY_CLEARED:
-        if(array_key_exists(self::OPT_AGENT_SET, $options))
-        {        
-          $agentIds = 'array[' . implode(',',$options[self::OPT_AGENT_SET]) . ']';
-          $agentFilter = " AND lr.agent_fk=ANY($agentIds)";
-        }
-        else
-        {
-          $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
-          $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
-          $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
-          $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
-        }
       case "noCopyright":
       case "noIp":
       case "noEcc":
@@ -252,36 +252,57 @@ class UploadTreeProxy extends DbViewProxy
     return $uploadTreeView;
   }
 
+  private static function getAgentFilter($options,$uploadId=0)
+  {
+    if (!array_key_exists(self::OPT_SKIP_THESE, $options)) {
+      return '';
+    }
+    $skipThese = $options[self::OPT_SKIP_THESE];
+    if ($skipThese != "noLicense" && $skipThese != self::OPT_SKIP_ALREADY_CLEARED) {
+      return '';
+    }
+
+    if(array_key_exists(self::OPT_AGENT_SET, $options))
+    {        
+      $agentIds = 'array[' . implode(',',$options[self::OPT_AGENT_SET]) . ']';
+      $agentFilter = " AND lr.agent_fk=ANY($agentIds)";
+    }
+    else
+    {
+      $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+      $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+      $agentFilter = $latestAgentIds ? " AND lr.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
+    }
+    return $agentFilter;
+  }    
+      
   /**
    * @param $skipThese
    * @return string
    */
   private static function getQueryCondition($skipThese, $groupId = null, $agentFilter='')
   {
-    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk=ut.pfile_fk $agentFilter)
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file_ref lr WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lr.pfile_fk= ut.pfile_fk $agentFilter)
         OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese)
     {
       case "noLicense":
         return $conditionQueryHasLicense;
-      case "alreadyCleared":
+      case self::OPT_SKIP_ALREADY_CLEARED:
         $decisionQuery = "SELECT decision_type FROM clearing_decision AS cd
                         WHERE cd.group_fk = $groupId
                           AND (ut.uploadtree_pk = cd.uploadtree_fk OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO.")
                         ORDER BY cd.clearing_decision_pk DESC LIMIT 1";
-        $conditionQuery = " $conditionQueryHasLicense
+        return " $conditionQueryHasLicense
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.") )";
-        return $conditionQuery;
       case "noCopyright":
-        $conditionQuery = "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
-        return $conditionQuery;
+        return "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noIp":
-        $conditionQuery = "EXISTS (SELECT ct_pk FROM ip cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
-        return $conditionQuery;
+        return "EXISTS (SELECT ct_pk FROM ip cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":
-        $conditionQuery = "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
-        return $conditionQuery;
+        return "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
     }
   }
 

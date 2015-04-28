@@ -85,8 +85,8 @@ class DeciderAgent extends Agent
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
       $itemTreeBounds = $item->getItemTreeBounds();
-      $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
-      $matches = $this->remapByProjectedId($matches);
+      $unMappedMatches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+      $matches = $this->remapByProjectedId($unMappedMatches);
 
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);

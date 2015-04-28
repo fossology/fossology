@@ -75,7 +75,8 @@ $IncludePath = set_include_path(get_include_path() . PATH_SEPARATOR . $FO_phpLoc
 
 try {
   require("$basename" . ".php");
-} catch (Exception $e ) {
+}
+catch (Exception $e ) {
   print $e->getMessage();
   var_dump($e->getTraceAsString());
 }

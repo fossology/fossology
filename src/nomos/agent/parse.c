@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -508,7 +508,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(cp);
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora)) {
+  else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora))
+  {
     INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
     lmem[_mAPACHE] = 1;
   }
@@ -1424,7 +1425,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (!HASTEXT(_TEXT_GCC, REG_EXTENDED) && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF, REG_EXTENDED) 
             && NOT_INFILE(_LT_GPL_EXCEPT_BISON_1) && NOT_INFILE(_LT_GPL_EXCEPT_BISON_2)
             && !HASTEXT(_LT_GPL_EXCEPT_AUTOCONF_2, REG_EXTENDED) && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)
-            && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && NOT_INFILE(_TITLE_D_FSL_10)){
+            && NOT_INFILE(_LT_GPL_EXCEPT_CLASSPATH_2) && NOT_INFILE(_LT_GPL_UPX_EXCEPT) && NOT_INFILE(_TITLE_D_FSL_10)){
           cp = GPLVERS();
           INTERESTING(lDebug ? "GPL(ref1#1)" : cp);
           lmem[_mGPL] = 1;
@@ -1587,6 +1588,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_GNU_JAVAMAIL_EXCEPT) && GPL_INFILE(_PHR_GPL2_OR_LATER)
         && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       INTERESTING("GNU-javamail-exception");
+      lmem[_mGPL] = 1;
+    }
+    else if (INFILE(_LT_GPL_UPX_EXCEPT) && GPL_INFILE(_PHR_GPL2_OR_LATER)
+        && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
+      INTERESTING("GPL-2.0+-with-UPX-exception");
       lmem[_mGPL] = 1;
     }
     else if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1) && GPL_INFILE(_PHR_GPL2_OR_LATER)
@@ -1762,7 +1768,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   {
     INTERESTING(lDebug ? "GPLV2+(named)" : "GPL-2.0+");
   }
-  else if (INFILE(_LT_TAPJOY)) {
+  else if (INFILE(_LT_TAPJOY) || INFILE(_LT_TAPJOY_ref1)) {
     INTERESTING("Tapjoy");
     lmem[_fGPL] = 1;
     lmem[_mMIT] = 1;
@@ -1834,6 +1840,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_CR_XFREE86) || INFILE(_LT_XFREE86)) {
     INTERESTING("XFree86");
+    lmem[_mMIT] = 1;
+  }
+  else if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED)) {
+    INTERESTING("MIT/BSD");
+    lmem[_mMIT] = 1;
+  }
+  else if (HASTEXT(_LT_BSD_AND_MIT, REG_EXTENDED)) {
+    INTERESTING("MIT&BSD");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
@@ -1992,6 +2006,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_MITref3)) {
     INTERESTING(lDebug ? "MIT(ref3)" : "MIT-style");
+    lmem[_mMIT] = 1;
+  }
+  else if (INFILE(_LT_MITref4)) {
+    INTERESTING(lDebug ? "MIT(ref4)" : "MIT-style");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_LT_OG_1)) {
@@ -5829,6 +5847,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (INFILE(_LT_ZEND_1) || URL_INFILE(_URL_ZEND)) {
     INTERESTING("Zend-2.0");
   }
+  else if (INFILE(_LT_ZEND_2)) {
+    INTERESTING("Zend-1.0");
+  }
   cleanLicenceBuffer();
   /* WebM */
   if (URL_INFILE(_URL_WEBM)) {
@@ -5976,8 +5997,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * The Beer-ware license(!)
    */
-  if (*licStr == NULL_CHAR && INFILE(_LT_BEERWARE)) {
-    LOWINTEREST("Beerware");
+  if (INFILE(_LT_BEERWARE)) {
+    INTERESTING("Beerware");
   }
   cleanLicenceBuffer();
   /* 
@@ -6234,8 +6255,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if(INFILE(_LT_Sendmail_title) ) {
      INTERESTING("Sendmail");
   }
-  cleanLicenceBuffer();
-  /** Giftware */
+  cleanLicenceBuffer(); /** Giftware */
   if(INFILE(_LT_GIFTWARE)) {
     INTERESTING("Giftware");
   } 
@@ -6255,6 +6275,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TCL");
   }
   cleanLicenceBuffer();
+  /** AndroidSDK-Commercial license */
+  if (INFILE(_LT_GOOGLE_SDK)) {
+    INTERESTING("AndroidSDK-Commercial");
+  }
+  cleanLicenceBuffer();
+
   /*
    * Some licenses say "licensed under the same terms as FOO".
    */
@@ -6321,35 +6347,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
-   * NOW look for unclassified licenses, if we haven't found anything yet.
-   * And avoid checking .po files -- message catalogues are known to have
-   * false-positives.
-   *****
-   * FIX-ME: if a file contains ONLY a "no warranty" description/clause, it
-   * will (currently) get flagged as an UnclassifiedLicense (so the check
-   * for no-warranty was moved ABOVE this check in case we can use that info)
-   */
-  if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
-    if (!pd &&
-        checkUnclassified(filetext, size, scp->score, isML,
-            isPS, nw)) {
-      strcpy(name, LS_UNCL);
-      if (isPS) {
-        strcat(name, "(PS)");
-      }
-      MEDINTEREST(name);
-      checkCornerCases(filetext, size, score, kwbm, isML, isPS, nw, YES);
-    }
-#ifdef  UNKNOWN_CHECK_DEBUG
-    else {
-      printf("... NOT an Unclassified license, NW %d PD %d\n",
-          nw, pd);
-    }
-#endif  /* UNKNOWN_CHECK_DEBUG */
-  }
-  listClear(&whereList, NO);      /* clear "unused" matches */
-  cleanLicenceBuffer();
-  /*
    * And, If no other licenses are present but there's a reference to
    * something being non-commercial, better note it now.
    */
@@ -6412,13 +6409,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (maxInterest != IL_HIGH) {
     if (INFILE(_LT_COMMERCIAL_1)) {
-      MEDINTEREST(lDebug ? "COMM(1)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(1)" : "COMMERCIAL");
     }
     else if (INFILE(_LT_COMMERCIAL_2)) {
-      MEDINTEREST(lDebug ? "COMM(2)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(2)" : "COMMERCIAL");
+    }
+    else if (INFILE(_LT_COMMERCIAL_3)) {
+      INTERESTING(lDebug ? "COMM(3)" : "COMMERCIAL");
+    }
+    else if (INFILE(_LT_COMMERCIAL_4)) {
+      INTERESTING(lDebug ? "COMM(4)" : "COMMERCIAL");
     }
     else if (HASTEXT(_TEXT_BOOK, 0) && INFILE(_LT_BOOKPURCHASE)) {
-      MEDINTEREST(lDebug ? "PurchBook" : "COMMERCIAL");
+      INTERESTING(lDebug ? "PurchBook" : "COMMERCIAL");
     }
     if (INFILE(_LT_NONPROFIT_1)) {
       MEDINTEREST(lDebug ? "NonP(1)" : "Non-profit!");
@@ -6528,6 +6531,35 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   listClear(&whereList, NO);      /* again, clear "unused" matches */
+  cleanLicenceBuffer();
+  /*
+   * NOW look for unclassified licenses, if we haven't found anything yet.
+   * And avoid checking .po files -- message catalogues are known to have
+   * false-positives.
+   *****
+   * FIX-ME: if a file contains ONLY a "no warranty" description/clause, it
+   * will (currently) get flagged as an UnclassifiedLicense (so the check
+   * for no-warranty was moved ABOVE this check in case we can use that info)
+   */
+  if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
+    if (!pd &&
+        checkUnclassified(filetext, size, scp->score, isML,
+            isPS, nw)) {
+      strcpy(name, LS_UNCL);
+      if (isPS) {
+        strcat(name, "(PS)");
+      }
+      MEDINTEREST(name);
+      checkCornerCases(filetext, size, score, kwbm, isML, isPS, nw, YES);
+    }
+#ifdef  UNKNOWN_CHECK_DEBUG
+    else {
+      printf("... NOT an Unclassified license, NW %d PD %d\n",
+          nw, pd);
+    }
+#endif  /* UNKNOWN_CHECK_DEBUG */
+  }
+  listClear(&whereList, NO);      /* clear "unused" matches */
   cleanLicenceBuffer();
   /*
    * If we still haven't found anything, check for the really-low interest
@@ -7205,6 +7237,10 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_PHR_GPL2_OR_LATER)) {
     if (INFILE(_TITLE_GPL_KDE)) {
       lstr = "GPL-2.0+KDEupgradeClause";
+    }
+    else if (GPL_INFILE(_PHR_GPL3_OR_LATER_ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref3)
+      || GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
+      lstr = "GPL-2.0+&GPL-3.0+";
     }
     else if (!HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
       lstr = "GPL-2.0+";
@@ -8622,7 +8658,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
     INTERESTING("See-file");
   }
-  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED)) {
+  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED)) {
     INTERESTING("See-URL");
   }
   return;

@@ -314,14 +314,18 @@ class UserDao extends Object
     }
     return $groupNowExists['group_pk'];
   }
+  
   /**
-   * @param string username and groupname of the user
-   * @return int $groupId && $userId
+   * @param int $userId
+   * @return string
    */
-  public function getUserNameAndGroupName($userId, $groupId)
+  public function getUserName($userId)
   {
-    $rowUnameGname = $this->dbManager->getSingleRow("SELECT user_name, group_name FROM users,groups WHERE user_pk = $1 AND group_pk = $2",
-    array($userId, $groupId), __METHOD__."getUserNameAndGroupName");
-    return $rowUnameGname;
+    $userRow = $this->dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk=$1",array($userId),__METHOD__);
+    if(!$userRow)
+    {
+      throw new \Exception('unknown user with id='.$userId);
+    }
+    return $userRow['user_name'];
   }
 }

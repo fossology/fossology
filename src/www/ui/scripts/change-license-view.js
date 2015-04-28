@@ -60,7 +60,18 @@ function scheduleBulkScan() {
   scheduleBulkScanCommon($('#bulkIdResult'), reloadClearingTable);
 }
 
+function cleanText() {
+  var $textField = $('#bulkRefText');
+  var text = $textField.val();
 
+  text = text.replace(/ [ ]*/gi, ' ')
+             .replace(/\/[\*\/]+/gi, '')
+             .replace(/#+/gi,'')
+             .replace(/^ */gi,'')
+             .replace(/\n[ \t]*/gi,'\n');
+
+  $textField.val(text);
+}
 
 
 function calculateDivHeight() {

@@ -275,6 +275,7 @@ if($errors>0)
 }
 exit($errors);
 
+
 /**
  * \brief Load the license_ref table with licenses.
  *

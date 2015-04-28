@@ -179,11 +179,10 @@ class ReportAgent extends Agent
    * @brief Design the summaryTable of the report
    * @param1 Section $section
    * @param2 string $packageName 
-   * @param3 int $groupId
    * @param4 int $userId
    * @param5 array mainLicenses
    */        
-  private function summaryTable(Section $section, $packageName, $groupId, $userId, $mainLicenses)
+  private function summaryTable(Section $section, $packageName, $userId, $mainLicenses)
   {
     
     $paragraphStyleSummary = array("spaceAfter" => 2, "spaceBefore" => 2,"spacing" => 2);          
@@ -208,7 +207,7 @@ class ReportAgent extends Agent
       $allMainLicenses = rtrim($allMainLicenses, ", ");
     }
     
-    $userAndGroupName = $this->userDao->getUserNameAndGroupName($userId, $groupId);
+    $userName = $this->userDao->getUserName($userId);
     $table = $section->addTable($this->tablestyle);
     
     $table->addRow($rowWidth);
@@ -227,7 +226,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, $paragraphStyleSummary);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userAndGroupName['user_name']."  <department>"), $firstRowStyle2, $paragraphStyleSummary);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userName."  <department>"), $firstRowStyle2, $paragraphStyleSummary);
       
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -635,7 +634,7 @@ class ReportAgent extends Agent
     $sR->reportTitle($section);
 
     /* Summery table */
-    $this->summaryTable($section, $packageName, $groupId, $userId, $contents['licensesMain']['statements']);
+    $this->summaryTable($section, $packageName, $userId, $contents['licensesMain']['statements']);
 
     /* clearing protocol change log table */
     $sR->clearingProtocolChangeLogTable($section);

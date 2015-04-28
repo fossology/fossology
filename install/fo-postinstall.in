@@ -77,20 +77,46 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
+
+readConfigVal() \{
+   local line="$1"
+   local key="$2"
+   local -n out="$3"
+   if [[ $line =~ ^[[:space:]]*${key}[[:space:]]*\=[[:space:]]*([^[:space:]]*) ]]; then
+      out="$\{BASH_REMATCH[1]\}"
+   fi
+\}
+
+setValueInSection() \{
+   echo "NOTE: writing $2=$3 in section $4 of $1"
+   sed -e "s/\[$4\]/[$4]\n$2=$3/" -i.bak "$1"
+\}
+
+confFile="{$SYSCONFDIR}/fossology.conf"
+if [ -e "$confFile" ] ; then
+   while read line; do
+      readConfigVal "$line" path REPO
+      readConfigVal "$line" PROJECTGROUP  PROJECTGROUP
+   done < "$confFile"
+   [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || \{ echo "ERROR: bad value for PROJECTGROUP in config"; exit 2; \}
+else
+   echo "ERROR: Cannot find $confFile"
+   exit 1
+fi
+
 if [ $COMMON ]; then
    echo "*** Running postinstall for common actions***"
 
-   ## get path to repo
-   if [ -e "{$SYSCONFDIR}/fossology.conf" ] ; then
-      while read line; do
-      if [[ $line =~ "path = " ]]; then
-          REPO=$\{line//'path = '/\}
-      fi
-      done < '{$SYSCONFDIR}/fossology.conf'
-   else
-      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology.conf"
+   ## check path to repo
+   [[ $REPO ]] || \{
+      echo "ERROR: path is not set in $confFile"
       exit 1
-   fi
+   \}
+   ## set default PROJECTGROUP if not set
+   [[ $PROJECTGROUP ]] || \{
+      setValueInSection "$confFile" PROJECTGROUP {$PROJECTGROUP} 'DIRECTORIES'
+      PROJECTGROUP="{$PROJECTGROUP}"
+   \}
 
    ## create user and group
    # Because we are doing these by name, in the multi-machine install case
@@ -103,20 +129,20 @@ if [ $COMMON ]; then
    echo "*** Creating user and group ***"
 
    # check for group
-   if grep -q "^{$PROJECTGROUP}:" /etc/group; then
-      echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
+   if grep -q "^$PROJECTGROUP:" /etc/group; then
+      echo "NOTE: group '$PROJECTGROUP' already exists, good."
    else
       # use addgroup if it exists since it supports --system
       if [ -f /usr/sbin/addgroup -a ! -L /usr/sbin/addgroup ]; then
-         addgroup --system {$PROJECTGROUP}
+         addgroup --system $PROJECTGROUP
       else
-         groupadd {$PROJECTGROUP}
+         groupadd $PROJECTGROUP
       fi
       if [ "$?" != "0" ] ; then
-         echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
+         echo "ERROR: Unable to create group '$PROJECTGROUP'"
          exit 1
       else
-         echo "NOTE: group '{$PROJECTGROUP}' created"
+         echo "NOTE: group '$PROJECTGROUP' created"
       fi
    fi
 
@@ -141,10 +167,10 @@ if [ $COMMON ]; then
       # use adduser if it exists since it supports --system, but
       # not if it's a symlink (probably to /usr/sbin/useradd)
       if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
-         adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
+         adduser --gecos "{$PROJECT}" --ingroup $PROJECTGROUP --system \
            --shell /bin/bash {$PROJECTUSER}
       else
-         useradd -c "{$PROJECT}" -g {$PROJECTGROUP} -m \
+         useradd -c "{$PROJECT}" -g $PROJECTGROUP -m \
            -s /bin/bash {$PROJECTUSER}
       fi
       if [ "$?" != "0" ] ; then
@@ -160,12 +186,12 @@ if [ $COMMON ]; then
    if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
       mkdir -m 2775 -p "{$PROJECTSTATEDIR}"
    fi
-   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}
+   chown root:$PROJECTGROUP {$PROJECTSTATEDIR}
    chmod 2775 {$PROJECTSTATEDIR}
    if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
       mkdir -m 2775 -p "{$PROJECTSTATEDIR}/agents"
    fi
-   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
+   chown root:$PROJECTGROUP {$PROJECTSTATEDIR}/agents
    chmod 2775 {$PROJECTSTATEDIR}/agents
 
    if [ ! -d "{$CACHEDIR}" ] ; then
@@ -174,7 +200,7 @@ if [ $COMMON ]; then
        echo "*** clearing file cache ***"
        rm -rf {$CACHEDIR}/*
    fi
-   chown root:{$PROJECTGROUP} {$CACHEDIR}
+   chown root:$PROJECTGROUP {$CACHEDIR}
    chmod 2775 {$CACHEDIR}
 
    if [ ! -d "$REPO" ] ; then
@@ -183,19 +209,21 @@ if [ $COMMON ]; then
       echo "NOTE: Repository already exists at $REPO"
    fi
 
-   chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+   chown {$PROJECTUSER}:$PROJECTGROUP $REPO
    chmod 2770 $REPO
    # make sure the parent dir has the right permissions too
-   chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
+   chown {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\}
    chmod 2770 $\{REPO%/*\}
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
-   chgrp {$PROJECTGROUP} {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+   chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
 
    echo "NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.  We suggest that you either configure postgres to run its autovacuum and autoanalyze daemons, or maintagent -D in a cron job, or run Admin > Maintenance on a regular basis.  Admin > Dashboard will show you the last time vacuum and analyze have been run."
 
 fi
+
+[[ $PROJECTGROUP ]] || \{ echo "PROJECTGROUP is not set"; exit 2; \}
 
 if [ $WEBONLY ]; then
    echo "*** Running postinstall for web-only actions***"
@@ -217,21 +245,21 @@ fi # end of license reference
 ########################################################################
 
 if [ $AGENT ]; then
-   # change all files ownership to {$PROJECTUSER}:{$PROJECTGROUP}
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$MODDIR}
+   # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
+   chown -R {$PROJECTUSER}:$PROJECTGROUP {$MODDIR}
    #chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
    #chmod g+s {$MODDIR}/scheduler/agent/fo_scheduler
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LIBEXECDIR}
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$SYSCONFDIR}
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/cron.d/fossology
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} /etc/init.d/fossology
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/departition
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/cp2foss
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/fossjobs
-   #chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$BINDIR}/schema-export
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$INCLUDEDIR}/libfossology.h
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/cp2foss.1
-   chown -f {$PROJECTUSER}:{$PROJECTGROUP} {$MAN1DIR}/fossjobs.1
+   chown -R {$PROJECTUSER}:$PROJECTGROUP {$LIBEXECDIR}
+   chown -R {$PROJECTUSER}:$PROJECTGROUP {$SYSCONFDIR}
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP /etc/cron.d/fossology
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP /etc/init.d/fossology
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/departition
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/cp2foss
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/fossjobs
+   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/schema-export
+   chown -f {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
+   chown -f {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1
+   chown -f {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/fossjobs.1
 
    {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
    if [ $? != 0 ] ; then
@@ -255,7 +283,7 @@ if [ $SCHEDULERONLY ]; then
    if [ ! -d {$LOGDIR} ] ; then
      mkdir -p {$LOGDIR}
    fi
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
+   chown -R {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
    chmod 2775 {$LOGDIR}
    find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
 fi # end of SCHEDULERONLY
@@ -273,16 +301,16 @@ if [ $WEBONLY ]; then
    # check for www-data (Debian, etc)
    grep -q "^www-data:" /etc/passwd
    if [ $? == 0 ] ; then
-     echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
+     echo "NOTE: Adding user www-data to group $PROJECTGROUP"
      # this is smart enough to not add multiple times so it's ok to repeat
-     usermod -G {$PROJECTGROUP} -a www-data
+     usermod -G $PROJECTGROUP -a www-data
    fi
    # check for apache (RHEL/CentOS, etc)
    grep -q "^apache:" /etc/passwd
    if [ $? == 0 ] ; then
-     echo "NOTE: Adding user apache to group {$PROJECTGROUP}"
+     echo "NOTE: Adding user apache to group $PROJECTGROUP"
      # this is smart enough to not add multiple times so it's ok to repeat
-     usermod -G {$PROJECTGROUP} -a apache
+     usermod -G $PROJECTGROUP -a apache
    fi
 
 fi # end of WEBONLY

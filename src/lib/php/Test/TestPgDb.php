@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,16 +22,13 @@ namespace Fossology\Lib\Test;
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/vendor/autoload.php");
 require_once(__DIR__ . "/../../../testing/db/TestDbFactory.php");
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 
-class TestPgDb
+class TestPgDb extends TestAbstractDb
 {
-  /** * @var DbManager */
-  private $dbManager;
   /** @var string dbName */
   private $dbName;
   /** @var string logFileName */
@@ -117,15 +114,6 @@ class TestPgDb
     $testDbFactory->purgeTestDb($this->sys_conf);
   }
 
-  private function dirnameRec($path, $depth = 1)
-  {
-    for ($i = 0; $i < $depth; $i++)
-    {
-      $path = dirname($path);
-    }
-    return $path;
-  }
-  
   function isInFossyGroup()
   {
     $gid_array = posix_getgroups();
@@ -142,29 +130,6 @@ class TestPgDb
     return ($uid_info['name'] !== 'root');
   }
   
-  
-  /**
-   * @param array $tableList
-   * @param bool $invert
-   */
-  public function alterTables($tableList, $invert=FALSE)
-  {
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if( $invert^!in_array($tableName, $tableList) ){
-        continue;
-      }
-      foreach ($tableCols as $attributes)
-      {
-        $attributeKey = "ALTER";
-        if (array_key_exists($attributeKey, $attributes))
-          $this->dbManager->queryOnce($attributes[$attributeKey]);
-      }
-    }
-  }
-
   /**
    * @param array $tableList
    * @param bool $invert 
@@ -218,54 +183,13 @@ class TestPgDb
   
   public function insertData_license_ref($limit=140)
   {
-    $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i++)
-    {
-      $sql = $splitted[$i];
-      $this->dbManager->queryOnce($delimiter.$sql);
-      if ($i > $limit)
-      {
-        break;
-      }
-    }
+    parent::insertData_license_ref($limit);
     $this->resetSequenceAsMaxOf('license_ref_rf_pk_seq', 'license_ref', 'rf_pk');
   }
 
   public function resetSequenceAsMaxOf($sequenceName, $tableName, $columnName)
   {
     $this->dbManager->queryOnce("SELECT setval('$sequenceName', (SELECT MAX($columnName) FROM $tableName))");
-  }
-
-  /**
-   * @param string $type
-   * @param array $elementList
-   * @param bool $invert
-   */
-  private function applySchema($type, $elementList, $invert=FALSE)
-  {
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach($Schema[$type] as $viewName=>$sql){
-      if( $invert^!in_array($viewName, $elementList) ){
-        continue;
-      }
-      $this->dbManager->queryOnce($sql);
-    }
-  }
-
-  /**
-   * @param array $viewList
-   * @param bool $invert 
-   */
-  public function createViews($viewList, $invert=FALSE)
-  {
-    $this->applySchema('VIEW', $viewList, $invert);
   }
 
   /**
@@ -285,11 +209,6 @@ class TestPgDb
   {
     $this->applySchema('CONSTRAINT', $cList, $invert);
   }
-
-  public function &getDbManager()
-  {
-    return $this->dbManager;
-  }
   
   public function createInheritedTables()
   {
@@ -299,7 +218,6 @@ class TestPgDb
     }
   }
 
-  
   public function createInheritedArsTables($agents)
   {
     foreach ($agents as $agent)

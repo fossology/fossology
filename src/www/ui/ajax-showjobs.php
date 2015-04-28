@@ -19,17 +19,19 @@
  */
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_ajaxShowJobs", _("ShowJobs"));
 
 class AjaxShowJobs extends FO_Plugin
 {
-  /** @var showJobsDao */
+  /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var UserDao */
+  private $userDao;
   /** @var maxUploadsPerPage */
   private $maxUploadsPerPage = 10;  /* max number of uploads to display on a page */
   /** @var colors */
@@ -53,7 +55,8 @@ class AjaxShowJobs extends FO_Plugin
     $this->OutputToStdout = true;
 
     global $container;
-    $this->showJobsDao = $container->get('dao.showJobs');
+    $this->showJobsDao = $container->get('dao.show_jobs');
+    $this->userDao = $container->get('dao.user');
 
     parent::__construct();
   }
@@ -156,13 +159,7 @@ class AjaxShowJobs extends FO_Plugin
           break;
         case 'job_user_fk':
           if(!empty($row[$field])){
-            $statementName = __METHOD__."UserRow";
-            $userRow = $dbManager->getSingleRow(
-            "select user_name from users where user_pk=$1",
-            array($row[$field]),
-            $statementName
-            );
-            $value = $userRow['user_name'];
+            $value = $this->userDao->getUserName($row[$field]);
           }
           break;
         case 'jq_args':
@@ -188,15 +185,15 @@ class AjaxShowJobs extends FO_Plugin
           if (array_key_exists($field, $row)) {  $value = htmlentities($row[$field]); }
           break;
       }
-      $table[]= array('DT_RowId' => $i++,
+      $table[] = array('DT_RowId' => $i++,
                       '0'=>$label,
                       '1'=> $value);
     }
-    $table = array_values($table); 
+    $tableData = array_values($table); 
     return new JsonResponse(array('sEcho' => intval($_GET['sEcho']),
-                                  'aaData' => $table,
-                                  'iTotalRecords' => count($table),
-                                  'iTotalDisplayRecords' => count($table)));
+                                  'aaData' => $tableData,
+                                  'iTotalRecords' => count($tableData),
+                                  'iTotalDisplayRecords' => count($tableData)));
     
   } // showJobDB()
 
@@ -222,8 +219,9 @@ class AjaxShowJobs extends FO_Plugin
     $uriFullMenu = $uri . Traceback_parm_keep(array("allusers"));
     /* Next/Prev menu */
     $next = $numJobs > $this->maxUploadsPerPage;
-    if ($numJobs > $this->maxUploadsPerPage)  
-    $pagination .= MenuEndlessPage($page, $next,$uriFullMenu); 
+    if ($numJobs > $this->maxUploadsPerPage) {
+      $pagination .= MenuEndlessPage($page, $next, $uriFullMenu);
+    }
 
     /*****************************************************************/
     /* Now display the summary */
@@ -241,7 +239,7 @@ class AjaxShowJobs extends FO_Plugin
     $jobNumber = -1;
     /** if $single_browse is 1, represent alread has an upload browse link, if single_browse is 0, no upload browse link */
     $single_browse = 0;
-    foreach ($jobData as $job_pk => $job){
+    foreach ($jobData as $job){
       /* Upload  */
       if (!empty($job["upload"])){
         $uploadName = GetArrayVal("upload_filename", $job["upload"]);
@@ -319,10 +317,10 @@ class AjaxShowJobs extends FO_Plugin
         if ($jobNumber < $firstJob) continue;
 
         /* blank line separator between pfiles */
-        $outBuf .= "<tr><td colspan=7> <hr> </td></tr>";
+        $outBuf .= "<tr><td colspan=8> <hr> </td></tr>";
         $outBuf .= "<tr>";
         $outBuf .= "<th $noUploadStyle></th>";
-        $outBuf .= "<th colspan=4 $noUploadStyle>";
+        $outBuf .= "<th colspan=6 $noUploadStyle>";
         $outBuf .= $job["job"]["job_name"];
         $outBuf .= "</th>";
         $outBuf .= "<th $noUploadStyle></th>";
@@ -420,7 +418,7 @@ class AjaxShowJobs extends FO_Plugin
         /* actions, must be admin or own the upload  */
         if (($jobqueueRec['jq_end_bits'] == 0) 
              && (($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
-                 || ($_SESSION[Auth::USER_ID] == $job['job']['job_user_fk'])))
+                 || (Auth::getUserId() == $job['job']['job_user_fk'])))
         {
           $outBuf .= "<th $jobStyle>";
           if ($isPaused){
@@ -439,7 +437,7 @@ class AjaxShowJobs extends FO_Plugin
 
         if (($jobqueueRec['jq_end_bits'] == 1) && ($jobqueueRec['jq_type'] === 'reportgen' || $jobqueueRec['jq_type'] === 'readmeoss')
              && (($_SESSION[Auth::USER_LEVEL] > PLUGIN_DB_ADMIN)
-                 || ($_SESSION[Auth::USER_ID] == $job['job']['job_user_fk']))){
+                 || (Auth::getUserId() == $job['job']['job_user_fk']))){
           if($jobqueueRec['jq_type'] === 'reportgen')
             $text = _("Download Report");
           else
@@ -559,37 +557,23 @@ class AjaxShowJobs extends FO_Plugin
     if (!$this->OutputToStdout){
       return;
     }
-    if ($output === "success"){
-      header('Content-type: text/json');
-      return $output;
-    }
     header('Content-type: text/json');
     return $output;
   }
 
   protected function jsonContent()
   {
-    global $SysConf;
-
-    $userId = $SysConf['auth']['UserId'];
-    $uploadPk;
-    $job_pk1;
     $action = GetParm("do", PARM_STRING);
-    if ($action){
-      switch ($action){
-        case "showjb":        
-          $uploadPk = GetParm('upload',PARM_INTEGER);
-          if(empty($uploadPk)){ 
-            return;
-          }
-      }
-      switch ($action){
-        case "showjb":
+    switch ($action){
+      case "showjb":
+        $uploadPk = GetParm('upload',PARM_INTEGER);
+        if(!empty($uploadPk)){ 
           return $this->getJobs($uploadPk);
-        case "showSingleJob":
-          $job_pk1 = GetParm('jobId',PARM_INTEGER);
-          return $this->showJobDB($job_pk1);
-      }
+        }
+        break;
+      case "showSingleJob":
+        $job_pk1 = GetParm('jobId',PARM_INTEGER);
+        return $this->showJobDB($job_pk1);
     }
   }
 }

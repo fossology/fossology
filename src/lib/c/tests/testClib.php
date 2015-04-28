@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,6 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
+
+/** 
+ * @todo remove this file and change Makefile
+ */
 
 if (!function_exists('Traceback_uri'))
 {

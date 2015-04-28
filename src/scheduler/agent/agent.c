@@ -1,5 +1,6 @@
 /* **************************************************************
  Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -201,7 +202,7 @@ static int agent_kill_traverse(int* pid, agent_t* agent, gpointer unused)
  * order separated by spaces.
  *
  * @param name the name of the agent
- * @param ma the meta_agetns structure associated with the specific name
+ * @param ma the meta_agents structure associated with the specific name
  * @param ostr the output stream to write the data to, socket in this case
  * @return always returns 0 to indicate that the traversal should continue
  */

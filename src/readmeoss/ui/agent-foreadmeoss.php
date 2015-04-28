@@ -40,6 +40,7 @@ class ReadmeossGenerator extends DefaultPlugin
     $text = _("Generate ReadMe_OSS");
     menu_insert("Browse-Pfile::Generate&nbsp;ReadMe_OSS", 0, self::NAME, $text);
     
+    menu_insert("UploadMulti::Generate&nbsp;ReadMe_OSS", 0, self::NAME, $text);
   }
 
   protected function handle(Request $request)
