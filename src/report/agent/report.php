@@ -146,7 +146,7 @@ class ReportAgent extends Agent
                       "ip" => $ip,
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
-    );
+                     );
 
     $contents = $this-> identifiedGlobalLicenses($contents);
    
@@ -165,7 +165,7 @@ class ReportAgent extends Agent
     $lenLicensesMain = count($contents["licensesMain"]["statements"]) ;
     for($j=0; $j<$lenLicensesMain; $j++){
       for($i=0; $i<$lenLicenses; $i++){
-        if(!strcmp($contents["licenses"]["statements"][$i]["content"],                      $contents["licensesMain"]["statements"][$j]["content"]))
+        if(!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"]))
         {
           $contents["licensesMain"]["statements"][$j]["files"] = $contents["licenses"]["statements"][$i]["files"];
           unset($contents["licenses"]["statements"][$i]);
