@@ -1170,7 +1170,7 @@
 #####
 %ENTRY%	_LT_COMMERCIAL_3
 %KEY%	"source"
-%STR%	"source code =ANY= of =FEW= (files?|materials?) =ANY= disclosed? =ANY= without =FEW= prior =FEW= written permission"
+%STR%	"source code =ANY= (files?|materials?) =ANY= disclosed? =ANY= without =FEW= prior =FEW= written permission"
 #####
 %ENTRY%	_LT_COMMERCIAL_4
 %KEY%	"license"

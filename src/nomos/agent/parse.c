@@ -510,14 +510,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora))
   {
-    if (INFILE(_LT_GOOGLE_SDK)) {
-      INTERESTING(lDebug ? "Apache(google)" : "Apache-2.0-Proprietary");
-      lmem[_mAPACHE] = 1;
-    }
-    else {
-      INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
-      lmem[_mAPACHE] = 1;
-    }
+    INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
   }
   else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
     INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache-2.0");
@@ -6277,11 +6271,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TCL");
   }
   cleanLicenceBuffer();
-  /** BSD/MIT and BSD*MIT
-  if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED) {
-    INTERESTING("BSD/MIT");
-  } else if if (HASTEXT(_LT_BSD_AND_MIT, REG_EXTENDED) {
-    INTERESTING("BSD&MIT");
+  /** AndroidSDK-Commercial license */
+  if (INFILE(_LT_GOOGLE_SDK)) {
+    INTERESTING("AndroidSDK-Commercial");
   }
   cleanLicenceBuffer();
 
@@ -6351,35 +6343,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
-   * NOW look for unclassified licenses, if we haven't found anything yet.
-   * And avoid checking .po files -- message catalogues are known to have
-   * false-positives.
-   *****
-   * FIX-ME: if a file contains ONLY a "no warranty" description/clause, it
-   * will (currently) get flagged as an UnclassifiedLicense (so the check
-   * for no-warranty was moved ABOVE this check in case we can use that info)
-   */
-  if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
-    if (!pd &&
-        checkUnclassified(filetext, size, scp->score, isML,
-            isPS, nw)) {
-      strcpy(name, LS_UNCL);
-      if (isPS) {
-        strcat(name, "(PS)");
-      }
-      MEDINTEREST(name);
-      checkCornerCases(filetext, size, score, kwbm, isML, isPS, nw, YES);
-    }
-#ifdef  UNKNOWN_CHECK_DEBUG
-    else {
-      printf("... NOT an Unclassified license, NW %d PD %d\n",
-          nw, pd);
-    }
-#endif  /* UNKNOWN_CHECK_DEBUG */
-  }
-  listClear(&whereList, NO);      /* clear "unused" matches */
-  cleanLicenceBuffer();
-  /*
    * And, If no other licenses are present but there's a reference to
    * something being non-commercial, better note it now.
    */
@@ -6442,19 +6405,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (maxInterest != IL_HIGH) {
     if (INFILE(_LT_COMMERCIAL_1)) {
-      MEDINTEREST(lDebug ? "COMM(1)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(1)" : "COMMERCIAL");
     }
     else if (INFILE(_LT_COMMERCIAL_2)) {
-      MEDINTEREST(lDebug ? "COMM(2)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(2)" : "COMMERCIAL");
     }
     else if (INFILE(_LT_COMMERCIAL_3)) {
-      MEDINTEREST(lDebug ? "COMM(3)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(3)" : "COMMERCIAL");
     }
     else if (INFILE(_LT_COMMERCIAL_4)) {
-      MEDINTEREST(lDebug ? "COMM(4)" : "COMMERCIAL");
+      INTERESTING(lDebug ? "COMM(4)" : "COMMERCIAL");
     }
     else if (HASTEXT(_TEXT_BOOK, 0) && INFILE(_LT_BOOKPURCHASE)) {
-      MEDINTEREST(lDebug ? "PurchBook" : "COMMERCIAL");
+      INTERESTING(lDebug ? "PurchBook" : "COMMERCIAL");
     }
     if (INFILE(_LT_NONPROFIT_1)) {
       MEDINTEREST(lDebug ? "NonP(1)" : "Non-profit!");
@@ -6564,6 +6527,35 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   listClear(&whereList, NO);      /* again, clear "unused" matches */
+  cleanLicenceBuffer();
+  /*
+   * NOW look for unclassified licenses, if we haven't found anything yet.
+   * And avoid checking .po files -- message catalogues are known to have
+   * false-positives.
+   *****
+   * FIX-ME: if a file contains ONLY a "no warranty" description/clause, it
+   * will (currently) get flagged as an UnclassifiedLicense (so the check
+   * for no-warranty was moved ABOVE this check in case we can use that info)
+   */
+  if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
+    if (!pd &&
+        checkUnclassified(filetext, size, scp->score, isML,
+            isPS, nw)) {
+      strcpy(name, LS_UNCL);
+      if (isPS) {
+        strcat(name, "(PS)");
+      }
+      MEDINTEREST(name);
+      checkCornerCases(filetext, size, score, kwbm, isML, isPS, nw, YES);
+    }
+#ifdef  UNKNOWN_CHECK_DEBUG
+    else {
+      printf("... NOT an Unclassified license, NW %d PD %d\n",
+          nw, pd);
+    }
+#endif  /* UNKNOWN_CHECK_DEBUG */
+  }
+  listClear(&whereList, NO);      /* clear "unused" matches */
   cleanLicenceBuffer();
   /*
    * If we still haven't found anything, check for the really-low interest
