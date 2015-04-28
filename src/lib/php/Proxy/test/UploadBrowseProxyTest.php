@@ -25,7 +25,6 @@ use Fossology\Lib\Test\TestPgDb;
 
 class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
 {
- 
   private $testDb;
   private $groupId = 401;
 

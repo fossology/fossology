@@ -774,7 +774,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
             array($uploadId,$groupId,$licenseId));
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId

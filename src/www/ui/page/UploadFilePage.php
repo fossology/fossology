@@ -189,6 +189,10 @@ class UploadFilePage extends DefaultPlugin
         return array(false,  $uploadedFile->getErrorMessage());
     }
 
+    if(!$uploadedFile->isValid()) {
+        return array(false,  $uploadedFile->getErrorMessage());
+    }
+
     $originalFileName = $uploadedFile->getClientOriginalName();
 
     $public = $request->get('public');
@@ -260,6 +264,7 @@ class UploadFilePage extends DefaultPlugin
     }
     return array(true, $message);
   }
+
 }
 
 register_plugin(new UploadFilePage());

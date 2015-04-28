@@ -1,5 +1,6 @@
 # FOSSology Makefile - lib/libfossology
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2015 Siemens AG
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf

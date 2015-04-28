@@ -22,7 +22,7 @@ $dbManager->queryOnce('UPDATE users SET group_fk=gum.group_fk FROM group_user_me
 echo "Link decisions with groups\n";
 $dbManager->queryOnce('UPDATE clearing_decision cd SET group_fk=u.group_fk FROM users u WHERE cd.user_fk=u.user_pk');
 
-echo "Fill clearing event table with old decisions";
+echo "Fill clearing event table with old decisions...";
 $dbManager->queryOnce('
   INSERT INTO clearing_event (  uploadtree_fk,
   rf_fk,

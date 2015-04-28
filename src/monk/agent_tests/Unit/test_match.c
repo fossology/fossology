@@ -2,11 +2,18 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -100,7 +107,7 @@ void test_findDiffsAtBeginning() {
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
 
   FO_ASSERT_EQUAL(matches->len, 2);
-  if (matches->len == 2){
+  if (matches->len == 2) {
     FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 1, 2))
     Match* expectedDiff = g_array_index(matches, Match*, 1);
     FO_ASSERT_TRUE(_matchEquals(expectedDiff, 1, 2, 6));
