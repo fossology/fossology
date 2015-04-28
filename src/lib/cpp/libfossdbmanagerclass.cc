@@ -36,7 +36,7 @@ static fo_dbManager* scheduler_connect(int* argc, char** argv) {
   return dbManager;
 }
 
-DbManager::DbManager(int* argc, char** argv) : DbManager(scheduler_connect(argc, argv))
+DbManager::DbManager(int* argc, char** argv) : DbManager::DbManager(scheduler_connect(argc, argv))
 {
 }
 
