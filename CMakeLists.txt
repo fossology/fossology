@@ -114,7 +114,6 @@ set(SOURCE_FILES
     src/lib/cpp/libfossdbQueryResult.cc
     src/lib/cpp/libfossdbQueryResult.hpp
     src/lib/cpp/libfossologyCPP.hpp
-    src/lib/cpp/uniquePtr.hpp
     src/lib/cpp/tests/run_tests.cc
     src/lib/cpp/tests/test_fossdbmanagerclass.cc
     src/lib/cpp/tests/testUtils.hpp
@@ -310,8 +309,6 @@ set(SOURCE_FILES
     src/ununpack/agent_tests/Unit/test_ununpack-ar.c
     src/ununpack/agent_tests/Unit/test_ununpack-disk.c
     src/ununpack/agent_tests/Unit/test_ununpack-iso.c
-    src/vendor/twig/twig/ext/twig/php_twig.h
-    src/vendor/twig/twig/ext/twig/twig.c
     src/wget_agent/agent/main.c
     src/wget_agent/agent/wget_agent.c
     src/wget_agent/agent/wget_agent.h

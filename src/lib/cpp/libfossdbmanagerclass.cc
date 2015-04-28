@@ -25,16 +25,18 @@ extern "C" {
 
 using namespace fo;
 
-DbManager::DbManager(int* argc, char** argv)
+DbManager::DbManager(fo_dbManager* dbManager)
+  : dbManager(std::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter()))
 {
-  fo_dbManager* _dbManager;
-  fo_scheduler_connect_dbMan(argc, argv, &_dbManager);
-
-  dbManager = unptr::shared_ptr<fo_dbManager>(_dbManager, DbManagerStructDeleter());
 }
 
-DbManager::DbManager(fo_dbManager* dbManager)
-  : dbManager(unptr::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter()))
+static fo_dbManager* scheduler_connect(int* argc, char** argv) {
+  fo_dbManager* dbManager;
+  fo_scheduler_connect_dbMan(argc, argv, &dbManager);
+  return dbManager;
+}
+
+DbManager::DbManager(int* argc, char** argv) : DbManager(scheduler_connect(argc, argv))
 {
 }
 
