@@ -158,14 +158,14 @@ abstract class ClearedGetterCommon
             "files" => array($fileName)
           );
         }
-     }else{
+      }else{
           $statements[] = array(
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "comments" => convertToUTF8($comments, false),
             "files" => array($fileName)
           );
-     } 
+      } 
     }
     arsort($statements);
     return $statements;

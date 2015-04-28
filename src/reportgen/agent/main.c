@@ -398,6 +398,7 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
         }
         const char* content = NULL;
         const char* text = NULL;
+        const char* comments = NULL;
         char* fileNames = NULL;
 
         json_object_object_foreach(val1, key2, val2) {
