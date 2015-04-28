@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 using namespace fo;
 
-QueryResult::QueryResult(PGresult* pgResult) : ptr(std::unique_ptr<PGresult, PGresultDeleter>(pgResult)) {
+QueryResult::QueryResult(PGresult* pgResult) : ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult)) {
 };
 
 bool QueryResult::isFailed() const {

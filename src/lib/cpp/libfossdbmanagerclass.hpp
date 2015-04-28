@@ -26,7 +26,6 @@ extern "C" {
 #include <cstdarg>
 #include <vector>
 #include <string>
-#include <memory>
 
 
 #include "libfossdbQueryResult.hpp"
@@ -63,7 +62,7 @@ namespace fo
     QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
   private:
-    std::shared_ptr <fo_dbManager> dbManager;
+    unptr::shared_ptr <fo_dbManager> dbManager;
   };
 }
 

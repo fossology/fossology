@@ -16,8 +16,9 @@ extern "C" {
 #include "libfossdbmanager.h"
 }
 
+#include "uniquePtr.hpp"
+
 #include <vector>
-#include <memory>
 
 namespace fo {
   class PGresultDeleter {
@@ -52,7 +53,7 @@ namespace fo {
     std::vector<T> getSimpleResults(int columnN, T (functionP)(const char*)) const;
 
   private:
-    std::unique_ptr <PGresult, PGresultDeleter> ptr;
+    unptr::unique_ptr <PGresult, PGresultDeleter> ptr;
   };
 
   template<typename T>
