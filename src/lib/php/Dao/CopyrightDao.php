@@ -106,9 +106,13 @@ class CopyrightDao extends Object
       $whereClause .= " AND UT.upload_fk = $".count($params);
       $statementName .= ".withUI";
     }
-    if ($type !== null)
-    {
+    if($type == "skipcontent"){
+      $distinctContent = "";
+    }else{
       $distinctContent = ", C.content";
+    }
+    if ($type !== null && $type != "skipcontent")
+    {
       $params []= $type;
       $whereClause .= " AND C.type = $".count($params);
       $statementName .= ".withType";

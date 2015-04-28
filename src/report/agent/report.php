@@ -98,8 +98,8 @@ class ReportAgent extends Agent
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
-    $this->ipClearedGetter = new XpClearedGetter("ip", null, true);
-    $this->eccClearedGetter = new XpClearedGetter("ecc", null, true);
+    $this->ipClearedGetter = new XpClearedGetter("ip", "skipcontent", true);
+    $this->eccClearedGetter = new XpClearedGetter("ecc", "skipcontent", true);
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->bulkMatchesGetter = new BulkMatchesGetter();
