@@ -16,8 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file list.php

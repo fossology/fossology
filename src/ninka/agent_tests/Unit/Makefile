@@ -12,8 +12,8 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 DEF = -DDATADIR='"$(MODDIR)"'
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -Wall -I. -I$(LOCALAGENTDIR) -fopenmp
-CXXFLAGS_LINK  = $(ALL_CXXFLAGS) -lcppunit -lstdc++ -fopenmp $(FO_LDFLAGS)
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -Wall -I. -I$(LOCALAGENTDIR) -fopenmp
+CXXFLAGS_LINK  = $(FO_CXXLDFLAGS) -lcppunit -fopenmp
 
 EXE = test_ninka
 

@@ -25,7 +25,7 @@
  #ifndef IDENTITY_IP
   #ifdef IDENTITY_COPYRIGHT
    #define IDENTITY "copyright"
-   #define MAX_TYPES 3
+   #define MAX_TYPES 4
   #else
    #error
   #endif

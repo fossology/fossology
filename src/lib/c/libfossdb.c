@@ -24,6 +24,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 
 #include "libfossdb.h"
 
+#include <string.h>
+
 /*!
  fo_dbconnect()
 

@@ -17,23 +17,24 @@ _runcopyright()
 
 _runcopyrightPositives()
 {
-  ./copyright --regex '<s>([^<]*)</s>' --regexId 1 -T 0 "$1" | sed -e '1d'
+  ./copyright --regex '1@@<s>([^\0]*?)</s>' -T 0 "$1" | sed -e '1d'
 }
 
 _checkFound()
 {
   while IFS="[:]'" read initial start length type unused content unused; do
-    found=""
+    found="not found"
     while IFS="[:]'" read initial2 start2 length2 type2 unused2 content2 unused2; do
-      if [ "x$content2" = "x$content1" ]; then
-        found="yes"
+      if [ "x$content2" = "x$content" ]; then
+        found="$content"
         break
       fi
     done <<EO2
 $2
 EO2
 
-    assertEquals "$found" "yes"
+    assertEquals "$content" "$found"
+    echo "$content"
   done <<EO1
 $1
 EO1
@@ -42,7 +43,7 @@ EO1
 
 testAll()
 {
-  for file_raw in ../testdata/testdata0_raw; do
+  for file_raw in ../testdata/testdata3_raw; do
     file=${file_raw%_raw}
     expectedPositives="$( _runcopyrightPositives "$file_raw" )"
     found="$( _runcopyright -T 1 "$file" )"
@@ -56,9 +57,9 @@ testUserRegexesDefault()
   assertTrue $?
   echo "test one" > "$tmpfile"
 
-  out=$( _runcopyright -T 0 --regex 'test[[:space:]]*' "$tmpfile" )
+  out=$( _runcopyright -T 0 --regex 'test[[:space:]]*o' "$tmpfile" )
 
-  expected=$(printf "\t[0:5:cli] 'test '")
+  expected=$(printf "\t[0:6:cli] 'test o'")
 
   assertEquals "$expected" "$out"
 
@@ -71,9 +72,9 @@ testUserRegexesName()
   assertTrue $?
   echo "test one" > "$tmpfile"
 
-  out=$( _runcopyright -T 0 --regex 'test@@test[[:space:]]*' "$tmpfile" )
+  out=$( _runcopyright -T 0 --regex 'test@@test[[:space:]]*o' "$tmpfile" )
 
-  expected=$(printf "\t[0:5:test] 'test '")
+  expected=$(printf "\t[0:6:test] 'test o'")
 
   assertEquals "$expected" "$out"
 
@@ -101,9 +102,9 @@ testUserRegexesNameAndGroup2()
   assertTrue $?
   echo "test one" > "$tmpfile"
 
-  out=$( _runcopyright -T 0 --regex 'test@@0@@t(es)t[[:space:]]*' "$tmpfile" )
+  out=$( _runcopyright -T 0 --regex 'test@@0@@t(es)t[[:space:]]*o' "$tmpfile" )
 
-  expected=$(printf "\t[0:5:test] 'test '")
+  expected=$(printf "\t[0:6:test] 'test o'")
 
   assertEquals "$expected" "$out"
 
