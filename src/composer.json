@@ -25,7 +25,9 @@
 
     "autoload": {
         "psr-4": {
-            "Fossology\\Lib\\": "lib/php"
+            "Fossology\\Lib\\": "lib/php",
+            "Fossology\\DeciderJob\\UI\\": "deciderjob/ui"
+            
         }
     }
 }
