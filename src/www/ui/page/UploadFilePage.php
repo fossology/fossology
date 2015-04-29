@@ -186,21 +186,13 @@ class UploadFilePage extends DefaultPlugin
     }
 
     if(!$uploadedFile->isValid()) {
-        return array(false,  $uploadedFile->getErrorMessage());
-    }
-
-    if(!$uploadedFile->isValid()) {
-        return array(false,  $uploadedFile->getErrorMessage());
+      return array(false, $uploadedFile->getErrorMessage());
     }
 
     $originalFileName = $uploadedFile->getClientOriginalName();
 
     $public = $request->get('public');
-      if ($public == self::PUBLIC_ALL) {
-          $publicPermission = Auth::PERM_READ;
-      } else {
-          $publicPermission = Auth::PERM_NONE;
-      }
+    $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"

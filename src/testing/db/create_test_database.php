@@ -459,6 +459,11 @@ $PG_CONN = $test_db_conn;
    ../../lib/php/common-cache.php  ReportCachePurgeAll() (required by ApplySchema)
 
 */
+if(!is_file(__DIR__ . '/../../vendor/autoload.php'))
+{
+  throw new Exception('you need to run "composer install" before creating adatabase via ApplySchema');
+}
+
 require_once(__DIR__ . '/../../lib/php/libschema.php');
 require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
