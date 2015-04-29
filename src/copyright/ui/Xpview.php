@@ -245,13 +245,13 @@ class Xpview extends DefaultPlugin
     {
       if (GetParm("mod", PARM_STRING) == $this->Name)
       {
-        menu_insert("View::View Copyright/Email/Url", 1);
-        menu_insert("View-Meta::View Copyright/Email/Url", 1);
+        menu_insert("View::View Copyright/Email/Url/Author", 1);
+        menu_insert("View-Meta::View Copyright/Email/Url/Author", 1);
       } else
       {
-        $text = _("View Copyright/Email/Url info");
-        menu_insert("View::Copyright/Email/Url", 1, $URI, $text);
-        menu_insert("View-Meta::Copyright/Email/Url", 1, $URI, $text);
+        $text = _("View Copyright/Email/Url/Author info");
+        menu_insert("View::Copyright/Email/Url/Author", 1, $URI, $text);
+        menu_insert("View-Meta::Copyright/Email/Url/Author", 1, $URI, $text);
       }
     }
     $licId = GetParm("lic", PARM_INTEGER);

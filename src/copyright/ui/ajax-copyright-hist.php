@@ -141,7 +141,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   }
 
-  public function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter)
+  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter)
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
@@ -271,11 +271,13 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $link = "<a href='";
     $link .= Traceback_uri();
     $urlArgs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
-    if (!empty($filter)) $urlArgs .= "&filter=$filter";
+    if (!empty($filter)) {
+      $urlArgs .= "&filter=$filter";
+    }
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class='delete' src=\"images/space_16.png\"</div><span hidden='true' id='update$type$hash'></span>";
+    $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class=\"delete\" src=\"images/space_16.png\"><span hidden='true' id='update$type$hash'></span>";
     return $output;
   }
 
@@ -312,7 +314,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
                             INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
                             WHERE CPR.ct_pk = CP.ct_pk
                               AND CP.hash =$1
-                              AND   ( UT.lft  BETWEEN  $2 AND  $3 ) $sql_upload
+                              AND   ( UT.lft BETWEEN $2 AND $3 ) $sql_upload
                             RETURNING CP.* ";
 
     $this->dbManager->prepare($statementName, $combinedQuerry);

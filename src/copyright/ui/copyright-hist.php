@@ -46,25 +46,25 @@ class CopyrightHistogram  extends HistogramBase {
 
     $tableVars=array();
 
-    list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
     $tableVars[$type]=$varsCopyright;
 
     $type = 'email';
     $description = _("Email");
 
-    list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
     $tableVars[$type]=$varsEmail;
 
     $type = 'url';
     $description = _("URL");
 
-    list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
     $tableVars[$type]=$varsURL;
 
     $type = 'author';
     $description = _("Author");
 
-    list($VAuthor, $varsAuthor) =  $this->getTableForSingleType($type, $description, $upload_pk, $Uploadtree_pk, $filter, $Agent_pk);
+    list($VAuthor, $varsAuthor) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
     $tableVars[$type]=$varsAuthor;
 
     return array( $VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars);
