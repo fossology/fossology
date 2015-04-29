@@ -182,7 +182,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
         "description"=> "desc",
         "textfinding" => "text",
         "comments" => "comment",
-	"uploadtree_pk" => "7",
+        "uploadtree_pk" => "7",
         "clearing_decision_type_fk" => "5",
         "content" => "copyright 3dfx interactive, inc. 1999, all rights reserved this \n"),
       array(
