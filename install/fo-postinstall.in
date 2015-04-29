@@ -81,9 +81,10 @@ fi
 readConfigVal() \{
    local line="$1"
    local key="$2"
-   local -n out="$3"
-   if [[ $line =~ ^[[:space:]]*${key}[[:space:]]*\=[[:space:]]*([^[:space:]]*) ]]; then
-      out="$\{BASH_REMATCH[1]\}"
+   local out="$3"
+   [[ "$out" =~ ^[a-zA-Z]+$ ]] || \{ echo "FATAL: bad parameters to readConfigVal: $@"; exit 1; \}
+   if [[ $line =~ ^[[:space:]]*${key}[[:space:]]*\=[[:space:]]*([^[:space:]\']*) ]]; then
+      eval "$out='$\{BASH_REMATCH[1]\}'"
    fi
 \}
 
@@ -96,7 +97,7 @@ confFile="{$SYSCONFDIR}/fossology.conf"
 if [ -e "$confFile" ] ; then
    while read line; do
       readConfigVal "$line" path REPO
-      readConfigVal "$line" PROJECTGROUP  PROJECTGROUP
+      readConfigVal "$line" PROJECTGROUP PROJECTGROUP
    done < "$confFile"
    [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || \{ echo "ERROR: bad value for PROJECTGROUP in config"; exit 2; \}
 else
