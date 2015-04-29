@@ -45,7 +45,7 @@ public:
   // s: string to scan
   // results: copyright matches are appended to this list
   virtual void ScanString(const string& s, list<match>& results) const = 0;
-  
+
   // fileName: file name to scan
   // results: copyright matches are appended to this list
   virtual void ScanFile(const string& fileName, list<match>& results) const

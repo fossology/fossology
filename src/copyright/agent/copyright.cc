@@ -72,18 +72,18 @@ int main(int argc, char** argv)
         else
         {
           list<match> l;
-          for (const scanner* sc : scanners)
+          for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
           {
-            sc->ScanString(s, l);
+            (*sc)->ScanString(s, l);
           }
 
           stringstream ss;
           ss << fileName << " ::" << endl;
           // Output matches
-          for (match& m : l)
+          for (auto m = l.begin();  m != l.end(); ++m)
           {
-            ss << "\t[" << m.start << ':' << m.end << ':' << m.type << "] '"
-              << cleanMatch(s, m)
+            ss << "\t[" << m->start << ':' << m->end << ':' << m->type << "] '"
+              << cleanMatch(s, *m)
               << "'" << endl;
           }
           // Thread-Safety: output all matches (collected in ss) at once to cout

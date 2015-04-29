@@ -152,8 +152,8 @@ void fillScanners(CopyrightState& state)
   const CliOptions& cliOptions = state.getCliOptions();
 
   const std::list<regexScanner>& extraRegexes =cliOptions.getExtraRegexes();
-  for (const regexScanner& sc : extraRegexes)
-    state.addScanner(&sc);
+  for (auto sc = extraRegexes.begin(); sc != extraRegexes.end(); ++sc)
+    state.addScanner(&(*sc));
 
 #ifdef IDENTITY_COPYRIGHT
   unsigned types = cliOptions.getOptType();
@@ -168,7 +168,7 @@ void fillScanners(CopyrightState& state)
 
   if (types & 1<<2)
     state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType(), 1));
-    
+
   if (types & 1<<3)
     state.addScanner(new regexScanner(regAuthor::getRegex(), regAuthor::getType()));
 #endif
@@ -186,16 +186,16 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
   }
 
   size_t count = 0;
-  for (const match& m : matches)
+  for (auto m = matches.begin(); m != matches.end(); ++m)
   {
 
     DatabaseEntry entry;
     entry.agent_fk = agentId;
-    entry.content = cleanMatch(s, m);
-    entry.copy_endbyte = m.end;
-    entry.copy_startbyte = m.start;
+    entry.content = cleanMatch(s, *m);
+    entry.copy_endbyte = m->end;
+    entry.copy_startbyte = m->start;
     entry.pfile_fk = pFileId;
-    entry.type = m.type;
+    entry.type = m->type;
 
     if (entry.content.length() != 0)
     {
@@ -220,9 +220,9 @@ void matchFileWithLicenses(const string& sContent, unsigned long pFileId, Copyri
 {
   list<match> l;
   const list<const scanner*>& scanners = state.getScanners();
-  for (const scanner* sc : scanners)
+  for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
   {
-    sc->ScanString(sContent, l);
+    (*sc)->ScanString(sContent, l);
   }
   saveToDatabase(sContent, l, pFileId, state.getAgentId(), databaseHandler);
 }
@@ -246,7 +246,7 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   {
     string s;
     ReadFileToString(fileName, s);
-    
+
     matchFileWithLicenses(s, pFileId, state, databaseHandler);
 
     free(fileName);
@@ -265,7 +265,7 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
 
 #pragma omp parallel
   {
-    CopyrightDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
+    CopyrightDatabaseHandler threadLocalDatabaseHandler(std::move(databaseHandler.spawn()));
 
     size_t pFileCount = fileIds.size();
 #pragma omp for
