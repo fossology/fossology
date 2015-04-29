@@ -248,7 +248,7 @@ class ui_browse_license extends DefaultPlugin
         'fileCount'=>$fileCount,
         'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
         'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
-        'scannerLicenseCount'=> $totalScannerLicenseCount-$noScannerLicenseFoundCount,
+        'scannerLicenseCount'=> $totalScannerLicenseCount,
         'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
         'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
         'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount,
