@@ -14,8 +14,12 @@ LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTDBDIR = $(TOP)/src/testing/db/c
-TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit -I $(TESTDIR) -I $(TESTDBDIR)
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
+TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
+TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
+
+LDFLAGS_LOCAL = $(ALL_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
+CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(ALL_CFLAGS) $(TEST_CFLAGS)
+
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
 
@@ -48,12 +52,12 @@ testlib:
 
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB} testlib
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 
 $(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB} testlib
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<

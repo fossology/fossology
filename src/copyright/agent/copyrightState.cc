@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  * Author: Johannes Najjar, Daniele Fognini
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -15,12 +15,16 @@
 CopyrightState::CopyrightState(int _agentId, const CliOptions& cliOptions) :
   agentId(_agentId),
   cliOptions(cliOptions),
-  regexMatchers()
+  scanners()
 {
 }
 
 CopyrightState::~CopyrightState()
 {
+  // TODO: Scanners with pointers contained in scanners list have been allocated
+  // with new and therefore have to be deleted here (but not those from extraRegexes)
+  /*for (const scanner* p : scanners)
+    delete p;*/
 }
 
 int CopyrightState::getAgentId() const
@@ -28,21 +32,14 @@ int CopyrightState::getAgentId() const
   return agentId;
 };
 
-void CopyrightState::addMatcher(const RegexMatcher& regexMatcher)
+void CopyrightState::addScanner(const scanner* sc)
 {
-  regexMatchers.push_back(regexMatcher);
+  scanners.push_back(sc);
 }
 
-void CopyrightState::addMatcher(const std::vector<RegexMatcher>& regexMatchers)
+const std::list<const scanner*>& CopyrightState::getScanners() const
 {
-  for (auto it = regexMatchers.begin(); it != regexMatchers.end(); ++it) {
-    addMatcher(*it);
-  }
-}
-
-const std::vector<RegexMatcher>& CopyrightState::getRegexMatchers() const
-{
-  return regexMatchers;
+  return scanners;
 }
 
 
@@ -70,7 +67,7 @@ const CliOptions& CopyrightState::getCliOptions() const
   return cliOptions;
 }
 
-const std::vector<RegexMatcher>& CliOptions::getExtraRegexes() const
+const std::list<regexScanner>& CliOptions::getExtraRegexes() const
 {
   return extraRegex;
 }
@@ -92,15 +89,21 @@ bool CliOptions::addExtraRegex(const std::string& regexDesc)
   if (rx::regex_match(regexDesc.begin(), regexDesc.end(), match, fmtRegex))
   {
     std::string type(match.length(1) > 0 ? match.str(1) : "cli");
+    
     int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
 
     if (match.length(3) == 0)
       return false;
 
     std::string regexPattern(match.str(3));
+    
+    char * ptype = new char[type.length() + 1];
+    // TODO: delete this pointer somewhere?
+    strcpy(ptype, type.c_str());
 
-    extraRegex.push_back(RegexMatcher(type, regexPattern, regId));
+    extraRegex.push_back(regexScanner(regexPattern, ptype, regId));
     return true;
   }
   return false;
 }
+

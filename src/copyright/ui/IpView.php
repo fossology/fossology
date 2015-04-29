@@ -32,7 +32,7 @@ class IpView extends Xpview
     $this->optionName = "skipFileIp";
     $this->ajaxAction = "setNextPrevIp";
     $this->skipOption = "noIp";
-    $this->hightlightTypeToStringMap = array(Highlight::IP => 'Patent');
+    $this->highlightTypeToStringMap = array(Highlight::IP => 'Patent');
     $this->typeToHighlightTypeMap = array('ip' => Highlight::IP);
     $this->xptext = 'patent';
     parent::__construct(self::NAME,array(

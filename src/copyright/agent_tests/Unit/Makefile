@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014-2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -11,14 +11,14 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(ALL_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp $(FO_LDFLAGS)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp
 
 EXE = test_copyright
 
-OBJECTS = test_regex.o test_RegMatcher.o
+OBJECTS = test_regex.o test_scanners.o
 OBJECTS_ACC = test_accuracy.o
 COVERAGE =
 
@@ -53,7 +53,7 @@ coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a
 	./$(EXE)
 
 accuracy: agent run_tests.cc $(OBJECTS_ACC) libcopyright.a
-	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK); \
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK); \
 	./$(EXE)
 
 clean:

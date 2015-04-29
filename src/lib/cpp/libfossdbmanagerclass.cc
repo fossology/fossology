@@ -29,13 +29,17 @@ DbManager::DbManager(int* argc, char** argv)
 {
   fo_dbManager* _dbManager;
   fo_scheduler_connect_dbMan(argc, argv, &_dbManager);
-
-  dbManager = unptr::shared_ptr<fo_dbManager>(_dbManager, DbManagerStructDeleter());
+  InitDbManagerPointer(_dbManager);
 }
 
-DbManager::DbManager(fo_dbManager* dbManager)
-  : dbManager(unptr::shared_ptr<fo_dbManager>(dbManager, DbManagerStructDeleter()))
+DbManager::DbManager(fo_dbManager* _dbManager)
 {
+  InitDbManagerPointer(_dbManager);
+}
+
+void DbManager::InitDbManagerPointer(fo_dbManager * p)
+{
+  dbManager = unptr::shared_ptr<fo_dbManager>(p, DbManagerStructDeleter());
 }
 
 PGconn* DbManager::getConnection() const

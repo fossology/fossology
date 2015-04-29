@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014, Siemens AG
- * Author: Johannes Najjar, Daniele Fognini
+ * Copyright (C) 2015, Siemens AG
+ * Author: Florian Krügel
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
  *
@@ -9,38 +9,31 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef REGCOPYRIGHT_H_
-#define REGCOPYRIGHT_H_
+#include "scanners.hpp"
 
+#include <sstream>
+#include <cstring>
 
-namespace regURL
+// Utility: read file to string from scanners.h
+
+bool ReadFileToString(const string& fileName, string& out)
 {
-  const char* getRegex();
-  const char* getType();
+  // TODO: there should be a maximum string size
+  // Returns true if there were no errors
+  ifstream stream(fileName);
+  std::stringstream sstr;
+  sstr << stream.rdbuf();
+  out = sstr.str();
+  return !stream.fail();
 }
 
 
-namespace regEmail
+bool operator==(const match& m1, const match& m2)
 {
-  const char* getRegex();
-  const char* getType();
+  return m1.start == m2.start && m1.end == m2.end && strcmp(m1.type, m2.type) == 0;
+}
+bool operator!=(const match& m1, const match& m2)
+{
+  return !(m1 == m2);
 }
 
-namespace regAuthor
-{
-  const char* getRegex();
-  const char* getType();
-}
-
-namespace regEcc
-{
-  const char* getRegex();
-  const char* getType();
-}
-
-namespace regIp
-{
-  const char* getRegex();
-  const char* getType();
-}
-#endif /* REGCOPYRIGHT_H_ */

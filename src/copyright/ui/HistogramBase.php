@@ -208,19 +208,9 @@ abstract class HistogramBase extends FO_Plugin {
       $OutBuf .= "<form action=\"$action\" id=\"newds\" method=\"POST\">$AgentSelect</form>";
     }
 
-    switch($filter)
-    {
-      case 'all':
-        $selectKey = 'all';
-        break;
-      case 'nolic':
-        $selectKey = 'nolic';
-        break;
-      default:
-        $selectKey = 'legal';
-    }
+    $selectKey = $filter == 'nolic' ? 'nolic' : 'all';
     $OutBuf .= "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
-    foreach(array('all'=>_("Show all"), 'legal'=>_("Show all legal copyrights"), 'nolic'=> _("Show files without licenses")) as $key=>$text)
+    foreach(array('all'=>_("Show all"), 'nolic'=> _("Show files without licenses")) as $key=>$text)
     {
       $selected = ($selectKey == $key) ? "selected" : "";
       $OutBuf .= "<option $selected value=\"$key\">$text</option>";

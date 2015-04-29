@@ -79,7 +79,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int Nu
   pCopy->DataBuf = calloc(BufSize, sizeof(char));
 
   /* Save TableName */
-  pCopy->TableName = strdup(TableName);
+  pCopy->TableName =g_strdup(TableName);
 
   /* check for malloc failures */
   if ((!pCopy->DataBuf) || (!pCopy->TableName))

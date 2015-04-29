@@ -40,16 +40,12 @@ class TestPgDb extends TestAbstractDb
 
   function __construct($dbName = null, $sysConf = null)
   {
+    $dbName = strtolower($dbName);
     $testDbFactory = new \TestDbFactory();
-    if (!empty($sysConf)) {
-      $this->sys_conf = getenv('TSYSCONFDIR');
-    } else {
-      $this->sys_conf = $sysConf;
-    }
+    $this->sys_conf = $sysConf;
     if(empty($this->sys_conf))
     {
       $this->sys_conf = $testDbFactory->setupTestDb($dbName);
-      putenv("TSYSCONFDIR=".$this->sys_conf);
       $dbName = $testDbFactory->getDbName($this->sys_conf);
     }
     $this->dbName = $dbName;
@@ -61,7 +57,7 @@ class TestPgDb extends TestAbstractDb
     global $container;
     $logger = new Logger('default'); // $container->get('logger');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.pg.log';
-    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
+    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
