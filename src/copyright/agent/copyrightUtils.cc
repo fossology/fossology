@@ -58,7 +58,7 @@ void bail(int exitval)
   exit(exitval);
 }
 
-bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames)
+bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
   unsigned type;
 
