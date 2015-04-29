@@ -32,6 +32,8 @@ use Monolog\Logger;
 
 class LicenseDao extends Object
 {
+  const NO_LICENSE_FOUND = 'No_license_found';
+  
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -335,14 +337,15 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= " WHERE (rf_shortname IS NULL OR rf_shortname NOT IN ('Void')) AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
-    $sql .= " GROUP BY license_shortname, rf_pk";
+    $sql .= " WHERE (rf_shortname IS NULL OR rf_shortname NOT IN ('Void')) AND upload_fk=$1
+             AND (UT.lft BETWEEN $2 AND $3) AND UT.ufile_mode&(3<<28)=0
+          GROUP BY license_shortname, rf_pk";
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $shortname = empty($row['rf_pk']) ? 'No_license_found' : $row['license_shortname'];
+      $shortname = empty($row['rf_pk']) ? self::NO_LICENSE_FOUND : $row['license_shortname'];
       $assocLicenseHist[$shortname] = array(
           'count' => intval($row['count']),
           'unique' => intval($row['unique']),

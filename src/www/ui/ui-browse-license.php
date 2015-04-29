@@ -240,8 +240,10 @@ class ui_browse_license extends DefaultPlugin
     $uniqueLicenseCount = count($tableData);
     $scannerUniqueLicenseCount = count( $licenseHistogram );
     $editedUniqueLicenseCount = count($editedLicensesHist);
-    $noScannerLicenseFoundCount = array_key_exists("No_license_found", $licenseHistogram) ? $licenseHistogram["No_license_found"]['count'] : 0;
-    $editedNoLicenseFoundCount = array_key_exists("No_license_found", $editedLicensesHist) ? $editedLicensesHist["No_license_found"]['count'] : 0;
+    $noScannerLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $licenseHistogram)
+            ? $licenseHistogram[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
+    $editedNoLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $editedLicensesHist)
+            ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
 
     $vars = array('tableDataJson'=>json_encode($tableData),
         'uniqueLicenseCount'=>$uniqueLicenseCount,
@@ -272,12 +274,13 @@ class ui_browse_license extends DefaultPlugin
     $allEditedLicenseNames = array_keys($editedLics);
 
     $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
+    $realLicNames = array_diff($allLicNames, array(LicenseDao::NO_LICENSE_FOUND));
 
     $totalScannerLicenseCount = 0;
     $editedTotalLicenseCount = 0;
 
     $tableData = array();
-    foreach ($allLicNames as $licenseShortName)
+    foreach ($realLicNames as $licenseShortName)
     {
       $count = 0;
       if (array_key_exists($licenseShortName, $scannerLics))
