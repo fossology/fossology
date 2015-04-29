@@ -21,7 +21,7 @@ class regexScanner : public scanner
   const char* type;
   int index;
 public:
-  void ScanString(const string& str, list<match>& results) const override;
+  void ScanString(const string& str, list<match>& results) const;
   regexScanner(const string& sReg, const char* t);
   regexScanner(const string& sReg, const char* t, int idx);
 } ;
