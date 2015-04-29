@@ -21,7 +21,7 @@ require_once('HistogramBase.php');
 
 define("TITLE_copyrightHistogram", _("Copyright/Email/URL/Author Browser"));
 
-class CopyrightHistogram  extends HistogramBase {
+class CopyrightHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "copyright-hist";
@@ -30,7 +30,6 @@ class CopyrightHistogram  extends HistogramBase {
     $this->agentName = "copyright";
     parent::__construct();
   }
-
 
   /**
    * @param $upload_pk
@@ -83,27 +82,11 @@ class CopyrightHistogram  extends HistogramBase {
   {
     list($VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
-    /* Combine VF and VLic */
-    $text = _("Jump to");
-    $text1 = _("Copyright Statements");
-    $text2 = _("Emails");
-    $text3 = _("URLs");
-    $text4 = _("Authors or Maintainers");
-    $V = "<table border=0 width='100%'>\n";
-    $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text2</a> | <a href=\"#urls\">$text3</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "<tr><td><a name=\"emails\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#urls\">$text3</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td><a name=\"urls\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#emails\">$text2</a> | <a href=\"#authors\">$text4</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td><a name=\"authors\"></a>$text: <a href=\"#statements\">$text1</a> | <a href=\"#emails\">$text2</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VAuthor</td><td valign='top'></td></tr>\n";
-    $V .= "</table>\n";
-    $V .= "<hr />\n";
-    return array($V, $tableVars);
+    $out = $this->renderString('copyrighthist_tables.html.twig', 
+            array('contCopyright'=>$VCopyright, 'contEmail'=>$VEmail, 'contUrl'=>$VUrl, 'contAuthor'=>$VAuthor,
+                'fileList'=>$VF));
+    return array($out, $tableVars);
   }
-
-
 
   function RegisterMenus()
   {
@@ -124,8 +107,7 @@ class CopyrightHistogram  extends HistogramBase {
         menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
       }
     }
-  } // RegisterMenus()
-
+  }
 
   protected function createScriptBlock()
   {
@@ -137,7 +119,6 @@ class CopyrightHistogram  extends HistogramBase {
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
     } );
-
     ";
   }
 
