@@ -103,7 +103,7 @@ class DeciderAgent extends Agent
     if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
     {
       $bulkReuser = new BulkReuser();
-      $jobId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId);
+      $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $this->jobId);
     }
     
     return true;

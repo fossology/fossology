@@ -53,17 +53,14 @@ class BulkReuser extends Object
     return array_unique($bulkIds);
   }
   
-  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId) {
+  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $jobId) {
     $bulkIds = $this->getBulkIds($uploadId, $groupId, $userId);
     if (count($bulkIds) == 0) {
       return 0;
     }
     /** @var UploadDao $uploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
-    $upload = $uploadDao->getUpload($uploadId);
-    $uploadName = $upload->getFilename();
     $topItem = $uploadDao->getUploadParent($uploadId);
-    $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array();
