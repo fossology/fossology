@@ -215,13 +215,14 @@ class ShowJobsDao extends Object
       if (!empty($rows)){
         foreach($rows as $jobQueueRec){
           $jq_pk = $jobQueueRec["jq_pk"];
-
-          /* Get dependencies */
-          $depArray = array();
-
-          $depArray[] = $jobQueueRec["jdep_jq_depends_fk"];
-          $jobQueueRec["depends"] = $depArray;
-          $jobData[$job_pk]['jobqueue'][$jq_pk] = $jobQueueRec;
+          if (array_key_exists($job_pk,$jobData) && array_key_exists('jobqueue',$jobData[$job_pk]) && array_key_exists($jq_pk,$jobData[$job_pk]['jobqueue'])) {
+            $jobData[$job_pk]['jobqueue'][$jq_pk]["depends"][] = $jobQueueRec["jdep_jq_depends_fk"];
+          }
+          else
+          {
+            $jobQueueRec["depends"] = array($jobQueueRec["jdep_jq_depends_fk"]);
+            $jobData[$job_pk]['jobqueue'][$jq_pk] = $jobQueueRec;
+          }
         }
       }else{
         unset($jobData[$job_pk]);
