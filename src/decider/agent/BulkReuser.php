@@ -21,6 +21,7 @@ namespace Fossology\Decider;
 use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Util\Object;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -67,12 +68,13 @@ class BulkReuser extends Object
     $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_fk,rf_text,removing,upload_fk,uploadtree_fk) "
             . "SELECT $1 AS user_fk, $2 AS group_fk,rf_fk,rf_text,removing,$3 AS upload_fk, $4 as uploadtree_fk
               FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk";
+    $jobQueueId = \IsAlreadyScheduled($jobId, AGENT_DECIDER_NAME, $uploadId);
     $this->dbManager->prepare($stmt=__METHOD__.'cloneBulk', $sql);
     foreach($bulkIds as $bulkId) {
       $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
       $row = $this->dbManager->fetchArray($res);
       $this->dbManager->freeResult($res);
-      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']);
+      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>$jobQueueId);
     }
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $dependecies);
