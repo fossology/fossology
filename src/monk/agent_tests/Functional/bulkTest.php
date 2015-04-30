@@ -75,7 +75,7 @@ class MonkBulkTest extends PHPUnit_Framework_TestCase
     $execDir = __DIR__;
     system("install -D $agentDir/VERSION-monkbulk $sysConf/mods-enabled/$agentName/VERSION");
 
-    $pipeFd = popen("echo $bulkId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start", "r");
+    $pipeFd = popen("echo '0\n$bulkId\n0' | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start", "r");
     $this->assertTrue($pipeFd !== false, 'running monk bulk failed');
 
     $output = "";

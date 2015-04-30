@@ -66,7 +66,6 @@ class ReuserAgentPlugin extends AgentPlugin
   public function preInstall()
   {
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
-    parent::preInstall();
   }
   
   

@@ -67,8 +67,8 @@ class DeciderAgentPlugin extends AgentPlugin
     
     if(in_array('agent_reuser',$dependencies))
     {
-      $resuserAgent = plugin_find('agent_reuser');
-      $reuserJobId = $resuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
+      $reuserAgent = plugin_find('agent_reuser');
+      $reuserJobId = $reuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
       $dependencies[] = $reuserJobId;
     }
    

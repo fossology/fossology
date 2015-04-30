@@ -99,11 +99,11 @@ class DeciderAgent extends Agent
       }
       $this->processItem($item, $matches);
     }
-    
-    if ($this->activeRules&self::RULES_BULK_REUSE == self::RULES_BULK_REUSE)
+
+    if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
     {
-      $bulkReuser = new BulkReuserAgent();
-      $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId);
+      $bulkReuser = new BulkReuser();
+      $jobId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId);
     }
     
     return true;
@@ -114,12 +114,12 @@ class DeciderAgent extends Agent
     $itemTreeBounds = $item->getItemTreeBounds();
     $heartbeat = 0;
     
-    if ($this->activeRules&self::RULES_NOMOS_IN_MONK == self::RULES_NOMOS_IN_MONK)
+    if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
     {
       $heartbeat = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
     }
     
-    if (!$heartbeat && $this->activeRules&self::RULES_NOMOS_MONK_NINKA == self::RULES_NOMOS_MONK_NINKA)
+    if (!$heartbeat && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
     {
       $heartbeat = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
     }
