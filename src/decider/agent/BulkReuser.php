@@ -18,8 +18,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Decider;
 
+use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class BulkReuser extends Object
 {
@@ -31,29 +34,11 @@ class BulkReuser extends Object
     $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
-  private function getRecursiveReuseCte($uploadId, $groupId, $userId)
-  {
-    return "WITH RECURSIVE reuse_tree(reused_upload_fk, reused_group_fk, pairs, cycle) AS (
-          SELECT reused_upload_fk, reused_group_fk,
-            array[ARRAY[reused_upload_fk, reused_group_fk]], false
-          FROM upload_reuse ur
-          WHERE upload_fk=$uploadId AND group_fk=$groupId
-        UNION ALL
-          SELECT ur.reused_upload_fk, ur.reused_group_fk,
-            pairs || array[ARRAY[ur.reused_upload_fk, ur.reused_group_fk]],
-            array[ARRAY[ur.reused_upload_fk, ur.reused_group_fk]] <@ pairs
-          FROM upload_reuse ur, reuse_tree rt
-          WHERE NOT cycle AND ur.upload_fk=rt.reused_upload_fk
-           AND ur.group_fk=rt.reused_group_fk
-           AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=ur.group_fk AND gum.user_fk=$userId)
-        )";
-  }
-  
   protected function getBulkIds($uploadId, $groupId, $userId)
   {
-    $sql = $this->getRecursiveReuseCte('$1', '$2', '$3')
-         ."  SELECT jq_args FROM reuse_tree, jobqueue, job 
-             WHERE NOT cycle 
+    $sql = "SELECT jq_args FROM upload_reuse, jobqueue, job 
+           WHERE upload_fk=$1 AND group_fk=$2
+             AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)
              AND jq_type=$4 AND jq_job_fk=job_pk
              AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk";
     $stmt = __METHOD__;
@@ -68,18 +53,30 @@ class BulkReuser extends Object
     return array_unique($bulkIds);
   }
   
-  
   public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId) {
     $bulkIds = $this->getBulkIds($uploadId, $groupId, $userId);
     if (count($bulkIds) == 0) {
       return 0;
     }
-    $upload = $GLOBALS['container']->get('dao.upload')->getUpload($uploadId);
+    /** @var UploadDao $uploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    $upload = $uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
+    $topItem = $uploadDao->getUploadParent($uploadId);
     $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
-    $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => implode("\n", $bulkIds)));
+    $dependecies = array();
+    $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_fk,rf_text,removing,upload_fk,uploadtree_fk) "
+            . "SELECT $1 AS user_fk, $2 AS group_fk,rf_fk,rf_text,removing,$3 AS upload_fk, $4 as uploadtree_fk
+              FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk";
+    $this->dbManager->prepare($stmt=__METHOD__.'cloneBulk', $sql);
+    foreach($bulkIds as $bulkId) {
+      $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
+      $row = $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
+      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']);
+    }
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $dependecies);
     if (!empty($errorMsg))
