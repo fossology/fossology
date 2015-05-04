@@ -181,18 +181,21 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
       array(
         "description"=> "desc",
         "textfinding" => "text",
+        "comments" => "comment",
         "uploadtree_pk" => "7",
         "clearing_decision_type_fk" => "5",
         "content" => "copyright 3dfx interactive, inc. 1999, all rights reserved this \n"),
       array(
         "description"=> "desc",
         "textfinding" => "text",
+        "comments" => "comment",
         "uploadtree_pk" => "7",
         "clearing_decision_type_fk" => "5",
         "content" => "copyright laws of \nthe united states. \n\ncopyright 3dfx interactive, inc. 1999, all rights reserved\" \n"),
       array(
         "description" => "desc",
         "textfinding" => "text",
+        "comments" => "comment",
         "uploadtree_pk" => "7",
         "clearing_decision_type_fk"=> "5",
         "content" => "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"

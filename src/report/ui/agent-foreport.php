@@ -1,7 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
- Author: Daniele Fognini, Steffen Weber
+ Copyright (C) 2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,14 +19,14 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
-class ReportGenerator extends DefaultPlugin
+class FoReportGenerator extends DefaultPlugin
 {
-  const NAME = 'ui_reportgen';
+  const NAME = 'agent_foreport';
   
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Report Generator"),
+        self::TITLE => _("Report generation"),
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
@@ -46,7 +45,7 @@ class ReportGenerator extends DefaultPlugin
       return $this->flushContent($e->getMessage());
     }
     
-    $reportGenAgent = plugin_find('agent_reportgen');
+    $reportGenAgent = plugin_find('agent_report');
     $userId = Auth::getUserId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
@@ -89,8 +88,12 @@ class ReportGenerator extends DefaultPlugin
   function preInstall()
   {
     $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Generate&nbsp;Word&nbsp;Report", 0, self::NAME, $text);
-  }
-}
+    menu_insert("Browse-Pfile::Generate&nbsp;Report", 0, self::NAME, $text);
+    $parm = Traceback_parm_keep(array("upload"));
+    $uri = $this->Name . $parm;
 
-register_plugin(new ReportGenerator());
+    menu_insert("Browse::Report",1,$uri,$text);
+  }
+  }
+
+register_plugin(new FoReportGenerator());

@@ -43,9 +43,11 @@ class TestInstaller
 
     if (!is_dir($fakeInstallationDir))
     {
-      $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
       mkdir($fakeInstallationDir, 0777, true);
+
+      $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
       system("ln -sf $libDir $fakeInstallationDir/lib");
+
       if (!is_dir("$fakeInstallationDir/www/ui")) {
         mkdir("$fakeInstallationDir/www/ui/", 0777, true);
         touch("$fakeInstallationDir/www/ui/ui-menus.php");

@@ -98,6 +98,7 @@ class CopyrightDao extends Object
 
     $params = array();
     $whereClause = "";
+    $distinctContent = "";
     $tableNameDecision = $tableName."_decision";
 
     if ($uploadTreeTableName === "uploadtree_a")
@@ -106,7 +107,12 @@ class CopyrightDao extends Object
       $whereClause .= " AND UT.upload_fk = $".count($params);
       $statementName .= ".withUI";
     }
-    if ($type !== null)
+    if($type == "skipcontent"){
+      $distinctContent = "";
+    }else{
+      $distinctContent = ", C.content";
+    }
+    if ($type !== null && $type != "skipcontent")
     {
       $params []= $type;
       $whereClause .= " AND C.type = $".count($params);
@@ -146,9 +152,9 @@ class CopyrightDao extends Object
       $statementName .= "._".$extrawhere."_";
     }
 
-    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content)
+    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk$distinctContent)
              CD.description as description, CD.textfinding as textfinding,
-             UT.uploadtree_pk as uploadtree_pk,
+             CD.comment as comments, UT.uploadtree_pk as uploadtree_pk,
              CD.clearing_decision_type_fk AS clearing_decision_type_fk,
              C.content AS content
             from $tableName C

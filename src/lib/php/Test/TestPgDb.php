@@ -147,36 +147,6 @@ class TestPgDb extends TestAbstractDb
     }
   }
   
-  /**
-   * @param array $tableList
-   * @param bool $invert 
-   */
-  public function insertData($tableList, $invert=FALSE)
-  {
-    $testdataFile = dirname(__FILE__) . '/testdata.sql';
-    $testdata = file_get_contents($testdataFile);
-    $delimiter = 'INSERT INTO ';
-    $offset = strpos($testdata, $delimiter);
-    while( false!==$offset) {
-      $nextOffset = strpos($testdata, $delimiter, $offset+1);
-      if (false===$nextOffset)
-      {
-        $sql = substr($testdata, $offset);
-      }
-      else
-      {
-        $sql = substr($testdata, $offset, $nextOffset-$offset);
-      }
-      preg_match('/^INSERT INTO (?P<name>\w+) /', $sql, $table);
-      if( ($invert^!in_array($table['name'], $tableList)) ){
-        $offset = $nextOffset;
-        continue;
-      }
-      $this->dbManager->queryOnce($sql);
-      $offset = $nextOffset;
-    }
-  }
-  
   public function insertData_license_ref($limit=140)
   {
     parent::insertData_license_ref($limit);
