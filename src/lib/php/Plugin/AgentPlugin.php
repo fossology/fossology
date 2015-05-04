@@ -152,7 +152,7 @@ abstract class AgentPlugin extends Object implements Plugin
       $pluginName = $dependency;
       $depArgs = null;
     }
-    $depPlugin = &\plugin_find($pluginName);
+    $depPlugin = plugin_find($pluginName);
     if (!$depPlugin)
     {
       $errorMsg = "Invalid plugin name: $pluginName, (CommonAgentAdd())";

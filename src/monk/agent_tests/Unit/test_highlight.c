@@ -2,11 +2,18 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +24,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include "string_operations.h"
 #include "diff.h"
 
-void _callConvertToAbsolutePositions(char* text, char* search, GArray* diffMatchInfo ){
+void _callConvertToAbsolutePositions(char* text, char* search, GArray* diffMatchInfo) {
   char* testText = g_strdup(text);
   char* testSearch = g_strdup(search);
 
@@ -29,7 +36,7 @@ void _callConvertToAbsolutePositions(char* text, char* search, GArray* diffMatch
 
 void _appendToDiffMatchInfo(GArray* diffMatchInfo,
   size_t textPosition, size_t textCount, size_t searchPosition,
-  size_t searchCount){
+  size_t searchCount) {
 
   DiffMatchInfo toAppend;
   toAppend.diffType = "a";
@@ -40,16 +47,17 @@ void _appendToDiffMatchInfo(GArray* diffMatchInfo,
 }
 
 //TODO move to utils and generalize
-int _CU_ASSERT_EQUAL(size_t actual, size_t expected, char * error){
+int _CU_ASSERT_EQUAL(size_t actual, size_t expected, char * error) {
   CU_ASSERT_EQUAL(actual, expected);
-  if(actual != expected)
+  if (actual != expected)
     printf(error, actual, expected);
   return actual == expected;
 }
-void _assertDiffMatchInfo(GArray* diffMatchInfo, GArray* expectedDiffMatchInfo){
+
+void _assertDiffMatchInfo(GArray* diffMatchInfo, GArray* expectedDiffMatchInfo) {
   CU_ASSERT_EQUAL(diffMatchInfo->len, expectedDiffMatchInfo->len );
-  if(diffMatchInfo->len == expectedDiffMatchInfo->len){
-    for(size_t i = 0; i < diffMatchInfo->len; i++){  
+  if (diffMatchInfo->len == expectedDiffMatchInfo->len) {
+    for (size_t i = 0; i < diffMatchInfo->len; i++) {
       DiffMatchInfo extracted = g_array_index(diffMatchInfo, DiffMatchInfo, i);
       DiffMatchInfo expected = g_array_index(expectedDiffMatchInfo, DiffMatchInfo, i);
       _CU_ASSERT_EQUAL(extracted.search.start, expected.search.start, "ss %zu != %zu\n");
@@ -60,7 +68,7 @@ void _assertDiffMatchInfo(GArray* diffMatchInfo, GArray* expectedDiffMatchInfo){
   }
 }
 
-void test_convertToAbsolute(){
+void test_convertToAbsolute() {
   GArray* diffMatchInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
   GArray* expectedDiffMatchInfo = g_array_new(TRUE, FALSE, sizeof(DiffMatchInfo));
 
@@ -84,7 +92,7 @@ void test_convertToAbsolute(){
   g_array_free(expectedDiffMatchInfo, TRUE);
 }
 
-void test_getFullHighlightFor(){
+void test_getFullHighlightFor() {
   char* text = g_strdup("...a.aa..b.a.c");
 
   GArray* tokens = tokenize(text, ".");
@@ -94,11 +102,11 @@ void test_getFullHighlightFor(){
   _CU_ASSERT_EQUAL(fullHighlight.start, 5, "start %zu!=%zu\n");
   _CU_ASSERT_EQUAL(fullHighlight.length, 7, "length %zu!=%zu\n");
 
-  free(text);
+  g_free(text);
   g_array_free(tokens, TRUE);
 }
 
-void test_getFullHighlightFor_2(){
+void test_getFullHighlightFor_2() {
   char* text = g_strdup("...a.aa..b.a.c");
 
   GArray* tokens = tokenize(text, ".");
@@ -108,7 +116,7 @@ void test_getFullHighlightFor_2(){
   _CU_ASSERT_EQUAL(fullHighlight.start, 5, "start %zu!=%zu\n");
   _CU_ASSERT_EQUAL(fullHighlight.length, 0, "length %zu!=%zu\n");
 
-  free(text);
+  g_free(text);
   g_array_free(tokens, TRUE);
 }
 

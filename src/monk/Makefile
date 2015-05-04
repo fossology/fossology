@@ -9,42 +9,53 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME=monk
+MOD_NAME = monk monkbulk
 
-DIRS = agent ui agent_tests
+DIRS = agent ui
 TESTDIR = agent_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
-
-coverage: all
-	$(MAKE) -C $(TESTDIR)/Unit coverage
+	$(call DIR_LOOP, )
 
 test: all
 	$(MAKE) -C $(TESTDIR) test
 
-# generate the VERSION file
-VERSIONFILE:
-	$(call WriteVERSIONFile, "monk")
+coverage: all
+	$(MAKE) -C $(TESTDIR) coverage
 
-install: all
-	@echo "make $(MOD_NAME) install"
-	$(call dirloop,install)
-	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+VERSIONFILE: $(MOD_NAME:%=VERSIONFILE-%)
 
+$(MOD_NAME:%=VERSIONFILE-%): NAME = $(@:VERSIONFILE-%=%)
+$(MOD_NAME:%=VERSIONFILE-%): VERSIONFILE = $(@:VERSIONFILE-%=VERSION-%)
+$(MOD_NAME:%=VERSIONFILE-%):
+	$(call WriteVERSIONFile,$(NAME))
+	$(MV) VERSION $(VERSIONFILE)
 
-uninstall:
-	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
-	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+install: $(MOD_NAME:%=install-%)
 
+$(MOD_NAME:%=install-%): NAME = $(@:install-%=%)
+$(MOD_NAME:%=install-%):
+	$(call DIR_LOOP,$@)
+	$(INSTALL_DATA) VERSION-$(NAME) $(DESTDIR)$(MODDIR)/$(NAME)/VERSION
+	$(INSTALL_DATA) $(NAME).conf $(DESTDIR)$(MODDIR)/$(NAME)/$(NAME).conf
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME); then \
+		ln -s $(MODDIR)/$(NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
+
+uninstall: $(MOD_NAME:%=uninstall-%)
+	$(call DIR_LOOP,uninstall)
+
+$(MOD_NAME:%=uninstall-%): NAME = $(@:uninstall-%=%)
+$(MOD_NAME:%=uninstall-%):
+	rm -rf $(DESTDIR)$(MODDIR)/$(NAME)
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(NAME)
 
 clean:
-	$(call dirloop,clean)
-	rm -f VERSION
+	$(call DIR_LOOP,clean)
+	$(MAKE) -C $(TESTDIR) clean
+	rm -f $(MOD_NAME:%=VERSION-%)
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage $(MOD_NAME:%=VERSION-%) install uninstall clean

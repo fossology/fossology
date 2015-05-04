@@ -21,6 +21,8 @@ define("TITLE_dashboard", _("Dashboard"));
 
 class dashboard extends FO_Plugin
 {
+  protected $pgVersion;
+  
   function __construct()
   {
     $this->Name       = "dashboard";
@@ -333,6 +335,9 @@ function GetLastAnalyzeTime($TableName)
   }
   
   public function Output() {
+    global $PG_CONN;
+    $this->pgVersion = pg_version($PG_CONN);
+    
     $V="";
     $V .= "<table border=0 width='100%'><tr>\n";
     $V .= "<td valign='top'>\n";

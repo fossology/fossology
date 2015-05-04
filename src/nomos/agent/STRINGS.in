@@ -576,6 +576,10 @@
 %ENTRY%	_LT_ASL20ref_2
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"(distributed|modified) =FEW= under =FEW= apache 2\.?0 licen[cs]e"
+#
+%ENTRY%	_LT_GOOGLE_SDK
+%KEY%	"legal"
+%STR%	"you agree that Google or third parties own all legal right =FEW=  title and interest in and to the SDK =FEW= any Intellectual Property Rights that subsist in the SDK =SOME= means any and all rights under patent law =FEW= trade secret law =FEW= and any and all other proprietary rights =FEW= Google reserves all rights not expressly granted to you"
 #####
 # DELETED: subject to the terms and conditions of this ... =ANY= patent
 # licen[cs]e to make have made use offer to sell sell import and otherwise
@@ -698,7 +702,7 @@
 #####
 %ENTRY%	_LT_BEERWARE
 %KEY%	"licen[cs]"
-%STR%	"the beer-ware licen[cs]e =SOME= as long as you retain this notice you (can|may) do whatever you want with this stuff"
+%STR%	"the beer-ware licen[cs]e =ANY= as long as you retain this notice you (can|may) do whatever you want with this stuff =ANY= you can buy me a beer in return"
 #####
 # DELETED: ... for any purpose and without fee is hereby granted provided
 # that the above copyright notice and this permission notice appear in all
@@ -988,6 +992,14 @@
 %KEY% "software"	
 %STR%	"this software is provided by =FEW= freebsd project"
 #
+%ENTRY%	_LT_BSD_AND_MIT
+%KEY% =NULL=
+%STR%	"MIT(license)? (and|\&) =FEW= BSD"
+#
+%ENTRY%	_LT_BSD_OR_MIT
+%KEY% =NULL=
+%STR%	"available via the MIT (or|\/) =FEW= BSD licenses?"
+#
 %ENTRY%	_LT_UC
 %KEY% "copyright"	
 %STR%	"copyright =SOME= (university of california|UC)"
@@ -1155,6 +1167,14 @@
 %ENTRY%	_LT_COMMERCIAL_2
 %KEY%	"distribut"
 %STR%	"source (code|code =SOME= librar =SOME= (created|derived) =SOME= ) may not be =SOME= distribute"
+#####
+%ENTRY%	_LT_COMMERCIAL_3
+%KEY%	"source"
+%STR%	"source code =ANY= (files?|materials?) =ANY= disclosed? =ANY= without =FEW= prior =FEW= written permission"
+#####
+%ENTRY%	_LT_COMMERCIAL_4
+%KEY%	"license"
+%STR%	"software license for =SOME= code"
 #####
 # DELETED: permission to use copy and modify this software and its
 # documentation is hereby granted ... the above copyright notice and
@@ -2243,6 +2263,10 @@
 %ENTRY%	_LT_GPL_EXCEPT_ECOS
 %KEY%	"licen[cs]"
 %STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file or you compile this file and link it =SOME= this file does not by itself cause the resulting work to be covered by the GNU General Public License"
+#
+%ENTRY%	_LT_GPL_UPX_EXCEPT
+%KEY%	"distribut"
+%STR%	"you must compress your program with a completely unmodified UPX version =FEW= either with our precompiled version =SOME= with a self compiled version of the unmodified UPX sources as distributed by us"
 #
 %ENTRY%	_LT_GPL_FONT1
 %KEY%	"permi[st]"
@@ -3385,6 +3409,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MITref2
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e is the MIT licen[cs]e"
+#
+%ENTRY%	_LT_MITref4
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under =FEW= MIT"
 #
 %ENTRY%	_LT_MITref3
 %KEY%	"licen[cs]"
@@ -5084,7 +5112,11 @@ e /* (INFILE(j)) */
 # Zend license information
 %ENTRY% _LT_ZEND_1
 %KEY%   "zend"
-%STR% "source file is subject to version 2\.?00 of the Zend license"
+%STR% "source file is subject to version 2\.?0 of the Zend (framework)? license"
+#
+%ENTRY% _LT_ZEND_2
+%KEY%   "zend"
+%STR% "source file is subject to version 1\.?0 of the Zend (Framework)? license"
 #
 %ENTRY%	_LT_ZEUS
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5315,6 +5347,10 @@ k
 %ENTRY% _LT_SEE_URL
 %KEY% =NULL=
 %STR% "see (https?|ftp) =SOME= (for|with|in) =FEW= (details|license|distribut|information|foder|directory)"
+#
+%ENTRY% _LT_SEE_URL_ref1
+%KEY% =NULL=
+%STR% "(org|com|net|cn|de)\.?\/licenses?"
 #
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
@@ -5682,6 +5718,10 @@ k
 %ENTRY% _LT_TAPJOY
 %KEY% "licen[cs]e"
 %STR% "you and the company or entity that you represent =FEW= are agreeing to be bound by and are becoming a party to this tapjoy sdk licen[cs]e agreement"
+#
+%ENTRY% _LT_TAPJOY_ref1
+%KEY% "agreement"
+%STR% "the tapjoy =SOME= you agree that you have =SOME= agree to be bound by =FEW= and are authorized to bind the entity on whose behalf you are entering into this agreement"
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -7416,7 +7456,7 @@ k
 #
 %ENTRY%	_TITLE_NCSA
 %KEY%	"licen[cs]"
-%STR%	"university of illinois/ncsa open source licen[cs]e"
+%STR%	"university of illinois(/ncsa)? open source licen[cs]e"
 #
 %ENTRY%	_TITLE_NCSA_EXHIBIT
 %KEY%	"licen[cs]"

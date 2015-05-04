@@ -2,23 +2,32 @@
 Author: Daniele Fognini, Andreas Wuerl
 Copyright (C) 2013-2014, Siemens AG
 
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+
 #include <glib.h>
 
 #include "license.h"
+#include "string_operations.h"
 
 int ignoredLicenseNamesCount = 2;
 char* ignoredLicenseNames[] = {"Void", "No_license_found"};
 
-int ignoredLicenseTextsCount = 1;
-char* ignoredLicenseTexts[] = {"License by Nomos."};
+int ignoredLicenseTextsCount = 2;
+char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
 
-int isIgnoredLicense(License* license) {
+int isIgnoredLicense(const License* license) {
   int ignored = 0;
   for (int i = 0; (i < ignoredLicenseNamesCount) && (!ignored); i++) {
     if (strcmp(license->shortname, ignoredLicenseNames[i]) == 0)
@@ -36,7 +45,7 @@ int isIgnoredLicense(License* license) {
   return ignored;
 }
 
-GArray* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult) {
+Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
   GArray* licenses = g_array_new(TRUE, FALSE, sizeof (License));
 
   for (int j = 0; j < PQntuples(licensesResult); j++) {
@@ -59,25 +68,104 @@ GArray* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult) {
       g_array_free(license.tokens, TRUE);
   }
 
-  return licenses;
+  return buildLicenseIndexes(licenses, minAdjacentMatches, maxLeadingDiff);
 }
 
-static gint lengthInverseComparator(const void * a, const void * b) {
-  size_t aLen = ((License*) a)->tokens->len;
-  size_t bLen = ((License*) b)->tokens->len;
+void licenses_free(Licenses* licenses) {
+  if (licenses) {
+    GArray* licenseArray = licenses->licenses;
+    for (guint i = 0; i < licenseArray->len; i++) {
+      License license = g_array_index(licenseArray, License, i);
+      g_array_free(license.tokens, TRUE);
+    }
 
-  return (aLen < bLen) - (aLen > bLen);
+    g_array_free(licenseArray, TRUE);
+
+    GArray* indexes = licenses->indexes;
+    for (guint i = 0; i < indexes->len; i++) {
+      GHashTable* index = g_array_index(indexes, GHashTable*, i);
+      g_hash_table_unref(index);
+    }
+    g_array_free(indexes, TRUE);
+
+    free(licenses);
+  }
 }
 
-void sortLicenses(GArray* licenses) {
-  g_array_sort(licenses, lengthInverseComparator);
+guint uint32_hash (gconstpointer v) {
+  uint32_t u = *(uint32_t*)v;
+  return u;
 }
 
-void freeLicenseArray(GArray* licenses) {
-  for (unsigned int i = 0; i < licenses->len; i++) {
-    License license = g_array_index(licenses, License, i);
-    g_array_free(license.tokens, TRUE);
+gboolean uint32_equal (gconstpointer  v1, gconstpointer  v2) {
+  uint32_t u1 = *(uint32_t*)v1;
+  uint32_t u2 = *(uint32_t*)v2;
+
+  return u1 == u2;
+}
+
+static void g_array_free_true(void* ptr) {
+  g_array_free(ptr, TRUE);
+}
+
+uint32_t getKey(const GArray* tokens, unsigned minAdjacentMatches, unsigned searchedStart) {
+  uint32_t result = 1;
+  for (guint i = 0; (i < minAdjacentMatches) && (i+searchedStart < tokens->len); i++)
+  {
+    Token* nToken = &g_array_index(tokens, Token, i+searchedStart);
+    result = (result << 1) + nToken->hashedContent;
   }
 
-  g_array_free(licenses, TRUE);
+  return result;
+}
+
+Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
+  Licenses* result = malloc(sizeof(Licenses));
+  if (!result)
+    return NULL;
+
+  GArray* indexes = g_array_new(FALSE, FALSE, sizeof(GHashTable*));
+
+  for (unsigned sPos = 0; sPos <= maxLeadingDiff; sPos++) {
+    GHashTable* index = g_hash_table_new_full(uint32_hash, uint32_equal, free, g_array_free_true);
+    g_array_append_val(indexes, index);
+
+    for (guint i = 0; i < licenses->len; i++) {
+      License license = g_array_index(licenses, License, i);
+      uint32_t* key = malloc(sizeof(uint32_t));
+      *key = getKey(license.tokens, minAdjacentMatches, sPos);
+
+      GArray* indexedLicenses = g_hash_table_lookup(index, key);
+      if (!indexedLicenses)
+      {
+        indexedLicenses = g_array_new(FALSE, FALSE, sizeof(License));
+        g_hash_table_replace(index, key, indexedLicenses);
+      } else {
+        free(key);
+      }
+      g_array_append_val(indexedLicenses, license);
+    }
+  }
+
+  result->licenses = licenses;
+  result->indexes = indexes;
+  result->minAdjacentMatches = minAdjacentMatches;
+
+  return result;
+}
+
+
+const GArray* getLicenseArrayFor(const Licenses* licenses, unsigned searchPos, const GArray* searchedTokens, unsigned searchedStart) {
+  const GArray* indexes = licenses->indexes;
+
+  guint minAdjacentMatches = licenses->minAdjacentMatches;
+
+  if (indexes->len <= searchPos) {
+    return licenses->licenses;
+  }
+
+  GHashTable* index = g_array_index(indexes, GHashTable*, searchPos);
+  uint32_t key = getKey(searchedTokens, minAdjacentMatches, searchedStart);
+  GArray* result = g_hash_table_lookup(index, &key);
+  return result;
 }

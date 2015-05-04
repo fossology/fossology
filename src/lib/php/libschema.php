@@ -26,8 +26,9 @@
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Db\ModernDbManager;
+use Fossology\Lib\Db\Driver;
 use Fossology\Lib\Db\Driver\Postgres;
+use Fossology\Lib\Db\ModernDbManager;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 
@@ -35,9 +36,7 @@ class fo_libschema
 {
   public $debug = false;
 
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbman;
 
   private $schema = array();
@@ -45,12 +44,16 @@ class fo_libschema
   private $currSchema = array();
 
   /**
-   *
-   * @param Fossology\Lib\Db\DbManager $dbManager
+   * @param DbManager $dbManager
    */
   function __construct(DbManager &$dbManager)
   {
     $this->dbman = $dbManager;
+  }
+  
+  function setDriver(Driver &$dbDriver)
+  {
+    $this->dbman->setDriver($dbDriver);
   }
 
 
@@ -80,7 +83,6 @@ class fo_libschema
   function applySchema($filename = NULL, $debug = false, $catalog = 'fossology', $migrateColumns = array())
   {
     global $PG_CONN;
-    $this->dbman->setDriver(new Postgres($PG_CONN));
 
     // first check to make sure we don't already have the plpgsql language installed
     $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
@@ -89,7 +91,7 @@ class fo_libschema
       or die("Could not check the database for plpgsql language\n");
 
     $plpgsql_already_installed = FALSE;
-    if ( $row = pg_fetch_row($result) ) {
+    if ( pg_fetch_row($result) ) {
       $plpgsql_already_installed = TRUE;
     }
 
@@ -99,7 +101,6 @@ class fo_libschema
       $result = pg_query($PG_CONN, $sql_statement)
         or die("Could not create plpgsql language in the database\n");
     }
-
 
     $this->debug = $debug;
     if (!file_exists($filename))
@@ -979,6 +980,7 @@ if (empty($dbManager) || !($dbManager instanceof DbManager))
   $logger = new Logger(__FILE__);
   $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
   $dbManager = new ModernDbManager($logger);
+  $dbManager->setDriver(new Postgres($PG_CONN));
 }
 /* simulate the old functions*/
 $libschema = new fo_libschema($dbManager);

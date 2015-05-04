@@ -8,5 +8,5 @@ without any warranty.
 */
 
 #ifndef SQUAREVISITOR_H
-#define	SQUAREVISITOR_H
+#define SQUAREVISITOR_H
 

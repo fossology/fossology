@@ -46,7 +46,7 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
-use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Db\Driver\Postgres;
 
 $groupInfo = posix_getgrnam("fossy");
 posix_setgid($groupInfo['gid']);
@@ -103,6 +103,16 @@ foreach($Options as $optKey => $optVal)
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
+$gInfo = posix_getgrnam($projectGroup);
+posix_setgid($gInfo['gid']);
+$groups = `groups`;
+if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid']))
+{
+  print "FATAL: You must be in group '$projectGroup'.\n";
+  exit(1);
+}
+
 require_once("$MODDIR/vendor/autoload.php");
 require_once("$MODDIR/lib/php/common-db.php");
 require_once("$MODDIR/lib/php/common-container.php");
@@ -119,7 +129,9 @@ require_once("$LIBEXECDIR/dbmigrate_2.0-2.5-pre.php");
 Migrate_20_25($Verbose);
 */
 
-if (empty($SchemaFilePath)) $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+if (empty($SchemaFilePath)) {
+  $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
+}
 
 if (!file_exists($SchemaFilePath))
 {
@@ -128,6 +140,10 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
+$libschema->setDriver(new Postgres($PG_CONN));
+$previousSchema = $libschema->getCurrSchema();
+$isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
+
 $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
@@ -197,7 +213,6 @@ if (array_key_exists('r', $Options))
 }
 
 /* migration */
-global $libschema;
 $currSchema = $libschema->getCurrSchema();
 $sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
@@ -212,7 +227,7 @@ if(!array_key_exists('Release', $sysconfig)){
     require_once("$LIBEXECDIR/dbmigrate_2.5-2.6.php");
     migrate_25_26($Verbose);
   }
-  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if(!array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']) && $isUpdating)
   {
     $timeoutSec = 20;
     echo "Missing column clearing_decision.clearing_pk, you should update to version 2.6.2 before migration\n";
@@ -237,8 +252,6 @@ if(!array_key_exists('Release', $sysconfig)){
 }
 if($sysconfig['Release'] == '2.6')
 {
-  $verbose = $Verbose;
-  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
   if(!$dbManager->existsTable('license_candidate'))
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
@@ -248,6 +261,7 @@ if($sysconfig['Release'] == '2.6')
     require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
   }
+  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
 }
 
 /* sanity check */
@@ -260,12 +274,6 @@ if($errors>0)
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
 }
 exit($errors);
-
-
-
-
-
-
 
 
 /**

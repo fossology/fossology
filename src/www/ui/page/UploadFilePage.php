@@ -177,8 +177,16 @@ class UploadFilePage extends DefaultPlugin
     $errorMessage = null;
     if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
       return array(false, $upload_errors[UPLOAD_ERR_EMPTY]);
+    else if ($uploadedFile->getSize() >=  UploadedFile::getMaxFilesize() )  {
+        return array(false, $upload_errors[UPLOAD_ERR_INI_SIZE] . _(" is  really "). $uploadedFile->getSize() . " bytes.");
+    }
+
     if (empty($folderId))
       return array(false, $upload_errors[UPLOAD_ERR_INVALID_FOLDER_PK]);
+
+    if(!$uploadedFile->isValid()) {
+        return array(false,  $uploadedFile->getErrorMessage());
+    }
 
     $originalFileName = $uploadedFile->getClientOriginalName();
 
@@ -255,14 +263,12 @@ class UploadFilePage extends DefaultPlugin
    */
   protected function getAgentPluginNames($hook='Agents')
   {
-    $agentList = menu_find($hook, $maxDepth);
+    $agentList = menu_find($hook, $maxDepth) ?: array();
     $agentPluginNames = array();
-    if(is_array($agentList)) {
-      foreach ($agentList as $parmAgent) {
-        $agent = plugin_find_id($parmAgent->URI);
-        if (!empty($agent)) {
-          $agentPluginNames[] = $agent;
-        }
+    foreach($agentList as $parmAgent) {
+      $agent = plugin_find_id($parmAgent->URI);
+      if (!empty($agent)) {
+        $agentPluginNames[] = $agent;
       }
     }
     return $agentPluginNames;

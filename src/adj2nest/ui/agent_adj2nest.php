@@ -37,19 +37,29 @@ class Adj2nestAgentPlugin extends AgentPlugin
     if (NULL == $uploadtree_tablename) strcpy($uploadtree_tablename, "uploadtree");
 
     /* see if the latest nomos and bucket agents have scaned this upload for this bucketpool */
-    $uploadtreeRec = $dbManager->getSingleRow("SELECT * FROM $uploadtree_tablename where upload_fk=$1 and lft is not null",
+    $uploadtreeRec = $dbManager->getSingleRow("SELECT * FROM $uploadtree_tablename WHERE upload_fk=$1 and lft is not null",
             array($uploadId),__METHOD__.'.lftNotSet');
     if (empty($uploadtreeRec))
     {
       return 0;
     }
-    $sql = "SELECT count(*) cnt FROM $uploadtree_tablename a, $uploadtree_tablename b
-            WHERE a.upload_fk=$1 AND b.upload_fk=$1
-              AND a.parent=b.parent and a.lft<b.lft
-              AND (a.ufile_name>b.ufile_name AND a.ufile_mode&(1<<29)=b.ufile_mode&(1<<29)
-                  OR (a.ufile_mode&(1<<29)) < (b.ufile_mode&(1<<29)) )";
-    $wrongOrdered = $dbManager->getSingleRow($sql,array($uploadId),__METHOD__.'.lftWrong');
-    return $wrongOrdered['cnt'] ? 2 : 1;
+
+    $stmt = __METHOD__.$uploadtree_tablename;
+    $sql = "SELECT parent,lft FROM $uploadtree_tablename WHERE upload_fk=$1 ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name";
+    $dbManager->prepare($stmt,$sql);
+    $res=$dbManager->execute($stmt,array($uploadId));
+    $prevRow = array('parent'=>0,'lft'=>0);
+    $wrongOrder = false;
+    while($row=$dbManager->fetchArray($res))
+    {
+      $wrongOrder = $prevRow['parent']==$row['parent'] && $prevRow['lft']>$row['lft'];
+      if ($wrongOrder) {
+        break;
+      }
+      $prevRow = $row;
+    }
+    $dbManager->freeResult($res);
+    return $wrongOrder ? 2 : 1;
   }
   
   /**

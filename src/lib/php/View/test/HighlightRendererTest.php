@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -30,30 +30,15 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 {
   /** @var int */
   private $level = 5;
-
-  /**
-   * @var Highlight|MockInterface
-   */
+  /** @var Highlight|MockInterface */
   private $highlight;
-
-  /**
-   * @var SplitPosition|MockInterface
-   */
+  /** @var SplitPosition|MockInterface */
   private $splitPosition;
-
-  /**
-   * @var HtmlElement
-   */
+  /** @var HtmlElement */
   private $htmlElement;
-
-  /**
-   * @var HighlightRenderer
-   */
+  /** @var HighlightRenderer */
   private $highlightRenderer;
-
-  /**
-   * @var array
-   */
+  /** @var array */
   private $colorMap;
 
   function setUp()
@@ -89,7 +74,7 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
   {
     $result = $this->highlightRenderer->createSpanStart($this->splitPosition);
 
-    assertThat($result, is("<span style=\"background-color:lightgreen;\" title=\"<infoText>\">"));
+    assertThat($result, is("<span class=\"hi-match\" title=\"<infoText>\">"));
   }
 
   public function testCreateSpanStartWrappingHtmlElement()
@@ -98,7 +83,7 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 
     $result = $this->highlightRenderer->createSpanStart($this->splitPosition);
 
-    assertThat($result, is("<span style=\"background-color:lightgreen;\" title=\"<infoText>\"><element>"));
+    assertThat($result, is("<span class=\"hi-match\" title=\"<infoText>\"><element>"));
   }
 
   public function testCreateSpanStartWithUndefinedType()
@@ -108,7 +93,7 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 
     $result = $this->highlightRenderer->createSpanStart($this->splitPosition);
 
-    assertThat($result, is("<span style=\"background-color:lightgray;\" title=\"\">"));
+    assertThat($result, is("<span class=\"hi-undefined\" title=\"\">"));
   }
 
   public function testCreateSpanStartWithPadding()
@@ -117,7 +102,7 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 
     $result = $this->highlightRenderer->createSpanStart($this->splitPosition);
 
-    assertThat($result, is("<span style=\"padding-top:-2px;padding-bottom:-2px;background-color:lightgreen;\" title=\"<infoText>\">"));
+    assertThat($result, is("<span class=\"hi-match\" title=\"<infoText>\">"));
   }
 
   public function testCreateSpanEnd()

@@ -45,7 +45,7 @@ abstract class DbManager extends Object
   }
 
   /** param Driver */
-  public function setDriver(&$dbDriver)
+  public function setDriver(Driver &$dbDriver)
   {
     $this->dbDriver = $dbDriver;
   }

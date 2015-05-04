@@ -30,23 +30,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* *    declaration and add it to the suites array                          * */
 /* ************************************************************************** */
 
+char* dbConf;
+
 extern CU_TestInfo fossconfig_testcases[];
 extern CU_TestInfo fossscheduler_testcases[];
 extern CU_TestInfo libfossdb_testcases[];
 extern CU_TestInfo libfossdbmanager_testcases[];
 
 /**
- * array of every test suite. There should be at least one test suite for every
- * library includes in libfossology.
- */
+* array of every test suite. There should be at least one test suite for every
+* library includes in libfossology.
+*/
 CU_SuiteInfo suites[] =
-{
-    { "Testing libfossdb",    NULL, NULL,      libfossdb_testcases },
-    { "Testing fossconfig",    NULL, NULL,    fossconfig_testcases },
-    { "Testing libfossdbmanger",    NULL, NULL,    libfossdbmanager_testcases },
+  {
+    {"Testing libfossdb", NULL, NULL, libfossdb_testcases},
+    {"Testing fossconfig", NULL, NULL, fossconfig_testcases},
+    {"Testing libfossdbmanger", NULL, NULL, libfossdbmanager_testcases},
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
-};
+  };
 
 /* ************************************************************************** */
 /* **** main function ******************************************************* */
@@ -54,11 +56,16 @@ CU_SuiteInfo suites[] =
 
 int main(int argc, char** argv)
 {
+  if (argc>1)
+    dbConf = argv[1];
+  else
+    dbConf = NULL;
+
   CU_pFailureRecord FailureList;
-  CU_RunSummary *pRunSummary;
+  CU_RunSummary* pRunSummary;
   int FailRec;
 
-  if(CU_initialize_registry())
+  if (CU_initialize_registry())
   {
     fprintf(stderr, "Initialization of Test Registry failed.'n");
     return -1;
@@ -67,7 +74,7 @@ int main(int argc, char** argv)
   assert(CU_get_registry());
   assert(!CU_is_test_running());
 
-  if(CU_register_suites(suites) != CUE_SUCCESS)
+  if (CU_register_suites(suites) != CUE_SUCCESS)
   {
     fprintf(stderr, "Register suites failed - %s\n", CU_get_error_msg());
     return -1;
@@ -95,12 +102,12 @@ int main(int argc, char** argv)
     for (FailureList = CU_get_failure_list(); FailureList; FailureList = FailureList->pNext)
     {
       printf("%d. File: %s  Line: %u   Test: %s\n",
-             FailRec,
-             FailureList->strFileName,
-             FailureList->uiLineNumber,
-             (FailureList->pTest)->pName);
+        FailRec,
+        FailureList->strFileName,
+        FailureList->uiLineNumber,
+        (FailureList->pTest)->pName);
       printf("  %s\n",
-             FailureList->strCondition);
+        FailureList->strCondition);
       FailRec++;
     }
     printf("\n");

@@ -1869,7 +1869,7 @@
 
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"upload_clearing\".\"group_fk\" IS 'who is working at upload';";
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"group_fk\" int4;";
-  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"group_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["upload_clearing"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_clearing"]["group_fk"]["UPDATE"] = "";
 
   $Schema["TABLE"]["upload_clearing"]["priority"]["DESC"] = "";

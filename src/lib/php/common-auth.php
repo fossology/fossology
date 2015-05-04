@@ -25,11 +25,17 @@
 
 /**
  * \brief Check if SiteMinder is enabled.
+ *  Note that this can be used for other authentication agents by changing
+ *  $IDEnvVar
  * \return -1 if not enabled, or the users SEA if enabled
  */
-function siteminder_check() {
-  if (isset($_SERVER['HTTP_SMUNIVERSALID'])){
-    $SEA = $_SERVER['HTTP_SMUNIVERSALID'];
+function siteminder_check() 
+{
+  // $IDEnvVar = 'HPPF_AUTH_UID';  // for example for PingIdentity
+  $IDEnvVar = 'HTTP_SMUNIVERSALID';
+  if (isset($_SERVER[$IDEnvVar]))
+  {
+    $SEA = $_SERVER[$IDEnvVar];
     return $SEA;
   }
   return(-1);

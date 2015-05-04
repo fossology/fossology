@@ -76,8 +76,6 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     
     $this->testDb->createInheritedTables();
 
-    $this->testDb->insertData(array('clearing_decision_type'));
-
     $userArray = array(
         array('myself', 1),
         array('in_same_group', 2),

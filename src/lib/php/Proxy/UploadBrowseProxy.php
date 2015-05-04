@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
@@ -26,7 +27,6 @@ use Fossology\Lib\Util\Object;
 class UploadBrowseProxy extends Object
 {
   const PRIO_COLUMN = 'priority';
-  const PERM_READ = 1;
   
   protected $groupId;
   protected $userPerm;
@@ -46,7 +46,7 @@ class UploadBrowseProxy extends Object
 
   public function sanity()
   {
-    $params = array($this->groupId, UploadStatus::OPEN, self::PERM_READ);
+    $params = array($this->groupId, UploadStatus::OPEN, Auth::PERM_READ);
     $sql = 'INSERT INTO upload_clearing (upload_fk,group_fk,status_fk,'.self::PRIO_COLUMN.') '
          . ' SELECT upload_pk,$1,$2,upload_pk as '.self::PRIO_COLUMN
          . ' FROM upload LEFT JOIN upload_clearing ON upload_pk=upload_fk AND group_fk=$1'
@@ -100,9 +100,6 @@ class UploadBrowseProxy extends Object
   {
     $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE upload_fk=$3";
     $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), __METHOD__);
-    // $sel = $this->dbManager->getSingleRow("SELECT status_comment FROM upload_clearing WHERE group_fk=$1 AND upload_pk=$2", array($this->groupId,$uploadId), __METHOD__ . '.question');
-    // print_r("$statusId, $commentText, $uploadId");
-    // print_r('#' . $sel['status_comment']);
   }
   
   public function moveUploadToInfinity($uploadId, $top)
@@ -153,7 +150,7 @@ class UploadBrowseProxy extends Object
       throw new \Exception('expected argument to be array with exactly one element for folderId');
     }
     $params[] = $this->groupId;
-    $params[] = self::PERM_READ;
+    $params[] = Auth::PERM_READ;
     $partQuery = 'upload
         INNER JOIN upload_clearing ON upload_pk = upload_clearing.upload_fk AND group_fk=$2
         INNER JOIN uploadtree ON upload_pk = uploadtree.upload_fk AND upload.pfile_fk = uploadtree.pfile_fk
@@ -165,4 +162,18 @@ class UploadBrowseProxy extends Object
     return $partQuery;
   }
   
+  /**
+   * @param int $uploadId
+   * @return int
+   * @throws \Exception
+   */
+  public function getStatus($uploadId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2",
+            array($uploadId, $this->groupId));
+    if (false === $row) {
+      throw new \Exception("cannot find uploadId=$uploadId");
+    }
+    return $row['status_fk'];
+  }
 } 

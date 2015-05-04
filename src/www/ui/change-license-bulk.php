@@ -137,18 +137,18 @@ class changeLicenseBulk extends FO_Plugin
     $upload = $this->uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
     $job_pk = JobAddJob($userId, $groupId, $uploadName, $uploadId);
-    /** @var agent_fodeciderjob $deciderPlugin */
+    /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
     $conflictStrategyId = intval(filter_input(INPUT_POST, 'forceDecision'));
     $errorMsg = '';
-    $jq_pk = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
+    $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
 
     if (!empty($errorMsg))
     {
       throw new Exception(str_replace('<br>', "\n", $errorMsg));
     }
-    return $jq_pk;
+    return $jqId;
   }
 
 }

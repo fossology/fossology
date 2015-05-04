@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014, 2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -6,14 +6,25 @@
 # without any warranty.
 
 TOP = ../../../..
-include $(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+VARS = $(TOP)/Makefile.conf
+DEPS = ${TOP}/Makefile.deps
+include $(VARS)
+
+LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-LOCAL_CFLAGS = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -lm $(TESTLIB) -Werror -fopenmp
+CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit -fopenmp -lm $(TESTLIB) -Werror
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk
+
+ifeq (,$(shell pkg-config --exists uchardet || echo no))
+CFLAGS_LOCAL += $(shell pkg-config --libs uchardet)
+CFLAGS_LOCAL += $(shell pkg-config --cflags uchardet)
+CFLAGS_LOCAL += -DHAVE_CHARDET
+else
+CFLAGS_LOCAL += -lmagic
+endif
 
 OBJECTS = test_string_operations.o \
           test_file_operations.o \
@@ -21,31 +32,27 @@ OBJECTS = test_string_operations.o \
           test_highlight.o \
           test_hash.o \
           test_match.o \
-          test_extended.o \
           test_diff.o \
           test_database.o \
+          test_encoding.o \
           utils.o
 
-all:
+all: $(EXE)
 
-test: $(EXE)
-	@echo "make monk Unit agent_tests"
+test: all
 	./$(EXE)
 
 coverage: run_tests.c $(OBJECTS) libmonk_cov.a ${FOLIB}
-	@echo "make monk agent_tests coverage"
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(LOCAL_CFLAGS) $(FLAG_COV) ; \
-	./$(EXE); \
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libmonk_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	./$(EXE)
 
 $(EXE): $(OBJECTS) libmonk.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(LOCAL_CFLAGS)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libmonk.a $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $(LOCAL_CFLAGS) $<
+	$(CC) -c $(CFLAGS_LOCAL) $<
 
 libmonk.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
@@ -54,14 +61,8 @@ libmonk_cov.a:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	@echo "make monk agent_tests clean"
 	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
 
-install:
-	@echo "make monk agent_tests nothing to install"
-uninstall:
-	@echo "make monk agent_tests nothing to uninstall"
+.PHONY: all test coverage clean
 
-.PHONY: all install uninstall clean test coverage
-include ${TOP}/Makefile.deps
-
+include ${DEPS}
