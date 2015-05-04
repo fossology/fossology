@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
@@ -386,7 +386,7 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 
   /* check if the upload_pk is currently in the job queue being processed when agent name is ununpack or adj2nest */
   /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
-  if ($AgentName == "ununpack")
+  if ($AgentName == "ununpack" || $AgentName == "adj2nest")
   {
     $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
   }

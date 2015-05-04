@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014 Siemens AG
 
  This library is free software; you can redistribute it and/or
@@ -300,7 +300,7 @@ function FolderGetName($FolderPk,$Top=-1)
 {
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,parent_fk FROM folder
+  $sql = "SELECT folder_name,folder.parent_fk FROM folder
 	LEFT JOIN foldercontents ON foldercontents_mode = 1
 	AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'
