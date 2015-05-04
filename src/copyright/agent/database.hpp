@@ -21,6 +21,20 @@
 
 #define MAX_TABLE_CREATION_RETRIES 5
 
+class DatabaseEntry
+{
+public:
+  DatabaseEntry();
+
+  long agent_fk;
+  long pfile_fk;
+  std::string content;
+  std::string hash;
+  std::string type;
+  int copy_startbyte;
+  int copy_endbyte;
+};
+
 class CopyrightDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:

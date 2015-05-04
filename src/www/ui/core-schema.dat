@@ -1844,6 +1844,7 @@
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
+  $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
 
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 

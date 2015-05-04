@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini
+ * Copyright (C) 2015, Siemens AG
+ * Author: Florian Krügel
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
  *
@@ -9,28 +9,16 @@
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef REGEXMATCHER_HPP
-#define REGEXMATCHER_HPP
+#ifndef COPYSCAN_HPP_
+#define COPYSCAN_HPP_
 
-#include <iostream>
-#include <string>
-#include "matcher.hpp"
-#include "regex.hpp"
+#include "scanners.hpp"
 
-
-class RegexMatcher : public virtual Matcher
+class hCopyrightScanner : public scanner
 {
-  friend std::ostream& operator<<(std::ostream&, const RegexMatcher&);
 public:
-  RegexMatcher(const std::string& type, const std::string& pattern, int regexIndex = 0);
-  virtual std::vector<CopyrightMatch> match(const std::string& content) const;
-  virtual ~RegexMatcher();
+  void ScanString(const string& s, list<match>& results) const;
+} ;
 
-private:
-  int regexIndex;
-  rx::regex matchingRegex;
-};
+#endif
 
-std::ostream& operator<<(std::ostream&, const RegexMatcher&);
-
-#endif // REGEXMATCHER_HPP

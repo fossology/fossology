@@ -83,13 +83,13 @@ abstract class Agent extends Object
   function scheduler_connect()
   {
     $schedulerHandledOpts = "c:";
-    $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
+    $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start",'config:');
 
     $longOpts = array_merge($schedulerHandledLongOpts, $this->agentSpecifLongOptions);
     $shortOpts = $schedulerHandledOpts . $this->agentSpecifOptions;
 
     $args = getopt($shortOpts, $longOpts);
-
+    
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = $args['userID'];

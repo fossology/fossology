@@ -28,7 +28,7 @@ use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
 
-class MonkBulkTest extends PHPUnit_Framework_TestCase
+class MonkBulkTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestPgDb */
   private $testDb;

@@ -50,7 +50,8 @@ class CopyrightDao extends Object
   public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
                                                                         'statement' => Highlight::COPYRIGHT,
                                                                         'email' => Highlight::EMAIL,
-                                                                        'url' => Highlight::URL)
+                                                                        'url' => Highlight::URL,
+                                                                        'author' => Highlight::AUTHOR)
    )
   {
     $pFileId = 0;

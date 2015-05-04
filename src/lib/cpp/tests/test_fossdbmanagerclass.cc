@@ -15,6 +15,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "testUtils.hpp"
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -24,7 +26,6 @@ extern "C" {
 #include <libfodbreposysconf.h>
 }
 
-#include "testUtils.hpp"
 #include <iostream>
 
 #include "libfossdbmanagerclass.hpp"
@@ -37,6 +38,7 @@ CPPUNIT_TEST_SUITE(FoLibCPPTest);
     CPPUNIT_TEST(test_runPreparedStatement);
     CPPUNIT_TEST(test_transactions);
     CPPUNIT_TEST(test_runBadCommandQueryCheckIfError);
+    CPPUNIT_TEST(test_runSchedulerConnectConstructor);
   CPPUNIT_TEST_SUITE_END();
 private:
   fo::DbManager* dbManager;
@@ -179,6 +181,24 @@ public:
     std::cout << std::endl << "-----" << std::endl;
 
     CPPUNIT_ASSERT(!result);
+  }
+
+  void test_runSchedulerConnectConstructor() {
+    const char* sysConf = get_sysconfdir(); // [sic]
+
+    // TODO make this correctly
+    CPPUNIT_ASSERT(system((std::string("install -D ../../../../VERSION '") + sysConf + "/mods-enabled/an agent name/VERSION'").c_str()) >= 0);
+    char const* argv[] = {"an agent name", "-c", sysConf};
+    int argc = 3;
+
+    fo::DbManager manager(&argc, (char**) argv); // [sic]
+
+    fo::QueryResult result = manager.queryPrintf("CREATE TABLE tbl()");
+
+    CPPUNIT_ASSERT(result);
+
+    // TODO make this correctly
+    CPPUNIT_ASSERT(system((std::string("rm -rf '") + sysConf + "/mods-enabled'").c_str()) >= 0);
   }
 
 };

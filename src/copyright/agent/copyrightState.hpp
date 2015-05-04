@@ -12,20 +12,22 @@
 #ifndef copyrightState_h
 #define copyrightState_h
 
+#include "regscan.hpp"
+#include "copyscan.hpp"
+
 #include "libfossdbmanagerclass.hpp"
-#include "regexMatcher.hpp"
 #include "database.hpp"
-#include <vector>
+#include <list>
 
 class CliOptions
 {
 private:
   int verbosity;
   unsigned int optType;
-  std::vector<RegexMatcher> extraRegex;
+  std::list<regexScanner> extraRegex;
 
 public:
-  const std::vector<RegexMatcher>& getExtraRegexes() const;
+  const std::list<regexScanner>& getExtraRegexes() const;
   bool isVerbosityDebug() const;
 
   unsigned int getOptType() const;
@@ -44,17 +46,18 @@ public:
 
   int getAgentId() const;
 
-  void addMatcher(const RegexMatcher& regexMatcher);
-  void addMatcher(const std::vector<RegexMatcher>& regexMatchers);
+  void addScanner(const scanner* sc);
+  //void addScanners(const std::list<scanner>& sc);
 
-  const std::vector<RegexMatcher>& getRegexMatchers() const;
+  const std::list<const scanner*>& getScanners() const;
 
   const CliOptions& getCliOptions() const;
 
 private:
   int agentId;
   const CliOptions& cliOptions;
-  std::vector<RegexMatcher> regexMatchers;
+  std::list<const scanner*> scanners;
 };
 
 #endif
+
