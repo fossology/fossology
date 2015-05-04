@@ -97,7 +97,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
-
+    
     $exitval = 0;
 
     ob_start();

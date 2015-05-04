@@ -64,11 +64,13 @@ class BulkReuser extends Object
     $topItem = $uploadDao->getUploadParent($uploadId);
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
+error_log(print_r($deciderPlugin,true),3,'/tmp/debug');
+error_log(print_r("!\n",true),3,'/tmp/debug');
     $dependecies = array();
     $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_fk,rf_text,removing,upload_fk,uploadtree_fk) "
             . "SELECT $1 AS user_fk, $2 AS group_fk,rf_fk,rf_text,removing,$3 AS upload_fk, $4 as uploadtree_fk
               FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk";
-    $jobQueueId = \IsAlreadyScheduled($jobId, AGENT_DECIDER_NAME, $uploadId);
+    $jobQueueId = IsAlreadyScheduled($jobId, AGENT_DECIDER_NAME, $uploadId);
     $this->dbManager->prepare($stmt=__METHOD__.'cloneBulk', $sql);
     foreach($bulkIds as $bulkId) {
       $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));

@@ -284,7 +284,7 @@ class UploadDao extends Object
    */
   public function getUploadParent($uploadId)
   {
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $statementname = __METHOD__ . $uploadTreeTableName;
 
     $parent = $this->dbManager->getSingleRow(
