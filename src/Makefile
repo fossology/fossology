@@ -25,6 +25,7 @@ DIRS = \
 	pkgagent \
 	readmeoss \
 	report \
+	reportgen \
 	reuser \
 	scheduler \
 	ununpack \
