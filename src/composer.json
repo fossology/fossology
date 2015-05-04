@@ -1,6 +1,6 @@
 {
     "_readme": [
-        "Copyright Siemens AG 2014",
+        "Copyright Siemens AG 2014-2015",
         "",
         "Copying and distribution of this file, with or without modification,",
         "are permitted in any medium without royalty provided the copyright",
@@ -26,7 +26,9 @@
 
     "autoload": {
         "psr-4": {
-            "Fossology\\Lib\\": "lib/php"
+            "Fossology\\Lib\\": "lib/php",
+            "Fossology\\DeciderJob\\UI\\": "deciderjob/ui",
+            "Fossology\\Decider\\UI\\": "decider/ui"
         }
     }
 }

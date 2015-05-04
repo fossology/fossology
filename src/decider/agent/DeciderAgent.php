@@ -37,7 +37,8 @@ class DeciderAgent extends Agent
 {
   const RULES_NOMOS_IN_MONK = 0x1;
   const RULES_NOMOS_MONK_NINKA = 0x2;
-  const RULES_ALL = 0x3; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA -> feature not available in php5.3
+  const RULES_BULK_REUSE = 0x4;
+  const RULES_ALL = 0x7; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int */
   private $activeRules;
@@ -98,6 +99,13 @@ class DeciderAgent extends Agent
       }
       $this->processItem($item, $matches);
     }
+
+    if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
+    {
+      $bulkReuser = new BulkReuser();
+      $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $this->jobId);
+    }
+    
     return true;
   }
 
@@ -105,13 +113,13 @@ class DeciderAgent extends Agent
   {
     $itemTreeBounds = $item->getItemTreeBounds();
     $haveDecided = false;
-
-    if ($this->activeRules&self::RULES_NOMOS_IN_MONK == self::RULES_NOMOS_IN_MONK)
+    
+    if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
     {
       $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
     }
-
-    if (!$haveDecided && $this->activeRules&self::RULES_NOMOS_MONK_NINKA == self::RULES_NOMOS_MONK_NINKA)
+    
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
     {
       $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
     }
@@ -121,8 +129,8 @@ class DeciderAgent extends Agent
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches)
   {
@@ -146,8 +154,8 @@ class DeciderAgent extends Agent
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches)
   {

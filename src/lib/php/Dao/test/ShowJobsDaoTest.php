@@ -185,13 +185,14 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->dbManager->prepare($stmt = 'insert.jobdepends',
         "INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES ($1, $2 )");
+    $jqWithTwoDependencies = 8;
     $jobDependsArray = array(array(2,1),
                              array(3,2),
                              array(4,2),
                              array(5,2),
                              array(6,2),
-                             array(7,2),
-                             array(8,2),
+                             array($jqWithTwoDependencies,4),
+                             array($jqWithTwoDependencies,4),
                           );
     foreach ($jobDependsArray as $uploadEntry)
     {
@@ -200,6 +201,7 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
 
     $testMyJobInfo = $this->showJobsDao->getJobInfo($this->job_pks);
     assertThat($testMyJobInfo,hasKey($jobId));
+    assertThat($testMyJobInfo[$jobId]['jobqueue'][$jqWithTwoDependencies]['depends'], is(arrayWithSize(2)));
 
     $testFilesPerSec = 0.23;
     $formattedEstimatedTime = $this->showJobsDao->getEstimatedTime($job_pk=1, $jq_Type="nomos", $testFilesPerSec);

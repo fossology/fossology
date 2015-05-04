@@ -18,11 +18,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\PackageDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\Upload\UploadProgress;
 use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\Util\StringOperation;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +28,7 @@ include_once(__DIR__ . "/../agent/version.php");
 class ReuserPlugin extends DefaultPlugin
 {
   const NAME = "plugin_reuser";
-
+  
   const REUSE_FOLDER_SELECTOR_NAME = 'reuseFolderSelectorName';
   const UPLOAD_TO_REUSE_SELECTOR_NAME = 'uploadToReuse';
   const FOLDER_PARAMETER_NAME = 'folder';
@@ -40,8 +36,6 @@ class ReuserPlugin extends DefaultPlugin
   public $AgentName = 'agent_reuser';
   /** @var FolderDao */
   private $folderDao;
-  /** @var UploadDao */
-  private $uploadDao;
 
   public function __construct()
   {
@@ -49,9 +43,8 @@ class ReuserPlugin extends DefaultPlugin
         self::TITLE => _("Automatic Clearing Decision Reuser"),
         self::PERMISSION => Auth::PERM_WRITE
     ));
-
+    
     $this->folderDao = $this->getObject('dao.folder');
-    $this->uploadDao = $this->getObject('dao.upload');
   }
     
 
@@ -74,7 +67,8 @@ class ReuserPlugin extends DefaultPlugin
     return new Response('called without valid method', Response::HTTP_METHOD_NOT_ALLOWED);
   }
   
-  protected function getFolderIdAndTrustGroup($folderGroup)
+  
+  public function getFolderIdAndTrustGroup($folderGroup)
   {
     $folderGroupPair = explode(',', $folderGroup,2);
     if (count($folderGroupPair) == 2) {
@@ -131,11 +125,6 @@ class ReuserPlugin extends DefaultPlugin
     return $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
   }
   
-  public function preInstall()
-  {
-    menu_insert("ParmAgents::" . $this->title, 0, $this->name);
-  }
-  
   /**
    * @param int $folderId
    * @param int $trustGroupId
@@ -157,62 +146,6 @@ class ReuserPlugin extends DefaultPlugin
     }
     return $uploadsById;
   }
-  
-  
-  public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
-  {
-    $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
-    if (count($reuseUploadPair) == 2) {
-      list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
-    }
-    else
-    {
-      $errorMsg .= 'no reuse upload id given';
-      return -1;
-    }
-    
-    $reuseModeVal = $request->get('reuseMode');
-    $reuseMode = empty($reuseModeVal) ? 0 : 1;
-    $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode);
-    
-    $agent = plugin_find($this->AgentName);
-    return $agent->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
-  }
-
-  public function AgentHasResults($uploadId)
-  {
-    $agent = plugin_find($this->AgentName);
-    return $agent->AgentHasResults($uploadId);
-  }
-  
-  /**
-   * @param int $uploadId
-   * @param int $reuseUploadId
-   * @param int $reuseGroupId
-   * @param int $reuseMode
-   * @internal description
-   */
-  protected function createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode=0)
-  {
-    /** @var PackageDao */
-    $packageDao = $this->getObject('dao.package');
-    $newUpload = $this->uploadDao->getUpload($uploadId);
-    $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
-
-    $package = $packageDao->findPackageForUpload($reuseUploadId);
-
-    if ($package === null)
-    {
-      $packageName = StringOperation::getCommonHead($uploadForReuse->getFilename(), $newUpload->getFilename());
-      $package = $packageDao->createPackage($packageName ?: $uploadForReuse->getFilename());
-      $packageDao->addUploadToPackage($reuseUploadId, $package);
-    }
-
-    $packageDao->addUploadToPackage($uploadId, $package);
-
-    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, Auth::getGroupId(), $reuseGroupId, $reuseMode);
-  }
-
 }
 
 register_plugin(new ReuserPlugin());

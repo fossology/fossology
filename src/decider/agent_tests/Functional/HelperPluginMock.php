@@ -1,7 +1,6 @@
 <?php
 /*
- Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+Copyright (C) 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,12 +18,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Decider;
 
-use Fossology\Lib\BusinessRules\LicenseMap;
+use Mockery as M;
 
-include_once(__DIR__ . "/DeciderAgent.php");
-include_once(__DIR__ . "/BulkReuser.php");
-
-$agent = new DeciderAgent(LicenseMap::CONCLUSION);
-$agent->scheduler_connect();
-$agent->run_scheduler_event_loop();
-$agent->scheduler_disconnect(0);
+$deciderPlugin = M::mock();//'Fossology\\DeciderJob\\UI\\DeciderJobAgentPlugin');
+$deciderPlugin->shouldReceive('AgentAdd')->withArgs(array(16,2,anything(), arrayWithSize(1)))->once();
+$GLOBALS['xyyzzzDeciderJob'] = $deciderPlugin;
+function plugin_find($x){
+  return $GLOBALS['xyyzzzDeciderJob'];
+}
+function IsAlreadyScheduled($jobId, $agentName, $uploadId){
+  return 177;
+}
