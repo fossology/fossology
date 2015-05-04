@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -12,15 +12,15 @@ include $(VARS)
 MOD_NAME = report
 
 DIRS = agent ui
-TESTDIR =
-
+TESTDIRS = agent_tests
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+TESTDIR_LOOP = @set -e; for dir in $(TESTDIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	@echo "nothing to do"
+	$(call TESTDIR_LOOP,test)
 
 coverage: all
 	@echo "nothing to do"

@@ -41,15 +41,15 @@ abstract class TestAbstractDb
    * @param array $tableList
    * @param bool $invert 
    */
-  abstract function createPlainTables($tableList, $invert=FALSE);
+  abstract function createPlainTables($tableList, $invert=false);
   
   /**
    * @param array $tableList
    * @param bool $invert 
    */
-  public function insertData($tableList, $invert=FALSE)
+  public function insertData($tableList, $invert=FALSE, $dataFile=null)
   {
-    $testdataFile = dirname(__FILE__) . '/testdata.sql';
+    $testdataFile = $dataFile ?: dirname(__FILE__) . '/testdata.sql';
     $testdata = file_get_contents($testdataFile);
     $delimiter = 'INSERT INTO ';
     $offset = strpos($testdata, $delimiter);
@@ -63,12 +63,12 @@ abstract class TestAbstractDb
       {
         $sql = substr($testdata, $offset, $nextOffset-$offset);
       }
+      $table = array();
       preg_match('/^INSERT INTO (?P<name>\w+) /', $sql, $table);
       if( ($invert^!in_array($table['name'], $tableList)) ){
         $offset = $nextOffset;
         continue;
-      }
-      
+      }    
       $this->dbManager->queryOnce($this->queryConverter($sql));
       $offset = $nextOffset;
     }

@@ -21,7 +21,8 @@ use PhpOffice\PhpWord\Element\Section;
 
 class ReportStatic
 {
- 
+  private $timeStamp;
+  
   private $fontFamily = "Arial";
 
   private $tablestyle = array("borderSize" => 2,
@@ -41,6 +42,10 @@ class ReportStatic
                                   "spacing" => 0
                                  );
 
+  function __construct($timeStamp) {
+    $this->timeStamp = $timeStamp ?: time();
+  }
+  
   /**
    * @param Section $section 
    */
@@ -65,7 +70,7 @@ class ReportStatic
     $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
     $footerStyle = array("color" => "000000", "size" => 9, "bold" => true, "name" => $this->fontFamily);
-    $footerTime = "Gen Date: ".date("Y/m/d H:i:s T");
+    $footerTime = "Gen Date: ".date("Y/m/d H:i:s T", $this->timeStamp);
     $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
     $footerSpace = str_repeat("  ", 7);
     $footerPageNo = "Page {PAGE} of {NUMPAGES}";

@@ -151,3 +151,5 @@ variable.list
 /src/decider/agent/version.php
 /src/copyright/agent_tests/Unit/results.html
 
+/src/report/agent/version.php
+/src/report/agent/report

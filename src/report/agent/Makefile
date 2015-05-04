@@ -20,6 +20,11 @@ version.php: version-process_php
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
+report: all
+	@echo "making locally runnable report (only for testing)"
+	$(MAKE) -C $(FOCLIDIR) fo_wrapper
+	ln -sf $(FOCLIDIR)/fo_wrapper.php report
+
 install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/report/agent/
 	for file in $(EXE); do \

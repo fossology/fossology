@@ -24,7 +24,6 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
@@ -39,7 +38,6 @@ include_once(__DIR__ . "/reportStatic.php");
 
 class ReportAgent extends Agent
 {
-
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
 
@@ -56,8 +54,8 @@ class ReportAgent extends Agent
   /** @var eccClearedGetter */
   private $eccClearedGetter;
 
-  /** @var  LicenseIrrelevantGetter*/
-  private $LicenseIrrelevantGetter;
+  /** @var LicenseIrrelevantGetter*/
+  private $licenseIrrelevantGetter;
 
   /** @var BulkMatchesGetter  */
   private $bulkMatchesGetter;
@@ -73,9 +71,6 @@ class ReportAgent extends Agent
 
   /** @var UserDao */
   private $userDao;
-
-  /** @var fontFamily */
-  private $fontFamily = "Arial";
 
   /** @var tablestyle */
   private $tablestyle = array("borderSize" => 2,
@@ -103,7 +98,7 @@ class ReportAgent extends Agent
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->bulkMatchesGetter = new BulkMatchesGetter();
-    $this->LicenseIrrelevantGetter = new LicenseIrrelevantGetter();
+    $this->licenseIrrelevantGetter = new LicenseIrrelevantGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -129,7 +124,7 @@ class ReportAgent extends Agent
     $this->licenseClearedGetter->setOnlyComments(true);
     $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licenseComments["statements"]));
-    $licensesIrre = $this->LicenseIrrelevantGetter->getCleared($uploadId, $groupId);
+    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licensesIrre["statements"]));
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($copyrights["statements"]));
@@ -226,7 +221,7 @@ class ReportAgent extends Agent
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, $paragraphStyleSummary);
-    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d")."  ".$userName."  <department>"), $firstRowStyle2, $paragraphStyleSummary);
+    $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d",$this->timeStamp)."  ".$userName."  <department>"), $firstRowStyle2, $paragraphStyleSummary);
       
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen, $cellRowContinue);
@@ -620,12 +615,15 @@ class ReportAgent extends Agent
     $properties->setCompany("Siemens AG");
     $properties->setTitle("Clearing Report");
     $properties->setDescription("OSS clearing report by FOSSologyNG tool");
-    $properties->setSubject("Copyright (C) 2015, Siemens AG");
+    $properties->setSubject("Copyright (C) ".date("Y", $this->timeStamp).", Siemens AG");
 
     /* Creating document layout */
     $section = $phpWord->addSection($docLayout);
 
-    $sR = new ReportStatic();
+    $jobInfo = $this->dbManager->getSingleRow('SELECT extract(epoch from jq_starttime) ts FROM jobqueue WHERE jq_pk=$1',
+            array($this->jobId));
+    $timestamp = $jobInfo['ts'];
+    $sR = new ReportStatic($timestamp);
 
     /* Header starts */
     $sR->reportHeader($section);
@@ -709,7 +707,7 @@ class ReportAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
-    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
+    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s",$timestamp).".docx" ;  
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
 
