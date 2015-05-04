@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2015, Siemens AG
  * Author: Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
@@ -14,23 +14,9 @@
 
 #include <string>
 #include "regex.hpp"
+#include "scanners.hpp"
 
-class DatabaseEntry
-{
-public:
-  DatabaseEntry();
-
-  long agent_fk;
-  long pfile_fk;
-  std::string content;
-  std::string hash;
-  std::string type;
-  int copy_startbyte;
-  int copy_endbyte;
-};
-
-
-bool normalizeDatabaseEntry(DatabaseEntry& input);
+string cleanMatch(const string& sText, const match& m);
 
 
 #endif /* CLEANENTRIES_HPP_ */

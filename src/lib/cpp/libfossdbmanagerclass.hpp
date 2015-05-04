@@ -63,6 +63,7 @@ namespace fo
 
   private:
     unptr::shared_ptr <fo_dbManager> dbManager;
+    void InitDbManagerPointer(fo_dbManager * p); // To be called from constructors
   };
 }
 

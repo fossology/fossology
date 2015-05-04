@@ -37,7 +37,7 @@ protected:
 
     std::string::const_iterator begin = content.begin();
     std::string::const_iterator end = content.end();
-    boost::match_results<std::string::const_iterator> what;
+    rx::match_results<std::string::const_iterator> what;
 
     int nfound =0;
     while (rx::regex_search(begin, end, what,matchingRegex)) {

@@ -13,7 +13,8 @@
         "symfony/http-foundation": "2.6.*",
         "symfony/dependency-injection": "2.6.*",
         "twig/twig": "1.*",
-        "twig/extensions": "1.*"
+        "twig/extensions": "1.*",
+        "phpoffice/phpword": "0.12.0"
     },
 
     "require-dev": {

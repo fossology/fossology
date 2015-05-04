@@ -20,10 +20,15 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
-#include "regexMatcher.hpp"
+#include "scanners.hpp"
+#include "regscan.hpp"
+#include "copyscan.hpp"
+
+//#include "regexMatcher.hpp"
 #include "copyrightState.hpp"
-#include "files.hpp"
+//#include "files.hpp"
 #include "regTypes.hpp"
 #include "database.hpp"
 #include "cleanEntries.hpp"
@@ -42,20 +47,14 @@ bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, 
 
 CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions);
 
-void fillMatchers(CopyrightState& state);
-
+void fillScanners(CopyrightState& state);
+/*
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
-
+*/
 void normalizeContent(std::string& content);
-
-bool saveToDatabase(const std::vector<CopyrightMatch>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& databaseHandler);
-
-std::vector<CopyrightMatch> findAllMatches(const fo::File& file, std::vector<RegexMatcher> const regexMatchers);
-void matchFileWithLicenses(const fo::File& file, const CopyrightState& state);
-void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler);
-
 
 bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& handler);
 
 
 #endif /* COPYRIGHTUTILS_HPP_ */
+

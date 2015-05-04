@@ -39,32 +39,56 @@ int main(int argc, char** argv)
   }
 
   CopyrightState state = getState(dbManager, cliOptions);
-  CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
 
-  fillMatchers(state);
+  fillScanners(state);
 
   if (!fileNames.empty())
   {
-    const vector<RegexMatcher>& regexMatchers = state.getRegexMatchers();
+    const list<const scanner*>& scanners = state.getScanners();
 
     const unsigned long fileNamesCount = fileNames.size();
+    bool fileError = false;
+
 #pragma omp parallel
     {
 #pragma omp for
       for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
       {
         const string fileName = fileNames[argn];
-        fo::File file(argn, fileName);
-        vector<CopyrightMatch> matches = findAllMatches(file, regexMatchers);
+        // Read file into one string
+        string s;
+        if (!ReadFileToString(fileName, s))
+        {
+          // File error
+          fileError = true;
+        }
+        else
+        {
+          list<match> l;
+          for (const scanner* sc : scanners)
+          {
+            sc->ScanString(s, l);
+          }
 
-        stringstream ss;
-        ss << fileName << " ::" << endl << matches << endl;
-        cout << ss.str();
+          stringstream ss;
+          ss << fileName << " ::" << endl;
+          // Output matches
+          for (match& m : l)
+          {
+            ss << "\t[" << m.start << ':' << m.end << ':' << m.type << "] '"
+              << cleanMatch(s, m)
+              << "'" << endl;
+          }
+          // Thread-Safety: output all matches (collected in ss) at once to cout
+          cout << ss.str();
+        }
       }
     }
+    return_sched(fileError ? 1 : 0);
   }
   else
   {
+    CopyrightDatabaseHandler copyrightDatabaseHandler(dbManager);
     if (!copyrightDatabaseHandler.createTables())
     {
       std::cout << "FATAL: initialization failed" << std::endl;
@@ -89,9 +113,9 @@ int main(int argc, char** argv)
       writeARS(state, arsId, uploadId, 1, dbManager);
     }
     fo_scheduler_heart(0);
+    /* do not use bail, as it would prevent the destructors from running */
+    return_sched(0);
   }
 
-  /* do not use bail, as it would prevent the destructors from running */
-  return_sched(0);
 }
 

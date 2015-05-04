@@ -32,6 +32,8 @@ use Monolog\Logger;
 
 class LicenseDao extends Object
 {
+  const NO_LICENSE_FOUND = 'No_license_found';
+  
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -324,8 +326,7 @@ class LicenseDao extends Object
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
-         RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
+         RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk";
     if (is_array($agentId))
     {
       $sql .= ' AND agent_fk=ANY($4)';
@@ -336,13 +337,16 @@ class LicenseDao extends Object
       $sql .= ' AND agent_fk=$4';
       $param[] = $agentId;
     }
-    $sql .= " GROUP BY license_shortname, rf_pk";
+    $sql .= " WHERE (rf_shortname IS NULL OR rf_shortname NOT IN ('Void')) AND upload_fk=$1
+             AND (UT.lft BETWEEN $2 AND $3) AND UT.ufile_mode&(3<<28)=0
+          GROUP BY license_shortname, rf_pk";
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $assocLicenseHist[$row['license_shortname']] = array(
+      $shortname = empty($row['rf_pk']) ? self::NO_LICENSE_FOUND : $row['license_shortname'];
+      $assocLicenseHist[$shortname] = array(
           'count' => intval($row['count']),
           'unique' => intval($row['unique']),
           'rf_pk' => intval($row['rf_pk']));

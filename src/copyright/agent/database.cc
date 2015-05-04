@@ -24,6 +24,17 @@ using namespace fo;
     }\
   } while(0)
 
+DatabaseEntry::DatabaseEntry() :
+        agent_fk(0),
+        pfile_fk(0),
+        content(""),
+        hash(""),
+        type(""),
+        copy_startbyte(0),
+        copy_endbyte(0)
+{
+};
+
 
 CopyrightDatabaseHandler CopyrightDatabaseHandler::spawn() const
 {

@@ -34,13 +34,15 @@ class CopyrightView extends Xpview
     $this->optionName = "skipFileCopyRight";
     $this->ajaxAction = "setNextPrevCopyRight";
     $this->skipOption = "noCopyright";
-    $this->hightlightTypeToStringMap = array(Highlight::COPYRIGHT => 'copyright remark',
-        Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address');
+    $this->highlightTypeToStringMap = array(Highlight::COPYRIGHT => 'copyright remark',
+        Highlight::URL => 'URL', Highlight::EMAIL => 'e-mail address',
+        Highlight::AUTHOR => 'author or maintainer');
     $this->xptext = 'copyright/e-mail/URL';
     $this->typeToHighlightTypeMap = array(
         'statement' => Highlight::COPYRIGHT,
         'email' => Highlight::EMAIL,
-        'url' => Highlight::URL);
+        'url' => Highlight::URL,
+        'author' => Highlight::AUTHOR);
     parent::__construct(self::NAME,array(
         self::TITLE => _("View Copyright/Email/Url Analysis")
     ));

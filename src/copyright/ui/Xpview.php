@@ -47,7 +47,7 @@ class Xpview extends DefaultPlugin
   /** @var string */
   protected $tableName;
   /** @var  array */
-  protected $hightlightTypeToStringMap;
+  protected $highlightTypeToStringMap;
   /** @var  array */
   protected $typeToHighlightTypeMap;
   /** @var string */
@@ -194,7 +194,7 @@ class Xpview extends DefaultPlugin
   function legendBox()
   {
     $output = _("file text");
-    foreach ($this->hightlightTypeToStringMap as $colorKey => $txt)
+    foreach ($this->highlightTypeToStringMap as $colorKey => $txt)
     {
       $output .= '<br/>' . $this->highlightRenderer->createStartSpan($colorKey, $txt) . $txt . '</span>';
     }
@@ -245,13 +245,13 @@ class Xpview extends DefaultPlugin
     {
       if (GetParm("mod", PARM_STRING) == $this->Name)
       {
-        menu_insert("View::View Copyright/Email/Url", 1);
-        menu_insert("View-Meta::View Copyright/Email/Url", 1);
+        menu_insert("View::View Copyright/Email/Url/Author", 1);
+        menu_insert("View-Meta::View Copyright/Email/Url/Author", 1);
       } else
       {
-        $text = _("View Copyright/Email/Url info");
-        menu_insert("View::Copyright/Email/Url", 1, $URI, $text);
-        menu_insert("View-Meta::Copyright/Email/Url", 1, $URI, $text);
+        $text = _("View Copyright/Email/Url/Author info");
+        menu_insert("View::Copyright/Email/Url/Author", 1, $URI, $text);
+        menu_insert("View-Meta::Copyright/Email/Url/Author", 1, $URI, $text);
       }
     }
     $licId = GetParm("lic", PARM_INTEGER);

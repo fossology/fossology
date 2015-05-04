@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,315 +18,149 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "regex.hpp"
-#include "regexMatcher.hpp"
-#include "copyrightUtils.hpp"
-#include "regTypes.hpp"
-#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <algorithm>
-#include <files.hpp>
+#include <string>
 
-#define TESTFILES_BEGIN 0
-#define TESTFILES_END 142
+#include "copyscan.hpp"
+#include "regTypes.hpp"
+#include "regscan.hpp"
 
-//#define SHOWALLDIFFS
+// Number of test cases (numbered from 0 to NUMTESTS-1)
+#define NUMTESTS 142
 
 using namespace std;
 
-bool compMatchByStart(const CopyrightMatch& a, const CopyrightMatch& b)
+class TestDataCheck : public CPPUNIT_NS::TestFixture
 {
-  return a.getStart() < b.getStart();
-}
-
-class StatsAccumulator
-{
-
-public:
-  StatsAccumulator() : matched(0), falsePositives(), falseNegatives() {}
-
-  size_t getMatched() const { return matched; }
-  vector<CopyrightMatch> getFalsePositives() const { return falsePositives; }
-  vector<CopyrightMatch> getFalseNegatives() const { return falseNegatives; }
-
-  void incrementMatched(size_t matched = 1) { StatsAccumulator::matched += matched; }
-  void incrementFalsePositives(const CopyrightMatch& match) { insertOrdered(falsePositives, match); }
-  void incrementFalseNegatives(const CopyrightMatch& match) { insertOrdered(falseNegatives, match); }
-
-  void incrementFalsePositives(const vector<CopyrightMatch>& matches) {
-    for (auto it = matches.begin(); it != matches.end(); ++it) incrementFalsePositives(*it);
-  }
-
-  void incrementFalseNegatives(const vector<CopyrightMatch>& matches)
-  {
-    for (auto it = matches.begin(); it != matches.end(); ++it) incrementFalseNegatives(*it);
-  }
-
-  StatsAccumulator& operator+=(const StatsAccumulator& rhs) {
-    if (this != &rhs) {
-      this->incrementFalsePositives(rhs.getFalsePositives());
-      this->incrementFalseNegatives(rhs.getFalseNegatives());
-      this->incrementMatched(rhs.getMatched());
-    }
-    return *this;
-  }
-
-private:
-
-  void insertOrdered(vector<CopyrightMatch>& dest, const CopyrightMatch& element)
-  {
-    auto position = std::lower_bound(dest.begin(), dest.end(), element, compMatchByStart);
-    dest.insert(position, element);
-  }
-
-  size_t matched;
-  vector<CopyrightMatch> falsePositives;
-  vector<CopyrightMatch> falseNegatives;
-
-};
-
-ostream& operator<<(ostream& os, const StatsAccumulator& accumulator) {
-  os << "Total:   " << accumulator.getMatched() + accumulator.getFalsePositives().size() << endl;
-  os << "Matches: " << accumulator.getMatched() << endl;
-  os << "False +: " << accumulator.getFalsePositives().size() << endl;
-  os << "False -: " << accumulator.getFalseNegatives().size() << endl;
-  return os;
-}
-
-class TestDataCheck : public CPPUNIT_NS :: TestFixture
-{
-  CPPUNIT_TEST_SUITE (TestDataCheck);
-    CPPUNIT_TEST (testDataCheck);
-    //CPPUNIT_TEST (testChanges);
-
-  CPPUNIT_TEST_SUITE_END ();
-
-private:
-
-
-  std::string getNewRegex()
-  {
-#define EMAILRGX  "[\\<\\(]?([\\w\\-\\.\\+]{1,100}@[\\w\\-\\.\\+]{1,100}\\.[a-z]{1,4})[\\>\\)]?"
-#define NAME              "(([[:alpha:]]{1,3}\\.)|([[:alpha:]]+)|(" EMAILRGX "))"
-#define SPACECLS          "[\\t ]"
-#define SPACES            SPACECLS "+"
-#define SPACESALL         "[[:space:]]*"
-#define PUNCTORSPACE      "[[:punct:][:space:]]"
-#define NAMESLIST         NAME "(([-, &]+)" NAME ")*"
-#define DATE              "([[:digit:]]{4,4}|[[:digit:]]{1,2})"
-#define DATESLIST DATE    "(([[:punct:][:space:]-]+)" DATE ")*"
-#define COPYR_SYM_ALONE   "©|\xA9|\xC2\xA9" "|\\$\xB8|\xED\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E"
-#define COPYR_SYM         "(\\(c\\)|" COPYR_SYM_ALONE ")"
-#define COPYR_TXT         "copyright(s)?"
-
-    return std::string(
-      "("
-      "("
-        "("
-          COPYR_SYM "(" SPACESALL COPYR_TXT "|" SPACES "(19|20)[[:digit:]]{2,2}" ")"
-          "|" COPYR_TXT ":?" SPACESALL COPYR_SYM
-          "|" COPYR_TXT
-          "|" COPYR_SYM_ALONE
-        ")"
-        "("
-          SPACES
-          "((and|hold|info|law|licen|message|notice|owner|state|string|tag|copy|permission|this|timestamp|@author)*)"
-        ")?"
-        "("
-          PUNCTORSPACE "?"
-          SPACESALL
-          DATESLIST
-        ")?"
-        "("
-          PUNCTORSPACE "?"
-          SPACESALL
-          NAMESLIST
-        ")"
-        "(" PUNCTORSPACE"*" "all" SPACES "rights" SPACES "reserved)?"
-      ")|("
-        "("
-          "((author|contributor|maintainer)s?)"
-          "|((written|contribut(ed|ions?)|maintained|modifi(?:ed|cations?)|put" SPACES "together)" SPACES "by)"
-        ")"
-        "[:]?"
-        SPACESALL
-        NAMESLIST
-      ")"
-      ")"
-      "[.]?"
-    );
-  }
-
-  vector<CopyrightMatch> correctPositions(const vector<CopyrightMatch>& input)
-  {
-    vector<CopyrightMatch> output;
-
-    for (size_t i=0; i<input.size(); ++i)
-    {
-      const CopyrightMatch& inputEl = input[i];
-
-      const size_t newStart = inputEl.getStart() - (strlen("<s>") + strlen("<s></s>") * i);
-
-      output.push_back(
-        CopyrightMatch(inputEl.getContent(), inputEl.getType(),
-          newStart, inputEl.getLength())
-      );
-    }
-
-    return output;
-  }
-
-  StatsAccumulator checkMatches(const vector<CopyrightMatch>& matches, const vector<CopyrightMatch>& expected)
-  {
-    StatsAccumulator accumulator;
-
-    const unsigned long matchesSize = matches.size();
-    const unsigned long expectedSize = expected.size();
-
-    size_t iMatches = 0;
-    size_t iExpected = 0;
-
-    while(iMatches < matchesSize || iExpected < expectedSize)
-    {
-      if (iMatches == matchesSize)
-      {
-        while (iExpected < expectedSize)
-        {
-          accumulator.incrementFalseNegatives(expected[iExpected]);
-          ++iExpected;
-        }
-        continue;
-      }
-
-      if (iExpected == expectedSize)
-      {
-        while (iMatches < matchesSize)
-        {
-          accumulator.incrementFalsePositives(matches[iMatches]);
-          ++iMatches;
-        }
-        continue;
-      }
-
-      const CopyrightMatch& currentExpected = expected[iExpected];
-      const CopyrightMatch& currentMatched = matches[iMatches];
-
-      if ((currentMatched <= currentExpected) || (currentMatched >= currentExpected)) {
-        accumulator.incrementMatched();
-        ++iMatches;
-        ++iExpected;
-      }
-      else if (currentExpected.getStart() > currentMatched.getStart())
-      {
-        accumulator.incrementFalsePositives(currentMatched);
-        ++iMatches;
-      }
-      else //if (currentExpected.getStart() < currentMatched.getStart())
-      {
-        accumulator.incrementFalseNegatives(currentExpected);
-        ++iExpected;
-      }
-    }
-
-    return accumulator;
-  }
-
-  StatsAccumulator runtestWith(string baseFileName, vector<RegexMatcher> copyrights, vector<RegexMatcher> untested, vector<RegexMatcher> expectedMatcher)
-  {
-    StatsAccumulator accumulator;
-
-    for (unsigned int i = TESTFILES_BEGIN; i < TESTFILES_END; ++i)
-    {
-      const string currentFileName = baseFileName + to_string(i);
-
-      fo::File currentFile(i, currentFileName);
-      fo::File expectedMatchesFile(i, currentFileName + "_raw");
-
-      CPPUNIT_ASSERT(currentFile.isReadable());
-      CPPUNIT_ASSERT(expectedMatchesFile.isReadable());
-
-      vector<CopyrightMatch> matches = matchStringToRegexes(currentFile.getContent(), copyrights);
-      vector<CopyrightMatch> expected = correctPositions(matchStringToRegexes(expectedMatchesFile.getContent(), expectedMatcher));
-
-      vector<CopyrightMatch> cheatMatches = matchStringToRegexes(currentFile.getContent(), untested);
-      accumulator.incrementMatched(untested.size());
-
-      const StatsAccumulator fileStats = checkMatches(matches, expected);
-
-      const vector<CopyrightMatch> falseNegatives = fileStats.getFalseNegatives();
-      const vector<CopyrightMatch> falsePositives = fileStats.getFalsePositives();
-
-#ifdef SHOWALLDIFFS
-      cout << currentFileName << ": " << fileStats << endl;
-      if (!falseNegatives.empty())
-      {
-        cout << "negatives: " << falseNegatives << endl;
-      }
-      if (!falsePositives.empty())
-      {
-        cout << "positives: " << falsePositives << endl;
-      }
-#endif
-
-      accumulator += fileStats;
-    }
-
-    return accumulator;
-  }
-
+  CPPUNIT_TEST_SUITE(TestDataCheck);
+  CPPUNIT_TEST(testDataCheck);
+  CPPUNIT_TEST_SUITE_END();
 protected:
-  void testChanges (void) {
-    string baseFileName("../testdata/testdata");
+  void testDataCheck();
+} ;
 
-    auto type = regCopyright::getType();
-    vector<RegexMatcher> copyrights = { RegexMatcher(type, regCopyright::getRegex()) };
-    vector<RegexMatcher> cheat = {
-      RegexMatcher(type, regEmail::getRegex()),
-      RegexMatcher(type, regURL::getRegex())
-    };
 
-    vector<RegexMatcher> expectedMatcher = { RegexMatcher(type, "<s>(.*?)<\\/s>", 1) };
-
-    const StatsAccumulator accumulator  = runtestWith(baseFileName, copyrights, cheat, expectedMatcher);
-
-    const vector<RegexMatcher> changing = { RegexMatcher(type, getNewRegex()) };
-    const StatsAccumulator accumulator2 = runtestWith(baseFileName, changing, cheat, expectedMatcher);
-
-    cout << endl
-     << "Current Regex:" << endl
-     << accumulator << endl
-     << endl
-     << "New     Regex:" << endl
-     << accumulator2 << endl;
-
-    StatsAccumulator diffPositives = checkMatches(accumulator2.getFalsePositives(), accumulator.getFalsePositives());
-    StatsAccumulator diffNegatives = checkMatches(accumulator2.getFalseNegatives(), accumulator.getFalseNegatives());
-
-    cout << endl
-    << "removed    False Positives: " << diffPositives.getFalseNegatives() << endl
-    << "removed    False Negatives: " << diffNegatives.getFalseNegatives() << endl
-    << "introduced False Positives: " << diffPositives.getFalsePositives() << endl
-    << "introduced False Negatives: " << diffNegatives.getFalsePositives() << endl
-    << endl;
-
-  };
-
-  void testDataCheck (void) {
-    string baseFileName("../testdata/testdata");
-
-    auto type = regCopyright::getType();
-    vector<RegexMatcher> copyrights = { RegexMatcher(type, regCopyright::getRegex()) };
-    vector<RegexMatcher> cheat = {
-      RegexMatcher(type, regEmail::getRegex()),
-      RegexMatcher(type, regURL::getRegex())
-    };
-
-    vector<RegexMatcher> expectedMatcher = { RegexMatcher(type, "<s>(.*?)<\\/s>", 1) };
-
-    const StatsAccumulator accumulator = runtestWith(baseFileName, copyrights, cheat, expectedMatcher);
-
-    cout << endl << accumulator << endl;
+void HtmlEscapedOutput(ostream& out, const char* s)
+{
+  char c = *s;
+  while (c)
+  {
+    switch (c)
+    {
+      case '<': out << "&lt;"; break;
+      case '>': out << "&gt;"; break;
+      case '&': out << "&amp;"; break;
+      default: out << (isprint(c) ? c : ' ');
+    }
+    s++;
+    c = *s;
   }
+}
 
-};
+void GetReferenceResults(const string& fileName, list<match>& results)
+{
+  
+  ifstream t(fileName);
+  stringstream tstream;
+  tstream << t.rdbuf();
+  string s = tstream.str();
+  string::size_type pos = 0;
+  string::size_type cpos = 0;
+  for (;;)
+  {
+    string::size_type tpos = s.find("<s>", pos);
+    if (tpos == string::npos) break;
+    cpos += tpos - pos;
+    int start = cpos;
+    tpos += 3;
+    pos = s.find("</s>", tpos);
+    if (pos == string::npos) break;
+    cpos += pos - tpos;
+    pos += 4;
+    results.push_back(match(start, cpos, "r"));
+  }
+}
+
+class overlappingMatch {
+  // Criterion if match m2 is sufficiently similar to a given match m
+  const match& m;
+public:
+  overlappingMatch(const match& mm) : m(mm) { }
+  bool operator()(const match& m2) const
+  {
+    return !(m.end <= m2.start || m2.end <= m.start);
+  }
+} ;
+
+void Display(ostream& out, ifstream& data, list<match>& l, list<match>& lcmp, const char*prein, const char*postin, const char*prenn, const char*postnn)
+{
+  // Print results
+  data.clear();
+  for (match& m : l)
+  {
+    // Find in lcmp
+    bool in = find_if(lcmp.begin(), lcmp.end(), overlappingMatch(m)) != lcmp.end();
+    // Print match
+    int len = m.end - m.start;
+    char* str = new char[len+1];
+    data.seekg(m.start);
+    data.read(str,len);
+    str[len]=0;
+    out << "<p><em>[" << m.start << ":" << m.end << "]</em>" << (in ? prein : prenn);
+    HtmlEscapedOutput(out, str);
+    delete[] str;
+    out << (in ? postin : postnn) << "</p>" << endl;
+  }
+}
+
+bool cmpMatches(const match &a, const match &b)
+{
+  // Compare matches, return true if a<b
+  if (a.start < b.start)
+    return true;
+  if (a.start == b.start && a.end < b.end)
+    return true;
+  // Otherwise, false
+  return false;
+}
+
+void TestDataCheck::testDataCheck()
+{
+  // Test all instances
+  string fileNameBase = "../testdata/testdata";
+  // Create a copyright scanner and an author scanner
+  hCopyrightScanner hsc;
+  regexScanner hauth(regAuthor::getRegex(), regAuthor::getType());
+  
+  ofstream out("results.html");
+  
+  out << "<html><head><style type=\"text/css\">"
+    "body { font-family: sans-serif; } h1 { font-size: 14pt; } h2 { font-size: 10pt; } p { font-size: 10pt; } .falsepos { background-color: #FFC080; } .falseneg { background-color: #FF8080; }"
+    "</style></head><body>" << endl;
+  
+  // Scan files
+  for (int i = 0; i < NUMTESTS; i++)
+  {
+    string fileName = fileNameBase + to_string(i);
+    ifstream tstream(fileName);
+    list<match> lng, lauth, lrefs;
+    hsc.ScanFile(fileName, lng);
+    hauth.ScanFile(fileName, lauth);
+    // Merge lists lng and lauth
+    lng.merge(lauth, cmpMatches);
+    GetReferenceResults(fileName + "_raw", lrefs);
+    
+    out << "<h1>testdata" << i << "</h1>" << endl;
+    out << "<h2>HScanner</h2>" << endl;
+    Display(out, tstream, lng, lrefs, "<code>", "</code>", "<code class=\"falsepos\">", "</code>");
+    out << "<h2>Reference</h2>" << endl;
+    Display(out, tstream, lrefs, lng, "<code>", "</code>", "<code class=\"falseneg\">", "</code>");
+  }
+  out << "</body></html>" << endl;
+  cout << endl << "----- Test results written to results.html -----" << endl;
+}
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestDataCheck );

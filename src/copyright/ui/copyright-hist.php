@@ -19,9 +19,9 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_copyrightHistogram", _("Copyright/Email/URL Browser NEW"));
+define("TITLE_copyrightHistogram", _("Copyright/Email/URL/Author Browser"));
 
-class CopyrightHistogram  extends HistogramBase {
+class CopyrightHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "copyright-hist";
@@ -30,7 +30,6 @@ class CopyrightHistogram  extends HistogramBase {
     $this->agentName = "copyright";
     parent::__construct();
   }
-
 
   /**
    * @param $upload_pk
@@ -41,24 +40,33 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
-    $tableVars=array();
-    
     $type = 'statement';
     $description = _("Copyright");
-    list($VCopyright, $varsCopyright) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars['statement']=$varsCopyright;
+
+    $tableVars=array();
+
+    list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars[$type]=$varsCopyright;
 
     $type = 'email';
     $description = _("Email");
-    list($VEmail, $varsEmail) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars['email']=$varsEmail;
+
+    list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars[$type]=$varsEmail;
 
     $type = 'url';
     $description = _("URL");
-    list($VUrl, $varsURL) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars['url']=$varsURL;
 
-    return array( $VCopyright, $VEmail, $VUrl, $tableVars);
+    list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars[$type]=$varsURL;
+
+    $type = 'author';
+    $description = _("Author");
+
+    list($VAuthor, $varsAuthor) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+    $tableVars[$type]=$varsAuthor;
+
+    return array( $VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars);
   }
 
 
@@ -72,26 +80,13 @@ class CopyrightHistogram  extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VCopyright, $VEmail, $VUrl, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
+    list($VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
-    /* Combine VF and VLic */
-    $text = _("Jump to");
-    $text1 = _("Emails");
-    $text2 = _("Copyright Statements");
-    $text3 = _("URLs");
-    $V = "<table border=0 width='100%'>\n";
-    $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text1</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "<tr><td><a name=\"emails\"></a>Jump to: <a href=\"#statements\">$text2</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td><a name=\"urls\"></a>Jump To: <a href=\"#statements\">$text2</a> | <a href=\"#emails\">$text1</a></td><td></td></tr>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
-    $V .= "</table>\n";
-    $V .= "<hr />\n";
-    return array($V, $tableVars);
+    $out = $this->renderString('copyrighthist_tables.html.twig', 
+            array('contCopyright'=>$VCopyright, 'contEmail'=>$VEmail, 'contUrl'=>$VUrl, 'contAuthor'=>$VAuthor,
+                'fileList'=>$VF));
+    return array($out, $tableVars);
   }
-
-
 
   function RegisterMenus()
   {
@@ -112,8 +107,7 @@ class CopyrightHistogram  extends HistogramBase {
         menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
       }
     }
-  } // RegisterMenus()
-
+  }
 
   protected function createScriptBlock()
   {
@@ -122,9 +116,9 @@ class CopyrightHistogram  extends HistogramBase {
     $(document).ready(function() {
       tableCopyright =  createTablestatement();
       tableEmail = createTableemail();
-      tableUrl =createTableurl();
+      tableUrl = createTableurl();
+      tableAuthor = createTableauthor();
     } );
-
     ";
   }
 

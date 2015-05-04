@@ -10,7 +10,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CLIBDIR = ../c/
-CXXFLAGS_LOCAL = -fPIC $(ALL_CXXFLAGS) $(CXXFLAGS_FO) -Wextra -Weffc++
+CXXFLAGS_LOCAL = -fPIC $(FO_CXXFLAGS) -Wextra -Weffc++
 
 CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
           -DFOSSGROUP='"$(PROJECTGROUP)"' \
@@ -33,7 +33,7 @@ $(DEPENDENCY):
 	$(MAKE) -C $(CLIBDIR)
 
 $(EXE): %: %.cc $(LIB) $(VARS)
-	$(CXX) $< $(CONFDEF) $(CXXFLAGS_LOCAL) $(LIB) -o $@
+	$(CXX) $< $(CONFDEF) $(FO_CXXLDFLAGS) $(LIB) -o $@
 
 $(OBJS): %.o: %.cc %.hpp
 	$(CXX) -c $< $(CONFDEF) $(CXXFLAGS_LOCAL) -o $@

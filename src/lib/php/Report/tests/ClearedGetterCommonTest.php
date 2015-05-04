@@ -35,9 +35,9 @@ class TestClearedGetter extends ClearedGetterCommon
   protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null)
   {
     return array(
-      array("content" => "1", "text" => "t1", "uploadtree_pk" => 1),
-      array("content" => "1", "text" => "t2", "uploadtree_pk" => 2),
-      array("content" => "2", "text" => "t3", "uploadtree_pk" => 3),
+      array("content" => "1", "text" => "t1", "comments" => "c1", "uploadtree_pk" => 1),
+      array("content" => "1", "text" => "t2", "comments" => "c1", "uploadtree_pk" => 2),
+      array("content" => "2", "text" => "t3", "comments" => "c3", "uploadtree_pk" => 3),
     );
   }
 }
@@ -123,15 +123,18 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         array(
           "content" => "1",
           "text" => "t1",
+          "comments" => "c1",
           "files" => array("a/1", "a/2")
         ),
         array(
           "content" => "2",
           "text" => "t3",
+          "comments" => "c3",
           "files" => array("a/b/1")
         )
       )
     );
+    $expected = arsort($expected);
     assertThat($expected, equalTo($statements));
   }
 
@@ -174,20 +177,24 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         array(
           "content" => "1",
           "text" => "t1",
+          "comments" => "c1",
           "files" => array("a/1")
         ),
         array(
           "content" => "1",
           "text" => "t2",
+          "comments" => "c1",
           "files" => array("a/2")
         ),
         array(
           "content" => "2",
           "text" => "t3",
+          "comments" => "c3",
           "files" => array("a/b/1")
         )
       )
     );
+    $expected = arsort($expected);
     assertThat($expected, equalTo($statements));
   }
   

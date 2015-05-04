@@ -24,6 +24,7 @@ DIRS = \
 	nomos \
 	pkgagent \
 	readmeoss \
+	report \
 	reportgen \
 	reuser \
 	scheduler \

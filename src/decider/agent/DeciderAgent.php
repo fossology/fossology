@@ -112,26 +112,25 @@ class DeciderAgent extends Agent
   private function processItem(Item $item, $matches)
   {
     $itemTreeBounds = $item->getItemTreeBounds();
-    $heartbeat = 0;
+    $haveDecided = false;
     
     if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
     {
-      $heartbeat = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
     }
     
-    if (!$heartbeat && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
     {
-      $heartbeat = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
     }
 
-    $this->heartbeat($heartbeat);
+    $this->heartbeat($haveDecided ? 1 : 0);
   }
 
-  
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches)
   {
@@ -150,13 +149,13 @@ class DeciderAgent extends Agent
     {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
-    return $canDecide ? 1 : 0;
+    return $canDecide;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches)
   {
@@ -175,7 +174,7 @@ class DeciderAgent extends Agent
     {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
-    return $canDecide ? 1 : 0;
+    return $canDecide;
   }
 
   protected function remapByProjectedId($matches)

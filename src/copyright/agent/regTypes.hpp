@@ -12,37 +12,35 @@
 #ifndef REGCOPYRIGHT_H_
 #define REGCOPYRIGHT_H_
 
-#include <string>
-
-namespace regCopyright
-{
-  const std::string getRegex();
-  const std::string getType();
-}
-
 
 namespace regURL
 {
-  const std::string getRegex();
-  const std::string getType();
+  const char* getRegex();
+  const char* getType();
 }
 
 
 namespace regEmail
 {
-  const std::string getRegex();
-  const std::string getType();
+  const char* getRegex();
+  const char* getType();
+}
+
+namespace regAuthor
+{
+  const char* getRegex();
+  const char* getType();
 }
 
 namespace regEcc
 {
-  const std::string getRegex();
-  const std::string getType();
+  const char* getRegex();
+  const char* getType();
 }
 
 namespace regIp
 {
-  const std::string getRegex();
-  const std::string getType();
+  const char* getRegex();
+  const char* getType();
 }
 #endif /* REGCOPYRIGHT_H_ */

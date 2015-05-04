@@ -47,9 +47,12 @@ class ReadmeOssAgent extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
 
-    $this->agentSpecifLongOptions = array(self::UPLOAD_ADDS.':');
+    $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
   }
 
+  /**
+   * @todo without wrapper
+   */
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
@@ -107,7 +110,9 @@ class ReadmeOssAgent extends Agent
   }
 
   private function updateReportTable($uploadId, $jobId, $filename){
-    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
+    $this->dbManager->insertTableRow('reportgen',
+            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$filename),
+            __METHOD__);
   }
 
   private function generateReport($contents, $packageName)
