@@ -1,14 +1,21 @@
 <?php
 /*
- Author: Daniele Fognini
- Copyright (C) 2014, Siemens AG
+Author: Daniele Fognini
+Copyright (C) 2014-2015, Siemens AG
 
- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 namespace Fossology\Lib\Agent;
 
@@ -34,8 +41,10 @@ abstract class Agent extends Object
   protected $groupId;
   protected $jobId;
 
-  protected $schedulerHandledOpts = "c:";
-  protected $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start");
+  protected $agentSpecifOptions = "";
+  protected $agentSpecifLongOptions = array();
+
+  protected $args = array();
 
   /** @var DbManager dbManager */
   protected $dbManager;
@@ -46,7 +55,7 @@ abstract class Agent extends Object
   /** @var ContainerBuilder */
   protected $container;
 
-  private $schedulerMode;
+  protected $schedulerMode;
 
   function __construct($agentName, $version, $revision) {
     $this->agentName = $agentName;
@@ -70,15 +79,26 @@ abstract class Agent extends Object
     $this->agentId = $this->agentDao->getCurrentAgentId($this->agentName, $this->agentDesc, $this->agentRev);
   }
 
+
   function scheduler_connect()
   {
-    $args = getopt($this->schedulerHandledOpts, $this->schedulerHandledLongOpts);
+    $schedulerHandledOpts = "c:";
+    $schedulerHandledLongOpts = array("userID:","groupID:","jobId:","scheduler_start",'config:');
 
+    $longOpts = array_merge($schedulerHandledLongOpts, $this->agentSpecifLongOptions);
+    $shortOpts = $schedulerHandledOpts . $this->agentSpecifOptions;
+
+    $args = getopt($shortOpts, $longOpts);
+    
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = $args['userID'];
     $this->groupId = $args['groupID'];
     $this->jobId = $args['jobId'];
+
+    unset ($args['jobId']);
+    unset ($args['userID']);
+    unset ($args['groupID']);
 
     $this->initArsTable();
 
@@ -89,6 +109,8 @@ abstract class Agent extends Object
       pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
       pcntl_alarm(ALARM_SECS);
     }
+
+    $this->args = $args;
   }
 
   static function heartbeat_handler($signo)
@@ -119,7 +141,7 @@ abstract class Agent extends Object
   {
     debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     $this->scheduler_disconnect($exitvalue);
-    exit($exitvalue);
+    throw new \Exception('agent fail in '.__FILE__.':'.__LINE__,$exitvalue);
   }
 
   function scheduler_disconnect($exitvalue)
@@ -165,35 +187,35 @@ abstract class Agent extends Object
   {
     while (false !== ($line = $this->scheduler_current()))
     {
+      $this->heartbeat(0);
+
       $uploadId = intval($line);
-
-      if ($uploadId > 0)
+      if ($uploadId <= 0)
       {
-        $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
-
-        if ($arsId<0) {
-          print "cannot insert ars record";
-          $this->bail(2);
-        }
-
-        try {
-          $success = $this->processUploadId($uploadId);
-        } catch(\Exception $e) {
-          print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
-          print "";
-          print $e->getTraceAsString();
-          $success = false;
-        }
-
-        $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
-
-        if (!$success) {
-          print "agent failed on uploadId=$uploadId";
-          $this->bail(1);
-        }
+        continue;
       }
 
-      $this->heartbeat(0);
+      $arsId = $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId);
+      if ($arsId<0) {
+        print "cannot insert ars record";
+        $this->bail(2);
+      }
+
+      try {
+        $success = $this->processUploadId($uploadId);
+      }
+      catch(\Exception $e) {
+        print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
+        print $e->getTraceAsString();
+        $success = false;
+      }
+
+      $this->agentDao->writeArsRecord($this->agentName, $this->agentId, $uploadId, $arsId, $success);
+
+      if (!$success) {
+        print "agent failed on uploadId=$uploadId";
+        $this->bail(1);
+      }
     }
   }
 }
