@@ -87,6 +87,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -98,12 +99,14 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()
@@ -212,7 +215,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $licId1 = $licenseRef1->getId();
 
     $agentNomosId = 6;
-    $agentMonkId = 5;
     $pfile = 4;
 
     $this->dbManager->queryOnce("DELETE FROM license_file");
@@ -304,7 +306,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run decider');
     $this->assertEquals($retCode, 0, 'decider failed: '.$output);
-
     assertThat($this->getHeartCount($output), equalTo(count($itemIds)));
 
     $this->rmRepo();
@@ -357,7 +358,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed: '.$output);
-
     assertThat($this->getHeartCount($output), equalTo(1));
 
     $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);

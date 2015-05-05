@@ -20,7 +20,6 @@ namespace Fossology\DeciderJob\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
-use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -31,7 +30,6 @@ use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
-include_once(__DIR__.'/AgentTestMockHelper.php');
 
 include_once(dirname(dirname(__DIR__)).'/agent/DeciderJobAgent.php');
 
