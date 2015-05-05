@@ -32,7 +32,6 @@ use Mockery as M;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
-include_once(__DIR__.'/AgentTestMockHelper.php');
 
 include_once(dirname(dirname(__DIR__)).'/agent/DeciderAgent.php');
 
@@ -98,7 +97,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
-
+    
     $exitval = 0;
 
     ob_start();

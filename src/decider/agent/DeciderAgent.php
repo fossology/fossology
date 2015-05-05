@@ -37,7 +37,8 @@ class DeciderAgent extends Agent
 {
   const RULES_NOMOS_IN_MONK = 0x1;
   const RULES_NOMOS_MONK_NINKA = 0x2;
-  const RULES_ALL = 0x3; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA -> feature not available in php5.3
+  const RULES_BULK_REUSE = 0x4;
+  const RULES_ALL = 0x7; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int */
   private $activeRules;
@@ -55,8 +56,10 @@ class DeciderAgent extends Agent
   private $decisionTypes;
   /** @var LicenseMap */
   private $licenseMap = null;
+  /** @var int */
+  private $licenseMapUsage = null;
 
-  function __construct()
+  function __construct($licenseMapUsage=null)
   {
     parent::__construct(AGENT_DECIDER_NAME, AGENT_DECIDER_VERSION, AGENT_DECIDER_REV);
 
@@ -66,27 +69,25 @@ class DeciderAgent extends Agent
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
-  }
 
-  function scheduler_connect($licenseMapUsage=null)
-  {
-    parent::scheduler_connect();
-    $args = getopt($this->schedulerHandledOpts."r:", $this->schedulerHandledLongOpts);
-    $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
-
-    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $licenseMapUsage);
+    $this->licenseMapUsage = $licenseMapUsage;
+    $this->agentSpecifOptions = "r:";
   }
 
   function processUploadId($uploadId)
   {
+    $args = $this->args;
+    $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
+    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
+
     $groupId = $this->groupId;
 
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
       $itemTreeBounds = $item->getItemTreeBounds();
-      $matches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
-      $matches = $this->remapByProjectedId($matches);
+      $unMappedMatches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+      $matches = $this->remapByProjectedId($unMappedMatches);
 
       $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
@@ -98,32 +99,38 @@ class DeciderAgent extends Agent
       }
       $this->processItem($item, $matches);
     }
+
+    if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
+    {
+      $bulkReuser = new BulkReuser();
+      $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $this->jobId);
+    }
+    
     return true;
   }
 
   private function processItem(Item $item, $matches)
   {
     $itemTreeBounds = $item->getItemTreeBounds();
-    $heartbeat = 0;
+    $haveDecided = false;
     
-    if ($this->activeRules&self::RULES_NOMOS_IN_MONK == self::RULES_NOMOS_IN_MONK)
+    if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
     {
-      $heartbeat = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
     }
     
-    if (!$heartbeat && $this->activeRules&self::RULES_NOMOS_MONK_NINKA == self::RULES_NOMOS_MONK_NINKA)
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
     {
-      $heartbeat = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
     }
-    
-    $this->heartbeat($heartbeat);
+
+    $this->heartbeat($haveDecided ? 1 : 0);
   }
 
-  
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMonkNinka(ItemTreeBounds $itemTreeBounds, $matches)
   {
@@ -142,13 +149,13 @@ class DeciderAgent extends Agent
     {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
-    return $canDecide ? 1 : 0;
+    return $canDecide;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param type $matches
-   * @return int $heatbeat (1=made decision)
+   * @param LicenseMatch[] $matches
+   * @return boolean
    */
   private function autodecideNomosMatchesInsideMonk(ItemTreeBounds $itemTreeBounds, $matches)
   {
@@ -167,7 +174,7 @@ class DeciderAgent extends Agent
     {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
-    return $canDecide ? 1 : 0;
+    return $canDecide;
   }
 
   protected function remapByProjectedId($matches)

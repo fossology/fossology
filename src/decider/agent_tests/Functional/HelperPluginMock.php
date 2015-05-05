@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,20 +16,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Lib\Plugin;
+namespace Fossology\Decider;
 
-interface Plugin {
-  function execute();
+use Mockery as M;
 
-  function preInstall();
-  function postInstall();
-
-  function unInstall();
-
-  /**
-   * @return string
-   */
-  function getName();
-
-  function __toString();
+$deciderPlugin = M::mock();//'Fossology\\DeciderJob\\UI\\DeciderJobAgentPlugin');
+$deciderPlugin->shouldReceive('AgentAdd')->withArgs(array(16,2,anything(), arrayWithSize(1)))->once();
+$GLOBALS['xyyzzzDeciderJob'] = $deciderPlugin;
+function plugin_find($x){
+  return $GLOBALS['xyyzzzDeciderJob'];
+}
+function IsAlreadyScheduled($jobId, $agentName, $uploadId){
+  return 177;
 }

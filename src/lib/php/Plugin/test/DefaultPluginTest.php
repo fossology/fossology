@@ -20,6 +20,7 @@ namespace Fossology\Lib\Plugin;
 
 
 use Exception;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
@@ -137,11 +138,11 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
 
   public function testGetPermission()
   {
-    assertThat($this->plugin->getDBaccess(), is(TestPlugin::PERM_NONE));
+    assertThat($this->plugin->getDBaccess(), is(Auth::PERM_NONE));
 
-    $this->plugin = new TestPlugin($this->name, array(TestPlugin::PERMISSION => TestPlugin::PERM_WRITE));
+    $this->plugin = new TestPlugin($this->name, array(TestPlugin::PERMISSION => Auth::PERM_WRITE));
 
-    assertThat($this->plugin->getDBaccess(), is(TestPlugin::PERM_WRITE));
+    assertThat($this->plugin->getDBaccess(), is(Auth::PERM_WRITE));
   }
 
   public function testIsRequiresLogin()

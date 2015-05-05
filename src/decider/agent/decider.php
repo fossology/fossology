@@ -22,8 +22,9 @@ namespace Fossology\Decider;
 use Fossology\Lib\BusinessRules\LicenseMap;
 
 include_once(__DIR__ . "/DeciderAgent.php");
+include_once(__DIR__ . "/BulkReuser.php");
 
-$agent = new DeciderAgent();
-$agent->scheduler_connect(LicenseMap::CONCLUSION);
+$agent = new DeciderAgent(LicenseMap::CONCLUSION);
+$agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->scheduler_disconnect(0);
