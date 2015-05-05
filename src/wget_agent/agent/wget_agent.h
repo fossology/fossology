@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __USE_LARGEFILE64
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,6 +39,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define lstat64(x,y) lstat(x,y)
 #define stat64(x,y) stat(x,y)
+#define systemError(line, error, cmd)  LOG_FATAL("[%s:%d] Error exit: %d, CMD:%s\n", __FILE__, line, WEXITSTATUS(error), cmd);
+
 typedef struct stat stat_t;
 
 #include "libfossology.h"
