@@ -14,10 +14,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
-
 include $(VARS)
 
 all:
@@ -38,5 +38,4 @@ phpvendors:
 
 .PHONY: all test coverage clean
 
-# include makefile dependencies from the TOP directory
 include $(DEPS)
