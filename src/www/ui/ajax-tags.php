@@ -38,15 +38,26 @@ class ajax_tags extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    $V="";
+
     $item = GetParm("uploadtree_pk",PARM_INTEGER);
     /* get uploadtree_tablename from $Item */
     $uploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk='$item'");
     $uploadRec = GetSingleRec("upload", "where upload_pk='$uploadtreeRec[upload_fk]'");
-    $uploadtree_tablename = empty($uploadRec['uploadtree_tablename']) ? "uploadtree" : $uploadRec['uploadtree_tablename'];
-    $allTags = GetAllTags($item, true, $uploadtree_tablename);
-    $tags = implode(',', $allTags);
-    return new Response($tags, Response::HTTP_OK,array('Content-type'=>'text/plain'));
+    if (empty($uploadRec['uploadtree_tablename'])) {
+      $uploadtree_tablename = "uploadtree";
+    }
+    else {
+      $uploadtree_tablename = $uploadRec['uploadtree_tablename'];
+    }
+
+    $List = GetAllTags($item, true, $uploadtree_tablename);
+    foreach($List as $L)
+    {
+      $V .= $L['tag_name'] . ",";
+    }
+
+    return new Response($V, Response::HTTP_OK,array('content-type'=>'text/plain'));
   }
 }
 $NewPlugin = new ajax_tags;
