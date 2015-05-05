@@ -15,6 +15,7 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /*************************************************
  Library of common functions for permissions and groups.
@@ -172,6 +173,7 @@
   }
 
   /* @brief Get array of groups that this user has admin access to
+   * @depricated use UserDao->getAdminGroupMap
    * @param $user_pk
    *
    * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
@@ -183,7 +185,7 @@
 
     $GroupArray = array();
 
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
     {
       $sql = "select group_pk, group_name from groups";
     }
@@ -217,21 +219,20 @@
   function GetUploadPerm($upload_pk, $user_pk=0)
   {
     global $PG_CONN;
-    global $SysConf;
 
-    if ($user_pk == 0) $user_pk = $SysConf['auth']['UserId'];
+    if ($user_pk == 0) $user_pk = Auth::getUserId ();
 
-    if (@$_SESSION['UserLevel'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
     //for the command line didn't have session info
     $UserRow = GetSingleRec("Users", "where user_pk='$user_pk'");
-    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return PERM_ADMIN;
+    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
 
     $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1) 
-      $perm = PERM_NONE;
+      $perm = Auth::PERM_NONE;
     else
     {
       $row = pg_fetch_assoc($result);
@@ -245,7 +246,7 @@
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     if (pg_num_rows($result) < 1) 
-      $perm2 = PERM_NONE;
+      $perm2 = Auth::PERM_NONE;
     else
     {
       $row = pg_fetch_assoc($result);
@@ -265,9 +266,8 @@
   function DeleteGroup($group_pk) 
   {
     global $PG_CONN;
-    global $SysConf;
 
-    $user_pk = $SysConf['auth']['UserId'];
+    $user_pk = Auth::getUserId();
 
     /* Make sure groupname looks valid */
     if (empty($group_pk)) 
@@ -292,7 +292,7 @@
      * Look through all the group users (table group_user_member)
      * and make sure the user has admin access.
      */
-    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
     {
       $sql = "SELECT *  FROM group_user_member WHERE group_fk = '$group_pk' and user_fk='$user_pk' and group_perm=1";
       $result = pg_query($PG_CONN, $sql);
@@ -343,5 +343,4 @@
     pg_free_result($result);
 
     return (NULL);
-  } // DeleteGroup()
-?>
+  }

@@ -97,12 +97,14 @@ $(document).ready(function () {
 function filterLicense(licenseShortName) {
   var searchField = $('#dirlist_filter input');
   searchField.val(licenseShortName);
+  resetFilters();
   searchField.trigger('keyup');
 }
 
 function clearSearchLicense() {
   var searchField =  $('#lichistogram_filter input');
   searchField.val('');
+  resetFilters();
   searchField.trigger('keyup.DT');
 }
 
@@ -110,6 +112,7 @@ function clearSearchFiles() {
   $('#dirlist_filter_license').val('');
   var searchField = $('#dirlist_filter input');
   searchField.val('');
+  resetFilters();
   searchField.trigger('keyup');
 }
 
@@ -154,7 +157,38 @@ function scheduleScan(upload, agentName, resultEntityKey) {
 
 function dressContents(data, type, full) {
   if (type === 'display')
-    return '<a href=\'#\' onclick=\'filterLicense(\"' + data + '\")\'>' + data + '</a>';
+    return '<a href=\'#\' onclick=\'filterLicense(\"scan:' + data[1] + '\")\'>' + data[0] + '</a>';
   return data;
 }
 
+$(document).ready(function () {
+  $('#filterCBoxOpen').change(function(){
+    var searchField = $('#dirlist_filter input');
+    var searchString = searchField.val();
+    if($(this).is(':checked')){
+      searchString += ' open:1';
+    }
+    else{
+      searchString = searchString.replace(/open:[^\s]*/g,''); 
+    }
+    searchField.val(searchString);
+    searchField.trigger('keyup');
+  });
+});
+
+function filterScan(id,keyword) {
+  var searchField = $('#dirlist_filter input');
+  var searchString = searchField.val().replace(new RegExp(keyword+':[^\s]*','g'),'');
+  if(id>0) {
+    searchString = searchString+' '+keyword+':'+id;
+  }
+  searchField.val(searchString.trim());
+  searchField.trigger('keyup');
+}
+
+function resetFilters()
+{
+  $('#scanFilter').val(0);
+  $('#conFilter').val(0);
+  $('#filterCBoxOpen').attr('checked',false);
+}

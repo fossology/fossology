@@ -17,10 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_ui_browse", _("Browse"));
@@ -248,7 +250,7 @@ class ui_browse extends FO_Plugin
     if (!empty($Upload))
     {
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ)
+      if ($UploadPerm < Auth::PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
@@ -272,6 +274,18 @@ class ui_browse extends FO_Plugin
     }
 
     $this->vars['content'] = $output;
+    $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
+    if (!empty($modsUploadMulti))
+    {
+      $hook = '';
+      foreach($modsUploadMulti as $mod)
+      {
+        $text = $GLOBALS['Plugins'][$mod]->title;
+        $hook .= '<br/><input type="hidden" name="mod" value="'.$mod.'"/><input type="submit" value="'.$text.'"/>';
+      }
+      $this->vars['uploadMultiSelectHook'] = $hook;
+    }
+
     return $this->render('ui-browse.html.twig');
   }
 
@@ -322,7 +336,7 @@ class ui_browse extends FO_Plugin
       $row = $dbManager->getSingleRow($sql, array($uploadTreeId));
       $Upload = $row['upload_fk'];
       $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < PERM_READ)
+      if ($UploadPerm < Auth::PERM_READ)
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
@@ -349,28 +363,27 @@ class ui_browse extends FO_Plugin
 
     if (empty($Upload))
     {
-      $html .= $this->ShowFolder($Folder, $show);
+      return $html . $this->ShowFolder($Folder, $show);
     }
-    else {
-      if (empty($uploadTreeId))
+
+    if (empty($uploadTreeId))
+    {
+      $row = $dbManager->getSingleRow(
+          $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
+          $sqlLog=__METHOD__.".getTreeRoot");
+      if ($row)
       {
-        $row = $dbManager->getSingleRow(
-            $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
-            $sqlLog=__METHOD__.".getTreeRoot");
-        if ($row)
-        {
-          $uploadTreeId = $row['uploadtree_pk'];
-        } else
-        {
-          $this->vars['message'] = _("Missing upload tree parent for upload");
-          return $this->render('include/base.html.twig');
-        }
+        $uploadTreeId = $row['uploadtree_pk'];
       }
-      $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
-      $this->vars['content'] = $html;
-      return $this->render('include/base.html.twig');
+      else
+      {
+        $this->vars['message'] = _("Missing upload tree parent for upload");
+        return $this->render('include/base.html.twig');
+      }
     }
-    return $html;
+    $html .= $this->ShowItem($Upload, $uploadTreeId, $show, $Folder, $uploadtree_tablename);
+    $this->vars['content'] = $html;
+    return $this->render('include/base.html.twig');
   }
 
   /**

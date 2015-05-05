@@ -25,6 +25,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\Lib\UI\MenuHook;
 use Fossology\Lib\Util\DataTablesUtility;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,11 +35,11 @@ class AjaxBrowse extends DefaultPlugin
 {
   const NAME = "browse-processPost";
 
-  /** @var  UploadDao $uploadDao */
+  /** @var UploadDao $uploadDao */
   private $uploadDao;
-  /** @var  UserDao $userDao */
+  /** @var UserDao $userDao */
   private $userDao;
-  /** @var  DbManager dbManager */
+  /** @var DbManager dbManager */
   private $dbManager;
   /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
@@ -52,7 +53,7 @@ class AjaxBrowse extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => self::PERM_READ
+        self::PERMISSION => Auth::PERM_READ
       ));
         
     global $container;
@@ -141,7 +142,7 @@ class AjaxBrowse extends DefaultPlugin
     $rowCounter = 0;
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < PERM_READ))
+      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < Auth::PERM_READ))
       {
         continue;
       }
@@ -212,6 +213,14 @@ class AjaxBrowse extends DefaultPlugin
     {
       $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId' title='" . htmlentities($textTitle) . "' >$text</a>]";
     }
+    
+    $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
+    if (!empty($modsUploadMulti))
+    {
+      $text = _('mark for action below');
+      $nameColumn .= ' [<input type="checkbox" name="uploads[]" style="vertical-align:bottom;margin:0px;" value="'.$uploadId.'"/>'.$text.']';
+    }
+    
     $dateCol = substr($row['upload_ts'], 0, 19);
     $pairIdPrio = array($uploadId, floatval($row[UploadBrowseProxy::PRIO_COLUMN]));
     if (!$this->userPerm && 4 == $row['status_fk'])
@@ -234,10 +243,24 @@ class AjaxBrowse extends DefaultPlugin
     }
     $rejectableUploadId = ($this->userPerm || $row['status_fk'] < 4) ? $uploadId : 0;
     $tripleComment = array($rejectableUploadId, $row['status_fk'], htmlspecialchars($row['status_comment']));
-    $output = array($nameColumn, $currentStatus, $tripleComment, $currentAssignee, $dateCol, $pairIdPrio);
+    
+    $sql = "SELECT rf_pk, rf_shortname FROM upload_clearing_license ucl, license_ref"
+            . " WHERE ucl.group_fk=$1 AND upload_fk=$2 AND ucl.rf_fk=rf_pk";
+    $stmt = __METHOD__.'.collectMainLicenses';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array(Auth::getGroupId(),$uploadId));
+    $mainLicenses = array();
+    while($lic=$this->dbManager->fetchArray($res)){
+      $mainLicenses[] = '<a onclick="javascript:window.open(\''.Traceback_uri()
+              ."?mod=popup-license&rf=$lic[rf_pk]','License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');"
+              .'" href="javascript:;">'.$lic['rf_shortname'].'</a>'
+              ."<img onclick=\"removeMainLicense($uploadId,$lic[rf_pk]);\" class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></img>";
+    }
+    $this->dbManager->freeResult($res);
+
+    $output = array($nameColumn, $currentStatus, $tripleComment, implode(', ', $mainLicenses), $currentAssignee, $dateCol, $pairIdPrio);
     return $output;
   }
-  
 
   /**
    * @param string $selectElementName
@@ -314,7 +337,7 @@ class AjaxBrowse extends DefaultPlugin
 
   private function getOrderString()
   {
-    $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
+    $columnNamesInDatabase = array('upload_filename', 'upload_clearing.status_fk', 'UNUSED', 'UNUSED', 'upload_clearing.assignee', 'upload_ts', 'upload_clearing.priority');
 
     $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase);
 

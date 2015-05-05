@@ -26,19 +26,11 @@ use Monolog\Logger;
 
 class CopyrightDao extends Object
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var UploadDao
-   */
+  /** @var UploadDao */
   private $uploadDao;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
 
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
@@ -47,7 +39,6 @@ class CopyrightDao extends Object
     $this->uploadDao = $uploadDao;
     $this->logger = new Logger(self::className());
   }
-  
   
   /**
    * @param int $uploadTreeId
@@ -59,7 +50,8 @@ class CopyrightDao extends Object
   public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
                                                                         'statement' => Highlight::COPYRIGHT,
                                                                         'email' => Highlight::EMAIL,
-                                                                        'url' => Highlight::URL)
+                                                                        'url' => Highlight::URL,
+                                                                        'author' => Highlight::AUTHOR)
    )
   {
     $pFileId = 0;
@@ -93,8 +85,115 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
-  
-  
-  
-  
+  public function saveDecision($tableName,$pfileId, $userId , $clearingType,
+                                         $description, $textFinding, $comment){
+    $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
+        'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
+    $this->dbManager->insertTableRow($tableName, $assocParams, $sqlLog=__METHOD__);
+  }
+
+  public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
+  {
+    $statementName = __METHOD__.$tableName.$uploadTreeTableName;
+
+    $params = array();
+    $whereClause = "";
+    $distinctContent = "";
+    $tableNameDecision = $tableName."_decision";
+
+    if ($uploadTreeTableName === "uploadtree_a")
+    {
+      $params []= $uploadId;
+      $whereClause .= " AND UT.upload_fk = $".count($params);
+      $statementName .= ".withUI";
+    }
+    if($type == "skipcontent"){
+      $distinctContent = "";
+    }else{
+      $distinctContent = ", C.content";
+    }
+    if ($type !== null && $type != "skipcontent")
+    {
+      $params []= $type;
+      $whereClause .= " AND C.type = $".count($params);
+      $statementName .= ".withType";
+    }
+
+    $clearingTypeClause = null;
+    if ($onlyCleared)
+    {
+      $joinType = "INNER";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $clearingTypeClause = "WHERE clearing_decision_type_fk = $".count($params);
+        $statementName .= ".withDecisionType";
+      }
+      else
+      {
+        throw new \Exception("requested only cleared but no type given");
+      }
+    }
+    else
+    {
+      $joinType = "LEFT";
+      if ($decisionType !== null)
+      {
+        $params []= $decisionType;
+        $clearingTypeClause = "WHERE clearing_decision_type_fk IS NULL OR clearing_decision_type_fk = $".count($params);
+        $statementName .= ".withDecisionType";
+      }
+    }
+    $statementName .= ".".$joinType."Join";
+
+    if ($extrawhere !== null)
+    {
+      $whereClause .= " AND ". $extrawhere;
+      $statementName .= "._".$extrawhere."_";
+    }
+
+    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk$distinctContent)
+             CD.description as description, CD.textfinding as textfinding,
+             CD.comment as comments, UT.uploadtree_pk as uploadtree_pk,
+             CD.clearing_decision_type_fk AS clearing_decision_type_fk,
+             C.content AS content
+            from $tableName C
+            INNER JOIN $uploadTreeTableName UT
+            ON C.pfile_fk = UT.pfile_fk
+            $joinType JOIN $tableNameDecision CD
+            ON C.pfile_fk = CD.pfile_fk
+            WHERE C.content IS NOT NULL $whereClause
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
+
+    if ($clearingTypeClause !== null)
+    {
+      $sql = "SELECT * FROM ($latestInfo) AS latestInfo $clearingTypeClause";
+    }
+    else
+    {
+      $sql = $latestInfo;
+    }
+
+    $this->dbManager->prepare($statementName, $sql);
+    $sqlResult = $this->dbManager->execute($statementName, $params);
+    $result = $this->dbManager->fetchAll($sqlResult);
+    $this->dbManager->freeResult($sqlResult);
+
+    return $result;
+  }
+
+  public function getDecision($tableName,$pfileId){
+
+    $statementName = __METHOD__.$tableName;
+    $sql = "SELECT * from $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+
+    $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
+
+    $description = $res['description'];
+    $textFinding = $res['textfinding'];
+    $comment = $res['comment'];
+    $decisionType = $res['clearing_decision_type_fk'];
+    return array($description,$textFinding,$comment, $decisionType);
+  }
+
 }
