@@ -21,7 +21,7 @@
  * \brief "Enable/Disable tag
  */
 
-define("TITLE_admin_tag_manage", _("Enable/Disable Tag"));
+define("TITLE_admin_tag_manage", _("Enable/Disable Tag Display"));
 
 class admin_tag_manage extends FO_Plugin
 {
@@ -152,7 +152,7 @@ class admin_tag_manage extends FO_Plugin
 
 
     $V .= "<form name='formy' method='post'>\n"; // no url = this url
-    $V .= _("Select an uploaded file to enable/disable.\n");
+    $V .= _("Displaying tags while browsing can be slow for large uploads.  This interface allows you to select an upload to disable (or enable) the tag display.  By default the tag display is enabled.<p>\n");
 
     $V .= "<ol>\n";
     $text = _("Select the folder containing the upload you wish to enable/disable:");

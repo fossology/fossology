@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2013-2015 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
  * \brief Create tag without tagging anything
  */
 
-define("TITLE_admin_tag", _("Creat Tag"));
+define("TITLE_admin_tag", _("Create Tag"));
 
 class admin_tag extends FO_Plugin
 {
