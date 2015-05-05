@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -147,7 +147,7 @@ class upload_url extends FO_Plugin {
     $text1 = _("has been queued. It is");
     $msg .= "$text $Name $text1 ";
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print displayMessage($msg,$keep);
+    $this->vars['message'] = $msg.$keep;
     return (NULL);
   } // Upload()
 
