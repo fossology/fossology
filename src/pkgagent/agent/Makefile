@@ -14,63 +14,56 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-LANG=C
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
-include $(VARS)
-TESTDIRS=../agent_tests
-LOCAL_CFLAGS=$(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
 
-EXE=pkgagent
-HDRS=pkgagent.h
-LOCAL_RPM_4_4_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4
-LOCAL_RPM_CFLAGS=$(LOCAL_CFLAGS) -D_RPM_4_4_COMPAT
+LANG = C
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
+
+CFLAGS_LOCAL = $(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
+
+EXE = pkgagent
+HDRS = pkgagent.h
+CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
+CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
-	@echo "make pkgagent agent and test"
 
 $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
-	@echo "make pkgagent agent"
-	$(CC) main.c pkgagent.o  $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
+	$(CC) main.c pkgagent.o $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-		$(CC) -c $< $(LOCAL_RPM_CFLAGS); \
+	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
+		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
-		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null ; then \
-			$(CC) -c $< $(LOCAL_RPM_CFLAGS); \
+		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 		else \
-			$(CC) -c $< $(LOCAL_RPM_4_4_CFLAGS); \
+			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
+		fi \
+	fi
+
+pkgagent_cov.o: pkgagent.c pkgagent.h
+	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
+		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
+	else \
+		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
+			$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
+		else \
+			$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
 		fi \
 	fi
 
 install: all
-	@echo "make pkgagent agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make pkgagent agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
-test: all
-	$(MAKE) -C $(TESTDIRS) test
-
-coverage: pkgagent_cov.o
-	$(MAKE) -C $(TESTDIRS) coverage
-
-pkgagent_cov.o: pkgagent.c pkgagent.h
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-		$(CC) -c $< $(COV_CFLAGS) $(LOCAL_RPM_CFLAGS) -o $@; \
-	else \
-		$(CC) -c $< $(COV_CFLAGS) $(LOCAL_RPM_4_4_CFLAGS) -o $@; \
-	fi
-
 clean:
-	@echo "make pkgagent agent clean"
-	rm -f $(EXE) *.o core *.gc*; \
-	$(MAKE) -C $(TESTDIRS) clean
+	rm -f $(EXE) *.o core *.gc*
+
+.PHONY: all install uninstall clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

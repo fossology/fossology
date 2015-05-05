@@ -32,7 +32,7 @@
 
 #define PG_ERRCODE_UNIQUE_VIOLATION "23505"
 #define FOSSY_EXIT( XY , XZ) printf(" %s %s,%d", XY , __FILE__, __LINE__);  Bail( XZ );
-
+#define LICENSE_REF_TABLE "ONLY license_ref"
 
 
 /** shortname cache very simple nonresizing hash table */

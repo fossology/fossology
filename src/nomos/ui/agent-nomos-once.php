@@ -16,7 +16,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file agent-nomos-once.php
@@ -132,11 +134,11 @@ class agent_nomos_once extends FO_Plugin
 
     /* Only register with the menu system if the user is logged in. */
     if (!empty($_SESSION['User'])) {
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
         menu_insert("Main::Upload::One-Shot Analysis", $this->MenuOrder, $this->Name, $this->MenuTarget);
       }
       // Debugging changes to license analysis
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ADMIN) {
+      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) {
         $URI = $this->Name . Traceback_parm_keep(array(
           "format",
           "item"

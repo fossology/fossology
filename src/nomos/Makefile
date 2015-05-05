@@ -15,49 +15,45 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# Makefile for nomos
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
+MOD_NAME = nomos
+
 DIRS = agent ui
 TESTDIR = agent_tests
-MOD_NAME=nomos
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
-# generate the VERSION file
 VERSIONFILE:
-	$(call WriteVERSIONFile,"nomos")
+	$(call WriteVERSIONFile,$(MOD_NAME))
 
 install: all
-	@echo "make $(MOD_NAME) install"
-	$(call dirloop,install)
-	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	$(call DIR_LOOP,install)
 	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
+	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
 clean:
-	rm -rf VERSION
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
+	rm -f VERSION
 
-.PHONY: all install uninstall clean test VERSIONFILE
+.PHONY: all test coverage VERSIONFILE install uninstall clean

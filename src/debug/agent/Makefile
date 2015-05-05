@@ -20,12 +20,6 @@ DIR = $(realpath .)
 all:
 	@echo "make nothing in $(DIR)"
 
-test:
-	@echo "make test nothing in $(DIR)"
-
-coverage:
-	@echo "make coverage nothing in $(DIR)"
-
 install:
 	@echo "make install nothing in $(DIR)"
 
@@ -35,4 +29,4 @@ uninstall:
 clean:
 	@echo "make uninstall nothing in $(DIR)"
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all install uninstall clean

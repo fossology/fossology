@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
@@ -23,12 +25,16 @@ define("TITLE_maintagent", _("FOSSology Maintenance"));
  * \brief Queue the maintenance agent with the requested parameters
  */
 class maintagent extends FO_Plugin {
-  public $Name = "maintagent";
-  public $Title = TITLE_maintagent;
-  public $Version = "1.0";
-  public $MenuList = "Admin::Maintenance";
-  public $DBaccess = PLUGIN_DB_ADMIN;
 
+  public function __construct()
+  {
+    $this->Name = "maintagent";
+    $this->Title = TITLE_maintagent;
+    $this->MenuList = "Admin::Maintenance";
+    $this->DBaccess = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
+  
   /**
    * \brief queue the job
    *
@@ -43,14 +49,16 @@ class maintagent extends FO_Plugin {
      * They look like _REQUEST["a"] = "a", _REQUEST["b"]="b", ...
      */
     $options = "-";
-    foreach($_REQUEST as $key=>$value) if ($key == $value) $options .= $value;
+    foreach ($_REQUEST as $key => $value) {
+      if ($key == $value)
+        $options .= $value;
+    }
 
     /* Create the maintenance job */
-    $user_pk = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
-    $upload_pk = 0;  // dummy
+    $user_pk = Auth::getUserId();
+    $groupId = Auth::getGroupId();
 
-    $job_pk = JobAddJob($user_pk, $groupId, "Maintenance", $upload_pk);
+    $job_pk = JobAddJob($user_pk, $groupId, "Maintenance");
     if (empty($job_pk) || ($job_pk < 0)) return _("Failed to insert job record");
 
     $jq_pk = JobQueueAdd($job_pk, "maintagent", NULL, NULL, NULL, NULL, $options);
@@ -77,6 +85,7 @@ class maintagent extends FO_Plugin {
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
               //       "g"=>_("Remove orphaned gold files."),
+                     "N"=>_("Normalize priority "),
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),
                      "R"=>_("Remove uploads with no pfiles."),
@@ -113,34 +122,19 @@ class maintagent extends FO_Plugin {
   }
 
 
-
-  /**
-   * \brief Generate the text for this plugin.
-   */
-  function Output() 
+  public function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)  return;
-
     $V = "";
-
     /* If this is a POST, then process the request. */
     $queue = GetParm('queue', PARM_STRING);
-
     if (!empty($queue))
     {
       $Msg = $this->QueueJob();
       $V .= "<font style='background-color:gold'>" . $Msg . "</font>";
     }
-    
     $V .= $this->DisplayForm();
-
-
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ("$V");
-    return;
+    return $V;
   }
-};
+}
+
 $NewPlugin = new maintagent;
-?>

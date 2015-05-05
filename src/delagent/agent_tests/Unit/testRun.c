@@ -50,7 +50,7 @@ int DelagentDBInit()
 
   memset(CMD, '\0', sizeof(CMD));
   //sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
-  sprintf(CMD, "sudo su postgres -c 'pg_restore -d %s ../testdata/testdb_all.tar'", get_db_name());
+  sprintf(CMD, "pg_restore -Ufossy -d %s ../testdata/testdb_all.tar", get_db_name());
   printf("restore database command: %s\n", CMD);
   rc = system(CMD); 
   //if (rc != 0)

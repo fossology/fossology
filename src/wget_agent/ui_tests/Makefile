@@ -14,11 +14,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 all:
-	@echo "No wget_agent agent_tests"
+	@echo "nothing to do"
+
+test:
+	@echo "nothing to do"
+
+coverage:
+	@echo "nothing to do"
+
 clean:
-	@echo "No wget_agent agent_tests clean"
-install:
-	@echo "No wget_agent agent_tests install"
-uninstall:
-	@echo "No wget_agent agent_tests uninstall"
+	@echo "nothing to do"
+
+.PHONY: all test coverage clean

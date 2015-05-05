@@ -16,59 +16,74 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Plugin\Plugin;
+
 define("TITLE_core_debug", _("Debug Plugins"));
 
 class core_debug extends FO_Plugin
 {
-  var $Name       = "debug";
-  var $Title      = TITLE_core_debug;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::Debug Plugins";
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "debug";
+    $this->Title      = TITLE_core_debug;
+    $this->MenuList   = "Help::Debug::Debug Plugins";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * \brief display the loaded menu and plugins.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    $V="";
-    global $Plugins;
-    switch($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $text = _("Plugin Summary");
-        $V .= "<H2>$text</H2>";
-        foreach ($Plugins as $key => $val)
-        {
-          $V .=  "$key : $val->Name (state=$val->State)<br>\n";
-        }
-        $text = _("Plugin State Details");
-        $V .= "<H2>$text</H2>";
-        $V .= "<pre>";
-        $V .= print_r($Plugins,1);
-        $V .= "</pre>";
-        break;
-      case "Text":
-        print_r($Plugins);
-        break;
-      default:
-        break;
+      return 0;
     }
-    if (!$this->OutputToStdout) {
-      return($V);
+    if ($this->OutputToStdout && $this->OutputType=="Text") {
+      global $Plugins;
+      print_r($Plugins);
     }
-    print("$V");
-    return;
-  } // Output()
+    $output = "";
+    if ($this->OutputType=='HTML')
+    {
+      $output = $this->htmlContent();
+    }
+    if (!$this->OutputToStdout)
+    {
+      $this->vars['content'] = $output;
+      return; // $output;
+    }
+    print $output;
+  }
+  
+  /**
+   * \brief Display the loaded menu and plugins.
+   */
+  protected function htmlContent()
+  {
+    $V = "";
+    /** @var Plugin[] $Plugins */
+    global $Plugins;
 
+    $text = _("Plugin Summary");
+    $V .= "<H2>$text</H2>";
+    foreach ($Plugins as $key => $val)
+    {
+      $V .= "$key : $val->Name (state=$val->State)<br>\n";
+    }
+    $text = _("Plugin State Details");
+    $V .= "<H2>$text</H2>";
+    $V .= "<pre>";
+    foreach ($Plugins as $plugin)
+    {
+      $V .= strval($plugin) . "\n";
+    }
+    $V .= "</pre>";
 
-};
+    return $V;
+  }
+
+}
 $NewPlugin = new core_debug;
 $NewPlugin->Initialize();
-
-?>

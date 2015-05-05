@@ -20,11 +20,14 @@ define("TITLE_core_debug_menus", _("Debug Menus"));
 
 class core_debug_menus extends FO_Plugin
 {
-  var $Name       = "debug-menus";
-  var $Title      = TITLE_core_debug_menus;
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::Debug Menus";
-  var $DBaccess   = PLUGIN_DB_ADMIN;
+  function __construct()
+  {
+    $this->Name       = "debug-menus";
+    $this->Title      = TITLE_core_debug_menus;
+    $this->MenuList   = "Help::Debug::Debug Menus";
+    $this->DBaccess   = PLUGIN_DB_ADMIN;
+    parent::__construct();
+  }
 
   /**
    * \brief This is where we check for
@@ -34,7 +37,7 @@ class core_debug_menus extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
-    } // don't re-run
+    }
     // Make sure dependencies are met
     foreach($this->Dependency as $key => $val)
     {
@@ -70,110 +73,114 @@ class core_debug_menus extends FO_Plugin
    */
   function Menu2HTML(&$Menu)
   {
-    print "<ol>\n";
+    $V = "<ol>\n";
     foreach($Menu as $M)
     {
-      print "<li>" . htmlentities($M->Name);
-      print " (" . htmlentities($M->Order);
-      print " -- " . htmlentities($M->URI);
-      print " @ " . htmlentities($M->Target);
-      print ")\n";
+      $V .= "<li>" . htmlentities($M->Name);
+      $V .= " (" . htmlentities($M->Order);
+      $V .= " -- " . htmlentities($M->URI);
+      $V .= " @ " . htmlentities($M->Target);
+      $V .= ")\n";
       if (!empty($M->SubMenu)) {
         $this->Menu2HTML($M->SubMenu);
       }
     }
-    print "</ol>\n";
-  } // Menu2HTML()
+    $V .= "</ol>\n";
+    return $V;
+  }
 
   /**
    * \brief display the loaded menu and plugins.
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    $V="";
-    global $MenuList;
-    switch($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
-      case "XML":
-        break;
-      case "HTML":
-        $FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
-        if ($FullMenuDebug == 2)
-        {
-          $text = _("Full debug ENABLED!");
-          $text1 = _("Now view any page.");
-          print "<b>$text</b> $text1<P>\n";
-        }
-        if ($FullMenuDebug == 1)
-        {
-          $text = _("Full debug disabled!");
-          $text1 = _("Now view any page.");
-          print "<b>$text</b> $text1<P>\n";
-        }
-        $text = _("This developer tool lists all items in the menu structure.");
-        print "$text\n";
-        $text = _("Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).");
-        print "$text\n";
-        $text = _("Fully-debugged menus show the full menu path and order number");
-        $text1 = _("in the menu");
-        print "$text <i>$text1</i>.\n";
-        print "<ul>\n";
-        $text = _("The full debugging is restricted to");
-        $text1 = _("your");
-        $text2 = _(" login session. (Nobody else will see it.)\n");
-        print "<li>$text <b>$text1</b>$text2";
-        $text = _("Full debugging shows the full menu path for each menu\n");
-        print "<li>$text";
-        $text = _("and the order is included in parenthesis.");
-        print "$text\n";
-        $text = _("However, menus that use HTML instead of text will");
-        $text1 = _("not");
-        $text2 = _("show the full path.\n");
-        print "$text <i>$text1</i>$text2";
-        $text = _("To disable full debugging, return here and unselect the option.\n");
-        print "<li>$text";
-        print "</ul>\n";
-        print "<br>\n";
-        print "<form method='post'>\n";
-        if (@$_SESSION['fullmenudebug'] == 1)
-        {
-          print "<input type='hidden' name='fullmenu' value='1'>";
-          $text = _("Disable Full Debug");
-          print "<input type='submit' value='$text!'>";
-        }
-        else
-        {
-          print "<input type='hidden' name='fullmenu' value='2'>";
-          $text = _("Enable Full Debug");
-          print "<input type='submit' value='$text!'>";
-        }
-        print "</form>\n";
-        print "<hr>";
-        $this->Menu2HTML($MenuList);
-        print "<hr>\n";
-        print "<pre>";
-        print htmlentities(print_r($MenuList,1));
-        print "</pre>";
-        break;
-      case "Text":
-        print_r($MenuList);
-        break;
-      default:
-        break;
+      return 0;
     }
-    if (!$this->OutputToStdout) {
-      return($V);
+    if ($this->OutputToStdout && $this->OutputType=="Text") {
+      global $MenuList;
+      print_r($MenuList);
     }
-    print($V);
-    return;
-  } // Output()
+    $output = "";
+    if ($this->OutputType=='HTML')
+    {
+      $output = $this->htmlContent();
+    }
+    if (!$this->OutputToStdout)
+    {
+      $this->vars['content'] = $output;
+      return; // $output;
+    }
+    print $output;
+  }
+   
+  protected function htmlContent()
+  {
+    $V = '';
+    global $MenuList;
 
+    $FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
+    if ($FullMenuDebug == 2)
+    {
+      $text = _("Full debug ENABLED!");
+      $text1 = _("Now view any page.");
+      $V .= "<b>$text</b> $text1<P>\n";
+    }
+    if ($FullMenuDebug == 1)
+    {
+      $text = _("Full debug disabled!");
+      $text1 = _("Now view any page.");
+      $V .= "<b>$text</b> $text1<P>\n";
+    }
+    $text = _("This developer tool lists all items in the menu structure.");
+    $V .= "$text\n";
+    $text = _("Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).");
+    $V .= "$text\n";
+    $text = _("Fully-debugged menus show the full menu path and order number");
+    $text1 = _("in the menu");
+    $V .= "$text <i>$text1</i>.\n";
+    $V .= "<ul>\n";
+    $text = _("The full debugging is restricted to");
+    $text1 = _("your");
+    $text2 = _(" login session. (Nobody else will see it.)\n");
+    $V .= "<li>$text <b>$text1</b>$text2";
+    $text = _("Full debugging shows the full menu path for each menu\n");
+    $V .= "<li>$text";
+    $text = _("and the order is included in parenthesis.");
+    $V .= "$text\n";
+    $text = _("However, menus that use HTML instead of text will");
+    $text1 = _("not");
+    $text2 = _("show the full path.\n");
+    $V .= "$text <i>$text1</i>$text2";
+    $text = _("To disable full debugging, return here and unselect the option.\n");
+    $V .= "<li>$text";
+    $V .= "</ul>\n";
+    $V .= "<br>\n";
+    $V .= "<form method='post'>\n";
+    if (@$_SESSION['fullmenudebug'] == 1)
+    {
+      $V .= "<input type='hidden' name='fullmenu' value='1'>";
+      $text = _("Disable Full Debug");
+      $V .= "<input type='submit' value='$text!'>";
+    }
+    else
+    {
+      $V .= "<input type='hidden' name='fullmenu' value='2'>";
+      $text = _("Enable Full Debug");
+      $V .= "<input type='submit' value='$text!'>";
+    }
+    $V .= "</form>\n";
+    $V .= "<hr>";
+    $this->Menu2HTML($MenuList);
+    $V .= "<hr>\n";
+    $V .= "<pre>";
+    $V .= htmlentities(print_r($MenuList,1));
+    $V .= "</pre>";
 
-};
+    return $V;
+  }
+
+}
 $NewPlugin = new core_debug_menus;
 $NewPlugin->Initialize();
-
-?>

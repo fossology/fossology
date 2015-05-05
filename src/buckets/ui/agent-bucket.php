@@ -24,15 +24,16 @@
 define("TITLE_agent_bucket", _("Bucket Analysis"));
 
 class agent_bucket extends FO_Plugin {
-
-  public $Name = "agent_bucket";
-  public $Title = TITLE_agent_bucket;
-  // public $MenuList   = "Jobs::Agents::Bucket Analysis";
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-  public $AgentName = "buckets";   // agent.agent_name
-
+  function __construct()
+  {
+    $this->Name = "agent_bucket";
+    $this->Title = TITLE_agent_bucket;
+  //   $this->MenuList   = "Jobs::Agents::Bucket Analysis";
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->AgentName = "buckets";   // agent.agent_name
+    parent::__construct();
+  }
+  
   /**
    * \brief Register additional menus.
    */
@@ -162,6 +163,5 @@ function AgentHasResults($upload_pk)
   function Output() {
       return;
   }
-};
+}
 $NewPlugin = new agent_bucket;
-?>
