@@ -1,5 +1,6 @@
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,52 +17,52 @@
 ***********************************************************/
 
 .text
-  {
+{
   font:normal 10pt verdana, arial, helvetica;
-  }
+}
 
 .mono
-  {
+{
   font:normal 10pt monospace;
-  }
+}
 
 .dir
-  {
+{
   height:24px;
   font:normal 10pt verdana, arial, helvetica;
   border: thin black;
   border-style: none none dotted none;
-  }
+}
 
 table { border-spacing:0; }
 
 th { background:lightsteelblue; }
 
 a, a:visited, a:link
-  {
+{
   text-decoration:none;
   color:blue;
-  }
+}
 a:active, a:hover
-  {
+{
   color:red;
-  }
+}
 
 div
-  {
+{
   padding:0;
   margin:0;
-  }
+}
 
 table
-  {
+{
   height:24px;
   font:normal 10pt verdana, arial, helvetica;
-  }
+}
 
 /* For tree views */
 .tree, a.tree
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -69,14 +70,14 @@ table
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none;
   color:black;
-  }
+}
 a.tree:active, a.tree:hover
-  {
+{
   color:red;
-  }
+}
 
 .treehide
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -84,10 +85,10 @@ a.tree:active, a.tree:hover
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none;
   color:white;
-  }
+}
 
 .treehide1
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -95,10 +96,10 @@ a.tree:active, a.tree:hover
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none;
   color:white;
-  }
+}
 
 .treebranch
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -106,10 +107,10 @@ a.tree:active, a.tree:hover
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none; 
   color:blue;
-  }
+}
 
 .treearm
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -117,10 +118,10 @@ a.tree:active, a.tree:hover
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none; 
   color:gray;
-  }
+}
 
 .treetext, a.treetext, a.treetext:link, a.treetext:visited
-  {
+{
   height:24px;
   border-style: none;
   border-left: thin dotted;
@@ -128,101 +129,101 @@ a.tree:active, a.tree:hover
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none; 
   color:black;
-  }
+}
 a.treetext:active, a.treetext:hover
-  {
+{
   color:red;
-  }
+}
 
 .highlight
-  {
-   background-color: #4bfe78;
-  }
+{
+  background-color: #4bfe78;
+}
 
 .buttonLink {
-	float: left;
-	color: #666;
-	font-size:14px;
-	line-height:24px;
-	font-weight: normal;
-	text-align: center;
-	border: 1px solid #BBB;
-	min-width: 14px;
-	padding: 0 7px;
-	margin: 0 5px 0 0;
-	border-radius: 3px;
-	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-	background: #efefef; /* Old browsers */
-	background: -moz-linear-gradient(top, #ffffff 0%, #efefef 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#efefef)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
-	background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
-	background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
+  float: left;
+  color: #666;
+  font-size:14px;
+  line-height:24px;
+  font-weight: normal;
+  text-align: center;
+  border: 1px solid #BBB;
+  min-width: 14px;
+  padding: 0 7px;
+  margin: 0 5px 0 0;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  background: #efefef; /* Old browsers */
+  background: -moz-linear-gradient(top, #ffffff 0%, #efefef 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#efefef)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
+  background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
+  background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
 }
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes
    a default/fixed height. */
 html, body
-  {
+{
   margin:0;
   padding-right: .25em;
   padding-left: .25em;
   /*padding:.25em;*/
   height:100%;
   background-color:white;
-  }
+}
 
 .semibordered
-  {
+{
   border:1px solid black;
   border-collapse:collapse;    
-  }
-  
+}
+
 .semibordered td, .semibordered th
-  {
+{
   border-left: 1px dashed #222233;
-  }
+}
 
 
 
 .simpleTable {
-    border:1px solid black;
-    border-collapse:collapse;
+  border:1px solid black;
+  border-collapse:collapse;
 }
 
 .simpleTable td, .simpleTable th {
-    border: 1px solid #222233;
+  border: 1px solid #222233;
 }
 
 .simpleTable .odd  { background-color: #E2E4FF; }
 .simpleTable .even { background-color: white; }
 
 table.dataTable tr.odd.removed td.sorting_1 {
-    background-color: #ef9e9c;
+  background-color: #ef9e9c;
 }
 table.dataTable tr.odd.removed {
-    background-color: #faa6a4;
+  background-color: #faa6a4;
 }
 table.dataTable tr.even.removed td.sorting_1 {
-    background-color: #ffb9b9;
+  background-color: #ffb9b9;
 }
 table.dataTable tr.even.removed {
-    background-color: #ffc9c9;
+  background-color: #ffc9c9;
 }
 
 table.dataTable tr.odd.match {
-    background-color: #cea15f;
+  background-color: #cea15f;
 }
 
 table.dataTable tr.even.match {
-    background-color: #efbe76;
+  background-color: #efbe76;
 }
 
 .inactiveClearing
-    {
-      background-color: #bebebe;
-    }
+{
+  background-color: #bebebe;
+}
 
 .modal {
   padding: 20px 40px;
@@ -233,87 +234,99 @@ table.dataTable tr.even.match {
 }
 
 .icon-small {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .centered {
-    text-align: center;
+  text-align: center;
 }
 
 .boxnew {
-    background-color: #ffffff;
-    border: 5px solid #f2f2f2;
-    display: inline-block;
-    float: left;
-    height: 700px;
-    overflow: auto;
-    padding: 0px;
-    position: relative;
-    text-align: left;
-    width: 99%;
+  background-color: #ffffff;
+  border: 5px solid #f2f2f2;
+  display: inline-block;
+  float: left;
+  height: 700px;
+  overflow: auto;
+  padding: 0px;
+  position: relative;
+  text-align: left;
+  width: 99%;
 }
 
 .groupBox {
-    clear: both;
-    margin-top: 20px;
-    position: relative;
-    top: -20px;
-    padding: 10px;
+  clear: both;
+  margin-top: 20px;
+  position: relative;
+  top: -20px;
+  padding: 10px;
 }
 
 .headerNew {
-   vertical-align: top;
-   overflow: auto;
+  vertical-align: top;
+  overflow: auto;
 }
 
 .scrollable {
-    /*overflow: auto;*/
-    /*max-height: 20%;*/
+  /*overflow: auto;*/
+  /*max-height: 20%;*/
 }
 
 .scrollable2 {
-    /*overflow: auto;*/
-    /*max-height: 30%;*/
+  /*overflow: auto;*/
+  /*max-height: 30%;*/
 }
 
 .headerBox {
-    width: 99%;
-    background-color: #ffffff;
-    display: inline-block;
-    float: right;
-    height: 700px;
-    overflow: auto;
-    padding-left: 1px;
-    text-align: left;
+  width: 99%;
+  background-color: #ffffff;
+  display: inline-block;
+  float: right;
+  height: 700px;
+  overflow: auto;
+  padding-left: 1px;
+  text-align: left;
 }
 
 .selectedRow {
-    font-weight: bold;
+  font-weight: bold;
 }
 
-div.delete, div.deleted, div.add, div.added {
-    background-size: 100% 100%;
-    height: 16px;
-    width: 16px;
-    margin: 0 auto;
+img.delete, img.add, img.deleted, img.added {
+  background-size: 100% 100%;
+  height: 16px;
+  width: 16px;
+  margin: 0 auto;
+  padding: 0 auto;
 }
 
-div.add {
-    background-image: url('../images/icons/add_16.png');
+img.add, img.delete {
+  cursor: pointer;
 }
 
-div.added {
-    background-image: url('../images/icons/added_16.png');
+img.add {
+  background-image: url('../images/icons/add_16.png');
 }
 
-div.delete {
-    background-image: url('../images/icons/close_16.png');
+img.delete {
+  background-image: url('../images/icons/close_16.png');
 }
-div.deleted {
-    background-image: url('../images/icons/closed_16.png');
+
+img.added {
+  background-image: url('../images/icons/added_16.png');
+}
+
+img.deleted {
+  background-image: url('../images/icons/closed_16.png');
 }
 
 .inactive {
-    color: gray;
+  color: gray;
 }
+
+.activeEditText textarea{
+  min-width: 30em;
+  min-height: 7em;
+}
+

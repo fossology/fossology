@@ -14,7 +14,7 @@
     <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
       <td>
           <table>
-            <td><div class='{% if row.removing %}deleted{% else %}added{% endif %}'></td>
+            <td><img class='{% if row.removing %}deleted{% else %}added{% endif %}' src='images/space_16.png'></td>
             <td>{{ row.lic|e }}</td>
           </table>
       </td>

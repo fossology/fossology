@@ -16,6 +16,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
 /**
  * \file ajax-uploads.php
  * \brief This plugin is used to list all uploads associated
@@ -50,7 +53,7 @@ class core_uploads extends FO_Plugin
       $FolderId = FolderGetTop();
     }
     $V = '';
-    $uploadList = FolderListUploads_perm($FolderId, PERM_WRITE);
+    $uploadList = FolderListUploads_perm($FolderId, Auth::PERM_WRITE);
     foreach($uploadList as $upload)
     {
       $V .= "<option value='" . $upload['upload_pk'] . "'>";
@@ -65,7 +68,7 @@ class core_uploads extends FO_Plugin
       }
       $V .= "</option>\n";
     }
-    return $V;
+    return new Response($V, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
 }
