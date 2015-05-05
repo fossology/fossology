@@ -31,6 +31,6 @@ before_script:
 
 script:
  - make
- - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
+ - cppcheck -q -i src/
  - phpunit -csrc/phpunit.xml
  - src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/
