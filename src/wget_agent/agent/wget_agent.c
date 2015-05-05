@@ -110,7 +110,11 @@ void DBLoadGold()
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
-  if (ForceGroup > 0) { chown(GlobalTempFile,-1,ForceGroup); }
+  if ((int)ForceGroup > 0) 
+  { 
+    rc = chown(GlobalTempFile,-1,ForceGroup); 
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno))
+  }
 
   if (!Sum)
   {
@@ -139,7 +143,11 @@ void DBLoadGold()
     }
     /* Put the file in the "files" repository too */
     Path = fo_RepMkPath("gold",Unique);
-    if ((int)ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+    if ((int)ForceGroup >= 0) 
+    { 
+      rc = chown(Path,-1,ForceGroup); 
+      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+    }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
   {
@@ -160,7 +168,11 @@ void DBLoadGold()
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
-  if ((int)ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+  if ((int)ForceGroup >= 0) 
+  { 
+    rc = chown(Path,-1,ForceGroup); 
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+  }
   if (Path != GlobalTempFile) 
   {
     if(Path)
@@ -414,7 +426,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       {
         systemError(__LINE__, rc_system, CMD)
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc_system = system(DeleteTempDirCmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -427,7 +440,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       {
         systemError(__LINE__, rc_system, CMD)
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc_system = system(DeleteTempDirCmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -460,17 +474,20 @@ int GetVersionControl()
   char command[MAXCMD] = {0};
   char TempFileDirectory[MAXCMD];
   char DeleteTempDirCmd[MAXCMD];
+  char TempHome[MAXCMD];
   int rc = 0;
-  int flag = 0; // 0: default; 1: home is null before setting, should rollback
+  int resethome = 0; // 0: default; 1: home is null before setting, should rollback
   int rc_system =0;
   char *homeenv = NULL;
+
   homeenv = getenv("HOME");
-//  char *repo = "/srv/fossology";
-  if(NULL == homeenv)
-  {
-    flag = 1;
-  }
-  setenv("HOME", "/srv/fossology", 1);
+  if(NULL == homeenv) resethome = 1;
+
+  /* We need HOME to point to where .gitconfig is installed 
+   * path is the repository path and .gitconfig is installed in its parent directory
+   */
+  snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
+  setenv("HOME", TempHome, 1);
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
@@ -494,7 +511,7 @@ int GetVersionControl()
 
   rc = system(command);
 
-  if (flag) // rollback
+  if (resethome) // rollback
     unsetenv("HOME");
   else
     setenv("HOME", homeenv, 1);
