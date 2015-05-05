@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -22,16 +22,13 @@ namespace Fossology\Lib\Test;
 // setup autoloading
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/vendor/autoload.php");
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\SqliteE;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use SQLite3;
 
-class TestLiteDb
+class TestLiteDb extends TestAbstractDb
 {
-  /** * @var DbManager */
-  private $dbManager;
   /** @var string dbFileName */
   private $dbFileName;
   /** @var string logFileName */
@@ -78,15 +75,6 @@ class TestLiteDb
     }
     $this->dbManager = null;    
   }
-  
-  private function dirnameRec($path, $depth = 1)
-  {
-    for ($i = 0; $i < $depth; $i++)
-    {
-      $path = dirname($path);
-    }
-    return $path;
-  }
 
   /**
    * @param array $tableList
@@ -114,80 +102,17 @@ class TestLiteDb
     }
   }
   
-  /**
-   * @param array $tableList
-   * @param bool $invert 
+   /**
+   * @brief convert sql string to something the drive understands
+   * @param string $sql
+   * @return string
    */
-  public function insertData($tableList, $invert=FALSE)
+  protected function queryConverter($sql)
   {
-    $testdataFile = dirname(__FILE__) . '/testdata.sql';
-    $testdata = file_get_contents($testdataFile);
-    $delimiter = 'INSERT INTO ';
-    $offset = strpos($testdata, $delimiter);
-    while( false!==$offset) {
-      $nextOffset = strpos($testdata, $delimiter, $offset+1);
-      if (false===$nextOffset)
-      {
-        $sql = substr($testdata, $offset);
-      }
-      else
-      {
-        $sql = substr($testdata, $offset, $nextOffset-$offset);
-      }
-      preg_match('/^INSERT INTO (?P<name>\w+) /', $sql, $table);
-      if( ($invert^!in_array($table['name'], $tableList)) ){
-        $offset = $nextOffset;
-        continue;
-      }
-      $sql = str_replace(' false,', " 'false',", $sql);
-      $sql = str_replace(' true,', " 'true',", $sql);
-      $sql = str_replace(' false)', " 'false')", $sql);
-      $sql = str_replace(' true)', " 'true')", $sql);
-      $this->dbManager->queryOnce($sql);
-      $offset = $nextOffset;
-    }
-  }
-  
-  public function insertData_license_ref($limit=140)
-  {
-    $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i++)
-    {
-      $partial = $splitted[$i];
-      $sql = $delimiter . str_replace(' false,', " 'false',", $partial);
-      $sql = str_replace(' true,', " 'true',", $sql);
-      $this->dbManager->queryOnce($sql);
-      if ($i > $limit)
-      {
-        break;
-      }
-    }
-  }
-
-  /**
-   * @param array $viewList
-   * @param bool $invert 
-   */
-  public function createViews($viewList, $invert=FALSE)
-  {
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach($Schema['VIEW'] as $viewName=>$sql){
-      if( $invert^!in_array($viewName, $viewList) ){
-        continue;
-      }
-      $this->dbManager->queryOnce($sql);
-    }
-  }
-  
-  public function &getDbManager()
-  {
-    return $this->dbManager;
+    $sql = str_replace(' false,', " 'false',", $sql);
+    $sql = str_replace(' true,', " 'true',", $sql);
+    $sql = str_replace(' false)', " 'false')", $sql);
+    $sql = str_replace(' true)', " 'true')", $sql);
+    return $sql;
   }
 }

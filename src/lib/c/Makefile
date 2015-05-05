@@ -1,20 +1,23 @@
 # FOSSology Makefile - lib/libfossology
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 # Copyright (C) 2015 Siemens AG
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL = -fPIC $(ALL_CFLAGS)
-CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' -DFOSSGROUP='"$(PROJECTGROUP)"' \
+
+CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
+		  -DFOSSGROUP='"$(PROJECTGROUP)"' \
           -DDEFAULT_SETUP='"$(SYSCONFDIR)"'
-EXE=sqlCopyTest fossconfigTest reppath
-LIB=libfossology.a
-OBJS=libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o libfossdbmanager.o
-COVERAGE=$(OBJS:%.o=%_cov.o)
+EXE = sqlCopyTest fossconfigTest reppath
+LIB = libfossology.a
+OBJS = libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fossconfig.o libfossdbmanager.o
+COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	echo "make $(LIB)"
+	@echo "make $(LIB)"
 
 $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
@@ -71,7 +74,7 @@ coverage: all
 	$(MAKE) -C tests coverage
 
 clean:
-	echo "make $(LIB) clean "
+	@echo "make $(LIB) clean "
 	rm -f *.a $(EXE) *.o core *.gc*
 
 .PHONY: all clean test

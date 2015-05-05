@@ -21,10 +21,13 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 SRCDIR = ..
+
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
+TESTDBDIR = $(TOP)/src/testing/db/c
+TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit -I $(TESTDIR) -I $(TESTDBDIR)
+
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS) \
-               $(TESTLIB) -I$(SRCDIR) -I../ -lcunit
+               $(TEST_FLAGS) -I$(SRCDIR) -I../ -lcunit
 EXE = testlibs
 
 OBJS = test_fossconfig.o \
@@ -37,13 +40,17 @@ test: $(EXE)
 	@echo "running library tests"
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 
+testlib:
+	$(MAKE) -C $(TESTDBDIR)
+	$(MAKE) -C $(TESTDIR)
+
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
 	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 	$(call coverage-report-html,$(SRCDIR))
 
-$(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB)
+$(EXE): $(OBJS) libfossology.a $(EXE).c $(FOLIB) testlib
 	$(CC) $(EXE).c -o $@ $(OBJS) $(SRCDIR)/libfossology.a $(CFLAGS_LOCAL)
 
 $(OBJS): %.o: %.c

@@ -1,44 +1,58 @@
-# FOSSology Makefile - agents/ununpack
+######################################################################
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+######################################################################
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
-LOCAL_CFLAGS=$(DB_CFLAGS) $(REPO_CFLAGS) $(AGENT_CFLAGS) -lpq -lmagic $(ALL_CFLAGS)
-EXE=departition ununpack
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+EXE = departition ununpack
 
-CHKHDR= checksum.h md5.h sha1.h
-CHKSRC=$(CHKHDR:%.h=%.c) traverse.c utils.c
-UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
-UUSRC=$(UUHDR:%.h=%.c)
+CHKHDR = checksum.h md5.h sha1.h
+CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
+UUHDR = ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
+UUSRC = $(UUHDR:%.h=%.c)
 
-TESTDIR=tests
-OBJECTS= checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE)
+
+coverage: $(FOLIB) $(EXE:%=%-coverage)
 
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
+departition-coverage: departition.c $(VARS)
+	$(CC) $< $(ALL_CFLAGS) $(FLAG_COV) -o $(@:%-coverage=%)
+
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
-	$(CC) ununpack.c libununpack.a $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
+	$(CC) ununpack.c libununpack.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+
+ununpack-coverage: ununpack.c libununpack_cov.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
+	$(CC) ununpack.c libununpack_cov.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $(@:%-coverage=%)
 
 install: all $(VARS)
-	if [ -e $(DESTDIR)$(MODDIR)/ununpack/agent/departition ] ; then \
-	   rm -f $(DESTDIR)$(MODDIR)/ununpack/agent/departition; \
-	fi
-	@mkdir -p $(CONFDIR)/mods-enabled
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
-
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(MODDIR)/ununpack/agent/ununpack
-	@if test ! -e $(CONFDIR)/mods-enabled/ununpack; then \
-	  ln -s $(MODDIR)/ununpack $(CONFDIR)/mods-enabled ; fi;
 
 # create wrapper for departition in BINDIR
-	@mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR)
 	@echo "#!/bin/bash" > $(DESTDIR)$(BINDIR)/departition
 	@echo "MODDIR=$(MODDIR)" >> $(DESTDIR)$(BINDIR)/departition
 	@echo "\$$MODDIR/ununpack/agent/departition \$$@" >> $(DESTDIR)$(BINDIR)/departition
@@ -46,14 +60,13 @@ install: all $(VARS)
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
-	rm -rf $(DESTDIR)$(MODDIR)/ununpack
+	rm -rf $(DESTDIR)$(MODDIR)/ununpack/agent
 
-$(OBJECTS): %.o: %.c  $(UUHDR)
-	$(CC) -c $< $(LOCAL_CFLAGS)
-
+$(OBJECTS): %.o: %.c $(UUHDR)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libununpack.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
@@ -61,16 +74,9 @@ libununpack.a: $(OBJECTS)
 libununpack_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
-
-test: libununpack.a
-	$(MAKE) -C $(TESTDIR) test
-
-coverage: libununpack_cov.a
-	$(MAKE) -C $(TESTDIR) coverage
-
 clean:
-	rm -f $(EXE) *.o core *.a *.gc*; \
+	rm -f $(EXE) *.o core *.a *.gc*
+
+.PHONY: all install uninstall clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

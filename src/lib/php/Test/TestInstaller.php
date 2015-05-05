@@ -28,20 +28,26 @@ class TestInstaller
   function __construct($sysConf)
   {
     $this->sysConf = $sysConf;
+  }
+
+  public function init() {
+    $sysConf = $this->sysConf;
 
     $confFile = $sysConf."/fossology.conf";
     $fakeInstallationDir = "$sysConf/inst";
-    
+
     $projectGroup = `id -g -n`;
     $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n"
       . "[DIRECTORIES]\nMODDIR = $fakeInstallationDir\nPROJECTGROUP = $projectGroup";
     file_put_contents($confFile, $config);
-    
+
     if (!is_dir($fakeInstallationDir))
     {
-      $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
       mkdir($fakeInstallationDir, 0777, true);
+
+      $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
       system("ln -sf $libDir $fakeInstallationDir/lib");
+
       if (!is_dir("$fakeInstallationDir/www/ui")) {
         mkdir("$fakeInstallationDir/www/ui/", 0777, true);
         touch("$fakeInstallationDir/www/ui/ui-menus.php");
@@ -51,8 +57,8 @@ class TestInstaller
     $topDir = dirname(dirname(dirname(dirname(__DIR__))));
     system("install -D $topDir/VERSION $sysConf");
   }
-  
-  public function __destruct()
+
+  public function clear()
   {
     system("rm $this->sysConf/inst -rf");
     $versionFile = $this->sysConf."/VERSION";
@@ -64,7 +70,23 @@ class TestInstaller
       unlink($confFile);
     }
   }
-    
+
+  public function install($srcDir) {
+    $sysConfDir = $this->sysConf;
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir install", $unused, $rt);
+    return ($rt != 0);
+  }
+
+  public function uninstall($srcDir) {
+    $sysConfDir = $this->sysConf;
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir uninstall", $unused, $rt);
+    $modEnabled = "$sysConfDir/mods-enabled";
+    if (is_dir($modEnabled)) {
+      rmdir($modEnabled);
+    }
+    return ($rt != 0);
+  }
+
   public function cpRepo()
   {
     $testRepoDir = __DIR__;
@@ -75,5 +97,4 @@ class TestInstaller
   {
     system("rm $this->sysConf/repo -rf");
   }
-  
 }

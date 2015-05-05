@@ -14,21 +14,33 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-DATA=../unpack-test-data.tar.bz2
 
-TESTFILE = tests.xml
+DATA = ../unpack-test-data.tar.bz2
+
 AGENTDIR = ../../agent/
 
 # list of the external test data files required by this test
 # UNLIKE MOST OTHER TESTS, these will be found in ../
 TEST_FILES = unpack-test-data.tar.bz2
 
-all:
-	$(MAKE) -C $(AGENTDIR)/ $@
+test: agent test-run
+
+coverage: agent-coverage test-run
+
+test-run: testdata
+	cd ..; tar -xf unpack-test-data.tar.bz2
+	$(PHPUNIT) --log-junit ununpack-Xunit.xml --configuration tests.xml
+
+agent:
+	$(MAKE) -C $(AGENTDIR)
+
+agent-coverage:
+	$(MAKE) -C $(AGENTDIR) coverage
 
 # target to retrieve remote test data if it doesn't already exist
 # make sure your /etc/wgetrc file is configured correctly!
@@ -39,30 +51,20 @@ testdata:
 	@# if it does not exist, look in /var/www/testfiles
 	@# if not in /var/www/testfiles, wget it from fossology.org
 	@$(foreach test_file, $(TEST_FILES), \
-	    if [ -e ../$(test_file) ]; then \
-	        echo "../$(test_file) exists"; \
-	    elif [ -e /var/www/testfiles/$(test_file) ]; then \
-	        echo "$(test_file) found in /var/www/testfiles"; \
-	        cp /var/www/testfiles/$(test_file) ../; \
-	    else \
-	        echo "$(test_file) does not exist.  need to wget from fossology.org"; \
-	        wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
-	    fi; \
+		if [ -e ../$(test_file) ]; then \
+			echo "../$(test_file) exists"; \
+		elif [ -e /var/www/testfiles/$(test_file) ]; then \
+			echo "$(test_file) found in /var/www/testfiles"; \
+			cp /var/www/testfiles/$(test_file) ../; \
+		else \
+			echo "$(test_file) does not exist. need to wget from fossology.org"; \
+			wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
+		fi; \
 	)
 
-test: all testdata fossology_testconfig
-	@echo "ununpack agent functional test"
-	cd ..; \
-	tar -xf unpack-test-data.tar.bz2; \
-	cd ./Functional; \
-	phpunit --log-junit ununpack-Xunit.xml --configuration $(TESTFILE)
-
-coverage:
-	@echo "no coverage for ununpack/agent_test/Functional"
-
 clean:
-	rm -rf ununpack-Xunit.xml  ../unpack-test-data.tar.bz2 ../test-data
-
-include $(DEPS)
+	rm -rf ununpack-Xunit.xml ../unpack-test-data.tar.bz2 ../test-data
 
 .PHONY: all test coverage clean
+
+include $(DEPS)

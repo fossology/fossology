@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
 
   PGresult* licensesResult = queryAllLicenses(state->dbManager);
   Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+  PQclear(licensesResult);
 
   if (argc > 1) {
     if (!handleCliMode(state, licenses, argc, argv))
@@ -119,7 +120,6 @@ int main(int argc, char** argv) {
   }
 
   licenses_free(licenses);
-  PQclear(licensesResult);
 
   scheduler_disconnect(state, 0);
   return 0;

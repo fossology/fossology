@@ -147,25 +147,35 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
   printf("  Number of failures: %d\n", pRunSummary->nFailureRecords);
 
   /* Print any failures */
+  int result = 0;
   if (pRunSummary->nFailureRecords)
   {
     printf("\nFailures:\n");
     FailRec = 1;
     for (FailureList = CU_get_failure_list(); FailureList; FailureList = FailureList->pNext)
     {
-      printf("%d. File: %s  Line: %u   Test: %s\n",
+      printf("%d. File: %s  Line: %u",
              FailRec,
              FailureList->strFileName,
-             FailureList->uiLineNumber,
-             (FailureList->pTest)->pName);
-      printf("  %s\n",
+             FailureList->uiLineNumber);
+
+      if (FailureList->pTest) {
+        printf("  Test: %s", (FailureList->pTest)->pName);
+      }
+      if (FailureList->pSuite) {
+        printf("  Suite: %s", (FailureList->pSuite)->pName);
+      }
+
+      printf("\n  %s\n",
              FailureList->strCondition);
+
       FailRec++;
     }
     printf("\n");
+    result = 1;
   }
 
   CU_cleanup_registry();
 
-  return 0;
+  return result;
 }

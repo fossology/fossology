@@ -2,7 +2,8 @@
  Ununpack: The universal unpacker.
 
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
- 
+ Copyright (C) 2015 Siemens AG
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -438,6 +439,11 @@ int	main(int argc, char *argv[])
       snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = (upload_mode | (1<<5)), uploadtree_tablename='%s' WHERE upload_pk = '%s';",uploadtree_tablename, Upload_Pk);
       result =  PQexec(pgConn, SQL); /* UPDATE upload */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(113);
+      PQclear(result);
+
+      snprintf(SQL,MAXSQL,"UPDATE %s SET realparent = getItemParent(uploadtree_pk) WHERE upload_fk = '%s'",uploadtree_tablename, Upload_Pk);
+      result =  PQexec(pgConn, SQL); /* UPDATE uploadtree */
+      if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(114);
       PQclear(result);
     }
 
