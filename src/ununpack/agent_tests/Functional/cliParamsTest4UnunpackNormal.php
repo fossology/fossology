@@ -1,5 +1,4 @@
 <?php
-
 /*
  Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
@@ -29,8 +28,8 @@ require_once './utility.php';
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\Test\TestInstaller;
 
-class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
-
+class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase
+{
   private $agentDir;
   private $ununpack;
 
@@ -47,7 +46,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     if (empty($TEST_DATA_PATH) || empty($TEST_RESULT_PATH))
       $this->markTestSkipped();
 
-    $this->testDb = new TestPgDb();
+    $this->testDb = new TestPgDb('ununpackNormal');
     $this->agentDir = dirname(dirname(__DIR__))."/";
     $this->ununpack = $this->agentDir . "/agent/ununpack";
 
