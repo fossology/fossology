@@ -63,6 +63,9 @@ class ReadmeossGenerator extends DefaultPlugin
         return $this->flushContent($e->getMessage());
       }
     }
+    if (empty($addUploads)) {
+      return $this->flushContent(_('No upload selected'));
+    }
     $upload = array_pop($addUploads);
     $uploadId = $upload->getId();
     $readMeOssAgent = plugin_find('agent_readmeoss');
