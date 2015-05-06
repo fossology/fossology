@@ -173,10 +173,6 @@ void fillScanners(CopyrightState& state)
     state.addScanner(new regexScanner(regAuthor::getRegex(), regAuthor::getType()));
 #endif
 
-#ifdef IDENTITY_IP
-  state.addScanner(new regexScanner(regIp::getRegex(), regIp::getType()));
-#endif
-
 #ifdef IDENTITY_ECC
   state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
 #endif

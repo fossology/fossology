@@ -44,7 +44,7 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "Written by: me, myself and Irene.\n\n"
   "Authors all the people at ABC\n\n"
   "Apache\n\n"
-  "This file is protected unter US patents 1 , 2 ,3\n\n"
+  "This file is protected under pants 1 , 2 ,3\n\n"
   "Do not modify this document\n\n"
   "the shuttle is a space vehicle designed by NASA\n\n"
   "visit http://mysite.org/FAQ or write to info@mysite.org\n\n"
@@ -56,7 +56,6 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
   CPPUNIT_TEST (regAuthorTest);
-  CPPUNIT_TEST (regIPTest);
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
@@ -106,11 +105,6 @@ protected:
       "Authors all the people at ABC",
       "maintained by benjamin drieu <benj@debian.org>"
     });
-  }
-
-  void regIPTest () {
-    regexScanner sc(regIp::getRegex(), regIp::getType());
-    scannerTest(&sc, testContent, regIp::getType(), { "US patents 1 , 2 ,3" });
   }
 
   void regEccTest () {

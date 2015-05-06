@@ -219,9 +219,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   private function getTableName($type)
   {
     switch ($type) {
-      case "ip" :
-        $tableName = "ip";
-        break;
       case "ecc" :
         $tableName = "ecc";
         break;
@@ -285,7 +282,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    * @param int
    * @param int
    * @param string
-   * @param string 'copyright'|'ip'
+   * @param string 'copyright'|'ecc'
    * @return string
    * @throws Exception
    */

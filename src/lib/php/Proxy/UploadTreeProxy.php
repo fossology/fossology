@@ -233,7 +233,6 @@ class UploadTreeProxy extends DbViewProxy
       case "noLicense":
       case self::OPT_SKIP_ALREADY_CLEARED:
       case "noCopyright":
-      case "noIp":
       case "noEcc":
 
         $queryCondition = self::getQueryCondition($skipThese, $groupId, $agentFilter)." ".$additionalCondition;
@@ -299,8 +298,6 @@ class UploadTreeProxy extends DbViewProxy
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.") )";
       case "noCopyright":
         return "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
-      case "noIp":
-        return "EXISTS (SELECT ct_pk FROM ip cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":
         return "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
     }

@@ -213,9 +213,6 @@ class Xpview extends DefaultPlugin
     $text = _("View Copyright/Email/Url info");
     menu_insert("Clearing::Copyright", 35, "copyright-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 
-    $text = _("View Patent info");
-    menu_insert("Clearing::IP", 34, "ip-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
-
     $text = _("View Export Control and Customs info");
     menu_insert("Clearing::ECC", 33, "ecc-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 

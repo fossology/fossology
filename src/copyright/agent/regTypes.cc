@@ -70,31 +70,6 @@ const char* regEmail::getRegex() {
 
 
 
-const char* regIp::getType(){
-  return "ip";
-};
-
-const char* regIp::getRegex() {
- return "("
-    "(patent(ability|ed|ee|ing))"
-    "|((US|EU)" SPACES "(PAT|patents))"
-    "|(USPTO|PCT)"
-    "|(invent(ion|or|ive))"
-    "|(filed)"
-    "|(innovation|infringement)"
-    "|(intellectual" SPACES "property)"
-    "|(prior" SPACES "art)"
-    "|(field[-]of[-]use" SPACES "limitation)"
-    "|(fair" SPACES "use)"
-   ")"
-   "[[:space:][:punct:]]+" // TODO what's the purpose of this???
-   "[[:alpha:]]*"
-   "[[:punct:]]*"
-   "[[:alpha:]]*"
-   "[[:space:]]*"
-   "[[:print:]]{0,60}"     // \TODO
- ;
-};
 
 
 const  char* regEcc::getType(){
