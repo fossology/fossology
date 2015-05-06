@@ -62,7 +62,7 @@ class CopyrightView extends Xpview
       /** @var AgentDao $agentDao */
       $agentDao = $GLOBALS['container']->get('dao.agent');
       $agentMap = $agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
-      $agentId = $agentMap['copyright'];
+      $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
     }
     
     $modCopyrightHist = plugin_find('copyright-hist');
