@@ -271,7 +271,7 @@ Description: architecture for analyzing software, Microsoft Word report generato
  .
  This package contains the reportgen agent programs and their resources.
 
-Package: fossology-reportgen
+Package: fossology-report
 Architecture: any
 Depends: fossology-common, ${misc:Depends}
 Description: architecture for analyzing software, Microsoft Word report generator
