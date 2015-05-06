@@ -1,101 +1,97 @@
-#####################################################################
-# Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+# Copyright Siemens AG 2014
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
-
 include $(VARS)
 
-LOCAL_CFLAGS = $(ALL_CFLAGS) -I. -Werror
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
+# -Werror -Wextra
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS)
 
-EXE = copyright
-TESTDIR = ../agent_tests
+DEF_ID_COP = -DIDENTITY_COPYRIGHT
+DEF_ID_ECC = -DIDENTITY_ECC
 
-OBJECTS  = copyright.o cvector.o radixtree.o  pair.o main.o
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+EXE_COP = copyright
+EXE_ECC = ecc
+EXE = $(EXE_COP) $(EXE_ECC)
+EXE_COV = $(EXE_COP)_cov
 
-##########################
-# executable build rules #
-##########################
-$(EXE): $(FOLIB) $(VARS) $(OBJECTS)
-	@echo "make copyright agent"
-	$(CC) $(OBJECTS) $(DEF) $(FO_LDFLAGS) -o $@
 
-all: $(EXE) test
-	@echo "make copyright agent and test"
 
-test:
-	$(MAKE) -C $(TESTDIR) test
-	$(MAKE) -C $(TESTDIR) coverage
+OBJECTS = copyright.o regscan.o scanners.o regTypes.o cleanEntries.o
+OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
+OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
+
+HEADERS = $(OBJECTS:%.o=%.hpp) $(OBJECTS_COP:%_cop.o=%.hpp)
+
+COVERAGE = $(OBJECTS:.o=_cov.o)
+COVERAGE_COP = $(OBJECTS_COP:.o=_cov.o)
+
+all: $(CXXFOLIB) $(EXE)
+
+$(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
+	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_ECC): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_ECC)
+	$(CXX) $(OBJECTS) $(OBJECTS_ECC) $(DEF_ID_ECC) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_COV): $(CXXFOLIB) $(VARS) $(COVERAGE) $(COVERAGE_COP)
+	$(CXX) $(COVERAGE) $(COVERAGE_COP) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 #######################
 # library build rules #
 #######################
 
-libcopyright.a: $(OBJECTS)
-	ar cvr $@ $(OBJECTS)
+$(CXXFOLIB):
+	$(MAKE) -C $(CXXFOLIBDIR)
 
-libcopyright_cov.a: $(COVERAGE)
-	ar cvr $@ $(COVERAGE)
+libcopyright.a: $(OBJECTS) $(OBJECTS_COP)
+	ar cvr $@ $(OBJECTS) $(OBJECTS_COP)
+	
+libcopyright_cov.a: $(COVERAGE) $(COVERAGE_COP)
+	ar cvr $@ $(COVERAGE) $(COVERAGE_COP)
 
 ######################
 # object build rules #
 ######################
 
-copyright.o: %.o: %.c %.h cvector.h radixtree.h
-	$(CC) -c $(LOCAL_CFLAGS) $(DEF) $<
+$(OBJECTS): %.o: %.cc $(HEADERS)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
+	
+$(OBJECTS_COP): %_cop.o: %.cc $(HEADERS)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $@ $<
+	
+$(OBJECTS_ECC): %_ecc.o: %.cc $(HEADERS)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
+	
+$(COVERAGE_COP): %_cop_cov.o: %.cc $(HEADERS)
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
-cvector.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(LOCAL_CFLAGS) $<
-
-radixtree.o: %.o: %.c %.h
-	$(CC) -c $(LOCAL_CFLAGS) $<
-
-pair.o: %.o: %.c %.h cvector.h
-	$(CC) -c $(LOCAL_CFLAGS) $<
-
-main.o: %.o: %.c copyright.h cvector.h pair.h sql_statements.h
-	$(CC) -c $(LOCAL_CFLAGS) $(DEFS) $<
-
-$(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) $(DEF) $(DEFS) -o $@
+$(COVERAGE): %_cov.o: %.cc $(HEADERS)
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
 #######################
 # install build rules #
 #######################
 
 install: $(EXE)
-	@echo "make copyright agent install"
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
-	$(INSTALL_DATA) names.dic $(DESTDIR)$(MODDIR)/$(EXE)/agent/
+	for mod_name in $(EXE); do \
+		$(INSTALL_PROGRAM) $$mod_name $(DESTDIR)$(MODDIR)/$$mod_name/agent/$$mod_name; \
+	done
 
 uninstall:
-	@echo "make copyright agent uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
-
-#####################
-# other build rules #
-#####################
+	for mod_name in $(EXE); do \
+		rm -rf $(DESTDIR)$(MODDIR)/$$mod_name/agent; \
+	done
 
 clean:
-	@echo "make copyright agent clean"
-	rm -f *.o *.a $(EXE) *.gc*
+	rm -f $(EXE) *.o *.a *.gcno *.gcda core
 
-.PHONY: all install uninstall clean test $(FOLIB)
-include ${TOP}/Makefile.deps
+.PHONY: all install uninstall clean

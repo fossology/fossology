@@ -35,6 +35,7 @@ class Highlight extends Object
   const COPYRIGHT = "C";
   const URL = "U";
   const EMAIL = "E";
+  const AUTHOR = "A";
   const IP = "I";
   const ECC = "X";
   const UNDEFINED = "any";
@@ -202,11 +203,7 @@ class Highlight extends Object
    */
   public function getHtmlElement()
   {
-    /**
-     * @var HtmlElement
-     */
-    $htmlElement = $this->htmlElement;
-    return $htmlElement;
+    return $this->htmlElement;
   }
 
 
