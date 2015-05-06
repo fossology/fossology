@@ -12,7 +12,7 @@
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public License
- along with this library; if not, write to the Free Software Foundation, Inc.0
+ along with this library; if not, write to the Free Software Foundation, Inc.
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************/
 
@@ -36,9 +36,8 @@
           with the scheduler.  However, it is highly discouraged to use it directly
           instead of through the functions in this file in case we need to keep
           track of other data associated with a connection.
-          NOTE that failures write and error message to stdout.
  **/
-function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg)
+function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
 { 
   if (empty($IPaddr)) $IPaddr = '127.0.0.1';
   if (empty($Port)) $Port = 5555;
@@ -118,8 +117,7 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
 
   $address = $SysConf['FOSSOLOGY']['address'];
   $port =  $SysConf['FOSSOLOGY']['port'];
-  $response_from_scheduler;
-  $sock = fo_scheduler_connect($address, $port, $error_msg); /* Connect to the scheduler */
+  $sock = fo_scheduler_connect($address, $port, $error_msg);
   if ($sock)
   {
     $msg = trim($input);
@@ -133,9 +131,9 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
         if (substr($buf, 0, 3) == "end") break; 
         if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
         {
-          /* 1. if the command is not 'status'or 'status <job_id>' or 'agents', when receiving 
+          /* 1. if the command is not 'status' or 'status <job_id>' or 'agents', when receiving 
                 a string 'received', that mean this communication is over.
-             2. if the command is 'status'or 'status <job_id>' or 'agents', first receiving
+             2. if the command is 'status' or 'status <job_id>' or 'agents', first receiving
                 a string 'received', then will receive related response.
                 then a string 'end' as ending.
            */
@@ -155,16 +153,8 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
     fo_scheduler_close($sock);
   }
 
-  /* failed to communicate with the scheduler */
-  if (empty($error_msg))
-  {
-    return true;
-  } 
-  else  /* communicate with the scheduler successfully */
-  {
-    return false;
-  }
-} // fo_communicate_with_scheduler()
+  return empty($error_msg);
+}
 
 /**
  * \brief  Get runnable job list, the process is below:
@@ -181,9 +171,9 @@ function GetRunnableJobList()
   /* get the raw job list from scheduler 
      send command 'status' to the scheduler, get the all status of runnable jobs and scheduler 
      like:
-      scheduler:[#] daemon:[#] jobs:[#] log:[str] port:[#] verbose:[#]
-      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
-      job:[#] status:[str] type:[str] priority:[#] running:[#] finished[#] failed:[#]
+      scheduler:[#] daemon:[#] jobs:[#] log:[agentName] port:[#] verbose:[#]
+      job:[#] status:[agentName] type:[agentName] priority:[#] running:[#] finished[#] failed:[#]
+      job:[#] status:[agentName] type:[agentName] priority:[#] running:[#] finished[#] failed:[#]
    */
   $command = "status";
   $command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);
@@ -195,6 +185,4 @@ function GetRunnableJobList()
   $job_array = $matches[1];
   sort($job_array, SORT_NUMERIC);
   return $job_array;
-} // GetRunnableJobList()
-
-?>
+}

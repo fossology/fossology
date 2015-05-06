@@ -663,7 +663,7 @@ class ui_picker extends FO_Plugin
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     if (!$uploadtree_pk)
     {
-      echo "<h2>Unidentified item 1</h2>";
+      echo "<h2>Unidentified item 1<h2>";
       return;
     }
     $uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
@@ -690,7 +690,7 @@ class ui_picker extends FO_Plugin
       if ($UploadPerm < Auth::PERM_READ)
       {
         $text = _("Permission Denied");
-        echo "<h2>$text item 2</h2>";
+        echo "<h2>$text item 2<h2>";
         return;
       }
     }

@@ -17,15 +17,6 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**
- * \file ajax-tags.php
- * \brief This plugin is used to list all uploads associated
- * with a folder.  This is NOT intended to be a user-UI
- * plugin.
- * This is intended as an active plugin to provide support
- * data to the UI.
- */
-
 use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_ajax_tags", _("List Tags"));
@@ -68,7 +59,6 @@ class ajax_tags extends FO_Plugin
 
     return new Response($V, Response::HTTP_OK,array('content-type'=>'text/plain'));
   }
-
 }
 $NewPlugin = new ajax_tags;
 $NewPlugin->Initialize();

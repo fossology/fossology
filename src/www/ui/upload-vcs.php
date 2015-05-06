@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_vcs", _("Upload from Version Control System"));
 
 /**
@@ -47,9 +49,6 @@ class upload_vcs extends FO_Plugin {
    */
   function Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm) 
   {
-    global $SysConf;
-
-    /* See if the URL looks valid */
     if (empty($Folder)) 
     {
       $text = _("Invalid folder");
@@ -78,8 +77,8 @@ class upload_vcs extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -148,7 +147,7 @@ class upload_vcs extends FO_Plugin {
     $Username = GetParm('username', PARM_TEXT);
     $Passwd = GetParm('passwd', PARM_TEXT);
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
     $V = '';
     if (!empty($GetURL) && !empty($Folder)) {
       $rc = $this->Upload($Folder, $VCSType, $GetURL, $Desc, $Name, $Username, $Passwd, $public_perm);
@@ -215,7 +214,7 @@ class upload_vcs extends FO_Plugin {
     $V.= "<li>";
     $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
       $text = _("Select optional analysis");
       $V.= "<li>$text<br />\n";
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

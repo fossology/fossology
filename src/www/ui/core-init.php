@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_core_init", _("Initialize"));
 
 class core_init extends FO_Plugin
@@ -68,7 +70,7 @@ class core_init extends FO_Plugin
       }
     }
     $this->State = PLUGIN_STATE_READY;
-    if ((@$_SESSION['UserLevel'] >= PLUGIN_DB_ADMIN) && ($this->MenuList !== ""))
+    if (($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) && ($this->MenuList !== ""))
     {
       menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
     }

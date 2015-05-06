@@ -179,7 +179,7 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
 /**
  * \brief Check if table exists.
  *
- * \param $tableName
+ * \param $decisionTableName
  *
  * \return 1 if table exists, 0 if not.
 **/
@@ -202,7 +202,7 @@ function DB_TableExists($tableName)
  * \brief Check if a column exists.
  *        This is postgresql specific.
  *
- * \param $tableName
+ * \param $decisionTableName
  * \param $colName
  * \param $DBName, default "fossology"
  *

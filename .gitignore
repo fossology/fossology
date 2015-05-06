@@ -97,3 +97,6 @@ variable.list
 /testReport/
 /src/readmeoss/agent/version.php
 /src/reuser/agent/version.php
+/src/copyright/agent/ecc
+/src/copyright/VERSION-ecc
+/src/copyright/VERSION-copyright

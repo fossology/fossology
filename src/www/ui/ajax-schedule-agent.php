@@ -1,4 +1,7 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
+use Symfony\Component\HttpFoundation\Response;
 /***********************************************************
  Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
 
@@ -45,62 +48,53 @@ class ajax_schedule_agent extends FO_Plugin
    */
   public function Output()
   {
-    $V="";
     global $Plugins;
     global $PG_CONN;
-    global $SysConf;
     $UploadPk = GetParm("upload",PARM_INTEGER);
     $Agent = GetParm("agent",PARM_STRING);
-    if (empty($UploadPk) && empty($Agent)) {
-      return;
+    if (empty($UploadPk) || empty($Agent)) {
+      return new Response('missing parameter', Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
     }
-    /* Make sure the uploadpk is valid */
-    if (!$UploadPk) return "agent-add.php AgentsAdd(): No upload_pk specified";
-    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$UploadPk';";
+    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$UploadPk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
     {
-      $ErrMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $UploadPk. " " .  _("not found");
-      return($ErrMsg);
+      $errMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $UploadPk. " " .  _("not found");
+      return new Response($errMsg, Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
     }
     $UploadRow = pg_fetch_assoc($result);
     $ShortName = $UploadRow['upload_filename'];
     pg_free_result($result);
 
-    /* Create Job */
-    $user_pk = $SysConf['auth']['UserId'];
-    $group_pk = $SysConf['auth']['GroupId'];
+    $user_pk = Auth::getUserId();
+    $group_pk = Auth::getGroupId();
     $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $UploadPk);
-
 
     $Dependencies = array();
     $P = &$Plugins[plugin_find_id($Agent)];
     $rv = $P->AgentAdd($job_pk, $UploadPk, $ErrorMsg, $Dependencies);
-    if ($rv > 0)
-    {
-      /** check if the scheudler is running */
-      $status = GetRunnableJobList();
-      $scheduler_msg = "";
-      if (empty($status))
-      {
-        $scheduler_msg .= _("Is the scheduler running? ");
-      }
-
-      $URL = Traceback_uri() . "?mod=showjobs&upload=$UploadPk";
-      /* Need to refresh the screen */
-      $text = _("Your jobs have been added to job queue.");
-      $LinkText = _("View Jobs");
-      $msg = "$scheduler_msg"."$text <a href=$URL>$LinkText</a>";
-      $this->vars['message'] = $msg;
-    }
-    else
+    if ($rv <= 0)
     {
       $text = _("Scheduling of Agent(s) failed: ");
-      $this->vars['message'] = $text.$rv.$ErrorMsg;
+      return new Response($text.$rv.$ErrorMsg, Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+    }
+    
+    /** check if the scheudler is running */
+    $status = GetRunnableJobList();
+    $scheduler_msg = "";
+    if (empty($status))
+    {
+      $scheduler_msg .= _("Is the scheduler running? ");
     }
 
-    return $V;
+    $URL = Traceback_uri() . "?mod=showjobs&upload=$UploadPk";
+    /* Need to refresh the screen */
+    $text = _("Your jobs have been added to job queue.");
+    $LinkText = _("View Jobs");
+    $msg = "$scheduler_msg"."$text <a href=$URL>$LinkText</a>";
+    $this->vars['message'] = $msg;
+    return new Response($msg, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
 }
