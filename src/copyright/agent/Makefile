@@ -17,16 +17,19 @@ CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopen
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
+DEF_ID_IP = -DIDENTITY_IP
 
 EXE_COP = copyright
+EXE_IP = ip
 EXE_ECC = ecc
-EXE = $(EXE_COP) $(EXE_ECC)
+EXE = $(EXE_COP) $(EXE_ECC) $(EXE_IP)
 EXE_COV = $(EXE_COP)_cov
 
 
 
 OBJECTS = copyright.o regscan.o scanners.o regTypes.o cleanEntries.o
 OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
+OBJECTS_IP = copyrightUtils_ip.o copyrightState_ip.o database_ip.o
 OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
 
 HEADERS = $(OBJECTS:%.o=%.hpp) $(OBJECTS_COP:%_cop.o=%.hpp)
@@ -38,6 +41,9 @@ all: $(CXXFOLIB) $(EXE)
 
 $(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
 	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
+
+$(EXE_IP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_IP)
+	$(CXX) $(OBJECTS) $(OBJECTS_IP) $(DEF_ID_IP) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 $(EXE_ECC): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_ECC)
 	$(CXX) $(OBJECTS) $(OBJECTS_ECC) $(DEF_ID_ECC) $(DEF) $(CXXFLAGS_LINK) -o $@
@@ -67,6 +73,9 @@ $(OBJECTS): %.o: %.cc $(HEADERS)
 	
 $(OBJECTS_COP): %_cop.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $@ $<
+	
+$(OBJECTS_IP): %_ip.o: %.cc $(HEADERS)
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF)  -o $@ $<
 	
 $(OBJECTS_ECC): %_ecc.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<

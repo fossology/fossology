@@ -45,4 +45,9 @@ namespace regEcc
   const char* getType();
 }
 
+namespace regIp
+{
+  const char* getRegex();
+  const char* getType();
+}
 #endif /* REGCOPYRIGHT_H_ */

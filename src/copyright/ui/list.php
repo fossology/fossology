@@ -40,7 +40,7 @@ class copyright_list extends FO_Plugin
     $this->Name = "copyright-list";
     $this->Title = TITLE_copyright_list;
     $this->Version = "1.0";
-    $this->Dependency = array("copyright-hist", "ecc-hist");
+    $this->Dependency = array("copyright-hist", "ip-hist");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -314,6 +314,9 @@ class copyright_list extends FO_Plugin
         case "url":
           $TypeStr = "$text5";
           break;
+        case "ip":
+          $TypeStr = _("international patent");
+          break;
         case "ecc":
           $TypeStr = _("export restriction");
           break;
@@ -402,6 +405,11 @@ class copyright_list extends FO_Plugin
   {
 
     switch ($type) {
+      case "ip" :
+        $tableName = "ip";
+        $modBack = "ip-hist";
+        $viewName = "ip-view";
+        break;
       case "ecc" :
         $tableName = "ecc";
         $modBack = "ecc-hist";

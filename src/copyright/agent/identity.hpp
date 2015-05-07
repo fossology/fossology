@@ -18,30 +18,45 @@
 
 
 #ifndef IDENTITY_HPP
-  #define IDENTITY_HPP
+#define IDENTITY_HPP
 
-  #ifndef IDENTITY_ECC
-      #ifndef IDENTITY_COPYRIGHT
-        #define IDENTITY_COPYRIGHT
-      #endif
-  #endif
+#ifndef IDENTITY_ECC
+#ifndef IDENTITY_IP
+#ifndef IDENTITY_COPYRIGHT
+#define IDENTITY_COPYRIGHT
+#endif
+#endif
+#endif
 
-  #ifndef IDENTITY_ECC
-    #ifdef IDENTITY_COPYRIGHT
-     #define IDENTITY "copyright"
-     #define MAX_TYPES 4
-    #else
-     #error
-    #endif
+#ifndef IDENTITY_ECC
+ #ifndef IDENTITY_IP
+  #ifdef IDENTITY_COPYRIGHT
+   #define IDENTITY "copyright"
+   #define MAX_TYPES 4
   #else
-    #ifndef IDENTITY_COPYRIGHT
-     #define IDENTITY "ecc"
-     #define MAX_TYPES 1
-    #else
-     #error
-    #endif
+   #error
   #endif
+ #else
+  #ifndef IDENTITY_COPYRIGHT
+   #define IDENTITY "ip"
+   #define MAX_TYPES 1
+  #else
+   #error
+  #endif
+ #endif
+#else
+ #ifndef IDENTITY_IP
+  #ifndef IDENTITY_COPYRIGHT
+   #define IDENTITY "ecc"
+   #define MAX_TYPES 1
+  #else
+   #error
+  #endif
+ #else
+  #error
+ #endif
+#endif
 
-  #define ALL_TYPES ((1<<MAX_TYPES) -1)
+#define ALL_TYPES ((1<<MAX_TYPES) -1)
 
 #endif // IDENTITY_HPP
