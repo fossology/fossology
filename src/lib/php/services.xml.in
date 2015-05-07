@@ -87,6 +87,10 @@ without any warranty.
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
         </service>
+        <service id="dao.show_jobs" class="Fossology\Lib\Dao\ShowJobsDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.upload"/>
+        </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes">
         </service>
@@ -151,5 +155,6 @@ without any warranty.
         <service id="twig.extension.i18n" class="Twig_Extensions_Extension_I18n">
             <tag name="twig.extension"/>
         </service>
+
     </services>
 </container>

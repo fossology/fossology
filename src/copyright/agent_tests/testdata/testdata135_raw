@@ -4,8 +4,8 @@ shutdown of Debian systems.
 This package is built from the `sysvinit' source package.  Please
 consult the copyright file of the sysvinit package for the location of
 the upstream sources of the sysvinit package.  Debian-specific files
-for sysvinit, such as these initscripts, are maintained by the members
-of the pkg-sysvinit project at alioth.debian.org.
+for sysvinit, such as these initscripts, are <s>maintained by the members
+of the pkg-sysvinit project at alioth.debian.org.</s>
 
     http://alioth.debian.org/projects/pkg-sysvinit
 

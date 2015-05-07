@@ -1,37 +1,43 @@
-######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright Siemens AG 2014
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-TESTFILE = cliParamsTest.php
-EXE_DIR = ../../agent/
+LOCALAGENTDIR = ../../agent
 
-all:
-	$(MAKE) -C $(EXE_DIR)
+all: version
+	$(MAKE) -C $(LOCALAGENTDIR) copyright
+	ln -fs $(LOCALAGENTDIR)/copyright ./copyright
 
-test: all
-	@echo "copyright agent functional test"
-	phpunit --log-junit copyright-Xunit.xml $(TESTFILE)
+version:
+	$(MAKE) -C $(LOCALAGENTDIR)/.. VERSIONFILE
 
-coverage:
-	@echo "no coverage for copyright/agent_test/Functional"
+test: all test-cli test-sched
+
+coverage: all-cov test-cli test-sched
+
+all-cov: version
+	$(MAKE) -C $(LOCALAGENTDIR) copyright_cov
+	ln -fs $(LOCALAGENTDIR)/copyright_cov ./copyright
+
+test-cli: all
+	@echo "make functional tests for cli mode"
+	./shunit2 cli_test.sh
+
+test-sched: all
+	@echo "make functional tests for scheduler mode"
+	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) schedulerTest.php
 
 clean:
-	rm -f *.xml
+	@echo "nothing to do"
 
 .PHONY: all test coverage clean
+
+include $(DEPS)

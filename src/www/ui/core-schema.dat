@@ -374,17 +374,6 @@
   $Schema["TABLE"]["clearing_decision"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_decision\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now();";
   $Schema["TABLE"]["clearing_decision"]["date_added"]["UPDATE"] = "UPDATE clearing_decision SET date_added=now()";
 
-
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["ADD"] = "ALTER TABLE \"clearing_decision_type\" ADD COLUMN \"type_pk\" int4;";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["ALTER"] = "ALTER TABLE \"clearing_decision_type\" ALTER COLUMN \"type_pk\" SET NOT NULL, ALTER COLUMN \"type_pk\" SET DEFAULT nextval('clearing_decision_type_type_seq'::regclass);";
-  $Schema["TABLE"]["clearing_decision_type"]["type_pk"]["UPDATE"] = "UPDATE clearing_decision_type SET type_pk=nextval('clearing_decision_type_type_seq'::regclass)";
-
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["DESC"] = "";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["ADD"] = "ALTER TABLE \"clearing_decision_type\" ADD COLUMN \"meaning\" varchar(30);";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["ALTER"] = "ALTER TABLE \"clearing_decision_type\" ALTER COLUMN \"meaning\" DROP NOT NULL;";
-  $Schema["TABLE"]["clearing_decision_type"]["meaning"]["UPDATE"] = "";
-
   
   $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8;";
@@ -1412,6 +1401,23 @@
   $Schema["TABLE"]["package"]["package_name"]["ALTER"] = "ALTER TABLE \"package\" ALTER COLUMN \"package_name\" SET NOT NULL;";
   $Schema["TABLE"]["package"]["package_name"]["UPDATE"] = "";
 
+  
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["group_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["ADD"] = "ALTER TABLE \"upload_clearing_license\" ADD COLUMN \"rf_fk\" int8;";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["ALTER"] = "ALTER TABLE \"upload_clearing_license\" ALTER COLUMN \"rf_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_clearing_license"]["rf_fk"]["UPDATE"] = "";
+  
+  
   $Schema["TABLE"]["upload_packages"]["package_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_packages"]["package_fk"]["ADD"] = "ALTER TABLE \"upload_packages\" ADD COLUMN \"package_fk\" int4;";
   $Schema["TABLE"]["upload_packages"]["package_fk"]["ALTER"] = "ALTER TABLE \"upload_packages\" ALTER COLUMN \"package_fk\" SET NOT NULL;";
@@ -1431,7 +1437,22 @@
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reused_upload_fk\" int4;";
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reused_upload_fk\" SET NOT NULL;";
   $Schema["TABLE"]["upload_reuse"]["reused_upload_fk"]["UPDATE"] = "";
+  
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"group_fk\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_reuse"]["group_fk"]["UPDATE"] = "";
 
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reused_group_fk\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reused_group_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["upload_reuse"]["reused_group_fk"]["UPDATE"] = "";
+  
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reuse_mode\" int4;";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reuse_mode\" SET NOT NULL, ALTER COLUMN \"reuse_mode\" SET DEFAULT 0;";
+  $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["UPDATE"] = "";
+  
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
   $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_pk\" SET NOT NULL, ALTER COLUMN \"upload_pk\" SET DEFAULT nextval('upload_upload_pk_seq'::regclass);";
@@ -1494,51 +1515,15 @@
 
 
 
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["UPDATE"] = "UPDATE uploadtree SET uploadtree_pk=nextval('uploadtree_uploadtree_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["uploadtree"]["parent"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"parent\" IS 'uploadtree parent';";
-  $Schema["TABLE"]["uploadtree"]["parent"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"parent\" int4;";
-  $Schema["TABLE"]["uploadtree"]["parent"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"parent\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["parent"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"upload_fk\" IS 'original uploaded file';";
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"upload_fk\" int4;";
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"ufile_mode\" IS 'container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, package<<25,directory=1<<18 (directory doesn''t seem to be used), note: wget and POST names are NOT considered artifacts.  Can tell directories as containers with no pfile.';";
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_mode\" int4;";
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_mode\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["lft"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"lft\" IS 'nested set left edge';";
-  $Schema["TABLE"]["uploadtree"]["lft"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"lft\" int4;";
-  $Schema["TABLE"]["uploadtree"]["lft"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"lft\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["lft"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["rgt"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"rgt\" IS 'nested set right edge';";
-  $Schema["TABLE"]["uploadtree"]["rgt"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"rgt\" int4;";
-  $Schema["TABLE"]["uploadtree"]["rgt"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"rgt\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["rgt"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"ufile_name\" IS 'file name';";
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_name\" text;";
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"uploadtree_pk\" int4;";
   $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
   $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["UPDATE"] = "UPDATE uploadtree_a SET uploadtree_pk=nextval('uploadtree_uploadtree_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["uploadtree_a"]["realparent"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree_a"]["realparent"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"realparent\" int4;";
+  $Schema["TABLE"]["uploadtree_a"]["realparent"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"realparent\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree_a"]["realparent"]["UPDATE"] = "";
 
   $Schema["TABLE"]["uploadtree_a"]["parent"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree_a"]["parent"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"parent\" int4;";
@@ -1574,6 +1559,52 @@
   $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"ufile_name\" text;";
   $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
   $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["UPDATE"] = "";
+
+
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["UPDATE"] = "UPDATE uploadtree SET uploadtree_pk=nextval('uploadtree_uploadtree_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["uploadtree"]["parent"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"parent\" IS 'uploadtree parent';";
+  $Schema["TABLE"]["uploadtree"]["parent"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"parent\" int4;";
+  $Schema["TABLE"]["uploadtree"]["parent"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"parent\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["parent"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["realparent"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"realparent\" IS 'uploadtree non-artifact parent';";
+  $Schema["TABLE"]["uploadtree"]["realparent"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"realparent\" int4;";
+  $Schema["TABLE"]["uploadtree"]["realparent"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"realparent\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["realparent"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"upload_fk\" IS 'original uploaded file';";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"ufile_mode\" IS 'container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, package<<25,directory=1<<18 (directory doesn''t seem to be used), note: wget and POST names are NOT considered artifacts.  Can tell directories as containers with no pfile.';";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_mode\" int4;";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_mode\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["lft"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"lft\" IS 'nested set left edge';";
+  $Schema["TABLE"]["uploadtree"]["lft"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"lft\" int4;";
+  $Schema["TABLE"]["uploadtree"]["lft"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"lft\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["lft"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["rgt"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"rgt\" IS 'nested set right edge';";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"rgt\" int4;";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"rgt\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["UPDATE"] = "";
+
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"ufile_name\" IS 'file name';";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_name\" text;";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["UPDATE"] = "";
 
 
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
@@ -1707,7 +1738,6 @@
   $Schema["SEQUENCE"]["tag_ns_group_tag_ns_group_pk_seq"] = "CREATE SEQUENCE \"tag_ns_group_tag_ns_group_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["tags_uploadtree_tag_uploadtree_pk_seq"] = "CREATE SEQUENCE \"tags_uploadtree_tag_uploadtree_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["clearing_decision_type_type_seq"] = "CREATE SEQUENCE \"clearing_decision_type_type_seq\" START 1;";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["clearing_decision_license_events_clearing_pk_seq"] = "CREATE SEQUENCE \"clearing_decision_license_events_clearing_pk_seq\" START 1;";
@@ -1728,7 +1758,6 @@
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
-  $Schema["CONSTRAINT"]["clearing_decision_type_pkey"] = "ALTER TABLE \"clearing_decision_type\" ADD CONSTRAINT \"clearing_decision_type_pkey\" PRIMARY KEY (\"type_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
@@ -1756,6 +1785,7 @@
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
   $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
+  $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
@@ -1814,6 +1844,7 @@
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
+  $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
 
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 

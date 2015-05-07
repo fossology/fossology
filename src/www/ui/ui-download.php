@@ -17,7 +17,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Monolog\Handler\BrowserConsoleHandler;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -29,7 +33,7 @@ define("TITLE_ui_download", _("Download File"));
  */
 class ui_download extends FO_Plugin
 {
-  var $NoHTML     = 1;
+  var $NoHTML = 1;
 
   function __construct()
   {
@@ -177,7 +181,7 @@ class ui_download extends FO_Plugin
     }
 
     $uploadPerm = GetUploadPerm($uploadId);
-    if ($uploadPerm < PERM_WRITE)
+    if ($uploadPerm < Auth::PERM_WRITE)
     {
       throw new Exception("No Permission: $uploadId");
     }
@@ -210,6 +214,11 @@ class ui_download extends FO_Plugin
     {
       $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
     }
+
+    $logger = $container->get("logger");
+    $logger->pushHandler(new NullHandler(Logger::DEBUG));
+    BrowserConsoleHandler::reset();
+    
     return $response;
   }
 }

@@ -15,30 +15,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-#
-# nomos/ui_tests Makefile
-
-TOP = ../../..
-VARS = $(TOP)/Makefile.conf
-include $(VARS)
-
-DIRS = Unit Functional
-
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
-
 all:
-	$(call dirloop, )
-
-install:
-	$(call dirloop, install)
+	@echo "nothing to do"
 
 test:
-	$(call dirloop, test)
+	@echo "nothing to do"
 
 coverage:
-	$(call dirloop, coverage)
+	@echo "nothing to do"
 
 clean:
-	$(call dirloop, clean)
+	@echo "nothing to do"
 
 .PHONY: all test coverage clean

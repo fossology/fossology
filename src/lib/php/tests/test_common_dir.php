@@ -94,13 +94,5 @@ class test_common_dir extends PHPUnit_Framework_TestCase
     $result = DirMode2String(0644);
     $this->assertEquals("---rw-r--r--", $result);
   }
-  
-   /**
-   * \brief test for Uploadtree2PathStr
-   */
-  public function test_Uploadtree2PathStr (){
-    $result = Uploadtree2PathStr(array(array('ufile_name'=>'path'),array('ufile_name'=>'to'),array('ufile_name'=>'nowhere'),));
-    $this->assertEquals($result,'/path/to/nowhere');
-  }  
-  
+ 
 }

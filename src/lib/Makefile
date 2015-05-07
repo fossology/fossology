@@ -14,29 +14,34 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS = c php
-TESTDIR = c
+DIRS = c php cpp
+TESTDIRS = c cpp
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+TESTDIR_LOOP = @set -e; for dir in $(TESTDIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
-test:
-	$(call dirloop,test)
+test: all
+	$(call TESTDIR_LOOP,$@)
+
+coverage: all
+	$(call TESTDIR_LOOP,$@)
 
 install: all
-	$(call dirloop,install)
+	$(call DIR_LOOP,$@)
 
 uninstall:
-	$(call dirloop,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/lib/
+	$(call DIR_LOOP,$@)
+	rm -rf $(DESTDIR)$(MODDIR)/lib
 
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,$@)
 
-.PHONY: all install uninstall clean test
+.PHONY: all test coverage install uninstall clean

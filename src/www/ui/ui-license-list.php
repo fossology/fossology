@@ -15,6 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  **********************************************************/
+use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -95,7 +96,7 @@ class ui_license_list extends FO_Plugin {
     if (empty($upload_pk))
       return;
     $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < PERM_READ)
+    if ($UploadPerm < Auth::PERM_READ)
     {
       $text = _("Permission Denied");
       echo "<h2>$text<h2>";

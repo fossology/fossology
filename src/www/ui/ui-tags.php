@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_ui_tag", _("Tag"));
 
 class ui_tag extends FO_Plugin
@@ -354,7 +356,7 @@ class ui_tag extends FO_Plugin
       {
         $VE .= "<tr><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
         $perm = GetUploadPerm($Upload);
-        if ($perm >= PERM_WRITE ) 
+        if ($perm >= Auth::PERM_WRITE )
         {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
         }
@@ -666,7 +668,7 @@ class ui_tag extends FO_Plugin
     } else {
       /* Show create tag page */
       $perm = GetUploadPerm($Upload);
-      if ($perm >= PERM_WRITE ) 
+      if ($perm >= Auth::PERM_WRITE )
       {
         $V .= $this->ShowCreateTagPage($Upload,$Item);
       }

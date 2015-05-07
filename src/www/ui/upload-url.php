@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_url", _("Upload from URL"));
 
 /**
@@ -48,13 +50,9 @@ class upload_url extends FO_Plugin {
    */
   function Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm) 
   {
-    global $SysConf;
-
-    /* See if the URL looks valid */
     if (empty($Folder)) 
     {
-      $text = _("Invalid folder");
-      return ($text);
+      return _("Invalid folder");
     }
 
     $GetURL = trim($GetURL);
@@ -64,8 +62,7 @@ class upload_url extends FO_Plugin {
 
     if (empty($GetURL)) 
     {
-      $text = _("Invalid URL");
-      return ($text);
+      return _("Invalid URL");
     }
     if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) 
     {
@@ -79,8 +76,8 @@ class upload_url extends FO_Plugin {
 
     /* Create an upload record. */
     $Mode = (1 << 2); // code for "it came from wget"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $GetURL, $Desc, $Mode, $Folder, $public_perm);
     if (empty($uploadpk)) {
       $text = _("Failed to insert upload record");
@@ -135,13 +132,9 @@ class upload_url extends FO_Plugin {
 
     AgentCheckBoxDo($jobpk, $uploadpk);
 
-    $msg = "";
     /** check if the scheudler is running */
     $status = GetRunnableJobList();
-    if (empty($status))
-    {
-      $msg .= _("Is the scheduler running? ");
-    }
+    $msg = empty($status) ? _("Is the scheduler running? ") : '';
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadpk";
     $text = _("The upload");
     $text1 = _("has been queued. It is");
@@ -149,7 +142,7 @@ class upload_url extends FO_Plugin {
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     $this->vars['message'] = $msg.$keep;
     return (NULL);
-  } // Upload()
+  }
 
   /**
    * \brief Generate the text for this plugin.
@@ -165,7 +158,7 @@ class upload_url extends FO_Plugin {
     $Reject = GetParm('reject', PARM_TEXT); // may be null
     $Level = GetParm('level', PARM_TEXT); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
 
     if (!empty($GetURL) && !empty($Folder)) {
       $rc = $this->Upload($Folder, $GetURL, $Desc, $Name, $Accept, $Reject, $Level, $public_perm);
@@ -241,7 +234,7 @@ class upload_url extends FO_Plugin {
     $V.= "<li>";
     $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
       $text = _("Select optional analysis");
       $V.= "<li>$text<br />\n";
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

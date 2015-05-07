@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2014-2015
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -12,7 +12,7 @@ include $(VARS)
 
 MODNAME = decider
 
-EXE = decider.php version.php DeciderAgent.php
+EXE = decider.php version.php DeciderAgent.php BulkReuser.php
 WRAP = decider
 
 all: version.php decider

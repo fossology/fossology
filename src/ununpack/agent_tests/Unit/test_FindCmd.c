@@ -206,7 +206,7 @@ void testFindCmd4ExeFile()
   char *Filename = "../test-data/testdata4unpack/PUTTY.EXE";
   int result = 0;
   result = FindCmd(Filename);
-  FO_ASSERT_EQUAL(result, 17);  /* this can be unpacked by 7z */
+  FO_ASSERT_EQUAL(result, 31);  /* this can be unpacked by 7z */
 }
 
 /**

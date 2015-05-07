@@ -240,7 +240,7 @@ void fo_scheduler_connect_conf(int* argc, char** argv, PGconn** db_conn, char** 
     fo_config_join(sysconfig, version, &error);
     if (error)
     {
-      fprintf(stderr, "FATAL %s.%d: unable to oin configuration files: %s\n",
+      fprintf(stderr, "FATAL %s.%d: unable to join configuration files: %s\n",
         __FILE__, __LINE__, error->message);
       exit(250);
     }

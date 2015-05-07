@@ -87,8 +87,11 @@ class fo_libschema
     // first check to make sure we don't already have the plpgsql language installed
     $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
 
-    $result = pg_query($PG_CONN, $sql_statement)
-      or die("Could not check the database for plpgsql language\n");
+    $result = pg_query($PG_CONN, $sql_statement);
+    if(!$result)
+    {
+      throw new Exception("Could not check the database for plpgsql language");
+    }
 
     $plpgsql_already_installed = FALSE;
     if ( pg_fetch_row($result) ) {
@@ -96,10 +99,14 @@ class fo_libschema
     }
 
     // then create language plpgsql if not already created
-    if ( $plpgsql_already_installed == FALSE ) {
+    if ($plpgsql_already_installed == FALSE)
+    {
       $sql_statement = "CREATE LANGUAGE plpgsql";
-      $result = pg_query($PG_CONN, $sql_statement)
-        or die("Could not create plpgsql language in the database\n");
+      $result = pg_query($PG_CONN, $sql_statement);
+      if (!$result)
+      {
+        throw new Exception("Could not create plpgsql language in the database");
+      }
     }
 
     $this->debug = $debug;
@@ -109,7 +116,7 @@ class fo_libschema
       return $errMsg;
     }
     $Schema = array(); /* will be filled in next line */
-    require_once($filename); /* this will DIE if the file does not exist. */
+    require($filename); /* this cause Fatal Error if the file does not exist. */
     $this->schema = $Schema;
 
     /* Very basic sanity check (so we don't delete everything!) */
@@ -238,7 +245,7 @@ class fo_libschema
             $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
-        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
+        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'] && isset($modification['ALTER']))
         {
           $sql = $modification['ALTER'];
           if ($this->debug)
@@ -970,6 +977,38 @@ class fo_libschema
     LANGUAGE plpgsql;
       ';
     $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.create');
+
+    /*
+     * getItemParent is a DB function that returns the non-artifact parent of an uploadtree_pk.
+     * drop and recreate to change the return type.
+     */
+    $sql = 'drop function if exists getItemParent(integer);';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop');
+
+    $sql = '
+    CREATE OR REPLACE FUNCTION getItemParent(itemId Integer) RETURNS Integer AS $$
+    WITH RECURSIVE file_tree(uploadtree_pk, parent, jump, path, cycle) AS (
+        SELECT ut.uploadtree_pk, ut.parent,
+          true,
+          ARRAY[ut.uploadtree_pk],
+          false
+        FROM uploadtree ut
+        WHERE ut.uploadtree_pk = $1
+      UNION ALL
+        SELECT ut.uploadtree_pk, ut.parent,
+          ut.ufile_mode & (1<<28) != 0,
+          path || ut.uploadtree_pk,
+        ut.uploadtree_pk = ANY(path)
+        FROM uploadtree ut, file_tree ft
+        WHERE ut.uploadtree_pk = ft.parent AND jump AND NOT cycle
+      )
+   SELECT uploadtree_pk from file_tree ft WHERE NOT jump
+   $$
+   LANGUAGE SQL
+   STABLE
+   RETURNS NULL ON NULL INPUT
+      ';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.create');
     return;
   } // MakeFunctions()
 }

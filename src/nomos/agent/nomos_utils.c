@@ -27,7 +27,6 @@
 
 
 
-
 /**
  add2license_ref
  \brief Add a new license to license_ref table
@@ -59,7 +58,7 @@ FUNCTION long add2license_ref(char *licenseName)
   LOG_WARNING("Does license name %s have multibyte encoding?", licenseName)
 
   /* verify the license is not already in the table */
-  sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s'", escLicName);
+  sprintf(query, "SELECT rf_pk FROM " LICENSE_REF_TABLE " where rf_shortname='%s'", escLicName);
   result = PQexec(gl.pgConn, query);
   if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__))
     return 0;
@@ -287,7 +286,7 @@ FUNCTION int initLicRefCache(cacheroot_t *pcroot)
   if (!pcroot)
     return 0;
 
-  sprintf(query, "SELECT rf_pk, rf_shortname FROM license_ref where rf_detector_type=2;");
+  sprintf(query, "SELECT rf_pk, rf_shortname FROM " LICENSE_REF_TABLE " where rf_detector_type=2");
   result = PQexec(gl.pgConn, query);
   if (fo_checkPQresult(gl.pgConn, result, query, __FILE__, __LINE__))
     return 0;

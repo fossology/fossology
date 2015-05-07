@@ -15,42 +15,40 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../
-VARS=$(TOP)/Makefile.conf
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-MOD_NAME=debug
+
+MOD_NAME = debug
 
 DIRS = ui
 TESTDIR = ui_tests
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
-test:
+test: all
 	$(MAKE) -C $(TESTDIR) test
 
-coverage:
+coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
 
 install: all
-	@echo "make $(MOD_NAME) install"
-	@mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
-	$(call dirloop,install)
-	@mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	@if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-	  ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled ; fi;
-
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)
+	$(call DIR_LOOP,install)
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi
 
 uninstall:
-	@echo "make $(MOD_NAME) uninstall"
-	$(call dirloop,uninstall)
+	$(call DIR_LOOP,uninstall)
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
 	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
 
-
 clean:
-	$(call dirloop,clean)
+	$(call DIR_LOOP,clean)
 
-.PHONY: all install uninstall clean test coverage
+.PHONY: all test coverage install uninstall clean

@@ -14,6 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
@@ -25,12 +26,10 @@ all:
 	$(MAKE) -C $(EXE_DIR)
 
 test: all
-	@echo "make mimetyme agent functional test"
 	phpunit --log-junit mimetype-Xunit.xml $(TESTFILE)
 
 coverage:
-	@echo "no coverage in mimetype for agent_test/Functional"
-
+	@echo "nothing to do"
 
 clean:
 	rm -f *.xml

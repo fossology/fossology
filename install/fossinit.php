@@ -46,16 +46,8 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
-use Fossology\Lib\Db\Driver\Postgres;
 
-$groupInfo = posix_getgrnam("fossy");
-posix_setgid($groupInfo['gid']);
-$group = `groups`;
-if (!preg_match("/\sfossy\s/",$group) && (posix_getgid()!=$groupInfo['gid']))
-{
-  print "FATAL: You must be in group 'fossy' to update the FOSSology database.\n";
-  exit(1);
-}
+use Fossology\Lib\Db\Driver\Postgres;
 
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
  * dummy options in order to catch invalid options.
@@ -250,6 +242,7 @@ if(!array_key_exists('Release', $sysconfig)){
           array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
   $sysconfig['Release'] = '2.6';
 }
+
 if($sysconfig['Release'] == '2.6')
 {
   if(!$dbManager->existsTable('license_candidate'))
@@ -261,7 +254,14 @@ if($sysconfig['Release'] == '2.6')
     require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
   }
-  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3'),$sqlLog='update.sysconfig.release');
+  $sysconfig['Release'] = '2.6.3';
+}
+
+if($sysconfig['Release'] == '2.6.3')
+{
+  require_once("$LIBEXECDIR/dbmigrate_real-parent.php");
+  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3.1'),$sqlLog='update.sysconfig.release');
+  $sysconfig['Release'] = '2.6.3.1';
 }
 
 /* sanity check */

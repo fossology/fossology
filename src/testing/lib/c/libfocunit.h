@@ -193,6 +193,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites);
  */
 #define FO_ASSERT_STRING_EQUAL(actual, expected) \
   { \
+    FO_ASSERT_PTR_NOT_NULL_FATAL(actual); \
     if (0 != (strcmp((const char*)(actual), (const char*)(expected)))) \
       printf("%s(%d) Expected (%s), got (%s)\n", __FILE__,__LINE__, expected, actual);\
     CU_ASSERT_STRING_EQUAL(actual, expected)\

@@ -14,44 +14,42 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-LOCAL_CFLAGS= $(DEF) $(ALL_CFLAGS) $(DEFS)
+DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
+CFLAGS_LOCAL = $(DEF) $(ALL_CFLAGS) $(DEFS)
 
-EXE=maintagent
-OBJS=usage.o utils.o process.o
-HDRS=maintagent.h
+EXE = maintagent
+OBJS = usage.o utils.o process.o
+HDRS = maintagent.h
 
 all: $(EXE)
-	@echo "make maintagent agent"
 
 $(EXE): maintagent.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) maintagent.c $(OBJS) -lpq $(LOCAL_CFLAGS) $(FO_LDFLAGS) -o $@
+	$(CC) maintagent.c $(OBJS) $(FO_LDFLAGS) $(CFLAGS_LOCAL) -o $@
 
 usage.o: $(HDRS) usage.c
-	$(CC) -c $(LOCAL_CFLAGS) usage.c
+	$(CC) -c $(CFLAGS_LOCAL) usage.c
 
 utils.o: $(HDRS) utils.c
-	$(CC) -c $(LOCAL_CFLAGS) utils.c
+	$(CC) -c $(CFLAGS_LOCAL) utils.c
 
 process.o: $(HDRS) process.c
-	$(CC) -c $(LOCAL_CFLAGS) process.c
+	$(CC) -c $(CFLAGS_LOCAL) process.c
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
-	@echo "make maintagent  agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make maintagent  agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test $(FOLIB) coverage
+.PHONY: all install uninstall clean $(FOLIB)

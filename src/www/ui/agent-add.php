@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,212 +17,135 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-define("TITLE_agent_add", _("Schedule an Analysis"));
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\UI\MenuHook;
+use Symfony\Component\HttpFoundation\Request;
 
-/**
- * \class agent_add extend from FO_Plugin
- * \brief 
- */
-class agent_add extends FO_Plugin
+class AgentAdder extends DefaultPlugin
 {
-  function __construct()
+  const NAME = "agent_add";
+
+  public function __construct()
   {
-    $this->Name       = "agent_add";
-    $this->Title      = TITLE_agent_add;
-    $this->MenuList   = "Jobs::Schedule Agents";
-    $this->Version    = "1.1";
-    $this->DBaccess   = PLUGIN_DB_WRITE;
-    parent::__construct();
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Schedule an Analysis"),
+        self::MENU_LIST => "Jobs::Schedule Agents",
+        self::PERMISSION => Auth::PERM_WRITE
+    ));
   }
 
-    /**
-   * \brief This function checks if the current job was already scheduled, but did not yet run (You can reschedule failed jobs)
-   * 
-   * \param $agentName   Name of the agent as specified in the agents table
-   * \param $upload_pk   Upload identifier
-   * \return true if the agent is currently scheduled for this upload and did not yet run, else false
-   */
-  function jobAlreadyScheduled( $agentName ,  $upload_pk )
-  {
-    global $PG_CONN;
-    $sql = "select * from job inner join jobqueue on job_pk=jq_job_fk where job_upload_fk=$upload_pk and jq_endtext is null and jq_type='$agentName'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $nrows=pg_num_rows($result);
-    pg_free_result($result);
-    return !($nrows<1);
-  }
-  
   /**
-   * \brief Add an upload to multiple agents.
-   *
-   * \param $uploadpk 
-   * \param $agentlist - list of agents
-   * \return NULL on success, error message string on failure
+   * @param Request $request
+   * @return Response
    */
-  private function AgentsAdd($uploadpk, $agentlist)
-  {
-    global $PG_CONN;
-    global $SysConf;
-
-    if (!is_array($agentlist)) {
-      return "bad parameters";
+  protected function handle(Request $request) {
+    $folderId = intval($request->get('folder'));
+    if (empty($folderId)) {
+      $folderId = FolderGetTop();
     }
+    $uploadId = intval($request->get('upload'));
+    $agents = $request->get('agents') ?: '';
 
-    /* Make sure the uploadpk is valid */
-    if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
-    $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$uploadpk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
+    if (!empty($uploadId) && !empty($agents) && is_array($agents))
     {
-      $ErrMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $uploadpk . " " .  _("not found");
-      return($ErrMsg);
-    }
-    $UploadRow = pg_fetch_assoc($result);
-    $ShortName = $UploadRow['upload_filename'];
-    pg_free_result($result);
-
-    $agents = array();
-    $agentList = listAgents();
-    foreach($agentList as $agentName => &$agentPlugin) {
-      if (in_array($agentName, $agentlist))
+      $rc = $this->agentsAdd($uploadId,$agents,$request);
+      if (empty($rc))
       {
-        $agents[$agentName] = &$agentPlugin;
+        $status = GetRunnableJobList();
+        $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
+        $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+        $text = _("Your jobs have been added to job queue.");
+        $linkText = _("View Jobs");
+        $msg = "$scheduler_msg"."$text <a href=\"$url\">$linkText</a>";
+        $vars['message'] = $msg;
+      }
+      else
+      {
+        $text = _("Scheduling of Agent(s) failed: ");
+        $vars['message'] = $text.$rc;
       }
     }
 
+    $vars['uploadScript'] = ActiveHTTPscript("Uploads");
+    $vars['agentScript'] = ActiveHTTPscript("Agents");
+    $vars['folderId'] = $folderId;
+    $vars['folderListOptions'] = FolderListOption(-1,0,1,$folderId);
+    $vars['folderListUploads'] = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
+    $vars['baseUri'] = Traceback_uri();
+    $vars['uploadId'] = $uploadId;
+    
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
+    $out =  '<ol>';
+    $parmAgentFoots = '';
+    foreach($parmAgentList as $parmAgent)
+    {
+      $agent = plugin_find($parmAgent);
+      $out .= "<br/><b>".$agent->AgentName.":</b><br/>";
+      $out .= $agent->renderContent($vars);
+      $parmAgentFoots .= $agent->renderFoot($vars);
+    }
+    $out .= '</ol>';
+    $vars['out'] = $out;
+    $vars['outFoot'] = '<script language="javascript"> '.$parmAgentFoots.'</script>';
+    
+    return $this->render('agent_adder.html.twig', $this->mergeWithDefault($vars));
+  }
+  
+  /**
+   * @brief Add an upload to multiple agents.
+   * @param int $uploadId
+   * @param string[] $agentsToStart - list of agents
+   * @return NULL on success, error message string on failure
+   */
+  private function agentsAdd($uploadId, $agentsToStart, Request $request)
+  {
+    if (!is_array($agentsToStart)) {
+      return "bad parameters";
+    }
+    if (!$uploadId) {
+      return "agent-add.php AgentsAdd(): No upload_pk specified";
+    }
+    
+    /** @var Upload $upload */
+    $upload = $GLOBALS['container']->get('dao.upload')->getUpload($uploadId);
+    if ($upload===null)
+    {
+      return _("Upload") . " " . $uploadId . " " .  _("not found");
+    }
+
+    $agents = array();
+    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
+    $plainAgentList = MenuHook::getAgentPluginNames("Agents");
+    $agentList = array_merge($plainAgentList, $parmAgentList);
+    foreach($agentList as $agentName) {
+      if (in_array($agentName, $agentsToStart))
+      {
+        $agents[$agentName] = plugin_find($agentName);
+      }
+    }
     if (count($agents)==0)
     {
       return _("no valid agent specified");
     }
 
-    /* Create Job */
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
-    $job_pk = JobAddJob($userId, $groupId, $ShortName, $uploadpk);
-
-    return AgentSchedule($job_pk, $uploadpk, $agents);
-  } // AgentsAdd()
-
-  /**
-   * \brief Generate the text for this plugin.
-   */
-  public function Output()
-  {
-    $V="";
-    /* If this is a POST, then process the request. */
-    $Folder = GetParm('folder',PARM_INTEGER);
-    if (empty($Folder)) {
-      $Folder = FolderGetTop();
+    $jobId = JobAddJob(Auth::getUserId(), Auth::getGroupId(), $upload->getFilename(), $uploadId);
+    $errorMsg = '';
+    foreach($parmAgentList as $parmAgent) {
+      $agent = plugin_find($parmAgent);
+      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
     }
-    $uploadpk = GetParm('upload',PARM_INTEGER);
-    $agents = array_key_exists('agents', $_REQUEST) ? $_REQUEST['agents'] : '';
 
-    if (!empty($uploadpk) && !empty($agents) && is_array($agents))
+    foreach($agents as &$agent)
     {
-      $rc = $this->AgentsAdd($uploadpk,$agents);
-      if (empty($rc))
-      {
-        /** check if the scheudler is running */
-        $status = GetRunnableJobList();
-        $scheduler_msg = "";
-        if (empty($status))
-        {
-          $scheduler_msg .= _("Is the scheduler running? ");
-        }
-
-        $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
-        /* Need to refresh the screen */
-        $text = _("Your jobs have been added to job queue.");
-        $LinkText = _("View Jobs");
-        $msg = "$scheduler_msg"."$text <a href=$URL>$LinkText</a>";
-        $this->vars['message'] = $msg;
-      }
-      else
-      {
-        $text = _("Scheduling of Agent(s) failed: ");
-        $this->vars['message'] = $text.$rc;
+      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      if ($rv == -1) {
+        return $errorMsg;
       }
     }
-
-    /**
-     * Create the AJAX (Active HTTP) javascript for doing the reply
-     * and showing the response. 
-     */
-    $V .= ActiveHTTPscript("Uploads");
-    $V .= "<script language='javascript'>\n";
-    $V .= "function Uploads_Reply()\n";
-    $V .= "  {\n";
-    $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-    $V .= "    {\n";
-    $V .= "    document.getElementById('uploaddiv').innerHTML = '<select size=\'10\' name=\'upload\' onChange=\'Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)\'>' + Uploads.responseText + '</select><P />';\n";
-    $V .= "    document.getElementById('agentsdiv').innerHTML = '';\n";
-    $V .= "    }\n";
-    $V .= "  }\n";
-    $V .= "</script>\n";
-
-    $V .= ActiveHTTPscript("Agents");
-    $V .= "<script language='javascript'>\n";
-    $V .= "function Agents_Reply()\n";
-    $V .= "  {\n";
-    $V .= "  if ((Agents.readyState==4) && (Agents.status==200))\n";
-    $V .= "    {\n";
-    $V .= "    document.getElementById('agentsdiv').innerHTML = '<select multiple size=\'10\' id=\'agents\' name=\'agents[]\'>' + Agents.responseText + '</select>';\n";
-    $V .= "    }\n";
-    $V .= "  }\n";
-    $V .= "</script>\n";
-
-    /*************************************************************/
-    /* Display the form */
-    $V .= "<form name='formy' method='post'>\n"; // no url = this url
-    $V .= _("Select an uploaded file for additional analysis.\n");
-
-    $V .= "<ol>\n";
-    $text = _("Select the folder containing the upload you wish to analyze:");
-    $V .= "<li>$text<br>\n";
-    $V .= "<select name='folder'\n";
-    $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
-    $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
-    $V .= FolderListOption(-1,0,1,$Folder);
-    $V .= "</select><P />\n";
-
-    $text = _("Select the upload to analyze:");
-    $V .= "<li>$text<br>";
-    $V .= "<div id='uploaddiv'>\n";
-    $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
-    $List = FolderListUploads_perm($Folder, PERM_WRITE);
-    foreach($List as $L)
-    {
-      $isSelected = (!empty($uploadpk) && $L['upload_pk']==$uploadpk) ? " selected='selected'" : '';
-      $V .= "<option value='" . $L['upload_pk'] . "'$isSelected>";
-      $V .= htmlentities($L['name']);
-      if (!empty($L['upload_desc']))
-      {
-        $V .= " (" . htmlentities($L['upload_desc']) . ")";
-      }
-      $V .= "</option>\n";
-    }
-    $V .= "</select><P />\n";
-    $V .= "</div>\n";
-    $text = _("Select additional analysis.");
-    $V .= "<li>$text<br>\n";
-    $V .= "<div id='agentsdiv'>\n";
-    $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
-    $V .= "</div>\n";
-    $V .= "</ol>\n";
-
-    if ($uploadpk)
-    {
-      $V .= "<script language='javascript'>\n";
-      $V .= "Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=$uploadpk\");</script>";
-    }
-
-    $text = _("Analyze");
-    $V .= "<input type='submit' value='$text!'>\n";
-    $V .= "</form>\n";
-
-    return $V;
+    return null;
   }
 }
-$NewPlugin = new agent_add;
+
+register_plugin(new AgentAdder());

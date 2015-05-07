@@ -1,69 +1,62 @@
-######################################################################
-# Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+# Copyright Siemens AG 2014-2015
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
-TOP = ../../../..
-include $(TOP)/Makefile.conf
-LOCALAGENTDIR=../../agent
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
 
-TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -l focunit -I $(TESTDIR)
-LOCAL_CFLAGS= $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB)
-DEF = -DDATADIR='"$(DATADIR)"'
+TOP = ../../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+LOCALAGENTDIR = ../../agent
+# -Werror -Wextra
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp
+DEF = -DDATADIR='"$(MODDIR)"'
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm  -lstdc++ -lcppunit -ldl -fopenmp
+
 EXE = test_copyright
 
-OBJECTS = test_cvector.o \
-          test_copyright.o \
-          test_radixtree.o \
+OBJECTS = test_regex.o test_scanners.o
+OBJECTS_ACC = test_accuracy.o
+COVERAGE =
 
-all: $(EXE)
-	@echo "make copyright Unit agent_tests"
+$(EXE): agent $(OBJECTS) libcopyright.a run_tests.cc
+	$(CXX) run_tests.cc -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(CXXFLAGS_LINK)
 
-test: $(EXE)
-	@echo "make copyright Unit agent_tests"
+all: $(CXXFOLIB) $(EXE)
+
+$(CXXFOLIB):
+	$(MAKE) -C $(CXXFOLIBDIR)
+
+agent:
+	$(MAKE) -C $(LOCALAGENTDIR)
+
+libcopyright.a: $(OBJECTS)
+	$(MAKE) -C $(LOCALAGENTDIR) $@
+
+libcopyright_cov.a: $(COVERAGE)
+	$(MAKE) -C $(LOCALAGENTDIR) $@
+
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
+
+$(COVERAGE): %_cov.o: %.c
+	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@
+
+test: all
 	./$(EXE)
 
-coverage: run_tests.c $(OBJECTS) libcopyright_cov.a ${FOLIB}
-	@echo "make copyright agent_tests coverage"
-	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(LOCAL_CFLAGS) $(COV_CFLAGS) ; \
-	./$(EXE); \
-	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
-	genhtml  -o  results cov.txt
+coverage: agent run_tests.cc $(OBJECTS) libcopyright_cov.a
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libcopyright_cov.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK) $(FLAG_COV); \
+	./$(EXE)
 
-$(EXE): $(OBJECTS) libcopyright.a run_tests.c ${FOLIB}
-	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libcopyright.a $(LOCAL_CFLAGS)
-
-$(OBJECTS): %.o: %.c
-	$(CC) -c $(LOCAL_CFLAGS) $<
-
-libcopyright.a:
-	$(MAKE) -C $(LOCALAGENTDIR) $@
-
-libcopyright_cov.a:
-	$(MAKE) -C $(LOCALAGENTDIR) $@
+accuracy: agent run_tests.cc $(OBJECTS_ACC) libcopyright.a
+	$(CXX) run_tests.cc -o $(EXE) $(OBJECTS_ACC) $(LOCALAGENTDIR)/libcopyright.a $(CFLAGS_LOCAL) $(CXXFLAGS_LINK); \
+	./$(EXE)
 
 clean:
-	@echo "make copyright agent_tests clean"
-	rm -rf $(EXE) *.a *.o *.g *.xml *.txt *.gcda *.gcno results
+	rm -rf $(EXE) $(EXE)_cov *.o *.a *.gcno *.gcda core results
 
-install:
-	@echo "make copyright agent_tests nothing to install"
-uninstall:
-	@echo "make copyright agent_tests nothing to uninstall"
-
-.PHONY: all install uninstall clean test
-include ${TOP}/Makefile.deps
+.PHONY: all test coverage clean

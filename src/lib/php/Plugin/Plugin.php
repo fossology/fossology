@@ -30,4 +30,6 @@ interface Plugin {
    * @return string
    */
   function getName();
+
+  function __toString();
 }

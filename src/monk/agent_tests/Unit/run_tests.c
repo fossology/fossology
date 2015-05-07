@@ -19,13 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* local includes */
 #include <libfocunit.h>
 
-/* std library includes */
-#include <stdio.h>
-#include <assert.h>
-
 /* cunit includes */
-#include <CUnit/CUnit.h>
-#include <CUnit/Automated.h>
+#include <libfodbreposysconf.h>
+
+#define AGENT_DIR "../../"
+
+fo_dbManager* dbManager;
 
 /* ************************************************************************** */
 /* **** test case sets ****************************************************** */
@@ -41,6 +40,12 @@ extern CU_TestInfo match_testcases[];
 extern CU_TestInfo database_testcases[];
 extern CU_TestInfo encoding_testcases[];
 
+extern int license_setUpFunc();
+extern int license_tearDownFunc();
+
+extern int database_setUpFunc();
+extern int database_tearDownFunc();
+
 /* ************************************************************************** */
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
@@ -48,12 +53,12 @@ extern CU_TestInfo encoding_testcases[];
 CU_SuiteInfo suites[] = {
     {"Testing process:", NULL, NULL, string_operations_testcases},
     {"Testing monk:", NULL, NULL, file_operations_testcases},
-    {"Testing license:", NULL, NULL, license_testcases},
+    {"Testing license:", license_setUpFunc, license_tearDownFunc, license_testcases},
     {"Testing highlighting:", NULL, NULL, highlight_testcases},
     {"Testing hash:", NULL, NULL, hash_testcases},
     {"Testing diff:", NULL, NULL, diff_testcases},
     {"Testing match:", NULL, NULL, match_testcases},
-    {"Testing database:", NULL, NULL, database_testcases},
+    {"Testing database:", database_setUpFunc, database_tearDownFunc, database_testcases},
     {"Testing encoding:", NULL, NULL, encoding_testcases},
     CU_SUITE_INFO_NULL
 };
@@ -63,5 +68,12 @@ CU_SuiteInfo suites[] = {
 /* ************************************************************************** */
 
 int main(int argc, char** argv) {
-  return focunit_main(argc, argv, "monk_agent_Tests", suites);
+    dbManager = createTestEnvironment(AGENT_DIR, "monk", 0);
+    const int returnValue = focunit_main(argc, argv, "monk_agent_Tests", suites);
+    if (returnValue == 0) {
+        dropTestEnvironment(dbManager, AGENT_DIR);
+    } else {
+        printf("preserving test environment in '%s'\n", get_sysconfdir());
+    }
+    return returnValue;
 }

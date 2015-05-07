@@ -15,6 +15,7 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file common-tags.php
@@ -29,81 +30,49 @@
  * \param $Recurse boolean, to recurse or not
  * \param $uploadtree_tablename
  *
- * \return an array of: ag_pk and tag_name; return empty array: disable tagging on this upload
+ * \return an array of: tag_pk and tag_name; return empty array: disable tagging on this upload
  */
-function GetAllTags($Item, $Recurse=true, $uploadtree_tablename)
+function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
 {
-  global $PG_CONN;
-  $sql = "select * from tag_manage where is_disabled = true and upload_fk in (select upload_fk from $uploadtree_tablename where uploadtree_pk = $Item);";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);    
-  $count = pg_num_rows($result);
-  /** check if disable tagging on this upload */
-  if ($count > 0)  // yes, return
+  if (empty($Item)) { return array(); }
+
+  global $container;
+
+  $dbManager = $container->get('db.manager');
+
+  $stmt = __METHOD__.".$uploadtree_tablename";
+  $sql = "select true from tag_manage, $uploadtree_tablename u where is_disabled = true and tag_manage.upload_fk = u.upload_fk and u.uploadtree_pk = $1";
+  $tagDisabled = $dbManager->getSingleRow($sql, array($Item), $stmt);
+  if ($tagDisabled !== false)
   {
     return array();
   }
 
-  if (empty($PG_CONN)) { return; }
-  if (empty($Item)) { return; }
-  $List=array();
+  $stmt2 = $stmt.'.lftRgt';
+  $sql = "select lft,rgt, upload_fk from $uploadtree_tablename where uploadtree_pk=$1";
+  $uploadtree_row = $dbManager->getSingleRow($sql,array($Item), $stmt2);
 
+  $params = array($Item, $uploadtree_row['upload_fk']);
   if ($Recurse)
   {
-    /* Get tree boundaries */
-    $sql = "select lft,rgt, upload_fk from $uploadtree_tablename where uploadtree_pk=$Item";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $uploadtree_row = pg_fetch_assoc($result);
-
-    $Condition = " lft between $uploadtree_row[lft] and $uploadtree_row[rgt] ";
-    $upload_pk = $uploadtree_row['upload_fk'];
-    pg_free_result($result);
+    $Condition = " lft between $3 and $4 ";
+    $stmt .= ".recurse";
+    $params[] = $uploadtree_row['lft'];
+    $params[] = $uploadtree_row['rgt'];
   }
   else
   {
-    $Condition = "  uploadtree.uploadtree_pk=$Item ";
+    $Condition = " uploadtree.uploadtree_pk=$1 ";
   }
 
   /* Get list of unique tag_pk's for this item */
-  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, $uploadtree_tablename WHERE tag_file.pfile_fk = {$uploadtree_tablename}.pfile_fk and upload_fk=$upload_pk AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $Item";
+  $sql = "SELECT distinct(tag_fk) as tag_pk FROM tag_file, $uploadtree_tablename WHERE tag_file.pfile_fk = {$uploadtree_tablename}.pfile_fk and upload_fk=$2 AND $Condition UNION SELECT tag_fk as tag_pk FROM tag_uploadtree WHERE tag_uploadtree.uploadtree_fk = $1";
 
-  /* simplify (i.e. speed up) for special case of looking at a single file */
-//  if (($uploadtree_row['rgt'] - $uploadtree_row['lft']) == 1)
-//    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where uploadtree_pk='$Item' UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
-//  else
-//    $sql = "select distinct(tag_fk) as tag_pk from uploadtree_tag_file_inner where upload_fk='$upload_pk' and $Condition UNION select tag_fk as tag_pk from tag_uploadtree where tag_uploadtree.uploadtree_fk='$Item'";
-//$uTime = microtime(true);
-  $result = pg_query($PG_CONN, $sql);
-//printf( "<br><small>%s Elapsed time: %.2f seconds</small>", $sql, microtime(true) - $uTime); 
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $SeenTag = array();
-  while ($TagRow = pg_fetch_assoc($result))
-  {
-    $tag_pk = $TagRow['tag_pk'];
-    if (empty($tag_pk)) continue;
-    if (array_key_exists($tag_pk, $SeenTag)) continue;
-    $SeenTag[$tag_pk] = 1;  
-  }
-  pg_free_result($result);
-
-  /* get the tag names */
-  foreach ($SeenTag as $tag_pk=>$One)
-  {
-    $sql = "select tag from tag where tag_pk=$tag_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $TagRow = pg_fetch_assoc($result);
-
-    /** @todo   Ignore any tags the user doesn't have permission to see 
-     **/
-
-    $New['tag_pk'] = $tag_pk;
-    $New['tag_name'] = $TagRow['tag'];
-    array_push($List,$New);
-
-    pg_free_result($result);
-  }
+  $stmt1 = $stmt.'.theTags';
+  $dbManager->prepare($stmt1,"select tag.tag AS tag_name, tag.tag_pk from tag,($sql) subquery where tag.tag_pk=subquery.tag_pk group by tag.tag_pk, tag.tag");
+  $res = $dbManager->execute($stmt1,$params);
+  $List = $dbManager->fetchAll($res);
+  $dbManager->freeResult($res);
 
   return($List);
 } // GetAllTags()
@@ -223,7 +192,7 @@ function TagStatus($upload_id)
   global $PG_CONN;
 
   $UploadPerm = GetUploadPerm($upload_id);
-  if ($UploadPerm < PERM_WRITE) return 0;
+  if ($UploadPerm < Auth::PERM_WRITE) return 0;
 
   /** check if this upload has been disabled */
   $sql = "select tag_manage_pk from tag_manage where upload_fk = $upload_id and is_disabled = true;";
@@ -231,7 +200,5 @@ function TagStatus($upload_id)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $count = pg_num_rows($result);
   pg_free_result($result);
-  if ($count > 0) return 0;
-  else return 1;
+  return ($count > 0) ? 0 : 1;
 }
-?>

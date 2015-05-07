@@ -14,39 +14,36 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-# FOSSology Makefile - agents/wget_agent
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-TESTDIR=../agent_tests
-LOCAL_CFLAGS=$(DB_CFLAGS) $(REPO_CFLAGS) $(AGENT_CFLAGS) -lpq $(ALL_CFLAGS)
-EXE=wget_agent
-CHKHDR=../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
-CHKSRC=$(CHKHDR:%.h=%.c)
-OBJECTS=wget_agent.o
-HDIR=$(OBJS:.o=.h)
-COVERAGE=$(OBJECTS:%.o=%_cov.o)
+
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
+EXE = wget_agent
+CHKHDR = ../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
+CHKSRC = $(CHKHDR:%.h=%.c)
+OBJECTS = wget_agent.o
+HDIR = $(OBJS:.o=.h)
+COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
-	@echo "make wget_agent"
-	$(CC) main.c libwget_agent.a $(CHKSRC) $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
+	$(CC) main.c libwget_agent.a $(FO_LDFLAGS) $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
-	@echo "make wget_agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
-	@echo "make wget_agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $< $(LOCAL_CFLAGS)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(LOCAL_CFLAGS) $(COV_CFLAGS) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libwget_agent.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
@@ -54,18 +51,9 @@ libwget_agent.a: $(OBJECTS)
 libwget_agent_cov.a: $(COVERAGE)
 	ar cvr $@ $(COVERAGE)
 
-test: libwget_agent.a
-	@echo "make test wget_agent"
-	$(MAKE) -C $(TESTDIR) test
-
-coverage: libwget_agent_cov.a
-	@echo "make coverage wget_agent"
-	$(MAKE) -C $(TESTDIR) coverage
-
 clean:
-	@echo "make wget_agent clean"
-	rm -f $(EXE) *.o core *.a *.gc*; \
+	rm -f $(EXE) *.o core *.a *.gc*
+
+.PHONY: all install uninstall clean
 
 include $(DEPS)
-
-.PHONY: all install uninstall clean test

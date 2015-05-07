@@ -1,0 +1,10 @@
+{% import "include/macros.html.twig" as macro %}
+
+<li>
+  ({{ 'Optional'|trans }}) {{ 'Select an already uploaded package for reuse in folder ' | trans }}
+  {% include 'reuse-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
+  <br/>
+  <input type="checkbox" name="reuseMode"/> {{ 'enhanced reuse (experimental, slower)'|trans }}<br/>
+  {{ 'Upload to reuse'|trans }}:<br/>
+  {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+</li>

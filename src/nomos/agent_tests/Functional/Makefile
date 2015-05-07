@@ -14,9 +14,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 EXE_DIR = ../../agent/
@@ -24,16 +25,16 @@ EXE_DIR = ../../agent/
 all: $(FOLIB)
 	$(MAKE) -C $(EXE_DIR)
 
-test: all
-	@echo "make nomos agent functional test"
-	cd ../Functional; \
-	pwd; \
-	ls -l; \
-	phpunit --log-junit nomos-Xunit.xml --configuration tests.xml
-#	./shunit2 --plugin example OneShot_test.sh
+all-coverage: $(FOLIB)
+	$(MAKE) -C $(EXE_DIR) coverage
 
-coverage:
-	@echo "no code coverage for nomos in agent_test/Functional"
+test: all test-run
+
+coverage: all-coverage test-run
+
+test-run:
+	$(PHPUNIT) --log-junit nomos-Xunit.xml --configuration tests.xml
+#	./shunit2 --plugin example OneShot_test.sh
 
 # note DO NOT put *.xml in the clean rule; it will remove the tests.xml file
 # which is needed to run the tests!

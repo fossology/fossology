@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_upload_srv_files", _("Upload from Server"));
 
 /**
@@ -86,7 +88,6 @@ class upload_srv_files extends FO_Plugin {
    */
   function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm) {
     global $Plugins;
-    global $SysConf;
 
     $FolderPath = FolderGetName($FolderPk);
     $SourceFiles = trim($SourceFiles);
@@ -138,10 +139,9 @@ class upload_srv_files extends FO_Plugin {
     }
 
     // Create an upload record.
-    $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $uploadpk = JobAddUpload($userId, $groupId, $ShortName, $SourceFiles, $Desc, $Mode, $FolderPk, $public_perm);
 
     /* Prepare the job: job "wget" */
@@ -195,7 +195,7 @@ class upload_srv_files extends FO_Plugin {
     $Desc = GetParm('description', PARM_STRING); // may be null
     $Name = GetParm('name', PARM_STRING); // may be null
     $public = GetParm('public', PARM_TEXT); // may be null
-    $public_perm = empty($public) ? PERM_NONE : PERM_READ;
+    $public_perm = empty($public) ? Auth::PERM_NONE : Auth::PERM_READ;
     $V = "";
     if (!empty($SourceFiles) && !empty($FolderPk)) {
       if (empty($HostName)) $HostName = "localhost";
@@ -257,7 +257,7 @@ class upload_srv_files extends FO_Plugin {
     $V.= "<li>";
     $V.= "<input type='checkbox' name='public' value='public' > $text1 <p>\n";
 
-    if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE) {
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
       $text = _("Select optional analysis");
       $V.= "<li>$text<br />\n";
       $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");

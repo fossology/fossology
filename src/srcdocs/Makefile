@@ -21,8 +21,8 @@
 #   java       (apt-get install default-jre)
 #   postgres JDBC (apt-get install libpg-java)
 
-TOP=../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DoxDir=$(FOSRCDIR)/srcdocs
@@ -32,8 +32,7 @@ PgJDBC=/usr/share/java/postgresql-jdbc4-9.1.jar
 all: doxygen schemaspy
 
 doxygen:
-
-	doxygen fodox.conf > fodox.log 2>fodox.errs
+	doxygen fodox.conf > fodox.log 2> fodox.errs
 
 schemaspy:
 	java -jar $(SchemaSpy) -t pgsql -cp $(PgJDBC) -db fossology -s public -host localhost -u fossy -p fossy -o $(DoxDir)/www/schemaspy
@@ -41,4 +40,4 @@ schemaspy:
 clean:
 	rm -rf www *~ fodox.errs fodox.log
 
-.PHONY: all clean doxygen schmaspy
+.PHONY: all doxygen schmaspy clean

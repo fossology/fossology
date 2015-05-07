@@ -50,5 +50,6 @@ void RemoveTemps();
 void ProcessExpired();
 void RemoveOrphanedFiles();
 void DeleteOrphanGold();
+void NormalizeUploadPriorities();
 
 #endif /* _DEMOMOD_H */

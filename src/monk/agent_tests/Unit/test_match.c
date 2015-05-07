@@ -107,7 +107,7 @@ void test_findDiffsAtBeginning() {
   GArray* matches = findAllMatchesBetween(file, licenses, 20, 1, 2);
 
   FO_ASSERT_EQUAL(matches->len, 2);
-  if (matches->len == 2){
+  if (matches->len == 2) {
     FO_ASSERT_TRUE(_matchEquals(g_array_index(matches, Match*, 0), 0, 1, 2))
     Match* expectedDiff = g_array_index(matches, Match*, 1);
     FO_ASSERT_TRUE(_matchEquals(expectedDiff, 1, 2, 6));

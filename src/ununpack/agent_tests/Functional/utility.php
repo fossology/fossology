@@ -17,7 +17,5 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-$TEST_DATA_PATH = "../test-data/testdata4unpack";
-$TEST_RESULT_PATH = "./test_result";
-
-?>
+$TEST_DATA_PATH = dirname(__DIR__)."/test-data/testdata4unpack";
+$TEST_RESULT_PATH = __DIR__."/test_result";

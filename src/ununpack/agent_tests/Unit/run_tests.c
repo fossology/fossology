@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 #include "../agent/ununpack_globals.h"
 
+#define AGENT_DIR "../../"
 /* globals that mostly shouldn't be globals */
 char *Filename = "";
 char *NewDir = "./test-result";
@@ -106,11 +107,17 @@ int file_dir_exists(char *path_name)
 
 int main(int argc, char** argv)
 {
-  create_db_repo_sysconf(1, "ununpack");
+
+  fo_dbManager* dbManager = createTestEnvironment(AGENT_DIR, "ununpack", 1);
+  if(!dbManager) {
+    printf("Unable to connect to test database\n");
+    return 1;
+  }
+
   DBConfFile = get_dbconf();
 
   int rc = focunit_main(argc, argv, "ununpack_Tests", suites);
-  drop_db_repo_sysconf(get_db_name());
+  dropTestEnvironment(dbManager, AGENT_DIR);
   return(rc);
 }
 

@@ -32,6 +32,8 @@ use Monolog\Logger;
 
 class LicenseDao extends Object
 {
+  const NO_LICENSE_FOUND = 'No_license_found';
+  
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -254,11 +256,36 @@ class LicenseDao extends Object
    * @param array $mask
    * @return array
    */
-  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $mask)
+  public function getLicenseIdPerPfileForAgentId(ItemTreeBounds $itemTreeBounds, $selectedAgentId, $includeSubfolders=true, $nameRange=array())
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
-    $param = array($selectedAgentId, $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $param = array($selectedAgentId);
+
+    if ($includeSubfolders)
+    {
+      $param[] = $itemTreeBounds->getLeft();
+      $param[] = $itemTreeBounds->getRight();
+      $condition = "lft BETWEEN $2 AND $3";
+      $statementName .= ".subfolders";
+      if(!empty($nameRange))
+      {
+        $condition .= " AND ufile_name BETWEEN $4 and $5";
+        $param[] = $nameRange[0];
+        $param[] = $nameRange[1];
+      }
+    }
+    else
+    {
+      $param[] = $itemTreeBounds->getItemId();
+      $condition = "realparent = $2";
+    }
+
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND utree.upload_fk=$".count($param);
+    }
 
     $sql = "SELECT utree.pfile_fk as pfile_id,
            license_ref.rf_pk as license_id,
@@ -269,23 +296,15 @@ class LicenseDao extends Object
          WHERE agent_fk = $1
            AND license_file.rf_fk = license_ref.rf_pk
            AND license_file.pfile_fk = utree.pfile_fk
-           AND (lft BETWEEN $2 AND $3)";
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
-      $sql .= " AND utree.upload_fk=$4";
-      $param[] = $itemTreeBounds->getUploadId();
-    }
-    $sql .= " ORDER BY match_percentage ASC";
+           AND $condition
+         ORDER BY match_percentage ASC";
 
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $licensesPerFileId = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (in_array($row['uploadtree_pk'], $mask))
-      {
-        $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
-      }
+      $licensesPerFileId[$row['pfile_id']][$row['license_id']] = $row;
     }
 
     $this->dbManager->freeResult($result);
@@ -294,43 +313,43 @@ class LicenseDao extends Object
 
   /**
    * @param ItemTreeBounds $itemTreeBounds
-   * @param string $orderStatement
    * @param null|int|int[] $agentId
    * @return array
    */
-  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $orderStatement = "", $agentId=null)
+  public function getLicenseHistogram(ItemTreeBounds $itemTreeBounds, $agentId=null)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $agentText = $agentId ? (is_array($agentId) ? implode(',', $agentId) : $agentId) : '-';
-    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$orderStatement.$agentText";
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName . ".$agentText";
     $param = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    $sql = "SELECT rf_shortname AS license_shortname, count(*) AS count, count(distinct pfile_ref.pfile_fk) as unique
+    $sql = "SELECT rf_shortname AS license_shortname, rf_pk, count(*) AS count, count(distinct pfile_ref.pfile_fk) as unique
          FROM ( SELECT license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk
              FROM license_file
              JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref
-         RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk
-         WHERE rf_shortname NOT IN ('Void') AND upload_fk=$1 AND UT.lft BETWEEN $2 and $3";
-    if (!empty($agentId))
+         RIGHT JOIN $uploadTreeTableName UT ON pfile_ref.pfile_fk = UT.pfile_fk";
+    if (is_array($agentId))
     {
-      if (is_array($agentId)) {
-        $sql .= ' AND agent_fk=ANY($4)';
-        $param[] = '{' . implode(',', $agentId) . '}';
-      } else {
-        $sql .= ' AND agent_fk=$4';
-        $param[] = $agentId;
-      }
+      $sql .= ' AND agent_fk=ANY($4)';
+      $param[] = '{' . implode(',', $agentId) . '}';
     }
-    $sql .= " GROUP BY license_shortname";
-    if ($orderStatement)
+    elseif (!empty($agentId))
     {
-      $sql .= $orderStatement;
+      $sql .= ' AND agent_fk=$4';
+      $param[] = $agentId;
     }
+    $sql .= " WHERE (rf_shortname IS NULL OR rf_shortname NOT IN ('Void')) AND upload_fk=$1
+             AND (UT.lft BETWEEN $2 AND $3) AND UT.ufile_mode&(3<<28)=0
+          GROUP BY license_shortname, rf_pk";
     $this->dbManager->prepare($statementName, $sql);
     $result = $this->dbManager->execute($statementName, $param);
     $assocLicenseHist = array();
     while ($row = $this->dbManager->fetchArray($result))
     {
-      $assocLicenseHist[$row['license_shortname']] = array('count' => intval($row['count']), 'unique' => intval($row['unique']));
+      $shortname = empty($row['rf_pk']) ? self::NO_LICENSE_FOUND : $row['license_shortname'];
+      $assocLicenseHist[$shortname] = array(
+          'count' => intval($row['count']),
+          'unique' => intval($row['unique']),
+          'rf_pk' => intval($row['rf_pk']));
     }
     $this->dbManager->freeResult($result);
     return $assocLicenseHist;

@@ -19,15 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\Upload\Upload;
-use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Upload\Upload;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\UploadTreeViewProxy;
 use Fossology\Lib\Util\Object;
-use Fossology\Lib\Proxy\UploadTreeProxy;
 use Monolog\Logger;
 
 require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
@@ -171,7 +172,7 @@ class UploadDao extends Object
 
   public function getStatus($uploadId, $userId)
   {
-    if (GetUploadPerm($uploadId, $userId) >= PERM_READ) {
+    if (GetUploadPerm($uploadId, $userId) >= Auth::PERM_READ) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
@@ -245,7 +246,7 @@ class UploadDao extends Object
     $originItem = $this->getUploadEntry($itemId, $uploadTreeTableName);
     $originLft = $originItem['lft'];
 
-    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (1<<29) = 0";
+    $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (3<<28) = 0";
     $uploadTreeViewName = 'items2care';
     
     if($direction == self::DIR_FWD)
@@ -283,7 +284,7 @@ class UploadDao extends Object
    */
   public function getUploadParent($uploadId)
   {
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     $statementname = __METHOD__ . $uploadTreeTableName;
 
     $parent = $this->dbManager->getSingleRow(
@@ -292,7 +293,6 @@ class UploadDao extends Object
             where upload_fk=$1 and lft=1", array($uploadId), $statementname);
     return $parent['uploadtree_pk'];
   }
-
 
   public function getLeftAndRight($uploadtreeID, $uploadTreeTableName = "uploadtree")
   {
@@ -349,32 +349,31 @@ class UploadDao extends Object
   /**
    * @param int $uploadId
    * @param int $reusedUploadId
+   * @param int $groupId
+   * @param int $reusedGroupId
+   * @param int $reuseMode
    */
-  public function addReusedUpload($uploadId, $reusedUploadId)
+  public function addReusedUpload($uploadId, $reusedUploadId, $groupId, $reusedGroupId, $reuseMode=0)
   {
-    $statementName = __METHOD__;
-
-    $this->dbManager->prepare($statementName,
-        "INSERT INTO upload_reuse (upload_fk, reused_upload_fk) VALUES($1, $2)");
-    $res = $this->dbManager->execute($statementName, array($uploadId, $reusedUploadId));
-    $this->dbManager->freeResult($res);
+    $this->dbManager->insertTableRow('upload_reuse',
+            array('upload_fk'=>$uploadId, 'group_fk'=> $groupId, 'reused_upload_fk'=>$reusedUploadId, 'reused_group_fk'=>$reusedGroupId,'reuse_mode'=>$reuseMode));
   }
 
   /**
    * @param int $uploadId
+   * @param int $groupId
    * @return int
    */
-  public function getReusedUpload($uploadId)
+  public function getReusedUpload($uploadId, $groupId)
   {
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-        "SELECT reused_upload_fk FROM upload_reuse WHERE upload_fk = $1");
-    $res = $this->dbManager->execute($statementName, array($uploadId));
-    $row = $this->dbManager->fetchArray($res);
-    $reusedUploadId = intval($row['reused_upload_fk']);
+        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
+    $res = $this->dbManager->execute($statementName, array($uploadId, $groupId));
+    $reusedPairs = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    return $reusedUploadId;
+    return $reusedPairs;
   }
 
   /**
@@ -414,18 +413,30 @@ class UploadDao extends Object
   
   /**
    * @param ItemTreeBounds $itemTreeBounds
+   * @param bool $isFlat plain files from sub*folders instead of folders
    * @return array
    */
-  public function getNonArtifactDescendants(ItemTreeBounds $itemTreeBounds)
+  public function countNonArtifactDescendants(ItemTreeBounds $itemTreeBounds, $isFlat=true)
   {
-    $sql = "SELECT u.* FROM ".$itemTreeBounds->getUploadTreeTableName()." u "
-         . "WHERE u.upload_fk=$1 AND (u.lft BETWEEN $2 AND $3) AND u.ufile_mode & (3<<28) = 0";
-    $this->dbManager->prepare($stmt=__METHOD__,$sql);
-    $params = array($itemTreeBounds->getUploadId(),$itemTreeBounds->getLeft(),$itemTreeBounds->getRight());
-    $res = $this->dbManager->execute($stmt,$params);
-    $descendants = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    return $descendants;
+    $stmt=__METHOD__;
+    $sql = "SELECT count(*) FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
+         . "WHERE ut.upload_fk=$1";
+    $params = array($itemTreeBounds->getUploadId());
+    if (!$isFlat)
+    {
+      $stmt = __METHOD__.'.parent';
+      $params[] = $itemTreeBounds->getItemId();
+      $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
+    }
+    else
+    {
+      $params[] = $itemTreeBounds->getLeft();
+      $params[] = $itemTreeBounds->getRight();
+      $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
+    }
+    
+    $descendants = $this->dbManager->getSingleRow($sql,$params);
+    return $descendants['count'];
   }
   
   
@@ -433,13 +444,13 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=PERM_NONE;
+    return $perm['perm']>=Auth::PERM_NONE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
     if (null === $perm) {
-      $perm = PERM_ADMIN;
+      $perm = Auth::PERM_ADMIN;
     }
     $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
             . "SELECT $1 perm, $2 upload_fk, gum.group_fk"

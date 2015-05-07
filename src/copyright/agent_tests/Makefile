@@ -1,43 +1,32 @@
-######################################################################
-# Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright Siemens AG 2014
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
+LOCALAGENTDIR = ../agent
+
 DIRS = Unit Functional
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop, test)
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(call dirloop, coverage)
+	$(call DIR_LOOP,coverage)
+	$(call coverage-report-html,$(LOCALAGENTDIR))
 
 clean:
-	$(call dirloop, clean)
+	$(call DIR_LOOP,clean)
+	rm -rf results/
 
-install:
-	echo "no make copyright ui install"
-
-uninstall:
-	echo "no make copyright ui uninstall"
-
-PHONY: all test coverage clean install uninstall
+.PHONY: all test coverage clean

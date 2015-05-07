@@ -1,7 +1,7 @@
 <?php
 
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -28,12 +28,12 @@ class TestDbFactory
       throw new \Exception("php-psql not found");
     }
     $sub = chr(mt_rand(97, 122)) . chr(mt_rand(97, 122)) . chr(mt_rand(97, 122)) . chr(mt_rand(97, 122));
-    if ($dbName === NULL)
+    if (empty($dbName))
     {
       $dbName = "fosstestone";
     } else {
       if ($dbName === "fossology") {
-        throw new Exception("cannot use production database for tests");
+        throw new \Exception("cannot use production database for tests");
       }
     }
     $dbName = strtolower($dbName);
@@ -46,7 +46,7 @@ class TestDbFactory
     }
     if (chmod($sys_conf, 0755) === FALSE)
     {
-      echo "ERROR: Cannot set mode to 755 on " . $sys_conf . "\n" . __FILE__ . " at line " . __LINE__ . "\n";
+      throw new \Exception("ERROR: Cannot set mode to 755 on " . $sys_conf . "\n" . __FILE__ . " at line " . __LINE__ . "\n");
     }
     $conf = "dbname=$dbName;\nhost=localhost;\nuser=fossy;\npassword=fossy;\n";
     if (file_put_contents($sys_conf . "/Db.conf", $conf) === FALSE)
@@ -85,8 +85,8 @@ class TestDbFactory
   {
     $userHome = getenv('HOME');
     $ipv4 = gethostbyname(gethostname());
-    $fullHostName = gethostbyaddr(gethostbyname($ipv4));
-    $contents = "$fullHostName:*:*:fossy:fossy\n";
+
+    $contents = "localhost:*:*:fossy:fossy\n";
     $pgpass = "$userHome/.pgpass";
     putenv("PGPASSFILE=$pgpass");
     $pg_pass_contents = file_exists($pgpass) ? file_get_contents($pgpass) : '';
@@ -102,7 +102,7 @@ class TestDbFactory
     }
     if (!chmod($pgpass, 0600))
     {
-      echo "Warning! could not set $pgpass to 0600\n";
+      throw new \Exception("Warning! could not set $pgpass to 0600\n");
     }
   }
 
@@ -111,16 +111,24 @@ class TestDbFactory
     $dbConfig = file_get_contents("$sys_conf/Db.conf");
     if (!preg_match("/dbname=([[:alnum:]]+);.*/", $dbConfig, $matches))
     {
-      print "could not parse db name";
-      exit(5);
+      throw new \Exception("could not parse db name");
     }
-    return $matches[1];    
+    return $matches[1];
   }
-  
-  public function purgeTestDb()
+
+  public function purgeTestDb($sys_conf=null)
   {
-    $sys_conf = getenv('SYSCONFDIR');
+    if (empty($sys_conf)) {
+      $sys_conf = getenv('SYSCONFDIR');
+    }
+    if (empty($sys_conf)) {
+      throw new \Exception( "refusing to purge from /");
+    }
+
     $dbName = $this->getDbName($sys_conf);
+    if (empty($dbName)) {
+      throw new \Exception( "cannot determine db to empty");
+    }
 
     $existCmd = "psql -Ufossy -h localhost -l | grep -q " . $dbName;
     exec($existCmd, $existkOut, $existRtn);
@@ -133,7 +141,7 @@ class TestDbFactory
       exec($dropCmd, $dropOut, $dropRtn);
       if ($dropRtn != 0)
       {
-        echo("ERROR: failed to delete database " . $dbName);
+        throw new \Exception("failed to delete database " . $dbName);
       }
     }
     foreach (glob($sys_conf . "/*.*") as $filename)

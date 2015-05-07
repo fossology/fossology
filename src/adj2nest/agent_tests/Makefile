@@ -14,9 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+DIRS = Unit Functional
+
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+
 all:
+	$(call DIR_LOOP, )
+
 test:
+	$(call DIR_LOOP,test)
+
+coverage:
+	$(call DIR_LOOP,coverage)
+
 clean:
-install:
-uninstall:
-	@echo "No adj2nest tests"
+	$(call DIR_LOOP,clean)
+
+.PHONY: all test coverage clean

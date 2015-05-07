@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class WelcomePage extends DefaultPlugin
+class GettingStartedPage extends DefaultPlugin
 {
   const NAME = 'Getting Started';
   
@@ -70,4 +70,4 @@ class WelcomePage extends DefaultPlugin
   }
 }
 
-register_plugin(new WelcomePage());
+register_plugin(new GettingStartedPage());

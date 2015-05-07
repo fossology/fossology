@@ -120,23 +120,23 @@ class HighlightProcessor extends Object
     $this->sortHighlights($highlights);
 
     $currentPosition = 0;
-    /**
-     * Highlight[] $highlights
-     */
+    /** Highlight[] $highlights */
     foreach ($highlights as $key => $highlight)
     {
-      $isAllowedType = !array_key_exists($highlight->getType(), $excludedTypesSet);
-      if ($isAllowedType)
+      $isExcludedType = array_key_exists($highlight->getType(), $excludedTypesSet);
+      if ($isExcludedType)
       {
-        if ($highlight->getEnd() < $currentPosition)
-        {
-          unset($highlights[$key]);
-        } else
-        {
-          $startPosition = max($highlight->getStart(), $currentPosition);
-          $highlights[$key] = new Highlight($startPosition, $highlight->getEnd(), "any", $highlight->getRefStart(), $highlight->getRefEnd(), $highlight->getInfoText());
-          $currentPosition = $highlight->getEnd();
-        }
+        continue;
+      }
+      if ($highlight->getEnd() > $currentPosition)
+      {
+        $startPosition = max($highlight->getStart(), $currentPosition);
+        $highlights[$key] = new Highlight($startPosition, $highlight->getEnd(), "any", $highlight->getRefStart(), $highlight->getRefEnd(), $highlight->getInfoText());
+        $currentPosition = $highlight->getEnd();
+      }
+      else
+      {
+        unset($highlights[$key]);
       }
     }
   }

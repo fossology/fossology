@@ -47,7 +47,9 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   private $testDb;
   /** @var ModernDbManager */
   private $dbManager;
-  
+
+  private $logFileName;
+
   /**
    * \brief initialization
    */
@@ -63,6 +65,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     global $DB_NAME;
 
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
+    print "*** path to test db creation command: " . $DB_COMMAND;
     exec($DB_COMMAND, $dbout, $rc);
     if (!empty($rc))
     {
