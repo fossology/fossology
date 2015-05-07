@@ -39,6 +39,9 @@ src/cli/fossjobs.txt
 src/cli/schema-export
 src/cli/tests/cli-Xunit.xml
 src/cli/testupdate2.php
+src/cli/fo_import_licenses
+src/cli/fo_usergroup
+src/cli/fossupload_status
 src/copyright/agent/copyright
 src/delagent/agent/delagent
 src/demomod/agent/demomod

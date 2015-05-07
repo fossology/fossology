@@ -18,6 +18,7 @@ install:
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
         libpq-dev
+        libboost-regex-dev libboost-program-options-dev
  - sudo apt-get install -qq cppcheck
 
 before_script:
