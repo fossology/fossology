@@ -239,7 +239,7 @@ class Xpview extends DefaultPlugin
     $view->addFormatMenuEntries($textFormat, $pageNumber, "Clearing");
 
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+    $URI = CopyrightView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (!empty($itemId) && !empty($uploadId))
     {
@@ -250,8 +250,8 @@ class Xpview extends DefaultPlugin
       } else
       {
         $text = _("View Copyright/Email/Url/Author info");
-        menu_insert("View::Copyright/Email/Url/Author", 1, $URI, $text);
-        menu_insert("View-Meta::Copyright/Email/Url/Author", 1, $URI, $text);
+        menu_insert("View::Copyright", 1, $URI, $text);
+        menu_insert("View-Meta::Copyright", 1, $URI, $text);
       }
     }
     $licId = GetParm("lic", PARM_INTEGER);
