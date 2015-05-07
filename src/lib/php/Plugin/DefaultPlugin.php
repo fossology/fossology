@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -360,6 +360,7 @@ abstract class DefaultPlugin implements Plugin
     }
 
     $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
