@@ -23,7 +23,7 @@ class MonkAgentPlugin extends AgentPlugin
 {
   public function __construct() {
     $this->Name = "agent_monk";
-    $this->Title =  _("Monk License Analysis");
+    $this->Title = _("Monk License Analysis, scanning for licenses performing a text comparison");
     $this->AgentName = "monk";
 
     parent::__construct();

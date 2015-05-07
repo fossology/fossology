@@ -330,3 +330,7 @@ img.deleted {
   min-height: 7em;
 }
 
+.info-bullet {
+  vertical-align: bottom;
+  margin-left: 3px;
+}
