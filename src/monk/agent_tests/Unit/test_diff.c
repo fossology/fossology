@@ -351,6 +351,26 @@ void test_matchNTokens(){
                               7));
 }
 
+void test_matchNTokensCorners(){
+  char* empty = g_strdup("....");
+  char* search = g_strdup("a.b.c.d.E.E.f.g");
+
+  GArray* emptyTokens = tokenize(empty,".");
+  GArray* secondTokens = tokenize(search,".");
+
+  CU_ASSERT_FALSE(matchNTokens(emptyTokens, 0, emptyTokens->len,
+                              secondTokens, 1, secondTokens->len,
+                              2));
+
+  CU_ASSERT_FALSE(matchNTokens(emptyTokens, 5, emptyTokens->len,
+                              secondTokens, 6, secondTokens->len,
+                              1));
+
+  CU_ASSERT_FALSE(matchNTokens(secondTokens, 0, secondTokens->len,
+                              emptyTokens, 0, emptyTokens->len,
+                              1));
+}
+
 int _test_lookForAdditions(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
         int expectedTextPosition, int expectedSearchPosition) {
@@ -659,6 +679,7 @@ CU_TestInfo diff_testcases[] = {
   {"Testing token diff functions, replaces complex cases:", test_lookForReplaces2},
   {"Testing token diff functions, replaces correctly handles max diff: ", test_lookForReplacesNotOverflowing},
   {"Testing token diff functions, matchNTokens:", test_matchNTokens},
+  {"Testing token diff functions, matchNTokens corner cases:", test_matchNTokensCorners},
   {"Testing token search_diffs:", test_token_search_diffs},
   CU_TEST_INFO_NULL
 };
