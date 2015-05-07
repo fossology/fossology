@@ -125,13 +125,16 @@ int main  (int argc, char *argv[])
           strcpy(GlobalTempFile,"wget.default_download");
         break;
       case 'A':
-        sprintf(GlobalParam, "%s -A %s ",GlobalParam, optarg);
+        strncat(GlobalParam, " -A ", MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
         break;
       case 'R':
-        sprintf(GlobalParam, "%s -R %s ",GlobalParam, optarg);
+        strncat(GlobalParam, " -R ", MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
         break;
       case 'l':
-        sprintf(GlobalParam, "%s -l %s ",GlobalParam, optarg);
+        strncat(GlobalParam, " -l ", MAXCMD - strlen(GlobalParam) -1);
+        strncat(GlobalParam, optarg, MAXCMD - strlen(GlobalParam) -1);
         break;
       case 'c': break; /* handled by fo_scheduler_connect() */
       case 'C':

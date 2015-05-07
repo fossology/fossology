@@ -110,7 +110,11 @@ void DBLoadGold()
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
-  if (ForceGroup > 0) { chown(GlobalTempFile,-1,ForceGroup); }
+  if ((int)ForceGroup > 0) 
+  { 
+    rc = chown(GlobalTempFile,-1,ForceGroup); 
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno))
+  }
 
   if (!Sum)
   {
@@ -139,7 +143,11 @@ void DBLoadGold()
     }
     /* Put the file in the "files" repository too */
     Path = fo_RepMkPath("gold",Unique);
-    if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+    if ((int)ForceGroup >= 0) 
+    { 
+      rc = chown(Path,-1,ForceGroup); 
+      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+    }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
   {
@@ -160,7 +168,11 @@ void DBLoadGold()
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
-  if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
+  if ((int)ForceGroup >= 0) 
+  { 
+    rc = chown(Path,-1,ForceGroup); 
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+  }
   if (Path != GlobalTempFile) 
   {
     if(Path)
@@ -372,7 +384,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
     unlink(GlobalTempFile);
-    system(DeleteTempDirCmd);
+    rc_system = system(DeleteTempDirCmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     SafeExit(12);
   }
 
@@ -387,7 +400,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     {
       LOG_FATAL("path %s is not http://, https://, or ftp://", TaintedURL);
       unlink(GlobalTempFile);
-      system(DeleteTempDirCmd);
+      rc_system = system(DeleteTempDirCmd);
+      if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
       SafeExit(26);
     }
     snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
@@ -398,7 +412,8 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       if (S_ISDIR(sb.st_mode))
       {
         snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
-        system(CMD); // delete all empty directories downloaded
+        rc_system = system(CMD); // delete all empty directories downloaded
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
         memset(CMD,'\0',MAXCMD);
         snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
       }
@@ -409,8 +424,10 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       rc_system = system(CMD);
       if (rc_system != 0)
       {
+        systemError(__LINE__, rc_system, CMD)
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc_system = system(DeleteTempDirCmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -421,8 +438,10 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       rc_system = system(CMD);
       if (rc_system != 0)
       {
+        systemError(__LINE__, rc_system, CMD)
         unlink(GlobalTempFile);
-        system(DeleteTempDirCmd);
+        rc_system = system(DeleteTempDirCmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
@@ -432,12 +451,14 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
     unlink(GlobalTempFile);
-    system(DeleteTempDirCmd);
+    rc_system = system(DeleteTempDirCmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     SafeExit(15);
   }
 
   /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  system(DeleteTempDirCmd);
+  rc_system = system(DeleteTempDirCmd);
+  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
   return(0);
 } /* GetURL() */
@@ -453,16 +474,20 @@ int GetVersionControl()
   char command[MAXCMD] = {0};
   char TempFileDirectory[MAXCMD];
   char DeleteTempDirCmd[MAXCMD];
+  char TempHome[MAXCMD];
   int rc = 0;
-  int flag = 0; // 0: default; 1: home is null before setting, should rollback
+  int resethome = 0; // 0: default; 1: home is null before setting, should rollback
+  int rc_system =0;
   char *homeenv = NULL;
+
   homeenv = getenv("HOME");
-//  char *repo = "/srv/fossology";
-  if(NULL == homeenv)
-  {
-    flag = 1;
-  }
-  setenv("HOME", "/srv/fossology", 1);
+  if(NULL == homeenv) resethome = 1;
+
+  /* We need HOME to point to where .gitconfig is installed 
+   * path is the repository path and .gitconfig is installed in its parent directory
+   */
+  snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
+  setenv("HOME", TempHome, 1);
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
@@ -486,19 +511,20 @@ int GetVersionControl()
 
   rc = system(command);
 
-  if (flag) // rollback
+  if (resethome) // rollback
     unsetenv("HOME");
   else
     setenv("HOME", homeenv, 1);
 
   if (rc != 0)
   {
-    LOG_FATAL("command is:%s\n", command);
+    systemError(__LINE__, rc, command)
     /** for user fossy */
     /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
     /** svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ **/
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
-    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     return 1;
   }
 
@@ -506,13 +532,15 @@ int GetVersionControl()
   rc = system(command);
   if (rc != 0)
   {
-    LOG_FATAL("command is:%s\n", command);
-    system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
     return 1;
   }
 
-  system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
 
   return 0; // succeed to retrieve source
 }
@@ -661,16 +689,22 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   int rc_system = 0;
 
   snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
-  system(CMD);
+  rc_system = system(CMD);
+  if (!WIFEXITED(rc_system)) 
+  {
+    LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
+    systemError(__LINE__, rc_system, CMD)
+    return 0;
+  }
 
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD,'\0', MAXCMD);
     snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s >/dev/null 2>&1", TempFile, Path, GlobalParam);
     rc_system = system(CMD);
-    if (rc_system != 0)
+    if (!WIFEXITED(rc_system)) 
     {
-      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
+      systemError(__LINE__, rc_system, CMD)
       return 0;
     }
   } else if (strstr(Path, "*"))  // wildcards
@@ -682,7 +716,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     rc_system = system(CMD);
     if (rc_system != 0)
     {
-      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
+      systemError(__LINE__, rc_system, CMD)
       return 0;
     }
     memset(CMD, '\0', MAXCMD);
@@ -690,7 +724,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     rc_system = system(CMD);
     if (rc_system != 0)
     {
-      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
+      systemError(__LINE__, rc_system, CMD)
       return 0;
     }
   } else if(S_ISREG(Status.st_mode)) /** regular file? */
@@ -700,7 +734,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     rc_system = system(CMD);
     if (rc_system != 0)
     {
-      LOG_FATAL("rc_system is:%d, CMD is:%s\n", rc_system, CMD);
+      systemError(__LINE__, rc_system, CMD)
       return 0;
     }
   }
@@ -833,4 +867,3 @@ void replace_url_with_auth()
     memset(GlobalParam,'\0',MAXCMD);
   }
 }
-

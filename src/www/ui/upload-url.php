@@ -58,6 +58,10 @@ class upload_url extends FO_Plugin {
     }
 
     $GetURL = trim($GetURL);
+
+    // url encode to allow spaces in URL
+    $GetURL = str_replace(" ", "%20", $GetURL);
+
     if (empty($GetURL)) 
     {
       $text = _("Invalid URL");
@@ -68,11 +72,7 @@ class upload_url extends FO_Plugin {
       $text = _("Invalid URL");
       return ("$text: " . htmlentities($GetURL));
     }
-    if (preg_match("@[[:space:]]@", $GetURL) != 0) 
-    {
-      $text = _("Invalid URL (no spaces permitted)");
-      return ("$text: " . htmlentities($GetURL));
-    }
+
     if (empty($Name)) $Name = basename($GetURL);
     $ShortName = basename($Name);
     if (empty($ShortName))  $ShortName = $Name;

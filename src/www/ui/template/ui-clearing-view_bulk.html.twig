@@ -28,7 +28,9 @@
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
     </select>
     <input type="checkbox" id="forceDecision"/>{{ 'ignoreConflicts'|trans }}
-    <br><button type="button" onclick='scheduleBulkScan();'>Schedule Bulk scan</button>
+    <br>
+      <button type="button" onclick='cleanText();'>Clean text</button>
+      <button type="button" onclick='scheduleBulkScan();'>Schedule Bulk scan</button>
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
   </form>
 </div>

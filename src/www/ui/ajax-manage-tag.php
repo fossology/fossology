@@ -1,7 +1,8 @@
 <?php
 /***********************************************************
  Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
-
+ Copyright (C) 2015 Siemens AG
+ 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -16,10 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**
- * \file ajax-manage-tag.php
- * \brief get the status of one upload, if have enabled/disabled on a upload
- */
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_upload_tagging", _("Manage Upload Tagging"));
 
@@ -37,56 +35,29 @@ class upload_tagging extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
+    $upload_id = GetParm("upload",PARM_INTEGER);
+    if (empty($upload_id)) {
+      return new Response('', Response::HTTP_OK,array('content-type'=>'text/plain'));
     }
-    $V="";
-    global $Plugins;
-    switch($this->OutputType)
+
+    /** check if this upload has been disabled */
+    $sql = "select count(*) from tag_manage where upload_fk = $1 and is_disabled = true";
+    $numTags = $GLOBALS['container']->get('db.manager')->getSingleRow($sql,array($upload_id));
+    $count = $numTags['count'];
+    if (empty($count)) // enabled
     {
-      case "XML":
-        break;
-      case "HTML":
-        $upload_id= GetParm("upload",PARM_INTEGER);
-        if (empty($upload_id)) {
-          break;
-        }
-
-        global $PG_CONN;
-
-        /** check if this upload has been disabled */
-        $sql = "select * from tag_manage where upload_fk = $upload_id and is_disabled = true;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        $count = pg_num_rows($result);
-        pg_free_result($result);
-        if (empty($count)) // enabled
-        {
-          $text = _("Disable");
-          $V = "<input type='submit' name='manage'  value='$text'>\n";
-        }
-        else // disabled
-        {
-          $text = _("Enable");
-          $V = "<input type='submit' name='manage' value='$text'>\n";
-        }
-
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+      $text = _("Disable");
+      $V = "<input type='submit' name='manage'  value='$text'>\n";
     }
-    if (!$this->OutputToStdout) {
-      return($V);
+    else // disabled
+    {
+      $text = _("Enable");
+      $V = "<input type='submit' name='manage' value='$text'>\n";
     }
-    print("$V");
-    return;
-  } // Output()
 
+    return new Response($V, Response::HTTP_OK,array('content-type'=>'text/plain'));
+  }
+}
 
-};
 $NewPlugin = new upload_tagging;
 $NewPlugin->Initialize();
-
-?>
