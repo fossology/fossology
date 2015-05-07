@@ -9,7 +9,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-LOCAL_CFLAGS = -std=c99 -I. -Werror -Wall -Wextra -fopenmp
+LOCAL_CFLAGS = $(CFLAGS) -std=c99 -I. -Werror -Wall -Wextra -fopenmp
 LOCAL_LDFLAGS = -lm -fopenmp
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
