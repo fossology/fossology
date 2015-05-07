@@ -22,7 +22,7 @@ class IpAgentPlugin extends AgentPlugin
 {
   public function __construct() {
     $this->Name = "agent_ip";
-    $this->Title = _("IP Analysis");
+    $this->Title = _("IP Analysis, scanning for text fragments potentially relevant for patent issues");
     $this->AgentName = "ip";
 
     parent::__construct();
