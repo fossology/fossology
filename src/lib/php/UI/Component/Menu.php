@@ -276,6 +276,7 @@ class Menu extends Object
     
     /* Handle login information */
     $vars['isLoggedOut'] = ((empty($_SESSION[Auth::USER_NAME])) or ($_SESSION[Auth::USER_NAME] == "Default User"));
+    $vars['isLoginPage'] = GetParm("mod", PARM_STRING)=='auth';
 
     global $SysConf;
     $vars['versionInfo'] = array(

@@ -119,7 +119,7 @@ class core_auth extends FO_Plugin
       $_SESSION['ip'] = $this->getIP();
     }
 
-    if (@$_SESSION['User'])
+    if (@$_SESSION[Auth::USER_NAME])
     {
       /* Recheck the user in case he is suddenly blocked or changed. */
       if (empty($_SESSION['time_check']))
@@ -205,6 +205,14 @@ class core_auth extends FO_Plugin
     if (empty($referrer))
     {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
+    }
+    $referrerQuery = parse_url($referrer,PHP_URL_QUERY);
+    if($referrerQuery) {
+      $params = array();
+      parse_str($referrerQuery,$params);
+      if (array_key_exists('mod', $params) && $params['mod'] == $this->Name) {
+        $referrer = Traceback_uri();
+      }
     }
 
     $validLogin = $this->checkUsernameAndPassword($userName, $password);
