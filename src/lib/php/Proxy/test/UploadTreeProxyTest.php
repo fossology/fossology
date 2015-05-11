@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Test\TestPgDb;
 
@@ -199,17 +200,212 @@ class UploadTreeProxyTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->freeResult($res);
     $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
     assertThat($zipDescendantsT, equalTo(array(103)) );
-  }  
+  }
+  
+  protected function insertDecisionEvent($decisionId,$eventId,$rfId,$groupId,$item,$pfileId,$type,$removed,$date)
+  {
+    $this->dbManager->insertTableRow('clearing_decision',array('clearing_decision_pk'=>$decisionId,'pfile_fk'=>$pfileId,'group_fk'=>$groupId,
+        'date_added'=>$date,'decision_type'=> $type));
+    $this->dbManager->insertTableRow('clearing_event',array('clearing_event_pk'=>$eventId,'rf_fk'=>$rfId,'group_fk'=>$groupId,'uploadtree_fk'=>$item,
+        'date_added'=>$date,'removed'=>$removed));
+    if ($type != DecisionTypes::WIP) {
+      $this->dbManager->insertTableRow('clearing_decision_event', array('clearing_event_fk' => $eventId, 'clearing_decision_fk' => $decisionId));
+    }
+  }
     
+  public function testOptionConRefParented()
+  {
+    $this->testDb->createPlainTables( array('clearing_decision','clearing_decision_event','clearing_event') );
 
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:15');
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:15');
+
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 308, 104, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 308, 104, DecisionTypes::WIP, 'true', '2015-05-11 12:15');
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 303, 101, DecisionTypes::WIP, 'false', '2015-05-11 12:15');
+
+    $this->prepareUploadTree($upload=4);
+  
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_REALPARENT=>301, UploadTreeProxy::OPT_CONCLUDE_REF=>$rfId);
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName='uploadtree_a', 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT uploadtree_pk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $parentOf306 = 305;
+    assertThat($zipDescendantsT, equalTo(array($parentOf306,308)) );
+  }
+  
+  public function testOptionConRefRanged()
+  {
+    $this->testDb->createPlainTables( array('clearing_decision','clearing_decision_event','clearing_event') );
+
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:15');
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:15');
+
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 308, 104, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 308, 104, DecisionTypes::WIP, 'true', '2015-05-11 12:15');
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 303, 101, DecisionTypes::WIP, 'false', '2015-05-11 12:15');
+
+    $this->prepareUploadTree($upload=4);
+  
+    $itemBoundsT = new ItemTreeBounds(301, $uploadTreeTableName='uploadtree_a', $upload, 1, 16);
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_RANGE=>$itemBoundsT, UploadTreeProxy::OPT_CONCLUDE_REF=>$rfId);
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName, 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT uploadtree_pk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(306,308)) );
+  }
+  
+  public function testOptionSkipAlreadyClearedRanged()
+  {
+    $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>$rfId,'rf_shortname'=>'any_license_found'));
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>103,'agent_fk'=>401));
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>104,'agent_fk'=>401));
+            
+    $this->prepareUploadTree($upload=4);
+  
+    $itemBoundsT = new ItemTreeBounds(301, $uploadTreeTableName='uploadtree_a', $upload, 1, 16);
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_RANGE=>$itemBoundsT, UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED=>true, UploadTreeProxy::OPT_AGENT_SET=>array(401));
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName, 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT pfile_fk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(104)) );
+  }
+  
+  public function testOptionSkipAlreadyClearedParented()
+  {
+    $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>$rfId,'rf_shortname'=>'any_license_found'));
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>103,'agent_fk'=>401));
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>104,'agent_fk'=>401));
+            
+    $this->prepareUploadTree($upload=4);
+  
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_REALPARENT=>301, UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED=>true, UploadTreeProxy::OPT_AGENT_SET=>array(401));
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName='uploadtree_a', 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT pfile_fk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(104)) );
+  }
+  
+  public function testOptionSkipAlreadyClearedButScanRanged()
+  {
+    $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref','license_map') );
+
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>$rfId,'rf_shortname'=>'any_license_found'));
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>$rfId+1,'rf_shortname'=>'license_found'));
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>103,'agent_fk'=>401));
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>104,'agent_fk'=>401));
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId+1,'pfile_fk'=>101,'agent_fk'=>401));
+            
+    $this->prepareUploadTree($upload=4);
+  
+    $itemBoundsT = new ItemTreeBounds(301, $uploadTreeTableName='uploadtree_a', $upload, 1, 16);
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_RANGE=>$itemBoundsT, 
+        UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED=>true, UploadTreeProxy::OPT_AGENT_SET=>array(401), UploadTreeProxy::OPT_SCAN_REF=>$rfId);
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName, 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT pfile_fk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(104)) );
+  }
+  
   public function testCount()
   {
     $uploadTreeProxy = new UploadTreeProxy(1, array(), 'uploadtree_a');
     assertThat($uploadTreeProxy->count(), is(12));
     
+    $uploadTreeProxy->materialize();
+    assertThat($uploadTreeProxy->count(), is(12));
+    
     $uploadTreeProxyAd = new UploadTreeProxy(1, array(UploadTreeProxy::OPT_ITEM_FILTER=>" AND ufile_name LIKE 'Ad%'"), 'uploadtree_a', 'viewWithHead');
     assertThat($uploadTreeProxyAd->count(), is(2));
   }
+
+  public function testGetUploadTreeTableName()
+  {
+    $uploadTreeProxy = new UploadTreeProxy(1, array(), $tableName='uploadtree_a');
+    assertThat($uploadTreeProxy->getUploadTreeTableName(), is(equalTo($tableName)));
+  }
   
+  public function testGetDefaultUploadTreeView()
+  {
+    $this->prepareUploadTree($upload=4);
+    $options = array(UploadTreeProxy::OPT_ITEM_FILTER=>"AND ufile_name='dirA'");
+    $uploadTreeProxy = new UploadTreeProxy(4, $options, $uploadTreeTableName='uploadtree_a');
+    
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT uploadtree_pk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(302)) );
+  }
 }
- 
