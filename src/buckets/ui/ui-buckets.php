@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,12 +17,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**
- * \file ui-buckets.php
- * \brief Bucket Browser
- */
-
-define("TITLE_ui_buckets", _("Bucket Browser"));
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 class ui_buckets extends FO_Plugin
 {
@@ -30,7 +27,7 @@ class ui_buckets extends FO_Plugin
   function __construct()
   {
     $this->Name       = "bucketbrowser";
-    $this->Title      = TITLE_ui_buckets;
+    $this->Title      = _("Bucket Browser");
     $this->Dependency = array("browse","view");
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->LoginFlag  = 0;
@@ -515,13 +512,13 @@ return;
   {
     $uTime = microtime(true);
     $V="";
-    $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($Upload);
-    if ($UploadPerm < Auth::PERM_READ)
+    /** @var UploadDao $uploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if ( !$uploadDao->isAccessible($Upload, Auth::getGroupId()) )
     {
       $text = _("Permission Denied");
-      return "<h2>$text<h2>";
+      return "<h2>$text</h2>";
     }
 
     $Item = GetParm("item",PARM_INTEGER);

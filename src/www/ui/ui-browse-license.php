@@ -189,8 +189,7 @@ class ui_browse_license extends DefaultPlugin
     $vars['licenseUri'] = Traceback_uri() . "?mod=popup-license&rf=";
     $vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
 
-    $vars = array_merge($vars, $dirVars);
-    return $vars;
+    return array_merge($vars, $dirVars);
   }
 
   /**

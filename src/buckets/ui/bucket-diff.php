@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,12 +17,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**
- * \file bucket-diff.php
- * \brief Compare Buckets Browser
- */
-
-define("TITLE_ui_diff_buckets", _("Compare Buckets Browser"));
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 class ui_diff_buckets extends FO_Plugin
 {
@@ -31,7 +28,7 @@ class ui_diff_buckets extends FO_Plugin
   function __construct()
   {
     $this->Name       = "bucketsdiff";
-    $this->Title      = TITLE_ui_diff_buckets;
+    $this->Title      = _("Compare Buckets Browser");
     $this->Dependency = array("browse","view");
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->LoginFlag  = 0;
@@ -708,11 +705,13 @@ return;
 
     /* Check item1 upload permission */
     $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
-    $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
-    if ($UploadPerm < Auth::PERM_READ)
+    
+    /** @var UploadDao $uploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if ( !$uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()) )
     {
       $text = _("Permission Denied");
-      echo "<h2>$text item 1<h2>";
+      echo "<h2>$text item 1</h2>";
       return;
     }
 

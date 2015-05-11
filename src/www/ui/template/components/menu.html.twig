@@ -24,7 +24,7 @@
       {% endif %}</td>
     <td align="right" valign="bottom">
       {% if isLoggedOut %}
-        <small><a href="{{ uri }}?mod=auth"><b>{{ 'Login'|trans }}</b></a></small>
+        <small>{% if isLoginPage %}{{ 'Login'|trans }}{% else %}<a href="{{ uri }}?mod=auth"><b>{{ 'Login'|trans }}</b></a>{% endif %}</small>
       {% else %}
         <small><a href="{{ logOutUrl }}"><b>logout</b></a></small>
         <table style="text-align: left;">

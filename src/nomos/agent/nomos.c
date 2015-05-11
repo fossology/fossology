@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014, Siemens AG
 
  This program is free software; you can redistribute it and/or
@@ -168,6 +168,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
     if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return 
     {
       LOG_FATAL("Unable to stat file: %s, error message: %s\n", filename_buf, strerror(errno)) ;
+      closedir(dir_handler);
       return;
     }
 
@@ -193,6 +194,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
       }
     }
   }
+  closedir(dir_handler);
 }
 
 /** 

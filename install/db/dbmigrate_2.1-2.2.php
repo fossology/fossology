@@ -217,5 +217,3 @@ function Migrate_21_22($Verbose)
 
   return 0;  // success
 } // Migrate_21_22
-
-?>
