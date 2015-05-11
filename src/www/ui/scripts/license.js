@@ -174,6 +174,8 @@ $(document).ready(function () {
     searchField.val(searchString);
     searchField.trigger('keyup');
   });
+  $('#scanFilter').change(function(){ filterScan($(this).val(),'scan'); });
+  $('#conFilter').change(function(){ filterScan($(this).val(),'con'); });
 });
 
 function filterScan(id,keyword) {

@@ -38,17 +38,17 @@
               <th></th>
               <th>
                 <select id="scanFilter">
-                  <option value="0" onclick="filterScan(0,'scan');">-- {{'filter for scan results'|trans}} --</option>
+                  <option value="0">-- {{'filter for scan results'|trans}} --</option>
                   {% for shortname,row in scannerLicenses %}
-                    <option onclick="filterScan({{row.rf_pk}},'scan');">{{ shortname }}</option>
+                    <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
                 </select>
               </th>
               <th>
                 <select id="conFilter">
-                  <option value="0" onclick="filterScan(0,'con');">-- {{'filter for edited results'|trans}} --</option>
+                  <option value="0">-- {{'filter for edited results'|trans}} --</option>
                   {% for shortname,row in editedLicenses %}
-                    <option onclick="filterScan({{row.rf_pk}},'con');">{{ shortname }}</option>
+                    <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
                 </select>
               </th>
