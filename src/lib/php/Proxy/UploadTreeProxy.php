@@ -146,10 +146,12 @@ class UploadTreeProxy extends DbViewProxy
               . " WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$this->uploadId
               . " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
               . "   WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
-              . "   AND cd.uploadtree_fk=usub.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+              . "   AND (cd.uploadtree_fk=usub.uploadtree_pk OR cd.scope=".DecisionScopes::REPO." AND cd.pfile_fk=usub.pfile_fk)"
+              . "   AND clearing_decision_pk=clearing_decision_fk"
               . "   AND clearing_event_fk=clearing_event_pk"
               . "   AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
-              . "   AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC LIMIT 1)"
+              . "   AND cd.decision_type!=".DecisionTypes::WIP
+              . " ORDER BY CASE cd.scope WHEN ".DecisionScopes::REPO." THEN 1 ELSE 0 END,cd.date_added DESC LIMIT 1)"
               . ")";
       $unifier .= "_".self::OPT_CONCLUDE_REF;
     }
@@ -158,10 +160,12 @@ class UploadTreeProxy extends DbViewProxy
     {
       $filter.= " AND NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
               . " WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
-              . " AND cd.uploadtree_fk=ut.uploadtree_pk AND clearing_decision_pk=clearing_decision_fk"
+              . " AND (cd.uploadtree_fk=ut.uploadtree_pk OR cd.scope=".DecisionScopes::REPO." AND cd.pfile_fk=ut.pfile_fk)"
+              . " AND clearing_decision_pk=clearing_decision_fk"
               . " AND clearing_event_fk=clearing_event_pk"
               . " AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
-              . " AND cd.decision_type!=".DecisionTypes::WIP." ORDER BY cd.date_added DESC)";
+              . " AND cd.decision_type!=".DecisionTypes::WIP
+              . " ORDER BY CASE cd.scope WHEN ".DecisionScopes::REPO." THEN 1 ELSE 0 END,cd.date_added DESC LIMIT 1)";
       $unifier .= "_".self::OPT_CONCLUDE_REF;
     }
   
