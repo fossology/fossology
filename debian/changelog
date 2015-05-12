@@ -1,3 +1,42 @@
+fossology (2.5.0-ng) unstable; urgency=low
+
+  * Story
+    * [SOSS-27] - include table with found copyright statements in the copyright file view
+    * [SOSS-47] - create postinstall sanity check for fossology
+    * [SOSS-51] - add progress statistics (e.g. ETA) in jobs view
+    * [SOSS-106] - Enable automatic clearing decision based on voting approach
+    * [SOSS-108] - bulk history does not filter events based on group
+    * [SOSS-117] - Exclude "irrelevant" files from decider agent?
+    * [SOSS-133] - Add "Generate report for this upload" link to folder view
+    * [SOSS-135] - contribute clearing view to community version
+    * [SOSS-153] - add db migration to community contribution
+    * [SOSS-192] - Corrections in "New Clearing View" Pull request
+    * [SOSS-195] - Filtering down to "Legal" copyrights misses legal copyright
+    * [SOSS-196] - Suggestions for Bulk Scans Workflow
+    * [SOSS-199] - Display Text for Report in "Change Concluded License" View
+    * [SOSS-200] - Command line tool to create a user, groups and add the user to groups
+    * [SOSS-210] - Import skipped with existing text - please add rf-source
+    * [SOSS-213] - Generated (Word) report fails if there are weird characters generated
+    * [SOSS-218] - Add main license setting / remove the "global setting"
+    * [SOSS-219] - New Report Template
+    * [SOSS-222] - Estimated Time of Arrival
+    * [SOSS-226] - Trust clearing decisions between fossology user groups
+    * [SOSS-228] - Reuse Bulk Scans of one Component for another component
+    * [SOSS-231] - Enhanced Reuse
+    * [SOSS-237] - bulk neutral placeholder for removed text
+    * [SOSS-269] - Improve Element Description on the Upload Page
+  * Task
+    * [SOSS-13] - Generate Readmeoss from Multiple Uploads
+    * [SOSS-119] - Create new section in report with list of all "irrelevant" files/folders
+    * [SOSS-202] - contrib bulkmonk + decider
+    * [SOSS-203] - contrib copyright + ecc
+    * [SOSS-204] - contrib reuser
+    * [SOSS-207] - contrib license csv im-/export
+    * [SOSS-208] - contrib cli tools
+    * [SOSS-209] - contrib readmeoss
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Tue, 12 May 2015 10:25:45 +0100
+
 fossology (2.4.1-ng) unstable; urgency=low
 
   * bugfix
