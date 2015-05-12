@@ -342,6 +342,36 @@ class UploadTreeProxyTest extends \PHPUnit_Framework_TestCase
     assertThat($zipDescendantsT, equalTo(array(104)) );
   }
   
+  public function testOptionSkipTheseThatAreAlreadyCleared()
+  {
+    $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+
+    $rfId = 201;
+    $groupId = 301;
+    $decisionId = 501;
+    $eventId = 601;
+
+    $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>$rfId,'rf_shortname'=>'any_license_found'));
+    
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 307, 103, DecisionTypes::IDENTIFIED, 'false', '2015-05-11 12:13');
+    $this->insertDecisionEvent($decisionId++, $eventId++, $rfId, $groupId, 306, 102, DecisionTypes::IDENTIFIED, 'true', '2015-05-11 12:13');
+
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>103,'agent_fk'=>401));
+    $this->dbManager->insertTableRow('license_file',array('rf_fk'=>$rfId,'pfile_fk'=>104,'agent_fk'=>401));
+            
+    $this->prepareUploadTree($upload=4);
+  
+    $options = array(UploadTreeProxy::OPT_GROUP_ID=>$groupId, UploadTreeProxy::OPT_REALPARENT=>301, UploadTreeProxy::OPT_SKIP_THESE=>UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED, UploadTreeProxy::OPT_AGENT_SET=>array(401));
+    $uploadTreeProxy = new UploadTreeProxy($upload, $options, $uploadTreeTableName='uploadtree_a', 'viewTop');
+    $stmt = __METHOD__;
+    $this->dbManager->prepare($stmt, $uploadTreeProxy->asCTE()." SELECT pfile_fk FROM ".$uploadTreeProxy->getDbViewName());
+    $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
+    $descendantsT = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    assertThat($zipDescendantsT, equalTo(array(104)) );
+  }
+  
   public function testOptionSkipAlreadyClearedButScanRanged()
   {
     $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref','license_map') );
