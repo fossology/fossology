@@ -59,7 +59,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
  \return sqlCopy_struct.
          On failure, ERROR to stdout, return 0
 */
-psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int NumColumns, ...)
+psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int NumColumns, ...)
 {
   psqlCopy_t pCopy;
   va_list ColumnNameArg;
@@ -89,7 +89,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int Nu
   }
 
   /* Save the DB connection */
-  pCopy->PGconn = PGconn;
+  pCopy->pGconn = pGconn;
 
   /* Save the data buffer size  */
   pCopy->BufSize = BufSize;
@@ -257,21 +257,21 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
   sprintf(copystmt, "COPY %s(%s) from stdin",
     pCopy->TableName,
     pCopy->ColumnNames);
-  result = PQexec(pCopy->PGconn, copystmt);
+  result = PQexec(pCopy->pGconn, copystmt);
   if (PGRES_COPY_IN == PQresultStatus(result))
   {
     PQclear(result);
-    if (PQputCopyData(pCopy->PGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
+    if (PQputCopyData(pCopy->pGconn, pCopy->DataBuf, pCopy->DataIdx) != 1)
     ERROR_RETURN(PQresultErrorMessage(result))
   }
-  else if (fo_checkPQresult(pCopy->PGconn, result, copystmt, __FILE__, __LINE__)) return 0;
+  else if (fo_checkPQresult(pCopy->pGconn, result, copystmt, __FILE__, __LINE__)) return 0;
 
 
   /* End copy  */
-  if (PQputCopyEnd(pCopy->PGconn, NULL) == 1)
+  if (PQputCopyEnd(pCopy->pGconn, NULL) == 1)
   {
-    result = PQgetResult(pCopy->PGconn);
-    if (fo_checkPQcommand(pCopy->PGconn, result, "copy end", __FILE__, __LINE__)) return 0;
+    result = PQgetResult(pCopy->pGconn);
+    if (fo_checkPQcommand(pCopy->pGconn, result, "copy end", __FILE__, __LINE__)) return 0;
   }
   PQclear(result);
 

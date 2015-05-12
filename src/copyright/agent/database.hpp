@@ -46,6 +46,8 @@ class CopyrightDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
   CopyrightDatabaseHandler(fo::DbManager manager);
+  CopyrightDatabaseHandler(const CopyrightDatabaseHandler&) = delete;
+  CopyrightDatabaseHandler(CopyrightDatabaseHandler&& other) : fo::AgentDatabaseHandler(std::move(other)) {}; // = default
   CopyrightDatabaseHandler spawn() const;
 
   bool createTables() const;

@@ -50,7 +50,7 @@ void bail(int exitval);
 
 int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager);
 
-bool parseCliOptions(int argc, char const* const* const argv, CliOptions& dest, std::vector<std::string>& fileNames);
+bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames);
 
 CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions);
 

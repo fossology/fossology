@@ -44,7 +44,7 @@ namespace fo {
     QueryResult(PGresult* ptr);
 
   public:
-    QueryResult(QueryResult&&) = default;
+    QueryResult(QueryResult&& o): ptr(std::move(o.ptr)) {};
 
     bool isFailed() const;
 
