@@ -21,6 +21,7 @@ class NinkaDatabaseHandler : public fo::AgentDatabaseHandler
 {
 public:
   NinkaDatabaseHandler(fo::DbManager dbManager);
+  NinkaDatabaseHandler(NinkaDatabaseHandler&& other) : fo::AgentDatabaseHandler(std::move(other)) {};
   NinkaDatabaseHandler spawn() const;
 
   std::vector<unsigned long> queryFileIdsForUpload(int uploadId);

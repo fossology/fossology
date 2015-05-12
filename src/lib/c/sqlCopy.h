@@ -35,7 +35,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 /* fo_sqlCopy for batch copy (mass inserts) */
 struct sqlCopy_struct
 {
-  PGconn* PGconn;
+  PGconn* pGconn;
   /* Database connection */
   char* TableName;
   /* Database table to copy (insert) into */
@@ -49,7 +49,7 @@ struct sqlCopy_struct
 };
 typedef struct sqlCopy_struct sqlCopy_t, * psqlCopy_t;
 
-psqlCopy_t fo_sqlCopyCreate(PGconn* PGconn, char* TableName, int BufSize, int NumColumns, ...);
+psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int NumColumns, ...);
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow);
 int fo_sqlCopyExecute(psqlCopy_t pCopy);
 void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag);

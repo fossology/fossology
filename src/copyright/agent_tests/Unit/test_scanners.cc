@@ -30,8 +30,8 @@ using namespace std;
 
 ostream& operator<<(ostream& out, const list<match>& l)
 {
-  for (const match& m : l)
-    out << '[' << m.start << ':' << m.end << ':' << m.type << ']';
+  for (auto m = l.begin(); m != l.end(); ++m)
+    out << '[' << m->start << ':' << m->end << ':' << m->type << ']';
   return out;
 }
 
@@ -69,20 +69,20 @@ private:
     list<match> matches;
     list<match> expected;
     sc->ScanString(content, matches);
-    
-    for (const char * s : expectedStrings)
+
+    for (auto s = expectedStrings.begin(); s != expectedStrings.end(); ++s)
     {
-      const char * p = strstr(content, s);
+      const char * p = strstr(content, *s);
       if (p)
       {
         int pos = p - content;
-        expected.push_back(match(pos, pos+strlen(s), type));
+        expected.push_back(match(pos, pos+strlen(*s), type));
       }
       // else: expected string is not contained in original string
     }
     CPPUNIT_ASSERT_EQUAL(expected, matches);
   }
-  
+
 protected:
   void copyscannerTest()
   {
