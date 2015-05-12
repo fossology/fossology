@@ -26,9 +26,6 @@ DIRS = \
 	readmeoss \
 	report \
 	reportgen \
-	nomos \
-	pkgagent \
-	readmeoss \
 	reuser \
 	scheduler \
 	ununpack \
