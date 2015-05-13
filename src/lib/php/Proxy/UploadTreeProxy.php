@@ -143,7 +143,7 @@ class UploadTreeProxy extends DbViewProxy
         $childFilter = self::getQueryCondition(self::OPT_SKIP_ALREADY_CLEARED, $groupAlias, $agentFilter);
         $filter .= ' AND EXISTS(SELECT * FROM '.$this->uploadTreeTableName.' utc WHERE utc.upload_fk='.$this->uploadId
                 . ' AND (utc.lft BETWEEN ut.lft AND ut.rgt) AND utc.ufile_mode&(3<<28)=0 AND '
-                   .str_replace(' ut.', ' utc.', $childFilter).')';
+                   .preg_replace('/([a-z])ut\./', '\1utc.', $childFilter).')';
       }
     }
     
@@ -292,7 +292,7 @@ class UploadTreeProxy extends DbViewProxy
   private static function getQueryCondition($skipThese, $groupId = null, $agentFilter='')
   {
     $conditionQueryHasLicense = "(EXISTS (SELECT * FROM license_ref lr, license_file lf"
-            . " WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lf.rf_fk=lr.rf_pk AND lf.pfile_fk=ut.pfile_fk $agentFilter)
+            . " WHERE rf_shortname NOT IN ('No_license_found', 'Void') AND lf.rf_fk=lr.rf_pk AND lf.pfile_fk = ut.pfile_fk $agentFilter)
         OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese)
