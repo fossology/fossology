@@ -25,21 +25,25 @@ extern "C" {
 
 using namespace fo;
 
-DbManager::DbManager(int* argc, char** argv)
-{
+static fo_dbManager* doConnect(int* argc, char** argv) {
   fo_dbManager* _dbManager;
   fo_scheduler_connect_dbMan(argc, argv, &_dbManager);
-  InitDbManagerPointer(_dbManager);
+  return _dbManager;
 }
 
-DbManager::DbManager(fo_dbManager* _dbManager)
+static inline unptr::shared_ptr<fo_dbManager> makeShared(fo_dbManager * p)
 {
-  InitDbManagerPointer(_dbManager);
+  return unptr::shared_ptr<fo_dbManager>(p, DbManagerStructDeleter());
 }
 
-void DbManager::InitDbManagerPointer(fo_dbManager * p)
+DbManager::DbManager(int* argc, char** argv) :
+  dbManager(makeShared(doConnect(argc, argv)))
 {
-  dbManager = unptr::shared_ptr<fo_dbManager>(p, DbManagerStructDeleter());
+}
+
+DbManager::DbManager(fo_dbManager* _dbManager) :
+  dbManager(makeShared(_dbManager))
+{
 }
 
 PGconn* DbManager::getConnection() const
