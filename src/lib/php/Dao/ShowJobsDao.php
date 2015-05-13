@@ -246,10 +246,12 @@ class ShowJobsDao extends Object
 
   /**
    * @brief Returns Estimated time using jobid
-   * @param $job_pk $jq_Type
+   * @param int $job_pk
+   * @param string $jq_Type
+   * @param float $filesPerSec
    * @return Returns empty if estimated time is 0 else returns time. 
    **/
-  public function getEstimatedTime($job_pk, $jq_Type, $filesPerSec)
+  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0)
   {
     /* try to get the itemsprocessed for the job whose endtext id completed */
     $statementName = __METHOD__."getEstimatedTime.jq_itemsprocessed";
