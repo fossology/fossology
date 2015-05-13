@@ -1,0 +1,11 @@
+
+<File rdf:about="{{ fileId }}">
+  <fileName>{{ fileName }}</fileName>
+  <licenseConcluded>
+    <DisjunctiveLicenseSet>
+{% for res in concludedLicenses %}
+      <member rdf:resource="{{ res }}"/>
+{% endfor %}
+    </DisjunctiveLicenseSet>
+  </licenseConcluded>
+</File>

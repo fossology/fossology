@@ -1,0 +1,16 @@
+<SpdxDocument rdf:about="{{ uri }}#SPDXRef-DOCUMENT">
+  <specVersion>SPDX-2.0</specVersion>
+  <dataLicense rdf:resource="http://spdx.org/licenses/CC0-1.0" />
+  <CreationInfo>
+    <licenseListVersion>2.0</licenseListVersion> 
+    <creator>Person: {{ userName }}</creator>
+    <creator>Organization: {{ organisation }}</creator>
+    <creator>Tool: spxd2</creator>
+    <created>{{ 'now'|date('Y-m-d\\TH:i:sT')}}</created>
+  </CreationInfo>
+  <name>{{ documentName }}</name>
+  <rdfs:comment> 
+    This document was created using SPDX 2.0 using licenses from Fossology.
+  </rdfs:comment>
+  {{ fileNodes|replace({'\n':'\n  '}) }}
+</SpdxDocument>
