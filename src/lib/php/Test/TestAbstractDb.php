@@ -117,7 +117,8 @@ abstract class TestAbstractDb
       if( $invert^!in_array($viewName, $elementList) ){
         continue;
       }
-      $this->dbManager->queryOnce($sql);
+      $sqlCreate = is_array($sql) ? $sql['CREATE'] : $sql;
+      $this->dbManager->queryOnce($sqlCreate);
     }
   }
 

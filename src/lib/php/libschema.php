@@ -467,7 +467,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $result = $this->dbman->freeResult($stmt);
     for ($i = 0; !empty($Results[$i]['view_name']); $i++)
     {
       $View = $Results[$i]['view_name'];
@@ -551,7 +552,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $this->dbman->freeResult($result);
     for ($i = 0; !empty($Results[$i]['table']); $i++)
     {
       $R = & $Results[$i];
@@ -622,6 +624,7 @@ class fo_libschema
       $sql = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
       $this->currSchema['VIEW'][$Results[$i]['viewname']] = $sql;
     }
+    $this->dbman->freeResult($result);
   }
 
   /***************************/
@@ -705,7 +708,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $this->dbman->freeResult($result);
     /* Constraints use indexes into columns.  Covert those to column names. */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
@@ -846,7 +850,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $result = $this->dbman->freeResult($stmt);
     for ($i = 0; !empty($Results[$i]['table']); $i++)
     {
       /* UNIQUE constraints also include indexes. */
@@ -876,7 +881,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $result = $this->dbman->freeResult($stmt);
     for ($i = 0; !empty($Results[$i]['proname']); $i++)
     {
       $sql = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
