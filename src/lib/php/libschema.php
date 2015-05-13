@@ -1,7 +1,7 @@
 <?php
 /*
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -905,51 +905,6 @@ class fo_libschema
   {
     print "  Applying database functions\n";
     flush();
-    /********************************************
-     * GetRunnable() is a DB function for listing the runnable items
-     * in the jobqueue. This is used by the scheduler.
-     ********************************************/
-    $sql = '
-  CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
-  DECLARE
-    jqrec jobqueue;
-    jqrec_test jobqueue;
-    jqcurse CURSOR FOR SELECT *
-      FROM jobqueue
-      INNER JOIN job ON jq_starttime IS NULL AND jq_end_bits < 2 AND job_pk = jq_job_fk
-      ORDER BY job_priority DESC
-      ;
-    jdep_row jobdepends;
-    success integer;
-  BEGIN
-    open jqcurse;
-  <<MYLABEL>>
-    LOOP
-      FETCH jqcurse INTO jqrec;
-      IF FOUND
-      THEN -- check all dependencies
-        success := 1;
-        <<DEPLOOP>>
-        FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
-    -- has the dependency been satisfied?
-    SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
-    IF NOT FOUND
-    THEN
-      success := 0;
-      EXIT DEPLOOP;
-    END IF;
-        END LOOP DEPLOOP;
-
-        IF success=1 THEN RETURN NEXT jqrec; END IF;
-      ELSE EXIT;
-      END IF;
-    END LOOP MYLABEL;
-  RETURN;
-  END;
-  $$
-  LANGUAGE plpgsql;
-      ';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getrunnable');
     /********************************************
      * uploadtree2path is a DB function that returns the non-artifact parents of an uploadtree_pk.
      * drop and recreate to change the return type.

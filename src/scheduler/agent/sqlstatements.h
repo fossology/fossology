@@ -79,7 +79,13 @@ const char* jobsql_email_job =
 
 /* job queue related sql */
 const char* basic_checkout =
-    " SELECT * FROM getrunnable() "
+    " SELECT jobqueue.* FROM jobqueue INNER JOIN job ON job_pk = jq_job_fk "
+    " WHERE jq_starttime IS NULL AND jq_end_bits < 2 "
+    "   AND NOT EXISTS(SELECT * FROM jobdepends, jobqueue jdep "
+    "     WHERE jdep_jq_fk=jobqueue.jq_pk "
+    "       AND jdep_jq_depends_fk=jdep.jq_pk"
+    "       AND NOT(jdep.jq_endtime IS NOT NULL AND jdep.jq_end_bits < 2)) "
+    " ORDER BY job_priority DESC "
     "   LIMIT 10;";
 
 const char* jobsql_information =
@@ -148,11 +154,13 @@ const char* jobsql_priority =
     "     WHERE jq_pk = '%d');";
 
 const char* jobsql_anyrunnable =
-    " SELECT * FROM getrunnable() "
-    "   WHERE jq_job_fk = ( "
-    "     SELECT jq_job_fk FROM jobqueue "
-    "       WHERE jq_pk = %d "
-    "   );";
+    " SELECT * FROM jobqueue "
+    " WHERE jq_starttime IS NULL AND jq_end_bits < 2 "
+    "   AND NOT EXISTS(SELECT * FROM jobdepends, jobqueue jdep "
+    "     WHERE jdep_jq_fk=jobqueue.jq_pk "
+    "       AND jdep_jq_depends_fk=jdep.jq_pk"
+    "       AND NOT(jdep.jq_endtime IS NOT NULL AND jdep.jq_end_bits < 2))"
+    "   AND jq_job_fk = (SELECT jq_job_fk FROM jobqueue queue WHERE queue.jq_pk = %d)";
 
 const char* jobsql_jobendbits =
     " SELECT jq_pk, jq_end_bits FROM jobqueue "
