@@ -140,6 +140,7 @@ class fo_libschema
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $this->applySequences();
     $this->applyTables();
+    $this->updateSequences();
     $this->applyViews();
     $this->dropConstraints();
     /* Reload current since the CASCADE may have changed things */
@@ -181,13 +182,34 @@ class fo_libschema
     {
       return;
     }
-    foreach ($this->schema['SEQUENCE'] as $name => $sql)
+    foreach ($this->schema['SEQUENCE'] as $name => $import)
     {
-      if (empty($name) || $this->currSchema['SEQUENCE'][$name] == $sql)
+      if (empty($name)) continue;
+
+      if(!array_key_exists($name, $this->currSchema['SEQUENCE']))
       {
-        continue;
+        $createSql = is_string($import) ? $import : $import['CREATE'];
+        $this->applyOrEchoOnce($createSql, $stmt = __METHOD__ . "." . $name . ".CREATE");
       }
-      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $name);
+    }
+  }
+
+  /************************************/
+  /* Add sequences */
+  /************************************/
+  function updateSequences()
+  {
+    if (empty($this->schema['SEQUENCE']))
+    {
+      return;
+    }
+    foreach ($this->schema['SEQUENCE'] as $name => $import)
+    {
+      if (empty($name)) continue;
+
+      if (is_array($import) && array_key_exists('UPDATE', $import)) {
+        $this->applyOrEchoOnce($import['UPDATE'], $stmt = __METHOD__ . "." . $name);
+      }
     }
   }
 
@@ -494,9 +516,9 @@ class fo_libschema
   {
     global $SysConf;
     $this->currSchema = array();
-    $this->addTables();
+    $referencedSequencesInTableColumns = $this->addTables();
     $this->addViews($viewowner = $SysConf['DBCONF']['user']);
-    $this->addSequences();
+    $this->addSequences($referencedSequencesInTableColumns);
     $this->addConstraints();
     $this->addIndexes();
     unset($this->currSchema['TABLEID']);
@@ -508,6 +530,8 @@ class fo_libschema
   /***************************/
   function addTables()
   {
+    $referencedSequencesInTableColumns = array();
+
     $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
@@ -568,9 +592,19 @@ class fo_libschema
         $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
         $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
+
+        $rgx = "/nextval\('([a-z_]*)'.*\)/";
+        $matches = array();
+        if (preg_match($rgx, $R['default'], $matches)) {
+           $sequence = $matches[1];
+           $referencedSequencesInTableColumns[$sequence] = array("table" => $Table, "column" => $Column);
+        }
       }
       $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ";";
     }
+    $this->dbman->freeResult($result);
+
+    return $referencedSequencesInTableColumns;
   }
 
   /***************************/
@@ -593,7 +627,7 @@ class fo_libschema
   /***************************/
   /* Get Sequence */
   /***************************/
-  function addSequences()
+  function addSequences($referencedSequencesInTableColumns)
   {
     $sql = "SELECT relname
       FROM pg_class
@@ -601,15 +635,30 @@ class fo_libschema
         AND relnamespace IN (
              SELECT oid FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname != 'information_schema'
             )";
+
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['relname']); $i++)
-    {
-      $sql = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
-      $this->currSchema['SEQUENCE'][$Results[$i]['relname']] = $sql;
+
+    while($row = $this->dbman->fetchArray($result)) {
+      $sequence = $row['relname'];
+      if (empty($sequence)) {
+         continue;
+      }
+
+      $sqlCreate = "CREATE SEQUENCE \"" . $sequence . "\"";
+      $this->currSchema['SEQUENCE'][$sequence]['CREATE'] = $sqlCreate;
+
+      if (array_key_exists($sequence, $referencedSequencesInTableColumns)) {
+        $table = $referencedSequencesInTableColumns[$sequence]['table'];
+        $column = $referencedSequencesInTableColumns[$sequence]['column'];
+
+        $sqlUpdate = "SELECT setval('$sequence',(SELECT greatest(1,max($column)) val FROM $table))";
+        $this->currSchema['SEQUENCE'][$sequence]['UPDATE'] = $sqlUpdate;
+      }
     }
+
+    $this->dbman->freeResult($result);
   }
 
   /***************************/
