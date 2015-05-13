@@ -542,7 +542,7 @@ class AjaxShowJobs extends FO_Plugin
       $jobs = $this->showJobsDao->myJobs($allusers);
     } 
     $jobsInfo = $this->showJobsDao->getJobInfo($jobs, $page);
-    usort($jobsInfo, "compareJobsInfo");
+    usort($jobsInfo, array($this,"compareJobsInfo"));
       
     $showJobData = $this->show($jobsInfo, $page);
     return new JsonResponse($showJobData);
