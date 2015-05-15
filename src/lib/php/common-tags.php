@@ -15,7 +15,9 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file common-tags.php
@@ -189,10 +191,12 @@ function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
  */
 function TagStatus($upload_id) 
 {
-  global $PG_CONN;
-
-  $UploadPerm = GetUploadPerm($upload_id);
-  if ($UploadPerm < Auth::PERM_WRITE) return 0;
+  global $PG_CONN, $container;
+  /* @var $uploadDao UploadDao */
+  $uploadDao = $container->get('dao.upload');
+  if (!$uploadDao->isEditable($upload_id, Auth::getGroupId())) {
+    return 0;
+  }
 
   /** check if this upload has been disabled */
   $sql = "select tag_manage_pk from tag_manage where upload_fk = $upload_id and is_disabled = true;";

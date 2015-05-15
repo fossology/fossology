@@ -18,6 +18,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\TextFragment;
 use Fossology\Lib\View\HighlightProcessor;
@@ -32,20 +33,14 @@ define("TITLE_ui_view", _("View File"));
 class ui_view extends FO_Plugin
 {
   const NAME = "view";
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-  /**
-   * @var TextRenderer
-   */
+  /** @var TextRenderer */
   private $textRenderer;
-
-  /**
-   * @var HighlightProcessor
-   */
+  /** @var HighlightProcessor */
   private $highlightProcessor;
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
@@ -62,6 +57,7 @@ class ui_view extends FO_Plugin
     $this->logger = $container->get("logger");
     $this->textRenderer = $container->get("view.text_renderer");
     $this->highlightProcessor = $container->get("view.highlight_processor");
+    $this->uploadDao = $container->get("dao.upload");
   }
 
   /**
@@ -294,10 +290,9 @@ class ui_view extends FO_Plugin
     global $Plugins;
 
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (!empty($Upload))
+    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload,Auth::getGroupId()))
     {
-      $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < Auth::PERM_READ) return "p";
+      return 'denied';
     }
 
     $Item = GetParm("item", PARM_INTEGER);
@@ -308,11 +303,11 @@ class ui_view extends FO_Plugin
       return "invalid input file";
     }
 
-    $uploadtree_tablename = GetUploadtreeTablename($Upload);
+    $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
 
     if ($ShowHeader)
     {
-      $Uri = Traceback_uri() . "?mod=browse" .  Traceback_parm_keep(array('item','show','folder','upload')) ;
+      $Uri = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array('item','show','folder','upload')) ;
       /* No item */
       $header = Dir2Browse($BackMod, $Item, NULL, $showBox=0, "View", -1, '', '', $uploadtree_tablename);
       $this->vars['micromenu'] = $header;

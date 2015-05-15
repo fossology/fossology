@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,25 +15,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  **********************************************************/
+
 use Fossology\Lib\Auth\Auth;
-use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Dao\UploadDao;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * \file ui-license-list.php
- * \brief list license for files/directories
- */
-define("TITLE_ui_license_list", _("License List"));
-
-class ui_license_list extends FO_Plugin {
-  var $Name = "license-list";
-  var $Title = TITLE_ui_license_list;
-  var $Version = "1.0";
-  var $Dependency = array("browse");
-  var $DBaccess = PLUGIN_DB_READ;
-  var $LoginFlag = 0;
-  var $NoHeader = 0;
-
+class ui_license_list extends FO_Plugin
+{
+  /** @var UploadDao */
+  private $uploadDao;
+  
+  function __construct()
+  {
+    $this->Name = "license-list";
+    $this->Title = _("License List");
+    $this->Dependency = array("browse");
+    $this->DBaccess = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+    $this->NoHeader = 0;
+    parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+  }
   /**
    * \brief Customize submenus.
    */
@@ -95,44 +97,33 @@ class ui_license_list extends FO_Plugin {
     $upload_pk = GetParm("upload", PARM_INTEGER);
     if (empty($upload_pk))
       return;
-    $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < Auth::PERM_READ)
+    if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId()))
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
-      return;
+      return "<h2>$text</h2>";
     }
 
-    if (GetParm("output", PARM_STRING) == 'dltext')
-      $dltext = true;
-    else
-      $dltext = false;
+    $dltext = (GetParm("output", PARM_STRING) == 'dltext');
 
     /* get last nomos agent_pk that has data for this upload */
-    $Agent_name = "nomos";
     $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
     $agent_pk = $AgentRec[0]["agent_fk"];
     if ($AgentRec === false)
     {
-      echo _("No data available");
-      return;
+      return _("No data available");
     }
 
     /* how many lines of data do you want to display */
     $NomostListNum = @$SysConf['SYSCONFIG']['NomostListNum'];
 
     /* get the top of tree */
-    $sql = "SELECT upload_fk, lft, rgt from uploadtree where uploadtree_pk='$uploadtree_pk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $toprow = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $toprow = $this->uploadDao->getUploadEntry($uploadtree_pk);
 
     /* loop through all the records in this tree */
     $sql = "select uploadtree_pk, ufile_name, lft, rgt from uploadtree
               where upload_fk='$toprow[upload_fk]' 
                     and lft>'$toprow[lft]'  and rgt<'$toprow[rgt]'
-                    and ((ufile_mode & (1<<28)) = 0) and ((ufile_mode & (1<<29)) = 0) limit $NomostListNum";
+                    and (ufile_mode & (3<<28)) = 0 limit $NomostListNum";
     $outerresult = pg_query($PG_CONN, $sql);
     DBCheckResult($outerresult, $sql, __FILE__, __LINE__);
 
@@ -140,7 +131,7 @@ class ui_license_list extends FO_Plugin {
      * filepath : license list
      * e.g. Pound-2.4.tgz/Pound-2.4/svc.c: GPL_v3+, Indemnity
      */
-    $uploadtreeTablename = GetUploadtreeTableName($toprow['upload_fk']);
+    $uploadtreeTablename = $this->uploadDao->getUploadtreeTableName($toprow['upload_fk']);
 
     $lines = array();
     while ($row = pg_fetch_assoc($outerresult)) {

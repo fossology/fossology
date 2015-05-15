@@ -113,7 +113,7 @@ class ShowJobsDao extends Object
     $jobArray = array();
 
     if ($allusers == 0) 
-      $allusers_str = "job_user_fk='".$SysConf['auth'][Auth::USER_ID]."' and ";
+      $allusers_str = "job_user_fk='".Auth::getUserId()."' and ";
     else
       $allusers_str = "";
     
@@ -123,7 +123,7 @@ class ShowJobsDao extends Object
     $result = $this->dbManager->execute($statementName);
     while($row = $this->dbManager->fetchArray($result)){
       if (!empty($row['job_upload_fk'])){
-        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], $SysConf['auth'][Auth::GROUP_ID]);
+        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], Auth::getGroupId());
         if (!$uploadIsAccessible) { continue; }
       }
       $jobArray[] = $row['job_pk'];

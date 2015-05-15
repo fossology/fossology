@@ -142,7 +142,7 @@ class AjaxBrowse extends DefaultPlugin
     $rowCounter = 0;
     while ($row = $this->dbManager->fetchArray($result))
     {
-      if (empty($row['upload_pk']) || (GetUploadPerm($row['upload_pk']) < Auth::PERM_READ))
+      if (empty($row['upload_pk']) || !$this->uploadDao->isAccessible($row['upload_pk'],Auth::getGroupId()))
       {
         continue;
       }

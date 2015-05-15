@@ -170,9 +170,12 @@ class UploadDao extends Object
     return $uploadStatus->getMap();
   }
 
-  public function getStatus($uploadId, $userId)
+  /**
+   * @brief unused function
+   */
+  public function getStatus($uploadId, $groupId)
   {
-    if (GetUploadPerm($uploadId, $userId) >= Auth::PERM_READ) {
+    if ($this->isAccessible($uploadId, $groupId)) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
@@ -280,7 +283,7 @@ class UploadDao extends Object
 
   /**
    * @param $uploadId
-   * @return mixed
+   * @return int uploadtreeId of top item
    */
   public function getUploadParent($uploadId)
   {
@@ -447,7 +450,18 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=Auth::PERM_NONE;
+    return $perm['perm']>Auth::PERM_NONE;
+  }
+  
+  public function isEditable($uploadId, $groupId) 
+  {
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
+      return true;
+    }
+
+    $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
+        array($uploadId, $groupId), __METHOD__);
+    return $perm['perm']>=Auth::PERM_WRITE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)

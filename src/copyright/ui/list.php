@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,8 +17,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 
 /**
  * \file list.php
@@ -30,10 +32,10 @@ define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
 
 class copyright_list extends FO_Plugin
 {
-  /**
-   * @var DbManager
-   */
+  /** @var DbManager */
   private $dbManager;
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
@@ -48,6 +50,7 @@ class copyright_list extends FO_Plugin
     parent::__construct();
     global $container;
     $this->dbManager = $container->get('db.manager');
+    $this->uploadDao = $container->get('dao.upload');
   }
 
   /**
@@ -64,15 +67,14 @@ class copyright_list extends FO_Plugin
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $hash = GetParm("hash",PARM_RAW);
     $type = GetParm("type",PARM_RAW);
-    $Page = GetParm("page",PARM_INTEGER);
     $Excl = GetParm("excl",PARM_RAW);
-    $filter = GetParm("filter",PARM_RAW);
 
     $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
-    if (!empty($Excl)) $URL .= "&excl=$Excl";
+    if (!empty($Excl)) {
+      $URL .= "&excl=$Excl";
+    }
     $text = _("Show All Files");
     menu_insert($this->Name."::Show All",0, $URL, $text);
-
   } // RegisterMenus()
 
 
@@ -89,19 +91,11 @@ class copyright_list extends FO_Plugin
    */
   function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName)
   {
-    global $PG_CONN;
-
     /*******  Get license names and counts  ******/
-    /* Find lft and rgt bounds for this $Uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
-              WHERE uploadtree_pk = $Uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
 
     /* get all the copyright records for this uploadtree.  */
     $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
@@ -262,14 +256,12 @@ class copyright_list extends FO_Plugin
     }
 
     /* Check item1 and item2 upload permissions */
-    $Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
-    $UploadPerm = GetUploadPerm($Row['upload_fk']);
-    if ($UploadPerm < Auth::PERM_READ)
+    $Row = $this->uploadDao->getUploadEntry($uploadtree_pk);
+    if (!$this->uploadDao->isAccessible($Row['upload_fk'], Auth::getGroupId()))
     {
       $this->vars['pageContent'] = "<h2>" . _("Permission Denied") . "</h2>";
       return;
     }
-
 
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) {
@@ -280,14 +272,12 @@ class copyright_list extends FO_Plugin
 
     /* get all rows */
     $upload_pk = -1;
-    $rows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName);
-
-    /* Get uploadtree_tablename */
-    $uploadtree_tablename = GetUploadtreeTableName($upload_pk);
+    $allRows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName);
+    $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload_pk);
 
     /* slim down to all rows with this hash and type,  and filter */
     $NumInstances = 0;
-    $rows = $this->GetRequestedRows($rows, $excl, $NumInstances, $filter);
+    $rows = $this->GetRequestedRows($allRows, $excl, $NumInstances, $filter);
 
     // micro menus
     $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);

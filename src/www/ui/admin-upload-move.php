@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
@@ -18,11 +16,14 @@ use Fossology\Lib\Auth\Auth;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**
- * \class upload_move extend from FO_Plugin
- * \brief move a upload from a place to another one
- */
-class upload_move extends FO_Plugin {
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
+
+class upload_move extends FO_Plugin
+{
+  /** @var UploadDao */
+  private $uploadDao;
+  
   function __construct()
   {
     $this->Name = "upload_move";
@@ -30,6 +31,7 @@ class upload_move extends FO_Plugin {
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->Title = "Move upload to different folder";
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
   /**
@@ -40,7 +42,6 @@ class upload_move extends FO_Plugin {
    * \return 1 if renamed, 0 if failed.
    */
   function Move($UploadId, $NewParentId, $OldParentId) {
-    global $Plugins;
     global $PG_CONN;
     /* Check the name */
     if (empty($NewParentId)) {
@@ -84,20 +85,17 @@ class upload_move extends FO_Plugin {
 
     $V = "";
     $text = _("Move upload to different folder.");
-    $V.= "<H2>$text</H1>\n";
+    $V.= "<H2>$text</H2>\n";
     /* If this is a POST, then process the request. */
     $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
     $UploadId = GetParm('uploadid', PARM_INTEGER);
     $TargetFolderId = GetParm('targetfolderid', PARM_INTEGER);
     if (!empty($OldFolderId) && !empty($TargetFolderId)) 
     {
-      /* check upload permission */
-      $UploadPerm = GetUploadPerm($UploadId);
-      if ($UploadPerm < Auth::PERM_WRITE)
+      if (!$this->uploadDao->isEditable($UploadId, Auth::getGroupId()))
       {
         $text = _("Permission Denied");
-        echo "<h2>$text<h2>";
-        return;
+        return "<h2>$text</h2>";
       }
 
       $rc = $this->Move($UploadId, $TargetFolderId, $OldFolderId);
