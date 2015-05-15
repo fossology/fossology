@@ -288,9 +288,12 @@ class UploadDao extends Object
     $statementname = __METHOD__ . $uploadTreeTableName;
 
     $parent = $this->dbManager->getSingleRow(
-        "select uploadtree_pk
-            from $uploadTreeTableName
-            where upload_fk=$1 and lft=1", array($uploadId), $statementname);
+        "SELECT uploadtree_pk
+            FROM $uploadTreeTableName
+            WHERE upload_fk=$1 AND parent IS NULL", array($uploadId), $statementname);
+    if(false === $parent) {
+      throw new \Exception("Missing upload tree parent for upload");
+    }
     return $parent['uploadtree_pk'];
   }
 

@@ -39,11 +39,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
 
-    $this->testDb->createPlainTables(
-        array(
-            'upload',
-            'uploadtree',
-        ));
+    $this->testDb->createPlainTables(array('upload','uploadtree'));
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
@@ -427,5 +423,30 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $zip = new ItemTreeBounds(1,'uploadtree_a', 1, 1, 24);
     $zipDescendants = $this->uploadDao->countNonArtifactDescendants($zip);
     assertThat($zipDescendants, is(count(array(6,7,8,10,11,12)) ) );
+  }
+  
+  
+  public function testGetUploadParent()
+  {
+    $this->prepareUploadTree($this->getTestFileStructure());
+    $topId = $this->uploadDao->getUploadParent(32);
+    assertThat($topId,equalTo(3650));
+  }
+  
+  /** @expectedException \Exception
+   * @expectedExceptionMessage Missing upload tree parent for upload
+   */
+  public function testGetUploadParentFromBrokenTree()
+  {
+    $this->prepareUploadTree(array(array(4651, 3650, 33, 0, 805323776, 2, 75, 'artifact.dir')));
+    $this->uploadDao->getUploadParent(33);
+  }
+  
+  /** @expectedException \Exception
+   * @expectedExceptionMessage Missing upload tree parent for upload
+   */
+  public function testGetUploadParentFromNonExistingTree()
+  {
+    $this->uploadDao->getUploadParent(34);
   }
 }
