@@ -74,7 +74,7 @@ fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAs
   if (doConnectAsAgent) {
     char* argv[] = {doConnectAsAgent, "-c", Sysconf};
     int argc = 3;
-    
+
     fo_scheduler_connect_dbMan(&argc, argv, &result);
   } else {
     char buffer[ARRAY_LENGTH + 1];
@@ -97,9 +97,12 @@ createError:
   return NULL;
 }
 
-void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir) {
+void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir, const char* doConnectAsAgent) {
   if (dbManager) {
     fo_dbManager_finish(dbManager);
+  }
+  if (doConnectAsAgent) {
+    fo_scheduler_disconnect(0);
   }
 
   if (Sysconf) {

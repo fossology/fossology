@@ -44,7 +44,7 @@ fo_dbManager* dbManager = NULL;
  */
 int PkgagentDBInit()
 {
-  dbManager = createTestEnvironment(AGENT_DIR, NULL, 1);
+  dbManager = createTestEnvironment(AGENT_DIR, "pkgagent", 1);
   DBConfFile = get_dbconf();
   return dbManager ? 0 : 1;
 }
@@ -55,7 +55,7 @@ int PkgagentDBInit()
 int PkgagentDBClean()
 {
   if (dbManager) {
-    dropTestEnvironment(dbManager, AGENT_DIR);
+    dropTestEnvironment(dbManager, AGENT_DIR, "pkgagent");
   }
   return 0;
 }
