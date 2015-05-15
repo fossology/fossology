@@ -117,7 +117,7 @@ int main(int argc, char** argv)
   DBConfFile = get_dbconf();
 
   int rc = focunit_main(argc, argv, "ununpack_Tests", suites);
-  dropTestEnvironment(dbManager, AGENT_DIR);
+  dropTestEnvironment(dbManager, AGENT_DIR, "ununpack");
   return(rc);
 }
 
