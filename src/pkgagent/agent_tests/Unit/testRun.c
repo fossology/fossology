@@ -35,22 +35,28 @@ extern CU_TestInfo testcases_GetMetadataDebSource[];
 extern CU_TestInfo testcases_GetMetadataDebBinary[];
 
 char *DBConfFile = NULL;
+fo_dbManager* dbManager = NULL;
+
+#define AGENT_DIR "../../"
 
 /**
  * \brief initialize db
  */
 int PkgagentDBInit()
 {
-  create_db_repo_sysconf(1, "pkgagent");
+  dbManager = createTestEnvironment(AGENT_DIR, NULL, 1);
   DBConfFile = get_dbconf();
-  return 0;
+  return dbManager ? 0 : 1;
 }
+
 /**
  * \brief clean db
  */
 int PkgagentDBClean()
 {
-  drop_db_repo_sysconf(get_db_name());
+  if (dbManager) {
+    dropTestEnvironment(dbManager, AGENT_DIR);
+  }
   return 0;
 }
 
