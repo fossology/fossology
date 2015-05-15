@@ -186,7 +186,8 @@ class fo_libschema
     {
       if (empty($name)) continue;
 
-      if(!array_key_exists($name, $this->currSchema['SEQUENCE']))
+      if(!array_key_exists('SEQUENCE', $this->currSchema)
+        || !array_key_exists($name, $this->currSchema['SEQUENCE']))
       {
         $createSql = is_string($import) ? $import : $import['CREATE'];
         $this->applyOrEchoOnce($createSql, $stmt = __METHOD__ . "." . $name . ".CREATE");
