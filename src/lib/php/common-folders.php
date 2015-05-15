@@ -18,6 +18,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
 
 /**
  * \file common-folders.php
@@ -78,63 +79,6 @@ function GetUserRootFolder()
 } // GetUserRootFolder()
 
 /**
- * \brief Get the fossology system root folder, default name is "Software Repository".
- * \return root folder_pk
- **/
-function GetRootFolder()
-{
-  global $PG_CONN;
-
-  /* if there is only a single folder, then that must be the root */
-  $sql = "select folder_pk from folder limit 2";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 1)
-  {
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    return $row['folder_pk'];
-  }
-  else if (pg_num_rows($result) == 0)
-  {
-    $text = _("This database has not been properly installed: No root folder found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  /* Get all the folder_pk's  of folders that have children
-   * and remove all the folders that are themselves children.
-   * The remainder (folder that is never a child) is the root.
-   * We should probably give some thought to having all folders in foldercontents.
-   * The root folder would just have a null parent.  That would be lots simpler
-   * than what we have to go through here.
-   */
-  $sql = "select distinct parent_fk as folder_pk from foldercontents where foldercontents_mode=1
-          except select distinct child_id as folder_pk from foldercontents where foldercontents_mode=1 ";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0)
-  {
-    $text = _("This database has not been properly installed: No root folder found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  if (pg_num_rows($result) > 1)
-  {
-    $text = _("This database has not been properly installed: Multiple root folders found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-
-  return $row['folder_pk'];
-} // GetRootFolder()
-
-
-/**
  * \brief Return an array of folder_pk, folder_name
  *        from the users.root_folder_fk to $folder_pk
  * Array is in top down order.
@@ -169,7 +113,7 @@ function Folder2Path($folder_pk)
     // against this loop going infinite.
     if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) break;
 
-    $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=1";
+    $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=".FolderDao::MODE_FOLDER;
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $FolderRow = pg_fetch_assoc($result);
@@ -202,7 +146,7 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
     $upload_pk = $UTrec['upload_fk'];
   }
 
-  $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=2";
+  $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=".FolderDao::MODE_UPLOAD;
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $FolderRow = pg_fetch_assoc($result);
@@ -266,7 +210,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
             foldercontents.foldercontents_mode, 
             NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
             FROM folder, foldercontents
-            WHERE foldercontents.foldercontents_mode = 1
+            WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
             AND foldercontents.parent_fk =$ParentFolder
             AND foldercontents.child_id = folder.folder_pk
             AND folder.folder_pk is not null
@@ -302,7 +246,7 @@ function FolderGetName($FolderPk,$Top=-1)
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
   $sql = "SELECT folder_name,folder.parent_fk FROM folder
-	LEFT JOIN foldercontents ON foldercontents_mode = 1
+	LEFT JOIN foldercontents ON foldercontents_mode = ".FolderDao::MODE_FOLDER."
 	AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'
 	LIMIT 1;";
@@ -361,7 +305,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   /* Load this folder's parent */
   if ($ShowParent && ($ParentFolder != GetUserRootFolder()))
   {
-    $sql = "SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;";
+    $sql = "SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = ".FolderDao::MODE_FOLDER." AND child_id = '$ParentFolder' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
@@ -397,7 +341,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
                                  foldercontents.foldercontents_mode, 
                                  NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
                           FROM folder, foldercontents
-                          WHERE foldercontents.foldercontents_mode = 1
+                          WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
                                 AND foldercontents.parent_fk =$ParentFolder
                                 AND foldercontents.child_id = folder.folder_pk
                                 AND folder.folder_pk is not null
@@ -470,7 +414,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
     $Parm = $Uploadpk;
     $sql = "SELECT foldercontents.parent_fk,folder_name FROM foldercontents
               INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
-			  AND foldercontents.foldercontents_mode = 2
+			  AND foldercontents.foldercontents_mode = ".FolderDao::MODE_UPLOAD."
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
   }
   else
@@ -530,7 +474,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 	FROM foldercontents,upload
   INNER JOIN uploadtree ON upload_fk = upload_pk AND upload.pfile_fk = uploadtree.pfile_fk AND parent IS NULL AND lft IS NOT NULL
 	WHERE foldercontents.parent_fk = '$ParentFolder'
-	AND foldercontents.foldercontents_mode = 2
+	AND foldercontents.foldercontents_mode = ".FolderDao::MODE_UPLOAD."
 	AND foldercontents.child_id = upload.upload_pk
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);
@@ -662,7 +606,7 @@ function GetFolderArray($RootFolder=-1, &$FolderArray)
   $sql = "SELECT folder.folder_pk, folder.folder_name,
             foldercontents.parent_fk
             FROM folder, foldercontents
-            WHERE foldercontents.foldercontents_mode = 1
+            WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
             AND foldercontents.parent_fk =$RootFolder
             AND foldercontents.child_id = folder.folder_pk
             AND folder.folder_pk is not null

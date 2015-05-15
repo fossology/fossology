@@ -32,18 +32,14 @@ class FolderDao extends Object
   const DEPTH_KEY = "depth" ;
   const TOP_LEVEL = 1;
 
-
-  /**
-   * @var DbManager
-   */
+  const MODE_FOLDER = 1;
+  const MODE_UPLOAD = 2;
+  const MODE_ITEM = 4;
+  
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-
 
   public function __construct(DbManager $dbManager)
   {
