@@ -482,7 +482,7 @@ class fo_libschema
         $this->applyOrEchoOnce($sql);
       }
     }
-    $result = $this->dbman->freeResult($stmt);
+    $result = $this->dbman->freeResult($result);
   }
 
   /************************************/
