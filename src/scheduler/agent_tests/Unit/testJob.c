@@ -78,14 +78,14 @@ void test_job_event()
 
   FO_ASSERT_PTR_NULL(scheduler->db_conn);
   database_init(scheduler);
-  FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(scheduler->db_conn);
 
   jq_pk = Prepare_Testing_Data_Job(scheduler);
 
   database_update_event(scheduler, NULL);
 
   job = g_tree_lookup(scheduler->job_list, &jq_pk);
-  FO_ASSERT_PTR_NOT_NULL(job);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(job);
   job_verbose_event(scheduler, job);
   FO_ASSERT_EQUAL(job->id, jq_pk);
 
@@ -134,7 +134,7 @@ void test_job_fun()
   database_update_event(scheduler, NULL);
 
   job = g_tree_lookup(scheduler->job_list, &jq_pk);
-  FO_ASSERT_PTR_NOT_NULL(job);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(job);
 
   res = job_next(job);
   FO_ASSERT_STRING_EQUAL(res, "6");
@@ -142,9 +142,9 @@ void test_job_fun()
   FO_ASSERT_PTR_NULL(log);
   job = next_job(scheduler->job_queue);
   FO_ASSERT_EQUAL(job->id, 1);
-  FO_ASSERT_PTR_NOT_NULL(job);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(job);
   job = peek_job(scheduler->job_queue);
-  FO_ASSERT_PTR_NOT_NULL(job);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(job);
   FO_ASSERT_EQUAL(job->id, 6);
   result = active_jobs(scheduler->job_list);
   FO_ASSERT_EQUAL(result, 0);
