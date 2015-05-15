@@ -37,14 +37,7 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
 
-    $this->testDb->createPlainTables(
-        array(
-            'upload',
-            'uploadtree',
-        ));
-
-    $this->testDb->insertData(
-        array());
+    $this->testDb->createPlainTables(array('upload','uploadtree'));
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
@@ -54,30 +47,37 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
     $this->treeDao = new TreeDao($this->dbManager);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   public function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+        
     $this->testDb = null;
     $this->dbManager = null;
 
     M::close();
   }
   
-  public function testGetRealParent()
+  public function testGetMinimalCoveringItem()
   {
     $this->prepareModularTable(array());
-    $realTop = $this->treeDao->getRealParent(1, "uploadtree");
-    assertThat($realTop,equalTo(5));
+    $coverContainer = $this->treeDao->getMinimalCoveringItem(1, "uploadtree");
+    assertThat($coverContainer,equalTo(5));
+    
+    $this->prepareUploadTree(array(array($item=99,null,$upload=32,88,0x0,1,2,'plainFile',null)));
+    $coverSelf = $this->treeDao->getMinimalCoveringItem($upload, "uploadtree");
+    assertThat($coverSelf,equalTo($item));
   }
   
   public function testGetFullPathFromSingleFolderUpload()
   {
-    $this->prepareModularTable(array(array(6,5,1,0,0,5,6,"file",5)));
-    $realTop = $this->treeDao->getRealParent(1, "uploadtree");
-    assertThat($realTop,equalTo(5));
-    $path = $this->treeDao->getFullPath(6, "uploadtree", $realTop);
-    $this->assertEquals("file", $path);
+    $this->prepareModularTable(array(array(6,5,1,0,0,5,6,$fName="file",5)));
+    $cover = $this->treeDao->getMinimalCoveringItem(1, "uploadtree");
+    assertThat($cover,equalTo(5));
+    $path = $this->treeDao->getFullPath(6, "uploadtree", $cover);
+    assertThat($path,equalTo($fName));
   }
 
   public function testGetFullPathFromSingleFolderUploadWithAFileOutside()
@@ -86,14 +86,14 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
       array(6,5,1,0,0,5,6,"file",5),
       array(11,4,1,0,0,11,12,"file2",3)
     ));
-    $realTop = $this->treeDao->getRealParent(1, "uploadtree");
-    assertThat($realTop,equalTo(4));
+    $cover = $this->treeDao->getMinimalCoveringItem(1, "uploadtree");
+    assertThat($cover,equalTo(4));
 
-    $pathInsideArchive = $this->treeDao->getFullPath(6, "uploadtree", $realTop);
+    $pathInsideArchive = $this->treeDao->getFullPath(6, "uploadtree", $cover);
     assertThat($pathInsideArchive,equalTo("archive/file"));
 
-    $pathOutsideArchive = $this->treeDao->getFullPath(11, "uploadtree", $realTop);
-    $this->assertEquals("file2", $pathOutsideArchive);
+    $pathOutsideArchive = $this->treeDao->getFullPath(11, "uploadtree", $cover);
+    assertThat($pathOutsideArchive,equalTo("file2"));
   }
 
   /**
@@ -122,62 +122,12 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
     $uploadTreeArray = array_merge(
         array(
             array(1, null, 1, 1, 0x20008400, 1, $right_base + 5, 'archive.tar.gz', null),
-            array(2, 1, 1, 0,    0x30004400, 2, $right_base + 4, 'artifact.dir', 1),
-            array(3, 2, 1, 2,    0x20008000, 3, $right_base + 3, 'archive.tar', 1),
-            array(4, 3, 1, 0,    0x30004400, 4, $right_base + 2, 'artifact.dir', 3),
-            array(5, 4, 1, 0,    0x20004400, 5, $right_base + 1, 'archive', 3)),
+            array(2,    1, 1, 0, 0x30004400, 2, $right_base + 4, 'artifact.dir', 1),
+            array(3,    2, 1, 2, 0x20008000, 3, $right_base + 3, 'archive.tar', 1),
+            array(4,    3, 1, 0, 0x30004400, 4, $right_base + 2, 'artifact.dir', 3),
+            array(5,    4, 1, 0, 0x20004400, 5, $right_base + 1, 'archive', 3)),
         $subentries);
     $this->prepareUploadTree($uploadTreeArray);
-  }
-
-  /**
-   * @return array
-   */
-  protected function getSubentriesForSingleFile()
-  {
-    return array(array(6, 5, 1, 3, 33188, 6, 10, 'README',5));
-  }
-
-  /**
-   * @return array
-   */
-  protected function getSubentriesForNestedFile()
-  {
-    return array(
-        array(6, 5, 1, 0, 0x20004400, 7, 12, 'docs',5),
-        array(7, 6, 1, 0, 0x20004400, 8, 11, 'txt',6),
-        array(8, 7, 1, 3, 33188, 9, 10, 'README',7)
-    );
-  }
-
-  /**
-   * @return array
-   */
-  protected function getSubentriesForFileAfterEmptyDirectory()
-  {
-    /**
-     * docs      <-dir
-     * docs/txt  <-dir
-     * README    <-file
-     */
-
-    return array(
-        array(6, 5, 1, 0, 0x20004400, 7, 10, 'docs',5),
-        array(7, 6, 1, 0, 0x20004400, 8, 9, 'txt',6),
-        array(8, 5, 1, 3, 33188, 11, 12, 'README',5)
-    );
-  }
-
-  /**
-   * @return array
-   */
-  protected function getSubentriesForMultipleFiles()
-  {
-    return array(
-        array(6, 5, 1, 3, 33188, 7, 8, 'INSTALL',5),
-        array(7, 5, 1, 4, 33188, 8, 9, 'README',5),
-        array(8, 5, 1, 5, 33188, 9, 10, 'COPYING',5)
-    );
   }
 
   /**
@@ -219,12 +169,7 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
    * P/P2/P2a                                           12               3658
    * P/P3                                               13               3660
    * R                                                  14               3686
-
    */
-
-  private $entries = array(
-      3653, 3668, 3683, 3685, 3671, 3665, 3676, 3675, 3681, 3677, 3673, 3658, 3660, 3686,
-  );
 
   protected function getTestFileStructure()
   {
@@ -265,27 +210,27 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
   public function testGetFullPathWithComlpexStructureFromFolder()
   {
     $this->prepareUploadTree($this->getTestFileStructure());
-    $realTop = $this->treeDao->getRealParent(32, "uploadtree");
-    assertThat($realTop,equalTo(3652));
-    $this->assertEquals("L/L1", $this->treeDao->getFullPath(3666, "uploadtree", $realTop));
+    $cover = $this->treeDao->getMinimalCoveringItem(32, "uploadtree");
+    assertThat($cover,equalTo(3652));
+    assertThat($this->treeDao->getFullPath(3666, "uploadtree", $cover),equalTo("L/L1"));
   }
 
   public function testGetFullPathWithComlpexStructureFromFile()
   {
     $this->prepareUploadTree($this->getTestFileStructure());
-    $realTop = $this->treeDao->getRealParent(32, "uploadtree");
-    assertThat($realTop,equalTo(3652));
-    $this->assertEquals("L/L2/L2a", $this->treeDao->getFullPath(3665, "uploadtree", $realTop));
-    $this->assertEquals("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a", $this->treeDao->getFullPath(3665, "uploadtree"));
+    $cover = $this->treeDao->getMinimalCoveringItem(32, "uploadtree");
+    assertThat($cover,equalTo(3652));
+    assertThat($this->treeDao->getFullPath(3665, "uploadtree", $cover),equalTo("L/L2/L2a"));
+    assertThat($this->treeDao->getFullPath(3665, "uploadtree"),equalTo("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a"));
   }
 
   public function testGetFullPathWithComlpexStructureFromFileAndOtherUpload()
   {
     $this->prepareUploadTree($this->getTestFileStructure());
     $this->prepareModularTable(array(array(6,5,1,0,0,5,6,"file",6)));
-    $realTop = $this->treeDao->getRealParent(32, "uploadtree");
-    assertThat($realTop,equalTo(3652));
-    $this->assertEquals("L/L2/L2a", $this->treeDao->getFullPath(3665, "uploadtree", $realTop));
-    $this->assertEquals("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a", $this->treeDao->getFullPath(3665, "uploadtree"));
+    $cover = $this->treeDao->getMinimalCoveringItem(32, "uploadtree");
+    assertThat($cover,equalTo(3652));
+    assertThat($this->treeDao->getFullPath(3665, "uploadtree", $cover),equalTo("L/L2/L2a"));
+    assertThat($this->treeDao->getFullPath(3665, "uploadtree"),equalTo("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a"));
   }
 }

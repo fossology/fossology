@@ -100,7 +100,7 @@ abstract class ClearedGetterCommon
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
   {
-    $parentId = $this->treeDao->getRealParent($uploadId, $uploadTreeTableName);
+    $parentId = $this->treeDao->getMinimalCoveringItem($uploadId, $uploadTreeTableName);
 
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];

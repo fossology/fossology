@@ -82,7 +82,7 @@ class TreeDao extends Object
     return $row['file_path'];
   }
 
-  public function getRealParent($uploadId, $tableName)
+  public function getMinimalCoveringItem($uploadId, $tableName)
   {
     $statementName = __METHOD__.".".$tableName;
 
@@ -90,7 +90,7 @@ class TreeDao extends Object
       "SELECT uploadtree_pk FROM $tableName ut WHERE ut.upload_fk = $1
       AND NOT EXISTS (
         SELECT 1 FROM $tableName ut2 WHERE ut2.upload_fk = $1
-        AND (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt))
+        AND NOT (ut2.lft BETWEEN ut.lft AND ut.rgt)
         AND (ut2.ufile_mode & (3<<28) = 0)
       )
       ORDER BY ut.lft DESC LIMIT 1",
