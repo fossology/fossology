@@ -62,6 +62,6 @@ int main(int argc, char** argv) {
   const int returnValue = focunit_main(argc, argv, "lib c Tests", suites);
 
   if (dbManager)
-    dropTestEnvironment(dbManager, "..");
+    dropTestEnvironment(dbManager, "..", NULL);
   return returnValue;
 }

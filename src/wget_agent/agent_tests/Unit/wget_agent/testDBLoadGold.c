@@ -138,7 +138,7 @@ int DBLoadGoldClean()
     RemoveDir(repoDir);
   }
 
-  dropTestEnvironment(dbManager, AGENT_DIR);
+  dropTestEnvironment(dbManager, AGENT_DIR, "wget_agent");
   GlobalUploadKey = -1;
 
   return 0;
