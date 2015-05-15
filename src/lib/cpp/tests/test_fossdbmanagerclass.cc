@@ -51,7 +51,7 @@ public:
   void tearDown() {
     delete dbManager;
     // dbManager connection is already closed by destructor
-    dropTestEnvironment(NULL, "");
+    dropTestEnvironment(NULL, "", NULL);
   }
 
   void test_runCommandQueryCheckIfSuccess() {
