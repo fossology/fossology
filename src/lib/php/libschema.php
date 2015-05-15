@@ -467,23 +467,22 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = $this->dbman->fetchAll($result);
-    $result = $this->dbman->freeResult($stmt);
-    for ($i = 0; !empty($Results[$i]['view_name']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $View = $Results[$i]['view_name'];
-      $table = $Results[$i]['table_name'];
+      $View = $row['view_name'];
+      $table = $row['table_name'];
       if (empty($this->schema['TABLE'][$table]))
       {
         continue;
       }
-      $column = $Results[$i]['column_name'];
+      $column = $row['column_name'];
       if (empty($this->schema['TABLE'][$table][$column]))
       {
         $sql = "DROP VIEW \"$View\";";
         $this->applyOrEchoOnce($sql);
       }
     }
+    $result = $this->dbman->freeResult($stmt);
   }
 
   /************************************/
@@ -552,11 +551,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = $this->dbman->fetchAll($result);
-    $this->dbman->freeResult($result);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
+    while ($R = $this->dbman->fetchArray($result))
     {
-      $R = & $Results[$i];
       $Table = $R['table'];
       $Column = $R['column_name'];
       $Type = $R['type'];
@@ -618,11 +614,10 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt, array($viewowner));
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['viewname']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $sql = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
-      $this->currSchema['VIEW'][$Results[$i]['viewname']] = $sql;
+      $sql = "CREATE VIEW \"" . $row['viewname'] . "\" AS " . $row['definition'];
+      $this->currSchema['VIEW'][$row['viewname']] = $sql;
     }
     $this->dbman->freeResult($result);
   }
@@ -850,16 +845,15 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = $this->dbman->fetchAll($result);
-    $result = $this->dbman->freeResult($stmt);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
       /* UNIQUE constraints also include indexes. */
-      if (empty($this->currSchema['CONSTRAINT'][$Results[$i]['index']]))
+      if (empty($this->currSchema['CONSTRAINT'][$row['index']]))
       {
-        $this->currSchema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
+        $this->currSchema['INDEX'][$row['table']][$row['index']] = $row['define'] . ";";
       }
     }
+    $this->dbman->freeResult($result);
   }
 
 
@@ -881,15 +875,14 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = $this->dbman->fetchAll($result);
-    $result = $this->dbman->freeResult($stmt);
-    for ($i = 0; !empty($Results[$i]['proname']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $sql = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
+      $sql = "CREATE or REPLACE function " . $row['proname'] . "()";
       $sql .= ' RETURNS ' . "TBD" . ' AS $$';
-      $sql .= " " . $Results[$i]['prosrc'];
-      $schema['FUNCTION'][$Results[$i]['proname']] = $sql;
+      $sql .= " " . $row['prosrc'];
+      $schema['FUNCTION'][$row['proname']] = $sql;
     }
+    $this->dbman->freeResult($result);
     return $schema;
   }
 
