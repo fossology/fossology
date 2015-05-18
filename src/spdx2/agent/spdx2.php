@@ -18,6 +18,7 @@
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
@@ -32,6 +33,8 @@ class SpdxTwoAgent extends Agent
   private $clearingDao;
   /** @var Twig_Environment */
   protected $renderer;
+  /** @var LicenseMap */
+  private $licenseMap;
 
   function __construct()
   {
@@ -48,12 +51,21 @@ class SpdxTwoAgent extends Agent
 
   function processUploadId($uploadId)
   {
+    $dbManager = $this->container->get('db.manager');
+    $this->licenseMap = new LicenseMap($dbManager, $this->groupId, LicenseMap::REPORT, true);
+    
+    $packageNode = $this->renderPackage($uploadId);
+   
+    $this->writeReport($packageNode, $uploadId);
+    return true;    
+  }
+  
+  private function renderPackage($uploadId)
+  {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
-    $dbManager = $this->container->get('db.manager');
-    $licenseMap = new LicenseMap($dbManager, $this->groupId, LicenseMap::REPORT);
-
+    
     $filesWithLicenses = array();
     foreach ($clearingDecisions as $clearingDecision) {
       if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
@@ -67,17 +79,32 @@ class SpdxTwoAgent extends Agent
           continue;
         }
         $filesWithLicenses[$clearingDecision->getUploadTreeId()][] = 
-                $licenseMap->getProjectedShortname($clearingLicense->getLicenseId(), $clearingLicense->getShortName());
+                $this->licenseMap->getProjectedShortname($clearingLicense->getLicenseId(), $clearingLicense->getShortName());
       }
     }
 
     $this->heartbeat(count($filesWithLicenses));
-   
-    $this->writeReport($filesWithLicenses,$uploadId);
-    return true;    
+    
+    $upload = $this->uploadDao->getUpload($uploadId);
+    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
+    
+    $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    $map = $this->licenseMap;
+    $mainLicenses = array_map(function ($id) use ($map) {return $map->getProjectedShortname($id);}, $mainLicenseIds);
+    $hashes = $this->uploadDao->getUploadHashes($uploadId);
+    
+    return $this->renderString('spdx-package.xml.twig',array(
+        'uploadId'=>$uploadId,
+        'packageName'=>$upload->getFilename(),
+        'uploadName'=>$upload->getFilename(),
+        'sha1'=>$hashes['sha1'],
+        'md5'=>$hashes['md5'],
+        'mainLicenses'=>$mainLicenses,
+        'fileNodes'=>$fileNodes)
+            );
   }
 
-  private function writeReport($filesWithLicenses, $uploadId)
+  private function writeReport($packageNodes, $uploadId)
   {
     global $SysConf;
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -90,14 +117,13 @@ class SpdxTwoAgent extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
-    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
     
     $message = $this->renderString('spdx-document.xml.twig',array(
         'documentName'=>$fileBase,
         'uri'=>$fileName,
         'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
         'organisation'=>'',
-        'fileNodes'=>$fileNodes)
+        'packageNodes'=>$packageNodes)
             );
 
     file_put_contents($fileName, $message);

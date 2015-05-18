@@ -1,0 +1,24 @@
+
+<Package rdf:ID="SPDXRef-{{ uploadId }}">
+  <name>{{ packageName }}</name>
+  <packageFilenName>{{ uploadName }}</packageFilenName>
+  <downloadLocation>NOASSERTION</downloadLocation>
+  <checksum>
+    <Checksum>
+      <algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+      <checksumValue>{{ sha1 }}</checksumValue>
+    </Checksum>
+    <Checksum>
+      <algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5"/>
+      <checksumValue>{{ md5 }}</checksumValue>
+    </Checksum>
+  </checksum>
+  <licenseConcluded>
+    <DisjunctiveLicenseSet>
+{% for res in mainLicenses %}
+      <member rdf:resource="{{ res }}"/>
+{% endfor %}
+    </DisjunctiveLicenseSet>
+  </licenseConcluded>
+  {{ fileNodes|replace({'\n':'\n  '}) }}
+</Package>
