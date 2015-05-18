@@ -8,4 +8,7 @@
 {% endfor %}
     </DisjunctiveLicenseSet>
   </licenseConcluded>
+{% for res in scannerLicenses %}
+  <licenseInfoInFile rdf:resource="{{ res }}" />
+{% endfor %}  
 </File>

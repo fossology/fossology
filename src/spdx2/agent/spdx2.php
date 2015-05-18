@@ -27,6 +27,7 @@ include_once(__DIR__ . "/version.php");
 
 class SpdxTwoAgent extends Agent
 {
+  const UPLOAD_ADDS = "uploadsAdd";
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDao */
@@ -45,7 +46,7 @@ class SpdxTwoAgent extends Agent
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
 
-    // $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
+    $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
   }
 
 
@@ -54,9 +55,15 @@ class SpdxTwoAgent extends Agent
     $dbManager = $this->container->get('db.manager');
     $this->licenseMap = new LicenseMap($dbManager, $this->groupId, LicenseMap::REPORT, true);
     
-    $packageNode = $this->renderPackage($uploadId);
+    $packageNodes = $this->renderPackage($uploadId);
+    
+    $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$this->args) ? explode(',',$this->args[self::UPLOAD_ADDS]) : array();
+    foreach($additionalUploadIds as $additionalId)
+    {
+      $packageNodes .= $this->renderPackage($additionalId);
+    }
    
-    $this->writeReport($packageNode, $uploadId);
+    $this->writeReport($packageNodes, $uploadId);
     return true;    
   }
   
@@ -78,7 +85,7 @@ class SpdxTwoAgent extends Agent
         {
           continue;
         }
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()][] = 
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
                 $this->licenseMap->getProjectedShortname($clearingLicense->getLicenseId(), $clearingLicense->getShortName());
       }
     }
@@ -154,7 +161,7 @@ class SpdxTwoAgent extends Agent
       $content .= $this->renderString('spdx-file.xml.twig',array(
           'fileId'=>$fileId,
           'fileName'=>$this->container->get('dao.tree')->getFullPath($fileId,$treeTableName),
-          'concludedLicenses'=>$licenses)
+          'concludedLicenses'=>$licenses['concluded'])
               );
     }
     return $content;
