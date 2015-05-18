@@ -20,5 +20,6 @@
 {% endfor %}
     </DisjunctiveLicenseSet>
   </licenseConcluded>
+  {% if licenseComments %}<licenseComments>{{ licenseComments }}</licenseComments>{% endif %}
   {{ fileNodes|replace({'\n':'\n  '}) }}
 </Package>

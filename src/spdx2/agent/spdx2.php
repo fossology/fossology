@@ -22,6 +22,8 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 include_once(__DIR__ . "/version.php");
 
@@ -36,6 +38,10 @@ class SpdxTwoAgent extends Agent
   protected $renderer;
   /** @var LicenseMap */
   private $licenseMap;
+  /** @var array */
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
+  /** @var DbManager */
+  protected $dbManager;
 
   function __construct()
   {
@@ -43,6 +49,7 @@ class SpdxTwoAgent extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->dbManager = $this->container->get('db.manager');
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
 
@@ -52,8 +59,7 @@ class SpdxTwoAgent extends Agent
 
   function processUploadId($uploadId)
   {
-    $dbManager = $this->container->get('db.manager');
-    $this->licenseMap = new LicenseMap($dbManager, $this->groupId, LicenseMap::REPORT, true);
+    $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     
     $packageNodes = $this->renderPackage($uploadId);
     
@@ -90,6 +96,7 @@ class SpdxTwoAgent extends Agent
       }
     }
 
+    $licenseComment = $this->addScannerResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
     
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -107,10 +114,38 @@ class SpdxTwoAgent extends Agent
         'sha1'=>$hashes['sha1'],
         'md5'=>$hashes['md5'],
         'mainLicenses'=>$mainLicenses,
+        'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
   }
 
+  private function addScannerResults(&$filesWithLicenses, $uploadId)
+  {
+    $scannerAgents = array_keys($this->agentNames);
+    $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'), $uploadId);
+    $scanJobProxy->createAgentStatus($scannerAgents);
+    $scannerIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if(empty($scannerIds))
+    {
+      return;
+    }
+    $selectedScanners = '{'.implode(',',$scannerIds).'}';
+    $sql= "SELECT uploadtree_pk,rf_fk FROM uploadtree_a ut, license_file
+      WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1) GROUP BY uploadtree_pk,rf_fk";
+    $stmt = __METHOD__ .'.scanner_findings';
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($selectedScanners));
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $shortName = $this->licenseMap->getProjectedShortname($row['rf_fk']);
+      if ($shortName != 'No_license_found' && $this->licenseMap->getProjectedShortname($row['rf_fk']) != 'Void') {
+        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
+      }
+    }
+    $this->dbManager->freeResult($res);
+    return "licenseInfoInFile determined by Scanners $selectedScanners";
+  }
+  
   private function writeReport($packageNodes, $uploadId)
   {
     global $SysConf;
@@ -161,7 +196,8 @@ class SpdxTwoAgent extends Agent
       $content .= $this->renderString('spdx-file.xml.twig',array(
           'fileId'=>$fileId,
           'fileName'=>$this->container->get('dao.tree')->getFullPath($fileId,$treeTableName),
-          'concludedLicenses'=>$licenses['concluded'])
+          'concludedLicenses'=>$licenses['concluded'],
+          'scannerLicenses'=>$licenses['scanner'])
               );
     }
     return $content;

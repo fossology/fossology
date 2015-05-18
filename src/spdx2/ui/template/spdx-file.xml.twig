@@ -1,6 +1,7 @@
 
 <File rdf:about="{{ fileId }}">
   <fileName>{{ fileName }}</fileName>
+{% if concludedLicenses is not empty %}
   <licenseConcluded>
     <DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
@@ -8,7 +9,8 @@
 {% endfor %}
     </DisjunctiveLicenseSet>
   </licenseConcluded>
+{% endif %}
 {% for res in scannerLicenses %}
   <licenseInfoInFile rdf:resource="{{ res }}" />
-{% endfor %}  
+{% endfor %}
 </File>
