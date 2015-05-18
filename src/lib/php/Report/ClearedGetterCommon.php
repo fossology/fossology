@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -100,7 +100,7 @@ abstract class ClearedGetterCommon
 
   protected function changeTreeIdsToPaths(&$ungrupedStatements, $uploadTreeTableName, $uploadId)
   {
-    $parentId = $this->treeDao->getRealParent($uploadId, $uploadTreeTableName);
+    $parentId = $this->treeDao->getMinimalCoveringItem($uploadId, $uploadTreeTableName);
 
     foreach($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];

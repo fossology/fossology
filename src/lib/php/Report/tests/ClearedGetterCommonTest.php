@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -59,7 +59,7 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
   }
 }
 
-class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
+class ClearedCommonReportTest extends \PHPUnit_Framework_TestCase
 {
   /** @var UploadDao|MockInterface */
   private $uploadDao;
@@ -98,7 +98,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->andReturn($uploadTreeTableName);
 
     $this->treeDao
-         ->shouldReceive('getRealParent')
+         ->shouldReceive('getMinimalCoveringItem')
          ->with($uploadId,$uploadTreeTableName)
          ->andReturn($parentId);
 
@@ -134,8 +134,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         )
       )
     );
-    $expected = arsort($expected);
-    assertThat($expected, equalTo($statements));
+    assertThat(arsort($expected), equalTo($statements));
   }
 
   public function testGetFileNamesGroupByText()
@@ -151,7 +150,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->andReturn($uploadTreeTableName);
 
     $this->treeDao
-         ->shouldReceive('getRealParent')
+         ->shouldReceive('getMinimalCoveringItem')
          ->with($uploadId,$uploadTreeTableName)
          ->andReturn($parentId);
 
@@ -194,8 +193,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
         )
       )
     );
-    $expected = arsort($expected);
-    assertThat($expected, equalTo($statements));
+    assertThat(arsort($expected), equalTo($statements));
   }
   
   function testWeirdChars()

@@ -204,15 +204,15 @@ class UploadTreeProxyTest extends \PHPUnit_Framework_TestCase
   
   protected function insertDecisionEvent($decisionId,$eventId,$rfId,$groupId,$item,$pfileId,$type,$removed,$date)
   {
-    $this->dbManager->insertTableRow('clearing_decision',array('clearing_decision_pk'=>$decisionId,'pfile_fk'=>$pfileId,'group_fk'=>$groupId,
-        'date_added'=>$date,'decision_type'=> $type));
+    $this->dbManager->insertTableRow('clearing_decision',array('clearing_decision_pk'=>$decisionId,'pfile_fk'=>$pfileId,'uploadtree_fk'=>$item,
+        'group_fk'=>$groupId,'date_added'=>$date,'decision_type'=> $type));
     $this->dbManager->insertTableRow('clearing_event',array('clearing_event_pk'=>$eventId,'rf_fk'=>$rfId,'group_fk'=>$groupId,'uploadtree_fk'=>$item,
         'date_added'=>$date,'removed'=>$removed));
     if ($type != DecisionTypes::WIP) {
       $this->dbManager->insertTableRow('clearing_decision_event', array('clearing_event_fk' => $eventId, 'clearing_decision_fk' => $decisionId));
     }
   }
-    
+
   public function testOptionConRefParented()
   {
     $this->testDb->createPlainTables( array('clearing_decision','clearing_decision_event','clearing_event') );

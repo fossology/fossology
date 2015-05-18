@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
@@ -140,12 +142,12 @@ class ui_demomod extends FO_Plugin
     $V="";
 
     $Upload = GetParm("upload",PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($Upload);
-    if ($UploadPerm < Auth::PERM_READ)
+    /* @var $uploadDao UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if (!$uploadDao->isAccessible($Upload, Fossology\Lib\Auth\Auth::getGroupId()))
     {
       $text = _("Permission Denied");
-      echo "<h2>$text<h2>";
-      return;
+      return "<h2>$text</h2>";
     }
 
     $Item = GetParm("item",PARM_INTEGER);
@@ -224,9 +226,7 @@ class ui_demomod extends FO_Plugin
     return;
   }
 
-};
+}
 
 $NewPlugin = new ui_demomod;
 $NewPlugin->Initialize();
-
-?>

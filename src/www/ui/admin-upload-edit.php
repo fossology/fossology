@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
@@ -19,22 +17,22 @@ use Fossology\Lib\Auth\Auth;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**
- * @file admin-upload-edit.php
- * @brief edit upload file properties
- **/
-
-define("TITLE_upload_properties", _("Edit Uploaded File Properties"));
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 class upload_properties extends FO_Plugin
 {
+  /** @var UploadDao */
+  private $uploadDao;          
+          
   function __construct()
   {
     $this->Name = "upload_properties";
-    $this->Title = TITLE_upload_properties;
+    $this->Title = _("Edit Uploaded File Properties");
     $this->MenuList = "Organize::Uploads::Edit Properties";
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
   /**
@@ -111,14 +109,10 @@ class upload_properties extends FO_Plugin
     if (empty($upload_pk)) $upload_pk = GetParm('upload', PARM_INTEGER);
 
     /* Check Upload permission */
-    if (!empty($upload_pk))
+    if (!empty($upload_pk) && !$this->uploadDao->isEditable($upload_pk, Auth::getGroupId()))
     {
-      $UploadPerm = GetUploadPerm($upload_pk);
-      if ($UploadPerm < Auth::PERM_WRITE)
-      {
-        $text = _("Permission Denied");
-        return "<h2>$text<h2>";
-      }
+      $text = _("Permission Denied");
+      return "<h2>$text</h2>";
     }
 
     $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);

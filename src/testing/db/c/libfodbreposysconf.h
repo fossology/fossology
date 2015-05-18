@@ -29,7 +29,7 @@ void drop_db_repo_sysconf(char *DBName);
 
 fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAsAgent, int initDbTables);
 
-void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir);
+void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir, const char* doConnectAsAgent);
 
 char *get_sysconfdir();
 

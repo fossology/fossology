@@ -16,6 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file fossjobs.php
@@ -201,6 +202,9 @@ if (array_key_exists("u", $options))
   exit(0);
 }
 
+/* @var $uploadDao UploadDao */
+$uploadDao = $GLOBALS['container']->get('dao.upload');
+
 if (array_key_exists("U", $options)) 
 {
   /* $options['U'] can either be 'ALL', a string (the upload_pk), 
@@ -232,8 +236,7 @@ if (array_key_exists("U", $options))
   $checked_list = array();
   foreach($upload_pk_array as $upload_pk)
   {
-    $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < Auth::PERM_WRITE)
+    if (!$uploadDao->isEditable($upload_pk, $groupId))
     {
       print "You have no permission to queue agents for upload " . $upload_pk . "\n";
       continue;
@@ -276,8 +279,7 @@ if (array_key_exists("D", $options))
   $checked_list = array();
   foreach($upload_pk_array as $upload_pk)
   {
-    $UploadPerm = GetUploadPerm($upload_pk);
-    if ($UploadPerm < Auth::PERM_WRITE)
+    if (!$uploadDao->isEditable($upload_pk, $groupId))
     {
       print "You have no permission to delete upload " . $upload_pk . "\n";
       continue;
@@ -289,5 +291,3 @@ if (array_key_exists("D", $options))
   /** scheduling delagent tasks on upload ids */
   QueueUploadsOnDelagents($checked_list_str, $Verbose);
 }
-
-exit(0);

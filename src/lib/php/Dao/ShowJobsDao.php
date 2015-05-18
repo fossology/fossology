@@ -113,7 +113,7 @@ class ShowJobsDao extends Object
     $jobArray = array();
 
     if ($allusers == 0) 
-      $allusers_str = "job_user_fk='".$SysConf['auth'][Auth::USER_ID]."' and ";
+      $allusers_str = "job_user_fk='".Auth::getUserId()."' and ";
     else
       $allusers_str = "";
     
@@ -123,7 +123,7 @@ class ShowJobsDao extends Object
     $result = $this->dbManager->execute($statementName);
     while($row = $this->dbManager->fetchArray($result)){
       if (!empty($row['job_upload_fk'])){
-        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], $SysConf['auth'][Auth::GROUP_ID]);
+        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], Auth::getGroupId());
         if (!$uploadIsAccessible) { continue; }
       }
       $jobArray[] = $row['job_pk'];
@@ -246,10 +246,12 @@ class ShowJobsDao extends Object
 
   /**
    * @brief Returns Estimated time using jobid
-   * @param $job_pk $jq_Type
+   * @param int $job_pk
+   * @param string $jq_Type
+   * @param float $filesPerSec
    * @return Returns empty if estimated time is 0 else returns time. 
    **/
-  public function getEstimatedTime($job_pk, $jq_Type, $filesPerSec)
+  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0)
   {
     /* try to get the itemsprocessed for the job whose endtext id completed */
     $statementName = __METHOD__."getEstimatedTime.jq_itemsprocessed";

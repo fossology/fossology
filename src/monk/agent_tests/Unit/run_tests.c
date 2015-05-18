@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     dbManager = createTestEnvironment(AGENT_DIR, "monk", 0);
     const int returnValue = focunit_main(argc, argv, "monk_agent_Tests", suites);
     if (returnValue == 0) {
-        dropTestEnvironment(dbManager, AGENT_DIR);
+        dropTestEnvironment(dbManager, AGENT_DIR, "monk");
     } else {
         printf("preserving test environment in '%s'\n", get_sysconfdir());
     }

@@ -73,8 +73,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     if( ($action=="update" || $action=="delete") && !isset($id))
     {
       $text = _("Wrong request");
-      echo "<h2>$text</h2>";
-      return;
+      return "<h2>$text</h2>";
     }
     else if (isset($id))
     {
@@ -82,12 +81,10 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     }
     
     /* check upload permissions */
-    $UploadPerm = GetUploadPerm($upload);
-    if ($UploadPerm < Auth::PERM_READ)
+    if (!$this->uploadDao->isAccessible($upload, Auth::getGroupId()))
     {
       $text = _("Permission Denied");
-      echo "<h2>$text</h2>";
-      return;
+      return "<h2>$text</h2>";
     }
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
     

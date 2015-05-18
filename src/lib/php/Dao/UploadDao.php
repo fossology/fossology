@@ -170,9 +170,12 @@ class UploadDao extends Object
     return $uploadStatus->getMap();
   }
 
-  public function getStatus($uploadId, $userId)
+  /**
+   * @brief unused function
+   */
+  public function getStatus($uploadId, $groupId)
   {
-    if (GetUploadPerm($uploadId, $userId) >= Auth::PERM_READ) {
+    if ($this->isAccessible($uploadId, $groupId)) {
       $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
       if (false === $row) {
         throw new \Exception("cannot find uploadId=$uploadId");
@@ -280,7 +283,7 @@ class UploadDao extends Object
 
   /**
    * @param $uploadId
-   * @return mixed
+   * @return int uploadtreeId of top item
    */
   public function getUploadParent($uploadId)
   {
@@ -288,9 +291,12 @@ class UploadDao extends Object
     $statementname = __METHOD__ . $uploadTreeTableName;
 
     $parent = $this->dbManager->getSingleRow(
-        "select uploadtree_pk
-            from $uploadTreeTableName
-            where upload_fk=$1 and lft=1", array($uploadId), $statementname);
+        "SELECT uploadtree_pk
+            FROM $uploadTreeTableName
+            WHERE upload_fk=$1 AND parent IS NULL", array($uploadId), $statementname);
+    if(false === $parent) {
+      throw new \Exception("Missing upload tree parent for upload");
+    }
     return $parent['uploadtree_pk'];
   }
 
@@ -444,7 +450,18 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=Auth::PERM_NONE;
+    return $perm['perm']>Auth::PERM_NONE;
+  }
+  
+  public function isEditable($uploadId, $groupId) 
+  {
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
+      return true;
+    }
+
+    $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
+        array($uploadId, $groupId), __METHOD__);
+    return $perm['perm']>=Auth::PERM_WRITE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)

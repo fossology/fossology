@@ -18,14 +18,13 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-
-define("TITLE_ui_download", _("Download File"));
 
 /**
  * \class ui_download extends FO_Plugin
@@ -38,7 +37,7 @@ class ui_download extends FO_Plugin
   function __construct()
   {
     $this->Name       = "download";
-    $this->Title      = TITLE_ui_download;
+    $this->Title      = _("Download File");
     $this->Dependency = array();
     $this->DBaccess   = PLUGIN_DB_WRITE;
     parent::__construct();
@@ -180,8 +179,9 @@ class ui_download extends FO_Plugin
       $uploadId = $row['upload_fk'];
     }
 
-    $uploadPerm = GetUploadPerm($uploadId);
-    if ($uploadPerm < Auth::PERM_WRITE)
+    /* @var $uploadDao UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if (!$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
     {
       throw new Exception("No Permission: $uploadId");
     }
