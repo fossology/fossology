@@ -13,4 +13,13 @@
 {% for res in scannerLicenses %}
   <licenseInfoInFile rdf:resource="{{ res }}" />
 {% endfor %}
+  <copyrightText>
+{% if copyrights is empty %}
+    NOASSERTION
+{% else %}
+  {% for cp in copyrights %}
+    {{ cp }}
+  {% endfor %}
+{% endif %}
+  </copyrightText>
 </File>

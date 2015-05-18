@@ -19,6 +19,7 @@
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
@@ -102,6 +103,7 @@ class SpdxTwoAgent extends Agent
     }
 
     $licenseComment = $this->addScannerResults($filesWithLicenses, $uploadId);
+    $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
     
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -158,6 +160,16 @@ class SpdxTwoAgent extends Agent
     return "licenseInfoInFile determined by Scanners $selectedScanners";
   }
   
+  private function addCopyrightResults(&$filesWithLicenses, $uploadId)
+  {
+    /* @var $copyrightDao CopyrightDao */
+    $copyrightDao = $this->container->get('dao.copyright');
+    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, 'uploadtree', $type='skipcontent', $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
+    foreach ($allEntries as $finding) {
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = $finding['textfinding'];
+    }
+  }       
+  
   private function writeReport($packageNodes, $uploadId)
   {
     global $SysConf;
@@ -208,7 +220,8 @@ class SpdxTwoAgent extends Agent
           'fileId'=>$fileId,
           'fileName'=>$this->container->get('dao.tree')->getFullPath($fileId,$treeTableName),
           'concludedLicenses'=>$licenses['concluded'],
-          'scannerLicenses'=>$licenses['scanner'])
+          'scannerLicenses'=>$licenses['scanner'],
+          'copyrights'=>$licenses['copyrights'])
               );
     }
     return $content;
