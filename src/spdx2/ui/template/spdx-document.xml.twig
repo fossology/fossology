@@ -12,5 +12,11 @@
   <rdfs:comment> 
     This document was created using SPDX 2.0 using licenses from Fossology.
   </rdfs:comment>
+  {% for licenseId,extractedText in licenseTexts %}
+  <ExtractedLicensingInfo rdf:about="{{ licenseId }}">
+    <licenseId>{{ licenseId }}</licenseId>
+    <extractedText>{{ extractedText }}</extractedText>
+  </ExtractedLicensingInfo>
+  {% endfor %}
   {{ packageNodes|replace({'\n':'\n  '}) }}
 </SpdxDocument>

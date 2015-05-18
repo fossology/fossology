@@ -23,6 +23,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 
 include_once(__DIR__ . "/version.php");
@@ -34,14 +35,16 @@ class SpdxTwoAgent extends Agent
   private $uploadDao;
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var DbManager */
+  protected $dbManager;
   /** @var Twig_Environment */
   protected $renderer;
   /** @var LicenseMap */
   private $licenseMap;
   /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
-  /** @var DbManager */
-  protected $dbManager;
+  /** @var array */
+  protected $includedLicenseIds = array();
 
   function __construct()
   {
@@ -91,8 +94,10 @@ class SpdxTwoAgent extends Agent
         {
           continue;
         }
+        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
         $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
-                $this->licenseMap->getProjectedShortname($clearingLicense->getLicenseId(), $clearingLicense->getShortName());
+                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
       }
     }
 
@@ -103,10 +108,15 @@ class SpdxTwoAgent extends Agent
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
     
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
-    $map = $this->licenseMap;
-    $mainLicenses = array_map(function ($id) use ($map) {return $map->getProjectedShortname($id);}, $mainLicenseIds);
+    $mainLicenses = array();
+    foreach($mainLicenseIds as $licId)
+    {
+      $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
+      $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+      $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
+    }
+
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
-    
     return $this->renderString('spdx-package.xml.twig',array(
         'uploadId'=>$uploadId,
         'packageName'=>$upload->getFilename(),
@@ -137,9 +147,11 @@ class SpdxTwoAgent extends Agent
     $res = $this->dbManager->execute($stmt,array($selectedScanners));
     while($row=$this->dbManager->fetchArray($res))
     {
-      $shortName = $this->licenseMap->getProjectedShortname($row['rf_fk']);
-      if ($shortName != 'No_license_found' && $this->licenseMap->getProjectedShortname($row['rf_fk']) != 'Void') {
-        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
+      $reportedLicenseId = $this->licenseMap->getProjectedId($row['uploadtree_pk']);
+      $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
+      if ($shortName != 'No_license_found' && $shortName != 'Void') {
+        $filesWithLicenses[$reportedLicenseId]['scanner'][] = $shortName;
+        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
       }
     }
     $this->dbManager->freeResult($res);
@@ -165,11 +177,10 @@ class SpdxTwoAgent extends Agent
         'uri'=>$fileName,
         'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
         'organisation'=>'',
-        'packageNodes'=>$packageNodes)
+        'packageNodes'=>$packageNodes,
+        'licenseTexts'=>$this->getLicenseTexts())
             );
-
     file_put_contents($fileName, $message);
-
     $this->updateReportTable($uploadId, $this->jobId, $fileName);
   }
 
@@ -203,6 +214,23 @@ class SpdxTwoAgent extends Agent
     return $content;
   }
 
+  /**
+   * @return string[] with keys being shortname
+   */
+  private function getLicenseTexts() {
+    $licenseTexts = array();
+    $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
+    $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
+    $res = $this->dbManager->execute($stmt);
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      if (array_key_exists($row['rf_pk'], $this->includedLicenseIds)) {
+        $licenseTexts[$row['rf_shortname']] = $row['rf_text'];
+      }
+    }
+    $this->dbManager->freeResult($res);
+    return $licenseTexts;
+  }
 }
 
 $agent = new SpdxTwoAgent();
