@@ -101,6 +101,17 @@ class TreeDao extends Object
      return $row ? $row['uploadtree_pk'] : 0;
   }
   
+  /**
+   * @param int $uploadtreeId
+   * @return array with keys sha1, md5
+   */
+  public function getItemHashes($uploadtreeId, $uploadtreeTablename='uploadtree')
+  {
+    $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
+        array($uploadtreeId), __METHOD__);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+  }
+  
   public function getRepoPathOfPfile($pfileId, $repo="files")
   {
     $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));
