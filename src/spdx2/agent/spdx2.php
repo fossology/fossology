@@ -20,6 +20,7 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
@@ -46,6 +47,8 @@ class SpdxTwoAgent extends Agent
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
   /** @var array */
   protected $includedLicenseIds = array();
+  /** @var string */
+  protected $uri;
 
   function __construct()
   {
@@ -64,9 +67,9 @@ class SpdxTwoAgent extends Agent
   function processUploadId($uploadId)
   {
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
+    $this->computeUri($uploadId);
     
     $packageNodes = $this->renderPackage($uploadId);
-    
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$this->args) ? explode(',',$this->args[self::UPLOAD_ADDS]) : array();
     foreach($additionalUploadIds as $additionalId)
     {
@@ -77,7 +80,7 @@ class SpdxTwoAgent extends Agent
     return true;    
   }
   
-  private function renderPackage($uploadId)
+  protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
@@ -121,6 +124,7 @@ class SpdxTwoAgent extends Agent
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString('spdx-package.xml.twig',array(
         'uploadId'=>$uploadId,
+        'uri'=>$this->uri,
         'packageName'=>$upload->getFilename(),
         'uploadName'=>$upload->getFilename(),
         'sha1'=>$hashes['sha1'],
@@ -131,7 +135,7 @@ class SpdxTwoAgent extends Agent
             );
   }
 
-  private function addScannerResults(&$filesWithLicenses, $uploadId)
+  protected function addScannerResults(&$filesWithLicenses, $uploadId)
   {
     $scannerAgents = array_keys($this->agentNames);
     $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'), $uploadId);
@@ -149,10 +153,10 @@ class SpdxTwoAgent extends Agent
     $res = $this->dbManager->execute($stmt,array($selectedScanners));
     while($row=$this->dbManager->fetchArray($res))
     {
-      $reportedLicenseId = $this->licenseMap->getProjectedId($row['uploadtree_pk']);
+      $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
-        $filesWithLicenses[$reportedLicenseId]['scanner'][] = $shortName;
+        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
         $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
       }
     }
@@ -160,17 +164,18 @@ class SpdxTwoAgent extends Agent
     return "licenseInfoInFile determined by Scanners $selectedScanners";
   }
   
-  private function addCopyrightResults(&$filesWithLicenses, $uploadId)
+  protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
     /* @var $copyrightDao CopyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
-    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, 'uploadtree', $type='skipcontent', $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
+    $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='skipcontent', $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
     foreach ($allEntries as $finding) {
       $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = $finding['textfinding'];
     }
   }       
-  
-  private function writeReport($packageNodes, $uploadId)
+
+  protected function computeUri($uploadId)
   {
     global $SysConf;
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -178,7 +183,14 @@ class SpdxTwoAgent extends Agent
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
     $fileName = $fileBase. "SPDX2_".$packageName.'_'.time().".txt" ;
-
+    
+    $this->uri = $fileName;
+  }
+  
+  protected function writeReport($packageNodes, $uploadId)
+  {
+    $fileBase = dirname($this->uri);
+            
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
@@ -186,17 +198,17 @@ class SpdxTwoAgent extends Agent
     
     $message = $this->renderString('spdx-document.xml.twig',array(
         'documentName'=>$fileBase,
-        'uri'=>$fileName,
+        'uri'=>$this->uri,
         'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
         'organisation'=>'',
         'packageNodes'=>$packageNodes,
         'licenseTexts'=>$this->getLicenseTexts())
             );
-    file_put_contents($fileName, $message);
-    $this->updateReportTable($uploadId, $this->jobId, $fileName);
+    file_put_contents($this->uri, $message);
+    $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }
 
-  private function updateReportTable($uploadId, $jobId, $fileName){
+  protected function updateReportTable($uploadId, $jobId, $fileName){
     $this->dbManager->insertTableRow('reportgen',
             array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
             __METHOD__);
@@ -207,18 +219,24 @@ class SpdxTwoAgent extends Agent
    * @param array $vars
    * @return string
    */
-  public function renderString($templateName, $vars)
+  protected function renderString($templateName, $vars)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
   }  
   
-  private function generateFileNodes($filesWithLicenses, $treeTableName)
+  protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
+    /* @var $treeDao TreeDao */
+    $treeDao = $this->container->get('dao.tree');
     $content = '';
     foreach($filesWithLicenses as $fileId=>$licenses) {
+      $hashes = $treeDao->getItemHashes($fileId);
       $content .= $this->renderString('spdx-file.xml.twig',array(
           'fileId'=>$fileId,
-          'fileName'=>$this->container->get('dao.tree')->getFullPath($fileId,$treeTableName),
+          'sha1'=>$hashes['sha1'],
+          'md5'=>$hashes['md5'],
+          'uri'=>$this->uri,
+          'fileName'=>$treeDao->getFullPath($fileId,$treeTableName),
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights'])
@@ -230,7 +248,7 @@ class SpdxTwoAgent extends Agent
   /**
    * @return string[] with keys being shortname
    */
-  private function getLicenseTexts() {
+  protected function getLicenseTexts() {
     $licenseTexts = array();
     $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
     $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
