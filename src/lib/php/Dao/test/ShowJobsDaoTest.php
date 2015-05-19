@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -60,8 +61,8 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->dbManager->prepare($stmt = 'insert.job',
         "INSERT INTO job (job_pk, job_queued, job_name, job_upload_fk, job_user_fk) VALUES ($1, $2, $3, $4, $5)");
-    $jobArray = array(array(1, "2015-04-21 18:29:19.16051+05:30", "FCKeditor_2.6.4.zip", 1,2 ),
-                      array(2,"2015-04-21 20:29:19.16051+05:30", "zlib_1.2.8.zip", 2,2));
+    $jobArray = array(array(1,date('c',time()-5), "FCKeditor_2.6.4.zip", 1,1 ),
+                      array(2,date('c'), "zlib_1.2.8.zip", 2,2));
     foreach ($jobArray as $uploadEntry)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
@@ -133,15 +134,27 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->dbManager->prepare($stmt = 'insert.perm_upload',
       "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
-    $uploadArrayPerm = array(array(1, 10, 1,2 ),
-                             array(2,10, 2,2));
+    $uploadArrayPerm = array(array(1, Auth::PERM_ADMIN, 1, $groupId=2),
+                             array(2, Auth::PERM_ADMIN, 2, $groupId),
+                             array(3, Auth::PERM_ADMIN, 3, $groupId+1),
+                             array(4, Auth::PERM_NONE, 3, $groupId),
+                             array(5, Auth::PERM_WRITE, 4, $groupId));
     foreach ($uploadArrayPerm as $uploadEntry)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
+    $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
+    $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
+    $testOurJobs = $this->showJobsDao->myJobs(true);
+    assertThat($testOurJobs,is(arrayContainingInAnyOrder($this->job_pks)));
+    $testMyJobs = $this->showJobsDao->myJobs(false);
+    assertThat($testMyJobs,equalTo(array(1)));
 
-    $testMyJobs = $this->showJobsDao->myJobs($allusers=1);
-    assertThat($testMyJobs,equalTo($this->job_pks));
+    $this->dbManager->queryOnce("UPDATE job SET job_queued=job_queued-INTERVAL '30 days' WHERE job_pk=1");
+    $this->dbManager->prepare($stmt = 'insert.perm_upload',
+      "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
+    $testOutdatedJobs = $this->showJobsDao->myJobs(true);
+    assertThat($testOutdatedJobs,equalTo(array(2)));
   }
   
   public function testgetNumItemsPerSec()
