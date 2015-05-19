@@ -25,7 +25,7 @@
     </spdx:licenseConcluded>
   {% endif %}
   {% if scannerLicenses is empty %}
-    <spdx:licenseInfoInFile>NOASSERTION</spdx:licenseInfoInFile>
+    <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
   {% else %}{% for res in scannerLicenses %}
     <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res }}" />
   {% endfor %}{% endif %}

@@ -5,7 +5,7 @@
       <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
-        <spdx:downloadLocation>NOASSERTION</spdx:downloadLocation>
+        <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:checksum>
           <spdx:Checksum>
             <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>

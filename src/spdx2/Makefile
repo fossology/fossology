@@ -12,15 +12,16 @@ include $(VARS)
 MOD_NAME = spdx2
 
 DIRS = agent ui
-TESTDIR =
+TESTDIRS = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+TESTDIR_LOOP = @set -e; for dir in $(TESTDIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	@echo "nothing to do"
+	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
 	@echo "nothing to do"
