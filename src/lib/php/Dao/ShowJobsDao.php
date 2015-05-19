@@ -109,7 +109,6 @@ class ShowJobsDao extends Object
    **/
   public function myJobs($allusers)
   {
-    global $SysConf;
     $jobArray = array();
 
     if ($allusers == 0) 

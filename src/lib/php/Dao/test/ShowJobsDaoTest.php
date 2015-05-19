@@ -61,8 +61,8 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
 
     $this->dbManager->prepare($stmt = 'insert.job',
         "INSERT INTO job (job_pk, job_queued, job_name, job_upload_fk, job_user_fk) VALUES ($1, $2, $3, $4, $5)");
-    $jobArray = array(array(1, "2015-04-21 18:29:19.16051+05:30", "FCKeditor_2.6.4.zip", 1,1 ),
-                      array(2,"2015-04-21 20:29:19.16051+05:30", "zlib_1.2.8.zip", 2,2));
+    $jobArray = array(array(1,date('c',time()-5), "FCKeditor_2.6.4.zip", 1,1 ),
+                      array(2,date('c'), "zlib_1.2.8.zip", 2,2));
     foreach ($jobArray as $uploadEntry)
     {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
@@ -146,9 +146,15 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
     $testOurJobs = $this->showJobsDao->myJobs(true);
-    assertThat($testOurJobs,equalTo($this->job_pks));
+    assertThat($testOurJobs,is(arrayContainingInAnyOrder($this->job_pks)));
     $testMyJobs = $this->showJobsDao->myJobs(false);
     assertThat($testMyJobs,equalTo(array(1)));
+
+    $this->dbManager->queryOnce("UPDATE job SET job_queued=job_queued-INTERVAL '30 days' WHERE job_pk=1");
+    $this->dbManager->prepare($stmt = 'insert.perm_upload',
+      "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
+    $testOutdatedJobs = $this->showJobsDao->myJobs(true);
+    assertThat($testOutdatedJobs,equalTo(array(2)));
   }
   
   public function testgetNumItemsPerSec()
