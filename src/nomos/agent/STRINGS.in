@@ -1169,12 +1169,24 @@
 %STR%	"source (code|code =SOME= librar =SOME= (created|derived) =SOME= ) may not be =SOME= distribute"
 #####
 %ENTRY%	_LT_COMMERCIAL_3
-%KEY%	"source"
-%STR%	"source code =ANY= (files?|materials?) =ANY= disclosed? =ANY= without =FEW= prior =FEW= written permission"
+%KEY%	=NULL=
+%STR%	"disclosed =ANY= without =FEW= prior =SOME= written permission"
+#####
+%ENTRY%	_LT_COMMERCIAL_Intel
+%KEY%	=NULL=
+%STR%	"copyright =SOME= Intel Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
+#####
+%ENTRY%	_LT_COMMERCIAL_Broadcom
+%KEY%	=NULL=
+%STR%	"copyright =SOME= Broadcom Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
 #####
 %ENTRY%	_LT_COMMERCIAL_4
 %KEY%	"license"
 %STR%	"software license for =SOME= code"
+#####
+%ENTRY%	_LT_COMMERCIAL_Android_Fraunhofer
+%KEY%	=NULL=
+%STR%	"Fraunhofer FDK AAC Codec Library for Android"
 #####
 # DELETED: permission to use copy and modify this software and its
 # documentation is hereby granted ... the above copyright notice and
