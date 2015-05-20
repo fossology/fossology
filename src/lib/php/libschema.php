@@ -254,12 +254,8 @@ class fo_libschema
             print "$sql\n";
           } else
           {
-            // Add the new column, then set the default value with update
+            // Add the new column which sets the default value
             $this->dbman->queryOnce($sql);
-            if (!empty($modification['UPDATE']))
-            {
-              $this->dbman->queryOnce($sql = $modification['UPDATE']);
-            }
           }
           if (!empty($rename))
           {
@@ -277,10 +273,6 @@ class fo_libschema
           } else if (!empty ($sql))
           {
             $this->dbman->queryOnce($sql);
-            if (!empty($modification['UPDATE']))
-            {
-              $this->dbman->queryOnce($sql = $modification['UPDATE']);
-            }
           }
         }
         if ($this->currSchema['TABLE'][$table][$column]['DESC'] != $modification['DESC'])
@@ -525,6 +517,23 @@ class fo_libschema
     unset($this->currSchema['TABLEID']);
     return $this->currSchema;
   }
+  
+  private function getInheritedRelations()
+  {
+    $sql = "SELECT class.relname AS table, daddy.relname AS inherits_from
+      FROM pg_class AS class
+      INNER JOIN pg_catalog.pg_inherits ON pg_inherits.inhrelid = class.oid
+      INNER JOIN pg_class daddy ON pg_inherits.inhparent = daddy.oid";
+    $this->dbman->prepare($stmt=__METHOD__, $sql);
+    $res = $this->dbman->execute($stmt);
+    $relations = array();
+    while($row=$this->dbman->fetchArray($res))
+    {
+      $relations[$row['table']] = $row['inherits_from'];
+    }
+    $this->dbman->freeResult($res);
+    return $relations;
+  }
 
   /***************************/
   /* Get the tables */
@@ -532,7 +541,7 @@ class fo_libschema
   function addTables()
   {
     $referencedSequencesInTableColumns = array();
-
+    $inheritatedRelations = $this->getInheritedRelations(); 
     $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
@@ -556,6 +565,10 @@ class fo_libschema
     {
       $Table = $R['table'];
       $Column = $R['column_name'];
+      if (array_key_exists($Table, $inheritatedRelations)) {
+        $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
+        continue;
+      }
       $Type = $R['type'];
       if ($Type == 'bpchar')
       {
@@ -569,16 +582,14 @@ class fo_libschema
       $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
       if (!empty($Desc))
       {
-        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
+        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc'";
       } else
       {
         $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "";
       }
-      $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
+      $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type";
       $this->currSchema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
       $Alter = "ALTER COLUMN \"$Column\"";
-      // create the index UPDATE to get rid of php notice
-      $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] = "";
       if ($R['notnull'] == 't')
       {
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL";
@@ -590,7 +601,7 @@ class fo_libschema
       {
         $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
-        $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
+        $this->currSchema['TABLE'][$Table][$Column]['ADD'] .= " DEFAULT " . $R['default'];
 
         $rgx = "/nextval\('([a-z_]*)'.*\)/";
         $matches = array();
@@ -598,9 +609,8 @@ class fo_libschema
            $sequence = $matches[1];
            $referencedSequencesInTableColumns[$sequence] = array("table" => $Table, "column" => $Column);
         }
-      }
-      $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ";";
-    }
+        }
+          }
     $this->dbman->freeResult($result);
 
     return $referencedSequencesInTableColumns;
