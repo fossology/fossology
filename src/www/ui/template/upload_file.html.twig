@@ -5,7 +5,6 @@
    This file is offered as-is, without any warranty.
 #}
 {% extends "include/base.html.twig" %}
-{% import "include/macros.html.twig" as macro %}
 
 {% block content %}
   <p>
@@ -64,8 +63,8 @@
         {{ aContent }}  
       {% endfor %}
     </ol>
-    {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
-    <br/>
+    <p>{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    </p>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
     </p>
