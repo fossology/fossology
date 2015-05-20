@@ -28,6 +28,7 @@ DIRS = \
 	reportgen \
 	reuser \
 	scheduler \
+	spdx2 \
 	ununpack \
 	wget_agent \
 	www

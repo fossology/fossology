@@ -476,4 +476,14 @@ class UploadDao extends Object
                array($perm, $uploadId, $userId), __METHOD__.'.insert');   
   }
  
+  /**
+   * @param int $uploadId
+   * @return array with keys sha1, md5
+   */
+  public function getUploadHashes($uploadId)
+  {
+    $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
+        array($uploadId), __METHOD__);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+  }
 }

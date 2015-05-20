@@ -233,4 +233,14 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($this->treeDao->getFullPath(3665, "uploadtree", $cover),equalTo("L/L2/L2a"));
     assertThat($this->treeDao->getFullPath(3665, "uploadtree"),equalTo("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a"));
   }
+  
+  public function testGetUploadHashes()
+  {
+    $this->testDb->createPlainTables(array('pfile'));
+    $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
+    $this->testDb->insertData(array('uploadtree_a','pfile'));
+    // (pfile_pk, pfile_md5, pfile_sha1, pfile_size) := (4, '59CACDFCE5051CD8A1D8A1F2DCCE40A5', '04621571BCBABCE75C4DD1C6445B87DEC0995734', 12320);
+    $hashes = $this->treeDao->getItemHashes(7,'uploadtree_a');
+    assertThat($hashes,equalTo(array('md5'=>'59CACDFCE5051CD8A1D8A1F2DCCE40A5','sha1'=>'04621571BCBABCE75C4DD1C6445B87DEC0995734')));
+  }
 }
