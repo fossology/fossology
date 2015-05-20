@@ -54,7 +54,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
-    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
@@ -121,14 +120,48 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
-    assertThat($filepath,  endsWith('.txt'));
-    /*
-    $comparisionFile = __DIR__.'/ReportTestfiles.tar_clearing_report_Mon_May_04_05_2015_11_53_18.docx';
-    assertThat(is_file($comparisionFile),equalTo(true));
-    assertThat(filesize($filepath), closeTo(filesize($comparisionFile),5));
-     * 
-     */
-
+    assertThat($filepath, endsWith('.rdf'));
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+        
+    $this->verifyRdf($filepath);
+    unlink($filepath);
     $this->rmRepo();
   }
+  
+  protected function verifyRdf($filepath)
+  {
+    exec('which java', $lines, $returnVar);
+    $this->assertEquals(0,$returnVar,'java required for this test');
+    
+    $toolDir = __DIR__.'/test-tool/';
+
+    if(!is_dir($toolDir))
+    {
+      $this->pullSpdxTools($toolDir);
+    }
+
+    $toolJarFile = $toolDir.'/SPDXTools-v2.0.0/spdx-tools-2.0.0-jar-with-dependencies.jar';
+    $tagFile = __DIR__."/out.tag";
+    exec("java -jar $toolJarFile RdfToTag $filepath $tagFile");
+    
+    $this->assertFileExists($tagFile, 'SPDXTools failed');
+    assertThat(filesize($tagFile),is(greaterThan(42)));
+    unlink($tagFile);
+  }
+  
+  protected function pullSpdxTools($toolDir)
+  {        
+    $toolZipFile = __DIR__."/SPDXTools-v2.0.0.zip";    
+    if(!file_exists($toolZipFile))
+    {
+      file_put_contents($toolZipFile, fopen("http://spdx.org/sites/spdx/files/SPDXTools-v2.0.0.zip", 'r'));
+    }
+    $this->assertFileExists($toolZipFile, 'could not find SPDXTools');
+    
+    $zip = new \ZipArchive();
+    $zip->open($toolZipFile);
+    $this->assertTrue( $zip->extractTo($toolDir), 'could not unzip SPDXTools');
+    $zip->close();
+  }
+
 }

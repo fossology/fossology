@@ -184,7 +184,7 @@ class SpdxTwoAgent extends Agent
     $packageName = $upload->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "SPDX2_".$packageName.'_'.time().".txt" ;
+    $fileName = $fileBase. "SPDX2_".$packageName.'_'.time().".rdf" ;
     
     $this->uri = $fileName;
   }
