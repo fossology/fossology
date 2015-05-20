@@ -213,7 +213,8 @@ class UploadFilePage extends DefaultPlugin
       return array(false, _("Could not save uploaded file"));
     }
 
-    $wgetAgentCall = "$MODDIR/wget_agent/agent/wget_agent -C -g fossy -k $uploadId '$uploadedTempFile' -c '$SYSCONFDIR'";
+    $projectGroup = $GLOBALS['SysConf']['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
+    $wgetAgentCall = "$MODDIR/wget_agent/agent/wget_agent -C -g $projectGroup -k $uploadId '$uploadedTempFile' -c '$SYSCONFDIR'";
     $wgetOutput = array();
     exec($wgetAgentCall, $wgetOutput, $wgetReturnValue);
     unlink($uploadedTempFile);
@@ -230,9 +231,9 @@ class UploadFilePage extends DefaultPlugin
         
     $jobId = JobAddJob($userId, $groupId, $originalFileName, $uploadId);
     global $Plugins;
-    /** @var agent_adj2nest $adj2nestplugin */
+    /* @var $adj2nestAgent agent_adj2nest  */
     $adj2nestplugin = &$Plugins['agent_adj2nest'];
-    $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage, $dependencies = array());
+    $adj2nestplugin->AgentAdd($jobId, $uploadId, $errorMessage);
 
     $checkedAgents = checkedAgents();
     AgentSchedule($jobId, $uploadId, $checkedAgents);
