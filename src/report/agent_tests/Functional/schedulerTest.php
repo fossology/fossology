@@ -53,7 +53,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   public function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
-    $this->testDb->fullDestruct();
+    // $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
   }
@@ -80,6 +80,25 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createInheritedArsTables(array('copyright','monk','nomos'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+    
+    $this->dbManager->queryOnce("CREATE TABLE ip(
+  ct_pk bigint NOT NULL DEFAULT 1234,
+  agent_fk bigint NOT NULL,
+  pfile_fk bigint NOT NULL,
+  content text,
+  hash text,
+  type text,
+  copy_startbyte integer,
+  copy_endbyte integer)");
+    
+    $this->dbManager->queryOnce("CREATE TABLE ip_decision(
+  copyright_decision_pk bigint NOT NULL DEFAULT 56789,
+  user_fk bigint NOT NULL,
+  pfile_fk bigint NOT NULL,
+  clearing_decision_type_fk bigint NOT NULL,
+  description text,
+  textfinding text,
+  comment text)");
     
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     // $this->testDb->insertData_license_ref();
