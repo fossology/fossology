@@ -140,6 +140,7 @@ class fo_libschema
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $this->applySequences();
     $this->applyTables();
+    $this->applyInheritedRelations();
     $this->updateSequences();
     $this->applyViews();
     $this->dropConstraints();
@@ -509,6 +510,7 @@ class fo_libschema
   {
     global $SysConf;
     $this->currSchema = array();
+    $this->addInheritedRelations();
     $referencedSequencesInTableColumns = $this->addTables();
     $this->addViews($viewowner = $SysConf['DBCONF']['user']);
     $this->addSequences($referencedSequencesInTableColumns);
@@ -518,7 +520,7 @@ class fo_libschema
     return $this->currSchema;
   }
   
-  private function getInheritedRelations()
+  function addInheritedRelations()
   {
     $sql = "SELECT class.relname AS table, daddy.relname AS inherits_from
       FROM pg_class AS class
@@ -532,7 +534,7 @@ class fo_libschema
       $relations[$row['table']] = $row['inherits_from'];
     }
     $this->dbman->freeResult($res);
-    return $relations;
+    $this->currSchema['INHERITS'] = $relations;
   }
 
   /***************************/
@@ -541,7 +543,7 @@ class fo_libschema
   function addTables()
   {
     $referencedSequencesInTableColumns = array();
-    $inheritatedRelations = $this->getInheritedRelations(); 
+
     $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
@@ -565,7 +567,7 @@ class fo_libschema
     {
       $Table = $R['table'];
       $Column = $R['column_name'];
-      if (array_key_exists($Table, $inheritatedRelations)) {
+      if (array_key_exists($Table, $this->currSchema['INHERITS'])) {
         $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
         continue;
       }
@@ -1024,7 +1026,28 @@ class fo_libschema
       ';
     $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.create');
     return;
-  } // MakeFunctions()
+  }
+
+  function applyInheritedRelations() {
+    if (empty($this->schema['INHERITS']))
+    {
+      return;
+    }
+    foreach ($this->schema['INHERITS'] as $table => $fromTable)
+    {
+      if (empty($table))
+      {
+        continue;
+      }
+      if (!$this->dbman->existsTable($table) && $this->dbman->existsTable($fromTable))
+      {
+        $sql = "CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")";
+        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $table);
+      }
+    }
+  }
+
+// MakeFunctions()
 }
 
 if (empty($dbManager) || !($dbManager instanceof DbManager))
