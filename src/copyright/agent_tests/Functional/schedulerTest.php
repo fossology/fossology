@@ -117,7 +117,6 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createConstraints(array('agent_pkey','upload_pkey_idx','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','users'));
     $this->testDb->createInheritedTables(array('uploadtree_a'));
-
     $this->testDb->insertData(array('upload','pfile','uploadtree_a','bucketpool','mimetype','users'), false);
   }
 

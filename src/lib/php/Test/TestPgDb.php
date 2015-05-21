@@ -201,19 +201,6 @@ class TestPgDb extends TestAbstractDb
         $this->dbManager->queryOnce("CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")");
       }
     }
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach ($Schema['INHERITS'] as $table=>$fromTable)
-    {
-      if ($fromTable == 'master_ars') {
-        continue;
-      }
-      if (!$this->dbManager->existsTable($table) && $this->dbManager->existsTable($fromTable))
-      {
-        $this->dbManager->queryOnce("CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")");
-      }
-    }
   }
 
   public function createInheritedArsTables($agents)
