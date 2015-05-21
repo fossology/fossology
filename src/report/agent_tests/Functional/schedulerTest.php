@@ -74,69 +74,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
+    $this->testDb->createSequences(array(),true);
     $this->testDb->createPlainTables(array(),true);
     $this->testDb->createInheritedTables();
-    $this->dbManager->queryOnce("CREATE TABLE copyright_ars () INHERITS (ars_master)");
-    $this->dbManager->queryOnce("CREATE TABLE monk_ars () INHERITS (ars_master)");
-    
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_id_seq','clearing_event_clearing_event_pk_seq'),false);
+    $this->testDb->createInheritedArsTables(array('copyright','monk','nomos'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
-    
-    $this->dbManager->queryOnce("CREATE TABLE copyright_decision
-( copyright_decision_pk bigint NOT NULL,
-  user_fk bigint NOT NULL,
-  pfile_fk bigint NOT NULL,
-  clearing_decision_type_fk bigint NOT NULL,
-  description text,
-  textfinding text,
-  comment text,
-  CONSTRAINT copyright_decision_pkey PRIMARY KEY (copyright_decision_pk)
-)",__METHOD__.'.copyright_decision');
-    
-    $this->dbManager->queryOnce("CREATE TABLE ecc
-( ct_pk bigint NOT NULL,
-  agent_fk bigint NOT NULL,
-  pfile_fk bigint NOT NULL,
-  content text,
-  hash text,
-  type text,
-  copy_startbyte integer,
-  copy_endbyte integer,
-  CONSTRAINT ecc_pkey PRIMARY KEY (ct_pk)
-)", __METHOD__.'.ecc');    
-    $this->dbManager->queryOnce("CREATE TABLE ecc_decision
-( copyright_decision_pk bigint NOT NULL,
-  user_fk bigint NOT NULL,
-  pfile_fk bigint NOT NULL,
-  clearing_decision_type_fk bigint NOT NULL,
-  description text,
-  textfinding text,
-  comment text,
-  CONSTRAINT ecc_decision_pkey PRIMARY KEY (copyright_decision_pk)
-)",__METHOD__.'.ecc_decision');
-    
-    $this->dbManager->queryOnce("CREATE TABLE ip
-( ct_pk bigint NOT NULL,
-  agent_fk bigint NOT NULL,
-  pfile_fk bigint NOT NULL,
-  content text,
-  hash text,
-  type text,
-  copy_startbyte integer,
-  copy_endbyte integer,
-  CONSTRAINT ip_pkey PRIMARY KEY (ct_pk)
-)",__METHOD__.'.ip');
-    $this->dbManager->queryOnce("CREATE TABLE ip_decision
-( copyright_decision_pk bigint NOT NULL,
-  user_fk bigint NOT NULL,
-  pfile_fk bigint NOT NULL,
-  clearing_decision_type_fk bigint NOT NULL,
-  description text,
-  textfinding text,
-  comment text,
-  CONSTRAINT ip_decision_pkey PRIMARY KEY (copyright_decision_pk)
-)",__METHOD__.'.ip_decision');
     
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     // $this->testDb->insertData_license_ref();
