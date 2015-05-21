@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -68,7 +68,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("reuserSched".time());
+    $this->testDb = new TestPgDb("reuserSched");
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
@@ -138,10 +138,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
-    $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
-    $this->testDb->getDbManager()->queryOnce("create table nomos_ars() inherits(ars_master)");
-    $this->testDb->getDbManager()->queryOnce("create table monk_ars() inherits(ars_master)");
     $this->testDb->createInheritedTables();
+    $this->testDb->createInheritedArsTables(array('nomos','monk'));
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars'), false);
     $this->testDb->insertData_license_ref();
