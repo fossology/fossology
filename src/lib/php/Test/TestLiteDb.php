@@ -93,11 +93,12 @@ class TestLiteDb extends TestAbstractDb
       // $pattern = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;"";
       foreach ($tableCols as $attributes)
       {
-        $sql = $attributes["ADD"];
+        $sql = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
         $alterSql = explode('"', $sql);
-        $columns[$alterSql[3]] = "$alterSql[3] " . substr($alterSql[4], 0, -1);
+        $columns[$alterSql[3]] = "$alterSql[3] " . $alterSql[4];
       }
       $createSql = "CREATE TABLE $tableName (" . implode(',', $columns) . ')';
+      error_log($createSql,3,'/tmp/error.log');
       $this->dbManager->queryOnce($createSql);
     }
   }

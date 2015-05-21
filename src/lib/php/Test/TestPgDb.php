@@ -108,6 +108,7 @@ class TestPgDb extends TestAbstractDb
     $GLOBALS['PG_CONN'] = false;
     $testDbFactory = new \TestDbFactory();
     $testDbFactory->purgeTestDb($this->sys_conf);
+    $this->dbManager = null;
   }
 
   function isInFossyGroup()
@@ -142,7 +143,8 @@ class TestPgDb extends TestAbstractDb
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
       foreach ($tableCols as $attributes)
       {
-        $this->dbManager->queryOnce($attributes["ADD"]);
+        $sqlAdd = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
+        $this->dbManager->queryOnce($sqlAdd);
       }
     }
   }
