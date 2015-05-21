@@ -1386,7 +1386,7 @@
   $Schema["TABLE"]["uploadtree"]["parent"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"parent\" DROP NOT NULL;";
 
   $Schema["TABLE"]["uploadtree"]["realparent"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"realparent\" IS 'uploadtree non-artifact parent';";
-  $Schema["TABLE"]["uploadtree"]["realparent"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"realparent\" int4;";
+  $Schema["TABLE"]["uploadtree"]["realparent"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"realparent\" int4";
   $Schema["TABLE"]["uploadtree"]["realparent"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"realparent\" DROP NOT NULL;";
 
   $Schema["TABLE"]["uploadtree"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"upload_fk\" IS 'original uploaded file';";
