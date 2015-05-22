@@ -152,7 +152,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
 
   if ((dir_handler = opendir(dir_name)) == NULL)
   {
-    fprintf(stderr, "Can't open %s\n", dir_name);
+    fprintf(stderr, "Can't open: %s, error: %s\n", dir_name, strerror(errno));
     return;
   }
 
