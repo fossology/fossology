@@ -401,6 +401,7 @@ class AjaxShowJobs extends FO_Plugin
         } 
         $outBuf .= "</td>";
         $outBuf .= "<td><span style='float:right;margin-right:32%;'>";
+        $itemsPerSec = null;
         /* Don't display items/sec unless the job has started */
         if ($jobqueueRec['jq_starttime']){
           $text = _(" items/sec");
