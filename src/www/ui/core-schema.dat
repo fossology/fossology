@@ -1753,52 +1753,6 @@
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["UPDATE"] = "";
 
 
-  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"uploadtree_pk\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"uploadtree_pk\" SET NOT NULL, ALTER COLUMN \"uploadtree_pk\" SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
-  $Schema["TABLE"]["uploadtree_a"]["uploadtree_pk"]["UPDATE"] = "UPDATE uploadtree_a SET uploadtree_pk=nextval('uploadtree_uploadtree_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["uploadtree_a"]["realparent"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["realparent"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"realparent\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["realparent"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"realparent\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["realparent"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["parent"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["parent"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"parent\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["parent"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"parent\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["parent"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"upload_fk\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["upload_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["pfile_fk"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"ufile_mode\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"ufile_mode\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_mode"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["lft"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["lft"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"lft\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["lft"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"lft\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["lft"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["rgt"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["rgt"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"rgt\" int4;";
-  $Schema["TABLE"]["uploadtree_a"]["rgt"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"rgt\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["rgt"]["UPDATE"] = "";
-
-  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree_a\" ADD COLUMN \"ufile_name\" text;";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree_a\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
-  $Schema["TABLE"]["uploadtree_a"]["ufile_name"]["UPDATE"] = "";
-
-
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_pk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_pk\" int4;";
   $Schema["TABLE"]["users"]["user_pk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_pk\" SET NOT NULL, ALTER COLUMN \"user_pk\" SET DEFAULT nextval('users_user_pk_seq'::regclass);";
