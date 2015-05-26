@@ -235,11 +235,15 @@ class AjaxClearingView extends FO_Plugin
 
       $licenseShortNameWithLink = $this->urlBuilder->getLicenseTextUrl($clearingResult->getLicenseRef());
       $actionLink = "<a href=\"javascript:;\" onclick=\"removeLicense($uploadId, $uploadTreeId, $licenseId);\"><img class=\"delete\" src=\"images/space_16.png\" alt=\"\"/></a>";
-      if (in_array($clearingResult->getLicenseId(), $mainLicIds)) {
-        $actionLink .= ' <img src="images/icons/star_filled_16.png" alt="mainLicense"/>';
+      if (in_array($clearingResult->getLicenseId(), $mainLicIds))
+      {
+        $tooltip = _('This is a main license for the upload. Click to discard selection.');
+        $actionLink .= " <a href=\"javascript:;\" onclick=\"removeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_filled_16.png\" alt=\"mainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
-      else {
-        $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" border=\"0\"/></a>";
+      else
+      {
+        $tooltip = _('Click to select this as a main license for the upload.');
+        $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
 
       $reportInfoField = nl2br(htmlspecialchars($reportInfo));
