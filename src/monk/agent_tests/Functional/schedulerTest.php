@@ -194,7 +194,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($retCode, 0, 'monk failed: '.$output);
     $this->assertEquals(6, $this->getHeartCount($output));
 
-    $this->assertEquals($retCode2, 0, 'monk failed: '.$output2);
+    $this->assertEquals($retCode2, 1, 'monk did not failed: '.$output2);
     $this->assertEquals(0, $this->getHeartCount($output2));
 
     $this->rmRepo();
