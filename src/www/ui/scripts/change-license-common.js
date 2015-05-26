@@ -186,6 +186,17 @@ function makeMainLicense(uploadId, licenseId) {
     .fail(failed);
 }
 
+function removeMainLicense(uploadId,licenseId) {
+  if(confirm("Remove this license from the main license list?"))
+  {
+    $.getJSON("?mod=conclude-license&do=removeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
+      .done(function (data) {
+        var table = createClearingTable();
+        table.fnDraw(false);
+      })
+      .fail(failed);
+  }
+}
 
 function removeLicense(uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
