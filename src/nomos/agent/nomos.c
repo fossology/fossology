@@ -79,22 +79,6 @@ void arsNomos(cacheroot_t* cacheroot){
       LOG_ERROR("You have no update permissions on upload %d", upload_pk);
       continue;
     }
-    /* if it is duplicate request (same upload_pk, sameagent_fk), then do not repeat */
-    snprintf(sqlbuf, sizeof(sqlbuf),
-        "select ars_pk from nomos_ars,agent \
-                where agent_pk=agent_fk and ars_success=true \
-                  and upload_fk='%d' and agent_fk='%d'",
-        upload_pk, gl.agentPk);
-    result = PQexec(gl.pgConn, sqlbuf);
-    if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__))
-      Bail(-__LINE__);
-    if (PQntuples(result) != 0)
-    {
-      LOG_NOTICE("Ignoring requested nomos analysis of upload %d - Results are already in database.", upload_pk);
-      PQclear(result);
-      continue;
-    }
-    PQclear(result);
     /* Record analysis start in nomos_ars, the nomos audit trail. */
     ars_pk = fo_WriteARS(gl.pgConn, ars_pk, upload_pk, gl.agentPk, AgentARSName, 0, 0);
     /* retrieve the records to process */
