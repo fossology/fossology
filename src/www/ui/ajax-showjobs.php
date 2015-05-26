@@ -413,7 +413,7 @@ class AjaxShowJobs extends FO_Plugin
         /* Get ETA for each agent */
         $text = _("Scanned");
         if(empty($jobqueueRec['jq_endtime']))
-          $outBuf .= "<td align='center'>".$this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec)."</td>";
+          $outBuf .= "<td align='center'>".$this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk'])."</td>";
         else
           $outBuf .= "<td align='center'>$text</td>";  
         /* actions, must be admin or own the upload  */
