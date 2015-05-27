@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 205 Siemens AG
@@ -44,19 +46,15 @@ class group_add extends FO_Plugin {
     {
       try
       {
-        $groupId = $GLOBALS['container']->get('dao.user')->addGroup($groupname);
-        /* Add group admin to table group_user_member */
-        $userId = $GLOBALS['SysConf']['auth']['UserId'];
-        $sql = "INSERT INTO group_user_member (group_fk,user_fk,group_perm) VALUES ($groupId, $userId, 1)";
-        $result = pg_query($GLOBALS['PG_CONN'], $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
-        
+        /* @var $userDao UserDao */
+        $userDao = $GLOBALS['container']->get('dao.user');
+        $groupId = $userDao->addGroup($groupname);
+        $userDao->addGroupMembership($groupId,Auth::getUserId());
         $text = _("Group");
         $text1 = _("added");
         $this->vars['message'] = "$text $groupname $text1.";
       }
-      catch(\Exception $e)
+      catch(Exception $e)
       {
         $this->vars['message'] = $e->getMessage();
       }

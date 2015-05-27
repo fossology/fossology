@@ -244,6 +244,16 @@ class UserDao extends Object
   }
 
   /**
+   * @param $groupName
+   * @return array
+   */
+  public function getGroupIdByName($groupName)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name = $1", array($groupName), __FUNCTION__);
+    return $row['group_pk'];
+  }
+  
+  /**
    * @param $permission
    * @return array
    */
@@ -265,16 +275,42 @@ class UserDao extends Object
     $userRow = $this->dbManager->getSingleRow(
         "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
         array($userName), __FUNCTION__);
-
-    if (!$userRow['group_fk']) {
-      $groupRow = $this->dbManager->getSingleRow(
+    if(empty($userRow)) {
+      throw new \Exception('invalid user name');
+    }
+    if ($userRow['group_fk']) {
+      return $userRow;
+    }
+    $groupRow = $this->fixDefaultGroup($userRow['user_pk'],$userName);
+    $this->setDefaultGroupMembership($userRow['user_pk'], $groupRow['group_fk']);
+    $userRow['group_fk'] = $groupRow['group_fk'];
+    $userRow['group_name'] = $groupRow['group_name'];
+    return $userRow;
+  }
+  
+  /**
+   * @param int $userId
+   * @param string $groupName
+   * @return array with keys 'group_fk', 'group_name'
+   */
+  private function fixDefaultGroup($userId, $groupName)
+  {
+    $groupRow = $this->dbManager->getSingleRow(
           "SELECT group_fk,group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1",
-          array($userRow['user_pk']), __FUNCTION__.".getGroup");
-      $userRow['group_fk'] = $groupRow['group_fk'];
-      $userRow['group_name'] = $groupRow['group_name'];
+          array($userId), __FUNCTION__.".getGroup");
+    if($groupRow)
+    {
+      return $groupRow;
     }
 
-    return $userRow;
+    $groupId = $this->getGroupIdByName($groupName);
+    if(empty($groupId))
+    {
+      $groupId = $this->addGroup($groupName);
+      $this->addGroupMembership($groupId, $userId);
+    }
+
+    return array('group_fk'=>$groupId,'group_name'=>$groupName);
   }
 
   public function isAdvisorOrAdmin($userId, $groupId)
@@ -286,7 +322,7 @@ class UserDao extends Object
 
   /**
    * @param string $groupName raw group name as entered by the user
-   * @return int $groupId | mixed
+   * @return int $groupId
    * @throws \Exception
    */
   public function addGroup($groupName)
@@ -307,12 +343,18 @@ class UserDao extends Object
     $this->dbManager->insertTableRow('groups', array('group_name'=>$groupName));
     $groupNowExists = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name=$1",
             array($groupName),
-            __METHOD__.'.gExists');
+            __METHOD__.'.gNowExists');
     if (!$groupNowExists)
     {
       throw new \Exception(_("Failed to create group"));
     }
     return $groupNowExists['group_pk'];
+  }
+
+  public function addGroupMembership($groupId, $userId)
+  {
+    $this->dbManager->insertTableRow('group_user_member',
+            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>1));
   }
   
   /**

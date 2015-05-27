@@ -269,7 +269,7 @@ if(!$isUpdating || $sysconfig['Release'] == '2.6')
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
   }
-  if (!$isUpdating && array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if ($isUpdating && array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
   {
     require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
