@@ -64,7 +64,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("deciderSched".time());
+    $this->testDb = new TestPgDb("deciderSched");
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
@@ -117,7 +117,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue'),false);
-    $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 

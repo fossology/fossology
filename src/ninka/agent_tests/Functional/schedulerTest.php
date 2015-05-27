@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -109,12 +109,12 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
+    $this->testDb->createPlainTables(array('upload','uploadtree','license_ref','license_file','highlight','agent','pfile','ars_master'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','rf_pkpk'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_file','highlight','license_ref'),false);
-
+    $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a'), false);
     $this->testDb->insertData_license_ref();
   }

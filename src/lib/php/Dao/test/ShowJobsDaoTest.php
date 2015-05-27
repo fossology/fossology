@@ -45,12 +45,12 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
         array(
             'upload',
             'uploadtree',
-            'uploadtree_a',
             'job',
             'perm_upload',
             'jobqueue',
             'jobdepends',
         ));
+    $this->testDb->createInheritedTables(array('uploadtree_a'));
 
     $uploadArray = array(array('upload_pk'=>1, 'uploadtree_tablename'=>'uploadtree'),
         array('upload_pk'=>2, 'uploadtree_tablename'=>'uploadtree_a'));

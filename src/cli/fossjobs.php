@@ -129,6 +129,7 @@ if (array_key_exists("password", $options)) {
 }
 
 account_check($user, $passwd, $group); // check username/password
+$groupId = Auth::getGroupId();
 
 /* init plugins */
 cli_Init();
@@ -238,7 +239,7 @@ if (array_key_exists("U", $options))
   {
     if (!$uploadDao->isEditable($upload_pk, $groupId))
     {
-      print "You have no permission to queue agents for upload " . $upload_pk . "\n";
+      print "You have no permission to queue agents for upload $upload_pk in group $groupId\n";
       continue;
     }
     $checked_list[] = $upload_pk;

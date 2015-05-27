@@ -54,7 +54,8 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetCopyrightHighlights()
   {
-    $this->testDb->createPlainTables(array(),TRUE); //array('copyright'));
+    $this->testDb->createPlainTables(array(),true);
+    $this->testDb->createInheritedTables();
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $uploadDao->shouldReceive('getUploadEntry')->with(1)->andReturn(array('pfile_fk'=>8));
     $uploadDao->shouldReceive('getUploadEntry')->with(2)->andReturn(array('pfile_fk'=>9));
@@ -100,6 +101,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
   private function setUpClearingTables()
   {
     $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype'));
+    $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','users'));

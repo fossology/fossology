@@ -19,6 +19,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file common-folders.php
@@ -466,6 +467,9 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
   if ($ParentFolder == "-1")  $ParentFolder = GetUserRootFolder(); 
+  $groupId = Auth::getGroupId();
+  /* @var $uploadDao UploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
   $List=array();
 
   /* Get list of uploads under $ParentFolder */
@@ -482,9 +486,12 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   while ($R = pg_fetch_assoc($result))
   {
     if (empty($R['upload_pk'])) { continue; }
-
-    // Filter out uploads where the user doesn't have sufficient permission 
-    if (GetUploadPerm($R['upload_pk']) < $perm) continue;
+    if($perm == Auth::PERM_READ && !$uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+      continue;
+    }
+    if ($perm == Auth::PERM_WRITE && !$uploadDao->isEditable($R['upload_pk'], $groupId)) {
+      continue;
+    }
 
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
@@ -497,24 +504,29 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 } // FolderListUploads_perm()
 
 /**
- * \brief Get uploads and folder info, starting from $ParentFolder.
+ * @brief Get uploads and folder info, starting from $ParentFolder.
  * The array is sorted by folder and upload name.
  * Folders that are empty do not show up.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder folder_pk, -1 for users root folder
- * \param $FolderPath Used for recursion, caller should not specify.
- *
- * \return array of {upload_pk, upload_desc, name, folder}
+ * @param int $ParentFolder folder_pk, -1 for users root folder
+ * @param string $FolderPath Used for recursion, caller should not specify.
+ * @param Auth::PERM_READ | Auth::PERM_WRITE
+ * @return array of {upload_pk, upload_desc, name, folder}
  */
-function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth::PERM_READ)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath='', $perm=Auth::PERM_READ)
 {
   global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
-  if (empty($ParentFolder)) { return; }
+  if (empty($PG_CONN)) { return array(); }
+  if (empty($ParentFolder)) { return array(); }
+  if($perm!=Auth::PERM_READ && $perm=Auth::PERM_WRITE)
+          return array();
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  $groupId = Auth::getGroupId();
+  /* @var $uploadDao UploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
   $List=array();
 
   /* Get list of uploads */
@@ -522,21 +534,25 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM folder,foldercontents,uploadtree, upload
     WHERE 
         foldercontents.parent_fk = '$ParentFolder'
-    AND foldercontents.foldercontents_mode = 2 
+    AND foldercontents.foldercontents_mode = ". FolderDao::MODE_UPLOAD ."
     AND foldercontents.child_id = upload.upload_pk
     AND folder.folder_pk = $ParentFolder
     AND uploadtree.upload_fk = upload.upload_pk
     AND uploadtree.parent is null
-    ORDER BY uploadtree.ufile_name,upload.upload_desc;";
+    ORDER BY uploadtree.ufile_name,upload.upload_desc";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
   {
-    if (empty($R['upload_pk'])) { continue; }
-
-    /* Check upload permission */
-    $UploadPerm = GetUploadPerm($R['upload_pk']);
-    if ($UploadPerm < $perm) continue;
+    if (empty($R['upload_pk'])) {
+      continue;
+    }
+    if($perm == Auth::PERM_READ && !$uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+      continue;
+    }
+    if ($perm == Auth::PERM_WRITE && !$uploadDao->isEditable($R['upload_pk'], $groupId)) {
+      continue;
+    }
 
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
@@ -551,7 +567,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   $sql = "SELECT A.child_id AS id,B.folder_name AS folder,B.folder_name AS subfolder
 	FROM foldercontents AS A
 	INNER JOIN folder AS B ON A.parent_fk = B.folder_pk
-	AND A.foldercontents_mode = 1
+	AND A.foldercontents_mode = ". FolderDao::MODE_FOLDER ."
 	AND A.parent_fk = '$ParentFolder'
   AND B.folder_pk = $ParentFolder
 	ORDER BY B.folder_name;";
@@ -561,7 +577,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   {
     if (empty($R['id'])) { continue; }
     /* RECURSE! */
-    $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder']);
+    $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder'], $perm);
     $List = array_merge($List,$SubList);
   }
   pg_free_result($result);

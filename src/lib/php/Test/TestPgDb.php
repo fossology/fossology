@@ -108,6 +108,7 @@ class TestPgDb extends TestAbstractDb
     $GLOBALS['PG_CONN'] = false;
     $testDbFactory = new \TestDbFactory();
     $testDbFactory->purgeTestDb($this->sys_conf);
+    $this->dbManager = null;
   }
 
   function isInFossyGroup()
@@ -142,7 +143,8 @@ class TestPgDb extends TestAbstractDb
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
       foreach ($tableCols as $attributes)
       {
-        $this->dbManager->queryOnce($attributes["ADD"]);
+        $sqlAdd = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
+        $this->dbManager->queryOnce($sqlAdd);
       }
     }
   }
@@ -176,11 +178,28 @@ class TestPgDb extends TestAbstractDb
     $this->applySchema('CONSTRAINT', $cList, $invert);
   }
   
-  public function createInheritedTables()
+  /**
+   * @param string[] $tableList array of table names or empty for all tables
+   */
+  public function createInheritedTables($tableList=array())
   {
-    if(!$this->dbManager->existsTable('license_candidate'))
+    $table = 'license_candidate';
+    if((empty($tableList) || in_array($table, $tableList)) && !$this->dbManager->existsTable($table))
     {
-      $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+      $this->dbManager->queryOnce("CREATE TABLE $table (group_fk integer) INHERITS (license_ref)");
+    }
+    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
+    $Schema = array();
+    require($coreSchemaFile);
+    foreach ($Schema['INHERITS'] as $table=>$fromTable)
+    {
+      if ($fromTable=='master_ars' || !empty($tableList) && !in_array($table, $tableList) ) {
+        continue;
+      }
+      if (!$this->dbManager->existsTable($table) && $this->dbManager->existsTable($fromTable))
+      {
+        $this->dbManager->queryOnce("CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")");
+      }
     }
   }
 

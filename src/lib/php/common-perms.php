@@ -211,54 +211,6 @@ use Fossology\Lib\Auth\Auth;
 
 
   /**
-   *  @brief Get the upload permission for a user
-   *  @param $upload_pk
-   *  @param $user_pk (optional, default is current user_pk)
-   *  @return hightest permission level a user has for an upload
-   **/
-  function GetUploadPerm($upload_pk, $user_pk=0)
-  {
-    global $PG_CONN;
-
-    if ($user_pk == 0) $user_pk = Auth::getUserId ();
-
-    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
-
-    //for the command line didn't have session info
-    $UserRow = GetSingleRec("Users", "where user_pk='$user_pk'");
-    if ($UserRow['user_perm'] == PLUGIN_DB_ADMIN) return Auth::PERM_ADMIN;
-
-    $sql = "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=$upload_pk and user_fk=$user_pk and group_user_member.group_fk=perm_upload.group_fk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1) 
-      $perm = Auth::PERM_NONE;
-    else
-    {
-      $row = pg_fetch_assoc($result);
-      $perm = $row['perm'];
-    }
-    pg_free_result($result);
-
-    /* check the upload public permission */
-    $sql = "select public_perm from upload where upload_pk=$upload_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    if (pg_num_rows($result) < 1) 
-      $perm2 = Auth::PERM_NONE;
-    else
-    {
-      $row = pg_fetch_assoc($result);
-      $perm2 = $row['public_perm'];
-    }
-    pg_free_result($result);
-
-    return max($perm, $perm2);
-  }
-
-
-  /**
    * \brief Delete a group.
    * \param $group_pk
    * Returns NULL on success, string on failure.

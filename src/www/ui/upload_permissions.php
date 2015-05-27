@@ -194,8 +194,8 @@ class upload_permissions extends FO_Plugin
     $text = _("Select the upload you wish to edit:  \n");
     $V.= "<br>$text";
 
-    // Get list of all upload records in this folder that the user has PERM_ADMIN
-    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_ADMIN);
+    // Get list of all upload records in this folder that the user can edit
+    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
 
     // Make data array for upload select list.  Key is upload_pk, value is a composite
     // of the upload_filename and upload_ts.

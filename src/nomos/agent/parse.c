@@ -6277,7 +6277,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   cleanLicenceBuffer();
   /** AndroidSDK-Commercial license */
   if (INFILE(_LT_GOOGLE_SDK)) {
-    INTERESTING("AndroidSDK-Commercial");
+    INTERESTING("AndroidSDK(Commercial)");
   }
   cleanLicenceBuffer();
 
@@ -6414,11 +6414,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_COMMERCIAL_2)) {
       INTERESTING(lDebug ? "COMM(2)" : "COMMERCIAL");
     }
-    else if (INFILE(_LT_COMMERCIAL_3)) {
-      INTERESTING(lDebug ? "COMM(3)" : "COMMERCIAL");
+    else if (HASTEXT(_LT_COMMERCIAL_3, REG_EXTENDED)) {
+      if (HASTEXT(_LT_COMMERCIAL_Intel, REG_EXTENDED)) {
+        INTERESTING("Intel(Commercial)");
+      } else if (HASTEXT(_LT_COMMERCIAL_Broadcom, REG_EXTENDED)) {
+        INTERESTING("Broadcom(Commercial)");
+      } else {
+        INTERESTING(lDebug ? "COMM(3)" : "COMMERCIAL");
+      }
     }
     else if (INFILE(_LT_COMMERCIAL_4)) {
-      INTERESTING(lDebug ? "COMM(4)" : "COMMERCIAL");
+      if (HASTEXT(_LT_COMMERCIAL_Android_Fraunhofer, 0)) {
+        INTERESTING("AndroidFraunhofer(Commercial)");
+      } else {
+        INTERESTING(lDebug ? "COMM(4)" : "COMMERCIAL");
+      }
     }
     else if (HASTEXT(_TEXT_BOOK, 0) && INFILE(_LT_BOOKPURCHASE)) {
       INTERESTING(lDebug ? "PurchBook" : "COMMERCIAL");

@@ -127,14 +127,14 @@ INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '1427295258110
 -- Data for Name: clearing_decision; Type: TABLE DATA; Schema: public; Owner: fossy
 --
 
-INSERT INTO clearing_decision VALUES (2, 4, 2, 2, 2, 5, 1, '2015-05-04 11:43:18.276425+02');
-INSERT INTO clearing_decision VALUES (4, 5, 3, 2, 2, 5, 1, '2015-05-04 11:43:18.297719+02');
-INSERT INTO clearing_decision VALUES (7, 10, 6, 2, 2, 5, 0, '2015-05-04 11:44:10.097161+02');
-INSERT INTO clearing_decision VALUES (8, 10, 6, 2, 2, 4, 0, '2015-05-04 11:45:11.88761+02');
-INSERT INTO clearing_decision VALUES (10, 7, 4, 2, 2, 5, 0, '2015-05-04 11:45:30.851906+02');
-INSERT INTO clearing_decision VALUES (12, 8, 5, 2, 2, 5, 0, '2015-05-04 11:45:34.941938+02');
-INSERT INTO clearing_decision VALUES (14, 5, 3, 2, 2, 5, 0, '2015-05-04 11:46:26.59626+02');
-INSERT INTO clearing_decision VALUES (16, 4, 2, 2, 2, 5, 0, '2015-05-04 11:47:10.946366+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (2, 4, 2, 2, 2, 5, 1, '2015-05-04 11:43:18.276425+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (4, 5, 3, 2, 2, 5, 1, '2015-05-04 11:43:18.297719+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (7, 10, 6, 2, 2, 5, 0, '2015-05-04 11:44:10.097161+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (8, 10, 6, 2, 2, 4, 0, '2015-05-04 11:45:11.88761+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (10, 7, 4, 2, 2, 5, 0, '2015-05-04 11:45:30.851906+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (12, 8, 5, 2, 2, 5, 0, '2015-05-04 11:45:34.941938+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (14, 5, 3, 2, 2, 5, 0, '2015-05-04 11:46:26.59626+02');
+INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (16, 4, 2, 2, 2, 5, 0, '2015-05-04 11:47:10.946366+02');
 
 
 
@@ -43134,14 +43134,14 @@ INSERT INTO upload_clearing VALUES (1, 2, 1, 2, 1, NULL);
 INSERT INTO upload_clearing_license VALUES (1, 2, 199);
 
 
-INSERT INTO uploadtree_a VALUES (7, 6, 6, 1, 4, 33188, 4, 5, 'test1.dtd');
-INSERT INTO uploadtree_a VALUES (8, 6, 6, 1, 5, 33188, 6, 7, 'test2.dtd');
-INSERT INTO uploadtree_a VALUES (6, 1, 2, 1, 0, 536888320, 3, 8, '3DFX');
-INSERT INTO uploadtree_a VALUES (10, 9, 9, 1, 6, 33188, 10, 11, 'hash_md5prime.c');
-INSERT INTO uploadtree_a VALUES (9, 1, 2, 1, 0, 536888320, 9, 12, 'Beerware');
-INSERT INTO uploadtree_a VALUES (4, 3, 3, 1, 2, 33188, 14, 15, 'Condor-1.0');
-INSERT INTO uploadtree_a VALUES (5, 3, 3, 1, 3, 33188, 16, 17, 'condor-1.1');
-INSERT INTO uploadtree_a VALUES (3, 1, 2, 1, 0, 536888320, 13, 18, 'Condor');
-INSERT INTO uploadtree_a VALUES (2, 1, 1, 1, 0, 805323776, 2, 19, 'artifact.dir');
-INSERT INTO uploadtree_a VALUES (1, NULL, NULL, 1, 1, 536904704, 1, 20, 'ReportTestfiles.tar');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (7, 6, 6, 1, 4, 33188, 4, 5, 'test1.dtd');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (8, 6, 6, 1, 5, 33188, 6, 7, 'test2.dtd');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (6, 1, 2, 1, 0, 536888320, 3, 8, '3DFX');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (10, 9, 9, 1, 6, 33188, 10, 11, 'hash_md5prime.c');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (9, 1, 2, 1, 0, 536888320, 9, 12, 'Beerware');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (4, 3, 3, 1, 2, 33188, 14, 15, 'Condor-1.0');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (5, 3, 3, 1, 3, 33188, 16, 17, 'condor-1.1');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (3, 1, 2, 1, 0, 536888320, 13, 18, 'Condor');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (2, 1, 1, 1, 0, 805323776, 2, 19, 'artifact.dir');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (1, NULL, NULL, 1, 1, 536904704, 1, 20, 'ReportTestfiles.tar');
 

@@ -46,7 +46,7 @@ function explainUsage()
  * @return 0 for success, 1 for failure.
  **/
 
-
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
 
 /* Note: php 5 getopt() ignores options not specified in the function call, so add
@@ -135,8 +135,30 @@ require_once("$MODDIR/lib/php/libschema.php");
 $libschema->setDriver(new Postgres($PG_CONN));
 $previousSchema = $libschema->getCurrSchema();
 $isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
+/* @var $dbManager DbManager */
+if ($dbManager->existsTable('sysconfig'))
+{
+  $sysconfig = $dbManager->createMap('sysconfig', 'variablename', 'conf_value');
+  if(!array_key_exists('Release', $sysconfig))
+  {
+    $sysconfig['Release'] = 0;
+  }
+  print "Old release was $sysconfig[Release]\n";
+}
 
 $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
+if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
+{
+  $dbManager->queryOnce('begin; 
+    CREATE TABLE uploadtree_b AS (SELECT * FROM uploadtree_a);
+    DROP TABLE uploadtree_a;
+    CREATE TABLE uploadtree_a () INHERITS (uploadtree);
+    ALTER TABLE uploadtree_a ADD CONSTRAINT uploadtree_a_pkey PRIMARY KEY (uploadtree_pk);
+    INSERT INTO uploadtree_a SELECT * FROM uploadtree_b;
+    DROP TABLE uploadtree_b;
+    COMMIT;',__FILE__.'.rebuild.uploadtree_a');
+}
+
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
@@ -208,7 +230,7 @@ if (array_key_exists('r', $Options))
 $currSchema = $libschema->getCurrSchema();
 $sysconfig = $dbManager->createMap('sysconfig','variablename','conf_value');
 global $LIBEXECDIR;
-if(!array_key_exists('Release', $sysconfig)){
+if($isUpdating && empty($sysconfig['Release'])) {
   require_once("$LIBEXECDIR/dbmigrate_2.0-2.1.php");  // this is needed for all new installs from 2.0 on
   Migrate_20_21($Verbose);
   require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
@@ -238,18 +260,16 @@ if(!array_key_exists('Release', $sysconfig)){
      exit(26);
     }
   }
-  $dbManager->insertTableRow('sysconfig',
-          array('variablename'=>'Release','conf_value'=>'2.6','ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
   $sysconfig['Release'] = '2.6';
 }
 
-if($sysconfig['Release'] == '2.6')
+if(!$isUpdating || $sysconfig['Release'] == '2.6')
 {
   if(!$dbManager->existsTable('license_candidate'))
   {
     $dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
   }
-  if (array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
+  if (!$isUpdating && array_key_exists('clearing_pk', $currSchema['TABLE']['clearing_decision']))
   {
     require_once("$LIBEXECDIR/dbmigrate_clearing-event.php");
     $libschema->dropColumnsFromTable(array('reportinfo','clearing_pk','type_fk','comment'), 'clearing_decision');
@@ -260,9 +280,17 @@ if($sysconfig['Release'] == '2.6')
 if($sysconfig['Release'] == '2.6.3')
 {
   require_once("$LIBEXECDIR/dbmigrate_real-parent.php");
-  $dbManager->getSingleRow("UPDATE sysconfig SET conf_value=$2 WHERE variablename=$1",array('Release','2.6.3.1'),$sqlLog='update.sysconfig.release');
-  $sysconfig['Release'] = '2.6.3.1';
 }
+if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1')
+{
+  $sysconfig['Release'] = '2.6.3.2';
+}
+
+$dbManager->begin();
+$dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),$sqlLog='drop.sysconfig.release');
+$dbManager->insertTableRow('sysconfig',
+        array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
+$dbManager->commit();
 
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");

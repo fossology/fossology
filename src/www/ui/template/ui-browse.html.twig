@@ -59,7 +59,13 @@
         <tbody></tbody>
         <tfoot></tfoot>
         </table>
-        {{ uploadMultiSelectHook|default('') }}
+        {% if multiUploadAgents is not empty %}
+          <input type="hidden" name="mod" id="mod" value=""/>
+          [<input type="checkbox" name="folder" value="{{ folderId }}" style="vertical-align:bottom;margin:0px;"/>{{ 'apply action below for whole folder'|trans }}] <br/>
+          {% for muAgent,muDesc in multiUploadAgents %}
+            <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent"/>
+          {% endfor %}
+        {% endif %}
         </form>
       </td>
     </tr>

@@ -401,6 +401,7 @@ class AjaxShowJobs extends FO_Plugin
         } 
         $outBuf .= "</td>";
         $outBuf .= "<td><span style='float:right;margin-right:32%;'>";
+        $itemsPerSec = null;
         /* Don't display items/sec unless the job has started */
         if ($jobqueueRec['jq_starttime']){
           $text = _(" items/sec");
@@ -412,7 +413,7 @@ class AjaxShowJobs extends FO_Plugin
         /* Get ETA for each agent */
         $text = _("Scanned");
         if(empty($jobqueueRec['jq_endtime']))
-          $outBuf .= "<td align='center'>".$this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec)."</td>";
+          $outBuf .= "<td align='center'>".$this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk'])."</td>";
         else
           $outBuf .= "<td align='center'>$text</td>";  
         /* actions, must be admin or own the upload  */
