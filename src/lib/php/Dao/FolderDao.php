@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Authors: Andreas Würl, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -32,18 +32,14 @@ class FolderDao extends Object
   const DEPTH_KEY = "depth" ;
   const TOP_LEVEL = 1;
 
-
-  /**
-   * @var DbManager
-   */
+  const MODE_FOLDER = 1;
+  const MODE_UPLOAD = 2;
+  const MODE_ITEM = 4;
+  
+  /** @var DbManager */
   private $dbManager;
-
-  /**
-   * @var Logger
-   */
+  /** @var Logger */
   private $logger;
-
-
 
   public function __construct(DbManager $dbManager)
   {
@@ -205,7 +201,7 @@ ORDER BY name_path;
 SELECT group_fk group_id,count(*) FROM foldercontents fc
   INNER JOIN upload u ON u.upload_pk = fc.child_id
   INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=ANY($2)
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = ". self::MODE_UPLOAD ." AND u.upload_mode = 104
 GROUP BY group_fk
 ");
     $res = $this->dbManager->execute($statementName, $parameters);
@@ -236,7 +232,7 @@ GROUP BY group_fk
 SELECT u.*,uc.* FROM foldercontents fc
   INNER JOIN upload u ON u.upload_pk = fc.child_id
   INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = 2 AND u.upload_mode = 104
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND u.upload_mode = 104
 ");
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = array();

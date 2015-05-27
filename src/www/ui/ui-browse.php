@@ -277,15 +277,14 @@ class ui_browse extends FO_Plugin
     $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
     if (!empty($modsUploadMulti))
     {
-      $hook = '';
+      $multiUploadAgents = array();
       foreach($modsUploadMulti as $mod)
       {
-        $text = $GLOBALS['Plugins'][$mod]->title;
-        $hook .= '<br/><input type="hidden" name="mod" value="'.$mod.'"/><input type="submit" value="'.$text.'"/>';
+        $multiUploadAgents[$mod] = $GLOBALS['Plugins'][$mod]->title;
       }
-      $this->vars['uploadMultiSelectHook'] = $hook;
+      $this->vars['multiUploadAgents'] = $multiUploadAgents;
     }
-
+    $this->vars['folderId'] = $folder_pk;
     return $this->render('ui-browse.html.twig');
   }
 
