@@ -159,7 +159,7 @@ abstract class AgentPlugin extends Object implements Plugin
     $depPlugin = plugin_find($pluginName);
     if (!$depPlugin)
     {
-      $errorMsg = "Invalid plugin name: $pluginName, (CommonAgentAdd())";
+      $errorMsg = "Invalid plugin name: $pluginName, (implicitAgentAdd())";
       return -1;
     }
     $jqId = $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
