@@ -65,6 +65,17 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
         return $this->flushContent($e->getMessage());
       }
     }
+    $folderId = $request->get('folder');
+    if(!empty($folderId))
+    {
+      /* @var $folderDao FolderDao */
+      $folderDao = $this->getObject('dao.folder');
+      $folderUploads = $folderDao->getFolderUploads($folderId, $groupId);
+      foreach($folderUploads as $uploadProgress)
+      {
+        $addUploads[$uploadProgress->getId()] = $uploadProgress;
+      }
+    }
     if (empty($addUploads)) {
       return $this->flushContent(_('No upload selected'));
     }
