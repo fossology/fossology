@@ -59,17 +59,18 @@ class ReadmeOssAgent extends Agent
 
     $args = $this->args;
     $this->additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+    $uploadIds = $this->additionalUploadIds;
+    array_unshift($uploadIds, $uploadId);
 
     $this->heartbeat(0);
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $licenseStmts = $licenses['statements'];
-    $this->heartbeat(count($licenseStmts));
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
-    $copyrightStmts = $copyrights['statements'];
-    $this->heartbeat(count($copyrightStmts));
-
-    foreach($this->additionalUploadIds as $addUploadId)
+    $licenseStmts = array();
+    $copyrightStmts = array();
+            
+    foreach($uploadIds as $addUploadId)
     {
+      if (!$this->uploadDao->isAccessible($addUploadId, $groupId)) {
+        continue;
+      }
       $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $groupId);
       $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
       $this->heartbeat(count($moreLicenses['statements']));

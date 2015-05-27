@@ -79,3 +79,8 @@ function removeMainLicense(uploadId,licenseId) {
       .fail(failed);
   }
 }
+
+$('.multi-upload-agent').click( function() {
+  $('#mod').val( $(this).attr('name') );
+  return true;
+});
