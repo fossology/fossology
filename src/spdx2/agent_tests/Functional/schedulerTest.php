@@ -80,8 +80,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array(),true);
     $this->testDb->createInheritedTables();
     $this->dbManager->queryOnce("CREATE TABLE copyright_ars () INHERITS (ars_master)");
-    $this->dbManager->queryOnce("CREATE TABLE monk_ars () INHERITS (ars_master)");
-    $this->dbManager->queryOnce("CREATE TABLE nomos_ars () INHERITS (ars_master)");
     
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'));
