@@ -1,0 +1,48 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<spdx:hasFile>
+  <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId }}">
+    <spdx:fileName>{{ fileName }}</spdx:fileName>
+    <spdx:checksum>
+      <spdx:Checksum>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+        <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
+      </spdx:Checksum>
+    </spdx:checksum>
+    <spdx:checksum> 
+      <spdx:Checksum>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5"/>
+        <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
+      </spdx:Checksum>
+    </spdx:checksum>
+  {% if concludedLicenses is empty %}
+    <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
+  {% else %}
+    <spdx:licenseConcluded>
+      <spdx:DisjunctiveLicenseSet>
+  {% for res in concludedLicenses %}
+        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res }}"/>
+  {% endfor %}
+      </spdx:DisjunctiveLicenseSet>
+    </spdx:licenseConcluded>
+  {% endif %}
+  {% if scannerLicenses is empty %}
+    <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+  {% else %}{% for res in scannerLicenses %}
+    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res }}" />
+  {% endfor %}{% endif %}
+    <spdx:copyrightText>
+  {% if copyrights is empty %}
+      NOASSERTION
+  {% else %}
+    {% for cp in copyrights %}
+      {{ cp|e }}
+    {% endfor %}
+  {% endif %}
+    </spdx:copyrightText>
+  </spdx:File>
+</spdx:hasFile>

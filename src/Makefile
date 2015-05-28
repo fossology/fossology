@@ -25,6 +25,7 @@ DIRS = \
 	readmeoss \
 	reuser \
 	scheduler \
+	spdx2 \
 	ununpack \
 	wget_agent \
 	www

@@ -20,6 +20,8 @@ namespace Fossology\Lib\Proxy;
 
 class LicenseViewProxy extends DbViewProxy
 {
+  const CANDIDATE_PREFIX = 'candidatePrefix';
+  const OPT_COLUMNS = 'columns';
   /** @var int */
   private $groupId;
   /** @var array */
@@ -51,12 +53,12 @@ class LicenseViewProxy extends DbViewProxy
   
   private function queryLicenseCandidate($options)
   {
-    $columns = array_key_exists('columns', $options) ? $options['columns'] : $this->allColumns;
-    if(array_key_exists('candidatePrefix',$options)){
+    $columns = array_key_exists(self::OPT_COLUMNS, $options) ? $options[self::OPT_COLUMNS] : $this->allColumns;
+    if(array_key_exists(self::CANDIDATE_PREFIX,$options)){
       $shortnameId = array_search('rf_shortname',$columns);
-      if ($shortnameId)
+      if ($shortnameId!==false)
       {
-        $columns[$shortnameId] = "'". pg_escape_string($options['candidatePrefix']). '\'||rf_shortname AS rf_shortname';
+        $columns[$shortnameId] = "'". pg_escape_string($options[self::CANDIDATE_PREFIX]). '\'||rf_shortname AS rf_shortname';
       }
     }
     $gluedColumns = implode(',', $columns);
@@ -69,7 +71,7 @@ class LicenseViewProxy extends DbViewProxy
 }
   
   private function queryOnlyLicenseRef($options){
-    $columns = array_key_exists('columns', $options) ? $options['columns'] : $this->allColumns;
+    $columns = array_key_exists(self::OPT_COLUMNS, $options) ? $options[self::OPT_COLUMNS] : $this->allColumns;
     $groupFkPos = array_search('group_fk',$columns);
     if($groupFkPos){
       $columns[$groupFkPos] = '0 AS group_fk';
