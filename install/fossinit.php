@@ -262,6 +262,12 @@ if($isUpdating && empty($sysconfig['Release'])) {
   }
   $sysconfig['Release'] = '2.6';
 }
+if(!$isUpdating)
+{
+  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+  print "Creating default user\n";
+  Migrate_21_22($Verbose);
+}
 
 if(!$isUpdating || $sysconfig['Release'] == '2.6')
 {
