@@ -1,7 +1,7 @@
 /***************************************************************
 libfossagent: Set of generic functions handy for agent development.
 
-Copyright (C) 2009-2015 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
 Copyright (C) 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
@@ -181,37 +181,15 @@ If ars_pk is zero a new ars record will be created. Otherwise, it is updated.
 
 \return On success write the ars record and return the ars_pk.
 On sql failure, return 0, and the error will be written to stdout.
-return -1 when Results are already in database
 */
 FUNCTION int fo_WriteARS(PGconn* pgConn, int ars_pk, int upload_pk, int agent_pk,
   const char* tableName, const char* ars_status, int ars_success)
 {
   char sql[1024];
   PGresult* result;
-  char *success_flag;
 
   /* does ars table exist?  If not, create it.  */
   if (!fo_CreateARSTable(pgConn, tableName)) return (0);
-
-  /* if it is duplicate request (same upload_pk, sameagent_fk), then do not repeat */
-  snprintf(sql, sizeof(sql),
-      "select ars_pk, ars_success from %s,agent \
-      where agent_pk=agent_fk and upload_fk='%d' and agent_fk='%d'",
-      tableName, upload_pk, agent_pk);
-  result = PQexec(pgConn, sql);
-  fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__);
-  if (PQntuples(result) != 0) {
-    success_flag = PQgetvalue(result, 0, 1);
-    /** the upload has done the sucessful analysis */
-    if (success_flag && 't' == success_flag[0])
-    {
-      LOG_NOTICE("Ignoring requested analysis of upload %d - Results are already in database.", upload_pk);
-      PQclear(result);
-      return -1;
-    }
-    else ars_pk = atoi(PQgetvalue(result, 0, 0)); // get failed upload's ars_pk
-  }
-  PQclear(result);
 
   /* If ars_pk is null, 
    * write the ars_status=false record 
