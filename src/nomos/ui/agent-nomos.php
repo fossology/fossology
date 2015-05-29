@@ -26,19 +26,16 @@
  * \brief run the nomos license agent
  */
 
-define("TITLE_agent_fonomos", _("Nomos License Analysis"));
+class agent_fonomos extends FO_Plugin
+{
+  public function __construct() {
+    $this->Name = "agent_nomos";
+    $this->Title = _("Nomos License Analysis, scanning for licenses using regular expressions");
+    $this->AgentName = "nomos";
 
-class agent_fonomos extends FO_Plugin {
-
-  public $Name = "agent_nomos";
-  public $Title = TITLE_agent_fonomos;
-  // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-  public $AgentName = "nomos";   // agent.agent_name
-
-
+    parent::__construct();
+  }
+  
   /**
    * \brief  Register additional menus.
    */
