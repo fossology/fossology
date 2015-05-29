@@ -113,7 +113,7 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
+    $this->testDb->createPlainTables(array('upload','uploadtree','license_ref','license_ref_bulk',
         'clearing_event','clearing_decision','clearing_decision_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
@@ -131,6 +131,57 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
       return intval($matches[1]);
     else
       return 0;
+  }
+
+  /** @group Functional */
+  public function testRunTwoIndependentMonkBulkScans()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+    $uploadId = 1;
+
+    $licenseId = 225;
+    $removing = false;
+    $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $jobId = 64;
+    list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkId);
+
+    $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 17, 18);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 15, 16);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
+
+    assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
+    assertThat(count($relevantDecisionsItem7),is(equalTo(1)));
+    assertThat($relevantDecisionsItem6,hasKeyInArray($licenseId));
+
+    $refSecondText = "Our General Public Licenses are designed to make sure that you " .
+               "have the freedom to distribute copies of free software";
+    $licenseSecondId = 215;
+    $bulkSecondId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseSecondId, $removing, $refSecondText);
+
+    $jobId++;
+    list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkSecondId);
+
+    $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
+    $relevantDecisionsItemPfile3 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItemPfile4 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
+    assertThat(count($relevantDecisionsItemPfile3),is(equalTo(1)));
+    
+    assertThat(count($relevantDecisionsItemPfile4),is(equalTo(2)));
+    assertThat($relevantDecisionsItemPfile4,hasKeyInArray($licenseSecondId));
+
+    $this->rmRepo();
   }
 
   /** @group Functional */
@@ -158,8 +209,8 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
 
     $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
-    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
-    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 17, 18);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 15, 16);
     $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
     $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
 
@@ -213,8 +264,8 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
 
     $this->assertEquals($retCode, 0, "monk bulk failed: $output");
-    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 15, 16);
-    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 17, 18);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 17, 18);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 15, 16);
     $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
     $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
 

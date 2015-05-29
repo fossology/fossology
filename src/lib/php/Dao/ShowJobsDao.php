@@ -248,17 +248,26 @@ class ShowJobsDao extends Object
    * @param int $job_pk
    * @param string $jq_Type
    * @param float $filesPerSec
+   * @param int $uploadId 
    * @return Returns empty if estimated time is 0 else returns time. 
    **/
-  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0)
+  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0, $uploadId=0)
   {
-    /* try to get the itemsprocessed for the job whose endtext id completed */
-    $statementName = __METHOD__."getEstimatedTime.jq_itemsprocessed";
-    $itemCount = $this->dbManager->getSingleRow(
-    "SELECT jq_itemsprocessed FROM jobqueue WHERE jq_type LIKE 'ununpack' AND jq_end_bits ='1' AND jq_job_fk =$1",
-    array($job_pk),
-    $statementName
-    );
+    if(!empty($uploadId)) {
+      $itemCount = $this->dbManager->getSingleRow(
+          "SELECT jq_itemsprocessed FROM jobqueue INNER JOIN job ON jq_job_fk=job_pk "
+                  . " WHERE jq_type LIKE 'ununpack' AND jq_end_bits ='1' AND job_upload_fk=$1",
+          array($uploadId),
+          __METHOD__.'.ununpack_might_be_in_other_job'
+          );
+    }
+    else {
+      $itemCount = $this->dbManager->getSingleRow(
+      "SELECT jq_itemsprocessed FROM jobqueue WHERE jq_type LIKE 'ununpack' AND jq_end_bits ='1' AND jq_job_fk =$1",
+      array($job_pk),
+      __METHOD__.'.ununpack_must_be_in_this_job'
+      );
+  }
 
     if(!empty($itemCount['jq_itemsprocessed'])){
 

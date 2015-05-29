@@ -17,12 +17,13 @@
  */
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
-class ReadmeossGenerator extends DefaultPlugin
+class ReadMeOssPlugin extends DefaultPlugin
 {
   const NAME = 'ui_readmeoss';
   
@@ -61,6 +62,17 @@ class ReadmeossGenerator extends DefaultPlugin
       catch(Exception $e)
       {
         return $this->flushContent($e->getMessage());
+      }
+    }
+    $folderId = $request->get('folder');
+    if(!empty($folderId))
+    {
+      /* @var $folderDao FolderDao */
+      $folderDao = $this->getObject('dao.folder');
+      $folderUploads = $folderDao->getFolderUploads($folderId, $groupId);
+      foreach($folderUploads as $uploadProgress)
+      {
+        $addUploads[$uploadProgress->getId()] = $uploadProgress;
       }
     }
     if (empty($addUploads)) {
@@ -108,4 +120,4 @@ class ReadmeossGenerator extends DefaultPlugin
   }
 }
 
-register_plugin(new ReadmeossGenerator());
+register_plugin(new ReadMeOssPlugin());
