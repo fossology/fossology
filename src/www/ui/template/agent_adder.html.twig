@@ -41,6 +41,11 @@
 
 {% block foot %}
   {{ parent() }}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $(document).tooltip();
+    });
+  </script>
   {% if uploadId %}
     <script language="javascript">
       Agents_Get("{{ baseUri }}?mod=upload_agent_options&upload={{ uploadId }}");
@@ -68,6 +73,5 @@
       }
     }
   </script>
-  
   {{ outFoot }}
 {% endblock %}
