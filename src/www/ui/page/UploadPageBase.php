@@ -1,5 +1,21 @@
 <?php
-
+/***********************************************************
+ * Copyright (C) 2015 Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
+         
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -59,10 +75,7 @@ abstract class UploadPageBase extends DefaultPlugin
 
     $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
-    if (empty($folderId) && !empty($folderStructure))
-    {
-      $folderId = $folderStructure[0][FolderDao::FOLDER_KEY]->getId();
-    }
+
     $vars['folderStructure'] = $folderStructure;
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
@@ -95,16 +108,16 @@ abstract class UploadPageBase extends DefaultPlugin
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
 
-    if ($jobId === null)
+    if ($jobId === null) {
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
-    global $Plugins;
+    }
     $dummy = "";
     if ($wgetDependency)
     {
-      $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
+      $unpackplugin = \plugin_find("agent_unpack");
       $unpackplugin->AgentAdd($jobId, $uploadId, $dummy, array("wget_agent"));
     }
-    $adj2nestplugin = &$Plugins['agent_adj2nest'];
+    $adj2nestplugin = \plugin_find('agent_adj2nest');
     $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy);
 
     $checkedAgents = checkedAgents();

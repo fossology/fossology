@@ -19,14 +19,8 @@
 
 namespace Fossology\UI\Page;
 
-use agent_adj2nest;
 use Fossology\UI\Page\UploadPageBase;
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Plugin\DefaultPlugin;
-use Fossology\Lib\UI\MenuHook;
-use Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -57,68 +51,6 @@ class UploadFilePage extends UploadPageBase
    */
   protected function handleView(Request $request, $vars)
   {
-    /*$this->folderDao->ensureTopLevelFolder();
-    
-    $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
-    $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
-
-    $message = "";
-    if ($request->isMethod(Request::METHOD_POST))
-    {
-      $uploadFile = $request->files->get(self::FILE_INPUT_NAME);
-
-      if ($uploadFile !== null && !empty($folderId))
-      {
-        list($successful, $vars['message']) = $this->handleFileUpload($request, $folderId, $uploadFile, $description);
-        $description = $successful ? null : $description;
-      }
-      else
-      {
-        $message = "Error: no file selected";
-      }
-    }
-
-    $vars = getBaseVars();
-    $vars['message'] = $message;
-    $vars['descriptionInputValue'] = $description ?: "";
-    $vars['descriptionInputName'] = self::DESCRIPTION_INPUT_NAME;
-    $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
-    $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
-    $vars['agentCheckBoxMake'] = '';
-    $vars['fileInputName'] = self::FILE_INPUT_NAME;
-
-    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
-    $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
-    if (empty($folderId) && !empty($folderStructure))
-    {
-      $folderId = $folderStructure[0][FolderDao::FOLDER_KEY]->getId();
-    }
-    $vars['folderStructure'] = $folderStructure;
-    $vars['baseUrl'] = $request->getBaseUrl();
-    $vars['moduleName'] = $this->getName();
-    $vars[self::FOLDER_PARAMETER_NAME] = $request->get(self::FOLDER_PARAMETER_NAME);
-    
-    $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
-    $vars['parmAgentContents'] = array();
-    $vars['parmAgentFoots'] = array();
-    foreach($parmAgentList as $parmAgent) {
-      $agent = plugin_find($parmAgent);
-      $vars['parmAgentContents'][] = $agent->renderContent($vars);
-      $vars['parmAgentFoots'][] = $agent->renderFoot($vars);
-    }
-    
-    $session = $request->getSession();
-    $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time().':'.$_SERVER['REMOTE_ADDR']);
-    $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
-    $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
-
-    if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
-    {
-      $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-      $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
-    }
-*/
-
     $vars['fileInputName'] = self::FILE_INPUT_NAME;
     return $this->render("upload_file.html.twig", $this->mergeWithDefault($vars));
   }
@@ -126,7 +58,7 @@ class UploadFilePage extends UploadPageBase
   /**
    * @brief Process the upload request.
    */
-  function handleUpload(Request $request)
+  protected function handleUpload(Request $request)
   {
     global $MODDIR;
     global $SYSCONFDIR;
@@ -134,12 +66,12 @@ class UploadFilePage extends UploadPageBase
     define("UPLOAD_ERR_EMPTY", 5);
     define("UPLOAD_ERR_INVALID_FOLDER_PK", 100);
     define("UPLOAD_ERR_RESEND", 200);
-    $upload_errors = array(
+    $uploadErrors = array(
         UPLOAD_ERR_OK => _("No errors."),
         UPLOAD_ERR_INI_SIZE => _("Larger than upload_max_filesize ") . ini_get('upload_max_filesize'),
         UPLOAD_ERR_FORM_SIZE => _("Larger than form MAX_FILE_SIZE."),
         UPLOAD_ERR_PARTIAL => _("Partial upload."),
-        UPLOAD_ERR_NO_FILE => _("No file."),
+        UPLOAD_ERR_NO_FILE => _("No file selected."),
         UPLOAD_ERR_NO_TMP_DIR => _("No temporary directory."),
         UPLOAD_ERR_CANT_WRITE => _("Can't write to disk."),
         UPLOAD_ERR_EXTENSION => _("File upload stopped by extension."),
@@ -152,22 +84,25 @@ class UploadFilePage extends UploadPageBase
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $uploadedFile = $request->files->get(self::FILE_INPUT_NAME);
 
-
+    if ($uploadedFile === null)
+    {
+      return array(false,$uploadErrors[UPLOAD_ERR_NO_FILE],$description);
+    }
+    
     if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
         != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
     {
-      $UploadFile['error'] = UPLOAD_ERR_RESEND;
-      return array(false, $upload_errors[$UploadFile['error']], $description);
+      return array(false, $uploadErrors[UPLOAD_ERR_RESEND], $description);
     }
 
     if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
-      return array(false, $upload_errors[UPLOAD_ERR_EMPTY], $description);
+      return array(false, $uploadErrors[UPLOAD_ERR_EMPTY], $description);
     } else if ($uploadedFile->getSize() >= UploadedFile::getMaxFilesize()) {
-      return array(false, $upload_errors[UPLOAD_ERR_INI_SIZE] . _(" is  really ") . $uploadedFile->getSize() . " bytes.", $description);
+      return array(false, $uploadErrors[UPLOAD_ERR_INI_SIZE] . _(" is  really ") . $uploadedFile->getSize() . " bytes.", $description);
     }
 
     if (empty($folderId)) {
-      return array(false, $upload_errors[UPLOAD_ERR_INVALID_FOLDER_PK], $description);
+      return array(false, $uploadErrors[UPLOAD_ERR_INVALID_FOLDER_PK], $description);
     }
 
     if(!$uploadedFile->isValid()) {
