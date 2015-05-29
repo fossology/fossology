@@ -141,7 +141,7 @@ class AjaxShowJobs extends FO_Plugin
           }else{
             $uri2 = Traceback_uri() . "?mod=showjobs";
             $back = "(" . _("Click to return to Show Jobs") . ")";
-            $value = "(" . _("Click to return to Show Jobs") . ")"."<a href='$uri2'>$row[$field] $back</a>";
+            $value = "<a href='$uri2'>$row[$field] $back</a>";
           }
           break;
         case 'job_upload_fk':
