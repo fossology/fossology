@@ -48,3 +48,13 @@ So that that results in the following packages and relationships:
   * fossology-buckets Depends on fossology-nomos and fossology-pkgagent
   * fossology-mimetype Depends on fossology-common
   * fossology-delagent Depends on fossology-common
+  * fossology-monk Depends on fossology-common
+  * fossology-monkbulk Depends on fossology-common
+  * fossology-ninka Depends on fossology-common
+  * fossology-decider Depends on fossology-common
+  * fossology-deciderjob Depends on fossology-common
+  * fossology-reportgen Depends on fossology-common
+  * fossology-report Depends on fossology-common
+  * fossology-readmeoss Depends on fossology-common and fossology-copyright
+  * fossology-reuser Depends on fossology-common
+  * fossology-spdx2 Depends on fossology-common
