@@ -28,12 +28,13 @@ define("TITLE_ajaxShowJobs", _("ShowJobs"));
 
 class AjaxShowJobs extends FO_Plugin
 {
+  const MAX_LOG_OUTPUT = 32768;
   /** @var ShowJobsDao */
   private $showJobsDao;
   /** @var UserDao */
   private $userDao;
-  /** @var maxUploadsPerPage */
-  private $maxUploadsPerPage = 10;  /* max number of uploads to display on a page */
+  /** @var int $maxUploadsPerPage max number of uploads to display on a page */
+  private $maxUploadsPerPage = 10;
   /** @var colors */
   private $colors = array(
           "Queued" => "#FFFFCC", // "white-ish",
@@ -151,10 +152,15 @@ class AjaxShowJobs extends FO_Plugin
           }
           break;
         case 'jq_log':
-          if(!empty($row[$field])){
-            if(file_exists($row[$field])){ 
-              $value = "<pre>" .file_get_contents($row[$field])."</pre>"; 
-            }
+          if(empty($row[$field]) || !file_exists($row[$field])){
+            break;
+          }  
+          if(filesize($row[$field])>self::MAX_LOG_OUTPUT){ 
+            $value = "<pre>" .file_get_contents($row[$field],false,null,-1,self::MAX_LOG_OUTPUT)."</pre>"
+                    .'<a href="'.Traceback_uri() . '?mod=download&log=' . $row['jq_pk'] . '">...</a>';
+          }
+          else{ 
+            $value = "<pre>" .file_get_contents($row[$field]). "</pre>"; 
           }
           break;
         case 'job_user_fk':

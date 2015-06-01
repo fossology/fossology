@@ -42,4 +42,9 @@ class Auth {
   {
     return $GLOBALS['SysConf']['auth'][self::GROUP_ID];
   }
-} 
+  
+  public static function isAdmin()
+  {
+    return $_SESSION[self::USER_LEVEL]==self::PERM_ADMIN;
+  }
+}
