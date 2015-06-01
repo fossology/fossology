@@ -60,10 +60,10 @@ class SolidDbManager extends DbManager
     {
       throw new \Exception("Unknown Statement");
     }
-    $startTime = microtime($get_as_float = true);
+    $startTime = microtime(true);
     $statement = $this->evaluateStatement($statementName, $params);
     $res = $this->dbDriver->query($statement);
-    $execTime = microtime($get_as_float = true) - $startTime;
+    $execTime = microtime(true) - $startTime;
     $this->collectStatistics($statementName, $execTime);
     $this->logger->addDebug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
     $this->checkResult($res, "$statementName :: $statement");

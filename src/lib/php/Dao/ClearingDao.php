@@ -51,7 +51,7 @@ class ClearingDao extends Object
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className()); //$container->get("logger");
+    $this->logger = new Logger(self::className());
     $this->uploadDao = $uploadDao;
     $this->licenseRefCache = array();
   }
