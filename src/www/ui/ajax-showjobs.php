@@ -378,8 +378,8 @@ class AjaxShowJobs extends FO_Plugin
         }
         $varJobQueueRow['canDoActions'] = 
                 ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
-        $varJobQueueRow['isReady'] = ($jobqueueRec['jq_end_bits'] == 0);
-        $varJobQueueRow['isInProgress'] = ($jobqueueRec['jq_end_bits'] == 1);
+        $varJobQueueRow['isInProgress'] = ($jobqueueRec['jq_end_bits'] == 0);
+        $varJobQueueRow['isReady'] = ($jobqueueRec['jq_end_bits'] == 1);
         
         switch($jobqueueRec['jq_type'])
         {
