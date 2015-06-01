@@ -371,7 +371,8 @@ class AjaxExplorer extends DefaultPlugin
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $latestSuccessfulAgentIds, array());
+      $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
+      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
       $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
     } else
     {
