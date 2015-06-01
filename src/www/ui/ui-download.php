@@ -138,6 +138,7 @@ class ui_download extends FO_Plugin
 
     $reportId = GetParm("report",PARM_INTEGER);
     $item = GetParm("item",PARM_INTEGER);
+    $logJq = GetParm('log', PARM_INTEGER);
 
     if (!empty($reportId))
     {
@@ -146,12 +147,23 @@ class ui_download extends FO_Plugin
       {
         throw new Exception("Missing report");
       }
-
       $path = $row['filepath'];
       $filename = basename($path);
       $uploadId = $row['upload_fk'];
     }
-    else if (empty($item))
+    elseif (!empty($logJq))
+    {
+      $sql = "SELECT jq_log, job_upload_fk FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1";
+      $row = $dbManager->getSingleRow($sql, array($logJq), "jqLogFileName");
+      if ($row === false)
+      {
+        throw new Exception("Missing report");
+      }
+      $path = $row['jq_log'];
+      $filename = basename($path);
+      $uploadId = $row['job_upload_fk'];
+    }
+    elseif (empty($item))
     {
       throw new Exception("Invalid item parameter");
     }
@@ -181,7 +193,7 @@ class ui_download extends FO_Plugin
 
     /* @var $uploadDao UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
+    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
     {
       throw new Exception("No Permission: $uploadId");
     }
