@@ -34,7 +34,7 @@ class UploadUrlPage extends UploadPageBase
   public function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Upload from an URL"),
+        self::TITLE => _("Upload from URL"),
         self::MENU_LIST => "Upload::From URL",
         self::DEPENDENCIES => array("agent_unpack", "showjobs"),
         self::PERMISSION => Auth::PERM_WRITE
