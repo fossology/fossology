@@ -355,7 +355,7 @@ class LicenseDao extends Object
     return $assocLicenseHist;
   }
 
-  public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $filterLicenses = array('VOID')) //'No_license_found',
+  public function getLicenseShortnamesContained(ItemTreeBounds $itemTreeBounds, $latestSuccessfulAgentIds=null, $filterLicenses = array('VOID')) //'No_license_found',
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
 
@@ -366,13 +366,22 @@ class LicenseDao extends Object
                 }, $filterLicenses)) . ")";
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    
+    $agentFilter = '';
+    if(is_array($latestSuccessfulAgentIds))
+    {
+      $agentIdSet = "{" . implode(',', $latestSuccessfulAgentIds) . "}";
+      $statementName .= ".$agentIdSet";
+      $agentFilter = " AND agent_fk=ANY('$agentIdSet')";
+    }
+
     $this->dbManager->prepare($statementName,
         "SELECT license_ref.rf_shortname
               FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk
               INNER JOIN $uploadTreeTableName uploadTree ON uploadTree.pfile_fk=license_file.pfile_fk
               WHERE upload_fk=$1
                 AND lft BETWEEN $2 AND $3
-                $noLicenseFoundStmt
+                $noLicenseFoundStmt $agentFilter
               GROUP BY rf_shortname
               ORDER BY rf_shortname ASC");
     $result = $this->dbManager->execute($statementName,

@@ -129,7 +129,9 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libmxml-dev json-c
+            libmxml-dev json-c \
+            libxml2 \
+            boost-devel 
          ;;
       Mandriva)
          # 2008.1 tested
@@ -145,8 +147,10 @@ if [ $BUILDTIME ]; then
          fi                     
          yum $YesOpt install \
             postgresql-devel \
-            gcc make file libxml2 libmxml-dev json-c \
-            perl-Text-Template subversion
+            gcc make file libxml2 \
+            libmxml-dev json-c \
+            perl-Text-Template subversion \
+            boost-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac

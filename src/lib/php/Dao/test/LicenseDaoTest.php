@@ -25,7 +25,7 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
 
 class LicenseDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -36,7 +36,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestLiteDb();
+    $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -167,8 +167,14 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $itemTreeBounds = new ItemTreeBounds($uploadtreeId,"uploadtree",$uploadId,$left,$right);
     $licenses = $licDao->getLicenseShortnamesContained($itemTreeBounds);
     
-    asort($licAll);    
-    assertThat($licenses, is(array_values($licAll)));
+    assertThat($licenses, is(arrayContainingInAnyOrder(array_values($licAll))));
+    
+    $licensesForBadAgent = $licDao->getLicenseShortnamesContained($itemTreeBounds,array(2*$agentId));
+    assertThat($licensesForBadAgent, is(emptyArray()));
+
+    $licensesForNoAgent = $licDao->getLicenseShortnamesContained($itemTreeBounds,array());
+    assertThat($licensesForNoAgent, is(emptyArray()));
+    
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
   
@@ -253,7 +259,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array('license_ref','uploadtree','license_file','agent','license_map'));
     $this->testDb->insertData_license_ref();
 
-    $lic0 = $this->dbManager->getSingleRow("Select * from license_ref limit 1");
+    $lic0 = $this->dbManager->getSingleRow("Select * from license_ref limit 1",array(),__METHOD__.'.anyLicense');
     $licRefId = $lic0['rf_pk'];
     $licenseFileId= 1;
     $pfileId= 42;
@@ -265,7 +271,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $right=2014;
     $agentName="fake";
     $agentRev=1;
-    $lic1 = $this->dbManager->getSingleRow("SELECT * FROM license_ref WHERE rf_pk!=$1 LIMIT 1",array($licRefId));
+    $lic1 = $this->dbManager->getSingleRow("SELECT * FROM license_ref WHERE rf_pk!=$1 LIMIT 1",array($licRefId),__METHOD__.'.anyOtherLicense');
     $licVarId = $lic1['rf_pk'];
     $mydate = "'2014-06-04 14:01:30.551093+02'";
     $this->dbManager->insertTableRow('license_map', array('license_map_pk'=>0,'rf_fk'=>$licVarId,'rf_parent'=>$licRefId,'usage'=>LicenseMap::CONCLUSION));

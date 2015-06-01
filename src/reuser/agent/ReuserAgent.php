@@ -131,11 +131,8 @@ class ReuserAgent extends Agent
 
   protected function processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId)
   {
-    $groupId = $this->groupId;
-    $userId = $this->userId;
-
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBoundsReused, $reusedGroupId);
-    $currenlyVisibleClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $currenlyVisibleClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
 
     $currenlyVisibleClearingDecisionsById = $this->mapByClearingId($currenlyVisibleClearingDecisions);
     $clearingDecisionsById = $this->mapByClearingId($clearingDecisions);
@@ -145,29 +142,33 @@ class ReuserAgent extends Agent
     $sql = "SELECT ut.* FROM uploadtree ur, uploadtree ut WHERE ur.upload_fk=$2 AND ur.pfile_fk=$3 AND ut.upload_fk=$1 AND ut.ufile_name=ur.ufile_name";
     $stmt = __METHOD__.'.reuseByName';
     $this->dbManager->prepare($stmt, $sql);
-    $treeDao = $GLOBALS['container']->get('dao.tree');
+    $treeDao = $this->container->get('dao.tree');
 
     foreach($clearingDecisionsToImport as $clearingDecision)
     {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
     
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),$itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
-      
       while($row = $this->dbManager->fetchArray($res))
       {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
-        $diffLevel = system($cmd="diff $reusedPath $newPath | wc -l");
-        if($diffLevel===false)
-        {
-          throw new \Exception('cannot use diff tool');
-        }
-        if($diffLevel<5)
-        {
-          $this->createCopyOfClearingDecision($row['uploadtree_pk'], $userId, $groupId, $clearingDecision);
-          $this->heartbeat(1);
-        }
+        $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
       }
       $this->dbManager->freeResult($res);
+    }
+  }
+  
+  protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
+  {
+    $diffLevel = system("diff $reusedPath $newPath | wc -l");
+    if($diffLevel===false)
+    {
+      throw new \Exception('cannot use diff tool');
+    }
+    if($diffLevel<5)
+    {
+      $this->createCopyOfClearingDecision($itemId, $this->userId, $this->groupId, $clearingDecision);
+      $this->heartbeat(1);
     }
   }
   
