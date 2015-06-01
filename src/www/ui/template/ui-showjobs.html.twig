@@ -7,6 +7,14 @@
 
 {% extends "include/base.html.twig" %}
 
+{% block head %}
+  {% include "include/head.html.twig" %}
+  <title>{% block title %}{{ title|e }}{% endblock %}</title>
+  {{ metadata }}
+  {{ styles }}
+  <link rel="stylesheet" href="css/showjobs.css">
+{% endblock %}
+
 {% block content %}
   {{ errorInfo }}
   {{ allusersdiv }}
