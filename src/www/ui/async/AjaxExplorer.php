@@ -293,13 +293,14 @@ class AjaxExplorer extends DefaultPlugin
     $tableData = array();    
     global $Plugins;
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
+    $latestSuccessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     foreach ($descendants as $child)
     {
       if (empty($child))
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $baseUri, $ModLicView, $UniqueTagArray, $isFlat);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $baseUri, $ModLicView, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
     }
     
     $vars['fileData'] = $tableData;
@@ -318,9 +319,10 @@ class AjaxExplorer extends DefaultPlugin
    * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
    * @param boolean $isFlat
+   * @param int[] $latestSuccessfulAgentIds
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $uri, $ModLicView, &$UniqueTagArray, $isFlat)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $uri, $ModLicView, &$UniqueTagArray, $isFlat, $latestSuccessfulAgentIds)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
@@ -369,7 +371,7 @@ class AjaxExplorer extends DefaultPlugin
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     if ($isContainer)
     {
-      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, array());
+      $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $latestSuccessfulAgentIds, array());
       $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
     } else
     {
