@@ -117,6 +117,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a'), false);
     $this->testDb->insertData_license_ref();
+    $this->testDb->resetSequenceAsMaxOf('license_ref_rf_pk_seq', 'license_ref', 'rf_pk');
   }
 
   /** @group Functional */
