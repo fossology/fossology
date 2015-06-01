@@ -331,6 +331,10 @@ img.deleted {
 }
 
 .info-bullet {
-  vertical-align: bottom;
+  vertical-align: middle;
   margin-left: 3px;
+  width: 11px;
+}
+.nobreaktext {
+  white-space: nowrap;
 }

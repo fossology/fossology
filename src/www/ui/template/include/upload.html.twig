@@ -66,6 +66,11 @@
 {% block foot %}
   {{ parent() }}
   <script src="scripts/tools.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $(document).tooltip();
+    });
+  </script>
   {% for aFoot in parmAgentFoots %}
     <script type="text/javascript">{{ aFoot }}  </script>
   {% endfor %}
