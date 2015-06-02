@@ -649,6 +649,7 @@ def main():
   parser.add_option("-t", "--tests",    dest = "testfile",   help = "The xml file to pull the tests from")
   parser.add_option("-r", "--results",  dest = "resultfile", help = "The file to output the junit xml to" )
   parser.add_option("-s", "--specific", dest = "specific",   help = "Only run the test with this particular name")
+  parser.add_option("-l", "--longest",dest = "skipLongTests",help = "Skip test suites if there are expected to run longer than x time units")
   
   (options, args) = parser.parse_args()
   
@@ -677,45 +678,52 @@ def main():
   maxRuntime = int(dom.firstChild.getAttribute("timeout"))
   
   for suite in dom.firstChild.getElementsByTagName('testsuite'):
-    if not suite.hasAttribute("disable") and (not options.specific or suite.getAttribute("name") == options.specific):
-      suiteNode = resultsDoc.createElement("testsuite")
-      errors = 0
-      
-      suiteNode.setAttribute("name", suite.getAttribute("name"))
-      suiteNode.setAttribute("errors", "0")
-      suiteNode.setAttribute("time", "0")
-      
-      try:
-        curr = testsuite(suite)
-        
-        setup   = curr.createAllActions(setupNode)
-        cleanup = curr.createAllActions(cleanupNode)
-        
-        curr.setup   = setup + curr.setup
-        curr.cleanup = cleanup + curr.cleanup
-        
-        starttime = time.time()
-        print "{0: >15} ::".format(suite.getAttribute("name")),
-        if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
-          errors += 1
-          errorNode = resultsDoc.createElement("error")
-          errorNode.setAttribute("type", "TimeOut")
-          errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
-          suiteNode.appendChild(errorNode)
-        runtime = (time.time() - starttime)
-        
-        suiteNode.setAttribute("time", str(runtime))
-        
-      except DefineError as detail:
+    if options.specific and suite.getAttribute("name") != options.specific:
+      continue
+    if suite.hasAttribute("disable"):
+      print suite.getAttribute("name"),'::','disabled'
+      continue
+    if options.skipLongTests and suite.hasAttribute("longest") and int(suite.getAttribute("longest"))>int(options.skipLongTests):
+      print suite.getAttribute("name"),'::','expected to run',suite.getAttribute("longest"),'time units'
+      continue
+    suiteNode = resultsDoc.createElement("testsuite")
+    errors = 0
+
+    suiteNode.setAttribute("name", suite.getAttribute("name"))
+    suiteNode.setAttribute("errors", "0")
+    suiteNode.setAttribute("time", "0")
+
+    try:
+      curr = testsuite(suite)
+
+      setup   = curr.createAllActions(setupNode)
+      cleanup = curr.createAllActions(cleanupNode)
+
+      curr.setup   = setup + curr.setup
+      curr.cleanup = cleanup + curr.cleanup
+
+      starttime = time.time()
+      print "{0: >15} ::".format(suite.getAttribute("name")),
+      if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
         errors += 1
         errorNode = resultsDoc.createElement("error")
-        errorNode.setAttribute("type", "DefinitionError")
-        errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
+        errorNode.setAttribute("type", "TimeOut")
+        errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
         suiteNode.appendChild(errorNode)
-        
-      finally:
-        suiteNode.setAttribute("errors", str(errors))
-        top_output.appendChild(suiteNode)
+      runtime = (time.time() - starttime)
+
+      suiteNode.setAttribute("time", str(runtime))
+
+    except DefineError as detail:
+      errors += 1
+      errorNode = resultsDoc.createElement("error")
+      errorNode.setAttribute("type", "DefinitionError")
+      errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
+      suiteNode.appendChild(errorNode)
+
+    finally:
+      suiteNode.setAttribute("errors", str(errors))
+      top_output.appendChild(suiteNode)
   
   os.chdir(dir);
   

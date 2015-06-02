@@ -43,7 +43,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   it then sends a stop command. Since the scheduler doesn't have any currently
   running agents, this will cause the scheduler to stop running immediately.
   -->
-  <testsuite name="JustStop">
+  <testsuite name="JustStop" longest="57">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -73,7 +73,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   @note  If a type of failing agent that is not currently tests is found, it
          should be added as a .c file under the agent_tests/agents directory
   -->
-  <testsuite name="TestAgents">
+  <testsuite name="TestAgents" longest="53">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -112,7 +112,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   still running. Then send the scheduler a die command and make sure that it is
   not running.
   -->
-  <testsuite name="Stop/Die">
+  <testsuite name="Stop/Die" longest="12">
     <definitions pwd       = "{$pwd}"
                  config    = "{pwd}/scheduler/agent_tests/agents"
                  log       = "{config}/fossology.log"
@@ -143,7 +143,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   tests to finish. Unlike with the test agents, all the agents should pass this
   step.
   -->
-  <testsuite name="RealAgents">
+  <testsuite name="RealAgents" longest="3">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -179,7 +179,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   
   This simply starts up a scheduler and stops it using the cli stop command.
   -->
-  <testsuite name="StopRealAgents">
+  <testsuite name="StopRealAgents" longest="7">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -206,7 +206,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   run on that file. After the scheduler finishes running, this checks that all
   the jobs finsihed correctly.
   -->
-  <testsuite name="SimpleUpload">
+  <testsuite name="SimpleUpload" longest="600">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
@@ -239,7 +239,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   
   Upload and scheduler agents on several
   -->
-  <testsuite name="UploadSeveral">
+  <testsuite name="UploadSeveral" longest="600">
     <definitions pwd       = "{$pwd}"
                  config    = "{$echo $FOSSOLOGY_TESTCONFIG}"
                  log       = "{config}/fossology.log"
