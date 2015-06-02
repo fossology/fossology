@@ -43,7 +43,9 @@ function Migrate_20_21($DryRun)
 
   if (@$exist_value == 't') 
   {
-    echo "Data previously migrated.\n";
+    if ($DryRun) {
+      echo __FUNCTION__.": Data previously migrated.\n";
+    }
     return 0;  // migration has already happened
   }
 
@@ -107,4 +109,3 @@ function RunSQL($sql, $DryRun)
   return $row;
 }
 
-?>
