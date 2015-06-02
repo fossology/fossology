@@ -59,7 +59,7 @@ def timeout(func, maxRuntime):
   @brief Allows the caller to set a max runtime for a particular function call.
   
   @param func        the function that will have the max runtime
-  @param maxRuntime  the max amount of time alloted to the function in minutes
+  @param maxRuntime  the max amount of time alloted to the function in seconds
   
   Returns a Boolean, True indicating that the function finished, False otherwise
   """
@@ -68,7 +68,7 @@ def timeout(func, maxRuntime):
     raise TimeoutError()
   
   signal.signal(signal.SIGALRM, timeout_handler)
-  signal.alarm(maxRuntime * 60)
+  signal.alarm(maxRuntime)
   
   try:
     func()
@@ -352,9 +352,6 @@ class testsuite:
     
     result = proc.stdout.readlines()
     if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
-      #print
-      #print expected
-      #print result[0].strip()
       self.failure(doc, dest, "ResultMismatch",
           "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return (1, 1)
@@ -362,8 +359,6 @@ class testsuite:
     proc.wait()
     
     if len(retval) != 0 and proc.returncode != int(retval):
-      #print
-      #print retval, " != ", proc.returncode
       self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
       return (1, 1)
     return (1, 0)
