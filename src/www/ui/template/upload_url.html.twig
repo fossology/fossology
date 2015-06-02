@@ -18,14 +18,14 @@
     {{ 'Enter the URL to the file or directory'| trans }}:
   </label>
   <br/>
-  <input name="{{ geturlField }}" type="text"/><br/>
+  <input name="{{ geturlField }}" type="text" size="120"/><br/>
 </li>
 <li>
   <label for="{{ nameField }}">
     {{ '(Optional) Enter a viewable name for this file or directory'| trans }}:
   </label>
   <br/>
-  <input name="{{ nameField }}" type="text"/><br/>
+  <input name="{{ nameField }}" type="text" size="120"/><br/>
   {{ 'Note: If no name is provided, then the uploaded file (directory) name will be used.' |trans }}
 </li>
 <li>
@@ -33,20 +33,20 @@
     {{ '(Optional) Enter comma-separated lists of file name suffixes or patterns to accept'| trans }}:
   </label>
   <br/>
-  <input name="{{ acceptField }}" type="text"/><br/>
+  <input name="{{ acceptField }}" type="text" size="120"/><br/>
 </li>
 <li>
   <label for="{{ rejectField }}">
     {{ '(Optional) Enter comma-separated lists of file name suffixes or patterns to reject'| trans }}:
   </label>
   <br/>
-  <input name="{{ rejectField }}" type="text"/><br/>
+  <input name="{{ rejectField }}" type="text" size="120"/><br/>
 </li>
 <li>
   <label for="{{ levelField }}">
     {{ '(Optional) maximum recursion depth (inf or 0 for infinite)'| trans }}:
   </label>
   <br/>
-  <input name="{{ levelField }}" type="text"/><br/>
+  <input name="{{ levelField }}" type="text" size="6"/><br/>
 </li>
 {% endblock %}
