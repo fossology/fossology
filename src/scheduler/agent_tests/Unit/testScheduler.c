@@ -44,7 +44,7 @@ int Prepare_Testing_Data_Scheduler(scheduler_t * scheduler)
   database_exec(scheduler, sql);
   
   /* Add the job info */
-  sprintf(sql, "INSERT INTO job (job_user_fk,job_queued,job_priority,job_name,job_upload_fk) VALUES('1',now(),'0','testing file',%d)", upload_pk);
+  sprintf(sql, "INSERT INTO job (job_user_fk,job_queued,job_priority,job_name,job_upload_fk,job_group_fk) VALUES('1',now(),'0','testing file',%d,1)", upload_pk);
   database_exec(scheduler, sql);
 
   /* get job_pk of just added upload */
