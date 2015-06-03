@@ -100,7 +100,7 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetFolderWithWrongParent()
   {
-    $folderId =$this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
+    $this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
     assertThat($this->folderDao->getFolderId('three'), is(null));
   }
 
@@ -114,5 +114,19 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     $this->folderDao->ensureTopLevelFolder();
     $folders = $this->dbManager->getSingleRow('SELECT count(*) FROM folder');
     assertThat($folders['count'],is(1));
+  }
+  
+  public function testIsWithoutReusableFolders()
+  {
+    assertThat($this->folderDao->isWithoutReusableFolders(array()),is(true));
+    $filledFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>12,'group_name'=>'one')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($filledFolder)),is(false));
+    $emptyFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>0,'group_name'=>'one')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($emptyFolder)),is(true));
+    $multiAccessibleFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>0,'group_name'=>'one'),
+        2=>array('group_id'=>2,'count'=>20,'group_name'=>'two')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($multiAccessibleFolder)),is(false));
+
+    assertThat($this->folderDao->isWithoutReusableFolders(array($filledFolder,$emptyFolder)),is(false));
   }
 }
