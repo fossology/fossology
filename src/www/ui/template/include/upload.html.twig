@@ -31,12 +31,9 @@
       {% endblock %}
       <li>
         ({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:<br/>
-
-        <p>
-          <label>
-            <input type="text" name="{{ descriptionInputName }}" size="120" value="{{ descriptionInputValue }}"/>
-          </label>
-        </p>
+        <label>
+          <input type="text" name="{{ descriptionInputName }}" size="120" value="{{ descriptionInputValue }}"/>
+        </label>
       </li>
       <li>
         <input type="radio" name="public" value="private" checked="checked"/> {{ 'Visible only for active group'| trans }}<img src="images/info_16.png" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>

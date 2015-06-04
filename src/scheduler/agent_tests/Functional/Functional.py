@@ -59,7 +59,7 @@ def timeout(func, maxRuntime):
   @brief Allows the caller to set a max runtime for a particular function call.
   
   @param func        the function that will have the max runtime
-  @param maxRuntime  the max amount of time alloted to the function in minutes
+  @param maxRuntime  the max amount of time alloted to the function in seconds
   
   Returns a Boolean, True indicating that the function finished, False otherwise
   """
@@ -68,7 +68,7 @@ def timeout(func, maxRuntime):
     raise TimeoutError()
   
   signal.signal(signal.SIGALRM, timeout_handler)
-  signal.alarm(maxRuntime * 60)
+  signal.alarm(maxRuntime)
   
   try:
     func()
@@ -352,9 +352,6 @@ class testsuite:
     
     result = proc.stdout.readlines()
     if len(result) != 0 and len(expected) != 0 and result[0].strip() != expected:
-      #print
-      #print expected
-      #print result[0].strip()
       self.failure(doc, dest, "ResultMismatch",
           "expected: '{0}' != result: '{1}'".format(expected, result[0].strip()))
       return (1, 1)
@@ -362,8 +359,6 @@ class testsuite:
     proc.wait()
     
     if len(retval) != 0 and proc.returncode != int(retval):
-      #print
-      #print retval, " != ", proc.returncode
       self.failure(doc, dest, "IncorrectReturn", "expected: {0} != result: {1}".format(retval, proc.returncode))
       return (1, 1)
     return (1, 0)
@@ -649,6 +644,7 @@ def main():
   parser.add_option("-t", "--tests",    dest = "testfile",   help = "The xml file to pull the tests from")
   parser.add_option("-r", "--results",  dest = "resultfile", help = "The file to output the junit xml to" )
   parser.add_option("-s", "--specific", dest = "specific",   help = "Only run the test with this particular name")
+  parser.add_option("-l", "--longest",dest = "skipLongTests",help = "Skip test suites if there are expected to run longer than x time units")
   
   (options, args) = parser.parse_args()
   
@@ -677,45 +673,52 @@ def main():
   maxRuntime = int(dom.firstChild.getAttribute("timeout"))
   
   for suite in dom.firstChild.getElementsByTagName('testsuite'):
-    if not suite.hasAttribute("disable") and (not options.specific or suite.getAttribute("name") == options.specific):
-      suiteNode = resultsDoc.createElement("testsuite")
-      errors = 0
-      
-      suiteNode.setAttribute("name", suite.getAttribute("name"))
-      suiteNode.setAttribute("errors", "0")
-      suiteNode.setAttribute("time", "0")
-      
-      try:
-        curr = testsuite(suite)
-        
-        setup   = curr.createAllActions(setupNode)
-        cleanup = curr.createAllActions(cleanupNode)
-        
-        curr.setup   = setup + curr.setup
-        curr.cleanup = cleanup + curr.cleanup
-        
-        starttime = time.time()
-        print "{0: >15} ::".format(suite.getAttribute("name")),
-        if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
-          errors += 1
-          errorNode = resultsDoc.createElement("error")
-          errorNode.setAttribute("type", "TimeOut")
-          errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
-          suiteNode.appendChild(errorNode)
-        runtime = (time.time() - starttime)
-        
-        suiteNode.setAttribute("time", str(runtime))
-        
-      except DefineError as detail:
+    if options.specific and suite.getAttribute("name") != options.specific:
+      continue
+    if suite.hasAttribute("disable"):
+      print suite.getAttribute("name"),'::','disabled'
+      continue
+    if options.skipLongTests and suite.hasAttribute("longest") and int(suite.getAttribute("longest"))>int(options.skipLongTests):
+      print suite.getAttribute("name"),'::','expected to run',suite.getAttribute("longest"),'time units'
+      continue
+    suiteNode = resultsDoc.createElement("testsuite")
+    errors = 0
+
+    suiteNode.setAttribute("name", suite.getAttribute("name"))
+    suiteNode.setAttribute("errors", "0")
+    suiteNode.setAttribute("time", "0")
+
+    try:
+      curr = testsuite(suite)
+
+      setup   = curr.createAllActions(setupNode)
+      cleanup = curr.createAllActions(cleanupNode)
+
+      curr.setup   = setup + curr.setup
+      curr.cleanup = cleanup + curr.cleanup
+
+      starttime = time.time()
+      print "{0: >15} ::".format(suite.getAttribute("name")),
+      if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
         errors += 1
         errorNode = resultsDoc.createElement("error")
-        errorNode.setAttribute("type", "DefinitionError")
-        errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
+        errorNode.setAttribute("type", "TimeOut")
+        errorNode.appendChild(resultsDoc.createTextNode("Test suite took too long to run."))
         suiteNode.appendChild(errorNode)
-        
-      finally:
-        suiteNode.setAttribute("errors", str(errors))
-        top_output.appendChild(suiteNode)
+      runtime = (time.time() - starttime)
+
+      suiteNode.setAttribute("time", str(runtime))
+
+    except DefineError as detail:
+      errors += 1
+      errorNode = resultsDoc.createElement("error")
+      errorNode.setAttribute("type", "DefinitionError")
+      errorNode.appendChild(resultsDoc.createTextNode("DefineError: {0}".format(detail.value)))
+      suiteNode.appendChild(errorNode)
+
+    finally:
+      suiteNode.setAttribute("errors", str(errors))
+      top_output.appendChild(suiteNode)
   
   os.chdir(dir);
   

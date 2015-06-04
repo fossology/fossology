@@ -14,3 +14,7 @@ $('#{{ reuseFolderSelectorName }}').change(function () {
       })
       .fail(failed);
 });
+
+$(document).ready( function(){
+  $('#{{ reuseFolderSelectorName }}').trigger("change");
+});
