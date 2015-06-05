@@ -187,17 +187,24 @@ int lprintf(log_t* log, const char* fmt, ...)
   if(!fmt) return 0;
 
   va_start(args, fmt);
-  if(log == NULL || log->log_file == NULL)
+/*  if(log == NULL || log->log_file == NULL)
   {
     rc = vlprintf(main_log, fmt, args);
   }
   else
   {
     rc = vlprintf(log, fmt, args);
-  }
+  }*/
+  vprintf(fmt, args);
   va_end(args);
 
   return rc;
+}
+
+void lflush(log_t* log)
+{
+  if (log && log->log_file)
+    fflush(log->log_file);
 }
 
 /**

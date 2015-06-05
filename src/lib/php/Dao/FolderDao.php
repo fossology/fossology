@@ -30,6 +30,7 @@ class FolderDao extends Object
 {
   const FOLDER_KEY = "folder" ;
   const DEPTH_KEY = "depth" ;
+  const REUSE_KEY = 'reuse';
   const TOP_LEVEL = 1;
 
   const MODE_FOLDER = 1;
@@ -178,7 +179,7 @@ ORDER BY name_path;
           self::FOLDER_KEY => new Folder(
                   intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])),
           self::DEPTH_KEY => $row['depth'],
-          'reuse' => $countUploads
+          self::REUSE_KEY => $countUploads
       );
     }
     $this->dbManager->freeResult($res);
@@ -188,7 +189,7 @@ ORDER BY name_path;
   /**
    * @param int $parentId
    * @param string[] $userGroupMap map groupId=>groupName
-   * @return array map groupId=>count
+   * @return array  of array(group_id,count,group_name)
    */
   public function countFolderUploads($parentId, $userGroupMap)
   {
@@ -209,7 +210,7 @@ GROUP BY group_fk
     while ($row = $this->dbManager->fetchArray($res))
     {
       $row['group_name'] = $userGroupMap[$row['group_id']];
-      $results[] = $row;
+      $results[$row['group_name']] = $row;
     }
     $this->dbManager->freeResult($res);
     return $results;
@@ -253,4 +254,16 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     }
   }
 
+  public function isWithoutReusableFolders($folderStructure) {
+    foreach($folderStructure as $folder)
+    {
+      $posibilities = array_reduce($folder[self::REUSE_KEY],
+                                 function($sum,$groupInfo){ return $sum+$groupInfo['count'];},
+                                 0);
+      if($posibilities > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

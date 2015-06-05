@@ -378,6 +378,17 @@ foreach ($src_dirs as $src_dir) {
         ) {
         continue;
     }
+    $splitModuls = array('monk'=>array('monk','monkbulk'),'copyright'=>array('copyright','ecc'));
+    if ( array_key_exists($src_dir,$splitModuls) ) {
+      foreach($splitModuls[$src_dir] as $agent){
+        mkdir("$mods_enabled_dir/$agent");
+        symlink("$full_src_dir/agent", "$mods_enabled_dir/$agent/agent");
+        symlink("$full_src_dir/ui", "$mods_enabled_dir/$agent/ui");
+        symlink("$full_src_dir/$agent.conf", "$mods_enabled_dir/$agent/$agent.conf");
+        symlink("$full_src_dir/VERSION-$agent", "$mods_enabled_dir/$agent/VERSION");
+      }
+      continue;
+    }
     if (is_dir($full_src_dir)) {
         symlink($full_src_dir, "$mods_enabled_dir/$src_dir")
             or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");
@@ -493,7 +504,7 @@ debug("Elapsed Time = $elapsed");
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
 $random_seed = rand().rand();
 $hash = sha1($random_seed . "fossy");
-$user_sql = "INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES ('fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
+$user_sql = "INSERT INTO users (user_pk, user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES (1, 'fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
 pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
 
