@@ -388,6 +388,8 @@ void scheduler_destroy(scheduler_t* scheduler)
   g_tree_unref(scheduler->host_list);
   g_tree_unref(scheduler->job_list);
 
+  if (scheduler->db_conn) PQfinish(scheduler->db_conn);
+  
   g_free(scheduler);
 }
 

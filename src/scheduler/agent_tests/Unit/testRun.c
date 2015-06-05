@@ -72,6 +72,9 @@ int clean_suite(void)
 {
   if(main_log)
     log_destroy(main_log);
+  
+  
+  
   main_log = NULL;
   return 0;
 }
@@ -103,7 +106,5 @@ int main( int argc, char *argv[] )
   g_thread_init(NULL);
 #endif
 
-  focunit_main(argc, argv, "scheduler_Tests", suites) ;
-
-  return 0;
+  return focunit_main(argc, argv, "scheduler_Tests", suites);
 }

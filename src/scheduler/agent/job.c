@@ -682,11 +682,14 @@ job_t* next_job(GSequence* job_queue)
  */
 job_t* peek_job(GSequence* job_queue)
 {
-  GSequenceIter* beg = g_sequence_get_begin_iter(job_queue);
+  GSequenceIter* beg;
 
   if(g_sequence_get_length(job_queue) == 0)
+  {
     return NULL;
+  }
 
+  beg = g_sequence_get_begin_iter(job_queue);
   return g_sequence_get(beg);
 }
 
