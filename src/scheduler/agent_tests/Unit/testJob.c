@@ -103,11 +103,11 @@ void test_job_fun()
   res = job_next(job);
   FO_ASSERT_STRING_EQUAL(res, "6");
   job = next_job(scheduler->job_queue);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(job);
   FO_ASSERT_EQUAL(job->id, 1);
   job = peek_job(scheduler->job_queue);
   FO_ASSERT_PTR_NOT_NULL_FATAL(job);
   FO_ASSERT_EQUAL(job->id, 1);
-  FO_ASSERT_PTR_NOT_NULL(job);
   result = active_jobs(scheduler->job_list);
   FO_ASSERT_EQUAL(result, 0);
 

@@ -267,8 +267,8 @@ void test_agent_create_event()
 void test_agent_init()
 {
   scheduler_t* scheduler;
-  agent_t* fagent = NULL;
-  job_t*  fjob = NULL;
+  agent_t* fagent;
+  job_t* fjob;
 
   static int32_t id_gen = -1;
   GList*  iter;
@@ -284,6 +284,7 @@ void test_agent_init()
     fjob = job_init(scheduler->job_list, scheduler->job_queue, ma->name,
         host->name, id_gen--, 0, 0, 0, 0, NULL);
     fagent = agent_init(scheduler, host, fjob);
+    FO_ASSERT_PTR_NOT_NULL(fagent);
   }
   /*
   FO_ASSERT_EQUAL(g_tree_nnodes(scheduler->meta_agents), 9);
