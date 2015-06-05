@@ -188,6 +188,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
     $UploadClause = "upload_fk=$upload_pk and ";
   else
     $UploadClause = "";
+  $theLimit = ($limit=='ALL') ? '' : "LIMIT $limit";
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
           from license_file, agent, $TagTable
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
@@ -198,7 +199,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
               AND agent_pk=agent_fk
               $TagClause
           GROUP BY uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name
-          $order limit $limit offset $offset";
+          $order $theLimit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   return $result;
@@ -343,6 +344,9 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  * \param $Recurse true if links should propapagate recursion.  Currently,
  *        this means that the displayed tags will be displayed for directory contents.
  * \param $UniqueTagArray - cumulative array of unique tags
+ * \param $uploadtree_tablename
+ * \param $wantTags - if true add [Tag] ...
+ *
  *        For example:
  * \verbatim  Array
  *        (
@@ -357,7 +361,7 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
  *
  * \returns String containing the links [View][Info][Download][Tag {tags}]
  */
-function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray, $uploadtree_tablename)
+function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=True, &$UniqueTagArray = array(), $uploadtree_tablename = "uploadtree", $wantTags=true)
 {
   $LinkStr = "";
 
@@ -372,10 +376,8 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
     $LinkStr .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >$text2</a>]";
   }
 
-  /********  Tag ********/
-
-  $tag_status = TagStatus($upload_fk); // check if tagging on one upload is disabled or not. 1: enable, 0: disable
-  if ($tag_status)
+  /********  Tag  ********/
+  if ($wantTags && TagStatus($upload_fk))// check if tagging on one upload is disabled or not. 1: enable, 0: disable
   {
     $TagArray = GetAllTags($uploadtree_pk, $Recurse, $uploadtree_tablename);
     $TagStr = "";

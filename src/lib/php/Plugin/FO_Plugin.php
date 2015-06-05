@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\Plugin;
 use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,20 +42,13 @@ define("PLUGIN_DB_READ", 1);
 define("PLUGIN_DB_WRITE", 3);        /* DB writes permitted */
 define("PLUGIN_DB_ADMIN", 10);        /* add/delete users */
 
-/**
- * Permissions
- * See http://www.fossology.org/projects/fossology/wiki/PermsPt2
- */
-define("PERM_NONE", 0);   /* No permissions */
-define("PERM_READ", 1);   /* Read only */
-define("PERM_WRITE", 3);         /* Create and write data. */
-define("PERM_ADMIN", 10); /* Control permissions    */
+
 
 $NoneText = _("None");
 $ReadText = _("Read");
 $WriteText = _("Write");
 $AdminText = _("Admin");
-$GLOBALS['PERM_NAMES'] = array(PERM_NONE => $NoneText, PERM_READ => $ReadText, PERM_WRITE => $WriteText, PERM_ADMIN => $AdminText);
+$GLOBALS['PERM_NAMES'] = array(Auth::PERM_NONE => $NoneText, Auth::PERM_READ => $ReadText, Auth::PERM_WRITE => $WriteText, Auth::PERM_ADMIN => $AdminText);
 
 /**
  * \class FO_Plugin
@@ -341,6 +335,7 @@ class FO_Plugin implements Plugin
     }
 
     $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";

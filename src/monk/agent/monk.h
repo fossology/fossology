@@ -59,7 +59,7 @@ typedef struct {
 
 typedef struct {
   long refId;
-  char* shortname;
+  gchar* shortname;
   GArray* tokens;
 } License;
 

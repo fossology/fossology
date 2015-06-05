@@ -38,6 +38,7 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
   }

@@ -378,6 +378,17 @@ foreach ($src_dirs as $src_dir) {
         ) {
         continue;
     }
+    $splitModuls = array('monk'=>array('monk','monkbulk'),'copyright'=>array('copyright','ecc'));
+    if ( array_key_exists($src_dir,$splitModuls) ) {
+      foreach($splitModuls[$src_dir] as $agent){
+        mkdir("$mods_enabled_dir/$agent");
+        symlink("$full_src_dir/agent", "$mods_enabled_dir/$agent/agent");
+        symlink("$full_src_dir/ui", "$mods_enabled_dir/$agent/ui");
+        symlink("$full_src_dir/$agent.conf", "$mods_enabled_dir/$agent/$agent.conf");
+        symlink("$full_src_dir/VERSION-$agent", "$mods_enabled_dir/$agent/VERSION");
+      }
+      continue;
+    }
     if (is_dir($full_src_dir)) {
         symlink($full_src_dir, "$mods_enabled_dir/$src_dir")
             or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");

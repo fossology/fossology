@@ -33,7 +33,7 @@ int main(int argc, char** argv)
   fo_conf* config;
   fo_conf* tmp;
 
-  if(argc < 2)
+  if (argc < 2)
   {
     fprintf(stderr, "Usage: %s ini1 ini2 ... iniN\n", argv[0]);
     return 255;
@@ -41,17 +41,17 @@ int main(int argc, char** argv)
 
   config = fo_config_load(argv[1], &error);
 
-  if(error)
+  if (error)
   {
     fprintf(stderr, "ERROR: %s\n", error->message);
     return 254;
   }
 
-  for(i = 2; i < argc; i++)
+  for (i = 2; i < argc; i++)
   {
     tmp = fo_config_load(argv[i], &error);
 
-    if(error)
+    if (error)
     {
       fprintf(stderr, "ERROR: %s\n", error->message);
       return 254;
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     fo_config_join(config, tmp, &error);
 
-    if(error)
+    if (error)
     {
       fprintf(stderr, "ERROR: %s\n", error->message);
       return 253;
@@ -69,28 +69,28 @@ int main(int argc, char** argv)
   }
 
   groups = fo_config_group_set(config, &ngrps);
-  for(i = 0; i < ngrps; i++)
+  for (i = 0; i < ngrps; i++)
   {
     printf("[%s]\n", groups[i]);
 
     keys = fo_config_key_set(config, groups[i], &nkeys);
-    for(j = 0; j < nkeys; j++)
+    for (j = 0; j < nkeys; j++)
     {
-      if(fo_config_is_list(config, groups[i], keys[j], &error))
+      if (fo_config_is_list(config, groups[i], keys[j], &error))
       {
         nlist = fo_config_list_length(config, groups[i], keys[j], &error);
         printf("  %s:\n", keys[j]);
-        for(k = 0; k < nlist; k++)
+        for (k = 0; k < nlist; k++)
         {
           printf("    [%d] = %s\n", k,
-              (temp = fo_config_get_list(config, groups[i], keys[j], k, &error)));
+            (temp = fo_config_get_list(config, groups[i], keys[j], k, &error)));
           g_free(temp);
         }
       }
       else
       {
         printf("  %s = %s\n", keys[j],
-            fo_config_get(config, groups[i], keys[j], &error));
+          fo_config_get(config, groups[i], keys[j], &error));
       }
     }
   }

@@ -259,6 +259,14 @@ function Populate_sysconfig()
   . CONFIG_TYPE_TEXT .
                     ",'Number', 4, '$NomosNumDesc', null";
 
+  $Variable = "ShowJobsAutoRefresh";
+  $contextNamePrompt = _("ShowJobs Auto Refresh Time");
+  $contextValue = "10";
+  $contextDesc = _("No of seconds to refresh ShowJobs");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'Number', null, '$contextDesc', null";
+
    
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.

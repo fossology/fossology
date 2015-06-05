@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -272,6 +273,42 @@ FUNCTION void DeleteOrphanGold()
   printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
 */
 LOG_NOTICE("Remove orphaned gold files from the repository is not implemented yet");
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+
+
+
+/**
+ * @brief Normalize priority of Uploads
+  * @returns void but writes status to stdout
+ */
+FUNCTION void NormalizeUploadPriorities()
+{
+  PGresult* result; // the result of the database access
+  long StartTime, EndTime;
+  char *sql1="create temporary table tmp_upload_prio(ordprio serial,uploadid int,groupid int)";
+  char *sql2="insert into tmp_upload_prio (uploadid, groupid) (   select upload_fk uploadid, group_fk groupid from upload_clearing order by priority asc  )";
+  char *sql3="UPDATE upload_clearing SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_fk AND group_fk=groupid";
+
+  StartTime = (long)time(0);
+
+  result = PQexec(pgConn, sql1);
+  if (fo_checkPQcommand(pgConn, result, sql1, __FILE__, __LINE__)) ExitNow(-211);
+  PQclear(result);
+
+  result = PQexec(pgConn, sql2);
+  if (fo_checkPQcommand(pgConn, result, sql2, __FILE__, __LINE__)) ExitNow(-212);
+  PQclear(result);
+
+  result = PQexec(pgConn, sql3);
+  if (fo_checkPQcommand(pgConn, result, sql3, __FILE__, __LINE__)) ExitNow(-213);
+  PQclear(result);
+  
+  EndTime = (long)time(0);
+  printf("Normalized upload priorities (%ld seconds)\n", EndTime-StartTime);
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success

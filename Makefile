@@ -5,7 +5,7 @@
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=install src
+DIRS = install src
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -17,8 +17,7 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
-CONFPATH=$(SYSCONFDIR)
-
+CONFPATH = $(SYSCONFDIR)
 
 ## Targets
 # build
@@ -58,20 +57,18 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
-
 coverage: $(COVDIRS)
 $(COVDIRS):
 	$(MAKE) -C $(@:cov-%=%) coverage
 
 clean: $(CLEANDIRS)
 	rm -f variable.list VERSION
-
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
-
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
+
 # release stuff
 tar: dist-testing
 dist-testing:

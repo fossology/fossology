@@ -17,11 +17,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Monolog\Handler\BrowserConsoleHandler;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-
-define("TITLE_ui_download", _("Download File"));
 
 /**
  * \class ui_download extends FO_Plugin
@@ -29,12 +32,12 @@ define("TITLE_ui_download", _("Download File"));
  */
 class ui_download extends FO_Plugin
 {
-  var $NoHTML     = 1;
+  var $NoHTML = 1;
 
   function __construct()
   {
     $this->Name       = "download";
-    $this->Title      = TITLE_ui_download;
+    $this->Title      = _("Download File");
     $this->Dependency = array();
     $this->DBaccess   = PLUGIN_DB_WRITE;
     parent::__construct();
@@ -135,6 +138,7 @@ class ui_download extends FO_Plugin
 
     $reportId = GetParm("report",PARM_INTEGER);
     $item = GetParm("item",PARM_INTEGER);
+    $logJq = GetParm('log', PARM_INTEGER);
 
     if (!empty($reportId))
     {
@@ -143,12 +147,23 @@ class ui_download extends FO_Plugin
       {
         throw new Exception("Missing report");
       }
-
       $path = $row['filepath'];
       $filename = basename($path);
       $uploadId = $row['upload_fk'];
     }
-    else if (empty($item))
+    elseif (!empty($logJq))
+    {
+      $sql = "SELECT jq_log, job_upload_fk FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1";
+      $row = $dbManager->getSingleRow($sql, array($logJq), "jqLogFileName");
+      if ($row === false)
+      {
+        throw new Exception("Missing report");
+      }
+      $path = $row['jq_log'];
+      $filename = basename($path);
+      $uploadId = $row['job_upload_fk'];
+    }
+    elseif (empty($item))
     {
       throw new Exception("Invalid item parameter");
     }
@@ -176,8 +191,9 @@ class ui_download extends FO_Plugin
       $uploadId = $row['upload_fk'];
     }
 
-    $uploadPerm = GetUploadPerm($uploadId);
-    if ($uploadPerm < PERM_WRITE)
+    /* @var $uploadDao UploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
     {
       throw new Exception("No Permission: $uploadId");
     }
@@ -210,6 +226,11 @@ class ui_download extends FO_Plugin
     {
       $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
     }
+
+    $logger = $container->get("logger");
+    $logger->pushHandler(new NullHandler(Logger::DEBUG));
+    BrowserConsoleHandler::reset();
+    
     return $response;
   }
 }

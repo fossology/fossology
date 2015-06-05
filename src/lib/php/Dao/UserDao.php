@@ -19,6 +19,7 @@
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -28,6 +29,8 @@ class UserDao extends Object
   const USER = 0;
   const ADMIN = 1;
   const ADVISOR = 2;
+  
+  const SUPER_USER = 'fossy';
 
   /* @var DbManager */
   private $dbManager;
@@ -50,7 +53,7 @@ class UserDao extends Object
     $sql = "SELECT user_pk, user_name FROM users LEFT JOIN group_user_member AS gum ON users.user_pk = gum.user_fk"
             . " WHERE gum.group_fk = $1";
     $this->dbManager->prepare($statementN, $sql);
-    $res = $this->dbManager->execute($statementN, array($_SESSION['GroupId']));
+    $res = $this->dbManager->execute($statementN, array(Auth::getGroupId()));
     while ($rw = $this->dbManager->fetchArray($res))
     {
       $userChoices[$rw['user_pk']] = $rw['user_name'];
@@ -154,10 +157,9 @@ class UserDao extends Object
     {
       throw new \Exception( _("Group must not be deleted due to name constraint.") );
     }
-    if ($_SESSION['UserLevel'] != PLUGIN_DB_ADMIN)
+    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
     {
-      global $SysConf;
-      $userId = $SysConf['auth']['UserId'];
+      $userId = Auth::getUserId();
       $adminLevel = $this->dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk=$1 and user_fk=$2 and group_perm=1",
               array($groupId,$userId),__METHOD__.'.admin_lvl');
       if ($adminLevel['cnt']< 1)
@@ -192,45 +194,41 @@ class UserDao extends Object
             array(PLUGIN_DB_READ), 
             $statementBasename . '.setDefaultPermission');
     /* There must always be at least one default user. */
-    $row = $this->getUserByName('Default User');
+    $defaultUser = $this->getUserByName('Default User');
 
-    if (empty($row['user_name']))
+    if (empty($defaultUser['user_name']))
     {
-      /* User "fossy" does not exist.  Create it. */
-      $Level = PLUGIN_DB_NONE;
+      $level = PLUGIN_DB_NONE;
       $this->dbManager->getSingleRow("
         INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
           VALUES ('Default User','Default User when nobody is logged in','Seed','Pass', $1,NULL,1);",
-          array($Level), $statementBasename . '.createDefaultUser');
+          array($level), $statementBasename . '.createDefaultUser');
     }
     /* There must always be at least one user with user-admin access.
-     If he does not exist, make it user "fossy".
-     If user "fossy" does not exist, add him with the default password 'fossy'. */
-    $Perm = PLUGIN_DB_ADMIN;
-    $row = $this->getUserByPermission($Perm);
+     If he does not exist, make it SUPER_USER with the same password. */
+    $perm = PLUGIN_DB_ADMIN;
+    $row = $this->getUserByPermission($perm);
     if (empty($row['user_name']))
     {
       /* No user with PLUGIN_DB_ADMIN access. */
-      $Seed = rand() . rand();
-      $Hash = sha1($Seed . "fossy");
-      $row0 = $this->getUserByName('fossy');
+      $seed = rand() . rand();
+      $hash = sha1($seed . self::SUPER_USER);
+      $row0 = $this->getUserByName(self::SUPER_USER);
 
       if (empty($row0['user_name']))
       {
-        /* User "fossy" does not exist.  Create it. */
         $this->dbManager->getSingleRow("
           INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk)
-            VALUES ('fossy','Default Administrator',$1, $2, $3, 'fossy','y',1)",
-            array($Seed, $Hash, $Perm), $statementBasename . '.createDefaultAdmin');
-      } else
-      {
-        /* User "fossy" exists!  Update it. */
-        $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1, email_notify = 'y'," .
-            " user_email= 'fossy' WHERE user_name = 'fossy'",
-            array($Perm), $statementBasename . '.updateDefaultUserToDefaultAdmin');
+            VALUES ($1,'Default Administrator',$2, $3, $4, $1,'y',1)",
+            array(self::SUPER_USER, $seed, $hash, $perm), $statementBasename . '.createDefaultAdmin');
       }
-
-      $row = $this->getUserByPermission($Perm);
+      else
+      {
+        $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1, email_notify = 'y'," .
+            " user_email=$2 WHERE user_name =$2",
+            array($perm, self::SUPER_USER), $statementBasename . '.updateDefaultUserToDefaultAdmin');
+      }
+      $row = $this->getUserByPermission($perm);
     }
 
     return empty($row['user_name']) ? 1 : 0;
@@ -240,11 +238,21 @@ class UserDao extends Object
    * @param $userName
    * @return array
    */
-  private function getUserByName($userName)
+  public function getUserByName($userName)
   {
     return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1", array($userName), __FUNCTION__);
   }
 
+  /**
+   * @param $groupName
+   * @return array
+   */
+  public function getGroupIdByName($groupName)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name = $1", array($groupName), __FUNCTION__);
+    return $row['group_pk'];
+  }
+  
   /**
    * @param $permission
    * @return array
@@ -267,16 +275,42 @@ class UserDao extends Object
     $userRow = $this->dbManager->getSingleRow(
         "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
         array($userName), __FUNCTION__);
-
-    if (!$userRow['group_fk']) {
-      $groupRow = $this->dbManager->getSingleRow(
+    if(empty($userRow)) {
+      throw new \Exception('invalid user name');
+    }
+    if ($userRow['group_fk']) {
+      return $userRow;
+    }
+    $groupRow = $this->fixDefaultGroup($userRow['user_pk'],$userName);
+    $this->setDefaultGroupMembership($userRow['user_pk'], $groupRow['group_fk']);
+    $userRow['group_fk'] = $groupRow['group_fk'];
+    $userRow['group_name'] = $groupRow['group_name'];
+    return $userRow;
+  }
+  
+  /**
+   * @param int $userId
+   * @param string $groupName
+   * @return array with keys 'group_fk', 'group_name'
+   */
+  private function fixDefaultGroup($userId, $groupName)
+  {
+    $groupRow = $this->dbManager->getSingleRow(
           "SELECT group_fk,group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1",
-          array($userRow['user_pk']), __FUNCTION__.".getGroup");
-      $userRow['group_fk'] = $groupRow['group_fk'];
-      $userRow['group_name'] = $groupRow['group_name'];
+          array($userId), __FUNCTION__.".getGroup");
+    if($groupRow)
+    {
+      return $groupRow;
     }
 
-    return $userRow;
+    $groupId = $this->getGroupIdByName($groupName);
+    if(empty($groupId))
+    {
+      $groupId = $this->addGroup($groupName);
+      $this->addGroupMembership($groupId, $userId);
+    }
+
+    return array('group_fk'=>$groupId,'group_name'=>$groupName);
   }
 
   public function isAdvisorOrAdmin($userId, $groupId)
@@ -286,4 +320,54 @@ class UserDao extends Object
     return $row!==false && ($row['group_perm']==self::ADVISOR || $row['group_perm']==self::ADMIN);
   }
 
-} 
+  /**
+   * @param string $groupName raw group name as entered by the user
+   * @return int $groupId
+   * @throws \Exception
+   */
+  public function addGroup($groupName)
+  {
+    if (empty($groupName))
+    {
+      throw new \Exception(_("Error: Group name must be specified."));
+    }
+
+    $groupAlreadyExists = $this->dbManager->getSingleRow("SELECT group_pk FROM groups WHERE group_name=$1",
+            array($groupName),
+            __METHOD__.'.gExists');
+    if ($groupAlreadyExists)
+    {
+      throw new \Exception(_("Group already exists.  Not added."));
+    }
+
+    $this->dbManager->insertTableRow('groups', array('group_name'=>$groupName));
+    $groupNowExists = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name=$1",
+            array($groupName),
+            __METHOD__.'.gNowExists');
+    if (!$groupNowExists)
+    {
+      throw new \Exception(_("Failed to create group"));
+    }
+    return $groupNowExists['group_pk'];
+  }
+
+  public function addGroupMembership($groupId, $userId)
+  {
+    $this->dbManager->insertTableRow('group_user_member',
+            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>1));
+  }
+  
+  /**
+   * @param int $userId
+   * @return string
+   */
+  public function getUserName($userId)
+  {
+    $userRow = $this->dbManager->getSingleRow("SELECT user_name FROM users WHERE user_pk=$1",array($userId),__METHOD__);
+    if(!$userRow)
+    {
+      throw new \Exception('unknown user with id='.$userId);
+    }
+    return $userRow['user_name'];
+  }
+}

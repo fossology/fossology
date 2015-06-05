@@ -102,8 +102,8 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu|LinuxMint)
          echo "DB: Installing build essiential....."
          apt-get $YesOpt install \
-            curl libxml2-dev libcunit1-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0
+            libmxml-dev curl libxml2-dev libcunit1-dev \
+            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
@@ -128,7 +128,8 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 
+            libxml2 \
+            boost-devel 
          ;;
       Mandriva)
          # 2008.1 tested
@@ -145,7 +146,8 @@ if [ $BUILDTIME ]; then
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
-            perl-Text-Template subversion
+            perl-Text-Template subversion \
+            boost-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac

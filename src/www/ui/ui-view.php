@@ -266,8 +266,7 @@ class ui_view extends FO_Plugin
   function ShowView($inputFile = NULL, $BackMod = "browse",
                     $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = array(), $insertBacklink = false)
   {
-    return $this->getView($inputFile , $BackMod,
-         $ShowHeader , $ShowText, $highlightEntries , $insertBacklink);
+    return $this->getView($inputFile, $BackMod, $ShowHeader, $ShowText, $highlightEntries, $insertBacklink);
   }
 
   /**
@@ -306,7 +305,7 @@ class ui_view extends FO_Plugin
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     if (!$inputFile && empty($Item))
     {
-      return "i";
+      return "invalid input file";
     }
 
     $uploadtree_tablename = GetUploadtreeTablename($Upload);
@@ -359,7 +358,8 @@ class ui_view extends FO_Plugin
               $this->vars['message'] = "$text: $rc";
             }
           }
-        } else
+        }
+        else
         {
           $flag = 1;
           $text = _("Reunpack job is running: you can see it in");
@@ -434,7 +434,10 @@ class ui_view extends FO_Plugin
       $output .= "<P /><center>$PageMenu</center><br>\n";
     }
 
-    if ($openedFin) fclose($inputFile);
+    if ($openedFin)
+    {
+      fclose($inputFile);
+    }
     if($getPageMenuInline)
       return array($PageMenu, $output);
     else

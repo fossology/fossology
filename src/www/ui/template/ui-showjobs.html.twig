@@ -1,0 +1,36 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+{% extends "include/base.html.twig" %}
+
+{% block head %}
+  {% include "include/head.html.twig" %}
+  <title>{% block title %}{{ title|e }}{% endblock %}</title>
+  {{ metadata }}
+  {{ styles }}
+  <link rel="stylesheet" href="css/showjobs.css">
+{% endblock %}
+
+{% block content %}
+  {{ errorInfo }}
+  {{ allusersdiv }}
+  <input name="time" id="time" type="hidden" value="{{ clockTime }}"/>
+  <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
+  <input name="allusersvalue" id="allusersvalue" type="hidden" value="{{ allusersval }}"/>
+  <input name="pageid" id="pageid" type="hidden" value="{{ page }}"/>
+  <div id="paginationup"></div>
+  <table class="text" border=1 width="100%" id="showjobstable">
+  <tbody>
+  </tbody>
+  </table>
+  <div id="paginationdown"></div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+<script type="text/javascript"> {% include "ui-showjobs.js.twig" %} </script>
+{% endblock %}

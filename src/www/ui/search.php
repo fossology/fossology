@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 define("TITLE_search", _("Search"));
 
 class search extends FO_Plugin
@@ -96,7 +98,7 @@ class search extends FO_Plugin
  
        /* Check upload permission */
        $UploadPerm = GetUploadPerm($upload_pk);
-       if ($UploadPerm < PERM_READ) return $UploadtreeRecs;
+       if ($UploadPerm < Auth::PERM_READ) return $UploadtreeRecs;
 
       pg_free_result($result);
     }
@@ -269,7 +271,7 @@ class search extends FO_Plugin
       while ($row = pg_fetch_assoc($result))
       {
         $UploadPerm = GetUploadPerm($row['upload_fk']);
-        if ($UploadPerm < PERM_READ) continue;
+        if ($UploadPerm < Auth::PERM_READ) continue;
         $UploadtreeRecs[] = $row;
       }
     }

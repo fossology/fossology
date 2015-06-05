@@ -1,0 +1,34 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <input name="job" id="job" type="hidden" value="{{ jobId }}"/>
+  <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
+  <h3>{{ "Geeky Scan Details"|trans }}</h3>
+
+  <table class="text" border=1 name="showJobTable" id="showJobTable">
+  <thead>
+   <tr>
+    <th align="left" colspan="2">{{ uploadName }} </th>
+   </tr>
+   <tr>
+    <th> </th>
+    <th> </th>
+   </tr>
+  </thead>
+ </table>
+
+{% endblock %}
+{% block foot %}
+{{ parent() }}
+<script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="scripts/tools.js" type="text/javascript"></script>
+<script type="text/javascript">{% include "ui-job-show.js.twig" %}</script>
+{% endblock %}

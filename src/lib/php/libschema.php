@@ -1,7 +1,7 @@
 <?php
 /*
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -87,8 +87,11 @@ class fo_libschema
     // first check to make sure we don't already have the plpgsql language installed
     $sql_statement = "select lanname from pg_language where lanname = 'plpgsql'";
 
-    $result = pg_query($PG_CONN, $sql_statement)
-      or die("Could not check the database for plpgsql language\n");
+    $result = pg_query($PG_CONN, $sql_statement);
+    if(!$result)
+    {
+      throw new Exception("Could not check the database for plpgsql language");
+    }
 
     $plpgsql_already_installed = FALSE;
     if ( pg_fetch_row($result) ) {
@@ -96,10 +99,14 @@ class fo_libschema
     }
 
     // then create language plpgsql if not already created
-    if ( $plpgsql_already_installed == FALSE ) {
+    if ($plpgsql_already_installed == FALSE)
+    {
       $sql_statement = "CREATE LANGUAGE plpgsql";
-      $result = pg_query($PG_CONN, $sql_statement)
-        or die("Could not create plpgsql language in the database\n");
+      $result = pg_query($PG_CONN, $sql_statement);
+      if (!$result)
+      {
+        throw new Exception("Could not create plpgsql language in the database");
+      }
     }
 
     $this->debug = $debug;
@@ -109,7 +116,7 @@ class fo_libschema
       return $errMsg;
     }
     $Schema = array(); /* will be filled in next line */
-    require_once($filename); /* this will DIE if the file does not exist. */
+    require($filename); /* this cause Fatal Error if the file does not exist. */
     $this->schema = $Schema;
 
     /* Very basic sanity check (so we don't delete everything!) */
@@ -133,6 +140,8 @@ class fo_libschema
     $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $this->applySequences();
     $this->applyTables();
+    $this->applyInheritedRelations();
+    $this->updateSequences();
     $this->applyViews();
     $this->dropConstraints();
     /* Reload current since the CASCADE may have changed things */
@@ -174,13 +183,35 @@ class fo_libschema
     {
       return;
     }
-    foreach ($this->schema['SEQUENCE'] as $name => $sql)
+    foreach ($this->schema['SEQUENCE'] as $name => $import)
     {
-      if (empty($name) || $this->currSchema['SEQUENCE'][$name] == $sql)
+      if (empty($name)) continue;
+
+      if(!array_key_exists('SEQUENCE', $this->currSchema)
+        || !array_key_exists($name, $this->currSchema['SEQUENCE']))
       {
-        continue;
+        $createSql = is_string($import) ? $import : $import['CREATE'];
+        $this->applyOrEchoOnce($createSql, $stmt = __METHOD__ . "." . $name . ".CREATE");
       }
-      $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $name);
+    }
+  }
+
+  /************************************/
+  /* Add sequences */
+  /************************************/
+  function updateSequences()
+  {
+    if (empty($this->schema['SEQUENCE']))
+    {
+      return;
+    }
+    foreach ($this->schema['SEQUENCE'] as $name => $import)
+    {
+      if (empty($name)) continue;
+
+      if (is_array($import) && array_key_exists('UPDATE', $import)) {
+        $this->applyOrEchoOnce($import['UPDATE'], $stmt = __METHOD__ . "." . $name);
+      }
     }
   }
 
@@ -224,12 +255,8 @@ class fo_libschema
             print "$sql\n";
           } else
           {
-            // Add the new column, then set the default value with update
+            // Add the new column which sets the default value
             $this->dbman->queryOnce($sql);
-            if (!empty($modification['UPDATE']))
-            {
-              $this->dbman->queryOnce($sql = $modification['UPDATE']);
-            }
           }
           if (!empty($rename))
           {
@@ -238,7 +265,7 @@ class fo_libschema
             $this->applyOrEchoOnce($sql = "ALTER TABLE \"$table\" DROP COLUMN \"$rename\"");
           }
         }
-        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'])
+        if ($this->currSchema['TABLE'][$table][$column]['ALTER'] != $modification['ALTER'] && isset($modification['ALTER']))
         {
           $sql = $modification['ALTER'];
           if ($this->debug)
@@ -247,10 +274,6 @@ class fo_libschema
           } else if (!empty ($sql))
           {
             $this->dbman->queryOnce($sql);
-            if (!empty($modification['UPDATE']))
-            {
-              $this->dbman->queryOnce($sql = $modification['UPDATE']);
-            }
           }
         }
         if ($this->currSchema['TABLE'][$table][$column]['DESC'] != $modification['DESC'])
@@ -438,22 +461,22 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['view_name']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $View = $Results[$i]['view_name'];
-      $table = $Results[$i]['table_name'];
+      $View = $row['view_name'];
+      $table = $row['table_name'];
       if (empty($this->schema['TABLE'][$table]))
       {
         continue;
       }
-      $column = $Results[$i]['column_name'];
+      $column = $row['column_name'];
       if (empty($this->schema['TABLE'][$table][$column]))
       {
         $sql = "DROP VIEW \"$View\";";
         $this->applyOrEchoOnce($sql);
       }
     }
+    $result = $this->dbman->freeResult($result);
   }
 
   /************************************/
@@ -487,13 +510,31 @@ class fo_libschema
   {
     global $SysConf;
     $this->currSchema = array();
-    $this->addTables();
+    $this->addInheritedRelations();
+    $referencedSequencesInTableColumns = $this->addTables();
     $this->addViews($viewowner = $SysConf['DBCONF']['user']);
-    $this->addSequences();
+    $this->addSequences($referencedSequencesInTableColumns);
     $this->addConstraints();
     $this->addIndexes();
     unset($this->currSchema['TABLEID']);
     return $this->currSchema;
+  }
+  
+  function addInheritedRelations()
+  {
+    $sql = "SELECT class.relname AS table, daddy.relname AS inherits_from
+      FROM pg_class AS class
+      INNER JOIN pg_catalog.pg_inherits ON pg_inherits.inhrelid = class.oid
+      INNER JOIN pg_class daddy ON pg_inherits.inhparent = daddy.oid";
+    $this->dbman->prepare($stmt=__METHOD__, $sql);
+    $res = $this->dbman->execute($stmt);
+    $relations = array();
+    while($row=$this->dbman->fetchArray($res))
+    {
+      $relations[$row['table']] = $row['inherits_from'];
+    }
+    $this->dbman->freeResult($res);
+    $this->currSchema['INHERITS'] = $relations;
   }
 
   /***************************/
@@ -501,6 +542,8 @@ class fo_libschema
   /***************************/
   function addTables()
   {
+    $referencedSequencesInTableColumns = array();
+
     $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
@@ -520,12 +563,14 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
+    while ($R = $this->dbman->fetchArray($result))
     {
-      $R = & $Results[$i];
       $Table = $R['table'];
       $Column = $R['column_name'];
+      if (array_key_exists($Table, $this->currSchema['INHERITS'])) {
+        $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
+        continue;
+      }
       $Type = $R['type'];
       if ($Type == 'bpchar')
       {
@@ -539,16 +584,14 @@ class fo_libschema
       $this->currSchema['TABLEID'][$Table][$R['ordinal']] = $Column;
       if (!empty($Desc))
       {
-        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
+        $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc'";
       } else
       {
         $this->currSchema['TABLE'][$Table][$Column]['DESC'] = "";
       }
-      $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
+      $this->currSchema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type";
       $this->currSchema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
       $Alter = "ALTER COLUMN \"$Column\"";
-      // create the index UPDATE to get rid of php notice
-      $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] = "";
       if ($R['notnull'] == 't')
       {
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL";
@@ -560,10 +603,19 @@ class fo_libschema
       {
         $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
-        $this->currSchema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
-      }
-      $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ";";
-    }
+        $this->currSchema['TABLE'][$Table][$Column]['ADD'] .= " DEFAULT " . $R['default'];
+
+        $rgx = "/nextval\('([a-z_]*)'.*\)/";
+        $matches = array();
+        if (preg_match($rgx, $R['default'], $matches)) {
+           $sequence = $matches[1];
+           $referencedSequencesInTableColumns[$sequence] = array("table" => $Table, "column" => $Column);
+        }
+        }
+          }
+    $this->dbman->freeResult($result);
+
+    return $referencedSequencesInTableColumns;
   }
 
   /***************************/
@@ -575,18 +627,18 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt, array($viewowner));
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['viewname']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $sql = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
-      $this->currSchema['VIEW'][$Results[$i]['viewname']] = $sql;
+      $sql = "CREATE VIEW \"" . $row['viewname'] . "\" AS " . $row['definition'];
+      $this->currSchema['VIEW'][$row['viewname']] = $sql;
     }
+    $this->dbman->freeResult($result);
   }
 
   /***************************/
   /* Get Sequence */
   /***************************/
-  function addSequences()
+  function addSequences($referencedSequencesInTableColumns)
   {
     $sql = "SELECT relname
       FROM pg_class
@@ -594,15 +646,30 @@ class fo_libschema
         AND relnamespace IN (
              SELECT oid FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname != 'information_schema'
             )";
+
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['relname']); $i++)
-    {
-      $sql = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
-      $this->currSchema['SEQUENCE'][$Results[$i]['relname']] = $sql;
+
+    while($row = $this->dbman->fetchArray($result)) {
+      $sequence = $row['relname'];
+      if (empty($sequence)) {
+         continue;
+      }
+
+      $sqlCreate = "CREATE SEQUENCE \"" . $sequence . "\"";
+      $this->currSchema['SEQUENCE'][$sequence]['CREATE'] = $sqlCreate;
+
+      if (array_key_exists($sequence, $referencedSequencesInTableColumns)) {
+        $table = $referencedSequencesInTableColumns[$sequence]['table'];
+        $column = $referencedSequencesInTableColumns[$sequence]['column'];
+
+        $sqlUpdate = "SELECT setval('$sequence',(SELECT greatest(1,max($column)) val FROM $table))";
+        $this->currSchema['SEQUENCE'][$sequence]['UPDATE'] = $sqlUpdate;
+      }
     }
+
+    $this->dbman->freeResult($result);
   }
 
   /***************************/
@@ -649,7 +716,8 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
+    $Results = $this->dbman->fetchAll($result);
+    $this->dbman->freeResult($result);
     /* Constraints use indexes into columns.  Covert those to column names. */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
@@ -790,15 +858,15 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['table']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
       /* UNIQUE constraints also include indexes. */
-      if (empty($this->currSchema['CONSTRAINT'][$Results[$i]['index']]))
+      if (empty($this->currSchema['CONSTRAINT'][$row['index']]))
       {
-        $this->currSchema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
+        $this->currSchema['INDEX'][$row['table']][$row['index']] = $row['define'] . ";";
       }
     }
+    $this->dbman->freeResult($result);
   }
 
 
@@ -820,14 +888,14 @@ class fo_libschema
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
-    $Results = pg_fetch_all($result);
-    for ($i = 0; !empty($Results[$i]['proname']); $i++)
+    while ($row = $this->dbman->fetchArray($result))
     {
-      $sql = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
+      $sql = "CREATE or REPLACE function " . $row['proname'] . "()";
       $sql .= ' RETURNS ' . "TBD" . ' AS $$';
-      $sql .= " " . $Results[$i]['prosrc'];
-      $schema['FUNCTION'][$Results[$i]['proname']] = $sql;
+      $sql .= " " . $row['prosrc'];
+      $schema['FUNCTION'][$row['proname']] = $sql;
     }
+    $this->dbman->freeResult($result);
     return $schema;
   }
 
@@ -899,51 +967,6 @@ class fo_libschema
     print "  Applying database functions\n";
     flush();
     /********************************************
-     * GetRunnable() is a DB function for listing the runnable items
-     * in the jobqueue. This is used by the scheduler.
-     ********************************************/
-    $sql = '
-  CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
-  DECLARE
-    jqrec jobqueue;
-    jqrec_test jobqueue;
-    jqcurse CURSOR FOR SELECT *
-      FROM jobqueue
-      INNER JOIN job ON jq_starttime IS NULL AND jq_end_bits < 2 AND job_pk = jq_job_fk
-      ORDER BY job_priority DESC
-      ;
-    jdep_row jobdepends;
-    success integer;
-  BEGIN
-    open jqcurse;
-  <<MYLABEL>>
-    LOOP
-      FETCH jqcurse INTO jqrec;
-      IF FOUND
-      THEN -- check all dependencies
-        success := 1;
-        <<DEPLOOP>>
-        FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
-    -- has the dependency been satisfied?
-    SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
-    IF NOT FOUND
-    THEN
-      success := 0;
-      EXIT DEPLOOP;
-    END IF;
-        END LOOP DEPLOOP;
-
-        IF success=1 THEN RETURN NEXT jqrec; END IF;
-      ELSE EXIT;
-      END IF;
-    END LOOP MYLABEL;
-  RETURN;
-  END;
-  $$
-  LANGUAGE plpgsql;
-      ';
-    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getrunnable');
-    /********************************************
      * uploadtree2path is a DB function that returns the non-artifact parents of an uploadtree_pk.
      * drop and recreate to change the return type.
      */
@@ -970,8 +993,61 @@ class fo_libschema
     LANGUAGE plpgsql;
       ';
     $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.uploadtree2path.create');
+
+    /*
+     * getItemParent is a DB function that returns the non-artifact parent of an uploadtree_pk.
+     * drop and recreate to change the return type.
+     */
+    $sql = 'drop function if exists getItemParent(integer);';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.drop');
+
+    $sql = '
+    CREATE OR REPLACE FUNCTION getItemParent(itemId Integer) RETURNS Integer AS $$
+    WITH RECURSIVE file_tree(uploadtree_pk, parent, jump, path, cycle) AS (
+        SELECT ut.uploadtree_pk, ut.parent,
+          true,
+          ARRAY[ut.uploadtree_pk],
+          false
+        FROM uploadtree ut
+        WHERE ut.uploadtree_pk = $1
+      UNION ALL
+        SELECT ut.uploadtree_pk, ut.parent,
+          ut.ufile_mode & (1<<28) != 0,
+          path || ut.uploadtree_pk,
+        ut.uploadtree_pk = ANY(path)
+        FROM uploadtree ut, file_tree ft
+        WHERE ut.uploadtree_pk = ft.parent AND jump AND NOT cycle
+      )
+   SELECT uploadtree_pk from file_tree ft WHERE NOT jump
+   $$
+   LANGUAGE SQL
+   STABLE
+   RETURNS NULL ON NULL INPUT
+      ';
+    $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . '.getItemParent.create');
     return;
-  } // MakeFunctions()
+  }
+
+  function applyInheritedRelations() {
+    if (empty($this->schema['INHERITS']))
+    {
+      return;
+    }
+    foreach ($this->schema['INHERITS'] as $table => $fromTable)
+    {
+      if (empty($table))
+      {
+        continue;
+      }
+      if (!$this->dbman->existsTable($table) && $this->dbman->existsTable($fromTable))
+      {
+        $sql = "CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")";
+        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $table);
+      }
+    }
+  }
+
+// MakeFunctions()
 }
 
 if (empty($dbManager) || !($dbManager instanceof DbManager))

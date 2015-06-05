@@ -175,7 +175,7 @@ void test_fo_config_group_set()
   int length;
   char** names = fo_config_group_set(test_data, &length);
 
-  FO_ASSERT_EQUAL(length, 4);
+  FO_ASSERT_EQUAL_FATAL(length, 4);
   FO_ASSERT_STRING_EQUAL(names[0], GROUP(3));
   FO_ASSERT_STRING_EQUAL(names[1], GROUP(0));
   FO_ASSERT_STRING_EQUAL(names[2], GROUP(2));
@@ -194,23 +194,23 @@ void test_fo_config_key_set()
   char** names;
 
   names = fo_config_key_set(test_data, GROUP(0), &length);
-  FO_ASSERT_EQUAL(length, 2);
+  FO_ASSERT_EQUAL_FATAL(length, 2);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(0, 0));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(0, 1));
 
   names = fo_config_key_set(test_data, GROUP(1), &length);
-  FO_ASSERT_EQUAL(length, 2);
+  FO_ASSERT_EQUAL_FATAL(length, 2);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(1, 0));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(1, 1));
 
   names = fo_config_key_set(test_data, GROUP(2), &length);
-  FO_ASSERT_EQUAL(length, 3);
+  FO_ASSERT_EQUAL_FATAL(length, 3);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(2, 1));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(2, 2));
   FO_ASSERT_STRING_EQUAL(names[2], KEY(2, 0));
 
   names = fo_config_key_set(test_data, GROUP(3), &length);
-  FO_ASSERT_EQUAL(length, 3);
+  FO_ASSERT_EQUAL_FATAL(length, 3);
   FO_ASSERT_STRING_EQUAL(names[0], KEY(3, 0));
   FO_ASSERT_STRING_EQUAL(names[1], KEY(3, 2));
   FO_ASSERT_STRING_EQUAL(names[2], KEY(3, 1));

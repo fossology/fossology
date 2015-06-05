@@ -18,6 +18,7 @@ install:
         binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
         libpq-dev
+        libboost-regex-dev libboost-program-options-dev
  - sudo apt-get install -qq cppcheck
 
 before_script:
@@ -25,9 +26,8 @@ before_script:
  - composer install --dev
  - composer self-update
  - cd ..
- - psql -c "CREATE USER fossy WITH PASSWORD 'fossy';" -U postgres
+ - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
- - psql -c "create database fosstestone;" -U postgres
 
 env:
   global:
@@ -99,7 +99,7 @@ matrix:
     # QA jobs for code analytics and metrics
     # static code analysis with cppcheck (we can add --enable=all later)
     - env:    TEST_NAME="cppcheck"
-      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
+      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
       before_install: sudo apt-get install cppcheck
     # search for TODO within source tree
     - env:    TEST_NAME="TODO"

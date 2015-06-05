@@ -14,24 +14,36 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
-TOP=../../..
-include $(TOP)/Makefile.conf
-MOD_NAME=copyright
-MOD_SUBDIR=ui
+
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+MOD_NAMES = copyright ecc
+MOD_SUBDIR = ui
 
 all:
-	@echo "make copyright ui"
+	@echo "nothing to do"
 
 install:
-	echo "make copyright ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	@for MOD_NAME in $(MOD_NAMES); do \
+		echo "make $$MOD_NAME ui $@"; \
+		mkdir -p $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+		$(INSTALL_DATA) ./*-$$MOD_NAME.php $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+	done
+	#TODO deduplicate php files
+	#TODO this is broken but currently works
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)
+	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ecc.php
+	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/{} \;
 
 uninstall:
-	echo "make copyright ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	@for MOD_NAME in $(MOD_NAMES); do \
+		echo "make $$MOD_NAME ui $@"; \
+		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$(MOD_SUBDIR); \
+	done
 
 clean:
-	echo "make copyright ui clean"
+	@echo "nothing to do"
 
-.PHONY: install uninstall  all clean
+.PHONY: all install uninstall clean

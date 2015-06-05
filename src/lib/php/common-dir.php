@@ -21,6 +21,8 @@
  * \brief Common Direcotory Functions
  */
 
+use Fossology\Lib\Db\DbManager;
+
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
@@ -96,23 +98,23 @@ function DirMode2String($Mode)
 $DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
 {
-  global $PG_CONN;
-
   $Children = array();
 
   /* Get contents of this directory */
   global $DirGetNonArtifact_Prepared;
+  global $container;
+  $dbManager = $container->get('db.manager');
   if (!$DirGetNonArtifact_Prepared)
   {
     $DirGetNonArtifact_Prepared=1;
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $UploadtreePk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
+    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $1";
+    $dbManager->prepare($stmt=__METHOD__.".$uploadtree_tablename",$sql);
+    $result = $dbManager->execute($stmt,array($UploadtreePk));
+    while ($child=$dbManager->fetchArray($result) )
     {
-      $Children = pg_fetch_all($result);
+      $Children[] = $child;
     }
-    pg_free_result($result);
+    $dbManager->freeResult($result);
   }
   $Recurse=NULL;
   foreach($Children as $C)
@@ -149,61 +151,6 @@ function _DirCmp($a,$b)
 {
   return(strcasecmp($a['ufile_name'],$b['ufile_name']));
 } // _DirCmp()
-
-/**
- * \brief Given a directory (uploadtree_pk),
- *  return the directory contents but resolve artifacts.
- *  TBD: "username" will be added in the future and it may change
- *  how this function works.
- *  \todo DEPRECATED use GetNonArtifactChildren($uploadtree_pk)
- *
- * \param $Upload upload_pk
- * \param $UploadtreePk uploadtree_pk (may be empty, to specify the whole upload)
- * \param $uploadtree_tablename
- *
- * \return array of uploadtree records sorted by file name
- */
-$DirGetList_Prepared=0;
-function DirGetList($Upload, $UploadtreePk, $uploadtree_tablename='uploadtree')
-{
-  global $PG_CONN;
-
-  /* Get the basic directory contents */
-  global $DirGetList_Prepared;
-  if (!$DirGetList_Prepared)
-  {
-    $DirGetList_Prepared=1;
-  }
-  if (empty($UploadtreePk))
-  {
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent IS NULL ORDER BY ufile_name ASC;";
-  }
-  else 
-  {
-    $sql = "SELECT * FROM $uploadtree_tablename LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE upload_fk = $Upload AND parent = $UploadtreePk ORDER BY ufile_name ASC;";
-  }
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $rows = pg_fetch_all($result);
-  pg_free_result($result);
-  if (is_array($rows))
-  {
-    $Results = $rows;
-    usort($Results,'_DirCmp');
-  }
-  
-  /* Replace all artifact directories */
-  foreach($Results as $Key => $Val)
-  {
-    /* if artifact and directory */
-    $R = &$Results[$Key];
-    if (Isartifact($R['ufile_mode']) && Iscontainer($R['ufile_mode']))
-    {
-      $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk'], $uploadtree_tablename);
-    }
-  }
-  return($Results);
-} // DirGetList()
 
 
 /**
@@ -527,8 +474,6 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  * If any children are artifacts, resolve them until you get
  * to a non-artifact.
  *
- * This function replaces DirGetList()
- *
  * \param $uploadtree_pk
  * \param $uploadtree_tablename
  *
@@ -538,27 +483,27 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
  */
 function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
-  global $PG_CONN;
-
-  $foundChildren = array();
+  global $container;
+  /** @var DbManager */
+  $dbManager = $container->get('db.manager');
 
   /* Find all the children */
   $sql = "select {$uploadtree_tablename}.*, pfile_size, pfile_mimetypefk from $uploadtree_tablename
           left outer join pfile on (pfile_pk=pfile_fk)
-          where parent=$uploadtree_pk";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0)
+          where parent=$1 ORDER BY lft";
+  $dbManager->prepare($stmt=__METHOD__."$uploadtree_tablename",$sql);
+  $result = $dbManager->execute($stmt,array($uploadtree_pk));
+  $children = $dbManager->fetchAll($result);
+  $dbManager->freeResult($result);
+  if (count($children) == 0)
   {
-    pg_free_result($result);
-    return $foundChildren;
+    return $children;
   }
-  $children = pg_fetch_all($result);
-  pg_free_result($result);
 
   /* Loop through each child and replace any artifacts with their
    non artifact child.  Or skip them if they are not containers.
    */
+  $foundChildren = array();
   foreach($children as $key => $child)
   {
     if (Isartifact($child['ufile_mode']))
@@ -568,7 +513,7 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
         unset($children[$key]);
         $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk'], $uploadtree_tablename);
         if ($NonAChildren)
-        $foundChildren = array_merge($foundChildren, $NonAChildren);
+          $foundChildren = array_merge($foundChildren, $NonAChildren);
       }
       else
         unset($children[$key]);
@@ -576,23 +521,6 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
     else
     $foundChildren[$key] = $child;
   }
-  uasort($foundChildren, '_DirCmp');
+  // uasort($foundChildren, '_DirCmp');
   return $foundChildren;
-}
-
-
-/**
- * \brief Get string representation of uploadtree path.
- *  Use Dir2Path to get $PathArray.
- *
- * \param $PathArry an array containing the path
- *
- * \return string representation of uploadtree path
- */
-function Uploadtree2PathStr ($PathArray)
-{
-  $Path = "";
-  if (count($PathArray))
-    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
-  return $Path;
 }

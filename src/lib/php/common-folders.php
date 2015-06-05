@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014 Siemens AG
 
  This library is free software; you can redistribute it and/or
@@ -16,6 +16,8 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \file common-folders.php
@@ -53,10 +55,9 @@ function FolderGetTop()
 function GetUserRootFolder()
 {
   global $PG_CONN;
-  global $SysConf;
 
   /* validate inputs */
-  $user_pk = $SysConf['auth']['UserId'];
+  $user_pk = Auth::getUserId();
 
   /* everyone has a user_pk, even if not logged in.  But verify. */
   if (empty($user_pk)) return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";
@@ -300,7 +301,7 @@ function FolderGetName($FolderPk,$Top=-1)
 {
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,parent_fk FROM folder
+  $sql = "SELECT folder_name,folder.parent_fk FROM folder
 	LEFT JOIN foldercontents ON foldercontents_mode = 1
 	AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'
@@ -316,74 +317,6 @@ function FolderGetName($FolderPk,$Top=-1)
   }
   return($Name);
 } // FolderGetName()
-
-/**
- * \brief Create the the folder list javascript
- * \return javascript for FolderListDiv().
- */
-function FolderListScript()
-{
-  $V = "";
-  $V .= "<script language='javascript'>\n";
-  $V .= "<!--\n";
-  $V .= "function ShowHide(name)\n";
-  $V .= "  {\n";
-  $V .= "  if (name.length < 1) { return; }\n";
-  $V .= "  var Element, State;\n";
-  $V .= "  if (document.getElementById) // standard\n";
-  $V .= "    { Element = document.getElementById(name); }\n";
-  $V .= "  else if (document.all) // IE 4, 5, beta 6\n";
-  $V .= "    { Element = document.all[name]; }\n";
-  $V .= "  else // if (document.layers) // Netscape 4 and older\n";
-  $V .= "    { Element = document.layers[name]; }\n";
-  $V .= "  State = Element.style;\n";
-  $V .= "  if (State.display == 'none') { State.display='block'; }\n";
-  $V .= "  else { State.display='none'; }\n";
-  $V .= "  }\n";
-  $V .= "function Expand()\n";
-  $V .= "  {\n";
-  $V .= "  var E = document.getElementsByTagName('div');\n";
-  $V .= "  for(var i = 0; i < E.length; i++)\n";
-  $V .= "    {\n";
-  $V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
-  $V .= "      {\n";
-  $V .= "      var Element, State;\n";
-  $V .= "      if (document.getElementById) // standard\n";
-  $V .= "        { Element = document.getElementById(E[i].id); }\n";
-  $V .= "      else if (document.all) // IE 4, 5, beta 6\n";
-  $V .= "        { Element = document.all[E[i].id]; }\n";
-  $V .= "      else // if (document.layers) // Netscape 4 and older\n";
-  $V .= "        { Element = document.layers[E[i].id]; }\n";
-  $V .= "      State = Element.style;\n";
-  $V .= "      State.display='block';\n";
-  $V .= "      }\n";
-  $V .= "    }\n";
-  $V .= "  }\n";
-  $V .= "function Collapse()\n";
-  $V .= "  {\n";
-  $V .= "  var E = document.getElementsByTagName('div');\n";
-  $V .= "  var First=1;\n";
-  $V .= "  for(var i = 0; i < E.length; i++)\n";
-  $V .= "    {\n";
-  $V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
-  $V .= "      {\n";
-  $V .= "      var Element, State;\n";
-  $V .= "      if (document.getElementById) // standard\n";
-  $V .= "        { Element = document.getElementById(E[i].id); }\n";
-  $V .= "      else if (document.all) // IE 4, 5, beta 6\n";
-  $V .= "        { Element = document.all[E[i].id]; }\n";
-  $V .= "      else // if (document.layers) // Netscape 4 and older\n";
-  $V .= "        { Element = document.layers[E[i].id]; }\n";
-  $V .= "      State = Element.style;\n";
-  $V .= "      if (First) { State.display='block'; First=0; } \n";
-  $V .= "      else { State.display='none'; } \n";
-  $V .= "      }\n";
-  $V .= "    }\n";
-  $V .= "  }\n";
-  $V .= "-->\n";
-  $V .= "</script>\n";
-  return($V);
-} // FolderListScript()
 
 /**
  * \brief Create the folder tree, using DIVs.
@@ -485,11 +418,14 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
   else { $Title = ""; }
 
-  if (plugin_find_id("basenav") >= 0) { $Target = "target='basenav'"; }
-  else { $Target = ""; }
-  if (!empty($Browse)) { $V .= "<a $Title $Target class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
+ if (!empty($Browse))
+  {
+    $V .= "<a $Title class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>";
+  }
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
-  { $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>"; }
+  {
+    $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>";
+  }
   $V .= htmlentities($Name);
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
   { $V .= "</font>"; }
@@ -532,7 +468,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   {
     /* Mode 2 means child_id is an upload_pk */
     $Parm = $Uploadpk;
-    $sql = "SELECT foldercontents.parent_fk, folder_name FROM foldercontents
+    $sql = "SELECT foldercontents.parent_fk,folder_name FROM foldercontents
               INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
 			  AND foldercontents.foldercontents_mode = 2
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
@@ -629,7 +565,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
  *
  * \return array of {upload_pk, upload_desc, name, folder}
  */
-function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=PERM_READ)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth::PERM_READ)
 {
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }

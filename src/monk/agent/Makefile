@@ -9,15 +9,15 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. -Werror -Wall -Wextra -fopenmp
+LOCAL_CFLAGS = -std=c99 -I. -Werror -Wall -Wextra -fopenmp
+LOCAL_LDFLAGS = -lm -fopenmp
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK = $(ALL_CFLAGS) -lm -fopenmp
 
 ifeq (,$(shell pkg-config --exists uchardet || echo no))
-CFLAGS_LOCAL += $(shell pkg-config --cflags uchardet) -DHAVE_CHARDET
-CFLAGS_LINK += $(shell pkg-config --libs uchardet)
+LOCAL_CFLAGS += $(shell pkg-config --cflags uchardet) -DHAVE_CHARDET
+LOCAL_LDFLAGS += $(shell pkg-config --libs uchardet)
 else
-CFLAGS_LINK += -lmagic
+LOCAL_LDFLAGS += -lmagic
 endif
 
 EXE = monk monkbulk
@@ -36,12 +36,12 @@ all: _squareVisitor.h $(EXE)
 all_cov: _squareVisitor.h $(EXE:%=%_cov)
 
 $(EXE): % : %.c $(FOLIB) $(VARS) $(OBJECTS)
-	$(CC) -c $< $(CFLAGS_LOCAL) $(DEF) -o $@.o
-	$(CC) $@.o $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(DEF) -o $@.o
+	$(CC) $@.o $(OBJECTS) $(DEF) $(FO_LDFLAGS) $(LOCAL_LDFLAGS) -o $@
 
 $(EXE:%=%_cov): %_cov : %.c $(FOLIB) $(VARS) $(COVERAGE)
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEF) $(DEFS) -o $@.o
-	$(CC) $@.o $(COVERAGE) $(FLAG_COV) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(FLAG_COV) $(DEF) $(DEFS) -o $@.o
+	$(CC) $@.o $(COVERAGE) $(FLAG_COV) $(DEF) $(FO_LDFLAGS) $(LOCAL_LDFLAGS) -o $@
 
 #######################
 # library build rules #
@@ -64,13 +64,13 @@ _squareVisitor.c _squareVisitor.h: squareBuilder
 	sh genSquareVisitor
 
 squareBuilder: buildSquareVisitor.c
-	$(CC) buildSquareVisitor.c $(DEF) $(CFLAGS_LOCAL) -lm -o $@
+	$(CC) buildSquareVisitor.c $(ALL_CFLAGS) $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) -o $@
 
 $(OBJECTS): %.o: %.c _squareVisitor.c
-	$(CC) -c $< $(CFLAGS_LOCAL) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) -o $@
 
 $(COVERAGE): %_cov.o: %.c _squareVisitor.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(FLAG_COV) -o $@
 
 #######################
 # install build rules #

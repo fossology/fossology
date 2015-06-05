@@ -96,7 +96,6 @@ function RepPath($PfilePk, $Repo="files")
  */
 function RepPathItem($Item, $Repo="files")
 {
-  global $Plugins;
   global $LIBEXECDIR;
   global $PG_CONN;
   if (empty($PG_CONN)) { return; }
@@ -111,6 +110,4 @@ function RepPathItem($Item, $Repo="files")
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
   return($Path[0]);
-} // RepPathItem()
-
-?>
+}

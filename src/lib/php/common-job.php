@@ -1,6 +1,9 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
 
  This library is free software; you can redistribute it and/or
@@ -59,7 +62,7 @@
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=PERM_NONE)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
 {
   global $container;
 
@@ -83,7 +86,7 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   {
     $groupId = $usersRow['group_fk'];
   }
-  $perm_admin = PERM_ADMIN;
+  $perm_admin = Auth::PERM_ADMIN;
 
   $dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) VALUES ($1,$2,$3)",
                array($perm_admin, $uploadId, $groupId),'insert.perm_upload');
@@ -268,11 +271,10 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 {
   global $Plugins;
   global $PG_CONN;
-  global $SysConf;
 
   /* Get the users.default_bucketpool_fk */
-  $user_pk = $SysConf['auth']['UserId'];
-  $group_pk = $SysConf['auth']['GroupId'];
+  $user_pk = Auth::getUserId();
+  $group_pk = Auth::getGroupId();
 
   if (empty($upload_pk_list)) 
   {
@@ -336,11 +338,9 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
  */
 function QueueUploadsOnDelagents($upload_pk_list)
 {
-  global $SysConf;
-
   /* Get the users.default_bucketpool_fk */
-  $user_pk = $SysConf['auth']['UserId'];
-  $group_pk = $SysConf['auth']['GroupId'];
+  $user_pk = Auth::getUserId();
+  $group_pk = Auth::getGroupId();
 
   if (!empty($upload_pk_list))
   {
@@ -386,7 +386,7 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 
   /* check if the upload_pk is currently in the job queue being processed when agent name is ununpack or adj2nest */
   /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
-  if ($AgentName == "ununpack")
+  if ($AgentName == "ununpack" || $AgentName == "adj2nest")
   {
     $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
   }

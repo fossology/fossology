@@ -44,6 +44,7 @@ class HighlightRenderer extends Object
             Highlight::COPYRIGHT => 'hi-cp',
             Highlight::EMAIL => 'hi-email',
             Highlight::URL => 'hi-url',
+            Highlight::AUTHOR => 'hi-author',
             Highlight::BULK => 'hi-bulk',
             Highlight::IP => 'hi-ip',
             Highlight::ECC => 'hi-mediumorchid'

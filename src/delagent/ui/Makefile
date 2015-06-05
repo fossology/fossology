@@ -15,23 +15,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../..
-include $(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
+include $(VARS)
+
+MOD_NAME = delagent
+MOD_SUBDIR = ui
 
 all:
-	@echo "make delagent ui"
+	@echo "nothing to do"
 
 install:
-	@echo "make delagent ui install"
-	mkdir -p $(DESTDIR)$(MODDIR)/delagent/ui
-	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/delagent/ui/
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 uninstall:
-	@echo "make delagent ui uninstall"
-	rm -rf $(DESTDIR)$(MODDIR)/delagent/ui
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 clean:
-	@echo "make delagent ui clean"
+	@echo "nothing to do"
 
 .PHONY: all install uninstall clean
-

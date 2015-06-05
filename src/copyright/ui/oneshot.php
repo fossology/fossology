@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 use Fossology\Lib\Data\Highlight;
-
+use Fossology\Lib\Auth\Auth;
 /**
  * \file oneshot.php
  * \brief One-Shot Copyright/Email/URL Analysis
@@ -53,7 +53,6 @@ class agent_copyright_once extends FO_Plugin {
     global $SYSCONFDIR;
     $ModBack = GetParm("modback",PARM_STRING);
     $copyright_array = array();
-
     $V = "";
 
     /** @var ui_view $view */
@@ -65,16 +64,18 @@ class agent_copyright_once extends FO_Plugin {
       $errmsg = _("unable to change working directory to $copyright_dir\n");
       return $errmsg;
     }
-    $Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    //$Sys = "./copyright -C $tempFileName -c $SYSCONFDIR";
+    $Sys = "./copyright -c $SYSCONFDIR $tempFileName";
+
     $inputFile = popen($Sys, "r");
-    $colors = Array();
+    $colors = array();
     $colors['statement'] = 0;
     $colors['email'] = 1;
     $colors['url'] = 2;
-    $stuff = Array();
-    $stuff['statement'] = Array();
-    $stuff['email'] = Array();
-    $stuff['url'] = Array();
+    $stuff = array();
+    $stuff['statement'] = array();
+    $stuff['email'] = array();
+    $stuff['url'] = array();
     $realline = "";
 
     $highlights = array();
@@ -83,7 +84,6 @@ class agent_copyright_once extends FO_Plugin {
         'statement' => Highlight::COPYRIGHT,
         'email' => Highlight::EMAIL,
         'url' => Highlight::URL);
-
     while (!feof($inputFile)) {
       $Line = fgets($inputFile);
       if ($Line[0] == '/') continue;
@@ -120,7 +120,7 @@ class agent_copyright_once extends FO_Plugin {
 
     $inputFile = fopen($tempFileName, "r");
     if ($inputFile) {
-      $view->ShowView($inputFile, $ModBack, 0, 0, NULL, True, False, $highlights); // do not show Header and micro menus
+      $V = $view->getView($inputFile, $ModBack, 0, NULL, $highlights); // do not show Header and micro menus
       fclose($inputFile);
     }
     if(!chdir($ui_dir)) {
@@ -180,10 +180,10 @@ class agent_copyright_once extends FO_Plugin {
       /* default header is plain text */
     }
     /* Only register with the menu system if the user is logged in. */
-    if (!empty($_SESSION['User']))
+    if (!empty($_SESSION[Auth::USER_NAME]))
     {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_WRITE)
+      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
       {
         menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
 
@@ -207,70 +207,64 @@ class agent_copyright_once extends FO_Plugin {
     /* For REST API:
        wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_copyright_once
     */
-    /* Ignore php Notice is array keys don't exist */
-    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
-    $tmp_name = $_FILES['licfile']['tmp_name'];
-    error_reporting($errlev);
 
-    if ($this->NoHTML && file_exists($tmp_name))
+    $tmp_name = '';
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('tmp_name', $_FILES['licfile']))
+    {
+      $tmp_name = $_FILES['licfile']['tmp_name'];
+    }
+
+    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
+    if ($this->OutputType!='HTML' && file_exists($tmp_name))
     {
       $copyright_res = $this->AnalyzeOne();
+      $cont = '';
       foreach ($copyright_res as $copyright)
       {
-        echo "$copyright\n";
+        $cont = "$copyright\n";
       }
       unlink($tmp_name);
-      return;
+      return $cont;
     }
 
-    $V = "";
-    switch ($this->OutputType) {
-      case "XML":
-        break;
-      case "HTML":
-        /* If this is a POST, then process the request. */
-        if (file_exists(@$_FILES['licfile']['tmp_name'])) {
-          if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
-            /* Size is not too big.  */
-            print $this->AnalyzeOne() . "\n";
-          }
-          if (!empty($_FILES['licfile']['unlink_flag'])) {
-            unlink($_FILES['licfile']['tmp_name']);
-          }
-          return;
+    if ($this->OutputType=='HTML') {
+      /* If this is a POST, then process the request. */
+      if ($tmp_name) {
+        if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
+          $this->vars['content'] = $this->AnalyzeOne();
         }
-
-        /* Display instructions */
-        $V.= _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
-        $V.= "<ul>\n";
-        $V.= "<li>" . _("The analysis is done in real-time.");
-        $V.= "<li>" . _("Files that contain files are <b>not</b> unpacked. If you upload a container like a gzip file, then only that binary file will be scanned.\n");
-        $V.= "<li>" . _("Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
-        $V.= "</ul>\n";
-        /* Display the form */
-        $V.= "<form enctype='multipart/form-data' method='post'>\n";
-        $V.= _("Select the file to upload:");
-        $V.= "<br><input name='licfile' size='60' type='file' /><br />\n";
-        $V.= "<input type='hidden' name='showheader' value='1'>";
-
-        $text = _("Upload and scan");
-        $V.= "<p><input type='submit' value='$text'>\n";
-        $V.= "</form>\n";
-        break;
-      case "Text":
-        break;
-      default:
-        break;
+        else {
+          $this->vars['message'] =  _('file is to large for one-shot copyright analyze');
+        }
+        return;
+      }
+      $this->vars['content'] = $this->htmlContent();
     }
-    if (!empty($_FILES['licfile']['unlink_flag'])) {
-      unlink($_FILES['licfile']['tmp_name']);
+    if (array_key_exists('licfile', $_FILES) && array_key_exists('unlink_flag',$_FILES['licfile'])) {
+      unlink($tmp_name);
     }
-    if (!$this->OutputToStdout) {
-      return ($V);
-    }
-    print ($V);
-    return;
+    // $_FILES['licfile'] = NULL;
   }
-};
+
+  protected function htmlContent()
+  {
+    $V = _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");
+    $V.= "<ul>\n";
+    $V.= "<li>" . _("The analysis is done in real-time.");
+    $V.= "<li>" . _("Files that contain files are <b>not</b> unpacked. If you upload a container like a gzip file, then only that binary file will be scanned.\n");
+    $V.= "<li>" . _("Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+    $V.= "</ul>\n";
+    /* Display the form */
+    $V.= "<form enctype='multipart/form-data' method='post'>\n";
+    $V.= _("Select the file to upload:");
+    $V.= "<br><input name='licfile' size='60' type='file' /><br />\n";
+    $V.= "<input type='hidden' name='showheader' value='1'>";
+
+    $text = _("Upload and scan");
+    $V.= "<p><input type='submit' value='$text'>\n";
+    $V.= "</form>\n";
+    return $V;
+  }
+}
 
 $NewPlugin = new agent_copyright_once();

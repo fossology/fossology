@@ -5,16 +5,17 @@
    This file is offered as-is, without any warranty.
 #}
 tableColumns = [
-  {"sTitle": "{{ "Upload Name and Description" }}", "sClass": "left"},
-  {"sTitle": "{{ "Status" }}", "sClass": "center", "bSearchable": false},
+  {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left"},
+  {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSearchable": false},
   {
-    "sTitle": "{{ "Comment" }}", "sClass": "center cc", "bSortable": false, "bSearchable": false,
+    "sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false,
     "mRender": 2
   },
-  {"sTitle": "{{ "Assigned to" }}", "sClass": "center", "bSearchable": false},
-  {"sTitle": "{{ "Upload Date" }}", "sClass": "center", "sType": "string", "bSearchable": false},
+  {"sTitle": "{{ "Main licenses"|trans }}", "sClass": "center", "bSearchable": false, "bSortable": false},
+  {"sTitle": "{{ "Assigned to"|trans }}", "sClass": "center", "bSearchable": false},
+  {"sTitle": "{{ "Upload Date"|trans }}", "sClass": "center", "sType": "string", "bSearchable": false},
   {
-    "sTitle": "{{ "Priority" }}", "sClass": "center priobucket", "bSearchable": false,
+    "sTitle": "{{ "Priority"|trans }}", "sClass": "center priobucket", "bSearchable": false,
     "mRender": function (source, type, val) {
       return prioColumn(source, type, val);
     }
@@ -22,11 +23,11 @@ tableColumns = [
 ];
 
 tableSorting = [
-  [5, "desc"],
+  [6, "desc"],
   [0, "asc"],
-  [3, "desc"],
+  [4, "desc"],
   [1, "desc"],
-  [4, "desc"]
+  [5, "desc"]
 ];
 
 dataTableConfig =
@@ -65,4 +66,21 @@ $('#nav-hider').click(function() {
 $('#nav-shower').click(function() {
   $('#nav-shower').hide('slow');
   $('#nav-cell').show('slow');
+});
+
+function removeMainLicense(uploadId,licenseId) {
+  if(confirm("{{'Remove this license from the main license list?'|trans}}"))
+  {
+    $.getJSON("?mod=conclude-license&do=removeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
+      .done(function (data) {
+        var table = createBrowseTable();
+        table.fnDraw(false);
+      })
+      .fail(failed);
+  }
+}
+
+$('.multi-upload-agent').click( function() {
+  $('#mod').val( $(this).attr('name') );
+  return true;
 });

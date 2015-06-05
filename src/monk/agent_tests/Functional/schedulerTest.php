@@ -38,7 +38,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   private $dbManager;
   /** @var TestInstaller */
   private $testInstaller;
-  
+
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -50,7 +50,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("monkSched".time());
+    $this->testDb = new TestPgDb("monkSched");
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
@@ -58,10 +58,13 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->uploadDao = new UploadDao($this->dbManager, $logger);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+
+    $this->agentDir = dirname(dirname(__DIR__));
   }
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -74,12 +77,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $sysConf = $this->testDb->getFossSysConf();
 
     $agentName = "monk";
-
-    $agentDir = dirname(dirname(__DIR__));
     $execDir = __DIR__;
-    $instRet = 0;
-    system($install="install -D $agentDir/VERSION-monk $sysConf/mods-enabled/$agentName/VERSION", $instRet);
-    $this->assertEquals(0, $instRet, 'copying version file failed '.$install);
 
     $pipeFd = popen("echo $uploadId | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start $args", "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
@@ -90,10 +88,6 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     }
     $retCode = pclose($pipeFd);
 
-    unlink("$sysConf/mods-enabled/$agentName/VERSION");
-    rmdir("$sysConf/mods-enabled/$agentName");
-    rmdir("$sysConf/mods-enabled");
-
     return array($output,$retCode);
   }
 
@@ -101,11 +95,15 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
+    $this->testInstaller->install($this->agentDir);
   }
 
   private function rmRepo()
   {
+    $this->testInstaller->uninstall($this->agentDir);
+    $this->testInstaller->clear();
     $this->testInstaller->rmRepo();
   }
 
@@ -117,7 +115,6 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','license_file','highlight'),false);
-    $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
     $this->testDb->insertData_license_ref();

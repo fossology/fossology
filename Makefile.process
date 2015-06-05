@@ -32,9 +32,9 @@ $(TOP)/variable.list: $(TOP)/Makefile.conf
 
 $(VARIABLES):
 	@if [ "$@" = "PROJECT" ]; then \
-	   echo "$@=\"$($@)\"" >$(TOP)/variable.list; \
+		echo "$@=\"$($@)\"" >$(TOP)/variable.list; \
 	else \
-	   echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
+		echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
 	fi
 
 .PHONY: $(VARIABLES)

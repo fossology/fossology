@@ -22,12 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 
 int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
-                        const GArray* searchTokens, size_t searchStart, size_t searchLength,
-                        unsigned int numberOfWantedMatches) {
+                 const GArray* searchTokens, size_t searchStart, size_t searchLength,
+                 unsigned int numberOfWantedMatches) {
 
-  if (tokenEquals(
-    &g_array_index(textTokens, Token, textStart),
-    &g_array_index(searchTokens, Token, searchStart))) {
+  if (
+    textStart < textLength &&
+    searchStart < searchLength &&
+    tokenEquals(
+      &g_array_index(textTokens, Token, textStart),
+      &g_array_index(searchTokens, Token, searchStart
+    )))
+  {
     unsigned matched = 1;
     size_t canMatch = MIN(numberOfWantedMatches,
                           1 + MIN(textLength - textStart, searchLength - searchStart));

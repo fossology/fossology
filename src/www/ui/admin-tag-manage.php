@@ -15,13 +15,15 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+use Fossology\Lib\Auth\Auth;
+
 
 /**
  * \file admin_tag_manage.php
  * \brief "Enable/Disable tag
  */
 
-define("TITLE_admin_tag_manage", _("Enable/Disable Tag"));
+define("TITLE_admin_tag_manage", _("Enable/Disable Tag Display"));
 
 class admin_tag_manage extends FO_Plugin
 {
@@ -56,7 +58,7 @@ class admin_tag_manage extends FO_Plugin
     /** get upload list */
     $upload_list = array();
     if (!empty($upload_id)) $upload_list[0] = array('upload_pk'=>$upload_id);
-    else $upload_list = FolderListUploadsRecurse($folder_id, NULL, PERM_WRITE); // want to manage all uploads under a folder
+    else $upload_list = FolderListUploadsRecurse($folder_id, NULL, Auth::PERM_WRITE); // want to manage all uploads under a folder
 
     foreach($upload_list as $upload)
     {
@@ -152,7 +154,7 @@ class admin_tag_manage extends FO_Plugin
 
 
     $V .= "<form name='formy' method='post'>\n"; // no url = this url
-    $V .= _("Select an uploaded file to enable/disable.\n");
+    $V .= _("Displaying tags while browsing can be slow for large uploads.  This interface allows you to select an upload to disable (or enable) the tag display.  By default the tag display is enabled.<p>\n");
 
     $V .= "<ol>\n";
     $text = _("Select the folder containing the upload you wish to enable/disable:");
@@ -167,7 +169,7 @@ class admin_tag_manage extends FO_Plugin
     $V .= "<li>$text<br>";
     $V .= "<div id='tagdiv'>\n";
     $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n"; 
-    $List = FolderListUploads_perm($Folder, PERM_WRITE);
+    $List = FolderListUploads_perm($Folder, Auth::PERM_WRITE);
     foreach($List as $L)
     {
       $V .= "<option value='" . $L['upload_pk'] . "'>";

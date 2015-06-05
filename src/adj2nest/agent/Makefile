@@ -15,42 +15,32 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
 
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
+TOP = ../../..
+VARS = $(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-LOCAL_CFLAGS= $(ALL_CFLAGS)
-EXE=adj2nest
+
+CFLAGS_LOCAL = $(ALL_CFLAGS)
+EXE = adj2nest
 
 $(EXE): adj2nest.c $(FOLIB) $(VARS)
-	$(CC) $< $(LOCAL_CFLAGS) $(FO_LDFLAGS) $(DEFS) -o $@
+	$(CC) $< $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 all: $(EXE)
 
 #######################
 # library build rules #
 #######################
+
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
-	@mkdir -p $(CONFDIR)/mods-enabled
-	@if test ! -e $(CONFDIR)/mods-enabled/$(EXE); then \
-	  ln -s $(MODDIR)/$(EXE) $(CONFDIR)/mods-enabled ; fi;
 
 uninstall:
-	@rm -rf $(DESTDIR)$(MODDIR)/$(EXE)
-	@rm -f $(CONFDIR)/mods-enabled/$(EXE)
-
-
-test: all
-	@echo "*** No tests available for src/$(EXE) ***"
-
-coverage:
-	@echo "NOTICE: no coverage available for adj2nest"
+	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean

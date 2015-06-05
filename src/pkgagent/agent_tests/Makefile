@@ -14,30 +14,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DIRS = Unit Functional
 
-dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all:
-	$(call dirloop, )
+	$(call DIR_LOOP, )
 
 test:
-	$(call dirloop, test)
+	$(call DIR_LOOP,test)
 
 coverage:
-	$(call dirloop, coverage)
+	$(call DIR_LOOP,coverage)
 
 clean:
-	$(call dirloop, clean)
-
-install:
-	@echo "No pkgagent agent_tests install"
-
-uninstall:
-	@echo "No pkgagent agent_tests uninstall"
+	$(call DIR_LOOP,clean)
 
 .PHONY: all test coverage clean

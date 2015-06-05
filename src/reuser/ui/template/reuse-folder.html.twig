@@ -1,0 +1,18 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% if selected is not defined %}
+  {% set selected = -1 %}
+{% endif %}
+<select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}>
+  {% for entry in folderStructure %}
+    {% for entryReuse in entry.reuse %}
+      <option value="{{ entry.folder.id }},{{ entryReuse.group_id }}"{% if selected == entry.folder.id %} selected="selected"{% endif %}>
+        {% for i in range(0, entry.depth) if i > 0 %}&nbsp; {% endfor %}{{ entry.folder.name }} ({{ entryReuse.group_name }}:{{ entryReuse.count }})
+      </option>
+    {% endfor %}
+  {% endfor %}
+</select>

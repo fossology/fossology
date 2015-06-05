@@ -19,6 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
+/** 
+ * @todo remove this file and change Makefile
+ */
+
 if (!function_exists('Traceback_uri'))
 {
   function Traceback_uri(){
@@ -45,9 +49,10 @@ class TestCLib extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $returnCode = 0;
-    system("./testlibs ".$sysConf."/Db.conf", $returnCode);
+    $lines = array();
+    exec("./testlibs ".$sysConf."/Db.conf", $lines, $returnCode);
 
-    $this->assertEquals($expected=0, $returnCode);
+    $this->assertEquals($expected=0, $returnCode, "error: ".implode("\n", $lines));
   }
 
 

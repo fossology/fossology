@@ -7,11 +7,31 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # the directories we do things in by default
-DIRS = adj2nest ununpack buckets cli copyright lib scheduler nomos monk pkgagent delagent wget_agent mimetype maintagent www debug decider deciderjob
+DIRS = \
+	adj2nest \
+	buckets \
+	cli \
+	copyright \
+	debug \
+	decider \
+	deciderjob \
+	delagent \
+	lib \
+	maintagent \
+	mimetype \
+	monk \
+	nomos \
+	pkgagent \
+	readmeoss \
+	reuser \
+	scheduler \
+	ununpack \
+	wget_agent \
+	www
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
-# run 'make $(operation)-$(subdir)'. Yet another convencience, a target of
+# run 'make $(operation)-$(subdir)'. Yet another convenience, a target of
 # '$(subdir)' is equivalent to 'build-$(subdir)'
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
@@ -19,6 +39,7 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 COVDIRS = $(DIRS:%=cov-%)
+
 all: $(BUILDDIRS)
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
@@ -38,7 +59,12 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -s -C $(@:test-%=%) test
 
-coverage: $(COVDIRS)
+coverage-report-html:
+	$(call coverage-report-html,.)
+
+coverage:
+	$(MAKE) -k $(COVDIRS)
+	$(MAKE) coverage-report-html
 $(COVDIRS):
 	$(MAKE) -s -C $(@:cov-%=%) coverage
 
@@ -47,12 +73,12 @@ $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
 phpvendors:
-	composer install
+	composer install -q
 
 composer_install:
-	echo "current dir: '${PWD}'"
+	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); composer install --no-dev)
+	(cd $(DESTDIR)$(MODDIR); composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

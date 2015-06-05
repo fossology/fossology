@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,16 +22,13 @@ namespace Fossology\Lib\Test;
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/vendor/autoload.php");
 require_once(__DIR__ . "/../../../testing/db/TestDbFactory.php");
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Db\Driver\Postgres;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 
-class TestPgDb
+class TestPgDb extends TestAbstractDb
 {
-  /** * @var DbManager */
-  private $dbManager;
   /** @var string dbName */
   private $dbName;
   /** @var string logFileName */
@@ -41,26 +38,26 @@ class TestPgDb
   /** @var array */
   private $sys_conf;
 
-  function __construct($dbName = null)
+  function __construct($dbName = null, $sysConf = null)
   {
+    $dbName = strtolower($dbName);
     $testDbFactory = new \TestDbFactory();
-    $this->sys_conf = getenv('TSYSCONFDIR');
+    $this->sys_conf = $sysConf;
     if(empty($this->sys_conf))
     {
       $this->sys_conf = $testDbFactory->setupTestDb($dbName);
-      putenv("TSYSCONFDIR=".$this->sys_conf);
       $dbName = $testDbFactory->getDbName($this->sys_conf);
     }
     $this->dbName = $dbName;
 
     require_once (dirname(dirname(__FILE__)).'/common-db.php');
     $this->connection = DBconnect($this->sys_conf);
-    
+
     require (dirname(dirname(__FILE__)).'/common-container.php');
     global $container;
     $logger = new Logger('default'); // $container->get('logger');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.pg.log';
-    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
+    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));
 
     $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
@@ -68,7 +65,7 @@ class TestPgDb
     $this->dropAllTables();
     $this->dropAllSequences();
   }
-  
+
   public function getFossSysConf()
   {
     return $this->sys_conf;
@@ -98,28 +95,22 @@ class TestPgDb
       $this->dbManager->queryOnce("DROP SEQUENCE $name CASCADE",$sqlLog=__METHOD__.".$name");
     }
   }
-  
+
   function __destruct()
   {
     $this->dbManager = null;
     $this->connection = null;
   }
-  
+
   function fullDestruct()
   {
+    pg_close($this->connection);
+    $GLOBALS['PG_CONN'] = false;
     $testDbFactory = new \TestDbFactory();
-    $testDbFactory->purgeTestDb();
+    $testDbFactory->purgeTestDb($this->sys_conf);
+    $this->dbManager = null;
   }
 
-  private function dirnameRec($path, $depth = 1)
-  {
-    for ($i = 0; $i < $depth; $i++)
-    {
-      $path = dirname($path);
-    }
-    return $path;
-  }
-  
   function isInFossyGroup()
   {
     $gid_array = posix_getgroups();
@@ -136,29 +127,6 @@ class TestPgDb
     return ($uid_info['name'] !== 'root');
   }
   
-  
-  /**
-   * @param array $tableList
-   * @param bool $invert
-   */
-  public function alterTables($tableList, $invert=FALSE)
-  {
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if( $invert^!in_array($tableName, $tableList) ){
-        continue;
-      }
-      foreach ($tableCols as $attributes)
-      {
-        $attributeKey = "ALTER";
-        if (array_key_exists($attributeKey, $attributes))
-          $this->dbManager->queryOnce($attributes[$attributeKey]);
-      }
-    }
-  }
-
   /**
    * @param array $tableList
    * @param bool $invert 
@@ -175,91 +143,15 @@ class TestPgDb
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
       foreach ($tableCols as $attributes)
       {
-        $this->dbManager->queryOnce($attributes["ADD"]);
+        $sqlAdd = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
+        $this->dbManager->queryOnce($sqlAdd);
       }
     }
   }
   
-  /**
-   * @param array $tableList
-   * @param bool $invert 
-   */
-  public function insertData($tableList, $invert=FALSE)
-  {
-    $testdataFile = dirname(__FILE__) . '/testdata.sql';
-    $testdata = file_get_contents($testdataFile);
-    $delimiter = 'INSERT INTO ';
-    $offset = strpos($testdata, $delimiter);
-    while( false!==$offset) {
-      $nextOffset = strpos($testdata, $delimiter, $offset+1);
-      if (false===$nextOffset)
-      {
-        $sql = substr($testdata, $offset);
-      }
-      else
-      {
-        $sql = substr($testdata, $offset, $nextOffset-$offset);
-      }
-      preg_match('/^INSERT INTO (?P<name>\w+) /', $sql, $table);
-      if( ($invert^!in_array($table['name'], $tableList)) ){
-        $offset = $nextOffset;
-        continue;
-      }
-      $this->dbManager->queryOnce($sql);
-      $offset = $nextOffset;
-    }
-  }
-  
-  public function insertData_license_ref($limit=140)
-  {
-    $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i++)
-    {
-      $sql = $splitted[$i];
-      $this->dbManager->queryOnce($delimiter.$sql);
-      if ($i > $limit)
-      {
-        break;
-      }
-    }
-    $this->resetSequenceAsMaxOf('license_ref_rf_pk_seq', 'license_ref', 'rf_pk');
-  }
-
   public function resetSequenceAsMaxOf($sequenceName, $tableName, $columnName)
   {
     $this->dbManager->queryOnce("SELECT setval('$sequenceName', (SELECT MAX($columnName) FROM $tableName))");
-  }
-
-  /**
-   * @param string $type
-   * @param array $elementList
-   * @param bool $invert
-   */
-  private function applySchema($type, $elementList, $invert=FALSE)
-  {
-    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
-    $Schema = array();
-    require($coreSchemaFile);
-    foreach($Schema[$type] as $viewName=>$sql){
-      if( $invert^!in_array($viewName, $elementList) ){
-        continue;
-      }
-      $this->dbManager->queryOnce($sql);
-    }
-  }
-
-  /**
-   * @param array $viewList
-   * @param bool $invert 
-   */
-  public function createViews($viewList, $invert=FALSE)
-  {
-    $this->applySchema('VIEW', $viewList, $invert);
   }
 
   /**
@@ -279,21 +171,32 @@ class TestPgDb
   {
     $this->applySchema('CONSTRAINT', $cList, $invert);
   }
-
-  public function &getDbManager()
-  {
-    return $this->dbManager;
-  }
   
-  public function createInheritedTables()
+  /**
+   * @param string[] $tableList array of table names or empty for all tables
+   */
+  public function createInheritedTables($tableList=array())
   {
-    if(!$this->dbManager->existsTable('license_candidate'))
+    $table = 'license_candidate';
+    if((empty($tableList) || in_array($table, $tableList)) && !$this->dbManager->existsTable($table))
     {
-      $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
+      $this->dbManager->queryOnce("CREATE TABLE $table (group_fk integer) INHERITS (license_ref)");
+    }
+    $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
+    $Schema = array();
+    require($coreSchemaFile);
+    foreach ($Schema['INHERITS'] as $table=>$fromTable)
+    {
+      if ($fromTable=='master_ars' || !empty($tableList) && !in_array($table, $tableList) ) {
+        continue;
+      }
+      if (!$this->dbManager->existsTable($table) && $this->dbManager->existsTable($fromTable))
+      {
+        $this->dbManager->queryOnce("CREATE TABLE \"$table\" () INHERITS (\"$fromTable\")");
+      }
     }
   }
 
-  
   public function createInheritedArsTables($agents)
   {
     foreach ($agents as $agent)

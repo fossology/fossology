@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
@@ -38,8 +40,6 @@ class admin_folder_delete extends FO_Plugin {
    */
   function Delete($folderpk, $Depends = NULL) 
   {
-    global $SysConf;
-
     /* Can't remove top folder */
     if ($folderpk == FolderGetTop()) {
       $text = _("Can Not Delete Root Folder");
@@ -48,8 +48,8 @@ class admin_folder_delete extends FO_Plugin {
     /* Get the folder's name */
     $FolderName = FolderGetName($folderpk);
     /* Prepare the job: job "Delete" */
-    $userId = $SysConf['auth']['UserId'];
-    $groupId = $SysConf['auth']['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName");
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");

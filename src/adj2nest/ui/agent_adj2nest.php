@@ -93,4 +93,3 @@ class Adj2nestAgentPlugin extends AgentPlugin
 }
 
 register_plugin(new Adj2nestAgentPlugin());
-

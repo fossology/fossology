@@ -35,6 +35,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SVN_REV "SVN_REV Unknown"
 #endif
 
+extern char* dbConf;
+
 /**
 * @brief fo_tableExists() tests:
 *   - Check for an existing table
@@ -47,7 +49,7 @@ void test_fo_tableExists()
   PGconn* pgConn;
   int nonexistant_table;
   int existing_table;
-  char* DBConfFile = NULL;  /* use default Db.conf */
+  char* DBConfFile = dbConf;
   char* ErrorBuf;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -55,11 +57,16 @@ void test_fo_tableExists()
   CU_ASSERT_PTR_NOT_NULL(pgConn);
 
   nonexistant_table = fo_tableExists(pgConn, "nonexistanttable");
-  printf("nonexistant table: %d\n", nonexistant_table);
   CU_ASSERT_FALSE(nonexistant_table);
 
-  existing_table = fo_tableExists(pgConn, "upload");
+  PGresult* result = PQexec(pgConn, "CREATE table exists()");
+  CU_ASSERT_PTR_NOT_NULL_FATAL(result);
+  CU_ASSERT_FALSE_FATAL(fo_checkPQcommand(pgConn, result, "create", __FILE__, __LINE__));
+
+  existing_table = fo_tableExists(pgConn, "exists");
   CU_ASSERT_TRUE(existing_table);
+
+  PQfinish(pgConn);
   return;
 }
 

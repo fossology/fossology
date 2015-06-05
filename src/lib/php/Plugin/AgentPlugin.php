@@ -22,6 +22,8 @@ use Fossology\Lib\Util\Object;
 
 abstract class AgentPlugin extends Object implements Plugin
 {
+  const PRE_JOB_QUEUE = 'preJq';
+  
   public $AgentName;
   public $Name = "agent_abstract";
   public $Dependency = array();
@@ -146,19 +148,31 @@ abstract class AgentPlugin extends Object implements Plugin
     {
       $pluginName = $dependency['name'];
       $depArgs = $dependency['args'];
+      $preJq = array_key_exists(self::PRE_JOB_QUEUE, $dependency) ? $dependency[self::PRE_JOB_QUEUE] : 0;
     }
     else
     {
       $pluginName = $dependency;
       $depArgs = null;
+      $preJq = 0;
     }
     $depPlugin = plugin_find($pluginName);
     if (!$depPlugin)
     {
-      $errorMsg = "Invalid plugin name: $pluginName, (CommonAgentAdd())";
+      $errorMsg = "Invalid plugin name: $pluginName, (implicitAgentAdd())";
       return -1;
     }
-    return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
+    $jqId = $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
+    if($preJq>0 && $jqId>0)
+    {
+      $dbManager = $GLOBALS['container']->get('db.manager');
+      $dbManager->insertTableRow('jobdepends',array('jdep_jq_fk'=>$jqId,'jdep_jq_depends_fk'=>$preJq));
+    }
+    return $jqId;
   }
 
+  function __toString()
+  {
+    return getStringRepresentation(get_object_vars($this), get_class($this));
+  }
 }

@@ -17,12 +17,37 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-/**
- * @global type $dbManager
- * @param type $verbose tell about decisions
- * @return int number of inserted decisions
- */
-function migrate_25_26($verbose)
+function setActiveGroup($verbose)
+{
+  global $dbManager;
+  $stmt = __METHOD__;
+  $sql = "SELECT user_pk,group_pk FROM users LEFT JOIN groups ON group_name=user_name WHERE group_fk IS NULL";
+  $dbManager->prepare($stmt,$sql);
+  $res = $dbManager->execute($stmt);
+  if (pg_num_rows($res)==0)
+  {
+    pg_free_result($res);
+    return 0;
+  }
+  $userGroupMap = pg_fetch_all($res);
+  pg_free_result($res);
+  $selectStmt = __METHOD__.'.select';
+  $sql = "SELECT user_fk,min(group_fk) group_fk FROM group_user_member WHERE user_fk=$1";
+  $updateStmt = __METHOD__.'.update';
+  $dbManager->prepare($updateStmt,"UPDATE users SET group_fk=$2 WHERE user_pk=$1");
+  foreach($userGroupMap as $row)
+  {
+    if (!empty($row['group_pk']))
+    {
+      pg_free_result( $dbManager->execute($updateStmt,$row) );
+      continue;
+    }
+    $rowrow = $dbManager->getSingleRow($sql,array($row['user_pk']),$selectStmt);
+    pg_fetch_result($dbManager->execute($updateStmt,$rowrow) );
+  }
+}
+
+function blowAudit($verbose)
 {
   global $dbManager;
   
@@ -51,9 +76,9 @@ function migrate_25_26($verbose)
   }
   $auditDecisions = pg_fetch_all($res);
   $dbManager->freeResult($res);
-  $scope = $dbManager->getSingleRow('SELECT scope_pk FROM clearing_decision_scopes WHERE meaning=$1',array('global'));
+  $scope = $dbManager->getSingleRow('SELECT scope_pk FROM clearing_decision_scope WHERE meaning=$1',array('global'));
   $scope = $scope['scope_pk'];
-  $type = $dbManager->getSingleRow('SELECT type_pk FROM clearing_decision_types WHERE meaning=$1',array('userDecision'));
+  $type = $dbManager->getSingleRow('SELECT type_pk FROM clearing_decision_type WHERE meaning=$1',array('userDecision'));
   $type = $scope['type_pk'];
   $dbManager->prepare($stmt='insertClearingDecision',
           'INSERT INTO clearing_decision'
@@ -77,4 +102,18 @@ function migrate_25_26($verbose)
    echo "inserted ".count($auditDecisions)." clearing decisions for ".count($pfiles)." files\n";
   }
   return count($auditDecisions);
+}
+
+
+/**
+ * @global type $dbManager
+ * @param type $verbose tell about decisions
+ * @return int number of inserted decisions
+ */
+function migrate_25_26($verbose)
+{
+  setActiveGroup($verbose);
+  //$nInsertedDecisions = blowAudit($verbose);
+  $nInsertedDecisions = 0;
+  return $nInsertedDecisions;
 }

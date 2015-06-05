@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
@@ -105,30 +107,13 @@ class changeLicenseBulk extends FO_Plugin
         throw new InvalidArgumentException('bad scope request');
     }
 
-    $userId = $_SESSION['UserId'];
-    $groupId = $_SESSION['GroupId'];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     $refText = filter_input(INPUT_POST, 'refText');
     $action = filter_input(INPUT_POST, 'bulkAction');
-    if ($action === 'new')
-    {
-      $shortnamePattern = '/^[-+_a-z0-9\\.()]{3,100}$/i';
-      $newShortname = filter_input(INPUT_POST, 'shortname');
-      if (!preg_match($shortnamePattern, $newShortname))
-      {
-        throw new Exception('invalid shortname pattern');
-      }
-      if (!$this->licenseDao->isNewLicense($newShortname, $groupId))
-      {
-        throw new Exception('license shortname already in use');
-      }
-      $licenseId = $this->licenseDao->insertUploadLicense($newShortname, $refText);
-      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, false, $refText);
-    } else
-    {
-      $licenseId = GetParm('licenseId', PARM_INTEGER);
-      $removing = ($action === 'remove');
-      $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
-    }
+    $licenseId = GetParm('licenseId', PARM_INTEGER);
+    $removing = ($action === 'remove');
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
 
     if ($bulkId <= 0)
     {

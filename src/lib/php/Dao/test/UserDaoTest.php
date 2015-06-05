@@ -39,12 +39,13 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
     $this->logger = new Logger("test");
-
     $this->userDao = new UserDao($this->dbManager, $this->logger);
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
   
   public function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
   }
@@ -91,4 +92,69 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($groupsAsForeign, equalTo(array()));
   }  
 
+  public function testAddGroup()
+  {
+    $this->dbManager->queryOnce('CREATE TABLE groups (group_pk integer NOT NULL PRIMARY KEY, group_name varchar(64))');
+    $this->testDb->insertData(array('groups'));
+    $groupId = $this->userDao->addGroup($groupName='newGroup');
+    $row = $this->dbManager->getSingleRow('SELECT group_name FROM groups WHERE group_pk=$1',array($groupId));
+    assertThat($row['group_name'], equalTo($groupName));    
+  }
+  
+  /**
+   * @expectedException \Exception
+   */
+  public function testAddGroupFailIfAlreadyExists()
+  {
+    $this->testDb->createPlainTables(array('groups','users'));
+    $this->testDb->insertData(array('groups','user'));
+    $this->userDao->addGroup('fossy');
+  }
+
+  /**
+   * @expectedException \Exception
+   */
+  public function testAddGroupFailEmptyName()
+  {
+    $this->testDb->createPlainTables(array('groups','users'));
+    $this->testDb->insertData(array('groups','user'));
+    $this->userDao->addGroup('');
+  }
+  
+  public function testGetUserName()
+  {
+    $username = 'testi';
+    $userId = 101;
+    $this->testDb->createPlainTables(array('users'));
+    $this->dbManager->insertTableRow('users',array('user_pk'=>$userId,'user_name'=>$username));
+    $uName = $this->userDao->getUserName($userId);
+    assertThat($uName,equalTo($username));
+  }
+  
+  /**
+   * @expectedException \Exception
+   * @expectedExceptionMessage unknown user with id=101
+   */
+  public function testGetUserNameFail()
+  {
+    $this->testDb->createPlainTables(array('users'));
+    $this->userDao->getUserName(101);
+  }
+  
+  public function testGetGroupIdByName()
+  {
+    $this->testDb->createPlainTables(array('groups'));
+    $this->testDb->insertData(array('groups'));
+    $groupId = $this->userDao->getGroupIdByName('fossy');
+    assertThat($groupId,equalTo(2));
+  }
+  
+  public function testAddGroupMembership()
+  {
+    $this->testDb->createPlainTables(array('users','groups','group_user_member'));
+    $this->testDb->insertData(array('users','groups','group_user_member'));
+    $this->userDao->addGroupMembership($groupId=2,$userId=1);
+    $map = $this->userDao->getUserGroupMap($userId);
+    assertThat($map,hasKey($groupId));
+  }
 }

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2015 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
+
 /**
  * \file ui-list-bucket-files.php
  * \brief This plugin is used to: \n
@@ -28,16 +32,17 @@
  *  bp     bucketpool_pk \n
  */
 
-define("TITLE_list_bucket_files", _("List Files for Bucket"));
-
 class list_bucket_files extends FO_Plugin
 {
-  var $Name       = "list_bucket_files";
-  var $Title      = TITLE_list_bucket_files;
-  var $Version    = "1.0";
-  var $Dependency = array("nomoslicense");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
+  function __construct()
+  {
+    $this->Name       = "list_bucket_files";
+    $this->Title      = _("List Files for Bucket");
+    $this->Dependency = array("nomoslicense");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+  }
 
   /**
    * \brief Customize submenus.
@@ -50,12 +55,10 @@ class list_bucket_files extends FO_Plugin
     $bucket_pk = GetParm("bpk",PARM_INTEGER);
     $bucketpool_pk = GetParm("bp",PARM_INTEGER);
     $nomosagent_pk = GetParm("napk",PARM_INTEGER);
-    $Page = GetParm("page",PARM_INTEGER);
 
     $URL = $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&page=-1";
     $text = _("Show All Files");
     menu_insert($this->Name."::Show All",0, $URL, $text);
-
   } // RegisterMenus()
 
   /**
@@ -70,10 +73,8 @@ class list_bucket_files extends FO_Plugin
    */
   function Initialize()
   {
-    global $Plugins;
     $this->State=PLUGIN_STATE_VALID;
     $this->State=PLUGIN_STATE_READY;
-    array_push($Plugins,$this);
 
     return(true);
   } // Initialize()
@@ -87,7 +88,6 @@ class list_bucket_files extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    global $Plugins;
     global $PG_CONN;
 
     /*  Input parameters */
@@ -108,11 +108,12 @@ class list_bucket_files extends FO_Plugin
 
     /* Check upload permission */
     $Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
-    $UploadPerm = GetUploadPerm($Row['upload_fk']);
-    if ($UploadPerm < PERM_READ)
+    /** @var UploadDao $uploadDao */
+    $uploadDao = $GLOBALS['container']->get('dao.upload');
+    if ( !$uploadDao->isAccessible($Row['upload_fk'], Auth::getGroupId()) )
     {
       $text = _("Permission Denied");
-      echo "<h2>$text item 1<h2>";
+      echo "<h2>$text item 1</h2>";
       return;
     }
 
@@ -131,8 +132,9 @@ class list_bucket_files extends FO_Plugin
     $result_name = pg_query($PG_CONN, $sql);
     DBCheckResult($result_name, $sql, __FILE__, __LINE__);
     $bucketNameCache = array();
-    while ($name_row = pg_fetch_assoc($result_name))
-    $bucketNameCache[$name_row['bucket_pk']] = $name_row['bucket_name'];
+    while ($name_row = pg_fetch_assoc($result_name)) {
+      $bucketNameCache[$name_row['bucket_pk']] = $name_row['bucket_name'];
+    }
     pg_free_result($result_name);
 
     switch($this->OutputType)
@@ -188,8 +190,7 @@ class list_bucket_files extends FO_Plugin
           $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
-                 and ((ufile_mode & (1<<28)) = 0)
-                 and ((ufile_mode & (1<<29))=0)
+                 and ((ufile_mode & (3<<28)) = 0)
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
@@ -271,8 +272,7 @@ class list_bucket_files extends FO_Plugin
           $text = _("Exclude files with license");
           $Header = "<a href=$URL>$text: $licstring.</a>";
 
-          $ok = true;
-          if ($Excl) if (in_array($licstring, $ExclArray)) $ok = false;
+          $ok = !($Excl && in_array($licstring, $ExclArray));
 
           if ($ok)
           {
@@ -323,9 +323,7 @@ class list_bucket_files extends FO_Plugin
     return;
   } // Output()
 
+}
 
-};
 $NewPlugin = new list_bucket_files;
 $NewPlugin->Initialize();
-
-?>

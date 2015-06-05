@@ -361,8 +361,8 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
             
-    $map = $this->clearingDao->getClearedLicenseMultiplicities($treeBounds, $groupId);
-    assertThat($map, is(array('FOO'=>2)));
+    $map = $this->clearingDao->getClearedLicenseIdAndMultiplicities($treeBounds, $groupId);
+    assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','rf_pk'=>401))));
   }
   
   public function testGetClearedLicenses()
@@ -388,5 +388,41 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $map = $this->clearingDao->getClearedLicenses($treeBounds, $groupId);
     assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full'))));
   }
+
   
+  public function testMainLicenseIds()
+  {
+    $this->testDb->createPlainTables(array('upload_clearing_license'));
+    $uploadId = 101;
+    $mainLicIdsInitially = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdsInitially, is(emptyArray()));
+    
+    $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId=402);
+    $mainLicIdsAfterAddingOne = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdsAfterAddingOne, arrayContaining(array($licenseId)));
+    
+    $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId);
+    $mainLicIdsAfterAddingOneTwice = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdsAfterAddingOneTwice, is(arrayWithSize(1)));
+    
+    $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId2=403);
+    $mainLicIdsAfterAddingOther = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdsAfterAddingOther, arrayContainingInAnyOrder(array($licenseId,$licenseId2)));
+    
+    $this->clearingDao->removeMainLicense($uploadId,$this->groupId,$licenseId2);
+    $mainLicIdsAfterRemovingOne = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdsAfterRemovingOne, is(arrayWithSize(1)));
+    
+    $this->clearingDao->removeMainLicense($uploadId,$this->groupId,$licenseId2);
+    $mainLicIdAfterRemovingSomethingNotInSet = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdAfterRemovingSomethingNotInSet, is(arrayWithSize(1)));
+    
+    $this->clearingDao->removeMainLicense($uploadId,$this->groupId+1,$licenseId);
+    $mainLicIdAfterInsertToOtherGroup = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdAfterInsertToOtherGroup, is(arrayWithSize(1)));
+    
+    $this->clearingDao->removeMainLicense($uploadId+1,$this->groupId,$licenseId);
+    $mainLicIdAfterInsertToOtherUpload = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
+    assertThat($mainLicIdAfterInsertToOtherUpload, is(arrayWithSize(1)));
+  }
 }

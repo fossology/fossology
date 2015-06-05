@@ -814,7 +814,7 @@ int ReadParameter (char *Parm)
   else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
   else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
   else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(0, ADMIN_PERM); rc=1; }
+  else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);

@@ -87,6 +87,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   public function tearDown()
   {
+    $this->testDb->fullDestruct();
     $this->testDb = null;
     $this->dbManager = null;
     $this->licenseDao = null;
@@ -98,22 +99,23 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
     $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member','license_map'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_id_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
-    $this->testDb->getDbManager()->queryOnce("alter table uploadtree_a inherit uploadtree");
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk'));
 
@@ -212,7 +214,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $licId1 = $licenseRef1->getId();
 
     $agentNomosId = 6;
-    $agentMonkId = 5;
     $pfile = 4;
 
     $this->dbManager->queryOnce("DELETE FROM license_file");
@@ -304,7 +305,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run decider');
     $this->assertEquals($retCode, 0, 'decider failed: '.$output);
-
     assertThat($this->getHeartCount($output), equalTo(count($itemIds)));
 
     $this->rmRepo();
@@ -357,7 +357,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed: '.$output);
-
     assertThat($this->getHeartCount($output), equalTo(1));
 
     $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);

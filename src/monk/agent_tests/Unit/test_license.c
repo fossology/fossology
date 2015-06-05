@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,12 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include <stdlib.h>
-#include <CUnit/CUnit.h>
 #include <stdarg.h>
+#include <libfocunit.h>
 
 #include "license.h"
-#include "utils.h"
 #include "hash.h"
+
+extern fo_dbManager* dbManager;
 
 void test_ignoreLicense_withGoodLicense() {
   License notIgnored;
@@ -105,12 +106,7 @@ void assertTokens(GArray* tokens, ...) {
 }
 
 void test_extractLicenses_Ignored() {
-  PGconn* dbConnection = dbRealConnect();
-  if (!dbConnection) {
-    CU_FAIL("no db connection");
-    return;
-  }
-  fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(dbManager);
 
   char* noLic = "No_license_found";
 
@@ -118,25 +114,17 @@ void test_extractLicenses_Ignored() {
           "select rf_pk, rf_shortname from license_ref where rf_shortname = '%s'",
           noLic);
 
-  CU_ASSERT_PTR_NOT_NULL(licensesResult);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(licensesResult);
 
   Licenses* licenses = extractLicenses(dbManager, licensesResult, 0 , 0);
   CU_ASSERT_EQUAL(licenses->licenses->len, 0);
 
   licenses_free(licenses);
   PQclear(licensesResult);
-
-  fo_dbManager_free(dbManager);
-  dbRealDisconnect(dbConnection);
 }
 
 void test_extractLicenses_One() {
-  PGconn* dbConnection = dbRealConnect();
-  if (!dbConnection) {
-    CU_FAIL("no db connection");
-    return;
-  }
-  fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(dbManager);
 
   char* gpl3 = "GPL-3.0";
 
@@ -144,11 +132,11 @@ void test_extractLicenses_One() {
           "select rf_pk, rf_shortname from license_ref where rf_shortname = '%s'",
           gpl3);
 
-  CU_ASSERT_PTR_NOT_NULL(licensesResult);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(licensesResult);
 
   Licenses* licenses = extractLicenses(dbManager, licensesResult, 0, 0);
   GArray* licenseArray = licenses->licenses;
-  CU_ASSERT_EQUAL(licenseArray->len, 1);
+  CU_ASSERT_EQUAL_FATAL(licenseArray->len, 1);
 
   License license = g_array_index(licenseArray, License, 0);
   CU_ASSERT_STRING_EQUAL(license.shortname, gpl3);
@@ -158,9 +146,6 @@ void test_extractLicenses_One() {
 
   licenses_free(licenses);
   PQclear(licensesResult);
-
-  fo_dbManager_free(dbManager);
-  dbRealDisconnect(dbConnection);
 }
 
 static gint lengthInverseComparator(const void* a, const void* b) {
@@ -175,33 +160,24 @@ void sortLicenses(GArray* licenses) {
 }
 
 void test_extractLicenses_Two() {
-  PGconn* dbConnection = dbRealConnect();
-  if (!dbConnection) {
-    CU_FAIL("no db connection");
-    return;
-  }
-  fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(dbManager);
 
   char* gpl3 = "GPL-3.0";
   char* gpl2 = "GPL-2.0";
 
-  PGresult* licensesResult = fo_dbManager_Exec_printf(dbManager,
-          "select rf_pk, rf_shortname from license_ref "
-          "where rf_shortname = '%s' or rf_shortname = '%s'",
-          gpl3, gpl2);
+  PGresult* licensesResult = queryAllLicenses(dbManager);
 
-  CU_ASSERT_PTR_NOT_NULL(licensesResult);
-
+  CU_ASSERT_PTR_NOT_NULL_FATAL(licensesResult);
   Licenses * licenses = extractLicenses(dbManager, licensesResult, 0, 0);
+  PQclear(licensesResult);
+
   GArray* licenseArray = licenses->licenses;
-  CU_ASSERT_EQUAL(licenseArray->len, 2);
+  CU_ASSERT_EQUAL_FATAL(licenseArray->len, 2);
 
   sortLicenses(licenseArray);
 
   License license0 = g_array_index(licenseArray, License, 0);
   License license1 = g_array_index(licenseArray, License, 1);
-
-  CU_ASSERT_TRUE(license0.tokens->len > license1.tokens->len);
 
   CU_ASSERT_STRING_EQUAL(license0.shortname, gpl3);
   CU_ASSERT_STRING_EQUAL(license1.shortname, gpl2);
@@ -212,10 +188,42 @@ void test_extractLicenses_Two() {
           "gnu", "general", "public", "license,", "version", "2", NULL);
 
   licenses_free(licenses);
-  PQclear(licensesResult);
+}
 
-  fo_dbManager_free(dbManager);
-  dbRealDisconnect(dbConnection);
+#define doOrReturnError(fmt, ...) do {\
+  PGresult* copy = fo_dbManager_Exec_printf(dbManager, fmt, #__VA_ARGS__); \
+  if (!copy) {\
+    return 1; \
+  } else {\
+    PQclear(copy);\
+  }\
+} while(0)
+
+int license_setUpFunc() {
+  if (!dbManager) {
+    return 1;
+  }
+
+  if (!fo_dbManager_tableExists(dbManager, "license_ref")) {
+    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)");
+  }
+
+  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
+                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)");
+  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
+                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)");
+
+  return 0;
+}
+
+int license_tearDownFunc() {
+  if (!dbManager) {
+    return 1;
+  }
+
+  doOrReturnError("DROP TABLE license_ref");
+
+  return 0;
 }
 
 CU_TestInfo license_testcases[] = {
