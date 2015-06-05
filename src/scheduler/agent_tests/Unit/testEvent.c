@@ -236,7 +236,7 @@ void test_event_loop_terminate()
 
 void test_event_loop_take()
 {
-  int retval = 0;
+  event_t* retval;
   scheduler_t* scheduler;
   scheduler = scheduler_init(testdb, NULL);
   scheduler_foss_config(scheduler);
@@ -246,7 +246,7 @@ void test_event_loop_take()
   vl->terminated = 1;
 
   retval = event_loop_take(vl);
-  FO_ASSERT_EQUAL(retval, 0x0);
+  FO_ASSERT_PTR_NULL(retval);
   FO_ASSERT_FALSE(vl->occupied);
   FO_ASSERT_TRUE(vl->terminated);
 

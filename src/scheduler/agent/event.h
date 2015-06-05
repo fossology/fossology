@@ -61,6 +61,8 @@ typedef struct
 
 event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name, char* source_name, uint16_t source_line);
 void     event_destroy(event_t* e);
+int event_loop_put(event_loop_t* event_loop, event_t* event);
+event_t* event_loop_take(event_loop_t* event_loop);
 
 void     event_loop_destroy();
 

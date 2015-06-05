@@ -44,6 +44,7 @@ if (array_key_exists("f", $opts)) {
   $testPgDb->createSequences(array(), true);
   $testPgDb->createPlainTables(array(), true);
   $testPgDb->alterTables(array(), true);
+  $testPgDb->createInheritedTables(array('uploadtree_a'));
 }
 
 print $sysConfDir;
