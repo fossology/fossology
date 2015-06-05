@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* testing sql statements */
 char sqltmp[1024] = {0};
 extern char* check_scheduler_tables;
+extern char* jobsql_processed;
 
 /* ************************************************************************** */
 /* **** database function tests ******************************************** */
@@ -71,7 +72,7 @@ void test_database_init()
 void test_database_exec_event()
 {
   scheduler_t* scheduler;
-  GString* sql;
+  gchar* sql = NULL;
 
   scheduler = scheduler_init(testdb, NULL);
 
@@ -79,11 +80,9 @@ void test_database_exec_event()
   database_init(scheduler);
   FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
 
-  sprintf(sqltmp, check_scheduler_tables, PQdb(scheduler->db_conn));
-  sql = g_string_new(sqltmp);
-  g_string_append(sql, "'users';");
+  sql = g_strdup_printf(jobsql_processed, 0, 123);
   
-  database_exec_event(scheduler, sql->str);
+  database_exec_event(scheduler, sql);
   scheduler_destroy(scheduler);
 }
 
