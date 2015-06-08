@@ -444,7 +444,7 @@ class UploadDao extends Object
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=Auth::PERM_NONE;
+    return $perm['perm']>Auth::PERM_NONE;
   }
  
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)

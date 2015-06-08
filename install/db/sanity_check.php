@@ -16,6 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
@@ -43,6 +44,9 @@ class SanityChecker
     $this->checkUploadStatus();
     $this->checkLicenseEventTypes();
     $this->checkExistsTable('license_candidate');
+    $folderDao = new FolderDao($this->dbManager);
+    $folderDao->ensureTopLevelFolder();
+    
     return $this->errors;
   }
 

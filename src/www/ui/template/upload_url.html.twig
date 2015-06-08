@@ -1,0 +1,52 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/upload.html.twig" %}
+
+{% block description %}
+  <p>
+    {{ 'This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) or a directory from a remote web or FTP server to FOSSology.
+    The file or directory to upload must be accessible via a URL and must not require human interaction such as login credentials.'| trans }}
+  </p>
+{% endblock %}
+{% block fileselect %}
+<li>
+  <label for="{{ geturlField }}">
+    {{ 'Enter the URL to the file or directory'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ geturlField }}" type="text" size="120"/><br/>
+</li>
+<li>
+  <label for="{{ nameField }}">
+    {{ '(Optional) Enter a viewable name for this file or directory'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ nameField }}" type="text" size="120"/><br/>
+  {{ 'Note: If no name is provided, then the uploaded file (directory) name will be used.' |trans }}
+</li>
+<li>
+  <label for="{{ acceptField }}">
+    {{ '(Optional) Enter comma-separated lists of file name suffixes or patterns to accept'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ acceptField }}" type="text" size="120"/><br/>
+</li>
+<li>
+  <label for="{{ rejectField }}">
+    {{ '(Optional) Enter comma-separated lists of file name suffixes or patterns to reject'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ rejectField }}" type="text" size="120"/><br/>
+</li>
+<li>
+  <label for="{{ levelField }}">
+    {{ '(Optional) maximum recursion depth (inf or 0 for infinite)'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ levelField }}" type="text" size="6"/><br/>
+</li>
+{% endblock %}

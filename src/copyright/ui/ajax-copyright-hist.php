@@ -18,6 +18,7 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
@@ -35,6 +36,8 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   private $dbManager;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var CopyrightDao */
+  private $copyrightDao;
 
   /** @var DataTablesUtility $dataTablesUtility */
   private $dataTablesUtility;
@@ -53,6 +56,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $this->dataTablesUtility = $container->get('utils.data_tables_utility');
     $this->uploadDao = $container->get('dao.upload');
     $this->dbManager = $container->get('db.manager');
+    $this->copyrightDao = $container->get('dao.copyright');
   }
 
 
@@ -181,10 +185,10 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $unorderedQuery = "FROM $tableName AS cp " .
         "INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk " .
         $join .
-        "WHERE " .
-        " ( UT.lft  BETWEEN  $1 AND  $2 ) " .
+        "WHERE cp.content!='' " .
+        "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND CP.type = $3 " .
-        " AND cp.agent_fk= $4 " .
+        "AND cp.agent_fk= $4 " .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
@@ -279,72 +283,32 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   }
 
   /**
-   * @param int
-   * @param int
+   * @param int $uploadId
+   * @param int $itemId
    * @param string
    * @param string 'copyright'|'ecc'
    * @return string
-   * @throws Exception
    */
-  protected function doUpdate($upload, $item, $hash,$type)
+  protected function doUpdate($uploadId, $itemId, $hash, $type)
   {
     $content = GetParm("value", PARM_RAW);
     if (!$content)
     {
       return new Response('empty content not allowed', Response::HTTP_BAD_REQUEST ,array('Content-type'=>'text/plain'));
     }
-    
-    list($left, $right) = $this->uploadDao->getLeftAndRight($item, $this->uploadtree_tablename);
-    $tableName = $this->getTableName($type);
+        
+    $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
+    $cpTable = $this->getTableName($type);
+    $this->copyrightDao->updateTable($item, $hash, $content, Auth::getUserId(), $cpTable);
 
-    $userId = Auth::getUserId();
-
-    $sql_upload = "";
-    if ('uploadtree_a' == $this->uploadtree_tablename)
-    {
-      $sql_upload = " AND UT.upload_fk=$upload ";
-    }
-    $statementName = __METHOD__.$tableName;
-    $combinedQuerry = "UPDATE $tableName AS CPR
-                              SET  content = $4 , hash = md5 ($4)
-                            FROM $tableName as CP
-                            INNER JOIN  $this->uploadtree_tablename AS UT ON CP.pfile_fk = UT.pfile_fk
-                            WHERE CPR.ct_pk = CP.ct_pk
-                              AND CP.hash =$1
-                              AND   ( UT.lft BETWEEN $2 AND $3 ) $sql_upload
-                            RETURNING CP.* ";
-
-    $this->dbManager->prepare($statementName, $combinedQuerry);
-    $oldData = $this->dbManager->execute($statementName, array($hash, $left, $right, $content));
-
-    if($type== "copyright") //no audit for other agents ?!
-    {
-      $insertQuerry = "INSERT into copyright_audit  (ct_fk,oldtext,user_fk,upload_fk, uploadtree_pk, pfile_fk  ) values ($1,$2,$3,$4,$5,$6)";
-      while ($row = $this->dbManager->fetchArray($oldData))
-      {
-        $this->dbManager->getSingleRow($insertQuerry, array($row['ct_pk'], $row['content'], $userId, $upload, $item, $row['pfile_fk']), __METHOD__ . "writeHist");
-      }
-    }
-    $this->dbManager->freeResult($oldData);
     return new Response('success', Response::HTTP_OK,array('Content-type'=>'text/plain'));
   }
 
-  protected function doDelete($uploadId, $item, $hash, $type)
+  protected function doDelete($uploadId, $itemId, $hash, $type)
   {
-    $tableName = $this->getTableName($type);
-    list($left, $right) = $this->uploadDao->getLeftAndRight($item, $this->uploadtree_tablename);
-
-    $deleteQuerry = " DELETE FROM $tableName as CPR
-                        USING $this->uploadtree_tablename AS UT
-                        WHERE CPR.pfile_fk = UT.pfile_fk
-                          and CPR.hash =$1
-                          and ( UT.lft  BETWEEN  $2 AND  $3 )";
-    if ('uploadtree_a' == $this->uploadtree_tablename)
-    {
-      $deleteQuerry .= " AND UT.upload_fk=$uploadId ";
-    }
-    $this->dbManager->getSingleRow($deleteQuerry, array($hash, $left, $right), __METHOD__."deleteCopyright".$tableName);
-
+    $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
+    $cpTable = $this->getTableName($type);
+    $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable);
     return new Response('Successfully deleted', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 

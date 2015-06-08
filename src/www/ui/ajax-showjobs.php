@@ -28,21 +28,13 @@ define("TITLE_ajaxShowJobs", _("ShowJobs"));
 
 class AjaxShowJobs extends FO_Plugin
 {
+  const MAX_LOG_OUTPUT = 32768;
   /** @var ShowJobsDao */
   private $showJobsDao;
   /** @var UserDao */
   private $userDao;
-  /** @var maxUploadsPerPage */
-  private $maxUploadsPerPage = 10;  /* max number of uploads to display on a page */
-  /** @var colors */
-  private $colors = array(
-          "Queued" => "#FFFFCC", // "white-ish",
-          "Scheduled" => "#99FFFF", // "blue-ish",
-          "Running" => "#99FF99", // "green",
-          "Finished" => "#D3D3D3", // "lightgray",
-          "Blocked" => "#FFCC66", // "orange",
-          "Failed" => "#FF6666" // "red"
-          );
+  /** @var int $maxUploadsPerPage max number of uploads to display on a page */
+  private $maxUploadsPerPage = 10;
 
   function __construct()
   {
@@ -70,7 +62,6 @@ class AjaxShowJobs extends FO_Plugin
     if (empty($uploadId)){
       return null;
     }
-
   }
 
   /**
@@ -141,7 +132,7 @@ class AjaxShowJobs extends FO_Plugin
           }else{
             $uri2 = Traceback_uri() . "?mod=showjobs";
             $back = "(" . _("Click to return to Show Jobs") . ")";
-            $value = "(" . _("Click to return to Show Jobs") . ")"."<a href='$uri2'>$row[$field] $back</a>";
+            $value = "<a href='$uri2'>$row[$field] $back</a>";
           }
           break;
         case 'job_upload_fk':
@@ -151,10 +142,15 @@ class AjaxShowJobs extends FO_Plugin
           }
           break;
         case 'jq_log':
-          if(!empty($row[$field])){
-            if(file_exists($row[$field])){ 
-              $value = "<pre>" .file_get_contents($row[$field])."</pre>"; 
-            }
+          if(empty($row[$field]) || !file_exists($row[$field])){
+            break;
+          }  
+          if(filesize($row[$field])>self::MAX_LOG_OUTPUT){ 
+            $value = "<pre>" .file_get_contents($row[$field],false,null,-1,self::MAX_LOG_OUTPUT)."</pre>"
+                    .'<a href="'.Traceback_uri() . '?mod=download&log=' . $row['jq_pk'] . '">...</a>';
+          }
+          else{ 
+            $value = "<pre>" .file_get_contents($row[$field]). "</pre>"; 
           }
           break;
         case 'job_user_fk':
@@ -354,101 +350,52 @@ class AjaxShowJobs extends FO_Plugin
   
       /* Job queue */
       foreach ($job['jobqueue'] as $jq_pk => $jobqueueRec){
-        $rowColor = $this->getColor($jobqueueRec);
-        $jobqueueStyle = $this->jobqueueStyle($rowColor);
-        $outBuf .= "<tr $jobqueueStyle>";
+        $varJobQueueRow = array('jqId'=>$jq_pk,
+            'jobId'=>$jobqueueRec['jq_job_fk'],
+            'class'=>$this->getClass($jobqueueRec),
+            'uriFull'=>$uriFull,
+            'depends'=>$jobqueueRec['jdep_jq_depends_fk'] ? $jobqueueRec['depends'] : array(),
+            'status'=>$jobqueueRec['jq_endtext'],
+            'agentName'=>$jobqueueRec['jq_type'],
+            'itemsProcessed'=>$jobqueueRec['jq_itemsprocessed'],
+            'startTime'=>substr($jobqueueRec['jq_starttime'], 0, 16),
+            'endTime'=>empty($jobqueueRec["jq_endtime"]) ? '' : substr($jobqueueRec['jq_endtime'], 0, 16),
+            'endText'=>$jobqueueRec['jq_endtext']);
 
-        /* Job/Dependency */
-        $outBuf .= "<td $jobqueueStyle>";
-        $outBuf .= "<a href='$uriFull&show=job&job=" . $jq_pk . "'>" ;
-        $outBuf .= $jq_pk;
-        $outBuf .= "</a>";
-        $count = 0;
-        if (!empty($jobqueueRec["jdep_jq_depends_fk"])){
-          foreach ($jobqueueRec["depends"] as $depend_jq_pk){
-            $outBuf .= ($count++ == 0) ? " / " : ", ";
-            $outBuf .= "<a href='$uriFull&show=job&job=" . $depend_jq_pk . "'>" ;
-            $outBuf .= $depend_jq_pk;
-            $outBuf .= "</a>";
-          }
-        }
-        $outBuf .= "</td>";
-
-        /* status */
-        $status = $jobqueueRec["jq_endtext"];
-        $outBuf .= "<td style='text-align:center'>$status</td>";
-        $isPaused = ($status == "Paused") ? true : false;
-
-        /* agent name */
-        $outBuf .= "<td>$jobqueueRec[jq_type]</td>";
-
-        /* items processed */
-        if ( $jobqueueRec["jq_itemsprocessed"] > 0){
-          $items = number_format($jobqueueRec['jq_itemsprocessed']);
-          $outBuf .= "<td style='text-align:right'>$items items</td>";
-        }else{
-          $outBuf .= "<td></td>";
-        } 
-
-        /* dates */
-        $outBuf .= "<td>";
-        $outBuf .= substr($jobqueueRec['jq_starttime'], 0, 16);
         if (!empty($jobqueueRec["jq_endtime"])) {
-          $outBuf .= " - " . substr($jobqueueRec['jq_endtime'], 0, 16);
           $numSecs = strtotime($jobqueueRec['jq_endtime']) - strtotime($jobqueueRec['jq_starttime']);
         }else{
           $numSecs = time()  - strtotime($jobqueueRec['jq_starttime']);
         } 
-        $outBuf .= "</td>";
-        $outBuf .= "<td><span style='float:right;margin-right:32%;'>";
+        
         $itemsPerSec = null;
-        /* Don't display items/sec unless the job has started */
         if ($jobqueueRec['jq_starttime']){
-          $text = _(" items/sec");
           $itemsPerSec = $this->showJobsDao->getNumItemsPerSec($jobqueueRec['jq_itemsprocessed'], $numSecs);
-          $itemsPerSecFmt = ($itemsPerSec < 2) ? sprintf("%01.2f", $itemsPerSec) : round($itemsPerSec);
-          $outBuf .= $itemsPerSecFmt.$text;
+          $varJobQueueRow['itemsPerSec'] = $itemsPerSec;
         }
-        $outBuf .= "</span></td>";
-        /* Get ETA for each agent */
-        $text = _("Scanned");
-        if(empty($jobqueueRec['jq_endtime']))
-          $outBuf .= "<td align='center'>".$this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk'])."</td>";
-        else
-          $outBuf .= "<td align='center'>$text</td>";  
-        /* actions, must be admin or own the upload  */
-        if (($jobqueueRec['jq_end_bits'] == 0) 
-             && (($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
-                 || (Auth::getUserId() == $job['job']['job_user_fk'])))
+        if (empty($jobqueueRec['jq_endtime'])) {
+          $varJobQueueRow['eta'] = $this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk']);
+        }
+        $varJobQueueRow['canDoActions'] = 
+                ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
+        $varJobQueueRow['isInProgress'] = ($jobqueueRec['jq_end_bits'] == 0);
+        $varJobQueueRow['isReady'] = ($jobqueueRec['jq_end_bits'] == 1);
+        
+        switch($jobqueueRec['jq_type'])
         {
-          $outBuf .= "<th $jobStyle>";
-          if ($isPaused){
-            $text = _("Unpause");
-            $outBuf .= "<a href='$uriFull&action=restart&jobid=$jq_pk' title='Un-Pause this job'>$text</a>";
-          }else{
-            $text = _("Pause");
-            $outBuf .= "<a href='$uriFull&action=pause&jobid=$jq_pk' title='Pause this job'>$text</a>";
-          }
-          $outBuf .= " | ";
-          $text = _("Cancel");
-          $outBuf .= "<a href='$uriFull&action=cancel&jobid=$jq_pk' title='Cancel this job'>$text</a>";
-        }else{
-          $outBuf .= "<th>";
-        } 
-
-        if (($jobqueueRec['jq_end_bits'] == 1) && ($jobqueueRec['jq_type'] === 'reportgen' || $jobqueueRec['jq_type'] === 'readmeoss')
-             && (($_SESSION[Auth::USER_LEVEL] > PLUGIN_DB_ADMIN)
-                 || (Auth::getUserId() == $job['job']['job_user_fk']))){
-          if($jobqueueRec['jq_type'] === 'reportgen')
-            $text = _("Download Report");
-          else
-            $text = _("Download ReadMe_OSS");
-          $outBuf .= "<a href='" . Traceback_uri() . "?mod=download&report=$jobqueueRec[jq_job_fk]'>" .$text."</a>";
+          case 'readmeoss':
+            $varJobQueueRow['download'] = "ReadMeOss";
+            break;
+          default:
+            $varJobQueueRow['download'] = "";
         }
-        $outBuf .= "</th></tr>";
+        
+        $outBuf .= $this->renderString('ui-showjobs-jobqueue-row.html.twig', $varJobQueueRow);
       }
     }
-    if ($numJobs > $this->maxUploadsPerPage) $pagination = "<p>" . MenuEndlessPage($page, $next,$uriFullMenu); 
+    if ($numJobs > $this->maxUploadsPerPage) {
+      $pagination = "<p>" . MenuEndlessPage($page, $next, $uriFullMenu);
+    }
 
     return array('showJobsData' => $outBuf, 'pagination' => $pagination);
   }
@@ -460,43 +407,34 @@ class AjaxShowJobs extends FO_Plugin
    **/
   protected function isUnfinishedJob($job)
   {
-    foreach ($job['jobqueue'] as $jq_pk => $jobqueueRec){
-      if ($jobqueueRec['jq_end_bits'] == 0) return true;
+    foreach ($job['jobqueue'] as $jobqueueRec){
+      if ($jobqueueRec['jq_end_bits'] === 0) {
+        return true;
+      }
     } 
     return false;
   }  /* isUnfinishedJob()  */
-  
-
-  /**
-   * @brief Get the style for a jobqueue rec.
-   * This is color coded based on $color
-   * @param $color
-   * @return a string containing the style
-   **/
-  protected function jobqueueStyle($color)
-  {
-    $jobqueueStyle = "style='font:normal 8pt verdana, arial, helvetica; background:$color; color:black;'";
-    return $jobqueueStyle;
-  }  /* jobqueueStyle() */
 
 
   /**
-   * @brief Get the jobqueue row color
-   * @return the color as a string
+   * @brief array $jobqueueRec get the jobqueue row color
+   * @return string css class
    **/
-  protected function getColor($jobqueueRec)
+  protected function getClass($jobqueueRec)
   {
-    $color=$this->colors['Queued']; /* default */
     if ($jobqueueRec['jq_end_bits'] > 1){
-      $color=$this->colors['Failed'];
+      return 'jobFailed';
     }
     else if (!empty($jobqueueRec['jq_starttime']) && empty($jobqueueRec['jq_endtime'])){
-      $color=$this->colors['Scheduled'];
-    }else if (!empty($jobqueueRec['jq_starttime']) && !empty($jobqueueRec['jq_endtime'])){
-      $color=$this->colors['Finished'];
+      return 'jobScheduled';
     }
-    return $color;
-  } /* getColor() */
+    else if (!empty($jobqueueRec['jq_starttime']) && !empty($jobqueueRec['jq_endtime'])) {
+      return 'jobFinished';
+    }
+    else {
+      return 'jobQueued';
+    }
+  }
 
 
   /**

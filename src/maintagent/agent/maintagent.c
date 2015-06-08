@@ -57,34 +57,90 @@ int main(int argc, char **argv)
   VERSION = fo_sysconfig("maintagent", "VERSION");
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
 
+  int ValidateFoldersExe = 0;
+  int VerifyFilePermsExe = 0;
+  int RemoveUploadsExe = 0;
+  int NormalizeUploadPrioritiesExe = 0;
+  int RemoveTempsExe = 0;
+  int VacAnalyzeExe = 0;
+  int ProcessExpiredExe = 0;
+  int RemoveOrphanedFilesExe = 0;
   /* command line options */
   while ((cmdopt = getopt(argc, argv, "aADFghpNPRTUZivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
       case 'a': /* All non slow operations */
-          ValidateFolders();
-          VerifyFilePerms(1);
-          RemoveUploads();
-          NormalizeUploadPriorities();
-          RemoveTemps();
-          VacAnalyze();
+          if(ValidateFoldersExe == 0){
+            ValidateFolders();
+            ValidateFoldersExe = 1; 
+          }
+          if(VerifyFilePermsExe == 0){
+            VerifyFilePerms(1);
+            VerifyFilePermsExe = 1;
+          }
+          if(RemoveUploadsExe == 0){
+            RemoveUploads();
+            RemoveUploadsExe = 1;
+          }
+          if(NormalizeUploadPrioritiesExe == 0){
+            NormalizeUploadPriorities();
+            NormalizeUploadPrioritiesExe = 1;
+          }
+          if(RemoveTempsExe == 0){ 
+            RemoveTemps();
+            RemoveTempsExe = 1;
+          }
+          if(VacAnalyzeExe == 0){
+            VacAnalyze();
+            VacAnalyzeExe = 1;
+          }
           break;
       case 'A': /* All operations */
-          ValidateFolders();
-          VerifyFilePerms(1);
-          RemoveUploads();
-          NormalizeUploadPriorities();
-          RemoveTemps();
-          VacAnalyze();
-          ProcessExpired();
-          RemoveOrphanedFiles();
+          if(ValidateFoldersExe == 0){
+            ValidateFolders();
+            ValidateFoldersExe = 1; 
+          }
+          if(VerifyFilePermsExe == 0){
+            VerifyFilePerms(1);
+            VerifyFilePermsExe = 1;
+          }
+          if(RemoveUploadsExe == 0){
+            RemoveUploads();
+            RemoveUploadsExe = 1;
+          }
+          if(NormalizeUploadPrioritiesExe == 0){
+            NormalizeUploadPriorities();
+            NormalizeUploadPrioritiesExe = 1;
+          }
+          if(RemoveTempsExe == 0){ 
+            RemoveTemps();
+            RemoveTempsExe = 1;
+          }
+          if(VacAnalyzeExe == 0){
+            VacAnalyze();
+            VacAnalyzeExe = 1;
+          }
+          if(ProcessExpiredExe == 0){ 
+            ProcessExpired();
+            ProcessExpiredExe = 1;
+          }
+          if(RemoveOrphanedFilesExe == 0){   
+            RemoveOrphanedFiles();
+            RemoveOrphanedFilesExe = 1;
+          } 
           break;
       case 'D': /* Vac/Analyze (slow) */
-          VacAnalyze();
+          if(VacAnalyzeExe == 0){
+            VacAnalyze();
+            VacAnalyzeExe = 1;
+          }
           break;
       case 'F': /* Validate folder contents */
-          ValidateFolders();
+          if(ValidateFoldersExe == 0){
+            ValidateFolders();
+            ValidateFoldersExe = 1;
+          }
           break;
       case 'g': /* Delete orphan gold files */
           DeleteOrphanGold();
@@ -93,25 +149,43 @@ int main(int argc, char **argv)
             Usage(argv[0]);
             ExitNow(0);
       case 'N': /* Remove uploads with no pfiles */
-          NormalizeUploadPriorities();
+          if(NormalizeUploadPrioritiesExe == 0){
+            NormalizeUploadPriorities();
+            NormalizeUploadPrioritiesExe = 1;
+          }
           break;
       case 'p': /* Verify file permissions */
           VerifyFilePerms(0);
           break;
       case 'P': /* Verify and fix file permissions */
-          VerifyFilePerms(1);
+          if(VerifyFilePermsExe == 0){
+            VerifyFilePerms(1);
+            VerifyFilePermsExe = 1;
+          }
           break;
       case 'R': /* Remove uploads with no pfiles */
-          RemoveUploads();
+          if(RemoveUploadsExe == 0){
+            RemoveUploads();
+            RemoveUploadsExe = 1;
+          } 
           break;
       case 'T': /* Remove orphaned temp tables */
-          RemoveTemps();
+          if(RemoveTempsExe == 0){
+            RemoveTemps();
+            RemoveTempsExe = 1;
+          }
           break;
       case 'U': /* Process expired uploads (slow) */
-          ProcessExpired();
+          if(ProcessExpiredExe == 0){
+            ProcessExpired();
+            ProcessExpiredExe = 1;
+          }
           break;
       case 'Z': /* Remove orphaned files from the repository (slow) */
-          RemoveOrphanedFiles();
+          if(RemoveOrphanedFilesExe == 0){
+            RemoveOrphanedFiles();
+            RemoveOrphanedFilesExe = 1;
+          } 
           break;
       case 'i': /* "Initialize" */
             ExitNow(0);

@@ -26,6 +26,7 @@ TEST_AGENTS = ../agents/
 REGRESSION = ./Functional.py
 TEST_SRC = Functional.xml
 TEST_DST = scheduler-Xunit.xml
+TEST_SUITE_LIMIT = 120
 
 all:
 	@echo "nothing to do"
@@ -34,7 +35,7 @@ test: fossology_testconfig
 	$(MAKE) -C $(TOP)/src
 	$(MAKE) -C $(AGENT_DIR)
 	$(MAKE) -C $(TEST_AGENTS) test
-	$(REGRESSION) --tests=$(TEST_SRC) --results=$(TEST_DST)
+	$(REGRESSION) --tests=$(TEST_SRC) --results=$(TEST_DST) --longest=$(TEST_SUITE_LIMIT)
 
 coverage:
 	@echo "nothing to do"

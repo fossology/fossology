@@ -149,12 +149,6 @@ class TestPgDb extends TestAbstractDb
     }
   }
   
-  public function insertData_license_ref($limit=140)
-  {
-    parent::insertData_license_ref($limit);
-    $this->resetSequenceAsMaxOf('license_ref_rf_pk_seq', 'license_ref', 'rf_pk');
-  }
-
   public function resetSequenceAsMaxOf($sequenceName, $tableName, $columnName)
   {
     $this->dbManager->queryOnce("SELECT setval('$sequenceName', (SELECT MAX($columnName) FROM $tableName))");

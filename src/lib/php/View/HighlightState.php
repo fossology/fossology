@@ -100,12 +100,11 @@ class HighlightState extends Object
       {
         case SplitPosition::START:
           $this->push($entry);
+          $result->appendMetaText($this->startSpan($entry));
+          break;
         case SplitPosition::ATOM:
           $result->appendMetaText($this->startSpan($entry));
-          if ($entry->getAction() == SplitPosition::ATOM)
-          {
-            $result->appendMetaText(self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
-          }
+          $result->appendMetaText(self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
           break;
 
         case SplitPosition::END:

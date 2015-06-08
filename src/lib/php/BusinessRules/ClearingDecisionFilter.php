@@ -86,36 +86,11 @@ class ClearingDecisionFilter
       {
         return $pfileMap[$itemId];
       }
-      else
-      {
-        if (array_key_exists(self::KEYREPO, $pfileMap)) {
-          return $pfileMap[self::KEYREPO];
-        } else {
-          return false;
-        }
+      if (array_key_exists(self::KEYREPO, $pfileMap)) {
+        return $pfileMap[self::KEYREPO];
       }
     }
 
     return false;
   }
-
-  /**
-   * @param ClearingDecision[] $clearingDecisions
-   * @return array
-   */
-  public function getAllLicenseNames($clearingDecisions)
-  {
-    $result = array();
-
-    foreach($clearingDecisions as $decision)
-    {
-      foreach($decision->getPositiveLicenses() as $toAdd)
-      {
-        $result[] = $toAdd->getShortName();
-      }
-    }
-
-    return $result;
-  }
-
 }

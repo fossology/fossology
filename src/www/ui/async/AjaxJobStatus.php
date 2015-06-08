@@ -39,7 +39,7 @@ class AjaxJobStatus extends DefaultPlugin
   }
 
   /**
-   * Bref : returns 1 when jobs are running else 0
+   * @brief : returns 1 when jobs are running else 0
    * @param Request $request
    * @return Response
    */
@@ -53,8 +53,7 @@ class AjaxJobStatus extends DefaultPlugin
     $status = 1;
     ReportCachePurgeAll();
     $status = empty($status) ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK;
-    $response = new Response(json_encode(array("status" => $response)), $status, array('content-type'=>'text/json'));
-    return $response;
+    return new Response(json_encode(array("status" => $response)), $status, array('content-type'=>'text/json'));
   }
   
 }

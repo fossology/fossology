@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
@@ -157,12 +158,12 @@ class CopyrightDao extends Object
              CD.comment as comments, UT.uploadtree_pk as uploadtree_pk,
              CD.clearing_decision_type_fk AS clearing_decision_type_fk,
              C.content AS content
-            from $tableName C
+            FROM $tableName C
             INNER JOIN $uploadTreeTableName UT
             ON C.pfile_fk = UT.pfile_fk
             $joinType JOIN $tableNameDecision CD
             ON C.pfile_fk = CD.pfile_fk
-            WHERE C.content IS NOT NULL $whereClause
+            WHERE C.content IS NOT NULL AND C.content!='' $whereClause  
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
 
     if ($clearingTypeClause !== null)
@@ -185,7 +186,7 @@ class CopyrightDao extends Object
   public function getDecision($tableName,$pfileId){
 
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * from $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
 
     $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
 
@@ -196,4 +197,44 @@ class CopyrightDao extends Object
     return array($description,$textFinding,$comment, $decisionType);
   }
 
+  /**
+   * @param ItemTreeBounds $item
+   * @param string $hash
+   * @param string $content
+   * @param int $userId
+   * @param string $cpTable
+   */
+  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright')
+  {
+    $itemTable = $item->getUploadTreeTableName();
+    $stmt = __METHOD__.".$cpTable.$itemTable";
+    $params = array($hash,$item->getLeft(),$item->getRight(),$content);
+    $sql = "UPDATE $cpTable AS cpr SET content = $4, hash = md5($4)
+            FROM $cpTable as cp
+            INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
+            WHERE cpr.ct_pk = cp.ct_pk
+              AND cp.hash =$1
+              AND ( ut.lft BETWEEN $2 AND $3 )";
+    if ('uploadtree_a' == $item->getUploadTreeTableName())
+    {
+      $params[] = $item->getUploadId();
+      $sql .= " AND ut.upload_fk=$".count($params);
+      $stmt .= '.upload';
+    }
+    
+    $this->dbManager->prepare($stmt, "$sql RETURNING cp.* ");
+    $oldData = $this->dbManager->execute($stmt, $params);
+
+    if($cpTable == "copyright")
+    {
+      while ($row = $this->dbManager->fetchArray($oldData))
+      {
+        $this->dbManager->insertTableRow('copyright_audit',
+                array('ct_fk'=>$row['ct_pk'],'oldtext'=>$row['content'],'user_fk'=>$userId,'upload_fk'=>$item->getUploadId(), 'uploadtree_pk'=>$item->getItemId(), 'pfile_fk'=>$row['pfile_fk']),
+                __METHOD__ . "writeHist");
+      }
+    }
+    $this->dbManager->freeResult($oldData);
+  }
+  
 }

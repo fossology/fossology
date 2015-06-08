@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -289,17 +289,12 @@ FUNCTION void NormalizeUploadPriorities()
 {
   PGresult* result; // the result of the database access
   long StartTime, EndTime;
-  char *sql0="drop table if exists tmp_upload_prio";
-  char *sql1="create table tmp_upload_prio(ordprio serial,uploadid int,groupid int)";
+  char *sql1="create temporary table tmp_upload_prio(ordprio serial,uploadid int,groupid int)";
   char *sql2="insert into tmp_upload_prio (uploadid, groupid) (   select upload_fk uploadid, group_fk groupid from upload_clearing order by priority asc  )";
-  char *sql3="UPDATE upload_clearing SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_fk AND group_fk=groupid; drop table tmp_upload_prio";
+  char *sql3="UPDATE upload_clearing SET priority = ordprio FROM tmp_upload_prio WHERE uploadid=upload_fk AND group_fk=groupid";
 
   StartTime = (long)time(0);
 
-  result = PQexec(pgConn, sql0);
-  if (fo_checkPQcommand(pgConn, result, sql0, __FILE__, __LINE__)) ExitNow(-210);
-  PQclear(result);
-      
   result = PQexec(pgConn, sql1);
   if (fo_checkPQcommand(pgConn, result, sql1, __FILE__, __LINE__)) ExitNow(-211);
   PQclear(result);

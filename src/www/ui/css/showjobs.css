@@ -1,6 +1,5 @@
-<?php
 /***********************************************************
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,22 +15,37 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-use Fossology\Lib\Plugin\AgentPlugin;
-
-class EccAgentPlugin extends AgentPlugin
+.jobQueued
 {
-  public function __construct() {
-    $this->Name = "agent_ecc";
-    $this->Title = _("ECC Analysis, scanning for text fragments potentially relevant for export control");
-    $this->AgentName = "ecc";
-
-    parent::__construct();
-  }
-
-  function AgentHasResults($uploadId=0)
-  {
-    return CheckARS($uploadId, $this->AgentName, "ecc scanner", "ecc_ars");
-  }
+ font: normal 8pt verdana, arial, helvetica;
+ background: #FFFFCC;
+ color:black; 
 }
 
-register_plugin(new EccAgentPlugin());
+.jobFailed
+{
+ font: normal 8pt verdana, arial, helvetica;
+ background: #FF6666;
+ color:black; 
+}
+
+.jobScheduled
+{
+ font: normal 8pt verdana, arial, helvetica;
+ background: #99FFFF;
+ color:black;
+}
+
+.jobFinished
+{
+ font: normal 8pt verdana, arial, helvetica;
+ background: #66FF99;
+ color:black;
+}
+
+.jobAction
+{
+  font: normal 8pt verdana, arial, helvetica;
+  background: lavender;
+  color: black;
+}

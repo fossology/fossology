@@ -192,10 +192,14 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_includedir}/*
 %{_mandir}/man1/*
 %{_sysconfdir}/PBPROJ/mods-enabled/maintagent
+%{_sysconfdir}/PBPROJ/mods-enabled/decider
+%{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
 %{_datadir}/PBPROJ/maintagent/*
 %{_datadir}/PBPROJ/composer.json
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
+%{_datadir}/PBPROJ/decider/*
+%{_datadir}/PBPROJ/deciderjob/*
 
 %files db
 %defattr(-,root,root)
@@ -210,6 +214,10 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_datadir}/PBPROJ/www/*
 %{_sysconfdir}/PBPROJ/mods-enabled/www-page
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
+%{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
+%{_sysconfdir}/PBPROJ/mods-enabled/reuser
+%{_datadir}/PBPROJ/readmeoss/*
+%{_datadir}/PBPROJ/reuser/*
 
 %files scheduler
 %defattr(-,root,root)
@@ -241,7 +249,9 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_sysconfdir}/PBPROJ/mods-enabled
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/copyright
+%{_sysconfdir}/PBPROJ/mods-enabled/ecc
 %{_datadir}/PBPROJ/copyright/*
+%{_datadir}/PBPROJ/ecc/*
 
 %files buckets
 %defattr(-,root,root)
@@ -290,7 +300,9 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_sysconfdir}/PBPROJ/mods-enabled
 %dir %{_datadir}/PBPROJ
 %{_sysconfdir}/PBPROJ/mods-enabled/monk
+%{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
 %{_datadir}/PBPROJ/monk/*
+%{_datadir}/PBPROJ/monkbulk/*
 
 %post common
 # Run the postinstall script

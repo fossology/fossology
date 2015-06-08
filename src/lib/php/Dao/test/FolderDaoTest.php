@@ -37,10 +37,10 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = $this->testDb->getDbManager();
     $this->folderDao = new FolderDao($this->dbManager);
     
-    $this->testDb->createPlainTables(array('folder'));
-    $this->testDb->createSequences(array('folder_folder_pk_seq'));
-    $this->testDb->createConstraints(array('folder_pkey'));
-    $this->testDb->alterTables(array('folder'));
+    $this->testDb->createPlainTables(array('folder','foldercontents'));
+    $this->testDb->createSequences(array('folder_folder_pk_seq','foldercontents_foldercontents_pk_seq'));
+    $this->testDb->createConstraints(array('folder_pkey','foldercontents_pkey'));
+    $this->testDb->alterTables(array('folder','foldercontents'));
   }
 
   public function tearDown()
@@ -79,7 +79,6 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testInsertFolderContents()
   {
-    $this->testDb->createPlainTables(array('foldercontents'));
     $this->folderDao->insertFolderContents($parentId = 7, $foldercontentsMode = 2, $childId = 22);
     $contentsInfo = $this->dbManager->getSingleRow('SELECT foldercontents_mode, child_id FROM foldercontents WHERE parent_fk=$1',
       array($parentId), __METHOD__);
@@ -101,8 +100,33 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testGetFolderWithWrongParent()
   {
-    $folderId =$this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
+    $this->folderDao->insertFolder($folderName = 'three', $folderDescription = 'floor(PI)+Epsilon',2);
     assertThat($this->folderDao->getFolderId('three'), is(null));
   }
 
+  public function testEnsureTopLevelFolder()
+  {
+    $htlfFresh = $this->folderDao->hasTopLevelFolder();
+    assertThat($htlfFresh, is(false));
+    $this->folderDao->ensureTopLevelFolder();
+    $htlfFixed = $this->folderDao->hasTopLevelFolder();
+    assertThat($htlfFixed, is(true));
+    $this->folderDao->ensureTopLevelFolder();
+    $folders = $this->dbManager->getSingleRow('SELECT count(*) FROM folder');
+    assertThat($folders['count'],is(1));
+  }
+  
+  public function testIsWithoutReusableFolders()
+  {
+    assertThat($this->folderDao->isWithoutReusableFolders(array()),is(true));
+    $filledFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>12,'group_name'=>'one')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($filledFolder)),is(false));
+    $emptyFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>0,'group_name'=>'one')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($emptyFolder)),is(true));
+    $multiAccessibleFolder = array(FolderDao::REUSE_KEY=>array(1=>array('group_id'=>1,'count'=>0,'group_name'=>'one'),
+        2=>array('group_id'=>2,'count'=>20,'group_name'=>'two')));
+    assertThat($this->folderDao->isWithoutReusableFolders(array($multiAccessibleFolder)),is(false));
+
+    assertThat($this->folderDao->isWithoutReusableFolders(array($filledFolder,$emptyFolder)),is(false));
+  }
 }

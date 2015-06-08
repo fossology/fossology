@@ -19,9 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Highlight;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
 if (!function_exists('Traceback_uri'))
@@ -67,7 +69,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     assertThat($highlights,arrayWithSize(1));
     $highlight0 = $highlights[0];
-    assertThat($highlight0,anInstanceOf(\Fossology\Lib\Data\Highlight::classname()));
+    assertThat($highlight0,anInstanceOf(Highlight::classname()));
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     assertThat($highlight0->getEnd(),equalTo(201));
     
@@ -260,4 +262,46 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals("desc2", $entries[0]['description']);
   }
 
+  public function testUpdateTable()
+  {
+    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree'));
+    $this->testDb->createInheritedTables(array('uploadtree_a'));
+    $this->testDb->insertData(array('copyright','uploadtree_a'));
+    
+    $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
+    $hash2 = '0x3a910990f114f12f';
+    $ctPk = 2;
+    
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+    $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
+    
+    $audit = $this->dbManager->getSingleRow('SELECT * FROM copyright_audit WHERE ct_fk=$1',array($ctPk),__METHOD__.'.audit');
+    assertThat($audit, hasKeyValuePair('ct_fk',$ctPk));
+    assertThat($audit, hasKeyValuePair('oldtext','modified versions of this software. you must, however, include this copyright statement along with any code built using doc software that you release. no copyright statement needs to be provided if you'));
+    assertThat($audit, hasKeyValuePair('user_fk',$userId));
+
+    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE ct_pk=$1',array($ctPk),__METHOD__.'.cp');
+    assertThat($updatedCp['content'],is(equalTo($content)));
+  }
+  
+  public function testDeleteCopyright()
+  {
+    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree','copyright_decision'));
+    $this->testDb->createInheritedTables(array('uploadtree_a'));
+    $this->testDb->insertData(array('copyright','uploadtree_a'));
+    
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);    
+    $initialEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
+    $initialCount = count($initialEntries);
+    
+    $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
+    $hash2 = '0x3a910990f114f12f';
+    $copyrightDao->updateTable($item, $hash2, $content='', 55);
+    
+    $remainingEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
+    $remainingCount = count($remainingEntries);
+    assertThat($remainingCount,is(equalTo($initialCount-1)));
+  }
 }
