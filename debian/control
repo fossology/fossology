@@ -20,7 +20,7 @@ Description: architecture for analyzing software, development utils
 
 Package: fossology
 Architecture: any
-Depends:fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reuser, ${misc:Depends}
+Depends:fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reuser, fossology-ninka, ${misc:Depends}
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -236,7 +236,7 @@ Description: architecture for analyzing software, ninka
  This package contains the ninka wrapper agent programs and their resources.
 
 Package: fossology-decider
-Architecture: all
+Architecture: any
 Depends: fossology-common, ${misc:Depends}
 Description: architecture for analyzing software, decider
  The FOSSology project is a web based framework that allows you to
@@ -284,7 +284,7 @@ Description: architecture for analyzing software, Microsoft Word report generato
  This package contains the report agent programs and their resources.
 
 Package: fossology-readmeoss
-Architecture: all
+Architecture: any
 Depends: fossology-common, fossology-copyright ${misc:Depends}
 Description: architecture for analyzing software, OSS readme generator
  The FOSSology project is a web based framework that allows you to
@@ -296,7 +296,7 @@ Description: architecture for analyzing software, OSS readme generator
  This package contains the readmeoss agent programs and their resources.
 
 Package: fossology-reuser
-Architecture: all
+Architecture: any
 Depends: fossology-common, ${misc:Depends}
 Description: architecture for reusing clearing result of other uploads, reuser
  The FOSSology project is a web based framework that allows you to
@@ -308,7 +308,7 @@ Description: architecture for reusing clearing result of other uploads, reuser
  This package contains the reuser agent programs and their resources.
 
 Package: fossology-spdx2
-Architecture: all
+Architecture: any
 Depends: fossology-common, ${misc:Depends}
 Description: architecture for analyzing software, SPDX v2.0 generator
  The FOSSology project is a web based framework that allows you to
