@@ -84,10 +84,22 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src composer_install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/decider install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/deciderjob install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/www install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/readmeoss install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/reuser install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-wgetagent \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
