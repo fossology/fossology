@@ -137,7 +137,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $upload = $this->upload_from_url();
     $upload_id = $upload[0];
 
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--username fossy --password fossy -c $fossology_testconfig";
     $uploadtree_id = $upload[1]; // uploadtree_id is the 1st uploadtree_id for this upload
 
     /** include container */
@@ -147,6 +147,7 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
     $output_msg_count = count($out);
 
     sort($out, SORT_STRING);
+    print_r($out);
     /** for this uload, will get 9 lines for report */
     $this->assertEquals(9, $output_msg_count, " upload[1] is:$upload[1], Test that the number of output lines from '$command' is $output_msg_count, have 9 licenses");
     /** check one line of the report */
@@ -188,8 +189,8 @@ class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
 
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);

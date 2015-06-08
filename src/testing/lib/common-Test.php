@@ -46,7 +46,7 @@ function addProxy($sysConfPath, $proxy='lart.usa.hp.com:3128')
     $pat = ';no_proxy = localhost,10.1.2.3';
     $replacepat = $pat . "\n" . 'http_proxy = ' . $proxy . "\n";
     //echo "replacepat is:$replacepat\n";
-    $testConf = preg_replace("/.*?no_proxy = .*/", $replacepat, $fossConf,-1,&$count);
+    $testConf = preg_replace("/.*?no_proxy = .*/", $replacepat, $fossConf,-1,$count);
     //echo "DB: matched pats is:$count\n";
     //echo "DB: testConf is:$testConf\n";
 
