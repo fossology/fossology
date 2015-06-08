@@ -137,6 +137,35 @@ class LicenseCsvImport {
     return $headrow;
   }
 
+  private function updateLicense($row,$sameText)
+  {
+    $log = "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
+    $stmt = __METHOD__;
+    $sql = 'UPDATE license_ref SET ';
+    $param = array($sameText['rf_pk']);
+    if(!empty($row['source']) && empty($sameText['rf_source']))
+    {
+      $stmt .= '.updSource';
+      $sql .= ' rf_source=$2';
+      $param[] = $row['source'];
+      $log .= ', updated the source';
+    }
+    if(false!==$row['risk'] && $row['risk']!==$sameText['rf_risk'])
+    {
+      $stmt .= '.updRisk';
+      $sql .= count($param)==2 ? ', rf_risk=$3' : 'rf_risk=$';
+      $param[] = $row['risk'];
+      $log .= ', updated the risk level';
+    }
+    if(count($param)>1)
+    {
+      $this->dbManager->prepare("$sql WHERE rf_pk=$1", $stmt);
+      $res = $this->dbManager->execute($stmt,$param);
+      $this->dbManager->freeResult($res);
+    }  
+    return $log;
+  }
+  
   /**
    * @param array $row
    * @return string
@@ -149,18 +178,10 @@ class LicenseCsvImport {
     {
       return "Shortname '$row[shortname]' already in DB (id=".$this->getKeyFromShortname($row['shortname']).")";
     }
-    $sameText = $dbManager->getSingleRow('SELECT rf_shortname,rf_source,rf_pk FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
-    if ($sameText!==false && !empty($row['source']) && empty($sameText['rf_source']))
-    {
-      $statementName = __METHOD__ .'.updSource';
-      $dbManager->prepare($statementName, 'UPDATE license_ref SET rf_source=$1 WHERE rf_pk=$2');
-      $res = $dbManager->execute($statementName,array($row['source'],$sameText['rf_pk']));
-      $dbManager->freeResult($res);
-      return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]', updated the source";
-    }  
+    $sameText = $dbManager->getSingleRow('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
     if ($sameText!==false)
     {
-      return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
+      return $this->updateLicense($row,$sameText);
     }
     $stmtInsert = __METHOD__.'.insert';
     $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source,rf_risk)'
