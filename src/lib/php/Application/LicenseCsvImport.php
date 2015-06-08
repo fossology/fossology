@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, 2015, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -41,7 +41,8 @@ class LicenseCsvImport {
       'report_shortname'=>array('report_shortname','Regular License Text Short Name'),
       'url'=>array('url','URL'),
       'notes'=>array('notes'),
-      'source'=>array('source','Foreign ID')
+      'source'=>array('source','Foreign ID'),
+      'risk'=>array('risk','risk_level')
       );
 
   public function __construct(DbManager $dbManager)
@@ -107,7 +108,7 @@ class LicenseCsvImport {
     foreach( array('shortname','fullname','text') as $needle){
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
-    foreach(array('parent_shortname'=>null,'report_shortname'=>null,'url'=>'','notes'=>'','source'=>'') as $optNeedle=>$defaultValue)
+    foreach(array('parent_shortname'=>null,'report_shortname'=>null,'url'=>'','notes'=>'','source'=>'','risk'=>0) as $optNeedle=>$defaultValue)
     {
       $mRow[$optNeedle] = $defaultValue;
       if ($this->headrow[$optNeedle]!==false && array_key_exists($this->headrow[$optNeedle], $row))
@@ -130,7 +131,7 @@ class LicenseCsvImport {
       }
       $headrow[$needle] = $col;
     }
-    foreach( array('parent_shortname','report_shortname','url','notes','source') as $optNeedle){
+    foreach( array('parent_shortname','report_shortname','url','notes','source','risk') as $optNeedle){
       $headrow[$optNeedle] = ArrayOperation::multiSearch($this->alias[$optNeedle], $row);
     }
     return $headrow;
@@ -142,7 +143,7 @@ class LicenseCsvImport {
    */
   private function handleCsvLicense($row)
   {
-    /** @var DbManager $dbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $this->dbManager;
     if ($this->getKeyFromShortname($row['shortname'])!==false)
     {
@@ -162,10 +163,10 @@ class LicenseCsvImport {
       return "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
     }
     $stmtInsert = __METHOD__.'.insert';
-    $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source)'
-            . ' VALUES ($1,$2,$3,md5($3),$4,$5,$6,$7) RETURNING rf_pk');
+    $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source,rf_risk)'
+            . ' VALUES ($1,$2,$3,md5($3),$4,$5,$6,$7,$8) RETURNING rf_pk');
     $resi = $dbManager->execute($stmtInsert,
-            array($row['shortname'],$row['fullname'],$row['text'],$userDetected=1,$row['url'],$row['notes'],$row['source']));
+            array($row['shortname'],$row['fullname'],$row['text'],$userDetected=1,$row['url'],$row['notes'],$row['source'],$row['risk']));
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
     $this->nkMap[$row['shortname']] = $new['rf_pk'];

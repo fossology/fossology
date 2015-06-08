@@ -45,7 +45,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
     for($i=1;$i<4;$i++){
       $licenses[$i] = array('rf_pk'=>$i,'rf_shortname'=>'lic'.$i,'rf_fullname'=>'lice'.$i,
           'rf_text'=>'text'.$i,'rf_url'=>$i.$i,'rf_notes'=>'note'.$i,'rf_source'=>'s'.$i,
-          'rf_detector_type'=>1);
+          'rf_detector_type'=>1,'rf_risk'=>($i-1));
       $dbManager->insertTableRow('license_ref', $licenses[$i]);
     }
 
@@ -53,7 +53,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>2,'usage'=>LicenseMap::REPORT));
     
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source');
+    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk');
     $out = fopen('php://output', 'w');
 
     $csv = $licenseCsvExport->createCsv();
@@ -66,7 +66,8 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         null,
         $licenses[1]['rf_url'],
         $licenses[1]['rf_notes'],
-        $licenses[1]['rf_source']));
+        $licenses[1]['rf_source'],
+        $licenses[1]['rf_risk']));
         
     fputcsv($out, array($licenses[2]['rf_shortname'],
         $licenses[2]['rf_fullname'],
@@ -75,7 +76,8 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         null,
         $licenses[2]['rf_url'],
         $licenses[2]['rf_notes'],
-        $licenses[2]['rf_source']));
+        $licenses[2]['rf_source'],
+        $licenses[2]['rf_risk']));
     
     fputcsv($out, array($licenses[3]['rf_shortname'],
         $licenses[3]['rf_fullname'],
@@ -84,7 +86,8 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         $licenses[2]['rf_shortname'],
         $licenses[3]['rf_url'],
         $licenses[3]['rf_notes'],
-        $licenses[3]['rf_source']));
+        $licenses[3]['rf_source'],
+        $licenses[3]['rf_risk']));
     $expected = ob_get_contents();
     ob_end_clean();
     assertThat($csv,is(equalTo($expected)));
@@ -101,7 +104,8 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
           $licenses[2]['rf_shortname'],
           $licenses[3]['rf_url'],
           $licenses[3]['rf_notes'],
-          $licenses[3]['rf_source']),
+          $licenses[3]['rf_source'],
+          $licenses[3]['rf_risk']),
         $delimiter);
     $expected3 = ob_get_contents();
     ob_end_clean();

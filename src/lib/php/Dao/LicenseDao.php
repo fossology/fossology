@@ -500,11 +500,11 @@ class LicenseDao extends Object
     return intval($licenseRefTable['cnt']);
   }
 
-  public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $readyformerge)
+  public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $readyformerge, $riskLvl)
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
-    $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6 WHERE rf_pk=$1',
-        array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone), __METHOD__);
+    $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6, rf_risk=$7 WHERE rf_pk=$1',
+        array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone, $riskLvl), __METHOD__);
   }
   
   public function getLicenseParentById($licenseId, $groupId=null)

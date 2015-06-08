@@ -72,29 +72,29 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
         array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
     $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
+            array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>0,
                 'parent_shortname'=>'licA','report_shortname'=>null)));
     assertThat($returnB, is("Inserted 'licB' in DB with conclusion 'licA'"));
 
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
         array('rf_fk'=>102,'rf_parent'=>100,'usage'=>LicenseMap::REPORT)))->once();
     $returnF = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'',
+            array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'','risk'=>1,
                 'parent_shortname'=>null,'report_shortname'=>'licZ')));
     assertThat($returnF, is("Inserted 'licF' in DB reporting 'licZ'"));
     
     $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'',
+            array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnC, is("Inserted 'licC' in DB"));
     
     $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'',
+            array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnA, is("Shortname 'licA' already in DB (id=101)"));
 
     $returnE = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'',
+            array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'','risk'=>1,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
     
@@ -110,10 +110,10 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
     $licenseCsvImport = new LicenseCsvImport($dbManager);
   
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text','fullname','notes','bar'))),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false) ) );
+            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false,'risk'=>0) ) );
     
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('Short Name','URL','text','fullname','notes','Foreign ID'))),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5) ) );
+            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5,'risk'=>false) ) );
   }
    
   /**

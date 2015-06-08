@@ -28,7 +28,7 @@
     </tr>
     <tr>
       <td valign="top">{{ 'Reference text'|trans }}:</td>
-      <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text }}</div></td>
+      <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text|e }}</div></td>
       {% if suggest_rf %}<td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ suggest_text }}</div></td>{% endif %}
     </tr>
     <tr style="background-color:#F5F5DC;">
@@ -42,6 +42,11 @@
       {% if suggest_rf %}<td>{{ suggest_notes|e }}</td>{% endif %}
     </tr>
     <tr style="background-color:#F5F5DC;">
+      <td>{{ 'Risk level'|trans }}:</td>
+      <td>{{ rf_risk }}</td>
+      {% if suggest_rf %}<td>{{ suggest_risk }}</td>{% endif %}
+    </tr>
+    <tr>
       <td></td>
       <td>
         <input type="button" id="verify-button" value="{{ 'Verify as new license'|trans }}"/>
