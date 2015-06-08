@@ -298,11 +298,6 @@ $dbManager->insertTableRow('sysconfig',
         array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
 $dbManager->commit();
 
-use Fossology\Lib\Dao\FolderDao;
-global $container;
-$folderDao = $container->get('dao.folder');
-$folderDao->ensureTopLevelFolder();
-
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
