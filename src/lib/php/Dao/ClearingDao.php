@@ -673,7 +673,7 @@ INSERT INTO clearing_decision (
 
     $sql = "$decisionsCte
             SELECT
-              COUNT(*) AS count,
+              COUNT(DISTINCT itemid) AS count,
               lr.rf_shortname AS shortname,
               rf_pk
             FROM decision
