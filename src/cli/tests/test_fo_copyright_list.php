@@ -145,11 +145,10 @@
       fwrite(STDOUT, "DEBUG: Executing '$command'\n");
       $last = exec("$command 2>&1", $out, $rtn);
       $output_msg_count = count($out);
-      /** for this uload, will get 101 lines for report */
-      $this->assertEquals(101, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+      $this->assertEquals(25, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
       /** check one line of the report */
       sort($out, SORT_STRING);
-      $this->assertEquals("test package/data.tar.gz/data.tar/etc/cron.d/fossology: copyright (c) 2007 hewlett-packard development company, l.p.", $out[83]);
+      $this->assertEquals("test package/data.tar.gz/data.tar/etc/cron.d/fossology: Copyright (C) 2007 Hewlett-Packard Development Company, L.P.", $out[7]);
 
 
       $out = "";
@@ -202,8 +201,8 @@
     $last = exec("$command 2>&1", $out, $rtn);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
@@ -233,7 +232,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(12, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
 
     /** help, not authentication */
@@ -242,7 +241,7 @@
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(12, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
     // print_r($out);
     fwrite(STDOUT,"DEBUG: Done running " . __METHOD__ . "\n");
   }

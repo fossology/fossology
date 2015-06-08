@@ -417,6 +417,14 @@ INSERT INTO clearing_decision (
     return $events;
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $userId
+   * @param int $groupId
+   * @param int $licenseId
+   * @param string $what
+   * @param string $changeTo
+   */
   public function updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo)
   {
     $this->dbManager->begin();
@@ -434,7 +442,7 @@ INSERT INTO clearing_decision (
       $row['reportinfo'] = "";
     }
 
-    if ($what == 'Text')
+    if ($what == 'reportinfo')
     {
       $reportInfo = $changeTo;
       $comment = $row['comment'];
@@ -673,7 +681,7 @@ INSERT INTO clearing_decision (
 
     $sql = "$decisionsCte
             SELECT
-              COUNT(*) AS count,
+              COUNT(DISTINCT itemid) AS count,
               lr.rf_shortname AS shortname,
               rf_pk
             FROM decision

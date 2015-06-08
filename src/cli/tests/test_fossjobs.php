@@ -126,11 +126,11 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     // print "cp2foss_command is:$cp2foss_command\n";
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$cp2foss_command'\n");
     $last = exec("$cp2foss_command 2>&1", $out, $rtn);
-    // print_r($out);
+    //print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
     } else $this->assertFalse(TRUE);
 
     $agent_status = 0;
@@ -141,7 +141,6 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $command = "$fossjobs_path $auth -U $upload_id -A agent_copyright,agent_mimetype,agent_nomos,agent_pkgagent -v";
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    //print_r($out);
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  Waiting 300 seconds for the agents to complete\n");
     sleep(300); //wait for the agents complete $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"nomos", $upload_id);
@@ -166,8 +165,8 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     //print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
     } else $this->assertFalse(TRUE);
 
     sleep(5); //wait for the agents complete
@@ -212,7 +211,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
     //print_r($out);
-    $this->assertEquals(17, $output_msg_count);
+    $this->assertEquals(18, $output_msg_count);
     $auth = "--username fossy --password fossy -c $fossology_testconfig";
     /** list agents */
     $out = "";
@@ -222,7 +221,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     //print_r($out);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
+    $this->assertEquals(10, $output_msg_count);
 
     /** list uploads */
     $out = "";
@@ -231,7 +230,7 @@ class test_fossjobs extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: " . __METHOD__ . " Line: " . __LINE__ . "  executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     fwrite(STDOUT, "DEBUG: output was:\n");
-    print_r($out);
+    //print_r($out);
     $output_msg_count = count($out);
     // TODO: / Note:  This is *Highly* dependent on the execution of 
     // test_reschedule_agents() - i.e. these two test cases are 

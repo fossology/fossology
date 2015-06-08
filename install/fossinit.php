@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014-2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
@@ -297,6 +297,11 @@ $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Re
 $dbManager->insertTableRow('sysconfig',
         array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
 $dbManager->commit();
+
+use Fossology\Lib\Dao\FolderDao;
+global $container;
+$folderDao = $container->get('dao.folder');
+$folderDao->ensureTopLevelFolder();
 
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");

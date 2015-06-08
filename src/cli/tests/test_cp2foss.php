@@ -91,7 +91,6 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
         print "$output\n";
         exit(1);
     }
-    sleep(10);
     print "\nStarting functional test for cp2foss. \n";
 
   }
@@ -141,12 +140,12 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth -q all -d 'regular expression testing' '../*.php' -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    fwrite(STDOUT, "DEBUG: $out[5] \n");
-    fwrite(STDOUT, print_r($out));
+    //fwrite(STDOUT, "DEBUG: $out[5] \n");
+    //fwrite(STDOUT, print_r($out));
     $upload_id = 0;
     /** get upload id that you just upload for testing */
     if ($out && $out[13]) {
-      $upload_id = get_upload_id($out[5]);
+      $upload_id = get_upload_id($out[6]);
     } else $this->assertFalse(TRUE);
     fwrite(STDOUT, "DEBUG: $upload_id \n");
     $agent_status = 0;
@@ -177,16 +176,16 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     #print_r($out);
     //DEBUG
     $repo_string = "Uploading to folder: 'Software Repository'";
-    $repo_pos = strpos($out[1], $repo_string);
+    $repo_pos = strpos($out[2], $repo_string);
     $output_msg_count = count($out);
     print "DEBUG: \$this->assertGreaterThan(0, $repo_pos);\n";
     $this->assertGreaterThan(0, $repo_pos);
     print "DEBUG: \$this->assertEquals(4, $output_msg_count);\n";
-    $this->assertEquals(4, $output_msg_count);
+    $this->assertEquals(5, $output_msg_count);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[3]) {
-      $upload_id = get_upload_id($out[3]);
+    if ($out && $out[4]) {
+      $upload_id = get_upload_id($out[4]);
       print "DEBUG: Upload_id is $upload_id\n";
     } 
     else {
@@ -205,14 +204,14 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $last = exec("$command 2>&1", $out, $rtn);
     // print_r($out);
     $repo_string = "Uploading to folder: 'Software Repository'";
-    $repo_pos = strpos($out[1], $repo_string);
+    $repo_pos = strpos($out[2], $repo_string);
     $output_msg_count = count($out);
     $this->assertGreaterThan(0, $repo_pos);
-    $this->assertEquals(4, $output_msg_count);
+    $this->assertEquals(5, $output_msg_count);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[3]) {
-      $upload_id = get_upload_id($out[3]);
+    if ($out && $out[4]) {
+      $upload_id = get_upload_id($out[4]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -225,11 +224,11 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth ./ -f $upload_path -d upload_des -q all -v";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    // print_r($out);
+    //print_r($out);
     $repo_string = "Uploading to folder: '/$upload_path'";
-    $repo_pos = strpos($out[7], $repo_string);
+    $repo_pos = strpos($out[8], $repo_string);
     $output_msg_count = count($out);
-    print "DEBUG: \$this->assertGreaterThan(0, $repo_pos)\n";
+    print "DEBUG: \$this->assertGreaterThan(0, $repo_pos), $repo_string\n";
     $this->assertGreaterThan(0, $repo_pos);
     $scheduled_agent_info_1 = "agent_pkgagent is queued to run on";
     $scheduled_agent_info_2 = "agent_nomos is queued to run on";
@@ -242,18 +241,19 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $pos = strpos($out[$output_msg_count - 2], $scheduled_agent_info_2);
     $this->assertEquals(0, $pos);
     $pos = false;
-    $pos = strpos($out[$output_msg_count - 3], $scheduled_agent_info_3);
+    $pos = strpos($out[$output_msg_count - 4], $scheduled_agent_info_3);
     $this->assertEquals(0, $pos);
     $pos = false;
-    $pos = strpos($out[$output_msg_count - 4], $scheduled_agent_info_4);
+    $pos = strpos($out[$output_msg_count - 6], $scheduled_agent_info_4);
     $this->assertEquals(0, $pos, $out[$output_msg_count-4]);
     $upload_id = 0;
 
     /** get upload id that you just upload for testing */
-    if ($out && $out[11]) {
-      $upload_id = get_upload_id($out[11]);
+    if ($out && $out[12]) {
+      $upload_id = get_upload_id($out[12]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
+    sleep(5);
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
     $agent_status = 0;
@@ -279,8 +279,8 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     // print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[23]) {
-      $upload_id = get_upload_id($out[23]);
+    if ($out && $out[24]) {
+      $upload_id = get_upload_id($out[24]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -293,11 +293,11 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth -q all -A -f 'regular expression testing' -n 'test globbing dir' -d 'test des globbing' '*.php' -v";
     fwrite(STDOUT, "DEBUG: Running $command\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    // print_r($out);
+    //print_r($out);
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[19]) {
-      $upload_id = get_upload_id($out[17]);
+    if ($out && $out[18]) {
+      $upload_id = get_upload_id($out[18]);
     } else $this->assertFalse(TRUE);
     fwrite(STDOUT, "Debug: upload_id is:$upload_id\n");
     $agent_status = 0;
@@ -336,12 +336,14 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     $command = "$cp2foss_path $auth http://www.fossology.org/testdata/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm -d 'fossology des' -f 'fossology path' -n 'test package'";
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
-    print "DEBUG: output is:\n";
-    print_r($out);
+    sleep(50);
+    //print "DEBUG: output is:\n";
+    //print_r($out);
+
     $upload_id = 0;
     /** get upload id that you just upload for testing */
-    if ($out && $out[4]) {
-      $upload_id = get_upload_id($out[4]);
+    if ($out && $out[5]) {
+      $upload_id = get_upload_id($out[5]);
     } else $this->assertFalse(TRUE);
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
@@ -372,7 +374,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(67, $output_msg_count, "Test that the number of output lines from '$command' is 65");
+    $this->assertEquals(68, $output_msg_count, "Test that the number of output lines from '$command' is 65");
     // print_r($out);
     /** list agents */
     $out = "";
@@ -381,7 +383,7 @@ class test_cp2foss extends PHPUnit_Framework_TestCase {
     fwrite(STDOUT, "DEBUG: Executing '$command'\n");
     $last = exec("$command 2>&1", $out, $rtn);
     $output_msg_count = count($out);
-    $this->assertEquals(9, $output_msg_count);
+    $this->assertEquals(10, $output_msg_count);
     /** uplaod NULL */
     $out = "";
     $pos = 0;

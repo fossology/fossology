@@ -100,7 +100,7 @@ class AjaxClearingView extends FO_Plugin
 
     list($licenseDecisions, $removed) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId);
 
-    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs($_SESSION['GroupId'], $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions));
+    $licenseRefs = $this->licenseDao->getConclusionLicenseRefs(Auth::getGroupId(), $_GET['sSearch'], $orderAscending, array_keys($licenseDecisions));
     $licenses = array();
     foreach ($licenseRefs as $licenseRef)
     {
@@ -187,7 +187,7 @@ class AjaxClearingView extends FO_Plugin
         if (isset($id))
         {
           list ($uploadTreeId, $licenseId) = explode(',', $id);
-          $what = GetParm("columnName", PARM_STRING);
+          $what = GetParm("columnId", PARM_INTEGER)==3 ? 'comment' : 'reportinfo';
           $changeTo = GetParm("value", PARM_RAW);
           $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
