@@ -69,7 +69,8 @@ extern log_t* main_log;
             lprintf(main_log, __VA_ARGS__); \
             lprintf(main_log, "\n"); \
             lprintf(main_log, "FATAL errno is: %s\n", strerror(errno)); \
-            exit(-1); } while(0)
+            fflush(main_log->log_file); \
+            exit(-2); } while(0)
 
 /** Macro that is called when a thread generated a fatal error */
 #define THREAD_FATAL(file, ...) do { \
@@ -137,6 +138,7 @@ log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_
 void log_destroy(log_t* log);
 
 int  lprintf (log_t* log, const char* fmt, ...);
+void lflush(log_t* log);
 int  clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...);
 int  vlprintf(log_t* log, const char* fmt, va_list args);
 

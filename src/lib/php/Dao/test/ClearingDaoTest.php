@@ -425,4 +425,20 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $mainLicIdAfterInsertToOtherUpload = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdAfterInsertToOtherUpload, is(arrayWithSize(1)));
   }
+  
+  public function testupdateClearingEvent()
+  {
+    $this->testDb->createSequences(array('clearing_event_clearing_event_pk_seq'));
+    $this->testDb->createConstraints(array('clearing_event_pkey'));
+    $this->dbManager->queryOnce("ALTER TABLE clearing_event ALTER COLUMN clearing_event_pk SET DEFAULT nextval('clearing_event_clearing_event_pk_seq'::regclass)");
+
+    $this->clearingDao->updateClearingEvent($uploadTreeId=301, $userId=1, $groupId=1, $licenseId=402, $what='comment', $changeCom='abc123');
+    $rowPast = $this->dbManager->getSingleRow('SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2 ORDER BY clearing_event_pk DESC LIMIT 1',array($uploadTreeId,$licenseId),__METHOD__.'beforeReportinfo');
+    assertThat($rowPast['comment'],equalTo($changeCom));
+    
+    $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what='reportinfo', $changeRep='def456');
+    $rowFuture = $this->dbManager->getSingleRow('SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2 ORDER BY clearing_event_pk DESC LIMIT 1',array($uploadTreeId,$licenseId),__METHOD__.'afterReportinfo');
+    assertThat($rowFuture['comment'],equalTo($changeCom));
+    assertThat($rowFuture['reportinfo'],equalTo($changeRep));
+  }
 }

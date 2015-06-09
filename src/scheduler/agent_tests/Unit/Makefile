@@ -44,7 +44,8 @@ OBJECTS = testHost.o \
           testEvent.o \
           testDatabase.o \
           testJob.o \
-          testScheduler.o
+          testScheduler.o \
+	  utils.o
 
 all: $(EXE)
 

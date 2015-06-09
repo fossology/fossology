@@ -125,7 +125,7 @@ int focunit_main(int argc, char **argv, char *test_name, CU_SuiteInfo *suites)
     if (ErrCode)
     {
       fprintf(stderr, "Error: %s\n", CU_get_error_msg());
-      exit(-1);
+      exit(-2);
     }
   }
   else // generate xml test report via Automated mode only when run all suits in pRegistrAy, or not

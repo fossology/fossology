@@ -348,8 +348,10 @@ fclose($db_conf_fh);
 /* now create a mods-enabled directory to contain symlinks to the 
    agents in the current working copy of fossology */
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
+/*
 mkdir($mods_enabled_dir, 0755, TRUE)
     or die("FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n");
+*/
 
 
 /* here we have to do the work that each of the agents' 'make install'
@@ -364,6 +366,7 @@ mkdir($mods_enabled_dir, 0755, TRUE)
 $fo_base_dir = realpath(__DIR__ . '/../..');
 $src_dirs = scandir($fo_base_dir);
 
+/*
 foreach ($src_dirs as $src_dir) {
     $full_src_dir = $fo_base_dir . "/" . $src_dir;
     // skip dotted directories, lib/, cli/, and other irrelevant directories
@@ -393,6 +396,16 @@ foreach ($src_dirs as $src_dir) {
         symlink($full_src_dir, "$mods_enabled_dir/$src_dir")
             or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");
     }
+}
+*/
+
+$des_dir = "/usr/local/etc/fossology/mods-enabled/";
+if (is_dir($des_dir)) {
+  symlink($des_dir, "$mods_enabled_dir")
+    or die("FAIL - could not create symlink for $des_dir\n");
+}
+else {
+  print "please run make install from source before do the test.\n";
 }
 
 /* Now let's set up a test repository location, which is just an empty
@@ -486,7 +499,6 @@ require_once(__DIR__ . '/../../lib/php/common-cache.php');
 debug("Applying the FOSSOlogy schema to test database via ApplySchema()");
 ob_start();
 $apply_result = ApplySchema($core_schema_dat_file);
-ob_end_clean();
 
 // then re-assign the previous PG_CONN, if there was one
 if (isset($previous_PG_CONN)) {
@@ -504,9 +516,20 @@ debug("Elapsed Time = $elapsed");
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
 $random_seed = rand().rand();
 $hash = sha1($random_seed . "fossy");
-$user_sql = "INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES ('fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
+$user_sql = "INSERT INTO users (user_pk, user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES (1, 'fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
 pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
+
+// insert top level folder 'Software Repository'
+$folder_sql = "INSERT  INTO folder(folder_pk, folder_name, folder_desc) values(1, 'Software Repository', 'Top Folder');";
+pg_query($test_db_conn, $folder_sql)
+    or die("FAIL: could not insert top folder\n");
+$folder_sql = "INSERT INTO foldercontents (parent_fk, foldercontents_mode, child_id) VALUES (1, 0, 0);";
+pg_query($test_db_conn, $folder_sql)
+    or die("FAIL: could not insert top folder contents\n");
+$folder_sql = "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 FROM folder LIMIT 1));";
+pg_query($test_db_conn, $folder_sql)
+    or die("FAIL: could not change folder sequence\n");
 
 $LIBEXECDIR = "/usr/local/lib/fossology/";
 $MODDIR = "/usr/local/share/fossology/";
@@ -516,6 +539,7 @@ require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for 
 $Verbose = 0;
 Migrate_20_21($Verbose);
 Migrate_21_22($Verbose);
+ob_end_clean();
 
 /* now we are done setting up the test database */
 pg_close($test_db_conn);
