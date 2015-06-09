@@ -131,7 +131,7 @@ class FolderDao extends Object
     return $rootFolder;
   }
 
-  private function getFolderTreeCte($parentId=null) {
+  public function getFolderTreeCte($parentId=null) {
     $parentCondition = $parentId ? '= $1' : 'IS NULL';
 
     return "WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folder_perm, id_path, name_path, depth, cycle_detected) AS (
@@ -150,8 +150,8 @@ class FolderDao extends Object
     name_path || f.folder_name,
     array_length(id_path, 1),
     f.folder_pk = ANY (id_path)
-  FROM folder f, folder_tree ft
-  WHERE f.parent_fk = ft.folder_pk AND NOT cycle_detected
+  FROM folder f, foldercontents fc, folder_tree ft
+  WHERE f.folder_pk=fc.child_id AND foldercontents_mode=".self::MODE_FOLDER." AND fc.parent_fk = ft.folder_pk AND NOT cycle_detected
 )";
   }
     
@@ -210,6 +210,24 @@ GROUP BY group_fk
     return $results;
   }
   
+  
+  public function getFolderChildUploads($parentId, $trustGroupId)
+  {
+    $statementName = __METHOD__;
+    $parameters = array($parentId, $trustGroupId);
+
+    $this->dbManager->prepare($statementName, $sql="
+SELECT u.*,uc.*,fc.foldercontents_pk FROM foldercontents fc
+  INNER JOIN upload u ON u.upload_pk = fc.child_id
+  INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND u.upload_mode = 104
+");
+    $res = $this->dbManager->execute($statementName, $parameters);
+    $results = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $results;
+  }
+  
   /**
    * @param int $parentId
    * @param int $trustGroupId
@@ -220,22 +238,11 @@ GROUP BY group_fk
     if (empty($trustGroupId)) {
       $trustGroupId = Auth::getGroupId();
     }
-    $statementName = __METHOD__;
-    $parameters = array($parentId, $trustGroupId);
-
-    $this->dbManager->prepare($statementName, "
-SELECT u.*,uc.* FROM foldercontents fc
-  INNER JOIN upload u ON u.upload_pk = fc.child_id
-  INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND u.upload_mode = 104
-");
-    $res = $this->dbManager->execute($statementName, $parameters);
     $results = array();
-    while ($row = $this->dbManager->fetchArray($res))
+    foreach($this->getFolderChildUploads($parentId, $trustGroupId) as $row)
     {
       $results[] = UploadProgress::createFromTable($row);
     }
-    $this->dbManager->freeResult($res);
     return $results;
   }
 
@@ -309,4 +316,20 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     }
   }
   
+  public function getFolderChildFolders($folderId)
+  {
+    $results = array();
+    $stmtFolder = __METHOD__;
+    $sqlFolder = "SELECT foldercontents_pk,foldercontents_mode, folder_name FROM foldercontents,folder "
+            . "WHERE foldercontents.parent_fk=$1 AND foldercontents.child_id=folder.folder_pk"
+            . " AND foldercontents_mode=".self::MODE_FOLDER;
+    $this->dbManager->prepare($stmtFolder, $sqlFolder);
+    $res = $this->dbManager->execute($stmtFolder,array($folderId));
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $results[$row['foldercontents_pk']] = $row;
+    }
+    $this->dbManager->freeResult($res);
+    return $results;
+  }
 }
