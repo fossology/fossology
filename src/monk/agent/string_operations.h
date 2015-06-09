@@ -38,7 +38,7 @@ GArray* tokenize(const char* inputString, const char* delimiters);
 int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
         GArray** output, Token** remainder);
 
-#define tokenEquals(a, b) ((a)->hashedContent == (b)->hashedContent)
+#define tokenEquals(a, b) (((a)->length == (b)->length ) && ((a)->hashedContent == (b)->hashedContent))
 
 int tokensEquals(const GArray* a, const GArray* b);
 

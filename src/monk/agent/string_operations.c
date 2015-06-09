@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -55,19 +55,31 @@ unsigned specialDelim(const char* z){
       return 2;
     return 1;
   }
+  else if( a==':' && b==':') {
+    return 2;
+  }
   return 0;
 }
 
-int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
-  GArray** output, Token** remainder) {
+int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters, GArray** output, Token** remainder) {
   GArray* tokens = *output;
   Token* stateToken;
+  Token* remToken;
+  
+  remToken = malloc(sizeof (Token));
+  remToken->length = 3;
+  remToken->removedBefore = 0;
+#ifndef MONK_CASE_INSENSITIVE
+  remToken->hashedContent = hash("REM");
+#else
+  remToken->hashedContent = hash("rem");
+#endif
 
   unsigned int initialTokenCount = tokens->len;
 
   if (!inputChunk) {
     stateToken = *remainder;
-    if ((stateToken) && (stateToken->length > 0))
+    if ((stateToken) && (stateToken->length > 0) && !(tokenEquals(stateToken,remToken)))
       g_array_append_val(tokens, *stateToken);
     if (stateToken) {
       free(stateToken);
@@ -103,7 +115,12 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       delimLen = splittingDelim(*ptr, delimiters);
     }
     if (delimLen>0) {
-      if (stateToken->length > 0) {
+      if(stateToken->length > 0 && tokenEquals(stateToken,remToken)) {
+        stateToken->hashedContent = hash_init();
+        stateToken->removedBefore += delimLen+stateToken->length;
+        stateToken->length = 0;
+      }
+      else if (stateToken->length > 0) {
         g_array_append_val(tokens, *stateToken);
         stateToken->hashedContent = hash_init();
         stateToken->length = 0;
@@ -126,7 +143,7 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       readBytes += 1;
     }
   }
-
+  free(remToken);
   return tokens->len - initialTokenCount;
 }
 
