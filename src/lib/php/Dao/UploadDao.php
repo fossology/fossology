@@ -463,7 +463,17 @@ class UploadDao extends Object
         array($uploadId, $groupId), __METHOD__);
     return $perm['perm']>=Auth::PERM_WRITE;
   }
- 
+
+  public function makeAccessibleToGroup($uploadId, $groupId, $perm=null)
+  {
+    if (null === $perm) {
+      $perm = Auth::PERM_ADMIN;
+    }
+    $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
+            . " VALUES($1,$2,$3)",
+               array($perm, $uploadId, $groupId), __METHOD__);
+  }
+
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
     if (null === $perm) {
@@ -473,7 +483,7 @@ class UploadDao extends Object
             . "SELECT $1 perm, $2 upload_fk, gum.group_fk"
             . " FROM group_user_member gum LEFT JOIN perm_upload ON perm_upload.group_fk=gum.group_fk AND upload_fk=$2"
             . " WHERE perm_upload IS NULL AND gum.user_fk=$3",
-               array($perm, $uploadId, $userId), __METHOD__.'.insert');   
+               array($perm, $uploadId, $userId), __METHOD__.'.insert');
   }
  
   /**
