@@ -42,11 +42,11 @@ void test_tokenize() {
 }
 
 void test_tokenizeWithSpecialDelims() {
-  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo");
+  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo \n:: qoo ");
 
   GArray* token = tokenize(test, " \n");
-
-  CU_ASSERT_EQUAL(token->len, 4);
+  printf("[[%d]]",token->len);
+  CU_ASSERT_EQUAL(token->len, 5);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 2);
@@ -59,12 +59,15 @@ void test_tokenizeWithSpecialDelims() {
   CU_ASSERT_EQUAL(g_array_index(token, Token, 3).hashedContent, hash("booo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 3).length, 4);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 3).removedBefore, 6);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 4).hashedContent, hash("qoo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 4).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 4).removedBefore, 5);
   g_array_free(token, TRUE);
   g_free(test);
 }
 
 void test_streamTokenize() {
-  char* test = g_strdup("^foo^^ba");
+  char* test = g_strdup("^foo^^ba^REM^booo");
   const char* delimiters = "^";
 
   GArray* token = tokens_new();
@@ -88,13 +91,16 @@ void test_streamTokenize() {
   if ((remainder) && (remainder->length > 0))
     g_array_append_val(token, *remainder);
 
-  CU_ASSERT_EQUAL(token->len, 2);
+  CU_ASSERT_EQUAL(token->len, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 1);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).hashedContent, hash("ba"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).length, 2);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 2);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("booo"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 4);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 5);
 
   if (remainder)
     free(remainder);
