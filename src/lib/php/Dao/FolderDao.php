@@ -93,7 +93,7 @@ class FolderDao extends Object
     $this->dbManager->freeResult($res);
   }
 
-  public function fixFolderSequence() {
+  protected function fixFolderSequence() {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
         "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 FROM folder LIMIT 1))");
@@ -131,13 +131,10 @@ class FolderDao extends Object
     return $rootFolder;
   }
 
-  public function getFolderStructure($parentId=null) {
-    $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
+  private function getFolderTreeCte($parentId=null) {
     $parentCondition = $parentId ? '= $1' : 'IS NULL';
-    $parameters = $parentId ? array($parentId) : array();
 
-    $this->dbManager->prepare($statementName, "
-WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folder_perm, id_path, name_path, depth, cycle_detected) AS (
+    return "WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folder_perm, id_path, name_path, depth, cycle_detected) AS (
   SELECT
     f.folder_pk, f.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,
     ARRAY [f.folder_pk]   AS id_path,
@@ -155,21 +152,18 @@ WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folde
     f.folder_pk = ANY (id_path)
   FROM folder f, folder_tree ft
   WHERE f.parent_fk = ft.folder_pk AND NOT cycle_detected
-)
-SELECT
-  folder_pk,
-  parent_fk,
-  folder_name,
-  folder_desc,
-  folder_perm,
-  depth
-FROM folder_tree
-ORDER BY name_path;
-");
+)";
+  }
     
+  public function getFolderStructure($parentId=null) {
+    $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
+    $parameters = $parentId ? array($parentId) : array();
+    $this->dbManager->prepare($statementName, $this->getFolderTreeCte($parentId)
+            . " SELECT folder_pk, parent_fk, folder_name, folder_desc, folder_perm, depth FROM folder_tree ORDER BY name_path");
+    $res = $this->dbManager->execute($statementName, $parameters);
+  
     $userGroupMap = $GLOBALS['container']->get('dao.user')->getUserGroupMap(Auth::getUserId());
     
-    $res = $this->dbManager->execute($statementName, $parameters);
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
@@ -266,4 +260,53 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     }
     return true;
   }
+  
+  protected function isInFolderTree($parentId,$folderId)
+  {
+    $cycle = $this->dbManager->getSingleRow(
+        $this->getFolderTreeCte() . " SELECT depth FROM folder_tree WHERE folder_pk=$2 LIMIT 1",
+        array($parentId,$folderId),
+        __METHOD__);
+    return !empty($cycle);
+  }
+  
+  public function moveContent($folderContentId, $newParentId)
+  {
+    $content = $this->dbManager->getSingleRow('SELECT * FROM foldercontents WHERE foldercontents_pk=$1',
+            array($folderContentId),
+            __METHOD__.'.getContent' );
+    if (empty($content)) {
+      throw new \Exception('invalid FolderContentId');
+    }
+    if ($content['parent_fk'] == $newParentId) {
+      return;
+    }
+    $newParent = $this->dbManager->getSingleRow('SELECT * FROM folder WHERE folder_pk=$1',
+            array($newParentId),
+            __METHOD__.'.getParent');
+    if (empty($newParent)) {
+      throw new \Exception('invalid parent folder');
+    }
+    
+    if($content['foldercontents_mode']==self::MODE_FOLDER)
+    {
+      if ($this->isInFolderTree($content['child_id'],$content['parent_fk'])) {
+        throw new \Exception("action would cause a cycle");
+      }
+      $this->dbManager->getSingleRow('UPDATE foldercontents SET parent_fk=$2 WHERE foldercontents_pk=$1',
+              array($folderContentId,$newParentId),__METHOD__.'.updateFolderParent');
+    }
+    elseif($content['foldercontents_mode']==self::MODE_UPLOAD)
+    {
+      $uploadId = $content['child_id'];
+      /* @var $uploadDao UploadDao */
+      $uploadDao = $GLOBALS['container']->get('dao.upload');
+      if (!$uploadDao->isEditable($uploadId, Auth::getGroupId())) {
+        throw new \Exception('permission to upload denied');
+      }
+      $this->dbManager->getSingleRow('UPDATE foldercontents SET parent_fk=$2 WHERE foldercontents_pk=$1',
+              array($folderContentId,$newParentId),__METHOD__.'.updateUploadParent');
+    }
+  }
+  
 }
