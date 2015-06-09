@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -199,35 +200,28 @@ class ui_browse extends FO_Plugin
   }
 
   /**
-   * @brief Given a upload_pk, list every item in it.
+   * @brief Given a folderId, list every item in it.
    * If it is an individual file, then list the file contents.
    */
-  private function ShowFolder($Folder, $Show)
+  private function ShowFolder($folderId)
   {
-    $V = "<div align='center'><small>";
-    if ($Folder != GetUserRootFolder())
-    {
-      $text = _("Top");
-      $V .= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    /* @var $uiFolderNav FolderNav */
+    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
+    
+    $folderNav = '<div id="sidetree">';
+    if ($folderId != $rootFolder) {
+      $folderNav .= '<div class="treeheader" style="display:inline;"><a href="'. Traceback_uri() . '?mod=' . $this->Name . '">Top</a> | </div>';
     }
-    $text = _("Expand");
-    $V .= "<a href='javascript:Expand();'>$text</a> |";
-    $text = _("Collapse");
-    $V .= "<a href='javascript:Collapse();'>$text</a> |";
-    $text = _("Refresh");
-    $V .= "<a href='" . Traceback() . "'>$text</a>";
-    $V .= "</small></div>";
-    $V .= "<P>\n";
-    $V .= "<form>\n";
-    $V .= FolderListDiv($Folder, 0, $Folder, 1);
-    $V .= "</form>\n";
-    $this->vars['folderNav'] = $V;
+    $folderNav .= '<div id="sidetreecontrol" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
+    $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
+   
+    $this->vars['folderNav'] = $folderNav;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
-    $this->vars['folder'] = $Folder;
-    $this->vars['show'] = $Show;
+    $this->vars['folder'] = $folderId;
     return '';
   }
 
@@ -247,14 +241,10 @@ class ui_browse extends FO_Plugin
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
     /* check permission if $Upload is given */
-    if (!empty($Upload))
+    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
     {
-      $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < Auth::PERM_READ)
-      {
-        $this->vars['message'] = _("Permission Denied");
-        return $this->render('include/base.html.twig');
-      }
+      $this->vars['message'] = _("Permission Denied");
+      return $this->render('include/base.html.twig');
     }
 
     if (empty($folder_pk))
@@ -285,6 +275,7 @@ class ui_browse extends FO_Plugin
       $this->vars['multiUploadAgents'] = $multiUploadAgents;
     }
     $this->vars['folderId'] = $folder_pk;
+
     return $this->render('ui-browse.html.twig');
   }
 
@@ -334,8 +325,7 @@ class ui_browse extends FO_Plugin
       $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
       $row = $dbManager->getSingleRow($sql, array($uploadTreeId));
       $Upload = $row['upload_fk'];
-      $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < Auth::PERM_READ)
+      if (!$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
@@ -351,32 +341,30 @@ class ui_browse extends FO_Plugin
           return $this->render('include/base.html.twig');
         }
       }
-      $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
+      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['upload_fk']);
       $html .= Dir2Browse($this->Name, $uploadTreeId, NULL, 1, "Browse", -1, '', '', $uploadtree_tablename) . "\n";
     }
     else if (!empty($Upload))
     {
-      $uploadtree_tablename = GetUploadtreeTableName($Upload);
+      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
       $html .= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
     }
 
     if (empty($Upload))
     {
-      return $html . $this->ShowFolder($Folder, $show);
+      $this->vars['show'] = $show;
+      return $html . $this->ShowFolder($Folder);
     }
 
     if (empty($uploadTreeId))
     {
-      $row = $dbManager->getSingleRow(
-          $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
-          $sqlLog=__METHOD__.".getTreeRoot");
-      if ($row)
+      try
       {
-        $uploadTreeId = $row['uploadtree_pk'];
+        $uploadTreeId = $this->uploadDao->getUploadParent($Upload);
       }
-      else
+      catch(Exception $e)
       {
-        $this->vars['message'] = _("Missing upload tree parent for upload");
+        $this->vars['message'] = $e->getMessage();
         return $this->render('include/base.html.twig');
       }
     }
@@ -394,7 +382,7 @@ class ui_browse extends FO_Plugin
     /** @var UserDao $userDao */
     $userDao = $container->get('dao.user');
     $assigneeArray = $userDao->getUserChoices();
-    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
+    $assigneeArray[Auth::getUserId()] = _('-- Me --');
     $assigneeArray[1] = _('Unassigned');
     $assigneeArray[0] = '';
     return $assigneeArray;
