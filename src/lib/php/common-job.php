@@ -1,6 +1,7 @@
 <?php
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
@@ -76,14 +77,13 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
       array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
-  /* Mode == 2 means child_id is upload_pk */
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
-               array($folder_pk,2,$uploadId),'insert.foldercontents');
+               array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
 
   /****  Add user permission to perm_upload *****/
-  $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
   if (empty($groupId))
   {
+    $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
     $groupId = $usersRow['group_fk'];
   }
   $perm_admin = Auth::PERM_ADMIN;
