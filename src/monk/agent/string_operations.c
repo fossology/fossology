@@ -143,7 +143,7 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       readBytes += 1;
     }
   }
-
+  free(remToken);
   return tokens->len - initialTokenCount;
 }
 
