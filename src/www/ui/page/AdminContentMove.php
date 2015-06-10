@@ -51,7 +51,16 @@ class AdminContentMove extends DefaultPlugin
     
     $folderContentId = intval($request->get('foldercontent'));
     $parentFolderId = intval($request->get('toFolder'));
-    if ($folderContentId && $parentFolderId)
+    if ($folderContentId && $parentFolderId && $request->get('copy'))
+    {
+      try{
+        $this->folderDao->copyContent($folderContentId, $parentFolderId);
+      }
+      catch (Exception $ex) {
+        $vars['message'] = $ex->getMessage();
+      }
+    }
+    elseif ($folderContentId && $parentFolderId)
     {
       try{
         $this->folderDao->moveContent($folderContentId, $parentFolderId);

@@ -68,7 +68,8 @@ class FolderDao extends Object
     $folderRow=$this->dbManager->fetchArray($res);
     $folderId=$folderRow["folder_pk"];
     $this->dbManager->freeResult($res);
-
+    $this->insertFolderContents($parentFolderId, self::MODE_FOLDER, $folderId);
+    
     return $folderId;
   }
 
@@ -271,13 +272,13 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
   protected function isInFolderTree($parentId,$folderId)
   {
     $cycle = $this->dbManager->getSingleRow(
-        $this->getFolderTreeCte() . " SELECT depth FROM folder_tree WHERE folder_pk=$2 LIMIT 1",
+        $this->getFolderTreeCte($parentId) . " SELECT depth FROM folder_tree WHERE folder_pk=$2 LIMIT 1",
         array($parentId,$folderId),
         __METHOD__);
     return !empty($cycle);
   }
   
-  public function moveContent($folderContentId, $newParentId)
+  protected function getContent($folderContentId)
   {
     $content = $this->dbManager->getSingleRow('SELECT * FROM foldercontents WHERE foldercontents_pk=$1',
             array($folderContentId),
@@ -285,8 +286,13 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     if (empty($content)) {
       throw new \Exception('invalid FolderContentId');
     }
+    return $content;
+  }
+  
+  protected function isContentMovable($content, $newParentId)
+  {
     if ($content['parent_fk'] == $newParentId) {
-      return;
+      return false;
     }
     $newParent = $this->dbManager->getSingleRow('SELECT * FROM folder WHERE folder_pk=$1',
             array($newParentId),
@@ -297,11 +303,9 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     
     if($content['foldercontents_mode']==self::MODE_FOLDER)
     {
-      if ($this->isInFolderTree($content['child_id'],$content['parent_fk'])) {
+      if ($this->isInFolderTree($content['child_id'],$newParentId)) {
         throw new \Exception("action would cause a cycle");
       }
-      $this->dbManager->getSingleRow('UPDATE foldercontents SET parent_fk=$2 WHERE foldercontents_pk=$1',
-              array($folderContentId,$newParentId),__METHOD__.'.updateFolderParent');
     }
     elseif($content['foldercontents_mode']==self::MODE_UPLOAD)
     {
@@ -311,8 +315,46 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
       if (!$uploadDao->isEditable($uploadId, Auth::getGroupId())) {
         throw new \Exception('permission to upload denied');
       }
-      $this->dbManager->getSingleRow('UPDATE foldercontents SET parent_fk=$2 WHERE foldercontents_pk=$1',
-              array($folderContentId,$newParentId),__METHOD__.'.updateUploadParent');
+    }
+    
+    return true;
+  }
+  
+  public function moveContent($folderContentId, $newParentId)
+  {
+    $content = $this->getContent($folderContentId);
+    if (!$this->isContentMovable($content, $newParentId)) {
+      return;
+    }
+
+    $this->dbManager->getSingleRow('UPDATE foldercontents SET parent_fk=$2 WHERE foldercontents_pk=$1',
+              array($folderContentId,$newParentId),__METHOD__.'.updateFolderParent');
+  }
+  
+  public function copyContent($folderContentId, $newParentId)
+  {
+    $content = $this->getContent($folderContentId);
+    if (!$this->isContentMovable($content, $newParentId)) {
+      return;
+    }
+    
+    $this->insertFolderContents($newParentId, $content['foldercontents_mode'], $content['child_id']);
+  }
+  
+  protected function isRemovableContentFolder($folderId)
+  {
+    $sql = "SELECT count(parent_fk) FROM foldercontents WHERE foldercontent_mode=".self::MODE_FOLDER." AND child_id=$1";
+    $parentCounter = $this->dbManager->getSingleRow($sql,array($folderId),__METHOD__);
+    return $parentCounter['count']>1;
+  }
+  
+  public function removeContent($folderContentId)
+  {
+    $content = $this->getContent($folderContentId);
+    if($content==self::MODE_FOLDER && $this->isRemovableContentFolder($content['child_id']))
+    {
+      $sql = "DELETE FROM foldercontents WHERE foldercontent_pk=$1";
+      $this->dbManager->getSingleRow($sql,array($folderContentId),__METHOD__);
     }
   }
   
