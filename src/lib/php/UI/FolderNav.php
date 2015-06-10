@@ -43,13 +43,17 @@ class FolderNav extends Object
   {
     $uri = Traceback_uri();
     $sql = $this->folderDao->getFolderTreeCte($parentFolder)
-            ." SELECT folder_pk, folder_name, folder_desc, depth FROM folder_tree";
+            ." SELECT folder_pk, folder_name, folder_desc, depth, name_path FROM folder_tree ORDER BY name_path";
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt,array($parentFolder));
     $out = '';
     $lastDepth = -1;
     while($row=$this->dbManager->fetchArray($res)){
+      for(;$row['depth']<$lastDepth;$lastDepth--)
+      {
+        $out .= '</li></ul>';
+      }
       if($row['depth']==$lastDepth)
       {
         $out .= "</li>\n<li>";
@@ -62,10 +66,6 @@ class FolderNav extends Object
       for(;$row['depth']>$lastDepth;$lastDepth++)
       {
         $out .= '<ul><li>';
-      }
-      for(;$row['depth']<$lastDepth;$lastDepth--)
-      {
-        $out .= '</li></ul>';
       }
       $title = empty($row['folder_desc']) ? '' : 'title="' . htmlspecialchars($row['folder_desc']) . '"';
       $out .= '<a '.$title.' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'">'.htmlentities($row['folder_name']).'</a>';
