@@ -246,7 +246,7 @@ function FolderGetName($FolderPk,$Top=-1)
 {
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,folder.parent_fk FROM folder
+  $sql = "SELECT folder_name,foldercontents.parent_fk FROM folder
 	LEFT JOIN foldercontents ON foldercontents_mode = ".FolderDao::MODE_FOLDER."
 	AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'

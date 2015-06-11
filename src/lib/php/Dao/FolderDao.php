@@ -63,8 +63,8 @@ class FolderDao extends Object
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-      "INSERT INTO folder (folder_name, folder_desc, parent_fk ) VALUES ($1, $2, $3) returning folder_pk");
-    $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription, $parentFolderId));
+      "INSERT INTO folder (folder_name, folder_desc) VALUES ($1, $2) returning folder_pk");
+    $res = $this->dbManager->execute($statementName, array($folderName, $folderDescription));
     $folderRow=$this->dbManager->fetchArray($res);
     $folderId=$folderRow["folder_pk"];
     $this->dbManager->freeResult($res);
@@ -76,8 +76,9 @@ class FolderDao extends Object
   public function getFolderId($folderName, $parentFolderId=self::TOP_LEVEL) {
     $statementName = __METHOD__;
     $this->dbManager->prepare($statementName,
-        "SELECT folder_pk FROM folder WHERE folder_name=$1 AND parent_fk=$2");
-    $res = $this->dbManager->execute($statementName, array( $folderName, $parentFolderId));
+        "SELECT folder_pk FROM folder, foldercontents fc"
+       ." WHERE folder_name=$1 AND fc.parent_fk=$2 AND fc.foldercontents_mode=$3 AND folder_pk=child_id");
+    $res = $this->dbManager->execute($statementName, array( $folderName, $parentFolderId, self::MODE_FOLDER));
     $rows= $this->dbManager->fetchAll($res);
 
     $rootFolder = !empty($rows) ? intval($rows[0]['folder_pk']) : null;
@@ -142,8 +143,8 @@ class FolderDao extends Object
     ARRAY [f.folder_name] AS name_path,
     0                     AS depth,
     FALSE                 AS cycle_detected
-  FROM folder f
-  WHERE folder_pk $parentCondition
+  FROM folder f, foldercontents fc
+  WHERE fc.foldercontents_mode=".self::MODE_FOLDER." AND f.folder_pk=fc.child_id AND fc.parent_fk $parentCondition
   UNION ALL
   SELECT
     f.folder_pk, f.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,

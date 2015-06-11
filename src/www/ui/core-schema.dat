@@ -539,10 +539,6 @@
   $Schema["TABLE"]["folder"]["folder_pk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_pk\" int4 DEFAULT nextval('folder_folder_pk_seq'::regclass)";
   $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_pk\" SET NOT NULL, ALTER COLUMN \"folder_pk\" SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["folder"]["parent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["folder"]["parent_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"parent_fk\" int4";
-  $Schema["TABLE"]["folder"]["parent_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"parent_fk\" DROP NOT NULL;";
-
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL;";
@@ -1726,7 +1722,6 @@
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_user_fk"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_user_fk\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["folder_parent_fk_fkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_parent_fk_fkey\" FOREIGN KEY (\"parent_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
