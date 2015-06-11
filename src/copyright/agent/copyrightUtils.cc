@@ -139,26 +139,23 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
   }
 }
 
-CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
+CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
 {
   int agentID;
   queryAgentId(agentID, dbManager.getConnection());
 
-  return CopyrightState(agentID, cliOptions);
+  CopyrightState state(agentID, std::move(cliOptions));
+
+  addDefaultScanners(state);
+
+  return state;
 }
 
-void fillScanners(CopyrightState& state)
+void addDefaultScanners(CopyrightState& state)
 {
-  const CliOptions& cliOptions = state.getCliOptions();
-
-  const std::list<regexScanner>& extraRegexes =cliOptions.getExtraRegexes();
-  for (auto sc = extraRegexes.begin(); sc != extraRegexes.end(); ++sc)
-    state.addScanner(&(*sc));
-
 #ifdef IDENTITY_COPYRIGHT
-  unsigned types = cliOptions.getOptType();
+  unsigned types = state.getCliOptions().getOptType();
 
-  // Note: Scanners are deleted in the CopyrightState destructor
   if (types & 1<<0)
     //state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
     state.addScanner(new hCopyrightScanner());
@@ -219,7 +216,7 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
 void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
 {
   list<match> l;
-  const list<const scanner*>& scanners = state.getScanners();
+  const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
   for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
   {
     (*sc)->ScanString(sContent, l);

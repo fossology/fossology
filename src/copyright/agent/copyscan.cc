@@ -21,7 +21,7 @@
 #include <cctype>
 #include <algorithm>
 
-const char copyrightType[] = "statement";
+const string copyrightType("statement");
 
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {

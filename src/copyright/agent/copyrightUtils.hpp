@@ -52,9 +52,9 @@ int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const 
 
 bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames);
 
-CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions);
+CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions);
 
-void fillScanners(CopyrightState& state);
+void addDefaultScanners(CopyrightState& state);
 /*
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);
 */

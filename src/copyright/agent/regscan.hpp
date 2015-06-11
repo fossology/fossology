@@ -25,12 +25,12 @@
 class regexScanner : public scanner
 {
   rx::regex reg;
-  const char* type;
+  const string type;
   int index;
 public:
   void ScanString(const string& str, list<match>& results) const;
-  regexScanner(const string& sReg, const char* t);
-  regexScanner(const string& sReg, const char* t, int idx);
+  regexScanner(const string& sReg, const string& t);
+  regexScanner(const string& sReg, const string& t, int idx);
 } ;
 
 
