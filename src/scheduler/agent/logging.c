@@ -195,7 +195,6 @@ int lprintf(log_t* log, const char* fmt, ...)
   {
     rc = vlprintf(log, fmt, args);
   }
-  vprintf(fmt, args);
   va_end(args);
 
   return rc;
