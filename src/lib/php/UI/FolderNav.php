@@ -67,14 +67,18 @@ class FolderNav extends Object
       {
         $out .= '<ul><li>';
       }
-      $title = empty($row['folder_desc']) ? '' : 'title="' . htmlspecialchars($row['folder_desc']) . '"';
-      $out .= '<a '.$title.' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'">'.htmlentities($row['folder_name']).'</a>';
+      $out .= $this->getFormattedItem($row, $uri);
     }
-    for(;0<$lastDepth;$lastDepth--)
+    for(;-1<$lastDepth;$lastDepth--)
     {
       $out .= '</li></ul>';
     }
     return $out;
   } 
 
+  protected function getFormattedItem($row,$uri)
+  {
+    $title = empty($row['folder_desc']) ? '' : ' title="' . htmlspecialchars($row['folder_desc']) . '"';
+    return '<a'.$title.' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'">'.htmlentities($row['folder_name']).'</a>';
+  }
 }
