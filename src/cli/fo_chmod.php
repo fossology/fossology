@@ -16,11 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-use Fossology\Lib\Dao\JobDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Data\JobStatus;
-use Fossology\Lib\Data\UploadStatus;
 
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
@@ -33,12 +30,19 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --password  = password
   --groupname = a group the user belongs to (default active group)
   --uploadId  = id of upload
+  --destgroup = group which will become admin of the upload
   ";
 
-$opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:"));
+// TODO support much more command line options
+
+$opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:", "destgroup:"));
 
 if (!array_key_exists("uploadId", $opts)) {
   echo "no uploadId supplied";
+  exit (1);
+}
+if (!array_key_exists("destgroup", $opts)) {
+  echo "no destgroup supplied";
   exit (1);
 }
 $uploadId = $opts["uploadId"];
@@ -52,63 +56,10 @@ global $SysConf;
 $userId = $SysConf['auth']['UserId'];
 $groupId = $SysConf['auth']['GroupId'];
 
-/** @var JobDao */
-$jobDao = $GLOBALS['container']->get("dao.job");
-$jobStatuses = $jobDao->getAllJobStatus($uploadId, $userId, $groupId);
-$runningJobs = false;
-foreach($jobStatuses as $jobStatus)
-{
-  switch ($jobStatus) {
-    case JobStatus::FAILED:
-      print "status=ERROR\n";
-      exit(0);
-    case JobStatus::RUNNING;
-      $runningJobs = true;
-      break;
-    default:
-      break;
-  }
-}
-
-if ($runningJobs) {
-  print "status=SCANNING\n";
-  exit(0);
-}
-
-/** @var DbManager */
-$dbManager = $GLOBALS['container']->get("db.manager");
-$userPerm = 0;
-$uploadBrowseProxy = new Fossology\Lib\Proxy\UploadBrowseProxy($groupId, $userPerm, $dbManager);
+/** @var UserDao */
+$userDao = $GLOBALS['container']->get("dao.user");
+$destGroupId = $userDao->getGroupIdByName($opts["destgroup"]);
 
 /** @var UploadDao */
 $uploadDao = $GLOBALS['container']->get("dao.upload");
-
-if ($uploadDao->getUpload($uploadId) == null) {
-  $status = "NON_EXISTENT";
-} else if (!$uploadDao->isAccessible($uploadId, $groupId)) {
-  $status = "INACCESSIBLE";
-} else {
-  try {
-    switch($uploadBrowseProxy->getStatus($uploadId)) {
-      case UploadStatus::OPEN:
-        $status = "OPEN";
-        break;
-      case UploadStatus::IN_PROGRESS:
-        $status = "IN_PROGRESS";
-        break;
-      case UploadStatus::CLOSED:
-        $status = "CLOSED";
-        break;
-      case UploadStatus::REJECTED:
-        $status = "REJECTED";
-        break;
-      default:
-        $status = "ERROR: invalid status";
-    }
-  }
-  catch(Exception $e)
-  {
-    $status = "ERROR: ".$e->getMessage();
-  }
-}
-print "status=$status\n";
+$uploadDao->makeAccessibleToGroup($uploadId, $destGroupId);
