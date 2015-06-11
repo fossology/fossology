@@ -60,6 +60,11 @@ function createBrowseTable() {
 
 $(document).ready(function() {
   browseTable = createBrowseTable();
+  $('.clickable-folder').click(function(event){
+    folder = $(this).attr('data-folder');
+    browseTable.fnDraw();
+    return false;
+  });
 });
 
 $('#nav-hider').click(function() {
@@ -90,9 +95,9 @@ $('.multi-upload-agent').click( function() {
 
 $(function() {
   $("#tree").treeview({
-    collapsed: true,
+    collapsed: false,
     animated: "fast",
-    control:"#sidetreecontrol",
+    control: "#sidetreecontrol",
     persist: "location"
     });
   });

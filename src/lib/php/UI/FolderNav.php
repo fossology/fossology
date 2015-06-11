@@ -81,7 +81,7 @@ class FolderNav extends Object
     $title = empty($row['folder_desc']) ? '' : ' title="' . htmlspecialchars($row['folder_desc']) . '"';
     return '<a'.$title.
            ' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'"'.
-           ' onclick="event.preventDefault(); folder='.$row['folder_pk'].'; browseTable.fnDraw();"'.
+           ' class="clickable-folder" data-folder="'.$row['folder_pk'].'"'.
            '>'.htmlentities($row['folder_name']).'</a>';
   }
 }
