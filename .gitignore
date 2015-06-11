@@ -163,3 +163,5 @@ variable.list
 /src/spdx2/agent/spdx2
 /src/spdx2/agent_tests/Functional/test-tool/
 /src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
+/src/cli/fo_chmod
+/src/cli/fo_folder
