@@ -30,12 +30,15 @@ tableSorting = [
   [5, "desc"]
 ];
 
+var folder = {{ folder }};
+var browseTable;
+
 dataTableConfig =
     {
       "bServerSide": true,
       "sAjaxSource": "?mod=browse-processPost",
       "fnServerData": function (sSource, aoData, fnCallback) {
-          aoData.push({"name": "folder", "value": "{{ folder }}"});
+          aoData.push({"name": "folder", "value": folder});
           aoData.push({"name": "show", "value": "{{ show }}"});
         aoData.push({"name": "assigneeSelected", "value": assigneeSelected});
         aoData.push({"name": "statusSelected", "value": statusSelected});
@@ -51,12 +54,12 @@ dataTableConfig =
     };
 
 function createBrowseTable() {
-  var otable = $('#browsetbl').dataTable(dataTableConfig);
+  var otable = $('#browsetbl').DataTable(dataTableConfig);
   return otable;
 }
 
 $(document).ready(function() {
-  createBrowseTable();
+  browseTable = createBrowseTable();
 });
 
 $('#nav-hider').click(function() {

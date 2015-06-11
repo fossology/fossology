@@ -79,6 +79,9 @@ class FolderNav extends Object
   protected function getFormattedItem($row,$uri)
   {
     $title = empty($row['folder_desc']) ? '' : ' title="' . htmlspecialchars($row['folder_desc']) . '"';
-    return '<a'.$title.' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'">'.htmlentities($row['folder_name']).'</a>';
+    return '<a'.$title.
+           ' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'"'.
+           ' onclick="event.preventDefault(); folder='.$row['folder_pk'].'; browseTable.fnDraw();"'.
+           '>'.htmlentities($row['folder_name']).'</a>';
   }
 }
