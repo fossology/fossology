@@ -1,0 +1,20 @@
+$('#fromFolder').change(function () {
+  var folder = this.selectedOptions[0].value;
+
+  $.getJSON("?mod=foldercontents&folder=" + folder)
+      .done(function (data) {
+        var folderchild = $('#foldercontent');
+        folderchild.empty();
+        $.each(data, function (key, value) {
+          var option = document.createElement("option");
+          option.innerHTML = value;
+          option.value = key;
+          folderchild.append(option);
+        });
+      })
+      .fail(failed);
+});
+
+$(document).ready( function(){
+  $('#fromFolder').trigger("change");
+});

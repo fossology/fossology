@@ -84,3 +84,12 @@ $('.multi-upload-agent').click( function() {
   $('#mod').val( $(this).attr('name') );
   return true;
 });
+
+$(function() {
+  $("#tree").treeview({
+    collapsed: true,
+    animated: "fast",
+    control:"#sidetreecontrol",
+    persist: "location"
+    });
+  });

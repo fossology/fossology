@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -199,35 +200,28 @@ class ui_browse extends FO_Plugin
   }
 
   /**
-   * @brief Given a upload_pk, list every item in it.
+   * @brief Given a folderId, list every item in it.
    * If it is an individual file, then list the file contents.
    */
-  private function ShowFolder($Folder, $Show)
+  private function ShowFolder($folderId)
   {
-    $V = "<div align='center'><small>";
-    if ($Folder != GetUserRootFolder())
-    {
-      $text = _("Top");
-      $V .= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    /* @var $uiFolderNav FolderNav */
+    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
+    
+    $folderNav = '<div id="sidetree">';
+    if ($folderId != $rootFolder) {
+      $folderNav .= '<div class="treeheader" style="display:inline;"><a href="'. Traceback_uri() . '?mod=' . $this->Name . '">Top</a> | </div>';
     }
-    $text = _("Expand");
-    $V .= "<a href='javascript:Expand();'>$text</a> |";
-    $text = _("Collapse");
-    $V .= "<a href='javascript:Collapse();'>$text</a> |";
-    $text = _("Refresh");
-    $V .= "<a href='" . Traceback() . "'>$text</a>";
-    $V .= "</small></div>";
-    $V .= "<P>\n";
-    $V .= "<form>\n";
-    $V .= FolderListDiv($Folder, 0, $Folder, 1);
-    $V .= "</form>\n";
-    $this->vars['folderNav'] = $V;
+    $folderNav .= '<div id="sidetreecontrol" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
+    $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
+   
+    $this->vars['folderNav'] = $folderNav;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
-    $this->vars['folder'] = $Folder;
-    $this->vars['show'] = $Show;
+    $this->vars['folder'] = $folderId;
     return '';
   }
 
@@ -281,6 +275,8 @@ class ui_browse extends FO_Plugin
       $this->vars['multiUploadAgents'] = $multiUploadAgents;
     }
     $this->vars['folderId'] = $folder_pk;
+        $this->vars['styles'] .= "<link rel='stylesheet' href='css/jquery.treeview.css'>\n";
+
     return $this->render('ui-browse.html.twig');
   }
 
@@ -357,7 +353,8 @@ class ui_browse extends FO_Plugin
 
     if (empty($Upload))
     {
-      return $html . $this->ShowFolder($Folder, $show);
+      $this->vars['show'] = $show;
+      return $html . $this->ShowFolder($Folder);
     }
 
     if (empty($uploadTreeId))
@@ -366,7 +363,7 @@ class ui_browse extends FO_Plugin
       {
         $uploadTreeId = $this->uploadDao->getUploadParent($Upload);
       }
-      catch(\Exception $e)
+      catch(Exception $e)
       {
         $this->vars['message'] = $e->getMessage();
         return $this->render('include/base.html.twig');

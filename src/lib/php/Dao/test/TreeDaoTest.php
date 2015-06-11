@@ -21,7 +21,6 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-use Mockery as M;
 
 class TreeDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -56,8 +55,6 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
         
     $this->testDb = null;
     $this->dbManager = null;
-
-    M::close();
   }
   
   public function testGetMinimalCoveringItem()
