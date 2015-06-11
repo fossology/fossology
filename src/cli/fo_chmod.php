@@ -30,12 +30,16 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --password  = password
   --groupname = a group the user belongs to (default active group)
   --uploadId  = id of upload
-  --destgroup = group which will become admin of the upload
-  ";
+  --destgroup = group which will become admin of the upload\n";
 
 // TODO support much more command line options
 
-$opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:", "destgroup:"));
+$opts = getopt("hc:", array("username:", "groupname:", "uploadId:", "password:", "destgroup:"));
+if(array_key_exists('h', $opts))
+{
+  print $Usage;
+  exit(0);
+}
 
 if (!array_key_exists("uploadId", $opts)) {
   echo "no uploadId supplied";
@@ -60,6 +64,6 @@ $groupId = $SysConf['auth']['GroupId'];
 $userDao = $GLOBALS['container']->get("dao.user");
 $destGroupId = $userDao->getGroupIdByName($opts["destgroup"]);
 
-/** @var UploadDao */
+/* @var $uploadDao UploadDao */
 $uploadDao = $GLOBALS['container']->get("dao.upload");
 $uploadDao->makeAccessibleToGroup($uploadId, $destGroupId);

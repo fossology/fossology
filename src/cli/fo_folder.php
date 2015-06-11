@@ -31,9 +31,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --password  = password
   --groupname = a group the user belongs to (default active group)
   --folderId  = id of folder (default root folder of user)
-  --linkFolder= create a link to this folder\n";
+  --linkFolder= create a link to this folder (id)
+  --linkUpload= create a link to this upload (id)\n";
 
-$opts = getopt("hc:", array("username:", "groupname:", "folderId:", "password:", "linkFolder:"));
+$opts = getopt("hc:", array("username:", "groupname:", "folderId:", "password:", "linkFolder:", "linkUpload:"));
 if(array_key_exists('h', $opts))
 {
   print $Usage;
@@ -49,11 +50,10 @@ global $SysConf;
 $userId = $_SESSION[Auth::USER_ID] = $SysConf['auth'][Auth::USER_ID];
 $groupId = $_SESSION[Auth::GROUP_ID] = $SysConf['auth'][Auth::GROUP_ID];
 
-
 /* @var $folderDao FolderDao */
 $folderDao = $GLOBALS['container']->get("dao.folder");
 
-if (!array_key_exists("folderId", $opts)) {
+if (array_key_exists("folderId", $opts)) {
   $folderId = $opts["folderId"];
 }
 else
@@ -61,10 +61,15 @@ else
   $folderId = $folderDao->getRootFolder($userId)->getId();
 }
 
-$childId = array_key_exists("linkFolder", $opts) ? $opts["linkFolder"] : null;
-if(!empty($childId))
+$linkFolder = array_key_exists("linkFolder", $opts) ? $opts["linkFolder"] : null;
+$linkUpload = array_key_exists("linkUpload", $opts) ? $opts["linkUpload"] : null;
+if(!empty($linkFolder))
 {
-  $folderDao->insertFolderContents($folderId,FolderDao::MODE_FOLDER,$childId);
+  $folderDao->insertFolderContents($folderId,FolderDao::MODE_FOLDER,$linkFolder);
+}
+elseif(!empty($linkUpload))
+{
+  $folderDao->insertFolderContents($folderId,FolderDao::MODE_UPLOAD,$linkUpload);
 }
 else
 {
