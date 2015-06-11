@@ -134,20 +134,20 @@ class FolderDao extends Object
   }
 
   public function getFolderTreeCte($parentId=null) {
-    $parentCondition = $parentId ? '= $1' : 'IS NULL';
+    $parentCondition = $parentId ? 'folder_pk=$1' : 'folder_pk='.self::TOP_LEVEL;
 
     return "WITH RECURSIVE folder_tree(folder_pk, parent_fk, folder_name, folder_desc, folder_perm, id_path, name_path, depth, cycle_detected) AS (
   SELECT
-    f.folder_pk, f.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,
+    f.folder_pk, fc.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,
     ARRAY [f.folder_pk]   AS id_path,
     ARRAY [f.folder_name] AS name_path,
     0                     AS depth,
     FALSE                 AS cycle_detected
-  FROM folder f, foldercontents fc
-  WHERE fc.foldercontents_mode=".self::MODE_FOLDER." AND f.folder_pk=fc.child_id AND fc.parent_fk $parentCondition
+  FROM folder f LEFT JOIN foldercontents fc ON fc.foldercontents_mode=".self::MODE_FOLDER." AND f.folder_pk=fc.child_id
+  WHERE $parentCondition
   UNION ALL
   SELECT
-    f.folder_pk, f.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,
+    f.folder_pk, fc.parent_fk, f.folder_name, f.folder_desc, f.folder_perm,
     id_path || f.folder_pk,
     name_path || f.folder_name,
     array_length(id_path, 1),
