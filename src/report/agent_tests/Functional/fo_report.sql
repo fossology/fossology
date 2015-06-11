@@ -224,7 +224,7 @@ INSERT INTO decider_ars VALUES (5, 20, 1, true, NULL, '2015-05-04 11:43:18.23611
 
 
 
-INSERT INTO folder VALUES (1, NULL, 'Software Repository', 'Top Folder', NULL);
+INSERT INTO folder VALUES (1, 'Software Repository', 'Top Folder', NULL);
 
 
 
