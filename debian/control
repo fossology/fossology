@@ -20,7 +20,8 @@ Description: architecture for analyzing software, development utils
 
 Package: fossology
 Architecture: any
-Depends:fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reuser, ${misc:Depends}
+Depends: fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
+Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
