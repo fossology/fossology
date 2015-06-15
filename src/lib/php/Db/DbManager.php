@@ -264,7 +264,7 @@ abstract class DbManager extends Object
    * @param array
    * @param string
    */
-  public function insertInto($tableName, $keys,$params,$sqlLog='')
+  public function insertInto($tableName, $keys, $params, $sqlLog='', $returning='')
   {
     if (empty($sqlLog))
     {
@@ -283,6 +283,10 @@ abstract class DbManager extends Object
         $params[$i] = $this->dbDriver->booleanToDb($params[$i]);
       }
     }
+    if(!empty($returning))
+    {
+      return $this->dbDriver->insertPreparedAndReturn($sqlLog, $sql, $params, $returning);
+    }
     $this->prepare($sqlLog,$sql);
     $res = $this->execute($sqlLog,$params);
     $this->freeResult($res);
@@ -292,8 +296,9 @@ abstract class DbManager extends Object
    * @param string
    * @param array with keys as column names
    * @param string
+   * @param string column that should be returned (empty string if not required)
    */
-  public function insertTableRow($tableName,$assocParams,$sqlLog='')
+  public function insertTableRow($tableName,$assocParams,$sqlLog='',$returning='')
   {
     $params = array_values($assocParams);
     $keys = implode(',',array_keys($assocParams));
@@ -301,7 +306,7 @@ abstract class DbManager extends Object
     {
       $sqlLog = __METHOD__ . ".$tableName.$keys";
     }
-    $this->insertInto($tableName, $keys, $params, $sqlLog);
+    return $this->insertInto($tableName, $keys, $params, $sqlLog, $returning);
   }
 
   /**

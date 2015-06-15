@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -74,7 +74,7 @@ class SqliteE implements Driver
       return false;
     }
     $params = array_values($parameters);
-    /** @var SQLite3Stmt */
+    /* @var $stmt SQLite3Stmt */
     $stmt = $this->preparedStmt[$statementName];
     for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
     {
@@ -204,10 +204,24 @@ class SqliteE implements Driver
     {
       throw new \Exception($this->getLastError());
     }
-    else if(!$res)
+    else if(!$row)
     {
       throw new \Exception('DB connection lost');
     }
     return($row['cnt']>0);
+  }
+  
+  /**
+   * @param string $stmt
+   * @param string $sql
+   * @param array $params
+   * @param string $colName
+   */
+  public function insertPreparedAndReturn($stmt, $sql, $params, $colName)
+  {
+    $this->prepare($stmt,$sql);
+    $res = $this->execute($stmt,$params);
+    $this->freeResult($res);
+    return SQLiteDatabase::lastInsertRowid();
   }
 }
