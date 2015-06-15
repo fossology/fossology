@@ -105,17 +105,20 @@ abstract class DbManagerTest extends \PHPUnit_Framework_TestCase
     assertThat($existsTable, is(TRUE));
   }
   
+  /**
+   * @expectedException \Exception
+   */
   function testExistsDb_hack()
   {
-    $exceptionThrown = false;
-    try {
-      $this->dbManager->existsTable("goodTable' OR 3<'4");
-    }
-    catch(\Exception $e) {
-      $exceptionThrown = TRUE;
-    }
-    assertThat($exceptionThrown, is(TRUE));
+    $this->dbManager->existsTable("goodTable' OR 3<'4");
   }
-
   
+  function testInsertTableRowReturning()
+  {
+    $this->driver->shouldReceive('insertPreparedAndReturn')
+            ->withArgs(array(anything(),'/insert into europe \(animal\) values \(\$1\)/i',array('mouse'),'id'))
+            ->andReturnUsing(function($stmt,$sql,$params,$colName){ return ($colName=='id') ? 23 : -1;});
+    $returnId = $this->dbManager->insertInto('europe', 'animal', array('mouse'), $log='logging', 'id');
+    assertThat($returnId,equalTo(23));
+  }
 } 

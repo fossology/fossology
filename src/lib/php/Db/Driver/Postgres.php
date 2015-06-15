@@ -201,4 +201,21 @@ class Postgres implements Driver
     pg_free_result($res);
     return($row['cnt']>0);
   }
+  
+  /**
+   * @param string $stmt
+   * @param string $sql
+   * @param array $params
+   * @param string $colName
+   */
+  public function insertPreparedAndReturn($stmt, $sql, $params, $colName)
+  {
+    $sql .= "RETURNING $colName";
+    $stmt .= ".returning:$colName";
+    $this->prepare($stmt,$sql);
+    $res = $this->execute($stmt,$params);
+    $return = $this->fetchArray($res);
+    $this->freeResult($res);
+    return $return[$colName];
+  }
 }
