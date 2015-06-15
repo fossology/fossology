@@ -36,5 +36,6 @@ string extractLicensePartFromNinkaResult(string ninkaResult);
 vector<string> splitLicensePart(string licensePart);
 vector<LicenseMatch> createMatches(vector<string> ninkaLicenseNames);
 string mapLicenseFromNinkaToFossology(string name);
+bool isLicenseCollection(string ninkaLicenseName,vector<LicenseMatch>& matches);
 
 #endif // NINKA_AGENT_NINKA_WRAPPER_HPP

@@ -86,6 +86,10 @@ vector<LicenseMatch> createMatches(vector<string> ninkaLicenseNames)
   for (vector<string>::const_iterator it = ninkaLicenseNames.begin(); it != ninkaLicenseNames.end(); ++it)
   {
     const string& ninkaLicenseName = *it;
+    if(isLicenseCollection(ninkaLicenseName,matches))
+    {
+      continue;
+    }    
     string fossologyLicenseName = mapLicenseFromNinkaToFossology(ninkaLicenseName);
     unsigned percentage = (ninkaLicenseName.compare("NONE") == 0 || ninkaLicenseName.compare("UNKNOWN") == 0) ? 0 : 100;
     LicenseMatch match = LicenseMatch(fossologyLicenseName, percentage);
@@ -98,5 +102,30 @@ string mapLicenseFromNinkaToFossology(string name)
 {
   if (name.compare("NONE") == 0) return string("No_license_found");
   if (name.compare("UNKNOWN") == 0) return string("UnclassifiedLicense");
+  if (name.compare("spdxMIT") ==0 ) return string("MIT");
+  if (name.compare("Apachev1.0") == 0) return string("Apache-1.0");
+  if (name.compare("Apachev2") == 0) return string("Apache-2.0")
   return name;
 };
+
+bool isLicenseCollection(string ninkaLicenseName, vector<LicenseMatch>& matches)
+{
+  if (ninkaLicenseName.compare("BisonException") == 0)
+  {
+    LicenseMatch match = LicenseMatch(string("GPL-2.0-with-bison-exception"), 50);
+    matches.push_back(match);
+    match = LicenseMatch(string("GPL-3.0-with-bison-exception"), 50);
+    matches.push_back(match);
+    return true;
+  }
+  if (ninkaLicenseName.compare("spdxBSD4") == 0)
+  {
+    LicenseMatch match = LicenseMatch(string("BSD-4-Clause"), 50);
+    matches.push_back(match);
+    match = LicenseMatch(string("BSD-4-Clause-UC"), 50);
+    matches.push_back(match);
+    return true;
+  }    
+  
+  return false;
+}
