@@ -19,8 +19,8 @@ HDRS = nomos.h $(OBJS:.o=.h) _autodefs.h
 COVERAGE = $(OBJS:%.o=%_cov.o)
 GENOBJS_COV = $(GENOBJS:%.o=%_cov.o)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -Werror
-CFLAGS_LOCALO = $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
+CFLAGS_LOCAL = $(FO_CFLAGS) -Werror
+CFLAGS_LOCALO = $(FO_CFLAGS)
 
 all: encode nomos libnomos.a
 
@@ -29,10 +29,10 @@ coverage: encode nomos_cov libnomos_cov.a
 debug: nomos-gl
 
 nomos: nomos.o $(OBJS) $(GENOBJS)
-	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
+	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) $(FO_LDFLAGS) -o $@
 
 nomos_cov: nomos_cov.o $(COVERAGE) $(GENOBJS_COV)
-	$(CC) nomos_cov.o $(COVERAGE) $(GENOBJS_COV) $(CFLAGS_LOCAL) $(FLAG_COV) -o nomos
+	$(CC) nomos_cov.o $(COVERAGE) $(GENOBJS_COV) $(CFLAGS_LOCAL) $(FO_LDFLAGS) $(FLAG_COV) -o nomos
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
@@ -47,10 +47,10 @@ nomos-g.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO)
 
 $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
-	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS)
+	$(CC) -c $< $(CFLAGS_DBO) $(FO_CFLAGS)
 
 $(COVERAGE) $(GENOBJS_COV): %_cov.o: %.c $(HDRS) $(DB) $(VARS)
-	$(CC) -c $< $(CFLAGS_DBO) $(ALL_CFLAGS) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CFLAGS_DBO) $(FO_CFLAGS) $(FLAG_COV) -o $@
 
 #
 # Non "standard" preprocessing stuff starts here...

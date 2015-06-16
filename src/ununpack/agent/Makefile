@@ -20,7 +20,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic
 EXE = departition ununpack
 
 CHKHDR = checksum.h md5.h sha1.h
@@ -36,16 +36,16 @@ all: $(FOLIB) $(EXE)
 coverage: $(FOLIB) $(EXE:%=%-coverage)
 
 departition: %: %.c $(VARS)
-	$(CC) $< $(ALL_CFLAGS) -o $@
+	$(CC) $< $(FO_CFLAGS) $(FO_LDFLAGS) -o $@
 
 departition-coverage: departition.c $(VARS)
-	$(CC) $< $(ALL_CFLAGS) $(FLAG_COV) -o $(@:%-coverage=%)
+	$(CC) $< $(FO_CFLAGS) $(FO_LDFLAGS) $(FLAG_COV) -o $(@:%-coverage=%)
 
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
-	$(CC) ununpack.c libununpack.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) ununpack.c libununpack.a $(FO_CFLAGS) $(LDFLAGS_LOCAL) $(DEFS) -o $@
 
 ununpack-coverage: ununpack.c libununpack_cov.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
-	$(CC) ununpack.c libununpack_cov.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $(@:%-coverage=%)
+	$(CC) ununpack.c libununpack_cov.a $(FO_CFLAGS) $(LDFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $(@:%-coverage=%)
 
 install: all $(VARS)
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(MODDIR)/ununpack/agent/departition
@@ -63,10 +63,10 @@ uninstall: $(VARS)
 	rm -rf $(DESTDIR)$(MODDIR)/ununpack/agent
 
 $(OBJECTS): %.o: %.c $(UUHDR)
-	$(CC) -c $< $(CFLAGS_LOCAL)
+	$(CC) -c $< $(FO_CFLAGS)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+	$(CC) -c $< $(FO_CFLAGS) $(FLAG_COV) -o $@
 
 libununpack.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)

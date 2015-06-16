@@ -20,7 +20,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -Werror
+CFLAGS_LOCAL = $(FO_CFLAGS) -Werror
 DEF =
 
 MODDIR = mods-enabled
@@ -47,7 +47,7 @@ $(EXES): %: %.c $(FOLIB)
 	@if [ ! -d $(MODDIR)/$@ ]; then \
 		mkdir -p $(MODDIR)/$@/agent; \
 	fi
-	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL)
+	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL) $(FO_LDFLAGS)
 	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
 	@echo "[default]\ncommand=$@\nmax=-1\nspecial[]=\n" > $(MODDIR)/$@/$@.conf
 

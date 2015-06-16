@@ -17,8 +17,8 @@ TESTDBDIR = $(TOP)/src/testing/db/c
 TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
 TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
 
-LDFLAGS_LOCAL = $(ALL_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
-CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(ALL_CFLAGS) $(TEST_CFLAGS)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
+CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(FO_CFLAGS) $(TEST_CFLAGS)
 
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_monk

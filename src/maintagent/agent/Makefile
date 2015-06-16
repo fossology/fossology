@@ -20,7 +20,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL = $(DEF) $(ALL_CFLAGS) $(DEFS)
+CFLAGS_LOCAL = $(DEF) $(FO_CFLAGS) $(DEFS)
 
 EXE = maintagent
 OBJS = usage.o utils.o process.o

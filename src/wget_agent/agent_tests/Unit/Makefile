@@ -8,11 +8,13 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
-CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
+CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
-TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
+TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq $(CUNIT_LIB) -lcunit $(TEST_LIB)
+
 EXE = test_wget_agent
 TEST_OBJ_RUN = testRun.o utility.o
 TEST_OBJ = ./wget_agent/testGetURL.o \
@@ -25,7 +27,7 @@ CHKSRC = $(CHKHDR:%.h=%.c)
 all: $(EXE)
 
 $(EXE): libwget_agent.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) cunit_lib test_lib
-	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
@@ -43,7 +45,7 @@ test: all
 	./$(EXE)
 
 coverage: libwget_agent_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) cunit_lib test_lib
-	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent_cov.a $(CHKSRC) $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent_cov.a $(CHKSRC) $(FLAG_COV) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt

@@ -20,7 +20,8 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -lpq -lssl -lcrypto
+CFLAGS_LOCAL = $(FO_CFLAGS)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq -lssl -lcrypto
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE = delagent
@@ -29,7 +30,7 @@ HDRS = delagent.h
 all: $(EXE)
 
 $(EXE): %: %.c $(FOLIB) delagent.o $(VARS) $(HDRS)
-	$(CC) $< delagent.o $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) $< delagent.o $(LDFLAGS_LOCAL) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 delagent.o: util.c $(HDRS)
 	$(CC) -c $< $(CFLAGS_LOCAL) -o $@

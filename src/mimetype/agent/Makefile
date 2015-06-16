@@ -6,7 +6,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS)
 EXE = mimetype
 OBJECTS = finder.o
 HDIR = $(OBJS:.o=.h)
@@ -16,7 +16,7 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 all: $(EXE)
 
 $(EXE): mimetype.c $(FOLIB) libmimetype.a $(DB) $(REPO) $(VARS)
-	$(CC) mimetype.c libmimetype.a $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) mimetype.c libmimetype.a $(FO_CFLAGS) $(LDFLAGS_LOCAL) $(DEFS) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
@@ -25,10 +25,10 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL)
+	$(CC) -c $< $(FO_CFLAGS)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $@
+	$(CC) -c $< $(FO_CFLAGS) $(FLAG_COV) $(DEFS) -o $@
 
 libmimetype.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
