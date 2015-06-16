@@ -11,7 +11,9 @@
       {% include "include/head.html.twig" %}
       <title>{% block title %}{{ title|e }}{% endblock %}</title>
       {{ metadata }}
+      {% block styles %}
       {{ styles }}
+      {% endblock %}
     {% endblock %}
   </head>
   <body class="text">

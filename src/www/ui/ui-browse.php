@@ -275,7 +275,6 @@ class ui_browse extends FO_Plugin
       $this->vars['multiUploadAgents'] = $multiUploadAgents;
     }
     $this->vars['folderId'] = $folder_pk;
-        $this->vars['styles'] .= "<link rel='stylesheet' href='css/jquery.treeview.css'>\n";
 
     return $this->render('ui-browse.html.twig');
   }

@@ -5,6 +5,10 @@
    This file is offered as-is, without any warranty.
 #}
 {% extends "include/base.html.twig" %}
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="css/jquery.treeview.css"/>
+{% endblock %}
 
 {% block content %}
   <div class="modal" id="commentModal" hidden>
