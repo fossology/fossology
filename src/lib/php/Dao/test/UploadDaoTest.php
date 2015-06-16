@@ -39,11 +39,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
 
-    $this->testDb->createPlainTables(
-        array(
-            'upload',
-            'uploadtree',
-        ));
+    $this->testDb->createPlainTables(array('upload','uploadtree'));
 
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
@@ -427,5 +423,40 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $zip = new ItemTreeBounds(1,'uploadtree_a', 1, 1, 24);
     $zipDescendants = $this->uploadDao->countNonArtifactDescendants($zip);
     assertThat($zipDescendants, is(count(array(6,7,8,10,11,12)) ) );
+  }
+  
+
+  public function testGetUploadParent()
+  {
+    $this->prepareUploadTree($this->getTestFileStructure());
+    $topId = $this->uploadDao->getUploadParent(32);
+    assertThat($topId,equalTo(3650));
+  }
+  
+  /** @expectedException \Exception
+   * @expectedExceptionMessage Missing upload tree parent for upload
+   */
+  public function testGetUploadParentFromBrokenTree()
+  {
+    $this->prepareUploadTree(array(array(4651, 3650, 33, 0, 805323776, 2, 75, 'artifact.dir')));
+    $this->uploadDao->getUploadParent(33);
+  }
+  
+  /** @expectedException \Exception
+   * @expectedExceptionMessage Missing upload tree parent for upload
+   */
+  public function testGetUploadParentFromNonExistingTree()
+  {
+    $this->uploadDao->getUploadParent(34);
+  }
+  
+  public function testGetUploadHashes()
+  {
+    $this->testDb->createPlainTables(array('pfile'));
+    $this->dbManager->queryOnce('TRUNCATE upload');
+    $this->testDb->insertData(array('upload','pfile'));
+    // (pfile_pk, pfile_md5, pfile_sha1, pfile_size) := (9, 'F703E0197FB6C5BD0C8DFDCC115A0231', '5DAFC9C82988A81413B995210B668CF5CF5975FF', 16845)
+    $hashes = $this->uploadDao->getUploadHashes(2);
+    assertThat($hashes,equalTo(array('md5'=>'F703E0197FB6C5BD0C8DFDCC115A0231','sha1'=>'5DAFC9C82988A81413B995210B668CF5CF5975FF')));
   }
 }

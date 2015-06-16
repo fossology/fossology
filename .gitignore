@@ -103,3 +103,7 @@ variable.list
 /src/copyright/agent/ecc
 /src/copyright/VERSION-ecc
 /src/copyright/VERSION-copyright
+/src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
+/src/spdx2/agent_tests/Functional/test-tool/
+/src/spdx2/agent/version.php
+/src/spdx2/agent/spdx2

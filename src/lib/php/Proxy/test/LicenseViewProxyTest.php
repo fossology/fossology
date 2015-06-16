@@ -73,8 +73,13 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
     $options2 = array('extraCondition'=>'rf_pk<100');
     $query2 = $method->invoke($licenseViewProxy,$options2);
     assertThat($query2, is("SELECT $this->almostAllColumns,group_fk FROM license_candidate WHERE group_fk=$groupId AND rf_pk<100"));
+    
+    $prefix = '#';
+    $options3 = array(LicenseViewProxy::CANDIDATE_PREFIX=>$prefix,'columns'=>array('rf_shortname'));
+    $query3 = $method->invoke($licenseViewProxy,$options3);
+    assertThat($query3, is("SELECT '". pg_escape_string($prefix). "'||rf_shortname AS rf_shortname FROM license_candidate WHERE group_fk=$groupId"));
   }
-
+  
   public function testConstruct()
   {
     $licenseViewProxy0 = new LicenseViewProxy(0);
