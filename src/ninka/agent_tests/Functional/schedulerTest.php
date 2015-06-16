@@ -144,7 +144,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
       switch ($licenseMatch->getFileId()) {
         case 7:
         case 4:
-          $expectedLicense = "GPLv3+";
+          $expectedLicense = "GPL-3.0+";
           break;
         case 3:
           $expectedLicense = "UnclassifiedLicense";
