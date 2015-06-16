@@ -43,6 +43,8 @@ env:
  - CC=gcc-4.8 CXX=g++-4.8
  - CC=gcc-4.9 CXX=g++-4.9
  - CC=gcc-5 CXX=g++-5
+ - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+ - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror'
 
 matrix:
   include:
@@ -54,6 +56,9 @@ matrix:
       env: CC=gcc CXX=g++
     - php: 5.6
       env: CC=gcc CXX=g++
+  allow_failures:
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror'
 
 script:
  - set -e
