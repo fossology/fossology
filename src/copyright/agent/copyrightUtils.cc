@@ -153,9 +153,8 @@ CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
 
 void addDefaultScanners(CopyrightState& state)
 {
-#ifdef IDENTITY_COPYRIGHT
   unsigned types = state.getCliOptions().getOptType();
-
+#ifdef IDENTITY_COPYRIGHT
   if (types & 1<<0)
     //state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
     state.addScanner(new hCopyrightScanner());
@@ -171,7 +170,8 @@ void addDefaultScanners(CopyrightState& state)
 #endif
 
 #ifdef IDENTITY_ECC
-  state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
+  if (types & 1<<0)
+    state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
 #endif
 }
 
