@@ -126,7 +126,7 @@ string mapLicenseFromNinkaToFossology(string name)
 
 bool isLicenseCollection(string name, vector<LicenseMatch>& matches)
 {
-  LicenseMatch match;
+  LicenseMatch match = LicenseMatch(name, -1);
   if (name.compare("BisonException") == 0)
   {
     match = LicenseMatch(string("GPL-2.0-with-bison-exception"), 50);
@@ -180,6 +180,16 @@ bool isLicenseCollection(string name, vector<LicenseMatch>& matches)
     match = LicenseMatch(string("LGPL-2.1"), 50);
     matches.push_back(match);
     match = LicenseMatch(string("LGPL-2.0"), 50);
+    matches.push_back(match);
+    return true;
+  }
+  if (name.compare("GPLv1orArtistic") == 0)
+  {
+    match = LicenseMatch(string("GPL-1.0"), 50);
+    matches.push_back(match);
+    match = LicenseMatch(string("Artistic-1.0"), 25);
+    matches.push_back(match);
+    match = LicenseMatch(string("Artistic-2.0"), 25);
     matches.push_back(match);
     return true;
   }
