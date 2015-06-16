@@ -350,19 +350,37 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     $this->insertFolderContents($newParentId, $content['foldercontents_mode'], $content['child_id']);
   }
   
-  protected function isRemovableContentFolder($folderId)
+  public function getRemovableContents($folderId)
   {
-    $sql = "SELECT count(parent_fk) FROM foldercontents WHERE foldercontent_mode=".self::MODE_FOLDER." AND child_id=$1";
-    $parentCounter = $this->dbManager->getSingleRow($sql,array($folderId),__METHOD__);
+    $sqlChildren = "SELECT child_id,foldercontents_mode
+             FROM foldercontents GROUP BY child_id,foldercontents_mode
+             HAVING count(*)>1 AND bool_or(parent_fk=$1)";
+    $sql = "SELECT fc.* FROM foldercontents fc,($sqlChildren) chi "
+            . "WHERE fc.child_id=chi.child_id AND fc.foldercontents_mode=chi.foldercontents_mode and fc.parent_fk=$1";
+    $this->dbManager->prepare($stmt=__METHOD__,$sql);
+    $res = $this->dbManager->execute($stmt,array($folderId));
+    $contents = array();
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $contents[] = $row['foldercontents_pk'];
+    }
+    $this->dbManager->freeResult($res);
+    return $contents;
+  }
+  
+  protected function isRemovableContent($childId,$mode)
+  {
+    $sql = "SELECT count(parent_fk) FROM foldercontents WHERE child_id=$1 AND foldercontents_mode=$2";
+    $parentCounter = $this->dbManager->getSingleRow($sql,array($childId,$mode),__METHOD__);
     return $parentCounter['count']>1;
   }
   
   public function removeContent($folderContentId)
   {
     $content = $this->getContent($folderContentId);
-    if($content==self::MODE_FOLDER && $this->isRemovableContentFolder($content['child_id']))
+    if($this->isRemovableContent($content['child_id'],$content['foldercontents_mode']))
     {
-      $sql = "DELETE FROM foldercontents WHERE foldercontent_pk=$1";
+      $sql = "DELETE FROM foldercontents WHERE foldercontents_pk=$1";
       $this->dbManager->getSingleRow($sql,array($folderContentId),__METHOD__);
     }
   }

@@ -178,4 +178,18 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($this->folderDao->getFolderChildFolders($folderA),is(arrayWithSize(1)));
     assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(3)));
   }
+  
+  public function testGetRemovableContents()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $this->folderDao->insertFolder('B', '/A/B', $folderA);
+    $folderC = $this->folderDao->insertFolder('C', '/C', FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(0));
+    $this->dbManager->insertTableRow('foldercontents',array('foldercontents_mode'=> FolderDao::MODE_UPLOAD,'parent_fk'=>$folderA,'child_id'=>$folderC));
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(0));
+    $this->dbManager->insertTableRow('foldercontents',array('foldercontents_mode'=> FolderDao::MODE_FOLDER,'parent_fk'=>$folderA,'child_id'=>$folderC));
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(1));
+
+  }
 }
