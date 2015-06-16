@@ -120,79 +120,114 @@ string mapLicenseFromNinkaToFossology(string name)
   if (name.compare("GPLnoVersion") == 0) return string("GPL");
   if (name.compare("LesserGPLnoVersion") == 0
           || name.compare("LibraryGPLnoVersion")==0) return string("LGPL");
+  if (name.compare("intelBSDLicense") == 0) return string("Intel-EULA");
+  if (name.compare("spdxSleepyCat") == 0
+          || name.compare("SleepyCat") == 0) return string("Sleepycat");
+  if (name.compare("spdxBSD2") == 0
+          || name.compare("BSD2") == 0) return string("BSD-2-Clause");
+  if (name.compare("spdxBSD3") == 0
+          || name.compare("BSD3") == 0) return string("BSD-3-Clause");
+  if (name.compare("BSD3") == 0) return string("BSD-4-Clause");
+  if (name.compare("spdxMIT") == 0) return string("MIT");
+  if (name.compare("ZLIB") == 0) return string("Zlib");
+  if (name.compare("openSSL") == 0
+          || name.compare("openSSLvar1") ==0
+          || name.compare("openSSLvar3") ==0) return string("OpenSSL");
+  if (name.compare("QPLt") == 0) return string("QT(Commercial)");
+  
   
   return name;
 };
 
 bool isLicenseCollection(string name, vector<LicenseMatch>& matches)
 {
-  LicenseMatch match = LicenseMatch(name, -1);
   if (name.compare("BisonException") == 0)
   {
-    match = LicenseMatch(string("GPL-2.0-with-bison-exception"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("GPL-3.0-with-bison-exception"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("GPL-2.0-with-bison-exception"), 50));
+    matches.push_back(LicenseMatch(string("GPL-3.0-with-bison-exception"), 50));
     return true;
   }
   if (name.compare("spdxBSD4") == 0)
   {
-    match = LicenseMatch(string("BSD-4-Clause"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("BSD-4-Clause-UC"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("BSD-4-Clause"), 50));
+    matches.push_back(LicenseMatch(string("BSD-4-Clause-UC"), 50));
     return true;
   }
   if (name.compare("GPL2orBSD3") == 0)
   {
-    match = LicenseMatch(string("BSD-3-Clause"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("GPL-2.0"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("BSD-3-Clause"), 50));
+    matches.push_back(LicenseMatch(string("GPL-2.0"), 50));
     return true;
   }
   if (name.compare("LGPLv2orv3") == 0)
   {
-    match = LicenseMatch(string("LGPL-2.0"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("LGPL-3.0"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("LGPL-2.0"), 50));
+    matches.push_back(LicenseMatch(string("LGPL-3.0"), 50));
     return true;
   }
   if (name.compare("LGPLv2_1orv3") == 0)
   {
-    match = LicenseMatch(string("LGPL-2.1"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("LGPL-3.0"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("LGPL-2.1"), 50));
+    matches.push_back(LicenseMatch(string("LGPL-3.0"), 50));
     return true;
   }
   if (name.compare("LGPLv2+MISTAKE") == 0)
   {
-    match = LicenseMatch(string("LGPL-2.1+"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("LGPL-2.0+"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("LGPL-2.1+"), 50));
+    matches.push_back(LicenseMatch(string("LGPL-2.0+"), 50));
     return true;
   }
   if (name.compare("LGPLv2MISTAKE") == 0)
   {
-    match = LicenseMatch(string("LGPL-2.1"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("LGPL-2.0"), 50);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("LGPL-2.1"), 50));
+    matches.push_back(LicenseMatch(string("LGPL-2.0"), 50));
     return true;
   }
   if (name.compare("GPLv1orArtistic") == 0)
   {
-    match = LicenseMatch(string("GPL-1.0"), 50);
-    matches.push_back(match);
-    match = LicenseMatch(string("Artistic-1.0"), 25);
-    matches.push_back(match);
-    match = LicenseMatch(string("Artistic-2.0"), 25);
-    matches.push_back(match);
+    matches.push_back(LicenseMatch(string("GPL-1.0"), 50));
+    matches.push_back(LicenseMatch(string("Artistic-1.0"), 25));
+    matches.push_back(LicenseMatch(string("Artistic-2.0"), 25));
+    return true;
+  }
+  if (name.compare("GPL2orOpenIB") == 0)
+  {
+    matches.push_back(LicenseMatch(string("GPL-2.0"), 50));
+    matches.push_back(LicenseMatch(string("BSD-2-Clause"), 50));
+    return true;
+  }
+  if (name.compare("CDDLv1orGPLv2") == 0)
+  {
+    matches.push_back(LicenseMatch(string("CDDL-1.0"), 50));
+    matches.push_back(LicenseMatch(string("GPL-2.0"), 50));
+    return true;
+  }
+  if (name.compare("Apache-2orLGPLgeneric") == 0)
+  {
+    matches.push_back(LicenseMatch(string("Apache-2.0"), 50));
+    matches.push_back(LicenseMatch(string("LGPL"), 50));
     return true;
   }
   
   return false;
 }
+
+/*
+ * unmatched:
+ * 
+BSD2AdvInsteadOfBinary:BSDpre,BSDcondSource,BSDcondAdvRULE,BSDasIs,BSDWarr
+BSD1:BSDpre,BSDcondBinary,BSDasIs,BSDWarr
+BSDOnlyAdv:BSDpre,BSDcondAdvRULE,BSDasIs,BSDWarr
+BSDOnlyEndorseNoWarranty:BSDpreLike,BSDcondEndorseRULE,BSDasIs
+BSD2var1:BSDpre,BSDCondSourceVariant,BSDcondBinary,BSDasIs,BSDWarr
+BSD2var2:BSDpre,BSDCondSourceVariant2,BSDcondBinary,BSDasIs,BSDWarr
+BSD2aic700:BSDpre,BSDcondSource,BSDcondBinaryVar1,AsIsVariant2,LiabilityBSDVariantAIC700
+BSD2SoftAndDoc:BSDpreSoftAndDoc,BSDcondSourceOrDoc,BSDcondBinary,BSDasIsSoftAndDoc,BSDWarr
+BSDCairoStyleWarr:BSDpre,BSDcondSource,BSDcondBinary,BSDcondAdvPart2,OpenSSLwritCond,OpenSSLName,BSDasIs,BSDWarr
+BSDdovecotStyle:BSDpre,BSDcondSource,BSDcondBinary,OpenSSLendorse,DovecotwriteCod,OpenSSLAckPart1,BSDcondAdvPart2,MITstyleCairoWarranty
+ZLIBref:ZLibRef
+boost-1:boostPermission,boostPreserve,boostAsIs,boostWarr
+boost-1:boostRefv1
+boost-1ref:boostSeev1
+SSLeay:SSLCopy,SSLeayAttrib,SSLeayAdType,BSDpre,BSDcondSource,BSDcondBinary,BSDcondAdvRULE,SSLeayCrypto,SSLeayWindows,BSDasIs,BSDWarr,SSLeayCantChangeLic
+ */
