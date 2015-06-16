@@ -68,6 +68,6 @@ class AdminContentDelete extends DefaultPlugin
    
     return $this->render('admin_content_delete.html.twig', $this->mergeWithDefault($vars));
   }
-  }
+}
 
 register_plugin(new AdminContentDelete());

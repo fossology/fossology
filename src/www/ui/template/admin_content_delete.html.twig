@@ -15,13 +15,13 @@
 {% block content %}
 <h2>{{ 'Delete content'|trans }}</h2>
 {{ 'Only folders or uploads that can be accessed via a different path can be deleted'| trans }}
-<table border="1">
-  <tr style="vertical-align: top;">
+<table>
+  <tr style="vertical-align:top;">
     <td id="sidetree">
       <div id="sidetreecontrol" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>
       {{ folderTree }}
     </td>
-    <td>
+    <td style="padding-left:20px;">
       <form name="formy" method="post">
         <label for="foldercontent">{{ 'Select the upload or folder you wish to unlink'|trans }}:<br/>
           <select name="foldercontent" id="foldercontent" size="20">

@@ -1,20 +1,30 @@
-$('#fromFolder').change(function () {
-  var folder = this.selectedOptions[0].value;
+var folder = 1;
 
-  $.getJSON("?mod=foldercontents&folder=" + folder)
-      .done(function (data) {
-        var folderchild = $('#foldercontent');
-        folderchild.empty();
-        $.each(data, function (key, value) {
-          var option = document.createElement("option");
-          option.innerHTML = value;
-          option.value = key;
-          folderchild.append(option);
-        });
-      })
-      .fail(failed);
-});
+$("#tree").treeview({
+  collapsed: false,
+  animated: "fast",
+  control: "#sidetreecontrol",
+  persist: "location"
+  });
 
-$(document).ready( function(){
-  $('#fromFolder').trigger("change");
+$(document).ready(function() {
+  $('.clickable-folder').click(function(event){
+    folder = $(this).attr('data-folder');
+    $('#fromFolder').val(folder);
+    $.getJSON("?mod=foldercontents&folder=" + folder)
+        .done(function (data) {
+          var folderchild = $('#foldercontent');
+          folderchild.empty();
+          $.each(data, function (key, value) {
+            var option = document.createElement("option");
+            option.innerHTML = value;
+            option.value = key;
+            folderchild.append(option);
+          });
+        })
+        .fail(failed);
+    return false;
+  });
+
+  $('.clickable-folder').first().trigger('click');
 });
