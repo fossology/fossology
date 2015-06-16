@@ -11,7 +11,11 @@ cache:
  - apt
 
 install:
+ - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+ - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
+ - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main'
  - sudo apt-get update -qq
+ - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
  - sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev
         libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
         apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
@@ -19,6 +23,7 @@ install:
         rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
         libpq-dev
         libboost-regex-dev libboost-program-options-dev
+ - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
 
 before_script:
@@ -28,6 +33,27 @@ before_script:
  - cd ..
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
+
+env:
+ - CC=gcc CXX=g++
+ - CC=clang-3.5 CXX=clang++-3.5
+ - CC=clang-3.6 CXX=clang++-3.6
+ - CC=gcc-4.4 CXX=g++-4.4
+ - CC=gcc-4.6 CXX=g++-4.6
+ - CC=gcc-4.8 CXX=g++-4.8
+ - CC=gcc-4.9 CXX=g++-4.9
+ - CC=gcc-5 CXX=g++-5
+
+matrix:
+  include:
+    - php: 5.3
+      env: CC=gcc CXX=g++
+    - php: 5.4
+      env: CC=gcc CXX=g++
+    - php: 5.5
+      env: CC=gcc CXX=g++
+    - php: 5.6
+      env: CC=gcc CXX=g++
 
 script:
  - set -e
