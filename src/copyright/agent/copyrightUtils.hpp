@@ -54,6 +54,7 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
 
 CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions);
 
+scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType);
 void addDefaultScanners(CopyrightState& state);
 /*
 std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std::vector<RegexMatcher> matchers);

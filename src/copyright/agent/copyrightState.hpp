@@ -32,14 +32,14 @@ class CliOptions
 private:
   int verbosity;
   unsigned int optType;
-  std::list<unptr::shared_ptr<scanner>> extraRegex;
+  std::list<unptr::shared_ptr<scanner>> cliScanners;
 
 public:
   bool isVerbosityDebug() const;
 
   unsigned int getOptType() const;
 
-  bool addExtraRegex(const std::string& regexDesc);
+  void addScanner(scanner* regexDesc);
   std::list<unptr::shared_ptr<scanner>> extractScanners();
 
   CliOptions(int verbosity, unsigned int type);
