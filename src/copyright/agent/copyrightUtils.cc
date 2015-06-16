@@ -144,19 +144,7 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
   }
 }
 
-CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
-{
-  int agentID;
-  queryAgentId(agentID, dbManager.getConnection());
-
-  CopyrightState state(agentID, std::move(cliOptions));
-
-  addDefaultScanners(state);
-
-  return state;
-}
-
-void addDefaultScanners(CopyrightState& state)
+static void addDefaultScanners(CopyrightState& state)
 {
   unsigned types = state.getCliOptions().getOptType();
 #ifdef IDENTITY_COPYRIGHT
@@ -180,6 +168,36 @@ void addDefaultScanners(CopyrightState& state)
 #endif
 }
 
+static std::string getRegexConfFile(const std::string& identity)
+{
+  return std::string(sysconfigdir) + "/mods-enabled/" + identity +  "/agent/scanners.conf";
+}
+
+static void addConfFileScanners(CopyrightState& state)
+{
+  std::string confFile = getRegexConfFile(IDENTITY);
+  ifstream stream(confFile);
+  if (stream)
+  {
+    for (std::string line; std::getline(stream, line); )
+    {
+      scanner* sc = makeRegexScanner(line, IDENTITY);
+      if (sc)
+      {
+        if (state.getCliOptions().isVerbosityDebug())
+          cout << "loaded scanner definition: " << line << endl;
+        state.addScanner(sc);
+      }
+      else
+      {
+        cout << "bad scanner definition in conf: " << line << endl;
+      }
+    }
+  } else {
+    if (state.getCliOptions().isVerbosityDebug())
+      cout << "cannot open scanner definition in conf: " << confFile << endl;
+  }
+}
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
   #define RGX_FMT_SEPARATOR "@@"
@@ -203,6 +221,19 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
     return new regexScanner(regexPattern, type, regId);
   }
   return 0; // nullptr
+}
+
+CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
+{
+  int agentID;
+  queryAgentId(agentID, dbManager.getConnection());
+
+  CopyrightState state(agentID, std::move(cliOptions));
+
+  addDefaultScanners(state);
+  addConfFileScanners(state);
+
+  return state;
 }
 
 bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)

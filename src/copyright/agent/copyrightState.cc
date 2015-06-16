@@ -33,7 +33,8 @@ int CopyrightState::getAgentId() const
 
 void CopyrightState::addScanner(scanner* sc)
 {
-  scanners.push_back(unptr::shared_ptr<scanner>(sc));
+  if (sc)
+    scanners.push_back(unptr::shared_ptr<scanner>(sc));
 }
 
 const std::list<unptr::shared_ptr<scanner>>& CopyrightState::getScanners() const
