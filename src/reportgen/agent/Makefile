@@ -13,16 +13,16 @@ EXE = reportgen
 EXE_COPY = getCleared.php getClearedCopy.php getClearedIp.php getClearedEcc.php getBulkMatches.php getKeywords.php getIrrelevant.php getMainLicense.php getClearedComment.php
 WRAP = getCleared getClearedCopy getClearedIp getClearedEcc getBulkMatches getKeywords getIrrelevant getMainLicense getClearedComment
 
-CFLAGS_LOCAL = -std=c99 $(ALL_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
-DEF          = -DDATADIR='"$(MODDIR)"'
-CONFDIR      = $(DESTDIR)$(SYSCONFDIR)
-CFLAGS_LINK  = $(ALL_CFLAGS) -lmxml -L ./libmxml.a `pkg-config json --cflags --libs`
+CFLAGS_LOCAL  = -std=c99 $(FO_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
+DEF           = -DDATADIR='"$(MODDIR)"'
+CONFDIR       = $(DESTDIR)$(SYSCONFDIR)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmxml -L ./libmxml.a `pkg-config json --cflags --libs`
 
 OBJECTS  = utils.o main.o table.o jsonDataRetriever.o
 COVERAGE = 
 
 $(EXE): $(FOLIB) $(VARS) $(OBJECTS)
-	$(CC) $(OBJECTS) $(DEF) $(CFLAGS_LINK) -o $@
+	$(CC) $(OBJECTS) $(DEF) $(LDFLAGS_LOCAL) -o $@
 
 all: $(FOLIB) $(EXE)
 
