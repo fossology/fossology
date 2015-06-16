@@ -51,8 +51,17 @@ class AjaxFolderContents extends DefaultPlugin
     {
       $results[$upload['foldercontents_pk']] = $upload['upload_filename'];
     }
-
-    return new JsonResponse($results);
+    if(!$request->get('removable'))
+    {
+      return new JsonResponse($results);
+    }
+    
+    $filterResults = array();
+    foreach($folderDao->getRemovableContents($folderId) as $content)
+    {
+      $filterResults[$content] = $results[$content];
+    }
+    return new JsonResponse($filterResults);
   }
   
 }
