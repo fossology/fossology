@@ -119,7 +119,7 @@ string mapLicenseFromNinkaToFossology(string name)
   if (name.compare("LGPLv3+") == 0) return string("LGPL-3.0+");
   if (name.compare("GPLnoVersion") == 0) return string("GPL");
   if (name.compare("LesserGPLnoVersion") == 0
-          || name.compare("LibraryGPLnoVersion"==0) return string("LGPL");
+          || name.compare("LibraryGPLnoVersion")==0) return string("LGPL");
   
   return name;
 };
@@ -164,6 +164,22 @@ bool isLicenseCollection(string name, vector<LicenseMatch>& matches)
     match = LicenseMatch(string("LGPL-2.1"), 50);
     matches.push_back(match);
     match = LicenseMatch(string("LGPL-3.0"), 50);
+    matches.push_back(match);
+    return true;
+  }
+  if (name.compare("LGPLv2+MISTAKE") == 0)
+  {
+    match = LicenseMatch(string("LGPL-2.1+"), 50);
+    matches.push_back(match);
+    match = LicenseMatch(string("LGPL-2.0+"), 50);
+    matches.push_back(match);
+    return true;
+  }
+  if (name.compare("LGPLv2MISTAKE") == 0)
+  {
+    match = LicenseMatch(string("LGPL-2.1"), 50);
+    matches.push_back(match);
+    match = LicenseMatch(string("LGPL-2.0"), 50);
     matches.push_back(match);
     return true;
   }
