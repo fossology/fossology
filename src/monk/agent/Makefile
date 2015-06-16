@@ -9,9 +9,8 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-LOCAL_CFLAGS = $(CFLAGS) -std=c99 -I. -Werror -Wall -Wextra -fopenmp
-LOCAL_LDFLAGS = -lm -fopenmp
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
+LOCAL_CFLAGS = -std=c99 -I. -Werror -Wall -Wextra -fopenmp $(FO_CFLAGS)
+LOCAL_LDFLAGS = -fopenmp $(FO_LDFLAGS)
 
 ifeq (,$(shell pkg-config --exists uchardet || echo no))
 LOCAL_CFLAGS += $(shell pkg-config --cflags uchardet) -DHAVE_CHARDET
@@ -36,12 +35,12 @@ all: _squareVisitor.h $(EXE)
 all_cov: _squareVisitor.h $(EXE:%=%_cov)
 
 $(EXE): % : %.c $(FOLIB) $(VARS) $(OBJECTS)
-	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(DEF) -o $@.o
-	$(CC) $@.o $(OBJECTS) $(DEF) $(FO_LDFLAGS) $(LOCAL_LDFLAGS) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(DEF) -o $@.o
+	$(CC) $@.o $(OBJECTS) $(DEF) $(LOCAL_LDFLAGS) -o $@
 
 $(EXE:%=%_cov): %_cov : %.c $(FOLIB) $(VARS) $(COVERAGE)
-	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(FLAG_COV) $(DEF) $(DEFS) -o $@.o
-	$(CC) $@.o $(COVERAGE) $(FLAG_COV) $(DEF) $(FO_LDFLAGS) $(LOCAL_LDFLAGS) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FLAG_COV) $(DEF) $(DEFS) -o $@.o
+	$(CC) $@.o $(COVERAGE) $(FLAG_COV) $(DEF) $(LOCAL_LDFLAGS) -o $@
 
 #######################
 # library build rules #
@@ -64,13 +63,13 @@ _squareVisitor.c _squareVisitor.h: squareBuilder
 	sh genSquareVisitor
 
 squareBuilder: buildSquareVisitor.c
-	$(CC) buildSquareVisitor.c $(ALL_CFLAGS) $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) -o $@
+	$(CC) buildSquareVisitor.c $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) -lm -o $@
 
 $(OBJECTS): %.o: %.c _squareVisitor.c
-	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) -o $@
 
 $(COVERAGE): %_cov.o: %.c _squareVisitor.c
-	$(CC) -c $< $(LOCAL_CFLAGS) $(FO_CFLAGS) $(FLAG_COV) -o $@
+	$(CC) -c $< $(LOCAL_CFLAGS) $(FLAG_COV) -o $@
 
 #######################
 # install build rules #

@@ -13,7 +13,8 @@ TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lmagic -lpq $(ALL_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) $(TEST_LIB)
 EXE = test_mimetype
 TEST_OBJ_RUN = testRun.o
 TEST_OBJ = ./finder/testDBCheckMime.o \
@@ -24,7 +25,7 @@ TEST_OBJ = ./finder/testDBCheckMime.o \
 all: $(EXE)
 
 $(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
-	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) -o $@
+	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
@@ -42,7 +43,7 @@ test: all
 	./$(EXE)
 
 coverage: libmimetype_cov.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
-	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype_cov.a $(FLAG_COV) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt

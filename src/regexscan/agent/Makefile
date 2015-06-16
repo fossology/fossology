@@ -18,9 +18,11 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-
-CFLAGS_LOCAL = $(ALL_CFLAGS)
+CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 EXE = regexscan
+
+$(EXE): regexscan.c $(FOLIB) $(VARS)
+	$(CC) $< $(FO_CFLAGS) $(FO_LDFLAGS) -o $@
 
 all: $(EXE)
 

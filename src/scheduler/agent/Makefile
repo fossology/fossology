@@ -22,9 +22,9 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 #GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
-AR = ar
 GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -lgobject-2.0
-CFLAGS_LOCAL = $(GLIB_FLAGS) $(ALL_CFLAGS) -I. -lpq -lpthread
+LDFLAGS_LOCAL = $(GLIB_FLAGS) $(FO_LDFLAGS) -lpthread
+CFLAGS_LOCAL = $(FO_CFLAGS) -I.
 DEPEN = Makefile logging.h
 DEF = -DLOG_DIR='"$(LOGDIR)"' \
       -DDEFAULT_SETUP='"$(SYSCONFDIR)"' \
@@ -72,7 +72,7 @@ HEAD = agent.h \
 all: $(FOLIB) $(EXE) $(CLI) defconf/init.d/fossology
 
 $(EXE): %: %.c $(LIB) $(VARS) $(HEAD) $(DEPEN) $(FOLIB)
-	$(CC) $< $(LIB) $(DEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(LIB) $(DEF) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(LIB): $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(AR) cr $@ $(OBJS)

@@ -21,7 +21,8 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I/usr/include/rpm -lpq -lrpm -lrpmio
+CFLAGS_LOCAL = $(FO_CFLAGS) -I/usr/include/rpm 
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq -lrpm -lrpmio
 
 EXE = pkgagent
 HDRS = pkgagent.h
@@ -31,7 +32,7 @@ CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 all: $(EXE)
 
 $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
-	$(CC) main.c pkgagent.o $(FO_LDFLAGS) $(CFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) main.c pkgagent.o $(LDFLAGS_LOCAL) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
