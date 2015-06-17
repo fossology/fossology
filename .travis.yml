@@ -29,7 +29,7 @@ install:
 before_script:
  - cd src/
  - composer install --dev
- - composer self-update
+ - composer self-update || echo "ignoring selfupdate failure"
  - cd ..
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
