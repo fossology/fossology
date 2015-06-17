@@ -100,6 +100,7 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
 
   if (tokens->len >= MAX_TOKENS_ARRAY_SIZE) {
     printf("WARNING: stream has more tokens than maximum allowed\n");
+    free(remToken);
     return -1;
   }
 
