@@ -33,11 +33,20 @@ class AdminContentMove extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Move upload or folder"),
-        self::MENU_LIST => "Organize::Folders::Move or copy",
+        self::MENU_LIST => "Organize::Folders::Move or Copy",
         self::PERMISSION => Auth::PERM_ADMIN,
         self::REQUIRES_LOGIN => TRUE
     ));
     $this->folderDao = $GLOBALS['container']->get('dao.folder');
+  }
+  
+  protected function RegisterMenus()
+  {
+    parent::RegisterMenus();
+    if (!$this->isRequiresLogin() || $this->isLoggedIn())
+    {
+      menu_insert("Main::Organize::Uploads::Move or Copy", 0, $this->name, $this->name);
+    }
   }
   
   /**
