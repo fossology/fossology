@@ -11,7 +11,7 @@ $(document).ready(function() {
   $('.clickable-folder').click(function(event){
     folder = $(this).attr('data-folder');
     $('#fromFolder').val(folder);
-    $.getJSON("?mod=foldercontents&folder=" + folder)
+    $.getJSON("?mod=foldercontents&folder=" + folder{% if removable is defined %} + "&removable=1"{% endif %})
         .done(function (data) {
           var folderchild = $('#foldercontent');
           folderchild.empty();

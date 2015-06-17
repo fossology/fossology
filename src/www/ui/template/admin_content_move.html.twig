@@ -11,11 +11,11 @@
 {% endblock %}
 
 {% block content %}
-<h2>{{ 'Move folder or upload to different folder'|trans }}</h2>
+{{ 'Select a folder on the left hand side to move or copy content to a different folder'|trans }}
 <table>
   <tr style="vertical-align:top;">
     <td id="sidetree">
-      <div id="sidetreecontrol" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>
+      <div id="sidetreecontrol" style="display:inline;">{{ 'Collapse All'|trans }}</a> | <a href="?#">{{ 'Expand All'|trans }}</div>
       {{ folderTree }}
     </td>
     <td style="padding-left:20px;">

@@ -33,8 +33,8 @@ class AdminContentDelete extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Delete upload or folder"),
-        self::MENU_LIST => "Organize::Folders::Delete Content",
+        self::TITLE => _("Unlink upload or folder"),
+        self::MENU_LIST => "Organize::Folders::Unlink Content",
         self::PERMISSION => Auth::PERM_ADMIN,
         self::REQUIRES_LOGIN => TRUE
     ));
