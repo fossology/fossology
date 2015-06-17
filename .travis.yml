@@ -44,7 +44,7 @@ env:
  - CC=gcc-4.9 CXX=g++-4.9
  - CC=gcc-5 CXX=g++-5
  - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
- - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror'
+ - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
 matrix:
   include:
@@ -58,7 +58,7 @@ matrix:
       env: CC=gcc CXX=g++
   allow_failures:
     - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror'
+    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
 script:
  - set -e
