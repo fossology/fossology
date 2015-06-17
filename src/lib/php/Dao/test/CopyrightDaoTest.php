@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Daniele Fognini, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -102,23 +102,20 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('agent','uploadtree','uploadtree_a','pfile','users','bucketpool','mimetype'));
+    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree','copyright_decision'));
     $this->testDb->createInheritedTables(array('uploadtree_a'));
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq'));
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','user_pkey'));
-    $this->testDb->alterTables(array('agent','pfile','users'));
+    $this->testDb->insertData(array('copyright','uploadtree_a'));
 
-    $this->testDb->insertData(array('agent'), false);
-    $this->runCopyright();
-
-    $this->testDb->insertData(array('mimetype','pfile','uploadtree_a','bucketpool','users','copyright'), false);
+    $this->testDb->createSequences(array('copyright_ct_pk_seq','copyright_decision_pk_seq'));
+    $this->testDb->alterTables(array('copyright','copyright_decision'));
   }
 
   private function searchContent($array, $content)
   {
     foreach($array as $entry) {
-      if ($entry['content'] === $content)
+      if ($entry['content'] === $content) {
         return true;
+      }
     }
     return false;
   }
@@ -264,9 +261,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testUpdateTable()
   {
-    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree'));
-    $this->testDb->createInheritedTables(array('uploadtree_a'));
-    $this->testDb->insertData(array('copyright','uploadtree_a'));
+    $this->setUpClearingTables();
     
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
@@ -287,9 +282,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
   
   public function testDeleteCopyright()
   {
-    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree','copyright_decision'));
-    $this->testDb->createInheritedTables(array('uploadtree_a'));
-    $this->testDb->insertData(array('copyright','uploadtree_a'));
+    $this->setUpClearingTables();
     
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);    
