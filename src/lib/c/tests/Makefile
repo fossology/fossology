@@ -27,8 +27,7 @@ TESTDBDIR = $(TOP)/src/testing/db/c
 TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
 TEST_LDFLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(FO_CFLAGS) \
-               $(TEST_CFLAGS) -I$(SRCDIR) -I../
+CFLAGS_LOCAL = $(FO_CFLAGS) $(TEST_CFLAGS) -I$(SRCDIR) -I../
 LDFLAGS_LOCAL = $(TEST_LDFLAGS) $(FO_LDFLAGS) -lcunit
 
 EXE = testlibs
@@ -49,7 +48,7 @@ testlib:
 
 coverage: $(OBJS) libfossology_cov.a $(EXE).c $(FOLIB)
 	@echo "make library coverage tests"
-	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
+	$(CC) $(EXE).c -o $(EXE) $(OBJS) $(SRCDIR)/libfossology_cov.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $(FLAG_COV)
 	$(PHPUNIT) --bootstrap $(PHPUNIT_BOOT) testClib.php
 	$(call coverage-report-html,$(SRCDIR))
 
