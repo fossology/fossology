@@ -110,7 +110,7 @@ protected:
 
   void regIPTest () {
     regexScanner sc(regIp::getRegex(), regIp::getType());
-    scannerTest(&sc, testContent, regIp::getType(), { "US patents 1 , 2 ,3" });
+    scannerTest(sc, testContent, regIp::getType(), { "US patents 1 , 2 ,3" });
   }
 
   void regEccTest () {
