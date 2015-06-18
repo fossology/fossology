@@ -116,10 +116,15 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
     {
       const std::vector<std::string>& userRegexesFmts = vm["regex"].as<vector<std::string> >();
       for (auto it = userRegexesFmts.begin(); it != userRegexesFmts.end(); ++it) {
-        if (!(dest.addExtraRegex(*it)))
+        scanner* sc = makeRegexScanner(*it, "cli");
+        if (!(sc))
         {
           cout << "cannot parse regex format : " << *it << endl;
           return false;
+        }
+        else
+        {
+          dest.addScanner(sc);
         }
       }
     }
@@ -139,26 +144,10 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
   }
 }
 
-CopyrightState getState(fo::DbManager dbManager, const CliOptions& cliOptions)
+static void addDefaultScanners(CopyrightState& state)
 {
-  int agentID;
-  queryAgentId(agentID, dbManager.getConnection());
-
-  return CopyrightState(agentID, cliOptions);
-}
-
-void fillScanners(CopyrightState& state)
-{
-  const CliOptions& cliOptions = state.getCliOptions();
-
-  const std::list<regexScanner>& extraRegexes =cliOptions.getExtraRegexes();
-  for (auto sc = extraRegexes.begin(); sc != extraRegexes.end(); ++sc)
-    state.addScanner(&(*sc));
-
+  unsigned types = state.getCliOptions().getOptType();
 #ifdef IDENTITY_COPYRIGHT
-  unsigned types = cliOptions.getOptType();
-
-  // Note: Scanners are deleted in the CopyrightState destructor
   if (types & 1<<0)
     //state.addMatcher(RegexMatcher(regCopyright::getType(), regCopyright::getRegex()));
     state.addScanner(new hCopyrightScanner());
@@ -178,8 +167,77 @@ void fillScanners(CopyrightState& state)
 #endif
 
 #ifdef IDENTITY_ECC
-  state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
+  if (types & 1<<0)
+    state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
 #endif
+}
+
+static std::string getRegexConfFile(const std::string& identity)
+{
+  return std::string(sysconfigdir) + "/mods-enabled/" + identity +  "/agent/scanners.conf";
+}
+
+static void addConfFileScanners(CopyrightState& state)
+{
+  std::string confFile = getRegexConfFile(IDENTITY);
+  ifstream stream(confFile);
+  if (stream)
+  {
+    for (std::string line; std::getline(stream, line); )
+    {
+      scanner* sc = makeRegexScanner(line, IDENTITY);
+      if (sc)
+      {
+        if (state.getCliOptions().isVerbosityDebug())
+          cout << "loaded scanner definition: " << line << endl;
+        state.addScanner(sc);
+      }
+      else
+      {
+        cout << "bad scanner definition in conf: " << line << endl;
+      }
+    }
+  } else {
+    if (state.getCliOptions().isVerbosityDebug())
+      cout << "cannot open scanner definition in conf: " << confFile << endl;
+  }
+}
+
+scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
+  #define RGX_FMT_SEPARATOR "@@"
+  auto fmtRegex = rx::regex(
+    "(?:([[:alpha:]]+)" RGX_FMT_SEPARATOR ")?(?:([[:digit:]]+)" RGX_FMT_SEPARATOR ")?(.*)",
+    rx::regex_constants::icase
+  );
+
+  rx::match_results<std::string::const_iterator> match;
+  if (rx::regex_match(regexDesc.begin(), regexDesc.end(), match, fmtRegex))
+  {
+    std::string type(match.length(1) > 0 ? match.str(1) : defaultType.c_str());
+
+    int regId = match.length(2) > 0 ? std::stoi(std::string(match.str(2))) : 0;
+
+    if (match.length(3) == 0)
+      return 0; // nullptr
+
+    std::string regexPattern(match.str(3));
+
+    return new regexScanner(regexPattern, type, regId);
+  }
+  return 0; // nullptr
+}
+
+CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
+{
+  int agentID;
+  queryAgentId(agentID, dbManager.getConnection());
+
+  CopyrightState state(agentID, std::move(cliOptions));
+
+  addDefaultScanners(state);
+  addConfFileScanners(state);
+
+  return state;
 }
 
 bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
@@ -223,7 +281,7 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
 void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
 {
   list<match> l;
-  const list<const scanner*>& scanners = state.getScanners();
+  const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
   for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
   {
     (*sc)->ScanString(sContent, l);

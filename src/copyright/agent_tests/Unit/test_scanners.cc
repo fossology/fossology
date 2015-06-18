@@ -64,11 +64,11 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE_END ();
 
 private:
-  void scannerTest (const scanner* sc, const char* content, const char* type, list<const char*> expectedStrings)
+  void scannerTest (const scanner& sc, const char* content, const string& type, list<const char*> expectedStrings)
   {
     list<match> matches;
     list<match> expected;
-    sc->ScanString(content, matches);
+    sc.ScanString(content, matches);
 
     for (auto s = expectedStrings.begin(); s != expectedStrings.end(); ++s)
     {
@@ -89,7 +89,7 @@ protected:
     // Test copyright matcher
     hCopyrightScanner sc;
 
-    scannerTest(&sc, testContent, "statement", { "© 2007 Hugh Jackman",
+    scannerTest(sc, testContent, "statement", { "© 2007 Hugh Jackman",
       "Copyright 2004 my company",
       "Copyrights by any strange people",
       "(C) copyright 2007-2011, 2013 my favourite company Google",
@@ -101,7 +101,7 @@ protected:
   void regAuthorTest()
   {
     regexScanner sc(regAuthor::getRegex(), regAuthor::getType());
-    scannerTest(&sc, testContent, regAuthor::getType(), {
+    scannerTest(sc, testContent, regAuthor::getType(), {
       "Written by: me, myself and Irene.",
       "Authors all the people at ABC",
       "maintained by benjamin drieu <benj@debian.org>"
@@ -115,17 +115,17 @@ protected:
 
   void regEccTest () {
     regexScanner sc(regEcc::getRegex(), regEcc::getType());
-    scannerTest(&sc, testContent, regEcc::getType(), { "space vehicle designed by NASA" });
+    scannerTest(sc, testContent, regEcc::getType(), { "space vehicle designed by NASA" });
   }
 
   void regUrlTest () {
     regexScanner sc(regURL::getRegex(), regURL::getType());
-    scannerTest(&sc, testContent, regURL::getType(), { "http://mysite.org/FAQ" });
+    scannerTest(sc, testContent, regURL::getType(), { "http://mysite.org/FAQ" });
   }
 
   void regEmailTest () {
     regexScanner sc(regEmail::getRegex(), regEmail::getType(), 1);
-    scannerTest(&sc, testContent, regEmail::getType(), { "info@mysite.org", "benj@debian.org" });
+    scannerTest(sc, testContent, regEmail::getType(), { "info@mysite.org", "benj@debian.org" });
   }
 };
 

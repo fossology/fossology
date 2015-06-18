@@ -37,7 +37,7 @@ bool ReadFileToString(const string& fileName, string& out)
 
 bool operator==(const match& m1, const match& m2)
 {
-  return m1.start == m2.start && m1.end == m2.end && strcmp(m1.type, m2.type) == 0;
+  return m1.start == m2.start && m1.end == m2.end && m1.type == m2.type;
 }
 bool operator!=(const match& m1, const match& m2)
 {

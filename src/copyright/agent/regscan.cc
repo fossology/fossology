@@ -20,11 +20,11 @@
 
 
 
-regexScanner::regexScanner(const string& sReg, const char* t)
+regexScanner::regexScanner(const string& sReg, const string& t)
   : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(0)
 { }
 
-regexScanner::regexScanner(const string& sReg, const char* t, int idx)
+regexScanner::regexScanner(const string& sReg, const string& t, int idx)
   : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(idx)
 { }
 
