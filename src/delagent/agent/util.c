@@ -521,12 +521,11 @@ void DeleteUpload (long UploadId)
  *
  * \param long Parent the parent folder id
  * \param int Depth
- * \param int Row
- * \param int DelFlag
+ * \param long Row grandparent (used to unlink if multiple grandparents)
+ * \param int DelFlag 0=no del, 1=del if unique parent, 2=del unconditional
  *
  */
-void ListFoldersRecurse	(long Parent, int Depth,
-    int Row, int DelFlag)
+void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
 {
   int r,MaxRow;
   long Fid;
@@ -537,76 +536,114 @@ void ListFoldersRecurse	(long Parent, int Depth,
 
   /* Find all folders with this parent and recurse */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
+  snprintf(SQL,sizeof(SQL),"SELECT folder_pk,foldercontents_mode,name,description,upload_pk FROM folderlist "
+          "WHERE parent=%ld "
+          "ORDER BY name,parent,folder_pk",Parent);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   MaxRow = PQntuples(result);
   for(r=0; r < MaxRow; r++)
   {
-    if (r == Row) continue; /* skip self-loops */
-    /* NOTE: There can be an infinite loop if two rows point to each other.
-       A->parent == B and B->parent == A  */
-    if (atol(PQgetvalue(result,r,1)) == Parent)
+    if (atol(PQgetvalue(result,r,0)) == Parent)
+    {
+      continue;
+    }
+
+    if (!DelFlag)
+    {
+      for(i=0; i<Depth; i++) fputs("   ",stdout);
+    }
+    Fid = atol(PQgetvalue(result,r,0));
+    if (Fid != 0)
     {
       if (!DelFlag)
       {
-        for(i=0; i<Depth; i++) fputs("   ",stdout);
+        printf("%4ld :: %s",Fid,PQgetvalue(result,r,2));
+        Desc = PQgetvalue(result,r,3);
+        if (Desc && Desc[0]) printf(" (%s)",Desc);
+        printf("\n");
+        ListFoldersRecurse(Fid,Depth+1,Parent,0);
       }
-      Fid = atol(PQgetvalue(result,r,0));
-      if (Fid != 0)
+      else ListFoldersRecurse(Fid,Depth+1,Parent,1);
+    }
+    else
+    {
+      if (DelFlag==1 && UnlinkContent(atol(PQgetvalue(result,r,4)),Parent,2))
       {
-        if (!DelFlag)
-        {
-          printf("%4ld :: %s",Fid,PQgetvalue(result,r,2));
-          Desc = PQgetvalue(result,r,3);
-          if (Desc && Desc[0]) printf(" (%s)",Desc);
-          printf("\n");
-        }
-        ListFoldersRecurse(Fid,Depth+1,r,DelFlag);
-      }
+        continue;
+      } 
+      if (DelFlag)
+        DeleteUpload(atol(PQgetvalue(result,r,4)));
       else
-      {
-        if (DelFlag) DeleteUpload(atol(PQgetvalue(result,r,4)));
-        else printf("%4s :: Contains: %s\n","--",PQgetvalue(result,r,2));
-      }
+        printf("%4s :: Contains: %s\n","--",PQgetvalue(result,r,2));
     }
   }
   PQclear(result);
 
-  /* if we're deleting folders, do it now */
-  if (DelFlag)
+  switch(Parent)
   {
-    switch(Parent)
-    {
-      case 1:	/* skip default parent */
-        printf("INFO: Default folder not deleted.\n");
+    case 1:	/* skip default parent */
+      printf("INFO: Default folder not deleted.\n");
+      break;
+    case 0:	/* it's an upload */
+      break;
+    default:	/* it's a folder */
+        LOG_FATAL("folder id=%ld will be deleted with flag %d\n",Parent,DelFlag);
+      if (DelFlag==0)
         break;
-      case 0:	/* it's an upload */
+      if (DelFlag==1 && UnlinkContent(Parent,Row,1))
+      {
         break;
-      default:	/* it's a folder */
-        memset(SQL,'\0',sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '%ld';",Parent);
-        if (Test) printf("TEST: %s\n",SQL);
-        else
-        {
-          result = PQexec(db_conn, SQL);
-          if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-          PQclear(result);
-        }
+      }
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",Parent);
+      if (Test) printf("TEST: %s\n",SQL);
+      else
+      {
+        result = PQexec(db_conn, SQL);
+        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+        PQclear(result);
+      }
 
-        memset(SQL,'\0',sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
-        if (Test) printf("TEST: %s\n",SQL);
-        else
-        {
-          result = PQexec(db_conn, SQL);
-          if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-          PQclear(result);
-        }
-        break;
-    } /* switch() */
-  }
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
+      if (Test) printf("TEST: %s\n",SQL);
+      else
+      {
+        result = PQexec(db_conn, SQL);
+        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+        PQclear(result);
+      }
+  } /* switch() */
 } /* ListFoldersRecurse() */
+
+
+/**
+ * \brief remove link between parent and (child,mode) if there are other parents
+ */
+int UnlinkContent (long child, long parent, int mode)
+{
+  PGresult *result;
+  char SQL[MAXSQL];
+  int cnt;
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  cnt = atol(PQgetvalue(result,0,0));
+  PQclear(result);
+  if(cnt>1 && !Test)
+  {
+    memset(SQL,'\0',sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode=%d AND child_id =%ld AND parent_fk=%ld",mode,child,parent);
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    PQclear(result);
+    return 1;
+  }
+  return 0;
+}
 
 /**
  * \brief ListFolders(): List every folder.
@@ -735,7 +772,7 @@ void ListUploads (int user_id, int user_perm)
  **/
 void DeleteFolder (long FolderId)
 {
-  ListFoldersRecurse(FolderId,0,-1,1);
+  ListFoldersRecurse(FolderId,0,-1,2);
 #if 0
   /** Disabled: Database will take care of this **/
   MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
