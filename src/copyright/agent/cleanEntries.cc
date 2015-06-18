@@ -58,7 +58,7 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
 string cleanMatch(const string& sText, const match& m)
 {
   string::const_iterator it = sText.begin();
-  if (strcmp(m.type, "statement") == 0)
+  if (m.type == "statement")
     return cleanStatement(it + m.start, it + m.end);
   else
     return cleanGeneral(it + m.start, it + m.end);

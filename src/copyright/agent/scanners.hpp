@@ -31,9 +31,9 @@ bool ReadFileToString(const string& fileName, string& out);
 
 struct match {
   // A pair of start/end positions and types
-  int start, end;
-  const char* type;
-  match(int s, int e, const char* t) : start(s), end(e), type(t) { }
+  const int start, end;
+  const string& type;
+  match(const int s, const int e, const string& t) : start(s), end(e), type(t) { }
 } ;
 
 bool operator==(const match& m1, const match& m2);
@@ -42,6 +42,8 @@ bool operator!=(const match& m1, const match& m2);
 class scanner
 {
 public:
+  virtual ~scanner() {};
+
   // s: string to scan
   // results: copyright matches are appended to this list
   virtual void ScanString(const string& s, list<match>& results) const = 0;

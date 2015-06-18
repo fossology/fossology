@@ -45,13 +45,11 @@ int main(int argc, char** argv)
     return_sched(1);
   }
 
-  CopyrightState state = getState(dbManager, cliOptions);
-
-  fillScanners(state);
+  CopyrightState state = getState(dbManager, std::move(cliOptions));
 
   if (!fileNames.empty())
   {
-    const list<const scanner*>& scanners = state.getScanners();
+    const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
 
     const unsigned long fileNamesCount = fileNames.size();
     bool fileError = false;
