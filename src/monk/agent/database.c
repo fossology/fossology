@@ -43,12 +43,9 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
 }
 
 PGresult* queryAllLicenses(fo_dbManager* dbManager) {
-  return fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "queryAllLicenses",
-      "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1"
-    )
+  return fo_dbManager_Exec_printf(
+    dbManager,
+    "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1"
   );
 }
 
@@ -65,10 +62,10 @@ char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId) {
   if (PQntuples(licenseTextResult) != 1) {
     printf("cannot find license text!\n");
     PQclear(licenseTextResult);
-    return "";
+    return g_strdup("");
   }
 
-  char* result = strdup(PQgetvalue(licenseTextResult, 0, 0));
+  char* result = g_strdup(PQgetvalue(licenseTextResult, 0, 0));
   PQclear(licenseTextResult);
   return result;
 }
@@ -164,4 +161,4 @@ int saveDiffHighlightsToDb(fo_dbManager* dbManager, const GArray* matchedInfo, l
   }
 
   return 1;
-};
+}

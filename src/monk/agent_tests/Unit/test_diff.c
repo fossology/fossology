@@ -47,7 +47,8 @@ int token_search_diff(char* text, char* search, unsigned int maxAllowedDiff,
   DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, maxAllowedDiff, 1);
   if(expectedAdditionsCount + expectedMatchCount + expectedRemovalsCount == 0) {
     CU_ASSERT_PTR_NULL(diffResult);
-    return diffResult != NULL;
+    result = diffResult != NULL;
+    goto end;
   } else {
     CU_ASSERT_PTR_NOT_NULL(diffResult);
     if (!diffResult) {
@@ -303,8 +304,11 @@ int token_search(char* text, char* search, size_t expectedStart) {
   size_t textStartPosition = 0;
   DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 0, 1);
 
+  int matched = (diffResult != NULL) && (diffResult->matchedInfo->len == 1);
+
   if (diffResult) {
     matchStart = g_array_index(diffResult->matchedInfo, DiffPoint, 0).start;
+    diffResult_free(diffResult);
   }
   CU_ASSERT_EQUAL(expectedStart, matchStart);
 
@@ -313,7 +317,7 @@ int token_search(char* text, char* search, size_t expectedStart) {
   g_free(textCopy);
   g_free(searchCopy);
 
-  return (diffResult != NULL) && (diffResult->matchedInfo->len == 1);
+  return matched;
 }
 
 void test_token_search() {
@@ -349,6 +353,11 @@ void test_matchNTokens(){
   CU_ASSERT_FALSE(matchNTokens(textTokens, 1, textTokens->len,
                               searchTokens, 1, searchTokens->len,
                               7));
+
+  g_array_free(textTokens, TRUE);
+  g_array_free(searchTokens, TRUE);
+  g_free(text);
+  g_free(search);
 }
 
 void test_matchNTokensCorners(){
@@ -369,6 +378,11 @@ void test_matchNTokensCorners(){
   CU_ASSERT_FALSE(matchNTokens(secondTokens, 0, secondTokens->len,
                               emptyTokens, 0, emptyTokens->len,
                               1));
+
+  g_array_free(emptyTokens, TRUE);
+  g_array_free(secondTokens, TRUE);
+  g_free(empty);
+  g_free(search);
 }
 
 int _test_lookForAdditions(char* text, char* search,
@@ -399,6 +413,8 @@ int _test_lookForAdditions(char* text, char* search,
     CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
 
+  g_array_free(textTokens, TRUE);
+  g_array_free(searchTokens, TRUE);
   g_free(testText);
   g_free(testSearch);
 
@@ -433,9 +449,10 @@ int _test_lookForRemovals(char* text, char* search,
     CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
 
+  g_array_free(textTokens, TRUE);
+  g_array_free(searchTokens, TRUE);
   g_free(testText);
   g_free(testSearch);
-
   return ret;
 }
 
@@ -470,6 +487,8 @@ void test_lookForReplacesNotOverflowing() {
   CU_ASSERT_FALSE(lookForDiff(textTokens, searchTokens,
                               0, 0, max, 1, &result));
 
+  g_array_free(textTokens, TRUE);
+  g_array_free(searchTokens, TRUE);
   free(testText);
   free(testSearch);
 }
@@ -501,6 +520,8 @@ int _test_lookForReplaces(char* text, char* search,
     CU_ASSERT_TRUE(result.text.start == expectedTextPosition);
   }
 
+  g_array_free(textTokens, TRUE);
+  g_array_free(searchTokens, TRUE);
   g_free(testText);
   g_free(testSearch);
 

@@ -39,7 +39,7 @@ int isIgnoredLicense(const License* license) {
     GArray* ignoredTokens = tokenize(ignoredText, DELIMITERS);
     if (tokensEquals(license->tokens, ignoredTokens))
       ignored = 1;
-    g_array_free(ignoredTokens, TRUE);
+    tokens_free(ignoredTokens);
     g_free(ignoredText);
   }
 
@@ -65,8 +65,10 @@ Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, uns
 
     if (!isIgnoredLicense(&license))
       g_array_append_val(licenses, license);
-    else
-      g_array_free(license.tokens, TRUE);
+    else {
+      tokens_free(license.tokens);
+      g_free(license.shortname);
+    }
   }
 
   return buildLicenseIndexes(licenses, minAdjacentMatches, maxLeadingDiff);
@@ -77,7 +79,7 @@ void licenses_free(Licenses* licenses) {
     GArray* licenseArray = licenses->licenses;
     for (guint i = 0; i < licenseArray->len; i++) {
       License license = g_array_index(licenseArray, License, i);
-      g_array_free(license.tokens, TRUE);
+      tokens_free(license.tokens);
       g_free(license.shortname);
     }
 
@@ -114,7 +116,7 @@ uint32_t getKey(const GArray* tokens, unsigned minAdjacentMatches, unsigned sear
   uint32_t result = 1;
   for (guint i = 0; (i < minAdjacentMatches) && (i+searchedStart < tokens->len); i++)
   {
-    Token* nToken = &g_array_index(tokens, Token, i+searchedStart);
+    Token* nToken = tokens_index(tokens, i+searchedStart);
     result = (result << 1) + nToken->hashedContent;
   }
 

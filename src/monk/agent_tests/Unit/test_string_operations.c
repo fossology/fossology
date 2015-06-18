@@ -45,7 +45,6 @@ void test_tokenizeWithSpecialDelims() {
   char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo \n:: qoo ");
 
   GArray* token = tokenize(test, " \n");
-  printf("[[%d]]",token->len);
   CU_ASSERT_EQUAL(token->len, 5);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
@@ -74,22 +73,23 @@ void test_streamTokenize() {
 
   Token* remainder = NULL;
 
-  char* endPtr = test + strlen(test);
+  size_t len = strlen(test);
 
   int chunkSize = 2;
   char* ptr = test;
-  while (*ptr && ptr <= endPtr) {
+  size_t rea = 0;
+  while (rea < len) {
     unsigned int tokenCount = token->len;
-    int thisChunkSize = MIN(chunkSize, endPtr - ptr);
+    int thisChunkSize = MIN(chunkSize, len - rea);
 
     int addedTokens = streamTokenize(ptr, thisChunkSize, delimiters, &token, &remainder);
 
     CU_ASSERT_EQUAL(addedTokens, token->len - tokenCount);
 
     ptr += chunkSize;
+    rea += chunkSize;
   }
-  if ((remainder) && (remainder->length > 0))
-    g_array_append_val(token, *remainder);
+  streamTokenize(NULL, 0, NULL, &token, &remainder);
 
   CU_ASSERT_EQUAL(token->len, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
@@ -102,10 +102,7 @@ void test_streamTokenize() {
   CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 4);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 5);
 
-  if (remainder)
-    free(remainder);
-
-  g_array_free(token, TRUE);
+  tokens_free(token);
   g_free(test);
 }
 
@@ -194,12 +191,12 @@ void test_token_equal() {
   GArray* tokenizedText = tokenize(text, "^");
   GArray* tokenizedSearch = tokenize(search, "^");
 
-  Token* t0 = &g_array_index(tokenizedText, Token, 0);
-  Token* t1 = &g_array_index(tokenizedText, Token, 1);
-  Token* t2 = &g_array_index(tokenizedText, Token, 2);
-  Token* t3 = &g_array_index(tokenizedText, Token, 3);
-  Token* s0 = &g_array_index(tokenizedSearch, Token, 0);
-  Token* s1 = &g_array_index(tokenizedSearch, Token, 1);
+  Token* t0 = tokens_index(tokenizedText, 0);
+  Token* t1 = tokens_index(tokenizedText, 1);
+  Token* t2 = tokens_index(tokenizedText, 2);
+  Token* t3 = tokens_index(tokenizedText, 3);
+  Token* s0 = tokens_index(tokenizedSearch, 0);
+  Token* s1 = tokens_index(tokenizedSearch, 1);
 
   CU_ASSERT_TRUE(tokenEquals(t0, s1)); // foo == foo
   CU_ASSERT_TRUE(tokenEquals(t1, s0)); // bar == bar
