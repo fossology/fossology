@@ -39,14 +39,14 @@ env:
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - TEST_TARGETS='test-lib'
   matrix: 
-   - CC=gcc CXX=g++ TEST_TARGETS='test-lib test-monk test-nomos test-copyright'
+   - CC=gcc CXX=g++ TEST_TARGETS='test-lib test-monk'
    - CC=clang-3.5 CXX=clang++-3.5
-   - CC=clang-3.6 CXX=clang++-3.6 TEST_TARGETS='test-lib test-monk test-nomos test-copyright'
-   - CC=gcc-4.4 CXX=g++-4.4 TEST_TARGETS='test-lib test-monk test-nomos test-copyright'
+   - CC=clang-3.6 CXX=clang++-3.6 TEST_TARGETS='test-lib test-monk'
+   - CC=gcc-4.4 CXX=g++-4.4 TEST_TARGETS='test-lib test-monk'
    - CC=gcc-4.6 CXX=g++-4.6
    - CC=gcc-4.8 CXX=g++-4.8
    - CC=gcc-4.9 CXX=g++-4.9
-   - CC=gcc-5 CXX=g++-5 TEST_TARGETS='test-lib test-monk test-nomos test-copyright'
+   - CC=gcc-5 CXX=g++-5 TEST_TARGETS='test-lib test-monk'
    - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
