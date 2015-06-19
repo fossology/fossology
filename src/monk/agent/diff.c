@@ -34,9 +34,10 @@ int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
     )))
   {
     unsigned matched = 1;
-    size_t canMatch = MIN(numberOfWantedMatches,
-                          1 + MIN(textLength - textStart, searchLength - searchStart));
-    for (size_t i = 1; i < canMatch; i++) {
+
+    size_t canMatch = MIN(textLength - textStart, searchLength - searchStart);
+    size_t shouldMatch = MIN(numberOfWantedMatches, canMatch);
+    for (size_t i = 1; i < shouldMatch; i++) {
       if (tokenEquals(
             tokens_index(textTokens, i + textStart),
             tokens_index(searchTokens, i + searchStart)))
@@ -44,7 +45,7 @@ int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
       else
         break;
     }
-    return (matched == canMatch);
+    return (matched == shouldMatch);
   }
   return 0;
 }
