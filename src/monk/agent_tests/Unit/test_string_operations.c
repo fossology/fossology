@@ -184,6 +184,19 @@ void test_tokenPosition() {
   assertTokenPosition("^foo^^bar^^^^^baz", 3, 1, 6, 14);
 }
 
+void test_tokenPositionAtEnd() {
+  char* test = g_strdup("^^23^5^7");
+  GArray* tokens = tokenize(test, "^");
+
+  CU_ASSERT_EQUAL(token_position_of(0, tokens), 2);
+  CU_ASSERT_EQUAL(token_position_of(1, tokens), 5);
+  CU_ASSERT_EQUAL(token_position_of(2, tokens), 7);
+  CU_ASSERT_EQUAL(token_position_of(3, tokens), 8);
+
+  g_array_free(tokens, TRUE);
+  g_free(test);
+}
+
 void test_token_equal() {
   char* text = g_strdup("^foo^^bar^ba^barr");
   char* search = g_strdup("bar^^foo^");
@@ -215,6 +228,7 @@ CU_TestInfo string_operations_testcases[] = {
   {"Testing stream tokenize:", test_streamTokenize},
   {"Testing stream tokenize with too long stream:",test_streamTokenizeEventuallyGivesUp},
   {"Testing find token position in string:", test_tokenPosition},
+  {"Testing find token position at end:", test_tokenPositionAtEnd},
   {"Testing token equals:", test_token_equal},
   CU_TEST_INFO_NULL
 };

@@ -201,10 +201,21 @@ size_t token_position_of(size_t index, const GArray* tokens) {
   size_t result = 0;
   size_t previousLength = 0;
 
-  for (size_t i = 0; i <= index; i++) {
+  size_t limit = MIN(index + 1, tokens->len);
+
+  for (size_t i = 0; i < limit; i++) {
     Token* token = tokens_index(tokens, i);
     result += token->removedBefore + previousLength;
     previousLength = token_length(*token);
+  }
+
+  if (index == tokens->len) {
+    result += previousLength;
+  }
+
+  if (index > tokens->len) {
+    result += previousLength;
+    printf("WARNING: requested calculation of token index after the END token\n");
   }
 
   return result;
