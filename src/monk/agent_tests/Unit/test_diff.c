@@ -304,9 +304,10 @@ int token_search(char* text, char* search, size_t expectedStart) {
   size_t textStartPosition = 0;
   DiffResult* diffResult = findMatchAsDiffs(tokenizedText, tokenizedSearch, textStartPosition, 0, 0, 1);
 
-  int matched = (diffResult != NULL) && (diffResult->matchedInfo->len == 1);
+  int matched = 0;
 
   if (diffResult) {
+    matched = diffResult->matchedInfo->len == 1;
     matchStart = g_array_index(diffResult->matchedInfo, DiffPoint, 0).start;
     diffResult_free(diffResult);
   }
