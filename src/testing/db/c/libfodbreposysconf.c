@@ -72,7 +72,7 @@ fo_dbManager* createTestEnvironment(const char* srcDirs, const char* doConnectAs
 
   fo_dbManager* result = NULL;
   if (doConnectAsAgent) {
-    char* argv[] = {doConnectAsAgent, "-c", Sysconf};
+    char* argv[] = {(char*) doConnectAsAgent, "-c", Sysconf};
     int argc = 3;
 
     fo_scheduler_connect_dbMan(&argc, argv, &result);
