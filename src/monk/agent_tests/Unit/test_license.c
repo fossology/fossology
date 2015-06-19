@@ -205,13 +205,13 @@ int license_setUpFunc() {
   }
 
   if (!fo_dbManager_tableExists(dbManager, "license_ref")) {
-    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)");
+    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)",);
   }
 
   doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)");
+                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)",);
   doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)");
+                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)",);
 
   return 0;
 }
@@ -221,7 +221,7 @@ int license_tearDownFunc() {
     return 1;
   }
 
-  doOrReturnError("DROP TABLE license_ref");
+  doOrReturnError("DROP TABLE license_ref",);
 
   return 0;
 }

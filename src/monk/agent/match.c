@@ -108,7 +108,7 @@ int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licen
     if (result) {
       result = matchFileWithLicenses(state, &file, licenses, callbacks);
 
-      g_array_free(file.tokens, TRUE);
+      tokens_free(file.tokens);
     }
 
     free(file.fileName);

@@ -71,6 +71,7 @@ src/lib/c/tests/results/
 src/lib/c/tests/testlibs
 src/lib/cpp/tests/test_libcpp
 src/lib/cpp/tests/results/
+src/lib/php/tests/lib-php-Xunit-Results.xml
 src/lib/php/bootstrap.php
 src/lib/php/services.xml
 src/lib/php/id.patch
@@ -85,6 +86,7 @@ src/monk/VERSION-*
 src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
 src/monk/agent/monkbulk
+src/mimetype/agent/mimetype
 src/monk/agent/monk_cov
 src/monk/agent/monkbulk_cov
 src/monk/agent/squareBuilder
@@ -95,6 +97,13 @@ src/ninka/agent/ninka_cov
 src/ninka/agent_tests/Functional/ninka
 src/ninka/agent_tests/Unit/test_ninka
 src/ninka/agent_tests/results/
+src/monk/agent_tests/Functional/monk-Xunit1.xml
+src/monk/agent_tests/Functional/monk-Xunit2.xml
+src/monk/agent_tests/Functional/monk-Xunit3.xml
+src/nomos/agent_tests/Functional/LastGoodNomosTestfilesScan.s
+src/nomos/agent_tests/Functional/scan.out
+src/nomos/agent_tests/Functional/scan.out.r
+src/nomos/agent_tests/Functional/scan.out.s
 src/nomos/agent/_STRFILTER
 src/nomos/agent/_autodefs.h
 src/nomos/agent/_strings.data
