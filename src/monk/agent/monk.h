@@ -64,15 +64,22 @@ typedef struct {
 } License;
 
 typedef struct {
-  GArray* licenses;
-  GArray* indexes;
-  unsigned minAdjacentMatches;
-} Licenses;
-
-typedef struct {
   long id;
   char* fileName;
   GArray* tokens;
 } File;
+
+typedef struct {
+  GArray* licenses;
+
+  /* germ of licenses with the same starting tokens
+   *   GArray<GHash<Germ, GArray<License>>> :  { [#skippedTokens]{ germ -> [License] } }  */
+  GArray* indexes;
+  /* number of tokens used as germ when the index was built */
+  unsigned minAdjacentMatches;
+
+  /* licenses shorter than what is needed to compute the germ are in this class */
+  GArray* shortLicenses;
+} Licenses;
 
 #endif // MONK_AGENT_MONK_H

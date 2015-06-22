@@ -21,6 +21,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "license.h"
 #include "file_operations.h"
 
+static inline void doFindAllMatches(const File* file, const GArray* licenseArray,
+                                    guint tPos, guint sPos,
+                                    unsigned maxAllowedDiff, unsigned minAdjacentMatches,
+                                    GArray* matches) {
+  if (!licenseArray) {
+    /* we hope to get here very often */
+    return;
+  }
+
+  for (guint i = 0; i < licenseArray->len; i++) {
+    License* license = license_index(licenseArray, i);
+    findDiffMatches(file, license, tPos, sPos, matches, maxAllowedDiff, minAdjacentMatches);
+  }
+}
+
 GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
         unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
   GArray* matches = g_array_new(FALSE, FALSE, sizeof(Match*));
@@ -31,17 +46,12 @@ GArray* findAllMatchesBetween(const File* file, const Licenses* licenses,
   for (guint tPos = 0; tPos < textLength; tPos++) {
     for (guint sPos = 0; sPos <= maxLeadingDiff; sPos++) {
       const GArray* availableLicenses = getLicenseArrayFor(licenses, sPos, textTokens, tPos);
-
-      if (!availableLicenses) {
-        /* we hope to get here very often */
-        continue;
-      }
-
-      for (guint i = 0; i < availableLicenses->len; i++) {
-        License* license = &g_array_index(availableLicenses, License, i);
-        findDiffMatches(file, license, tPos, sPos, matches, maxAllowedDiff, minAdjacentMatches);
-      }
+      doFindAllMatches(file, availableLicenses, tPos, sPos, maxAllowedDiff, minAdjacentMatches, matches);
     }
+
+    /* now search short licenses only fully (i.e. maxAllowedDiff = 0, minAdjacentMatches = 1) */
+    const GArray* shortLicenses = getShortLicenseArray(licenses);
+    doFindAllMatches(file, shortLicenses, tPos, 0, 0, 1, matches);
   }
 
   return filterNonOverlappingMatches(matches);

@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "string_operations.h"
 #include "hash.h"
+#include "monk.h"
 
 void test_tokenize() {
   char* test = g_strdup("^foo^^ba^");
@@ -66,7 +67,7 @@ void test_tokenizeWithSpecialDelims() {
 }
 
 void test_streamTokenize() {
-  char* test = g_strdup("^foo^^ba^REM^booo");
+  char* test = g_strdup("^foo^^ba^REM^boooREM^REM^");
   const char* delimiters = "^";
 
   GArray* token = tokens_new();
@@ -91,16 +92,24 @@ void test_streamTokenize() {
   }
   streamTokenize(NULL, 0, NULL, &token, &remainder);
 
-  CU_ASSERT_EQUAL(token->len, 3);
+  CU_ASSERT_EQUAL_FATAL(token->len, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 1);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).hashedContent, hash("ba"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).length, 2);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 2);
-  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("booo"));
-  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 4);
+#ifndef MONK_CASE_INSENSITIVE
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("boooREM"));
+#else
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("booorem"));
+#endif
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 7);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 5);
+
+  CU_ASSERT_PTR_NULL(remainder);
+
+  CU_ASSERT_EQUAL(token_position_of(3, token), 20);
 
   tokens_free(token);
   g_free(test);
@@ -131,17 +140,15 @@ void test_streamTokenizeEventuallyGivesUp() {
       break;
     } else
       if (addedTokens != token->len - tokenCount)
-      CU_FAIL("wrong return value from streamTokenize()");
+        CU_FAIL("wrong return value from streamTokenize()");
 
     i++;
   }
+  streamTokenize(NULL, 0, NULL, &token, &remainder);
 
   CU_ASSERT_EQUAL(addedTokens, -1);
 
   CU_ASSERT_TRUE(token->len > 0);
-
-  if (remainder)
-    free(remainder);
 
   g_array_free(token, TRUE);
   g_free(test);

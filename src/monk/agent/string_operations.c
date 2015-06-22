@@ -94,6 +94,7 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       }
       free(stateToken);
     }
+    *remainder = NULL;
     return 0;
   }
 

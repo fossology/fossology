@@ -22,28 +22,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "string_operations.h"
 #include "monk.h"
 
-int ignoredLicenseNamesCount = 2;
-char* ignoredLicenseNames[] = {"Void", "No_license_found"};
-
-int ignoredLicenseTextsCount = 2;
-char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
+static char* ignoredLicenseNames[] = {"Void", "No_license_found"};
+static char* ignoredLicenseTexts[] = {"License by Nomos.", "License by Ninka."};
 
 int isIgnoredLicense(const License* license) {
-  int ignored = 0;
-  for (int i = 0; (i < ignoredLicenseNamesCount) && (!ignored); i++) {
+
+  int ignoredLicenseNamesCount = sizeof(ignoredLicenseNames)/sizeof(char*);
+  for (int i = 0; i < ignoredLicenseNamesCount; i++) {
     if (strcmp(license->shortname, ignoredLicenseNames[i]) == 0)
-      ignored = 1;
-  }
-  for (int i = 0; (i < ignoredLicenseTextsCount) && (!ignored); i++) {
-    char* ignoredText = g_strdup(ignoredLicenseTexts[i]);
-    GArray* ignoredTokens = tokenize(ignoredText, DELIMITERS);
-    if (tokensEquals(license->tokens, ignoredTokens))
-      ignored = 1;
-    tokens_free(ignoredTokens);
-    g_free(ignoredText);
+      return 1;
   }
 
-  return ignored;
+  int ignoredLicenseTextsCount = sizeof(ignoredLicenseTexts)/sizeof(char*);
+  for (int i = 0; i < ignoredLicenseTextsCount; i++) {
+    GArray* ignoredTokens = tokenize(ignoredLicenseTexts[i], DELIMITERS);
+    if (tokensEquals(license->tokens, ignoredTokens)) {
+      tokens_free(ignoredTokens);
+      return 1;
+    }
+    tokens_free(ignoredTokens);
+  }
+
+  return 0;
 }
 
 Licenses* extractLicenses(fo_dbManager* dbManager, PGresult* licensesResult, unsigned minAdjacentMatches, unsigned maxLeadingDiff) {
@@ -78,12 +78,16 @@ void licenses_free(Licenses* licenses) {
   if (licenses) {
     GArray* licenseArray = licenses->licenses;
     for (guint i = 0; i < licenseArray->len; i++) {
-      License license = g_array_index(licenseArray, License, i);
-      tokens_free(license.tokens);
-      g_free(license.shortname);
+      License* license = license_index(licenseArray, i);
+      tokens_free(license->tokens);
+      if (license->shortname) {
+        g_free(license->shortname);
+      }
     }
 
     g_array_free(licenseArray, TRUE);
+
+    g_array_free(licenses->shortLicenses, TRUE);
 
     GArray* indexes = licenses->indexes;
     for (guint i = 0; i < indexes->len; i++) {
@@ -128,6 +132,15 @@ Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, uns
   if (!result)
     return NULL;
 
+#define is_short(license) ( (license)->tokens->len <= minAdjacentMatches )
+  GArray* shortLicenses = g_array_new(FALSE, FALSE, sizeof(License));
+  for (guint i = 0; i < licenses->len; i++) {
+    License* license = license_index(licenses, i);
+    if (is_short(license)) {
+      g_array_append_val(shortLicenses, *license);
+    }
+  }
+
   GArray* indexes = g_array_new(FALSE, FALSE, sizeof(GHashTable*));
 
   for (unsigned sPos = 0; sPos <= maxLeadingDiff; sPos++) {
@@ -135,29 +148,36 @@ Licenses* buildLicenseIndexes(GArray* licenses, unsigned minAdjacentMatches, uns
     g_array_append_val(indexes, index);
 
     for (guint i = 0; i < licenses->len; i++) {
-      License license = g_array_index(licenses, License, i);
-      uint32_t* key = malloc(sizeof(uint32_t));
-      *key = getKey(license.tokens, minAdjacentMatches, sPos);
+      License* license = license_index(licenses, i);
+      if (!is_short(license)) {
+        uint32_t* key = malloc(sizeof(uint32_t));
+        *key = getKey(license->tokens, minAdjacentMatches, sPos);
 
-      GArray* indexedLicenses = g_hash_table_lookup(index, key);
-      if (!indexedLicenses)
-      {
-        indexedLicenses = g_array_new(FALSE, FALSE, sizeof(License));
-        g_hash_table_replace(index, key, indexedLicenses);
-      } else {
-        free(key);
+        GArray* indexedLicenses = g_hash_table_lookup(index, key);
+        if (!indexedLicenses)
+        {
+          indexedLicenses = g_array_new(FALSE, FALSE, sizeof(License));
+          g_hash_table_replace(index, key, indexedLicenses);
+        } else {
+          free(key);
+        }
+        g_array_append_val(indexedLicenses, *license);
       }
-      g_array_append_val(indexedLicenses, license);
     }
   }
+#undef is_short
 
   result->licenses = licenses;
+  result->shortLicenses = shortLicenses;
   result->indexes = indexes;
   result->minAdjacentMatches = minAdjacentMatches;
 
   return result;
 }
 
+const GArray* getShortLicenseArray(const Licenses* licenses) {
+  return licenses->shortLicenses;
+}
 
 const GArray* getLicenseArrayFor(const Licenses* licenses, unsigned searchPos, const GArray* searchedTokens, unsigned searchedStart) {
   const GArray* indexes = licenses->indexes;
