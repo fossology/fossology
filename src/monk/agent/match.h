@@ -46,7 +46,7 @@ typedef struct {
 } MatchCallbacks;
 
 void match_array_free(GArray* matches);
-#define match_array_index(matches, i) g_array_index(matches, Match*, i)
+#define match_array_index(matches, i) (g_array_index(matches, Match*, i))
 
 void match_free(Match* match);
 
