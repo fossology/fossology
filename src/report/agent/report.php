@@ -139,6 +139,61 @@ class ReportAgent extends Agent
   }
 
   /**
+   * @brief setting default heading styles and paragraphstyles
+   * @param1 array $phpWord
+   * @param2 int $timestamp
+   */
+  private function documentSettingsAndStyles($phpWord, $timestamp, $userId)
+  {
+
+    $topHeading = array("size" => 22, 
+                        "bold" => true, 
+                        "underline" => "single"
+                       );
+
+    $mainHeading = array("size" => 18, 
+                         "bold" => true, 
+                         "color" => "000000"
+                        );
+
+    $subHeading = array("size" => 16, 
+                        "italic" => true
+                       );
+
+    $subSubHeading = array("size" => 14, 
+                           "bold" => true
+                          );
+
+    $paragraphStyle = array("spaceAfter" => 0,
+                            "spaceBefore" => 0,
+                            "spacing" => 0
+                           );
+
+    $paragraphStyleSummary = array("spaceAfter" => 2, 
+                                   "spaceBefore" => 2, 
+                                   "spacing" => 2
+                                  );
+    
+    /* Adding styles for the document*/
+    $phpWord->setDefaultFontName("Arial");
+    $phpWord->addTitleStyle(1, $topHeading);
+    $phpWord->addTitleStyle(2, $mainHeading);
+    $phpWord->addTitleStyle(3, $subHeading);
+    $phpWord->addTitleStyle(4, $subSubHeading);
+    $phpWord->addParagraphStyle("pStyle", $paragraphStyle);
+    $phpWord->addParagraphStyle("pStyleSummary", $paragraphStyle);
+
+    /* Setting document properties*/
+    $properties = $phpWord->getDocInfo();
+    $userName = $this->userDao->getUserName($userId);
+    $properties->setCreator($userName);
+    $properties->setCompany("Siemens AG");
+    $properties->setTitle("Clearing Report");
+    $properties->setDescription("OSS clearing report by FOSSologyNG tool");
+    $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Siemens AG");
+  }
+
+  /**
    * @brief identifiedGlobalLicenses() copy identified global licenses
    * @param array $contents 
    * @return array $contents with identified global license path
@@ -584,7 +639,6 @@ class ReportAgent extends Agent
 
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
     $parentItem = $this->uploadDao->getParentItemBounds($uploadId);
-
     $docLayout = array("orientation" => "landscape", 
                        "marginLeft" => "950", 
                        "marginRight" => "950", 
@@ -592,57 +646,15 @@ class ReportAgent extends Agent
                        "marginBottom" => "950"
                       );
 
-    $topHeading = array("size" => 22, 
-                        "bold" => true, 
-                        "underline" => "single"
-                       );
-
-    $mainHeading = array("size" => 18, 
-                         "bold" => true, 
-                         "color" => "000000"
-                        );
-
-    $subHeading = array("size" => 16, 
-                        "italic" => true
-                       );
-
-    $subSubHeading = array("size" => 14, 
-                           "bold" => true
-                          );
-
-    $paragraphStyle = array("spaceAfter" => 0,
-                            "spaceBefore" => 0,
-                            "spacing" => 0
-                           );
-
-    $paragraphStyleSummary = array("spaceAfter" => 2, 
-                                   "spaceBefore" => 2, 
-                                   "spacing" => 2
-                                  );
-
     /* Creating the new DOCX */
     $phpWord = new PhpWord();
 
-    /* Adding styles for the document*/
-    $phpWord->setDefaultFontName("Arial");
-    $phpWord->addTitleStyle(1, $topHeading);
-    $phpWord->addTitleStyle(2, $mainHeading);
-    $phpWord->addTitleStyle(3, $subHeading);
-    $phpWord->addTitleStyle(4, $subSubHeading);
-    $phpWord->addParagraphStyle("pStyle", $paragraphStyle);
-    $phpWord->addParagraphStyle("pStyleSummary", $paragraphStyle);
-
+    /* Get start time */
     $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) ts FROM jobqueue WHERE jq_pk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
 
-    /* Setting document properties*/
-    $properties = $phpWord->getDocInfo();
-    $userName = $this->userDao->getUserName($userId);
-    $properties->setCreator($userName);
-    $properties->setCompany("Siemens AG");
-    $properties->setTitle("Clearing Report");
-    $properties->setDescription("OSS clearing report by FOSSologyNG tool");
-    $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Siemens AG");
+    /* Applying document properties and styling */
+    $this->documentSettingsAndStyles($phpWord, $timestamp, $userId);
 
     /* Creating document layout */
     $section = $phpWord->addSection($docLayout);
@@ -684,6 +696,7 @@ class ReportAgent extends Agent
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
+
     /* Display global licenses */
     $this->globalLicenseTable($section, $contents['licensesMain']['statements']);
 
@@ -720,6 +733,7 @@ class ReportAgent extends Agent
     $heading = "16. Irrelevant Files";
     $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements']);
 
+    /* Display comments entered for report */
     $heading = "17. Notes";  
     $rowHead = "Comment Entered";
     $this->licensesTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
