@@ -33,6 +33,19 @@ class NinkaAgentPlugin extends AgentPlugin
   {
     return CheckARS($uploadId, $this->AgentName, "ninka agent", "ninka_ars");
   }
+  
+  function preInstall()
+  {
+    if ($this->isNinkaInstalled()) {
+      menu_insert("Agents::" . $this->Title, 0, $this->Name);
+    }
+  }
+  
+  public function isNinkaInstalled()
+  {
+    exec('which ninka', $lines, $returnVar);
+    return (0==$returnVar);
+  }
 }
 
 register_plugin(new NinkaAgentPlugin());

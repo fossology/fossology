@@ -131,8 +131,8 @@ public:
     // normal case: a known license should have a percentage of 100
     matches = createMatches(list_of("LGPLv3+")("Apachev1.0"));
     CPPUNIT_ASSERT_EQUAL(2L, (long) matches.size());
-    CPPUNIT_ASSERT_EQUAL(LicenseMatch("LGPLv3+", 100), matches[0]);
-    CPPUNIT_ASSERT_EQUAL(LicenseMatch("Apachev1.0", 100), matches[1]);
+    CPPUNIT_ASSERT_EQUAL(LicenseMatch("LGPL-3.0+", 100), matches[0]);
+    CPPUNIT_ASSERT_EQUAL(LicenseMatch("Apache-1.0", 100), matches[1]);
   }
 
   void test_mapLicenseFromNinkaToFossology()
