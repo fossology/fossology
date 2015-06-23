@@ -81,6 +81,9 @@ dist:
 empty-cache:
 	rm -rf $(CACHEDIR)/*
 
+%:
+	$(MAKE) -C $(FOSRCDIR) $@
+
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
 .PHONY: all install uninstall clean test utils
