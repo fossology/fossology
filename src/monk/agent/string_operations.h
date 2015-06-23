@@ -32,6 +32,9 @@ typedef struct {
 #define token_length(token) (token).length
 
 #define tokens_new() g_array_new(FALSE, FALSE, sizeof (Token))
+#define tokens_free(p) g_array_free((p), TRUE)
+
+#define tokens_index(tokens,i) &g_array_index((tokens), Token, (i))
 
 GArray* tokenize(const char* inputString, const char* delimiters);
 

@@ -29,22 +29,23 @@ int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,
     textStart < textLength &&
     searchStart < searchLength &&
     tokenEquals(
-      &g_array_index(textTokens, Token, textStart),
-      &g_array_index(searchTokens, Token, searchStart
+      tokens_index(textTokens, textStart),
+      tokens_index(searchTokens, searchStart
     )))
   {
     unsigned matched = 1;
-    size_t canMatch = MIN(numberOfWantedMatches,
-                          1 + MIN(textLength - textStart, searchLength - searchStart));
-    for (size_t i = 1; i < canMatch; i++) {
+
+    size_t canMatch = MIN(textLength - textStart, searchLength - searchStart);
+    size_t shouldMatch = MIN(numberOfWantedMatches, canMatch);
+    for (size_t i = 1; i < shouldMatch; i++) {
       if (tokenEquals(
-            &g_array_index(textTokens, Token, i + textStart),
-            &g_array_index(searchTokens, Token, i + searchStart)))
+            tokens_index(textTokens, i + textStart),
+            tokens_index(searchTokens, i + searchStart)))
         matched++;
       else
         break;
     }
-    return (matched == canMatch);
+    return (matched == shouldMatch);
   }
   return 0;
 }
@@ -186,8 +187,8 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
 
   // match first token
   while (iText < textLength) {
-      Token* textToken = &g_array_index(textTokens, Token, iText);
-      Token* searchToken = &g_array_index(searchTokens, Token, iSearch);
+      Token* textToken = tokens_index(textTokens, iText);
+      Token* searchToken = tokens_index(searchTokens, iSearch);
       if (tokenEquals(textToken, searchToken))
         break;
     iText++;
@@ -199,8 +200,8 @@ DiffResult* findMatchAsDiffs(const GArray* textTokens, const GArray* searchToken
     initSimpleMatch(&simpleMatch, iText, iSearch);
 
     while ((iText < textLength) && (iSearch < searchLength)) {
-      Token* textToken = &g_array_index(textTokens, Token, iText);
-      Token* searchToken = &g_array_index(searchTokens, Token, iSearch);
+      Token* textToken = tokens_index(textTokens, iText);
+      Token* searchToken = tokens_index(searchTokens, iSearch);
 
       if (tokenEquals(textToken, searchToken)) {
         simpleMatch.text.length++;

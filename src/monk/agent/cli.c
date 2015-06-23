@@ -32,7 +32,7 @@ int matchCliFileWithLicenses(MonkState* state, const Licenses* licenses, int arg
 
   int result = matchFileWithLicenses(state, &file, licenses, &cliCallbacks);
 
-  g_array_free(file.tokens, TRUE);
+  tokens_free(file.tokens);
 
   return result;
 }

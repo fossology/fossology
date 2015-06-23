@@ -419,10 +419,12 @@ PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedSta
 
 #ifdef DEBUG
   char* printedStatement = fo_dbManager_printStatement(preparedStatement);
+  char* params = array_print(parameters, preparedStatement->paramc);
   LOG_DEBUG("Exec prepared '%s' with params '%s'\n",
             printedStatement,
-            array_print(parameters, preparedStatement->paramc));
-  free(printedStatement);
+            params);
+  g_free(printedStatement);
+  g_free(params);
 #endif
   PGresult* result = PQexecPrepared(dbConnection,
     preparedStatement->name,
@@ -435,19 +437,23 @@ PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedSta
   if (!result)
   {
     char* printedStatement = fo_dbManager_printStatement(preparedStatement);
+    char* params = array_print(parameters, preparedStatement->paramc);
     LOG_FATAL("%sExecuting prepared '%s' with params %s\n",
       PQerrorMessage(dbConnection),
       printedStatement,
-      array_print(parameters, preparedStatement->paramc));
-    free(printedStatement);
+      params);
+    g_free(printedStatement);
+    g_free(params);
   } else if (PQresultStatus(result) == PGRES_FATAL_ERROR)
   {
     char* printedStatement = fo_dbManager_printStatement(preparedStatement);
+    char* params = array_print(parameters, preparedStatement->paramc);
     LOG_ERROR("%sExecuting prepared '%s' with params %s\n",
       PQresultErrorMessage(result),
       printedStatement,
-      array_print(parameters, preparedStatement->paramc));
-    free(printedStatement);
+      params);
+    g_free(printedStatement);
+    g_free(params);
 
     PQclear(result);
     result = NULL;

@@ -33,7 +33,7 @@ void test_ignoreLicense_withGoodLicense() {
 
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
 
-  g_array_free(notIgnored.tokens, TRUE);
+  tokens_free(notIgnored.tokens);
   g_free(text_ptr);
 }
 
@@ -46,7 +46,7 @@ void test_ignoreLicense_withGoodLicenseBranch2() {
 
   CU_ASSERT_FALSE(isIgnoredLicense(&notIgnored));
 
-  g_array_free(notIgnored.tokens, TRUE);
+  tokens_free(notIgnored.tokens);
   g_free(text_ptr);
 }
 
@@ -59,7 +59,7 @@ void test_ignoreLicense_withNomosLicense() {
 
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
 
-  g_array_free(notIgnored.tokens, TRUE);
+  tokens_free(notIgnored.tokens);
   g_free(text_ptr);
 }
 
@@ -76,8 +76,57 @@ void test_ignoreLicense_withIgnoredName() {
 
   CU_ASSERT_TRUE(isIgnoredLicense(&notIgnored));
 
-  g_array_free(notIgnored.tokens, TRUE);
+  tokens_free(notIgnored.tokens);
   g_free(text_ptr);
+}
+
+void _assertLicIds(const GArray* lics, unsigned int n, ...) {
+  CU_ASSERT_PTR_NOT_NULL_FATAL(lics);
+  CU_ASSERT_EQUAL_FATAL(lics->len, n);
+  va_list args;
+
+  va_start(args, n);
+
+  for (int i=0; i<n; i++) {
+    int expectedLicId = va_arg(args, int);
+    CU_ASSERT_EQUAL(license_index(lics, i)->refId, expectedLicId);
+  }
+
+  va_end(args);
+}
+
+void _addLic(GArray* lics, int id, const char* text) {
+  License toAdd = (License) {
+    .refId = id,
+    .tokens = tokenize(text, "^")
+  };
+  g_array_append_val(lics, toAdd);
+}
+
+void test_indexLicenses() {
+  GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof(License));
+
+  GArray* textTokens = tokenize("a^b^c^d^e^f", "^");
+
+  _addLic(licenseArray, 17, "b^c");
+  _addLic(licenseArray, 18, "b^c^d^e^f");
+  _addLic(licenseArray, 19, "1^b^c^d^e^f");
+  _addLic(licenseArray, 20, "2^b^c^d^e^f");
+
+  Licenses* indexedLicenses = buildLicenseIndexes(licenseArray, 4, 2);
+
+  CU_ASSERT_EQUAL(licenseArray, indexedLicenses->licenses);
+
+  _assertLicIds(getShortLicenseArray(indexedLicenses), 1, 17); // lic 17 is a short lic
+
+  CU_ASSERT_PTR_NULL(getLicenseArrayFor(indexedLicenses, 0, textTokens, 0)); // no lic matches the first 4 tokens of text
+
+  _assertLicIds(getLicenseArrayFor(indexedLicenses, 0, textTokens, 1), 1, 18); // lic 18 matches tokens 1-5 of text
+  _assertLicIds(getLicenseArrayFor(indexedLicenses, 1, textTokens, 1), 2, 19, 20); // lic 19 and 20 matche tokens 1-5 of text with a 1 token head diff
+
+  licenses_free(indexedLicenses);
+
+  tokens_free(textTokens);
 }
 
 void assertTokens(GArray* tokens, ...) {
@@ -156,7 +205,7 @@ static gint lengthInverseComparator(const void* a, const void* b) {
 }
 
 void sortLicenses(GArray* licenses) {
-    g_array_sort(licenses, lengthInverseComparator);
+  g_array_sort(licenses, lengthInverseComparator);
 }
 
 void test_extractLicenses_Two() {
@@ -205,13 +254,13 @@ int license_setUpFunc() {
   }
 
   if (!fo_dbManager_tableExists(dbManager, "license_ref")) {
-    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)");
+    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)",);
   }
 
   doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)");
+                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)",);
   doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)");
+                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)",);
 
   return 0;
 }
@@ -221,7 +270,7 @@ int license_tearDownFunc() {
     return 1;
   }
 
-  doOrReturnError("DROP TABLE license_ref");
+  doOrReturnError("DROP TABLE license_ref",);
 
   return 0;
 }
@@ -234,5 +283,6 @@ CU_TestInfo license_testcases[] = {
   {"Testing extracting a license from DB:", test_extractLicenses_One},
   {"Testing extracting two licenses from DB:", test_extractLicenses_Two},
   {"Testing extracting an ignored license from DB:", test_extractLicenses_Ignored},
+  {"Testing indexing of licenses:", test_indexLicenses},
   CU_TEST_INFO_NULL
 };

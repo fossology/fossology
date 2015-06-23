@@ -32,6 +32,11 @@ void _callConvertToAbsolutePositions(char* text, char* search, GArray* diffMatch
   GArray* searchTokens = tokenize(testSearch, "." ); 
 
   convertToAbsolutePositions(diffMatchInfo, textTokens, searchTokens);
+
+  tokens_free(textTokens);
+  tokens_free(searchTokens);
+  g_free(testText);
+  g_free(testSearch);
 }
 
 void _appendToDiffMatchInfo(GArray* diffMatchInfo,
@@ -103,7 +108,7 @@ void test_getFullHighlightFor() {
   _CU_ASSERT_EQUAL(fullHighlight.length, 7, "length %zu!=%zu\n");
 
   g_free(text);
-  g_array_free(tokens, TRUE);
+  tokens_free(tokens);
 }
 
 void test_getFullHighlightFor_2() {
@@ -117,7 +122,7 @@ void test_getFullHighlightFor_2() {
   _CU_ASSERT_EQUAL(fullHighlight.length, 0, "length %zu!=%zu\n");
 
   g_free(text);
-  g_array_free(tokens, TRUE);
+  tokens_free(tokens);
 }
 
 CU_TestInfo highlight_testcases[] = {

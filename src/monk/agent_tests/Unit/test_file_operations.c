@@ -81,9 +81,9 @@ void test_read_file_tokens2() {
 }
 
 void test_read_file_tokens_error() {
-  GArray* tokens;
+  GArray* tokens = (GArray*)0x17;
   CU_ASSERT_FALSE(readTokensFromFile("not a file", &tokens, "\n\t\r^ "));
-  CU_ASSERT_EQUAL(tokens->len, 0);
+  CU_ASSERT_EQUAL((GArray*)0x17, tokens);
 }
 
 void test_read_file_tokens_binaries() {

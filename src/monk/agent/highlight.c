@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "string_operations.h"
 
 void convertToAbsoluteHighlight(const GArray* tokens, DiffPoint* indexHighlight) {
-  Token* firstToken = &g_array_index(tokens, Token, indexHighlight->start);
+  Token* firstToken = tokens_index(tokens, indexHighlight->start);
 
   size_t start = token_position_of(indexHighlight->start, tokens);
 
@@ -31,7 +31,7 @@ void convertToAbsoluteHighlight(const GArray* tokens, DiffPoint* indexHighlight)
   for (size_t j = indexHighlight->start + 1;
        j < indexHighlight->start + indexHighlight->length; 
        j++) {
-    Token* currentToken = &g_array_index(tokens, Token, j);
+    Token* currentToken = tokens_index(tokens, j);
     length += token_length(*currentToken) + currentToken->removedBefore;
   }
 
@@ -57,7 +57,7 @@ DiffPoint getFullHighlightFor(const GArray* tokens, size_t firstMatchedIndex, si
     return (DiffPoint){matchStart, 0};
 
   size_t lastMatchedIndex = firstMatchedIndex + matchedCount - 1;
-  Token* lastMatchedToken = &g_array_index(tokens, Token, lastMatchedIndex);
+  Token* lastMatchedToken = tokens_index(tokens, lastMatchedIndex);
   size_t matchLength = token_position_of(lastMatchedIndex, tokens)
                        - matchStart
                        + token_length(*lastMatchedToken);

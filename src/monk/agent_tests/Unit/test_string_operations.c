@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "string_operations.h"
 #include "hash.h"
+#include "monk.h"
 
 void test_tokenize() {
   char* test = g_strdup("^foo^^ba^");
@@ -45,7 +46,6 @@ void test_tokenizeWithSpecialDelims() {
   char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo \n:: qoo ");
 
   GArray* token = tokenize(test, " \n");
-  printf("[[%d]]",token->len);
   CU_ASSERT_EQUAL(token->len, 5);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
@@ -67,45 +67,51 @@ void test_tokenizeWithSpecialDelims() {
 }
 
 void test_streamTokenize() {
-  char* test = g_strdup("^foo^^ba^REM^booo");
+  char* test = g_strdup("^foo^^ba^REM^boooREM^REM^");
   const char* delimiters = "^";
 
   GArray* token = tokens_new();
 
   Token* remainder = NULL;
 
-  char* endPtr = test + strlen(test);
+  size_t len = strlen(test);
 
   int chunkSize = 2;
   char* ptr = test;
-  while (*ptr && ptr <= endPtr) {
+  size_t rea = 0;
+  while (rea < len) {
     unsigned int tokenCount = token->len;
-    int thisChunkSize = MIN(chunkSize, endPtr - ptr);
+    int thisChunkSize = MIN(chunkSize, len - rea);
 
     int addedTokens = streamTokenize(ptr, thisChunkSize, delimiters, &token, &remainder);
 
     CU_ASSERT_EQUAL(addedTokens, token->len - tokenCount);
 
     ptr += chunkSize;
+    rea += chunkSize;
   }
-  if ((remainder) && (remainder->length > 0))
-    g_array_append_val(token, *remainder);
+  streamTokenize(NULL, 0, NULL, &token, &remainder);
 
-  CU_ASSERT_EQUAL(token->len, 3);
+  CU_ASSERT_EQUAL_FATAL(token->len, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 1);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).hashedContent, hash("ba"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).length, 2);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 1).removedBefore, 2);
-  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("booo"));
-  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 4);
+#ifndef MONK_CASE_INSENSITIVE
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("boooREM"));
+#else
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).hashedContent, hash("booorem"));
+#endif
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 2).length, 7);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 2).removedBefore, 5);
 
-  if (remainder)
-    free(remainder);
+  CU_ASSERT_PTR_NULL(remainder);
 
-  g_array_free(token, TRUE);
+  CU_ASSERT_EQUAL(token_position_of(3, token), 20);
+
+  tokens_free(token);
   g_free(test);
 }
 
@@ -134,17 +140,15 @@ void test_streamTokenizeEventuallyGivesUp() {
       break;
     } else
       if (addedTokens != token->len - tokenCount)
-      CU_FAIL("wrong return value from streamTokenize()");
+        CU_FAIL("wrong return value from streamTokenize()");
 
     i++;
   }
+  streamTokenize(NULL, 0, NULL, &token, &remainder);
 
   CU_ASSERT_EQUAL(addedTokens, -1);
 
   CU_ASSERT_TRUE(token->len > 0);
-
-  if (remainder)
-    free(remainder);
 
   g_array_free(token, TRUE);
   g_free(test);
@@ -187,6 +191,19 @@ void test_tokenPosition() {
   assertTokenPosition("^foo^^bar^^^^^baz", 3, 1, 6, 14);
 }
 
+void test_tokenPositionAtEnd() {
+  char* test = g_strdup("^^23^5^7");
+  GArray* tokens = tokenize(test, "^");
+
+  CU_ASSERT_EQUAL(token_position_of(0, tokens), 2);
+  CU_ASSERT_EQUAL(token_position_of(1, tokens), 5);
+  CU_ASSERT_EQUAL(token_position_of(2, tokens), 7);
+  CU_ASSERT_EQUAL(token_position_of(3, tokens), 8);
+
+  g_array_free(tokens, TRUE);
+  g_free(test);
+}
+
 void test_token_equal() {
   char* text = g_strdup("^foo^^bar^ba^barr");
   char* search = g_strdup("bar^^foo^");
@@ -194,12 +211,12 @@ void test_token_equal() {
   GArray* tokenizedText = tokenize(text, "^");
   GArray* tokenizedSearch = tokenize(search, "^");
 
-  Token* t0 = &g_array_index(tokenizedText, Token, 0);
-  Token* t1 = &g_array_index(tokenizedText, Token, 1);
-  Token* t2 = &g_array_index(tokenizedText, Token, 2);
-  Token* t3 = &g_array_index(tokenizedText, Token, 3);
-  Token* s0 = &g_array_index(tokenizedSearch, Token, 0);
-  Token* s1 = &g_array_index(tokenizedSearch, Token, 1);
+  Token* t0 = tokens_index(tokenizedText, 0);
+  Token* t1 = tokens_index(tokenizedText, 1);
+  Token* t2 = tokens_index(tokenizedText, 2);
+  Token* t3 = tokens_index(tokenizedText, 3);
+  Token* s0 = tokens_index(tokenizedSearch, 0);
+  Token* s1 = tokens_index(tokenizedSearch, 1);
 
   CU_ASSERT_TRUE(tokenEquals(t0, s1)); // foo == foo
   CU_ASSERT_TRUE(tokenEquals(t1, s0)); // bar == bar
@@ -218,6 +235,7 @@ CU_TestInfo string_operations_testcases[] = {
   {"Testing stream tokenize:", test_streamTokenize},
   {"Testing stream tokenize with too long stream:",test_streamTokenizeEventuallyGivesUp},
   {"Testing find token position in string:", test_tokenPosition},
+  {"Testing find token position at end:", test_tokenPositionAtEnd},
   {"Testing token equals:", test_token_equal},
   CU_TEST_INFO_NULL
 };

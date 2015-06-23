@@ -21,14 +21,14 @@ LDFLAGS_LOCAL = $(FO_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
 CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(FO_CFLAGS) $(TEST_CFLAGS)
 
 DEF = -DDATADIR='"$(DATADIR)"'
-EXE = test_monk
+EXE = run_tests
 
 ifeq (,$(shell pkg-config --exists uchardet || echo no))
-CFLAGS_LOCAL += $(shell pkg-config --libs uchardet)
+LDFLAGS_LOCAL += $(shell pkg-config --libs uchardet)
 CFLAGS_LOCAL += $(shell pkg-config --cflags uchardet)
 CFLAGS_LOCAL += -DHAVE_CHARDET
 else
-CFLAGS_LOCAL += -lmagic
+LDFLAGS_LOCAL += -lmagic
 endif
 
 OBJECTS = test_string_operations.o \
