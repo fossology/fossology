@@ -10,7 +10,7 @@
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
-      <file suffix=".php">cli/tests/test_fo_copyright_list.php</file>
+      <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
 
     <testsuite name="Fossology PhpUnit Agent Test Suite">

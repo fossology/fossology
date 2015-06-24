@@ -53,13 +53,13 @@ env:
 matrix:
   include:
     - php: 5.3
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKETARGETS='build-lib build-cli'
     - php: 5.4
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib build-cli'
     - php: 5.5
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib build-cli'
     - php: 5.6
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib build-cli'
   allow_failures:
     - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'

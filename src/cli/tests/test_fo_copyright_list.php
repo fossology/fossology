@@ -21,7 +21,7 @@ use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 
 class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
-  /* @var string scheduler_path is the absolute path to the scheduler binary */
+  /** @var string scheduler_path is the absolute path to the scheduler binary */
   public $fo_copyright_list_path;
   /** @var TestPgDb */
   private $testDb;
@@ -100,7 +100,6 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
   }
   
   public function test_help_noAuthentication() {
-    $fossology_testconfig = $this->testDb->getFossSysConf();
     $out = "";
     $command = "$this->fo_copyright_list_path -h";
     exec("$command 2>&1", $out, $rtn);
