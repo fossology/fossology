@@ -51,8 +51,6 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
     $dbManager = $GLOBALS['container']->get('db.manager');
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
-    $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
-
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
       if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
@@ -72,22 +70,21 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
-        
-        if (!$this->onlyComments && in_array($licenseId, $mainLicIds)) {
-          continue;
-        }
 
         if ($this->onlyComments)
         {
           $text = $comment;
+          $risk = "";
         }
         else
         {
           $reportInfo = $clearingLicense->getReportInfo();
           $text = $reportInfo ? : $this->getCachedLicenseText($licenseId, $groupId);
+          $risk = $this->getCachedLicenseRisk($licenseId, $groupId);
         }
 
         $ungroupedStatements[] = array(
+          'risk' => $risk, 
           'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
           'text' => $text
@@ -116,5 +113,17 @@ class LicenseClearedGetter extends ClearedGetterCommon
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
     }
     return $this->licenseCache[$licenseId]->getText();
+  }
+
+  /**
+   * @param int $licenseId, $groupId
+   * @return Risk
+   */
+  protected function getCachedLicenseRisk($licenseId, $groupId)
+  {
+    if (!array_key_exists($licenseId, $this->licenseCache)) {
+      $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
+    }
+    return $this->licenseCache[$licenseId]->getRisk();
   }
 }
