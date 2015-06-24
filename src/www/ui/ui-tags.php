@@ -641,8 +641,10 @@ class ui_tag extends FO_Plugin
 
   /**
    * \brief Display the tagging page.
+   * @param string $action
+   * @param int $ShowHeader
    */
-  function ShowTaggingPage($ShowMenu=0,$ShowHeader=0,$action)
+  function ShowTaggingPage($action,$ShowHeader=0)
   {
     $V = "";
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -677,9 +679,6 @@ class ui_tag extends FO_Plugin
         $nopermtext = _("You do not have permission to tag this upload.");
         $V .= $nopermtext;
       }
-      /* Show delete tag page removing
-       $V .= $this->ShowDeleteTagPage($Upload,$Item);
-       */
     }
     return($V);
   }
@@ -723,7 +722,7 @@ class ui_tag extends FO_Plugin
         $this->vars['message'] = _("Delete Tag Successful!");
       }
     }
-    $V .= $this->ShowTaggingPage(1,1,$action);
+    $V .= $this->ShowTaggingPage($action,1);
 
     return $V;
   }

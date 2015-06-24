@@ -515,7 +515,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
  *  for all uploads in a given folder.
  *
  */
-function FolderListUploads_perm($ParentFolder=-1, $perm)
+function FolderListUploads_perm($ParentFolder, $perm)
 {
   global $PG_CONN;
 
@@ -641,7 +641,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
  *       use this for its data.  In general data collection and data formatting
  *       should be separate functions.
  */
-function GetFolderArray($RootFolder=-1, &$FolderArray)
+function GetFolderArray($RootFolder, &$FolderArray)
 {
   global $PG_CONN;
 

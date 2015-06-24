@@ -337,7 +337,7 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
  *
  * \return string of browse paths
  */
-function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL, $uploadtree_tablename)
+function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL, $uploadtree_tablename='uploadtree')
 {
   global $PG_CONN;
   /* Find the file associated with the upload */
