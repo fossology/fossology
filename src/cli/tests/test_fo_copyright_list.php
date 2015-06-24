@@ -30,32 +30,32 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
 
   protected function setUp()
   {
-    $this->fo_copyright_list_path = dirname(__DIR__) . '/fo_copyright_list';
-   
     $this->testDb = new TestPgDb("fossclitest");
     $tables = array('users','upload','uploadtree_a','uploadtree','copyright','groups','group_user_member','agent','copyright_decision','copyright_ars','ars_master');
     $this->testDb->createPlainTables($tables);
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->createInheritedArsTables(array('copyright'));
     $this->testDb->insertData($tables);
-    
+
     $sysConf = $this->testDb->getFossSysConf();
+    $this->fo_copyright_list_path = dirname(__DIR__) . '/fo_copyright_list -c '.$sysConf;
+
     $this->testInstaller = new TestInstaller($sysConf);
     $this->testInstaller->init();
   }
   
   protected function tearDown() {
+    return;
     $this->testInstaller->clear();
     $this->testDb->fullDestruct();
     $this->testDb = null;
   }
 
 
-  function test_get_copryright_list_all()
+  function test_get_copyright_list_all()
   {
-    $fossology_testconfig = $this->testDb->getFossSysConf();
     $upload_id = 2;
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--user fossy --password fossy";
     $out = "";
     $uploadtree_id = 13;
     $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --container 1";
@@ -66,9 +66,8 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
 
   function test_get_copryright_list_email()
   {
-    $fossology_testconfig = $this->testDb->getFossSysConf();
     $upload_id = 2;
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--user fossy --password fossy";
     $out = "";
     $uploadtree_id = 13;
     $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 1";
@@ -79,9 +78,8 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
   
   function test_get_copryright_list_withoutContainer()
   {
-    $fossology_testconfig = $this->testDb->getFossSysConf();
     $upload_id = 2;
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--user fossy --password fossy";
     $out = "";
     $uploadtree_id = 13;    $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 0";
      exec("$command 2>&1", $out, $rtn);
@@ -90,8 +88,7 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
   }
 
   public function test_help() {
-    $fossology_testconfig = $this->testDb->getFossSysConf();
-    $auth = "--user fossy --password fossy -c $fossology_testconfig";
+    $auth = "--user fossy --password fossy";
 
     $command = "$this->fo_copyright_list_path $auth -h";
     exec("$command 2>&1", $out, $rtn);
