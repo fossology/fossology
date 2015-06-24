@@ -157,7 +157,7 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
  *
  * \return None, prints error, sql and line number, then exits(1)
  **/
-function DBCheckResult($result, $sql="", $filenm, $lineno)
+function DBCheckResult($result, $sql, $filenm, $lineno)
 {
   global $PG_CONN;
 

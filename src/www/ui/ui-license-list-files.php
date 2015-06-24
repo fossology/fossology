@@ -257,17 +257,17 @@ class LicenseListFiles extends FO_Plugin
    *
    * \return Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
    */
-  protected function countFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $tag_pk=0, $uploadtree_tablename)
+  protected function countFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $tag_pk, $uploadtree_tablename)
   {
     global $container;
-    /** @var LicenseDao */
+    /* @var $licenseDao LicenseDao */
     $licenseDao = $container->get('dao.license');
     $license = $licenseDao->getLicenseByShortname($rf_shortname);
     if (null == $license)
     {
       return array();
     }
-    /** @var UploadDao */
+    /* @var $uploadDao UploadDao */
     $uploadDao = $container->get('dao.upload');
     $itemBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtree_tablename);
     $dbManager = $container->get('db.manager');
