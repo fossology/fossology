@@ -46,8 +46,8 @@ class ReportStatic
   }
 
   /**
-   * @param1 PhpWord $phpWord
-   * @param2 Section $section 
+   * @param PhpWord $phpWord
+   * @param Section $section 
    */
   function reportFooter($phpWord, Section $section)
   { 
@@ -81,7 +81,7 @@ class ReportStatic
 
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function clearingProtocolChangeLogTable(Section $section)
   {
@@ -93,7 +93,7 @@ class ReportStatic
     $cellSecondLen = 4500;
     $cellThirdLen = 9000;
 
-    $heading = "1. Clearing Protocol Change Log";
+    $heading = "Clearing Protocol Change Log";
     $section->addTitle(htmlspecialchars($heading), 2);
 
     $table = $section->addTable($this->tablestyle);
@@ -112,12 +112,12 @@ class ReportStatic
   }
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function functionalityTable(Section $section)
   {
     $infoTextStyle = array("size" => 11, "color" => "0000FF");
-    $heading = "2. Functionality";
+    $heading = "Functionality";
     $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
  
     $section->addTitle(htmlspecialchars($heading), 2);
@@ -128,11 +128,11 @@ class ReportStatic
 
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function assessmentSummaryTable(Section $section)
   {          
-    $heading = "3. Assessment Summary:";
+    $heading = "Assessment Summary";
     $infoText = "The following table only contains significant obligations, restrictions & risks for a quick overview – all obligations, restrictions & risks according to Section 3 must be considered.";
       
     $infoTextStyle = array("size" => 10, "color" => "000000");
@@ -151,31 +151,31 @@ class ReportStatic
     $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
     $cell->addCheckBox("mainline", htmlspecialchars(" Mainline"), $rightColStyleBlack, "pStyle");
     $cell->addCheckBox("specific", htmlspecialchars(" Specific"), $rightColStyleBlack, "pStyle");
     $cell->addCheckBox("denied", htmlspecialchars(" Denied"), $rightColStyleBlack, "pStyle");
  
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
     $cell->addCheckBox("no", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("yes", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
     $cell->addCheckBox("nocriticalfiles", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("criticalfiles", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
     $cell->addCheckBox("nodependenciesfound", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("dependenciesfoundinsourcecode", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, "pStyle");
@@ -183,7 +183,7 @@ class ReportStatic
     $cell->addText(htmlspecialchars(" <if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth, "pStyle");
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
@@ -203,8 +203,8 @@ class ReportStatic
     $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
 
-    $heading = "4. When using this component, you need to fulfill the following “ToDos”";
-    $subHeading = " 4.1. Common obligations, restrictions and risks:";
+    $heading = "When using this component, you need to fulfill the following “ToDos”";
+    $subHeading = "Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined to simplify the To-Dos for development and distribution. The following list contains rules for development, and      distribution which must always be followed!";
     $rowWidth = 5;
     $firstColLen = 500;
@@ -339,7 +339,7 @@ class ReportStatic
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
     $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
     $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
-    $subHeading = " 4.2. Additional obligations, restrictions & risks beyond common rules";
+    $subHeading = "Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
 
@@ -384,58 +384,57 @@ class ReportStatic
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
     $cell = $table->addCell($thirdColLen);
     $cell->addText(htmlspecialchars("<reason for that>"), $secondRowTextStyle2);
     $cell->addText(htmlspecialchars("Filelist:"), $secondRowTextStyle2Bold, $secondRowTextStyle2);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Copyleft Effect"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen,$secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen);
+    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Copyleft Effect"), $firstRowTextStyle);
+    $table->addCell($secondColLen,$secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen);
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Restrictions for advertising materials"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen,$secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen);
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-
-    $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional Rules for modification"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle)->addText(htmlspecialchars(""), $firstRowTextStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars(""), $secondRowTextStyle2Bold);
+    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Restrictions for advertising materials"), $firstRowTextStyle);
+    $table->addCell($secondColLen,$secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen);
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional documentation requirements for modifications (e.g. notice file with author’s name)"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional Rules for modification"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle)->addText(htmlspecialchars(""), $firstRowTextStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars(""), $secondRowTextStyle2Bold);
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Include special acknowledgments in advertising material"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen);
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional documentation requirements for modifications (e.g. notice file with author’s name)"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Specific Risks"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Include special acknowledgments in advertising material"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen);
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+
+    $table->addRow($rowWidth);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Specific Risks"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen);
 
     $section->addTextBreak();
   }
@@ -448,10 +447,9 @@ class ReportStatic
     $firstRowStyle = array("bgColor" => "C0C0C0");
     $firstRowTextStyle = array("size" => 10, "bold" => true);
     
-    $subHeadingStyle = array("size" => 14, "italic" => true);
     $subHeadingStyle1 = array("size" => 11, "color" => "0000FF", "italic" => true);
     $subHeadingStyle2 = array("size" => 10, "color" => "000000");
-    $subHeading = "4.3.	File list with specific obligations ";
+    $subHeading = "File list with specific obligations ";
     $subHeading1 = 'This is an optional chapter. it is oprional and should be used in special cases. if you just have a simple license as Apache-2.0 you must put in the note "not applicable"';
     $subHeading2 = "Depending of the license additional license conditions to the Common Rules in computer 4.1. exist. Here is the list of all licenses found in this component with additional rules.";
 
@@ -503,18 +501,18 @@ class ReportStatic
     $subSubHeadingInfoTextStyle = array("size" => 10, "bold"=>false);
     $subSubHeadingInfoTextStyle1 = array("size" => 12, "bold"=>true);
 
-    $subHeading = "4.4. Further general obligations, restrictions & risks"; 
-    $subSubHeading = "   4.4.1. Export Restrictions";
+    $subHeading = "Further general obligations, restrictions & risks"; 
+    $subSubHeading = "Export Restrictions";
     $subSubHeadingInfoText = "Assess potential export restrictions together with your export control agent regarding this software component as defined in your applicable process.";
     $subSubHeadingInfoText1 = "Export Restrictions found in Source Code:";
     $subSubHeadingInfoText2 = "No export restriction notices found in source scan – export restriction clarification is responsibility of Siemens projects/product managers.";
 
-    $subSubHeading1 = "   4.4.2. Security Vulnerabilities";
+    $subSubHeading1 = "Security Vulnerabilities";
     $subSubHeadingInfoText3 = "Security Vulnerabilities must be examined in product specific use - project leader is responsible to verify all security issues - as defined in your applicable process";
     $subSubHeadingInfoText4 = "--> Follow the link to show security vulnerabilities reported by CT IT Cert: http://mainline.nbgm.siemens.de/Mainline/SecurityInfo.aspx?Component_ID=000";
     $subSubHeadingInfoText5 = "Remark: This link leads to a site which may only list security vulnerabilities becoming known after the clearing date!";
 
-    $subSubHeading2 = "   4.4.3. Patent Situation";
+    $subSubHeading2 = "Patent Situation";
     $subSubHeadingInfoText6 = "Assess patent situation regarding open source software together with your BU patent strategy manager – we cannot expect the community to have clarified the patent situation. ";
     $subSubHeadingInfoText7 = "Patent Notices found in Source Code:";
     $subSubHeadingInfoText8 = "No patent notices found in source scan – patent clearing is responsibility of Siemens projects";
@@ -546,7 +544,7 @@ class ReportStatic
    */ 
   function basicForClearingReport(Section $section)
   {
-    $heading = "5. Basis for Clearing Report";
+    $heading = "Basis for Clearing Report";
     $section->addTitle(htmlspecialchars($heading), 2);
     
     $table = $section->addTable($this->tablestyle);
