@@ -21,27 +21,16 @@ use PhpOffice\PhpWord\Element\Section;
 
 class ReportStatic
 {
+  /** @var timeStamp */
   private $timeStamp;
-  
-  private $fontFamily = "Arial";
 
+  /** @var tablestyle */
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
                               "cellSpacing" => 5
                              );
-  /** @var tableHeading */
-  private $tableHeading = array("color" => "000000",
-                                "size" => 18,
-                                "bold" => true,
-                                "name" => "Arial"
-                               );
-
-  private $paragraphStyle = array("spaceAfter" => 0,
-                                  "spaceBefore" => 0,
-                                  "spacing" => 0
-                                 );
-
+ 
   function __construct($timeStamp) {
     $this->timeStamp = $timeStamp ?: time();
   }
@@ -51,14 +40,14 @@ class ReportStatic
    */
   function reportHeader(Section $section)
   {
-    $headerStyle = array("color" => "48CCCD", "size" => 20, "bold" => true, "name" => $this->fontFamily);
+    $headerStyle = array("color" => "48CCCD", "size" => 20, "bold" => true);
     $header = $section->addHeader();
     $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
 
   /**
-   * @param1 PhpWord $phpWord
-   * @param2 Section $section 
+   * @param PhpWord $phpWord
+   * @param Section $section 
    */
   function reportFooter($phpWord, Section $section)
   { 
@@ -69,7 +58,7 @@ class ReportStatic
     $styleTable = array('borderSize'=>10, 'borderColor'=>'FFFFFF' );
     $styleFirstRow = array('borderTopSize'=>10, 'borderTopColor'=>'000000');
     $phpWord->addTableStyle('footerTableStyle', $styleTable, $styleFirstRow);
-    $footerStyle = array("color" => "000000", "size" => 9, "bold" => true, "name" => $this->fontFamily);
+    $footerStyle = array("color" => "000000", "size" => 9, "bold" => true);
     $footerTime = "Gen Date: ".date("Y/m/d H:i:s T", $this->timeStamp);
     $footerCopyright = "Copyright © 2015 Siemens AG - Restricted"; 
     $footerSpace = str_repeat("  ", 7);
@@ -85,15 +74,14 @@ class ReportStatic
    */
   function reportTitle(Section $section)
   {
-    $titleStyle = array("name" => $this->fontFamily, "size" => 22, "bold" => true, "underline" => "single");
     $title = "License Clearing Report - V1";
-    $section->addText(htmlspecialchars($title), $titleStyle);
+    $section->addTitle(htmlspecialchars($title), 1);
     $section->addTextBreak(); 
   }
 
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function clearingProtocolChangeLogTable(Section $section)
   {
@@ -105,8 +93,8 @@ class ReportStatic
     $cellSecondLen = 4500;
     $cellThirdLen = 9000;
 
-    $heading = "1. Clearing Protocol Change Log";
-    $section->addText(htmlspecialchars($heading), $this->tableHeading);
+    $heading = "Clearing Protocol Change Log";
+    $section->addTitle(htmlspecialchars($heading), 2);
 
     $table = $section->addTable($this->tablestyle);
 
@@ -124,15 +112,15 @@ class ReportStatic
   }
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function functionalityTable(Section $section)
   {
-    $infoTextStyle = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF");
-    $heading = "2. Functionality";
+    $infoTextStyle = array("size" => 11, "color" => "0000FF");
+    $heading = "Functionality";
     $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
  
-    $section->addText(htmlspecialchars($heading), $this->tableHeading);
+    $section->addTitle(htmlspecialchars($heading), 2);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
 
     $section->addTextBreak();
@@ -140,14 +128,14 @@ class ReportStatic
 
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function assessmentSummaryTable(Section $section)
   {          
-    $heading = "3. Assessment Summary:";
+    $heading = "Assessment Summary";
     $infoText = "The following table only contains significant obligations, restrictions & risks for a quick overview – all obligations, restrictions & risks according to Section 3 must be considered.";
       
-    $infoTextStyle = array("name" => $this->fontFamily, "size" => 10, "color" => "000000");
+    $infoTextStyle = array("size" => 10, "color" => "000000");
     $leftColStyle = array("size" => 11, "color" => "000000","bold" => true);
     $rightColStyleBlue = array("size" => 11, "color" => "0000A0","italic" => true);
     $rightColStyleBlack = array("size" => 11, "color" => "000000");
@@ -157,50 +145,50 @@ class ReportStatic
     $cellFirstLen = 5000;
     $cellSecondLen = 10500;
 
-    $section->addText(htmlspecialchars($heading), $this->tableHeading);
+    $section->addTitle(htmlspecialchars($heading), 2);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
 
     $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, $this->paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, $this->paragraphStyle);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, $this->paragraphStyle);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("mainline", htmlspecialchars(" Mainline"), $rightColStyleBlack, $this->paragraphStyle);
-    $cell->addCheckBox("specific", htmlspecialchars(" Specific"), $rightColStyleBlack, $this->paragraphStyle);
-    $cell->addCheckBox("denied", htmlspecialchars(" Denied"), $rightColStyleBlack, $this->paragraphStyle);
+    $cell->addCheckBox("mainline", htmlspecialchars(" Mainline"), $rightColStyleBlack, "pStyle");
+    $cell->addCheckBox("specific", htmlspecialchars(" Specific"), $rightColStyleBlack, "pStyle");
+    $cell->addCheckBox("denied", htmlspecialchars(" Denied"), $rightColStyleBlack, "pStyle");
  
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, $this->paragraphStyle);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("no", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addCheckBox("yes", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
+    $cell->addCheckBox("no", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addCheckBox("yes", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, $this->paragraphStyle);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("nocriticalfiles", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addCheckBox("criticalfiles", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $this->paragraphStyle);
+    $cell->addCheckBox("nocriticalfiles", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addCheckBox("criticalfiles", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, $this->paragraphStyle);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, "pStyle");
     $cell = $table->addCell($cellSecondLen);
-    $cell->addCheckBox("nodependenciesfound", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addCheckBox("dependenciesfoundinsourcecode", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addCheckBox("dependenciesfoundinbinaries", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars(" <if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, $this->paragraphStyle);
+    $cell->addCheckBox("nodependenciesfound", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addCheckBox("dependenciesfoundinsourcecode", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addCheckBox("dependenciesfoundinbinaries", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, "pStyle");
+    $cell->addText(htmlspecialchars(" <if there are dependencies found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, "pStyle");
 
-    $table->addRow($rowWidth, $this->paragraphStyle);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, $this->paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, $this->paragraphStyle);
+    $table->addRow($rowWidth, "pStyle");
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
+    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, $this->paragraphStyle);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, $this->paragraphStyle);
+    $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, "pStyle");
+    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, "pStyle");
     
     $section->addTextBreak();
   }
@@ -212,19 +200,18 @@ class ReportStatic
   {   
     $rowStyle = array("bgColor" => "C0C0C0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $rowTextStyleLeft = array("size" => 10, "bold" => true);
-    $rowTextStyleRight = array("name" => $this->fontFamily, "size" => 10, "bold" => false);
+    $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
-    $subHeadingStyle = array("name" => $this->fontFamily, "size "=> 14, "italic" => true);  
- 
-    $heading = "4. When using this component, you need to fulfill the following “ToDos”";
-    $subHeading = " 4.1. Common obligations, restrictions and risks:";
+
+    $heading = "When using this component, you need to fulfill the following “ToDos”";
+    $subHeading = "Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined to simplify the To-Dos for development and distribution. The following list contains rules for development, and      distribution which must always be followed!";
     $rowWidth = 5;
     $firstColLen = 500;
     $secondColLen = 15000;
     
-    $section->addText(htmlspecialchars($heading), $this->tableHeading);
-    $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
+    $section->addTitle(htmlspecialchars($heading), 2);
+    $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeadingInfoText), $rowTextStyleRight);
 
     $r1c1 = "1";
@@ -269,72 +256,72 @@ class ReportStatic
     $table = $section->addTable($this->tablestyle);
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r1c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r1c2), $rowTextStyleRightBold, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen);
-    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r2c22), $rowTextStyleRightBold, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r2c23),$rowTextStyleRight,$this->paragraphStyle);
+    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r2c22), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r2c23),$rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r3c2), $rowTextStyleRight, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r3c2), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r4c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r4c2), $rowTextStyleRight, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r4c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r4c2), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r5c1), $rowTextStyleLeft, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r5c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen, $rowStyle);
-    $cell->addText(htmlspecialchars($r5c21), $rowTextStyleRightBold, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r5c22), $rowTextStyleRight, $this->paragraphStyle);
+    $cell->addText(htmlspecialchars($r5c21), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r5c22), $rowTextStyleRight, "pStyle");
 
-    $table->addRow($rowWidth, $this->paragraphStyle);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r6c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r6c2), $rowTextStyleRight, $this->paragraphStyle);
+    $table->addRow($rowWidth, "pStyle");
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r6c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r6c2), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r7c1), $rowTextStyleLeft, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r7c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen);
-    $cell->addText(htmlspecialchars($r7c21), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r7c22), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r7c23), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r7c24), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r7c25), $rowTextStyleRight, $this->paragraphStyle);
+    $cell->addText(htmlspecialchars($r7c21), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r7c22), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r7c23), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r7c24), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r7c25), $rowTextStyleRight, "pStyle");
  
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r8c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r8c2), $rowTextStyleRightBold, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r8c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r8c2), $rowTextStyleRightBold, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r9c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r9c2), $rowTextStyleRight, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r9c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r9c2), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r10c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r10c2), $rowTextStyleRight, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r10c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen)->addText(htmlspecialchars($r10c2), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r11c1), $rowTextStyleLeft, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r11c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen);
-    $cell->addText(htmlspecialchars($r11c2), $rowTextStyleRightBold, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r11c21), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r11c22), $rowTextStyleRight, $this->paragraphStyle);
+    $cell->addText(htmlspecialchars($r11c2), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r11c21), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r11c22), $rowTextStyleRight, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r12c1), $rowTextStyleLeft, $this->paragraphStyle);
-    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r12c2), $rowTextStyleRightBold, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r12c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r12c2), $rowTextStyleRightBold, "pStyle");
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r13c1), $rowTextStyleLeft, $this->paragraphStyle);
+    $cell = $table->addCell($firstColLen)->addText(htmlspecialchars($r13c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen);
-    $cell->addText(htmlspecialchars($r13c21), $rowTextStyleRightBold, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r13c22), $rowTextStyleRight, $this->paragraphStyle);
-    $cell->addText(htmlspecialchars($r13c23), $rowTextStyleRight, $this->paragraphStyle);
+    $cell->addText(htmlspecialchars($r13c21), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r13c22), $rowTextStyleRight, "pStyle");
+    $cell->addText(htmlspecialchars($r13c23), $rowTextStyleRight, "pStyle");
 
     $section->addTextBreak();
   }
@@ -352,12 +339,11 @@ class ReportStatic
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
     $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
     $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
-    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
-    $subHeading = " 4.2. Additional obligations, restrictions & risks beyond common rules";
+    $subHeading = "Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
 
-    $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
+    $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeadingInfoText1));
     $section->addText(htmlspecialchars($subHeadingInfoText2));
 
@@ -398,58 +384,57 @@ class ReportStatic
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
     $cell = $table->addCell($thirdColLen);
     $cell->addText(htmlspecialchars("<reason for that>"), $secondRowTextStyle2);
     $cell->addText(htmlspecialchars("Filelist:"), $secondRowTextStyle2Bold, $secondRowTextStyle2);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Copyleft Effect"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen,$secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen);
+    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Copyleft Effect"), $firstRowTextStyle);
+    $table->addCell($secondColLen,$secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen);
 
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Restrictions for advertising materials"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen,$secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen);
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-
-    $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional Rules for modification"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle)->addText(htmlspecialchars(""), $firstRowTextStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars(""), $secondRowTextStyle2Bold);
+    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Restrictions for advertising materials"), $firstRowTextStyle);
+    $table->addCell($secondColLen,$secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen);
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional documentation requirements for modifications (e.g. notice file with author’s name)"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional Rules for modification"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle)->addText(htmlspecialchars(""), $firstRowTextStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars(""), $secondRowTextStyle2Bold);
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Include special acknowledgments in advertising material"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen);
-    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional documentation requirements for modifications (e.g. notice file with author’s name)"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
 
     $table->addRow($rowWidth);
-    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Specific Risks"), $firstRowTextStyle);
-    $cell = $table->addCell($secondColLen, $secondColStyle);
-    $cell = $table->addCell($thirdColLen);
-    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $cell = $table->addCell($fifthColLen);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Include special acknowledgments in advertising material"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen);
+    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+
+    $table->addRow($rowWidth);
+    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Specific Risks"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $secondColStyle);
+    $table->addCell($thirdColLen);
+    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $table->addCell($fifthColLen);
 
     $section->addTextBreak();
   }
@@ -462,14 +447,13 @@ class ReportStatic
     $firstRowStyle = array("bgColor" => "C0C0C0");
     $firstRowTextStyle = array("size" => 10, "bold" => true);
     
-    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
-    $subHeadingStyle1 = array("name" => $this->fontFamily, "size" => 11, "color" => "0000FF", "italic" => true);
-    $subHeadingStyle2 = array("name" => $this->fontFamily, "size" => 10, "color" => "000000");
-    $subHeading = "4.3.	File list with specific obligations ";
+    $subHeadingStyle1 = array("size" => 11, "color" => "0000FF", "italic" => true);
+    $subHeadingStyle2 = array("size" => 10, "color" => "000000");
+    $subHeading = "File list with specific obligations ";
     $subHeading1 = 'This is an optional chapter. it is oprional and should be used in special cases. if you just have a simple license as Apache-2.0 you must put in the note "not applicable"';
     $subHeading2 = "Depending of the license additional license conditions to the Common Rules in computer 4.1. exist. Here is the list of all licenses found in this component with additional rules.";
 
-    $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
+    $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeading1), $subHeadingStyle1);
     $section->addListItem(htmlspecialchars("Always if you have remove files"));
     $section->addListItem(htmlspecialchars("Patent Issues"));
@@ -485,7 +469,7 @@ class ReportStatic
     
     $table = $section->addTable($this->tablestyle);
 
-    $tableTextStyle = array("name" => $this->fontFamily, "size" => 10, "color" => "0000FF", "italic" => true);
+    $tableTextStyle = array("size" => 10, "color" => "0000FF", "italic" => true);
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $firstRowStyle)->addText(htmlspecialchars("Issues obligations (licenses, patent …) see chapter 4.2"), $firstRowTextStyle);
     $cell = $table->addCell($secondColLen, $firstRowStyle)->addText(htmlspecialchars("Files (embedded document) (optional)"), $firstRowTextStyle);
@@ -514,44 +498,42 @@ class ReportStatic
    */ 
   function forOtherTodos(Section $section)
   {
-    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
-    $subSubHeadingStyle = array("name" => $this->fontFamily, "size" => 16, "bold" => true);
-    $subSubHeadingInfoTextStyle = array("name" => $this->fontFamily, "size" => 10, "bold"=>false);
-    $subSubHeadingInfoTextStyle1 = array("name" => $this->fontFamily, "size" => 12, "bold"=>true);
+    $subSubHeadingInfoTextStyle = array("size" => 10, "bold"=>false);
+    $subSubHeadingInfoTextStyle1 = array("size" => 12, "bold"=>true);
 
-    $subHeading = "4.4.	Further general obligations, restrictions & risks"; 
-    $subSubHeading = "   4.4.1	 Export Restrictions";
+    $subHeading = "Further general obligations, restrictions & risks"; 
+    $subSubHeading = "Export Restrictions";
     $subSubHeadingInfoText = "Assess potential export restrictions together with your export control agent regarding this software component as defined in your applicable process.";
     $subSubHeadingInfoText1 = "Export Restrictions found in Source Code:";
     $subSubHeadingInfoText2 = "No export restriction notices found in source scan – export restriction clarification is responsibility of Siemens projects/product managers.";
 
-    $subSubHeading1 = "   4.4.2   Security Vulnerabilities";
+    $subSubHeading1 = "Security Vulnerabilities";
     $subSubHeadingInfoText3 = "Security Vulnerabilities must be examined in product specific use - project leader is responsible to verify all security issues - as defined in your applicable process";
     $subSubHeadingInfoText4 = "--> Follow the link to show security vulnerabilities reported by CT IT Cert: http://mainline.nbgm.siemens.de/Mainline/SecurityInfo.aspx?Component_ID=000";
     $subSubHeadingInfoText5 = "Remark: This link leads to a site which may only list security vulnerabilities becoming known after the clearing date!";
 
-    $subSubHeading2 = "   4.4.3   Patent Situation";
+    $subSubHeading2 = "Patent Situation";
     $subSubHeadingInfoText6 = "Assess patent situation regarding open source software together with your BU patent strategy manager – we cannot expect the community to have clarified the patent situation. ";
     $subSubHeadingInfoText7 = "Patent Notices found in Source Code:";
     $subSubHeadingInfoText8 = "No patent notices found in source scan – patent clearing is responsibility of Siemens projects";
-    $section->addText(htmlspecialchars($subHeading), $subHeadingStyle);
-    $section->addText(htmlspecialchars($subSubHeading), $subSubHeadingStyle);
+    $section->addTitle(htmlspecialchars($subHeading), 3);
+    $section->addTitle(htmlspecialchars($subSubHeading), 4);
     $section->addText(htmlspecialchars($subSubHeadingInfoText), $subSubHeadingInfoTextStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, $this->paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, "pStyle");
     $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle);
     
     $section->addTextBreak();
 
-    $section->addText(htmlspecialchars($subSubHeading1), $subSubHeadingStyle);
+    $section->addTitle(htmlspecialchars($subSubHeading1), 4);
     $section->addText(htmlspecialChars($subSubHeadingInfoText3), $subSubHeadingInfoTextStyle);
     $section->addText(htmlspecialChars($subSubHeadingInfoText4), $subSubHeadingInfoTextStyle);
     $section->addText(htmlspecialChars($subSubHeadingInfoText5), $subSubHeadingInfoTextStyle);
     
     $section->addTextBreak();
 
-    $section->addText(htmlspecialchars($subSubHeading2), $subSubHeadingStyle);
+    $section->addTitle(htmlspecialchars($subSubHeading2), 4);
     $section->addText(htmlspecialchars($subSubHeadingInfoText6), $subSubHeadingInfoTextStyle);
-    $section->addText(htmlspecialchars($subSubHeadingInfoText7), $subSubHeadingInfoTextStyle1,$this->paragraphStyle);
+    $section->addText(htmlspecialchars($subSubHeadingInfoText7), $subSubHeadingInfoTextStyle1, "pStyle");
     $section->addText(htmlspecialchars($subSubHeadingInfoText8), $subSubHeadingInfoTextStyle);
 
     $section->addTextBreak();
@@ -562,8 +544,8 @@ class ReportStatic
    */ 
   function basicForClearingReport(Section $section)
   {
-    $heading = "5. Basis for Clearing Report";
-    $section->addText(htmlspecialchars($heading), $this->tableHeading);
+    $heading = "Basis for Clearing Report";
+    $section->addTitle(htmlspecialchars($heading), 2);
     
     $table = $section->addTable($this->tablestyle);
 
