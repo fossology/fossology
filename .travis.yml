@@ -36,39 +36,37 @@ before_script:
 env:
   global: 
    - PHPTESTSUITE='Fossology PhpUnit Agent Test Suite'
-   - MAKEBEFORE='make'
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
-   - MAKETARGETS='test-lib'
+   - MAKETARGETS='all test-lib'
   matrix: 
-   - CC=gcc CXX=g++ MAKETARGETS='test-lib test-monk'
+   - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk'
    - CC=clang-3.5 CXX=clang++-3.5
-   - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='test-lib test-monk'
-   - CC=gcc-4.4 CXX=g++-4.4 MAKETARGETS='test-lib test-monk'
+   - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk'
+   - CC=gcc-4.4 CXX=g++-4.4 MAKETARGETS='all test-lib test-monk'
    - CC=gcc-4.6 CXX=g++-4.6
    - CC=gcc-4.8 CXX=g++-4.8
    - CC=gcc-4.9 CXX=g++-4.9
-   - CC=gcc-5 CXX=g++-5 MAKETARGETS='test-lib test-monk'
+   - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk'
    - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
 matrix:
   include:
     - php: 5.3
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKEBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.4
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKEBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKEBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.6
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKEBEFORE='' MAKETARGETS='build-lib'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
   allow_failures:
     - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
 script:
  - set -e
- - $MAKEBEFORE
  - $CHECKBEFORE
- - make -C src $MAKETARGETS
+ - make $MAKETARGETS
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
  - set +e
