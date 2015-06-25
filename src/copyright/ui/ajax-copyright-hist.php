@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
+use Monolog\Handler\StreamHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -97,9 +98,9 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       case "getData":
          return $this->doGetData($upload);
       case "update":
-         return $this->doUpdate($upload, $item, $hash, $type);
+         return $this->doUpdate($item, $hash, $type);
       case "delete":
-         return $this->doDelete($upload, $item, $hash, $type);
+         return $this->doDelete($item, $hash, $type);
     }
 
   }
@@ -184,19 +185,19 @@ class CopyrightHistogramProcessPost extends FO_Plugin
         $join .
         "WHERE cp.content!='' " .
         "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
-        "AND CP.type = $3 " .
+        "AND cp.type = $3 " .
         "AND cp.agent_fk= $4 " .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
-    $grouping = " GROUP BY content, hash ";
+    $grouping = " GROUP BY content ";
 
-    $countQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery $totalFilter $grouping) as K";
+    $countQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery $totalFilter $grouping) as K";
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
         $filterParms, __METHOD__.$tableName . ".count");
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $countAllQuery = "SELECT count(*) FROM (SELECT content, hash, count(*) $unorderedQuery$grouping) as K";
+    $countAllQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery$grouping) as K";
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all");
     $iTotalRecords = $iTotalRecordsRow['count'];
 
@@ -207,7 +208,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $range .= ' LIMIT $' . count($filterParms);
 
     $sql = "SELECT content, hash, count(*) as copyright_count  " .
-        $unorderedQuery . $totalFilter . $grouping . $orderString . $range;
+        $unorderedQuery . $totalFilter . " GROUP BY content, hash " . $orderString . $range;
     $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName;
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement, $filterParms);
@@ -283,13 +284,12 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   }
 
   /**
-   * @param int $uploadId
    * @param int $itemId
    * @param string
    * @param string 'copyright'|'ip'
    * @return string
    */
-  protected function doUpdate($uploadId, $itemId, $hash, $type)
+  protected function doUpdate($itemId, $hash, $type)
   {
     $content = GetParm("value", PARM_RAW);
     if (!$content)
@@ -304,7 +304,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return new Response('success', Response::HTTP_OK,array('Content-type'=>'text/plain'));
   }
 
-  protected function doDelete($uploadId, $itemId, $hash, $type)
+  protected function doDelete($itemId, $hash, $type)
   {
     $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
     $cpTable = $this->getTableName($type);
