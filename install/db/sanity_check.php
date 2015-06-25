@@ -44,7 +44,7 @@ class SanityChecker
     $this->checkUploadStatus();
     $this->checkLicenseEventTypes();
     $this->checkExistsTable('license_candidate');
-    $folderDao = new FolderDao($this->dbManager);
+    $folderDao = new FolderDao($this->dbManager, $GLOBALS['container']->get('dao.user'), $GLOBALS['container']->get('dao.upload'));
     $folderDao->ensureTopLevelFolder();
     
     return $this->errors;
