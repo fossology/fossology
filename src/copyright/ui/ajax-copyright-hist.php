@@ -22,7 +22,6 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
-use Monolog\Handler\StreamHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -104,6 +103,8 @@ class CopyrightHistogramProcessPost extends FO_Plugin
          return $this->doUpdate($item, $hash, $type);
       case "delete":
          return $this->doDelete($item, $hash, $type);
+      case "undo":
+         return $this->doUndo($item, $hash, $type);
     }
 
   }
@@ -310,6 +311,16 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $cpTable = $this->getTableName($type);
     $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable);
     return new Response('Successfully deleted', Response::HTTP_OK, array('Content-type'=>'text/plain'));
+  }
+
+  protected function doUndo($itemId, $hash, $type) {
+    $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
+    $cpTable = $this->getTableName($type);
+    if ($cpTable != 'copyright') {
+      return new Response('There is not undo for ' . $cpTable, Response::HTTP_NOT_IMPLEMENTED, array('Content-type' => 'text/plain'));
+    }
+    $this->copyrightDao->rollbackTable($item, $hash, Auth::getUserId(), $cpTable);
+    return new Response('Successfully restored', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
 }
