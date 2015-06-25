@@ -40,7 +40,7 @@ class ReportStatic
    */
   function reportHeader(Section $section)
   {
-    $headerStyle = array("color" => "48CCCD", "size" => 20, "bold" => true);
+    $headerStyle = array("color" => "009999", "size" => 20, "bold" => true);
     $header = $section->addHeader();
     $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
@@ -85,7 +85,7 @@ class ReportStatic
    */ 
   function clearingProtocolChangeLogTable(Section $section)
   {
-    $thColor = array("bgColor" => "C0C0C0");
+    $thColor = array("bgColor" => "E0E0E0");
     $thText = array("size" => 12, "bold" => true);
     $rowWidth = 600;
     $rowWidth1 = 200;
@@ -194,11 +194,11 @@ class ReportStatic
   }
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function todoTable(Section $section)
   {   
-    $rowStyle = array("bgColor" => "C0C0C0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
+    $rowStyle = array("bgColor" => "E0E0E0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $rowTextStyleLeft = array("size" => 10, "bold" => true);
     $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
@@ -328,7 +328,7 @@ class ReportStatic
 
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function todoObliTable(Section $section)
   {
@@ -337,8 +337,8 @@ class ReportStatic
     $secondRowTextStyle1 = array("size" => 11, "bold" => false);
     $secondRowTextStyle2 = array("size" => 10, "bold" => false);
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
-    $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
-    $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
+    $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FEFF99");
+    $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "CDFFFF");
     $subHeading = "Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
@@ -440,11 +440,11 @@ class ReportStatic
   }
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function todoObliList(Section $section)
   {
-    $firstRowStyle = array("bgColor" => "C0C0C0");
+    $firstRowStyle = array("bgColor" => "E0E0E0");
     $firstRowTextStyle = array("size" => 10, "bold" => true);
     
     $subHeadingStyle1 = array("size" => 11, "color" => "0000FF", "italic" => true);
@@ -494,7 +494,7 @@ class ReportStatic
   }    
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function forOtherTodos(Section $section)
   {
@@ -540,7 +540,7 @@ class ReportStatic
   }
 
   /**
-   * @param1 Section $section 
+   * @param Section $section 
    */ 
   function basicForClearingReport(Section $section)
   {

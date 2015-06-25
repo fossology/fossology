@@ -121,6 +121,7 @@ abstract class ClearedGetterCommon
       $content = convertToUTF8($statement['content'], false);
       $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
+      $risk = $statement['risk'];
 
       if (!array_key_exists('text', $statement))
       {
@@ -151,6 +152,7 @@ abstract class ClearedGetterCommon
             $currentFiles[] = $fileName;
         }else{
           $statements[$groupBy] = array(
+            "risk" => $risk,
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "comments" => convertToUTF8($comments, false),
@@ -159,6 +161,7 @@ abstract class ClearedGetterCommon
         }
       }else{
           $statements[] = array(
+            "risk" => $risk,
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "comments" => convertToUTF8($comments, false),
