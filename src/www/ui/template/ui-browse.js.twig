@@ -63,6 +63,7 @@ $(document).ready(function() {
   $('.clickable-folder').click(function(event){
     folder = $(this).attr('data-folder');
     browseTable.fnDraw();
+    $('#current-folder').text($(this).text());
     return false;
   });
 });

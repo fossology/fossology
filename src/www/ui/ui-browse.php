@@ -210,10 +210,10 @@ class ui_browse extends FO_Plugin
     $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
     
     $folderNav = '<div id="sidetree">';
-    if ($folderId != $rootFolder) {
+    if ($folderId != $rootFolder->getId()) {
       $folderNav .= '<div class="treeheader" style="display:inline;"><a href="'. Traceback_uri() . '?mod=' . $this->Name . '">Top</a> | </div>';
     }
-    $folderNav .= '<div id="sidetreecontrol" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
+    $folderNav .= '<div id="sidetreecontrol" class="treeheader" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
     $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
    
     $this->vars['folderNav'] = $folderNav;
@@ -222,7 +222,7 @@ class ui_browse extends FO_Plugin
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
     $this->vars['folder'] = $folderId;
-    return '';
+    $this->vars['folderName'] = $rootFolder->getName();
   }
 
   /**
@@ -353,7 +353,8 @@ class ui_browse extends FO_Plugin
     if (empty($Upload))
     {
       $this->vars['show'] = $show;
-      return $html . $this->ShowFolder($Folder);
+      $this->ShowFolder($Folder);
+      return $html;
     }
 
     if (empty($uploadTreeId))
