@@ -118,21 +118,6 @@ class FolderDao extends Object
     return $rootFolder;
   }
 
-  /**
-   * @param int $userId
-   * @return Folder|null
-   */
-  public function getParentFolder($userId) {
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName,
-        "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");
-    $res = $this->dbManager->execute($statementName, array($userId));
-    $row = $this->dbManager->fetchArray($res);
-    $rootFolder = $row ? new Folder(intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])) : null;
-    $this->dbManager->freeResult($res);
-    return $rootFolder;
-  }
-
   public function getFolderTreeCte($parentId=null) {
     $parentCondition = $parentId ? 'folder_pk=$1' : 'folder_pk='.self::TOP_LEVEL;
 
