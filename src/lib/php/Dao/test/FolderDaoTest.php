@@ -21,6 +21,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Mockery as M;
 
 class FolderDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -35,8 +36,10 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
-    $this->folderDao = new FolderDao($this->dbManager);
-    
+    $userDao = M::mock('Fossology\Lib\Dao\UserDao');
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $this->folderDao = new FolderDao($this->dbManager, $userDao, $uploadDao);
+
     $this->testDb->createPlainTables(array('folder','foldercontents'));
     $this->testDb->createSequences(array('folder_folder_pk_seq','foldercontents_foldercontents_pk_seq'));
     $this->testDb->createConstraints(array('folder_pkey','foldercontents_pkey'));

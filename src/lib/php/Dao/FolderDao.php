@@ -39,13 +39,19 @@ class FolderDao extends Object
   
   /** @var DbManager */
   private $dbManager;
+  /** @var UserDao */
+  private $userDao;
+  /** @var UploadDao */
+  private $uploadDao;
   /** @var Logger */
   private $logger;
 
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, UserDao $userDao, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
+    $this->uploadDao = $uploadDao;
+    $this->userDao = $userDao;
   }
 
   /**
@@ -118,21 +124,6 @@ class FolderDao extends Object
     return $rootFolder;
   }
 
-  /**
-   * @param int $userId
-   * @return Folder|null
-   */
-  public function getParentFolder($userId) {
-    $statementName = __METHOD__;
-    $this->dbManager->prepare($statementName,
-        "SELECT f.* FROM folder f INNER JOIN users u ON f.folder_pk = u.root_folder_fk WHERE u.user_pk = $1;");
-    $res = $this->dbManager->execute($statementName, array($userId));
-    $row = $this->dbManager->fetchArray($res);
-    $rootFolder = $row ? new Folder(intval($row['folder_pk']), $row['folder_name'], $row['folder_desc'], intval($row['folder_perm'])) : null;
-    $this->dbManager->freeResult($res);
-    return $rootFolder;
-  }
-
   public function getFolderTreeCte($parentId=null) {
     $parentCondition = $parentId ? 'folder_pk=$1' : 'folder_pk='.self::TOP_LEVEL;
 
@@ -156,7 +147,7 @@ class FolderDao extends Object
   WHERE f.folder_pk=fc.child_id AND foldercontents_mode=".self::MODE_FOLDER." AND fc.parent_fk = ft.folder_pk AND NOT cycle_detected
 )";
   }
-    
+
   public function getFolderStructure($parentId=null) {
     $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
     $parameters = $parentId ? array($parentId) : array();
@@ -164,7 +155,7 @@ class FolderDao extends Object
             . " SELECT folder_pk, parent_fk, folder_name, folder_desc, folder_perm, depth FROM folder_tree ORDER BY name_path");
     $res = $this->dbManager->execute($statementName, $parameters);
   
-    $userGroupMap = $GLOBALS['container']->get('dao.user')->getUserGroupMap(Auth::getUserId());
+    $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
     
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
@@ -319,9 +310,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     elseif($content['foldercontents_mode']==self::MODE_UPLOAD)
     {
       $uploadId = $content['child_id'];
-      /* @var $uploadDao UploadDao */
-      $uploadDao = $GLOBALS['container']->get('dao.upload');
-      if (!$uploadDao->isEditable($uploadId, Auth::getGroupId())) {
+      if (!$this->uploadDao->isEditable($uploadId, Auth::getGroupId())) {
         throw new \Exception('permission to upload denied');
       }
     }
