@@ -1,3 +1,25 @@
+fossology (2.6.0-ng) unstable; urgency=low
+
+  * Story
+    * [SOSS-73] - Add tool tip for explanation of clearing status
+    * [SOSS-100] - remove code duplications from Fossology\Lib\Util\CopyrightLister
+    * [SOSS-103] - harmonize license IDs between Ninka and Monk
+    * [SOSS-223] - adding risk level to licenses
+    * [SOSS-257] - create SPDX Export as Clearing Report alternative
+    * [SOSS-270] - ReadMeOSS for whole folder
+    * [SOSS-276] - undo copyright remove
+    * [SOSS-278] - cleanup makefile variables
+    * [SOSS-282] - add more escape charaters to Monk / Bulk scanning
+    * [SOSS-291] - aymlink Support
+    * [SOSS-301] - enhancement to Extended Report
+  * Task
+    * [SOSS-309] - monk should be able to match searches with as few as 2 tokens
+    * [SOSS-172] - migrate GetUploadPerm to a method in UploadDao
+    * [SOSS-206] - contrib ninka
+    * [SOSS-283] - adding risk level in report
+
+-- Steffen Weber <steffen.weber@tngtech.com>  Thu, 25 June 2015 18:48:38 +0100
+
 fossology (2.5.0-ng) unstable; urgency=low
 
   * Story
