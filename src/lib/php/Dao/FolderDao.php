@@ -39,13 +39,19 @@ class FolderDao extends Object
   
   /** @var DbManager */
   private $dbManager;
+  /** @var UserDao */
+  private $userDao;
+  /** @var UploadDao */
+  private $uploadDao;
   /** @var Logger */
   private $logger;
 
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, UserDao $userDao, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
     $this->logger = new Logger(self::className());
+    $this->uploadDao = $uploadDao;
+    $this->userDao = $userDao;
   }
 
   /**
@@ -149,7 +155,7 @@ class FolderDao extends Object
             . " SELECT folder_pk, parent_fk, folder_name, folder_desc, folder_perm, depth FROM folder_tree ORDER BY name_path");
     $res = $this->dbManager->execute($statementName, $parameters);
   
-    $userGroupMap = $GLOBALS['container']->get('dao.user')->getUserGroupMap(Auth::getUserId());
+    $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
     
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
@@ -304,9 +310,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     elseif($content['foldercontents_mode']==self::MODE_UPLOAD)
     {
       $uploadId = $content['child_id'];
-      /* @var $uploadDao UploadDao */
-      $uploadDao = $GLOBALS['container']->get('dao.upload');
-      if (!$uploadDao->isEditable($uploadId, Auth::getGroupId())) {
+      if (!$this->uploadDao->isEditable($uploadId, Auth::getGroupId())) {
         throw new \Exception('permission to upload denied');
       }
     }
