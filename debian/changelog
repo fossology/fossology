@@ -18,7 +18,7 @@ fossology (2.6.0-ng) unstable; urgency=low
     * [SOSS-206] - contrib ninka
     * [SOSS-283] - adding risk level in report
 
--- Steffen Weber <steffen.weber@tngtech.com>  Thu, 25 June 2015 18:48:38 +0100
+ -- Steffen Weber <steffen.weber@tngtech.com>  Thu, 25 Jun 2015 18:48:38 +0200
 
 fossology (2.5.0-ng) unstable; urgency=low
 
