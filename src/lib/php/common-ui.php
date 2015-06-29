@@ -46,7 +46,7 @@ $FirstEmpty=false, $SelElt=true, $Options="")
     $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
     else
     $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
-    $str .= "<option value='$key' $SELECTED>$val</option>\n";
+    $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
   }
   $str .= "</select>";
   return $str;

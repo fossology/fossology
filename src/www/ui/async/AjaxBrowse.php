@@ -26,6 +26,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\Lib\UI\MenuHook;
+use Fossology\Lib\UI\MenuRenderer;
 use Fossology\Lib\Util\DataTablesUtility;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -199,21 +200,13 @@ class AjaxBrowse extends DefaultPlugin
     $Parm = "upload=$uploadId&show=$show&item=" . $row['uploadtree_pk'];
     if (Iscontainer($row['ufile_mode']))
     {
-      $nameColumn .= menu_to_1list($menuPfile, $Parm, " ", " ", 1, $uploadId);
+      $nameColumn .= MenuRenderer::menuToActiveSelect($menuPfile, $Parm, $uploadId);
     }
     else
     {
-      $nameColumn .= menu_to_1list($menuPfileNoCompare, $Parm, " ", " ", 1, $uploadId);
+      $nameColumn .= MenuRenderer::menuToActiveSelect($menuPfileNoCompare, $Parm, $uploadId);
     }
 
-    /* Job queue link */
-    $text = _("History");
-    $textTitle = _("Scan History");
-    if (plugin_find_id('showjobs') >= 0)
-    {
-      $nameColumn .= "[<a href='" . Traceback_uri() . "?mod=showjobs&upload=$uploadId' title='" . htmlentities($textTitle) . "' >$text</a>]";
-    }
-    
     $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
     if (!empty($modsUploadMulti))
     {
