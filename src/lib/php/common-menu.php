@@ -34,8 +34,17 @@ class menu {
   var $MaxDepth = 0; // How deep is SubMenu?
   var $SubMenu = NULL;
   public $FullName; // list to submenu list
+  
+  public function getName($showFullName=false)
+  {
+    if($showFullName)
+    {
+      return $this->FullName . "(" . $this->Order . ")";
+    }
+    return $this->Name;
+  }
+}
 
-};
 /*********************************
  Global array: don't touch!
  *********************************/
@@ -409,53 +418,43 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
  */
 function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
 {
-  $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
-
-  $V = "";
-  if (!empty($Menu)) {
-    foreach($Menu as $Val) {
-      if (!empty($Val->HTML)) {
-        $V.= $Pre;
-        $V.= $Val->HTML;
-        $V.= $Post;
-      }
-      else if (!empty($Val->URI)) {
-        if (!empty($upload_id) && "tag" == $Val->URI)
-        {
-          $tagstatus = TagStatus($upload_id);
-          if (0 == $tagstatus) break; // tagging on this upload is disabled
-        }
-        $V.= $Pre;
-        $V.= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
-        if (!empty($Val->Title)) {
-          $V.= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
-        }
-        $V.= ">";
-        if ($showFullName) {
-          $V.= $Val->FullName . "(" . $Val->Order . ")";
-        }
-        else {
-          $V.= $Val->Name;
-        }
-        $V.= "</a>]";
-        $V.= $Post;
-      }
-      else if ($ShowAll) {
-        $V.= $Pre;
-        $V.= "[";
-        if ($showFullName) {
-          $V.= $Val->FullName . "(" . $Val->Order . ")";
-        }
-        else {
-          $V.= $Val->Name;
-        }
-        $V.= "]";
-        $V.= $Post;
-      }
-    }
+  if (empty($Menu)) {
+    return '';
   }
-  return ($V);
-} // menu_to_1list()
+
+  $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
+  $V = "";
+  
+  foreach($Menu as $Val) {
+    if (!empty($Val->HTML)) {
+      $entry = $Val->HTML;
+    }
+    else if (!empty($Val->URI)) {
+      if (!empty($upload_id) && "tag" == $Val->URI)
+      {
+        $tagstatus = TagStatus($upload_id);
+        if (0 == $tagstatus) break; // tagging on this upload is disabled
+      }
+      
+      $entry = "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
+      if (!empty($Val->Title)) {
+        $entry .= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
+      }
+      $entry .= ">" ;
+      $entry .= $Val->getName($showFullName);
+      $entry .= "</a>]";
+    }
+    else if ($ShowAll) {
+      $entry = "[" . $Val->getName($showFullName) . "]";
+    }
+    else
+    {
+      continue;
+    }
+    $V .= $Pre . $entry . $Post;
+  }
+  return $V;
+}
 
 
 /**
@@ -470,7 +469,7 @@ function menu_print(&$Menu, $Indent)
   if (!isset($Menu)) {
     return;
   }
-  foreach($Menu as $Key => $Val) {
+  foreach($Menu as $Val) {
     for ($i = 0;$i < $Indent;$i++) {
       print " ";
     }
@@ -523,4 +522,3 @@ function menu_remove($Menu, $RmName)
   }
   return $NewArray;
 }
-?>

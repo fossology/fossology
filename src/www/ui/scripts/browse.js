@@ -39,6 +39,10 @@ $(document).ready(function () {
         var source=table.fnGetData(this);
         openCommentModal(source[0],source[1],source[2]); 
       } );
+    $('select.goto-active-option').change(function() {
+      var url = $(this).val();
+      if(url){ window.location = url;}
+    });
   });
   commentModal = $('#commentModal').plainModal();
   $(document).tooltip();
