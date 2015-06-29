@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  * Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
  *
@@ -18,6 +16,7 @@ use Fossology\Lib\Dao\UploadDao;
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file ui-list-lic-files.php
@@ -120,7 +119,7 @@ class LicenseListFiles extends FO_Plugin
       $limit = ($Page < 0) ? "ALL" : $Max;
       $order = " order by ufile_name asc";
       /** should delete $filesresult yourself */
-      $filesresult = GetFilesWithLicense($agentId, pg_escape_string($rf_shortname), $uploadtree_pk,
+      $filesresult = GetFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk,
           $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);
       $NumFiles = pg_num_rows($filesresult);
 
