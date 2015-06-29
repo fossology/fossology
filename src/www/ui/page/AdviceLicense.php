@@ -75,6 +75,13 @@ class AdviceLicense extends DefaultPlugin
         $vars['message'] = 'Successfully updated.';
       } catch (\Exception $e)
       {
+        $vars = array('rf_shortname' => $request->get('shortname'),
+                      'rf_fullname' => $request->get('fullname'),
+                      'rf_text' => $request->get('rf_text'),
+                      'rf_url' => $request->get('url'),
+                      'rf_notes' => $request->get('note'),
+                      'rf_risk' => intval($request->get('risk'))
+                     );
         $vars['message'] = $e->getMessage();
       }
     }
@@ -153,7 +160,7 @@ class AdviceLicense extends DefaultPlugin
 
     if (empty($shortname) || empty($fullname) || empty($rfText))
     {
-      throw new \Exception('missing parameter');
+      throw new \Exception('missing shortname (or) fullname (or) reference text');
     }
 
     /* @var $licenseDao LicenseDao */
