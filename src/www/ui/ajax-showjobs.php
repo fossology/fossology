@@ -317,7 +317,7 @@ class AjaxShowJobs extends FO_Plugin
         $outBuf .= "<tr>";
         $outBuf .= "<th $noUploadStyle></th>";
         $outBuf .= "<th colspan=6 $noUploadStyle>";
-        $outBuf .= $job["job"]["job_name"];
+        $outBuf .= htmlentities($job["job"]["job_name"], ENT_QUOTES);
         $outBuf .= "</th>";
         $outBuf .= "<th $noUploadStyle></th>";
         $outBuf .= "</tr>";
@@ -334,7 +334,7 @@ class AjaxShowJobs extends FO_Plugin
       $outBuf .= "</th>";
 
       $outBuf .= "<th colspan=3 $jobStyle>";
-      $outBuf .= $job["job"]["job_name"];
+      $outBuf .= htmlentities($job["job"]["job_name"], ENT_QUOTES);
       $outBuf .= "</th>";
       
       $outBuf .= "<th $jobStyle>";
