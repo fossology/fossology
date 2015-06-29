@@ -119,8 +119,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
+    assertThat(file_exists($filepath),equalTo(true));
+    $copyrightStatement = 'condor-admin@cs.wisc.edu';
+    assertThat(file_get_contents($filepath), stringContainsInOrder($copyrightStatement));
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
-        
+    
     $this->verifyRdf($filepath);
     unlink($filepath);
     $this->rmRepo();
