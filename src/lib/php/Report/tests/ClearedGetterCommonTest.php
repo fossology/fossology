@@ -98,7 +98,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->andReturn($uploadTreeTableName);
 
     $this->treeDao
-         ->shouldReceive('getRealParent')
+         ->shouldReceive('getMinimalCoveringItem')
          ->with($uploadId,$uploadTreeTableName)
          ->andReturn($parentId);
 
@@ -151,7 +151,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
          ->andReturn($uploadTreeTableName);
 
     $this->treeDao
-         ->shouldReceive('getRealParent')
+         ->shouldReceive('getMinimalCoveringItem')
          ->with($uploadId,$uploadTreeTableName)
          ->andReturn($parentId);
 
