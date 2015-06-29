@@ -40,7 +40,7 @@
       NOASSERTION
   {% else %}
     {% for cp in copyrights %}
-      {{ cp|e }}
+      {{ cp|replace({'\f':''})|e }}
     {% endfor %}
   {% endif %}
     </spdx:copyrightText>
