@@ -63,7 +63,7 @@ class LicenseListFiles extends FO_Plugin
   function Output()
   {
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_STRING);
+    $rf_shortname = GetParm("lic", PARM_RAW);
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $Excl = GetParm("excl", PARM_RAW);
     $Exclic = GetParm("exclic", PARM_RAW);
@@ -120,7 +120,7 @@ class LicenseListFiles extends FO_Plugin
       $limit = ($Page < 0) ? "ALL" : $Max;
       $order = " order by ufile_name asc";
       /** should delete $filesresult yourself */
-      $filesresult = GetFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk,
+      $filesresult = GetFilesWithLicense($agentId, pg_escape_string($rf_shortname), $uploadtree_pk,
           $PkgsOnly, $Offset, $limit, $order, $tag_pk, $uploadtree_tablename);
       $NumFiles = pg_num_rows($filesresult);
 
