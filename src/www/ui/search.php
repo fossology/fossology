@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,20 +18,27 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
-
-define("TITLE_search", _("Search"));
+use Fossology\Lib\Dao\UploadDao;
 
 class search extends FO_Plugin
 {
-  var $Name       = "search";
-  var $Title      = TITLE_search;
-  var $Version    = "1.0";
-  var $MenuList   = "Search";
-  var $MenuOrder  = 90;
-  var $Dependency = array("browse");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
-  var $MaxPerPage  = 100;  /* maximum number of result items per page */
+  protected $MaxPerPage  = 100;  /* maximum number of result items per page */
+  /** @var UploadDao */
+  private $uploadDao;
+  
+  function __construct()
+  {
+    $this->Name       = "search";
+    $this->Title      = _("Search");
+    $this->MenuList   = "Search";
+    $this->MenuOrder  = 90;
+    $this->Dependency = array("browse");
+    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->LoginFlag  = 0;
+    parent::__construct();
+    
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+  }
 
   function PostInitialize()
   {
@@ -82,25 +90,20 @@ class search extends FO_Plugin
     if ($Item)
     {
       /* Find lft and rgt bounds for this $Uploadtree_pk  */
-      $sql = "SELECT lft,rgt,upload_fk, pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) < 1)
+      $row = $this->uploadDao->getUploadEntry($Item);
+      if (empty($row))
       {
-        pg_free_result($result);
         $text = _("Invalid URL, nonexistant item");
-        return "<h2>$text $Uploadtree_pk</h2>";
+        return "<h2>$text $Item</h2>";
       }
-      $row = pg_fetch_assoc($result);
       $lft = $row["lft"];
       $rgt = $row["rgt"];
       $upload_pk = $row["upload_fk"];
  
        /* Check upload permission */
-       $UploadPerm = GetUploadPerm($upload_pk);
-       if ($UploadPerm < Auth::PERM_READ) return $UploadtreeRecs;
-
-      pg_free_result($result);
+       if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId())) {
+        return $UploadtreeRecs;
+      }
     }
 
     /* Start the result select stmt */
@@ -270,8 +273,9 @@ class search extends FO_Plugin
     {
       while ($row = pg_fetch_assoc($result))
       {
-        $UploadPerm = GetUploadPerm($row['upload_fk']);
-        if ($UploadPerm < Auth::PERM_READ) continue;
+        if (!$this->uploadDao->isAccessible($row['upload_fk'], Auth::getGroupId())) {
+          continue;
+        }
         $UploadtreeRecs[] = $row;
       }
     }

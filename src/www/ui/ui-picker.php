@@ -15,7 +15,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file ui-picker.php
@@ -42,20 +44,21 @@ function picker_ufile_name_cmp($rowa, $rowb)
 }
 
 
-define("TITLE_ui_picker", _("File Picker"));
-
 class ui_picker extends FO_Plugin
 {
   var $HighlightColor = '#4bfe78';
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
     $this->Name       = "picker";
-    $this->Title      = TITLE_ui_picker;
+    $this->Title      = _("File Picker");
     $this->Dependency = array("browse","view");
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->LoginFlag  = 0;
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
 
@@ -663,35 +666,30 @@ class ui_picker extends FO_Plugin
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     if (!$uploadtree_pk)
     {
-      echo "<h2>Unidentified item 1<h2>";
-      return;
+      return "<h2>Unidentified item 1</h2>";
     }
     $uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
     $folder_pk = GetParm("folder",PARM_INTEGER);
-    $user_pk = $_SESSION['UserId'];
+    $user_pk = Auth::getUserId();
 
     /* Item to start Browse window on */
     $Browseuploadtree_pk = GetParm("bitem",PARM_INTEGER);
 
     /* Check item1 and item2 upload permissions */
     $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
-    $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
-    if ($UploadPerm < Auth::PERM_READ)
+    if (!$this->uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()))
     {
       $text = _("Permission Denied");
-      echo "<h2>$text item 1<h2>";
-      return;
+      return "<h2>$text item 1</h2>";
     }
 
     if (!empty($uploadtree_pk2))
     {
       $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk2");
-      $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
-      if ($UploadPerm < Auth::PERM_READ)
+      if (!$this->uploadDao->isAccessible($Item2Row['upload_fk'], Auth::getGroupId()))
       {
         $text = _("Permission Denied");
-        echo "<h2>$text item 2<h2>";
-        return;
+        return "<h2>$text item 2</h2>";
       }
     }
 
@@ -726,11 +724,7 @@ class ui_picker extends FO_Plugin
       }
     }
 
-    if ($this->OutputToStdout) {
-      print $OutBuf;
-      return;
-    }
-    $this->vars['content'] = $OutBuf;
+    return $OutBuf;
   }
   
   /**
