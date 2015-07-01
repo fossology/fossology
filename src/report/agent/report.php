@@ -77,7 +77,23 @@ class ReportAgent extends Agent
                               "name" => "Arial",
                               "borderColor" => "000000",
                               "cellSpacing" => 5
-                             );
+                             );  
+
+  /** @var licenseColumn */
+  private $licenseColumn = array("size" => "10", 
+                                 "bold" => true
+                                );
+
+  /** @var licenseTextColumn */
+  private $licenseTextColumn = array("name" => "Courier New", 
+                                     "size" => 10, 
+                                     "bold" => false
+                                    );
+
+  /** @var filePathColumn */
+  private $filePathColumn = array("size" => "10", 
+                                  "bold" => false
+                                 );
   
   function __construct()
   {
@@ -354,15 +370,15 @@ class ReportAgent extends Agent
           $styleColumn = array("bgColor" => "FFFFFF");
         $table->addRow($rowHeight);
         $cell1 = $table->addCell($firstColLen, $styleColumn, "pStyle");
-        $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), null, "pStyle");
+        $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen, "pStyle");
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
-        $cell2->addText($licenseText,null, "pStyle");
+        $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         if(!empty($licenseMain["files"])){
           $cell3 = $table->addCell($thirdColLen, $styleColumn, "pStyle");
           foreach($licenseMain["files"] as $fileName){
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }
         else{
@@ -414,14 +430,14 @@ class ReportAgent extends Agent
         if($licenseStatement['risk'] == "4" || $licenseStatement['risk'] == "5"){
           $table->addRow($rowHeight);
           $cell1 = $table->addCell($firstColLen, $redRowStyle, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), null, "pStyle");
+          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
           $cell2 = $table->addCell($secondColLen, "pStyle"); 
           // replace new line character
           $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
+          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, $redRowStyle, "pStyle");
           foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }else{ continue; }
       }
@@ -469,14 +485,14 @@ class ReportAgent extends Agent
         if($licenseStatement['risk'] == "2" || $licenseStatement['risk'] == "3"){
           $table->addRow($rowHeight);
           $cell1 = $table->addCell($firstColLen, $yellowRowStyle, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), null, "pStyle");
+          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
           $cell2 = $table->addCell($secondColLen, "pStyle"); 
           // replace new line character
           $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
+          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, $yellowRowStyle, "pStyle");
           foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }else{ continue; }
       }
@@ -522,15 +538,15 @@ class ReportAgent extends Agent
       foreach($licenses as $licenseStatement){
         if(empty($licenseStatement['risk']) || $licenseStatement['risk'] == "0" || $licenseStatement['risk'] == "1"){
           $table->addRow($rowHeight);
-          $cell1 = $table->addCell($firstColLen, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED),null, "pStyle");
+          $cell1 = $table->addCell($firstColLen, null, "pStyle"); 
+          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
           $cell2 = $table->addCell($secondColLen, "pStyle"); 
           // replace new line character
           $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
+          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, "pStyle");
           foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }else{ continue; }
       }
@@ -602,12 +618,12 @@ class ReportAgent extends Agent
       foreach($statementsCEI as $statements){
         $table->addRow($rowHeight, "pStyle");
         $cell1 = $table->addCell($firstColLen, "pStyle"); 
-        $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED),null, "pStyle");
+        $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen, "pStyle");
-        $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), null, "pStyle");
+        $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen, "pStyle");
         foreach($statements['files'] as $fileName){ 
-          $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+          $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
     }else{
@@ -646,7 +662,7 @@ class ReportAgent extends Agent
         $cell1->addText(htmlspecialchars($statements['content']),null, "pStyle");
         $cell2 = $table->addCell($secondColLen);
         foreach($statements['files'] as $fileName){
-          $cell2->addText(htmlspecialchars($fileName),null, "pStyle");
+          $cell2->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
     }else{
