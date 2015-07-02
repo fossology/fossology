@@ -370,4 +370,18 @@ class UserDao extends Object
     }
     return $userRow['user_name'];
   }
+
+  /**
+   * @param $groupId
+   * @return array
+   */
+  public function getGroupNameById($groupId)
+  {
+    $groupRow =  $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
+    if (empty($groupId))
+    {
+      throw new \Exception("Error: Group Id must be specified.");
+    }
+    return $groupRow['group_name'];
+  }
 }

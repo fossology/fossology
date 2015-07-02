@@ -496,13 +496,5 @@ class UploadDao extends Object
         array($uploadId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
-  /**
-   * @param int $uploadId
-   * @return groupName
-   */
-  public function getGroupNameByUploadId($uploadId)
-  {
-    $groupName = $this->dbManager->getSingleRow('select group_name from groups INNER JOIN upload_clearing ON groups.group_pk=upload_clearing.group_fk WHERE upload_fk=$1', array($uploadId), __METHOD__);
-    return $groupName;
-  }
+
 }

@@ -68,7 +68,6 @@ class Sw360Component
       foreach($getComponents as $getComponent){
         $releasesT = $getComponent->releases;
         foreach($releasesT as $releaseT){
-          echo $releaseT->fossologyId;
           if(intval($releaseT->fossologyId) == $uploadId){
             $flag = True;
             break;

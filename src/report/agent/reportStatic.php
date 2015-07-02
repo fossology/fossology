@@ -340,8 +340,7 @@ class ReportStatic
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
     $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
     $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
-    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
-    $subHeading = " 4.2. Additional obligations, restrictions & risks beyond common rules";
+    $subHeading = " Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
 
@@ -440,6 +439,9 @@ class ReportStatic
   }
   
   
+  /**
+   * @param Section $section 
+   */ 
   function todoObliList(Section $section)
   {
     $firstRowStyle = array("bgColor" => "E0E0E0");

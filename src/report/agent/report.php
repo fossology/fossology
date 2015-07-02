@@ -746,18 +746,7 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
-  /**
-   * @param uploadId
-   * returns groupName  
-   */
-  function getGroupName($uploadId)
-  {
-    
-    $groupNameArray = $this->uploadDao->getGroupNameByUploadId($uploadId);
-    $groupName = $groupNameArray["group_name"];
-    return $groupName;
-  }
-  
+
   /**
    * @param array $contents
    * @param int $uploadId
@@ -795,7 +784,7 @@ class ReportAgent extends Agent
     
     $licenseObli = new Sw360License();
     
-    $groupName = $this->getGroupName($uploadId);
+    $groupName = $this->userDao->getGroupNameById($groupId);
     
     $results = $licenseObli->sw360GetLicense($uploadId, $groupName, $contents['licenses']['statements']);
 
