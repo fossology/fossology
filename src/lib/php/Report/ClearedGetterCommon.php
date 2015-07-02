@@ -114,14 +114,13 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
-  protected function groupStatements($ungrupedStatements)
+  protected function groupStatements($ungrupedStatements, $extended)
   {
     $statements = array();
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
       $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
-      $risk = $statement['risk'];
 
       if (!array_key_exists('text', $statement))
       {
@@ -143,31 +142,30 @@ abstract class ClearedGetterCommon
 
       $groupBy = $statement[$this->groupBy];
 
-      if(empty($comments))
+      if(empty($comments) && array_key_exists($groupBy, $statements))
       {
-        if (array_key_exists($groupBy, $statements))
-        {
           $currentFiles = &$statements[$groupBy]['files'];
           if (!in_array($fileName, $currentFiles))
             $currentFiles[] = $fileName;
-        }else{
-          $statements[$groupBy] = array(
-            "risk" => $risk,
+      }
+      else {
+        $singleStatement = array(
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "comments" => convertToUTF8($comments, false),
             "files" => array($fileName)
           );
+        if ($extended) {
+          $singleStatement["risk"] =  $statement['risk'];
         }
-      }else{
-          $statements[] = array(
-            "risk" => $risk,
-            "content" => convertToUTF8($content, false),
-            "text" => convertToUTF8($text, false),
-            "comments" => convertToUTF8($comments, false),
-            "files" => array($fileName)
-          );
-      } 
+
+        if (empty($comments)) {
+          $statements[$groupBy] = $singleStatement;
+        }
+        else {
+          $statements[] = $singleStatement;
+        }
+      }
     }
     arsort($statements);
     return $statements;
@@ -181,18 +179,18 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null)
+  public function getCleared($uploadId, $groupId=null, $extended=true)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements);
+    $statements = $this->groupStatements($ungrupedStatements, $extended);
     return array("statements" => array_values($statements));
   }
   
   public function cJson($uploadId, $groupId=null)
   {
-    $json = json_encode($this->getCleared($uploadId, $groupId));
+    $json = json_encode($this->getCleared($uploadId, $groupId, false));
     return str_replace('\u001b','',str_replace('\\f','',$json));
   }
 }
