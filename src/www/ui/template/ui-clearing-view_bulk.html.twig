@@ -7,6 +7,8 @@
 <div class="modal" id="bulkModal" hidden>
   <form name="bulkForm">
     <h2>{{ 'Bulk recognition'| trans }}</h2>
+    {{ 'Notice'|trans }}: {{ 'Since punctuation is included in the matching process, periods needs to be included in the phrases if the word just before is included.'|trans }}
+    <br/>
     {{ 'Hint'|trans }}: {{ 'New license candidates can be added via'|trans }}
     <a href="?mod=advice_license">{{ 'menu Organize&raquo;Licenses'|trans }}</a><br/>
     <select id="bulkAction">
@@ -32,6 +34,7 @@
     <input type="checkbox" style="vertical-align:bottom;" id="forceDecision"/>{{ 'ignoreConflicts'|trans }}<img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/>
     <br>
       <button type="button" onclick='cleanText();'>Clean text</button>
+      <img src="images/info_16.png" style="vertical-align:middle;" title="{{ 'The matching process ignores comment symbols, e.g. double-slashes. Hence, these symbols can be remove from bulk text.'|trans }}" alt="" class="info-bullet"/>
       <button type="button" onclick='scheduleBulkScan();'>Schedule Bulk scan</button>
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
   </form>
