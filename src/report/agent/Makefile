@@ -10,7 +10,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=report.php reportStatic.php version.php
+EXE=report.php reportStatic.php sw360Component.php sw360Licenses.php sw360IpPort.php version.php
 WRAP=report
 
 all: version.php

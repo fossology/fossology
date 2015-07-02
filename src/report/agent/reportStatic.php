@@ -328,21 +328,26 @@ class ReportStatic
 
 
   /**
-   * @param Section $section 
+   * @param1 Section $section
+   * @param2 array of obloigations  
    */ 
-  function todoObliTable(Section $section)
+  function todoObliTable(Section $section, $results)
   {
     $firstRowStyle = array("bgColor" => "D2D0CE");
     $firstRowTextStyle = array("size" => 11, "bold" => true);
     $secondRowTextStyle1 = array("size" => 11, "bold" => false);
     $secondRowTextStyle2 = array("size" => 10, "bold" => false);
     $secondRowTextStyle2Bold = array("size" => 10, "bold" => true);
-    $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FEFF99");
-    $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "CDFFFF");
-    $subHeading = "Additional obligations, restrictions & risks beyond common rules";
+    $firstColStyle = array ("size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
+    $secondColStyle = array ("size" => 11 , "bold"=> true, "bgcolor"=> "E0FFFF");
+    $subHeadingStyle = array("name" => $this->fontFamily, "size" => 14, "italic" => true);
+    $subHeading = " 4.2. Additional obligations, restrictions & risks beyond common rules";
     $subHeadingInfoText1 = "  In this chapter you will find the summary of additional license conditions (relevant for development and distribution) for the OSS component.";
     $subHeadingInfoText2 = "  * The following information helps the project to determine the responsibility regarding the To Do’s. But it is not limited to Development or Distribution. ";
 
+    $cellRowSpan = array("vMerge" => "restart", "valign" => "top","size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
+    $cellRowContinue = array("vMerge" => "continue","size" => 11 , "bold"=> true, "bgcolor" => "FFFFC2");
+    
     $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeadingInfoText1));
     $section->addText(htmlspecialchars($subHeadingInfoText2));
@@ -384,64 +389,57 @@ class ReportStatic
 
 
     $table->addRow($rowWidth);
-    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $secondColStyle);
+    $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
+    $cell = $table->addCell($secondColLen, $secondColStyle);
     $cell = $table->addCell($thirdColLen);
     $cell->addText(htmlspecialchars("<reason for that>"), $secondRowTextStyle2);
     $cell->addText(htmlspecialchars("Filelist:"), $secondRowTextStyle2Bold, $secondRowTextStyle2);
-    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Copyleft Effect"), $firstRowTextStyle);
-    $table->addCell($secondColLen,$secondColStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $table->addCell($fifthColLen);
-
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars("Restrictions for advertising materials"), $firstRowTextStyle);
-    $table->addCell($secondColLen,$secondColStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen);
-    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional Rules for modification"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $secondColStyle)->addText(htmlspecialchars(""), $firstRowTextStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $table->addCell($fifthColLen)->addText(htmlspecialchars(""), $secondRowTextStyle2Bold);
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Additional documentation requirements for modifications (e.g. notice file with author’s name)"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $secondColStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Include special acknowledgments in advertising material"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $secondColStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen);
-    $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-
-    $table->addRow($rowWidth);
-    $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Specific Risks"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $secondColStyle);
-    $table->addCell($thirdColLen);
-    $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
-    $table->addCell($fifthColLen);
-
+    $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
+    
+    if(!empty($results)){ 
+      foreach($results as $key=>$value){
+        if(!empty($value)){
+          $num = count($value);
+          if($num == 1){
+            $table->addRow($rowWidth);
+            $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($key), $firstRowTextStyle);
+            $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
+            $table->addCell($thirdColLen)->addText($value[0]["Text"]);
+            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+          }
+          else{
+            $table->addRow($rowWidth);
+            $table->addCell($firstColLen,$cellRowSpan)->addText(htmlspecialchars($key), $firstRowTextStyle);
+            $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
+            $table->addCell($thirdColLen)->addText($value[0]["Text"]);
+            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            for($j=1;$j<$num;$j++){
+              $table->addRow($rowWidth);
+              $table->addCell($firstColLen,$cellRowContinue)->addText(htmlspecialchars($key), $firstRowTextStyle);
+              $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[$j]["License Name"]));
+              $table->addCell($thirdColLen)->addText($value[$j]["Text"]);
+              $table->addCell($fourthColLen)->addText(htmlspecialchars($value[$j]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+              $table->addCell($fifthColLen)->addText(htmlspecialchars($value[$j]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            }
+          }
+        }
+        else{
+          $table->addRow($rowWidth);
+          $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($key), $firstRowTextStyle);
+          $table->addCell($secondColLen,$secondColStyle);
+          $table->addCell($thirdColLen);
+          $table->addCell($fourthColLen);
+          $table->addCell($fifthColLen);
+        }
+      }
+    }
     $section->addTextBreak();
   }
-
-  /**
-   * @param Section $section 
-   */ 
+  
+  
   function todoObliList(Section $section)
   {
     $firstRowStyle = array("bgColor" => "E0E0E0");

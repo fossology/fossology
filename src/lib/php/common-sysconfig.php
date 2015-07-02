@@ -268,6 +268,23 @@ function Populate_sysconfig()
                     ",'Number', null, '$contextDesc', null";
 
    
+  $Variable = "Sw360ServerIpAddress";
+  $contextNamePrompt = _("SW360 Server IP");
+  $contextValue = "127.0.0.1";
+  $contextDesc = _("Current SW360 Server IP Address");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'SW360IpPort', null, '$contextDesc', null";
+
+
+  $Variable = "Sw360ServerPortAddress";
+  $contextNamePrompt = _("SW360 Server Port");
+  $contextValue = "4085";
+  $contextDesc = _("Current SW360 Server Port Address");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'SW360IpPort', null, '$contextDesc', null";
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
