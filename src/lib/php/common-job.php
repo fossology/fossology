@@ -1,8 +1,4 @@
 <?php
-
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
@@ -20,6 +16,11 @@ use Fossology\Lib\Db\DbManager;
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Db\DbManager;
+
 /**
  * \file common-job.php
  * \brief library of functions used by the ui to manage jobs.
@@ -404,82 +405,4 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
   }
   pg_free_result($result);
   return $jq_pk;
-} // IsAlreadyScheduled()
-
-
-/**
- * \brief Queue an agent.  This is a simple version of AgentAdd() that can be
- *  used by multiple plugins that only use upload_pk as jqargs.
- *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
- *  - It is already queued
- *  - It has already been run by the latest agent version
- *
- * \param $plugin caller plugin object
- * \param $job_pk
- * \param $upload_pk
- * \param $ErrorMsg - error message on failure
- * \param $Dependencies - array of named dependencies. Each array element is the plugin name.
- *         For example,  array(agent_adj2nest, agent_pkgagent).  
- *         Typically, this will just be array(agent_adj2nest).
- * \param $jqargs (optional) jobqueue.jq_args
- *
- * \returns
- * - jq_pk Successfully queued
- * -   0   Not queued, latest version of agent has previously run successfully
- * -  -1   Not queued, error, error string in $ErrorMsg
- **/
-function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies, $jqargs = "", $jq_cmd_args = NULL)
-{
-  global $Plugins;
-  $Deps = array();
-  $DependsEmpty = array();
-
-  /* check if the latest agent has already been run */
-  if ($plugin->AgentHasResults($upload_pk) == 1)
-    return 0;
-
-  /* if it is already scheduled, then return success */
-  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0)
-    return $jq_pk;
-
-  /* queue up dependencies */
-  foreach ($Dependencies as $Dependency)
-  {
-    if (is_array($Dependency))
-    {
-      $PluginName = $Dependency['name'];
-      $DepArgs = $Dependency['args'];
-    } else
-    {
-      $PluginName = $Dependency;
-      $DepArgs = null;
-    }
-    $DepPlugin = plugin_find($PluginName);
-    if ($DepPlugin === null)
-    {
-      $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
-      return -1;
-    }
-    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
-      return -1;
-  }
-  /* schedule AgentName */
-  if (empty($jqargs))
-  {
-    $jqargs = $upload_pk;
-  }
-  $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL, $jq_cmd_args);
-  if (empty($jq_pk))
-  {
-    $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
-    return (-1);
-  }
-  /* Tell the scheduler to check the queue. */
-  $success = fo_communicate_with_scheduler("database", $output, $error_msg);
-  if (!$success)
-  {
-    $ErrorMsg = $error_msg . "\n" . $output;
-  }
-
-  return ($jq_pk);
 }
