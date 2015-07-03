@@ -281,38 +281,46 @@ class ui_browse extends FO_Plugin
 
   /**
    * @brief kludge for plugins not supplying a folder parameter.
-   * Find what folder this upload is in.  Error if in multiple folders.
+   * Find what folder this upload is in.
    */
   private function getFolderId($uploadId)
   {
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     if (empty($uploadId))
     {
-      return GetUserRootFolder();
+      return $rootFolder->getId();
     }
+    
     global $container;
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $container->get('db.manager');
     $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
     if ($uploadExists['cnt']< 1)
     {
       throw new Exception("This upload no longer exists on this system.");
     }
-    $dbManager->prepare($stmt=__METHOD__.'.parent',
-           $sql = "select parent_fk from foldercontents where child_id=$1 and foldercontents_mode=$2");
-    $result = $dbManager->execute($stmt,array($uploadId,2));
-    $allParents = $dbManager->fetchAll($result);
-    $dbManager->freeResult($result);
-    if (count($allParents) > 1)
+    
+    
+    $folderTreeCte = $this->folderDao->getFolderTreeCte($rootFolder);
+    
+    $parent = $dbManager->getSingleRow(
+           $folderTreeCte." SELECT ft.folder_pk FROM foldercontents fc LEFT JOIN folder_tree ft ON fc.parent_fk=ft.folder_pk "
+            . "WHERE child_id=$2 AND foldercontents_mode=$3 ORDER BY depth LIMIT 1",
+               array($rootFolder->getId(), $uploadId, FolderDao::MODE_UPLOAD),
+            __METHOD__.'.parent');
+    if (!$parent)
     {
-      Fatal("Upload $uploadId found in multiple folders.", __FILE__, __LINE__);
+      throw new Exception("Upload $uploadId missing from foldercontents in your foldertree.");
     }
-    if (count($allParents) < 1)
-    {
-      Fatal("Upload $uploadId missing from foldercontents.", __FILE__, __LINE__);
-    }
-    return $allParents[0]['parent_fk'];
+    return $parent['folder_pk'];
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $Folder
+   * @param int $Upload
+   * @return string
+   */
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
   {
     global $container;
