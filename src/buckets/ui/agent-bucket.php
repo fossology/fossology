@@ -34,12 +34,6 @@ class BucketAgentPlugin extends AgentPlugin
 
   protected function getDefaultBucketPool()
   {  
-    global $SysConf;
-    $AuthRec = $SysConf['auth'];
-    if (empty($AuthRec)) {
-      return 0;
-    }
-
     $user_pk = Auth::getUserId();
     if (empty($user_pk)) {
       return 0;
@@ -53,7 +47,8 @@ class BucketAgentPlugin extends AgentPlugin
 
   function preInstall()
   {
-    if (!empty($this->getDefaultBucketPool()))
+    $bucketPool = $this->getDefaultBucketPool();
+    if (!empty($bucketPool))
     {
       menu_insert("Agents::" . $this->Title, 0, $this->Name);
     }
