@@ -377,7 +377,7 @@ class UserDao extends Object
    */
   public function getGroupNameById($groupId)
   {
-    $groupRow =  $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
+    $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
     if (empty($groupId))
     {
       throw new \Exception("Error: Group Id must be specified.");

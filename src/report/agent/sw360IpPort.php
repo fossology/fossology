@@ -1,6 +1,5 @@
 <?php
 /*
- Author: 
  Copyright (C) 2015, Siemens AG
 
  This program is free software; you can redistribute it and/or
