@@ -195,8 +195,8 @@ class ReportAgent extends Agent
                            "bold" => true
                           );
 
-    $paragraphStyle = array("spaceAfter" => 0.5,
-                            "spaceBefore" => 0.75,
+    $paragraphStyle = array("spaceAfter" => 0,
+                            "spaceBefore" => 0,
                             "spacing" => 0
                            );
     
