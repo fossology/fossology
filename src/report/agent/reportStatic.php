@@ -18,6 +18,8 @@
  */
 
 use PhpOffice\PhpWord\Element\Section;
+use \PhpOffice\PhpWord\Shared\Html;
+
 
 class ReportStatic
 {
@@ -34,7 +36,8 @@ class ReportStatic
   function __construct($timeStamp) {
     $this->timeStamp = $timeStamp ?: time();
   }
-  
+
+
   /**
    * @param Section $section 
    */
@@ -44,6 +47,7 @@ class ReportStatic
     $header = $section->addHeader();
     $header->addText(htmlspecialchars("SIEMENS"), $headerStyle);
   }
+
 
   /**
    * @param PhpWord $phpWord
@@ -68,6 +72,7 @@ class ReportStatic
     $table->addRow(200, $styleFirstRow);
     $table->addCell(15000,$styleFirstRow)->addPreserveText(htmlspecialchars("$footerCopyright $footerSpace $footerTime $footerSpace FOSSologyNG Ver:#$commitId-$commitDate $footerSpace $footerPageNo"), $footerStyle); 
   }
+
 
   /**
    * @param Section section 
@@ -110,6 +115,7 @@ class ReportStatic
 
     $section->addTextBreak();
   }
+
 
   /**
    * @param Section $section 
@@ -192,6 +198,7 @@ class ReportStatic
     
     $section->addTextBreak();
   }
+
 
   /**
    * @param Section $section 
@@ -326,7 +333,7 @@ class ReportStatic
     $section->addTextBreak();
   }
 
-
+  
   /**
    * @param1 Section $section
    * @param2 array of obloigations  
@@ -386,7 +393,6 @@ class ReportStatic
     $cell = $table->addCell($fourthColLen);
     $cell = $table->addCell($fifthColLen);
 
-
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $firstColStyle)->addText(htmlspecialchars("Do not use the following Files"), $firstRowTextStyle);
     $cell = $table->addCell($secondColLen, $secondColStyle);
@@ -396,6 +402,8 @@ class ReportStatic
     $cell = $table->addCell($fourthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
     $cell = $table->addCell($fifthColLen)->addText(htmlspecialchars("X"), $secondRowTextStyle2Bold, array("align" => "center"));
     
+    $html = new Html;
+
     if(!empty($results)){ 
       foreach($results as $key=>$value){
         if(!empty($value)){
@@ -404,7 +412,8 @@ class ReportStatic
             $table->addRow($rowWidth);
             $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($key), $firstRowTextStyle);
             $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
-            $table->addCell($thirdColLen)->addText($value[0]["Text"]);
+            $cell = $table->addCell($thirdColLen);
+            $html->addHtml($cell, $value[0]["Text"]);
             $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
           }
@@ -412,14 +421,16 @@ class ReportStatic
             $table->addRow($rowWidth);
             $table->addCell($firstColLen,$cellRowSpan)->addText(htmlspecialchars($key), $firstRowTextStyle);
             $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
-            $table->addCell($thirdColLen)->addText($value[0]["Text"]);
+            $cell = $table->addCell($thirdColLen);
+            $html->addHtml($cell, $value[0]["Text"]);
             $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             for($j=1;$j<$num;$j++){
               $table->addRow($rowWidth);
               $table->addCell($firstColLen,$cellRowContinue)->addText(htmlspecialchars($key), $firstRowTextStyle);
               $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[$j]["License Name"]));
-              $table->addCell($thirdColLen)->addText($value[$j]["Text"]);
+              $cell = $table->addCell($thirdColLen);
+              $html->addHtml($cell, $value[$j]["Text"]);
               $table->addCell($fourthColLen)->addText(htmlspecialchars($value[$j]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
               $table->addCell($fifthColLen)->addText(htmlspecialchars($value[$j]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             }
@@ -493,6 +504,7 @@ class ReportStatic
     $section->addTextBreak();
   }    
 
+
   /**
    * @param Section $section 
    */ 
@@ -538,6 +550,7 @@ class ReportStatic
 
     $section->addTextBreak();
   }
+
 
   /**
    * @param Section $section 
