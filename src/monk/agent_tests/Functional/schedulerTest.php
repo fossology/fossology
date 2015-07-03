@@ -50,7 +50,7 @@ class MonkScheduledTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->testDb = new TestPgDb("monkSched");
+    $this->testDb = new TestPgDb("monkSched".time());
     $this->dbManager = $this->testDb->getDbManager();
 
     $this->licenseDao = new LicenseDao($this->dbManager);
