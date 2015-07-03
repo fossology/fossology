@@ -308,7 +308,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         array(3652, 3651, 32, 0, 536888320, 3, 74, 'uploadDaoTest'),
 
         array(3653, 3652, 32, 3287, $isFile, 4, 5, 'A'),
-        // * B_NoLic 6:7
+        array(3663, 3652, 32, 3287, $isContainer, 6, 7, 'B'),
         array(3668, 3652, 32, 3294, $isFile, 8, 9, 'C'),
         array(3682, 3652, 32, 0, $isContainer, 10, 16, 'D'),
         array(3683, 3682, 32, 3303, $isFile, 11, 12, 'E'),
@@ -320,7 +320,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         // * H/K_NoLic 21:22
         array(3661, 3652, 32, 0, $isContainer, 24, 37, 'L'),
         array(3666, 3661, 32, 0, $isContainer, 25, 28, 'L1'),
-        // * L/L1/L1a_NoLic 26:27
+        array(3667, 3666, 32, 0, $isContainer, 26, 27, 'L1a'),  // * L/L1/L1a_NoLic 26:27
         array(3664, 3661, 32, 0, $isContainer, 29, 32, 'L2'),
         array(3665, 3664, 32, 3292, $isFile, 30, 31, 'L2a'),
         array(3662, 3661, 32, 0, $isContainer, 33, 36, 'L3'),
@@ -482,5 +482,28 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
     $nowAccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupIdAlternative);
     assertThat($nowAccessibleIsAccessible,equalTo(true));
+  }
+  
+  public function testGetFatItem()
+  {
+    $this->prepareUploadTree($this->getTestFileStructure());
+    $isContainer = 536888320;
+    $itemM1a = 13655;
+    $this->prepareUploadTree(array(array($itemM1a, 3655, 32, 0, $isContainer, 39+0, 40-0, 'M1a')));
+    $this->dbManager->queryOnce('UPDATE uploadtree SET realparent=parent WHERE ufile_mode&(1<<28)=0',__METHOD__.'.fixRealparent');
+    
+    $fatA = $this->uploadDao->getFatItemId($itemA=3653, 32, 'uploadtree');
+    assertThat($fatA,equalTo($itemA));
+    $fatB = $this->uploadDao->getFatItemId($itemBEmpty=3663, 32, 'uploadtree');
+    assertThat($fatB, equalTo($itemBEmpty));
+    $fatD = $this->uploadDao->getFatItemId($itemDFolder=3682, 32, 'uploadtree');
+    assertThat($fatD, equalTo($itemDFolder));          
+    $fatL1 = $this->uploadDao->getFatItemId($itemL1ToFolder=3666, 32, 'uploadtree');
+    assertThat($fatL1, equalTo(3667));        
+    $fatL2 = $this->uploadDao->getFatItemId($itemL2ToItem=3664, 32, 'uploadtree');
+    assertThat($fatL2, equalTo(3665));
+    
+    $fatM = $this->uploadDao->getFatItemId(3654, 32, 'uploadtree');
+    assertThat($fatM, equalTo($itemM1a));
   }
 }

@@ -325,7 +325,7 @@ class ui_browse extends FO_Plugin
   {
     global $container;
     $dbManager = $container->get('db.manager');
-    $show = 'detail';
+    $show = 'quick';
     $html = '';
     $uploadtree_tablename = "";
     if (!empty($uploadTreeId))

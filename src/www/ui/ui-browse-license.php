@@ -113,12 +113,15 @@ class ui_browse_license extends DefaultPlugin
 
     $vars['baseuri'] = Traceback_uri();
     $vars['uploadId'] = $upload;
-    $vars['itemId'] = $item;
-
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
+    if($request->get('show')=='quick')
+    {
+      $item = $this->uploadDao->getFatItemId($item,$upload,$this->uploadtree_tablename);
+    }
+    $vars['itemId'] = $item;    
+    
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
-
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
