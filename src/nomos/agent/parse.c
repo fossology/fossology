@@ -81,7 +81,7 @@
 #define _fW3C           30
 #define _mAPTANA        31
 #define _tOPENLDAP      32
-#define _mNTP			33 // To avoid W3C-style detection
+#define _mNTP           33 // To avoid W3C-style detection
 #define _fIP            34
 #define _fANTLR         35
 #define _fCCBY          36
@@ -2337,6 +2337,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_TITLE_ZLIB)) {
     INTERESTING("Zlib");
+  }
+   else if (INFILE (_LT_TRUECRYPT_30)) {
+    INTERESTING("TrueCrypt-3.0");
   }
   else if (INFILE(_TITLE_LIBPNG)) {
     INTERESTING("Libpng");

@@ -10159,6 +10159,10 @@ k
 %ENTRY%	_UTIL_PASSWORD
 %KEY%	=NULL=
 %STR%	"n0m0s4u"
+#
+%ENTRY%	_LT_TRUECRYPT_30
+%KEY%	"(truecrypt)"
+%STR%	"all occurrences of the name truecrypt that could reasonably be considered to identify your product must be removed"
 #####
 # This MUST be the last alias specified; the size of the array of encrypted
 # strings is determined from the following value! (see NFOOTPRINTS, below)
