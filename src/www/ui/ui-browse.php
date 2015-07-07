@@ -144,30 +144,17 @@ class ui_browse extends FO_Plugin
           $V .= "<td>&nbsp;</td>";
         }
       }
-      /* Display item */
-      $V .= "<td>";
-      if (Iscontainer($Row['ufile_mode']))
+      
+      $displayItem = Isdir($Row['ufile_mode']) ? "$Name/" : $Name;
+      if(!empty($Link))
       {
-        $V .= "<b>";
-      }
-      if (!empty($Link))
-      {
-        $V .= "<a href='$Link'>";
-      }
-      $V .= $Name;
-      if (Isdir($Row['ufile_mode']))
-      {
-        $V .= "/";
-      }
-      if (!empty($Link))
-      {
-        $V .= "</a>";
+        $displayItem = "<a href=\"$Link\">$displayItem</a>";
       }
       if (Iscontainer($Row['ufile_mode']))
       {
-        $V .= "</b>";
+        $displayItem = "<b>$displayItem</b>";
       }
-      $V .= "</td>\n";
+      $V .= "<td>$displayItem</td>\n";
 
       if (!Iscontainer($Row['ufile_mode']))
         $V .= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
@@ -176,7 +163,6 @@ class ui_browse extends FO_Plugin
       else
         $V .= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
 
-      $V .= "</td>";
     } /* foreach($Results as $Row) */
     $V .= "</table>\n";
     if (!$ShowSomething)
