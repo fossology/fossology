@@ -23,6 +23,8 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
+require_once __DIR__.'/../../Plugin/FO_Plugin.php';
+
 class UploadPermissionDaoTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestPgDb */
@@ -82,5 +84,50 @@ class UploadPermissionDaoTest extends \PHPUnit_Framework_TestCase
     $nowAccessibleIsAccessible = $this->uploadPermissionDao->isAccessible($uploadId, $groupIdAlternative);
     assertThat($nowAccessibleIsAccessible,equalTo(true));
   }
+  
+  public function testDeletePermissionId()
+  {
+    $this->testDb->createPlainTables(array('perm_upload'));
+    $this->testDb->insertData(array('perm_upload'));
+    $accessibleBefore = $this->uploadPermissionDao->isAccessible($uploadId=1, $groupId=2);
+    assertThat($accessibleBefore,equalTo(true));
+    $this->uploadPermissionDao->updatePermissionId(1,0);
+    $accessibleAfter = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
+    assertThat($accessibleAfter,equalTo(false));
+  }
+  
+  public function testUpdatePermissionId()
+  {
+    $this->testDb->createPlainTables(array('perm_upload'));
+    $this->testDb->insertData(array('perm_upload'));
+    $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_READ;
+    $adminBefore = $this->uploadPermissionDao->isEditable($uploadId=1, $groupId=2);
+    assertThat($adminBefore,equalTo(true));
+    $this->uploadPermissionDao->updatePermissionId(1,Auth::PERM_READ);
+    $adminNomore = $this->uploadPermissionDao->isEditable($uploadId, $groupId);
+    assertThat($adminNomore,equalTo(false));
+    $this->uploadPermissionDao->updatePermissionId(1,Auth::PERM_WRITE);
+    $adminAgain = $this->uploadPermissionDao->isEditable($uploadId, $groupId);
+    assertThat($adminAgain,equalTo(true));
+  }
 
+  public function testInsertPermission()
+  {
+    $this->testDb->createPlainTables(array('perm_upload'));
+    $accessibleBefore = $this->uploadPermissionDao->isAccessible($uploadId=1, $groupId=2);
+    assertThat($accessibleBefore,equalTo(false));
+    $this->uploadPermissionDao->insertPermission($uploadId, $groupId, Auth::PERM_READ);
+    $accessibleAfter = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
+    assertThat($accessibleAfter,equalTo(true));
+    $this->uploadPermissionDao->insertPermission($uploadId, $groupId, Auth::PERM_NONE);
+    $accessibleNomore = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
+    assertThat($accessibleNomore,equalTo(false));
+  }
+  
+  public function testGetPublicPermission()
+  {
+    $this->testDb->insertData(array('upload'));
+    $perm = $this->uploadPermissionDao->getPublicPermission(3);
+    assertThat($perm,equalTo(0));
+  }
 }

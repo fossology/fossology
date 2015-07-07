@@ -1,0 +1,105 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  
+      
+  {{ 'Select the folder that contains the upload'|trans }}: 
+  {% include 'components/select-folder.html.twig' with {'name':'folderselect','id':'folderselect','selected':folderId} %}
+  <br/>
+  {% if uploadList is empty %}
+    {{ 'You have no permission to change permissions on any upload in this folder.'|trans }}
+  {% else %}
+    {{ 'Select the upload you wish to edit'|trans }}:
+    <select id="uploadselect" name="uploadselect">
+    {% for upload in uploadList %}
+      <option value="{{ upload.upload_pk }}"{% if upload.upload_pk==uploadId %} selected="selected"{% endif %}>{{ upload.name|e }},
+        {{ upload.upload_ts|date('Y-m-d h:i:s') }}</option>
+    {% endfor %}
+    </select>
+    <br/>
+    {% import 'include/macros.html.twig' as macro %}
+    {{ "Public Permission"|trans }}:
+    {{ macro.select('publicpermselect',permNames,'publicpermselect',publicPerm) }}
+    
+    <p><table border="1">
+      <tr><th>{{ 'Group'|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
+      
+     {{ content }}
+     
+     
+           
+      <tr>
+        <td>
+          {{ macro.select('groupselectnew',groupArray,'groupselectnew',newGroup) }}
+        </td>
+        <td>
+          {{ macro.select('permselectnew',permNames,'permselectnew',newPerm) }}
+        </td>
+      </tr>
+    </table>    
+    
+    {{ "All upload permissions take place immediately when a value is changed.  There is no submit button."|trans }}<br/>
+    {{ "Add new groups on the last line."|trans }}
+  {% endif %}
+  <h2>{{ "Look up who is a member of group "|trans }}</h2>
+  {{ "To edit group memberships "|trans }} <a href="?mod=group_manage_users">{{ "click here"|trans }}</a>
+  <br/>
+  {{ 'To list the users in a group, select the group'|trans }}: <select id="groupsForGum">
+  {% for gId,gName in groupArray %}
+    <option value="{{ gId }}">{{ gName|e }}</option>
+  {% endfor %}
+  </select>
+  <table id="tblUsers">
+  </table>
+    
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    function js_url(val, url)
+    {
+      window.location.assign(url+val);
+    }
+    
+    dataTableConfig = {
+      "aaData":{{ gumJson }},
+      "aoColumns": [
+        {"sTitle": "{{ 'User'|trans }}", "sClass": "left", "sWidth": "200px"},
+        {"sTitle": "Group", "bVisible": false}
+      ],
+      "iDisplayLength": 50
+    };
+    var oTable = $('#tblUsers').dataTable(dataTableConfig);
+    $('#groupsForGum').change( function() { oTable.fnFilter( $(this).val(), 1 ); } );
+    $('#groupsForGum').trigger('change');
+    
+    $('#folderselect').change(function(){
+      window.location.assign('{{ baseUri }}&folder='+$(this).val());
+    });
+    
+    $('#uploadselect').change(function(){
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload='+$(this).val());
+    });
+    
+    $('#publicpermselect').change(function(){
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&public='+$(this).val());
+    });
+    
+    $('#groupselectnew').change(function(){
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&newperm={{ newPerm }}&newgroup='+$(this).val());
+    });
+
+    $('#permselectnew').change(function(){
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&newgroup={{ newGroup }}&newperm='+$(this).val());
+    });
+    
+  </script>
+{% endblock %}

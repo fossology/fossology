@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
@@ -76,5 +77,39 @@ class UploadPermissionDao extends Object
                array($perm, $uploadId, $userId), __METHOD__.'.insert');
   }
  
-
+  public function updatePermissionId($permId, $permLevel)
+  {
+    if (empty($permLevel)) {
+      $this->dbManager->getSingleRow('DELETE FROM perm_upload WHERE perm_upload_pk=$1',
+              array($permId),
+              __METHOD__ . '.delete');
+    }
+    else {
+      $this->dbManager->getSingleRow('UPDATE perm_upload SET perm=$2 WHERE perm_upload_pk=$1', 
+              array($permId, $permLevel),
+              __METHOD__ . '.update');
+    }
+  }
+  
+  public function insertPermission($uploadId, $groupId, $permLevel)
+  { 
+    $this->dbManager->getSingleRow("DELETE FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2",
+            array($uploadId,$groupId),
+            __METHOD__.'.avoid_doublet');
+    if ($permLevel == Auth::PERM_NONE) {
+      return;
+    }
+    $this->dbManager->insertTableRow('perm_upload', array('perm'=>$permLevel,'upload_fk'=>$uploadId,'group_fk'=>$groupId));
+  }
+  
+  public function setPublicPermission($uploadId, $permLevel)
+  {
+    $this->dbManager->getSingleRow('UPDATE upload SET public_perm=$2 WHERE upload_pk=$1', array($uploadId, $permLevel));
+  }
+  
+  public function getPublicPermission($uploadId)
+  {
+    $row = $this->dbManager->getSingleRow('SELECT public_perm FROM upload WHERE upload_pk=$1 LIMIT 1',array($uploadId),__METHOD__);
+    return $row['public_perm'];
+  }
 }
