@@ -42,6 +42,11 @@ without any warranty.
         <service id="dao.upload" class="Fossology\Lib\Dao\UploadDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
+            <argument type="service" id="dao.upload.permission"/>
+        </service>
+        <service id="dao.upload.permission" class="Fossology\Lib\Dao\UploadPermissionDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="dao.folder" class="Fossology\Lib\Dao\FolderDao">
             <argument type="service" id="db.manager"/>

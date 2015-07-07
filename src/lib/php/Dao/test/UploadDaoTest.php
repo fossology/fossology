@@ -50,7 +50,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     }
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
     $logger->shouldReceive('debug');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $uploadPermissionDao = M::mock('Fossology\Lib\Dao\UploadPermissionDao');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $uploadPermissionDao);
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
