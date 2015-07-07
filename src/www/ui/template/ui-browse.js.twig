@@ -64,7 +64,15 @@ $(document).ready(function() {
     folder = $(this).attr('data-folder');
     browseTable.fnDraw();
     $('#current-folder').text($(this).text());
+    $('#browse-upload-all').val(folder);
     return false;
+  });
+  $('#browse-upload-all').button().change(function event(){
+    var wholeFolder = $(this).prop('checked');
+    if(wholeFolder)
+      $(this).switchClass('browse-upload-all-off','browse-upload-all-on');
+    else
+      $(this).switchClass('browse-upload-all-om','browse-upload-all-off');
   });
 });
 

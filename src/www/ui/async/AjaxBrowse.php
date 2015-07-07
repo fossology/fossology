@@ -210,8 +210,7 @@ class AjaxBrowse extends DefaultPlugin
     $modsUploadMulti = MenuHook::getAgentPluginNames('UploadMulti');
     if (!empty($modsUploadMulti))
     {
-      $text = _('mark for action below');
-      $nameColumn .= ' [<input type="checkbox" name="uploads[]" style="vertical-align:bottom;margin:0px;" value="'.$uploadId.'"/>'.$text.']';
+      $nameColumn = '<input type="checkbox" name="uploads[]" class="browse-upload-checkbox" value="'.$uploadId.'"/>'.$nameColumn;
     }
     
     $dateCol = substr($row['upload_ts'], 0, 19);

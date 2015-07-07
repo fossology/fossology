@@ -63,9 +63,16 @@
         <tbody></tbody>
         <tfoot></tfoot>
         </table>
+        <br/>
         {% if multiUploadAgents is not empty %}
           <input type="hidden" name="mod" id="mod" value=""/>
-          [<input type="checkbox" name="folder" value="{{ folderId }}" style="vertical-align:bottom;margin:0px;"/>{{ 'apply action below for whole folder'|trans }}] <br/>
+          {{ 'Select'|trans }}
+          <input type="checkbox" name="folder" id="browse-upload-all" value="{{ folderId }}"/>
+          <label for="browse-upload-all">
+            <span class="browse-upload-all-on">{{ 'whole folder'|trans }}</span> |
+            <span class="browse-upload-all-off">{{ 'marked uploads'|trans }}</span>
+          </label>
+          {{ 'to run'|trans }}:
           {% for muAgent,muDesc in multiUploadAgents %}
             <input type="submit" value="{{ muDesc }}" name="{{ muAgent }}" class="multi-upload-agent"/>
           {% endfor %}
