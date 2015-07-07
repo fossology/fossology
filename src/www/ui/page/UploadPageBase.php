@@ -138,7 +138,7 @@ abstract class UploadPageBase extends DefaultPlugin
     $message .= _("The file") . " " . $fileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
     if ($request->get('public')==self::PUBLIC_GROUPS)
     {
-      $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
+      $this->getObject('dao.upload.permission')->makeAccessibleToAllGroupsOf($uploadId, $userId);
     }
     return $message;
   }

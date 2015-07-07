@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -51,7 +50,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     }
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
     $logger->shouldReceive('debug');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $uploadPermissionDao = M::mock('Fossology\Lib\Dao\UploadPermissionDao');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $uploadPermissionDao);
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -460,30 +460,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $hashes = $this->uploadDao->getUploadHashes(2);
     assertThat($hashes,equalTo(array('md5'=>'F703E0197FB6C5BD0C8DFDCC115A0231','sha1'=>'5DAFC9C82988A81413B995210B668CF5CF5975FF')));
   }
-  
-  public function testmakeAccessibleToGroup()
-  {
-    $this->testDb->createPlainTables(array('perm_upload','group_user_member'));
-    $userId = 501;
-    $groupId = 601;
-    $groupIdAlternative = 602;
-    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
-    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupIdAlternative,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
-    
-    $unaccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId=1, $groupId);
-    assertThat($unaccessibleIsAccessible,equalTo(false));
-    
-    $this->uploadDao->makeAccessibleToGroup($uploadId, $groupId, Auth::PERM_WRITE);
-    $accessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupId);
-    assertThat($accessibleIsAccessible,equalTo(true));
-    $stillUnaccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupIdAlternative);
-    assertThat($stillUnaccessibleIsAccessible,equalTo(false));
-    
-    $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
-    $nowAccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupIdAlternative);
-    assertThat($nowAccessibleIsAccessible,equalTo(true));
-  }
-  
+   
   public function testGetFatItem()
   {
     $this->prepareUploadTree($this->getTestFileStructure());
