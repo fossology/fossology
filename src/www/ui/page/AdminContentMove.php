@@ -37,7 +37,7 @@ class AdminContentMove extends DefaultPlugin
         self::PERMISSION => Auth::PERM_ADMIN,
         self::REQUIRES_LOGIN => TRUE
     ));
-    $this->folderDao = $GLOBALS['container']->get('dao.folder');
+    $this->folderDao = $this->getObject('dao.folder');
   }
   
   protected function RegisterMenus()
@@ -81,7 +81,7 @@ class AdminContentMove extends DefaultPlugin
     
     $rootFolderId = $this->folderDao->getRootFolder($userId)->getId();
     /* @var $uiFolderNav FolderNav */
-    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
+    $uiFolderNav = $this->getObject('ui.folder.nav');
     $vars['folderTree'] = $uiFolderNav->showFolderTree($rootFolderId);
     $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
    

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,300 +16,184 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Data\UploadStatus;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\AgentPlugin;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @file upload_permissions.php
- * @brief edit upload permissions
- **/
-
-define("TITLE_upload_permissions", _("Edit Uploaded File Permissions"));
-
-class upload_permissions extends FO_Plugin 
+class UploadPermissionPage extends DefaultPlugin 
 {
+  const NAME = 'upload_permissions';
+  const MOD_REUSE = 16;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
+  /** @var DbManager */
+  private $dbManager;
+
   function __construct()
   {
-    $this->Name = "upload_permissions";
-    $this->Title = TITLE_upload_permissions;
-    $this->Version = "1.0";
-    $this->MenuList = "Admin::Upload Permissions";
-    $this->Dependency = array();
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    parent::__construct();
+    parent::__construct(self::NAME, array(
+        self::TITLE =>  _("Edit Uploaded File Permissions"),
+        self::MENU_LIST => "Admin::Upload Permissions",
+        self::PERMISSION => Auth::PERM_WRITE,
+        self::REQUIRES_LOGIN => TRUE
+    ));
+    $this->uploadPermDao = $this->getObject('dao.upload.permission');
+    $this->dbManager = $this->getObject('db.manager');
   }
-
-
-  /* @brief Display group membership
-   * @return html
-   **/
-  function DisplayGroupMembership()
+  
+  /**
+   * @param Request $request
+   * @return Response
+   */
+  protected function handle(Request $request)
   {
-    global $PG_CONN;
-
-    $group_pk = GetParm('group_pk', PARM_INTEGER);
-    $user_pk = Auth::getUserId();
-    $V = "";
-
-    $text = _("To edit group memberships ");
-    $text2 = _("click here");
-    $V .= "<p>$text" . "<a href='" . Traceback_uri() . "?mod=group_manage_users'>" . $text2 . "</a>";
-    $text = _("Look up who is a member of group ");
-
     /* Get array of groups that this user is an admin of */
-    $GroupArray = GetGroupArray($user_pk);
-    if (empty($GroupArray))
+    $groupsWhereUserIsAdmin = GetGroupArray(Auth::getUserId());
+    if (empty($groupsWhereUserIsAdmin))
     {
       $text = _("You have no permission to manage any group.");
-      echo "<p>$text<p>";
-      return;
+      return $this->render('include/base.html.twig',$this->mergeWithDefault(array('content'=>$text)));
     }
-    reset($GroupArray);
-    if (empty($group_pk)) $group_pk = key($GroupArray);
-
-    $text = _("To list the users in a group, select the group:  \n");
-    $V.= "<p>$text";
-
-    /*** Display group select list, on change request new page with group= in url ***/
-    $url = preg_replace('/&group_pk=[0-9]*/',"",Traceback()) . "&group_pk=";
-
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($GroupArray, "groupuserselect", $group_pk, false, false, $onchange);
-
-    /* Select all the user members of this group */
-    $sql = "select group_user_member_pk, user_fk, group_perm, user_name from group_user_member GUM, users
-              where GUM.group_fk=$group_pk and user_fk=user_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $GroupMembersArray = pg_fetch_all($result);
-    pg_free_result($result);
-
-    /* Permissions Table */
-    $V .= "<p><table border=1>";
-    $UserText = _("User");
-    $V .= "<tr><th>$UserText</th></tr>";
-    foreach ($GroupMembersArray as $GroupMember)
-    {
-      $V .= "<tr>";
-      $V .= "<td>";  // user
-      $V .= $GroupMember['user_name'];
-      $V .= "</td>";
-      $V .= "</tr>";
-    }
-
-    $V .= "</table>";
-
-    return $V;
-  }
-
-
-  public function Output()
-  {
-    global $PG_CONN;
-    global $PERM_NAMES;
-
-    /* GET parameters */
-    $folder_pk = GetParm('folder', PARM_INTEGER);
-    $upload_pk = GetParm('upload', PARM_INTEGER);
-    $users_group_pk = GetParm('group_pk', PARM_INTEGER);
-    $group_pk = GetParm('group', PARM_INTEGER);
-    $perm_upload_pk = GetParm('permupk', PARM_INTEGER);
-    $perm = GetParm('perm', PARM_INTEGER);
-    $newgroup = GetParm('newgroup', PARM_INTEGER);
-    $newperm = GetParm('newperm', PARM_INTEGER);
     
-    $public_perm = GetArrayVal('public', $_GET);
-    if ($public_perm == "") $public_perm = -1;
-
-    $V = "";
-
-    /* If perm_upload_pk is passed in, update either the perm or group_pk */
-    $sql = "";
+    $folder_pk = intval($request->get('folder'));
+    $upload_pk = intval($request->get('upload'));
+    $perm_upload_pk = intval($request->get('permupk'));
+    $perm = intval($request->get('perm'));
+    $newgroup = intval($request->get('newgroup'));
+    $newperm = intval($request->get('newperm'));
+    $public_perm = $request->get('public', -1);
+    
+    /* @var $folderDao FolderDao */
+    $folderDao = $this->getObject('dao.folder');
+    $root_folder_pk = $folderDao->getRootFolder(Auth::getUserId())->getId();
+    if (empty($folder_pk)) {
+      $folder_pk = $root_folder_pk;
+    }
+    
+    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
+    if (empty($upload_pk) && !empty($UploadList))
+    {
+      $upload_pk = $UploadList[0]['upload_pk'];
+    }
+    
     if (!empty($perm_upload_pk))
     { 
-      if ($perm === 0)
-      {
-        $sql = "delete from perm_upload where perm_upload_pk='$perm_upload_pk'";
-      }
-      else if (!empty($perm))
-      {
-        $sql = "update perm_upload set perm='$perm' where perm_upload_pk='$perm_upload_pk'";
-      }
-      else if (!empty($group_pk))
-      {
-        $sql = "update perm_upload set group_fk='$group_pk' where perm_upload_pk='$perm_upload_pk'";
-      }
-      
-      if (!empty($sql))
-      {
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
-      } 
+      $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
     }
-    else if (!empty($newgroup) and (!empty($newperm)))
+    else if (!empty($newgroup) && !empty($newperm))
     {
-      // before inserting this new record, delete any record for the same upload and group since
-      // that would be a duplicate
-      $sql = "delete from perm_upload where upload_fk=$upload_pk and group_fk=$newgroup";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-    
-      // Don't insert a Auth::PERM_NONE.  NONE is the default
-      if ($newperm != Auth::PERM_NONE)
-      {
-        $sql = "insert into perm_upload (perm, upload_fk, group_fk) values ($newperm, $upload_pk, $newgroup)";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
-        pg_free_result($result);
-      }
+      $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
       $newperm = $newgroup = 0;
     }
     else if ($public_perm >= 0)
     {
-      $sql = "update upload set public_perm='$public_perm' where upload_pk='$upload_pk'";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
+      $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
     }
 
-    $root_folder_pk = GetUserRootFolder();
-    if (empty($folder_pk)) $folder_pk = $root_folder_pk;
+    $vars = array('folderStructure' => $folderDao->getFolderStructure($root_folder_pk),
+        'groupArray'=>$groupsWhereUserIsAdmin,
+        'uploadId'=>$upload_pk,
+        'folderId'=>$folder_pk,
+        'baseUri'=> Traceback_uri() . '?mod=upload_permissions',
+        'newPerm'=>$newperm, 'newGroup'=>$newgroup,
+        'uploadList'=>$UploadList, 'permNames'=>$GLOBALS['PERM_NAMES']);
 
-    // Get folder array folder_pk => folder_name
-    $FolderArray = array();
-    GetFolderArray($root_folder_pk, $FolderArray);
-
-    /* define js_url */
-    $V .= js_url(); 
-
-    $text = _("Select the folder that contains the upload:  \n");
-    $V.= "$text";
-
-    /*** Display folder select list, on change request new page with folder= in url ***/
-    $url = Traceback_uri() . "?mod=upload_permissions&folder=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($FolderArray, "folderselect", $folder_pk, false, false, $onchange);
-
-    /*** Display upload select list, on change, request new page with new upload= in url ***/
-    $text = _("Select the upload you wish to edit:  \n");
-    $V.= "<br>$text";
-
-    // Get list of all upload records in this folder that the user has PERM_ADMIN
-    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_ADMIN);
-
-    // Make data array for upload select list.  Key is upload_pk, value is a composite
-    // of the upload_filename and upload_ts.
-    // Note that $UploadList may be empty so $UploadArray will be empty
-    $UploadArray = array();
-    foreach($UploadList as $UploadRec) 
+    if (!empty($UploadList))
     {
-      $SelectText = htmlentities($UploadRec['name']);
-      if (!empty($UploadRec['upload_ts']))
+      $vars['publicPerm'] = $this->uploadPermDao->getPublicPermission($upload_pk);
+      $permGroups = $this->uploadPermDao->getPermissionGroups($upload_pk);
+      $vars['permGroups'] = $permGroups;
+      $additableGroups = array(0=>'-- select group --');
+      foreach($groupsWhereUserIsAdmin as $gId=>$gName)
       {
-        $SelectText .= ", " . substr($UploadRec['upload_ts'], 0, 19);
+        if (!array_key_exists($gId, $permGroups)) {
+          $additableGroups[$gId] = $gName;
+        }
       }
-      $UploadArray[$UploadRec['upload_pk']] = $SelectText;
+      $vars['additableGroups'] = $additableGroups;
     }
-
-    /* Get selected upload info to display*/
-    if (empty($upload_pk))
-    {
-      // no upload selected, so use the top one in the select list
-      reset($UploadArray);
-      $upload_pk = key($UploadArray);
+    $vars['gumJson'] = json_encode($this->getGroupMembers($groupsWhereUserIsAdmin));
+    
+    if(!empty($upload_pk)){
+      $vars['permNamesWithReuse'] = $this->getPermNamesWithReuse($upload_pk);
     }
-
-    /* Upload select list */
-    $url = Traceback_uri() . "?mod=upload_permissions&folder=$folder_pk&upload=";
-    $onchange = "onchange=\"js_url(this.value, '$url')\"";
-    $V .= Array2SingleSelect($UploadArray, "uploadselect", $upload_pk, false, false, $onchange);
-
-    /* Get permissions for this upload */
-    if (!empty($UploadArray))
-    {
-      // Get upload.public_perm
-      $sql = "select public_perm from upload where upload_pk='$upload_pk'";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $Row = pg_fetch_all($result);
-      $public_perm = $Row[0]['public_perm'];
-      pg_free_result($result);
-      $text1 = _("Public Permission");
-      $V .= "<p>$text1 &nbsp;";
-      $url = Traceback_uri() . "?mod=upload_permissions&folder=$folder_pk&upload=$upload_pk&public=";
-      $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $V .= Array2SingleSelect($PERM_NAMES, "publicpermselect", $public_perm, false, false, $onchange);
-
-      $sql = "select perm_upload_pk, perm, group_pk, group_name from groups, perm_upload where group_fk=group_pk and upload_fk='$upload_pk'";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $PermArray = pg_fetch_all($result);
-      pg_free_result($result);
-
-      /* Get master array of groups */
-      $sql = "select group_pk, group_name from groups order by group_name";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $GroupArray = array();
-      while ($GroupRow = pg_fetch_assoc($result))
-      {
-        $GroupArray[$GroupRow['group_pk']] = $GroupRow['group_name'];
-      }
-      pg_free_result($result);
-
-      /* Permissions Table */
-      $V .= "<p><table border=1>";
-      $GroupText = _("Group");
-      $PermText = _("Permission");
-      $V .= "<tr><th>$GroupText</th><th>$PermText</th></tr>";
-      foreach ($PermArray as $PermRow)
-      {
-        $V .= "<tr>";
-        $V .= "<td>";  // group
-        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&permupk={$PermRow['perm_upload_pk']}&group=";
-        $onchange = "onchange=\"js_url(this.value, '$url')\"";
-        $V .= Array2SingleSelect($GroupArray, "groupselect", $PermRow['group_pk'], false, false, $onchange);
-        $V .= "</td>";
-        $V .= "<td>";  // permission
-        $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&permupk={$PermRow['perm_upload_pk']}&perm=";
-        $onchange = "onchange=\"js_url(this.value, '$url')\"";
-        $V .= Array2SingleSelect($PERM_NAMES, "permselect", $PermRow['perm'], false, false, $onchange);
-        $V .= "</td>";
-        $V .= "</tr>";
-      }
-      /* Print one extra row for adding perms */
-      $V .= "<tr>";
-      $V .= "<td>";  // group
-      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&newperm=$newperm&newgroup=";
-      $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $Selected = (empty($newgroup)) ? "" : $newgroup;
-      $V .= Array2SingleSelect($GroupArray, "groupselectnew", $Selected, true, false, $onchange);
-      $V .= "</td>";
-      $V .= "<td>";  // permission
-      $url = Traceback_uri() . "?mod=upload_permissions&group_pk=$users_group_pk&upload=$upload_pk&folder=$folder_pk&newgroup=$newgroup&newperm=";
-      $onchange = "onchange=\"js_url(this.value, '$url')\"";
-      $Selected = (empty($newperm)) ? "" : $newperm;
-      $V .= Array2SingleSelect($PERM_NAMES, "permselectnew", $Selected, false, false, $onchange);
-      $V .= "</td>";
-      $V .= "</tr>";
+        
+    return $this->render('upload_permissions.html.twig', $this->mergeWithDefault($vars));
+  }
   
-      $V .= "</table>";
-  
-      $text = _("All upload permissions take place immediately when a value is changed.  There is no submit button.");
-      $V .= "<p>" . $text;
-      $text = _("Add new groups on the last line.");
-      $V .= "<br>" . $text;
-    }
-    else
+  private function getPermNamesWithReuse($uploadId)
+  {
+    $permNamesWithReuse = $GLOBALS['PERM_NAMES'];
+    try
     {
-      $text = _("You have no permission to change permissions on any upload in this folder.");
-      $V .= "<p>$text<p>";
+      $uploadBrowseProxy = new UploadBrowseProxy(Auth::getGroupId(), Auth::PERM_READ, $this->dbManager);
+      $uploadStatus = $uploadBrowseProxy->getStatus($uploadId);
+    }
+    catch(\Exception $e)
+    {
+      return $permNamesWithReuse;
+    }
+    if($uploadStatus==UploadStatus::IN_PROGRESS || $uploadStatus==UploadStatus::CLOSED)
+    {
+      foreach($GLOBALS['PERM_NAMES'] as $perm=>$name)
+      {
+        $permNamesWithReuse[$perm|self::MOD_REUSE] = $name._(' with reuse');
+      }
+    }
+    return $permNamesWithReuse;
+  }
+  
+  private function insertPermission($groupId,$uploadId,$permission,$uploadList)
+  {
+    $fileName = false;
+    foreach($uploadList as $uploadEntry)
+    {
+      if ($uploadEntry['upload_pk']) {
+        $fileName = $uploadEntry['name'];
+      }
+    }
+    if(empty($fileName))
+    {
+      throw new \Exception('This upload is missing or inaccessible');
     }
 
-    $V .= "<hr>";
-    $V .= $this->DisplayGroupMembership();
-    return $V;
+    $reuseBit = $permission&self::MOD_REUSE;
+    if($reuseBit){
+      $jobId = \JobAddJob(Auth::getUserId(), $groupId, $fileName, $uploadId);
+      $reuserAgent = \plugin_find('agent_reuser');
+      $request = new Request(array('uploadToReuse'=>"$uploadId,".Auth::getGroupId(),'groupId'=>$groupId));
+      $reuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
+      if (!empty($errorMsg)) {
+        throw new Exception($errorMsg);
+      }
+      $permission ^= $reuseBit;
+    }
+    $this->uploadPermDao->insertPermission($uploadId, $groupId, $permission);
+  }
+  
+  private function getGroupMembers($groupsWhereUserIsAdmin)
+  {
+    $this->dbManager->prepare($stmt=__METHOD__,
+            "SELECT user_name,gum.group_fk FROM group_user_member gum, users WHERE user_fk=user_pk");
+    $res = $this->dbManager->execute($stmt);
+    $gum = array();
+    while($row = $this->dbManager->fetchArray($res))
+    {
+      if (array_key_exists($row['group_fk'], $groupsWhereUserIsAdmin)) {
+        $gum[] = array($row['user_name'], $row['group_fk']);
+      }
+    }
+    $this->dbManager->freeResult($res);
+    return $gum;
   }
 }
-$NewPlugin = new upload_permissions;
+
+register_plugin(new UploadPermissionPage());

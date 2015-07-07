@@ -459,10 +459,14 @@ class UploadDao extends Object
     return $this->permissionDao->isEditable($uploadId, $groupId);
   }
 
-
   public function makeAccessibleToGroup($uploadId, $groupId, $perm=null)
   {
     $this->permissionDao->makeAccessibleToGroup($uploadId, $groupId, $perm);
+  }
+
+  public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
+  {
+    $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
   }
  
   /**
@@ -474,5 +478,40 @@ class UploadDao extends Object
     $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
         array($uploadId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+  }
+  
+  /**
+   * @param int $itemId
+   * @param string $uploadId
+   * @param string $uploadtreeTablename
+   * @return array
+   */
+  public function getFatItemArray($itemId,$uploadId,$uploadtreeTablename)
+  {
+    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s 
+         WHERE ufile_mode&(1<<28)=0 and s.upload_fk=$2 AND s.realparent=";
+    $sql="WITH RECURSIVE item_path (item_id,num_children,depth,ufile_mode,ufile_name) AS (
+        SELECT uploadtree_pk item_id, ($sqlChildrenOf $1) num_children, 0 depth, ufile_mode, ufile_name
+          FROM $uploadtreeTablename WHERE upload_fk=$2 AND uploadtree_pk=$1
+        UNION
+        SELECT uploadtree_pk item_id, ($sqlChildrenOf ut.uploadtree_pk) num_children,
+               item_path.depth+1 depth, ut.ufile_mode, item_path.ufile_name||'/'||ut.ufile_name ufile_name
+          FROM $uploadtreeTablename ut INNER JOIN item_path ON item_id=ut.realparent
+          WHERE upload_fk=$2 AND ut.ufile_mode&(1<<28)=0 AND num_children<2
+        )
+        SELECT * FROM item_path WHERE num_children!=1 OR ufile_mode&(1<<29)=0 ORDER BY depth DESC LIMIT 1";
+    return $this->dbManager->getSingleRow($sql,array($itemId, $uploadId),__METHOD__.$uploadtreeTablename);
+  }
+    
+  /**
+   * @param int $itemId
+   * @param string $uploadId
+   * @param string $uploadtreeTablename
+   * @return int
+   */
+  public function getFatItemId($itemId,$uploadId,$uploadtreeTablename)
+  {
+    $itemRow = $this->getFatItemArray($itemId,$uploadId,$uploadtreeTablename);
+    return $itemRow['item_id'];
   }
 }
