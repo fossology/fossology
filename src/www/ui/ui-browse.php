@@ -114,7 +114,7 @@ class ui_browse extends FO_Plugin
     $ShowSomething = 0;
     $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     $stmtGetFirstChild = __METHOD__.'.getFirstChild';
-    $dbManager->prepare($stmtGetFirstChild,'SELECT uploadtree_pk FROM uploadtree WHERE parent=$1 limit 1');
+    $dbManager->prepare($stmtGetFirstChild,"SELECT uploadtree_pk FROM $uploadtree_tablename WHERE parent=$1 limit 1");
     foreach ($Results as $Row)
     {
       if (empty($Row['uploadtree_pk'])) continue;
