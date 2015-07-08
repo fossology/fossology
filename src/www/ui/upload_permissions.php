@@ -20,14 +20,18 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class UploadPermissionPage extends DefaultPlugin 
 {
   const NAME = 'upload_permissions';
+  const MOD_REUSE = 16;
   /** @var UploadPermissionDao */
   private $uploadPermDao;
   /** @var DbManager */
@@ -66,14 +70,27 @@ class UploadPermissionPage extends DefaultPlugin
     $newgroup = intval($request->get('newgroup'));
     $newperm = intval($request->get('newperm'));
     $public_perm = $request->get('public', -1);
-
+    
+    /* @var $folderDao FolderDao */
+    $folderDao = $this->getObject('dao.folder');
+    $root_folder_pk = $folderDao->getRootFolder(Auth::getUserId())->getId();
+    if (empty($folder_pk)) {
+      $folder_pk = $root_folder_pk;
+    }
+    
+    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
+    if (empty($upload_pk))
+    {
+      $upload_pk = $UploadList[0]['upload_pk'];
+    }
+    
     if (!empty($perm_upload_pk))
     { 
       $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
     }
-    else if (!empty($newgroup) and (!empty($newperm)))
+    else if (!empty($newgroup) && !empty($newperm))
     {
-      $this->uploadPermDao->insertPermission($upload_pk, $newgroup, $newperm);
+      $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
       $newperm = $newgroup = 0;
     }
     else if ($public_perm >= 0)
@@ -81,18 +98,6 @@ class UploadPermissionPage extends DefaultPlugin
       $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
     }
 
-    /* @var $folderDao FolderDao */
-    $folderDao = $this->getObject('dao.folder');
-    $root_folder_pk = $folderDao->getRootFolder(Auth::getUserId())->getId();
-    if (empty($folder_pk)) {
-      $folder_pk = $root_folder_pk;
-    }
-
-    $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
-    if (empty($upload_pk))
-    {
-      $upload_pk = $UploadList[0]['upload_pk'];
-    }
     $vars = array('folderStructure' => $folderDao->getFolderStructure($root_folder_pk),
         'groupArray'=>$groupsWhereUserIsAdmin,
         'uploadId'=>$upload_pk,
@@ -116,8 +121,56 @@ class UploadPermissionPage extends DefaultPlugin
       $vars['additableGroups'] = $additableGroups;
     }
     $vars['gumJson'] = json_encode($this->getGroupMembers($groupsWhereUserIsAdmin));
+    
+    if(!empty($upload_pk)){
+      $vars['permNamesWithReuse'] = $this->getPermNamesWithReuse($upload_pk);
+    }
         
     return $this->render('upload_permissions.html.twig', $this->mergeWithDefault($vars));
+  }
+  
+  private function getPermNamesWithReuse($uploadId)
+  {
+    $permNamesWithReuse = $GLOBALS['PERM_NAMES'];
+    unset($permNamesWithReuse[Auth::PERM_NONE]);
+    $uploadBrowseProxy = new UploadBrowseProxy(Auth::getGroupId(), Auth::PERM_READ, $this->dbManager);
+    $uploadStatus = $uploadBrowseProxy->getStatus($uploadId);
+    if($uploadStatus==UploadStatus::IN_PROGRESS || $uploadStatus==UploadStatus::CLOSED)
+    {
+      foreach($GLOBALS['PERM_NAMES'] as $perm=>$name)
+      {
+        $permNamesWithReuse[$perm|self::MOD_REUSE] = $name._(' with reuse');
+      }
+    }
+    return $permNamesWithReuse;
+  }
+  
+  private function insertPermission($groupId,$uploadId,$permission,$uploadList)
+  {
+    $fileName = false;
+    foreach($uploadList as $uploadEntry)
+    {
+      if ($uploadEntry['upload_pk']) {
+        $fileName = $uploadEntry['name'];
+      }
+    }
+    if(empty($fileName))
+    {
+      throw new \Exception('This upload is missing or inaccessible');
+    }
+
+    $reuseBit = $permission&self::MOD_REUSE;
+    if($reuseBit){
+      $jobId = \JobAddJob(Auth::getUserId(), $groupId, $fileName, $uploadId);
+      $reuserAgent = \plugin_find('agent_reuser');
+      $request = new Request(array('uploadToReuse'=>"$uploadId,".Auth::getGroupId()));
+      $reuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
+      if (!empty($errorMsg)) {
+        throw new Exception($errorMsg);
+      }
+      $permission ^= $reuseBit;
+    }
+    $this->uploadPermDao->insertPermission($uploadId, $groupId, $permission);
   }
   
   private function getGroupMembers($groupsWhereUserIsAdmin)

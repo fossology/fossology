@@ -43,14 +43,21 @@
           {{ macro.select('groupselectnew',additableGroups,'groupselectnew',newGroup) }}
         </td>
         <td>
-          {{ macro.select('permselectnew',permNames,'permselectnew',newPerm) }}
+          {% if permNamesWithReuse is defined %}
+            {{ macro.select('permselectnew',permNamesWithReuse,'permselectnew',newPerm) }}
+          {% else %}
+            {{ macro.select('permselectnew',permNames,'permselectnew',newPerm) }}
+          {% endif %}
         </td>
       </tr>
       {% endif %}
     </table>    
     
     {{ "All upload permissions take place immediately when a value is changed.  There is no submit button."|trans }}<br/>
-    {% if additableGroups is not empty %}{{ "Add new groups on the last line."|trans }}{% endif %}
+    {% if additableGroups is not empty %}
+      {{ "Add new groups on the last line."|trans }}
+      {{ 'If the clearing for the upload is in progress or ready for your recent group, the reuser can copy these.'|trans }}
+    {% endif %}
   {% endif %}
   <h2>{{ "Look up who is a member of group "|trans }}</h2>
   {{ "To edit group memberships "|trans }} <a href="?mod=group_manage_users">{{ "click here"|trans }}</a>
@@ -69,11 +76,6 @@
   {{ parent() }}
   <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
   <script type="text/javascript">
-    function js_url(val, url)
-    {
-      window.location.assign(url+val);
-    }
-    
     dataTableConfig = {
       "aaData":{{ gumJson }},
       "aoColumns": [
