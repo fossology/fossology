@@ -27,6 +27,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
@@ -55,6 +56,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $agentLicenseEventProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
   /** @var HighlightDao */
   private $highlightDao;
   /** @var SchedulerTestRunnerCli */
@@ -69,7 +72,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
