@@ -130,4 +130,12 @@ class UploadPermissionDaoTest extends \PHPUnit_Framework_TestCase
     $perm = $this->uploadPermissionDao->getPublicPermission(3);
     assertThat($perm,equalTo(0));
   }
+  
+  public function testGetPermissionGroups()
+  {
+    $this->testDb->createPlainTables(array('perm_upload','groups'));
+    $this->testDb->insertData(array('perm_upload','groups'));
+    $permissionGroups = $this->uploadPermissionDao->getPermissionGroups(1);
+    assertThat($permissionGroups,is(array(2=>array('perm_upload_pk'=>1, 'perm'=>10, 'group_pk'=>2, 'group_name'=>'fossy'))));
+  }
 }

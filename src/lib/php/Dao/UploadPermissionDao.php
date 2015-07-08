@@ -112,4 +112,21 @@ class UploadPermissionDao extends Object
     $row = $this->dbManager->getSingleRow('SELECT public_perm FROM upload WHERE upload_pk=$1 LIMIT 1',array($uploadId),__METHOD__);
     return $row['public_perm'];
   }
+  
+  public function getPermissionGroups($uploadId)
+  {
+    $this->dbManager->prepare($stmt=__METHOD__,
+        "SELECT perm_upload_pk, perm, group_pk, group_name
+           FROM groups, perm_upload
+           WHERE group_fk=group_pk AND upload_fk=$1
+           ORDER BY group_name");
+    $res = $this->dbManager->execute($stmt, array($uploadId));
+    $groupMap = array();
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $groupMap[$row['group_pk']] = $row;
+    }
+    $this->dbManager->freeResult($res);
+    return $groupMap;
+  }
 }

@@ -29,23 +29,28 @@
     
     <p><table border="1">
       <tr><th>{{ 'Group'|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
-      
-     {{ content }}
-     
-     
-           
+      {% for permGroup in permGroups %}
+      <tr>
+        <td>{{ permGroup.group_name|e }}</td>
+        <td>
+          {{ macro.select('permselect',permNames,'permselect'~permGroup.perm_upload_pk,permGroup.perm,'data-puid="'~permGroup.perm_upload_pk~'"') }}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if additableGroups is not empty %}
       <tr>
         <td>
-          {{ macro.select('groupselectnew',groupArray,'groupselectnew',newGroup) }}
+          {{ macro.select('groupselectnew',additableGroups,'groupselectnew',newGroup) }}
         </td>
         <td>
           {{ macro.select('permselectnew',permNames,'permselectnew',newPerm) }}
         </td>
       </tr>
+      {% endif %}
     </table>    
     
     {{ "All upload permissions take place immediately when a value is changed.  There is no submit button."|trans }}<br/>
-    {{ "Add new groups on the last line."|trans }}
+    {% if additableGroups is not empty %}{{ "Add new groups on the last line."|trans }}{% endif %}
   {% endif %}
   <h2>{{ "Look up who is a member of group "|trans }}</h2>
   {{ "To edit group memberships "|trans }} <a href="?mod=group_manage_users">{{ "click here"|trans }}</a>
@@ -99,6 +104,10 @@
 
     $('#permselectnew').change(function(){
       window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&newgroup={{ newGroup }}&newperm='+$(this).val());
+    });
+    
+    $('select[name=permselect]').change(function(){
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&permupk='+$(this).attr('data-puid')+'&perm='+$(this).val());
     });
     
   </script>
