@@ -1,0 +1,5 @@
+/*
+ * If you purchased a commercial license for product [product name] the commercial
+ * license agreement applies to this source code.
+ * Otherwise the GPL license agreement applies to this source code.
+ */

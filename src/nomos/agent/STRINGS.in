@@ -1385,6 +1385,74 @@
 %KEY%	"licen[cs]"
 %STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is r?e?-?distributed along with the work"
 #
+%ENTRY% _LT_DUAL_GEPHI
+%KEY%	"notice[s]"
+%STR%	"This file is part of Gephi\.? DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER"
+#
+%ENTRY% _LT_DUAL_LICENSE_LOGBACK
+%KEY%   "LICENSE"
+%STR%   "Logback LICENSE"
+#
+%ENTRY% _LT_DUAL_LICENSE_OPENSSL
+%KEY%   "license"
+%STR%   "OpenSSL toolkit stays under a dual license"
+#
+%ENTRY% _LT_DUAL_LICENSE_QOOXDOO
+%KEY%   "license"
+%STR%   "recipient of qooxdoo\,? you may choose which licen[cs]e to receive the code under"
+#
+%ENTRY% _LT_DUAL_LICENSE_XMIND
+%KEY%   "licenses"
+%STR%   "XMind 3 is dual licensed under 2 open source licen[cs]es"
+#
+%ENTRY% _LT_DUAL_LICENSE_JQUERY
+%KEY%   "Library"
+%STR%   "jQuery JavaScript Library"
+#
+%ENTRY% _LT_DUAL_LICENSE_RHINOSLIDER
+%KEY%   "Rhinoslide"
+%STR%   "Rhinoslider 1\.?05"
+#
+%ENTRY% _LT_DUAL_LICENSE_TRIMOZILLA
+%KEY%	"terms"
+%STR%	"terms of any one of the MPL\,? the GPL or the LGPL\.?"
+#
+%ENTRY% _LT_DUAL_LICENSE_TRIQT
+%KEY%   "licenses"
+%STR%   "Licensees holding valid commercial Qt licen[cs]es"
+#
+%ENTRY% _LT_DUAL_LICENSE_ASTERISK
+%KEY%   "License"
+%STR%   "Asterisk is distributed under the GNU General Public Licen[cs]e"
+#
+%ENTRY% _LT_DUAL_LICENSE_PERL
+%KEY%   "terms"
+%STR%   "no Perl script falls under the terms of the GPL unless you explicitly put"
+#
+%ENTRY% _LT_DUAL_LICENSE_X3DOM
+%KEY%   "Copyright"
+%STR%   "Copyright \(C\) 2009 X3DOM"
+#
+%ENTRY% _LT_DUAL_LICENSE_GLASSFISH
+%KEY%   "glassfish"
+%STR%   "glassfish\.?dev\.?java\.?net"
+#
+%ENTRY% _LT_DUAL_LICENSE_HAPI
+%KEY%   "Hapi"
+%STR%   "HAPI configuration and factory"
+#
+%ENTRY% _LT_DUAL_LICENSE_NETBEANS
+%KEY%   "original"
+%STR%   "original software is NetBeans"
+#
+%ENTRY% _LT_DUAL_LICENSE_COMMERCIAL
+%KEY%   "license"
+%STR%   "commercial licen[cs]e agreement applies to this source code\.? Otherwise the GPL licen[cs]e agreement"
+#
+%ENTRY% _LT_DUAL_LICENSE_MAGNOLIA
+%KEY%   "magnolia"
+%STR%   "w?w?w\.?magnolia-cms\.?com/mna\.?html"
+#
 %ENTRY%	_LT_DUAL_LICENSE_0
 %KEY%	"licen[cs]"
 %STR%	"(\<dual\>)[ -]license =FEW= and"
