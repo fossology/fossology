@@ -74,7 +74,7 @@ class CopyrightDao extends Object
     $params = array($pFileId);
     if($agentId!=0) {
       $statementName .= '.agentId';
-      $sql .= 'AND agent_fk=$2';
+      $sql .= ' AND agent_fk=$2';
       $params[] = $agentId;
     }
     $this->dbManager->prepare($statementName,$sql);
@@ -274,5 +274,4 @@ class CopyrightDao extends Object
     $resource = $this->dbManager->execute($stmt, $params);
     $this->dbManager->freeResult($resource);
   }
-  
 }
