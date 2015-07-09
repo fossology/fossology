@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\View\HighlightRenderer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,8 @@ class Xpview extends DefaultPlugin
   protected $decisionTableName;
   /** @var string */
   protected $tableName;
+  /** @var string */
+  protected $agentName;
   /** @var  array */
   protected $highlightTypeToStringMap;
   /** @var  array */
@@ -61,6 +64,7 @@ class Xpview extends DefaultPlugin
                                        self::PERMISSION=> Auth::PERM_READ));
     
     parent::__construct($name,$mergedParams);
+    $this->agentName = $this->tableName;
     
     $this->uploadDao = $this->getObject('dao.upload');
     $this->copyrightDao = $this->getObject('dao.copyright');
@@ -129,7 +133,12 @@ class Xpview extends DefaultPlugin
           $description, $textFinding, $comment);
     }
 
-    $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $this->typeToHighlightTypeMap);
+    $scanJobProxy = new ScanJobProxy($this->getObject('dao.agent'), $uploadId);
+    $scanJobProxy->createAgentStatus(array($this->agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    $latestXpAgentId = $selectedScanners[$this->agentName];
+    
+    $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
 
     if (count($highlights) < 1)
     {
