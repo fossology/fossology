@@ -98,13 +98,14 @@ class Xpview extends DefaultPlugin
         return $this->responseBad();
       }
 
-      $uploadTreeId = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
-      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      $uploadTree = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
+      if ($uploadTree === UploadDao::NOT_FOUND)
       {
         return $this->responseBad();
       }
+      $uploadTreeId = $uploadTree->getId();
 
-      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
     }
     if (empty($uploadTreeId))
     {
@@ -206,6 +207,9 @@ class Xpview extends DefaultPlugin
    */
   function RegisterMenus()
   {
+    $text = _("Copyright/Email/Url/Author");
+    menu_insert("Browse-Pfile::Copyright/Email/Url", 0, 'copyright-view', $text);
+    
     // For this menu, I prefer having this in one place
     $text = _("Set the concluded licenses for this upload");
     menu_insert("Clearing::Licenses", 36, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
