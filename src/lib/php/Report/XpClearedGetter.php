@@ -52,6 +52,9 @@ class XpClearedGetter extends ClearedGetterCommon
     $scanJobProxy->createAgentStatus(array($agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     $latestXpAgentId = $selectedScanners[$agentName];
+    if (!empty($this->extrawhere)) {
+      $this->extrawhere .= ' AND';
+    }
     $this->extrawhere .= ' agent_fk='.$latestXpAgentId;
 
     return $this->copyrightDao->getAllEntries($this->tableName, $uploadId, $uploadTreeTableName, $this->type, $this->getOnlyCleared, DecisionTypes::IDENTIFIED, $this->extrawhere);
