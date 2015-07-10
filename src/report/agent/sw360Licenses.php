@@ -89,8 +89,8 @@ class Sw360License
                 "Text" => $todo->text, 
                 "ObligationsType" => $obligationType->type,
                 "ObligationName" => $obligationType->name,
-                "developmentString" => $todo->developmentString,
-                "distributionString" => $todo->distributionString
+                "DevelopmentString" => $todo->developmentString,
+                "DistributionString" => $todo->distributionString
               );
             }
           }
@@ -99,33 +99,33 @@ class Sw360License
     }
     
     if(!empty($todoLicenseArray)){
-      foreach($todoLicenseArray as &$LicenseArray){
-        if($LicenseArray["developmentString"] == "True"){
-          $LicenseArray["developmentString"] = "X";
+      foreach($todoLicenseArray as &$licenseArray){
+        if($licenseArray["DevelopmentString"] == "True"){
+          $licenseArray["DevelopmentString"] = "X";
         }
         else{
-          $LicenseArray["developmentString"] = " ";
+          $licenseArray["DevelopmentString"] = " ";
         }
         
-        if($LicenseArray["distributionString"] == "True"){
-          $LicenseArray["distributionString"] = "X";
+        if($licenseArray["DistributionString"] == "True"){
+          $licenseArray["DistributionString"] = "X";
         }
         else{
-          $LicenseArray["distributionString"] = " ";
+          $licenseArray["DistributionString"] = " ";
         }
       }
-    }
     
-    $results = array();
-    foreach($todoLicenseArray as $data){
-      $id = $data["ObligationName"];
-      if(isset($results[$id])) {
-        $results[$id][] = $data;
-      }
-      else{
-        $results[$id] = array($data);
-      }
-    }   
+      $results = array();
+      foreach($todoLicenseArray as $data){
+        $id = $data["ObligationName"];
+        if(isset($results[$id])) {
+          $results[$id][] = $data;
+        }
+        else{
+          $results[$id] = array($data);
+        }
+      }   
+    }
     return $results;
   }
 }

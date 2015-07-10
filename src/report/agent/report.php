@@ -221,7 +221,7 @@ class ReportAgent extends Agent
   /**
    * @brief Design the summaryTable of the report
    * @param Section $section
-   * @param string $packageName 
+   * @param string $uploadId 
    * @param string $userName
    * @param array mainLicenses
    * @param int $timestamp
