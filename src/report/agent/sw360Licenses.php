@@ -97,7 +97,6 @@ class Sw360License
         }
       } 
     }
-    
     if(!empty($todoLicenseArray)){
       foreach($todoLicenseArray as &$licenseArray){
         if($licenseArray["DevelopmentString"] == "True"){

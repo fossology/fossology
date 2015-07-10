@@ -23,7 +23,7 @@ include $(VARS)
 FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$"`
 
 all:
-	@echo "TODO run the thrift compiler here"
+	@echo "nothing to do"
 
 install: all
 	mkdir -p $(DESTDIR)$(MODDIR)/lib/thrift
@@ -36,7 +36,7 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/lib/thrift
 
 clean:
-	rm -f gen-php
+	@echo "nothing to do"
 
 test:
 	@echo "nothing to do"

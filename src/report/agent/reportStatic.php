@@ -414,8 +414,8 @@ class ReportStatic
             $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
             $cell = $table->addCell($thirdColLen);
             $html->addHtml($cell, $value[0]["Text"]);
-            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
-            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["DevelopmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["DistributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
           }
           else{
             $table->addRow($rowWidth);
@@ -423,16 +423,16 @@ class ReportStatic
             $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[0]["License Name"]));
             $cell = $table->addCell($thirdColLen);
             $html->addHtml($cell, $value[0]["Text"]);
-            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
-            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fourthColLen)->addText(htmlspecialchars($value[0]["DevelopmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+            $table->addCell($fifthColLen)->addText(htmlspecialchars($value[0]["DistributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             for($j=1;$j<$num;$j++){
               $table->addRow($rowWidth);
               $table->addCell($firstColLen,$cellRowContinue)->addText(htmlspecialchars($key), $firstRowTextStyle);
               $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars($value[$j]["License Name"]));
               $cell = $table->addCell($thirdColLen);
               $html->addHtml($cell, $value[$j]["Text"]);
-              $table->addCell($fourthColLen)->addText(htmlspecialchars($value[$j]["developmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
-              $table->addCell($fifthColLen)->addText(htmlspecialchars($value[$j]["distributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+              $table->addCell($fourthColLen)->addText(htmlspecialchars($value[$j]["DevelopmentString"]), $secondRowTextStyle2Bold, array("align" => "center"));
+              $table->addCell($fifthColLen)->addText(htmlspecialchars($value[$j]["DistributionString"]), $secondRowTextStyle2Bold, array("align" => "center"));
             }
           }
         }
