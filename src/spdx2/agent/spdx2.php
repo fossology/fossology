@@ -87,26 +87,9 @@ class SpdxTwoAgent extends Agent
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
+    $this->heartbeat(0);
+    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
     
-    $filesWithLicenses = array();
-    foreach ($clearingDecisions as $clearingDecision) {
-      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
-        continue;
-      }
-      /** @var ClearingDecision $clearingDecision */
-      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved())
-        {
-          continue;
-        }
-        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
-                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
-      }
-    }
-
     $licenseComment = $this->addScannerResults($filesWithLicenses, $uploadId);
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
@@ -135,6 +118,39 @@ class SpdxTwoAgent extends Agent
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
+  }
+
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
+   */
+  protected function getFilesWithLicensesFromClearings(&$clearingDecisions)
+  {
+    $filesWithLicenses = array();
+    $clearingsProceeded = 0;
+    foreach ($clearingDecisions as $clearingDecision) {
+      $clearingsProceeded += 1;
+      if(($clearingsProceeded&2047)==0)
+      {
+        $this->heartbeat(count($filesWithLicenses));
+      }
+      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      {
+        continue;
+      }
+      
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved())
+        {
+          continue;
+        }
+        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
+                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
+      }
+    }
+    return $filesWithLicenses;
   }
 
   protected function addScannerResults(&$filesWithLicenses, $uploadId)
@@ -228,10 +244,15 @@ class SpdxTwoAgent extends Agent
   
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
+    $filesProceeded = 0;
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
     $content = '';
     foreach($filesWithLicenses as $fileId=>$licenses) {
+      $filesProceeded += 1;
+      if(($filesProceeded&2047)==0){
+        $this->heartbeat($filesProceeded);
+      }
       $hashes = $treeDao->getItemHashes($fileId);
       $content .= $this->renderString('spdx-file.xml.twig',array(
           'fileId'=>$fileId,
