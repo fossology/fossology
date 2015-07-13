@@ -25,6 +25,7 @@ use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -91,7 +92,7 @@ class SpdxTwoAgent extends Agent
     $this->heartbeat(0);
     $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
     
-    $licenseComment = $this->addScannerResults($filesWithLicenses, $uploadId);
+    $licenseComment = $this->addScannerResults($filesWithLicenses, $itemTreeBounds);
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
     
@@ -154,8 +155,13 @@ class SpdxTwoAgent extends Agent
     return $filesWithLicenses;
   }
 
-  protected function addScannerResults(&$filesWithLicenses, $uploadId)
+  /**
+   * @param string[][][] $filesWithLicenses
+   * @param ItemTreeBounds $itemTreeBounds
+   */
+  protected function addScannerResults(&$filesWithLicenses, $itemTreeBounds)
   {
+    $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array_keys($this->agentNames);
     $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'), $uploadId);
     $scanJobProxy->createAgentStatus($scannerAgents);
@@ -165,11 +171,19 @@ class SpdxTwoAgent extends Agent
       return;
     }
     $selectedScanners = '{'.implode(',',$scannerIds).'}';
-    $sql= "SELECT uploadtree_pk,rf_fk FROM uploadtree_a ut, license_file
-      WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1) GROUP BY uploadtree_pk,rf_fk";
+    $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
+    $sql = "SELECT uploadtree_pk,rf_fk FROM $tableName ut, license_file
+      WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
+    $param = array($selectedScanners);
+    if ($tableName == 'uploadtree_a') {
+      $param[] = $uploadId;
+      $sql .= " AND upload_fk=$".count($param);
+      $stmt .= $tableName;
+    }
+    $sql .=  " GROUP BY uploadtree_pk,rf_fk";
     $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt,array($selectedScanners));
+    $res = $this->dbManager->execute($stmt,$param);
     while($row=$this->dbManager->fetchArray($res))
     {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
