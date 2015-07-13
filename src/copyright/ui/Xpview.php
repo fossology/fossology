@@ -136,16 +136,19 @@ class Xpview extends DefaultPlugin
     $scanJobProxy = new ScanJobProxy($this->getObject('dao.agent'), $uploadId);
     $scanJobProxy->createAgentStatus(array($this->agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    $latestXpAgentId = $selectedScanners[$this->agentName];
-    
-    $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
+    $highlights = array();
+    if(array_key_exists($this->agentName, $selectedScanners))
+    {
+      $latestXpAgentId = $selectedScanners[$this->agentName];
+      $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
+    }
 
     if (count($highlights) < 1)
     {
       $vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
-    /** @var ui_view $view */
+    /* @var $view ui_view */
     $view = plugin_find("view");
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
