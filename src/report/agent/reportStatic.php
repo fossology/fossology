@@ -496,7 +496,7 @@ class ReportStatic
   /**
    * @param Section $section 
    */ 
-  function forOtherTodos(Section $section)
+  function forOtherTodos(Section $section, $eccCount)
   {
     $subSubHeadingInfoTextStyle = array("size" => 10, "bold"=>false);
     $subSubHeadingInfoTextStyle1 = array("size" => 12, "bold"=>true);
@@ -506,6 +506,7 @@ class ReportStatic
     $subSubHeadingInfoText = "Assess potential export restrictions together with your export control agent regarding this software component as defined in your applicable process.";
     $subSubHeadingInfoText1 = "Export Restrictions found in Source Code:";
     $subSubHeadingInfoText2 = "No export restriction notices found in source scan – export restriction clarification is responsibility of Siemens projects/product managers.";
+    $subSubHeadingInfoTextElse ="Export Restrictions found in the source code -> Hyperlink";
 
     $subSubHeading1 = "Security Vulnerabilities";
     $subSubHeadingInfoText3 = "Security Vulnerabilities must be examined in product specific use - project leader is responsible to verify all security issues - as defined in your applicable process";
@@ -520,8 +521,11 @@ class ReportStatic
     $section->addTitle(htmlspecialchars($subSubHeading), 4);
     $section->addText(htmlspecialchars($subSubHeadingInfoText), $subSubHeadingInfoTextStyle);
     $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, "pStyle");
+    if(empty($eccCount)){
     $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle);
-    
+    }else{
+    $section->addLink("eccInternalLink", htmlspecialChars($subSubHeadingInfoTextElse), null, null, true);
+    }
     $section->addTextBreak();
 
     $section->addTitle(htmlspecialchars($subSubHeading1), 4);

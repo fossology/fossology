@@ -766,7 +766,7 @@ class ReportAgent extends Agent
     $sR->todoObliList($section);
  
     /* For other todolist */
-    $sR->forOtherTodos($section);
+    $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
     /* Basic for clearing report */
     $sR->basicForClearingReport($section);
@@ -802,6 +802,7 @@ class ReportAgent extends Agent
 
     /* Display Ecc statements and files */
     $heading = "Export Restrictions";
+    $section->addBookmark("eccInternalLink");
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements']);
 
     /* Display IP statements and files */
