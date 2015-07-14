@@ -22,7 +22,6 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Symfony\Component\HttpFoundation\Request;
