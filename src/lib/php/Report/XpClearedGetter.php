@@ -51,6 +51,9 @@ class XpClearedGetter extends ClearedGetterCommon
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
     $scanJobProxy->createAgentStatus(array($agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return array();
+    }
     $latestXpAgentId = $selectedScanners[$agentName];
     if (!empty($this->extrawhere)) {
       $this->extrawhere .= ' AND';
