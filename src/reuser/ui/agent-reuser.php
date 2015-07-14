@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\PackageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Util\StringOperation;
+use Symfony\Component\HttpFoundation\Request;
 
 class ReuserAgentPlugin extends AgentPlugin
 {
@@ -68,7 +69,12 @@ class ReuserAgentPlugin extends AgentPlugin
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
   }
   
-  
+  /**
+   * @param int $jobId
+   * @param int $uploadId
+   * @param string $errorMsg
+   * @param Request $request
+   */
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
     $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
@@ -80,10 +86,11 @@ class ReuserAgentPlugin extends AgentPlugin
       $errorMsg .= 'no reuse upload id given';
       return -1;
     }
+    $groupId = $request->get('groupId', Auth::getGroupId());
     
     $reuseModeVal = $request->get('reuseMode');
     $reuseMode = empty($reuseModeVal) ? 0 : 1;
-    $this->createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode);
+    $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode);
     
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
   }
@@ -91,13 +98,13 @@ class ReuserAgentPlugin extends AgentPlugin
   /**
    * @param int $uploadId
    * @param int $reuseUploadId
+   * @param int $groupId
    * @param int $reuseGroupId
    * @param int $reuseMode
-   * @internal description
    */
-  protected function createPackageLink($uploadId, $reuseUploadId, $reuseGroupId, $reuseMode=0)
+  protected function createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode=0)
   {
-    /** @var PackageDao */
+    /* @var $packageDao PackageDao */
     $packageDao = $GLOBALS['container']->get('dao.package');
     $newUpload = $this->uploadDao->getUpload($uploadId);
     $uploadForReuse = $this->uploadDao->getUpload($reuseUploadId);
@@ -113,7 +120,7 @@ class ReuserAgentPlugin extends AgentPlugin
 
     $packageDao->addUploadToPackage($uploadId, $package);
 
-    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, Auth::getGroupId(), $reuseGroupId, $reuseMode);
+    $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode);
   }
 }
 

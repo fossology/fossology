@@ -53,7 +53,7 @@ env:
 matrix:
   include:
     - php: 5.3
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKETARGETS='build-lib VERSIONFILE build-cli'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.4
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5
