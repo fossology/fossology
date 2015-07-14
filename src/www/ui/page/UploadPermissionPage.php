@@ -22,7 +22,6 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,7 +78,7 @@ class UploadPermissionPage extends DefaultPlugin
     }
     
     $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
-    if (empty($upload_pk))
+    if (empty($upload_pk) && !empty($UploadList))
     {
       $upload_pk = $UploadList[0]['upload_pk'];
     }
@@ -111,7 +110,7 @@ class UploadPermissionPage extends DefaultPlugin
       $vars['publicPerm'] = $this->uploadPermDao->getPublicPermission($upload_pk);
       $permGroups = $this->uploadPermDao->getPermissionGroups($upload_pk);
       $vars['permGroups'] = $permGroups;
-      $additableGroups = array();
+      $additableGroups = array(0=>'-- select group --');
       foreach($groupsWhereUserIsAdmin as $gId=>$gName)
       {
         if (!array_key_exists($gId, $permGroups)) {
@@ -132,9 +131,15 @@ class UploadPermissionPage extends DefaultPlugin
   private function getPermNamesWithReuse($uploadId)
   {
     $permNamesWithReuse = $GLOBALS['PERM_NAMES'];
-    unset($permNamesWithReuse[Auth::PERM_NONE]);
-    $uploadBrowseProxy = new UploadBrowseProxy(Auth::getGroupId(), Auth::PERM_READ, $this->dbManager);
-    $uploadStatus = $uploadBrowseProxy->getStatus($uploadId);
+    try
+    {
+      $uploadBrowseProxy = new UploadBrowseProxy(Auth::getGroupId(), Auth::PERM_READ, $this->dbManager);
+      $uploadStatus = $uploadBrowseProxy->getStatus($uploadId);
+    }
+    catch(\Exception $e)
+    {
+      return $permNamesWithReuse;
+    }
     if($uploadStatus==UploadStatus::IN_PROGRESS || $uploadStatus==UploadStatus::CLOSED)
     {
       foreach($GLOBALS['PERM_NAMES'] as $perm=>$name)
@@ -163,7 +168,7 @@ class UploadPermissionPage extends DefaultPlugin
     if($reuseBit){
       $jobId = \JobAddJob(Auth::getUserId(), $groupId, $fileName, $uploadId);
       $reuserAgent = \plugin_find('agent_reuser');
-      $request = new Request(array('uploadToReuse'=>"$uploadId,".Auth::getGroupId()));
+      $request = new Request(array('uploadToReuse'=>"$uploadId,".Auth::getGroupId(),'groupId'=>$groupId));
       $reuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
       if (!empty($errorMsg)) {
         throw new Exception($errorMsg);

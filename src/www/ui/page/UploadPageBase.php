@@ -18,13 +18,14 @@
          
 namespace Fossology\UI\Page;
 
-use Fossology\Lib\Plugin\DefaultPlugin;
-use Symfony\Component\HttpFoundation\Request;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Plugin\AgentPlugin;
+use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\UI\MenuHook;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class UploadPageBase extends DefaultPlugin
 {
@@ -112,13 +113,15 @@ abstract class UploadPageBase extends DefaultPlugin
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
     $dummy = "";
+    $adj2nestDependency = array();
     if ($wgetDependency)
     {
       $unpackplugin = \plugin_find("agent_unpack");
-      $unpackplugin->AgentAdd($jobId, $uploadId, $dummy, array("wget_agent"));
+      $ununpackJqId = $unpackplugin->AgentAdd($jobId, $uploadId, $dummy, array("wget_agent"));
+      $adj2nestDependency = array('name'=>'agent_unpack',AgentPlugin::PRE_JOB_QUEUE=>$ununpackJqId);
     }
     $adj2nestplugin = \plugin_find('agent_adj2nest');
-    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy);
+    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependency);
 
     $checkedAgents = checkedAgents();
     AgentSchedule($jobId, $uploadId, $checkedAgents);
