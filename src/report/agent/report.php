@@ -406,99 +406,43 @@ class ReportAgent extends Agent
   }
 
   /**
-   * @brief This function lists out the red licenses
+   * @brief This function lists out the bulk licenses,
+   * comments of identified licenses
    * @param Section section
    * @param $title
    * @param $licenses
    * @param $rowHead
    */ 
-  private function redOSSLicenseTable(Section $section, $title, $licenses, $rowHead = "")
+  private function bulkLicenseTable(Section $section, $title, $licenses, $rowHead="")
   {
     $firstColLen = 2000;
     $secondColLen = 9500;
-    $thirdColLen = 4000;
-    $redRowStyle = array("bgColor" => "F9A7B0");  
+    $thirdColLen = 4000;  
 
     $section->addTitle(htmlspecialchars($title), 2);
     $table = $section->addTable($this->tablestyle);
     $table->addRow($this->rowHeight);
     $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
-
-    if(empty($rowHead)){  
+    if(empty($rowHead)){
       $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
-    }
-    else{  
-      $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
-    }
-    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
-
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
-        if($licenseStatement['risk'] == "4" || $licenseStatement['risk'] == "5"){
-          $table->addRow($this->rowHeight);
-          $cell1 = $table->addCell($firstColLen, $redRowStyle, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
-          $cell2 = $table->addCell($secondColLen, "pStyle"); 
-          // replace new line character
-          $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-          $cell3 = $table->addCell($thirdColLen, $redRowStyle, "pStyle");
-          foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
-          }
-        }else{ continue; }
-      }
     }else{
-      $table->addRow($this->rowHeight);
-      $table->addCell($firstColLen)->addText("");
-      $table->addCell($secondColLen)->addText("");
-      $table->addCell($thirdColLen)->addText("");
-    }
-    $section->addTextBreak(); 
-  }
-
-  /**
-   * @brief This function lists out the yellow licenses
-   * @param Section section
-   * @param $title
-   * @param $licenses
-   * @param $rowHead
-   */ 
-  private function yellowOSSLicenseTable(Section $section, $title, $licenses, $rowHead = "")
-  {
-    $firstColLen = 2000;
-    $secondColLen = 9500;
-    $thirdColLen = 4000;
-    $yellowRowStyle = array("bgColor" => "FEFF99");
-
-    $section->addTitle(htmlspecialchars($title), 2);
-    $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
-
-    if(empty($rowHead)){  
-      $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
-    }
-    else{  
       $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
-    }
+    } 
     $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
 
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
-        if($licenseStatement['risk'] == "2" || $licenseStatement['risk'] == "3"){
-          $table->addRow($this->rowHeight);
-          $cell1 = $table->addCell($firstColLen, $yellowRowStyle); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
-          $cell2 = $table->addCell($secondColLen); 
-          // replace new line character
-          $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-          $cell3 = $table->addCell($thirdColLen, $yellowRowStyle);
-          foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
-          }
-        }else{ continue; }
+        $table->addRow($this->rowHeight);
+        $cell1 = $table->addCell($firstColLen, $redRowStyle, "pStyle"); 
+        $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen, "pStyle"); 
+        // replace new line character
+        $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+        $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
+        $cell3 = $table->addCell($thirdColLen, $redRowStyle, "pStyle");
+        foreach($licenseStatement["files"] as $fileName){ 
+          $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
+        }
       }
     }else{
       $table->addRow($this->rowHeight);
@@ -510,13 +454,13 @@ class ReportAgent extends Agent
   }
   
   /**
-   * @brief This function lists out the white licenses
+   * @brief This function lists out the red, white & yellow licenses
    * @param Section section
    * @param $title
    * @param $licenses
-   * @param $rowHead
+   * @param $riskarray
    */ 
-  private function licensesTable(Section $section, $title, $licenses, $rowHead = "")
+  private function licensesTable(Section $section, $title, $licenses, $riskarray)
   {
     $firstColLen = 2000;
     $secondColLen = 9500;
@@ -538,15 +482,15 @@ class ReportAgent extends Agent
 
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
-        if(empty($licenseStatement['risk']) || $licenseStatement['risk'] == "0" || $licenseStatement['risk'] == "1"){
+        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){ 
           $table->addRow($this->rowHeight);
-          $cell1 = $table->addCell($firstColLen); 
+          $cell1 = $table->addCell($firstColLen, $riskarray['color']); 
           $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
           $cell2 = $table->addCell($secondColLen); 
           // replace new line character
           $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
           $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-          $cell3 = $table->addCell($thirdColLen);
+          $cell3 = $table->addCell($thirdColLen, $riskarray['color']);
           foreach($licenseStatement["files"] as $fileName){ 
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
@@ -779,19 +723,22 @@ class ReportAgent extends Agent
 
     /* Display licenses(red) name,text and files */
     $heading = "Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses";
-    $this->redOSSLicenseTable($section, $heading, $contents['licenses']['statements']);
+    $redLicense = array("color" => array("bgColor" => "F9A7B0"), "riskLevel" => array("5", "4")); 
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $redLicense);
 
     /* Display licenses(yellow) name,text and files */
     $heading = "Other OSS Licenses (yellow) - additional obligations to common rules";
-    $this->yellowOSSLicenseTable($section, $heading, $contents['licenses']['statements']);
+    $yellowLicense = array("color" => array("bgColor" => "FEFF99"), "riskLevel" => array("3", "2"));
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $yellowLicense);
 
     /* Display licenses(white) name,text and files */
     $heading = "Other OSS Licenses (white) - only common rules";  
-    $this->licensesTable($section, $heading, $contents['licenses']['statements']);
+    $whiteLicense = array("color" => array("bgColor" => "FFFFFF"), "riskLevel" => array("", "0", "1"));
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense);
 
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
-    $this->licensesTable($section, $heading, $contents['bulkLicenses']['statements']);
+    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
 
     /* Display acknowledgement */
     $this->acknowledgementTable($section);
@@ -816,7 +763,7 @@ class ReportAgent extends Agent
     /* Display comments entered for report */
     $heading = "Notes";  
     $rowHead = "Comment Entered";
-    $this->licensesTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
+    $this->bulkLicenseTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
 
     /* Footer starts */
     $sR->reportFooter($phpWord, $section);
