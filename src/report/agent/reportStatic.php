@@ -522,9 +522,9 @@ class ReportStatic
     $section->addText(htmlspecialchars($subSubHeadingInfoText), $subSubHeadingInfoTextStyle);
     $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, "pStyle");
     if(empty($eccCount)){
-    $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle);
+      $section->addText(htmlspecialChars($subSubHeadingInfoText2), $subSubHeadingInfoTextStyle);
     }else{
-    $section->addLink("eccInternalLink", htmlspecialChars($subSubHeadingInfoTextElse), null, null, true);
+      $section->addLink("eccInternalLink", htmlspecialChars($subSubHeadingInfoTextElse), null, null, true);
     }
     $section->addTextBreak();
 
