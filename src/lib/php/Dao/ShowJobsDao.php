@@ -267,7 +267,7 @@ class ShowJobsDao extends Object
       array($job_pk),
       __METHOD__.'.ununpack_must_be_in_this_job'
       );
-  }
+    }
 
     if(!empty($itemCount['jq_itemsprocessed'])){
 
