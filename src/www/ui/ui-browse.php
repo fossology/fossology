@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -113,7 +114,7 @@ class ui_browse extends FO_Plugin
     $ShowSomething = 0;
     $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     $stmtGetFirstChild = __METHOD__.'.getFirstChild';
-    $dbManager->prepare($stmtGetFirstChild,'SELECT uploadtree_pk FROM uploadtree WHERE parent=$1 limit 1');
+    $dbManager->prepare($stmtGetFirstChild,"SELECT uploadtree_pk FROM $uploadtree_tablename WHERE parent=$1 limit 1");
     foreach ($Results as $Row)
     {
       if (empty($Row['uploadtree_pk'])) continue;
@@ -143,30 +144,17 @@ class ui_browse extends FO_Plugin
           $V .= "<td>&nbsp;</td>";
         }
       }
-      /* Display item */
-      $V .= "<td>";
-      if (Iscontainer($Row['ufile_mode']))
+      
+      $displayItem = Isdir($Row['ufile_mode']) ? "$Name/" : $Name;
+      if(!empty($Link))
       {
-        $V .= "<b>";
-      }
-      if (!empty($Link))
-      {
-        $V .= "<a href='$Link'>";
-      }
-      $V .= $Name;
-      if (Isdir($Row['ufile_mode']))
-      {
-        $V .= "/";
-      }
-      if (!empty($Link))
-      {
-        $V .= "</a>";
+        $displayItem = "<a href=\"$Link\">$displayItem</a>";
       }
       if (Iscontainer($Row['ufile_mode']))
       {
-        $V .= "</b>";
+        $displayItem = "<b>$displayItem</b>";
       }
-      $V .= "</td>\n";
+      $V .= "<td>$displayItem</td>\n";
 
       if (!Iscontainer($Row['ufile_mode']))
         $V .= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
@@ -175,7 +163,6 @@ class ui_browse extends FO_Plugin
       else
         $V .= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
 
-      $V .= "</td>";
     } /* foreach($Results as $Row) */
     $V .= "</table>\n";
     if (!$ShowSomething)
@@ -199,36 +186,29 @@ class ui_browse extends FO_Plugin
   }
 
   /**
-   * @brief Given a upload_pk, list every item in it.
+   * @brief Given a folderId, list every item in it.
    * If it is an individual file, then list the file contents.
    */
-  private function ShowFolder($Folder, $Show)
+  private function ShowFolder($folderId)
   {
-    $V = "<div align='center'><small>";
-    if ($Folder != GetUserRootFolder())
-    {
-      $text = _("Top");
-      $V .= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    /* @var $uiFolderNav FolderNav */
+    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
+    
+    $folderNav = '<div id="sidetree">';
+    if ($folderId != $rootFolder->getId()) {
+      $folderNav .= '<div class="treeheader" style="display:inline;"><a href="'. Traceback_uri() . '?mod=' . $this->Name . '">Top</a> | </div>';
     }
-    $text = _("Expand");
-    $V .= "<a href='javascript:Expand();'>$text</a> |";
-    $text = _("Collapse");
-    $V .= "<a href='javascript:Collapse();'>$text</a> |";
-    $text = _("Refresh");
-    $V .= "<a href='" . Traceback() . "'>$text</a>";
-    $V .= "</small></div>";
-    $V .= "<P>\n";
-    $V .= "<form>\n";
-    $V .= FolderListDiv($Folder, 0, $Folder, 1);
-    $V .= "</form>\n";
-    $this->vars['folderNav'] = $V;
+    $folderNav .= '<div id="sidetreecontrol" class="treeheader" style="display:inline;"><a href="?#">Collapse All</a> | <a href="?#">Expand All</a></div>';
+    $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
+   
+    $this->vars['folderNav'] = $folderNav;
 
     $assigneeArray = $this->getAssigneeArray();
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
-    $this->vars['folder'] = $Folder;
-    $this->vars['show'] = $Show;
-    return '';
+    $this->vars['folder'] = $folderId;
+    $this->vars['folderName'] = $rootFolder->getName();
   }
 
   /**
@@ -247,14 +227,10 @@ class ui_browse extends FO_Plugin
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
     /* check permission if $Upload is given */
-    if (!empty($Upload))
+    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
     {
-      $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < Auth::PERM_READ)
-      {
-        $this->vars['message'] = _("Permission Denied");
-        return $this->render('include/base.html.twig');
-      }
+      $this->vars['message'] = _("Permission Denied");
+      return $this->render('include/base.html.twig');
     }
 
     if (empty($folder_pk))
@@ -285,48 +261,57 @@ class ui_browse extends FO_Plugin
       $this->vars['multiUploadAgents'] = $multiUploadAgents;
     }
     $this->vars['folderId'] = $folder_pk;
+
     return $this->render('ui-browse.html.twig');
   }
 
   /**
    * @brief kludge for plugins not supplying a folder parameter.
-   * Find what folder this upload is in.  Error if in multiple folders.
+   * Find what folder this upload is in.
    */
   private function getFolderId($uploadId)
   {
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     if (empty($uploadId))
     {
-      return GetUserRootFolder();
+      return $rootFolder->getId();
     }
+    
     global $container;
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $container->get('db.manager');
     $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
     if ($uploadExists['cnt']< 1)
     {
       throw new Exception("This upload no longer exists on this system.");
     }
-    $dbManager->prepare($stmt=__METHOD__.'.parent',
-           $sql = "select parent_fk from foldercontents where child_id=$1 and foldercontents_mode=$2");
-    $result = $dbManager->execute($stmt,array($uploadId,2));
-    $allParents = $dbManager->fetchAll($result);
-    $dbManager->freeResult($result);
-    if (count($allParents) > 1)
+    
+    
+    $folderTreeCte = $this->folderDao->getFolderTreeCte($rootFolder);
+    
+    $parent = $dbManager->getSingleRow(
+           $folderTreeCte." SELECT ft.folder_pk FROM foldercontents fc LEFT JOIN folder_tree ft ON fc.parent_fk=ft.folder_pk "
+            . "WHERE child_id=$2 AND foldercontents_mode=$3 ORDER BY depth LIMIT 1",
+               array($rootFolder->getId(), $uploadId, FolderDao::MODE_UPLOAD),
+            __METHOD__.'.parent');
+    if (!$parent)
     {
-      Fatal("Upload $uploadId found in multiple folders.", __FILE__, __LINE__);
+      throw new Exception("Upload $uploadId missing from foldercontents in your foldertree.");
     }
-    if (count($allParents) < 1)
-    {
-      Fatal("Upload $uploadId missing from foldercontents.", __FILE__, __LINE__);
-    }
-    return $allParents[0]['parent_fk'];
+    return $parent['folder_pk'];
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $Folder
+   * @param int $Upload
+   * @return string
+   */
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
   {
     global $container;
     $dbManager = $container->get('db.manager');
-    $show = 'detail';
+    $show = 'quick';
     $html = '';
     $uploadtree_tablename = "";
     if (!empty($uploadTreeId))
@@ -334,8 +319,7 @@ class ui_browse extends FO_Plugin
       $sql = "SELECT ufile_mode, upload_fk FROM uploadtree WHERE uploadtree_pk = $1";
       $row = $dbManager->getSingleRow($sql, array($uploadTreeId));
       $Upload = $row['upload_fk'];
-      $UploadPerm = GetUploadPerm($Upload);
-      if ($UploadPerm < Auth::PERM_READ)
+      if (!$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
       {
         $this->vars['message'] = _("Permission Denied");
         return $this->render('include/base.html.twig');
@@ -351,32 +335,31 @@ class ui_browse extends FO_Plugin
           return $this->render('include/base.html.twig');
         }
       }
-      $uploadtree_tablename = GetUploadtreeTableName($row['upload_fk']);
+      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['upload_fk']);
       $html .= Dir2Browse($this->Name, $uploadTreeId, NULL, 1, "Browse", -1, '', '', $uploadtree_tablename) . "\n";
     }
     else if (!empty($Upload))
     {
-      $uploadtree_tablename = GetUploadtreeTableName($Upload);
+      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
       $html .= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse", $uploadtree_tablename) . "\n";
     }
 
     if (empty($Upload))
     {
-      return $html . $this->ShowFolder($Folder, $show);
+      $this->vars['show'] = $show;
+      $this->ShowFolder($Folder);
+      return $html;
     }
 
     if (empty($uploadTreeId))
     {
-      $row = $dbManager->getSingleRow(
-          $sql = "select uploadtree_pk from uploadtree where parent is NULL and upload_fk=$1", array($Upload),
-          $sqlLog=__METHOD__.".getTreeRoot");
-      if ($row)
+      try
       {
-        $uploadTreeId = $row['uploadtree_pk'];
+        $uploadTreeId = $this->uploadDao->getUploadParent($Upload);
       }
-      else
+      catch(Exception $e)
       {
-        $this->vars['message'] = _("Missing upload tree parent for upload");
+        $this->vars['message'] = $e->getMessage();
         return $this->render('include/base.html.twig');
       }
     }
@@ -394,7 +377,7 @@ class ui_browse extends FO_Plugin
     /** @var UserDao $userDao */
     $userDao = $container->get('dao.user');
     $assigneeArray = $userDao->getUserChoices();
-    $assigneeArray[$_SESSION['UserId']] = _('-- Me --');
+    $assigneeArray[Auth::getUserId()] = _('-- Me --');
     $assigneeArray[1] = _('Unassigned');
     $assigneeArray[0] = '';
     return $assigneeArray;

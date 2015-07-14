@@ -44,15 +44,17 @@ class CopyrightDao extends Object
   /**
    * @param int $uploadTreeId
    * @param string $tableName
+   * @param int $agentId
    * @param array $typeToHighlightTypeMap
    * @throws \Exception
    * @return Highlight[]
    */
-  public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
-                                                                        'statement' => Highlight::COPYRIGHT,
-                                                                        'email' => Highlight::EMAIL,
-                                                                        'url' => Highlight::URL,
-                                                                        'author' => Highlight::AUTHOR)
+  public function getHighlights($uploadTreeId, $tableName="copyright", $agentId=0,
+          $typeToHighlightTypeMap=array(
+                                          'statement' => Highlight::COPYRIGHT,
+                                          'email' => Highlight::EMAIL,
+                                          'url' => Highlight::URL,
+                                          'author' => Highlight::AUTHOR)
    )
   {
     $pFileId = 0;
@@ -68,9 +70,15 @@ class CopyrightDao extends Object
     }
 
     $statementName = __METHOD__.$tableName;
-    $this->dbManager->prepare($statementName,
-        "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
-    $result = $this->dbManager->execute($statementName, array($pFileId));
+    $sql = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1";
+    $params = array($pFileId);
+    if($agentId!=0) {
+      $statementName .= '.agentId';
+      $sql .= ' AND agent_fk=$2';
+      $params[] = $agentId;
+    }
+    $this->dbManager->prepare($statementName,$sql);
+    $result = $this->dbManager->execute($statementName, $params);
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -237,4 +245,33 @@ class CopyrightDao extends Object
     $this->dbManager->freeResult($oldData);
   }
   
+  /**
+   * @param ItemTreeBounds $item
+   * @param string $hash
+   * @param int $userId
+   * @param string $cpTable
+   */
+  public function rollbackTable($item, $hash, $userId, $cpTable='copyright')
+  {
+    $itemTable = $item->getUploadTreeTableName();
+    $stmt = __METHOD__.".$cpTable.$itemTable";
+    $params = array($hash,$item->getLeft(),$item->getRight(),$userId);
+    $sql = "UPDATE $cpTable AS cpr SET content = cpa.oldtext, hash = $1
+            FROM ".$cpTable."_audit as cpa, $itemTable AS ut
+            WHERE cpr.pfile_fk = ut.pfile_fk
+              AND cpr.ct_pk = cpa.ct_fk
+              AND md5(cpa.oldtext) = $1
+              AND ( ut.lft BETWEEN $2 AND $3 )
+              AND cpa.user_fk=$4";
+    if ('uploadtree_a' == $item->getUploadTreeTableName())
+    {
+      $params[] = $item->getUploadId();
+      $sql .= " AND ut.upload_fk=$".count($params);
+      $stmt .= '.upload';
+    }
+    
+    $this->dbManager->prepare($stmt, "$sql");
+    $resource = $this->dbManager->execute($stmt, $params);
+    $this->dbManager->freeResult($resource);
+  }
 }

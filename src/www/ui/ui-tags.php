@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,17 +18,21 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
-define("TITLE_ui_tag", _("Tag"));
 
 class ui_tag extends FO_Plugin
 {
+  /** @var UploadDao */
+  private $uploadDao;
+  
   function __construct()
   {
-    $this->Name       = "tag";
-    $this->Title      = TITLE_ui_tag;
-    $this->DBaccess   = PLUGIN_DB_WRITE;
+    $this->Name     = "tag";
+    $this->Title    = _("Tag");
+    $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
   /**
@@ -355,8 +360,7 @@ class ui_tag extends FO_Plugin
       while ($row = pg_fetch_assoc($result))
       {
         $VE .= "<tr><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
-        $perm = GetUploadPerm($Upload);
-        if ($perm >= Auth::PERM_WRITE )
+        if ($this->uploadDao->isEditable($Upload, Auth::getGroupId()))
         {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
         }
@@ -641,8 +645,10 @@ class ui_tag extends FO_Plugin
 
   /**
    * \brief Display the tagging page.
+   * @param string $action
+   * @param int $ShowHeader
    */
-  function ShowTaggingPage($ShowMenu=0,$ShowHeader=0,$action)
+  function ShowTaggingPage($action,$ShowHeader=0)
   {
     $V = "";
     $Upload = GetParm("upload",PARM_INTEGER);
@@ -667,8 +673,7 @@ class ui_tag extends FO_Plugin
       $V .= $this->ShowEditTagPage($Upload,$Item);
     } else {
       /* Show create tag page */
-      $perm = GetUploadPerm($Upload);
-      if ($perm >= Auth::PERM_WRITE )
+      if ($this->uploadDao->isEditable($Upload, Auth::getGroupId()) )
       {
         $V .= $this->ShowCreateTagPage($Upload,$Item);
       }
@@ -677,9 +682,6 @@ class ui_tag extends FO_Plugin
         $nopermtext = _("You do not have permission to tag this upload.");
         $V .= $nopermtext;
       }
-      /* Show delete tag page removing
-       $V .= $this->ShowDeleteTagPage($Upload,$Item);
-       */
     }
     return($V);
   }
@@ -723,7 +725,7 @@ class ui_tag extends FO_Plugin
         $this->vars['message'] = _("Delete Tag Successful!");
       }
     }
-    $V .= $this->ShowTaggingPage(1,1,$action);
+    $V .= $this->ShowTaggingPage($action,1);
 
     return $V;
   }

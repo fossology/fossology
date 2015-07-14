@@ -61,78 +61,9 @@ table
 }
 
 /* For tree views */
-.tree, a.tree
+.treeheader
 {
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: gray;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none;
-  color:black;
-}
-a.tree:active, a.tree:hover
-{
-  color:red;
-}
-
-.treehide
-{
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: gray;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none;
-  color:white;
-}
-
-.treehide1
-{
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: white;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none;
-  color:white;
-}
-
-.treebranch
-{
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: gray;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none; 
-  color:blue;
-}
-
-.treearm
-{
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: gray;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none; 
-  color:gray;
-}
-
-.treetext, a.treetext, a.treetext:link, a.treetext:visited
-{
-  height:24px;
-  border-style: none;
-  border-left: thin dotted;
-  border-color: white;
-  font:normal 10pt verdana, arial, helvetica;
-  text-decoration:none; 
-  color:black;
-}
-a.treetext:active, a.treetext:hover
-{
-  color:red;
+  font:normal 8pt verdana, arial, helvetica;
 }
 
 .highlight
@@ -337,4 +268,23 @@ img.deleted {
 }
 .nobreaktext {
   white-space: nowrap;
+}
+
+.browse-upload-checkbox {
+  vertical-align: bottom;
+  margin:0px;
+}
+
+.ui-button-text .browse-upload-all-off {
+  color: black;
+}
+.ui-button-text .browse-upload-all-on {
+  color: white;
+}
+
+.ui-state-active .ui-button-text .browse-upload-all-off {
+  color: #cccccc;
+}
+.ui-state-active .ui-button-text .browse-upload-all-on {
+  color: black;
 }

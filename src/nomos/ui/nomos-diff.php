@@ -1,4 +1,7 @@
 <?php
+
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
 
@@ -624,24 +627,22 @@ class ui_nomos_diff extends FO_Plugin
         $FreezeCol = 0;
       }
 
+      /* @var $uploadDao UploadDao  */
+      $uploadDao = $GLOBALS['container']->get('dao.upload');
       /* Check item1 upload permissions */
-      $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
-      $UploadPerm = GetUploadPerm($Item1Row['upload_fk']);
-      if ($UploadPerm < Auth::PERM_READ)
+      $Item1Row = $uploadDao->getUploadEntry($in_uploadtree_pk1);
+      if (!$uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()))
       {
         $text = _("Permission Denied");
-        echo "<h2>$text item 1<h2>";
-        return;
+        return "<h2>$text item 1</h2>";
       }
 
       /* Check item2 upload permissions */
-      $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk2");
-      $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
-      if ($UploadPerm < Auth::PERM_READ)
+      $Item2Row = $uploadDao->getUploadEntry($in_uploadtree_pk2);
+      if(!$uploadDao->isAccessible($Item2Row['upload_fk'],Auth::getGroupId()))
       {
         $text = _("Permission Denied");
-        echo "<h2>$text item 2<h2>";
-        return;
+        return "<h2>$text item 2</h2>";
       }
 
       $uploadtree_pk1  = $in_uploadtree_pk1;
@@ -737,7 +738,6 @@ JSOUT;
     $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 
-    /**/
     if ($Cached)
     {
       $text = _("cached");
@@ -753,9 +753,7 @@ JSOUT;
     return;
   }  /* End Output() */
 
-}  /* End Class */
+}
 
 $NewPlugin = new ui_nomos_diff;
 $NewPlugin->Initialize();
-
-?>

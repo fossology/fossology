@@ -1,0 +1,51 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="css/jquery.treeview.css"/>
+{% endblock %}
+
+{% block content %}
+{{ 'Select a folder on the left hand side to move or copy content to a different folder'|trans }}
+<table>
+  <tr style="vertical-align:top;">
+    <td id="sidetree">
+      <div id="sidetreecontrol" style="display:inline;"><a href="?#">{{ 'Collapse All'|trans }}</a> | <a href="?#">{{ 'Expand All'|trans }}</div>
+      {{ folderTree }}
+    </td>
+    <td style="padding-left:20px;">
+      <form name="formy" method="post">
+        <input type="hidden" name="fromFolder" id="fromFolder" value="-1"/>
+
+        <label for="foldercontent">{{ 'Select the upload or folder you wish to move'|trans }}:<br/>
+          <select name="foldercontent" id="foldercontent" size="20">
+          </select>
+        </label>
+        <br/>
+        <br/>
+
+        <label for="toFolder">{{ 'Select the folder where the content shall be placed'| trans }}:<br/>
+          {% include 'components/select-folder.html.twig' with {'name':'toFolder'} %}
+        </label>
+        <br/>
+        <br/>
+
+        <input type="submit" name="move" value="{{ 'Move'|trans }}"/> &nbsp; <input type="submit" name="copy" value="{{ 'Copy'|trans }}"/>
+      </form>
+    </td>
+  </tr>
+</table>
+{% endblock %}
+
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/tools.js" type="text/javascript"></script>
+  <script src="scripts/jquery.treeview.js" type="text/javascript"></script>
+  <script type="text/javascript">{% include 'admin_content_move.js.twig' %}</script>
+{% endblock %}

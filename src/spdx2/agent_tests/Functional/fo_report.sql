@@ -169,7 +169,7 @@ INSERT INTO decider_ars VALUES (5, 20, 1, true, NULL, '2015-05-04 11:43:18.23611
 
 
 
-INSERT INTO folder VALUES (1, NULL, 'Software Repository', 'Top Folder', NULL);
+INSERT INTO folder VALUES (1, 'Software Repository', 'Top Folder', NULL);
 
 
 
@@ -540,7 +540,8 @@ INSERT INTO license_file VALUES (11, 561, 1, NULL, '2015-05-04 11:43:18.066447+0
 
 INSERT INTO license_ref VALUES (485, 'lic A', 'Text of license A.', 'http://www.opensource.org', NULL, NULL, NULL, 'License A', NULL, NULL, NULL, '', NULL, false, false, false, 'eb59014579b4dda6991d5e9838506749', 1, NULL);
 INSERT INTO license_ref VALUES (272, 'lic B', 'License by Nomos.', NULL, NULL, NULL, NULL, 'License B', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
-INSERT INTO license_ref VALUES (199, 'lic C', 'License by Nomos.', NULL, NULL, NULL, NULL, 'License C', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
+INSERT INTO license_ref VALUES (199, 'lic C', 'License by Nomos
+and new line.', NULL, NULL, NULL, NULL, 'License C', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 INSERT INTO license_ref VALUES (560, 'lic Cpp', 'License by Nomos plus plus.', NULL, NULL, NULL, NULL, 'License Cpp', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 INSERT INTO license_ref VALUES (561, 'lic D', 'License by Nomos.', NULL, NULL, NULL, NULL, 'License D', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 

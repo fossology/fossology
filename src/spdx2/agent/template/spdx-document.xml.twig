@@ -27,7 +27,7 @@
   <spdx:hasExtractedLicensingInfo>
     <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#LicenseRef-{{ licenseId }}">
       <spdx:licenseId>LicenseRef-{{ licenseId }}</spdx:licenseId>
-      <spdx:extractedText>{{ extractedText|e }}</spdx:extractedText>
+      <spdx:extractedText>{{ extractedText|replace({'\f':''})|e }}</spdx:extractedText>
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>
   {% endfor %}

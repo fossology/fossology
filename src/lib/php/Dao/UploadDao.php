@@ -39,11 +39,14 @@ class UploadDao extends Object
   private $dbManager;
   /** @var Logger */
   private $logger;
+  /** @var UploadPermissionDao */
+  private $permissionDao;
 
-  public function __construct(DbManager $dbManager, Logger $logger)
+  public function __construct(DbManager $dbManager, Logger $logger, UploadPermissionDao $uploadPermissionDao)
   {
     $this->dbManager = $dbManager;
     $this->logger = $logger;
+    $this->permissionDao = $uploadPermissionDao;
   }
 
 
@@ -448,32 +451,22 @@ class UploadDao extends Object
   
   public function isAccessible($uploadId, $groupId) 
   {
-    $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
-        array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>Auth::PERM_NONE;
+    return $this->permissionDao->isAccessible($uploadId, $groupId);
   }
   
   public function isEditable($uploadId, $groupId) 
   {
-    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
-      return true;
-    }
-
-    $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
-        array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=Auth::PERM_WRITE;
+    return $this->permissionDao->isEditable($uploadId, $groupId);
   }
- 
+
+  public function makeAccessibleToGroup($uploadId, $groupId, $perm=null)
+  {
+    $this->permissionDao->makeAccessibleToGroup($uploadId, $groupId, $perm);
+  }
+
   public function makeAccessibleToAllGroupsOf($uploadId, $userId, $perm=null)
   {
-    if (null === $perm) {
-      $perm = Auth::PERM_ADMIN;
-    }
-    $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
-            . "SELECT $1 perm, $2 upload_fk, gum.group_fk"
-            . " FROM group_user_member gum LEFT JOIN perm_upload ON perm_upload.group_fk=gum.group_fk AND upload_fk=$2"
-            . " WHERE perm_upload IS NULL AND gum.user_fk=$3",
-               array($perm, $uploadId, $userId), __METHOD__.'.insert');   
+    $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
   }
  
   /**
@@ -485,5 +478,40 @@ class UploadDao extends Object
     $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
         array($uploadId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+  }
+  
+  /**
+   * @param int $itemId
+   * @param string $uploadId
+   * @param string $uploadtreeTablename
+   * @return array
+   */
+  public function getFatItemArray($itemId,$uploadId,$uploadtreeTablename)
+  {
+    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s 
+         WHERE ufile_mode&(1<<28)=0 and s.upload_fk=$2 AND s.realparent=";
+    $sql="WITH RECURSIVE item_path (item_id,num_children,depth,ufile_mode,ufile_name) AS (
+        SELECT uploadtree_pk item_id, ($sqlChildrenOf $1) num_children, 0 depth, ufile_mode, ufile_name
+          FROM $uploadtreeTablename WHERE upload_fk=$2 AND uploadtree_pk=$1
+        UNION
+        SELECT uploadtree_pk item_id, ($sqlChildrenOf ut.uploadtree_pk) num_children,
+               item_path.depth+1 depth, ut.ufile_mode, item_path.ufile_name||'/'||ut.ufile_name ufile_name
+          FROM $uploadtreeTablename ut INNER JOIN item_path ON item_id=ut.realparent
+          WHERE upload_fk=$2 AND ut.ufile_mode&(1<<28)=0 AND num_children<2
+        )
+        SELECT * FROM item_path WHERE num_children!=1 OR ufile_mode&(1<<29)=0 ORDER BY depth DESC LIMIT 1";
+    return $this->dbManager->getSingleRow($sql,array($itemId, $uploadId),__METHOD__.$uploadtreeTablename);
+  }
+    
+  /**
+   * @param int $itemId
+   * @param string $uploadId
+   * @param string $uploadtreeTablename
+   * @return int
+   */
+  public function getFatItemId($itemId,$uploadId,$uploadtreeTablename)
+  {
+    $itemRow = $this->getFatItemArray($itemId,$uploadId,$uploadtreeTablename);
+    return $itemRow['item_id'];
   }
 }

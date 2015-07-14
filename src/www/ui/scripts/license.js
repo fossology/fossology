@@ -157,11 +157,27 @@ function scheduleScan(upload, agentName, resultEntityKey) {
 
 function dressContents(data, type, full) {
   if (type === 'display')
-    return '<a href=\'#\' onclick=\'filterLicense(\"scan:' + data[1] + '\")\'>' + data[0] + '</a>';
+    return '<a href=\'#\' onclick=\'filterScan(' + data[1] + ',\"scan\")\'>' + data[0] + '</a>';
   return data;
 }
 
 $(document).ready(function () {
+  var isOpen = $('#dirlist_filter input').val().match(new RegExp('open:[^\\s]*','g'));
+  if(isOpen)
+  {
+    $('#filterCBoxOpen').prop('checked', true);
+  }
+  var theScan = $('#dirlist_filter input').val().match(new RegExp('scan:[^\\s]*','g'));
+  if(theScan)
+  {
+    $('#scanFilter').val(theScan[0].substring(5));
+  }
+  var theCon = $('#dirlist_filter input').val().match(new RegExp('con:[^\\s]*','g'));
+  if(theCon)
+  {
+    $('#conFilter').val(theScan[0].substring(4));
+  }
+  
   $('#filterCBoxOpen').change(function(){
     var searchField = $('#dirlist_filter input');
     var searchString = searchField.val();
@@ -180,9 +196,14 @@ $(document).ready(function () {
 
 function filterScan(id,keyword) {
   var searchField = $('#dirlist_filter input');
-  var searchString = searchField.val().replace(new RegExp(keyword+':[^\s]*','g'),'');
+  var searchString = searchField.val().replace(new RegExp(keyword+':[^\\s]*','g'),'');
   if(id>0) {
     searchString = searchString+' '+keyword+':'+id;
+    if(keyword==='scan'){
+      $('#scanFilter').val(id);
+    }
+    else if(keyword==='con')
+      $('#conFilter').val(id);
   }
   searchField.val(searchString.trim());
   searchField.trigger('keyup');

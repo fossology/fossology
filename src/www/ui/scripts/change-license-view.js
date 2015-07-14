@@ -65,11 +65,11 @@ function cleanText() {
   var text = $textField.val();
 
   text = text.replace(/ [ ]*/gi, ' ')
-             .replace(/\/[\*\/]+/gi, '')
-             .replace(/#+/gi,'')
-             .replace(/^ */gi,'')
-             .replace(/\n[ \t]*/gi,'\n');
-
+             .replace(/(^|\n)[ \t]*/gi,'$1')
+             .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
+             .replace(/[\*]+\//gi, '')
+             .replace(/(^|\n) ?#+/gi,'$1')
+             ;
   $textField.val(text);
 }
 

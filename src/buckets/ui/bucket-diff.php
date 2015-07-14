@@ -684,8 +684,7 @@ return;
   
   public function htmlContent()
   {
-  
-      $filter = GetParm("filter",PARM_STRING);
+    $filter = GetParm("filter",PARM_STRING);
     if (empty($filter)) $filter = "none";
     $FreezeCol = GetParm("freeze",PARM_INTEGER);  // which column to freeze?  1 or 2 or null
     $ClickedCol = GetParm("col",PARM_INTEGER);  // which column was clicked on?  1 or 2 or null
@@ -703,29 +702,25 @@ return;
       $FreezeCol = 0;
     }
 
-    /* Check item1 upload permission */
-    $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk1");
-    
-    /** @var UploadDao $uploadDao */
+    /* @var $uploadDao UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
+    /* Check item1 upload permission */
+    $Item1Row = $uploadDao->getUploadEntry($in_uploadtree_pk1);
     if ( !$uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()) )
     {
       $text = _("Permission Denied");
-      echo "<h2>$text item 1</h2>";
-      return;
+      return "<h2>$text item 1</h2>";
     }
 
     /* Check item2 upload permission */
-    $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $in_uploadtree_pk2");
-    $UploadPerm = GetUploadPerm($Item2Row['upload_fk']);
-    if ($UploadPerm < Auth::PERM_READ)
+    $Item2Row = $uploadDao->getUploadEntry($in_uploadtree_pk2);
+    if (!$uploadDao->isAccessible($Item2Row['upload_fk'], Auth::getGroupId()))
     {
       $text = _("Permission Denied");
-      echo "<h2>$text item 2<h2>";
-      return;
+      return "<h2>$text item 2</h2>";
     }
 
-    $uploadtree_pk1  = $in_uploadtree_pk1;
+    $uploadtree_pk1 = $in_uploadtree_pk1;
     $uploadtree_pk2 = $in_uploadtree_pk2;
 
       if ($FreezeCol == 1)

@@ -39,7 +39,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
   function preInstall()
   {
-    $text = _("Generate ReadMe_OSS");
+    $text = _("Generate SPDX");
     menu_insert("Browse-Pfile::SPDX", 0, self::NAME, $text);
     
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);

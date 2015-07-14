@@ -25,6 +25,7 @@ use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -87,27 +88,10 @@ class SpdxTwoAgent extends Agent
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
+    $this->heartbeat(0);
+    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
     
-    $filesWithLicenses = array();
-    foreach ($clearingDecisions as $clearingDecision) {
-      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
-        continue;
-      }
-      /** @var ClearingDecision $clearingDecision */
-      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved())
-        {
-          continue;
-        }
-        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
-                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
-      }
-    }
-
-    $licenseComment = $this->addScannerResults($filesWithLicenses, $uploadId);
+    $licenseComment = $this->addScannerResults($filesWithLicenses, $itemTreeBounds);
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
     
@@ -137,8 +121,46 @@ class SpdxTwoAgent extends Agent
             );
   }
 
-  protected function addScannerResults(&$filesWithLicenses, $uploadId)
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
+   */
+  protected function getFilesWithLicensesFromClearings(&$clearingDecisions)
   {
+    $filesWithLicenses = array();
+    $clearingsProceeded = 0;
+    foreach ($clearingDecisions as $clearingDecision) {
+      $clearingsProceeded += 1;
+      if(($clearingsProceeded&2047)==0)
+      {
+        $this->heartbeat(count($filesWithLicenses));
+      }
+      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      {
+        continue;
+      }
+      
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved())
+        {
+          continue;
+        }
+        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
+                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
+      }
+    }
+    return $filesWithLicenses;
+  }
+
+  /**
+   * @param string[][][] $filesWithLicenses
+   * @param ItemTreeBounds $itemTreeBounds
+   */
+  protected function addScannerResults(&$filesWithLicenses, $itemTreeBounds)
+  {
+    $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array_keys($this->agentNames);
     $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'), $uploadId);
     $scanJobProxy->createAgentStatus($scannerAgents);
@@ -148,11 +170,19 @@ class SpdxTwoAgent extends Agent
       return;
     }
     $selectedScanners = '{'.implode(',',$scannerIds).'}';
-    $sql= "SELECT uploadtree_pk,rf_fk FROM uploadtree_a ut, license_file
-      WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1) GROUP BY uploadtree_pk,rf_fk";
+    $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
+    $sql = "SELECT uploadtree_pk,rf_fk FROM $tableName ut, license_file
+      WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
+    $param = array($selectedScanners);
+    if ($tableName == 'uploadtree_a') {
+      $param[] = $uploadId;
+      $sql .= " AND upload_fk=$".count($param);
+      $stmt .= $tableName;
+    }
+    $sql .=  " GROUP BY uploadtree_pk,rf_fk";
     $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt,array($selectedScanners));
+    $res = $this->dbManager->execute($stmt,$param);
     while($row=$this->dbManager->fetchArray($res))
     {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
@@ -171,9 +201,9 @@ class SpdxTwoAgent extends Agent
     /* @var $copyrightDao CopyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='skipcontent', $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
+    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='skipcontent'); //, $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
     foreach ($allEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = $finding['textfinding'];
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = $finding['content'];
     }
   }       
 
@@ -228,10 +258,15 @@ class SpdxTwoAgent extends Agent
   
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
+    $filesProceeded = 0;
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
     $content = '';
     foreach($filesWithLicenses as $fileId=>$licenses) {
+      $filesProceeded += 1;
+      if(($filesProceeded&2047)==0){
+        $this->heartbeat($filesProceeded);
+      }
       $hashes = $treeDao->getItemHashes($fileId);
       $content .= $this->renderString('spdx-file.xml.twig',array(
           'fileId'=>$fileId,

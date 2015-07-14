@@ -16,16 +16,18 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-define("TITLE_user_edit", _("Edit User Account"));
-
 class user_edit extends FO_Plugin {
-  var $Name = "user_edit";
-  var $Title = TITLE_user_edit;
-  var $MenuList = "Admin::Users::Edit User Account";
-  var $Version = "1.0";
-  var $Dependency = array();
-  var $DBaccess = PLUGIN_DB_WRITE;
-  var $LoginFlag = 1;
+  
+  public function __construct()
+  {
+    $this->Name = "user_edit";
+    $this->Title = _("Edit User Account");
+    $this->MenuList = "Admin::Users::Edit User Account";
+    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->LoginFlag = 1;
+
+    parent::__construct();
+  }
 
   /**
    * \brief Display the user record edit form
@@ -40,11 +42,9 @@ class user_edit extends FO_Plugin {
     $OutS = "";  // Output string
 
     /* Build HTML form */
-    $OutS .= "<form name='user_edit' method='POST'>\n"; // no url = this url
-
+    $OutS .= "<form name='user_edit' method='POST'>\n";
     $OutS .= "<p><input type='hidden' name='user_pk' value='$UserRec[user_pk]'/></p>";
-
-    $OutS .= "<P />\n";
+    $OutS .= "<p />\n";
 
     if ($SessionIsAdmin)
     {
@@ -264,15 +264,13 @@ class user_edit extends FO_Plugin {
   {
     if (empty($user_pk))
     {
-      echo _("Invalid access.  Your session has expired.");
-      exit(1);
+      throw new Exception("Invalid access.  Your session has expired.",1);
     }
 
     $UserRec = GetSingleRec("users", "WHERE user_pk=$user_pk");
     if (empty($UserRec))
     {
-      echo _("Invalid user. ");
-      exit(1);
+      throw new Exception("Invalid user. ",1);
     }
     return $UserRec;
   }
@@ -299,8 +297,6 @@ class user_edit extends FO_Plugin {
    */
   function CreateUserRec($user_pk="") 
   {
-    global $PG_CONN;
-
     /* If a $user_pk was given, use it to read the user db record.
      * Otherwise, use the form data.
      */
@@ -359,11 +355,9 @@ class user_edit extends FO_Plugin {
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)  return;
-
-    global $PG_CONN;
-    global $PERM_NAMES;
-
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     /* Is the session owner an admin?  */
     $user_pk = $_SESSION['UserId'];
     $SessionUserRec = $this->GetUserRec($user_pk);
@@ -422,4 +416,3 @@ class user_edit extends FO_Plugin {
   }
 }
 $NewPlugin = new user_edit;
-?>
