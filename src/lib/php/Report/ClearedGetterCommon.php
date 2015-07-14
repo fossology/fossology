@@ -152,10 +152,10 @@ abstract class ClearedGetterCommon
         $singleStatement = array(
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
-            "comments" => convertToUTF8($comments, false),
             "files" => array($fileName)
           );
         if ($extended) {
+          $singleStatement["comments"] = convertToUTF8($comments, false);
           $singleStatement["risk"] =  $statement['risk'];
         }
 

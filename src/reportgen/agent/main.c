@@ -398,7 +398,6 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
         }
         const char* content = NULL;
         const char* text = NULL;
-        const char* comments = NULL;
         char* fileNames = NULL;
 
         json_object_object_foreach(val1, key2, val2) {
@@ -406,9 +405,6 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
             content = json_object_get_string(val2);
           }
           else if (((strcmp(key2, "text")) == 0) && json_object_is_type(val2, json_type_string)) {
-            text = json_object_get_string(val2);
-          }
-          else if (((strcmp(key2, "comments")) == 0) && json_object_is_type(val2, json_type_string)) {
             text = json_object_get_string(val2);
           }
           else if (((strcmp(key2, "files")) == 0) && json_object_is_type(val2, json_type_array)) {
@@ -423,6 +419,9 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
         if (content && text && fileNames) {
           table_addRow(table, content, text, fileNames);
         }
+        //else if (content && comments && fileNames){
+        //  table_addRow(table, content, comments, fileNames);
+       // }
         else if (content && fileNames) { // TODO use a count argument in addRowsFromJson_ContentTextFiles
           table_addRow(table, content, fileNames);
         }

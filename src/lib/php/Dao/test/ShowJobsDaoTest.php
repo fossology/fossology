@@ -234,4 +234,27 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
             is(closeTo(($itemCount-$itemNomos)/$fewFilesPerSec,0.5+$fewFilesPerSec)));
   }
+  
+  public function testGetEstimatedTimeShouldNotDivideByZero()
+  {
+    $this->dbManager->prepare($stmt = 'insert.jobqueue',
+       "INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed)"
+     . "VALUES ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)");
+    
+    $nowTime = time();
+    $diffTime = 2345;
+    $nomosTime = date('Y-m-d H:i:sO',$nowTime-$diffTime);
+    $uploadArrayQue = array(array(8, $jobId=1, $jqType="nomos", 1,$nomosTime,null ,"Started", 0,"localhost.5963", $itemNomos=147),
+                           array(1, $jobId, "ununpack", 1, "2015-04-21 18:29:19.23825+05:30", "2015-04-21 18:29:26.396562+05:30", "Completed",1,null,$itemCount=646 ));
+    foreach ($uploadArrayQue as $uploadEntry)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
+    }
+    
+    $showJobsDaoMock = M::mock('Fossology\\Lib\\Dao\\ShowJobsDao[getNumItemsPerSec]',array($this->dbManager, $this->uploadDao));
+    $showJobsDaoMock->shouldReceive('getNumItemsPerSec')->andReturn(0);
+
+    $estimated = $showJobsDaoMock->getEstimatedTime($jobId, $jqType);
+    assertThat($estimated,  equalTo('0:00:00'));
+  }
 }
