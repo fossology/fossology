@@ -433,13 +433,13 @@ class ReportAgent extends Agent
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
         $table->addRow($this->rowHeight);
-        $cell1 = $table->addCell($firstColLen, $redRowStyle, "pStyle"); 
+        $cell1 = $table->addCell($firstColLen, null, "pStyle"); 
         $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
         $cell2 = $table->addCell($secondColLen, "pStyle"); 
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-        $cell3 = $table->addCell($thirdColLen, $redRowStyle, "pStyle");
+        $cell3 = $table->addCell($thirdColLen, null, "pStyle");
         foreach($licenseStatement["files"] as $fileName){ 
           $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
