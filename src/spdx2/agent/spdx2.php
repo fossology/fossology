@@ -88,7 +88,6 @@ class SpdxTwoAgent extends Agent
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
-    echo "catched ".count($clearingDecisions)." clearing decisions\n";
     $this->heartbeat(0);
     $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
     

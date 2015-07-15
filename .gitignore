@@ -39,6 +39,7 @@ src/cli/fossjobs.1
 src/cli/fossjobs.html
 src/cli/fossjobs.txt
 src/cli/schema-export
+src/cli/tests/cli-Xunit.xml
 src/cli/testupdate2.php
 src/copyright/VERSION-*
 src/cli/fo_import_licenses
@@ -78,10 +79,10 @@ src/lib/php/id.patch
 src/lib/php/tests/lib-php-Xunit-Results.xml
 src/lib/php/services.xml
 src/maintagent/agent/maintagent
+src/mimetype/mimetype
 src/mimetype/agent/mimetype
 src/mimetype/agent_tests/Unit/results/
 src/mimetype/agent_tests/Unit/test_mimetype
-src/mimetype/mimetype
 src/monk/VERSION-*
 src/monk/agent/_squareVisitor.h.gen
 src/monk/agent/monk
@@ -92,10 +93,7 @@ src/monk/agent/monkbulk_cov
 src/monk/agent/squareBuilder
 src/monk/agent_tests/Unit/run_tests
 src/monk/agent_tests/results/
-src/ninka/agent/ninka
 src/ninka/agent/ninka_cov
-src/ninka/agent_tests/Functional/ninka
-src/ninka/agent_tests/Unit/test_ninka
 src/ninka/agent_tests/results/
 src/monk/agent_tests/Functional/monk-Xunit1.xml
 src/monk/agent_tests/Functional/monk-Xunit2.xml
@@ -168,10 +166,10 @@ variable.list
 /src/readmeoss/agent/version.php
 /src/reuser/agent/version.php
 /src/copyright/agent/ecc
+/src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
+/src/spdx2/agent_tests/Functional/test-tool/
 /src/spdx2/agent/version.php
 /src/spdx2/agent/spdx2
-/src/spdx2/agent_tests/Functional/test-tool/
-/src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
 /src/cli/fo_chmod
 /src/cli/fo_folder
 /src/ninka/agent_tests/Functional/ninka
