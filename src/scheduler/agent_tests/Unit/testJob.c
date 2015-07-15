@@ -43,7 +43,7 @@ void test_job_event()
 
   FO_ASSERT_PTR_NULL(scheduler->db_conn);
   database_init(scheduler);
-  FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
+  FO_ASSERT_PTR_NOT_NULL_FATAL(scheduler->db_conn);
 
   jq_pk = Prepare_Testing_Data_Job(scheduler);
 

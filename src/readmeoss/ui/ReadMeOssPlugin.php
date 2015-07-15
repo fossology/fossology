@@ -79,15 +79,12 @@ class ReadMeOssPlugin extends DefaultPlugin
       return $this->flushContent(_('No upload selected'));
     }
     $upload = array_pop($addUploads);
-    $uploadId = $upload->getId();
-    $readMeOssAgent = plugin_find('agent_readmeoss');
-    $userId = Auth::getUserId();
-    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
-    $error = "";
-    $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array(), $readMeOssAgent->uploadsAdd($addUploads));
-    if ($jobQueueId<0)
+    try
     {
-      return $this->flushContent(_("Cannot schedule").": ".$error);
+      list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
+    }
+    catch (Exception $ex) {
+      return $this->flushContent($ex->getMessage());
     }
 
     $vars = array('jqPk' => $jobQueueId,
@@ -101,6 +98,39 @@ class ReadMeOssPlugin extends DefaultPlugin
     $showJobsPlugin = \plugin_find('showjobs');
     $showJobsPlugin->OutputOpen();
     return $showJobsPlugin->getResponse();
+  }
+  
+  protected function getJobAndJobqueue($groupId, $upload, $addUploads)
+  {
+    $uploadId = $upload->getId();
+    $readMeOssAgent = plugin_find('agent_readmeoss');
+    $userId = Auth::getUserId();
+    $jqCmdArgs = $readMeOssAgent->uploadsAdd($addUploads);
+    $dbManager = $this->getObject('db.manager');
+    $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
+         . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';
+    $params = array($readMeOssAgent->AgentName,$uploadId,$userId,$groupId);
+    $log = __METHOD__;
+    if ($jqCmdArgs) {
+      $sql .= ' AND jq_cmd_args=$5';
+      $params[] = $jqCmdArgs;
+      $log .= '.args';
+    }
+    else {
+      $sql .= ' AND jq_cmd_args IS NULL';
+    }
+    $scheduled = $dbManager->getSingleRow($sql,$params,$log);
+    if (!empty($scheduled)) {
+      return array($scheduled['job_pk'],$scheduled['jq_pk']);
+    }
+    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
+    $error = "";
+    $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
+    if ($jobQueueId<0)
+    {
+      throw new Exception(_("Cannot schedule").": ".$error);
+    }
+    return array($jobId,$jobQueueId);
   }
   
   protected function getUpload($uploadId, $groupId)

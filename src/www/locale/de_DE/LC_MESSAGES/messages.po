@@ -129,10 +129,6 @@ msgstr "bSAM Lizenz-Browser (veraltet)"
 msgid "Clear"
 msgstr "L&ouml;schen"
 
-#: plugins/ui-license.php:89
-msgid "View bsam license histogram"
-msgstr "bSAM-Lizenz-Histogramm-Ansicht"
-
 #: plugins/ui-license.php:313 plugins/ui-buckets.php:276
 #: plugins/ui-licgroup.php:561 plugins/ui-nomos-license.php:200
 msgid "Count"
@@ -1812,10 +1808,6 @@ msgstr "Absenden"
 #: plugins/admin-check-template.php:27
 msgid "License Template Check"
 msgstr "Prüfung Lizenz-Vorlagen"
-
-#: plugins/admin-check-template.php:48
-msgid "Failed to read License.bsam"
-msgstr "Konnte License.bsam nicht lesen"
 
 #: plugins/admin-check-template.php:58
 msgid "Checking for duplicate errors within the license templates"

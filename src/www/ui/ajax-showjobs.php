@@ -387,8 +387,8 @@ class AjaxShowJobs extends FO_Plugin
             $varJobQueueRow['download'] = "ReadMeOss";
             break;
           case 'spdx2':
-             $varJobQueueRow['download'] = "SPDX";
-             break;
+            $varJobQueueRow['download'] = "SPDX";
+            break;
           default:
             $varJobQueueRow['download'] = "";
         }
