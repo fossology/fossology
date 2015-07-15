@@ -174,3 +174,6 @@ variable.list
 /src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
 /src/cli/fo_chmod
 /src/cli/fo_folder
+/src/ninka/agent_tests/Functional/ninka
+/src/ninka/agent_tests/Unit/test_ninka
+/src/ninka/agent/ninka
