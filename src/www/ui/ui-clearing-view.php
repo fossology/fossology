@@ -133,10 +133,14 @@ class ClearingView extends FO_Plugin
     $openOutput = $this->OutputOpen();
     if($openOutput instanceof RedirectResponse)
     {
-      $openOutput->prepare($this->getRequest());
-      $openOutput->send();
+      $response = $openOutput;
     }
-    $this->renderOutput();
+    else
+    {
+      $response = $this->getResponse();
+    }
+    $response->prepare($this->getRequest());
+    $response->send();
   }
 
   function OutputOpen()

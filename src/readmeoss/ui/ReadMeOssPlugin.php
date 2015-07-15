@@ -95,7 +95,12 @@ class ReadMeOssPlugin extends DefaultPlugin
                   'reportType' => "ReadMe_OSS");
     $text = sprintf(_("Generating ReadMe_OSS for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
-    return $this->render("report.html.twig",$this->mergeWithDefault($vars));
+    $content = $this->renderer->loadTemplate("report.html.twig")->render($vars);
+    $message = '<h3 id="jobResult"></h3>';
+    $request->duplicate(array('injectedMessage'=>$message,'injectedFoot'=>$content,'mod'=>'showjobs'))->overrideGlobals();
+    $showJobsPlugin = \plugin_find('showjobs');
+    $showJobsPlugin->OutputOpen();
+    return $showJobsPlugin->getResponse();
   }
   
   protected function getUpload($uploadId, $groupId)
