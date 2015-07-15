@@ -101,7 +101,7 @@ class ui_download extends FO_Plugin
   } // CheckRestore()
 
   
-  function renderOutput()
+  function getResponse()
   {
     try
     {
@@ -114,8 +114,7 @@ class ui_download extends FO_Plugin
       $this->vars['content'] = $e->getMessage();
       $response = $this->render($this->getTemplateName());
     }
-    $response->prepare($this->getRequest());
-    $response->send();
+    return $response;
   }
 
   /**

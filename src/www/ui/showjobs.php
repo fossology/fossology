@@ -205,6 +205,8 @@ class showjobs extends FO_Plugin
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
+      $this->vars['injectedFoot'] = $_GET['injectedFoot'];
+      $this->vars['message'] = $_GET['injectedMessage'];
     }
   }
 

@@ -8500,7 +8500,7 @@ int checkUnclassified(char *filetext, int size, int score,
   m = INFILE(_LT_GEN_EULA) || INFILE(_LT_LG);
   /* gl.flags & ~FL_SAVEBASE;  CDB -- This makes no sense, given line above */
   if (m) {
-    if (cur.licPara == NULL_STR) {
+    if (cur.licPara == NULL_STR  && cur.matchBase) {
       saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
     }
     return(1);
@@ -9145,7 +9145,11 @@ void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
   char *cp;
   char *start = mtext;
   int len;
-  /* */
+  if(!start)
+  {
+    LOG_FATAL("called saveLicenseParagraph without text")
+    Bail(-__LINE__);
+  }
 #ifdef PROC_TRACE
 #ifdef PROC_TRACE_SWITCH
   if (gl.ptswitch)
