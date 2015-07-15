@@ -41,6 +41,11 @@ class DeciderAgentPlugin extends AgentPlugin
   public function renderContent(&$vars)
   {
     $renderer = $GLOBALS['container']->get('twig.environment');
+    $vars['isNinkaInstalled'] = false;
+    if($ninkaUi=plugin_find('agent_ninka'))
+    {
+      $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
+    }
     return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
   }
   
