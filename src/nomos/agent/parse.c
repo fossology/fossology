@@ -5957,7 +5957,58 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* 
    * Dual licenses
    */
-  if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
+  if (INFILE(_LT_DUAL_GEPHI)) {
+     INTERESTING("DUAL-Gephi");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_LOGBACK)) {
+     INTERESTING("DUAL-Logback");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_OPENSSL)) {  
+     INTERESTING("Open-ssl");  
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_QOOXDOO)) {  
+     INTERESTING("DUAL-Qooxdoo");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_XMIND)) {
+     INTERESTING("DUAL-Xmind");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_JQUERY)) {  
+     INTERESTING("DUAL-jquery");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_RHINOSLIDER)) {  
+     INTERESTING("DUAL-rhinoslider");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_TRIMOZILLA)) {  
+     INTERESTING("Tri-Mozilla");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_TRIQT)) {  
+     INTERESTING("Tri-Qt");
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_ASTERISK)) {  
+     INTERESTING("DUAL-Asterisk");  
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_PERL)) {   
+     INTERESTING("DUAL-Perl");  
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_X3DOM)) {  
+     INTERESTING("DUAL-X3DOM");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_GLASSFISH)) {  
+     INTERESTING("DUAL-Glassfish");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_HAPI)) {  
+     INTERESTING("DUAL-Hapi");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_NETBEANS)) {  
+     INTERESTING("DUAL-Netbeans");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_COMMERCIAL)) {  
+     INTERESTING("DUAL-GPL-Commercial");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_MAGNOLIA)) {
+     INTERESTING("DUAL-Magnolia");   
+  }
+  else if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
     INTERESTING(lDebug ? "Dual-license(0)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {

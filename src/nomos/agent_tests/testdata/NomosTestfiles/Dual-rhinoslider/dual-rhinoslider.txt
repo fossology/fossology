@@ -1,0 +1,6 @@
+Rhinoslider 1.05
+ http://rhinoslider.com/
+ 
+ Copyright 2013: Sebastian Pontow, Rene Maas (http://renemaas.de/)
+ Dual licensed under the MIT or GPL Version 2 licenses.
+ http://rhinoslider.com/license/

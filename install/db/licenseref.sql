@@ -42621,3 +42621,1508 @@ Permission is granted to anyone to use this software for any purpose, including 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.', 'http://www.truecrypt.org', NULL, NULL, NULL, 'TrueCrypt License Version 3.0', NULL, NULL, NULL, '', NULL, false, true, true, 'e7292558b9ea2a2a2d23010e742d6bc4', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (561, 'DUAL-Gephi', 'Copyright 2008-2010 Gephi
+Authors : Mathieu Bastian <mathieu.bastian@gephi.org>
+Website : http://www.gephi.org
+This file is part of Gephi.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+Copyright 2011 Gephi Consortium. All rights reserved.
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 3 only ("GPL") or the Common
+Development and Distribution License("CDDL") (collectively, the
+"License"). You may not use this file except in compliance with the
+License. You can obtain a copy of the License at
+http://gephi.org/about/legal/license-notice/
+or /cddl-1.0.txt and /gpl-3.0.txt. See the License for the
+specific language governing permissions and limitations under the
+License.  When distributing the software, include this License Header
+Notice in each file and include the License files at
+/cddl-1.0.txt and /gpl-3.0.txt. If applicable, add the following below the
+License Header, with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+If you wish your version of this file to be governed by only the CDDL
+or only the GPL Version 3, indicate your decision by adding
+"[Contributor] elects to include this software in this distribution
+under the [CDDL or GPL Version 3] license." If you do not indicate a
+single choice of license, a recipient has the option to distribute
+your version of this file under either the CDDL, the GPL Version 3 or
+to extend the choice of license to its licensees as provided above.
+However, if you add GPL Version 3 code and therefore, elected the GPL
+Version 3 license, then the option applies only if the new code is
+made subject to such option by the copyright holder.
+Contributor(s):
+Portions Copyrighted 2011 Gephi Consortium.', '', NULL, NULL, NULL, 'DUAL-Gephi', NULL, NULL, NULL, '', NULL, false, false, false, 'ea988cd5a6fbc37273677dd73a768a27', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (562, 'DUAL-Logback', 'Logback LICENSE
+---------------
+
+Logback: the reliable, generic, fast and flexible logging framework.
+Copyright (C) 1999-2015, QOS.ch. All rights reserved.
+
+This program and the accompanying materials are dual-licensed under
+either the terms of the Eclipse Public License v1.0 as published by
+the Eclipse Foundation
+ 
+  or (per the licensee''s choosing)
+ 
+under the terms of the GNU Lesser General Public License version 2.1
+as published by the Free Software Foundation.', '', NULL, NULL, NULL, 'DUAL-Logback', NULL, NULL, NULL, '', NULL, false, false, false, '9ae130c777e0dd1701dfaca83038d08d', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (563, 'Open-ssl', 'License
+This is a copy of the current LICENSE file inside the CVS repository. 
+
+
+  LICENSE ISSUES
+  ==============
+
+  The OpenSSL toolkit stays under a dual license, i.e. both the conditions of
+  the OpenSSL License and the original SSLeay license apply to the toolkit.
+  See below for the actual license texts. Actually both licenses are BSD-style
+  Open Source licenses. In case of any license issues related to OpenSSL
+  please contact openssl-core@openssl.org.
+
+  OpenSSL License
+  ---------------
+
+/* ====================================================================
+ * Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgment:
+ *    "This product includes software developed by the OpenSSL Project
+ *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+ *
+ * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+ *    endorse or promote products derived from this software without
+ *    prior written permission. For written permission, please contact
+ *    openssl-core@openssl.org.
+ *
+ * 5. Products derived from this software may not be called "OpenSSL"
+ *    nor may "OpenSSL" appear in their names without prior written
+ *    permission of the OpenSSL Project.
+ *
+ * 6. Redistributions of any form whatsoever must retain the following
+ *    acknowledgment:
+ *    "This product includes software developed by the OpenSSL Project
+ *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+ * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This product includes cryptographic software written by Eric Young
+ * (eay@cryptsoft.com).  This product includes software written by Tim
+ * Hudson (tjh@cryptsoft.com).
+ *
+ */
+
+ Original SSLeay License
+ -----------------------
+
+/* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
+ * All rights reserved.
+ *
+ * This package is an SSL implementation written
+ * by Eric Young (eay@cryptsoft.com).
+ * The implementation was written so as to conform with Netscapes SSL.
+ *
+ * This library is free for commercial and non-commercial use as long as
+ * the following conditions are aheared to.  The following conditions
+ * apply to all code found in this distribution, be it the RC4, RSA,
+ * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
+ * included with this distribution is covered by the same copyright terms
+ * except that the holder is Tim Hudson (tjh@cryptsoft.com).
+ *
+ * Copyright remains Eric Young''s, and as such any Copyright notices in
+ * the code are not to be removed.
+ * If this package is used in a product, Eric Young should be given attribution
+ * as the author of the parts of the library used.
+ * This can be in the form of a textual message at program startup or
+ * in documentation (online or textual) provided with the package.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    "This product includes cryptographic software written by
+ *     Eric Young (eay@cryptsoft.com)"
+ *    The word ''cryptographic'' can be left out if the rouines from the library
+ *    being used are not cryptographic related :-).
+ * 4. If you include any Windows specific code (or a derivative thereof) from
+ *    the apps directory (application code) you must include an acknowledgement:
+ *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
+ *
+ * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * The licence and distribution terms for any publically available version or
+ * derivative of this code cannot be changed.  i.e. this code cannot simply be
+ * copied and put under another distribution licence
+ * [including the GNU Public Licence.]
+ */', '', NULL, NULL, NULL, 'Open ssl', NULL, NULL, NULL, '', NULL, false, false, false, 'e842eeba7c8a14988bc0cc1ac60e25f8', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (564, 'DUAL-Qooxdoo', 'qooxdoo License
+qooxdoo may be used under the terms of either the
+
+GNU Lesser General Public License (LGPL) http://www.gnu.org/licenses/lgpl.html
+or the
+
+Eclipse Public License (EPL) http://www.eclipse.org/org/documents/epl-v10.php
+As a recipient of qooxdoo, you may choose which license to receive the code under. Certain files or entire directories may not be covered by this dual license, but are subject to licenses compatible to both LGPL and EPL. License exceptions are explicitly declared in all relevant files or in a LICENSE file in the relevant directories.
+
+Following are the license text of the two licenses.
+
+GNU Lesser General Public License, version 2.1
+GNU LESSER GENERAL PUBLIC LICENSE
+Version 2.1, February 1999
+
+
+Copyright (C) 1991, 1999 Free Software Foundation, Inc.
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+
+
+[This is the first released version of the Lesser GPL. It also counts
+as the successor of the GNU Library Public License, version 2, hence
+the version number 2.1.]
+
+
+Preamble
+
+
+The licenses for most software are designed to take away your
+freedom to share and change it. By contrast, the GNU General Public
+Licenses are intended to guarantee your freedom to share and change
+free software--to make sure the software is free for all its users.
+
+
+This license, the Lesser General Public License, applies to some
+specially designated software packages--typically libraries--of the
+Free Software Foundation and other authors who decide to use it. You
+can use it too, but we suggest you first think carefully about whether
+this license or the ordinary General Public License is the better
+strategy to use in any particular case, based on the explanations below.
+
+
+When we speak of free software, we are referring to freedom of use,
+not price. Our General Public Licenses are designed to make sure that
+you have the freedom to distribute copies of free software (and charge
+for this service if you wish); that you receive source code or can get
+it if you want it; that you can change the software and use pieces of
+it in new free programs; and that you are informed that you can do
+these things.
+
+
+To protect your rights, we need to make restrictions that forbid
+distributors to deny you these rights or to ask you to surrender these
+rights. These restrictions translate to certain responsibilities for
+you if you distribute copies of the library or if you modify it.
+
+
+For example, if you distribute copies of the library, whether gratis
+or for a fee, you must give the recipients all the rights that we gave
+you. You must make sure that they, too, receive or can get the source
+code. If you link other code with the library, you must provide
+complete object files to the recipients, so that they can relink them
+with the library after making changes to the library and recompiling
+it. And you must show them these terms so they know their rights.
+
+
+We protect your rights with a two-step method: (1) we copyright the
+library, and (2) we offer you this license, which gives you legal
+permission to copy, distribute and/or modify the library.
+
+
+To protect each distributor, we want to make it very clear that
+there is no warranty for the free library. Also, if the library is
+modified by someone else and passed on, the recipients should know
+that what they have is not the original version, so that the original
+author''s reputation will not be affected by problems that might be
+introduced by others.
+
+
+Finally, software patents pose a constant threat to the existence of
+any free program. We wish to make sure that a company cannot
+effectively restrict the users of a free program by obtaining a
+restrictive license from a patent holder. Therefore, we insist that
+any patent license obtained for a version of the library must be
+consistent with the full freedom of use specified in this license.
+
+
+Most GNU software, including some libraries, is covered by the
+ordinary GNU General Public License. This license, the GNU Lesser
+General Public License, applies to certain designated libraries, and
+is quite different from the ordinary General Public License. We use
+this license for certain libraries in order to permit linking those
+libraries into non-free programs.
+
+
+When a program is linked with a library, whether statically or using
+a shared library, the combination of the two is legally speaking a
+combined work, a derivative of the original library. The ordinary
+General Public License therefore permits such linking only if the
+entire combination fits its criteria of freedom. The Lesser General
+Public License permits more lax criteria for linking other code with
+the library.
+
+
+We call this license the "Lesser" General Public License because it
+does Less to protect the user''s freedom than the ordinary General
+Public License. It also provides other free software developers Less
+of an advantage over competing non-free programs. These disadvantages
+are the reason we use the ordinary General Public License for many
+libraries. However, the Lesser license provides advantages in certain
+special circumstances.
+
+
+For example, on rare occasions, there may be a special need to
+encourage the widest possible use of a certain library, so that it becomes
+a de-facto standard. To achieve this, non-free programs must be
+allowed to use the library. A more frequent case is that a free
+library does the same job as widely used non-free libraries. In this
+case, there is little to gain by limiting the free library to free
+software only, so we use the Lesser General Public License.
+
+
+In other cases, permission to use a particular library in non-free
+programs enables a greater number of people to use a large body of
+free software. For example, permission to use the GNU C Library in
+non-free programs enables many more people to use the whole GNU
+operating system, as well as its variant, the GNU/Linux operating
+system.
+
+
+Although the Lesser General Public License is Less protective of the
+users'' freedom, it does ensure that the user of a program that is
+linked with the Library has the freedom and the wherewithal to run
+that program using a modified version of the Library.
+
+
+The precise terms and conditions for copying, distribution and
+modification follow. Pay close attention to the difference between a
+"work based on the library" and a "work that uses the library". The
+former contains code derived from the library, whereas the latter must
+be combined with the library in order to run.
+
+
+GNU LESSER GENERAL PUBLIC LICENSE
+TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+
+0. This License Agreement applies to any software library or other
+program which contains a notice placed by the copyright holder or
+other authorized party saying it may be distributed under the terms of
+this Lesser General Public License (also called "this License").
+Each licensee is addressed as "you".
+
+
+A "library" means a collection of software functions and/or data
+prepared so as to be conveniently linked with application programs
+(which use some of those functions and data) to form executables.
+
+
+The "Library", below, refers to any such software library or work
+which has been distributed under these terms. A "work based on the
+Library" means either the Library or any derivative work under
+copyright law: that is to say, a work containing the Library or a
+portion of it, either verbatim or with modifications and/or translated
+straightforwardly into another language. (Hereinafter, translation is
+included without limitation in the term "modification".)
+
+
+"Source code" for a work means the preferred form of the work for
+making modifications to it. For a library, complete source code means
+all the source code for all modules it contains, plus any associated
+interface definition files, plus the scripts used to control compilation
+and installation of the library.
+
+
+Activities other than copying, distribution and modification are not
+covered by this License; they are outside its scope. The act of
+running a program using the Library is not restricted, and output from
+such a program is covered only if its contents constitute a work based
+on the Library (independent of the use of the Library in a tool for
+writing it). Whether that is true depends on what the Library does
+and what the program that uses the Library does.
+
+
+1. You may copy and distribute verbatim copies of the Library''s
+complete source code as you receive it, in any medium, provided that
+you conspicuously and appropriately publish on each copy an
+appropriate copyright notice and disclaimer of warranty; keep intact
+all the notices that refer to this License and to the absence of any
+warranty; and distribute a copy of this License along with the
+Library.
+
+
+You may charge a fee for the physical act of transferring a copy,
+and you may at your option offer warranty protection in exchange for a
+fee.
+
+
+2. You may modify your copy or copies of the Library or any portion
+of it, thus forming a work based on the Library, and copy and
+distribute such modifications or work under the terms of Section 1
+above, provided that you also meet all of these conditions:
+
+
+a) The modified work must itself be a software library.
+
+
+b) You must cause the files modified to carry prominent notices
+stating that you changed the files and the date of any change.
+
+
+c) You must cause the whole of the work to be licensed at no
+charge to all third parties under the terms of this License.
+
+
+d) If a facility in the modified Library refers to a function or a
+table of data to be supplied by an application program that uses
+the facility, other than as an argument passed when the facility
+is invoked, then you must make a good faith effort to ensure that,
+in the event an application does not supply such function or
+table, the facility still operates, and performs whatever part of
+its purpose remains meaningful.
+
+
+(For example, a function in a library to compute square roots has
+a purpose that is entirely well-defined independent of the
+application. Therefore, Subsection 2d requires that any
+application-supplied function or table used by this function must
+be optional: if the application does not supply it, the square
+root function must still compute square roots.)
+
+
+These requirements apply to the modified work as a whole. If
+identifiable sections of that work are not derived from the Library,
+and can be reasonably considered independent and separate works in
+themselves, then this License, and its terms, do not apply to those
+sections when you distribute them as separate works. But when you
+distribute the same sections as part of a whole which is a work based
+on the Library, the distribution of the whole must be on the terms of
+this License, whose permissions for other licensees extend to the
+entire whole, and thus to each and every part regardless of who wrote
+it.
+
+
+Thus, it is not the intent of this section to claim rights or contest
+your rights to work written entirely by you; rather, the intent is to
+exercise the right to control the distribution of derivative or
+collective works based on the Library.
+
+
+In addition, mere aggregation of another work not based on the Library
+with the Library (or with a work based on the Library) on a volume of
+a storage or distribution medium does not bring the other work under
+the scope of this License.
+
+
+3. You may opt to apply the terms of the ordinary GNU General Public
+License instead of this License to a given copy of the Library. To do
+this, you must alter all the notices that refer to this License, so
+that they refer to the ordinary GNU General Public License, version 2,
+instead of to this License. (If a newer version than version 2 of the
+ordinary GNU General Public License has appeared, then you can specify
+that version instead if you wish.) Do not make any other change in
+these notices.
+
+
+Once this change is made in a given copy, it is irreversible for
+that copy, so the ordinary GNU General Public License applies to all
+subsequent copies and derivative works made from that copy.
+
+
+This option is useful when you wish to copy part of the code of
+the Library into a program that is not a library.
+
+
+4. You may copy and distribute the Library (or a portion or
+derivative of it, under Section 2) in object code or executable form
+under the terms of Sections 1 and 2 above provided that you accompany
+it with the complete corresponding machine-readable source code, which
+must be distributed under the terms of Sections 1 and 2 above on a
+medium customarily used for software interchange.
+
+
+If distribution of object code is made by offering access to copy
+from a designated place, then offering equivalent access to copy the
+source code from the same place satisfies the requirement to
+distribute the source code, even though third parties are not
+compelled to copy the source along with the object code.
+
+
+5. A program that contains no derivative of any portion of the
+Library, but is designed to work with the Library by being compiled or
+linked with it, is called a "work that uses the Library". Such a
+work, in isolation, is not a derivative work of the Library, and
+therefore falls outside the scope of this License.
+
+
+However, linking a "work that uses the Library" with the Library
+creates an executable that is a derivative of the Library (because it
+contains portions of the Library), rather than a "work that uses the
+library". The executable is therefore covered by this License.
+Section 6 states terms for distribution of such executables.
+
+
+When a "work that uses the Library" uses material from a header file
+that is part of the Library, the object code for the work may be a
+derivative work of the Library even though the source code is not.
+Whether this is true is especially significant if the work can be
+linked without the Library, or if the work is itself a library. The
+threshold for this to be true is not precisely defined by law.
+
+
+If such an object file uses only numerical parameters, data
+structure layouts and accessors, and small macros and small inline
+functions (ten lines or less in length), then the use of the object
+file is unrestricted, regardless of whether it is legally a derivative
+work. (Executables containing this object code plus portions of the
+Library will still fall under Section 6.)
+
+
+Otherwise, if the work is a derivative of the Library, you may
+distribute the object code for the work under the terms of Section 6.
+Any executables containing that work also fall under Section 6,
+whether or not they are linked directly with the Library itself.
+
+
+6. As an exception to the Sections above, you may also combine or
+link a "work that uses the Library" with the Library to produce a
+work containing portions of the Library, and distribute that work
+under terms of your choice, provided that the terms permit
+modification of the work for the customer''s own use and reverse
+engineering for debugging such modifications.
+
+
+You must give prominent notice with each copy of the work that the
+Library is used in it and that the Library and its use are covered by
+this License. You must supply a copy of this License. If the work
+during execution displays copyright notices, you must include the
+copyright notice for the Library among them, as well as a reference
+directing the user to the copy of this License. Also, you must do one
+of these things:
+
+
+a) Accompany the work with the complete corresponding
+machine-readable source code for the Library including whatever
+changes were used in the work (which must be distributed under
+Sections 1 and 2 above); and, if the work is an executable linked
+with the Library, with the complete machine-readable "work that
+uses the Library", as object code and/or source code, so that the
+user can modify the Library and then relink to produce a modified
+executable containing the modified Library. (It is understood
+that the user who changes the contents of definitions files in the
+Library will not necessarily be able to recompile the application
+to use the modified definitions.)
+
+
+b) Use a suitable shared library mechanism for linking with the
+Library. A suitable mechanism is one that (1) uses at run time a
+copy of the library already present on the user''s computer system,
+rather than copying library functions into the executable, and (2)
+will operate properly with a modified version of the library, if
+the user installs one, as long as the modified version is
+interface-compatible with the version that the work was made with.
+
+
+c) Accompany the work with a written offer, valid for at
+least three years, to give the same user the materials
+specified in Subsection 6a, above, for a charge no more
+than the cost of performing this distribution.
+
+
+d) If distribution of the work is made by offering access to copy
+from a designated place, offer equivalent access to copy the above
+specified materials from the same place.
+
+
+e) Verify that the user has already received a copy of these
+materials or that you have already sent this user a copy.
+
+
+For an executable, the required form of the "work that uses the
+Library" must include any data and utility programs needed for
+reproducing the executable from it. However, as a special exception,
+the materials to be distributed need not include anything that is
+normally distributed (in either source or binary form) with the major
+components (compiler, kernel, and so on) of the operating system on
+which the executable runs, unless that component itself accompanies
+the executable.
+
+
+It may happen that this requirement contradicts the license
+restrictions of other proprietary libraries that do not normally
+accompany the operating system. Such a contradiction means you cannot
+use both them and the Library together in an executable that you
+distribute.
+
+
+7. You may place library facilities that are a work based on the
+Library side-by-side in a single library together with other library
+facilities not covered by this License, and distribute such a combined
+library, provided that the separate distribution of the work based on
+the Library and of the other library facilities is otherwise
+permitted, and provided that you do these two things:
+
+
+a) Accompany the combined library with a copy of the same work
+based on the Library, uncombined with any other library
+facilities. This must be distributed under the terms of the
+Sections above.
+
+
+b) Give prominent notice with the combined library of the fact
+that part of it is a work based on the Library, and explaining
+where to find the accompanying uncombined form of the same work.
+
+
+8. You may not copy, modify, sublicense, link with, or distribute
+the Library except as expressly provided under this License. Any
+attempt otherwise to copy, modify, sublicense, link with, or
+distribute the Library is void, and will automatically terminate your
+rights under this License. However, parties who have received copies,
+or rights, from you under this License will not have their licenses
+terminated so long as such parties remain in full compliance.
+
+
+9. You are not required to accept this License, since you have not
+signed it. However, nothing else grants you permission to modify or
+distribute the Library or its derivative works. These actions are
+prohibited by law if you do not accept this License. Therefore, by
+modifying or distributing the Library (or any work based on the
+Library), you indicate your acceptance of this License to do so, and
+all its terms and conditions for copying, distributing or modifying
+the Library or works based on it.
+
+
+10. Each time you redistribute the Library (or any work based on the
+Library), the recipient automatically receives a license from the
+original licensor to copy, distribute, link with or modify the Library
+subject to these terms and conditions. You may not impose any further
+restrictions on the recipients'' exercise of the rights granted herein.
+You are not responsible for enforcing compliance by third parties with
+this License.
+
+
+11. If, as a consequence of a court judgment or allegation of patent
+infringement or for any other reason (not limited to patent issues),
+conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License. If you cannot
+distribute so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you
+may not distribute the Library at all. For example, if a patent
+license would not permit royalty-free redistribution of the Library by
+all those who receive copies directly or indirectly through you, then
+the only way you could satisfy both it and this License would be to
+refrain entirely from distribution of the Library.
+
+
+If any portion of this section is held invalid or unenforceable under any
+particular circumstance, the balance of the section is intended to apply,
+and the section as a whole is intended to apply in other circumstances.
+
+
+It is not the purpose of this section to induce you to infringe any
+patents or other property right claims or to contest validity of any
+such claims; this section has the sole purpose of protecting the
+integrity of the free software distribution system which is
+implemented by public license practices. Many people have made
+generous contributions to the wide range of software distributed
+through that system in reliance on consistent application of that
+system; it is up to the author/donor to decide if he or she is willing
+to distribute software through any other system and a licensee cannot
+impose that choice.
+
+
+This section is intended to make thoroughly clear what is believed to
+be a consequence of the rest of this License.
+
+
+12. If the distribution and/or use of the Library is restricted in
+certain countries either by patents or by copyrighted interfaces, the
+original copyright holder who places the Library under this License may add
+an explicit geographical distribution limitation excluding those countries,
+so that distribution is permitted only in or among countries not thus
+excluded. In such case, this License incorporates the limitation as if
+written in the body of this License.
+
+
+13. The Free Software Foundation may publish revised and/or new
+versions of the Lesser General Public License from time to time.
+Such new versions will be similar in spirit to the present version,
+but may differ in detail to address new problems or concerns.
+
+
+Each version is given a distinguishing version number. If the Library
+specifies a version number of this License which applies to it and
+"any later version", you have the option of following the terms and
+conditions either of that version or of any later version published by
+the Free Software Foundation. If the Library does not specify a
+license version number, you may choose any version ever published by
+the Free Software Foundation.
+
+
+14. If you wish to incorporate parts of the Library into other free
+programs whose distribution conditions are incompatible with these,
+write to the author to ask for permission. For software which is
+copyrighted by the Free Software Foundation, write to the Free
+Software Foundation; we sometimes make exceptions for this. Our
+decision will be guided by the two goals of preserving the free status
+of all derivatives of our free software and of promoting the sharing
+and reuse of software generally.
+
+
+NO WARRANTY
+
+
+15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
+WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
+EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR
+OTHER PARTIES PROVIDE THE LIBRARY "AS IS" WITHOUT WARRANTY OF ANY
+KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE
+LIBRARY IS WITH YOU. SHOULD THE LIBRARY PROVE DEFECTIVE, YOU ASSUME
+THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+
+16. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN
+WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY
+AND/OR REDISTRIBUTE THE LIBRARY AS PERMITTED ABOVE, BE LIABLE TO YOU
+FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
+LIBRARY (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
+
+
+END OF TERMS AND CONDITIONS
+
+
+How to Apply These Terms to Your New Libraries
+
+
+If you develop a new library, and you want it to be of the greatest
+possible use to the public, we recommend making it free software that
+everyone can redistribute and change. You can do so by permitting
+redistribution under these terms (or, alternatively, under the terms of the
+ordinary General Public License).
+
+
+To apply these terms, attach the following notices to the library. It is
+safest to attach them to the start of each source file to most effectively
+convey the exclusion of warranty; and each file should have at least the
+"copyright" line and a pointer to where the full notice is found.
+
+
+<one line to give the library''s name and a brief idea of what it does.>
+Copyright (C) <year> <name of author>
+
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+
+Also add information on how to contact you by electronic and paper mail.
+
+
+You should also get your employer (if you work as a programmer) or your
+school, if any, to sign a "copyright disclaimer" for the library, if
+necessary. Here is a sample; alter the names:
+
+
+Yoyodyne, Inc., hereby disclaims all copyright interest in the
+library `Frob''(a library for tweaking knobs) written by James Random Hacker.
+
+
+<signature of Ty Coon>, 1 April 1990
+Ty Coon, President of Vice
+
+
+That''s all there is to it!
+Eclipse Public License - v 1.0
+Eclipse Public License - v 1.0
+
+
+THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT''S ACCEPTANCE OF THIS AGREEMENT.
+
+
+1. DEFINITIONS
+
+
+"Contribution" means:
+
+
+a) in the case of the initial Contributor, the initial code and documentation distributed under this Agreement, and
+
+
+b) in the case of each subsequent Contributor:
+
+
+i) changes to the Program, and
+
+
+ii) additions to the Program;
+
+
+where such changes and/or additions to the Program originate from and are distributed by that particular Contributor. A Contribution ''originates'' from a Contributor if it was added to the Program by such Contributor itself or anyone acting on such Contributor''s behalf. Contributions do not include additions to the Program which: (i) are separate modules of software distributed in conjunction with the Program under their own license agreement, and (ii) are not derivative works of the Program.
+
+
+"Contributor" means any person or entity that distributes the Program.
+
+
+"Licensed Patents" mean patent claims licensable by a Contributor which are necessarily infringed by the use or sale of its Contribution alone or when combined with the Program.
+
+
+"Program" means the Contributions distributed in accordance with this Agreement.
+
+
+"Recipient" means anyone who receives the Program under this Agreement, including all Contributors.
+
+
+2. GRANT OF RIGHTS
+
+
+a) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free copyright license to reproduce, prepare derivative works of, publicly display, publicly perform, distribute and sublicense the Contribution of such Contributor, if any, and such derivative works, in source code and object code form.
+
+
+b) Subject to the terms of this Agreement, each Contributor hereby grants Recipient a non-exclusive, worldwide, royalty-free patent license under Licensed Patents to make, use, sell, offer to sell, import and otherwise transfer the Contribution of such Contributor, if any, in source code and object code form. This patent license shall apply to the combination of the Contribution and the Program if, at the time the Contribution is added by the Contributor, such addition of the Contribution causes such combination to be covered by the Licensed Patents. The patent license shall not apply to any other combinations which include the Contribution. No hardware per se is licensed hereunder.
+
+
+c) Recipient understands that although each Contributor grants the licenses to its Contributions set forth herein, no assurances are provided by any Contributor that the Program does not infringe the patent or other intellectual property rights of any other entity. Each Contributor disclaims any liability to Recipient for claims brought by any other entity based on infringement of intellectual property rights or otherwise. As a condition to exercising the rights and licenses granted hereunder, each Recipient hereby assumes sole responsibility to secure any other intellectual property rights needed, if any. For example, if a third party patent license is required to allow Recipient to distribute the Program, it is Recipient''s responsibility to acquire that license before distributing the Program.
+
+
+d) Each Contributor represents that to its knowledge it has sufficient copyright rights in its Contribution, if any, to grant the copyright license set forth in this Agreement.
+
+
+3. REQUIREMENTS
+
+
+A Contributor may choose to distribute the Program in object code form under its own license agreement, provided that:
+
+
+a) it complies with the terms and conditions of this Agreement; and
+
+
+b) its license agreement:
+
+
+i) effectively disclaims on behalf of all Contributors all warranties and conditions, express and implied, including warranties or conditions of title and non-infringement, and implied warranties or conditions of merchantability and fitness for a particular purpose;
+
+
+ii) effectively excludes on behalf of all Contributors all liability for damages, including direct, indirect, special, incidental and consequential damages, such as lost profits;
+
+
+iii) states that any provisions which differ from this Agreement are offered by that Contributor alone and not by any other party; and
+
+
+iv) states that source code for the Program is available from such Contributor, and informs licensees how to obtain it in a reasonable manner on or through a medium customarily used for software exchange.
+
+
+When the Program is made available in source code form:
+
+
+a) it must be made available under this Agreement; and
+
+
+b) a copy of this Agreement must be included with each copy of the Program.
+
+
+Contributors may not remove or alter any copyright notices contained within the Program.
+
+
+Each Contributor must identify itself as the originator of its Contribution, if any, in a manner that reasonably allows subsequent Recipients to identify the originator of the Contribution.
+
+
+4. COMMERCIAL DISTRIBUTION
+
+
+Commercial distributors of software may accept certain responsibilities with respect to end users, business partners and the like. While this license is intended to facilitate the commercial use of the Program, the Contributor who includes the Program in a commercial product offering should do so in a manner which does not create potential liability for other Contributors. Therefore, if a Contributor includes the Program in a commercial product offering, such Contributor ("Commercial Contributor") hereby agrees to defend and indemnify every other Contributor ("Indemnified Contributor") against any losses, damages and costs (collectively "Losses") arising from claims, lawsuits and other legal actions brought by a third party against the Indemnified Contributor to the extent caused by the acts or omissions of such Commercial Contributor in connection with its distribution of the Program in a commercial product offering. The obligations in this section do not apply to any claims or Losses relating to any actual or alleged intellectual property infringement. In order to qualify, an Indemnified Contributor must: a) promptly notify the Commercial Contributor in writing of such claim, and b) allow the Commercial Contributor to control, and cooperate with the Commercial Contributor in, the defense and any related settlement negotiations. The Indemnified Contributor may participate in any such claim at its own expense.
+
+
+For example, a Contributor might include the Program in a commercial product offering, Product X. That Contributor is then a Commercial Contributor. If that Commercial Contributor then makes performance claims, or offers warranties related to Product X, those performance claims and warranties are such Commercial Contributor''s responsibility alone. Under this section, the Commercial Contributor would have to defend claims against the other Contributors related to those performance claims and warranties, and if a court requires any other Contributor to pay any damages as a result, the Commercial Contributor must pay those damages.
+
+
+5. NO WARRANTY
+
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, THE PROGRAM IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Each Recipient is solely responsible for determining the appropriateness of using and distributing the Program and assumes all risks associated with its exercise of rights under this Agreement , including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and unavailability or interruption of operations.
+
+
+6. DISCLAIMER OF LIABILITY
+
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER RECIPIENT NOR ANY CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OR DISTRIBUTION OF THE PROGRAM OR THE EXERCISE OF ANY RIGHTS GRANTED HEREUNDER, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+7. GENERAL
+
+
+If any provision of this Agreement is invalid or unenforceable under applicable law, it shall not affect the validity or enforceability of the remainder of the terms of this Agreement, and without further action by the parties hereto, such provision shall be reformed to the minimum extent necessary to make such provision valid and enforceable.
+
+
+If Recipient institutes patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Program itself (excluding combinations of the Program with other software or hardware) infringes such Recipient''s patent(s), then such Recipient''s rights granted under Section 2(b) shall terminate as of the date such litigation is filed.
+
+
+All Recipient''s rights under this Agreement shall terminate if it fails to comply with any of the material terms or conditions of this Agreement and does not cure such failure in a reasonable period of time after becoming aware of such noncompliance. If all Recipient''s rights under this Agreement terminate, Recipient agrees to cease use and distribution of the Program as soon as reasonably practicable. However, Recipient''s obligations under this Agreement and any licenses granted by Recipient relating to the Program shall continue and survive.
+
+
+Everyone is permitted to copy and distribute copies of this Agreement, but in order to avoid inconsistency the Agreement is copyrighted and may only be modified in the following manner. The Agreement Steward reserves the right to publish new versions (including revisions) of this Agreement from time to time. No one other than the Agreement Steward has the right to modify this Agreement. The Eclipse Foundation is the initial Agreement Steward. The Eclipse Foundation may assign the responsibility to serve as the Agreement Steward to a suitable separate entity. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved.
+
+
+This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.', '', NULL, NULL, NULL, 'DUAL-Qooxdoo', NULL, NULL, NULL, '', NULL, false, false, false, 'fbe86157f977ab6287e671a48ffdef59', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (565, 'DUAL-Xmind', '=XMind Readme=
+
+==License==
+
+XMind 3 is dual licensed under 2 open source licenses: the Eclipse Public License v1.0 (EPL), 
+which is available at http://www.eclipse.org/legal/epl-v10.html , and the GNU Lesser General 
+Public License v3 (LGPL), which is available at http://www.gnu.org/licenses/lgpl.html .
+
+XMind Pro 3 SLA is available at http://www.xmind.net/pro/license.html
+
+
+==Requirements==
+
+	Hardware:
+		A 800Mhz or greater processor.
+		256M RAM or greater, recommend 512M or greater.
+		100MB free disk space for downloaded file and installaltion.
+		Internet connection for certain features (like Share) and XMind Pro.
+
+	Windows Users:
+		Windows 2000(SP4)/XP/2003/Vista/7.
+		Microsoft Word/Powerpoint for certain features (like Export).
+		
+	Mac Users:
+		Mac OS X 10.4 and later.
+
+		
+	Linux Users
+		GTK.
+		Some features need lame(http://lame.sourceforge.net/).
+		Only Sun JRE/OpenJDK/IBM JRE/BEA JRockit are supported. Don''t use unsupported JVM.
+
+
+==Installation==
+
+	First, Download XMind from http://www.xmind.net/
+	
+	For downloading zip portable package, unzip it to a clean folder. Open this folder, 
+	and launch XMind directly without installation.
+		
+	For Windows installer, double-click it and follow the onscreen instructions. 
+
+	For Mac disk image, double-click it to open a Finder window including "XMind.app" 
+	(Some download tool would open it automatically.) Drag the "XMind.app" into your 
+	Applications folder to copy it to your hard driver. You can drag XMind again from 
+	the Applications folder to your dock, if you want.
+
+==Release Notes==
+
+Change of Version 3.2.1
+
+1. New dictionary management.
+2. New XMind special version for Japanese users.
+3. Improve the offline usage.
+4. Improve the security of signin process.
+5. Copy multiple lines into map as separated subtopics on Mac OS.
+6. Improve the French and Spanish translation.
+7. Fix the bug about changing shortcut(Ctrl+Alt+N).
+
+
+Change of Version 3.2.0
+
+New Features:
+1.New sign-in dialog
+2.French and Spanish language packages inside
+3.Fit map and Fit selection to view the map
+4.Unlistted Sharing to share maps easily with friends and colleagues
+5.Home Map to start with your own special map
+6.Overview Viewer to navigate the map fast and easily
+7.Powerful search the content in Notes
+8.New Date Time Picker in TaskInfo
+9.Insert image from the clipboard
+10.New Notification Window
+11.Export to MS Word/PPT 2010 (Windows Only)
+12.New Gallery, More friendly work.
+
+Bugs:
+1. In Windows, the inserted image in the map will disappear if we open it with a spcial process.
+2. Failed to import the FreeMind file if some topics have the rich content.
+3. In Windows, we can not mannual input the right month information in the TaskInfo view.
+4. The timer in Brainstorming mode will be reset when we drilldown a topic or drillup.
+5. When we share a map to people whose computer has the different date format, the taskbar in Gantt View will not show corrently or successfully.
+6. When we insert a relative hyperlink to a topic, the link will be invalid if the link path is deeper than two folders.
+7. When we open the pop-up view, and try to delete the image in it, the XMind will freeze.
+8. The multuple color line setting is not extracted successfully when we extract a theme.
+9. Sometimes, the search(Ctrl+F) in a Workbook, which has multiple sheets linked by the topic links, will cause XMind crash.
+10. In Windows, the inserted attachment in the map can not open if we open this map with a spcial process.
+11. In Windows, the customers'' own markers in the map will disappear if we open it with a sort of special steps.
+12. In Wondows, people can not open a xmind file which named with Chinese Character.
+13. If the image in notes is a litter big, it will fail to export the image out in PDF(Document).
+14. When exporting a map, which has locial file link, to PDF(document), if the link path has space, clicking the link in exported PDF file has no response.
+15. Right-clicking the hyperlink icon on a topic and selecting "cancel hyperlink" does not work.
+
+Improvements:
+1. We can cancel the map preview image while saving the map to reduce the file size.
+2. While exporting the map to PDF(Map), XMind will fit the map to the paper size you choose.
+3. While importing the MindManager file, the resources and duration elements will be imported.
+4. Can not import the Mind Manamager files successfully if there is an image in central topic.
+5. Improve the feature "export to freemind".
+6. While importing the MindManager file which has attachments, the attachment will lose.
+7. Improve the feature "export to PDF(document)"
+8. Improve the hyperlink. If linked folder has the "." in its name, there is no folder icon on the topic.
+
+
+Change of Version 3.1.1
+
+New Features:
+1. If your account has been renewed, after signing in, your XMind title will become "XMind Pro".
+2. XMind shows the Path of current XMind file.
+
+Bugs:
+1. When adding local files as hyperlink in XMind for Windows version, if the path has "space", XMind will not work well.
+2. If using Spreadsheet structure, we can not edit the column name via double-click.
+3. If showing the Legend in the map, we can not edit the description of markers in legend via double-click.
+4. While signing into your account on XMind.net, we can not unsubscriber the newsletter/tips at the Setting page.
+5. After extracting a new Theme or Style, we can not rename them via double-click in the theme view or style view.
+
+Improvements:
+1. XMind prepares the description file about "XMind File Format".
+2. While launching XMind, you can enable "Do not show this again". Then you can sign in under Help menu when you want to.
+3. Every Pro feature is labeled "Pro" in Menu.
+4. If you sign up an account in the inside browser, XMind will sign in automatically.
+5. If you renew you account in the inside browser, XMind will enable all Pro features automatically.
+6. Improve some translation.
+
+Change of Version 3.1.0
+
+New Features:
+1. Default theme
+2. Brainstorming mode and countdown timer
+3. Export to PDF (Map)
+4. Search tool
+5. Sort topics
+6. Add local file as relative hyperlink 
+7. Add your own dictionary into XMind
+8. New online update system
+9. Add context menu when editing notes
+10. Double click to open XMind file on Mac OS
+
+Bugs:
+1. Fishbone:  If changing map''s structure to fishbone, add summary to a topic, drag and add more topic into this summary, click print, the layout is chaos. When reopening this map, the layout will be chaos too.
+2. Extract Theme: If we extract a theme(named theme 1), close and reopen xmind, then extract another theme(its name will be the theme 1 automatically,), change its name (like to be theme 2).Now when we reopen XMind, the theme 2 is lost.
+3. Context Menu: Only in the first sheet of the first workbook,  select a topic and right-click mouse, you can see the full context menu(including markers, and structures).
+4. Upload map: If we add some special theme or style to a map and upload it to http://share.xmind.net/, then download this map and open it, all special theme and style will disappear. 
+5. Import XMind 2008 file: If the map has wallpaper, that wallpaper will lose after being imported. 
+6. Import FreeMind 0.9: Some Freemind 0.9 files can not be right imported into XMind.
+7. Extract style: Sometimes, your extracted style will disappear after re-launching XMind Pro.
+Some other bugs fixed.
+
+Improvements:
+1. Based on Eclipse RCP 3.5
+2. Improve spell checker
+3. Improve "Find and Replace"
+4. Improve notes editing
+5. XMind Pro users can use XMind Pro offline
+Some other improvements.
+
+Change of Version 3.0.3
+
+New Features:
+1. Crash Recovery
+2. Topic Text Alignment
+3. Export to FreeMind Map
+4. Zoom the map with "Ctrl+Scroll Mouse Wheel"
+5. Find and Replace the content in Label, Relationship and Boundary, Summary, and Rich Text Notes.
+6. Auto Hyperlink 
+7. SpellChecker in Rich Text Notes
+8. Enter into presentation mode by using command line: "xmind -p xxx.xmind"(Available in Windows).
+
+Bugs:
+1. After enabling "Restore last session" in preference dialog, and restarting XMind without closing file, that file will be labeled dirty to ask you to save it.
+2. After deleting the hyperlink and clicking ''ok'' in the hyperlink dialog, that hyperlink is still available in that topic.
+3. Some other bugs 
+
+Improvements:
+1. Improve the Memory usage, esp. on Windows.
+2. Improve the performance, such as the speed to save a map which has some big attachments
+3.Some other improvements.
+
+Change of Version 3.0.2
+
+New Features:
+1. Security
+2. New Sheet from Topic
+3. Hyperlink in Notes
+
+Bugs:
+1. Delete any a topic in drilled down map, XMind will be back to the orginal map.
+2. If enabling the "Auto-save", sometimes, it will report auto-save error.
+3. When positioning the topic which has been added summary, the summary will has wrong direction sometimes.
+4. Selecting and Positioning multiple topics which have boundary together will bring chaos
+5. The last two default styles in the style view are not available.
+6. Add boundary to multiple main branches in fishbone, the layout will be chaos.
+7. Pasting the multiple lines structural text into XMind has no effect.
+8. If using mouse context menu to align topics, users may not use alignment feature again untill re-open the XMind.
+
+Improvements:
+1. Improve XMind speed 
+2. Improve XMind performance and use less memory
+3. Improve Fishbone layout
+4. Importing FreeMind file performs better.
+5. XMind can run better on Mac OS X 10.4 fluently.
+6. Using personal markers in a map, and sharing with others, the markers sometimes can not been see.
+7. Enhance Save Sheet as...
+
+Change of version 3.0.1
+
+New Features:
+1. New Mind Map Structure: Clockwise and Anti Clockwise
+2. Import XMind 2008 file.
+3. Export to XMind 2008 file.
+4. Map Shot:  User can set a path to save.
+5. Hyperlink: Users can add Local File/Folder link, and topic link(in the same workbook) to a topic.
+6. The personal markers in a map can be seen after opening the map in another computer.
+7. New languages package including German, Japanese, Chinese(Simplified), Chinese(Traditional)
+8. New relationship style: Zigzag.
+9. New markers.
+
+Bugs:
+1. XMind can not run on PowerPC-based Mac OS X Tiger 10.4.
+2. Print dialog will be freeze sometimes.
+3. Marker, legend will become ugly if printing the map.
+4. Extract a Theme, and apply to a map. This theme will be lost after reopening XMind and that file.
+5. If users enable the Auto Save in XMind, open a new workbook and edit it, then leave XMind and do other work. After a while, there will be many "Save as" dialog.
+6. Open the build-in browser, and open a website, now if there is no response after clicking a URL inside this website, closing this browser view will close XMind.
+7. Spelling checker is in.
+8. If users use XMind 3 to open an XMind 2008 file which has wallpaper, that wallpaper can not be read. 
+Some other bugs fixed.
+
+Improvement:
+1. Can not open all XMind 2008 files directly.
+2. Theme will be seen after uploading and exporting to images.
+3. Users can drag an image into XMind as an individual topic.
+4. Ctrl+Home will let users focus on Central topic and central topic be at center.
+5. Users can change the Row order in Spreadsheet easily.
+6. Importing Mind Manager file performs better.
+7. Highlight the theme in current map in the theme view.
+8. If a topic is near the left or right of editor, and now double clicking or F2 to edit it, the map will jump to let this topic be center of editor.
+9. The Fishbone Chart has tapered line.
+10. There is a print icon on toolbar.
+11. New .deb package for Debian/Ubuntu Linux.
+12. Open .xmind file directly from Share.xmind.net.
+Some other improvements.
+', '', NULL, NULL, NULL, 'DUAL-Xmind', NULL, NULL, NULL, '', NULL, false, false, false, '51a26211cc10d37f406cadd5aebcb479', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (566, 'DUAL-jquery', 'jQuery JavaScript Library v1.7.2
+ http://jquery.com/
+ 
+ Copyright 2011, John Resig
+ Dual licensed under the MIT or GPL Version 2 licenses.
+ http://jquery.org/license
+
+ Includes Sizzle.js
+ http://sizzlejs.com/
+ Copyright 2011, The Dojo Foundation
+ Released under the MIT, BSD, and GPL Licenses.', '', NULL, NULL, NULL, 'DUAL-jquery', NULL, NULL, NULL, '', NULL, false, false, false, 'e7fdf06ffa23671a0203373796955751', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (567, 'DUAL-rhinoslider', 'Rhinoslider 1.05
+ http://rhinoslider.com/
+ 
+ Copyright 2013: Sebastian Pontow, Rene Maas (http://renemaas.de/)
+ Dual licensed under the MIT or GPL Version 2 licenses.
+ http://rhinoslider.com/license/', '', NULL, NULL, NULL, 'DUAL-rhinoslider', NULL, NULL, NULL, '', NULL, false, false, false, '10fd8e1e21906dcb49a32d3fa26e6ee6', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (568, 'Tri-Mozilla', 'Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version 
+1.1 (the "License"); you may not use this file except in compliance with 
+the License. You may obtain a copy of the License at 
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is __________________________________________.
+
+The Initial Developer of the Original Code is
+____________________________________________.
+Portions created by the Initial Developer are Copyright (C) 2___
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+
+Alternatively, the contents of this file may be used under the terms of
+either the GNU General Public License Version 2 or later (the "GPL"), or
+the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+in which case the provisions of the GPL or the LGPL are applicable instead
+of those above. If you wish to allow use of your version of this file only
+under the terms of either the GPL or the LGPL, and not to allow others to
+use your version of this file under the terms of the MPL, indicate your
+decision by deleting the provisions above and replace them with the notice
+and other provisions required by the GPL or the LGPL. If you do not delete
+the provisions above, a recipient may use your version of this file under
+the terms of any one of the MPL, the GPL or the LGPL.', '', NULL, NULL, NULL, 'Tri-Mozilla', NULL, NULL, NULL, '', NULL, false, false, false, 'a3501a3261107b9dd32aa9b359fc5cad', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (569, 'Tri-Qt', 'Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+ Contact: http://www.qt-project.org/legal
+
+ This file is part of the QtCore module of the Qt Toolkit.
+
+ $QT_BEGIN_LICENSE:LGPL$
+ Commercial License Usage
+ Licensees holding valid commercial Qt licenses may use this file in
+ accordance with the commercial license agreement provided with the
+ Software or, alternatively, in accordance with the terms contained in
+ a written agreement between you and Digia.  For licensing terms and
+ conditions see http://qt.digia.com/licensing.  For further information
+ use the contact form at http://qt.digia.com/contact-us.
+
+ GNU Lesser General Public License Usage
+ Alternatively, this file may be used under the terms of the GNU Lesser
+ General Public License version 2.1 as published by the Free Software
+ Foundation and appearing in the file LICENSE.LGPL included in the
+ packaging of this file.  Please review the following information to
+ ensure the GNU Lesser General Public License version 2.1 requirements
+ will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+
+ In addition, as a special exception, Digia gives you certain additional
+ rights.  These rights are described in the Digia Qt LGPL Exception
+ version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+
+ GNU General Public License Usage
+ Alternatively, this file may be used under the terms of the GNU
+ General Public License version 3.0 as published by the Free Software
+ Foundation and appearing in the file LICENSE.GPL included in the
+ packaging of this file.  Please review the following information to
+ ensure the GNU General Public License version 3.0 requirements will be
+ met: http://www.gnu.org/copyleft/gpl.html.', '', NULL, NULL, NULL, 'Tri-Qt', NULL, NULL, NULL, '', NULL, false, false, false, '8c9b4637dca497018fcd61dffec12c9f', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (570, 'DUAL-Asterisk', 'Asterisk is distributed under the GNU General Public License version 2
+and is also available under alternative licenses negotiated directly
+with Digium, Inc. If you obtained Asterisk under the GPL, then the GPL
+applies to all loadable Asterisk modules used on your system as well,
+except as defined below. The GPL (version 2) is included in this
+source tree in the file COPYING.
+
+This package also includes various components that are not part of
+Asterisk itself; these components are in the ''contrib'' directory
+and its subdirectories. These components are also distributed under the
+GPL version 2 as well.
+
+Digium, Inc. (formerly Linux Support Services) holds copyright
+and/or sufficient licenses to all components of the Asterisk
+package, and therefore can grant, at its sole discretion, the ability
+for companies, individuals, or organizations to create proprietary or
+Open Source (even if not GPL) modules which may be dynamically linked at
+runtime with the portions of Asterisk which fall under our
+copyright/license umbrella, or are distributed under more flexible
+licenses than GPL.
+
+If you wish to use our code in other GPL programs, don''t worry --
+there is no requirement that you provide the same exception in your
+GPL''d products (although if you''ve written a module for Asterisk we
+would strongly encourage you to make the same exception that we do).
+
+Specific permission is also granted to link Asterisk with OpenSSL, OpenH323
+and/or the UW IMAP Toolkit and distribute the resulting binary files.
+
+In addition, Asterisk implements two management/control protocols: the
+Asterisk Manager Interface (AMI) and the Asterisk Gateway Interface
+(AGI). It is our belief that applications using these protocols to
+manage or control an Asterisk instance do not have to be licensed
+under the GPL or a compatible license, as we believe these protocols
+do not create a ''derivative work'' as referred to in the GPL. However,
+should any court or other judiciary body find that these protocols do
+fall under the terms of the GPL, then we hereby grant you a license to
+use these protocols in combination with Asterisk in external
+applications licensed under any license you wish.
+
+The ''Asterisk'' name and logos are trademarks owned by Digium, Inc.,
+and use of them is subject to our trademark licensing policies. If you
+wish to use these trademarks for purposes other than simple
+redistribution of Asterisk source code obtained from Digium, you
+should contact our licensing department to determine the necessary
+steps you must take. For more information on this policy, please read:
+
+http://www.digium.com/en/company/profile/trademarkpolicy.php
+
+If you have any questions regarding our licensing policy, please
+contact us:
+
++1.877.344.4861 (via telephone in the USA)
++1.256.428.6000 (via telephone outside the USA)
++1.256.864.0464 (via FAX inside or outside the USA)
+IAX2/pbx.digium.com (via IAX2)
+licensing@digium.com (via email)
+
+Digium, Inc.
+445 Jan Davis Drive
+Huntsville, AL 35806
+USA', '', NULL, NULL, NULL, 'DUAL-Asterisk', NULL, NULL, NULL, '', NULL, false, false, false, '41204182bc43ce554f4cdf71ae8028d6', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (571, 'DUAL-Perl', 'For those of you that choose to use the GNU General Public License, my interpretation of the GNU General Public License is that no Perl script falls under the terms of the GPL unless you explicitly put said script under the terms of the GPL yourself.
+
+Furthermore, any object code linked with perl does not automatically fall under the terms of the GPL, provided such object code only adds definitions of subroutines and variables, and does not otherwise impair the resulting interpreter from executing any standard Perl script. I consider linking in C subroutines in this manner to be the moral equivalent of defining subroutines in the Perl language itself. You may sell such an object file as proprietary provided that you provide or offer to provide the Perl source, as specified by the GNU General Public License. (This is merely an alternate way of specifying input to the program.) You may also sell a binary produced by the dumping of a running Perl script that belongs to you, provided that you provide or offer to provide the Perl source as specified by the GPL. (The fact that a Perl interpreter and your code are in the same binary file is, in this case, a form of mere aggregation.)
+
+This is my interpretation of the GPL. If you still have concerns or difficulties understanding my intent, feel free to contact me. Of course, the Artistic License spells all this out for your protection, so you may prefer to use that.', '', NULL, NULL, NULL, 'DUAL-Perl', NULL, NULL, NULL, '', NULL, false, false, false, '4343581ca3c37e9813bf99349888ab1e', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (572, 'DUAL-X3DOM', 'Dual licensed under the MIT and GPL licenses.
+
+==[MIT]====================================================================
+Copyright (c) 2009 X3DOM
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+
+==[GPL]====================================================================
+
+X3DOM - Declarative 3D for HTML
+
+Copyright (C) 2009 X3DOM
+                                                                       
+This program is free software: you can redistribute it and/or modify   
+it under the terms of the GNU General Public License as published by   
+the Free Software Foundation, either version 3 of the License, or      
+(at your option) any later version.                                    
+                                                                       
+This program is distributed in the hope that it will be useful,        
+but WITHOUT ANY WARRANTY; without even the implied warranty of         
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
+GNU General Public License for more details.                           
+                                                                       
+You should have received a copy of the GNU General Public License      
+along with this program.  If not, see <http://www.gnu.org/licenses/>.', '', NULL, NULL, NULL, 'DUAL-X3DOM', NULL, NULL, NULL, '', NULL, false, false, false, '8d5a068f6ae773ea0ed249aff7e2a434', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (573, 'DUAL-Glassfish', '/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *
+ * The contents of this file are subject to the terms of either the GNU
+ * General Public License Version 2 only ("GPL") or the Common Development
+ * and Distribution License("CDDL") (collectively, the "License").  You
+ * may not use this file except in compliance with the License.  You can
+ * obtain a copy of the License at
+ * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+ * or packager/legal/LICENSE.txt.  See the License for the specific
+ * language governing permissions and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file at packager/legal/LICENSE.txt.
+ *
+ * GPL Classpath Exception:
+ * Oracle designates this particular file as subject to the "Classpath"
+ * exception as provided by Oracle in the GPL Version 2 section of the License
+ * file that accompanied this code.
+ *
+ * Modifications:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ *
+ * Contributor(s):
+ * If you wish your version of this file to be governed by only the CDDL or
+ * only the GPL Version 2, indicate your decision by adding "[Contributor]
+ * elects to include this software in this distribution under the [CDDL or GPL
+ * Version 2] license."  If you don''t indicate a single choice of license, a
+ * recipient has the option to distribute your version of this file under
+ * either the CDDL, the GPL Version 2 or to extend the choice of license to
+ * its licensees as provided above.  However, if you add GPL Version 2 code
+ * and therefore, elected the GPL Version 2 license, then the option applies
+ * only if the new code is made subject to such option by the copyright
+ * holder.
+ *
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ * Copyright 2004 The Apache Software Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */', '', NULL, NULL, NULL, 'DUAL-Glassfish', NULL, NULL, NULL, '', NULL, false, false, false, '84ca573927924e5fa98baed75953c759', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (574, 'DUAL-Hapi', '/**
+The contents of this file are subject to the Mozilla Public License Version 1.1 
+(the "License"); you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at http://www.mozilla.org/MPL/ 
+Software distributed under the License is distributed on an "AS IS" basis, 
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the 
+specific language governing rights and limitations under the License. 
+
+The Original Code is "HapiContext.java".  Description: 
+"HAPI configuration and factory" 
+
+The Initial Developer of the Original Code is University Health Network. Copyright (C) 
+2001.  All Rights Reserved. 
+
+Contributor(s): ______________________________________. 
+
+Alternatively, the contents of this file may be used under the terms of the 
+GNU General Public License (the  "GPL"), in which case the provisions of the GPL are 
+applicable instead of those above.  If you wish to allow use of your version of this 
+file only under the terms of the GPL and not to allow others to use your version 
+of this file under the MPL, indicate your decision by deleting  the provisions above 
+and replace  them with the notice and other provisions required by the GPL License.  
+If you do not delete the provisions above, a recipient may use your version of 
+this file under either the MPL or the GPL. 
+ */', '', NULL, NULL, NULL, 'DUAL-Hapi', NULL, NULL, NULL, '', NULL, false, false, false, '3d457884b7425fc94a005f1fe1c64506', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (575, 'DUAL-Netbeans', 'DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright © 1997, 2012, Oracle and/or its affiliates. All rights reserved.
+
+Oracle and Java are registered trademarks of Oracle and/or its
+affiliates. Other names may be trademarks of their respective owners.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common
+Development and Distribution License("CDDL") (collectively, the
+"License"). You may not use this file except in compliance with the
+License. You can obtain a copy of the License at
+https://netbeans.org/cddl-gplv2.html or
+nbbuild/licenses/CDDL-GPL-2-CP. See the License for the specific
+language governing permissions and limitations under the License.
+When distributing the software, include this License Header
+Notice in each file and include the License file at
+nbbuild/licenses/CDDL-GPL-2-CP. Oracle designates this particular file
+as subject to the "Classpath" exception as provided by Oracle in the
+GPL Version 2 section of the License file that accompanied this code. If
+applicable, add the following below the License Header, with the fields
+enclosed by brackets [] replaced by your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+
+Contributor(s):
+
+The original software is NetBeans. The initial developer of the original
+software was Sun Microsystems, Inc.; portions copyright 1997-2006 Sun
+Microsystems, Inc. All rights reserved.
+
+If you wish your version of this file to be governed by only the CDDL or
+only the GPL Version 2, indicate your decision by adding "[Contributor]
+elects to include this software in this distribution under the [CDDL or
+GPL Version 2] license." If you do not indicate a single choice of license, 
+a recipient has the option to distribute your version of this file under 
+either the CDDL, the GPL Version 2 or to extend the choice of license to 
+its licensees as provided above. However, if you add GPL Version 2 code 
+and therefore, elected the GPL Version 2 license, then the option applies 
+only if the new code is made subject to such option by the copyright holder.
+
+Oracle is not responsible for the availability of third-party Web sites
+mentioned in this document. Oracle does not endorse and is not
+responsible or liable for any content, advertising, products, or other
+materials on or available from such sites or resources. Oracle will not be
+responsible or liable for any damage or loss caused or alleged to be
+caused by or in connection with use of or reliance on any such content,
+goods, or services available on or through any such sites or resources.', '', NULL, NULL, NULL, 'DUAL-Netbeans', NULL, NULL, NULL, '', NULL, false, false, false, '26a917acad4522a10deaa100b99d33d4', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (576, 'DUAL-GPL-Commercial', '/*
+ * If you purchased a commercial license for product [product name] the commercial
+ * license agreement applies to this source code.
+ * Otherwise the GPL license agreement applies to this source code.
+ */', '', NULL, NULL, NULL, 'DUAL-GPL-Commercial', NULL, NULL, NULL, '', NULL, false, false, false, '12f83b95f50bddfb0dd74e091babba6b', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (577, 'DUAL-Magnolia', '===============================================
+ 
+M A G N O L I A (R)
+${project.properties.magnoliaNiceName} ${project.properties.magnoliaNiceVersion}
+ 
+Yes, we''re open.
+License Agreement 
+===============================================
+ 
+Magnolia source code is dual-licensed under both the Magnolia
+Network Agreement and the GNU General Public License.
+You may elect to use one or the other of these licenses.
+ 
+This file is distributed in the hope that it will be
+useful, but AS-IS and WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE, TITLE, or NONINFRINGEMENT.
+Redistribution, except as permitted by whichever of the GPL
+or MNA you select, is prohibited.
+ 
+1. For the GPL license (GPL), you can redistribute and/or
+modify this file under the terms of the GNU General
+Public License, Version 3, as published by the Free Software
+Foundation.  You should have received a copy of the GNU
+General Public License, Version 3 along with this program;
+if not, write to the Free Software Foundation, Inc., 51
+Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  
+2. For the Magnolia Network Agreement (MNA), this file
+and the accompanying materials are made available under the
+terms of the MNA which accompanies this distribution, and
+is available at http://www.magnolia-cms.com/mna.html', '', NULL, NULL, NULL, 'DUAL-Magnolia', NULL, NULL, NULL, '', NULL, false, false, false, 'abd60423e8b0520ae580c11708c39495', 1, NULL);
