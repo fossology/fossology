@@ -108,7 +108,7 @@ class DeciderAgent extends Agent
     $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $this->groupId);
 
     $markAsWip = false;
-    if(($this->activeRules&self::RULES_WIP_SCANNER_UPDATES)== self::RULES_WIP_SCANNER_UPDATES)
+    if(null!==$lastDecision && $projectedScannerMatches && ($this->activeRules&self::RULES_WIP_SCANNER_UPDATES)== self::RULES_WIP_SCANNER_UPDATES)
     {
       $licensesFromDecision = array();
       foreach($lastDecision->getClearingLicenses() as $clearingLicense)
@@ -116,7 +116,7 @@ class DeciderAgent extends Agent
         $licenseIdFromEvent = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
         $licensesFromDecision[$licenseIdFromEvent] = $licenseIdFromEvent;
       }
-      $markAsWip = $this->existsUndecidedMatch($projectedScannerMatches,$licensesFromDecision);
+      $markAsWip = $this->existsUnhandledMatch($projectedScannerMatches,$licensesFromDecision);
     }
 
     if(null!==$lastDecision && $markAsWip)
@@ -150,7 +150,7 @@ class DeciderAgent extends Agent
     return ($haveDecided||$markAsWip ? 1 : 0);
   }
 
-  private function existsUndecidedMatch($projectedScannerMatches, $licensesFromDecision)
+  private function existsUnhandledMatch($projectedScannerMatches, $licensesFromDecision)
   {
     foreach(array_keys($projectedScannerMatches) as $projectedLicenseId)
     {
