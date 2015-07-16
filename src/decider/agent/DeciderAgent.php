@@ -38,7 +38,8 @@ class DeciderAgent extends Agent
   const RULES_NOMOS_IN_MONK = 0x1;
   const RULES_NOMOS_MONK_NINKA = 0x2;
   const RULES_BULK_REUSE = 0x4;
-  const RULES_ALL = 0x7; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
+  const RULES_WIP_SCANNER_UPDATES = 0x8;
+  const RULES_ALL = 0xf; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int */
   private $activeRules;

@@ -6,5 +6,6 @@
   {% if isNinkaInstalled %}
   <input type="checkbox" name="deciderRules[]" value="nomosMonkNinka" /> {{ '... scanners matches if Nomos, Monk and Ninka find the same license'|trans }}<br />
   {% endif %}
-  <input type="checkbox" name="deciderRules[]" value="reuseBulk" /> {{ '... bulk phrases from reused packages'|trans }}
+  <input type="checkbox" name="deciderRules[]" value="reuseBulk" /> {{ '... bulk phrases from reused packages'|trans }}<br />
+  <input type="checkbox" name="deciderRules[]" value="wipScannerUpdates" /> {{ '... new scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}
 </li>
