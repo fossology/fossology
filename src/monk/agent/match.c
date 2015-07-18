@@ -273,12 +273,8 @@ static int licenseIncludes(const License* big, const License* small) {
   return 0;
 }
 
-static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense) {
-  return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
-}
-
-static int licensesCanNotOverlap(const License* thisLicense, const License* otherLicense) {
-  return thisLicense->refId == otherLicense->refId || !(oneLicenseIncludesTheOther(thisLicense, otherLicense));
+int licensesDiffer(const License *thisLicense, const License *otherLicense) {
+	return (thisLicense->refId != otherLicense->refId);
 }
 
 /* N.B. this is only a partial order of matches
@@ -291,6 +287,18 @@ static int licensesCanNotOverlap(const License* thisLicense, const License* othe
 int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
   const int thisIncludesOther = match_includes(thisMatch, otherMatch);
   const int otherIncludesThis = match_includes(otherMatch, thisMatch);
+  const License *thisLicense = thisMatch->license;
+  const License *otherLicense = otherMatch->license;
+
+  //Verify if licenses overlap
+  if (licensesDiffer(thisLicense, otherLicense)) {
+    if (licenseIncludes(thisLicense, otherLicense)) {
+      return 1;
+    }
+    if (licenseIncludes(otherLicense, thisLicense)) {
+      return -1;
+    }
+  }
 
   if (thisIncludesOther || otherIncludesThis) {
     if (match_isFull(thisMatch) && thisIncludesOther) {
@@ -300,9 +308,7 @@ int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
       return -1;
     }
 
-    if (licensesCanNotOverlap(thisMatch->license, otherMatch->license)) {
-      return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
-    }
+    return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
   }
   return 0;
 }
