@@ -20,11 +20,13 @@ DIRS = \
 	maintagent \
 	mimetype \
 	monk \
+	ninka \
 	nomos \
 	pkgagent \
 	readmeoss \
 	reuser \
 	scheduler \
+	spdx2 \
 	ununpack \
 	wget_agent \
 	www

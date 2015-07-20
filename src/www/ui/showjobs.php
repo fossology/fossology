@@ -21,13 +21,16 @@
 define("TITLE_showjobs", _("Show Jobs"));
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 
 class showjobs extends FO_Plugin
 {
   /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var UploadDao */
+  private $uploadDao;
 
   function __construct()
   {
@@ -39,6 +42,7 @@ class showjobs extends FO_Plugin
 
     global $container;
     $this->showJobsDao = $container->get('dao.show_jobs');
+    $this->uploadDao = $container->get('dao.upload');
 
     parent::__construct();
   }
@@ -106,8 +110,7 @@ class showjobs extends FO_Plugin
         return _("Job history record is no longer available"); 
       }
 
-      $uploadtree_tablename = GetUploadtreeTableName($row['job_upload_fk']);
-      if (NULL == $uploadtree_tablename) strcpy($uploadtree_tablename, "uploadtree");
+      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['job_upload_fk']);
 
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
       $statementName = __METHOD__."uploadtreeRec";
@@ -134,11 +137,11 @@ class showjobs extends FO_Plugin
     $uploadPk = GetParm('upload',PARM_INTEGER);
     if (empty($uploadPk)){ 
       $uploadPk = -1; 
-    }else{
-      $uploadPerm = GetUploadPerm($uploadPk);
-      if ($uploadPerm < Auth::PERM_WRITE){
+    }
+    elseif($uploadPk>0){
+      if (!$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
         $text = _("Permission Denied");
-        return "<h2>$text<h2>";
+        return "<h2>$text</h2>";
       }
     }
 
@@ -152,13 +155,9 @@ class showjobs extends FO_Plugin
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
-      if (!empty($uploadPk)){
-        $uploadPerm = GetUploadPerm($uploadPk);
-        if ($uploadPerm < Auth::PERM_WRITE){
-          $text = _("Permission Denied");
-          echo "<h2>$text<h2>";
-          return;
-        }
+      if (!empty($uploadPk) && !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
+        $text = _("Permission Denied");
+        return "<h2>$text</h2>";
       }
       $page = GetParm('page',PARM_INTEGER);
       if (empty($page)) $page = 0;
@@ -206,6 +205,8 @@ class showjobs extends FO_Plugin
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
+      $this->vars['injectedFoot'] = $_GET['injectedFoot'];
+      $this->vars['message'] = $_GET['injectedMessage'];
     }
   }
 
@@ -216,24 +217,20 @@ class showjobs extends FO_Plugin
    **/
   public function getTimeToRefresh()
   {
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-
-    $result = $dbManager->getSingleRow(
-    "SELECT conf_value FROM sysconfig WHERE variablename = 'ShowJobsAutoRefresh' LIMIT 1"
-    );
-    return $result['conf_value'];
+    global $SysConf;
+    return $SysConf['SYSCONFIG']['ShowJobsAutoRefresh'];
   } /* getTimeToRefresh() */
 
 
   public function getTemplateName()
   {
     $job = GetParm('job', PARM_INTEGER);
-    if (empty($job))
+    if (empty($job)) {
       return "ui-showjobs.html.twig";
-    else
+    }
+    else {
       return "ui-job-show.html.twig";
+    }
   }
 
 }

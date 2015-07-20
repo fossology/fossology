@@ -216,7 +216,7 @@ class AjaxClearingView extends FO_Plugin
     $mainLicIds = $this->clearingDao->getMainLicenseIds($uploadId, $groupId);
 
     $table = array();
-    /** @var ClearingResult $clearingResult */
+    /* @var $clearingResult ClearingResult */
     foreach ($addedClearingResults as $licenseShortName => $clearingResult)
     {
       $licenseId = $clearingResult->getLicenseId();
@@ -228,7 +228,7 @@ class AjaxClearingView extends FO_Plugin
       if ($clearingResult->hasClearingEvent())
       {
         $licenseDecisionEvent = $clearingResult->getClearingEvent();
-        $types[] = $licenseEventTypes->getTypeName($licenseDecisionEvent->getEventType());
+        $types[] = $this->getEventInfo($licenseDecisionEvent, $uberUri, $uploadTreeId, $licenseEventTypes);
         $reportInfo = $licenseDecisionEvent->getReportinfo();
         $comment = $licenseDecisionEvent->getComment();
       }
@@ -388,6 +388,16 @@ class AjaxClearingView extends FO_Plugin
   {
     return new Response($output, Response::HTTP_OK, array('Content-type' => 'text/plain'));
   }
+
+  private function getEventInfo($licenseDecisionEvent, $uberUri, $uploadTreeId, $licenseEventTypes) {
+    $type = $licenseEventTypes->getTypeName($licenseDecisionEvent->getEventType());
+    if ($licenseDecisionEvent->getEventType() == ClearingEventTypes::BULK) {
+      $eventId = $licenseDecisionEvent->getEventId();
+      $type .= ': <a href="'.$uberUri."&item=$uploadTreeId&clearingId=".$eventId.'#highlight">#'.$eventId.'</a>';
+    }
+    return $type;
+  }
+
 }
 
 $NewPlugin = new AjaxClearingView();

@@ -31,9 +31,6 @@ $(BUILDDIRS):
 build-scheduler: build-src
 build-agents: build-src
 
-# cli needs the php include file built in ui
-build-cli: build-ui
-
 # utils is a separate target, since it isn't built by default yet
 utils: build-utils
 
@@ -80,6 +77,9 @@ dist:
 
 empty-cache:
 	rm -rf $(CACHEDIR)/*
+
+%:
+	$(MAKE) -C $(FOSRCDIR) $@
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)

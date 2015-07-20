@@ -25,21 +25,22 @@
 #include "libfossdbmanagerclass.hpp"
 #include "database.hpp"
 #include <list>
+#include "uniquePtr.hpp"
 
 class CliOptions
 {
 private:
   int verbosity;
   unsigned int optType;
-  std::list<regexScanner> extraRegex;
+  std::list<unptr::shared_ptr<scanner>> cliScanners;
 
 public:
-  const std::list<regexScanner>& getExtraRegexes() const;
   bool isVerbosityDebug() const;
 
   unsigned int getOptType() const;
 
-  bool addExtraRegex(const std::string& regexDesc);
+  void addScanner(scanner* regexDesc);
+  std::list<unptr::shared_ptr<scanner>> extractScanners();
 
   CliOptions(int verbosity, unsigned int type);
   CliOptions();
@@ -48,22 +49,21 @@ public:
 class CopyrightState
 {
 public:
-  CopyrightState(int agentId, const CliOptions& cliOptions);
-  ~CopyrightState();
+  CopyrightState(int agentId, CliOptions&& cliOptions);
 
   int getAgentId() const;
 
-  void addScanner(const scanner* sc);
-  //void addScanners(const std::list<scanner>& sc);
+  /* give ownership of the scanner pointer to this CopyrightState */
+  void addScanner(scanner* scanner);
 
-  const std::list<const scanner*>& getScanners() const;
+  const std::list<unptr::shared_ptr<scanner>>& getScanners() const;
 
   const CliOptions& getCliOptions() const;
 
 private:
   int agentId;
-  const CliOptions& cliOptions;
-  std::list<const scanner*> scanners;
+  const CliOptions cliOptions;
+  std::list<unptr::shared_ptr<scanner>> scanners;
 };
 
 #endif

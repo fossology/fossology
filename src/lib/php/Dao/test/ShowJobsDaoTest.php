@@ -32,8 +32,11 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
   private $dbManager;
   /** @var UploadDao */
   private $uploadDao;
-  /** @vars ShowJobsDao */
+  /** @var ShowJobsDao */
   private $showJobsDao;
+  /** @var Mock for UploadPermissionDao */
+  private $uploadPermissionDao;
+  
   private $job_pks = array(2,1);
 
   public function setUp()
@@ -70,7 +73,8 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
 
     $logger = M::mock('Monolog\Logger');
     $logger->shouldReceive('debug');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermissionDao = M::mock('Fossology\Lib\Dao\UploadPermissionDao');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermissionDao);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -132,26 +136,19 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
   
   public function testMyJobs()
   {
-    $this->dbManager->prepare($stmt = 'insert.perm_upload',
-      "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
-    $uploadArrayPerm = array(array(1, Auth::PERM_ADMIN, 1, $groupId=2),
-                             array(2, Auth::PERM_ADMIN, 2, $groupId),
-                             array(3, Auth::PERM_ADMIN, 3, $groupId+1),
-                             array(4, Auth::PERM_NONE, 3, $groupId),
-                             array(5, Auth::PERM_WRITE, 4, $groupId));
-    foreach ($uploadArrayPerm as $uploadEntry)
-    {
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
-    }
+    $groupId = 2;
     $GLOBALS['SysConf']['auth'][Auth::GROUP_ID] = $groupId;
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
+
+    $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
+            ->andReturnUsing(function($upload,$group){ return ($upload==1 || $upload==2 || $upload==4);});
     $testOurJobs = $this->showJobsDao->myJobs(true);
     assertThat($testOurJobs,is(arrayContainingInAnyOrder($this->job_pks)));
     $testMyJobs = $this->showJobsDao->myJobs(false);
     assertThat($testMyJobs,equalTo(array(1)));
 
     $this->dbManager->queryOnce("UPDATE job SET job_queued=job_queued-INTERVAL '30 days' WHERE job_pk=1");
-    $this->dbManager->prepare($stmt = 'insert.perm_upload',
+    $this->dbManager->prepare(__METHOD__.'insert.perm_upload',
       "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
     $testOutdatedJobs = $this->showJobsDao->myJobs(true);
     assertThat($testOutdatedJobs,equalTo(array(2)));
@@ -236,5 +233,28 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     $hourMinSec = explode(':', $formattedLongTime);
     assertThat($hourMinSec[0]*3600+$hourMinSec[1]*60+$hourMinSec[2],
             is(closeTo(($itemCount-$itemNomos)/$fewFilesPerSec,0.5+$fewFilesPerSec)));
+  }
+  
+  public function testGetEstimatedTimeShouldNotDivideByZero()
+  {
+    $this->dbManager->prepare($stmt = 'insert.jobqueue',
+       "INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed)"
+     . "VALUES ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)");
+    
+    $nowTime = time();
+    $diffTime = 2345;
+    $nomosTime = date('Y-m-d H:i:sO',$nowTime-$diffTime);
+    $uploadArrayQue = array(array(8, $jobId=1, $jqType="nomos", 1,$nomosTime,null ,"Started", 0,"localhost.5963", $itemNomos=147),
+                           array(1, $jobId, "ununpack", 1, "2015-04-21 18:29:19.23825+05:30", "2015-04-21 18:29:26.396562+05:30", "Completed",1,null,$itemCount=646 ));
+    foreach ($uploadArrayQue as $uploadEntry)
+    {
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
+    }
+    
+    $showJobsDaoMock = M::mock('Fossology\\Lib\\Dao\\ShowJobsDao[getNumItemsPerSec]',array($this->dbManager, $this->uploadDao));
+    $showJobsDaoMock->shouldReceive('getNumItemsPerSec')->andReturn(0);
+
+    $estimated = $showJobsDaoMock->getEstimatedTime($jobId, $jqType);
+    assertThat($estimated,  equalTo('0:00:00'));
   }
 }

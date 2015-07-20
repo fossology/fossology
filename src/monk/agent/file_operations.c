@@ -32,14 +32,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 int readTokensFromFile(const char* fileName, GArray** tokens, const char* delimiters)
 {
-  *tokens = tokens_new();
-
   int fd = open(fileName, O_RDONLY);
   if (fd < 0)
   {
     printf("FATAL: can not open %s\n", fileName);
     return 0;
   }
+
+  *tokens = tokens_new();
 
   int needConverter = 1;
   iconv_t converter = NULL;

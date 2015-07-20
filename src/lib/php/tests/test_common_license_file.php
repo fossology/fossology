@@ -252,27 +252,6 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
   }
 
   /**
-   * \brief testing for CountFilesWithLicense
-   */
-  function testCountFilesWithLicense()
-  {
-    global $PG_CONN;
-    global $agent_pk;
-
-    /** get a license short name */
-    $sql = "SELECT rf_shortname from license_ref where rf_pk = 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $rf_shortname = $row['rf_shortname'];
-    pg_free_result($result);
-
-    $CountFiles = CountFilesWithLicense($agent_pk, $rf_shortname, $this->uploadtree_pk_parent, false, false, 0, $this->uploadtree_tablename);
-    $this->assertEquals(1, $CountFiles['count']);
-    $this->assertEquals(1, $CountFiles['unique']);
-  }
-
-  /**
    * \brief testing for Level1WithLicense
    */
   function testLevel1WithLicense()

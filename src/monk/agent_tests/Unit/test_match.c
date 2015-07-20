@@ -367,7 +367,6 @@ void test_filterMatchesWithBadGroupingAtFirstPass() {
   licenses_free(licenses);
 }
 
-
 MonkState* testState = (MonkState*) 0x17;
 
 int expectOnAll;
@@ -377,7 +376,7 @@ int onAll(MonkState* state, const File* file, const GArray* matches) {
   CU_ASSERT_EQUAL(file->fileName, testFileName);
   FO_ASSERT_TRUE(expectOnAll);
   return 1;
-};
+}
 
 int expectOnNo;
 int onNo(MonkState* state, const File* file) {
@@ -385,7 +384,7 @@ int onNo(MonkState* state, const File* file) {
   CU_ASSERT_EQUAL(file->fileName, testFileName);
   FO_ASSERT_TRUE(expectOnNo);
   return 1;
-};
+}
 
 int expectOnFull;
 int onFull(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo) {
@@ -413,8 +412,7 @@ int ignore(MonkState* state, const File* file) {
   CU_ASSERT_EQUAL(state, testState);
   CU_ASSERT_EQUAL(file->fileName, testFileName);
   return doIgnore;
-};
-
+}
 
 void doProcessTest(MatchCallbacks* expectedCallbacks)
 {
@@ -586,6 +584,7 @@ void test_matchComparatorIncludedSameLicensesComparedByRank() {
   match_free(match3);
   licenses_free(licenses);
 }
+
 CU_TestInfo match_testcases[] = {
   {"Testing match of all licenses with disjoint full matches:", test_findAllMatchesDisjoint},
   {"Testing match of all licenses with diff at beginning", test_findDiffsAtBeginning},

@@ -17,6 +17,7 @@
 ***********************************************************/
 
 use Fossology\Lib\Dao\JobDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Data\JobStatus;
 use Fossology\Lib\Data\UploadStatus;
@@ -79,26 +80,35 @@ $dbManager = $GLOBALS['container']->get("db.manager");
 $userPerm = 0;
 $uploadBrowseProxy = new Fossology\Lib\Proxy\UploadBrowseProxy($groupId, $userPerm, $dbManager);
 
-try {
-  switch($uploadBrowseProxy->getStatus($uploadId)) {
-    case UploadStatus::OPEN:
-      $status = "OPEN";
-      break;
-    case UploadStatus::IN_PROGRESS:
-      $status = "IN_PROGRESS";
-      break;
-    case UploadStatus::CLOSED:
-      $status = "CLOSED";
-      break;
-    case UploadStatus::REJECTED:
-      $status = "REJECTED";
-      break;
-    default:
-      $status = "ERROR: invalid status";
+/** @var UploadDao */
+$uploadDao = $GLOBALS['container']->get("dao.upload");
+
+if ($uploadDao->getUpload($uploadId) == null) {
+  $status = "NON_EXISTENT";
+} else if (!$uploadDao->isAccessible($uploadId, $groupId)) {
+  $status = "INACCESSIBLE";
+} else {
+  try {
+    switch($uploadBrowseProxy->getStatus($uploadId)) {
+      case UploadStatus::OPEN:
+        $status = "OPEN";
+        break;
+      case UploadStatus::IN_PROGRESS:
+        $status = "IN_PROGRESS";
+        break;
+      case UploadStatus::CLOSED:
+        $status = "CLOSED";
+        break;
+      case UploadStatus::REJECTED:
+        $status = "REJECTED";
+        break;
+      default:
+        $status = "ERROR: invalid status";
+    }
   }
-}
-catch(Exception $e)
-{
+  catch(Exception $e)
+  {
     $status = "ERROR: ".$e->getMessage();
+  }
 }
 print "status=$status\n";

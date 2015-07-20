@@ -133,10 +133,14 @@ class ClearingView extends FO_Plugin
     $openOutput = $this->OutputOpen();
     if($openOutput instanceof RedirectResponse)
     {
-      $openOutput->prepare($this->getRequest());
-      $openOutput->send();
+      $response = $openOutput;
     }
-    $this->renderOutput();
+    else
+    {
+      $response = $this->getResponse();
+    }
+    $response->prepare($this->getRequest());
+    $response->send();
   }
 
   function OutputOpen()
@@ -171,7 +175,7 @@ class ClearingView extends FO_Plugin
       return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
-    $uploadTreeTableName = GetUploadtreeTableName($uploadId);
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
     if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
     {
@@ -259,10 +263,8 @@ class ClearingView extends FO_Plugin
     $this->vars['ajaxAction'] = "setNextPrev";
     $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId);
 
-    $permission = GetUploadPerm($uploadId);
-
     $isSingleFile = !$itemTreeBounds->containsFiles();
-    $hasWritePermission = $permission >= Auth::PERM_WRITE;
+    $hasWritePermission = $this->uploadDao->isEditable($uploadId, $groupId);
 
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
@@ -270,7 +272,7 @@ class ClearingView extends FO_Plugin
       $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false);
     }
 
-    if ($isSingleFile && $permission >= Auth::PERM_WRITE)
+    if ($isSingleFile && $hasWritePermission)
     {
       $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
       $licenseArray = $this->licenseDao->getLicenseArray($groupId);

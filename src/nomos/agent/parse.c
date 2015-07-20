@@ -81,7 +81,7 @@
 #define _fW3C           30
 #define _mAPTANA        31
 #define _tOPENLDAP      32
-#define _mNTP			33 // To avoid W3C-style detection
+#define _mNTP           33 // To avoid W3C-style detection
 #define _fIP            34
 #define _fANTLR         35
 #define _fCCBY          36
@@ -2337,6 +2337,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_TITLE_ZLIB)) {
     INTERESTING("Zlib");
+  }
+   else if (INFILE (_LT_TRUECRYPT_30)) {
+    INTERESTING("TrueCrypt-3.0");
   }
   else if (INFILE(_TITLE_LIBPNG)) {
     INTERESTING("Libpng");
@@ -8497,7 +8500,7 @@ int checkUnclassified(char *filetext, int size, int score,
   m = INFILE(_LT_GEN_EULA) || INFILE(_LT_LG);
   /* gl.flags & ~FL_SAVEBASE;  CDB -- This makes no sense, given line above */
   if (m) {
-    if (cur.licPara == NULL_STR) {
+    if (cur.licPara == NULL_STR  && cur.matchBase) {
       saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
     }
     return(1);
@@ -9142,7 +9145,11 @@ void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
   char *cp;
   char *start = mtext;
   int len;
-  /* */
+  if(!start)
+  {
+    LOG_FATAL("called saveLicenseParagraph without text")
+    Bail(-__LINE__);
+  }
 #ifdef PROC_TRACE
 #ifdef PROC_TRACE_SWITCH
   if (gl.ptswitch)

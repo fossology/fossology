@@ -326,34 +326,42 @@ class AjaxExplorer extends DefaultPlugin
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
-
+    $linkUri = '';
     if (!empty($fileId) && !empty($ModLicView))
     {
-      $LinkUri = Traceback_uri();
-      $LinkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
+      $linkUri = Traceback_uri();
+      $linkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
       if ($selectedAgentId)
       {
-        $LinkUri .= "&agentId=$selectedAgentId";
+        $linkUri .= "&agentId=$selectedAgentId";
       }
-    } else
-    {
-      $LinkUri = null;
     }
 
     /* Determine link for containers */
     $isContainer = Iscontainer($child['ufile_mode']);
-    if ($isContainer)
+    if($isContainer && !$isFlat)
     {
-      $uploadtree_pk = Isartifact($child['ufile_mode']) ? DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename) : $childUploadTreeId;
-      $LicUri = "$uri&item=" . $uploadtree_pk;
+      $fatChild = $this->uploadDao->getFatItemArray($child['uploadtree_pk'], $uploadId, $this->uploadtree_tablename);
+      $uploadtree_pk = $fatChild['item_id'];
+      $linkUri = "$uri&item=" . $uploadtree_pk;
       if ($selectedAgentId)
       {
-        $LicUri .= "&agentId=$selectedAgentId";
+        $linkUri .= "&agentId=$selectedAgentId";
+      }
+      $child['ufile_name'] = $fatChild['ufile_name'];
+      if( !Iscontainer($fatChild['ufile_mode']) )
+      {
+        $isContainer = false;
       }
     }
-    else
+    else if ($isContainer)
     {
-      $LicUri = null;
+      $uploadtree_pk = Isartifact($child['ufile_mode']) ? DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename) : $childUploadTreeId;
+      $linkUri = "$uri&item=" . $uploadtree_pk;
+      if ($selectedAgentId)
+      {
+        $linkUri .= "&agentId=$selectedAgentId";
+      }
     }
 
     /* Populate the output ($VF) - file list */
@@ -361,10 +369,10 @@ class AjaxExplorer extends DefaultPlugin
     $fileName = $child['ufile_name'];
     if ($isContainer)
     {
-      $fileName = "<a href='$LicUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
-    } else if (!empty($LinkUri))
+      $fileName = "<a href='$linkUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
+    } else if (!empty($linkUri))
     {
-      $fileName = "<a href='$LinkUri'>$fileName</a>";
+      $fileName = "<a href='$linkUri'>$fileName</a>";
     }
     /* show licenses under file name */
     $childItemTreeBounds = 

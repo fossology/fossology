@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -40,6 +41,8 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
   private $clearingDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
   /** @var HighlightDao */
   private $highlightDao;
 
@@ -50,7 +53,8 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("MonkBulkTest");
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }
@@ -271,5 +275,97 @@ class MonkBulkTest extends \PHPUnit_Framework_TestCase
 
     $this->assertEquals($expected=0, count($relevantDecisionsItem6));
     $this->assertEquals($expected=0, count($relevantDecisionsItem7));
+  }
+
+  /** @group Functional */
+  public function testRunMonkBulkScanWithAShortSearch()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+    $uploadId = 1;
+
+    $licenseId = 225;
+    $removing = false;
+    $refText = "The GNU";
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $jobId = 64;
+    list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkId);
+
+    $this->rmRepo();
+
+    $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 17, 18);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 15, 16);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
+
+    assertThat(count($relevantDecisionsItem6),is(equalTo(1)));
+    assertThat(count($relevantDecisionsItem7),is(equalTo(1)));
+    $rfForACE = 225;
+    assertThat($relevantDecisionsItem6,hasKeyInArray($rfForACE));
+    /** @var ClearingEvent $clearingEvent */
+    $clearingEvent = $relevantDecisionsItem6[$rfForACE];
+    $eventId = $clearingEvent->getEventId();
+    $bulkHighlights = $this->highlightDao->getHighlightBulk(6, $eventId);
+
+    $this->assertEquals(1, count($bulkHighlights));
+
+    /** @var Highlight $bulkHighlight */
+    $bulkHighlight = $bulkHighlights[0];
+    $this->assertEquals($licenseId, $bulkHighlight->getLicenseId());
+    $this->assertEquals(Highlight::BULK, $bulkHighlight->getType());
+    $this->assertEquals(3, $bulkHighlight->getStart());
+    $this->assertEquals(10, $bulkHighlight->getEnd());
+
+    $bulkHighlights = $this->highlightDao->getHighlightBulk(6);
+
+    $this->assertEquals(1, count($bulkHighlights));
+    $this->assertEquals($bulkHighlight, $bulkHighlights[0]);
+  }
+
+  /** @group Functional */
+  public function testRunMonkBulkScanWithAnEmptySearchText()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $userId = 2;
+    $groupId = 2;
+    $uploadTreeId = 1;
+    $uploadId = 1;
+
+    $licenseId = 225;
+    $removing = false;
+    $refText = "";
+
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+
+    $this->assertGreaterThan($expected=0, $bulkId);
+
+    $jobId = 64;
+    list($output,$retCode) = $this->runBulkMonk($uploadId, $userId, $groupId, $jobId, $bulkId);
+
+    $this->rmRepo();
+
+    $this->assertEquals($retCode, 0, 'monk bulk failed: '.$output);
+    $bounds6 = new ItemTreeBounds(6, 'uploadtree_a', 1, 17, 18);
+    $bounds7 = new ItemTreeBounds(7, 'uploadtree_a', 1, 15, 16);
+    $relevantDecisionsItem6 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
+    $relevantDecisionsItem7 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
+
+    assertThat(count($relevantDecisionsItem6),is(equalTo(0)));
+    assertThat(count($relevantDecisionsItem7),is(equalTo(0)));
+
+    $bulkHighlights = $this->highlightDao->getHighlightBulk(6);
+
+    assertThat(count($bulkHighlights),is(equalTo(0)));
   }
 }

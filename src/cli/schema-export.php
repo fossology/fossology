@@ -37,6 +37,7 @@ $AllPossibleOpts = "abc:d:ef:ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234
 $Verbose = false;
 $DatabaseName = "fossology";
 $UpdateLiceneseRef = false;
+$showUsage = false;
 
 /* default location of core-schema.dat.  This file is checked into svn */
 $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
@@ -56,38 +57,15 @@ foreach($Options as $Option => $OptVal)
       $SchemaFilePath = $OptVal;
       break;
     case 'h': /* help */
-      Usage();
+      $showUsage = true;
+      break;
     default:
       echo "Invalid Option \"$Option\".\n";
-      Usage();
+      $showUsage = true;
   }
 }
 
-if (file_exists($SchemaFilePath))
-{
-  $success = unlink($SchemaFilePath);
-  if (!$success)
-  {
-    print "ERROR: Existing schema data file ($SchemaFilePath) could not be removed.\n";
-    exit(1);
-  }
-}
-
-$FailMsg = ExportSchema($SchemaFilePath);
-if ($FailMsg !== false)
-{
-  print "ERROR: $FailMsg \n";
-  exit(1);
-}
-
-/* success */
-exit(0);
-
-
-/** \brief Print Usage statement.
- *  \return No return, this calls exit.
- **/
-function Usage()
+if($showUsage)
 {
   global $argv;
 
@@ -97,6 +75,21 @@ function Usage()
   -f  {output file} 
   -h  this help usage";
   print "$usage\n";
-  exit(0);
 }
-?>
+else
+{ 
+  if (file_exists($SchemaFilePath) && !@nlink($SchemaFilePath))
+  {
+    $FailMsg = "Existing schema data file ($SchemaFilePath) could not be removed.";
+  }
+  else
+  {
+    $FailMsg = ExportSchema($SchemaFilePath);
+  }
+  
+  if ($FailMsg !== false)
+  {
+    print "ERROR: $FailMsg \n";
+    exit(1);
+  }
+}

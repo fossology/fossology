@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -55,33 +55,54 @@ unsigned specialDelim(const char* z){
       return 2;
     return 1;
   }
+  else if( a==':' && b==':') {
+    return 2;
+  }
   return 0;
 }
 
-int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters,
-  GArray** output, Token** remainder) {
+static inline void initStateToken(Token* stateToken) {
+  stateToken->hashedContent = hash_init();
+  stateToken->length = 0;
+  stateToken->removedBefore = 0;
+}
+
+static int isIgnoredToken(Token* token) {
+  Token remToken;
+
+#ifndef MONK_CASE_INSENSITIVE
+  remToken.hashedContent = hash("REM");
+#else
+  remToken.hashedContent = hash("rem");
+#endif
+  remToken.length = 3;
+  remToken.removedBefore = 0;
+
+  return tokenEquals(token, &remToken);
+}
+
+int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimiters, GArray** output, Token** remainder) {
   GArray* tokens = *output;
   Token* stateToken;
 
   unsigned int initialTokenCount = tokens->len;
 
   if (!inputChunk) {
-    stateToken = *remainder;
-    if ((stateToken) && (stateToken->length > 0))
-      g_array_append_val(tokens, *stateToken);
-    if (stateToken) {
+    if ((stateToken = *remainder)) {
+      if ((stateToken->length > 0) && !isIgnoredToken(stateToken)) {
+        g_array_append_val(tokens, *stateToken);
+      }
       free(stateToken);
     }
+    *remainder = NULL;
+    return 0;
   }
 
   if (!*remainder) {
     //initialize state
     stateToken = malloc(sizeof (Token));
     *remainder = stateToken;
-
-    stateToken->length = 0;
-    stateToken->hashedContent = hash_init();
-    stateToken->removedBefore = 0;
+    initStateToken(stateToken);
   } else {
     stateToken = *remainder;
   }
@@ -96,21 +117,27 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
   size_t readBytes = 0;
   while (readBytes < inputSize) {
     unsigned delimLen = 0;
-    if(inputSize-readBytes>=2) {
+    if (inputSize - readBytes >= 2) {
       delimLen = specialDelim(ptr);
     }
-    if(!delimLen) {
+    if (!delimLen) {
       delimLen = splittingDelim(*ptr, delimiters);
     }
-    if (delimLen>0) {
+
+    if (delimLen > 0) {
       if (stateToken->length > 0) {
-        g_array_append_val(tokens, *stateToken);
-        stateToken->hashedContent = hash_init();
-        stateToken->length = 0;
-        stateToken->removedBefore = delimLen;
-      } else {
-        stateToken->removedBefore += delimLen;
+        if (isIgnoredToken(stateToken)) {
+          stateToken->removedBefore += stateToken->length;
+          stateToken->length = 0;
+          stateToken->hashedContent = hash_init();
+        } else {
+          g_array_append_val(tokens, *stateToken);
+          initStateToken(stateToken);
+        }
       }
+
+      stateToken->removedBefore += delimLen;
+
       ptr += delimLen;
       readBytes += delimLen;
     } else {
@@ -121,7 +148,9 @@ int streamTokenize(const char* inputChunk, size_t inputSize, const char* delimit
       const char* newCharPtr = &newChar;
 #endif
       hash_add(newCharPtr, &(stateToken->hashedContent));
+
       stateToken->length++;
+
       ptr += 1;
       readBytes += 1;
     }
@@ -159,8 +188,8 @@ int tokensEquals(const GArray* a, const GArray* b) {
     return 0;
 
   for (size_t i = 0; i < a->len; i++) {
-    Token* aToken = &g_array_index(a, Token, i);
-    Token* bToken = &g_array_index(b, Token, i);
+    Token* aToken = tokens_index(a, i);
+    Token* bToken = tokens_index(b, i);
 
     if (!tokenEquals(aToken, bToken))
       return 0;
@@ -173,10 +202,21 @@ size_t token_position_of(size_t index, const GArray* tokens) {
   size_t result = 0;
   size_t previousLength = 0;
 
-  for (size_t i = 0; i <= index; i++) {
-    Token* token = &g_array_index(tokens, Token, i);
+  size_t limit = MIN(index + 1, tokens->len);
+
+  for (size_t i = 0; i < limit; i++) {
+    Token* token = tokens_index(tokens, i);
     result += token->removedBefore + previousLength;
     previousLength = token_length(*token);
+  }
+
+  if (index == tokens->len) {
+    result += previousLength;
+  }
+
+  if (index > tokens->len) {
+    result += previousLength;
+    printf("WARNING: requested calculation of token index after the END token\n");
   }
 
   return result;

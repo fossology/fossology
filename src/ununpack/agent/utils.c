@@ -200,7 +200,7 @@ int	TaintString	(char *Dest, int DestLen,
  * - Remove zero-length files
  * @returns 1=pruned, 0=no change.
  **/
-inline int	Prune	(char *Fname, struct stat Stat)
+int	Prune	(char *Fname, struct stat Stat)
 {
   if (!Fname || (Fname[0]=='\0')) return(1);  /* not a good name */
   /* check file type */
@@ -231,7 +231,7 @@ inline int	Prune	(char *Fname, struct stat Stat)
  * @param Fname file name
  * @returns 0 on success, 1 on failure.
  **/
-inline int	MkDirs	(char *Fname)
+int MkDirs (char *Fname)
 {
   char Dir[FILENAME_MAX+1];
   int i;
@@ -285,7 +285,7 @@ inline int	MkDirs	(char *Fname)
  * @param Fname file name
  * @returns 0 on success, 1 on failure.
  **/
-inline int	MkDir	(char *Fname)
+int	MkDir	(char *Fname)
 {
   if (mkdir(Fname,0770))
   {
@@ -301,7 +301,7 @@ inline int	MkDir	(char *Fname)
  * @param Fname file name
  * @returns 1=yes, 0=no.
  **/
-inline int	IsDir	(char *Fname)
+int	IsDir	(char *Fname)
 {
   struct stat Stat;
   int rc;

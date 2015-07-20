@@ -18,6 +18,8 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file common-folders.php
@@ -78,63 +80,6 @@ function GetUserRootFolder()
 } // GetUserRootFolder()
 
 /**
- * \brief Get the fossology system root folder, default name is "Software Repository".
- * \return root folder_pk
- **/
-function GetRootFolder()
-{
-  global $PG_CONN;
-
-  /* if there is only a single folder, then that must be the root */
-  $sql = "select folder_pk from folder limit 2";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 1)
-  {
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    return $row['folder_pk'];
-  }
-  else if (pg_num_rows($result) == 0)
-  {
-    $text = _("This database has not been properly installed: No root folder found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  /* Get all the folder_pk's  of folders that have children
-   * and remove all the folders that are themselves children.
-   * The remainder (folder that is never a child) is the root.
-   * We should probably give some thought to having all folders in foldercontents.
-   * The root folder would just have a null parent.  That would be lots simpler
-   * than what we have to go through here.
-   */
-  $sql = "select distinct parent_fk as folder_pk from foldercontents where foldercontents_mode=1
-          except select distinct child_id as folder_pk from foldercontents where foldercontents_mode=1 ";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0)
-  {
-    $text = _("This database has not been properly installed: No root folder found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  if (pg_num_rows($result) > 1)
-  {
-    $text = _("This database has not been properly installed: Multiple root folders found.");
-    echo "$text<br>";
-    echo __FILE__ . ":" . __LINE__ . ":". __FUNCTION__ ."<br>";
-    exit;
-  }
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-
-  return $row['folder_pk'];
-} // GetRootFolder()
-
-
-/**
  * \brief Return an array of folder_pk, folder_name
  *        from the users.root_folder_fk to $folder_pk
  * Array is in top down order.
@@ -169,7 +114,7 @@ function Folder2Path($folder_pk)
     // against this loop going infinite.
     if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) break;
 
-    $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=1";
+    $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=".FolderDao::MODE_FOLDER;
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $FolderRow = pg_fetch_assoc($result);
@@ -202,7 +147,7 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
     $upload_pk = $UTrec['upload_fk'];
   }
 
-  $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=2";
+  $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=".FolderDao::MODE_UPLOAD;
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $FolderRow = pg_fetch_assoc($result);
@@ -266,7 +211,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
             foldercontents.foldercontents_mode, 
             NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
             FROM folder, foldercontents
-            WHERE foldercontents.foldercontents_mode = 1
+            WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
             AND foldercontents.parent_fk =$ParentFolder
             AND foldercontents.child_id = folder.folder_pk
             AND folder.folder_pk is not null
@@ -301,8 +246,8 @@ function FolderGetName($FolderPk,$Top=-1)
 {
   global $PG_CONN;
   if ($Top == -1) { $Top = FolderGetTop(); }
-  $sql = "SELECT folder_name,folder.parent_fk FROM folder
-	LEFT JOIN foldercontents ON foldercontents_mode = 1
+  $sql = "SELECT folder_name,foldercontents.parent_fk FROM folder
+	LEFT JOIN foldercontents ON foldercontents_mode = ".FolderDao::MODE_FOLDER."
 	AND child_id = '$FolderPk'
 	WHERE folder_pk = '$FolderPk'
 	LIMIT 1;";
@@ -316,135 +261,8 @@ function FolderGetName($FolderPk,$Top=-1)
     $Name = FolderGetName($Parent,$Top) . "/" . $Name;
   }
   return($Name);
-} // FolderGetName()
+}
 
-/**
- * \brief Create the folder tree, using DIVs.
- * This is recursive!
- * NOTE: If there is a recursive loop in the folder table, then
- * this will loop INFINITELY.
- *
- * \param $ParentFolder  parent folder_pk
- * \param $Depth         folder depth to display, -1 to use users root folder
- * \param $HighLight     Optional, folder_pk of folder to highlight.
- * \param $ShowParent    Optional default is false. true if parent should be in shown in the tree.
- *
- * \return HTML of the folder tree
- */
-function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
-{
-  global $Plugins;
-  global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
-  if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { return(FolderListDiv(GetUserRootFolder(),0)); }
-  $Browse = &$Plugins[plugin_find_id("browse")];
-  $Uri = Traceback_uri();
-  $V="";
-
-  if ($Depth != 0)
-  {
-    $V .= "<font class='treehide1' color='white'>";
-    $V .= "+&nbsp;";
-    $V .= "</font>";
-    if ($Depth > 1)
-    {
-      for($i=1; $i < $Depth; $i++)
-      {
-        $V .= "<font class='treehide'>";
-        $V .= "+&nbsp;";
-        $V .= "</font>";
-      }
-    }
-  }
-
-  /* Load this folder's parent */
-  if ($ShowParent && ($ParentFolder != GetUserRootFolder()))
-  {
-    $sql = "SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
-    {
-      $row = pg_fetch_assoc($result);
-      $P = $row['parent_fk'];
-      if (!empty($P) && ($P != 0)) { $ParentFolder=$P; }
-      pg_free_result($result);
-    }
-    else
-    {
-      pg_free_result($result);
-      // No parent
-      return "";
-    }
-  }
-
-  /* Load this folder's name */
-  $sql = "SELECT folder_name,folder_desc FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $Name = trim($row['folder_name']);
-  $Desc = trim($row['folder_desc']);
-  if ($Name == "") { $Name = "[default]"; }
-  $Desc = str_replace('"',"&quot;",$Desc);
-  pg_free_result($result);
-
-  /* Load any subfolders */
-  $sql = "SELECT folder.folder_pk, folder.folder_name AS name,
-                                 folder.folder_desc AS description, 
-                                 foldercontents.parent_fk AS parent, 
-                                 foldercontents.foldercontents_mode, 
-                                 NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
-                          FROM folder, foldercontents
-                          WHERE foldercontents.foldercontents_mode = 1
-                                AND foldercontents.parent_fk =$ParentFolder
-                                AND foldercontents.child_id = folder.folder_pk
-                                AND folder.folder_pk is not null
-                          ORDER BY name";
-
-  /* Now create the HTML */
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
-    $V .= '<a href="javascript:ShowHide(' . "'TreeDiv-$ParentFolder'" . ')"><font class="treebranch">+</font></a>';
-  }
-  else
-  {
-    $V .= "<font class='treearm'>&ndash;</font>";
-  }
-  $V .= "&nbsp;";
-  if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
-  else { $Title = ""; }
-
- if (!empty($Browse))
-  {
-    $V .= "<a $Title class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>";
-  }
-  if (!empty($Highlight) && ($Highlight == $ParentFolder))
-  {
-    $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>";
-  }
-  $V .= htmlentities($Name);
-  if (!empty($Highlight) && ($Highlight == $ParentFolder))
-  { $V .= "</font>"; }
-  if (!empty($Browse)) { $V .= "</a>"; }
-  $V .= "<br>\n";
-  if (pg_num_rows($result) > 0)
-  {
-    $Hide="";
-    if ($Depth > 0) { $Hide = "style='display:none;'"; }
-    $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
-    while($row = pg_fetch_assoc($result))
-    {
-      $V .= FolderListDiv($row['folder_pk'],$Depth+1,$Highlight);
-    }
-    $V .= "</div>\n";
-  }
-  pg_free_result($result);
-  return($V);
-} /* FolderListDiv() */
 
 /**
  * \brief DEPRECATED! Given an upload number, return the
@@ -470,7 +288,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
     $Parm = $Uploadpk;
     $sql = "SELECT foldercontents.parent_fk,folder_name FROM foldercontents
               INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
-			  AND foldercontents.foldercontents_mode = 2
+			  AND foldercontents.foldercontents_mode = ".FolderDao::MODE_UPLOAD."
 			  WHERE foldercontents.child_id = $Parm LIMIT 1;";
   }
   else
@@ -515,13 +333,16 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
  *  for all uploads in a given folder.
  *
  */
-function FolderListUploads_perm($ParentFolder=-1, $perm)
+function FolderListUploads_perm($ParentFolder, $perm)
 {
   global $PG_CONN;
 
   if (empty($PG_CONN)) { return; }
   if (empty($ParentFolder)) { return; }
   if ($ParentFolder == "-1")  $ParentFolder = GetUserRootFolder(); 
+  $groupId = Auth::getGroupId();
+  /* @var $uploadDao UploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
   $List=array();
 
   /* Get list of uploads under $ParentFolder */
@@ -530,7 +351,7 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 	FROM foldercontents,upload
   INNER JOIN uploadtree ON upload_fk = upload_pk AND upload.pfile_fk = uploadtree.pfile_fk AND parent IS NULL AND lft IS NOT NULL
 	WHERE foldercontents.parent_fk = '$ParentFolder'
-	AND foldercontents.foldercontents_mode = 2
+	AND foldercontents.foldercontents_mode = ".FolderDao::MODE_UPLOAD."
 	AND foldercontents.child_id = upload.upload_pk
 	ORDER BY upload_filename,upload_pk;";
   $result = pg_query($PG_CONN, $sql);
@@ -538,9 +359,12 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
   while ($R = pg_fetch_assoc($result))
   {
     if (empty($R['upload_pk'])) { continue; }
-
-    // Filter out uploads where the user doesn't have sufficient permission 
-    if (GetUploadPerm($R['upload_pk']) < $perm) continue;
+    if($perm == Auth::PERM_READ && !$uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+      continue;
+    }
+    if ($perm == Auth::PERM_WRITE && !$uploadDao->isEditable($R['upload_pk'], $groupId)) {
+      continue;
+    }
 
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
@@ -553,24 +377,29 @@ function FolderListUploads_perm($ParentFolder=-1, $perm)
 } // FolderListUploads_perm()
 
 /**
- * \brief Get uploads and folder info, starting from $ParentFolder.
+ * @brief Get uploads and folder info, starting from $ParentFolder.
  * The array is sorted by folder and upload name.
  * Folders that are empty do not show up.
  * This is recursive!
  * NOTE: If there is a recursive loop in the folder table, then
  * this will loop INFINITELY.
  *
- * \param $ParentFolder folder_pk, -1 for users root folder
- * \param $FolderPath Used for recursion, caller should not specify.
- *
- * \return array of {upload_pk, upload_desc, name, folder}
+ * @param int $ParentFolder folder_pk, -1 for users root folder
+ * @param string $FolderPath Used for recursion, caller should not specify.
+ * @param Auth::PERM_READ | Auth::PERM_WRITE
+ * @return array of {upload_pk, upload_desc, name, folder}
  */
-function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth::PERM_READ)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath='', $perm=Auth::PERM_READ)
 {
   global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
-  if (empty($ParentFolder)) { return; }
+  if (empty($PG_CONN)) { return array(); }
+  if (empty($ParentFolder)) { return array(); }
+  if($perm!=Auth::PERM_READ && $perm=Auth::PERM_WRITE)
+          return array();
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  $groupId = Auth::getGroupId();
+  /* @var $uploadDao UploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
   $List=array();
 
   /* Get list of uploads */
@@ -578,21 +407,25 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   $sql = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM folder,foldercontents,uploadtree, upload
     WHERE 
         foldercontents.parent_fk = '$ParentFolder'
-    AND foldercontents.foldercontents_mode = 2 
+    AND foldercontents.foldercontents_mode = ". FolderDao::MODE_UPLOAD ."
     AND foldercontents.child_id = upload.upload_pk
     AND folder.folder_pk = $ParentFolder
     AND uploadtree.upload_fk = upload.upload_pk
     AND uploadtree.parent is null
-    ORDER BY uploadtree.ufile_name,upload.upload_desc;";
+    ORDER BY uploadtree.ufile_name,upload.upload_desc";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($R = pg_fetch_assoc($result))
   {
-    if (empty($R['upload_pk'])) { continue; }
-
-    /* Check upload permission */
-    $UploadPerm = GetUploadPerm($R['upload_pk']);
-    if ($UploadPerm < $perm) continue;
+    if (empty($R['upload_pk'])) {
+      continue;
+    }
+    if($perm == Auth::PERM_READ && !$uploadDao->isAccessible($R['upload_pk'], $groupId)) {
+      continue;
+    }
+    if ($perm == Auth::PERM_WRITE && !$uploadDao->isEditable($R['upload_pk'], $groupId)) {
+      continue;
+    }
 
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
@@ -607,7 +440,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   $sql = "SELECT A.child_id AS id,B.folder_name AS folder,B.folder_name AS subfolder
 	FROM foldercontents AS A
 	INNER JOIN folder AS B ON A.parent_fk = B.folder_pk
-	AND A.foldercontents_mode = 1
+	AND A.foldercontents_mode = ". FolderDao::MODE_FOLDER ."
 	AND A.parent_fk = '$ParentFolder'
   AND B.folder_pk = $ParentFolder
 	ORDER BY B.folder_name;";
@@ -617,7 +450,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
   {
     if (empty($R['id'])) { continue; }
     /* RECURSE! */
-    $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder']);
+    $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder'], $perm);
     $List = array_merge($List,$SubList);
   }
   pg_free_result($result);
@@ -641,7 +474,7 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL, $perm=Auth
  *       use this for its data.  In general data collection and data formatting
  *       should be separate functions.
  */
-function GetFolderArray($RootFolder=-1, &$FolderArray)
+function GetFolderArray($RootFolder, &$FolderArray)
 {
   global $PG_CONN;
 
@@ -662,7 +495,7 @@ function GetFolderArray($RootFolder=-1, &$FolderArray)
   $sql = "SELECT folder.folder_pk, folder.folder_name,
             foldercontents.parent_fk
             FROM folder, foldercontents
-            WHERE foldercontents.foldercontents_mode = 1
+            WHERE foldercontents.foldercontents_mode = ".FolderDao::MODE_FOLDER."
             AND foldercontents.parent_fk =$RootFolder
             AND foldercontents.child_id = folder.folder_pk
             AND folder.folder_pk is not null

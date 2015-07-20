@@ -42,9 +42,16 @@ without any warranty.
         <service id="dao.upload" class="Fossology\Lib\Dao\UploadDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
+            <argument type="service" id="dao.upload.permission"/>
+        </service>
+        <service id="dao.upload.permission" class="Fossology\Lib\Dao\UploadPermissionDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
         </service>
         <service id="dao.folder" class="Fossology\Lib\Dao\FolderDao">
             <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.upload"/>
         </service>
         <service id="dao.package" class="Fossology\Lib\Dao\PackageDao">
             <argument type="service" id="db.manager"/>
@@ -138,6 +145,10 @@ without any warranty.
     
         <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu">
             <argument type="service" id="twig.environment"/>
+        </service>
+        <service id="ui.folder.nav" class="Fossology\Lib\UI\FolderNav">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.folder"/>
         </service>
 
         <service id="twig.loader" class="Twig_Loader_Filesystem">

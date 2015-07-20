@@ -1,0 +1,30 @@
+var folder = 1;
+
+$("#tree").treeview({
+  collapsed: false,
+  animated: "fast",
+  control: "#sidetreecontrol",
+  persist: "location"
+  });
+
+$(document).ready(function() {
+  $('.clickable-folder').click(function(event){
+    folder = $(this).attr('data-folder');
+    $('#fromFolder').val(folder);
+    $.getJSON("?mod=foldercontents&folder=" + folder{% if removable is defined %} + "&removable=1"{% endif %})
+        .done(function (data) {
+          var folderchild = $('#foldercontent');
+          folderchild.empty();
+          $.each(data, function (key, value) {
+            var option = document.createElement("option");
+            option.innerHTML = value;
+            option.value = key;
+            folderchild.append(option);
+          });
+        })
+        .fail(failed);
+    return false;
+  });
+
+  $('.clickable-folder').first().trigger('click');
+});

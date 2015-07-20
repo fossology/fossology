@@ -267,7 +267,7 @@ class ShowJobsDao extends Object
       array($job_pk),
       __METHOD__.'.ununpack_must_be_in_this_job'
       );
-  }
+    }
 
     if(!empty($itemCount['jq_itemsprocessed'])){
 
@@ -288,12 +288,16 @@ class ShowJobsDao extends Object
       $estimatedArray = array(); // estimate time for each agent
 
       while($row = $this->dbManager->fetchArray($result)){
+        $timeOfCompletion = 0;
         if(empty($row['jq_endtime']) && !empty($row['jq_starttime'])) { // for agent started and not ended 
           if(empty($filesPerSec)) {
             $burnTime = time() - strtotime($row['jq_starttime']);
             $filesPerSec = $this->getNumItemsPerSec($row['jq_itemsprocessed'], $burnTime);
           }
-          $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
+
+          if(!empty($filesPerSec)) {           
+            $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
+          }
           array_push($estimatedArray, $timeOfCompletion);
         }
       }

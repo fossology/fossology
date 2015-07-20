@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,20 +18,22 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
-
-define("TITLE_ui_view_info", _("View File Information"));
+use Fossology\Lib\Dao\UploadDao;
 
 class ui_view_info extends FO_Plugin
 {
+  /** @var UploadDao */
+  private $uploadDao;
+  
   function __construct()
   {
     $this->Name       = "view_info";
-    $this->Title      = TITLE_ui_view_info;
+    $this->Title      = _("View File Information");
     $this->Dependency = array("browse");
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->LoginFlag  = 0;
-
     parent::__construct();
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
   }
 
   /**
@@ -554,30 +557,23 @@ class ui_view_info extends FO_Plugin
     $VT = "";
     $text = _("Tag Info");
     $VT .= "<H2>$text</H2>\n";
-
-    global $PG_CONN;
-    /* Find lft and rgt bounds for this uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
+    $groupId = Auth::getGroupId();
+    $row = $this->uploadDao->getUploadEntry($Item);
+    if (empty($row))
     {
-      pg_free_result($result);
       $text = _("Invalid URL, nonexistant item");
       return "<h2>$text $Item</h2>";
     }
-    $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
 
     if (empty($lft))
     {
       $text = _("Upload data is unavailable.  It needs to be unpacked.");
       return "<h2>$text uploadtree_pk: $Item</h2>";
     }
-
+    global $PG_CONN;
     $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag WHERE tag_pk = tag_fk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree,tag WHERE tag_pk = tag_fk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -590,8 +586,7 @@ class ui_view_info extends FO_Plugin
       while ($row = pg_fetch_assoc($result))
       {
         $VT .= "<tr><td align='center'>" . $row['ufile_name'] . "</td><td align='center'>" . $row['tag'] . "</td>";
-        $perm = GetUploadPerm($upload_pk);
-        if ($perm >= Auth::PERM_READ)
+        if ($this->uploadDao->isAccessible($upload_pk, $groupId))
         {
           $VT .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=" . $row['uploadtree_pk'] . "&tag_file_pk=" . $row['tag_file_pk'] . "'>View</a></td></tr>\n";
         }else{
@@ -608,8 +603,7 @@ class ui_view_info extends FO_Plugin
   public function Output()
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
-    $UploadPerm = GetUploadPerm($uploadId);
-    if ($UploadPerm < Auth::PERM_READ) return;
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) return;
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");

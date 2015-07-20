@@ -799,6 +799,8 @@ char* _test_wrongQueries_unparsableTypes(fo_dbManager** dbManager, const char* t
 
 char* _test_wrongQueries_transactions(fo_dbManager** dbManager, const char* testTableName)
 {
+  fo_dbManager_ignoreWarnings(*dbManager, 1);
+
   CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
   CU_ASSERT_TRUE(fo_dbManager_begin(*dbManager));
 
@@ -818,7 +820,6 @@ char* _test_wrongQueries_transactions(fo_dbManager** dbManager, const char* test
   PQclear(res);
 
  return g_strdup_printf(
-   "NOTICE: WARNING:  there is already a transaction in progress\n"
    "ERROR: ERROR:  column \"c\" of relation \"%s\" does not exist\n"
    "LINE 1: *\n"
    "*^\n"

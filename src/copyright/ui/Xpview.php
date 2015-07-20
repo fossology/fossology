@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\View\HighlightRenderer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,8 @@ class Xpview extends DefaultPlugin
   protected $decisionTableName;
   /** @var string */
   protected $tableName;
+  /** @var string */
+  protected $agentName;
   /** @var  array */
   protected $highlightTypeToStringMap;
   /** @var  array */
@@ -61,6 +64,7 @@ class Xpview extends DefaultPlugin
                                        self::PERMISSION=> Auth::PERM_READ));
     
     parent::__construct($name,$mergedParams);
+    $this->agentName = $this->tableName;
     
     $this->uploadDao = $this->getObject('dao.upload');
     $this->copyrightDao = $this->getObject('dao.copyright');
@@ -98,13 +102,14 @@ class Xpview extends DefaultPlugin
         return $this->responseBad();
       }
 
-      $uploadTreeId = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
-      if ($uploadTreeId === UploadDao::NOT_FOUND)
+      $uploadTree = $this->uploadDao->getNextItem($uploadEntry['upload_fk'], $parent);
+      if ($uploadTree === UploadDao::NOT_FOUND)
       {
         return $this->responseBad();
       }
+      $uploadTreeId = $uploadTree->getId();
 
-      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
     }
     if (empty($uploadTreeId))
     {
@@ -128,14 +133,22 @@ class Xpview extends DefaultPlugin
           $description, $textFinding, $comment);
     }
 
-    $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $this->typeToHighlightTypeMap);
+    $scanJobProxy = new ScanJobProxy($this->getObject('dao.agent'), $uploadId);
+    $scanJobProxy->createAgentStatus(array($this->agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    $highlights = array();
+    if(array_key_exists($this->agentName, $selectedScanners))
+    {
+      $latestXpAgentId = $selectedScanners[$this->agentName];
+      $highlights = $this->copyrightDao->getHighlights($uploadTreeId, $this->tableName, $latestXpAgentId, $this->typeToHighlightTypeMap);
+    }
 
     if (count($highlights) < 1)
     {
       $vars['message'] = _("No ").$this->tableName ._(" data is available for this file.");
     }
 
-    /** @var ui_view $view */
+    /* @var $view ui_view */
     $view = plugin_find("view");
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
@@ -206,6 +219,9 @@ class Xpview extends DefaultPlugin
    */
   function RegisterMenus()
   {
+    $text = _("Copyright/Email/Url/Author");
+    menu_insert("Browse-Pfile::Copyright/Email/Url", 0, 'copyright-view', $text);
+    
     // For this menu, I prefer having this in one place
     $text = _("Set the concluded licenses for this upload");
     menu_insert("Clearing::Licenses", 36, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);

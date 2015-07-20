@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit bootstrap="./phpunit-bootstrap.php">
+<phpunit bootstrap="./phpunit-bootstrap.php" colors="true">
   <php>
     <env name="SYSCONFDIR" value="/usr/local/etc/fossology/"/>
   </php>
@@ -10,19 +10,16 @@
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
+      <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
 
     <testsuite name="Fossology PhpUnit Agent Test Suite">
       <directory suffix="Test.php">decider/agent_tests</directory>
       <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
-      <directory suffix="Test.php">monk/agent_tests/Functional</directory>    
+      <directory suffix="Test.php">monk/agent_tests/Functional</directory>
+      <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
+      <directory suffix="Test.php">spdx2/agent_tests/Functional</directory>
     </testsuite>
-  
-    <!--             
-    <testsuite name="Fossology PhpUnit Slow Test Suite">
-      <directory suffix=".php">lib/php/tests</directory>
-    </testsuite>
-    //-->
 
   </testsuites>
 

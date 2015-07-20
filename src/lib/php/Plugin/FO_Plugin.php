@@ -376,17 +376,19 @@ class FO_Plugin implements Plugin
     return "";
   }
 
-  function renderOutput()
+  /**
+   * @return Response
+   */
+  function getResponse()
   {
     ob_start();
-
     $output = $this->Output();
 
-    // if (is_subclass_of($output, '\Symfony\Component\HttpFoundation\Response'))
     if($output instanceof Response)
     {
       $response = $output;
-    } else
+    }
+    else
     {
       if (empty($this->vars['content']) && $output)
       {
@@ -398,9 +400,8 @@ class FO_Plugin implements Plugin
       $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
-
-    $response->prepare($this->getRequest());
-    $response->send();
+    
+    return $response;
   }
 
 
@@ -460,7 +461,9 @@ class FO_Plugin implements Plugin
   public function execute()
   {
     $this->OutputOpen();
-    $this->renderOutput();
+    $response = $this->getResponse();
+    $response->prepare($this->getRequest());
+    $response->send();
   }
 
   function preInstall()
@@ -480,7 +483,7 @@ class FO_Plugin implements Plugin
     $state = $this->Install();
     if ($state != 0)
     {
-      throw new \Exception("install of plugin " . $this->Name . " failed");
+      throw new Exception("install of plugin " . $this->Name . " failed");
     }
   }
 

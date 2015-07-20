@@ -109,4 +109,12 @@ interface Driver
    * @return bool
    */
   public function existsTable($tableName);
+  
+  /**
+   * @param string $stmt
+   * @param string $sql
+   * @param array $params
+   * @param string $colName
+   */
+  public function insertPreparedAndReturn($stmt, $sql, $params, $colName);
 }

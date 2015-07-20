@@ -1,6 +1,6 @@
+<?php
 /*
-Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -14,13 +14,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-#include <stdlib.h>
-#include <stdio.h>
-#include <CUnit/CUnit.h>
+*/
 
-#include "extended.h"
+namespace Fossology\SpdxTwo\Test;
 
-CU_TestInfo extended_testcases[] = {
-  CU_TEST_INFO_NULL
-};
+interface SchedulerTestRunner
+{
+  public function run($uploadId, $userId = 2, $groupId = 2, $jobId = 1, $args = "");
+}

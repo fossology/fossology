@@ -98,8 +98,8 @@ class UploadBrowseProxy extends Object
   
   public function setStatusAndComment($uploadId, $statusId, $commentText)
   {
-    $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE upload_fk=$3";
-    $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $uploadId), __METHOD__);
+    $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE group_fk=$3 AND upload_fk=$4";
+    $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $this->groupId, $uploadId), __METHOD__);
   }
   
   public function moveUploadToInfinity($uploadId, $top)

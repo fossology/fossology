@@ -381,18 +381,18 @@ class fo_libschema
     {
       return;
     }
-    foreach ($this->schema['INDEX'] as $table => $IndexInfo)
+    foreach ($this->schema['INDEX'] as $table => $indexInfo)
     {
       if (empty($table))
       {
         continue;
       }
-      if (!array_key_exists($table, $this->schema["TABLE"]))
+      if (!array_key_exists($table, $this->schema["TABLE"]) && !array_key_exists($table, $this->schema['INHERITS']) )
       {
         echo "skipping orphan table: $table\n";
         continue;
       }
-      foreach ($IndexInfo as $name => $sql)
+      foreach ($indexInfo as $name => $sql)
       {
         if (empty($name) || $this->currSchema['INDEX'][$table][$name] == $sql)
         {

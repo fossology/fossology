@@ -206,89 +206,6 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
 }
 
 /**
- * \brief Count files with a given license (shortname).
- * 
- * \param $agent_pk - agent id
- * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
- * \param $uploadtree_pk - sets scope of request
- * \param $PkgsOnly - if true, only list packages, default is false (all files are listed)
- *                    $PkgsOnly is not yet implemented.  Default is false.
- * \param $CheckOnly - if true, sets LIMIT 1 to check if uploadtree_pk has
- *                     any of the given license.  Default is false.
- * \param $uploadtree_tablename
- *
- * \return Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
- */
-function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
-                               $PkgsOnly=false, $CheckOnly=false, $tag_pk=0, $uploadtree_tablename)
-{
-  global $PG_CONN;
-
-  /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "SELECT lft, rgt, upload_fk FROM $uploadtree_tablename
-                 WHERE uploadtree_pk = $uploadtree_pk";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $lft = $row["lft"];
-  $rgt = $row["rgt"];
-  $upload_pk = $row["upload_fk"];
-  pg_free_result($result);
-
-  /* Find rf_pk for rf_shortname.  This will speed up the main query tremendously */
-  $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$rf_shortname'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $rf_pk = $row["rf_pk"];
-  while ($row = pg_fetch_assoc($result))
-  {
-    $rf_pk .= "," . $row["rf_pk"];
-  }
-  pg_free_result($result);
-
-  if (empty($rf_pk)) return array(); // if when the rf_shortname does not exist
-
-  $shortname = pg_escape_string($rf_shortname);
-  $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
-
-  /* Optional tag restriction */
-  if (empty($tag_pk))
-  {
-    $TagTable = "";
-    $TagClause = "";
-  }
-  else
-  {
-    $TagTable = "tag_file,";
-    $TagClause = "and PF=tag_file.pfile_fk and tag_fk=$tag_pk";
-  }
-
-  $agentCondition = $agent_pk != "any" ? "and agent_fk=$agent_pk" : "";
-
-
-  /* Strip out added upload_pk condition if it isn't needed */
-  if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
-    $UploadClause = "upload_fk=$upload_pk and ";
-  else
-    $UploadClause = "";
-
-  $sql = "select count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
-          from license_file, $TagTable
-              (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
-                 where $UploadClause lft BETWEEN $lft and $rgt) as SS
-          where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
-                $TagClause $chkonly";
-  $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  $RetArray = pg_fetch_assoc($result);
-  pg_free_result($result);
-  return $RetArray;
-}
-
-
-/**
  * \brief Given an uploadtree_pk, find all the non-artifact, immediate children
  * (uploadtree_pk's) that have license $rf_shortname.
  * By "immediate" I mean the earliest direct non-artifact.
@@ -307,7 +224,6 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  */
 function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false, $uploadtree_tablename)
 {
-  global $PG_CONN;
   $pkarray = array();
 
   $Children = GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename);

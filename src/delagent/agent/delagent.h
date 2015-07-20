@@ -46,7 +46,8 @@ extern PGconn* db_conn;
 
 void DeleteLicense(long UploadId);
 void DeleteUpload(long UploadId);
-void ListFoldersRecurse(long Parent, int Depth, int Row, int DelFlag);
+void ListFoldersRecurse(long Parent, int Depth, long Row, int DelFlag);
+int UnlinkContent (long child, long parent, int mode);
 void ListFolders();
 void ListUploads (int user_id, int user_perm);
 void DeleteFolder(long FolderId);

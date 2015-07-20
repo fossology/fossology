@@ -60,7 +60,7 @@ class TreeDao extends Object
         WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, file_path, cycle) AS (
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             ARRAY[ut.uploadtree_pk],
-            ut.ufile_name,
+            CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN ut.ufile_name ELSE '' END,
             false
           FROM $tableName ut
           WHERE ut.uploadtree_pk = $1
@@ -76,20 +76,13 @@ class TreeDao extends Object
         $params, $statementName);
 
     if (false === $row) {
-      throw new \Exception("could not find path of $itemId:\n$sql");
+      throw new \Exception("could not find path of $itemId:\n$sql--".print_r($params,true));
     }
 
     return $row['file_path'];
   }
 
-  /** @deprecated it takes too long: use getRealParent + getFull with a parent */
-  public function getShortPath($itemId, $tableName, $uploadId)
-  {
-    $parentId = $this->getRealParent($uploadId, $tableName);
-    return $this->getFullPath($itemId, $tableName, $parentId);
-  }
-
-  public function getRealParent($uploadId, $tableName)
+  public function getMinimalCoveringItem($uploadId, $tableName)
   {
     $statementName = __METHOD__.".".$tableName;
 
@@ -97,7 +90,7 @@ class TreeDao extends Object
       "SELECT uploadtree_pk FROM $tableName ut WHERE ut.upload_fk = $1
       AND NOT EXISTS (
         SELECT 1 FROM $tableName ut2 WHERE ut2.upload_fk = $1
-        AND (NOT (ut2.lft BETWEEN ut.lft AND ut.rgt))
+        AND NOT (ut2.lft BETWEEN ut.lft AND ut.rgt)
         AND (ut2.ufile_mode & (3<<28) = 0)
       )
       ORDER BY ut.lft DESC LIMIT 1",
@@ -106,6 +99,17 @@ class TreeDao extends Object
      );
 
      return $row ? $row['uploadtree_pk'] : 0;
+  }
+  
+  /**
+   * @param int $uploadtreeId
+   * @return array with keys sha1, md5
+   */
+  public function getItemHashes($uploadtreeId, $uploadtreeTablename='uploadtree')
+  {
+    $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
+        array($uploadtreeId), __METHOD__);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
   
   public function getRepoPathOfPfile($pfileId, $repo="files")

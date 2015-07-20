@@ -1,4 +1,6 @@
 <?php
+
+use Fossology\Lib\Dao\FolderDao;
 /***********************************************************
  Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
@@ -79,34 +81,12 @@ class folder_create extends FO_Plugin
       }
     }
 
-    /* Create the folder
-     * Block SQL injection by protecting single quotes
-     *
-     * Protect the folder name with htmlentities.
-     */
-    $NewFolder = str_replace("'", "''", $NewFolder); // PostgreSQL quoting
-    $Desc = str_replace("'", "''", $Desc); // PostgreSQL quoting
-    $sql = "INSERT INTO folder (folder_name, folder_desc, parent_fk) VALUES ('$NewFolder','$Desc', $ParentId);";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-    $sql = "SELECT folder_pk FROM folder WHERE folder_name='$NewFolder' AND folder_desc = '$Desc' ORDER BY folder_pk DESC;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $FolderPk = $row['folder_pk'];
-    if (empty ($FolderPk))
-    {
-      return (0);
-    }
-
-    $sql = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$ParentId','1','$FolderPk');";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    /* @var $folderDao FolderDao*/
+    $folderDao = $GLOBALS['container']->get('dao.folder');
+    $folderDao->createFolder($NewFolder, $Desc, $ParentId);
+    
     return (1);
-  } // Create()
+  }
 
   /**
    * \brief Generate the text for this plugin.

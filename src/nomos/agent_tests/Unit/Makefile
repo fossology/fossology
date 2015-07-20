@@ -15,13 +15,14 @@ include $(VARS)
 LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
-TESTLIB = -L$(TESTDIR) -lfocunit -lcunit -I$(TESTDIR)
-CFLAGS_LOCAL = $(ALL_CFLAGS) -I$(LOCALAGENTDIR) -lcunit $(TESTLIB) -std=c99
+TESTLIB = -L$(TESTDIR) -lfocunit -lcunit 
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I$(TESTDIR) -std=c99
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(TESTLIB)
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_nomos
 
-OBJECTS = test_nomos_gap.o test_DoctoredBuffer.o \
-          $(NULL)
+OBJECTS = test_nomos_gap.o test_DoctoredBuffer.o 
+
 # test_nomos_gap.o
 all: $(EXE)
 
@@ -30,14 +31,14 @@ test: all
 
 coverage: agent run_tests.c $(OBJECTS) libnomos_cov.a ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(FLAG_COV); \
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/libnomos_cov.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $(FLAG_COV); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR) --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
 $(EXE): agent $(OBJECTS) libnomos.a run_tests.c ${FOLIB}
 	${MAKE} -C ${TESTDIR}
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libnomos.a $(CFLAGS_LOCAL)
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(LOCALAGENTDIR)/libnomos.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<

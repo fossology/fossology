@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -21,6 +21,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Mockery as M;
 
 class FolderDaoTest extends \PHPUnit_Framework_TestCase
 {
@@ -35,16 +36,21 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
-    $this->folderDao = new FolderDao($this->dbManager);
-    
+    $userDao = M::mock('Fossology\Lib\Dao\UserDao');
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $this->folderDao = new FolderDao($this->dbManager, $userDao, $uploadDao);
+
     $this->testDb->createPlainTables(array('folder','foldercontents'));
     $this->testDb->createSequences(array('folder_folder_pk_seq','foldercontents_foldercontents_pk_seq'));
     $this->testDb->createConstraints(array('folder_pkey','foldercontents_pkey'));
     $this->testDb->alterTables(array('folder','foldercontents'));
+    
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
   public function tearDown()
   {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
     $this->dbManager = null;
   }
@@ -128,5 +134,65 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($this->folderDao->isWithoutReusableFolders(array($multiAccessibleFolder)),is(false));
 
     assertThat($this->folderDao->isWithoutReusableFolders(array($filledFolder,$emptyFolder)),is(false));
+  }
+  
+  public function testGetFolderChildFolders()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder('A', '/A', FolderDao::TOP_LEVEL);
+    $this->folderDao->insertFolder('B', '/A/B', $folderA);
+    $this->folderDao->insertFolder('C', '/C', FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(2)));
+  }
+  
+  public function testMoveContent()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);
+    $fc = $this->dbManager->getSingleRow('SELECT foldercontents_pk FROM foldercontents WHERE child_id=$1',
+            array($folderB),__METHOD__.'.needs.the.foldercontent_pk');
+    $this->folderDao->moveContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(2)));
+  }
+  
+  /**
+   * @expectedException Exception
+   */
+  public function testMoveContentShouldFailIfCyclesAreProduced()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);
+    $fc = $this->dbManager->getSingleRow('SELECT foldercontents_pk FROM foldercontents WHERE child_id=$1',
+            array($folderA),__METHOD__.'.needs.the.foldercontent_pk');
+    $this->folderDao->moveContent($fc['foldercontents_pk'], $folderB);
+  }
+  
+  public function testCopyContent()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);
+    $this->folderDao->insertFolder($folderName='C', '/C', FolderDao::TOP_LEVEL);
+    $fc = $this->dbManager->getSingleRow('SELECT foldercontents_pk FROM foldercontents WHERE child_id=$1',
+            array($folderB),__METHOD__.'.needs.the.foldercontent_pk');
+    $this->folderDao->copyContent($fc['foldercontents_pk'], FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->getFolderChildFolders($folderA),is(arrayWithSize(1)));
+    assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(3)));
+  }
+  
+  public function testGetRemovableContents()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
+    $this->folderDao->insertFolder('B', '/A/B', $folderA);
+    $folderC = $this->folderDao->insertFolder('C', '/C', FolderDao::TOP_LEVEL);
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(0));
+    $this->dbManager->insertTableRow('foldercontents',array('foldercontents_mode'=> FolderDao::MODE_UPLOAD,'parent_fk'=>$folderA,'child_id'=>$folderC));
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(0));
+    $this->dbManager->insertTableRow('foldercontents',array('foldercontents_mode'=> FolderDao::MODE_FOLDER,'parent_fk'=>$folderA,'child_id'=>$folderC));
+    assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(1));
+
   }
 }

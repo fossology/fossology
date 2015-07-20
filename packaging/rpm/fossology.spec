@@ -11,7 +11,7 @@ Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
-BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel openssl-devel PBBUILDDEP
+BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel openssl-devel gcc-c++ php boost-devel PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
@@ -216,8 +216,12 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
 %{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
 %{_sysconfdir}/PBPROJ/mods-enabled/reuser
+%{_sysconfdir}/PBPROJ/mods-enabled/ninka
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_datadir}/PBPROJ/readmeoss/*
 %{_datadir}/PBPROJ/reuser/*
+%{_datadir}/PBPROJ/ninka/*
+%{_datadir}/PBPROJ/spdx2/*
 
 %files scheduler
 %defattr(-,root,root)

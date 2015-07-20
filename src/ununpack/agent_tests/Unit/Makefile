@@ -8,11 +8,12 @@ include $(VARS)
 
 AGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
-CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
+CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
-TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
+TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf 
 
-CFLAGS_LOCAL = -lpq -lmagic $(ALL_CFLAGS) -I$(AGENTDIR) -I./ $(CUNIT_LIB) -lcunit $(TEST_LIB)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(AGENTDIR) -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR)
+LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE = run_tests
 
 OBJS =	run_tests.o \
@@ -43,7 +44,7 @@ TEST_FILES = unpack-test-data.tar.bz2
 all: $(EXE)
 
 $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
-	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJS) $(AGENTDIR)/libununpack.a $(LDFLAGS_LOCAL) $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
@@ -77,7 +78,7 @@ test: all testdata
 
 coverage: testdata $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
 	cd ..; tar -xf unpack-test-data.tar.bz2
-	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
+	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL); \
 	./$(EXE)
 
 libununpack_cov.a:
