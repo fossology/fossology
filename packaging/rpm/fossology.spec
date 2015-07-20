@@ -216,8 +216,12 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
 %{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
 %{_sysconfdir}/PBPROJ/mods-enabled/reuser
+%{_sysconfdir}/PBPROJ/mods-enabled/ninka
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_datadir}/PBPROJ/readmeoss/*
 %{_datadir}/PBPROJ/reuser/*
+%{_datadir}/PBPROJ/ninka/*
+%{_datadir}/PBPROJ/spdx2/*
 
 %files scheduler
 %defattr(-,root,root)

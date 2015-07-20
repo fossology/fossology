@@ -100,6 +100,12 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/ninka install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/spdx2 install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-wgetagent \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
