@@ -66,11 +66,8 @@ matrix:
     - env: TESTNAME="make install"
       compiler: gcc
       script:
-       - curl -sS https://getcomposer.org/installer | php
-       - sudo mv composer.phar /usr/local/bin/composer
-       - cd src 
-       - sudo composer install
-       - sudo composer update
+       - cd src/ 
+       - sudo composer install --dev
        - cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
@@ -88,11 +85,8 @@ matrix:
        - cat ~/.pgpass
       script:
        - make
-       - curl -sS https://getcomposer.org/installer | php
-       - sudo mv composer.phar /usr/local/bin/composer
-       - cd src
-       - sudo composer install 
-       - sudo composer update 
+       - cd src/
+       - sudo composer install --dev 
        - cd ..
        - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
