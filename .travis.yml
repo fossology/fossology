@@ -62,9 +62,7 @@ matrix:
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.6
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-  allow_failures:
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+
     - env: TESTNAME="make install"
       compiler: gcc
       script:
@@ -100,7 +98,9 @@ matrix:
        - sudo /usr/local/lib/fossology/fo-postinstall
        - cd src/testing/unit
        - sudo ./runAgentUnit.php
-
+  allow_failures:
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 script:
  - set -e
  - $CHECKBEFORE
