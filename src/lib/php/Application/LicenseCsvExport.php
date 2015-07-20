@@ -50,7 +50,7 @@ class LicenseCsvExport {
    */
   public function createCsv($rf=0)
   {
-    $sql = "SELECT rf.rf_shortname,rf.rf_fullname,rf.rf_text,rc.rf_shortname parent_shortname,rr.rf_shortname report_shortname,rf.rf_url,rf.rf_notes,rf.rf_source
+    $sql = "SELECT rf.rf_shortname,rf.rf_fullname,rf.rf_text,rc.rf_shortname parent_shortname,rr.rf_shortname report_shortname,rf.rf_url,rf.rf_notes,rf.rf_source,rf.rf_risk
             FROM license_ref rf
               LEFT JOIN license_map mc ON mc.rf_fk=rf.rf_pk AND mc.usage=$2
               LEFT JOIN license_ref rc ON mc.rf_parent=rc.rf_pk
@@ -77,7 +77,7 @@ class LicenseCsvExport {
     
     $out = fopen('php://output', 'w');
     ob_start();
-    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source');
+    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk');
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
     foreach($vars as $row)
     {
