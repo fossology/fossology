@@ -108,7 +108,7 @@ class AgentAdder extends DefaultPlugin
       return "agent-add.php AgentsAdd(): No upload_pk specified";
     }
     
-    /** @var Upload $upload */
+    /* @var $upload Upload */
     $upload = $GLOBALS['container']->get('dao.upload')->getUpload($uploadId);
     if ($upload===null)
     {
@@ -134,7 +134,7 @@ class AgentAdder extends DefaultPlugin
     $errorMsg = '';
     foreach($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
-      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
+      $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request);
     }
 
     foreach($agents as &$agent)

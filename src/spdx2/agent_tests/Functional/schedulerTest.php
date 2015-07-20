@@ -131,17 +131,14 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   
   protected function verifyRdf($filepath)
   {
+    $lines = '';
+    $returnVar = 0;
     exec('which java', $lines, $returnVar);
     $this->assertEquals(0,$returnVar,'java required for this test');
     
-    $toolDir = __DIR__.'/test-tool/';
+    $toolJarFile = __DIR__.'/spdx-tools-2.0.2-jar-with-dependencies.jar';
+    $this->pullSpdxTools($toolJarFile);
 
-    if(!is_dir($toolDir))
-    {
-      $this->pullSpdxTools($toolDir);
-    }
-
-    $toolJarFile = $toolDir.'/SPDXTools-v2.0.0/spdx-tools-2.0.0-jar-with-dependencies.jar';
     $tagFile = __DIR__."/out.tag";
     exec("java -jar $toolJarFile RdfToTag $filepath $tagFile");
     
@@ -150,19 +147,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     unlink($tagFile);
   }
   
-  protected function pullSpdxTools($toolDir)
-  {        
-    $toolZipFile = __DIR__."/SPDXTools-v2.0.0.zip";    
-    if(!file_exists($toolZipFile))
+  protected function pullSpdxTools($jarFile)
+  {
+    if(!file_exists($jarFile))
     {
-      file_put_contents($toolZipFile, fopen("http://spdx.org/sites/spdx/files/SPDXTools-v2.0.0.zip", 'r'));
+      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/V2.0.2/spdx-tools-2.0.2-jar-with-dependencies.jar', 'r'));
     }
-    $this->assertFileExists($toolZipFile, 'could not find SPDXTools');
-    
-    $zip = new \ZipArchive();
-    $zip->open($toolZipFile);
-    $this->assertTrue( $zip->extractTo($toolDir), 'could not unzip SPDXTools');
-    $zip->close();
+    $this->assertFileExists($jarFile, 'could not download SPDXTools');
   }
-
 }

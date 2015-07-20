@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,10 +31,12 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
       "queryFileIdsForUploadAndLimits"
       ,
       "SELECT distinct (pfile_fk) FROM ("  
-        "select distinct ON(ut.uploadtree_pk, ut.pfile_fk) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type FROM uploadtree ut "
-        " LEFT JOIN clearing_decision cd ON cd.group_fk=$5 AND (ut.uploadtree_pk=cd.uploadtree_fk AND scope=0 or ut.pfile_fk=cd.pfile_fk AND scope=1) "
-        " where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 and lft between $2 and $3 and ut.pfile_fk != 0"
-        " ORDER BY ut.uploadtree_pk, ut.pfile_fk, date_added DESC"
+        "SELECT distinct ON(ut.uploadtree_pk, ut.pfile_fk, scopesort) ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type,"
+          " CASE cd.scope WHEN 1 THEN 1 ELSE 0 END AS scopesort"
+        " FROM uploadtree ut "
+        " LEFT JOIN clearing_decision cd ON cd.group_fk=$5 AND (ut.uploadtree_pk=cd.uploadtree_fk AND scope=0 OR ut.pfile_fk=cd.pfile_fk AND scope=1) "
+        " WHERE upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0 AND (lft between $2 and $3) AND ut.pfile_fk != 0"
+        " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
       ") itemView WHERE decision_type!=$4 OR decision_type IS NULL"
       ,
       int, long, long, int, long),
