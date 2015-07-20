@@ -166,8 +166,9 @@ variable.list
 /src/readmeoss/agent/version.php
 /src/reuser/agent/version.php
 /src/copyright/agent/ecc
-/src/spdx2/agent_tests/Functional/SPDXTools-v2.0.0.zip
-/src/spdx2/agent_tests/Functional/test-tool/
+/src/copyright/VERSION-ecc
+/src/copyright/VERSION-copyright
+/src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar
 /src/spdx2/agent/version.php
 /src/spdx2/agent/spdx2
 /src/cli/fo_chmod
