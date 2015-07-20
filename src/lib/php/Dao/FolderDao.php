@@ -147,7 +147,7 @@ class FolderDao extends Object
   WHERE f.folder_pk=fc.child_id AND foldercontents_mode=".self::MODE_FOLDER." AND fc.parent_fk = ft.folder_pk AND NOT cycle_detected
 )";
   }
-
+    
   public function getFolderStructure($parentId=null) {
     $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
     $parameters = $parentId ? array($parentId) : array();

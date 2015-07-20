@@ -45,7 +45,7 @@ $(document).ready(function () {
     });
   });
   commentModal = $('#commentModal').plainModal();
-  $(document).tooltip();
+  $(document).tooltip({'items':"img"});
 });
 
 function initPrioClick() {

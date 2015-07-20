@@ -105,6 +105,11 @@ class DeciderAgent extends Agent
     $projectedScannerMatches = $this->remapByProjectedId($unMappedMatches);
 
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $this->groupId);
+    
+    if (null!==$lastDecision && $lastDecision->getType()==DecisionTypes::IRRELEVANT) {
+      return 0;
+    }
+
     $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $this->groupId);
 
     $markAsWip = false;
