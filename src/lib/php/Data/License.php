@@ -29,12 +29,25 @@ class License extends LicenseRef
    * @var string
    */
   private $url;
+  /**
+   * @var string
+   */
+  private $risk;
 
-  function __construct($id, $shortName, $fullName, $text, $url)
+  function __construct($id, $shortName, $fullName, $risk, $text, $url)
   {
     parent::__construct($id, $shortName, $fullName);
     $this->text = $text;
     $this->url = $url;
+    $this->risk = $risk;
+  }
+
+  /**
+   * @return int
+   */
+  public function getRisk()
+  {
+    return $this->risk;
   }
 
   /**

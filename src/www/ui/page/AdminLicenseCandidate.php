@@ -78,7 +78,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     $shortname = $request->get('shortname') ?: $vars['rf_shortname'];
     $vars['shortname'] = $shortname;
     $rfText = $vars['rf_text'];
-    $vars['rf_text'] = htmlentities($rfText);
+    $vars['rf_text'] = $rfText;
 
     $suggest = intval($request->get('suggest_rf'));
     $suggestLicense = false;
@@ -101,9 +101,10 @@ class AdminLicenseCandidate extends DefaultPlugin
       $vars['suggest_text'] = $suggestLicense['rf_text'];
       $vars['suggest_url'] = $suggestLicense['rf_url'];
       $vars['suggest_notes'] = $suggestLicense['rf_notes'];
+      $vars['suggest_risk'] = $suggestLicense['rf_risk'];
     }
 
-    /** @var LicenseDao */
+    /* @var $licenseDao LicenseDao */
     $licenseDao = $this->getObject('dao.license');
     $vars['licenseArray'] = $licenseDao->getLicenseArray(0);
     $vars['scripts'] = js_url();
@@ -178,7 +179,7 @@ class AdminLicenseCandidate extends DefaultPlugin
 
   private function getDataRow($licId,$table='license_candidate')
   {
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes";
+    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,rf_notes,rf_risk";
     if ($table == 'license_candidate')
     {
       $sql .= ',group_name,group_pk FROM license_candidate LEFT JOIN groups ON group_pk=group_fk '
@@ -195,7 +196,7 @@ class AdminLicenseCandidate extends DefaultPlugin
   }
 
   private function suggestLicenseId($str){
-    /** @var \Fossology\Monk\UI\Oneshot */
+    /* @var $monkOneShotPlugin \Fossology\Monk\UI\Oneshot */
     $monkOneShotPlugin = plugin_find("oneshot-monk");
 
     if (null !== $monkOneShotPlugin)
@@ -215,19 +216,22 @@ class AdminLicenseCandidate extends DefaultPlugin
    */
   private function verifyCandidate($rf, $shortname, $rfParent)
   {
-    /** @var LicenseDao */
+    /* @var $licenseDao LicenseDao */
     $licenseDao = $this->getObject('dao.license');
     if (!$licenseDao->isNewLicense($shortname, 0))
     {
       return false;
     }
     
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->begin();
-    $dbManager->getSingleRow('INSERT INTO license_ref (SELECT rf_pk, $2 as rf_shortname, rf_text, rf_url, now() as rf_add_date, rf_copyleft,
+    $dbManager->getSingleRow('INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft,
         "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
-        false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type
+        marydone, rf_active, rf_text_updatable, rf_md5 , rf_detector_type, rf_risk)
+      (SELECT rf_pk, $2 as rf_shortname, rf_text, rf_url, now() as rf_add_date, rf_copyleft,
+        "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora",
+        false AS marydone, rf_active, rf_text_updatable, md5(rf_text) rf_md5 , 1 rf_detector_type, rf_risk
   FROM license_candidate WHERE rf_pk=$1)',array($rf,$shortname),__METHOD__.'.insert');
     $dbManager->insertTableRow('license_map',array('rf_fk'=>$rf,'rf_parent'=>$rfParent,'usage'=>LicenseMap::CONCLUSION));
     $dbManager->getSingleRow('DELETE FROM license_candidate WHERE rf_pk=$1',array($rf),__METHOD__.'.delete');
