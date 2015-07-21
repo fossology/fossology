@@ -114,20 +114,6 @@ class DeciderAgentPlugin extends AgentPlugin
     }
   }
   
-  /*
-  protected function addAgentAsDependency($agentName, &$dependencies, $jobId, $uploadId, &$errorMsg, $request)
-  {
-    if(in_array($agentName,$request->get('agents')))
-    {
-     
-      $agentPlugin = plugin_find($agentName);
-      $jqId = $agentPlugin->AgentAdd($jobId, $uploadId, $errorMsg);
-      $dependencies[] = array('name'=>$agentName,self::PRE_JOB_QUEUE=>$jqId);
-    }
-  }
-   * */
-   
-  
   /**
    * @override
    */
