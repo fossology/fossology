@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
-
+use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
 class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
@@ -40,15 +40,19 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $itemId = 543;
     $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::classname());
+    $decision1->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
     $decision2 = M::mock(ClearingDecision::classname());
+    $decision2->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId+1);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
+    $decisionIrrel = M::mock(ClearingDecision::classname());
+    $decisionIrrel->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IRRELEVANT);
 
-    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decision2));
+    $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decisionIrrel, $decision2));
 
     assertThat($this->clearingDecisionFilter->getDecisionOf($filteredClearingDecisions, $itemId, $pfileId), is(sameInstance($decision1)));
     assertThat($this->clearingDecisionFilter->getDecisionOf($filteredClearingDecisions, $itemId+1, $pfileId), is(sameInstance($decision2)));
@@ -65,6 +69,7 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     $itemId = 543;
     $pfileId = 432;
     $decision = M::mock(ClearingDecision::classname());
+    $decision->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(12345);
     $decision->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision->shouldReceive("getPfileId")->andReturn($pfileId);
