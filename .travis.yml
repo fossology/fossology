@@ -66,11 +66,13 @@ matrix:
     - env: TESTNAME="make install"
       compiler: gcc
       script:
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
        - cd src/
-       - composer install --dev
-       - composer self-update
+       - sudo composer install --dev
+       - sudo composer self-update
        - cd ..
-       - make install
+       - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
     - env: TESTNAME="Unit Test (gcc)"
       compiler: gcc
@@ -87,10 +89,10 @@ matrix:
       script:
        - make
        - cd src/
-       - composer install --dev 
-       - composer self-update
+       - sudo composer install --dev 
+       - sudo composer self-update
        - cd ..
-       - make install
+       - sudo make install
        - sudo /usr/local/lib/fossology/fo-postinstall
        - cd src/testing/unit
        - sudo ./runAgentUnit.php
