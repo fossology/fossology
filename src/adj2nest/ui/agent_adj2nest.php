@@ -75,20 +75,39 @@ class Adj2nestAgentPlugin extends AgentPlugin
    **/
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    $dependencies[] = "agent_unpack";
     if ($this->AgentHasResults($uploadId) == 1)
     {
       return 0;
     }
-
+    
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
     if ($jobQueueId != 0)
     {
       return $jobQueueId;
     }
 
+    if (!$this->isAgentIncluded($dependencies, 'agent_unpack')) {
+      $dependencies[] = "agent_unpack";
+    }
     $args = is_array($arguments) ? '' : $arguments;
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+  }
+  
+  
+  protected function isAgentIncluded($dependencies, $agentName)
+  {
+    foreach($dependencies as $dependency)
+    {
+      if ($dependency == $agentName)
+      {
+        return true;
+      }
+      if (is_array($dependency) && $agentName == $dependency['name'])
+      {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
