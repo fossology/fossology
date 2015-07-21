@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
  * Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
  *
@@ -18,6 +16,7 @@ use Fossology\Lib\Dao\UploadDao;
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file ui-list-lic-files.php
@@ -63,7 +62,7 @@ class LicenseListFiles extends FO_Plugin
   function Output()
   {
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_STRING);
+    $rf_shortname = GetParm("lic", PARM_RAW);
     $tag_pk = GetParm("tag", PARM_INTEGER);
     $Excl = GetParm("excl", PARM_RAW);
     $Exclic = GetParm("exclic", PARM_RAW);

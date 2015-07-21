@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -47,8 +47,8 @@ class AdviceLicense extends DefaultPlugin
   protected function handle(Request $request)
   {
     $rf = intval($request->get('rf'));
-    $userId = $_SESSION[Auth::USER_ID];
-    $groupId = $_SESSION[Auth::GROUP_ID];
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
     /** @var UserDao */
     $userDao = $this->getObject('dao.user');
     $canEdit = $userDao->isAdvisorOrAdmin($userId,$groupId);
@@ -75,6 +75,13 @@ class AdviceLicense extends DefaultPlugin
         $vars['message'] = 'Successfully updated.';
       } catch (\Exception $e)
       {
+        $vars = array('rf_shortname' => $request->get('shortname'),
+                      'rf_fullname' => $request->get('fullname'),
+                      'rf_text' => $request->get('rf_text'),
+                      'rf_url' => $request->get('url'),
+                      'rf_notes' => $request->get('note'),
+                      'rf_risk' => intval($request->get('risk'))
+                     );
         $vars['message'] = $e->getMessage();
       }
     }
@@ -117,8 +124,8 @@ class AdviceLicense extends DefaultPlugin
     {
       return array('rf_pk' => -1, 'rf_shortname' => '');
     }
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
-    /** @var DbManager */
+    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone,rf_risk FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
+    /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $row = $dbManager->getSingleRow($sql, array($groupId, $licId), __METHOD__);
     if (false !== $row)
@@ -149,19 +156,19 @@ class AdviceLicense extends DefaultPlugin
     $url = $request->get('url');
     $marydone = $request->get('marydone');
     $note = $request->get('note');
+    $riskLvl = intval($request->get('risk'));
 
     if (empty($shortname) || empty($fullname) || empty($rfText))
     {
-      throw new \Exception('missing parameter');
+      throw new \Exception('missing shortname (or) fullname (or) reference text');
     }
 
-    /** @var LicenseDao $licenseDao */
+    /* @var $licenseDao LicenseDao */
     $licenseDao = $this->getObject('dao.license');
-    $groupId = $_SESSION['GroupId'];
     $ok = ($oldRow['rf_shortname'] == $shortname);
     if (!$ok)
     {
-      $ok = $licenseDao->isNewLicense($shortname, $groupId);
+      $ok = $licenseDao->isNewLicense($shortname, Auth::getGroupId());
     }
     if (!$ok)
     {
@@ -172,13 +179,14 @@ class AdviceLicense extends DefaultPlugin
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText);
     }
 
-    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, !empty($marydone));
+    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, !empty($marydone), $riskLvl);
     return array('rf_pk' => $oldRow['rf_pk'],
         'rf_shortname' => $shortname,
         'rf_fullname' => $fullname,
         'rf_text' => $rfText,
         'rf_url' => $url,
         'rf_notes' => $note,
+        'rf_risk' => $riskLvl,
         'marydone' => $marydone);
   }
 

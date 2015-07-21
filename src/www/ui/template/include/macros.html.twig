@@ -37,7 +37,7 @@
     {{ action}}{% endif %}>
     {% for key, value in options %}
       <option value="{{ key }}"{% if selected == key %} selected="selected"{% endif %}>
-        {{ value }}
+        {{ value|e }}
       </option>
     {% endfor %}
   </select>
