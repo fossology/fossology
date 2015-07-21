@@ -192,7 +192,7 @@ abstract class HistogramBase extends FO_Plugin {
     /** change the copyright  result when selecting one version of copyright */
     if (!empty($AgentSelect))
     {
-      $action = Traceback_uri(). Traceback_parm_keep(array('mod','upload','item'));
+      $action = Traceback_uri() . '?mod=' . GetParm('mod',PARM_RAW) . Traceback_parm_keep(array('upload','item'));
 
       $OutBuf .= "<script type='text/javascript'>
         function addArsGo(formid, selectid)

@@ -30,11 +30,11 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 
   rx::regex regCopyright(
     "\\bcopyright(?:ed|s)?[[:space:]:]|"
-    COPYSYM "[[:space:]]+[[:alnum:]]",
+    COPYSYM "[ \t]+([[:alnum:] ][^\\0]{0,2}){5,}",
     rx::regex_constants::icase);
     
   rx::regex regException(
-    "\\bcopyrights?(?:[[:space:]/\\\\\\*\\+#\"\\.-]+)(?:licen[cs]es?|notices?|holders?|and|statements?|owners?)[[:space:]\\.,][^\\0]*",
+    "\\bcopyrights?(?:[ \t/\\\\\\*\\+#\"\\.-]+)(?:licen[cs]es?|notices?|holders?|and|statements?|owners?)[ \t\\.,][^\\0]*",
       rx::regex_constants::icase);
   // [^\0] is a hack: is supposed to mean "any character"
   rx::regex regNonBlank(
