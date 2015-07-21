@@ -111,21 +111,11 @@ class UploadTreeProxy extends DbViewProxy
       $filter .= $this->addScanFilter($options);
     }
    
-    if(array_key_exists(self::OPT_CONCLUDE_REF, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
-            && array_key_exists(self::OPT_REALPARENT, $options))
+    if(array_key_exists(self::OPT_CONCLUDE_REF, $options) && array_key_exists(self::OPT_GROUP_ID, $options))
     {
-      $filter .=" AND EXISTS(SELECT * FROM ".$this->uploadTreeTableName." usub"
-              . "            WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$this->uploadId
-              . "            AND ".$this->subqueryConcludeRefMatches('usub', $options) . ")";
-      $this->dbViewName .= "_".self::OPT_CONCLUDE_REF;
+      $filter .= $this->addConFilter($options);
     }
-    elseif(array_key_exists(self::OPT_CONCLUDE_REF, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
-            && array_key_exists(self::OPT_RANGE, $options))
-    {
-      $filter.= " AND ".$this->subqueryConcludeRefMatches('ut', $options);
-      $this->dbViewName .= "_".self::OPT_CONCLUDE_REF;
-    }
-  
+   
     if(array_key_exists(self::OPT_SKIP_ALREADY_CLEARED, $options) && array_key_exists(self::OPT_GROUP_ID, $options)
             && array_key_exists(self::OPT_AGENT_SET, $options))
     {
@@ -153,6 +143,24 @@ class UploadTreeProxy extends DbViewProxy
     }
     $options[self::OPT_ITEM_FILTER] = $filter;
     return self::getUploadTreeView($this->uploadId, $options, $uploadTreeTableName);
+  }
+  
+  private function addConFilter($options)
+  {
+    $filter = '';
+    if( array_key_exists(self::OPT_REALPARENT, $options))
+    {
+      $filter .=" AND EXISTS(SELECT * FROM ".$this->uploadTreeTableName." usub"
+              . "            WHERE (usub.lft BETWEEN ut.lft AND ut.rgt) AND upload_fk=".$this->uploadId
+              . "            AND ".$this->subqueryConcludeRefMatches('usub', $options) . ")";
+      $this->dbViewName .= "_".self::OPT_CONCLUDE_REF;
+    }
+    elseif(array_key_exists(self::OPT_RANGE, $options))
+    {
+      $filter.= " AND ".$this->subqueryConcludeRefMatches('ut', $options);
+      $this->dbViewName .= "_".self::OPT_CONCLUDE_REF;
+    }
+    return $filter;
   }
   
   private function addScanFilter($options)
@@ -191,7 +199,8 @@ class UploadTreeProxy extends DbViewProxy
   
   private function subqueryConcludeRefMatches($itemTable,$options)
   {
-    return "NOT(SELECT removed FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
+    return "NOT(SELECT (removed OR cd.decision_type=".DecisionTypes::IRRELEVANT.") excluded"
+            . " FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
          . "    WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
          . "      AND (cd.uploadtree_fk=$itemTable.uploadtree_pk"
          . "        OR cd.scope=".DecisionScopes::REPO." AND cd.pfile_fk=$itemTable.pfile_fk)"

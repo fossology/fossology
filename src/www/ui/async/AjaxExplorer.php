@@ -405,7 +405,7 @@ class AjaxExplorer extends DefaultPlugin
         }
       }
 
-      /** @var ClearingDecision $decision */
+      /* @var $decision ClearingDecision */
       if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
       {
         $editedLicenses = $decision->getPositiveLicenses();

@@ -116,7 +116,7 @@ class ClearingDao extends Object
     $condition = "ut.lft BETWEEN $1 AND $2";
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
-
+    $params[] = DecisionTypes::IRRELEVANT;
     $sql = "$decisionsCte
             SELECT
               lr.rf_pk AS license_id,
@@ -126,7 +126,7 @@ class ClearingDao extends Object
               INNER JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               INNER JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               INNER JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            WHERE NOT ce.removed
+            WHERE NOT ce.removed AND type_id!=$".count($params)."
             GROUP BY license_id,shortname,fullname";
 
     $this->dbManager->prepare($statementName, $sql);
@@ -678,7 +678,7 @@ INSERT INTO clearing_decision (
     $condition = "ut.lft BETWEEN $1 AND $2";
 
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
-
+    $params[] = DecisionTypes::IRRELEVANT;
     $sql = "$decisionsCte
             SELECT
               COUNT(DISTINCT itemid) AS count,
@@ -688,7 +688,7 @@ INSERT INTO clearing_decision (
               LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
               LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
               LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
-            WHERE NOT ce.removed OR clearing_event_pk IS NULL
+            WHERE (NOT ce.removed OR clearing_event_pk IS NULL) AND type_id!=$".count($params)."
             GROUP BY shortname,rf_pk";
 
     $this->dbManager->prepare($statementName, $sql);
