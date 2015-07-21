@@ -147,7 +147,7 @@ abstract class AgentPlugin extends Object implements Plugin
     if (is_array($dependency))
     {
       $pluginName = $dependency['name'];
-      $depArgs = array_key_exists('args', $dependency) ? $dependency['args'] : '';
+      $depArgs = $dependency['args'];
       $preJq = array_key_exists(self::PRE_JOB_QUEUE, $dependency) ? $dependency[self::PRE_JOB_QUEUE] : 0;
     }
     else

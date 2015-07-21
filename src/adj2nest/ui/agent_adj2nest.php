@@ -75,10 +75,7 @@ class Adj2nestAgentPlugin extends AgentPlugin
    **/
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    if (empty($dependencies))
-    {
-      $dependencies[] = "agent_unpack";
-    }
+    $dependencies[] = "agent_unpack";
     if ($this->AgentHasResults($uploadId) == 1)
     {
       return 0;

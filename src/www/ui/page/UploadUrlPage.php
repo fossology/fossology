@@ -18,9 +18,8 @@
 
 namespace Fossology\UI\Page;
 
-use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Plugin\AgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Auth\Auth;
 
 class UploadUrlPage extends UploadPageBase
 {
@@ -107,8 +106,8 @@ class UploadUrlPage extends UploadPageBase
     if (empty($jobqueueId)) {
       return array(false, "Failed to insert task 'wget_agent' into job queue", $description);
     }
-    
-    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, $jobqueueId);
+
+    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, true);
     return array(true, $message, $description);
   }
   
