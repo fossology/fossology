@@ -769,7 +769,7 @@ function MakeCover($unitTest)
 
   // make coverage
   $lastCovr = exec('make coverage 2>&1', $covrOut, $covrRtn);
-  echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
+  //echo "DB: Exit status of 'make coverage' of $unitTest is:$covrRtn\n";
   $Cover = new RunTest($unitTest);
   if($covrRtn != 0)
   {

@@ -88,6 +88,8 @@ matrix:
        - cat ~/.pgpass
       script:
        - make
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
        - cd src/
        - sudo composer install --dev 
        - sudo composer self-update
