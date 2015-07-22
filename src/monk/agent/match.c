@@ -1,6 +1,6 @@
 /*
-Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Authors: Daniele Fognini, Andreas Wuerl, Marion Deveaud
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -290,22 +290,27 @@ int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
   const License *thisLicense = thisMatch->license;
   const License *otherLicense = otherMatch->license;
 
-  //Verify if licenses overlap
-  if (licensesDiffer(thisLicense, otherLicense)) {
-    if (licenseIncludes(thisLicense, otherLicense)) {
-      return 1;
-    }
-    if (licenseIncludes(otherLicense, thisLicense)) {
-      return -1;
-    }
-  }
-
+  //Verify if matches overlap
   if (thisIncludesOther || otherIncludesThis) {
     if (match_isFull(thisMatch) && thisIncludesOther) {
       return 1;
     }
     if (match_isFull(otherMatch) && otherIncludesThis) {
       return -1;
+    }
+
+    //Verify if licenses overlap
+    if (licensesDiffer(thisLicense, otherLicense)) {
+      if (licenseIncludes(thisLicense, otherLicense)) {
+        return 1;
+      }
+      if (licenseIncludes(otherLicense, thisLicense)) {
+        return -1;
+      }
+      if (match_isFull(otherMatch) && thisIncludesOther) {
+        //a complete different license is included in this match
+        return 0;
+      }
     }
 
     return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
