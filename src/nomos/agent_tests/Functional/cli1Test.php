@@ -1,6 +1,7 @@
 <?php
 /*
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,11 +16,9 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+require_once ('CommonCliTest.php');
 
-use Fossology\Lib\Test\TestInstaller;
-use Fossology\Lib\Test\TestPgDb;
-
-class cli1Test extends PHPUnit_Framework_TestCase
+class cli1Test extends CommonCliTest
 {
   function setUp()
   {
@@ -48,7 +47,8 @@ class cli1Test extends PHPUnit_Framework_TestCase
   public function testHelp()
   {
     $nomos = dirname(dirname(__DIR__)) . '/agent/nomos';
-    $last = exec("$nomos -h 2>&1", $out, $rtn);
+    list($output,$retCode) = $this->runNomos($args="-h");
+    $out = explode("\n", $output);
     $usage = "Usage: $nomos [options] [file [file [...]]";
     $this->assertEquals($usage, $out[0]);
   }

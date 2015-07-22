@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,44 +16,24 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/**
- * \brief Perform a one-shot license analysis on files (include Oracle-Berkeley-DB, Sleepycat)
- *
- */
+require_once ('CommonCliTest.php');
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
-
-
-class OneShot_Oracle_Berkeley_DB extends PHPUnit_Framework_TestCase
+class OneShot_Oracle_Berkeley_DB extends CommonCliTest
 {
-  public $nomos;
   public $tested_file;
 
-  function setUp()
-  {
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    //echo "DB: sysconf is:$sysconf\n";
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-    //echo "DB: nomos is:$this->nomos\n";
-  }
-
-  function testOneShotOracle_Berkeley_DB()
+  public function testOneShotOracle_Berkeley_DB()
   {
     /** Oracle-Berkeley-DB */
-    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/Oracle-Berkeley-DB.java';
-    $license_report = "Oracle-Berkeley-DB";
-    $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
-    $this->assertEquals($license, $license_report);
+    $oracleBDB_tested_file = dirname(dirname(dirname(__DIR__))).'/testing/dataFiles/TestData/licenses/Oracle-Berkeley-DB.java';
+    list($output,) = $this->runNomos("",array($oracleBDB_tested_file));
+    list(,,,,$licenseOBDB) = explode(' ', $output);
+    $this->assertEquals(trim($licenseOBDB), "Oracle-Berkeley-DB");
 
-
-    $out = "";
     /** sleepycat */
-    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/sleepycat.php';
-    $license_report = "Sleepycat";
-    $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
-    $this->assertEquals($license, $license_report);
+    $sleepycatTested_file = dirname(dirname(dirname(__DIR__))).'/testing/dataFiles/TestData/licenses/sleepycat.php';
+    list($outputSc,) = $this->runNomos("",array($sleepycatTested_file));
+    list(,,,,$licenseSc) = explode(' ', $outputSc);
+    $this->assertEquals(trim($licenseSc), "Sleepycat");
   }
 }

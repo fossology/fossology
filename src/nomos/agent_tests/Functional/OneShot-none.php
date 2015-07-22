@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,36 +20,24 @@
  * \brief Perform a one-shot license analysis on a file with no license
  *
  * License returned should be: No_license_found
- *
- * @version "$Id$"
- *
- * Created on March 1, 2012
  */
+require_once ('CommonCliTest.php');
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
-
-
-class OneShotnoneTest extends PHPUnit_Framework_TestCase
+class OneShotnoneTest extends CommonCliTest
 {
-  public $nomos;
   public $none;
 
-  function setUp()
+  public function testOneShotnone()
   {
     /* check to see if the file exists */
     $this->none = dirname(dirname(__FILE__)).'/testdata/noLic';
     $this->assertFileExists($this->none,"OneShotnoneTest FAILURE! $this->none not found\n");
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-  }
 
-  function testOneShotnone()
-  {
-    $last = exec("$this->nomos $this->none 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
+    list($output,) = $this->runNomos("",array($this->none));
+    list(,$fname,,,$license) = explode(' ', $output);
+
     $this->assertEquals($fname, 'noLic', "Error filename $fname does not equal noLic");
-    $this->assertEquals($license, 'No_license_found', "Error license does not
+    $this->assertEquals(trim($license), 'No_license_found', "Error license does not
       equal No_license_found, $license was returned");
   }
 }
