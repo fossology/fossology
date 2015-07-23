@@ -56,9 +56,9 @@ class BucketAgentPlugin extends AgentPlugin
 
   /**
    * @override
-   * @param int $upload_pk
+   * @param int $uploadId
    */
-  public function AgentHasResults($upload_pk) 
+  public function AgentHasResults($uploadId=0) 
   {
     $default_bucketpool_fk = $this->getDefaultBucketPool();
     if (empty($default_bucketpool_fk)) {
@@ -78,12 +78,12 @@ class BucketAgentPlugin extends AgentPlugin
     $dbManager = $GLOBALS['container']->get('db.manager');
 
     $bucketLatestArsRec = $dbManager->getSingleRow("SELECT * FROM bucket_ars WHERE bucketpool_fk=$1 AND upload_fk=$2 AND nomosagent_fk=$3 and agent_fk=$4 AND ars_success=$5",
-            array($default_bucketpool_fk,$upload_pk,$latestNomosAgentId,$latestBucketAgentId,$dbManager->booleanToDb(true)),
+            array($default_bucketpool_fk,$uploadId,$latestNomosAgentId,$latestBucketAgentId,$dbManager->booleanToDb(true)),
             __METHOD__.'.latestNomosAndBucketScannedThisPool');
     if (!empty($bucketLatestArsRec)) return 1;
 
     $bucketOldArsRec = $dbManager->getSingleRow("SELECT * FROM bucket_ars WHERE bucketpool_fk=$1 AND upload_fk=$2 AND ars_success=$3",
-            array($default_bucketpool_fk,$upload_pk,$dbManager->booleanToDb(true)),
+            array($default_bucketpool_fk,$uploadId,$dbManager->booleanToDb(true)),
             __METHOD__.'.anyBucketScannedThisPool');
     if (!empty($bucketOldArsRec)) return 2;
 

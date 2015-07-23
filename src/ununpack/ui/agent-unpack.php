@@ -29,9 +29,9 @@ class UnpackAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($uploadId=0)
   {
-    return CheckARS($upload_pk, "ununpack", "Archive unpacker", "ununpack_ars");
+    return CheckARS($uploadId, "ununpack", "Archive unpacker", "ununpack_ars");
   }
   
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)

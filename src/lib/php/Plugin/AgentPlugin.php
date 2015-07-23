@@ -18,7 +18,6 @@
 
 namespace Fossology\Lib\Plugin;
 
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 
 abstract class AgentPlugin extends Object implements Plugin
