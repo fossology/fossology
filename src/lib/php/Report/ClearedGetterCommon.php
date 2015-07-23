@@ -117,6 +117,8 @@ abstract class ClearedGetterCommon
   protected function groupStatements($ungrupedStatements, $extended)
   {
     $statements = array();
+    $findings = array();
+    $findingsCheck = 0;
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
       $comments = convertToUTF8($statement['comments'], false);
@@ -130,8 +132,6 @@ abstract class ClearedGetterCommon
         if ($description === null) {
           $text = "";
         } else {
-          if(!empty($textfinding))
-            $content = $textfinding;
           $text = $description;
         }
       }
@@ -166,7 +166,19 @@ abstract class ClearedGetterCommon
           $statements[] = $singleStatement;
         }
       }
+      if(!empty($statement['textfinding']) && !in_array($statement['textfinding'], $findings)){
+        $findings[$statement['textfinding']] = array(
+            "content" => convertToUTF8($statement['textfinding'], false),
+            "text" => convertToUTF8($text, false),
+            "files" => array($fileName),
+            "comments" => convertToUTF8($comments, false)
+          );
+        $findingsCheck = 1;
+      }
     }
+    if(!empty($findingsCheck))
+      $statements = array_merge($findings, $statements);
+
     arsort($statements);
     return $statements;
   }
