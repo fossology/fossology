@@ -38,3 +38,7 @@ FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-
 
 ## Screenshots
 ![Concluding a license](/examples/Concludeb.jpg)
+
+![Browsing](/examples/Browseb.jpg)
+
+![LicenseBrowser](/examples/LicenseBrowserb.jpg)
