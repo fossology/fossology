@@ -35,3 +35,6 @@ See [Contact Us](http://www.fossology.org/projects/fossology/wiki/Contact_Us)
 
 ## License
 FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-public-license-v2)
+
+## Screenshots
+![Concluding a license](/examples/Concludeb.jpg)
