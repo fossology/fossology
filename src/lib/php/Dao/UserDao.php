@@ -380,7 +380,7 @@ class UserDao extends Object
     $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
     if (empty($groupRow))
     {
-      throw new \Exception('Error: GroupId ='.$groupId ' not a member of a valid group.');
+      throw new \Exception('Error: GroupId ='. $groupId .' not a member of a valid group.');
     }
     return $groupRow['group_name'];
   }
