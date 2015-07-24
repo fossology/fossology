@@ -117,11 +117,37 @@ class ReportStatic
   function functionalityTable(Section $section)
   {
     $infoTextStyle = array("size" => 11, "color" => "0000FF");
+    $thColor = array("bgColor" => "E0E0E0");
+    $thText = array("size" => 10, "bold" => true, "align" => "center");
+    $rowWidth = 200;
+    $cellFirstLen = 3500;
+    $cellSecondLen = 2000;
+    $cellThirdLen = 3000;
+
     $heading = "Functionality";
     $infoText = "<Hint: look in ohloh.net in the mainline portal or Component database or on the communities web page for information>";
- 
+    $infoText2 = "Most recent stable version at clearing date and date of version mentioned below:";
+
     $section->addTitle(htmlspecialchars($heading), 2);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
+    $section->addText(htmlspecialchars($infoText2), $infoTextStyle);
+
+    $table = $section->addTable($this->tablestyle);
+
+    $table->addRow($rowWidth);
+    $cell = $table->addCell($cellFirstLen, $thColor)->addText(htmlspecialchars("Version"), $thText);
+    $cell = $table->addCell($cellSecondLen, $thColor)->addText(htmlspecialchars("Date"), $thText);
+    $cell = $table->addCell($cellThirdLen, $thColor)->addText(htmlspecialchars("Source URL"), $thText);
+
+    $table->addRow($rowWidth);
+    $cell = $table->addCell($cellFirstLen);
+    $cell = $table->addCell($cellSecondLen);
+    $cell = $table->addCell($cellThirdLen);
+
+    $table->addRow($rowWidth);
+    $cell = $table->addCell($cellFirstLen);
+    $cell = $table->addCell($cellSecondLen);
+    $cell = $table->addCell($cellThirdLen);
 
     $section->addTextBreak();
   }
@@ -134,16 +160,27 @@ class ReportStatic
   {          
     $heading = "Assessment Summary";
     $infoText = "The following table only contains significant obligations, restrictions & risks for a quick overview – all obligations, restrictions & risks according to Section 3 must be considered.";
-      
+    
+    $thColor = array("bgColor" => "E0E0E0");  
     $infoTextStyle = array("size" => 10, "color" => "000000");
     $leftColStyle = array("size" => 11, "color" => "000000","bold" => true);
+    $firstRowStyle1 = array("size" => 11, "bold" => true);
     $rightColStyleBlue = array("size" => 11, "color" => "0000A0","italic" => true);
     $rightColStyleBlack = array("size" => 11, "color" => "000000");
     $rightColStyleBlackWithItalic = array("size" => 11, "color" => "000000","italic" => true);
+    
+    $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
+    $cellRowContinue = array("vMerge" => "continue");    
+    $cellColSpan = array("gridSpan" => 4);
+    $cellColSpan2 = array("gridSpan" => 3);
 
     $rowWidth = 200;
+    $rowWidth2 = 300;
     $cellFirstLen = 5000;
-    $cellSecondLen = 10500;
+    $cellSecondLen = 5000;
+    $cellThirdLen = 3000;
+    $cellFourthLen = 3000;
+    $cellFifthLen = 3000;
 
     $section->addTitle(htmlspecialchars($heading), 2);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
@@ -152,31 +189,65 @@ class ReportStatic
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, "pStyle");
+    $table->addCell($cellSecondLen,$cellColSpan)->addText(htmlspecialchars(" <e.g. strong copyleft effect, license incompatibilities,  or also “easy to fulfill obligations, common rules only”>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Mainline Portal Status for component"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen);
+    $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Other license (s)"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $firstRowStyle1, "pStyle");    
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Do Not Use license (s)"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $firstRowStyle1, "pStyle");    
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen,$cellRowSpan)->addText(htmlspecialchars(" Other registration on Software Mainline portal"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen,$cellColSpan2)->addText();
+    
+    $table->addRow($rowWidth2);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen,$cellRowContinue);
+    $table->addCell($cellThirdLen,$thColor)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellFourthLen,$thColor)->addText(htmlspecialchars(" State"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellFifthLen,$thColor)->addText(htmlspecialchars(" License Change"), $firstRowStyle1, "pStyle");
+
+    $table->addRow($rowWidth2);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen,$cellRowContinue);
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" "), $firstRowStyle1, "pStyle");
+    $table->addCell($cellFourthLen)->addText(htmlspecialchars(" "), $firstRowStyle1, "pStyle");
+    $table->addCell($cellFifthLen)->addText(htmlspecialchars(" "), $firstRowStyle1, "pStyle");
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen,$cellRowContinue);
+    $table->addCell($cellThirdLen,$cellColSpan2);
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Component Status"), $leftColStyle, "pStyle");
+    $cell = $table->addCell($cellSecondLen,$cellColSpan);
     $cell->addCheckBox("mainline", htmlspecialchars(" Mainline"), $rightColStyleBlack, "pStyle");
     $cell->addCheckBox("specific", htmlspecialchars(" Specific"), $rightColStyleBlack, "pStyle");
     $cell->addCheckBox("denied", htmlspecialchars(" Denied"), $rightColStyleBlack, "pStyle");
  
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" License Incompatibility found"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen);
+    $cell = $table->addCell($cellSecondLen,$cellColSpan);
     $cell->addCheckBox("no", htmlspecialchars(" no"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("yes", htmlspecialchars(" yes"), $rightColStyleBlackWithItalic, "pStyle");
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source / binary integration notes"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen);
+    $cell = $table->addCell($cellSecondLen,$cellColSpan);
     $cell->addCheckBox("nocriticalfiles", htmlspecialchars(" no critical files found, source code and binaries can be used as is"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("criticalfiles", htmlspecialchars(" critical files found, source code needs to be adapted and binaries possibly re-built"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addText(htmlspecialchars(" <if there are critical files found, please provide some additional information or refer to chapter(s) in this documents where additional information is given>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Dependency notes"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen);
+    $cell = $table->addCell($cellSecondLen,$cellColSpan);
     $cell->addCheckBox("nodependenciesfound", htmlspecialchars(" no dependencies found, neither in source code nor in binaries"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("dependenciesfoundinsourcecode", htmlspecialchars(" dependencies found in source code"), $rightColStyleBlackWithItalic, "pStyle");
     $cell->addCheckBox("dependenciesfoundinbinaries", htmlspecialchars(" dependencies found in binaries"), $rightColStyleBlackWithItalic, "pStyle");
@@ -184,12 +255,24 @@ class ReportStatic
 
     $table->addRow($rowWidth, "pStyle");
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, "pStyle");
+    $cell = $table->addCell($cellSecondLen,$cellColSpan)->addText(htmlspecialchars(" <e.g. only global license was cleared since the project who requested the clearing only uses the component without mixing it with Siemens code>"), $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, "pStyle");
-    
+    $cell = $table->addCell($cellSecondLen,$cellColSpan)->addText(htmlspecialchars(" <e.g. not maintained by community anymore – must be supported by Siemens – see ohloh.net for info>"), $rightColStyleBlue, "pStyle");
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Security Vulnerabilities"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen,$cellColSpan)->addText();
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Export Control Verification Result"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen,$cellColSpan)->addText();
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Source Code Analysis Result (Optional)"), $leftColStyle, "pStyle");
+    $table->addCell($cellSecondLen,$cellColSpan)->addText();
+
     $section->addTextBreak();
   }
 
@@ -248,7 +331,7 @@ class ReportStatic
     $r11c2 = "Consider for your product/project if you accept the general risk that";
     $r11c21 = "• it cannot be verified whether contributors to open source software are legally permitted to contribute (the code could e.g. belong to his employer, and not the developer). Usually, disclaimers or contribution policies exclude responsibility for contributors even to verify the legal status.	";
     $r11c22 = "•  there is no warranty or liability from the community – i.e. error corrections must be made by Siemens, and Siemens must cover all damages";
-    $r12c2 = "IC SG EA specific rules";
+    $r12c2 = "EM EA, EM SG specific rules - ";
     $r13c21 = "The following statement must be added to any manual. The language of the statement is equal to the manual language. Check translation with documentation department.";
     $r13c22 = "English:";
     $r13c23 = "	The product contains, among other things, Open Source Software developed by third parties. The Open Source Software used in the product and the license agreements concerning this software can be found in the Readme_OSS. These Open Source Software files are protected by copyright. Your compliance with those license conditions will entitle you to use the Open Source Software as foreseen in the relevant license. In the event of conflicts between Siemens license conditions and the Open Source Software license conditions, the Open Source Software conditions shall prevail with respect to the Open Source Software portions of the software. The Open Source Software is licensed royalty-free. Insofar as the applicable Open Source Software License Conditions provide for it you can order the source code of the Open Source Software from your Siemens sales contact - against payment of the shipping and handling charges - for a period of at least 3 years since purchase of the Product. We are liable for the Product including the Open Source Software contained in it pursuant to the license conditions applicable to the Product. Any liability for the Open Source Software beyond the program flow intended for the Product is explicitly excluded. Furthermore any liability for defects resulting from modifications to the Open Source Software by you or third parties is excluded. We do not provide any technical support for the Product if it has been modified.";
@@ -499,7 +582,7 @@ class ReportStatic
   function forOtherTodos(Section $section, $eccCount)
   {
     $subSubHeadingInfoTextStyle = array("size" => 10, "bold"=>false);
-    $subSubHeadingInfoTextStyle1 = array("size" => 12, "bold"=>true);
+    $subSubHeadingInfoTextStyle1 = array("size" => 12, "bold"=>true);  
 
     $subHeading = "Further general obligations, restrictions & risks"; 
     $subSubHeading = "Export Restrictions";
@@ -517,7 +600,39 @@ class ReportStatic
     $subSubHeadingInfoText6 = "Assess patent situation regarding open source software together with your BU patent strategy manager – we cannot expect the community to have clarified the patent situation. ";
     $subSubHeadingInfoText7 = "Patent Notices found in Source Code:";
     $subSubHeadingInfoText8 = "No patent notices found in source scan – patent clearing is responsibility of Siemens projects";
+
+    $subSubHeading3 = "Dependencies";
+    $subSubHeading3InfoText = "The following dependencies were found in the source code. If the dependencies will be part of the final product, they must be cleared before this component may be used within a Siemens product." ;
+
     $section->addTitle(htmlspecialchars($subHeading), 3);
+    $section->addTitle(htmlspecialchars($subSubHeading3), 4);
+    $section->addText(htmlspecialchars($subSubHeading3InfoText), $subSubHeadingInfoTextStyle);
+
+    $rowWidth = 200;
+    $firstColLen = 2000;
+    $secondColLen = 5000;
+    $thirdColLen = 2000;
+    $fourthColLen = 2000;
+
+    $firstRowStyle = array("bgColor" => "D2D0CE");
+    $firstRowTextStyle = array("size" => 11, "bold" => true);
+   
+    $table = $section->addTable($this->tablestyle);
+    
+    $table->addRow($rowWidth);
+    $table->addCell($firstColLen, $firstRowStyle)->addText(htmlspecialchars("Dependency Name"), $firstRowTextStyle);
+    $table->addCell($secondColLen, $firstRowStyle)->addText(htmlspecialchars("Description"), $firstRowTextStyle);
+    $table->addCell($thirdColLen, $firstRowStyle)->addText(htmlspecialchars("Component State"), $firstRowTextStyle);
+    $table->addCell($fourthColLen, $firstRowStyle)->addText(htmlspecialchars("Source of finding "), $firstRowTextStyle);
+
+    $table->addRow($rowWidth);
+    $table->addCell($firstColLen)->addText();
+    $table->addCell($secondColLen)->addText();
+    $table->addCell($thirdColLen)->addText();
+    $table->addCell($fourthColLen)->addText();
+    
+    $section->addTextBreak();
+
     $section->addTitle(htmlspecialchars($subSubHeading), 4);
     $section->addText(htmlspecialchars($subSubHeadingInfoText), $subSubHeadingInfoTextStyle);
     $section->addText(htmlspecialchars($subSubHeadingInfoText1), $subSubHeadingInfoTextStyle1, "pStyle");
@@ -597,4 +712,12 @@ class ReportStatic
   
     $section->addTextBreak();
   }
+
+  function getNonFunctionalLicenses(Section $section)
+  {
+    $heading = "NON Functional Licenses";
+    $section->addTitle(htmlspecialchars($heading), 2);
+    $section->addTextBreak();
+  }
+
 }
