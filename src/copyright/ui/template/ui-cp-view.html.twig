@@ -5,6 +5,10 @@
    This file is offered as-is, without any warranty.
 #}
 {% extends "include/base.html.twig" %}
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="css/highlights.css"/>
+{% endblock %}
 
 {% block content %}
   <div id="leftrightalignment" name="leftrightalignment">
