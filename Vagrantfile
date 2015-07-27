@@ -38,7 +38,7 @@ sudo cp /vagrant/install/src-install-apache-example.conf  /etc/apache2/conf-enab
 sudo /etc/init.d/apache2 restart
 
 echo "use your FOSSology at http://localhost:8081/repo/"
-echo " user: fossy , password: fossy
+echo " user: fossy , password: fossy"
 echo "or do a vagrant ssh and look at /vagrant for your source tree"
 SCRIPT
 
