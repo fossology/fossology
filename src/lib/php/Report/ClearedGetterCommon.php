@@ -169,9 +169,11 @@ abstract class ClearedGetterCommon
         $findings[$fileName] = array(
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
-            "files" => array($fileName),
-            "comments" => convertToUTF8($comments, false)
+            "files" => array($fileName)
           );
+        if ($extended) {
+          $findings[$fileName] = convertToUTF8($comments, false);
+        }
       }
     }
     if(!empty($findings))
