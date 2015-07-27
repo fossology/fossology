@@ -172,7 +172,7 @@ abstract class ClearedGetterCommon
             "files" => array($fileName)
           );
         if ($extended) {
-          $findings[$fileName] = convertToUTF8($comments, false);
+          $findings[$fileName]["comments"] = convertToUTF8($comments, false);
         }
       }
     }
