@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Dao\FolderDao;
 /***********************************************************
  Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
@@ -17,15 +15,14 @@ use Fossology\Lib\Dao\FolderDao;
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
-define("TITLE_folder_create", _("Create a new Fossology folder"));
+use Fossology\Lib\Dao\FolderDao;
 
 class folder_create extends FO_Plugin
 {
   function __construct()
   {
     $this->Name = "folder_create";
-    $this->Title = TITLE_folder_create;
+    $this->Title = _("Create a new Fossology folder");
     $this->MenuList = "Organize::Folders::Create";
     $this->Dependency = array ();
     $this->DBaccess = PLUGIN_DB_WRITE;
@@ -38,53 +35,36 @@ class folder_create extends FO_Plugin
    *
    * Includes idiot checking since the input comes from stdin.
    *
-   * \param $ParentId - parent folder id
-   * \param $NewFolder - new folder name
-   * \param $Desc - new folder discription
+   * @param $parentId - parent folder id
+   * @param $newFolder - new folder name
+   * @param $desc - new folder discription
    *
-   * \return 1 if created, 0 if failed
+   * @return int 1 if created, 0 if failed
    */
-  function Create($ParentId, $NewFolder, $Desc)
+  public function create($parentId, $newFolder, $desc)
   {
-    global $PG_CONN;
-
-    /* Check the name */
-    $NewFolder = trim($NewFolder);
-    if (empty ($NewFolder))
+    $folderName = trim($newFolder);
+    if (empty ($folderName))
     {
       return (0);
     }
-
-    /* Make sure the parent folder exists */
-    $sql = "SELECT * FROM folder WHERE folder_pk = '$ParentId';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if ($row['folder_pk'] != $ParentId)
-    {
-      return (0);
-    }
-
-    // folder name exists under the parent?
-    $sql = "SELECT * FROM folderlist WHERE name = '$NewFolder' AND
-                parent = '$ParentId' AND foldercontents_mode = '1';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (!empty ($result))
-    {
-      if ($row['name'] == $NewFolder)
-      {
-        return (4);
-      }
-    }
-
+    
     /* @var $folderDao FolderDao*/
     $folderDao = $GLOBALS['container']->get('dao.folder');
-    $folderDao->createFolder($NewFolder, $Desc, $ParentId);
-    
+
+    $parentExists = $folderDao->getFolder($parentId);
+    if (!$parentExists)
+    {
+      return (0);
+    }
+
+    $folderWithSameNameUnderParent = $folderDao->getFolderId($folderName, $parentId);
+    if (!empty ($folderWithSameNameUnderParent))
+    {
+      return 4;
+    }
+
+    $folderDao->createFolder($folderName, $desc, $parentId);
     return (1);
   }
 
@@ -100,7 +80,7 @@ class folder_create extends FO_Plugin
     $Desc = GetParm('description', PARM_TEXT);
     if (!empty ($ParentId) && !empty ($NewFolder))
     {
-      $rc = $this->Create($ParentId, $NewFolder, $Desc);
+      $rc = $this->create($ParentId, $NewFolder, $Desc);
       if ($rc == 1)
       {
         /* Need to refresh the screen */
