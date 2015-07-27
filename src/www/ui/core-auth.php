@@ -229,7 +229,11 @@ class core_auth extends FO_Plugin
     }
     $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     $this->vars['referrer'] = $referrer;
-    return $this->render('login.html.twig');
+    $this->vars['loginFailure'] = !empty($userName) || !empty($password);
+    if (!empty($userName) && $userName!='Default User') {
+      $this->vars['userName'] = $userName;
+    }
+    return $this->render('login.html.twig',$this->vars);
   }
 
   /**
@@ -259,8 +263,14 @@ class core_auth extends FO_Plugin
     {
       return false;
     }
-
-    $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+    try
+    {
+      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+    }
+    catch(Exception $e)
+    {
+      return false;
+    }
 
     if (empty($row['user_name']))
     {

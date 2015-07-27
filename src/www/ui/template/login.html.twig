@@ -7,7 +7,8 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-
-    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
-
+    {% if loginFailure %}
+      {{ 'The combination of user name and password was not found.'|trans }}<br/><br/> 
+    {% endif %}
+    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName} only %}
 {% endblock %}
