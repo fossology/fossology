@@ -166,7 +166,7 @@ abstract class ClearedGetterCommon
         }
       }
       if(!empty($statement['textfinding']) && !in_array($statement['textfinding'], $findings)){
-        $findings[$statement['textfinding']] = array(
+        $findings[$fileName] = array(
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
             "files" => array($fileName),
