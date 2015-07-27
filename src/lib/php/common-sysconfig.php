@@ -267,7 +267,16 @@ function Populate_sysconfig()
   . CONFIG_TYPE_TEXT .
                     ",'Number', null, '$contextDesc', null";
 
-   
+  $Variable = "BlockSizeHex";
+  $hexPrompt = _("Chars per page in hex view");
+  $hexDesc = _("Number of characters per page in hex view");
+  $ValueArray[$Variable] = "'$Variable', '8192', '$hexPrompt', ". CONFIG_TYPE_TEXT . ",'Number', 5, '$hexDesc', null";
+
+  $Variable = "BlockSizeText";
+  $textPrompt = _("Chars per page in text view");
+  $textDesc = _("Number of characters per page in text view");
+  $ValueArray[$Variable] = "'$Variable', '81920', '$textPrompt', " . CONFIG_TYPE_TEXT . ",'Number', 5, '$textDesc', null";
+  
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
@@ -281,7 +290,7 @@ function Populate_sysconfig()
     if (empty($VarRec))
     {
       $sql = "insert into sysconfig ({$Columns}) values ($Values);";
-      $result = @pg_query($PG_CONN, $sql);
+      $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     }
