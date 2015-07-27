@@ -13,12 +13,7 @@ sudo dpkg-reconfigure locales
 
 sudo apt-get update -qq -y
 
-sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev libtext-template-perl librpm-dev subversion rpm libpcre3-dev libssl-dev libboost-regex-dev libboost-program-options-dev
-sudo apt-get install -qq php5-pgsql php-pear php5-cli
-sudo apt-get install -qq apache2 libapache2-mod-php5
-sudo apt-get install -qq binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils rpm upx-ucl unrar-free unzip p7zip-full p7zip
-sudo apt-get install -qq wget subversion git
-sudo apt-get install -qq libpq-dev postgresql
+sudo apt-get install -qq curl php5
 
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/bin/composer
@@ -28,6 +23,7 @@ date > /etc/vagrant.provisioned
 echo "lets go!"
 cd /vagrant
 
+./utils/fo-installdeps -e -y
 make CFLAGS=-I/usr/include/glib-2.0
 sudo make install
 sudo /usr/local/lib/fossology/fo-postinstall
